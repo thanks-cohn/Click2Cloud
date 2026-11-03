@@ -30,6 +30,10 @@ The application **materializes** the current full known graph in an indexed data
 
 A weekly new snapshot is generated from the **committed local/indexed known graph**, *not automatically a full cloud rescan*. The known graph may be incomplete/stale relative to external cloud operations. Completion/coverage/freshness are explicit metadata; never confuse a complete serialization with exhaustive up-to-the-second provider coverage.
 
+## User-requested targeted directory reconciliation
+
+Users may right-click a real directory in the REDOWN / Click2Cloud Portal Explorer and choose **Scan and Update**. This verifies the selected directory **and its descendants**, within a bounded, resumable scan, compares just that scope with CURRENT and appends **only confirmed semantic changes** as delta events. No whole-cloud rescan, Full Snapshot rewrite, or unrelated branch mutation occurs. A separately labeled **Scan This Level Only** option permits immediate-children-only checking. If a scan is incomplete, the UI must not claim the entire subtree is up to date or infer deletions. See [Directory Scan and Update](DIRECTORY_SCAN_AND_UPDATE.md) for the complete operation, journal contract and acceptance tests.
+
 ## Change handling
 
 - **REDOWN-confirmed folder changes**: update changed indexed nodes + append one idempotent event transactionally, immediately reproject affected Depth menu entries. No whole-tree rewrite or global rescan.
