@@ -11,3 +11,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
+      - run: node --test assisted_proposal/tests/*.test.mjs
+      - run: node --test simple/original_proposition/tests/*.test.mjs
+      - run: node --test shared_destination_picker/tests/*.test.mjs
+      - run: node --test assisted_proposal/depth/tests/*.test.mjs
+      - run: node --test destination_manager/tests/*.test.mjs
+      - run: node --test universal_connectors/tests/*.test.mjs

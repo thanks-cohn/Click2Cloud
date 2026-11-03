@@ -1,5 +1,9 @@
 # Click2Cloud — REDOWN V3+1
 
+> **Universal connector architecture update:** S3-compatible connections now have **their own active Simple/Narrow/Depth mode**; Cloudflare Simple and MEGA S4 Depth may coexist as separate REDOWN siblings. This supersedes the early one-global-mode registry assumption. See [Universal S3/S4 Connectors](universal_connectors/README.md) and [Codex handoff](universal_connectors/CODEX_START_HERE.md). MEGA S4 is an S3-compatible product, not a separate invented S4 protocol; future native MEGA is distinct.
+>
+> **Architecture status (November 3, 2026):** This README describes the **early bootstrap prototype**, not the full latest owner-approved V3+1 implementation. In particular, its duplicate-destination rejection and shared-config assumptions are **superseded** by [the independent Destination Manager contract](destination_manager/README.md), [Simple](simple/original_proposition/), [Narrow](narrow/rewrite_proposition/), and [Depth](assisted_proposal/depth/). For a source-backed V3 comparison and remaining migration hazards, start with [Legacy Lessons](legacy/README.md) and [New-repository Prototype Conflicts](legacy/CURRENT_CLICK2CLOUD_CONFLICTS.md). No live production/browser implementation is implied by these newer documents.
+
 Click2Cloud is an independently developed, fully functional right-click-to-cloud destination engine. Its **Portal menu is a real save interface, not a simulator**. The Portal and Chrome extension share the same pure menu compiler, destination identifiers, click intent, provider adapters, and verified-save result handling.
 
 ## Invariants
