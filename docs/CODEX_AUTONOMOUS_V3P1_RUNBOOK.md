@@ -2,6 +2,8 @@
 
 **Authority:** `thanks-cohn/Click2Cloud` only. The original `thanks-cohn/REDOWN` is a *read-only behavioral reference* and eventual transplant target, not a build/deployment target for this run.
 
+**Complete functional API contract:** [V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md](./V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md). This is the canonical condition → behavior → evidence matrix and the proposed V3+1 Engine API surface. Trace each implemented journey to its engine operation and an actual test or external receipt, and record unimplemented cases honestly; no fake control or simulated cloud success.
+
 ## The mandate
 **Execute the entire feasible engineering run without a new user prompt:** inspect, implement, test, repair, commit, push, inspect CI/Cloudflare builds, and report evidence. Never substitute a design document or mock controls for working code. The user's existing authorization allows automated development within the isolated Click2Cloud project and the documented disposable test prefixes; it does not authorize changing R2 subscription/billing, user OAuth consent, external account permissions, or production REDOWN infrastructure.
 
