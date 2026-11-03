@@ -3,3 +3,78 @@ name = "click2cloud-v3p1-r2-lab"
 main = "src/lab-worker.mjs"
 compatibility_date = "2026-11-03"
 workers_dev = false
+
+# LIVE REDOWN WORKER SERVICE BINDINGS — EXACT DEPLOYED WORKER SCRIPTS
+# These are references, not clones. Do not modify a target Worker from this repo.
+# NEVER proxy arbitrary URLs/methods; live mutation tests only on disposable test prefixes.
+[[services]]
+binding = "REDOWN_1234"
+service = "redown-1234-404399"
+
+[[services]]
+binding = "REDOWN_12345"
+service = "redown-12345-404399"
+
+[[services]]
+binding = "REDOWN_4CHAN"
+service = "redown-4chan-404399"
+
+[[services]]
+binding = "REDOWN_ANYSHAPE_FORM_UPLOADS"
+service = "redown-anyshape-form-uploads-404399"
+
+[[services]]
+binding = "REDOWN_EXTENDED"
+service = "redown-extended-404399"
+
+[[services]]
+binding = "REDOWN_HITOMI"
+service = "redown-hitomi-404399"
+
+[[services]]
+binding = "REDOWN_HP_MINI"
+service = "redown-hp-mini-404399"
+
+[[services]]
+binding = "REDOWN_MEME_MATERIAL"
+service = "redown-meme-material-404399"
+
+[[services]]
+binding = "REDOWN_MY_ASSETS"
+service = "redown-my-assets-404399"
+
+[[services]]
+binding = "REDOWN_NEW"
+service = "redown-new-404399"
+
+[[services]]
+binding = "REDOWN_NEW_6"
+service = "redown-new-6-404399"
+
+[[services]]
+binding = "REDOWN_NUME_GALLERY_OPENNEXT_CACHE"
+service = "redown-nume-gallery-opennext-cache-404399"
+
+[[services]]
+binding = "REDOWN_TEST_1_NEW"
+service = "redown-test-1-new-404399"
+
+[[services]]
+binding = "REDOWN_TEST_2_NEW"
+service = "redown-test-2-new-404399"
+
+[[services]]
+binding = "REDOWN_TEST_3_NEW"
+service = "redown-test-3-new-404399"
+
+[[services]]
+binding = "REDOWN_TEST_4_NEW"
+service = "redown-test-4-new-404399"
+
+[[services]]
+binding = "REDOWN_WDP_DOT_TV"
+service = "redown-wdp-dot-tv-404399"
+
+[[services]]
+binding = "REDOWN_WORKS"
+service = "redown-works-404399"
