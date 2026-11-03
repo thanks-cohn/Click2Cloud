@@ -55,13 +55,14 @@ test('one mode edit cannot alter other mode config or revision',()=>{
   assert.deepEqual(c.narrow.destinations,[]);
   assert.throws(()=>addDestination(c.simple,{id:'b',menuTitle:'A',target},0),/Stale/);
 });
-test('left circle count reflects aliases; click remains new-add affordance, not bulk delete',()=>{
+test('left circle is ONLY filled/empty, not a numeric count; same folder accepts many aliases',()=>{
   const c=initial();
   c.simple=addDestination(c.simple,{id:'a',menuTitle:'X',target});
   c.narrow=addDestination(c.narrow,{id:'b',menuTitle:'Y',target});
   const nodes=[{id:'f',name:'Weddings',target}];
   const panel=managerPanel('simple',{browseNodes:nodes,configs:c});
-  assert.equal(panel.rows[0].count,2);
+  assert.equal(panel.rows[0].checked,true);
+  assert.equal('count' in panel.rows[0],false);
   assert.equal(panel.showTree,true);assert.equal(panel.showExisting,false);
 });
 test('Existing Destinations shows both modes but owner remains explicit',()=>{

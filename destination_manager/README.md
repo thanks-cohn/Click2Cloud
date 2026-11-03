@@ -47,7 +47,7 @@ Browse Folders:
   (○) ▾ 📁 bucket-1
   (○) 📁 bucket-2
 
-Circle click -> anchored popup
+Circle click -> compact anchored popup
   [ Simple ] [ Narrow ]                        <- for THIS new entry
   Menu title (optional): [                    ]  <- blank means lowest folder
   Menu preview: ...
@@ -71,7 +71,7 @@ Depth:
 - The circle **opens an Add Destination popup** even if this location already has one or more entries. Show only an empty or a checked circle; **no count badge**. A checked circle simply means at least one saved entry already points here. Never toggle/delete a saved record ambiguously from a single circle; Existing Destinations is the editing/removal surface.
 - Popup has exactly a **Simple/Narrow** choice, one optional initially blank menu-title input, a small preview, Cancel and Add destination. Blank resolves to terminal folder name (or selected bucket root name). Do not show additional label-source buttons. The top switch governs current menu/editor mode; popup selection controls the **new entry's owner**, which may differ without silently switching the native menu.
 - Simple emits **one flat menu leaf per saved entry**. Narrow emits the selected path with true ancestors and only the terminal segment renamed. Depth's private engine is not imported or modified by either.
-- Multiple entries pointing to an **identical provider/account/bucket/prefix** are allowed. Multiple entries with **identical visible titles** are ALSO allowed, simultaneously, after optional collision confirmation. They do not collide because every saved entry receives its own **immutable, opaque destination ID** on creation. The native registry ID is namespaced by mode plus saved ID. **Titles, file paths, and mode selection are not identity keys.**
+- Multiple entries pointing to an **identical provider/account/bucket/prefix** are allowed. Multiple entries with **identical visible titles** are ALSO allowed, simultaneously, **without any extra blocking confirmation in the minimalist popup**. They do not collide because every saved entry receives its own **immutable, opaque destination ID** on creation. The native registry ID is namespaced by mode plus saved ID. **Titles, file paths, and mode selection are not identity keys.**
 - Clicking Rename updates only the chosen record's `menuTitle`; it does not alter its ID, cloud target, sibling aliases, or provider objects. Clicking the red **×** removes only that record from the relevant mode's selected list; it never deletes the remote folder, other aliases, or another mode's entry. No deletions in the navigator. A hard-coded `redown` default may be hidden/reduced to one flat `Cloudflare` save leaf but cannot be deleted as a remote bucket via this UI.
 - `Existing Destinations` can show `All` (both Simple and Narrow) with explicit mode tags, plus `Simple` and `Narrow` filters. The aggregation is **read-only**. Each Rename/Delete command is routed only to that row's owning mode state reducer. Only the active mode is registered in Chrome's native menu, even though both modes' saved entries are visible in the manager.
 - A default per-mode draft is retained when switching top tabs. Switching tabs alone never registers a half-edited menu. `Save Changes / Apply` applies **one selected mode's finished plan** via the neutral registrar with explicit native acknowledgement and rollback on error.

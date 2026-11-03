@@ -101,7 +101,7 @@ export function managerPanel(mode,{browseNodes=[],expanded=new Set(),bucketOptio
     for(const node of nodes){
       if(!cleanString(node?.id)||!cleanString(node?.name))throw new TypeError('Invalid folder node');
       rows.push({id:node.id,name:node.name,level:indent,
-        target:structuredClone(node.target),count:node.target?locationEntryCount(configs,node.target):0,
+        target:structuredClone(node.target),checked:node.target?locationEntryCount(configs,node.target)>0:false,
         hasChildren:!!(node.children?.length||node.hasChildren)});
       if(expanded.has(node.id))walk(node.children||[],indent+1);
     }
