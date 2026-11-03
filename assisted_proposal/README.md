@@ -23,6 +23,8 @@ The important new boundary is that **Time Machine and Depth are not the same sub
 
 ## Files
 
+- [depth/README.md](depth/README.md) — authoritative Depth-only ownership, full-folder index, delta journal, menu projection and strict cross-system isolation invariants
+- [ENGINE_ISOLATION_CONTRACT.md](ENGINE_ISOLATION_CONTRACT.md) — the four independent state owners (Simple, Narrow, Depth, Time Machine), shared provider/event seams, registry permissions and regression acceptance
 - [TIME_MACHINE_ARCHITECTURE.md](TIME_MACHINE_ARCHITECTURE.md) — historical queries, source evidence and RFIS semantics
 - [STORAGE_AND_CHECKPOINTS.md](STORAGE_AND_CHECKPOINTS.md) — one adaptive snapshot, lossless journals, daily/weekly lightweight indexes, atomic HEAD, recovery
 - [SCAN_AND_UPDATE.md](SCAN_AND_UPDATE.md) — bounded folder-only or recursive subtree reconciliation
