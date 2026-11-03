@@ -1,5 +1,7 @@
 # CODEX — Build the REAL Click2Cloud V3+1 engine (P0)
 
+**Agent diagnostics:** Follow the [Glaciaring seed](V3P1_GLACIARING_AGENTIC_DEBUG_API_SEED.md) for MenuSpec inspection, native acknowledgement evidence, bounded causal tracing and sanitized Agent Debug Receipts. Apply it alongside the existing mandates and [V3 vs. V3+1 source review](../final-review/V3_VS_V3PLUS1_SOURCE_AUDIT_2026-11-03.md). The diagnostics layer observes the same service owners and preserves their authority.
+
 **Mandatory API and behavioral acceptance contract:** [V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md](./V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md). It is the exhaustive 29-section matrix of actual user/runtime situations, required engine behavior, formal API signatures, state priorities and proof types. Implement real operations for the P0 path, build tests directly from the rows and mark each scenario PASS/FAIL/BLOCKED/NOT_TESTED. Do not treat it as mere design copy or build a duplicate file Explorer. If this document and an older plan conflict, prefer current REDOWN code and the owner-approved principles here; explicitly document the conflict.
 
 ## AUTONOMOUS RUN — READ FIRST (highest priority)
