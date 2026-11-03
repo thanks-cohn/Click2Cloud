@@ -9,7 +9,9 @@ Cloudflare **must not expose nested right-click destinations until BOTH necessar
 1. REDOWN can confirm the user has an authenticated/connected Cloudflare account.
 2. REDOWN can independently confirm that the connected Cloudflare account has **an active R2 subscription/entitlement**.
 
-If **either** check fails, is unknown, or the session is expired, the entire Cloudflare contribution to the REDOWN right-click menu consists of **one flat item**, titled exactly `Cloudflare`. Clicking that item is **onboarding navigation**, **not a save attempt**: open [Cloudflare's R2 dashboard overview](https://dash.cloudflare.com/?to=/:account/r2/overview), where Cloudflare can authenticate the user and present its R2 enable/checkout flow. Do not show a submenu, bucket headings, false save animations or successful History entries. Do not launch an unrelated REDOWN Shelf page first.
+If **either** check fails, is unknown, or the session is expired, the entire Cloudflare contribution to the REDOWN right-click menu consists of **one flat item**, titled exactly `Cloudflare`. Clicking that item performs **progressive onboarding, never a save**: when not connected to Cloudflare, it launches REDOWN's existing Cloudflare login/connection flow. Once the Cloudflare session is verified but R2 is inactive/unknown, clicking the **same unchanged flat row** opens the [official Cloudflare R2 Overview](https://dash.cloudflare.com/?to=/:account/r2/overview) to activate R2. Do not show a submenu, bucket headings, false save animations or successful History entries. Do not open an unrelated REDOWN Shelf page or send an unconnected user directly to R2 checkout before offering REDOWN login.
+
+The official R2 documentation's `Go to Overview` link currently resolves to `https://dash.cloudflare.com/?to=/:account/r2/overview`, an account-selection-aware dashboard route. Prefer this official account-neutral route over a hardcoded account ID. If Cloudflare changes its dashboard deep-link path, update the single onboarding URL constant from the official docs; the REDOWN login flow remains separate.
 
 Cloudflare's own current documentation says an R2 subscription must be added through **Storage & databases → R2 → Overview**, and R2 includes some free monthly usage. Do not describe R2 activation as necessarily a charge or claim that the user has paid. Source: https://developers.cloudflare.com/r2/get-started/ (verified November 3, 2026).
 
@@ -21,7 +23,7 @@ To preserve the original Simple UX: after both checks, **exactly one valid defau
 
 | Cloudflare session | R2 subscription | Authorized save targets | Native Cloudflare row | Click action |
 |---|---|---|---|---|
-| Missing / unknown / expired | Any | Any | One **flat Cloudflare** | Open R2 Overview (login / subscribe) |
+| Missing / unknown / expired | Any | Any | One **flat Cloudflare** | Launch REDOWN Cloudflare login/connection flow |
 | Verified | Missing / unknown / inactive | Any | One **flat Cloudflare** | Open R2 Overview (activate / checkout) |
 | Verified | Active | 0 | One **flat Cloudflare** | Open R2 setup / prepare bucket, not save |
 | Verified | Active | 1 | One **flat Cloudflare** | Verified direct save to exact target |
@@ -39,7 +41,7 @@ Do not equate `workerUrl`, a cached profile, or a successful Cloudflare sign-in 
 - Pure reference decision model: `src/cloudflare-simple-gate.mjs`; no network, Chrome, credential or cloud operations.
 - Unit contracts: `tests/cloudflare-simple-gate.test.mjs`.
 - Engine integration should gate **before** invoking Simple's existing `simpleProjection()`, in the provider contribution boundary; its `simpleTargets()` remains unchanged until separate explicitly scoped tweaks are approved.
-- When setup click is selected, open verified official R2 Overview URL using a browser tab. Never treat it as a file source URL or cloud upload.
+- The click dispatcher distinguishes `start-cloudflare-login` (invoke the existing REDOWN Cloudflare connection/login flow) from `open-r2-setup` (open the official Cloudflare R2 Overview in a browser tab). Never treat either as a save, a file-source URL, or a cloud upload.
 - Only confirmed upload receipts trigger SUCCESS! and History success.
 
 ## Verification

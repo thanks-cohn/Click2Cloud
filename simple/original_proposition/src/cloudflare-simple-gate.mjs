@@ -19,13 +19,22 @@ export const MENU_CONTEXTS=Object.freeze(['link','image','video','audio','page']
  */
 export function decideSimpleCloudflare({cloudflareSession='unknown',r2Subscription='unknown',validSaveTargets=[]}={}){
   if(!Array.isArray(validSaveTargets))throw new TypeError('validSaveTargets must be an array');
-  const ready=cloudflareSession==='verified'&&r2Subscription==='active';
-  if(!ready||validSaveTargets.length===0){
+  // First click is always REDOWN's own connection flow while signed out;
+  // it must NOT skip straight to Cloudflare's R2 subscription page.
+  if(cloudflareSession!=='verified'){
+    return Object.freeze({
+      mode:'flat-setup',title:'Cloudflare',target:null,
+      action:{kind:'start-cloudflare-login'},
+      reason:'cloudflare-login-required',children:[],
+    });
+  }
+  // After REDOWN has a verified Cloudflare session, the same single
+  // Cloudflare leaf becomes an explicit R2 activation/continuation action.
+  if(r2Subscription!=='active'||validSaveTargets.length===0){
     return Object.freeze({
       mode:'flat-setup',title:'Cloudflare',target:null,
       action:{kind:'open-r2-setup',url:R2_SETUP_URL},
-      reason:cloudflareSession!=='verified'?'cloudflare-login-required'
-        :r2Subscription!=='active'?'r2-activation-required':'no-authorized-bucket',
+      reason:r2Subscription!=='active'?'r2-activation-required':'no-authorized-bucket',
       children:[],
     });
   }
