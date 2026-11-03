@@ -32,6 +32,12 @@ A failed right-click should let a diagnostic agent immediately distinguish, usin
 - Establish versioned **known-good mode/provider baselines** and immutable golden scenarios. When Nested changes, test that Simple and Depth output/config, all independent provider leaves and verified destinations remain intact. If a regression occurs, report precisely which actions/items changed and the smallest owner; do not rewrite unrelated modules.
 - Build an **inspectable logical mirror** so the owner can express the desired result by editing/viewing the tree rather than repeatedly explaining each nested interaction. Converge by focused code or config changes and tests, **not autonomous production source rewrites**.
 
+### Agent consumption without expensive or unsafe infrastructure
+
+Design **how Codex/ChatGPT Work actually obtains the diagnostic evidence from a different machine or sandbox**, not just how an extension-local function returns it. Provide a stable, bounded, sanitized, machine-readable **user-authorized export** (e.g., portable Agent Debug Receipt, MenuSpec snapshot, generation diff and test fixture ID) that can be attached or passed to a coding agent without exposing private routes or credentials. Evaluate an ephemeral, explicitly approved read-only diagnostic bridge only if it demonstrably reduces manual iteration; no default public server, no background uploads, no persistent external telemetry, and no new production dependency on ChatGPT connectivity.
+
+A debug receipt must carry enough source revision/build/stage manifest and **focused reproduction instructions** that a fresh Codex/Work conversation can immediately pick the responsible subsystem without repeatedly requesting logs or screenshots. The agent access path must respect allowlisted senders, explicit consent, redaction, bounded payloads and the distinction between diagnostic read/simulation and privileged live actions. Benchmark export cost outside the hot path.
+
 ### Mandatory evidence: prove saved debugging work and latency
 
 Codex may not mark this P0 complete by only shipping a tracing library, adding console logs, or passing the existing 26 tests. Deliver, with *actual measured results*:
