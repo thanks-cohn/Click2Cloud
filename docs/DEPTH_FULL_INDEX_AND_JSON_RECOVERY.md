@@ -1,5 +1,7 @@
 # V3+1 Depth — complete cloud index, independent menu depth, and durable JSON recovery
 
+> **Storage nomenclature superseded (2026-11-03):** The authoritative delta-first storage names and nonredundant physical model are [Full Snapshot, Daily Index, Weekly Index, HEAD and Delta Segment](DELTA_FIRST_STORAGE_NAMING.md). Earlier references below to daily full `current.json`, weekly full `weekly.json`, and an in-place appended remote JSON journal document a **prior draft** and are no longer the selected design. Daily/weekly period policies govern historical restore points; one full checkpoint plus referenced immutable deltas provides the latest known graph. The original V3 algorithm extraction remains a parity baseline only.
+
 **Owner correction, 2026-11-03. This supersedes any Click2Cloud text that describes selected Depth 1–10 as the limit of the persistent cloud inventory.**
 
 ## Intent and immutable separation
