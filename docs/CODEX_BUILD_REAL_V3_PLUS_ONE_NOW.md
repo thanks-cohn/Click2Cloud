@@ -1,5 +1,7 @@
 # CODEX — Build the REAL Click2Cloud V3+1 engine (P0)
 
+**Glaciaring implementation brief for Codex:** [CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md](CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md). This is the focused execution companion for the comprehensive, low-overhead, no-shortcuts agent diagnostic API; it preserves the authority and all gates of this full V3+1 request.
+
 ## P0 CORRECTION — COMPLETE INSPECTABILITY, NO DIAGNOSTIC SHORTCUTS (OWNER REQUIREMENT)
 
 **This section takes precedence over any earlier wording about “minimal traversal,” “fewer files inspected,” “earliest suspicious boundary,” “sparsity,” “lightest API,” or “fewer agent iterations.”** Those phrases describe benefits of a *fully instrumented, readily inspectable system*; they are **NOT** implementation targets that permit dropping checks, excluding paths, hiding inconvenient failures, suppressing signals, narrowing tests, or prematurely declaring a diagnosis.
