@@ -2,6 +2,10 @@
 
 **Owner direction (2026-11-03). Status: proposed UI + testable neutral model, NOT a deployed Chrome/REDOWN feature.**
 
+## Selected connection is the editing scope
+
+The owner chooses the provider/connection being configured (Cloudflare R2 account, MEGA S4 access point, future Amazon S3 connection, etc.). The top `Simple | Narrow | Depth` switch changes **only that selected S3-compatible connection's active menu mode and draft**, not any other connected provider's menu. The same minimalist folder tree and popup design remains unchanged; no extra controls appear on each folder row. Each connected account's Existing Destinations shows its own modes/aliases, with an optional filter for all connections that still routes edits to the exact owner ID. Native flat providers (Google Drive, OneDrive, Dropbox, future MEGA) remain fixed independent rows and do not inherit S3 menu modes. See [Universal Connectors](../universal_connectors/).
+
 ## Final minimalist circle → popup flow (owner's latest decision)
 
 **Supersedes earlier popup options and folder count badges.** Keep the navigator **literally a standard indented directory tree**. Each row shows just a **circle on the left**, a separate expand chevron, the folder icon and its real folder name:
@@ -73,7 +77,7 @@ Depth:
 - Simple emits **one flat menu leaf per saved entry**. Narrow emits the selected path with true ancestors and only the terminal segment renamed. Depth's private engine is not imported or modified by either.
 - Multiple entries pointing to an **identical provider/account/bucket/prefix** are allowed. Multiple entries with **identical visible titles** are ALSO allowed, simultaneously, **without any extra blocking confirmation in the minimalist popup**. They do not collide because every saved entry receives its own **immutable, opaque destination ID** on creation. The native registry ID is namespaced by mode plus saved ID. **Titles, file paths, and mode selection are not identity keys.**
 - Clicking Rename updates only the chosen record's `menuTitle`; it does not alter its ID, cloud target, sibling aliases, or provider objects. Clicking the red **×** removes only that record from the relevant mode's selected list; it never deletes the remote folder, other aliases, or another mode's entry. No deletions in the navigator. A hard-coded `redown` default may be hidden/reduced to one flat `Cloudflare` save leaf but cannot be deleted as a remote bucket via this UI.
-- `Existing Destinations` can show `All` (both Simple and Narrow) with explicit mode tags, plus `Simple` and `Narrow` filters. The aggregation is **read-only**. Each Rename/Delete command is routed only to that row's owning mode state reducer. Only the active mode is registered in Chrome's native menu, even though both modes' saved entries are visible in the manager.
+- `Existing Destinations` can show `All` (both Simple and Narrow) with explicit mode tags, plus `Simple` and `Narrow` filters. The aggregation is **read-only**. Each Rename/Delete command is routed only to that row's owning mode state reducer. Only the selected mode **for that connection** is registered in Chrome's native menu; other S3 connections may concurrently use different modes, even though both modes' saved entries are visible in the editor.
 - A default per-mode draft is retained when switching top tabs. Switching tabs alone never registers a half-edited menu. `Save Changes / Apply` applies **one selected mode's finished plan** via the neutral registrar with explicit native acknowledgement and rollback on error.
 
 ### Depth is visually and logically separate

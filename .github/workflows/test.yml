@@ -16,3 +16,4 @@ jobs:
       - run: node --test shared_destination_picker/tests/*.test.mjs
       - run: node --test assisted_proposal/depth/tests/*.test.mjs
       - run: node --test destination_manager/tests/*.test.mjs
+      - run: node --test universal_connectors/tests/*.test.mjs

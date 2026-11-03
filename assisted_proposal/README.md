@@ -17,12 +17,13 @@ The important new boundary is that **Time Machine and Depth are not the same sub
 | Narrow engine (future replacement) | Its own shortcut aliases, chosen path expression | Simple, Depth, Time Machine internals |
 | Time Machine / RFIS (independent, optional) | File identity, placement biography, history timelines, as-of queries, historical evidence | Any menu engine internals |
 | Provider adapter / verified operation events | Authenticated list/change-stream/save receipts and authoritative identity/observations | UI mode decisions |
-| Mode-neutral menu registrar | One selected mode's finished descriptors, root/provider sibling menus, native acknowledgement/routing | Cloud inventory, journal generation or mode state |
+| Mode-neutral menu registrar | One selected mode **per connection**, aggregate independently owned provider fragments, root/provider sibling menus, native acknowledgement/routing | Cloud inventory, journal generation or mode state |
 
 **No mode imports another mode.** Provider adapters and a typed verified-change event bus are neutral infrastructure, not calls between modes. Depth may maintain its own minimal directory journal even when Premium RFIS is disabled. Time Machine independently subscribes to permitted provider events and maintains the richer file-identity history. Free core saving must not depend on Time Machine.
 
 ## Files
 
+- [Universal S3/S4 connectors](../universal_connectors/README.md) — per-connection mode selection, distinct MEGA S3 and MEGA native providers, multi-connection native registration and storage namespaces
 - [depth/README.md](depth/README.md) — authoritative Depth-only ownership, full-folder index, delta journal, menu projection and strict cross-system isolation invariants
 - [ENGINE_ISOLATION_CONTRACT.md](ENGINE_ISOLATION_CONTRACT.md) — the four independent state owners (Simple, Narrow, Depth, Time Machine), shared provider/event seams, registry permissions and regression acceptance
 - [TIME_MACHINE_ARCHITECTURE.md](TIME_MACHINE_ARCHITECTURE.md) — historical queries, source evidence and RFIS semantics

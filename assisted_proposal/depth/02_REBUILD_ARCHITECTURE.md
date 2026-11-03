@@ -57,4 +57,4 @@ All identities include exact provider/connection/account/container and exact pre
 - Switching mode or changing the selected menu depth makes zero cloud listings solely because of that display choice.
 - Provider event fan-out is neutral infrastructure: each owner independently decides whether to ingest a verified event. Time Machine tracking selections produce zero Depth writes.
 
-Only the active mode's **finished menu descriptors** reach native registration.
+Only the active mode's **finished menu descriptors FOR EACH CONNECTION** reach native registration. Each connection may independently select its mode; the neutral registry combines multiple connections' outputs as siblings (Cloudflare Simple + MEGA S4 Depth, etc.). See `../../universal_connectors/`.

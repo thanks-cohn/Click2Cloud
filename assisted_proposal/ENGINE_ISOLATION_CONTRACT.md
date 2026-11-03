@@ -13,7 +13,7 @@ This file defines the isolation of **Simple**, **Narrow**, **Depth**, and the **
 | Depth | `depthConfigRevision`, `depthInventoryGeneration` (separate) | Participating bucket scopes, independent full-known directory inventory, reconciliation cursor, directory delta events, selected *menu* depth | Finished Depth descriptors, verified inventory observations via neutral event contract | Edit Simple/Narrow settings; import RFIS; use tracking selections to filter folder inventory |
 | Time Machine / RFIS | `timeMachineSettingsRevision`, `timeMachineEventGeneration` | Tracking selections, durable file identity/placement records, historical events, as-of queries, retention policy | Its own historical query/view results; may subscribe to neutral verified provider events | Edit or increment Depth/Simple/Narrow revisions, publish Chrome menu descriptors, or create cloud folders on mere tracking selection |
 
-The **neutral menu registry** is not a fifth mode: it receives exactly **one selected mode's** finished descriptors, composes provider sibling rows and native action IDs, registers with Chrome, and routes clicks through an authorized dispatch interface. It never reads or mutates private journal, scan, alias, or historical state.
+The **neutral menu registry** is not a fifth mode: it receives exactly **one selected mode's finished descriptors PER CONNECTION** (e.g., Cloudflare Simple and MEGA S4 Depth concurrently), composes provider sibling rows and native action IDs, registers with Chrome, and routes clicks through an authorized dispatch interface. It never reads or mutates private journal, scan, alias, or historical state.
 
 The **provider adapter/event distribution** is neutral infrastructure, with authenticated listing and confirmed operations per exact provider/account/bucket identity. A shared verified provider event may independently be consumed by Depth and Time Machine, but **neither calls into the other or writes the other's store**. This is event fan-out, not coupling.
 
@@ -28,6 +28,12 @@ The **provider adapter/event distribution** is neutral infrastructure, with auth
 **IF** the user actually **creates, deletes, or moves a directory in the provider** via a verified REDOWN operation or independently confirmed remote observation, **THEN** Depth may update its own folder graph and reproject *affected* menu descriptors. Time Machine may *independently* record file/placement history if entitled/tracking; it has no authority to initiate Depth's update.
 
 **IF** the user changes Depth's menu display depth 1→10→2→10, **THEN** its full-known folder inventory, deltas, and Time Machine histories remain unchanged. Only the menu projection revision/signature can change.
+
+## Connection isolation — additional mandatory owner decision
+
+A selected right-click menu mode is **connection-scoped**, not an extension-wide global switch. Every S3-compatible connection carries its own `activeMode: simple | narrow | depth` and independent per-mode configs; its finished projection is assembled with other provider contributions. Cloudflare Simple, MEGA S4 Depth and a future Amazon S3 Narrow can appear simultaneously. Multiple accounts of the same provider also stay separate by immutable `connectionId`, exact account, endpoint identity and bucket namespace. The registry must preserve previously acknowledged contributions from unaffected providers if one fails. A future `MEGA` native provider is not the same as `MEGA S3`. For the full contract and testable reference model see [Universal Connectors](../universal_connectors/).
+
+The existing bootstrap `src/registry/mode-registry.mjs` accepts only one global Simple/Depth projection: **it is a historical prototype, not compliant multi-connection implementation**.
 
 ## Storage: independence without gigabytes of duplication
 
@@ -45,7 +51,7 @@ The **provider adapter/event distribution** is neutral infrastructure, with auth
 2. Create a real cloud folder while Time Machine is disabled: Depth gets its own confirmed update without depending on Time Machine.
 3. Inject a Time Machine crash or corrupted historical segment: Depth's previously registered menu and authorized destinations continue functioning; history reports incomplete/recovery failure separately.
 4. Inject Depth discovery failure/partial listing: no Time Machine event deletion or history rewrite; known folder graph preserved.
-5. Switch among Simple/Narrow/Depth: no foreign storage writes, no scans caused solely by switching, no Time Machine sequence changes.
+5. Switch among Simple/Narrow/Depth **on one selected connection**: no foreign connection or mode storage writes, no scans caused solely by switching, no Time Machine sequence changes. Other connections' active modes and installed menu rows remain unchanged.
 6. Compile identical configs/known graph twice: deterministic menu entries/IDs and exact account/bucket/prefix routes.
 7. Attempt a stale native ID after scope or permission revocation: fail closed and do not silently fall back to the default destination.
 8. Two bucket paths with the same name in two connected accounts remain separate in BOTH inventories/histories.

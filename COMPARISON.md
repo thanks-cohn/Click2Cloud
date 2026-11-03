@@ -18,3 +18,7 @@ These are **two preserved, side-by-side alternatives**, not two active productio
 **Source lineage:** `thanks-cohn/REDOWN/NEED_TO_DO/fundamentals.md`, `FOREVER_WORKS/v3/P0_PERSISTENT_RIGHT_CLICK_TREE_WORK_REQUEST.md`, and `docs/proposals/RFIS_PERSISTENT_FILE_IDENTITY_HISTORY.md`.
 
 **Status:** none of these files are being used by REDOWN's shipping code or live provider/Chrome adapters. Pure historical replay reference tests do not establish browser or cloud end-to-end performance.
+
+## Connection-scope update
+
+The owner-approved revised integration contract is under [Universal Connectors](universal_connectors/). One active mode **per S3 connection** is essential; it does not require separate engines or huge copy-on-every-provider inventories. Cloudflare, MEGA S4, Amazon S3, other compatible object providers, and future supported non-S3 adapters each contribute independent rows to a neutral REDOWN registrar. Native providers stay flat unless the owner separately changes them.

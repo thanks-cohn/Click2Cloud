@@ -9,6 +9,12 @@ Start with [CODEX_START_HERE.md](CODEX_START_HERE.md). This directory contains t
 
 Depth is **one independent engine**. This directory documents what **Depth owns, what it can read, and what it is forbidden to touch**. For the entire four-engine isolation boundary see [Independent Engine Ownership Contract](../ENGINE_ISOLATION_CONTRACT.md).
 
+## Universal connection integration (separate from Depth's internals)
+
+A Depth instance is **bound to an exact authorized provider connection** and its participating buckets. The chosen Simple/Narrow/Depth mode is **per connection**, allowing Cloudflare Simple and MEGA S4 Depth simultaneously. The [universal connectors contract](../../universal_connectors/) owns provider readiness, endpoint/credential handles and multi-connection menu composition. Depth may consume a neutral S3-compatible listing adapter and emits only its own finished plan. A MEGA S4 bucket's CURRENT/journal/HEAD/snapshot chain uses its **MEGA S4 connection namespace**, not Cloudflare's index or the user's menu depth.
+
+The new connection registry, not Depth, creates `MEGA S3` as a REDOWN sibling. MEGA S4 is a provider implementing the S3 interface, not a distinct universal “S4 wire protocol”. Native MEGA, if later added, is its own adapter and namespace.
+
 ## Depth's exclusive responsibilities
 
 1. **Participating scopes and display setting:** Track opt-in cloud accounts/buckets and numeric right-click menu depth (currently 1..10). These are Depth-only settings, separate from its inventory generation.

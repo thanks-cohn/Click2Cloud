@@ -15,7 +15,7 @@
 
 In current `buildMenus()`, Dropbox uses `RedownGoogleDriveMenu.composeSibling()`; OneDrive uses a further composer. The provider menu fragments are therefore **not fully independent** despite separate source files. A shared background import error can prevent downstream providers from registering. Moving a provider's row can trigger recreation of all destination rows.
 
-**Required V3+1 boundary:** each provider/mode supplies a validated, namespaced immutable fragment `{providerId, revision, entries, ownedActions}` to one neutral registrar. It must never import another provider's composer. One provider's failure must preserve the last acknowledged valid plan of the other providers and the root/Manage rows.
+**Required V3+1 boundary:** each provider **connection with its own active Simple/Narrow/Depth mode** supplies a validated, namespaced immutable fragment `{providerId, revision, entries, ownedActions}` to one neutral registrar. It must never import another provider's composer. One provider's failure must preserve the last acknowledged valid plan of the other providers and the root/Manage rows.
 
 ## Tests and OPEN design gates
 
@@ -28,3 +28,7 @@ In current `buildMenus()`, Dropbox uses `RedownGoogleDriveMenu.composeSibling()`
 - One native plan may be temporarily incomplete during reorder; report truthful pending/failure and retry rather than declaring the entire menu atomically committed. Distinguish **menu acknowledged** from **file save verified**.
 
 **Do not transplant** old `buildMenus()` cross-provider composition or `removeAll` behavior into new mode modules.
+
+## Universal S3/S4 connection correction (November 3, 2026)
+
+The previous “one selected mode” global registry prototype is insufficient. Its unit of composition must be an **immutable provider connection**, each with its own active mode and already compiled descriptor fragment. This supports Cloudflare Simple, MEGA S4 Depth and Amazon S3 Narrow concurrently, plus independent flat native Google Drive, OneDrive, Dropbox and potential MEGA. Never require a MEGA S4 connection to go through Cloudflare R2 setup or shared credentials. See [Universal Connector design](../../universal_connectors/) and its [concurrency tests](../../universal_connectors/tests/connection-registry.test.mjs).
