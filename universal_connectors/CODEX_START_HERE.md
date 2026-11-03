@@ -4,6 +4,8 @@
 **Branch:** `feature/original-vs-assisted-depth-proposals`
 **Scope:** build isolated connector/registry integration and tests in this new repository; **do not change REDOWN production or connect a real account without separately approved credentials**.
 
+**Live R2 credentials:** first read `universal_connectors/CLOUDFLARE_FIVE_BUCKET_TEST_ACCESS.md`. Five specific buckets are authorized for object operations, but **no access token or Worker secret has been provisioned/verified yet**. Do not hardcode a credential or make an unauthenticated public test endpoint.
+
 Read in order:
 1. `universal_connectors/README.md`
 2. `universal_connectors/CONNECTOR_API.md`

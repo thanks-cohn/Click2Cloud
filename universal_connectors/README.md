@@ -2,6 +2,10 @@
 
 **Decision, 2026-11-03:** V3+1 is a menu engine, **not a separate implementation for every cloud provider**. A verified universal file API / adapter layer supplies normalized capabilities, folders and upload receipts to three independently implemented menu modes. One neutral registry joins the resulting provider contributions beneath REDOWN. This is an **integration contract and pure reference model**, not a live adapter, Chrome registrar, Cloudflare Worker or tested MEGA connection.
 
+## Authorized Cloudflare R2 test identity
+
+Read [Five-Bucket Cloudflare Test Access](CLOUDFLARE_FIVE_BUCKET_TEST_ACCESS.md) before attempting real R2 tests. It records the owner's exactly-five-bucket Object Read & Write authorization, the separate test Worker secret bindings and the fact that credentials **have not yet been provisioned** because the connector sign-in is blocked. Do not infer readiness from a committed specification.
+
 ## Critical correction: mode is selected per connection
 
 Each authorized provider **connection** owns its own menu-mode selection. E.g. Cloudflare R2 can show Simple while MEGA S3 concurrently shows Depth, without changing either mode's private configuration or folder index. The Destination Manager's top `Simple | Narrow | Depth` tabs apply to the **currently selected connection**, not to the whole extension. Non-S3 native integrations such as Google Drive, OneDrive, Dropbox and future MEGA native remain their separately specified flat provider actions; they are not forced into S3 folder modes.
