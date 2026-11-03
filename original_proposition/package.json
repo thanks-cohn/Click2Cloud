@@ -1,0 +1,12 @@
+{
+  "name": "click2cloud",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "One deterministic Click2Cloud menu specification for a real REDOWN Portal and Chrome",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test"
+  },
+  "engines": { "node": ">=20" }
+}
