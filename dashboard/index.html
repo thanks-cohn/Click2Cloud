@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Click2Cloud V3+1 — R2 connection controls</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="workbench" aria-labelledby="title">
+    <header class="heading">
+      <div><p class="eyebrow">Click2Cloud · V3+1</p><h1 id="title">Cloudflare connection</h1>
+      <p class="subhead">REDOWN's existing Refresh and Activate Buckets behavior. Menu modes stay independent.</p></div>
+    </header>
+    <section class="controls" aria-label="Cloudflare maintenance">
+      <div class="control-row">
+        <div><h2>Refresh</h2><p>Read the latest accounts, buckets or selected folder. Never provision Workers.</p></div>
+        <button type="button" id="refresh" title="Refresh accounts/buckets or current folder; never activate buckets">↻ Refresh</button>
+      </div>
+      <div class="control-row">
+        <div><h2>Activate Buckets</h2><p>Prepare and verify REDOWN Workers and menu registration for existing authorized buckets.</p></div>
+        <button type="button" id="prepare" title="Use REDOWN's original authenticated activation operation">✦ Activate Buckets</button>
+      </div>
+    </section>
+    <section aria-labelledby="inventory-title" class="inventory">
+      <h2 id="inventory-title">Actual R2 inventory</h2>
+      <label for="bucket">Bucket / folder to refresh</label>
+      <select id="bucket"><option value="">All connected accounts and buckets</option></select>
+      <label for="prefix">Folder path in selected bucket</label>
+      <input id="prefix" type="text" placeholder="Bucket root" autocomplete="off" spellcheck="false">
+      <p id="inventory-summary" class="muted">Not loaded yet.</p>
+      <ul id="entries"></ul>
+    </section>
+    <section class="status-card" aria-label="Operation status" aria-live="polite">
+      <p class="eyebrow">Current state</p>
+      <p id="status">Checking for the authenticated REDOWN host…</p>
+      <p id="activation-status" class="muted"></p>
+    </section>
+  </main>
+  <script src="../src/explorer/cloudflare-api.js"></script>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
