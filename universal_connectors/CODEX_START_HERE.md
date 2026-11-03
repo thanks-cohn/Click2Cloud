@@ -7,12 +7,12 @@
 Read in order:
 1. `universal_connectors/README.md`
 2. `universal_connectors/CONNECTOR_API.md`
-3. `universal_connectors/src/connection-registry.mjs`, reference tests
-4. `assisted_proposal/ENGINE_ISOLATION_CONTRACT.md`
-5. `assisted_proposal/depth/` and `destination_manager/`
-6. `legacy/registry/`, `legacy/providers-and-saves/`, `legacy/storage-and-migration/` and `legacy/CURRENT_CLICK2CLOUD_CONFLICTS.md`
+3. `universal_connectors/EXISTING_FILE_API_BRIDGE.md` and actual REDOWN `extension/beta/file-api.mjs`\n4. `universal_connectors/src/connection-registry.mjs`, reference tests
+5. `assisted_proposal/ENGINE_ISOLATION_CONTRACT.md`
+6. `assisted_proposal/depth/` and `destination_manager/`
+7. `legacy/registry/`, `legacy/providers-and-saves/`, `legacy/storage-and-migration/` and `legacy/CURRENT_CLICK2CLOUD_CONFLICTS.md`
 
-Implement a **universal provider connection interface** in which MEGA S4 is only the first S3-compatible adapter fixture, not a hardcoded backend or a separate invented S4 protocol. Support multiple S3 connections and future S3-compatible providers behind the same capability/credential/read/list/upload/verify contract. The browser extension—not any remote Worker—owns native Chrome right-click registration.
+Reuse the existing REDOWN `createFileApi(adapter)` and `api.run()/api.batch()` semantics as the normalized operations boundary. Inspect actual C3 S3-specific engine source before attempting a compatibility bridge; do not invent a new parallel file API or a second native menu registrar.\n\nImplement a **universal provider connection interface** in which MEGA S4 is only the first S3-compatible adapter fixture, not a hardcoded backend or a separate invented S4 protocol. Support multiple S3 connections and future S3-compatible providers behind the same capability/credential/read/list/upload/verify contract. The browser extension—not any remote Worker—owns native Chrome right-click registration.
 
 **Change the prior one-global-mode registry assumption to per-connection active modes.** Allow `Cloudflare` in Simple and `MEGA S3` in Depth *at the same time*, plus fixed flat `Google Drive`, `OneDrive`, `Dropbox` and future separate `MEGA` native provider. Register all contributions as independent siblings under REDOWN; preserve ordering and unaffected providers when one fails. Each connection may independently select Simple/Narrow/Depth; inactive settings persist.
 

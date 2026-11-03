@@ -1,5 +1,7 @@
 # Universal File API adapter — capability and evidence contract
 
+**Source authority:** the actual `extension/beta/file-api.mjs` already implements `createFileApi(adapter)`, `api.run()` and `api.batch()`; see [Existing File API Bridge](EXISTING_FILE_API_BRIDGE.md). The TypeScript interface below is a **provider-specific adapter extension** and normalized connection identity proposal, **not a competing public file API**.
+
 This is a **normalization boundary**, not a promise that one S3 SDK works identically for all vendors. It deliberately separates:
 
 - **Transport/credential service**: secret handles, signing, permitted endpoints, workers, auth refresh and provider-specific behavior

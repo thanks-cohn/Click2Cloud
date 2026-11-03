@@ -33,6 +33,10 @@ Not every cloud is S3-compatible. For example Koofr officially documents **WebDA
 
 **MEGA S3** (MEGA S4 object storage) is explicitly different from **MEGA** (future native MEGA file storage). Both may coexist under REDOWN with separate `connectionId`, `adapterKind`, credentials and root handling.
 
+## Reuse the actual existing file API
+
+REDOWN already exposes `createFileApi(adapter)` and `api.run()` / `api.batch()` in its [Beta file API](https://github.com/thanks-cohn/REDOWN/blob/main/extension/beta/file-api.mjs). This is the operation/policy/progress/partial-or-uncertain-write boundary. **V3+1 should integrate with it, not build another upload stack.** The owner also references C3 as the older S3-specific engine: treat its compatibility as a separately verified bridge, not as a competing registrar. Read [Existing File API Bridge](EXISTING_FILE_API_BRIDGE.md) before coding.
+
 ## Ownership diagram
 
 ```text
