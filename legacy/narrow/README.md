@@ -27,3 +27,7 @@
 `common-last`, `diverge-two`, `parent-selected`, `two-aliases`, `identical-label`, `alias-children`, `alternate-branch-attempt`, `same-label-scopes`, `prefix-case-unicode`, `disabled`, `invalid-path`, `duplicate-id`, `revoked`, `shared-modes`, `root-alias`. The original [casebook](https://github.com/thanks-cohn/REDOWN/blob/94a1a5f0699eec904d989a3823d22f9bf2bd131d/FOREVER_WORKS/v3-plus-one-master-audit/04_DUPLICATES_ALIASES_AND_BRANCH_INSTANCES.md) serializes actual current descriptors and routes.
 
 **Preserve** exact route semantics, parent-selected save and alias multiplicity. **Replace** shared config/cascading-delete surprises. **Do not implement** optional alternate named whole branches until approved and tested separately.
+
+## New-repository compiler caveat
+
+**Separate from original REDOWN:** the current new Click2Cloud `src/core/menu-compiler.mjs` still rejects duplicate Narrow target paths before it can emit multiple actions, and its `add()` rejects identical sibling visible labels. That is a current **prototype/code conflict** with the user's accepted duplicate-alias design. See [Click2Cloud current conflicts](../CURRENT_CLICK2CLOUD_CONFLICTS.md). Do not mistake passing its older regression tests for proof of the new independent Narrow implementation.

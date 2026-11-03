@@ -19,6 +19,10 @@
 | **Evidence and tests** | [tests-and-release/README.md](tests-and-release/README.md) | Existing test failures cannot be waved away; baseline, differential fixtures and real-browser verification gates |
 | **Consolidated priorities** | [PRIORITY_GAP_LEDGER.md](PRIORITY_GAP_LEDGER.md) | Gap → new proposed owner → acceptance proof → migration hazard |
 
+## Current new-repository prototype contradictions
+
+Read [CURRENT_CLICK2CLOUD_CONFLICTS.md](CURRENT_CLICK2CLOUD_CONFLICTS.md) **before using any existing Click2Cloud `src/core/menu-compiler.mjs` or early README as implementation authority**. The early compiler rejects two distinct same-title/save-path entries, while the latest manager intentionally supports them. This is a current prototype-vs-owner-contract gap, not a regression caused by the archived REDOWN code.
+
 ## Source-of-truth hierarchy
 
 1. **LATEST OWNER DECISIONS WIN** over V3 historical UX. They include: Simplified three-tab editor (Simple/Narrow/Depth); *only empty/checked circle* in a plain directory browser; a tiny popup with Simple/Narrow and optional title; independent **Existing Destinations** rename/red-X; multiple exact duplicate path/title aliases with unique IDs; Simple creates/reuses lowercase `redown` after authorized R2 readiness; manual-only rechecking after clearing extras; fully independent Depth graph/journals; independent optional Time Machine.

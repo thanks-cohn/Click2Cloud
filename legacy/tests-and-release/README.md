@@ -38,3 +38,7 @@ The audit recorded **1001 tests, 904 passed, 97 failed** across its full suite; 
 6. Preserve prior REDOWN state/config backups; log migration report (including duplicates) and rollback route. No edit to production main or live cloud scope without approval.
 
 Relevant original fixtures are indexed in [audit evidence](https://github.com/thanks-cohn/REDOWN/blob/94a1a5f0699eec904d989a3823d22f9bf2bd131d/FOREVER_WORKS/v3-plus-one-master-audit/evidence/INDEX.md). Do not silently rewrite failing expectations or old frozen evidence hashes. **A new test that passed in Click2Cloud covers only what that test actually exercises.**
+
+## Important new-repository negative golden
+
+The early Click2Cloud compiler's test expects **sibling label collisions** to be rejected, and its Narrow prototype maps one action to one path. Those were valid earlier prototype assertions but conflict with the owner's later explicit requirement for *two identical labels and paths with distinct IDs*. Do not silently waive this: retain old test as a version-pinned historical behavior, write **new expected behavior** tests in the independent mode compiler, and ensure the exact two distinct native IDs and saves in an installed Chrome run. See [current conflicts](../CURRENT_CLICK2CLOUD_CONFLICTS.md).

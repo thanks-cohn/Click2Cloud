@@ -4,6 +4,7 @@ This is the quick Codex triage view; read the area-specific documents for mechan
 
 | Priority | Legacy evidence / lesson | New owner | Current status / necessary next action |
 |---|---|---|---|
+| **P0** | Current Click2Cloud prototype compiler rejects same-label siblings and duplicate Narrow target paths, despite latest owner allowing both | **New per-mode menu compiler** | **DIRECT CODE CONFLICT**: preserve unique record/action IDs and duplicate visible labels/targets, do not copy old de-duplication; see [new-repo conflicts](CURRENT_CLICK2CLOUD_CONFLICTS.md) |
 | **P0** | Old `migrate()` merges two distinct aliases if profile, prefix and label match | **Migration** | **NOT COVERED IN RUNTIME**: preserve every original ID, provenance and rollback; test exact duplicate-title+path records and parentId |
 | **P0** | V3 shared rightClickV3 array and mirrored direct writers can clobber states | **Mode config + storage** | **CONTRACT ONLY**: per-mode CAS revisions and one durable authority; multiwindow/IDB+mirror fault injection |
 | **P0** | Dropbox composer depends on Google Drive; OneDrive further chained | **Neutral registry** | **CONTRACT ONLY**: per-provider isolated contributions, last acknowledged valid plan, failed-module/bootstrap tests |
