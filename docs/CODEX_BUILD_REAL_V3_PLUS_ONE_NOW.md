@@ -1,5 +1,7 @@
 # CODEX — Build the REAL Click2Cloud V3+1 engine (P0)
 
+**Mandatory API and behavioral acceptance contract:** [V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md](./V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md). It is the exhaustive 29-section matrix of actual user/runtime situations, required engine behavior, formal API signatures, state priorities and proof types. Implement real operations for the P0 path, build tests directly from the rows and mark each scenario PASS/FAIL/BLOCKED/NOT_TESTED. Do not treat it as mere design copy or build a duplicate file Explorer. If this document and an older plan conflict, prefer current REDOWN code and the owner-approved principles here; explicitly document the conflict.
+
 ## AUTONOMOUS RUN — READ FIRST (highest priority)
 
 **Follow [CODEX_AUTONOMOUS_V3P1_RUNBOOK.md](./CODEX_AUTONOMOUS_V3P1_RUNBOOK.md) as the implementation contract.** The user authorizes a fully automated engineering run within Click2Cloud's isolated repository and documented lab scope: inspect, implement, test, repair, commit, push, and inspect build outcomes **without new design approval prompts**. This does NOT authorize paid R2 enrollment, new OAuth scopes or account consent, copying tokens, modifying non-lab REDOWN resources, or transplanting to REDOWN production.
