@@ -1,15 +1,15 @@
-# Codex handoff — Simple Cloudflare R2 eligibility, no nested menu before activation
+# Codex — Simple automatic bucket discovery, redown root and flat-only toggle
 
-Target repo: `thanks-cohn/Click2Cloud`
-Branch: `feature/original-vs-assisted-depth-proposals`
-Scope: `simple/original_proposition/` and eventual isolated Simple integration. **Do not touch the other menu modes.**
+Scope: `simple/original_proposition/` ONLY for this implementation and Simple integration files. **Do not edit Depth, Narrow, Time Machine private code, inventories, snapshots or revision counters.** Working baseline: `reference/simple-v3-original.mjs`.
 
-Read `README.md`, `reference/simple-v3-original.mjs`, `src/cloudflare-simple-gate.mjs`, and `tests/cloudflare-simple-gate.test.mjs`. Verify the original Simple V3 route/label/menu behaviors before any adapter changes.
+1. Read `README.md`, `AUTOMATIC_BUCKETS_AND_DEFAULT.md`, `src/cloudflare-simple-gate.mjs`, `src/simple-redown-bootstrap.mjs` and their tests.
+2. Inspect actual REDOWN `extension/background.js` functions: `createBucket` (~1043), `setupRedownQuickDestination` (~1056), `activateAllBuckets` (~2260), `runGlobalActivation` (~2294); existing provider validation/menu registration and durable `commitV3Current`. The current explicit setup routine creates/reuses redown but is not guaranteed in the default Activate Buckets journey. Reuse verified code, do not invent a parallel Cloudflare API.
+3. Progressive single flat Cloudflare item: missing login → REDOWN login; verified login without R2 → official R2 Overview; R2 active but no verified redown root → consented/idempotent first-run provisioning, never upload or fake success.
+4. After setup, verify `redown` root is writable and bind it to Simple's first-run default with account-specific CAS transaction. Existing bucket names DO NOT prevent creating `redown`. Don't overwrite later explicit user-selected defaults; preserve all existing configured destinations.
+5. Pull other bucket roots from authorized paginated R2 bucket listing; prepare/verify writable targets; auto check all initially, display **redown FIRST**, then alphabetical other buckets. Newly created authorized buckets appear on next refresh without manually configuring Simple or Narrow.
+6. Add Simple checkbox UI for all additional bucket roots. Unchecking all extras renders exactly one flat `REDOWN → Cloudflare` SAVE leaf targeting `redown/`. Persist flat-only preference so new bucket discovery doesn't silently repopulate the submenu. `Auto-show new buckets` opt back in. Hiding a bucket never deletes it.
+7. On native click, recheck connection/target/permission. Setup click is never a verified save; upload success requires actual provider receipt. Native menu registration and history counters must not incorrectly increment. Do not run provider listings while the Chrome native menu opens.
+8. Implement tests for new account with/without existing buckets; ambiguous create; no R2; redown existing; 3 buckets auto-discovered; deselect all; subsequent new bucket; account swaps, revocation; stable native IDs; existing custom folder destinations; concurrent tab preferences; and independent provider rows.
+9. Run node unit tests, actual configured extension integration and real authorized test-account readback (no new Cloudflare buckets in production accounts without approved user activation). Provide exact commit/test receipts. Keep REDOWN production unchanged until transplant explicitly authorized.
 
-Implement an authenticated **Cloudflare connection + active R2 subscription** eligibility gate in the provider contribution layer. If the Cloudflare session is missing/expired/unknown, render exactly ONE flat root child `Cloudflare`; clicking it invokes REDOWN's existing Cloudflare login/connection flow, NOT an R2 URL. If the session is verified but R2 is inactive/unknown, retain the same one-row flat `Cloudflare`; clicking it opens the official R2 Overview `https://dash.cloudflare.com/?to=/:account/r2/overview`. Neither onboarding action ever uses save dispatch. If both pass but there is no valid writable destination, keep setup leaf; with one verified save target preserve direct flat save; with 2+ use the original flat-destination Simple submenu. No fake R2 subscription check inferred from stale cache or token; define fail-closed fallback. Preserve all sibling providers and the REDOWN root.
-
-Write separate tests for the native registry contribution, account activation/expiration, login-versus-R2 click dispatch, and the setup click listener. Ensure a previously registered save action is invalidated when R2 entitlement expires. Prove zero uploads, history successes and counters on setup clicks. Do not provision an R2 subscription or charge the user automatically; Cloudflare owns checkout. Keep production REDOWN unchanged until explicit transplant approval.
-
-**Other S3-compatible providers do not need Cloudflare R2.** Never apply this Cloudflare gate globally.
-
-Report completed source changes, exact test results and remaining installed-browser/cloud acceptance gaps.
+**Note:** other S3-compatible providers do not need a Cloudflare R2 subscription.
