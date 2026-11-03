@@ -1,5 +1,8 @@
 # Simple / Depth source-preserving extraction (Phase 1)
 
+> **V3+1 design correction (2026-11-03):** Depth's persistent inventory is intended to crawl the **full reachable authorized cloud tree**, independently of the selected 1–10 right-click menu presentation depth. The preserved V3 discovery code in this extraction is **not yet compliant**: it presently uses the selected depth to bound its discovery and cache. The owner also requires cumulative daily `current.json`, weekly `weekly.json`, an incremental journal, and verified encrypted recovery outside Chrome storage. See [Depth full-index and JSON recovery](DEPTH_FULL_INDEX_AND_JSON_RECOVERY.md). Treat the extracted V3 as a behavioral baseline only, not the finished V3+1 inventory design.
+
+
 **Decision approved by owner (2026-11-03):** Retain V3 Simple and Depth algorithms. Make only narrowly scoped Simple tweaks later. **Narrow is to be redesigned from scratch in a subsequent phase.** Do not attempt to port or embellish Narrow now.
 
 ## Proof of origin
