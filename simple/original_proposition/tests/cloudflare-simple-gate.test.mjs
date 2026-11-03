@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {decideSimpleCloudflare,R2_SETUP_URL,newSimpleBucketSelection,toggleSimpleBucket,
-  setSimpleAutoIncludeNew} from '../src/cloudflare-simple-gate.mjs';
+import {decideSimpleCloudflare,R2_SETUP_URL,newSimpleBucketSelection,toggleSimpleBucket, toggleSimpleDestination } from '../src/cloudflare-simple-gate.mjs';
 const base={cloudflareSession:'verified',cloudflareAccountId:'acct',r2Subscription:'active'};
 const root={accountId:'acct',profileId:'p',bucketName:'redown',prefix:''};
 const b1={...root,bucketName:'bucket-1'},b2={...root,bucketName:'bucket-2'};
@@ -42,8 +41,11 @@ test('explicit flat-only preference survives a newly created bucket, until user 
   const b3={...root,bucketName:'bucket-3'};
   const plan=decideSimpleCloudflare({...base,validSaveTargets:[root,b1,b3],selection:s});
   assert.equal(plan.mode,'flat-save');
-  s=setSimpleAutoIncludeNew(s,true,['bucket-1','bucket-3']);
+  // User must explicitly re-check each destination; there is no automatic
+  // switch back to auto-population after choosing flat-only.
+  s=toggleSimpleBucket(s,'bucket-3',true,['bucket-1','bucket-3']);
   const reopened=decideSimpleCloudflare({...base,validSaveTargets:[root,b1,b3],selection:s});
+  assert.equal(s.autoIncludeNew,false);
   assert.deepEqual(reopened.children.map(x=>x.title),['redown','bucket-3']);
 });
 test('one checkbox change does not modify cloud buckets or other engine state',()=>{
@@ -68,4 +70,17 @@ test('existing optional Simple folder shortcuts remain independent of bucket che
   const folder={...root,prefix:'photos/wedding',label:'Weddings',configured:true};
   const p=decideSimpleCloudflare({...base,validSaveTargets:[root,folder]});
   assert.deepEqual(p.children.map(x=>x.title),['redown','Weddings']);
+});
+
+test('all optional buckets and configured folder shortcuts can be unchecked manually',()=>{
+  const folder={...root,id:'manual-path',prefix:'Photos/Weddings',label:'Weddings',configured:true};
+  let s=newSimpleBucketSelection('acct');
+  s=toggleSimpleBucket(s,'bucket-1',false,['bucket-1']);
+  s=toggleSimpleDestination(s,folder,false,[root,b1,folder]);
+  let menu=decideSimpleCloudflare({...base,validSaveTargets:[root,b1,folder],selection:s});
+  assert.equal(menu.mode,'flat-save');assert.equal(menu.action.target.bucketName,'redown');
+  s=toggleSimpleDestination(s,folder,true,[root,b1,folder]);
+  menu=decideSimpleCloudflare({...base,validSaveTargets:[root,b1,folder],selection:s});
+  assert.equal(menu.mode,'nested');assert.deepEqual(menu.children.map(x=>x.title),['redown','Weddings']);
+  assert.equal(s.autoIncludeNew,false);
 });
