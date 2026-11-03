@@ -1,5 +1,10 @@
 # Depth — V3+1 Assisted Proposal
 
+## Codex self-contained rebuild package
+
+Start with [CODEX_START_HERE.md](CODEX_START_HERE.md). This directory contains the immutable V3 original algorithm and CURRENT implementation under `reference/`, executable isolated reference contracts under `src/` and `tests/`, and detailed, ordered rebuild instructions in documents 01–07. **Only two tiny reference functions exist so far; the production-grade rebuild remains to be implemented and verified.**
+
+
 **Date:** November 3, 2026. **Status:** Authoritative *proposed* Depth contract for this branch, **not** completed implementation.
 
 Depth is **one independent engine**. This directory documents what **Depth owns, what it can read, and what it is forbidden to touch**. For the entire four-engine isolation boundary see [Independent Engine Ownership Contract](../ENGINE_ISOLATION_CONTRACT.md).
