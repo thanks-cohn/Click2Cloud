@@ -40,3 +40,7 @@ Both renderers -> shared SaveIntent dispatcher -> provider byte upload -> verifi
 - [ ] Remove legacy menu engine only after verified parity and migration.
 
 This repository is a separate development track, not REDOWN's production branch.
+
+## V3+1 Universal Engine API contract
+
+The complete, editable [V3+1 Universal Engine API & Behavioral Contract](docs/V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md) specifies state detection, real API operations, dashboard Refresh/Activate behavior, independent Simple/Nested/Depth engines, Chrome menus, live saves, other providers, failure recovery, security and transplant acceptance. This is a target specification, not an assertion that every capability is implemented. Follow the [autonomous Codex runbook](docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md) and its [implementation request](docs/CODEX_BUILD_REAL_V3_PLUS_ONE_NOW.md).
