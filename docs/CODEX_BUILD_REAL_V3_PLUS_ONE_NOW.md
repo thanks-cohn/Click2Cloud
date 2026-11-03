@@ -1,5 +1,59 @@
 # CODEX — Build the REAL Click2Cloud V3+1 engine (P0)
 
+## P0 GLACIARING: minimal diagnostic traversal + canonical menu convergence (OWNER REQUIREMENT)
+
+**Read both owner's clarifications before modifying any runtime module:**
+1. [GLACIARING_MINIMAL_TRAVERSAL_OWNER_INTENT.md](references/GLACIARING_MINIMAL_TRAVERSAL_OWNER_INTENT.md) — **Glaciaring means reduce the traversal/work necessary to find a failure** through sparse, strategic boundary signals. It does **not** mean exhaustive logging or running expensive tracing constantly.
+2. [CANONICAL_MENU_CONVERGENCE_OWNER_INTENT.md](references/CANONICAL_MENU_CONVERGENCE_OWNER_INTENT.md) — the entire right-click menu is first a versioned, human/agent-inspectable logical MenuSpec; Chrome is a generated view of that model. Humans and agents can inspect the **same** intended menu, and deliberate edits converge safely toward it.
+
+These clarifications refine, but **do not remove**, the previously published [Glaciaring API seed](V3P1_GLACIARING_AGENTIC_DEBUG_API_SEED.md), [complete behavioral contract](V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md), [REDOWN source review](../final-review/V3_VS_V3PLUS1_SOURCE_AUDIT_2026-11-03.md), or [autonomous runbook](CODEX_AUTONOMOUS_V3P1_RUNBOOK.md).
+
+### Goal: faster correct diagnosis, not more debug data
+
+The success metric is **less investigation by ChatGPT Work, Codex and maintainers, fewer repair iterations, and fewer regressions**, while preserving near-zero right-click latency overhead. Build the **smallest** fast diagnostic API with the **widest useful boundary coverage**. The owner's illustrative “90% map coverage” means coverage of important behavior/interactions, **not a target for logging 90% of lines**.
+
+A failed right-click should let a diagnostic agent immediately distinguish, using only cheap signals and previously observed evidence: `auth → R2/bucket activation → Worker readiness → inventory → Simple/Nested/Depth projection → MenuSpec → native registration → action resolution → source capture → upload → provider readback → History/counter`. It should point to the **earliest observed suspicious prerequisite** and the **smallest owning source/test surface**. Subsequent blocked steps are cascade symptoms, not automatically independent root causes. Missing signals remain `UNKNOWN`; green checkpoints indicate only that their narrow assertion passed.
+
+### Runtime non-negotiables
+
+- **Sparsity first:** Optional injected diagnostic sink, tiny enum/code + attempt/epoch/generation/revision information at strategic boundaries. No raw request/response bodies, stack capture, per-click deep cloning/JSON, source URLs, tokens, object names, or network reporting on the hot path. Use bounded fixed-size buffers and record dropped/evicted data.
+- **Three tiers:** cheap passive observations only if benchmarks allow; explicit authorized **Debug Mode** for detailed inspection and console/export; **deferred** compact causal analysis and redacted receipt on definitive failure or terminal uncertainty.
+- **No ordinary debug spam:** Do not render diagnostic codes/console messages/panels during normal use. Keep essential *user-facing* save error status independently visible; never hide actual failures merely because Debug Mode is off.
+- **No behavioral dependency:** Disabled, missing or throwing diagnostics must never change the result of authorization, menu application, source capture, saving, receipt verification, or REDOWN History. Fail-open **observations**, fail-closed security/receipt checks.
+- **No second engine:** Instrument the existing single authorized registrar, activation owner, file API, provider dispatcher and verified completion handoff. Do not duplicate Cloudflare Worker provisioning, provider OAuth, saved-file database, history/counters or the full Explorer.
+- **Lazy root-cause narrowing:** Inspect only the failed operation's dependency neighborhood first; follow explicit `requires / produces / retry-of` relations, never temporal proximity alone; distinguish missing observations, independent faults, possible origins, and downstream blocked work. No unbounded replay/probing of cloud services.
+- **Future-proof modules:** Adding an S3 adapter or replacing Depth should only register a small stable boundary/capability manifest. Never modify Simple, Nested, or the diagnostics core to add a provider.
+
+### Menu twin, exact logical pairing and regression baselines
+
+- Compile **one** deterministic immutable, credential-free MenuSpec first, with complete bounded tree, ordering, action vs item identity, labels, nesting, separators, reasons, omission index, authorization scope and revision; every visual mirror/agent inspector/native Chrome plan consumes this **same** structure.
+- Implement read-only inspection, structured desired/generated/acknowledged/observed menu diffs and pure **simulation** with **zero** capture/cloud write/History/success effects. Native click, human mirror and agent simulation must resolve the **same canonical action** at the same acknowledged generation and eligible context. Any live agent action requires separately granted execution authority.
+- Preserve REDOWN's existing serialized native registrar and callback semantics where practical. A Chrome ACK is **not** independently observed native pixels; true menu parity needs installed Chrome evidence. Never claim perfect visual sameness without it.
+- Establish versioned **known-good mode/provider baselines** and immutable golden scenarios. When Nested changes, test that Simple and Depth output/config, all independent provider leaves and verified destinations remain intact. If a regression occurs, report precisely which actions/items changed and the smallest owner; do not rewrite unrelated modules.
+- Build an **inspectable logical mirror** so the owner can express the desired result by editing/viewing the tree rather than repeatedly explaining each nested interaction. Converge by focused code or config changes and tests, **not autonomous production source rewrites**.
+
+### Mandatory evidence: prove saved debugging work and latency
+
+Codex may not mark this P0 complete by only shipping a tracing library, adding console logs, or passing the existing 26 tests. Deliver, with *actual measured results*:
+
+1. **Boundary coverage ledger:** enumerate critical interaction boundaries and state transitions, each with signal, owner, evidence gap behavior and matching fault-injection test. Record covered/partially covered/unknown; expose why some aren't instrumented. No line-count percentage substitution.
+2. **Minimal investigation test:** inject defects at representative boundaries (auth, inventory, one mode, registrar ACK, resolver, Worker capability, upload receipt, History); show that a single bounded query/receipt directs the agent to the relevant **observed** boundary and focused test/source owner without scanning the entire engine.
+3. **Cascade and independent-fault test:** one origin with downstream symptoms plus two unrelated faults; report separate evidence-backed candidates, not a confident invented common cause. Explicit observation gaps never turn green.
+4. **Regression-before/after test:** intentionally change Nested output so a known-good Simple or Depth route is lost; the golden MenuSpec diff detects it, localizes ownership and blocks acceptance. Repeat with a flat provider leaf and a stale native generation.
+5. **Human/agent pairing test:** full logical menu introspection across nested rows and omitted destinations; compare native ID and mirror/agent-resolved action, zero-write simulation, real Chrome independently when available.
+6. **Debug OFF / ON / sink failure tests:** normal save behavior and verified feedback unchanged; no ordinary debug console/UI spam; redaction and sender restrictions hold.
+7. **Performance A/B:** benchmark identical warmed and cold extension runs, with diagnostics disabled, passive and Debug Mode enabled. Report p50/p95/p99 for compile, native Apply and click-to-dispatch; heap, events, dropped counts and bytes persisted. Use the [seed's provisional budgets](V3P1_GLACIARING_AGENTIC_DEBUG_API_SEED.md#performance-model-and-acceptance) as initial **gates to validate**, not fictional performance claims. Reject a design that adds noticeable right-click latency.
+8. **Debugging efficiency comparison:** for the same injected failures, measure boundary traversals/files inspected, repeated reproduce/log-instrumentation cycles, time to first actionable cause, false attributions and necessary agent iterations **with vs without Glaciaring**. Report measurements and limits; no invented percentage improvement.
+9. **Agent Debug Receipt:** include minimal typed outcomes, owner, operation/generation, relevant prerequisites, evidence gaps, source/test anchors, focused repro and safe next action; redacted/bounded and generated outside the hot path.
+
+### Build order and scope
+
+**Start with** canonical identity / MenuSpec / read-only resolver / browser parity scaffolding and mode-isolation regression baselines. **Then** add sparse optional boundary instrumentation around the *existing* REDOWN service owners, followed by bounded failure-localization/receipts, agent-facing read/simulate API, and explicit benchmark + fault-injection gates. Favor extracting proven REDOWN mechanisms over new abstractions.
+
+**No broad refactor, no duplicate dashboard, no production REDOWN changes, no Cloudflare entitlement/billing bypass.** Work autonomously on isolated Click2Cloud and lab fixtures under the runbook. Report actual `PASS / FAIL / BLOCKED / NOT_TESTED`; don't hold the main engine hostage to unavailable Chrome/provider permissions.
+
+---
+
 **Agent diagnostics:** Follow the [Glaciaring seed](V3P1_GLACIARING_AGENTIC_DEBUG_API_SEED.md) for MenuSpec inspection, native acknowledgement evidence, bounded causal tracing and sanitized Agent Debug Receipts. Apply it alongside the existing mandates and [V3 vs. V3+1 source review](../final-review/V3_VS_V3PLUS1_SOURCE_AUDIT_2026-11-03.md). The diagnostics layer observes the same service owners and preserves their authority.
 
 **Mandatory API and behavioral acceptance contract:** [V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md](./V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md). It is the exhaustive 29-section matrix of actual user/runtime situations, required engine behavior, formal API signatures, state priorities and proof types. Implement real operations for the P0 path, build tests directly from the rows and mark each scenario PASS/FAIL/BLOCKED/NOT_TESTED. Do not treat it as mere design copy or build a duplicate file Explorer. If this document and an older plan conflict, prefer current REDOWN code and the owner-approved principles here; explicitly document the conflict.
