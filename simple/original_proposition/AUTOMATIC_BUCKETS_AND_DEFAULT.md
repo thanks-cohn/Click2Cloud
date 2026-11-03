@@ -46,9 +46,17 @@ The right-click row `Cloudflare` becomes a submenu only when **multiple visible 
 
 - Additional verified bucket roots are visible/checked **automatically by default**.
 - Unchecking one bucket hides **only its menu row**; it neither deletes the cloud bucket nor touches the directory journal.
-- Unchecking the last additional bucket **locks in flat-only Cloudflare mode** via `autoIncludeNew=false`. Subsequent newly discovered buckets remain unselected; REDOWN does not violate an explicit flat-only preference. The user can recheck an individual bucket or enable `Auto-show new buckets` again.
+- Unchecking the last optional destination (including custom folder shortcuts) **locks in flat-only Cloudflare mode** via `autoIncludeNew=false` and hidden destination keys. Subsequent newly discovered buckets remain unselected; REDOWN does not violate an explicit flat-only preference. The user must manually recheck each desired bucket or explicitly add a chosen folder location. Rechecking one does **not** reactivate automatic inclusion; later new buckets remain unchecked.
 - Save these visibility preferences under the **exact connected account ID**, with their own `simpleBucketSelection.revision`. Do not overwrite, reset or borrow selections on an account swap.
 - A newly created bucket appears after the next verified bucket-list refresh. Do not invent it before Cloudflare confirms its existence and writable destination is prepared. Cloudflare R2 bucket discovery is distinct from Depth's folder index.
+
+## Full-tree destination picker versus Simple native menu
+
+A **shared neutral Explorer tree picker** shows every directory that can be enumerated with authorized provider permissions. Each row has a selectable circle. Circle on `redown/Photos/Weddings/2026` → popup with **Use default: 2026 / Use bucket name: redown / Custom menu title** and **Save as Simple / Save as Narrow**. The intent carries the exact scope+path, not just its label.
+
+**Simple** persists the exact selected destination with one chosen display label, and expresses it as **ONE FLAT right-click save row** under Cloudflare. The popup and tree picker are documented in [shared_destination_picker](../../shared_destination_picker/); the future Narrow branch behavior is a separately scoped [Narrow contract](../../narrow/rewrite_proposition/LOCATION_PICKER_CONTRACT.md). Neither renderer imports the other's logic. This Simple contract does not grant Depth any responsibilities.
+
+If all optional buckets **and optional selected-folder shortcuts** are unchecked, `REDOWN → Cloudflare` alone saves to the verified `redown/` root. Newly discovered buckets must remain unchecked unless manually selected.
 
 ## Implementation status & artifacts
 

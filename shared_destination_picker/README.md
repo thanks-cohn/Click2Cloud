@@ -21,7 +21,7 @@ Neutral provider folder listing → Setup Tree Picker → neutral LocationSelect
 Both finished plans (never their internal configs) → neutral menu registry
 ```
 
-The picker has **no imports of Simple, Narrow, Depth, or Time Machine**. The neutral selection event is delivered only to the chosen mode handler through a boundary. A successful Simple save NEVER writes Narrow settings and a Narrow selection NEVER changes Simple config.
+The picker has **no imports of Simple, Narrow, Depth, or Time Machine**. The neutral selection event is delivered only to the chosen mode handler through a boundary. A successful Simple save NEVER writes Narrow settings and a Narrow selection NEVER changes Simple config. If the chosen mode is not the currently active mode, save the selection into that mode's configuration and offer an **explicit switch**; do not silently change the global selected mode.
 
 The code in `shared_destination_picker/` is a **pure intent model and tests**, not a live UI or a rebuilt Narrow engine.
 
