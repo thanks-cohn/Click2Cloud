@@ -78,3 +78,8 @@ service = "redown-wdp-dot-tv-404399"
 [[services]]
 binding = "REDOWN_WORKS"
 service = "redown-works-404399"
+
+# Verified REDOWN production-protocol Worker for the lowercase redown bucket.
+[[services]]
+binding = "REDOWN_ROOT"
+service = "redown-redown-404399"
