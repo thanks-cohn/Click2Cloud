@@ -2,6 +2,13 @@
 
 Design seed, November 3, 2026. The [condition-to-behavior contract](V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md) governs product behavior. The [source audit](../final-review/V3_VS_V3PLUS1_SOURCE_AUDIT_2026-11-03.md) governs preservation and transplant gates. This seed adds observability and proof requirements. Examples below are synthetic.
 
+## Owner's clarifications: preserve the correct meaning
+
+- **[GLACIARING — Minimal Diagnostic Traversal](references/GLACIARING_MINIMAL_TRAVERSAL_OWNER_INTENT.md):** Glaciaring primarily reduces the *investigation/traversal* a coding agent must perform. Place inexpensive signals at critical boundaries, not exhaustive line-by-line traces. Ordinary saves must remain responsive, and detailed output belongs only in authorized Debug Mode/on-demand diagnostics. Coverage refers to meaningful behavioral boundaries, with gaps marked UNKNOWN, not a percentage of logged lines.
+- **[Canonical Menu Twin and Iterative Convergence](references/CANONICAL_MENU_CONVERGENCE_OWNER_INTENT.md):** The full menu exists as one exact programmatic MenuSpec before the user sees it. Human and AI inspector/mirror share that structure and a pure resolver; Chrome generates its native menu from the same plan. Compare *desired → generated → acknowledged → independently observed*, locate mismatches and preserve approved known-good golden baselines across future mode/provider changes.
+
+**Joint objective:** reduce the number of Work/Codex investigation and repair iterations needed to reach a correct result, **without increasing lag or latency**. The latest [Codex implementation request](CODEX_BUILD_REAL_V3_PLUS_ONE_NOW.md#p0-glaciaring-minimal-diagnostic-traversal--canonical-menu-convergence-owner-requirement) and [autonomous runbook](CODEX_AUTONOMOUS_V3P1_RUNBOOK.md#glaciaring-and-convergence-execution-gates-p0--diagnostics-must-save-engineering-work) specify concrete acceptance tests: boundary fault injection, cascade vs independent faults, regression diffs, diagnostic-off equivalence, and measured enabled-vs-disabled runtime and investigation cost. Treat performance budgets as targets to validate, not evidence already achieved.
+
 ## Source baseline and ownership
 
 Click2Cloud baseline `f69d1e83b63216df335b2b1f07b42d134a13133b`, REDOWN reference `89211efc08bfb6f4370f9293cc98ebea2050f859`. Click2Cloud `npm test` passed 26 tests. The tests cover deterministic projection, flat providers, mode output isolation, adapter behavior and dashboard controls with injected transports. They do not establish real native registration, durable mode isolation or provider writes.
