@@ -1,0 +1,5 @@
+# Isolated Click2Cloud V3+1 lab only. Not the REDOWN production Worker.
+name = "click2cloud-v3p1-r2-lab"
+main = "src/lab-worker.mjs"
+compatibility_date = "2026-11-03"
+workers_dev = false
