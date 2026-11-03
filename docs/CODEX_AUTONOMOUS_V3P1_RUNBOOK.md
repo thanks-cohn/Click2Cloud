@@ -1,5 +1,7 @@
 # Codex V3+1 — Autonomous implementation and live REDOWN-parity acceptance
 
+**Glaciaring focused execution brief:** [CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md](CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md). Use with the owner-approved P0 no-shortcuts correction and existing repo/lab authorization rules; do not equate efficiency with skipped error detection.
+
 ## PRIORITY OVERRIDE — Glaciaring is coverage, not a shortcut
 
 **Read the [P0 no-shortcuts correction in the Codex request](CODEX_BUILD_REAL_V3_PLUS_ONE_NOW.md#p0-correction--complete-inspectability-no-diagnostic-shortcuts-owner-requirement) first. It overrides all earlier optimization-focused language in this runbook.** The real owner intent is an **entirely programmatically inspectable and traceable engine surface**, with inexpensive signals covering every critical supported state, branch, error, handoff, mode, provider and menu item. The benefit is quicker access to complete evidence—not fewer checks, ignored faults, or an easy-looking summary.
