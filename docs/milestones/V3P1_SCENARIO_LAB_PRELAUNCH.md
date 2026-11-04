@@ -95,7 +95,7 @@ A future thin CLI may run:
 
 ```sh
 # Examples illustrate the required operator experience. These commands do NOT exist yet.
-python -m click2cloud.lab run --scenario C2C-S14-003 --seed 20261103 --profile fixture
+python -m click2cloud.lab run --scenario C2C-S14-cf95513b --seed 20261103 --profile fixture
 python -m click2cloud.lab run --suite prelaunch --seed 20261103 --profile fixture --report-dir runs/
 python -m click2cloud.lab run --suite native --profile authorized-chrome
 python -m click2cloud.lab run --suite provider --profile approved-r2-lab
@@ -110,7 +110,7 @@ Prefer a **single Node service adapter that invokes the real production modules*
 ```json
 {
   "schemaVersion": "1.0",
-  "scenarioId": "C2C-S14-003",
+  "scenarioId": "C2C-S14-cf95513b",
   "seed": 20261103,
   "profile": "fixture",
   "engineRevision": "git-sha",
