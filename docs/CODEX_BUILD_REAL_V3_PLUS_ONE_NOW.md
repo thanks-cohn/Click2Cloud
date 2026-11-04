@@ -1,5 +1,7 @@
 # CODEX — Build the REAL Click2Cloud V3+1 engine (P0)
 
+**Release-blocking Scenario Laboratory:** Follow [M0–M10 prelaunch milestones](milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md) and the [337-case machine-readable behavioral inventory](milestones/V3P1_CONTRACT_SCENARIOS.json). The thin test controller must exercise the **actual V3+1 engine and Universal File API** like REDOWN's Python Laboratory, rather than emulating an alternate engine. Every source case, critical condition/branch and generated scenario needs a truthful evidence status and reproducible diagnostic receipt; no public release until native Chrome, live provider, performance and REDOWN rollback gates are independently proven. This supplements—not replaces—all preceding functional, safety and Glaciaring mandates.
+
 **Glaciaring implementation brief for Codex:** [CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md](CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md). This is the focused execution companion for the comprehensive, low-overhead, no-shortcuts agent diagnostic API; it preserves the authority and all gates of this full V3+1 request.
 
 ## P0 CORRECTION — COMPLETE INSPECTABILITY, NO DIAGNOSTIC SHORTCUTS (OWNER REQUIREMENT)
