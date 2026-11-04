@@ -30,6 +30,12 @@ Provider discovery -> canonical tree -> validated configuration -> pure compiler
 Both renderers -> shared SaveIntent dispatcher -> provider byte upload -> verified receipt
 ```
 
+## Pre-launch Scenario Laboratory — release-blocking milestones
+
+**Owner requirement:** [M0–M10 Universal Scenario Laboratory milestones](docs/milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md), modeled on REDOWN's thin Python → authorized extension → Universal File API testing approach. A [machine-readable baseline inventory](docs/milestones/V3P1_CONTRACT_SCENARIOS.json) captures **337 existing behavioral contract cases, 27 illustrative API operations, and 7 acceptance examples**, all honestly marked unverified until individually mapped to tests and required proof.
+
+The future agent/CLI runner must call the **actual V3+1 JavaScript engine and REDOWN Universal File API adapters**, not a parallel mock implementation. Deterministic property, scenario, state-machine, combinatorial and fault-injection tests validate logical behavior; installed Chrome, authorized live provider receipts, REDOWN migration and latency remain **separate mandatory acceptance gates**. Every scenario must have an inspectable PASS/FAIL/PARTIAL/BLOCKED/NOT_TESTED/UNSUPPORTED/UNKNOWN verdict, Glaciaring evidence, source revision and replay seed. A failed or missing P0 proof blocks public release. The current 121 passing local tests do **not** satisfy the unrun prelaunch catalog.
+
 ## Project milestones
 
 - [ ] Capture current REDOWN V3 real behavior and compatibility requirements.
