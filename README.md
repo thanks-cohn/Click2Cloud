@@ -1,5 +1,7 @@
 # Click2Cloud — REDOWN V3+1
 
+**Agent engineering charter:** Read [AGENTS.md](AGENTS.md) first. Its guiding principle is REDOWN Python Universal File API-style, real-engine iterative testing: expand the [500-case golden atlas](docs/milestones/V3P1_GOLDEN_500_SCENARIO_ATLAS.json) toward 1,000 genuinely distinct journeys and combine independent oracles with Glaciaring to repair V3+1 regressions without hiding failures. The cases are not yet 500 executable test passes; native Chrome and real provider acceptance remain separate gates.
+
 Click2Cloud develops an isolated V3+1 right-click destination engine and Glaciaring Agent Debug API. The canonical menu, pure resolver, native registrar, independent modes, durable configuration, inventory discovery and verified dispatcher are working libraries with a diagnostic MV3 harness. Live saves require an authorized host supplying the existing REDOWN transports and provider session; the standalone harness does not invent those credentials. See [actual evidence and limitations](docs/GLACIARING_EVIDENCE.md).
 
 Run `npm test` for the positive/adversarial suite, `node scripts/demo-glaciaring.mjs` for a complete synthetic menu and two-fault agent receipt, and `node --expose-gc scripts/benchmark-glaciaring.mjs` for matched latency/memory measurements. `node scripts/test-native-chrome.mjs` separately checks real Chromium capabilities and IndexedDB; exit 2 reports an explicit administrator policy block on unpacked extensions. It needs an installed Playwright module, configurable via `C2C_PLAYWRIGHT_MODULE`.
