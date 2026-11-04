@@ -99,6 +99,14 @@ With **identical source-defined critical coverage and fault corpus**, benchmark 
 
 If required coverage conflicts with the target latency, **redesign capture/encoding and move expensive work off-path**. Do not silently disable checks, narrow trees, drop hard error cases or call an unmeasured result “negligible.”
 
+## New release-blocking M0–M10 milestone: programmatic V3+1 Scenario Laboratory
+
+Follow [the owner-approved Scenario Laboratory plan](milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md) and [its source-derived 337-case inventory](milestones/V3P1_CONTRACT_SCENARIOS.json) **before declaring V3+1 launch ready**. This is analogous to REDOWN's Python Universal File API laboratory: an optional thin Python/agent CLI controls **the real engine through a bounded local/authorized bridge**; independent oracles verify exact MenuSpec/actions, state transitions, bytes/provider receipts and Glaciaring diagnosis. **Never build a second engine, API, uploader, Worker or Explorer merely to simulate success.**
+
+Start by implementing a machine-readable **scenario registry/runner and drift checker**, which map every existing contract condition to exact assertions and required evidence classes. Then implement reproducible state-machine, combinatorial/pairwise and seeded property/fault-injection suites, and permanently capture every regression. Incomplete error/path/branch coverage, a skipped or missing test, and unknown evidence must remain visible, even when another fault is already diagnosed.
+
+A logical/API test can validate thousands of scenarios without clicking through Chrome, but native Chrome behavior, live R2 verified saves, real MV3 recovery, migration/rollback and repeat latency remain separate release-blocking gates. Do not call existing 121 unit tests “337 scenarios passed.” Produce a commit-pinned, machine-readable prelaunch ledger: all scenario IDs, supported operation/branch mapping, profiles, statuses (PASS/FAIL/BLOCKED/NOT_TESTED/UNSUPPORTED/PARTIAL/UNKNOWN), Glaciaring traces, source/test refs, replay seeds, proof type and open blockers. Public launch requires **complete applicable evidence**, not merely a large number of simulated green cases.
+
 ## 8. Test and delivery gates
 
 Perform implementation in cohesive steps, each independently testable:
