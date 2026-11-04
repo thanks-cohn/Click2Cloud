@@ -1061,11 +1061,11 @@
     {
       "id": "C2C-G383",
       "section": "onboarding",
-      "title": "Existing redown bucket contains user files",
-      "initialState": "Cloudflare authorized; redown exists with user objects",
-      "steps": "run first-use setup > choose default > inspect menu",
-      "expectedOutcome": "Reuse existing bucket and files; default prefix preserved where configured",
-      "prohibitedEffects": "No object rewrite, extra bucket or public access change",
+      "title": "Previously selected custom default survives redown onboarding",
+      "initialState": "Cloudflare authorized; redown exists with user objects; previous Simple default is redown/Personal/Images",
+      "steps": "reconnect > rerun authorized first-use setup > inspect native default > simulate save to Home",
+      "expectedOutcome": "Reuse existing bucket and files, preserve the previous exact custom default prefix Personal/Images, and bind Home to that prefix after current authority checks",
+      "prohibitedEffects": "No reset to root, object rewrite, extra bucket or public access change",
       "coverageFocus": [
         "onboarding",
         "existing-redown-bucket-contains-user-files"
