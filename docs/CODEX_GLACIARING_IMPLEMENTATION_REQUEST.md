@@ -99,6 +99,8 @@ With **identical source-defined critical coverage and fault corpus**, benchmark 
 
 If required coverage conflicts with the target latency, **redesign capture/encoding and move expensive work off-path**. Do not silently disable checks, narrow trees, drop hard error cases or call an unmeasured result “negligible.”
 
+**Follow-up execution requirement:** [Codex golden 500→1,000 expansion and engine test contract](CODEX_EXPAND_GOLDEN_500_TO_1000_AND_VALIDATE_V3P1.md). Existing [500-case atlas](milestones/V3P1_GOLDEN_500_SCENARIO_ATLAS.json) is a draft descriptive baseline; it does not establish passed independent golden assertions or native Chrome parity. Preserve coverage, do not inflate counts with trivial variations, and do not allow the compiler to generate its own expected answer.
+
 ## New release-blocking M0–M10 milestone: programmatic V3+1 Scenario Laboratory
 
 Follow [the owner-approved Scenario Laboratory plan](milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md) and [its source-derived 337-case inventory](milestones/V3P1_CONTRACT_SCENARIOS.json) **before declaring V3+1 launch ready**. This is analogous to REDOWN's Python Universal File API laboratory: an optional thin Python/agent CLI controls **the real engine through a bounded local/authorized bridge**; independent oracles verify exact MenuSpec/actions, state transitions, bytes/provider receipts and Glaciaring diagnosis. **Never build a second engine, API, uploader, Worker or Explorer merely to simulate success.**
