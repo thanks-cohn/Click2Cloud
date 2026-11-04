@@ -30,6 +30,8 @@ Provider discovery -> canonical tree -> validated configuration -> pure compiler
 Both renderers -> shared SaveIntent dispatcher -> provider byte upload -> verified receipt
 ```
 
+**Golden right-click atlas:** [500 source-linked scenario descriptions](docs/milestones/V3P1_GOLDEN_500_SCENARIO_ATLAS.json) (337 contract cases + 163 new user journeys). **Codex follow-up:** [expand to 1,000 without filler, implement independent oracles and execute the real engine](docs/CODEX_EXPAND_GOLDEN_500_TO_1000_AND_VALIDATE_V3P1.md). These are **test specifications**, not claims of 500 or 1,000 passing tests. The real Chrome/cloud/performance/rollback gates remain mandatory.
+
 ## Pre-launch Scenario Laboratory — release-blocking milestones
 
 **Owner requirement:** [M0–M10 Universal Scenario Laboratory milestones](docs/milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md), modeled on REDOWN's thin Python → authorized extension → Universal File API testing approach. A [machine-readable baseline inventory](docs/milestones/V3P1_CONTRACT_SCENARIOS.json) captures **337 existing behavioral contract cases, 27 illustrative API operations, and 7 acceptance examples**, all honestly marked unverified until individually mapped to tests and required proof.
