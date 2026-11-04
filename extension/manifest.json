@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Click2Cloud Glaciaring Lab",
+  "version": "0.1.0",
+  "description": "Isolated native MenuSpec and read-only diagnostic harness. No provider credentials or public routes.",
+  "permissions": ["contextMenus", "storage"],
+  "background": { "service_worker": "extension/background.mjs", "type": "module" },
+  "action": { "default_popup": "extension/mirror.html" },
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" }
+}
