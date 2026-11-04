@@ -6,6 +6,57 @@
 **Status:** Engineering request for a future Codex implementation run; **not a claim the 1,000 scenarios exist or passed**.  
 **Core objective:** Make the true Click2Cloud V3+1 right-click engine increasingly reliable and faithful to the owner's vision by combining **independently specified expected behavior**, **programmatic scenario execution**, **complete Glaciaring evidence**, **measured low overhead**, and **real Chrome/provider acceptance**.
 
+## P0 OWNER DIRECTIVE — 1,000 golden scenarios × Glaciaring × real engine = productive self-iteration
+
+**This is the primary operating principle for the final Codex run.** Also read repository-root [AGENTS.md](../AGENTS.md) before doing any coding. The owner wants to replicate the successful **REDOWN Python Laboratory ↔ Universal File API workflow**, but for the *actual V3+1 right-click engine*: stateful, programmatic testing of what a user sees, clicks and accomplishes, without manually clicking thousands of Chrome menus. Build the **testable product and its test surface together**, not more disconnected documents.
+
+The intended loop is:
+
+```text
+Owner-authoritative, independently reviewed expected user/menu behavior
+  → 1,000 genuinely different golden journeys and deterministic variations
+  → ACTUAL V3+1 JavaScript engine + existing authorized Universal File API adapter
+  → exact independent assertions: menu tree, nested clicks, action identity,
+    state transitions, prohibited side effects, verified provider result
+  → Glaciaring reveals complete observed state/fault chain and all evidence gaps
+  → focus on owning source, fix a real defect (do NOT weaken goldens)
+  → replay the failing seed + adjacent invariants + entire accepted suite
+  → persist a versioned regression proof; repeat
+  → independently verify native Chrome / live cloud integration and rollback
+```
+
+**The owner's aspiration:** reach **900+ meaningfully *verified logical engine scenarios***, preferably all **1,000**, before spending most effort on actual native-Chrome visual/click acceptance. That should give us a substantially real and robust V3+1 engine *before* the final browser translation. This is **a strong intermediate engineering target, not an automatic PASS threshold**: a critical failed case is still a release blocker at 999 passes, a blocked/unmapped/duplicated case does not count as verified, and logical fixture success never substitutes for Chrome/provider proof.
+
+### One programmatic surface, not a test-only imitation
+
+Build or expose an agent- and Python-script-friendly controller with a versioned discoverable schema, using the **actual V3+1 JS modules**. It must accept:
+
+- Initial provider/account connections (fixture-authenticated, expired, revoked, unauthorized, unknown), R2 entitlement, Worker capabilities, inventories and stored mode revisions; fixture state may simulate external conditions but **must be explicitly labeled simulation**.
+- User-like ordered actions: open native logical REDOWN root, browse exact nested child IDs, choose a Save here / Simple leaf / Depth node / independent flat provider, edit destinations using path/autocomplete/pill semantics, switch modes, activate/revoke connections, apply menu, initiate right-click save, interrupt/restart, reconcile.
+- Exact expected output: **every relevant row/parent/sibling order/role/context/label/action ID**, complete omissions and reasons, exact selected canonical provider/account/bucket/prefix, changes to stored config/registration generations, upload destination/verified bytes and History/feedback effects, *plus all effects that must not occur*.
+- Fault injection at every declared supported operation/transition/error path; user-like sequences may trigger multiple independent errors. Glaciaring must expose all relevant events and missing/dropped evidence without inventing success.
+- Machine-readable results: source/build, scenario ID, fixed seed, pre/post state and menu diff, expected vs actual, fault code, complete paginated available diagnostics, regression IDs and `PASS/FAIL/BLOCKED/NOT_TESTED/PARTIAL/UNKNOWN/UNSUPPORTED` **per evidence class**.
+
+A **thin Python wrapper is optional**, as long as the same low-overhead, replayable remote-agent experience is available from a bounded Node/authorized bridge. Do not build a second Python implementation of the compiler, native registrar, OAuth, uploader or file API, and don't put a debug server on the public network.
+
+### Hard safeguards against an agent gaming its own tests
+
+1. **Independent oracle:** Source-authoritative golden expectations come from the owner's contract and reviewed test fixtures, *never* from `compileMenuSpec()` or the UI mirror being tested. Use deliberate wrong-menu/wrong-target mutations to demonstrate that the oracle catches them.
+2. **No shortcut metrics:** Do not hide errors, remove fixtures, overwrite expectations to match implementation, stop after identifying the first plausible root cause, reclassify failing tests, skip difficult cases to reach 900, weaken privacy checks or trim coverage for latency. Declare gaps explicitly.
+3. **Meaningful novelty:** Each of the 500 added journeys documents the nearest preexisting case and the new material decision, transition, error path or independent assertion. A new random name, label, account display name or seed with identical semantics does **not** count as a new golden case.
+4. **Coverage before score:** Enumerate/cover all supported critical branches, state transitions, negative outcomes and provider/mode interactions with fault-injection tests. Track independently verified logical cases versus mocked provider adapter cases versus actual Chrome/provider evidence; publish the full denominator.
+5. **Live integration is a separate gate:** Use many logical tests to refine and harden the product first, then actual installed Chrome/MV3 and authorized real R2 receipt verification to prove native action parity. Chrome is **not simply a paint layer**: it has API/callback/context/limit/timing behavior which logical simulation cannot prove.
+6. **Low runtime overhead without blindness:** Benchmark identical full diagnostic coverage in disabled/passive/debug states on real critical hot paths. Prior repeat menu-compilation latency FAIL remains open until measured fixed; don't solve it by dropping mandatory signals.
+7. **Real product outcome:** Prove correctness of actual engine operations and their effects, not only inspectable debug messages, simulated click-tree pictures or test-case descriptions. A test detecting a false success should prove no provider object/History success/counter was incorrectly committed.
+
+### Iteration objective and deliverables
+
+Implement the executable Scenario Laboratory as an early milestone, expand the reviewed atlas toward 1,000 distinct cases, then run and repair iteratively. Report a real table for `authored / approved-oracle / executable / logical PASS / logical FAIL / other proof missing / installed Chrome PASS / real provider PASS`, along with a pinned reproduction receipt for *every* failure. Maintain old failing receipts and link their correcting commits, rather than deleting them.
+
+The goal is not to make Codex execute exactly 1,000 function calls. It is to **turn the owner's click model into an independently verifiable, self-reinforcing engineering contract**, until a robust actual V3+1 engine exists and the remaining work is concentrated in real Chrome/provider parity, UX and deployment—not an endless rediscovery of logical behavior.
+
+---
+
 ## 0. Required reading; authority and source version
 
 Read these documents and current source, not just this prompt:
