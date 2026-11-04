@@ -1,5 +1,7 @@
 # Codex V3+1 — Autonomous implementation and live REDOWN-parity acceptance
 
+**Agent guiding principle:** Read repository-root [AGENTS.md](../AGENTS.md) first. The [1,000-case Codex request](CODEX_EXPAND_GOLDEN_500_TO_1000_AND_VALIDATE_V3P1.md) makes real-engine programmatic iteration plus Glaciaring the default workflow: independent golden expected results → actual JS API → complete diagnostics → focused repair → regression rerun. 900+ genuinely verified logical cases is an engineering aspiration, **not** permission to ignore critical failures or to claim native Chrome/provider proof.
+
 **Glaciaring focused execution brief:** [CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md](CODEX_GLACIARING_IMPLEMENTATION_REQUEST.md). Use with the owner-approved P0 no-shortcuts correction and existing repo/lab authorization rules; do not equate efficiency with skipped error detection.
 
 ## PRIORITY OVERRIDE — Glaciaring is coverage, not a shortcut
