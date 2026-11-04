@@ -1,10 +1,12 @@
 # Click2Cloud — REDOWN V3+1
 
-Click2Cloud is an independently developed, fully functional right-click-to-cloud destination engine. Its **Portal menu is a real save interface, not a simulator**. The Portal and Chrome extension share the same pure menu compiler, destination identifiers, click intent, provider adapters, and verified-save result handling.
+Click2Cloud develops an isolated V3+1 right-click destination engine and Glaciaring Agent Debug API. The canonical menu, pure resolver, native registrar, independent modes, durable configuration, inventory discovery and verified dispatcher are working libraries with a diagnostic MV3 harness. Live saves require an authorized host supplying the existing REDOWN transports and provider session; the standalone harness does not invent those credentials. See [actual evidence and limitations](docs/GLACIARING_EVIDENCE.md).
+
+Run `npm test` for the positive/adversarial suite, `node scripts/demo-glaciaring.mjs` for a complete synthetic menu and two-fault agent receipt, and `node --expose-gc scripts/benchmark-glaciaring.mjs` for matched latency/memory measurements. `node scripts/test-native-chrome.mjs` separately checks real Chromium capabilities and IndexedDB; exit 2 reports an explicit administrator policy block on unpacked extensions. It needs an installed Playwright module, configurable via `C2C_PLAYWRIGHT_MODULE`.
 
 ## Invariants
 
-1. **One canonical configuration** produces a deterministic menu specification; same normalized inputs must produce byte-for-byte equivalent output.
+1. **Three independent mode configurations** produce one canonical deterministic menu specification; the same normalized inputs produce byte-for-byte equivalent output. The legacy bootstrap `compileMenu` remains compatible; new hosts use `compileMenuSpec` and `createEngine`.
 2. **One real dispatcher** is called by both the Portal UI and the Chrome native context-menu adapter. Nothing is marked successful until the destination provider verifies the upload.
 3. **Provider isolation:** Cloudflare R2 exposes Simple, Narrow, Depth; Google Drive, Dropbox, and OneDrive remain flat native leaf entries. Future S3 providers are siblings, never nested under Cloudflare.
 4. **Mode isolation:** Simple, Narrow and Depth are independent projections over a shared canonical folder tree. Narrow contains only configured paths; Depth includes all discovered paths to the selected limit (including unconfigured folders); Simple is flat.
