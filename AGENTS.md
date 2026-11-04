@@ -1,5 +1,7 @@
 # AGENTS.md — Click2Cloud V3+1 agent engineering charter
 
+**IMPORTANT cross-project guiding architecture:** Read [the Universal Agentic Test Corpus & Pipeline](IMPORTANT/UNIVERSAL_AGENTIC_TEST_CORPUS_AND_PIPELINE.md) before implementing or declaring acceptance of BOOT, RIGHT-CLICK or UNIVERSAL FILE API changes. Its shared scenario kernel, source-owned adapters, independent goldens, complete Glaciaring/BOOT/File evidence, finite-state/interaction testing and permanent regression receipts are the default agentic workflow for Click2Cloud and REDOWN. The mirrored REDOWN document is kept aligned. All release-specific live Chrome/provider/rollback gates remain mandatory.
+
 **Applies to:** all implementation, debugging, testing, integration and release-readiness work in this repository. Read this file **before** modifying code or altering test expectations.
 
 ## Guiding principle: real-engine iteration, not manual-click guesswork
