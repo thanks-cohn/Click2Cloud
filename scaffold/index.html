@@ -18,9 +18,20 @@
       <section class="explorer panel" aria-labelledby="explorer-title">
         <div class="section-head">
           <div><span class="eyebrow">01 / SELECT A LOCATION</span><h1 id="explorer-title">File Explorer</h1></div>
-          <button id="add-right-click" class="button primary" type="button"><span aria-hidden="true">＋</span> Right Click</button>
+          <div class="explorer-actions">
+            <button id="add-right-click" class="button primary" type="button"><span aria-hidden="true">＋</span> Right Click</button>
+            <button id="depth-toggle" class="button tree-toggle" type="button" aria-pressed="false" aria-label="Turn automatic Depth tree on or off" title="Depth: show the full indexed hierarchy to the selected level">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="5" rx="1"/><rect x="2.5" y="16.5" width="6" height="5" rx="1"/><rect x="15.5" y="16.5" width="6" height="5" rx="1"/><path d="M12 7.5v5.3M5.5 16.5v-3.7h13v3.7"/></svg>
+              Depth <span id="depth-toggle-state" class="tree-state">OFF</span>
+            </button>
+          </div>
         </div>
         <p class="hint">Select an authorized destination folder, then choose <strong>+ Right Click</strong>. You can also right-click a row.</p>
+        <div id="depth-detail" class="depth-detail explorer-depth" hidden>
+          <label for="depth-range">Show complete authorized folder tree through level <output id="depth-number">3</output></label>
+          <input id="depth-range" type="range" min="1" max="10" value="3" />
+          <span class="hint">Additive: manually saved Simple and Narrow options stay visible.</span>
+        </div>
         <div class="explorer-breadcrumb">Cloudflare R2 <span>›</span> <strong>redown</strong></div>
         <div class="folder-heading"><span>DIRECTORY</span><span>LOCATION</span></div>
         <div id="folder-list" class="folder-list" role="listbox" aria-label="Demo File Explorer folders"></div>
@@ -50,23 +61,17 @@
         <p class="hint">Click any saved destination row to reopen the very same editor with its original configuration.</p>
         <div id="saved-groups" class="saved-groups" aria-live="polite"></div>
 
-        <div class="depth-control">
-          <div class="depth-heading">
-            <div><strong>Automatic Depth</strong><small>Separate from saved Simple and Narrow destinations</small></div>
-            <label class="switch"><input type="checkbox" id="depth-enabled" /><span class="switch-track"></span><span class="sr-only">Enable Depth</span></label>
-          </div>
-          <div id="depth-detail" class="depth-detail" hidden><label for="depth-range">Levels <output id="depth-number">3</output></label><input id="depth-range" type="range" min="1" max="10" value="3" /></div>
-        </div>
       </section>
     </main>
 
     <section class="menu-demo panel" aria-labelledby="preview-title">
       <div class="section-head"><div><span class="eyebrow">03 / V3+1 PROJECTION</span><h2 id="preview-title">Native Menu Shapes</h2></div><span class="aside-badge">NOT REGISTERED IN CHROME</span></div>
+      <div id="combined-preview" class="composite-preview"><h3>Combined V3+1 menu · Simple + Narrow + optional Depth</h3><div id="composite-tree" class="menu-tree"></div></div>
       <div class="mode-previews">
         <div><h3>Simple · One pop-out</h3><div id="simple-preview" class="menu-tree"></div></div>
         <div><h3>Narrow · Branches by path</h3><div id="narrow-preview" class="menu-tree"></div></div>
       </div>
-      <p class="hint">These are visual representations of the intended V3+1 menu spec, not registered Chrome context menus. Cloudflare's transfer adapter is separate from the menu engine.</p>
+      <p class="hint">Depth augments the manual Simple + Narrow menu, never replaces them. These are visual examples of the planned V3+1 menu spec, not native Chrome context menus; Cloudflare's file transport is separate from the engine.</p>
     </section>
   </div>
 
