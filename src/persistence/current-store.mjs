@@ -1,3 +1,4 @@
+import {initialConfig,validateProduct} from '../api/config.mjs';
 // Adapted transaction/journal/desired-applied fences from REDOWN right-click-current.js
 // blob 2590a47f7eaa032cbadc18dc2de9e82d8dcc60e5 at 89211efc08bfb6f4370f9293cc98ebea2050f859.
 // Chrome and cloud operations stay outside CURRENT; config never carries authorization.
@@ -59,6 +60,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         const checkpointId=mode+':'+new Date(at).toISOString().slice(0,10);
         if(prior&&!await request(stores.checkpoints.get(checkpointId)))stores.checkpoints.add({id:checkpointId,mode,at,config:prior});
         stores.state.put({id:'mode:'+mode,value:current});
+        const product=(await request(stores.state.get('product')))?.value;
+        if(product)stores.state.put({id:'product',value:validateProduct({...product,revision:product.revision+1,configs:{...product.configs,[mode]:current}})});
         await append(stores,{kind:'config',mode,at,previous:prior,current});
         return current;
       });
@@ -129,7 +132,46 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       signal('persistence.restore','ok','RESTORE_REQUIRES_RECONNECT',operationId);return read();
     } catch(e) {signal('persistence.restore',e?.code==='BACKUP_AUTH_REQUIRED'?'blocked':'failed',e?.code==='BACKUP_AUTH_REQUIRED'?'BACKUP_AUTH_REQUIRED':'MIGRATION_QUARANTINED',operationId);throw e;}
   }
-  return Object.freeze({read,getModeConfig,saveModeConfig,setDesiredGeneration:(g,o)=>generationChange(g,o),acknowledgeGeneration:g=>generationChange(g,{acknowledge:true}),journal,exportEncrypted,restoreEncrypted,
+  async function readProduct() {
+    return transact('readonly',async stores=>{
+      const saved=(await request(stores.state.get('product')))?.value;
+      if(saved)return validateProduct(saved);
+      const value=initialConfig();
+      for(const mode of Object.keys(modeModules)) {
+        const config=(await request(stores.state.get('mode:'+mode)))?.value;
+        if(config)value.configs[mode]=validateModeConfig(mode,config);
+      }
+      return validateProduct(value);
+    });
+  }
+  async function commitProduct(value,{expectedRevision}={}) {
+    const operationId=operationIdentity();signal('persistence.commit','started','PERSIST_STARTED',operationId);
+    const normalized=validateProduct(value);integer(expectedRevision);
+    try {const result=await transact('readwrite',async stores=>{
+      const prior=(await request(stores.state.get('product')))?.value;
+      if((prior?.revision??0)!==expectedRevision)throw error('REVISION_CONFLICT');
+      const configs={};
+      for(const [mode,config] of Object.entries(normalized.configs)) {
+        const previous=(await request(stores.state.get('mode:'+mode)))?.value??null;
+        const baseline=previous??modeModules[mode].createConfig();
+        const changed=JSON.stringify({...baseline,revision:0})!==JSON.stringify({...config,revision:0});
+        configs[mode]=validateModeConfig(mode,{...config,revision:baseline.revision+(changed?1:0)});
+        if(changed)await append(stores,{kind:'config',mode,at:clock(),previous,current:configs[mode]});
+      }
+      const current=validateProduct({...normalized,configs,revision:expectedRevision+1});
+      stores.state.put({id:'product',value:current});
+      const journal=(await request(stores.state.get('productJournal')))?.value??[];
+      journal.push({sequence:current.revision,at:clock(),previousRevision:expectedRevision,current});
+      stores.state.put({id:'productJournal',value:journal.slice(-MAX_RECORDS)});
+      // Existing mode readers and the save engine see the exact same committed configs.
+      for(const [mode,config] of Object.entries(current.configs))stores.state.put({id:'mode:'+mode,value:config});
+      return current;
+    });signal('persistence.commit','ok','PERSIST_COMMITTED',operationId,result.revision);return result;
+    }catch(e){signal('persistence.commit','failed',e.code==='REVISION_CONFLICT'?'REVISION_CONFLICT':'STORAGE_COMMIT_FAILED',operationId);throw e;}
+  }
+  async function readBackupRoot(){return transact('readonly',async stores=>(await request(stores.state.get('backupRoot')))?.value??null);}
+  async function saveBackupRoot(value){return transact('readwrite',async stores=>{stores.state.put({id:'backupRoot',value});return {state:'FILESYSTEM_HANDLE_STORED'};});}
+  return Object.freeze({readBackupRoot,saveBackupRoot,readProduct,commitProduct,read,getModeConfig,saveModeConfig,setDesiredGeneration:(g,o)=>generationChange(g,o),acknowledgeGeneration:g=>generationChange(g,{acknowledge:true}),journal,exportEncrypted,restoreEncrypted,
     async close(){if(opening){const db=await opening;db.close();opening=null;}}
   });
 }

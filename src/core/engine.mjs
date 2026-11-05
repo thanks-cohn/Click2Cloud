@@ -1,3 +1,4 @@
+import {compileComposite} from './composite-menu.mjs';
 // Narrow composition of the existing owners. Diagnostics has no write authority.
 import {compileMenuSpec} from './menu-spec.mjs';
 import {resolveMenuAction} from './action-resolver.mjs';
@@ -23,6 +24,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       generation:generation??state.generation.desired+1,sink,operationId:operationIdentity()});
   }
   async function apply(spec) {
+    if(spec.coverage?.rowsComplete===false)return {state:'blocked',code:'MENU_BUDGET_EXCEEDED'};
     const state=await current.read();
     if(spec.generation<state.generation.desired)return {state:'blocked',code:'STALE_GENERATION'};
     if(spec.generation>state.generation.desired)await current.setDesiredGeneration(spec.generation,{expectedGeneration:state.generation.desired});
@@ -93,7 +95,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       return finish({state:error?.uncertain||code.includes('UNCONFIRMED')||code.includes('UNVERIFIED')?'uncertain':error?.name==='AbortError'||code==='CAPTURE_INTERRUPTED'?'cancelled':code==='AUTH_REVOKED'?'blocked':'failed',code,operationId});
     }
   }
-  return Object.freeze({compile,apply,save,
+  return Object.freeze({compile,compileComposite:async options=>compileComposite({...options,sink}),apply,save,
     getMenu:generation=>menus.get(generation)??null,
     menuRetention:()=>({retained:menus.size,evictedGenerations,maxSnapshots}),
     getEvidence:()=>registrar.inspect(),

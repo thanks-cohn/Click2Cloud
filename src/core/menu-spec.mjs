@@ -101,7 +101,7 @@ export function compileMenuSpec(options={}) {
         // Natural bucket roots disambiguate scopes; custom labels still require explicit collision resolution.
         const repeatedRoot=row.parentPlacement===null&&!row.target.prefix&&projection.rows.some(other=>other!==row&&other.parentPlacement===null&&!other.target.prefix&&other.target.provider===row.target.provider&&other.label===row.label);
         const label=repeatedRoot?row.label+' ['+row.target.connectionId+'/'+row.target.accountId+']':row.label;
-        const id=add({...row,label,parentId:parentId??'missing-parent:'+row.parentPlacement,origin:{mode,provider:row.target.provider},placement:row.placement});
+        const id=add({...row,label,parentId:parentId??'missing-parent:'+row.parentPlacement,origin:{mode:row.mode??mode,provider:row.target.provider},placement:row.placement});
         if(id)placements.set(row.placement,id);
       }
       if(defaultTarget&&!direct) {

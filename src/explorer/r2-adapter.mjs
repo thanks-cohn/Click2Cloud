@@ -127,7 +127,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       return {ready,reason:ready?'Bucket Worker is ready for safe file operations.':'Bucket Worker configuration needs an explicit update. Use Set up right-click destination.'};
     },
     connect:(_,o)=>message('cfConnect',{},o),disconnect:(_,o)=>message('cfDisconnect',{},o),
-    accounts:(_,o)=>message('cfAccounts',{},o),buckets:({accountId},o)=>message('cfBuckets',{accountId},o),
+    accounts:(_,o)=>message('cfAccounts',{},o),buckets:({accountId,cursor=''},o)=>message('cfBuckets',{accountId,cursor},o),
     archiveEntries:({source,key:k},o)=>message('cfArchiveEntries',{...location(source),key:key(k)},o),
     archiveEntryUrl:({source,key:k,entry:archiveEntry,contentType},o)=>message('cfArchiveEntryUrl',{...location(source),key:key(k),entry:key(archiveEntry),contentType},o),
     async extractArchiveEntry({source,key:k,entry:archiveEntry,destinationPrefix=''},o){

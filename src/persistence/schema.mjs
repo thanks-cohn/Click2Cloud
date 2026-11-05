@@ -24,9 +24,9 @@ export function validateModeConfig(mode,raw) {
   const values=raw[mode==='depth'?'scopes':'destinations']??[];
   if(!Array.isArray(values)||values.length>MAX_RECORDS)fail();
   for(const d of values) {
-    closed(d,mode==='depth'?['target','maxDepth']:['id','target','label']);target(d.target);
+    closed(d,mode==='depth'?['target','maxDepth']:['id','target','label','aliases']);target(d.target);
     if(mode==='depth'){if(d.maxDepth!==undefined&&(!Number.isSafeInteger(d.maxDepth)||d.maxDepth<1))fail();}
-    else {if(d.id!==undefined)text(d.id,128);if(d.label!==undefined)text(d.label,256);}
+    else {if(d.aliases!==undefined&&(!Array.isArray(d.aliases)||d.aliases.some(a=>typeof a!=='string'||a.length>256||/[\x00-\x1f]/.test(a))))fail();if(d.id!==undefined)text(d.id,128);if(d.label!==undefined)text(d.label,256);}
   }
   return modeModules[mode].createConfig(raw);
 }

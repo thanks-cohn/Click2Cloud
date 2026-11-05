@@ -25,7 +25,7 @@ export function createFileApiSaveProvider({fileApi,resolveDestination}={}) {
       if(!exactDestination(destination,source))throw Object.assign(Error('Resolved destination differs from the requested action'),{code:'DESTINATION_CHANGED'});
       const objectKey=prefix(source.prefix)+name(filename);
       const file=new Blob([bytes],{type:contentType});
-      const result=await fileApi.run('upload',{source,file,key:objectKey,conflict:'keep'});
+      const result=await fileApi.run('upload',{source,file,key:objectKey,conflict:'keep',stagingPrefix:prefix(source.prefix)+'.click2cloud-staging/'});
       if(result.state!=='completed')throw Object.assign(Error('Provider upload is not confirmed. Inspect destination before retrying.'),
         {uncertain:['uncertain','started','partial'].includes(result.state),code:'UPLOAD_UNCONFIRMED'});
       const finalKey=result.data?.key;

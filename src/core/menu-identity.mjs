@@ -69,7 +69,8 @@ export function normalizedDestinations(values=[]) {
     seen.add(key);
     if(item.label!==undefined&&(typeof item.label!=='string'||!item.label||/[\x00-\x1f]/.test(item.label)))
       throw new MenuSpecError('INVALID_LABEL','Labels must be non-empty plain text.');
-    return {id:typeof item.id==='string'?item.id:String(index),target,...(item.label===undefined?{}:{label:item.label})};
+    if(item.aliases!==undefined&&(!Array.isArray(item.aliases)||item.aliases.some(x=>typeof x!=='string'||x.length>256||/[\x00-\x1f]/.test(x))))throw new MenuSpecError('INVALID_LABEL','Invalid ancestor aliases');
+    return {id:typeof item.id==='string'?item.id:String(index),target,...(item.aliases?{aliases:[...item.aliases]}:{}),...(item.label===undefined?{}:{label:item.label})};
   });
 }
 export function availabilityReasons(scope,folder) {
