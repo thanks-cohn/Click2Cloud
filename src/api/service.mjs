@@ -1,4 +1,5 @@
 import {validateProduct} from './config.mjs';
+import {describeExplorerContextMenu} from './explorer-context-menu.mjs';
 import {normalizeTarget,stableId,targetKey,freeze} from '../core/menu-identity.mjs';
 import {inspectMenuTree,diffMenuSpecs} from '../core/menu-spec.mjs';
 const fail=code=>{throw Object.assign(Error(code),{code});};
@@ -6,13 +7,13 @@ const copy=value=>structuredClone(value);
 const targetFields=['provider','connectionId','accountId','bucketName','prefix'];
 const definitions={
   describeCapabilities:['inspect',[]],getEngineHealth:['inspect',[]],getConfiguration:['inspect',[]],
-  listDestinations:['inspect',['mode','cursor','limit']],previewNativeMenu:['inspect',[]],inspectNativeACK:['inspect',[]],
+  listDestinations:['inspect',['mode','cursor','limit']],inspectExplorerContextMenu:['inspect',['target']],previewNativeMenu:['inspect',[]],inspectNativeACK:['inspect',[]],
   listRecoveryPolicies:['inspect',[]],inspectBackupRoots:['inspect',[]],inspectWholeCloudJobs:['inspect',['identity']],enableWholeCloudJob:['configure',['identity','cadence']],disableWholeCloudJob:['configure',['identity']],listAccounts:['inspect',[]],listAuthorizedBuckets:['inspect',['accountId','cursor']],listFolders:['inspect',['source','cursor']],
   previewConfigChange:['configure',['change','expectedRevision']],commitConfigChange:['configure',['previewId','expectedRevision','idempotencyKey']],
   reconcileNativeMenu:['configure',[]],requestRestorePreview:['restore',['recoveryPoint','expectedRevision']],
   restoreRightClickMenu:['restore',['previewId','expectedRevision','idempotencyKey']],dispatchSave:['execute',['itemId','generation','context','source','idempotencyKey']]
 };
-export const toolRegistry=freeze(Object.entries(definitions).map(([name,[scope,keys]])=>({name,version:1,scope,effectful:['commitConfigChange','restoreRightClickMenu','dispatchSave','reconcileNativeMenu'].includes(name),inputSchema:{type:'object',additionalProperties:false,required:({previewConfigChange:['change','expectedRevision'],commitConfigChange:['previewId','expectedRevision','idempotencyKey'],requestRestorePreview:['recoveryPoint','expectedRevision'],restoreRightClickMenu:['previewId','expectedRevision','idempotencyKey'],listAuthorizedBuckets:['accountId'],listFolders:['source'],dispatchSave:['itemId','generation','context','source','idempotencyKey'],enableWholeCloudJob:['identity'],disableWholeCloudJob:['identity'],inspectWholeCloudJobs:['identity']}[name]??[]),properties:Object.fromEntries(keys.map(key=>[key,{...(key==='expectedRevision'||key==='generation'||key==='limit'?{type:'integer',minimum:0}:['change','source','recoveryPoint','identity'].includes(key)?{type:'object'}:{type:'string'})}]))}})));
+export const toolRegistry=freeze(Object.entries(definitions).map(([name,[scope,keys]])=>({name,version:1,scope,effectful:['commitConfigChange','restoreRightClickMenu','dispatchSave','reconcileNativeMenu'].includes(name),inputSchema:{type:'object',additionalProperties:false,required:({previewConfigChange:['change','expectedRevision'],commitConfigChange:['previewId','expectedRevision','idempotencyKey'],requestRestorePreview:['recoveryPoint','expectedRevision'],restoreRightClickMenu:['previewId','expectedRevision','idempotencyKey'],listAuthorizedBuckets:['accountId'],listFolders:['source'],inspectExplorerContextMenu:['target'],dispatchSave:['itemId','generation','context','source','idempotencyKey'],enableWholeCloudJob:['identity'],disableWholeCloudJob:['identity'],inspectWholeCloudJobs:['identity']}[name]??[]),properties:Object.fromEntries(keys.map(key=>[key,{...(key==='expectedRevision'||key==='generation'||key==='limit'?{type:'integer',minimum:0}:['change','source','recoveryPoint','identity','target'].includes(key)?{type:'object'}:{type:'string'})}]))}})));
 /** Trusted, in-process API. Host authorization is mandatory even for reads. No network listener. */
 export function createEngineApi({engine,current,fileApi,getInventory=async()=>({scopes:[]}),authorize,confirm=async()=>false,recovery,wholeCloud,clock=Date.now}={}) {
   if(typeof authorize!=='function'||!engine||!current)throw TypeError('Trusted engine, CURRENT and authorizer required');
@@ -80,6 +81,7 @@ export function createEngineApi({engine,current,fileApi,getInventory=async()=>({
           const all=product.configs[mode].destinations,items=all.slice(offset,offset+limit);
           return {items,total:all.length,nextCursor:offset+limit<all.length?JSON.stringify({revision:product.revision,mode,offset:offset+limit}):null};
         }
+        case 'inspectExplorerContextMenu':return describeExplorerContextMenu(params.target);
         case 'previewNativeMenu':return inspectMenuTree(await compile(product),{limit:1000,includeOmissions:true});
         case 'inspectNativeACK':return engine.getEvidence();
         case 'listAccounts':case 'listAuthorizedBuckets':case 'listFolders': {
