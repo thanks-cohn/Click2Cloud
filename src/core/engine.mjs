@@ -5,13 +5,15 @@ import {resolveMenuAction} from './action-resolver.mjs';
 import {captureSelectedBytes} from './source-capture.mjs';
 import {dispatchSave} from './save-dispatcher.mjs';
 import {operationIdentity,observe} from './boundary-observation.mjs';
+import {location,key} from '../explorer/file-api.mjs';
 
 export function createEngine({current,registrar,providers,getAuthorization,authorizeSource,fetchSource,
-  diagnostics,onVerifiedCompletion,onSaveOutcome=()=>{},maxSnapshots=16}={}) {
+  diagnostics,onVerifiedCompletion,onSaveOutcome=()=>{},fileApi,maxSnapshots=16}={}) {
   if(typeof current?.read!=='function'||typeof registrar?.apply!=='function'||typeof getAuthorization!=='function') throw TypeError('Trusted current state, native registrar and authorization owner required');
   if(!Number.isSafeInteger(maxSnapshots)||maxSnapshots<1||maxSnapshots>256)throw TypeError('Invalid menu retention budget');
   const sink=typeof diagnostics==='function'?diagnostics:diagnostics?.emit;
   const menus=new Map();let evictedGenerations=0;
+  const trustedExplorerSources=new WeakSet();
   const expectedSave=['auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history'];
   function retain(spec) {
     if(menus.has(spec.generation)&&menus.get(spec.generation)!==spec)throw Object.assign(Error('Generation already exists'),{code:'GENERATION_CONFLICT'});
@@ -73,7 +75,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         authorizedTargets:auth.authorizedTargets,sink:saveSink,operationId});
       if(resolved.state!=='completed'){blockRemaining('resolver');return finish({...resolved,operationId});}
       activeStage='capture.acquire';
-      const file=await captureSelectedBytes(source,{authorizeSource,fetchSource,sink:saveSink,signal,operationId});
+      const file=await captureSelectedBytes(source,{authorizeSource:async source=>trustedExplorerSources.has(source)||await authorizeSource(source),fetchSource,sink:saveSink,signal,operationId});
       activeStage='intent';
       const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
         // Recheck current authority after source capture and before upload.
@@ -95,7 +97,42 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       return finish({state:error?.uncertain||code.includes('UNCONFIRMED')||code.includes('UNVERIFIED')?'uncertain':error?.name==='AbortError'||code==='CAPTURE_INTERRUPTED'?'cancelled':code==='AUTH_REVOKED'?'blocked':'failed',code,operationId});
     }
   }
-  return Object.freeze({compile,compileComposite:async options=>compileComposite({...options,sink}),apply,save,
+  // Explorer uses the same save resolver/dispatcher as Chrome native menus. It
+  // reads exact bytes through the authoritative Universal File API, never a URL
+  // sent to the provider. Only this host-created byte source is whitelisted.
+  async function saveExplorerEntry({itemId,generation,context='link',source,entry,signal}={}) {
+    if(typeof fileApi?.run!=='function')return {state:'blocked',code:'FILE_API_UNAVAILABLE'};
+    let cloud,keyName,filename;
+    try {
+      cloud=location(source);keyName=key(entry?.key);
+      if(entry?.folder===true||keyName.endsWith('/'))throw Error('FILE_REQUIRED');
+      filename=entry?.displayName??keyName.split('/').at(-1);
+      if(typeof filename!=='string'||!filename||/[\\/\\\\\\0]/.test(filename))throw Error('INVALID_FILENAME');
+    }catch{return {state:'blocked',code:'INVALID_EXPLORER_SOURCE'};}
+    const limit=32*1024*1024;
+    const stat=await fileApi.run('stat',{source:cloud,key:keyName},{signal});
+    if(stat.state!=='completed'||!stat.data?.object)return {state:'blocked',code:'SOURCE_NOT_VERIFIED'};
+    const size=Number(stat.data.object.size);
+    if(!Number.isSafeInteger(size)||size<0||size>limit)return {state:'blocked',code:'CAPTURE_SIZE_LIMIT'};
+    const chunks=[];let total=0;
+    let response;
+    try {
+      response=await fileApi.run('readStream',{source:cloud,key:keyName},{signal,onChunk:chunk=>{
+        if(!(chunk instanceof Uint8Array))throw Error('INVALID_SOURCE_CHUNK');
+        total+=chunk.byteLength;
+        if(total>limit||total>size)throw Error('CAPTURE_SIZE_LIMIT');
+        chunks.push(chunk);
+      }});
+    }catch{return {state:'failed',code:'SOURCE_READ_FAILED'};}
+    if(response.state!=='completed'||total!==size)return {state:'uncertain',code:'SOURCE_READ_UNCONFIRMED'};
+    const bytes=new Uint8Array(total);let offset=0;
+    for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+    const captured={filename,bytes,contentType:entry.contentType??'application/octet-stream'};
+    trustedExplorerSources.add(captured);
+    try{return await save({itemId,generation,context,source:captured,signal});}
+    finally{trustedExplorerSources.delete(captured);}
+  }
+  return Object.freeze({compile,compileComposite:async options=>compileComposite({...options,sink}),apply,save,saveExplorerEntry,
     getMenu:generation=>menus.get(generation)??null,
     menuRetention:()=>({retained:menus.size,evictedGenerations,maxSnapshots}),
     getEvidence:()=>registrar.inspect(),
