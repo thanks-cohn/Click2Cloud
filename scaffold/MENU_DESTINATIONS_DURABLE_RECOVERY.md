@@ -64,8 +64,8 @@ Settings → **Backup / Recovery Mode** MUST offer exactly two clear **Backup Lo
 
 | Choice | Windows location | Role |
 | --- | --- | --- |
-| **Automatic (DEFAULT)** | **%LOCALAPPDATA%\Click2Cloud\Recovery\** | Native-companion-managed recovery outside Chrome cache/profile and extension-origin IndexedDB |
-| **Documents** | **Documents\Click2Cloud\Backups\** | User-visible durable recovery outside Chrome cache/profile; resolve actual Windows Documents known-folder path instead of hardcoding user paths |
+| **Automatic (DEFAULT)** | `%LOCALAPPDATA%\Click2Cloud\Recovery\` | Native-companion-managed recovery outside Chrome cache/profile and extension-origin IndexedDB |
+| **Documents** | `Documents\Click2Cloud\Backups\` | User-visible durable recovery outside Chrome cache/profile; resolve actual Windows Documents known-folder path instead of hardcoding user paths |
 
 - Exactly **one** active recovery location is selected at a time; neither choice means both locations receive automatic copies. An optional second-copy feature would require separate opt-in.
 - When the user changes the backup location, perform **Copy → checksum/readback Verify → Switch** across all namespaces, including CURRENT, journals, dated snapshots and policy metadata; preserve the old location until the destination is verified. On error, keep the old active root and show an accurate failure. Never delete the original without separate explicit confirmation.
