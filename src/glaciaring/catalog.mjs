@@ -1,0 +1,95 @@
+import {providerFailureManifest} from '../explorer/failure-classification.mjs';
+// Source-owned boundary vocabulary. Rows describe evidence, never business authority.
+const definitions = [
+  ['auth.check','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
+  ['entitlement.check','src/dashboard/controls.mjs','tests/glaciaring.test.mjs','unobservable'],
+  ['activation.prepare','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
+  ['activation.status','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
+  ['worker.capability','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['fileApi.run','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['fileApi.batch','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['transport.send','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['transport.http','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['inventory.page','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
+  ['inventory.refresh','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
+  ['modes.simple','src/modes/simple/index.mjs','tests/canonical-menu.test.mjs','partial'],
+  ['modes.nested','src/modes/nested/index.mjs','tests/canonical-menu.test.mjs','partial'],
+  ['modes.depth','src/modes/depth/index.mjs','tests/canonical-menu.test.mjs','partial'],
+  ['menu.compile','src/core/menu-spec.mjs','tests/canonical-menu.test.mjs','partial'],
+  ['chrome.plan','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
+  ['chrome.apply','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
+  ['chrome.ack','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
+  ['chrome.recovery','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
+  ['resolver','src/core/action-resolver.mjs','tests/canonical-menu.test.mjs','partial'],
+  ['capture.acquire','src/core/source-capture.mjs','tests/inventory-capture.test.mjs','partial'],
+  ['inventory.scan','src/inventory/discovery.mjs','tests/inventory-capture.test.mjs','partial'],
+  ['persistence.commit','src/persistence/current-store.mjs','tests/persistence.test.mjs','partial'],
+  ['persistence.restore','src/persistence/current-store.mjs','tests/persistence.test.mjs','partial'],
+  ['persistence.backup','src/persistence/current-store.mjs','tests/persistence.test.mjs','partial'],
+  ['intent','src/core/save-dispatcher.mjs','tests/menu-compiler.test.mjs','partial'],
+  ['transfer.upload','src/core/save-dispatcher.mjs','tests/menu-compiler.test.mjs','partial'],
+  ['transfer.verify','src/core/save-dispatcher.mjs','tests/menu-compiler.test.mjs','partial'],
+  ['completion.history','src/core/save-dispatcher.mjs','tests/glaciaring.test.mjs','unobservable'],
+  ['lifecycle','src/glaciaring/index.mjs','tests/glaciaring.test.mjs','partial']
+];
+export const REASON_CODES = Object.freeze([...new Set([
+  'OK','STARTED','UNKNOWN','UNKNOWN_REASON','AUTH_REQUIRED','AUTH_REVOKED','AUTH_UNKNOWN',
+  'ENTITLEMENT_UNKNOWN','ACTIVATION_PARTIAL','ACTIVATION_FAILED','ACTIVATION_READY','CAPABILITY_MISMATCH',
+  'PROVISION_UNCERTAIN','UNSUPPORTED_OPERATION','TRANSPORT_TIMEOUT','TRANSPORT_FAILED','ABORTED',
+  'CURSOR_REPEATED','INVENTORY_PARTIAL','LABEL_COLLISION','DEPTH_BUDGET','INVALID_PARENT','ID_COLLISION',
+  'INVALID_CONFIG','CONFIG_INVALID','PROJECTION_OK','COMPILE_OK','MENU_INVALID','NATIVE_ACK_ERROR','NATIVE_ACK_UNKNOWN',
+  'NATIVE_ACK_OK','NATIVE_APPLY_OK','NATIVE_PLAN_READY','STALE_GENERATION','ACTION_UNAVAILABLE','CAPTURE_DENIED',
+  'CAPTURE_INTERRUPTED','DESTINATION_CHANGED','INTENT_INVALID','UPLOAD_UNCERTAIN','UPLOAD_FAILED','RECEIPT_MISMATCH',
+  'RECEIPT_UNVERIFIED','RECEIPT_VERIFIED','HANDOFF_PENDING','HANDOFF_FAILED','REVISION_CONFLICT',
+  'MIGRATION_QUARANTINED','OBSERVATION_GAP','APPLY_SUPERSEDED','CHECKPOINT_MISSING','CANCELLED',
+  'DISCONNECTED','RESULT_UNCONFIRMED','REFRESH_FAILED','BUSY','READY','PARTIAL','FAILED','UNCERTAIN',
+  'COMPLETED','SKIPPED','PENDING','INTERRUPTED','API_THROW','RESTART','APPLY_STARTED','APPLY_COMPLETE',
+  'ACK_TIMEOUT','ACK_ERROR','ACK_OK','ACK_STALE','PLAN_CREATED','RECOVERY_REQUIRED','RESOLVED',
+  'PROVIDER_UNAVAILABLE','INVALID_INPUT','UNVERIFIED_SAVE','HISTORY_SKIPPED','HISTORY_COMMITTED',
+  'VERIFICATION_FAILED','VERIFICATION_UNAVAILABLE','NO_RECEIPT','REPLAY_BLOCKED','STALE_INVENTORY',
+  'SESSION_REQUIRED','SESSION_REVOKED','ACTIVATION_UNCONFIRMED','FILE_API_FAILED','FILE_API_PARTIAL',
+  'FILE_API_UNCERTAIN','FILE_API_CANCELLED','TRANSPORT_UNCERTAIN','UPLOAD_STARTED','UPLOAD_CONFIRMED',
+  'RECEIPT_INVALID','COMPLETION_PENDING','COMPLETION_FAILED','COMPLETION_COMMITTED',
+  'MODE_PROJECTED','MODE_INVALID','COMPILER_INVALID','RECONCILED','APPLY_PARTIAL','APPLY_FAILED',
+  'PLAN_GENERATED','INVALID_MENU_SPEC','DUPLICATE_OR_INVALID_ITEM','INVALID_MENU_PARENT','INVALID_NATIVE_PROPERTIES',
+  'INVALID_SEPARATOR','INVALID_MENU_LABEL','CHROME_ACK_TIMEOUT','CHROME_API_ERROR','CHROME_API_THROW',
+  'PARENT_NOT_ACKNOWLEDGED','ITEM_ACKNOWLEDGED','NATIVE_APPLY_INCOMPLETE','NATIVE_ACKNOWLEDGED','PERSISTENCE_FAILED',
+  'PREVIOUS_PROCESS_ACK_NOT_CURRENT','REGISTRAR_STATE_SAVED','REGISTRAR_STATE_WRITE_FAILED','CURRENT_AUTHORIZATION_REQUIRED',
+  'STORAGE_UNAVAILABLE','STORAGE_COMMIT_FAILED','BACKUP_AUTH_REQUIRED','BACKUP_INVALID',
+  'CAPTURE_STARTED','CAPTURE_COMPLETE','CAPTURE_INVALID','CAPTURE_UNAVAILABLE','CAPTURE_SIZE_LIMIT','CAPTURE_FAILED','CAPTURE_TIMEOUT',
+  'INVENTORY_PAGE_STARTED','INVENTORY_PAGE_COMPLETE','INVENTORY_COMPLETE','INVENTORY_SCOPED_COMPLETE','INVENTORY_PAGE_FAILED','INVENTORY_UNCERTAIN',
+  'INVENTORY_CANCELLED','INVENTORY_INVALID_PATH','INVENTORY_BUDGET',
+  'COMPILE_STARTED','COMPILE_PARTIAL','COMPILE_FAILED','INVALID_MODE','INVALID_TARGET','INVALID_PREFIX','INVALID_REVISION','INVALID_LABEL','INVALID_DEPTH','DUPLICATE_DESTINATION','DUPLICATE_SCOPE','DUPLICATE_ITEM','ROW_LIMIT','INVALID_GENERATION','INVENTORY_INVALID','PROJECTION_STARTED','PROJECTION_PARTIAL','PROJECTION_FAILED','RESOLVE_STARTED','RESOLVE_OK','RESOLVE_FAILED','ITEM_UNKNOWN','ACK_MISSING','NOT_ACTIONABLE','ITEM_DISABLED','CONTEXT_MISMATCH','AUTHORIZATION_MISSING','SCOPE_UNAUTHORIZED','SCOPE_UNDISCOVERED','INVENTORY_STALE','WORKER_UNVERIFIED','FOLDER_UNDISCOVERED','INVENTORY_INCOMPLETE','FOLDER_NOT_WRITABLE','STALE_REVISION','FILE_API_COMPLETED','FILE_API_STARTED','FILE_API_UNKNOWN','FILE_API_THROWN','FILE_STARTED','FILE_UPLOADING','FILE_VERIFYING','FILE_COMMITTING','FILE_COMPLETED','FILE_PARTIAL','FILE_FAILED','FILE_UNCERTAIN','FILE_CANCELLED','FILE_PROGRESS','BATCH_STARTED','BATCH_HALTED','BATCH_COMPLETED','BATCH_FAILED','TRANSPORT_STARTED','TRANSPORT_REJECTED','TRANSPORT_RETURNED','TRANSPORT_CANCELLED','INTENT_VALIDATE','INTENT_VALID','AUTH_CHECK_FAILED','AUTH_VERIFIED','AUTH_EXTERNAL','VERIFIER_UNAVAILABLE','PROVIDER_CAPABLE','UPLOAD_CANCELLED','UPLOAD_UNCONFIRMED','UPLOAD_ACKNOWLEDGED','VERIFY_STARTED','VERIFY_UNCERTAIN','VERIFY_FAILED','HANDOFF_COMMITTED','HANDOFF_EXTERNAL','ACTIVATION_STATUS_FAILED','ACTIVATION_RUNNING','ACTIVATION_NEEDS_ATTENTION','REFRESH_STARTED','LOCATION_INVALID','REFRESH_COMPLETED','ACTIVATION_STARTED','ACTIVATION_RETRY_FAILED','ACTIVATION_INITIAL','SENDER_DENIED','INVALID_ACTIVATION','REGISTRAR_CLOSED','GENERATION_CONFLICT','UNCHANGED_ACK_REUSED','NATIVE_GENERATION_UNACKNOWLEDGED','AUTHORIZED_DISPATCHER_REQUIRED','DISPATCH_FAILED','CHROME_ACK','SCAN_BUSY','PERSIST_STARTED','PERSIST_COMMITTED','BACKUP_STARTED','BACKUP_ENCRYPTED','RESTORE_STARTED','RESTORE_REQUIRES_RECONNECT',
+  'ACTIVATION_UNVERIFIED','CONSENT_REQUIRED','SIMPLE_CONFIGURED','NOT_CONFIGURED','NESTED_CONFIGURED','NATURAL_ANCESTOR','ACTIONABLE_BRANCH','UNSELECTED_SCOPE','DEPTH_LIMIT','DEPTH_DISCOVERED','STRUCTURE','REDOWN','DEFAULT_DIRECT_SAVE','PROVIDER_BRANCH','FLAT_PROVIDER','DEFAULT_DIRECT_PLACEMENT','DEFAULT_HOME_PLACEMENT','HOME_SEPARATOR','DEFAULT_HOME_SAVE','STALE_CURSOR','CHROME_UNAVAILABLE','INVALID_ACK_TIMEOUT','INVALID_SIBLING_INDEX','INVALID_NATIVE_STATE','NATIVE_ITEM_OBSERVATION_MISSING','NATIVE_RENDERING_NOT_OBSERVED','INVALID_OBSERVED_EVIDENCE','JOURNAL_EVICTED','RESTORE_NOT_EMPTY','TERMINAL_MISSING','DEPENDENCY_MISSING','STALE_EPOCH','OBSERVATION_EVICTED','OBSERVATION_DROPPED','OBSERVATION_EXPIRED','DEPENDENCY_DROPPED','DECLARATION_EVICTED','FAIL','COVERAGE_GAP','OBSERVED_OK','REGISTRAR_ALREADY_OWNED','ACTION_BINDING_INVALID','DEPENDENCY_BLOCKED','NATIVE_OBSERVATION_PARTIAL','NATIVE_RENDERING_NOT_OBSERVED','UNOBSERVABLE_BOUNDARY','EXTERNAL_BOUNDARY_UNOBSERVED','DEPENDENCY_OUT_OF_ORDER','WORKER_READY','PROVENANCE_SHARED_LEGACY','REDOWN_SENDER_REQUIRED','REQUEST_FAILED','WORKER_NOT_PREPARED','WORKER_AUTH_REJECTED','WORKER_CAPABILITY_MISMATCH','HTTP_400','HTTP_401','HTTP_403','HTTP_404','HTTP_409','HTTP_429','HTTP_500','HTTP_502','HTTP_503','HTTP_504','OBSERVATION_METADATA_DROPPED','PROVIDER_BAD_REQUEST','PROVIDER_AUTH_REQUIRED','PROVIDER_PERMISSION_DENIED','PROVIDER_NOT_FOUND','PROVIDER_CONFLICT','PROVIDER_RATE_LIMITED','PROVIDER_FAILURE_UNKNOWN',...providerFailureManifest.map(row=>row.code)
+])]);
+const reasonGroups = {
+  'auth.':/^(AUTH|CURRENT_AUTHORIZATION|DISCONNECTED|SENDER|CONSENT)/,
+  'entitlement.':/^ENTITLEMENT/,
+  'activation.':/^(ACTIVATION|NATIVE_ACK|BUSY|CONSENT|SENDER|INVALID_ACTIVATION)/,
+  'worker.':/^(WORKER|CAPABILITY|PROVIDER_|VERIFIER)/,
+  'fileApi.':/^(FILE_|UNSUPPORTED_OPERATION|BATCH_|PROVIDER_|WORKER_|PROVENANCE_)/,
+  'transport.':/^TRANSPORT_/,
+  'inventory.':/^(INVENTORY|CURSOR|CANCELLED|TRANSPORT_FAILED|SCAN_BUSY|LOCATION|REFRESH|BUSY)/,
+  'modes.':/^(PROJECTION|SIMPLE|NESTED|DEPTH|NOT_CONFIGURED|NATURAL|ACTIONABLE|UNSELECTED|INVALID|DUPLICATE|SCOPE|FOLDER|WORKER|LABEL)/,
+  'menu.':/^(COMPILE|INVALID|DUPLICATE|ROW_LIMIT|ID_COLLISION|LABEL_COLLISION|STRUCTURE|DEFAULT|PROVIDER_BRANCH|FLAT_PROVIDER|HOME|STALE_CURSOR|INVENTORY)/,
+  'chrome.':/^(NATIVE|CHROME|REGISTRAR|APPLY|PLAN|INVALID|DUPLICATE|PARENT|ITEM|STALE|PERSISTENCE|GENERATION|UNCHANGED|PREVIOUS_PROCESS)/,
+  'resolver':/^(RESOLVE|ITEM|ACTION|MENU|ACK|NOT_ACTIONABLE|CONTEXT|AUTHORIZATION|SCOPE|STALE|NATIVE)/,
+  'capture.':/^CAPTURE/,
+  'persistence.':/^(PERSIST|RESTORE|BACKUP|REVISION|STORAGE|MIGRATION|JOURNAL|REGISTRAR|OBSERVATION)/,
+  'intent':/^(INTENT|DESTINATION)/,
+  'transfer.upload':/^(UPLOAD|PROVIDER|UNVERIFIED)/,
+  'transfer.verify':/^(VERIFY|VERIFICATION|RECEIPT)/,
+  'completion.':/^(HANDOFF|HISTORY)/,
+  'lifecycle':/^(OBSERVATION|RESTART|APPLY)/
+};
+const providerCodes=new Set(providerFailureManifest.map(row=>row.code));
+const codesFor=stage=>{
+  const key=Object.keys(reasonGroups).find(prefix=>stage.startsWith(prefix)),pattern=reasonGroups[key];
+  return Object.freeze(REASON_CODES.filter(code=>['OK','STARTED','UNKNOWN','UNKNOWN_REASON','DEPENDENCY_BLOCKED'].includes(code)||pattern?.test(code)||stage==='fileApi.run'&&providerCodes.has(code)));
+};
+export const CRITICAL_BOUNDARIES = Object.freeze(definitions.map(([stage,source,test,coverage]) => Object.freeze({
+  stage, source, tests:Object.freeze([test]), owner:source, codes:codesFor(stage), coverage,
+  boundaryLimit:coverage==='unobservable'?'Requires authenticated host/provider or durable lifecycle integration.':'Gateway evidence does not certify hidden service internals.',
+  reproduction:'Run the source-owned test with a rejected, missing, stale and uncertain boundary result.'
+})));
+export const OUTCOMES = Object.freeze(['started','ok','blocked','failed','uncertain','cancelled','skipped','partial','stale','interrupted','unknown']);

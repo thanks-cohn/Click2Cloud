@@ -1,0 +1,105 @@
+import {compileComposite} from './composite-menu.mjs';
+// Narrow composition of the existing owners. Diagnostics has no write authority.
+import {compileMenuSpec} from './menu-spec.mjs';
+import {resolveMenuAction} from './action-resolver.mjs';
+import {captureSelectedBytes} from './source-capture.mjs';
+import {dispatchSave} from './save-dispatcher.mjs';
+import {operationIdentity,observe} from './boundary-observation.mjs';
+
+export function createEngine({current,registrar,providers,getAuthorization,authorizeSource,fetchSource,
+  diagnostics,onVerifiedCompletion,onSaveOutcome=()=>{},maxSnapshots=16}={}) {
+  if(typeof current?.read!=='function'||typeof registrar?.apply!=='function'||typeof getAuthorization!=='function') throw TypeError('Trusted current state, native registrar and authorization owner required');
+  if(!Number.isSafeInteger(maxSnapshots)||maxSnapshots<1||maxSnapshots>256)throw TypeError('Invalid menu retention budget');
+  const sink=typeof diagnostics==='function'?diagnostics:diagnostics?.emit;
+  const menus=new Map();let evictedGenerations=0;
+  const expectedSave=['auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history'];
+  function retain(spec) {
+    if(menus.has(spec.generation)&&menus.get(spec.generation)!==spec)throw Object.assign(Error('Generation already exists'),{code:'GENERATION_CONFLICT'});
+    menus.set(spec.generation,spec);
+    while(menus.size>maxSnapshots){menus.delete(menus.keys().next().value);evictedGenerations++;}
+  }
+  async function compile({mode,inventory,defaultTarget,flatProviders=[],generation}={}) {
+    const state=await current.read();
+    return compileMenuSpec({mode,inventory,defaultTarget,flatProviders,configs:state.configs,
+      generation:generation??state.generation.desired+1,sink,operationId:operationIdentity()});
+  }
+  async function apply(spec) {
+    if(spec.coverage?.rowsComplete===false)return {state:'blocked',code:'MENU_BUDGET_EXCEEDED'};
+    const state=await current.read();
+    if(spec.generation<state.generation.desired)return {state:'blocked',code:'STALE_GENERATION'};
+    if(spec.generation>state.generation.desired)await current.setDesiredGeneration(spec.generation,{expectedGeneration:state.generation.desired});
+    retain(spec);
+    const result=await registrar.apply(spec);
+    if(result.state==='completed'&&result.appliedGeneration===spec.generation) {
+      try{await current.acknowledgeGeneration(spec.generation);}catch{return {...result,state:'partial',code:'PERSISTENCE_FAILED'};}
+    }
+    return result;
+  }
+  async function save({itemId,generation,context='image',source,signal}={}) {
+    const operationId=operationIdentity(),scope={operationId,generation};
+    let priorBoundary=0;
+    // These are actual sequential prerequisites in this owner, not inferred
+    // correlations between temporally adjacent independent operations.
+    const saveSink=event=>{
+      if(typeof sink!=='function')return 0;
+      const requires=event.requires?.length?event.requires:priorBoundary?[priorBoundary]:[];
+      let id=0;try{id=sink({...event,operationId,generation,requires})||0;}catch{}
+      if(id)priorBoundary=id;return id;
+    };
+    const blockRemaining=stage=>{
+      for(const downstream of expectedSave.slice(expectedSave.indexOf(stage)+1))
+        observe(saveSink,downstream,downstream==='completion.history'?'skipped':'blocked','DEPENDENCY_BLOCKED',scope);
+    };
+    let activeStage='auth.check';
+    try{diagnostics?.declareOperation?.(operationId,expectedSave);}catch{}
+    const finish=outcome=>{try{onSaveOutcome(outcome);}catch{}return outcome;};
+    try {
+      const spec=menus.get(generation);
+      let auth;
+      try{auth=await getAuthorization();}
+      catch{observe(saveSink,'auth.check','failed','AUTH_CHECK_FAILED',scope);blockRemaining('auth.check');throw Object.assign(Error('Authorization could not be checked'),{code:'AUTH_CHECK_FAILED'});}
+      if(!auth?.sessionId||!Array.isArray(auth.authorizedTargets)) {
+        observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
+        blockRemaining('auth.check');
+        return finish({state:'blocked',code:'AUTH_REQUIRED',operationId});
+      }
+      observe(saveSink,'auth.check','ok','AUTH_VERIFIED',scope);
+      activeStage='resolver';
+      // Authorization can await storage/network. Inspect current native generation
+      // after that await, never reuse an observation from before it.
+      const native=registrar.inspect();
+      const resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:
+        native.pending||native.desired?.generation!==generation?null:native.acknowledgedGeneration,
+        authorizedTargets:auth.authorizedTargets,sink:saveSink,operationId});
+      if(resolved.state!=='completed'){blockRemaining('resolver');return finish({...resolved,operationId});}
+      activeStage='capture.acquire';
+      const file=await captureSelectedBytes(source,{authorizeSource,fetchSource,sink:saveSink,signal,operationId});
+      activeStage='intent';
+      const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
+        // Recheck current authority after source capture and before upload.
+        authorize:async intent=>{
+          const latest=await getAuthorization();
+          if(latest?.sessionId!==auth.sessionId)return false;
+          const registration=registrar.inspect();
+          if(registration.pending||registration.desired?.generation!==generation)return false;
+          return resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:registration.acknowledgedGeneration,
+            authorizedTargets:latest.authorizedTargets}).state==='completed';
+        },onVerifiedCompletion});
+      return finish({state:result.completion==='pending'?'partial':'completed',operationId,...result});
+    } catch(error) {
+      // No raw host/provider errors enter the UI/export; uncertain writes must not be replayed.
+      if(activeStage==='capture.acquire')blockRemaining('capture.acquire');
+      if(activeStage==='resolver'){observe(saveSink,'resolver','failed','RESOLVE_FAILED',scope);blockRemaining('resolver');}
+      const safeCodes=['AUTH_REVOKED','AUTH_CHECK_FAILED','CAPTURE_DENIED','CAPTURE_INVALID','CAPTURE_UNAVAILABLE','CAPTURE_SIZE_LIMIT','CAPTURE_INTERRUPTED','CAPTURE_TIMEOUT','CAPTURE_FAILED','UPLOAD_UNCONFIRMED','VERIFIER_UNAVAILABLE','RECEIPT_UNVERIFIED','VERIFY_UNCERTAIN'];
+      const code=safeCodes.includes(error?.code)?error.code:'SAVE_FAILED';
+      return finish({state:error?.uncertain||code.includes('UNCONFIRMED')||code.includes('UNVERIFIED')?'uncertain':error?.name==='AbortError'||code==='CAPTURE_INTERRUPTED'?'cancelled':code==='AUTH_REVOKED'?'blocked':'failed',code,operationId});
+    }
+  }
+  return Object.freeze({compile,compileComposite:async options=>compileComposite({...options,sink}),apply,save,
+    getMenu:generation=>menus.get(generation)??null,
+    menuRetention:()=>({retained:menus.size,evictedGenerations,maxSnapshots}),
+    getEvidence:()=>registrar.inspect(),
+    getModeConfig:mode=>current.getModeConfig(mode),
+    saveModeConfig:(mode,config,options)=>current.saveModeConfig(mode,config,options)
+  });
+}

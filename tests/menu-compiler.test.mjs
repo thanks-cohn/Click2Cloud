@@ -79,14 +79,14 @@ test('Native submenu parents expose explicit Save here leaf',()=>{
 });
 test('Upload is not acknowledged until provider confirms it',async()=>{
   const args={intent:{provider:'cloudflare',bucket:'redown',path:'alpha/assets'},file:{filename:'sample.txt',bytes:new Uint8Array([1,2,3])}};
-  const providers={cloudflare:{upload:async()=>({confirmed:false})}};
-  await assert.rejects(dispatchSave(args,{providers}),UnverifiedSaveError);
+  const providers={cloudflare:{upload:async()=>({confirmed:false}),verifyReceipt:async()=>({verified:true,independent:true,destinationMatches:true,byteLength:3,evidenceClass:'provider-readback'})}};
+  await assert.rejects(dispatchSave(args,{providers,authorize:async()=>true}),UnverifiedSaveError);
   providers.cloudflare.upload=async function(payload){
     assert.equal(payload.filename,'sample.txt');
     assert.ok(!('sourceUrl' in payload));
     assert.ok(!('pageUrl' in payload));
     return {confirmed:true,id:'verified-test-receipt'};
   };
-  const result=await dispatchSave(args,{providers});
+  const result=await dispatchSave(args,{providers,authorize:async()=>true});
   assert.equal(result.confirmed,true);
 });

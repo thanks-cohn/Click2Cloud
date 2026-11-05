@@ -1,0 +1,994 @@
+{
+  "schemaVersion": 1,
+  "command": "node --expose-gc scripts/benchmark-glaciaring.mjs",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logicalCpus": 5,
+    "totalMemoryBytes": 35743748096,
+    "gcExposed": true,
+    "sourceRevision": "da81723333667242ebecddcacb8be00c3c2daa97"
+  },
+  "method": {
+    "samplesPerVariant": 120,
+    "warmupSamples": 20,
+    "order": "alternating disabled/passive/debug",
+    "capture": "passive and debug have identical mandatory capture; debug only defers queries",
+    "clock": "performance.now",
+    "units": "milliseconds",
+    "providerRequests": 0,
+    "nativeEvidence": "injected Chrome callback integration; not installed-browser timing",
+    "coldDefinition": "fresh Node diagnostic and registrar instances; not cold MV3"
+  },
+  "faultDetection": {
+    "status": "PASS",
+    "evidenceClass": "unit-diagnostic-core",
+    "stageCount": 37,
+    "terminalOutcomes": [
+      "failed",
+      "blocked",
+      "uncertain",
+      "partial",
+      "stale",
+      "interrupted",
+      "unknown"
+    ],
+    "assertedFaultCases": 259,
+    "additional": [
+      "green parent + failed child",
+      "independent second operation",
+      "causal blocked symptom",
+      "missing mandatory verify",
+      "disabled UNKNOWN",
+      "eviction",
+      "restart gap"
+    ],
+    "limitation": "This corpus checks every declared stage status encoder; owner branch tests and external receipts are separate gates."
+  },
+  "sourceCoverage": {
+    "status": "COVERAGE_GAP",
+    "rows": [
+      {
+        "stage": "auth.check",
+        "coverage": "partial"
+      },
+      {
+        "stage": "entitlement.check",
+        "coverage": "unobservable"
+      },
+      {
+        "stage": "activation.prepare",
+        "coverage": "partial"
+      },
+      {
+        "stage": "activation.status",
+        "coverage": "partial"
+      },
+      {
+        "stage": "activation.run",
+        "coverage": "partial"
+      },
+      {
+        "stage": "worker.capability",
+        "coverage": "partial"
+      },
+      {
+        "stage": "provider.capability",
+        "coverage": "partial"
+      },
+      {
+        "stage": "fileApi.run",
+        "coverage": "partial"
+      },
+      {
+        "stage": "fileApi.batch",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transport.send",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transport.http",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.page",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.refresh",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.simple",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.nested",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.depth",
+        "coverage": "partial"
+      },
+      {
+        "stage": "menu.compile",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.plan",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.apply",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.ack",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.recovery",
+        "coverage": "partial"
+      },
+      {
+        "stage": "resolver",
+        "coverage": "partial"
+      },
+      {
+        "stage": "capture.acquire",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.scan",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.commit",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.restore",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.backup",
+        "coverage": "partial"
+      },
+      {
+        "stage": "capture",
+        "coverage": "unobservable"
+      },
+      {
+        "stage": "intent",
+        "coverage": "partial"
+      },
+      {
+        "stage": "intent.validate",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transfer.upload",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transfer.verify",
+        "coverage": "partial"
+      },
+      {
+        "stage": "completion.history",
+        "coverage": "unobservable"
+      },
+      {
+        "stage": "completion.handoff",
+        "coverage": "partial"
+      },
+      {
+        "stage": "configuration.persist",
+        "coverage": "partial"
+      },
+      {
+        "stage": "configuration.migrate",
+        "coverage": "partial"
+      },
+      {
+        "stage": "lifecycle",
+        "coverage": "partial"
+      }
+    ]
+  },
+  "compile": [
+    {
+      "scenario": "reference-300-wide-multi-provider",
+      "discoveredFolders": 300,
+      "menuRows": 359,
+      "omissions": 3,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 13.122890999999981,
+          "p50": 19.915175999999974,
+          "p95": 51.3511069999995,
+          "p99": 90.86532899999929,
+          "max": 100.86409600000025
+        },
+        "passive": {
+          "samples": 120,
+          "min": 13.241344000000026,
+          "p50": 19.601007999999638,
+          "p95": 57.06070399999953,
+          "p99": 82.86953900000026,
+          "max": 212.94880999999987
+        },
+        "debug": {
+          "samples": 120,
+          "min": 13.417777999999089,
+          "p50": 19.773863000000347,
+          "p95": 52.06263899999976,
+          "p99": 82.27699500000017,
+          "max": 86.49379700000009
+        }
+      },
+      "passiveGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 5.709597000000031,
+        "allowedP95DeltaMs": 2.5675553499999753,
+        "p99DeltaMs": -7.995789999999033
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.7115320000002612,
+        "allowedP95DeltaMs": 2.5675553499999753,
+        "p99DeltaMs": -8.588333999999122
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "scenario": "large-1000-wide-multi-provider",
+      "discoveredFolders": 1000,
+      "menuRows": 1177,
+      "omissions": 3,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 51.35220900000422,
+          "p50": 74.46619700000156,
+          "p95": 169.33721399999922,
+          "p99": 238.2695359999998,
+          "max": 329.7005659999995
+        },
+        "passive": {
+          "samples": 120,
+          "min": 55.55945300000167,
+          "p50": 73.88905199999863,
+          "p95": 193.74436100000457,
+          "p99": 547.1964070000031,
+          "max": 622.5737060000029
+        },
+        "debug": {
+          "samples": 120,
+          "min": 51.52807899999971,
+          "p50": 75.28917200000433,
+          "p95": 117.87649899999815,
+          "p99": 258.95105400000466,
+          "max": 262.6355790000016
+        }
+      },
+      "passiveGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 24.407147000005352,
+        "allowedP95DeltaMs": 8.46686069999996,
+        "p99DeltaMs": 308.9268710000033
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": -51.46071500000107,
+        "allowedP95DeltaMs": 8.46686069999996,
+        "p99DeltaMs": 20.68151800000487
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "scenario": "deep-16-partial-multi-provider",
+      "discoveredFolders": 300,
+      "menuRows": 372,
+      "omissions": 4,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 14.861446000002616,
+          "p50": 23.654882999995607,
+          "p95": 49.018246999999974,
+          "p99": 69.88412000000244,
+          "max": 96.87877399999707
+        },
+        "passive": {
+          "samples": 120,
+          "min": 13.93760900000052,
+          "p50": 23.843440999997256,
+          "p95": 54.13823699999921,
+          "p99": 85.92578899999353,
+          "max": 95.80909700000484
+        },
+        "debug": {
+          "samples": 120,
+          "min": 14.943826000002446,
+          "p50": 23.91278500000044,
+          "p95": 50.49190500000259,
+          "p99": 60.85438900000008,
+          "max": 78.07739700000093
+        }
+      },
+      "passiveGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 5.119989999999234,
+        "allowedP95DeltaMs": 2.450912349999999,
+        "p99DeltaMs": 16.04166899999109
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 1.4736580000026152,
+        "allowedP95DeltaMs": 2.450912349999999,
+        "p99DeltaMs": -9.029731000002357
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    }
+  ],
+  "apply": [
+    {
+      "rows": 1,
+      "callbackDelayMs": 1,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 1.295375999994576,
+          "p50": 2.246868000001996,
+          "p95": 2.6443060000019614,
+          "p99": 3.0245040000008885,
+          "max": 3.0615189999953145
+        },
+        "passive": {
+          "samples": 120,
+          "min": 2.179482999999891,
+          "p50": 2.274338000002899,
+          "p95": 2.732834999995248,
+          "p99": 3.014436999997997,
+          "max": 3.046926999995776
+        },
+        "debug": {
+          "samples": 120,
+          "min": 2.1177930000048946,
+          "p50": 2.264517000003252,
+          "p95": 2.7500730000028852,
+          "p99": 3.7015490000048885,
+          "max": 4.136104000004707
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.006248999998206273,
+          "p50": 0.007339000003412366,
+          "p95": 0.017232999998668674,
+          "p99": 0.13948099999834085,
+          "max": 0.2080199999982142
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.007517999998526648,
+          "p50": 0.008776000002399087,
+          "p95": 0.03747799999837298,
+          "p99": 0.199203000003763,
+          "max": 0.26535600000352133
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.007573999995656777,
+          "p50": 0.008838000001560431,
+          "p95": 0.03432299999985844,
+          "p99": 0.1385870000012801,
+          "max": 0.5606009999974049
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.08852899999328656,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -0.010067000002891291
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.10576700000092387,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 0.677045000004
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 1041,
+          "evicted": 529,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 1041,
+          "evicted": 529,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "rows": 100,
+      "callbackDelayMs": 0,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.1358230000041658,
+          "p50": 0.19805699999415083,
+          "p95": 0.5416320000003907,
+          "p99": 4.565853000000061,
+          "max": 9.620780999997805
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.1539109999939683,
+          "p50": 0.2214860000021872,
+          "p95": 0.6424079999997048,
+          "p99": 1.2515629999979865,
+          "max": 1.7587260000000242
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.15651700000307756,
+          "p50": 0.20571199999540113,
+          "p95": 0.5485360000020592,
+          "p99": 0.9612950000009732,
+          "max": 1.2310079999951995
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.13560400000278605,
+          "p50": 0.16571899999689776,
+          "p95": 0.7483680000004824,
+          "p99": 2.482842999997956,
+          "max": 4.918516999998246
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.15402699999685865,
+          "p50": 0.22015400000236696,
+          "p95": 0.8950180000028922,
+          "p99": 14.012280000002647,
+          "max": 31.182071000002907
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.15387100000225473,
+          "p50": 0.20789499999955297,
+          "p95": 0.755248000001302,
+          "p99": 7.470734000002267,
+          "max": 13.037350999999035
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.10077599999931408,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -3.3142900000020745
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.006904000001668464,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -3.6045579999990878
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 26781,
+          "evicted": 26269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 26781,
+          "evicted": 26269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "rows": 300,
+      "callbackDelayMs": 0,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.4298170000038226,
+          "p50": 0.6508580000008806,
+          "p95": 2.3747520000033546,
+          "p99": 8.72637200000463,
+          "max": 9.453364000000875
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.501724000001559,
+          "p50": 0.7587490000005346,
+          "p95": 2.3295319999961066,
+          "p99": 11.014986000001954,
+          "max": 13.746799000000465
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.4844730000040727,
+          "p50": 0.7274610000022221,
+          "p95": 2.1018050000056974,
+          "p99": 10.13428600000043,
+          "max": 14.923771999994642
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.41342500000610016,
+          "p50": 0.62457600000198,
+          "p95": 1.8390629999994417,
+          "p99": 5.56374599999981,
+          "max": 5.909272000004421
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.4968640000006417,
+          "p50": 0.704145999996399,
+          "p95": 2.0169240000032005,
+          "p99": 5.5030859999969834,
+          "max": 7.853476000003866
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.47979799999302486,
+          "p50": 0.7519250000041211,
+          "p95": 2.1419370000003255,
+          "p99": 4.696444999994128,
+          "max": 8.751594000001205
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.04522000000724802,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 2.288613999997324
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.27294699999765726,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 1.4079139999957988
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 78781,
+          "evicted": 78269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 78781,
+          "evicted": 78269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    }
+  ],
+  "click": {
+    "measurement": "native click handler entry through current-authority check and pure action resolution to injected dispatcher acknowledgement; excludes source fetch/upload",
+    "timings": {
+      "disabled": {
+        "samples": 120,
+        "min": 0.018482999999832828,
+        "p50": 0.019831999998132233,
+        "p95": 0.0902700000006007,
+        "p99": 0.11467500000435393,
+        "max": 0.1502810000019963
+      },
+      "passive": {
+        "samples": 120,
+        "min": 0.01847000000270782,
+        "p50": 0.020022000004246365,
+        "p95": 0.047512000004644506,
+        "p99": 0.09599799999705283,
+        "max": 0.2935369999977411
+      },
+      "debug": {
+        "samples": 120,
+        "min": 0.018232000002171844,
+        "p50": 0.019891000003553927,
+        "p95": 0.08850200000597397,
+        "p99": 0.2057700000004843,
+        "max": 0.24758699999802047
+      }
+    },
+    "dispatchAcknowledgements": 420,
+    "passiveGate": {
+      "status": "PASS",
+      "p95DeltaMs": -0.0427579999959562,
+      "allowedP95DeltaMs": 0.5,
+      "p99DeltaMs": -0.018677000007301103,
+      "allowedP99DeltaMs": 1
+    },
+    "debugGate": {
+      "status": "PASS",
+      "p95DeltaMs": -0.0017679999946267344,
+      "allowedP95DeltaMs": 0.5,
+      "p99DeltaMs": 0.09109499999613035,
+      "allowedP99DeltaMs": 1
+    }
+  },
+  "memory": {
+    "ring": {
+      "enabled": true,
+      "capacity": 512,
+      "occupancy": 512,
+      "sequence": 1024,
+      "evicted": 512,
+      "dropped": 0,
+      "expired": 0,
+      "restarts": 0,
+      "dependencyDrops": 0,
+      "declarationDrops": 0,
+      "epoch": 1,
+      "slotBytes": 63,
+      "bufferBytes": 32256,
+      "retentionMs": 900000
+    },
+    "retainedHeapDeltaBytes": 748728,
+    "replicas": 40,
+    "averageRetainedHeapDeltaBytes": 18718.2,
+    "averageHeapAndBackingBytes": 50974.2,
+    "ordinaryBudgetBytes": 131072,
+    "status": "PASS",
+    "limitation": "V8 heap delta includes manifest/maps and excludes typed-array backing store; backing store reported separately. GC-dependent estimate, not browser heap proof."
+  },
+  "export": {
+    "evidenceClass": "unit-authorized-agent-api-export",
+    "timings": {
+      "samples": 120,
+      "min": 2.098644999998214,
+      "p50": 3.25406899999507,
+      "p95": 8.034371000001556,
+      "p99": 13.187927999999374,
+      "max": 14.214052999996056
+    },
+    "events": 512,
+    "totalPageBytes": 197946,
+    "maximumPageBytes": 24782,
+    "pageCount": 8,
+    "maximumEventsPerPage": 64,
+    "perPageBudgetBytes": 65536,
+    "totalOptionalRetentionBudgetBytes": 262144,
+    "status": "PASS",
+    "limitation": "In-process user grant fixture; sender restrictions are tested separately. No file dialog, disk persistence or network upload."
+  },
+  "externalGates": {
+    "installedChromeTiming": "NOT_TESTED",
+    "coldMv3Timing": "NOT_TESTED",
+    "authenticatedProviderReceipt": "NOT_TESTED",
+    "agentIterationSavings": "NOT_TESTED"
+  },
+  "captureIntegrity": {
+    "status": "PASS",
+    "reason": "Dropped/unknown source-owned signals invalidate a full-coverage performance claim even if latency passes."
+  },
+  "overallPerformanceStatus": "FAIL"
+}

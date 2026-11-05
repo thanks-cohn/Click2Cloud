@@ -1,249 +1,51 @@
-/**
- * Click2Cloud Cloudflare OAuth 2.0 authorization-code + PKCE S256.
- * The new Cloudflare client must be registered for THIS extension's redirect URL.
- *
- * This is a privileged EXTENSION-CONTEXT MODULE. Call from background / service
- * worker only; do not expose access tokens in runtime message responses or DOM.
- * No REDOWN auth state, extension identity, app ID or secrets are reused.
- */
-export const CLOUDFLARE_SCOPES = Object.freeze([
-  'workers-r2.read', 'workers-r2.write',
-  'workers-scripts.read', 'workers-scripts.write'
-]);
-export const CLOUDFLARE_AUTH_KEY = 'click2cloud:cloudflare:auth';
-const ATTEMPT_KEY = 'click2cloud:cloudflare:oauth-attempt';
-const AUTH = 'https://dash.cloudflare.com/oauth2/auth';
-const TOKEN = 'https://dash.cloudflare.com/oauth2/token';
-const API = 'https://api.cloudflare.com/client/v4';
-const EARLY_REFRESH_MS = 60_000;
-const TIMEOUT_MS = 5 * 60_000;
-
-export class CloudflareOAuthError extends Error {
-  constructor(code, message) { super(message); this.name='CloudflareOAuthError'; this.code=code; }
-}
-
-const problem=(code,message)=>new CloudflareOAuthError(code,message);
-const b64url = bytes => {
-  let binary=''; for(const b of bytes)binary+=String.fromCharCode(b);
-  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
-};
-const random = (c,bytes=32)=>b64url(c.getRandomValues(new Uint8Array(bytes)));
-const challenge = async (c,verifier)=>b64url(new Uint8Array(
-  await c.subtle.digest('SHA-256',new TextEncoder().encode(verifier))
-));
-function responseError(body, fallback) {
-  return String(body?.errors?.[0]?.message || body?.error_description || body?.error || fallback);
-}
-function sanitizedAuth(auth) {
-  if(!auth?.accessToken) return {phase:'disconnected'};
-  return {phase:auth.reconnectRequired?'reconnect-required':auth.verifiedAt?'connected':'authorized-not-verified',
-    expiresAt:auth.expiresAt||null, sessionId:auth.sessionId||null};
-}
-function formFields(fields){return new URLSearchParams(Object.entries(fields).filter(([,v])=>v!==undefined&&v!==null));}
-
-/**
- * Inject Chrome/fetch/crypto for deterministic tests. A client ID is a public
- * identifier, not a secret, but must come from a registered Click2Cloud client.
- */
-export function createClick2CloudCloudflareOAuth({
-  chromeApi=globalThis.chrome, fetchImpl=globalThis.fetch,
-  cryptoApi=globalThis.crypto, clientId='', now=()=>Date.now(),
-  timeoutMs=30000, locks=globalThis.navigator?.locks
-}={}) {
-  if(typeof clientId!=='string'||!clientId.trim())
-    throw problem('CLIENT_NOT_REGISTERED','Click2Cloud needs its own registered Cloudflare OAuth client ID.');
-  if(!chromeApi?.identity?.getRedirectURL || !chromeApi?.identity?.launchWebAuthFlow ||
-     !chromeApi?.storage?.local || !chromeApi?.storage?.session)
-    throw problem('CHROME_EXTENSION_REQUIRED','Cloudflare OAuth requires a trusted installed Click2Cloud Chrome extension.');
-  if(typeof fetchImpl!=='function'||!cryptoApi?.getRandomValues||!cryptoApi?.subtle?.digest)
-    throw problem('RUNTIME_UNAVAILABLE','Secure OAuth browser primitives are missing.');
-
-  const redirectUri=chromeApi.identity.getRedirectURL('cloudflare');
-  if(!/^https:\/\/[a-p]{32}\.chromiumapp\.org\/cloudflare\/?$/.test(redirectUri))
-    throw problem('INVALID_REDIRECT','Click2Cloud requires its Chrome identity redirect for Cloudflare.');
-  let connecting=null,refreshing=null;
-
-  const withLock=(name,fn)=>locks?.request?locks.request('click2cloud-'+name,fn):fn();
-  let protectedStorage=null;
-  async function ensureProtectedStorage() {
-    if(!protectedStorage) {
-      if(typeof chromeApi.storage.local.setAccessLevel!=='function')
-        throw problem('UNSAFE_TOKEN_STORAGE','Chrome must restrict Cloudflare tokens to trusted extension contexts.');
-      protectedStorage=chromeApi.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}).catch(e=>{protectedStorage=null;throw e;});
-    }
-    return protectedStorage;
+export const CLIENT_ID='59535938bc4cc093003b4385a7e2b005';
+const base64=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const random=()=>base64(crypto.getRandomValues(new Uint8Array(32)));
+const failure=code=>Object.assign(Error(code),{code});
+/** Only the trusted service worker receives tokens; neither API nor diagnostics returns them. */
+export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.now,onConnected=async()=>{}}={}) {
+  const key='click2cloudOAuth';let refreshing;
+  const read=async()=>(await chrome.storage.local.get(key))[key];
+  const store=value=>chrome.storage.local.set({[key]:value});
+  async function token(body) {
+    const response=await fetch('https://dash.cloudflare.com/oauth2/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...body,client_id:CLIENT_ID}),redirect:'error',signal:AbortSignal.timeout(30000)});
+    const data=await response.json();if(!response.ok||typeof data.access_token!=='string'||!Number.isFinite(Number(data.expires_in))||Number(data.expires_in)<=0)throw failure('OAUTH_TOKEN_REJECTED');return data;
   }
-  const getSaved=async()=> {await ensureProtectedStorage();return (await chromeApi.storage.local.get(CLOUDFLARE_AUTH_KEY))[CLOUDFLARE_AUTH_KEY]||null;};
-  const store=async auth=>{await ensureProtectedStorage();return chromeApi.storage.local.set({[CLOUDFLARE_AUTH_KEY]:auth});};
-  const eraseAttempt=()=>chromeApi.storage.session.remove(ATTEMPT_KEY);
-
-  async function postToken(fields) {
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  async function connect(scopes) {
+    // Scope IDs must be supplied from the owner's verified registration, not guessed dashboard labels.
+    if(!Array.isArray(scopes)||!scopes.length||scopes.some(s=>typeof s!=='string'||!/^[a-z0-9._:-]+$/i.test(s)))throw failure('OAUTH_REGISTERED_SCOPES_REQUIRED');
+    const state=random(),verifier=random(),redirect=chrome.identity.getRedirectURL('cloudflare');
+    const challenge=base64(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));
+    await chrome.storage.session.set({click2cloudOAuthAttempt:{state,verifier,redirect,expires:clock()+300000}});
+    const url=new URL('https://dash.cloudflare.com/oauth2/auth');url.search=new URLSearchParams({client_id:CLIENT_ID,redirect_uri:redirect,response_type:'code',scope:scopes.join(' '),state,code_challenge:challenge,code_challenge_method:'S256'});
     try {
-      const res=await fetchImpl(TOKEN,{
-        method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:formFields({client_id:clientId,...fields}),signal:controller.signal,
-        cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer'
-      });
-      const body=await res.json().catch(()=>({}));
-      if(!res.ok||!body?.access_token) {
-        const e=problem('TOKEN_REJECTED',responseError(body,'Cloudflare did not issue an access token.'));
-        e.oauthCode=body?.error||'';throw e;
-      }
-      return body;
-    }catch(error){
-      if(error?.name==='AbortError') throw problem('TOKEN_TIMEOUT','Cloudflare token exchange timed out.');
-      throw error;
-    }finally{clearTimeout(timer);}
+      const callback=await chrome.identity.launchWebAuthFlow({url:url.href,interactive:true});
+      const attempt=(await chrome.storage.session.get('click2cloudOAuthAttempt')).click2cloudOAuthAttempt;
+      await chrome.storage.session.remove('click2cloudOAuthAttempt');
+      const result=new URL(callback),expected=new URL(redirect);
+      if(!attempt||attempt.expires<clock()||result.origin!==expected.origin||result.pathname!==expected.pathname||result.searchParams.get('state')!==attempt.state||!result.searchParams.get('code')||result.searchParams.has('error'))throw failure('OAUTH_CALLBACK_REJECTED');
+      const data=await token({grant_type:'authorization_code',code:result.searchParams.get('code'),redirect_uri:redirect,code_verifier:attempt.verifier});
+      const session={sessionId:random(),accessToken:data.access_token,refreshToken:data.refresh_token??null,expiresAt:clock()+Number(data.expires_in)*1000,scopes:typeof data.scope==='string'?data.scope.split(' '):scopes};
+      await store(session);await onConnected();return status();
+    } finally {await chrome.storage.session.remove('click2cloudOAuthAttempt');}
   }
-
-  async function verifyAccount(accessToken) {
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),timeoutMs);
-    try {
-      const res=await fetchImpl(API+'/accounts?per_page=50',{
-        headers:{Authorization:'Bearer '+accessToken},cache:'no-store',
-        credentials:'omit',redirect:'error',signal:controller.signal
-      });
-      const body=await res.json().catch(()=>({}));
-      if(!res.ok||body.success!==true||!Array.isArray(body.result))
-        throw problem('ACCOUNT_VERIFICATION_FAILED',responseError(body,'Cloudflare account verification failed.'));
-      return body.result.map(x=>({id:x.id,name:x.name}));
-    }catch(error){
-      if(error?.name==='AbortError')throw problem('ACCOUNT_TIMEOUT','Cloudflare account verification timed out.');
-      throw error;
-    }finally{clearTimeout(timer);}
+  async function access() {
+    const session=await read();if(!session||session.reconnectRequired)throw failure('AUTH_REQUIRED');
+    if(session.expiresAt>clock()+60000)return session;
+    return refreshing??=(async()=>{
+      const old=await read();if(!old?.refreshToken)throw failure('AUTH_REQUIRED');
+      let data;try{data=await token({grant_type:'refresh_token',refresh_token:old.refreshToken});}catch(e){if((await read())?.sessionId===old.sessionId)await store({...old,reconnectRequired:true});throw e;}
+      if((await read())?.sessionId!==old.sessionId)throw failure('AUTH_SESSION_CHANGED');
+      const next={...old,accessToken:data.access_token,refreshToken:data.refresh_token??old.refreshToken,expiresAt:clock()+Number(data.expires_in)*1000};await store(next);return next;
+    })().finally(()=>{refreshing=null;});
   }
-
-  async function connectUnlocked() {
-    const existing=(await chromeApi.storage.session.get(ATTEMPT_KEY))[ATTEMPT_KEY];
-    if(existing) await eraseAttempt(); // no stale pending PKCE verifier is ever reused
-    const state=random(cryptoApi,24);
-    const verifier=random(cryptoApi,48);
-    const requestId=cryptoApi.randomUUID?.()||random(cryptoApi,16);
-    const at=now();
-    const attempt={state,verifier,requestId,redirectUri,at};
-    await chromeApi.storage.session.set({[ATTEMPT_KEY]:attempt});
-    const url=new URL(AUTH);
-    url.searchParams.set('client_id',clientId);
-    url.searchParams.set('response_type','code');
-    url.searchParams.set('redirect_uri',redirectUri);
-    url.searchParams.set('code_challenge',await challenge(cryptoApi,verifier));
-    url.searchParams.set('code_challenge_method','S256');
-    url.searchParams.set('state',state);
-    url.searchParams.set('scope',CLOUDFLARE_SCOPES.join(' '));
-
-    try{
-      const responseUrl=await chromeApi.identity.launchWebAuthFlow({url:url.href,interactive:true});
-      // Verify exact Chrome redirect (not any website) and the persisted nonce.
-      const saved=(await chromeApi.storage.session.get(ATTEMPT_KEY))[ATTEMPT_KEY];
-      await eraseAttempt(); // consume nonce before redeeming one-use code
-      if(!saved||saved.requestId!==requestId||saved.state!==state||saved.redirectUri!==redirectUri||now()-saved.at>=TIMEOUT_MS)
-        throw problem('EXPIRED_ATTEMPT','Cloudflare sign-in expired or another attempt replaced it.');
-      if(!responseUrl)throw problem('CANCELLED','Cloudflare sign-in was cancelled.');
-      const incoming=new URL(responseUrl), expected=new URL(redirectUri);
-      if(incoming.origin!==expected.origin||incoming.pathname!==expected.pathname||
-         incoming.username||incoming.password||incoming.hash||
-         incoming.searchParams.getAll('state').length!==1||incoming.searchParams.get('state')!==state)
-        throw problem('INVALID_CALLBACK','The Cloudflare OAuth callback did not match this sign-in attempt.');
-      if(incoming.searchParams.get('error'))
-        throw problem('ACCESS_DENIED',incoming.searchParams.get('error_description')||'Cloudflare authorization was declined.');
-      if(incoming.searchParams.getAll('code').length!==1||!incoming.searchParams.get('code'))
-        throw problem('MISSING_CODE','Cloudflare did not return a valid authorization code.');
-      const token=await postToken({grant_type:'authorization_code',code:incoming.searchParams.get('code'),redirect_uri:redirectUri,code_verifier:verifier});
-      // Verify the token before showing "Connected" or persisting a new session.
-      const accounts=await verifyAccount(token.access_token);
-      const auth={
-        sessionId:cryptoApi.randomUUID?.()||random(cryptoApi,16),
-        accessToken:token.access_token,
-        refreshToken:token.refresh_token||null,
-        expiresAt:Number.isFinite(Number(token.expires_in))?now()+Number(token.expires_in)*1000:null,
-        reconnectRequired:false,accountIds:accounts.map(a=>a.id),verifiedAt:now()
-      };
-      await store(auth);
-      return Object.freeze({phase:'connected',accounts,sessionId:auth.sessionId});
-    }finally{await eraseAttempt();}
+  async function request(path,options={}) {
+    if(typeof path!=='string'||!path.startsWith('/accounts')||path.includes('..'))throw failure('PROVIDER_PATH_DENIED');
+    const session=await access();const headers=new Headers(options.headers);headers.set('authorization','Bearer '+session.accessToken);
+    const response=await fetch('https://api.cloudflare.com/client/v4'+path,{...options,headers,redirect:'error',signal:options.signal??AbortSignal.timeout(30000)});
+    if((await read())?.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');
+    if(response.status===401||response.status===403)throw failure('PROVIDER_AUTH_REJECTED');return response;
   }
-
-  async function connect() {
-    if(!connecting)connecting=connectUnlocked().finally(()=>{connecting=null;});
-    return connecting;
-  }
-
-  async function refreshUnlocked({force=false,expectedSession}={}) {
-    const current=await getSaved();
-    if(!current?.accessToken)throw problem('DISCONNECTED','Connect Cloudflare first.');
-    if(current.reconnectRequired)throw problem('RECONNECT_REQUIRED','Reconnect Cloudflare to renew authorization.');
-    if(expectedSession && current.sessionId!==expectedSession)
-      throw problem('SESSION_CHANGED','Cloudflare connection changed; refresh the File Explorer.');
-    if(!force&&(!current.expiresAt || now()<current.expiresAt-EARLY_REFRESH_MS))
-      return current.accessToken;
-    if(!current.refreshToken){
-      await store({...current,reconnectRequired:true});
-      throw problem('RECONNECT_REQUIRED','Cloudflare session expired; reconnect Cloudflare.');
-    }
-    let token;
-    try {token=await postToken({grant_type:'refresh_token',refresh_token:current.refreshToken});}
-    catch(e){
-      if(e?.oauthCode==='invalid_grant') {
-        await store({...current,reconnectRequired:true});
-        throw problem('RECONNECT_REQUIRED','Cloudflare authorization was revoked or expired. Reconnect.');
-      }
-      throw e;
-    }
-    const after=await getSaved();
-    if(after?.sessionId!==current.sessionId)
-      throw problem('SESSION_CHANGED','Cloudflare connection changed during token renewal.');
-    const renewed={...after,accessToken:token.access_token,
-      refreshToken:token.refresh_token||after.refreshToken,
-      expiresAt:Number.isFinite(Number(token.expires_in))?now()+Number(token.expires_in)*1000:null,
-      reconnectRequired:false};
-    await store(renewed);
-    return renewed.accessToken;
-  }
-  function getAccessToken(options={}) {
-    // Locks serialize refreshes across extension contexts, not only this instance.
-    if(!refreshing) refreshing=withLock('cloudflare-refresh',()=>refreshUnlocked(options)).finally(()=>{refreshing=null;});
-    return refreshing;
-  }
-
-  async function status() {return sanitizedAuth(await getSaved());}
-  async function accountStatus() {
-    const token=await getAccessToken();
-    const accounts=await verifyAccount(token);
-    return Object.freeze({phase:'connected',accounts});
-  }
-  async function disconnect() {
-    await ensureProtectedStorage();
-    await chromeApi.storage.local.remove(CLOUDFLARE_AUTH_KEY);
-    await eraseAttempt();
-    // Deliberately preserve menu choices, Narrow aliases, Depth and backups.
-    return {phase:'disconnected'};
-  }
-  async function apiRequest(path,options={}) {
-    if(typeof path!=='string'||!/^\/(?!\/)/.test(path))
-      throw problem('INVALID_API_PATH','Only relative Cloudflare management API paths are allowed.');
-    const current=await getSaved();
-    if(!current?.sessionId)throw problem('DISCONNECTED','Connect Cloudflare first.');
-    let token=await getAccessToken({expectedSession:current.sessionId});
-    const send=accessToken=>{
-      const headers=new Headers(options.headers||{});
-      headers.set('Authorization','Bearer '+accessToken);
-      return fetchImpl(API+path,{
-        ...options,headers,credentials:'omit',redirect:'error',referrerPolicy:'no-referrer'
-      });
-    };
-    let response=await send(token);
-    if(response.status===401) {
-      await response.body?.cancel?.();
-      token=await getAccessToken({force:true,expectedSession:current.sessionId});
-      response=await send(token);
-    }
-    if((await getSaved())?.sessionId!==current.sessionId)
-      throw problem('SESSION_CHANGED','Cloudflare account changed during request.');
-    return response;
-  }
-  return Object.freeze({connect,status,accountStatus,getAccessToken,apiRequest,disconnect,redirectUri,
-    scopes:[...CLOUDFLARE_SCOPES]});
+  async function status(){const s=await read();return {state:s&&!s.reconnectRequired?'AUTHORIZED':'UNAUTHORIZED',sessionId:s?.sessionId??null,scopes:s?.scopes??[],redirectUri:chrome.identity.getRedirectURL('cloudflare')};}
+  return Object.freeze({connect,request,status,disconnect:()=>chrome.storage.local.remove(key)});
 }

@@ -5,8 +5,12 @@
   "type": "module",
   "description": "One deterministic Click2Cloud menu specification for a real REDOWN Portal and Chrome",
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "check": "npm test"
+    "test": "node tests/run.mjs",
+    "check": "npm test",
+    "build:extension": "node scripts/build-extension.mjs",
+    "test:engine-api": "node tests/engine-api-focused.test.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

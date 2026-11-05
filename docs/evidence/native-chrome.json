@@ -1,0 +1,32 @@
+{
+  "state": "BLOCKED",
+  "browserVersion": "155.0.8059.79",
+  "native": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  },
+  "persistence": {
+    "state": "PASS",
+    "evidence": "installed-browser-indexeddb",
+    "passed": [
+      "independent mode state persisted",
+      "concurrent IDB transactions fence revisions",
+      "interrupted transaction rolls config and journal back together",
+      "desired versus applied native generation fenced",
+      "daily checkpoint remains immutable across same-day edits",
+      "cold store reopen retains config and journal",
+      "encrypted empty-store restore preserves config and requires new authorization/ACK",
+      "journal paging and material failure signals"
+    ],
+    "assertionGroups": 8
+  },
+  "mirror": {
+    "state": "PASS",
+    "rows": 58,
+    "evidenceClass": "browser-dom-mirror"
+  },
+  "limitations": [
+    "No native Chrome registration, rendering or click was verified. Administrator extension policy was preserved.",
+    "Authenticated provider save and live MV3 write recovery remain BLOCKED: no provider session/credentials supplied."
+  ]
+}

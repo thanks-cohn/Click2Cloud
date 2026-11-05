@@ -1,0 +1,1261 @@
+{
+  "schemaVersion": 1,
+  "command": "node --expose-gc scripts/benchmark-glaciaring.mjs",
+  "sourceFiles": [
+    {
+      "path": "src/chrome/debug-host.mjs",
+      "sha256": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd"
+    },
+    {
+      "path": "src/chrome/mirror.mjs",
+      "sha256": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d"
+    },
+    {
+      "path": "src/chrome/registrar.mjs",
+      "sha256": "235c42f2e6f94204ee12897404e70376fd8db56ae4e0170f7a17ccd20890de8b"
+    },
+    {
+      "path": "src/core/action-resolver.mjs",
+      "sha256": "bbdb0ef1c268cd53f78fa010eae2107b97283c071f1f5b23ba14b63481e3f4c9"
+    },
+    {
+      "path": "src/core/boundary-observation.mjs",
+      "sha256": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730"
+    },
+    {
+      "path": "src/core/engine.mjs",
+      "sha256": "fef461ba936da7068ce09567923ba71860a0e3b9023a56c2552939f90dfedc6e"
+    },
+    {
+      "path": "src/core/menu-compiler.mjs",
+      "sha256": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2"
+    },
+    {
+      "path": "src/core/menu-identity.mjs",
+      "sha256": "f165d0c2160c73cdcd974513114897d2c07881908250af44fcbd4b567bad27ef"
+    },
+    {
+      "path": "src/core/menu-spec.mjs",
+      "sha256": "4b01c0aece9c979e342c7b878778dbbeb7229deb63b975afe3690496b7feba10"
+    },
+    {
+      "path": "src/core/save-dispatcher.mjs",
+      "sha256": "88a2952e07c07ce94b5f1d41c2a68d8cebd5c43432b1caf4b1cae7da5d3a2f2c"
+    },
+    {
+      "path": "src/core/source-capture.mjs",
+      "sha256": "73f99641ee769ca39aacdd6f44c28f6b06055bb5b986f7678c872c3b4413cfff"
+    },
+    {
+      "path": "src/dashboard/controls.mjs",
+      "sha256": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa"
+    },
+    {
+      "path": "src/dashboard/redown-bridge.mjs",
+      "sha256": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f"
+    },
+    {
+      "path": "src/explorer/cloudflare-api.js",
+      "sha256": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64"
+    },
+    {
+      "path": "src/explorer/configuration.mjs",
+      "sha256": "3f6c1cf638db85604bd6936f632c881a40514be9f0d88c882324593aaf8113b7"
+    },
+    {
+      "path": "src/explorer/failure-classification.mjs",
+      "sha256": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b"
+    },
+    {
+      "path": "src/explorer/file-api.mjs",
+      "sha256": "0efa16667c92e527eba88324c4b153bdcdcd84cfc2fd861262257d54a05cce66"
+    },
+    {
+      "path": "src/explorer/index.mjs",
+      "sha256": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0"
+    },
+    {
+      "path": "src/explorer/observed-api.mjs",
+      "sha256": "6dc7a86693a88c64848f53fd318c32e602cdf4218b2908dd5f17072a486ab24a"
+    },
+    {
+      "path": "src/explorer/r2-adapter.mjs",
+      "sha256": "1d29907ae5696cd3b8557c1f4c78cbe6e7f7ede95c44fb6a305ddc753482c057"
+    },
+    {
+      "path": "src/explorer/save-provider.mjs",
+      "sha256": "8a70c376fda2cf47fef5c91811def6af9d4ebe9d990ad2227fa4d422fcc8f8d0"
+    },
+    {
+      "path": "src/glaciaring/agent-api.mjs",
+      "sha256": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e"
+    },
+    {
+      "path": "src/glaciaring/catalog.mjs",
+      "sha256": "cf2bf05eb71b56693231fb4e60eb2dd4a73d2a2f4ed92827fbb052450a4e01d5"
+    },
+    {
+      "path": "src/glaciaring/index.mjs",
+      "sha256": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68"
+    },
+    {
+      "path": "src/inventory/discovery.mjs",
+      "sha256": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e"
+    },
+    {
+      "path": "src/lab-worker.mjs",
+      "sha256": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b"
+    },
+    {
+      "path": "src/modes/depth/index.mjs",
+      "sha256": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55"
+    },
+    {
+      "path": "src/modes/nested/index.mjs",
+      "sha256": "7492ce7359f8678a6ad412018dbbee54ff799e65dc0bf52ff497610f2e721012"
+    },
+    {
+      "path": "src/modes/simple/index.mjs",
+      "sha256": "48e5cd7cfd934a27e57db19dc439cbec9ba09362afdf4e70f99b6d1b93db324e"
+    },
+    {
+      "path": "src/persistence/backup.mjs",
+      "sha256": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf"
+    },
+    {
+      "path": "src/persistence/current-store.mjs",
+      "sha256": "ee3d0879866fab21eff50f36aca1e139c57e13b063634bb0fe1ab4804bef4dbe"
+    },
+    {
+      "path": "src/persistence/schema.mjs",
+      "sha256": "7fd41a51c8113943d4a3ab600a68160570e276c008df2637f8069ffc5f0d3da7"
+    },
+    {
+      "path": "scripts/benchmark-glaciaring.mjs",
+      "sha256": "0522b602f1f51b424b052564fedeb323e69953a51c9a23f530d6b0600a7ef323"
+    },
+    {
+      "path": "scripts/demo-glaciaring.mjs",
+      "sha256": "1d6d3f9678615fbafa40f914eb74a41a08c80a6721121502dd56f704ddeaa14c"
+    },
+    {
+      "path": "scripts/glaciaring-fixtures.mjs",
+      "sha256": "82ac9de82d52e90bb3b640cec99e31d2f3888e77d39d9bfd717ba9cd757e8cb2"
+    },
+    {
+      "path": "scripts/performance-utils.mjs",
+      "sha256": "d2b0ac92d42e1bb19e5d6afe0f52373304b460110d0e53834a8e6e9b2e493251"
+    },
+    {
+      "path": "scripts/test-native-chrome.mjs",
+      "sha256": "e5413666d1dbc120f982f424e5c867269e74795c3c4fb9ee7190235c997e47ba"
+    }
+  ],
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logicalCpus": 5,
+    "totalMemoryBytes": 35743748096,
+    "gcExposed": true,
+    "sourceRevision": "da81723333667242ebecddcacb8be00c3c2daa97"
+  },
+  "method": {
+    "samplesPerVariant": 120,
+    "warmupSamples": 20,
+    "order": "balanced six-permutation rotation of disabled/passive/debug",
+    "capture": "passive and debug have identical mandatory capture; debug only defers queries",
+    "clock": "performance.now",
+    "units": "milliseconds",
+    "providerRequests": 0,
+    "nativeEvidence": "injected Chrome callback integration; not installed-browser timing",
+    "coldDefinition": "fresh Node diagnostic and registrar instances; not cold MV3"
+  },
+  "faultDetection": {
+    "status": "PASS",
+    "evidenceClass": "unit-diagnostic-core",
+    "stageCount": 30,
+    "terminalOutcomes": [
+      "failed",
+      "blocked",
+      "uncertain",
+      "partial",
+      "stale",
+      "interrupted",
+      "unknown"
+    ],
+    "assertedFaultCases": 210,
+    "additional": [
+      "green parent + failed child",
+      "independent second operation",
+      "causal blocked symptom",
+      "missing mandatory verify",
+      "disabled UNKNOWN",
+      "eviction",
+      "restart gap"
+    ],
+    "limitation": "This corpus checks every declared stage status encoder; owner branch tests and external receipts are separate gates."
+  },
+  "sourceCoverage": {
+    "status": "COVERAGE_GAP",
+    "rows": [
+      {
+        "stage": "auth.check",
+        "coverage": "partial"
+      },
+      {
+        "stage": "entitlement.check",
+        "coverage": "unobservable"
+      },
+      {
+        "stage": "activation.prepare",
+        "coverage": "partial"
+      },
+      {
+        "stage": "activation.status",
+        "coverage": "partial"
+      },
+      {
+        "stage": "worker.capability",
+        "coverage": "partial"
+      },
+      {
+        "stage": "fileApi.run",
+        "coverage": "partial"
+      },
+      {
+        "stage": "fileApi.batch",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transport.send",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transport.http",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.page",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.refresh",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.simple",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.nested",
+        "coverage": "partial"
+      },
+      {
+        "stage": "modes.depth",
+        "coverage": "partial"
+      },
+      {
+        "stage": "menu.compile",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.plan",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.apply",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.ack",
+        "coverage": "partial"
+      },
+      {
+        "stage": "chrome.recovery",
+        "coverage": "partial"
+      },
+      {
+        "stage": "resolver",
+        "coverage": "partial"
+      },
+      {
+        "stage": "capture.acquire",
+        "coverage": "partial"
+      },
+      {
+        "stage": "inventory.scan",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.commit",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.restore",
+        "coverage": "partial"
+      },
+      {
+        "stage": "persistence.backup",
+        "coverage": "partial"
+      },
+      {
+        "stage": "intent",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transfer.upload",
+        "coverage": "partial"
+      },
+      {
+        "stage": "transfer.verify",
+        "coverage": "partial"
+      },
+      {
+        "stage": "completion.history",
+        "coverage": "unobservable"
+      },
+      {
+        "stage": "lifecycle",
+        "coverage": "partial"
+      }
+    ]
+  },
+  "compile": [
+    {
+      "scenario": "reference-300-wide-multi-provider",
+      "discoveredFolders": 300,
+      "menuRows": 359,
+      "omissions": 3,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 7.11309499999993,
+          "p50": 9.812745000000177,
+          "p95": 19.874783999999636,
+          "p99": 65.94427199999973,
+          "max": 190.0126110000001
+        },
+        "passive": {
+          "samples": 120,
+          "min": 6.396033999999872,
+          "p50": 10.949213999999984,
+          "p95": 22.821424000000206,
+          "p99": 48.48057800000015,
+          "max": 53.45778099999961
+        },
+        "debug": {
+          "samples": 120,
+          "min": 6.874346999999943,
+          "p50": 10.340473999999631,
+          "p95": 19.146766999999727,
+          "p99": 57.16957299999967,
+          "max": 214.83415200000036
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": 0.7655549999999494,
+          "p95": 11.39325400000007,
+          "p99": 33.6397979999997,
+          "min": -180.4932060000001,
+          "max": 37.543227000000115
+        },
+        "debug": {
+          "samples": 120,
+          "p50": 0.16251999999985856,
+          "p95": 9.265280999999959,
+          "p99": 49.55972399999928,
+          "min": -179.2848429999999,
+          "max": 197.95585700000083
+        }
+      },
+      "passiveGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 2.9466400000005706,
+        "allowedP95DeltaMs": 1,
+        "p99DeltaMs": -17.463693999999577
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.7280169999999089,
+        "allowedP95DeltaMs": 1,
+        "p99DeltaMs": -8.774699000000055
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "scenario": "large-1000-wide-multi-provider",
+      "discoveredFolders": 1000,
+      "menuRows": 1177,
+      "omissions": 3,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 26.2165870000008,
+          "p50": 37.51854599999933,
+          "p95": 52.96087400000033,
+          "p99": 84.75394300000335,
+          "max": 94.71180699999968
+        },
+        "passive": {
+          "samples": 120,
+          "min": 26.825110999998287,
+          "p50": 39.65738599999895,
+          "p95": 68.51741000000038,
+          "p99": 79.36440100000073,
+          "max": 143.79613299999983
+        },
+        "debug": {
+          "samples": 120,
+          "min": 26.949046000001545,
+          "p50": 37.081765999999334,
+          "p95": 63.965047999998205,
+          "p99": 117.23171399999956,
+          "max": 135.73291999999856
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": 1.6592950000012934,
+          "p95": 21.82121499999994,
+          "p99": 48.519837000001644,
+          "min": -55.299244000005274,
+          "max": 79.76390300000094
+        },
+        "debug": {
+          "samples": 120,
+          "p50": -0.4252630000009958,
+          "p95": 25.483727999999246,
+          "p99": 86.38715000000047,
+          "min": -34.33756999999787,
+          "max": 95.44948899999872
+        }
+      },
+      "passiveGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 15.556536000000051,
+        "allowedP95DeltaMs": 2.6480437000000165,
+        "p99DeltaMs": -5.389542000002621
+      },
+      "debugGate": {
+        "status": "FAIL",
+        "p95DeltaMs": 11.004173999997874,
+        "allowedP95DeltaMs": 2.6480437000000165,
+        "p99DeltaMs": 32.47777099999621
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "scenario": "deep-16-partial-multi-provider",
+      "discoveredFolders": 300,
+      "menuRows": 372,
+      "omissions": 4,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 7.8797429999976885,
+          "p50": 11.566183999999339,
+          "p95": 20.428689000000304,
+          "p99": 30.38561699999991,
+          "max": 32.906724000000395
+        },
+        "passive": {
+          "samples": 120,
+          "min": 8.059062000000267,
+          "p50": 11.349991999999475,
+          "p95": 16.981066000000283,
+          "p99": 20.865795000001526,
+          "max": 23.006285999999818
+        },
+        "debug": {
+          "samples": 120,
+          "min": 8.197328999998717,
+          "p50": 11.409632999999303,
+          "p95": 18.952989000001253,
+          "p99": 22.6444960000008,
+          "max": 23.628766999998334
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": -0.3018420000007609,
+          "p95": 5.956286000000546,
+          "p99": 12.004971000002115,
+          "min": -17.88383899999826,
+          "max": 13.193676000002597
+        },
+        "debug": {
+          "samples": 120,
+          "p50": -0.4296269999977085,
+          "p95": 6.592018000003009,
+          "p99": 9.916159000003972,
+          "min": -20.62839399999939,
+          "max": 10.766411000000517
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": -3.4476230000000214,
+        "allowedP95DeltaMs": 1.0214344500000152,
+        "p99DeltaMs": -9.519821999998385
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": -1.4756999999990512,
+        "allowedP95DeltaMs": 1.0214344500000152,
+        "p99DeltaMs": -7.7411209999991115
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 560,
+          "evicted": 48,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    }
+  ],
+  "apply": [
+    {
+      "rows": 1,
+      "callbackDelayMs": 1,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 1.2558460000000196,
+          "p50": 2.2548060000008263,
+          "p95": 2.7256630000010773,
+          "p99": 3.2494150000020454,
+          "max": 3.2861809999994875
+        },
+        "passive": {
+          "samples": 120,
+          "min": 2.175805999999284,
+          "p50": 2.266529000000446,
+          "p95": 2.6255119999987073,
+          "p99": 3.1589070000009087,
+          "max": 3.2818550000010873
+        },
+        "debug": {
+          "samples": 120,
+          "min": 1.1457359999985783,
+          "p50": 2.2484830000030342,
+          "p95": 2.6705670000010286,
+          "p99": 3.7511599999997998,
+          "max": 3.8143939999972645
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": 0.006547999997565057,
+          "p95": 0.3338030000013532,
+          "p99": 0.5286500000001979,
+          "min": -0.9339810000019497,
+          "max": 1.9030610000008892
+        },
+        "debug": {
+          "samples": 120,
+          "p50": 0.0018220000019937288,
+          "p95": 0.4441709999991872,
+          "p99": 1.1808629999977711,
+          "min": -1.1193360000033863,
+          "max": 1.5368149999994785
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.007004999999480788,
+          "p50": 0.008092000000033295,
+          "p95": 0.029668999999557855,
+          "p99": 0.1614640000007057,
+          "max": 0.242246999998315
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.009187999999994645,
+          "p50": 0.010618000000249594,
+          "p95": 0.022762000000511762,
+          "p99": 0.0758029999997234,
+          "max": 0.2658950000004552
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.009276999997382518,
+          "p50": 0.01061900000058813,
+          "p95": 0.04346300000179326,
+          "p99": 0.1756040000000212,
+          "max": 0.2961040000009234
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.10015100000236998,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -0.09050800000113668
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.05509600000004866,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 0.5017449999977543
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 1041,
+          "evicted": 529,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 1041,
+          "evicted": 529,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "rows": 100,
+      "callbackDelayMs": 0,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.16732100000081118,
+          "p50": 0.30054499999823747,
+          "p95": 1.12068200000067,
+          "p99": 2.8124279999974533,
+          "max": 3.0970559999987017
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.1996770000005199,
+          "p50": 0.3820259999993141,
+          "p95": 1.183391999999003,
+          "p99": 2.9287460000014107,
+          "max": 3.3142509999997856
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.20565999999962514,
+          "p50": 0.3848839999991469,
+          "p95": 1.261411000003136,
+          "p99": 4.120173999999679,
+          "max": 8.122047000000748
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": 0.07589599999846541,
+          "p95": 0.7896150000051421,
+          "p99": 1.8260950000003504,
+          "min": -2.7834209999964514,
+          "max": 2.6647000000048138
+        },
+        "debug": {
+          "samples": 120,
+          "p50": 0.07142699999531033,
+          "p95": 0.7351600000038161,
+          "p99": 3.62119900000107,
+          "min": -2.882620999997016,
+          "max": 7.779031000001851
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.16360600000189152,
+          "p50": 0.31310799999846495,
+          "p95": 0.6163749999977881,
+          "p99": 1.4473219999999856,
+          "max": 1.6186720000005153
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.19654799999989336,
+          "p50": 0.35457600000154343,
+          "p95": 0.8006120000027295,
+          "p99": 0.9026379999995697,
+          "max": 0.9100899999975809
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.19449900000108755,
+          "p50": 0.3337680000004184,
+          "p95": 0.7572949999994307,
+          "p99": 2.821521000001667,
+          "max": 10.782293000000209
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.06270999999833293,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 0.11631800000395742
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.1407290000024659,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": 1.3077460000022256
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 26781,
+          "evicted": 26269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 26781,
+          "evicted": 26269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    },
+    {
+      "rows": 300,
+      "callbackDelayMs": 0,
+      "timings": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.5214059999998426,
+          "p50": 0.9735559999971883,
+          "p95": 2.4605179999998654,
+          "p99": 15.886399999999412,
+          "max": 17.40271500000017
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.5851829999992333,
+          "p50": 1.096295999999711,
+          "p95": 2.439658999999665,
+          "p99": 5.944220999997924,
+          "max": 9.656188000000839
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.5933720000030007,
+          "p50": 1.1036700000004203,
+          "p95": 2.750724999998056,
+          "p99": 10.492088999999396,
+          "max": 14.272815000000264
+        }
+      },
+      "pairedDeltaMs": {
+        "passive": {
+          "samples": 120,
+          "p50": 0.14533300000039162,
+          "p95": 1.3009249999995518,
+          "p99": 2.9791709999990417,
+          "min": -16.29349000000002,
+          "max": 8.29710200000045
+        },
+        "debug": {
+          "samples": 120,
+          "p50": 0.07449299999643699,
+          "p95": 2.0344900000018242,
+          "p99": 9.832626999999775,
+          "min": -16.3576209999992,
+          "max": 13.29868400000123
+        }
+      },
+      "coldNodeInstance": {
+        "disabled": {
+          "samples": 120,
+          "min": 0.47106500000154483,
+          "p50": 0.6977079999996931,
+          "p95": 1.542764999998326,
+          "p99": 2.4578370000017458,
+          "max": 2.589690000000701
+        },
+        "passive": {
+          "samples": 120,
+          "min": 0.6066950000022189,
+          "p50": 0.9032399999996414,
+          "p95": 1.6774660000010044,
+          "p99": 2.377169999999751,
+          "max": 6.660454000000755
+        },
+        "debug": {
+          "samples": 120,
+          "min": 0.5680460000003222,
+          "p50": 0.8047350000015285,
+          "p95": 1.966577999999572,
+          "p99": 3.3832619999993767,
+          "max": 4.094638999999006
+        }
+      },
+      "unchangedApply": {
+        "disabled": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "passive": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        },
+        "debug": {
+          "state": "completed",
+          "code": "UNCHANGED_ACK_REUSED",
+          "extraNativeMutations": 0
+        }
+      },
+      "passiveGate": {
+        "status": "PASS",
+        "p95DeltaMs": -0.020859000000200467,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -9.942179000001488
+      },
+      "debugGate": {
+        "status": "PASS",
+        "p95DeltaMs": 0.29020699999819044,
+        "allowedP95DeltaMs": 2,
+        "p99DeltaMs": -5.394311000000016
+      },
+      "stats": {
+        "disabled": {
+          "enabled": false,
+          "capacity": 512,
+          "occupancy": 0,
+          "sequence": 0,
+          "evicted": 0,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "passive": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 78781,
+          "evicted": 78269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        },
+        "debug": {
+          "enabled": true,
+          "capacity": 512,
+          "occupancy": 512,
+          "sequence": 78781,
+          "evicted": 78269,
+          "dropped": 0,
+          "expired": 0,
+          "restarts": 0,
+          "dependencyDrops": 0,
+          "declarationDrops": 0,
+          "metadataDrops": 0,
+          "epoch": 1,
+          "slotBytes": 63,
+          "bufferBytes": 32256,
+          "retentionMs": 900000
+        }
+      }
+    }
+  ],
+  "click": {
+    "measurement": "native click handler entry through current-authority check and pure action resolution to injected dispatcher acknowledgement; excludes source fetch/upload",
+    "timings": {
+      "disabled": {
+        "samples": 120,
+        "min": 0.021713999998610234,
+        "p50": 0.02354399999967427,
+        "p95": 0.08908700000029057,
+        "p99": 0.1738999999979569,
+        "max": 0.3736510000017006
+      },
+      "passive": {
+        "samples": 120,
+        "min": 0.02241400000275462,
+        "p50": 0.023678999998082872,
+        "p95": 0.1096639999996114,
+        "p99": 0.20338300000003073,
+        "max": 0.5491479999982403
+      },
+      "debug": {
+        "samples": 120,
+        "min": 0.022555999999894993,
+        "p50": 0.023814000000129454,
+        "p95": 0.05510800000047311,
+        "p99": 0.10068200000023353,
+        "max": 0.10227200000008452
+      }
+    },
+    "pairedDeltaMs": {
+      "passive": {
+        "samples": 120,
+        "p50": 0.00021600000036414713,
+        "p95": 0.08573799999794574,
+        "p99": 0.17392100000142818,
+        "min": -0.34963900000366266,
+        "max": 0.5255229999966105
+      },
+      "debug": {
+        "samples": 120,
+        "p50": 0.0003590000014810357,
+        "p95": 0.027193999998416984,
+        "p99": 0.07778899999902933,
+        "min": -0.319961000001058,
+        "max": 0.07816400000228896
+      }
+    },
+    "dispatchAcknowledgements": 420,
+    "passiveGate": {
+      "status": "PASS",
+      "p95DeltaMs": 0.020576999999320833,
+      "allowedP95DeltaMs": 0.5,
+      "p99DeltaMs": 0.029483000002073823,
+      "allowedP99DeltaMs": 1
+    },
+    "debugGate": {
+      "status": "PASS",
+      "p95DeltaMs": -0.03397899999981746,
+      "allowedP95DeltaMs": 0.5,
+      "p99DeltaMs": -0.07321799999772338,
+      "allowedP99DeltaMs": 1
+    }
+  },
+  "memory": {
+    "ring": {
+      "enabled": true,
+      "capacity": 512,
+      "occupancy": 512,
+      "sequence": 1024,
+      "evicted": 512,
+      "dropped": 0,
+      "expired": 0,
+      "restarts": 0,
+      "dependencyDrops": 0,
+      "declarationDrops": 0,
+      "metadataDrops": 0,
+      "epoch": 1,
+      "slotBytes": 63,
+      "bufferBytes": 32256,
+      "retentionMs": 900000
+    },
+    "retainedHeapDeltaBytes": 1086288,
+    "replicas": 40,
+    "averageRetainedHeapDeltaBytes": 27157.2,
+    "averageHeapAndBackingBytes": 59413.2,
+    "ordinaryBudgetBytes": 131072,
+    "status": "PASS",
+    "limitation": "V8 heap delta includes manifest/maps and excludes typed-array backing store; backing store reported separately. GC-dependent estimate, not browser heap proof."
+  },
+  "export": {
+    "evidenceClass": "unit-authorized-agent-api-export",
+    "timings": {
+      "samples": 120,
+      "min": 3.557035999998334,
+      "p50": 7.0258710000016436,
+      "p95": 11.207140000002255,
+      "p99": 14.58920699999726,
+      "max": 15.35486999999921
+    },
+    "events": 512,
+    "totalPageBytes": 185447,
+    "maximumPageBytes": 23217,
+    "pageCount": 8,
+    "maximumEventsPerPage": 64,
+    "perPageBudgetBytes": 65536,
+    "totalOptionalRetentionBudgetBytes": 262144,
+    "status": "PASS",
+    "limitation": "In-process user grant fixture; sender restrictions are tested separately. No file dialog, disk persistence or network upload."
+  },
+  "externalGates": {
+    "installedChromeTiming": "NOT_TESTED",
+    "coldMv3Timing": "NOT_TESTED",
+    "authenticatedProviderReceipt": "NOT_TESTED",
+    "agentIterationSavings": "NOT_TESTED"
+  },
+  "captureIntegrity": {
+    "status": "PASS",
+    "reason": "Dropped/unknown source-owned signals invalidate a full-coverage performance claim even if latency passes."
+  },
+  "overallPerformanceStatus": "FAIL"
+}
