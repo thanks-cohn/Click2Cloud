@@ -125,11 +125,21 @@ The `All Folders` heading above is an **illustrative collision-safe grouping pro
 - **Do not claim this is implemented.** Existing REDOWN CURRENT, backup and journal code in IndexedDB supplies proven semantics, but **not** an external uninstall-safe `CURRENT.json` file.
 - Acceptance: create 100 Simple/Narrow entries with custom aliases; crash, clear extension storage, uninstall/reinstall; restore identical records and native menus with an external backup, no full scan and no duplicate/wrong-target save. Validate backup policy defaults and failure states.
 
+## Required real Chrome + OAuth proof — latest owner clarification
+
+The PRIMARY Codex deliverable is a **complete installable Click2Cloud MV3 Chrome extension** with real Explorer, Connect Cloudflare OAuth, **native Chrome `contextMenus`**, and authenticated Worker→R2 saves verified by read-back. **The existing Cloudflare Workers are live Codex test infrastructure; Worker/service bindings do not replace a user-authorized browser OAuth connection.** Synthetic folders may be used for stress/fault injection only; fake menus, fake OAuth and simulated saves DO NOT count as successful extension tests.
+
+- [Installable extension, real native-menu and Worker/R2 exit criteria](./gui/CHROME_EXTENSION_LIVE_ACCEPTANCE.md).
+- [Extracted REDOWN Cloudflare OAuth scopes and PKCE/redirect/refresh requirements](./gui/REDOWN_OAUTH_EXTRACTION.md).
+- [Updated real Chrome + OAuth + provider test journeys](./gui/TEST_JOURNEYS.md).
+
+OAuth registration must match **Click2Cloud's own extension ID**; do not copy REDOWN's manifest key, private credential or existing token. Do not claim any current extension or OAuth implementation is already finished based on this documentation.
+
 ## GUI source extraction and post-Codex test entry point
 
 **[GUI handoff based on current REDOWN](./gui/README.md)** lives under `scaffold/gui/`. This is a **source-backed, documentation-only extraction** of REDOWN's Shelf/Remotes, cloud account/bucket sidebar, File Explorer actions, navigation and right-click menu premise. It intentionally **does not copy V3's old global setup form** or modify REDOWN.
 
-- [Exact REDOWN GUI source map and Codex GUI/launcher contract](./gui/README.md) — build the actual GUI under `scaffold/gui/`, with a proposed `npm run demo` launch and deterministic compiler-driven menu preview.
+- [Exact REDOWN GUI source map and Codex GUI/launcher contract](./gui/README.md) — build the actual GUI under `scaffold/gui/`, with a **real installable Chrome MV3 extension**, Cloudflare OAuth, native contextMenus and verified R2 save as the primary exit gate; optional `npm run demo` and compiler preview are development conveniences.
 - [Synthetic accounts, buckets, folders, Simple/Narrow aliases and stress-case seed data](./gui/demo-fixtures.json) — no credentials or real cloud writes.
 - [GUI interaction, native Chrome and external recovery test journeys](./gui/TEST_JOURNEYS.md) — required post-Codex proof rather than decorative click demonstrations.
 - **Not yet implemented:** `scaffold/gui/index.html`, GUI runtime, `npm run demo`, `npm run test:gui`, and standalone Chrome test harness. The specification requires Codex to create them, then verify actual launch/results. No simulated UI is claimed as functioning today.
@@ -138,7 +148,7 @@ The `All Folders` heading above is an **illustrative collision-safe grouping pro
 
 - `README.md` (this file): authoritative UX workflow, mode semantics, saved destination manager, architecture separation and V3+1 build/acceptance instructions.
 - `MENU_DESTINATIONS_DURABLE_RECOVERY.md`: independent uninstall-safe menu configuration CURRENT.json + journals + weekly-default backup and restore contract, separate from Depth indexing.
-- `gui/README.md`, `gui/TEST_JOURNEYS.md`, `gui/demo-fixtures.json`: source-backed REDOWN GUI baseline, testable launch/interaction contract, and safe synthetic test data for Codex.
+- `gui/README.md`, `gui/TEST_JOURNEYS.md`, `gui/demo-fixtures.json`: source-backed REDOWN GUI baseline, real extension/OAuth/native-menu testable contract, with safe synthetic fixture data only for fault and edge-case testing.
 - No runnable app, HTML prototype, CSS, JavaScript controller or test harness is created by this scaffold. Build those in a future explicitly authorized implementation run.
 
 ## V3+1 engine build plan (later, not part of scaffold)
