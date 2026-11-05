@@ -1,60 +1,66 @@
 # Click2Cloud V3+1 GUI — executable acceptance journeys for Codex
 
-**Status:** Documentation-only test protocol. These are NOT passing tests; implement `npm run test:gui` and a separate real-Chrome test harness.  
-**Premise:** Build the GUI from REDOWN's recognizable Explorer/Shelf layout, but test the **new V3+1 combined engine** from `../README.md`, not historical V3-exclusive mode switching.
+**Status:** Documentation-only acceptance protocol; these are NOT passing tests. Primary acceptance requires a **real unpacked Click2Cloud MV3 Chrome extension**, **actual Cloudflare OAuth** for its installed extension identity, **actual Chrome native context menus**, and real authorized Worker→R2 saves with independent readback. See [Chrome extension contract](./CHROME_EXTENSION_LIVE_ACCEPTANCE.md) and [REDOWN OAuth extraction](./REDOWN_OAUTH_EXTRACTION.md).
 
-## Test levels and truth labels
+**Premise:** Borrow REDOWN's Explorer/Remotes layout, but implement the NEW V3+1 combined engine. **Existing Workers are Codex's live test infrastructure, not a replacement for browser OAuth.**
 
-- **D (Demo GUI)** — local browser at `http://localhost:4173/scaffold/gui/`, synthetic folder/provider fixture, actual implemented GUI + state + compiler. May simulate transfer; MUST label it `SIMULATED`.
-- **C (Native Chrome)** — minimal Click2Cloud MV3 harness loaded as an unpacked extension, real `chrome.contextMenus` create/update/remove callbacks, actual submenu nesting, worker termination/restart, one click handler. No simulated DOM menu counts as C.
-- **P (Real provider)** — independent account authorization, Cloudflare TRUE REMOTE Worker fetch to R2 and read-back receipt; other providers separately validated. Never silently substitute browser-bytes for Cloudflare TRUE REMOTE.
-- **R (Durable recovery)** — independent filesystem/native companion backup location outside the browser profile; fault-injected storage loss and verified import/replay. Saving solely in IndexedDB or localStorage does NOT count.
+### Test classes and truthful proof
 
-Every journey has observable expected state, deterministic test data, and an actual PASS/FAIL/NOT_TESTED result. Run tests from a fresh clone in Windows 11/Chrome with Node >=20 as supported.
+- **C = real Chrome** — extension loaded through `chrome://extensions` → Load unpacked; real `chrome.contextMenus` registration, branching, clicks and MV3 restart with ACK.
+- **O = real OAuth** — user explicitly consents via Cloudflare to Click2Cloud's own registered extension/client/redirect; token and account verified, no copied REDOWN credentials.
+- **P = real provider** — actual authorized Worker (lab service binding / authenticated route), disposable `redown/__redown_v3plus1_lab__/` R2 prefix, completed upload and independent object read-back.
+- **R = independent durable recovery** — external filesystem/companion CURRENT, journals and backups outside Chrome profile; actual fault-injected data loss/replay.
+- **F = isolated fault/fixture** — synthetic cases allowed ONLY for stress, failure handling and edge cases; these do not qualify as O/C/P successes.
 
-## A. Required launch and basic REDOWN layout
+Every test must report PASS / FAIL / BLOCKED / NOT TESTED with actual evidence. No simulated OAuth or DOM faux menu can count as a passing live test.
 
-| ID | Test action | Expected observable result / tier |
+## A. Install + OAuth + basic REDOWN-style GUI (REAL)
+
+| IC | Test action | Required result |
 |---|---|---|
-| GUI-01 | Run `npm run demo` after clean checkout with NO REDOWN extension, NO auth and no cloud network. Open `http://localhost:4173/scaffold/gui/`. | Real working page opens, clear Demo indicator, no sender-authorization errors, no fake provider status. D |
-| GUI-02 | First load | **Remotes is default**, visible cloud provider cards, odometer area and Explorer / Manage navigation. No onboarding gate hides basic navigation. D |
-| GUI-03 | Open File Explorer; choose demo account A's `redown` bucket; expand `Art`, select `Photography`. | Breadcrumb and immutable selected exact account/bucket/prefix reflect `demo-account-a/redown/Art/Photography`. Normal folder list and keyboard navigation work. D |
-| GUI-04 | Right-click selected Explorer folder, and separately press toolbar `+ Right Click`. | Both launch the SAME compact creation popup for exactly the selected location; the local Explorer right-click menu also offers Manage Destinations. D |
-| GUI-05 | Change viewport, keyboard focus, type quickly in popup, Escape. | No jump, popover overlap, focus theft or accidental cloud mutation; clean dismissal and responsive layout. D |
+| CHROME-BOOT-01 | Build/package MV3 extension from clean Click2Cloud clone; load `manifest.json` directory through Developer mode → Load unpacked | Extension installs with no manifest/runtime errors; toolbar opens Click2Cloud Remotes; Explorer entry visible. **C** |
+| OAUTH-01 | On independently installed Click2Cloud, press **Connect Cloudflare** | Real Cloudflare consent/login opens for Click2Cloud's own OAuth client/extension ID and accurate permissions; no REDOWN token reused. **O** |
+| OAUTH-02 | Complete sign-in; inspect account state | Genuine Cloudflare management API confirms intended account, bucket access and token scope; no false ready based on token presence alone. **O** |
+| OAUTH-03 | Refresh expiry, suspend/restart service worker, reconnect/revoke grant | Refresh/reconnect works when authorized; revoked connection safely blocks saves and preserves saved menu aliases. **O/C** |
+| GUI-01 | Open Click2Cloud Explorer from toolbar / Remotes | Real Cloudflare `redown` bucket and actual authorized folders listed; no fictional account shown as connected. **C/O/P** |
+| GUI-02 | Select a real folder in approved `__redown_v3plus1_lab__/` prefix | Breadcrumb shows exact authorized account/bucket/prefix. No manual path re-entry to create destination. **C/O/P** |
+| GUI-03 | Right-click selected Explorer folder; use `+ Right Click` | The compact Simple/Narrow creation popup opens for actual selected location, with the same target in both entry paths. **C** |
+| GUI-04 | Keyboard, focus, resize and Escape | Responsive popup, no focus theft, no accidental cloud writes. **C** |
+| GUI-FIXTURE-01 | Inject synthetic 5000-folder hierarchy or timeout | Compiler handles bounded failures but does not count as real account/Worker/browser proof. **F** |
 
 ## B. V3+1 creation and menu compiler
 
-| ID | Action | Expected observable result / tier |
+| IC | Action | Expected observable result / tier |
 |---|---|---|
-| MODE-01 | With only `redown` default root (no manually saved options), Depth OFF | `REDOWN → Cloudflare` is one actionable default leaf alongside flat provider siblings. No duplicate or arbitrary Home. D/C |
-| MODE-02 | Select `Art/Photography`; Simple; leave title empty; Save | One flat leaf is added under Cloudflare with fallback title `Photography`. Native tree contains no `Art`/ancestor chain for this Simple option. Exact target is unchanged. D/C |
-| MODE-03 | Add another Simple option titled `Invoices`. | Both Simple leaves coexist; Save is a real persistent configuration action and compiler updates. D/C |
-| MODE-04 | Select `Art/Photography/Portraits`; switch to Narrow. | **Menu Titles tab appears**; actual bucket and every ancestor name are read-only left column; optional display titles right column. D |
-| MODE-05 | Enter Setup title `Portrait Albums`, switch Menu Titles tab, change Art to `Creative`, Photography to `Photo Library`; Save. | Final field is bidirectionally synchronized with Setup; Chrome projection branches `redown → Creative → Photo Library → Portrait Albums`, exact destination unchanged. D/C |
-| MODE-06 | Narrow → Simple → Narrow without saving, then Cancel | Menu Titles disappears entirely in Simple and reappears with same local draft when back on Narrow; Cancel writes nothing. D |
-| MODE-07 | Save a Simple leaf and a Narrow branch for different paths; toggle Depth ON level 2 and then level 3, then OFF. | **Both manually saved types are always present.** Depth adds all indexed authorized folders (including unconfigured folders) up to chosen level; OFF removes ONLY generated Depth nodes; returns remembered last level on ON. No unnecessary full cloud scan. D/C |
-| MODE-08 | Configure the exact same folder in two accounts; apply duplicate aliases | Stable menu route IDs distinguish accounts; visible collisions receive explicit handling; no cross-account save. D/C |
-| MODE-09 | Test an actionable folder that also has children | Parent folder submenu is not itself misleadingly clickable as a save leaf: explicit `Save here` action exists where necessary. D/C |
-| MODE-10 | Test a large hierarchy at depths 1,2,3,10 and >Chrome's menu budget. | Deterministic bounded projection and a truthful incomplete/overflow notice; existing Simple and Narrow entries do not disappear silently to make room. D/C |
-| MODE-11 | Rapidly edit alias titles during a pending menu application | No duplicate destination IDs, no stale native receipt marking the wrong generation as applied. D/C |
+| MODE-01 | With only `redown` default root (no manually saved options), Depth OFF | `REDOWN → Cloudflare` is one actionable default leaf alongside flat provider siblings. No duplicate or arbitrary Home. C |
+| MODE-02 | Select `Art/Photography`; Simple; leave title empty; Save | One flat leaf is added under Cloudflare with fallback title `Photography`. Native tree contains no `Art`/ancestor chain for this Simple option. Exact target is unchanged. C |
+| MODE-03 | Add another Simple option titled `Invoices`. | Both Simple leaves coexist; Save is a real persistent configuration action and compiler updates. C |
+| MODE-04 | Select `Art/Photography/Portraits`; switch to Narrow. | **Menu Titles tab appears**; actual bucket and every ancestor name are read-only left column; optional display titles right column. C |
+| MODE-05 | Enter Setup title `Portrait Albums`, switch Menu Titles tab, change Art to `Creative`, Photography to `Photo Library`; Save. | Final field is bidirectionally synchronized with Setup; Chrome projection branches `redown → Creative → Photo Library → Portrait Albums`, exact destination unchanged. C |
+| MODE-06 | Narrow → Simple → Narrow without saving, then Cancel | Menu Titles disappears entirely in Simple and reappears with same local draft when back on Narrow; Cancel writes nothing. C |
+| MODE-07 | Save a Simple leaf and a Narrow branch for different paths; toggle Depth ON level 2 and then level 3, then OFF. | **Both manually saved types are always present.** Depth adds all indexed authorized folders (including unconfigured folders) up to chosen level; OFF removes ONLY generated Depth nodes; returns remembered last level on ON. No unnecessary full cloud scan. C |
+| MODE-08 | Configure the exact same folder in two accounts; apply duplicate aliases | Stable menu route IDs distinguish accounts; visible collisions receive explicit handling; no cross-account save. C |
+| MODE-09 | Test an actionable folder that also has children | Parent folder submenu is not itself misleadingly clickable as a save leaf: explicit `Save here` action exists where necessary. C |
+| MODE-10 | Test a large hierarchy at depths 1,2,3,10 and >Chrome's menu budget. | Deterministic bounded projection and a truthful incomplete/overflow notice; existing Simple and Narrow entries do not disappear silently to make room. C |
+| MODE-11 | Rapidly edit alias titles during a pending menu application | No duplicate destination IDs, no stale native receipt marking the wrong generation as applied. C |
 
 ## C. Manage Destinations — one popup, 20/page
 
-| ID | Action | Expected observable result / tier |
+| IC | Action | Expected observable result / tier |
 |---|---|---|
-| MANAGE-01 | Open from Explorer button; separately from Explorer folder's own context menu; separately from circular pointer below/right of odometer. | All open **one consistent manager GUI**, no stacked popup. D |
-| MANAGE-02 | Generate 21 Simple and 21 Narrow entries from `demo-fixtures.json` scenario `page-boundary`. | Simple page 1 has 20, page 2 has 1. Narrow page 1 has 20, page 2 has 1. Independent page state and scroll preserved. D |
-| MANAGE-03 | Change manager's Simple/Narrow switch at top | Lists only matching records. This is a LIST FILTER, not a conversion of any record. D |
-| MANAGE-04 | Click a Simple row | SAME popup content changes to edit: immutable actual directory name LEFT and ONE editable Menu Title RIGHT, Save at bottom. `← Back to Destinations` directly BELOW the top switch. D |
-| MANAGE-05 | Edit a Simple title then press Back / Escape instead of Save | Return to previously filtered list/page, original persisted label unchanged. Escape on list closes manager. D |
-| MANAGE-06 | Open a Narrow saved row | SAME popup opens directly to two-column path/aliases editor; all levels original/read-only on left and editable titles on right; Save at bottom. D |
-| MANAGE-07 | Save edit | Updates the exact existing record ID and its aliases, not creates a duplicate; Chrome target stays identical. D/C |
-| MANAGE-08 | Click row X, cancel confirmation; then confirm | Cancel preserves record; confirm removes only menu configuration, **never a cloud folder/file**, and updates composer. D/C |
-| MANAGE-09 | Toggle Settings `Show Manage Destinations in Chrome menu` OFF | Native `REDOWN → Manage Destinations` entry disappears, but Explorer and odometer controls still open manager. ON restores menu entry. D/C |
+| MANAGE-01 | Open from Explorer button; separately from Explorer folder's own context menu; separately from circular pointer below/right of odometer. | All open **one consistent manager GUI**, no stacked popup. C |
+| MANAGE-02 | Generate 21 Simple and 21 Narrow entries from `demo-fixtures.json` scenario `page-boundary`. | Simple page 1 has 20, page 2 has 1. Narrow page 1 has 20, page 2 has 1. Independent page state and scroll preserved. C |
+| MANAGE-03 | Change manager's Simple/Narrow switch at top | Lists only matching records. This is a LIST FILTER, not a conversion of any record. C |
+| MANAGE-04 | Click a Simple row | SAME popup content changes to edit: immutable actual directory name LEFT and ONE editable Menu Title RIGHT, Save at bottom. `← Back to Destinations` directly BELOW the top switch. C |
+| MANAGE-05 | Edit a Simple title then press Back / Escape instead of Save | Return to previously filtered list/page, original persisted label unchanged. Escape on list closes manager. C |
+| MANAGE-06 | Open a Narrow saved row | SAME popup opens directly to two-column path/aliases editor; all levels original/read-only on left and editable titles on right; Save at bottom. C |
+| MANAGE-07 | Save edit | Updates the exact existing record ID and its aliases, not creates a duplicate; Chrome target stays identical. C |
+| MANAGE-08 | Click row X, cancel confirmation; then confirm | Cancel preserves record; confirm removes only menu configuration, **never a cloud folder/file**, and updates composer. C |
+| MANAGE-09 | Toggle Settings `Show Manage Destinations in Chrome menu` OFF | Native `REDOWN → Manage Destinations` entry disappears, but Explorer and odometer controls still open manager. ON restores menu entry. C |
 
 ## D. CURRENT, journals, backup and failure recovery
 
-| ID | Action | Expected observable result / tier |
+| IC | Action | Expected observable result / tier |
 |---|---|---|
 | REC-01 | Create/edit/remove/rename 100 Simple/Narrow records with custom ancestor aliases | `menu-config/CURRENT.json` changes on each confirmed save, ordered semantic deltas append; historical snapshot cadence **WEEKLY BY DEFAULT**, with separate DAILY option. Journal not paused between backups. R |
 | REC-02 | Create an indexed Depth tree; switch Depth level, turn off | `depth-index/CURRENT.json`/journal stores the complete known authorized graph and discovery/completeness independently. No overwrite of menu-config recovery root. R |
@@ -65,9 +71,9 @@ Every journey has observable expected state, deterministic test data, and an act
 | REC-07 | Companion missing, file read-only/disk-full, or user-selected external path gone | GUI distinctly reports `Saved locally, external backup unavailable` instead of `Protected`. No misleading green success. R |
 | REC-08 | Delete Depth recovery data but preserve menu-config backups; and vice versa | Recovery systems are independent. Restoring one does not delete the other's state or force cross-mode reset. R |
 
-## E. Real Chrome / provider acceptance (NOT implied by demo)
+## E. Real native Chrome + Worker/R2 acceptance (MANDATORY, not optional after demo)
 
-| ID | Action | Required proof |
+| IC | Action | Required proof |
 |---|---|---|
 | CHROME-01 | Install standalone Click2Cloud test extension in Chrome | Actual nested submenus and default-only leaf, provider siblings, real Manage shortcut, auto-reconciliation after worker restart. One root, one listener. C |
 | CHROME-02 | Click every menu leaf using file/image/link/page context | Same canonical route as GUI preview, exactly authorized provider/account/bucket/prefix, no phantom destination fallback. C |
@@ -79,8 +85,8 @@ Every journey has observable expected state, deterministic test data, and an act
 
 ```text
 Feature: [MODE-07] Additive Depth keeps Simple and Narrow
-Tier: Demo GUI / Native Chrome / Real Provider / Durable Recovery
-Status: PASS | FAIL | BLOCKED | NOT_TESTED
+Tier: Real Chrome / Click2Cloud OAuth / Real Worker+R2 / Durable Recovery / Isolated fixture
+Status: PASS | FAIL | BLOCKEC | NOT_TESTED
 Commit:
 Commands:
 Environment:
