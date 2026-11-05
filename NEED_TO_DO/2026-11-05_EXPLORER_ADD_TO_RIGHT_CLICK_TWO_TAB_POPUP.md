@@ -72,6 +72,36 @@ This tab is **enabled when Narrow is selected** and **disabled/inaccessible for 
 - **Edit existing:** same popup prefilled from CURRENT, including saved mode, final title and path aliases. Reopening is not allowed to make duplicate entries by accident.
 - The popup should be small, keyboard accessible, focus-safe, responsive, and theme-compatible. Use Cancel/Save; no extra wizard pages.
 
+## Shelf: circular pointer icon → existing saved destinations
+
+**Latest owner-approved navigation and layout:**
+- On the **REDOWN Shelf**, place one **small, aesthetically integrated CIRCULAR icon showing a pointer/cursor**, **beneath the odometer section, aligned toward its RIGHT side**. It must be noticeable and usable without dominating the odometer or overlapping Shelf tabs.
+- Its action opens a **Saved Right-Click Destinations** view/panel INSIDE the Shelf. This is the **one clear entry point for viewing and managing previously configured locations**; it is not the Chrome web-content right-click menu, and it does not open a browser tab or a duplicate legacy setup page.
+- Organize existing saved destinations into **TWO clearly labeled subsections: Simple and Narrow**. Each subsection presents **ROWS** of saved destination entries, with a readable **Menu Title** and corresponding actual authorized cloud path (and provider/account/bucket distinction where needed), with a suitable small edit affordance. A row represents one saved location/option, **not an entire Depth-discovered tree**.
+- The user can **scroll down** through entries. **Pagination MUST exist**, even for long lists; ideally scope the paging independently per Simple and Narrow subsection so paging one does not jump the other. Page sizes can be sensible defaults; do not introduce an arbitrary cap on total saved entries as an excuse for hiding them. Respect canonical storage/security and native Chrome menu limits transparently.
+- An existing row opens the SAME two-tab **Add to Right-Click** popup prefilled for editing, rather than a second competing editor. Update correct configured destination ID and original path. Delete/remove should be deliberate and confirmed when relevant; no unintended cloud object deletion.
+- Moving between Simple and Narrow in the popup updates category placement only after a successful save; maintain exact destination identity and avoid duplicate rows/entries.
+- **Depth does not appear as a saved-location subsection** because it is a projection of the canonical directory index, not a user-created destination list. Depth remains controlled by its separate switch/settings.
+- Accessibility and visual standard: circular button should have a meaningful name such as "Saved Right-Click Destinations", keyboard focus and visible tooltip; support keyboard rows, small-screen Shelf, theme contrast, responsive scrolling and usable navigation. Preserve the current odometer state and Shelf layout.
+- The first draw and page changes should read **CURRENT's locally saved configured destination records**, NOT rescan R2, rerun the Depth index or wait on provider login. Changes then reconcile with the native Chrome menu asynchronously and report actual applied status.
+
+**Illustrative rows:**
+```text
+                        [ ◉ ↖ ]   ← small circle/pointer under odometer (right)
+Saved Right-Click Destinations
+
+Simple
+  My Photos            Cloudflare R2 · redown/Art/Photography
+  Invoices             Cloudflare R2 · redown/Work/Invoices
+  ...                  [scroll] [Previous  1  2  3  Next]
+
+Narrow
+  Creative Shots       Cloudflare R2 · redown/Art/Photography
+  Project Docs         Cloudflare R2 · redown/Projects/Docs
+  ...                  [scroll] [Previous  1  2  3  Next]
+```
+This is a conceptual layout, not a mandate for exact glyphs or page size. Avoid putting the new icon inside the odometer itself; the specified position is **below and right** of that section.
+
 ## Depth stays outside this popup
 
 **Depth is a separate ON/OFF (or selected-mode) control and a numerical depth selector in the right-click settings.** It projects the locally cached, authorized folder tree up to the selected level, including eligible folders not hand-added. It does not need an Add to Right-Click command for every folder, and users do not need to configure Path Titles for Depth.
@@ -105,8 +135,9 @@ Native Chrome web-content right-click action
 7. Change the bottom Path Titles value to **My Pictures**; return to Setup → Menu Title shows **My Pictures** immediately. Cancel does not change canonical state.
 8. Narrow selected but user never opens Path Titles → Save still generates natural ancestry with original parent folder names and entered bottom label.
 9. Duplicate titles, alias collisions, concurrent popup edits, same-named folders in different buckets, cloud authorization changes and stale native IDs never redirect saves.
-10. Changing between Simple, Narrow and Depth uses warmed CURRENT local data quickly; check separate UI paint latency, compiler time, native Chrome ACK, and R2 network reads. No forced refresh for simple preference edits.
-11. No duplicate menu registration, no old "single Simple marker" rule, no accidental breaking of other provider flat leaves, no Chrome-native success claimed without ACK.
+10. Changing between Simple, Narrow and Depth uses warmed CURRENT local data quickly; check separate UI paint latency, compiler time, native Chrome ACK, and R2 network reads.
+11. Shelf circular pointer icon below/right of the odometer opens Saved Right-Click Destinations → TWO scrolling, paginated Simple and Narrow row sections; rows show existing titles and exact saved paths; selecting a row opens prefilled editing; no Depth inventory scan. No forced refresh for simple preference edits.
+12. No duplicate menu registration, no old "single Simple marker" rule, no accidental breaking of other provider flat leaves, no Chrome-native success claimed without ACK.
 
 ## Relationship to older documents
 
