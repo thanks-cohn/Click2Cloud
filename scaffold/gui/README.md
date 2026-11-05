@@ -1,10 +1,10 @@
 # Click2Cloud V3+1 — GUI extraction from REDOWN (Codex handoff)
 
-**Status: SOURCE-BACKED GUI DESIGN AND TEST HANDOFF ONLY.** No runnable GUI has been built by these files. Codex will implement it in this directory.  
+**Status: SOURCE-BACKED GUI DESIGN AND TEST HANDOFF ONLY.** No runnable GUI has been built by these files. Codex will implement it. **The primary deliverable is an installable Chrome MV3 extension with working Cloudflare OAuth and REAL native right-click saving via Workers/R2.**  
 **Extracted:** 2026-11-05  
 **Read-only reference:** `thanks-cohn/REDOWN` commit `75fd1425d0db5270c725b3e4ef8e9ab124c3083a`  
 **Implementation target:** `thanks-cohn/Click2Cloud/scaffold/gui/`  
-**Authority:** Latest [V3+1 scaffold](../README.md) and [independent Menu Configuration Recovery](../MENU_DESTINATIONS_DURABLE_RECOVERY.md) override REDOWN's old exclusive mode/editing behavior.
+**Authority:** Latest [V3+1 scaffold](../README.md), [independent Menu Configuration Recovery](../MENU_DESTINATIONS_DURABLE_RECOVERY.md), [actual Chrome + real Worker acceptance](./CHROME_EXTENSION_LIVE_ACCEPTANCE.md) and [REDOWN OAuth extraction](./REDOWN_OAUTH_EXTRACTION.md) override REDOWN's old exclusive mode/editing behavior and earlier mock-cloud-first testing.
 
 ## 1. Basic premise being extracted
 
@@ -43,42 +43,44 @@ Every link below is pinned to the inspected REDOWN commit:
 
 The Click2Cloud repo already contains `src/explorer/{file-api.mjs,r2-adapter.mjs,configuration.mjs}` and `src/dashboard/{controls.mjs,redown-bridge.mjs}`, a basic `dashboard/` host-dependent screen, and `src/core/menu-compiler.mjs`. Reuse them as sources; do **not** pretend that REDOWN-host-only actions function in an ordinary `http://localhost` page.
 
-## 3. Codex must build HERE; the GUI must be launchable
+## 3. Codex must build a REAL Chrome extension with this GUI
 
-**Required launch contract after implementation:**
-- Implement a real entry point `scaffold/gui/index.html` with modules, style and assets **inside Click2Cloud** (relative imports of existing `src/` modules are allowed). This file does not yet exist.
-- Implement `npm run demo` as a self-contained local dev server, opening or clearly printing the exact browser URL `http://localhost:4173/scaffold/gui/`. It must work on Windows 11 and Node >=20. Never ask users to open a `file://` HTML page or require the REDOWN extension just to see Demo.
-- Implement `npm run test:gui` for automated interaction tests. Provide an optional `scripts/start-gui.ps1` double-click/PowerShell Windows launcher if practical. Do not claim commands work until tested.
-- Default to **DEMO (simulated cloud)** mode. All demo-only data and actions visibly identify themselves. A fake transfer may show `SIMULATED` but **never `Verified upload` or verified real R2 success**.
-- Include a user-selectable **Connected / Integration** mode only after an authorized Click2Cloud Chrome host bridge exists. The current REDOWN bridge intentionally rejects standalone `localhost` privileged calls: do not bypass sender authorization or copy live tokens into a web app.
-- Actual native Chrome context menus cannot run in the local web page. Preview them via the SAME **pure combined V3+1 compiler output**. Add a separate minimal MV3 test-extension harness for real native Chrome registration and routing, with one writer, one listener, deterministic IDs and runtime acknowledgements.
-- Keep REDOWN read-only throughout Click2Cloud development. No side effects to production Cloudflare, accounts, Workers or buckets during demo.
+**Primary deliverable:** A working **Manifest V3 unpacked Chrome extension** with `manifest.json`, service worker, Click2Cloud Explorer page, real Cloudflare OAuth (registered for its own extension identity), menu controller/registrar/dispatcher, authenticated Worker/R2 integration and proper install instructions.
 
-**Work area suggestion:**
+- User installs in `chrome://extensions` → Developer mode → **Load unpacked**. Clicking its toolbar icon opens Click2Cloud **Remotes**, with a direct entry to its File Explorer. Neither REDOWN V3 nor a localhost server may be required for the actual extension to work.
+- The GUI's `+ Right Click`, Simple, Narrow, additive Depth and Manage Destinations actions must register/modify the **real Chrome native `contextMenus`** through one canonical V3+1 compiler. A browser-page illustration is never native-menu acceptance.
+- **OAuth IS REQUIRED:** The user must be able to click Connect Cloudflare inside the installed extension and grant the requested scopes, then browse actual authorized R2 bucket/folder data. Copy the verified REDOWN OAuth behavior, but use a valid Click2Cloud-specific OAuth client registration/redirect. See [OAuth contract](./REDOWN_OAUTH_EXTRACTION.md).
+- **Real Worker testing:** Use the existing `click2cloud-v3p1-r2-lab` Worker, the actual `redown` bucket and **only the authorized disposable test prefix** for end-to-end saves/verification. Worker service bindings alone do NOT substitute for extension OAuth or ensure a publicly reachable Worker endpoint.
+- `npm run demo` / `npm run test:gui` may be included as developer conveniences, but the **main acceptance is the installed extension** (actual native Chrome menus, real user auth, real Worker upload + independent R2 readback). Synthetic fixtures remain only for isolated unit tests and fault injection.
+- If a Cloudflare OAuth client registration or redirect permission cannot be granted by Codex, report **BLOCKED** with the exact required user action. Keep implementing and testing the unaffected extension code; never fake connection.
+- Preserve REDOWN source and unrelated production buckets/Workers unchanged. Do not copy credentials/tokens or bypass the extension's sender authorization.
+
+**Proposed build tree (actual layout up to Codex):**
 ```text
 scaffold/
-  README.md                    authoritative V3+1 end state
+  README.md                           authoritative V3+1 UX/spec
   MENU_DESTINATIONS_DURABLE_RECOVERY.md
   gui/
-    README.md                  THIS REDOWN GUI extraction and implementation/launch contract
-    TEST_JOURNEYS.md           manual + automated E2E acceptance
-    demo-fixtures.json         synthetic folder and menu seeds (NO credentials)
-    index.html                 ← Codex IMPLEMENTS later
-    app.mjs                    ← Codex IMPLEMENTS later
-    style.css                  ← Codex IMPLEMENTS later
+    README.md                         this REDOWN GUI extraction
+    CHROME_EXTENSION_LIVE_ACCEPTANCE.md
+    REDOWN_OAUTH_EXTRACTION.md
+    TEST_JOURNEYS.md
+    demo-fixtures.json                ONLY edge-case and fault-injection fixture data
+src/                                  reusable actual engine and API modules
+extension/ OR dist/chrome-unpacked/   Codex IMPLEMENTS the load-unpacked MV3 product
 ```
 
 ## 4. GUI navigation hierarchy and interaction contracts
 
-1. **Remotes (DEFAULT)** — small cloud/provider cards and connection state, odometer, quick **Explorer / Manage Destinations** routes. In demo, card says `Demo disconnected/connected`, not a live OAuth claim.
+1. **Remotes (DEFAULT)** — small cloud/provider cards and connection state, odometer, quick **Explorer / Manage Destinations** routes. Real OAuth connection status must be shown (not mocked as connected).
 2. **File Explorer** — left authorized account/bucket tree; main breadcrumbs + selectable folder/file rows and preview (minimum: folder navigation and folder selection). **+ Right Click**, Depth tree switch and Manage Destinations near Explorer top, always findable.
 3. **+ Right Click creation popup** — Setup tab is the default, optional title, **Simple / Narrow** switch; Narrow introduces Menu Titles tab with actual ancestor names LEFT and optional aliases RIGHT, final title synchronized. Save at bottom on either tab; Cancel unchanged.
 4. **Manage Destinations popup** — its own *single* modal/panel; two modes as **list filters** at top; scroll and 20 entries per page with independent page positions; every row has X (confirm removes config only). Clicking a row swaps list → editor **in the same popup**; Back immediately below filter and Escape return to same page. Simple editor one row; Narrow editor all ancestor rows; Save updates existing ID.
 5. **Depth tree toggle** — **beside + Right Click**; tree-glyph ON/OFF, level selector, auto-include ALL indexed authorized directories to selected level. All saved Simple/Narrow choices remain present when Depth is ON or OFF. Persist last depth selection.
-6. **Native menu preview** — always generated from the real combined compiler, annotating Simple, Narrow, Depth and flat provider leaves. Both `REDOWN → Cloudflare` direct-only default and correct nested/flat cases must be represented. Unique path actions even when display labels collide. Preview route click shows exact provider/account/bucket/prefix and refuses unknown/unverified.
+6. **Native menu and optional preview** — real Chrome contextMenus must be registered from the same combined compiler, with optional GUI preview annotating Simple, Narrow, Depth and flat provider leaves. Both `REDOWN → Cloudflare` direct-only default and correct nested/flat cases must be represented. Unique path actions even when display labels collide. Native click resolves exact provider/account/bucket/prefix and refuses unknown/unverified.
 7. **Settings** — toggle **Show Manage Destinations in Chrome menu** without hiding Explorer/Shelf control; separate backup status/policies for Menu Config and Depth Index; Menu Config backups WEEKLY by default or DAILY; clearly show independent storage health.
 8. **Recovery Lab** — simulate IndexedDB/cache loss, extension uninstall/reinstall and invalid CURRENT/journal; restore from external independent menu and depth recovery roots without a full cloud rescan and without dropping per-level aliases. Never present LocalStorage/IndexedDB itself as uninstall-proof storage.
-9. **Status and trust** — display whether each action is `Draft`, `Saved to working state`, `Externally backed up`, `Chrome applied`, `Simulated`, or `Provider verified` as distinct truthful stages.
+9. **Status and trust** — display whether each action is `Draft`, `Saved to working state`, `Externally backed up`, `Chrome applied`, `Chrome registered`, or `Provider verified` as distinct truthful stages.
 
 ## 5. Visual intent
 
@@ -91,21 +93,23 @@ REDOWN's source has an approachable premium look: spaced account sidebar, restra
 
 ## 6. Exit gate and actual testing
 
-The GUI is **NOT DONE** until:
-- `npm run demo` opens the workbench in a real browser after a clean checkout, without REDOWN or Cloudflare auth.
-- All GUI actions call actual state/controller/engine operations, not dead buttons and static text swaps.
-- `npm run test:gui` executes deterministic automated journeys from [TEST_JOURNEYS.md](./TEST_JOURNEYS.md).
-- Source IDs, menu paths and versions survive GUI reload and external recovery after simulated storage deletion.
-- A separate installed Chrome harness verifies real native menu branching, permissions, limits, service-worker restart and ACK. Browser-only preview is **not** native proof.
-- Only then introduce actual Cloudflare TRUE REMOTE verification (Worker fetch → R2 independent read-back) and other provider bytes upload. No false success on a timer.
+The GUI/extension is **NOT DONE** until:
+- Actual unpacked extension loads in Chrome, independent of REDOWN and localhost, with Click2Cloud's real Remotes and File Explorer.
+- **Actual Cloudflare OAuth** works under Click2Cloud's extension ID and scopes; auth can be refreshed/reconnected without erasing saved menus.
+- Actual R2 bucket/folder inventory loads and exact selected folder targets are verified.
+- All GUI actions invoke canonical engine/controller methods, and **native Chrome contextMenus** genuinely match Simple + Narrow + additive Depth with verified registration ACK and worker restart recovery.
+- **A real right-click on an external image or link saves it via authorized Worker to the correct test prefix**, verified by an independent R2 read-back, without false success on timers.
+- Separate menu and Depth backups/recovery meet `../MENU_DESTINATIONS_DURABLE_RECOVERY.md`.
+- `TEST_JOURNEYS.md` passes native Chrome + real provider acceptance, or shows a precise **BLOCKED** external consent gate; mocks do not count as passed live features.
+- Actual build/install path, test commands, evidence, and PASS/FAIL/NOT TESTED results are provided.
 
 ## 7. Codex's first implementation pass
 
-1. Read `../README.md`, `../MENU_DESTINATIONS_DURABLE_RECOVERY.md`, this file, `TEST_JOURNEYS.md`, `demo-fixtures.json`; inspect `src/core/menu-compiler.mjs` and `src/explorer/index.mjs`.
-2. Implement workbench shell and synthetic File API provider; get launching browser GUI and reliable folder selection.
-3. Implement the **new canonical menu model + combined compiler**; attach creation popup and manager; add in-GUI menu preview and tests. Do not "solve" the demo by retaining exclusive one-mode `compileMenu({mode})`.
-4. Add Depth toggle and indexed tree budget/completeness indicators, then independent external recovery engine and Recovery Lab.
-5. Add native MV3 test harness, verified provider transport integration behind authenticated adapter, evidence and rollback.
-6. Report a truthful feature-by-feature PASS/FAIL/NOT TESTED table with actual commands/CI receipts. No REDOWN V3 production edits.
+1. Read `../README.md`, `../MENU_DESTINATIONS_DURABLE_RECOVERY.md`, `CHROME_EXTENSION_LIVE_ACCEPTANCE.md`, `REDOWN_OAUTH_EXTRACTION.md`, this file, `TEST_JOURNEYS.md`; inspect `src/core/menu-compiler.mjs` and `src/explorer/index.mjs`.
+2. Build an unpacked MV3 extension with real Explorer GUI, then integrate Click2Cloud-specific OAuth, real account/bucket discovery and authenticated Worker access. Do not import REDOWN's extension identity or tokens.
+3. Implement composite Simple + Narrow + additive Depth engine and real `chrome.contextMenus` registration; wire compact creation popup and single manager directly to canonical saved data.
+4. Verify a real image/link right-click save under disposable R2 test prefix and independent read-back; test Chrome worker suspension/installation/reload.
+5. Build separate external backups/recovery and failure tests; keep synthetic fixtures for independent fault scenarios.
+6. Report actual installable package path, real-Chrome OAuth/menu/saving evidence and explicit PASS/FAIL/BLOCKED, with no REDOWN V3 production edits.
 
 **Do not build a visual imitation of V3's original global settings form. Build the V3+1 UX described above.**
