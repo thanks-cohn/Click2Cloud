@@ -36,7 +36,7 @@ function responseError(body, fallback) {
 }
 function sanitizedAuth(auth) {
   if(!auth?.accessToken) return {phase:'disconnected'};
-  return {phase:auth.reconnectRequired?'reconnect-required':'authorized-not-verified',
+  return {phase:auth.reconnectRequired?'reconnect-required':auth.verifiedAt?'connected':'authorized-not-verified',
     expiresAt:auth.expiresAt||null, sessionId:auth.sessionId||null};
 }
 function formFields(fields){return new URLSearchParams(Object.entries(fields).filter(([,v])=>v!==undefined&&v!==null));}
