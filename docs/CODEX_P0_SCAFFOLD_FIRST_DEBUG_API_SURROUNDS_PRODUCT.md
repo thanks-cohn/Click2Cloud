@@ -5,6 +5,8 @@
 **Status:** Owner-approved controlling specification; documentation is not implementation evidence.  
 **Priority:** P0, supersedes conflicting older mode/UI and testing-sequence assumptions.
 
+**CURRENT COMPREHENSIVE CODEX BUILD REQUEST:** [CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md](./CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md) is the active all-in-one implementation task. It incorporates updated /scaffold behavior, the popup-only Show controls, no hierarchy toolbar, agent-ready headless service, external Backup Location choice, one-click Restore My Right-Click Menu, and silently perpetual Save Whole Cloud with same-account authorization resume. Follow it as the execution plan. This earlier P0 document remains the architectural authority for Glaciaring-as-observer but must not override more recent /scaffold or comprehensive owner requirements.
+
 ## The authority hierarchy (unambiguous)
 
 1. **`/scaffold` defines the FINAL Click2Cloud product and user experience.** It is the acceptance target—not an optional reference, mockup, or a visual wrapper around a diagnostics lab. Read the actual scaffold documents and implement their behaviors faithfully.
