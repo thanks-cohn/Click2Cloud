@@ -2,8 +2,8 @@
 
 **Status:** Architecture and Codex requirements ONLY; no code implementation.  
 **Date:** November 5, 2026  
-**Applies to:** User-created **Simple and Narrow right-click menus**, destination/menu titles, custom Narrow per-ancestor aliases, and menu configuration preferences.  
-**Separate subsystem:** Depth folder index and its own `CURRENT.json`/backup/journal lifecycle. Never confuse, overwrite or merge their independent recovery histories.
+**Applies to:** Saved Simple/Narrow/Depth display configurations, **Show in Chrome** Simple/Narrow/Depth/All/Flat choices, exact Flat default save target, **Settings → Recovery Mode** Weekly/Daily schedule, Simple/Narrow recovery ON/OFF and per-bucket Depth Recovery ON/OFF + recovery crawl depth.  
+**Distinct subsystems:** Menu configuration, Depth display configuration and Depth recovery folder index; each has its own CURRENT, journals, backup/restore lifecycle. Never confuse Chrome display depth with Recovery Mode crawl depth.
 
 ## Product promise
 
@@ -11,49 +11,61 @@
 
 The underlying directory names do not change; menu aliases are persistent user work. No automatic recovery system can guarantee survival if ALL copies are deleted or storage hardware is lost.
 
-## A. Two separate durable stores
+## A. Settings → Recovery Mode and three independent durable recovery stores
 
-| Subsystem | Contents and purpose |
+Recovery Mode is a dedicated, aesthetically integrated Settings section, **not a mode in the `+ Right Click` popup**. The user selects **Weekly (default; Monday)** or **Daily** scheduled checkpoint cadence, turns **Simple Recovery** ON/OFF and **Narrow Recovery** ON/OFF independently, and expands **Depth Recovery Buckets** to view the full authorized bucket list. Each recovery bucket has its OWN ON/OFF checkbox and editable positive integer **recovery crawl depth**, with **no arbitrary app-imposed ceiling**. The selected recovery depth determines how far Click2Cloud may incrementally discover and preserve bucket folders. It is wholly independent of that bucket's **Chrome display depth**, configured in the popup Depth tab (default 10, no imposed max) and independent of Show:Depth ON/OFF.
+
+- Enabling Simple Recovery protects original Simple destinations, custom titles, exact target IDs and ordering; enabling Narrow Recovery independently protects all Narrow paths and ancestor aliases. Disabling either prevents new scheduled recovery coverage for that type but **does not delete the live configuration or surviving prior recovery files**. Preserve the user's policy selection in durable recovery metadata. The user can re-enable without re-creating destinations.
+- Depth Recovery buckets are **not** inherited from the popup's Depth-display bucket set. They are separately selected in Settings, can include buckets hidden from Chrome and can crawl deeper or shallower than popup display depth. Only user-authorized buckets are scanned. Recovery can run when no Depth rows are shown in Chrome.
+- **Scheduled weekly checkpoint means every Monday while a working scheduler/authorized native companion is available**; if Chrome and companion cannot run, mark overdue and catch up on next supported launch, showing actual completion timestamp. Daily works analogously. Do not claim guaranteed background execution from a suspended/closed Chrome MV3 worker. Allow safe incremental/resumable discovery (pagination, rate limiting, time budgets) with truthful coverage/completeness. An incomplete scan updates only verified known observations and retains previous known data rather than wiping a valid graph. Do not confuse a folder-name/path index with a full copy of cloud file bytes.
+- The **Show in Chrome** choices and Flat exact default target remain persisted even if their recovery-type toggle is OFF. Show toggles decide native menu projection only, not index scan/protection. All/Flat are presentation shortcuts, never destructive transforms.
+- The recovery coordinator MUST preserve the schedule, protection toggles, selected recovery bucket identities/depths, last successful/attempted scan checkpoints, and integrity receipts in independent durable settings. Restoring one corrupt namespace must not damage another.
+
+| Durable subsystem | Contains |
 | --- | --- |
-| **Menu Config Recovery** (**this spec**) | Canonical user-created **Simple** entries and exact target identities, **Narrow** saved branches and their customizable display titles for every path segment, record IDs, enabled states, ordering, collision resolutions and menu settings. Small; update on every confirmed user change. |
-| **Depth Directory Recovery** (separate spec) | Previously discovered cloud buckets/folders, canonical authorized directory graph, discovery cursors/completeness, levels, freshness observations, independent daily/weekly snapshots and deltas. Large; rebuild local IndexedDB graph without a full R2 scan when an authentic recovery copy survives. |
+| **`menu-config/`** | User-created Simple and Narrow destinations, aliases, stable IDs, ordering, Show:Simple/Narrow/Depth/All/Flat state, and independent exact **Flat Default Save Selection**; their backup coverage is filtered by Simple/Narrow Recovery policy without deleting live data. |
+| **`depth-config/`** | Chrome-display Depth bucket participation + *display depth*, default 10 for first setup, no arbitrary max, and display config revisions. These settings are distinct from cloud indexing. Recover committed display choices separately from directory graph loss. |
+| **`depth-index/`** | Recovery Mode selected buckets + *recovery crawl depth*, authenticated known folder graph (no tokens), scan cursors/completeness/freshness, resumable discovery state, and independent deltas/checkpoints. |
+| **`recovery-policy/`** | Weekly/Daily choice, Simple/Narrow backup ON/OFF, per-bucket Depth Recovery ON/OFF + crawl depth, last run/health/status metadata. May be an independently versioned manifest/config if same atomicity/recoverability is guaranteed. |
 
-Both can be exposed through one V3+1 coordinator but MUST have distinct namespaces, files, validation, backup policies, journals and restore operations. A corrupt Depth index must not erase or block menu-config recovery, and corrupt menu-config backup must not erase surviving indexed directories.
+**External durable backing location:** outside the Chrome extension origin and browser profile. Prefer the authorized native companion (Rcomplex/Click2Cloud), or a user-approved independent folder with optional encryption. IndexedDB, `chrome.storage.local` and Chrome's own profile do **not** survive all reinstall scenarios. Missing external storage requires explicit **Backup pending / not protected** status.
 
-## B. Menu configuration's independent CURRENT, journals and backup policy
-
-**External durable backing location:** outside the Chrome extension's origin storage and outside the browser profile's files. Prefer the **shared authorized native companion** (Rcomplex/Click2Cloud) on Windows, with a configurable user-approved external folder and optional additional encrypted backup. A file merely persisted to IndexedDB, `chrome.storage.local`, or the Chrome profile **does not satisfy uninstall survival**. An independent location is necessary but still subject to its own cleanup policies, disk failure, deletion and permissions.
-
-Illustrative file layout (names can change; API semantics must not):
+Illustrative file structure:
 
 ```text
-<independent user-approved recovery root>/
-  click2cloud/
-    menu-config/
-      CURRENT.json                 # complete latest VERIFIED menu configuration checkpoint
-      journal/
-        2026-11.jsonl              # append-only ordered semantic deltas
-      backups/
-        2026-W45.json              # immutable weekly snapshot (DEFAULT)
-        ...
-      manifest.json                # schema, generations, checksums, backup policy
-    depth-index/
-      CURRENT.json                 # SEPARATE full known folder tree checkpoint
-      journal/
-      backups/
+<authorized external recovery root>/click2cloud/
+  menu-config/
+    CURRENT.json
+    journal/2026-11.jsonl
+    backups/2026-W45.json          # immutable full checkpoint
+    backups/weekly.json            # last verified WEEKLY snapshot/pointer
+    manifest.json
+  depth-config/
+    CURRENT.json
+    journal/2026-11.jsonl
+    backups/2026-W45.json
+    backups/weekly.json
+    manifest.json
+  depth-index/
+    CURRENT.json
+    journal/2026-11.jsonl
+    backups/2026-W45.json
+    backups/weekly.json
+    manifest.json
+  recovery-policy/
+    CURRENT.json
+    journal/2026-11.jsonl
+    backups/2026-W45.json
 ```
 
-**`menu-config/CURRENT.json`** is a self-contained, versioned, credential-free snapshot sufficient to rehydrate **every original Simple/Narrow menu choice** with exact identity and custom display aliases. It is NOT REDOWN's existing IndexedDB `CURRENT` or `chrome.storage.local['right-click.json']`; those are source/compatibility references. Preserve its integrity using atomic temp-write + durable replace where supported, a validated schema, sequence/generation, hash/checksum and safe last-known-good fallback.
+### CURRENT.json, delta journal and weekly.json have DIFFERENT jobs
 
-**Append-only delta journal** records every meaningful committed user change: add/remove/reorder destination; edit menu title; edit any ancestor alias; change Simple/Narrow status or visibility; and related menu preferences (if stored in this subsystem). Include event ID, monotonic sequence, timestamp, account/bucket namespace, exact record ID, base generation, operation and validation information. Idempotent replay: duplicate events cannot create duplicate menu rows or reorder incorrectly. No secrets, OAuth tokens or personal source URLs in backup/journal.
-
-**Backup cadence (CONFIGURATION only):**
-- **WEEKLY by DEFAULT**, user-selectable **DAILY**. This controls immutable historical checkpoint cadence.
-- `CURRENT.json` is refreshed **after every successfully committed configuration change**, not only once a week. The journal records the same semantic change and remains continuous across backup periods.
-- First backup is created when enabling durable storage / on initial valid configuration, then capture checkpoint on first eligible operation in a new day/week **or use a real scheduler** if a wall-clock guarantee is wanted. Do not claim cron-style daily/weekly schedules if implementation only performs rollover on use.
-- Settings for menu-config backup policy are independent of Depth backup cadence. Changing one has zero side effects on the other.
-- Retention, encryption/passphrase handling, rollback points, storage-space pressure and export/import must be explicit rather than deleting backups automatically without notice.
-- Backup completion and recovery health must report actual write receipts, not claim success when disk or companion is unavailable.
+- **`CURRENT.json` = complete latest VERIFIED committed snapshot** for its subsystem. On every successful relevant save/change (or verified index update), atomically replace CURRENT (temp write + validated durable replace where possible). Include schema/version, namespace, exact account/bucket identities, sequence/generation, checksum/integrity data and coverage metadata. Never include OAuth secrets, raw source URLs or access tokens. It is updated **continuously**, NOT only weekly.
+- **`journal/YYYY-MM.jsonl` = append-only semantic delta ledger** for every confirmed edit or verified index discovery: unique event ID, monotonic sequence, timestamp, type, target identity, prior revision, change and validation hashes. For example: `redown` Chrome display depth 8→12 belongs to **depth-config**; change `redown` recovery crawl depth 25→50 belongs to **recovery-policy**; a newly discovered folder belongs to **depth-index**; a Simple destination alias change belongs to **menu-config**. Idempotent replay must not duplicate entries; tombstones represent intentional deletion. No snapshot is reconstructed from an incomplete/noncontiguous journal as if complete.
+- **`backups/2026-W45.json` = immutable dated fully validated weekly recovery snapshot** of all information *verified as known at that point*, including partial-scan coverage; not just Monday's newly discovered paths. **`backups/weekly.json` = atomic rolling alias/copy/pointer to the LATEST verified weekly checkpoint** for ease of recovery. Replacing weekly.json must not overwrite or erase immutable dated historical backups. If Daily selected, use analogous daily dated snapshots/pointer and retain explicit retention controls.
+- A first valid backup is created when recovery is enabled/external storage is authorized. Subsequent WEEKLY checkpoints occur Monday when actually schedulable; Daily on the chosen daily cadence. Updating CURRENT/journal NEVER waits for weekly rollover. Existing backups are not silently deleted when a recovery toggle is switched OFF.
+- Before claiming `Protected`, verify external write/readback or durable receipt. If a scheduled crawl fails or a filesystem write is unavailable, preserve last known valid CURRENT, journal and checkpoint, record errors and next resume cursor; never report complete when only partial.
+- Restore: prefer validated CURRENT plus valid later deltas; if CURRENT is corrupt/missing, restore newest suitable verified weekly/daily snapshot then replay **contiguous valid post-snapshot journal entries**, rejecting tampered/gapped events. Select an older snapshot explicitly for accidental user deletion; never silently resurrect intentionally removed records. No cross-account rebinding, no guessed paths. Recover Simple/Narrow and Show/Flat, Depth *display* choices, independently recovered Depth folder graph and Recovery Mode policy. Reauthorization may be required after reinstall.
 
 ## C. Crash-safe commit sequence
 
@@ -65,30 +77,27 @@ A canonical V3+1 menu edit needs to preserve consistent recorded intent across i
 4. Reconcile native Chrome `contextMenus` separately. **Saved** and **Applied to Chrome** are different states; only Chrome callback/generation ACK makes it Applied. On worker crash, replay pending intents and reconcile without double-applying or deleting another menu.
 5. Concurrent edits in multiple extension windows/companion sessions use monotonic generation/expectedRevision, serialization and conflict handling. Never blindly select an older snapshot as authoritative.
 
-## D. Recovery algorithm — reinstallation and browser storage loss
+## D. Recovery algorithm — reinstallation, accidental deletion and browser loss
 
-1. Detect IndexedDB/CURRENT missing, incompatible, corrupt or incomplete; **do not initialize an empty canonical model over an independently recoverable configuration**.
-2. Discover authorized independent menu-config recovery root via the companion or an explicit user-granted location (reinstall may require reconnecting/re-authorizing the companion or choosing an existing file). If unavailable, offer safe read-only/recovery choices; do not assert recovery succeeded.
-3. Validate `menu-config/CURRENT.json` schema/version/checksum and namespace. Replay subsequent verified ordered JSONL deltas only when sequence is contiguous and conflict-free; otherwise fall back to the latest valid immutable DAILY/WEEKLY checkpoint and replay from that snapshot.
-4. Restore **Simple**: ALL exact destination records, optional titles, ordering and enabled status. Restore **Narrow**: ALL configured paths and exact per-level user-assigned titles. Exact bucket/profile identity must be preserved; account disconnect must not turn records into another user's bucket.
-5. Rebuild browser IndexedDB and derived menu projection from that durable state. Recover Depth independently from **its separate recovery files**. Neither requires re-crawling the entire cloud directory merely to recover *known previous* state.
-6. If provider authorization was cleared, user may need login/OAuth again before saves are re-enabled. Render restored destinations as **Pending reconnect** rather than silently binding them to unrelated credentials or discarding them.
-7. Register native menu from current validated authorization; wait for Chrome receipt. Preserve recovery root/Manage functionality if registration fails. Never claim uploaded-file success from a restored menu config alone.
-8. Recreate/verify secure external backup linkage after reinstall. Extension uninstall must **NOT** issue cleanup requests for durable backups. **Delete My Data** is separate and must require explicit, informed confirmation, including choosing whether to delete external copies.
-9. Background verification of folder freshness may occur after recovery with bounded budgets, but must not erase saved aliases or force a full scan to show recoverable menus.
+1. Detect Chrome storage/CURRENT missing, incomplete or corrupt, and pause unsafe reinitialization if an independent recoverable state exists. Do not overwrite surviving external backups with empty defaults.
+2. Locate authorized external recovery roots through companion or explicitly approved folder. Validate **all four** namespaces (menu-config, depth-config, depth-index and recovery-policy) independently. If one is damaged, recover healthy peers without resetting them.
+3. Load valid latest CURRENT per namespace; apply only contiguous independently verified journal deltas; if invalid, recover from `weekly.json`/immutable dated snapshot plus contiguous later deltas. Allow user-selected earlier restore point for intentionally deleted items. Respect recorded tombstones unless owner explicitly requests rollback.
+4. Restore Simple destinations, Narrow branches and per-ancestor aliases, committed Show combination/All/Flat, and exact Default Save Selection target independently. Restore per-bucket Depth **Chrome display** selections and depths independently of folder graph/index and of per-bucket **recovery crawl** settings.
+5. Restore Recovery Mode Week/Daily and Simple/Narrow ON/OFF, chosen bucket recoveries with their depths and confirmed scan cursors/completeness. Rebuild working IndexedDB and native menu from the saved Show selection; never reset recovered settings just because a provider connection is temporarily unauthorized.
+6. Revalidate account/bucket authorization and actual save targets. Reconnect OAuth when needed; leave entries safely Pending reconnect rather than redirecting to a different account/bucket. Chrome native registration must independently ACK applied generation before saying menu is applied.
+7. After restore, resume incomplete recovery crawls within authorized limits, not a forced full rescan. If a bucket has disappeared or a folder is now inaccessible, preserve historical indexed knowledge with honest stale/unverified labels; do not pretend a remote file or folder still exists.
+8. Never delete durable backups as part of ordinary extension uninstall. Deleting external copies requires explicit separate informed user consent. Missing authorized external storage or all deleted copies means no guaranteed recovery.
 
-## E. Test matrix — hard acceptance
+## E. Test matrix — focused real scaffold acceptance
 
-- Create 100+ Simple and Narrow entries with long nested paths and unique titles at each ancestor; record hash of exported semantic config.
-- Save/Edit/Delete/reorder operations each update CURRENT and ordered delta journal; **default weekly**, switch to **daily**, reboot, and verify distinct backup schedules from Depth.
-- Fault-inject crash between IndexedDB transaction, delta append, atomic `CURRENT.json` replace and native menu ACK; recover without missed or duplicate user edits.
-- **Clear ordinary Chrome cache**, delete simulated extension IndexedDB and `chrome.storage.local`, and test Chrome extension **uninstall/reinstall** with external files retained; verify exact records/aliases/IDs/ordering restored and menu recompiled.
-- Damage latest CURRENT but preserve weekly checkpoint + later valid deltas; restore exactly to last valid change, reject tampered/out-of-order delta and report the discrepancy.
-- Lose both latest CURRENT and latest weekly checkpoint, retain older snapshot plus verified deltas; recover if contiguous; otherwise fail safely without fabricating state.
-- Turn Depth ON/OFF and change its level during/after restore; all Simple/Narrow entries remain accessible; Depth corruption does not destroy menu configurations.
-- Multi-account same folder labels, disconnected account, changed Worker URL, revoked bucket, cross-profile migration: no accidental routing to wrong cloud.
-- Companion missing or offline, read-only filesystem, interrupted file replacement, antivirus file locks, disk full, no user-approved external location: save UI distinguishes **not backed up** from **backed up**, and recovery never claims success without verified file evidence.
-- Recover weekly/daily snapshots after restart on Windows; retention and explicit data deletion are tested.
+- In popup save Simple/Narrow/Depth and Show:Simple/Narrow/Depth/All/Flat; verify journals and CURRENT have exact committed state, including title aliases and exact Flat default target. Hide one category: live stored config remains unchanged. No separate hierarchy toolbar button exists.
+- In Settings choose Weekly (Monday) and Daily in separate sessions; Simple Recovery ON/Narrow Recovery OFF and inverse; verify only enabled types receive new policy-governed historical protection, without deleting their live records or existing backups.
+- Expand Recovery Mode bucket list; enable two buckets at Recovery Depth 50 and 4 while Depth popup display depths are 10 and 17; verify the two independent numbers remain distinct across save/restart/restore. No app-imposed maximum 10 for either setting. Simulate rate limits and paused scan with truthful incomplete status.
+- Verify every change updates the appropriate independent CURRENT+delta journal. Confirm first verified checkpoint, weekly.json rolling pointer and immutable dated weekly checkpoint on actual Monday/supported scheduler (or missed-run catch-up), and Daily selected cadence.
+- Deliberately corrupt CURRENT; restore from dated snapshot plus contiguous verified deltas. Simulate a missing journal segment and refuse false full restoration; test independent recovery of uncorrupted namespaces.
+- Intentionally delete a Simple destination or a Narrow branch: it stays deleted in current state. Explicitly choose earlier weekly snapshot to restore it without mutating unrelated Depth and other modes.
+- Remove browser IndexedDB/uninstall extension while valid external backup remains; require valid recovery of menu aliases, saved display modes, Flat destination, Depth display/recovery levels and known folder graph after reauthorization. Check no wrong-account routing, duplicate Chrome native menu entries or phantom verified uploads.
+- Companion offline/disk-full, interrupted atomic replace, stale snapshots, partial index and revoked provider access show honest status; Glaciaring instruments real persistence/recovery, not a simulated parallel database. **Do not read, run or expand the old 1,000-scenario project for this task.**
 
 ## F. Relationship to existing REDOWN sources
 
