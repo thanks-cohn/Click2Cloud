@@ -9,6 +9,7 @@ function store(seed={}) {
   const map=new Map(Object.entries(seed));
   return {
     map,
+    async setAccessLevel({accessLevel}) { assert.equal(accessLevel,'TRUSTED_CONTEXTS'); },
     async get(keys) {
       const names=Array.isArray(keys)?keys:[keys];return Object.fromEntries(names.map(k=>[k,map.get(k)]));
     },
