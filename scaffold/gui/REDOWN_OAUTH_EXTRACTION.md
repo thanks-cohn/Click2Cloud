@@ -9,6 +9,16 @@ The repo now has [`src/auth/cloudflare-oauth.mjs`](../../src/auth/cloudflare-oau
 
 **Still blocked:** Cloudflare's connected API rejected OAuth client listing (403, needs OAuth Client Read) and cannot create a client without **OAuth Client Write**. The actual Click2Cloud manifest/extension identity and registered OAuth Client ID must be set before sign-in works. The existing REDOWN-dependent dashboard bridge remains a reference until the new MV3 host is built; no claim of live login.
 
+## Owner-registered Click2Cloud OAuth client (2026-11-05)
+
+The owner has now created a separate Click2Cloud **public OAuth client** with Client ID `59535938bc4cc093003b4385a7e2b005`. This Client ID is not a secret; do not place access/refresh tokens or confidential credentials in Git.
+
+At Cloudflare registration the owner selected these **Required** dashboard permissions: **Workers Content Read-Only**, **Workers Editor**, **Workers R2 Storage Read**, **Workers R2 Storage Write**. The new Workers labels are not proof of identical scope strings to REDOWN's older `workers-scripts.read/write`. Inspect the actual OAuth client's granted scope identifiers/consent response, then request and validate those precise authorized scopes; no silent privilege widening.
+
+Required grants: Authorization Code with **PKCE S256**, and refresh-token grant where supported. Target **two or more hours of uninterrupted user experience** using token refresh well before expiration, lock/rotation/session-generation protection, persistence over MV3 restarts, and safe reconnect when renewal becomes impossible. Cloudflare controls actual access-token lifetime; this is a session-continuity design goal, not a guaranteed two-hour token TTL.
+
+**Next external prerequisite:** Build Click2Cloud with a stable independent Chrome extension ID, derive exact `chrome.identity.getRedirectURL('cloudflare')`, and print that real URL for the owner to add to the existing OAuth client. A provisional website callback, if used during registration, does not complete Chrome sign-in. Keep REDOWN credentials/ID entirely separate. **Do not ask the owner to register another OAuth client.**
+
 ## Exact REDOWN Cloudflare permissions and source
 
 Reference (read-only REDOWN):
