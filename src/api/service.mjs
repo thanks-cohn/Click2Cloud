@@ -12,9 +12,9 @@ const definitions={
   listRecoveryPolicies:['inspect',[]],inspectBackupRoots:['inspect',[]],inspectWholeCloudJobs:['inspect',['identity']],enableWholeCloudJob:['configure',['identity','cadence']],disableWholeCloudJob:['configure',['identity']],listAccounts:['inspect',[]],listAuthorizedBuckets:['inspect',['accountId','cursor']],listFolders:['inspect',['source','cursor']],
   previewConfigChange:['configure',['change','expectedRevision']],commitConfigChange:['configure',['previewId','expectedRevision','idempotencyKey']],
   reconcileNativeMenu:['configure',[]],requestRestorePreview:['restore',['recoveryPoint','expectedRevision']],
-  restoreRightClickMenu:['restore',['previewId','expectedRevision','idempotencyKey']],dispatchSave:['execute',['itemId','generation','context','source','idempotencyKey']]
+  restoreRightClickMenu:['restore',['previewId','expectedRevision','idempotencyKey']],dispatchSave:['execute',['itemId','generation','context','source','idempotencyKey']],dispatchExplorerSave:['execute',['itemId','generation','context','source','entry','idempotencyKey']]
 };
-export const toolRegistry=freeze(Object.entries(definitions).map(([name,[scope,keys]])=>({name,version:1,scope,effectful:['commitConfigChange','restoreRightClickMenu','dispatchSave','reconcileNativeMenu'].includes(name),inputSchema:{type:'object',additionalProperties:false,required:({previewConfigChange:['change','expectedRevision'],commitConfigChange:['previewId','expectedRevision','idempotencyKey'],requestRestorePreview:['recoveryPoint','expectedRevision'],restoreRightClickMenu:['previewId','expectedRevision','idempotencyKey'],listAuthorizedBuckets:['accountId'],listFolders:['source'],inspectExplorerContextMenu:['target'],dispatchSave:['itemId','generation','context','source','idempotencyKey'],enableWholeCloudJob:['identity'],disableWholeCloudJob:['identity'],inspectWholeCloudJobs:['identity']}[name]??[]),properties:Object.fromEntries(keys.map(key=>[key,{...(key==='expectedRevision'||key==='generation'||key==='limit'?{type:'integer',minimum:0}:['change','source','recoveryPoint','identity','target'].includes(key)?{type:'object'}:{type:'string'})}]))}})));
+export const toolRegistry=freeze(Object.entries(definitions).map(([name,[scope,keys]])=>({name,version:1,scope,effectful:['commitConfigChange','restoreRightClickMenu','dispatchSave','dispatchExplorerSave','reconcileNativeMenu'].includes(name),inputSchema:{type:'object',additionalProperties:false,required:({previewConfigChange:['change','expectedRevision'],commitConfigChange:['previewId','expectedRevision','idempotencyKey'],requestRestorePreview:['recoveryPoint','expectedRevision'],restoreRightClickMenu:['previewId','expectedRevision','idempotencyKey'],listAuthorizedBuckets:['accountId'],listFolders:['source'],inspectExplorerContextMenu:['target'],dispatchSave:['itemId','generation','context','source','idempotencyKey'],dispatchExplorerSave:['itemId','generation','context','source','entry','idempotencyKey'],enableWholeCloudJob:['identity'],disableWholeCloudJob:['identity'],inspectWholeCloudJobs:['identity']}[name]??[]),properties:Object.fromEntries(keys.map(key=>[key,{...(key==='expectedRevision'||key==='generation'||key==='limit'?{type:'integer',minimum:0}:['change','source','entry','recoveryPoint','identity','target'].includes(key)?{type:'object'}:{type:'string'})}]))}})));
 /** Trusted, in-process API. Host authorization is mandatory even for reads. No network listener. */
 export function createEngineApi({engine,current,fileApi,getInventory=async()=>({scopes:[]}),authorize,confirm=async()=>false,recovery,wholeCloud,clock=Date.now}={}) {
   if(typeof authorize!=='function'||!engine||!current)throw TypeError('Trusted engine, CURRENT and authorizer required');
@@ -121,11 +121,11 @@ export function createEngineApi({engine,current,fileApi,getInventory=async()=>({
           const result={version:1,revision:committed.revision,native,backup};replays.set(key,{previewId:params.previewId,result});while(replays.size>128)replays.delete(replays.keys().next().value);return result;
         }
         case 'reconcileNativeMenu':return synchronize();
-        case 'dispatchSave': {
+        case 'dispatchSave':case 'dispatchExplorerSave': {
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           if(typeof params.idempotencyKey!=='string'||params.idempotencyKey.length<8)fail('IDEMPOTENCY_KEY_REQUIRED');
           const key=JSON.stringify([actor,method,params.idempotencyKey]);if(replays.has(key))fail('SAVE_REPLAY_BLOCKED');
-          replays.set(key,{started:true});return engine.save(params);
+          replays.set(key,{started:true});return method==='dispatchExplorerSave'?engine.saveExplorerEntry(params):engine.save(params);
         }
       }
     };
