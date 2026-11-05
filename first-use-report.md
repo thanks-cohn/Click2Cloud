@@ -156,3 +156,34 @@ Do not run giant unrelated 500/1,000-case scenario projects in place of these fo
 **When Codex starts:** Read this file alongside AGENTS.md, docs/CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md, scaffold/README.md, scaffold/gui/CHROME_EXTENSION_LIVE_ACCEPTANCE.md and docs/UNIVERSAL_FILE_API_EXTRACTION.md. Implement and test the real product; keep REDOWN unchanged. At the end return changed paths, commit SHA, exact tested user journeys, evidence, remaining blockers and one concise reproducible local-install/build instruction. Avoid a second engine, mock-only “completion,” unnecessary migrations and claims of feature parity not supported by actual evidence.
 
 **Owner's simplest acceptance criterion:** **Choose bucket → Depth 10 → Save → real existing hierarchy is in Chrome. Hide it → index remains. Re-enable it → it comes back. Create a folder in Explorer → index updates automatically. Connect Cloudflare → no scope prompt. Back/Forward/Up/Refresh work. Explorer and right-click can actually save verified files.**
+
+## 10. Follow-up first-use finding — Explorer context menu and programmatic twin
+
+**Owner-reported November 5, 2026, after the first report was created:**
+
+- Right-clicking an Explorer row presented four **inline row buttons**, not a proper context menu. Repeating the right-click **appended another copy** of those buttons indefinitely. This is a clear usability and DOM-lifecycle defect.
+- The owner explicitly requested an **actual cursor-anchored, dismissible, nested Explorer context menu**, not a row toolbar or a cosmetic Chrome-looking screenshot. Right-clicks should never change row height or add controls inside the row.
+- The Explorer menu is more than a mock: it is a **human-operable and machine-inspectable interface to the same source-owned V3+1 menu model** used to register Chrome native contextMenus. Programmatic tests (Python, JavaScript or an authorized agent) must inspect the exact tree, stable item IDs, parent-child nesting, enabled/disabled states, reasons, generation, target identities and resulting outcomes.
+- Scripts should be able to specify the **situation** (selected file, selected folder, source account/bucket/path, context type, authorized state, configured Show combination) and receive the expected menu model **without relying on pixels or screenshot OCR**. The actual on-screen menu still must be interactable by mouse and keyboard; test automation should be able to compare its DOM tree against the canonical menu model and independently observed Chrome native menu.
+- A right-click **folder** menu supports navigation/organization and + Right Click/Default Save Selection/Manage Destinations. A right-click **file** menu must show actual configured V3+1 save destinations with correct nesting, just as Chrome should, and selecting a save route must attempt a **real cloud-to-cloud copy via the existing Universal File API and verified V3+1 dispatcher**, not simulate success.
+- Both the Explorer's file-menu action and a Chrome native context-menu action must resolve through the same canonical target identity and enforcement, with source acquisition appropriate to each environment: Explorer uses Universal File API to read the actual cloud object's bytes; Chrome uses authorized browser source capture. No source URL/provenance goes to destination provider APIs.
+- Repeated right-clicks close or replace a **single menu overlay**. Escape, click-away, switching view, navigation, scrolling and window blur dismiss it. Position beside the pointer, keep menu in viewport, support keyboard navigation and nested fly-outs, and provide disabled item explanations. Ensure nested submenus fit screen edges and remain operable for deep branches.
+- This shared menu model is a first-class **scriptable testing instrument**, not a second implementation of menu/business logic. Expose versioned inspection and authorized real action dispatch through the headless Engine API. Glaciaring remains a read-only observer; its simulations are never proof of live saves.
+- Do not confuse **a GUI menu rendering**, **a compiled MenuSpec**, **Chrome ACK**, **human-observed native rendering**, **a provider upload receipt**, or **independent byte verification**. Track each as separate evidence.
+
+**Development work committed directly to Click2Cloud main after owner reported the bug (not yet browser-verified):**
+
+- extension/app.mjs and extension/app.css: replace row-appended menus with one floating menu; files display a nested canonical-menu mirror.
+- src/api/explorer-context-menu.mjs: inspectable Explorer folder-menu description.
+- src/api/menu-view.mjs: inspectable nested canonical V3+1 MenuSpec description.
+- src/api/service.mjs: add inspectExplorerContextMenu, previewContextMenu and permission-gated dispatchExplorerSave operations.
+- src/core/engine.mjs and extension/background.mjs: wire Explorer-source readStream/stat through the existing Universal File API and same save dispatcher.
+- **This is source-code progress, not verified installed-browser acceptance.** A successfully built or syntactically valid extension alone does not prove nested-menu usability or successful file delivery. The known Cloudflare Worker transport blocker still prevents claiming a working provider-backed save.
+
+**Additional focused acceptance:**
+
+1. Right-click the same folder twenty times, dismissing/reopening: exactly **one** detached menu overlay appears at a time, zero controls are appended to file rows, no accumulating DOM nodes or event listeners.
+2. Verify the menu is anchored to the pointer, viewport-aware, accessible by keyboard, and dismissed correctly; deep submenus do not spill offscreen or disappear during navigation.
+3. Generate and inspect representative Simple/Narrow/Depth/Flat combinations via the headless API; compare the full ordered tree with the Explorer menu's DOM, then separately verify actual Chrome native menu structure/ACK.
+4. Invoke a configured file save from the Explorer menu in an authorized test bucket. Inspect exact bytes from the source via Universal File API, resolve the correct V3+1 target, verify destination readback, report only real confirmed success. With the Worker intentionally unavailable, expect an explicit **blocked** result and no false success.
+5. Drive the same action through a bounded, authorized programmatic client/Python integration, not DOM click automation as the sole contract. Permission-denied, unacknowledged-generation, stale target and uncertain-write cases must be tested.
