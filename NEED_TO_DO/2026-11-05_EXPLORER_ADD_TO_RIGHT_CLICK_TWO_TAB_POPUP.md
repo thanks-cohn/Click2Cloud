@@ -43,7 +43,7 @@ The popup has an unambiguous **Save** action (and Cancel/close). The mode switch
 
 ### Tab 2 — Path Titles (available ONLY in Narrow mode)
 
-This tab is **enabled when Narrow is selected** and **disabled/inaccessible for Simple**. It is a small **two-column top-to-bottom table**, not a graphical tree builder:
+**CRITICAL CONDITIONAL VISIBILITY — not merely disabled:** In **Simple**, the popup displays **ONLY the Setup tab**; the **Path Titles tab/button and its two-column table are completely HIDDEN, not greyed out or shown as an inactive second tab**. When the user selects **Narrow**, **Path Titles appears immediately** as a second selectable tab, containing the two-column top-to-bottom table. If the user switches back to **Simple**, **Path Titles disappears immediately**; if it was open, return the view and keyboard focus safely to Setup. Switching back to Narrow shows Path Titles again with any unsaved path-title draft preserved for this popup session. Nothing about hiding the tab deletes existing saved Narrow aliases or changes the chosen destination. This is a small **two-column top-to-bottom table**, not a graphical tree builder:
 
 | Original location (read-only, left column) | Menu Title (editable, right column) |
 | --- | --- |
@@ -131,6 +131,7 @@ Native Chrome web-content right-click action
 3. Add `redown/Work/Invoices` as Simple title **Invoices** → two Simple **sibling** title options in the Cloudflare submenu; no nested Art/Work folders.
 4. With only the uncustomized default `redown` root present, **REDOWN → Cloudflare** is itself an actionable leaf with no submenu.
 5. Enter **My Photos** in Setup, switch to **Narrow**, open **Path Titles** → left column `redown / Art / Photography` top-down, right column contains editable titles; bottom right **My Photos** already populated.
+5a. With **Simple** selected, **Path Titles is entirely absent** (not a disabled tab and no two-column table). Selecting **Narrow** reveals Path Titles instantly. Switching **Narrow → Simple**, even while Path Titles is open, automatically returns to Setup and hides Path Titles; switching back to Narrow restores this popup session's unsaved row titles.
 6. Edit left row `Art` to title **Visual Arts**; choose another custom root menu alias; save → Narrow Chrome menu titles reflect those aliases while TRUE REMOTE target remains exactly `redown/Art/Photography`.
 7. Change the bottom Path Titles value to **My Pictures**; return to Setup → Menu Title shows **My Pictures** immediately. Cancel does not change canonical state.
 8. Narrow selected but user never opens Path Titles → Save still generates natural ancestry with original parent folder names and entered bottom label.
