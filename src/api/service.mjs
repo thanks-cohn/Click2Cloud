@@ -1,5 +1,6 @@
 import {validateProduct} from './config.mjs';
 import {describeExplorerContextMenu} from './explorer-context-menu.mjs';
+import {describeCanonicalContextMenu} from './menu-view.mjs';
 import {normalizeTarget,stableId,targetKey,freeze} from '../core/menu-identity.mjs';
 import {inspectMenuTree,diffMenuSpecs} from '../core/menu-spec.mjs';
 const fail=code=>{throw Object.assign(Error(code),{code});};
@@ -7,7 +8,7 @@ const copy=value=>structuredClone(value);
 const targetFields=['provider','connectionId','accountId','bucketName','prefix'];
 const definitions={
   describeCapabilities:['inspect',[]],getEngineHealth:['inspect',[]],getConfiguration:['inspect',[]],
-  listDestinations:['inspect',['mode','cursor','limit']],inspectExplorerContextMenu:['inspect',['target']],previewNativeMenu:['inspect',[]],inspectNativeACK:['inspect',[]],
+  listDestinations:['inspect',['mode','cursor','limit']],inspectExplorerContextMenu:['inspect',['target']],previewContextMenu:['inspect',['context']],previewNativeMenu:['inspect',[]],inspectNativeACK:['inspect',[]],
   listRecoveryPolicies:['inspect',[]],inspectBackupRoots:['inspect',[]],inspectWholeCloudJobs:['inspect',['identity']],enableWholeCloudJob:['configure',['identity','cadence']],disableWholeCloudJob:['configure',['identity']],listAccounts:['inspect',[]],listAuthorizedBuckets:['inspect',['accountId','cursor']],listFolders:['inspect',['source','cursor']],
   previewConfigChange:['configure',['change','expectedRevision']],commitConfigChange:['configure',['previewId','expectedRevision','idempotencyKey']],
   reconcileNativeMenu:['configure',[]],requestRestorePreview:['restore',['recoveryPoint','expectedRevision']],
@@ -82,6 +83,12 @@ export function createEngineApi({engine,current,fileApi,getInventory=async()=>({
           return {items,total:all.length,nextCursor:offset+limit<all.length?JSON.stringify({revision:product.revision,mode,offset:offset+limit}):null};
         }
         case 'inspectExplorerContextMenu':return describeExplorerContextMenu(params.target);
+        case 'previewContextMenu': {
+          const evidence=engine.getEvidence(),acknowledged=evidence.acknowledgedGeneration;
+          const installed=acknowledged!==null&&evidence.pending===0&&evidence.desired?.generation===acknowledged?engine.getMenu(acknowledged):null;
+          const spec=installed??await compile(product);
+          return describeCanonicalContextMenu(spec,{context:params.context??'link',nativeAcknowledged:!!installed});
+        }
         case 'previewNativeMenu':return inspectMenuTree(await compile(product),{limit:1000,includeOmissions:true});
         case 'inspectNativeACK':return engine.getEvidence();
         case 'listAccounts':case 'listAuthorizedBuckets':case 'listFolders': {
