@@ -5,8 +5,9 @@ function button(text,fn){const n=el('button',text,{type:'button'});n.onclick=()=
 async function call(method,params={}){const r=await chrome.runtime.sendMessage({channel:'engine',version:1,method,params});if(!r?.ok)throw Error(r?.code??'HOST_UNAVAILABLE');return r.data;}
 async function run(fn){try{return await fn();}catch(e){$('#status').textContent=e.message;}}
 let config,selected=null,accounts=[],buckets=[],view='remotes';
-let explorerContextMenu=null;
+let explorerContextMenu=null,menuRequestSeq=0;
 function dismissExplorerContextMenu({restoreFocus=false}={}){
+  menuRequestSeq++;
   if(!explorerContextMenu)return;
   const {element,owner}=explorerContextMenu; explorerContextMenu=null;element.remove();
   if(restoreFocus&&owner?.isConnected)owner.focus({preventScroll:true});
@@ -16,11 +17,11 @@ function dismissExplorerContextMenu({restoreFocus=false}={}){
 // inspectExplorerContextMenu; this DOM is a presentation of those descriptors.
 async function showExplorerContextMenu(event,source,entry,root,owner){
   event.preventDefault();event.stopPropagation();
-  dismissExplorerContextMenu();
+  dismissExplorerContextMenu();const seq=menuRequestSeq;
   const currentTarget=target({...source,prefix:entry.key});
   selected=currentTarget;
   const descriptor=await call('inspectExplorerContextMenu',{target:currentTarget});
-  if(!owner?.isConnected)return;
+  if(!owner?.isConnected||seq!==menuRequestSeq)return;
   const menu=el('div',undefined,{className:'explorer-context-menu'});
   menu.id='explorer-context-menu';menu.setAttribute('role','menu');
   menu.setAttribute('aria-label','Folder actions: '+entry.displayName);
@@ -64,6 +65,85 @@ async function showExplorerContextMenu(event,source,entry,root,owner){
   explorerContextMenu={element:menu,owner};
   menu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
 }
+
+async function showExplorerFileMenu(event,source,entry,owner){
+  event.preventDefault();event.stopPropagation();
+  dismissExplorerContextMenu();const seq=menuRequestSeq;
+  const preview=await call('previewContextMenu',{context:'link'});
+  if(!owner?.isConnected||seq!==menuRequestSeq)return;
+  const menu=el('div',undefined,{className:'explorer-context-menu'});
+  menu.id='explorer-context-menu';menu.dataset.menuKind='explorer.file';
+  menu.dataset.source=JSON.stringify(source);menu.dataset.entryKey=entry.key;
+  menu.setAttribute('role','menu');menu.setAttribute('aria-label','Send '+entry.displayName+' to cloud');
+  menu.tabIndex=-1;
+  const save=async action=>{
+    const params={
+      itemId:action.itemId,generation:preview.generation,context:'link',
+      source:{accountId:source.accountId,bucketName:source.bucketName,prefix:source.prefix??''},
+      entry:{key:entry.key,displayName:entry.displayName,folder:false,...(entry.contentType?{contentType:entry.contentType}:{})},
+      idempotencyKey:crypto.randomUUID()
+    };
+    await call('confirmJob',{method:'dispatchExplorerSave',params});
+    const result=await call('dispatchExplorerSave',params);
+    $('#status').textContent=result.state==='completed'
+      ?'Verified save completed.'
+      :'Cloud save not confirmed: '+(result.code??result.state);
+  };
+  const renderNode=(item,container)=>{
+    const holder=el('div',undefined,{className:'explorer-menu-node'});
+    const control=el('button',item.label+(item.children?.length?' ›':''),{type:'button'});
+    control.dataset.itemId=item.itemId;control.dataset.actionId=item.actionId??'';
+    control.setAttribute('role','menuitem');
+    holder.append(control);
+    if(item.children?.length){
+      const submenu=el('div',undefined,{className:'explorer-context-submenu'});
+      submenu.setAttribute('role','menu');submenu.setAttribute('aria-label',item.label);
+      control.setAttribute('aria-haspopup','menu');
+      control.setAttribute('aria-expanded','false');
+      for(const child of item.children)renderNode(child,submenu);
+      holder.append(submenu);
+      control.addEventListener('pointerenter',()=>control.setAttribute('aria-expanded','true'));
+      control.addEventListener('click',()=>{control.setAttribute('aria-expanded',control.getAttribute('aria-expanded')==='true'?'false':'true');});
+    }else{
+      control.disabled=item.role!=='save'||!item.enabled||!preview.nativeAcknowledged;
+      control.title=control.disabled?(!preview.nativeAcknowledged?'Native Chrome menu is not acknowledged':item.reason??'Unavailable'):'Save file to this cloud destination';
+      control.addEventListener('click',()=>{
+        if(explorerContextMenu?.element!==menu)return;
+        dismissExplorerContextMenu();void run(()=>save(item));
+      });
+    }
+    container.append(holder);
+  };
+  for(const root of preview.roots??[])renderNode(root,menu);
+  if(!preview.roots?.length)menu.append(el('span','No configured destinations'));
+  if(!preview.nativeAcknowledged)menu.append(el('small','Configure destinations to enable verified saves.'));
+  menu.addEventListener('contextmenu',e=>e.preventDefault());
+  menu.addEventListener('keydown',e=>{
+    const current=e.target.closest('button[role=menuitem]'),node=current?.parentElement;
+    const parentMenu=node?.parentElement;
+    const peers=parentMenu?[...parentMenu.children].map(h=>h.querySelector(':scope > button[role=menuitem]')).filter(b=>b&&!b.disabled):[];
+    const index=peers.indexOf(current);
+    if(e.key==='Escape'){e.preventDefault();dismissExplorerContextMenu({restoreFocus:true});return;}
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Home'||e.key==='End'){
+      e.preventDefault();
+      if(!peers.length)return;
+      const next=e.key==='Home'?0:e.key==='End'?peers.length-1:
+        (index+(e.key==='ArrowDown'?1:peers.length-1))%peers.length;
+      peers[next]?.focus();
+    }else if(e.key==='ArrowRight'){
+      const child=node?.querySelector(':scope > [role=menu] > .explorer-menu-node > button:not(:disabled)');
+      if(child){e.preventDefault();current.setAttribute('aria-expanded','true');child.focus();}
+    }else if(e.key==='ArrowLeft'){
+      const parent=parentMenu?.parentElement?.querySelector(':scope > button[role=menuitem]');
+      if(parent){e.preventDefault();parent.focus();}
+    }
+  });
+  document.body.append(menu);
+  menu.style.left=Math.max(8,Math.min(event.clientX,window.innerWidth-menu.offsetWidth-8))+'px';
+  menu.style.top=Math.max(8,Math.min(event.clientY,window.innerHeight-menu.offsetHeight-8))+'px';
+  explorerContextMenu={element:menu,owner};
+  menu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+}
 document.addEventListener('pointerdown',event=>{
   if(explorerContextMenu&&!explorerContextMenu.element.contains(event.target))dismissExplorerContextMenu();
 },true);
@@ -101,7 +181,7 @@ async function render(){await refresh();$('#heading').textContent={remotes:'Remo
  }
 }
 async function folder(source,root){dismissExplorerContextMenu();selected=target(source);root.replaceChildren(el('h3',source.bucketName+'/'+source.prefix));root.append(button('+ Right Click',()=>openEditor()),button('Default Save Selection',()=>commit({type:'setFlatDefault',target:selected})),button('Manage Destinations',()=>openManager()));
- const r=await call('listFolders',{source});if(r.state!=='completed')throw Error(r.code??r.error);for(const entry of r.data.entries){const row=el('div',undefined,{className:'row'});row.append(el('span',(entry.folder?'▣ ':'')+entry.displayName));if(entry.folder){row.append(button('Open',()=>folder({...source,prefix:entry.key},root)));row.tabIndex=0;row.oncontextmenu=e=>void run(()=>showExplorerContextMenu(e,source,entry,root,row));row.addEventListener('keydown',e=>{if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();const bounds=row.getBoundingClientRect();void run(()=>showExplorerContextMenu({preventDefault(){},stopPropagation(){},clientX:bounds.left+20,clientY:bounds.top+20},source,entry,root,row));}});}root.append(row);}}
+ const r=await call('listFolders',{source});if(r.state!=='completed')throw Error(r.code??r.error);for(const entry of r.data.entries){const row=el('div',undefined,{className:'row'});row.append(el('span',(entry.folder?'▣ ':'')+entry.displayName));if(entry.folder){row.append(button('Open',()=>folder({...source,prefix:entry.key},root)));}row.tabIndex=0;row.oncontextmenu=e=>void run(()=>entry.folder?showExplorerContextMenu(e,source,entry,root,row):showExplorerFileMenu(e,source,entry,row));row.addEventListener('keydown',e=>{if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();const bounds=row.getBoundingClientRect();const virtualEvent={preventDefault(){},stopPropagation(){},clientX:bounds.left+20,clientY:bounds.top+20};void run(()=>entry.folder?showExplorerContextMenu(virtualEvent,source,entry,root,row):showExplorerFileMenu(virtualEvent,source,entry,row));}});root.append(row);}}
 let draft,tab,title,aliases,depthDraft,editingTarget;
 function openEditor(){draft=structuredClone(config.show);tab='simple';title='';aliases=[];editingTarget=structuredClone(selected);depthDraft=structuredClone(config.configs.depth.scopes);renderEditor();$('#editor').showModal();}
 function renderEditor(){const tabs=$('#tabs');tabs.replaceChildren();for(const mode of ['simple','narrow','depth'])tabs.append(button(mode[0].toUpperCase()+mode.slice(1),()=>{tab=mode;renderEditor();}));const setup=$('#setup');setup.replaceChildren();
