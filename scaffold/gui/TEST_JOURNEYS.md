@@ -80,6 +80,9 @@ Every test must report PASS / FAIL / BLOCKED / NOT TESTED with actual evidence. 
 | REC-08 | Companion unavailable, filesystem read-only/disk-full, or 50-level recovery crawl interrupted. | Report incomplete/not protected truthfully; retain known index and resumable cursor; don't fabricate recovery receipts. **R** |
 | REC-09 | Corrupt only Depth index, preserve other backup namespaces. | Restore intact Simple/Narrow/Depth-display/Flat/Recovery policies untouched; no forced loss of menu choices. **R** |
 
+| REC-10 | In Settings → Backup Location choose Automatic (default) %LOCALAPPDATA%\Click2Cloud\Recovery\, then Documents\Click2Cloud\Backups\, then back. | Only the selected root is active. An existing backup root is copied and verified (all four recovery namespaces: CURRENT, monthly journals, dated snapshots, manifests) before switching; failed relocation keeps prior root and prior backups. Documents is the real backup root, not exports-only. No Chrome-profile storage used as sole durable copy. **R** |
+| REC-11 | Commit configuration changes on November 30, December 1 and January 1 (cross-year) and then restore after CURRENT corruption. | Automatically generate distinct journal files by YYYY-MM for each month (2026-11.jsonl, 2026-12.jsonl, 2027-01.jsonl are illustrative only); preserve globally continuous per-namespace sequence numbers, ordered multi-month replay, and immutable dated weekly/daily backups. **R** |
+
 ## E. Real native Chrome + Worker/R2 acceptance (MANDATORY, not optional after demo)
 
 | IC | Action | Required proof |
