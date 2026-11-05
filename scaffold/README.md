@@ -48,7 +48,7 @@ REDOWN
         My Photos            ← redown/Art/Photography
 ```
 
-These are *three separate views* selected by V3+1, not an instruction to display every branch or mode simultaneously. The actual selected folder has the same exact destination in Simple and Narrow.
+The three examples above isolate individual menu shapes **for illustration only**. In the FINAL V3+1 model, **saved Simple choices and saved Narrow branches COEXIST**, and **Depth can be toggled ON to add its discovered tree alongside both**. Turning Depth OFF removes only its generated branches. The actual selected folder may be represented differently in Simple and Narrow without changing the cloud destination. Do NOT implement historical mutually exclusive projection semantics.
 
 ## Depth controls and resulting composite menu (latest owner decision)
 
@@ -148,4 +148,4 @@ The `All Folders` heading above is an **illustrative collision-safe grouping pro
 - [V3+1 Codex execution contract](../FOREVER_WORKS/CODEX_REBUILD_FROM_REDOWN_CURRENT_V3_EXTRACTION_2026-11-05.md)
 - [Instant mode-switching requirements](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md)
 
-**Source-of-truth precedence:** This document captures the owner's latest UX wording. Where earlier docs describe Simple as a single global marker, a native Cloudflare leaf with no configured locations, or mistakenly call TRUE REMOTE the "V3+1 engine", use these latest distinctions. Do not claim this scaffold has implemented any engine behavior until actual code and tests prove it.
+**Source-of-truth precedence:** The dated `/scaffold/README.md` and its [independent menu recovery contract](./MENU_DESTINATIONS_DURABLE_RECOVERY.md) define the **latest owner-approved end state**. Earlier FOREVER_WORKS/NEED_TO_DO/docs V3+1 source mappings are evidence and implementation references, but any old statements about (a) a single global Simple marker, (b) mutually exclusive Simple/Narrow/Depth projections, (c) Depth being selected instead of an additive ON/OFF tree, (d) a separate popup stacked over the saved-destination manager, (e) in-Chrome backup being uninstall-safe, or (f) TRUE REMOTE being the V3+1 engine are **superseded**. Resolve conflicts to this scaffold explicitly before coding, preserve REDOWN implementation facts as historical, and do not claim current implementation/test completion based only on documentation.
