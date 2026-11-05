@@ -58,6 +58,37 @@ Illustrative file structure:
     backups/2026-W45.json
 ```
 
+### Backup Location — user-selected Windows recovery folder
+
+Settings → **Backup / Recovery Mode** MUST offer exactly two clear **Backup Location** choices. The selected location is the REAL independent durable recovery root used for CURRENT, monthly delta journals, manifests, and historical backup snapshots—not a one-time export.
+
+| Choice | Windows location | Role |
+| --- | --- | --- |
+| **Automatic (DEFAULT)** | **%LOCALAPPDATA%\Click2Cloud\Recovery\** | Native-companion-managed recovery outside Chrome cache/profile and extension-origin IndexedDB |
+| **Documents** | **Documents\Click2Cloud\Backups\** | User-visible durable recovery outside Chrome cache/profile; resolve actual Windows Documents known-folder path instead of hardcoding user paths |
+
+- Exactly **one** active recovery location is selected at a time; neither choice means both locations receive automatic copies. An optional second-copy feature would require separate opt-in.
+- When the user changes the backup location, perform **Copy → checksum/readback Verify → Switch** across all namespaces, including CURRENT, journals, dated snapshots and policy metadata; preserve the old location until the destination is verified. On error, keep the old active root and show an accurate failure. Never delete the original without separate explicit confirmation.
+- The shared authorized Windows native companion writes/reads the selected folder. The extension must not treat Chrome storage or IndexedDB as an uninstall-safe copy. The active location and recovery instructions must remain discoverable after reinstall (possibly requiring the user to select the surviving recovery directory).
+- Both locations are outside Chrome's routine cache/extension-data deletion, **not** immune to Windows account deletion, disk cleanup, uninstaller removal, hardware failures or deliberate user deletion. Do not claim absolute safety.
+- The local recovery folder contains no OAuth secrets, access tokens, or browsing-source URLs.
+
+### Dynamic calendar filenames, NOT a November 2026-only system
+
+Every **journal/YYYY-MM.jsonl** is a **format pattern**, not a hardcoded date. The companion automatically rolls over to a new append-only file every calendar month: **2026-11.jsonl**, **2026-12.jsonl**, **2027-01.jsonl**, and so on. Changes retain a **global monotonic sequence across monthly files** within each recovery namespace, ensuring replay across year boundaries. At month rollover, close/flush the prior file; do not overwrite, reset the sequence or discard old months.
+
+Weekly dated backups use the ISO week-year convention **YYYY-Www.json** (e.g. **2026-W45.json**, **2026-W46.json**), with **backups/weekly.json** as the atomic latest verified alias/pointer, never a replacement for the immutable dated history. Daily dated backups use the actual calendar date **YYYY-MM-DD.json** when Daily is enabled. The example names in this document are **illustrative only**; dynamically calculate periods from the companion's correct local time and handle year boundaries.
+
+### Back up everything: contents and cadence
+
+When Simple Recovery and Narrow Recovery are enabled and the user enables desired buckets in Depth Recovery, the chosen recovery folder preserves:
+- Full committed Simple destination names, IDs, folder locations and ordering; full Narrow paths and per-ancestor menu labels; popup-only Show settings and the verified Flat Default Save Selection.
+- Depth's separately saved **DISPLAY** bucket selections/depths, separately saved **RECOVERY** buckets/depths, the known verified directory index and partial/resumable discovery state.
+- Recovery Mode Weekly/Daily selection, per-mode/bucket recovery enablement, namespace versions, checksums, dated checkpoints and deltas. This is a backup of **configuration and directory knowledge**, not copies of actual cloud file contents or OAuth credentials.
+
+**Weekly** creates an immutable complete historical checkpoint on the first eligible Monday while the authorized scheduler is operating (or transparently catches up when it resumes). **Daily** creates an immutable complete checkpoint on each eligible calendar day. **In BOTH cases, CURRENT.json is updated after every committed relevant change, and the monthly delta journal receives that change immediately.** The choice is historical snapshot frequency, not the frequency at which the latest recovery state is persisted.
+
+
 ### CURRENT.json, delta journal and weekly.json have DIFFERENT jobs
 
 - **`CURRENT.json` = complete latest VERIFIED committed snapshot** for its subsystem. On every successful relevant save/change (or verified index update), atomically replace CURRENT (temp write + validated durable replace where possible). Include schema/version, namespace, exact account/bucket identities, sequence/generation, checksum/integrity data and coverage metadata. Never include OAuth secrets, raw source URLs or access tokens. It is updated **continuously**, NOT only weekly.
