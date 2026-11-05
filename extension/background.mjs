@@ -41,7 +41,7 @@ const registrar=createChromeRegistrar({chrome,sink:diagnostics,persist:value=>ch
     return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,context:info.srcUrl?'image':'link',source:{url,filename}});
   },onOutcome:async result=>{await chrome.storage.local.set({lastSave:{state:result?.state,code:result?.code??null}});}
 });
-engine=createEngine({current,registrar,providers:{cloudflare:provider},getAuthorization,diagnostics,
+engine=createEngine({current,registrar,providers:{cloudflare:provider},getAuthorization,diagnostics,fileApi,
   authorizeSource:async source=>{try{const u=new URL(source.url);return ['https:','http:'].includes(u.protocol)&&await chrome.permissions.contains({origins:[u.origin+'/*']});}catch{return false;}},fetchSource:fetch});
 async function external() {
   const handle=await current.readBackupRoot();
