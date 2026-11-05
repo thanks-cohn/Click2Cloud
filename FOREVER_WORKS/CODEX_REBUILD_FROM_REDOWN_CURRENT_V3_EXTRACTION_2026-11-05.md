@@ -5,7 +5,7 @@
 **Reference repository:** thanks-cohn/REDOWN (READ ONLY)  
 **Pinned REDOWN source:** 0fe8f7dce301027ad53e1958e037b82652c57088  
 **Precondition:** Read [REDOWN_CURRENT_V3_SOURCE_EXTRACTION_2026-11-05.md](./REDOWN_CURRENT_V3_SOURCE_EXTRACTION_2026-11-05.md) in full before changing code. It defines SOURCE vs OWNER-NEW vs TARGET/GAP.  
-**Other required references:** [Click2Cloud runbook](../docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md), [complete behavioral contract](../docs/V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md), and [owner's latest fast-mode/marker note](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md).
+**Other required references:** [Click2Cloud runbook](../docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md), [complete behavioral contract](../docs/V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md), and the **latest controlling [two-tab popup + paginated Shelf existing-destinations spec](../NEED_TO_DO/2026-11-05_EXPLORER_ADD_TO_RIGHT_CLICK_TWO_TAB_POPUP.md)** plus [fast-mode note](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md).
 
 **This document is a work request and correctness contract, NOT a claim the functionality has been delivered.**
 
@@ -21,11 +21,13 @@
 
 ### The three modes (selection logic only; transport never changes)
 
-**Simple** = user selects a single authorized cloud location and marks it Simple. Chrome receives **REDOWN → Cloudflare** as one actionable flat leaf; clicking it TRUE REMOTE saves to the exact marked account/bucket/prefix. With no marker, use uniquely authorized default lowercase redown root. Other configured locations do not automatically turn Simple into a submenu.
+**Simple** = user right-clicks an Explorer location → Add to Right-Click → Setup tab: Menu Title + Simple/Narrow switch. Saving Simple creates **one user-labeled flat option within Cloudflare's submenu**, and **multiple Simple options are allowed** (REDOWN → Cloudflare → My Photos, Invoices, etc.). **Only** when the sole destination is the uncustomized authorized default lowercase redown root does REDOWN → Cloudflare itself act as one direct leaf, with no submenu. All resolve exact destination IDs and save TRUE REMOTE.
 
-**Narrow** = user manually configures many eligible destinations and custom menu labels. Chrome displays a natural nested hierarchy of those configured paths and necessary ancestors, including Save here at a selectable parent that has children. Unconfigured directories do not appear. This is the **simple nesting option**.
+**Narrow** = same popup's Setup tab lets user select Narrow, enabling second **Path Titles** tab with original path segments top-down on left and per-level editable Menu Titles on right. Existing Setup title auto-populates the **bottom/final destination row** and the two values stay synchronized. Many manually configured paths form naturally nested labeled ancestry; only those configured routes/ancestors appear, including Save here at a selectable parent when needed. This is the **simple nesting option**.
 
 **Depth** = using cached canonical discovered folders, display authorized paths up to the selected depth, including eligible paths not explicitly configured. Distinguish confirmed/partial/incomplete nodes and never advertise stale authorization.
+
+**Saved destination management on Shelf:** A small aesthetically positioned **circular pointer icon beneath the odometer and aligned toward the right** opens saved destinations. Two **Simple** and **Narrow** subsections show each saved location as a scrollable, paginated row. **Clicking ANY row opens the exact same two-tab popup in prefilled Edit mode**, where Menu Title, Simple/Narrow choice and, for Narrow, per-level Path Titles are editable. Save updates the SAME canonical record, not another duplicate; Cancel discards changes. Depth is controlled separately, not shown as stored user-picked destinations.
 
 Selecting any mode must not mutate the other two mode configurations or perform an unsolicited remote listing. **Mode selector click-to-visible state target: p95 <100 ms on warmed valid local data, measured, not assumed.** Native Chrome registration may finish asynchronously; do not say Applied until matching ACK.
 
@@ -83,10 +85,10 @@ These are *behavioral interfaces* for Codex to map to existing code. Avoid gratu
 ## E. Pure menu compiler tasks
 
 ### Simple (must be the *fastest* path)
-- Build single actionable Cloudflare node under REDOWN from one validated Simple marker/default. Do not synthesize an intermediate Cloudflare submenu, redown child or Home leaf.
+- Build **multiple individually labeled Simple option leaves under Cloudflare**, each binding an exact saved authorized path; **do not nest by the source folder's ancestors**. When only the uncustomized redown root is active, Cloudflare itself is the single actionable leaf without submenu. Do not invent Home/redundant redown children.
 - Do not traverse full folders, compute Depth inventory, or block on TTL when showing Simple.
-- Keep user Menu Label as saved metadata for the destination (use in setup/Narrow where needed), while preserving the native provider label **Cloudflare** for flat Simple.
-- Support changing the marker without deleting Narrow routes, resetting Depth preferences, provisioning cloud files, or inventing account scope.
+- Show the user's saved Menu Title as the native **Simple option label** (e.g., My Photos); retain **Cloudflare** as the provider submenu title when more than the default root choice exists.
+- Allow several independently configured Simple options without overwriting each other; editing one option changes only that exact record, without deleting Narrow routes, resetting Depth, or provisioning cloud files.
 
 ### Narrow
 - Build a canonical trie/parent-child map from *only* user-configured paths.
@@ -147,13 +149,13 @@ TRUE REMOTE steps:
 
 Write/port automated tests and present results **with exact commands, environments and current run evidence**, not merely references to old REDOWN logs:
 
-1. **Compiler:** deterministic output; default Simple direct Cloudflare leaf; marked Simple exact subfolder; no extra Simple menu options; Narrow configured-only multi-route labels; Depth includes allowed unconfigured; collision, cycle, disabled ancestor, same label across accounts.
+1. **Compiler:** deterministic output; default uncustomized redown root yields direct Cloudflare leaf; **one and multiple labeled Simple submenu options** save to exact paths; Narrow configurable per-segment path labels; Depth includes allowed unconfigured; collision, cycle, disabled ancestor, same label across accounts.
 2. **CURRENT:** rollback on fault-injected transaction failure; journal per semantic change; no changes on identical snapshot; daily/weekly/off; concurrency in two windows; auth revocation; stale JSON/backup; session restart; pointer native acknowledgment on matching generation.
 3. **Performance:** each of six direction transitions among Simple/Narrow/Depth, including change Depth 1/10; 0/100/5,000 cached folder nodes; 0/5/200 configured routes; 30+ iterations warm and cold; no network calls on warmed mode switch. Report click → UI p95 and registration time separately.
 4. **Native:** installed Chrome MV3 right-click submenu UI (not only DOM mocks); update/create/remove ACK, worker restart, missing IDs, reorder, duplicate IDs, malformed parent graph, root/Manage preserved, no stale unauthorized save.
 5. **TRUE REMOTE:** controlled public HTTPS source reachable from Worker, actual URL-control POST, Worker remote fetch, byte-accurate verified R2 object/size/metadata, no local browser asset fetch or download, exact prefix, Keep Both, bad URLs, private host, redirect, auth expiry, unsafe/cookie-gated targets, unknown-length source, capped size.
 6. **Other providers:** one Google Drive/Dropbox/OneDrive sibling, no nested Cloudflare ownership, real byte upload contract where authenticated, no source provenance, exact receipt and failure lifecycle.
-7. **UX:** keyboard/focus in editor, Add/Rename/Delete/Undo, Save Changes vs Apply status, rapid mode switching, deep links/management, permissions denied, missing worker, stale cache.
+7. **UX:** Explorer context-menu **Add to Right-Click** opens small **two-tab popup**; Tab 1 only Menu Title + Simple/Narrow switch; Tab 2 only for Narrow, top-down original path on left and title field on right, Setup title synced to bottom field. Shelf circular pointer below/right odometer opens **scrollable paginated saved destination rows grouped Simple/Narrow**; clicking ANY row reopens same prefilled popup and Save updates in place. Also test Cancel, keyboard/focus, duplicate/conflict handling, rapid mode switching, actual Chrome ACK, permissions denied, missing worker and stale cache.
 8. **Security and correctness:** stable one-use click intent on overflow if still necessary, no silent fallback to another destination, no secrets in logs/backups, bounded resource consumption.
 9. **Compatibility:** compare REDOWN current source projections against extracted Click2Cloud except where OWNER-NEW explicitly overrides; run a side-by-side behavior table and explain every intentional difference.
 10. **Evidence ladder:** distinguish static extraction, mocked unit tests, real installed-Chrome native menu, live Cloudflare Worker receipt, and independent byte verification. Never call a Cloudflare build green if browser/Worker tests were blocked.
@@ -162,7 +164,7 @@ Write/port automated tests and present results **with exact commands, environmen
 
 **Phase 0: Audit** REDOWN pinned commit; inventory Click2Cloud current files; run baseline tests; produce a concise KEEP/ADAPT/REJECT map and small, reproducible traces. Read license/third-party boundaries. Do not rewrite modules prematurely.
 
-**Phase 1: Canonical graph and compiler** with one effective Simple marker, Narrow trie, Depth indexed projection, deterministic identities and unit tests. Preserve extracted Universal File API as the file-operation boundary.
+**Phase 1: Canonical graph and compiler** with multiple independently labeled Simple options, an uncustomized flat default, Narrow per-segment title trie, Depth indexed projection, deterministic identities and unit tests. Preserve extracted Universal File API as the file-operation boundary.
 
 **Phase 2: Native menu and CURRENT** deterministic snapshot, journal/backup, high-speed transitions, safe Chrome registrar, sender-checked configuration and restoration.
 
