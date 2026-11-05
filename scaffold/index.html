@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Click2Cloud — V3+1 UI Scaffold</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">C<span>2</span>C</span><span><strong>Click2Cloud</strong><small>V3+1 · Universal File API</small></span></div>
+      <span class="prototype-tag">INTERACTIVE SCAFFOLD · DEMO ONLY</span>
+    </header>
+
+    <main class="workspace">
+      <section class="explorer panel" aria-labelledby="explorer-title">
+        <div class="section-head">
+          <div><span class="eyebrow">01 / SELECT A LOCATION</span><h1 id="explorer-title">File Explorer</h1></div>
+          <button id="add-right-click" class="button primary" type="button"><span aria-hidden="true">＋</span> Right Click</button>
+        </div>
+        <p class="hint">Select an authorized destination folder, then choose <strong>+ Right Click</strong>. You can also right-click a row.</p>
+        <div class="explorer-breadcrumb">Cloudflare R2 <span>›</span> <strong>redown</strong></div>
+        <div class="folder-heading"><span>DIRECTORY</span><span>LOCATION</span></div>
+        <div id="folder-list" class="folder-list" role="listbox" aria-label="Demo File Explorer folders"></div>
+        <div class="selection-summary"><span class="tiny-dot"></span><span id="selected-path">redown / Art / Photography</span></div>
+      </section>
+
+      <section class="dashboard panel" aria-labelledby="dashboard-title">
+        <div class="section-head">
+          <div><span class="eyebrow">02 / CONTROL & REVIEW</span><h2 id="dashboard-title">Dashboard</h2></div>
+          <span class="aside-badge">CURRENT · UI PREVIEW</span>
+        </div>
+        <div class="odometer-wrap">
+          <div class="odometer">
+            <span class="eyebrow">YOUR CLOUD COMPANION</span>
+            <div class="digits" aria-label="Decorative demo odometer">0 0 0 0 0 8</div>
+            <span class="odometer-note">Destination control</span>
+          </div>
+          <button id="open-saved" class="pointer-button" type="button" title="Saved Right-Click Destinations" aria-label="Saved Right-Click Destinations">
+            <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M5 3.5v16l4.4-4.4 3.1 6 3-1.5-3.2-6 6.6-.6z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <div class="section-head saved-heading">
+          <div><span class="eyebrow">YOUR SAVED LOCATIONS</span><h3>Right-Click Destinations</h3></div>
+          <button id="refresh-view" class="button subtle" type="button">Show all</button>
+        </div>
+        <p class="hint">Click any saved destination row to reopen the very same editor with its original configuration.</p>
+        <div id="saved-groups" class="saved-groups" aria-live="polite"></div>
+
+        <div class="depth-control">
+          <div class="depth-heading">
+            <div><strong>Automatic Depth</strong><small>Separate from saved Simple and Narrow destinations</small></div>
+            <label class="switch"><input type="checkbox" id="depth-enabled" /><span class="switch-track"></span><span class="sr-only">Enable Depth</span></label>
+          </div>
+          <div id="depth-detail" class="depth-detail" hidden><label for="depth-range">Levels <output id="depth-number">3</output></label><input id="depth-range" type="range" min="1" max="10" value="3" /></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="menu-demo panel" aria-labelledby="preview-title">
+      <div class="section-head"><div><span class="eyebrow">03 / V3+1 PROJECTION</span><h2 id="preview-title">Native Menu Shapes</h2></div><span class="aside-badge">NOT REGISTERED IN CHROME</span></div>
+      <div class="mode-previews">
+        <div><h3>Simple · One pop-out</h3><div id="simple-preview" class="menu-tree"></div></div>
+        <div><h3>Narrow · Branches by path</h3><div id="narrow-preview" class="menu-tree"></div></div>
+      </div>
+      <p class="hint">These are visual representations of the intended V3+1 menu spec, not registered Chrome context menus. Cloudflare's transfer adapter is separate from the menu engine.</p>
+    </section>
+  </div>
+
+  <div id="editor-backdrop" class="backdrop" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <div class="dialog-header"><div><span class="eyebrow">CONFIGURE MENU DESTINATION</span><h2 id="editor-title">+ Right Click</h2></div><button id="editor-close" type="button" class="icon-button" aria-label="Close editor">×</button></div>
+      <p id="editor-path" class="dialog-path"></p>
+      <div id="editor-tabs" class="tabs" role="tablist" aria-label="Destination editor tabs">
+        <button id="setup-tab" class="tab active" type="button" role="tab" aria-selected="true">Setup</button>
+        <button id="titles-tab" class="tab" type="button" role="tab" aria-selected="false" hidden>Menu Titles</button>
+      </div>
+      <div id="editor-body" class="dialog-body">
+        <div id="setup-panel" role="tabpanel" aria-labelledby="setup-tab">
+          <label class="field" for="menu-title"><span>Menu Title <em>Optional</em></span><input id="menu-title" maxlength="60" autocomplete="off" placeholder="Uses folder name when empty" /></label>
+          <label class="mode-label">Menu style</label>
+          <div class="mode-switch" role="group" aria-label="Menu style">
+            <button id="choose-simple" class="chosen" type="button" aria-pressed="true">Simple</button>
+            <button id="choose-narrow" type="button" aria-pressed="false">Narrow</button>
+          </div>
+          <p id="mode-explainer" class="hint mode-explainer">One submenu pop-out. No folder-by-folder branches.</p>
+        </div>
+        <div id="titles-panel" role="tabpanel" aria-labelledby="titles-tab" hidden>
+          <div class="titles-grid-heading"><span>ACTUAL DIRECTORY · READ ONLY</span><span>MENU TITLE · EDITABLE</span></div>
+          <div id="path-titles-rows" class="path-title-rows"></div>
+        </div>
+      </div>
+      <footer class="dialog-actions"><button id="editor-cancel" class="button subtle" type="button">Cancel</button><button id="editor-save" class="button primary" type="button">Save</button></footer>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
