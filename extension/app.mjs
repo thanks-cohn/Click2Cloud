@@ -5,6 +5,74 @@ function button(text,fn){const n=el('button',text,{type:'button'});n.onclick=()=
 async function call(method,params={}){const r=await chrome.runtime.sendMessage({channel:'engine',version:1,method,params});if(!r?.ok)throw Error(r?.code??'HOST_UNAVAILABLE');return r.data;}
 async function run(fn){try{return await fn();}catch(e){$('#status').textContent=e.message;}}
 let config,selected=null,accounts=[],buckets=[],view='remotes';
+let explorerContextMenu=null;
+function dismissExplorerContextMenu({restoreFocus=false}={}){
+  if(!explorerContextMenu)return;
+  const {element,owner}=explorerContextMenu; explorerContextMenu=null;element.remove();
+  if(restoreFocus&&owner?.isConnected)owner.focus({preventScroll:true});
+}
+// One floating, inspectable menu instance for the whole Explorer, never a row child.
+// The same headless action descriptors are available to authorized scripts through
+// inspectExplorerContextMenu; this DOM is a presentation of those descriptors.
+async function showExplorerContextMenu(event,source,entry,root,owner){
+  event.preventDefault();event.stopPropagation();
+  dismissExplorerContextMenu();
+  const currentTarget=target({...source,prefix:entry.key});
+  selected=currentTarget;
+  const descriptor=await call('inspectExplorerContextMenu',{target:currentTarget});
+  if(!owner?.isConnected)return;
+  const menu=el('div',undefined,{className:'explorer-context-menu'});
+  menu.id='explorer-context-menu';menu.setAttribute('role','menu');
+  menu.setAttribute('aria-label','Folder actions: '+entry.displayName);
+  menu.dataset.menuKind=descriptor.kind;
+  menu.dataset.target=JSON.stringify(descriptor.target);
+  menu.tabIndex=-1;
+  const perform={
+    'explorer.open':()=>folder({...source,prefix:entry.key},root),
+    'explorer.rightClickSetup':()=>openEditor(),
+    'explorer.setFlatDefault':()=>commit({type:'setFlatDefault',target:currentTarget}),
+    'explorer.manageDestinations':()=>openManager()
+  };
+  for(const item of descriptor.items){
+    const action=perform[item.id];
+    const control=el('button',item.label,{type:'button'});
+    control.setAttribute('role','menuitem');
+    control.dataset.actionId=item.id;
+    control.disabled=item.enabled===false||typeof action!=='function';
+    control.addEventListener('click',()=>{
+      if(explorerContextMenu?.element!==menu)return;
+      dismissExplorerContextMenu();
+      if(action)void run(action);
+    });
+    menu.append(control);
+  }
+  menu.addEventListener('contextmenu',e=>e.preventDefault());
+  menu.addEventListener('keydown',e=>{
+    const controls=[...menu.querySelectorAll('button:not(:disabled)')],index=controls.indexOf(document.activeElement);
+    if(e.key==='Escape'){e.preventDefault();dismissExplorerContextMenu({restoreFocus:true});}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      controls[(index+(e.key==='ArrowDown'?1:controls.length-1))%controls.length]?.focus();
+    }else if(e.key==='Home'||e.key==='End'){
+      e.preventDefault();controls[e.key==='Home'?0:controls.length-1]?.focus();
+    }
+  });
+  document.body.append(menu);
+  const width=menu.offsetWidth,height=menu.offsetHeight;
+  menu.style.left=Math.max(8,Math.min(event.clientX,window.innerWidth-width-8))+'px';
+  menu.style.top=Math.max(8,Math.min(event.clientY,window.innerHeight-height-8))+'px';
+  explorerContextMenu={element:menu,owner};
+  menu.querySelector('button:not(:disabled)')?.focus({preventScroll:true});
+}
+document.addEventListener('pointerdown',event=>{
+  if(explorerContextMenu&&!explorerContextMenu.element.contains(event.target))dismissExplorerContextMenu();
+},true);
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&explorerContextMenu)dismissExplorerContextMenu({restoreFocus:true});
+},true);
+document.addEventListener('scroll',()=>dismissExplorerContextMenu(),true);
+window.addEventListener('blur',()=>dismissExplorerContextMenu());
+
 async function refresh(){config=await call('getConfiguration');const h=await call('getEngineHealth');$('#health').textContent=`Revision ${h.revision} · Native ${h.native.nativeApi}`;}
 async function commit(change){const p=await call('previewConfigChange',{change,expectedRevision:config.revision});await call('confirmPreview',{previewId:p.previewId});const result=await call('commitConfigChange',{previewId:p.previewId,expectedRevision:p.expectedRevision,idempotencyKey:crypto.randomUUID()});await refresh();$('#status').textContent=`Saved revision ${result.revision} · Chrome: ${result.native.code} · External backup: ${result.backup.state}`;return result;}
 function target(source){return {provider:'cloudflare',connectionId:'cloudflare:'+source.accountId,accountId:source.accountId,bucketName:source.bucketName,prefix:source.prefix??''};}
@@ -32,8 +100,8 @@ async function render(){await refresh();$('#heading').textContent={remotes:'Remo
   root.append(button('All',()=>checks.forEach(x=>x.check.checked=true)),button('Clear',()=>checks.forEach(x=>x.check.checked=false)),button('Save Whole Cloud',async()=>{for(const x of checks.filter(x=>x.check.checked)){const params={identity:x.identity,cadence:config.recoveryPolicy.cadence};await call('confirmJob',{method:'enableWholeCloudJob',params});await call('enableWholeCloudJob',params);}$('#status').textContent='Selected subscriptions activated. Progress is externally checkpointed; lost authorization pauses quietly.';}));
  }
 }
-async function folder(source,root){selected=target(source);root.replaceChildren(el('h3',source.bucketName+'/'+source.prefix));root.append(button('+ Right Click',()=>openEditor()),button('Default Save Selection',()=>commit({type:'setFlatDefault',target:selected})),button('Manage Destinations',()=>openManager()));
- const r=await call('listFolders',{source});if(r.state!=='completed')throw Error(r.code??r.error);for(const entry of r.data.entries){const row=el('div',undefined,{className:'row'});row.append(el('span',(entry.folder?'▣ ':'')+entry.displayName));if(entry.folder){row.append(button('Open',()=>folder({...source,prefix:entry.key},root)));row.oncontextmenu=e=>{e.preventDefault();selected=target({...source,prefix:entry.key});const menu=el('div',undefined,{className:'row'});menu.append(button('+ Right Click',()=>{menu.remove();return openEditor();}),button('Default Save Selection',()=>{menu.remove();return commit({type:'setFlatDefault',target:selected});}),button('Manage Destinations',()=>{menu.remove();return openManager();}));row.append(menu);};}root.append(row);}}
+async function folder(source,root){dismissExplorerContextMenu();selected=target(source);root.replaceChildren(el('h3',source.bucketName+'/'+source.prefix));root.append(button('+ Right Click',()=>openEditor()),button('Default Save Selection',()=>commit({type:'setFlatDefault',target:selected})),button('Manage Destinations',()=>openManager()));
+ const r=await call('listFolders',{source});if(r.state!=='completed')throw Error(r.code??r.error);for(const entry of r.data.entries){const row=el('div',undefined,{className:'row'});row.append(el('span',(entry.folder?'▣ ':'')+entry.displayName));if(entry.folder){row.append(button('Open',()=>folder({...source,prefix:entry.key},root)));row.tabIndex=0;row.oncontextmenu=e=>void run(()=>showExplorerContextMenu(e,source,entry,root,row));row.addEventListener('keydown',e=>{if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();const bounds=row.getBoundingClientRect();void run(()=>showExplorerContextMenu({preventDefault(){},stopPropagation(){},clientX:bounds.left+20,clientY:bounds.top+20},source,entry,root,row));}});}root.append(row);}}
 let draft,tab,title,aliases,depthDraft,editingTarget;
 function openEditor(){draft=structuredClone(config.show);tab='simple';title='';aliases=[];editingTarget=structuredClone(selected);depthDraft=structuredClone(config.configs.depth.scopes);renderEditor();$('#editor').showModal();}
 function renderEditor(){const tabs=$('#tabs');tabs.replaceChildren();for(const mode of ['simple','narrow','depth'])tabs.append(button(mode[0].toUpperCase()+mode.slice(1),()=>{tab=mode;renderEditor();}));const setup=$('#setup');setup.replaceChildren();
@@ -53,4 +121,4 @@ function managerEdit(d){managerEditing=true;const root=$('#destinations');root.r
 if($('#filter').value==='narrow'){const parts=[d.target.bucketName,...d.target.prefix.split('/').filter(Boolean)];parts.forEach((part,i)=>{const row=el('div',undefined,{className:'row'}),alias=el('input',undefined,{type:'text',value:aliases[i]??''});alias.oninput=()=>{aliases[i]=alias.value;if(i===parts.length-1)input.value=alias.value;};row.append(el('span',part),alias);root.append(row);});}else root.append(input);
 root.append(button('Save',async()=>{await commit({type:'updateDestination',mode:$('#filter').value,id:d.id,label:input.value,...($('#filter').value==='narrow'?{aliases:Array.from({length:d.target.prefix.split('/').filter(Boolean).length+1},(_,i)=>aliases[i]??'')}:{})});await managerList();}));}
 $('#filter').onchange=()=>run(()=>{managerCursor=null;return managerList();});$('#close-manager').onclick=()=>$('#manager').close();$('#manager').addEventListener('cancel',e=>{if(managerEditing){e.preventDefault();run(managerList);}});
-for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>run(async()=>{view=b.dataset.view;await render();});run(render);
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>run(async()=>{dismissExplorerContextMenu();view=b.dataset.view;await render();});run(render);
