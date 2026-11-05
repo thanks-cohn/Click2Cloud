@@ -3,6 +3,12 @@
 **Status: reference-backed implementation contract, NOT a functioning OAuth login yet.**
 **Owner requirement 2026-11-05:** Cloudflare Workers and disposable R2 test paths are Codex's live-test infrastructure. **OAuth in the independently installed Click2Cloud extension must work** so the user can connect Cloudflare, explore real buckets, create destinations and test a **real native Chrome right-click save**. Do not treat a simulated GUI or the existence of a Worker as a substitute for OAuth and browser testing.
 
+## New Click2Cloud OAuth implementation (now in repository)
+
+The repo now has [`src/auth/cloudflare-oauth.mjs`](../../src/auth/cloudflare-oauth.mjs), [dedicated account-registration instructions](../../src/auth/README.md), and [`tests/cloudflare-oauth.test.mjs`](../../tests/cloudflare-oauth.test.mjs). This is a **new Click2Cloud-namespaced** background-context PKCE client; it does NOT import REDOWN's client ID, tokens, OAuth storage or manifest key.
+
+**Still blocked:** Cloudflare's connected API rejected OAuth client listing (403, needs OAuth Client Read) and cannot create a client without **OAuth Client Write**. The actual Click2Cloud manifest/extension identity and registered OAuth Client ID must be set before sign-in works. The existing REDOWN-dependent dashboard bridge remains a reference until the new MV3 host is built; no claim of live login.
+
 ## Exact REDOWN Cloudflare permissions and source
 
 Reference (read-only REDOWN):
