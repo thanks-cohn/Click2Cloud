@@ -1,5 +1,7 @@
 # CODEX — Implement GLACIARING for Click2Cloud V3+1 (P0)
 
+> **P0 OWNER PRIORITY OVERRIDE — /scaffold IS THE END PRODUCT.** Read [the controlling scaffold-first Codex directive](CODEX_P0_SCAFFOLD_FIRST_DEBUG_API_SURROUNDS_PRODUCT.md) and `../scaffold/README.md` **before following older instructions**. Build the actual `/scaffold` GUI, composite **Simple + Narrow + optional additive Depth** real native Chrome menu and verified save pipeline. **Build/extend Glaciaring AROUND the real product/engine** as its low-overhead debug/diagnostic interface, not as the product itself or a prerequisite that postpones the product. Older exclusive-mode/minimal-workbench/1,000-tests-first wording is superseded. Maintain security, live-Chrome, OAuth, provider, resilience and honest proof requirements.
+
 **Repository:** `thanks-cohn/Click2Cloud`  
 **Starting branch:** `docs/glaciaring-agent-debug` (the latest specification and corrected owner intent live here; they are not yet on `main`)  
 **Reference repository:** `thanks-cohn/REDOWN` — read-only for this work  
