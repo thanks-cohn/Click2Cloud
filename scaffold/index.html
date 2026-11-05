@@ -20,6 +20,7 @@
           <div><span class="eyebrow">01 / SELECT A LOCATION</span><h1 id="explorer-title">File Explorer</h1></div>
           <div class="explorer-actions">
             <button id="add-right-click" class="button primary" type="button"><span aria-hidden="true">＋</span> Right Click</button>
+            <button id="open-manager-explorer" class="button subtle" type="button" title="Review and edit saved Right-Click destinations">Manage Destinations</button>
             <button id="depth-toggle" class="button tree-toggle" type="button" aria-pressed="false" aria-label="Turn automatic Depth tree on or off" title="Depth: show the full indexed hierarchy to the selected level">
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="5" rx="1"/><rect x="2.5" y="16.5" width="6" height="5" rx="1"/><rect x="15.5" y="16.5" width="6" height="5" rx="1"/><path d="M12 7.5v5.3M5.5 16.5v-3.7h13v3.7"/></svg>
               Depth <span id="depth-toggle-state" class="tree-state">OFF</span>
@@ -56,10 +57,20 @@
 
         <div class="section-head saved-heading">
           <div><span class="eyebrow">YOUR SAVED LOCATIONS</span><h3>Right-Click Destinations</h3></div>
-          <button id="refresh-view" class="button subtle" type="button">Show all</button>
+          <button id="refresh-view" class="button subtle" type="button">Manage All</button>
         </div>
-        <p class="hint">Click any saved destination row to reopen the very same editor with its original configuration.</p>
+        <p class="hint">Dashboard quick glance. Click a row or the pointer button to open the dedicated, paginated Manage Destinations pop-out.</p>
         <div id="saved-groups" class="saved-groups" aria-live="polite"></div>
+        <details class="manager-settings">
+          <summary>Right-Click Settings</summary>
+          <div class="settings-row">
+            <label for="chrome-manage-visible">
+              <strong>Show Manage Destinations in Chrome menu</strong>
+              <small>When OFF, hide only that Chrome right-click shortcut. The File Explorer and dashboard Manage Destinations controls remain available. Demo preview only; real Chrome registration is not connected.</small>
+            </label>
+            <input type="checkbox" id="chrome-manage-visible" checked />
+          </div>
+        </details>
 
       </section>
     </main>
@@ -100,6 +111,33 @@
       </div>
       <footer class="dialog-actions"><button id="editor-cancel" class="button subtle" type="button">Cancel</button><button id="editor-save" class="button primary" type="button">Save</button></footer>
     </div>
+  </div>
+  <div id="explorer-context" class="explorer-context" role="menu" hidden>
+    <button id="explorer-context-add" type="button" role="menuitem">＋ Add to Right-Click</button>
+    <button id="explorer-context-manage" type="button" role="menuitem">↗ Manage Destinations</button>
+  </div>
+
+  <!-- This is ONE manager pop-out: list and edit are alternate views in the same container. -->
+  <div id="manager-backdrop" class="backdrop" hidden>
+    <section class="dialog manager-dialog" role="dialog" aria-modal="true" aria-labelledby="manager-title">
+      <header class="dialog-header">
+        <div><span class="eyebrow">V3+1 · SAVED RIGHT-CLICK LOCATIONS</span><h2 id="manager-title">Manage Destinations</h2></div>
+        <button id="manager-close" class="icon-button" type="button" aria-label="Close Manage Destinations">×</button>
+      </header>
+      <div class="manager-toolbar">
+        <div id="manager-mode-switch" class="mode-switch manager-switch" role="group" aria-label="Show saved destinations by mode">
+          <button id="manager-simple" class="chosen" type="button" aria-pressed="true">Simple</button>
+          <button id="manager-narrow" type="button" aria-pressed="false">Narrow</button>
+        </div>
+        <button id="manager-back" class="back-link" type="button" hidden>← Back to Destinations</button>
+      </div>
+      <div id="manager-list" class="manager-list" aria-live="polite"></div>
+      <div id="manager-editor" class="manager-editor" hidden></div>
+      <footer id="manager-footer" class="dialog-actions manager-actions" hidden>
+        <span class="hint">Editing names never renames the actual cloud directories.</span>
+        <button id="manager-save" class="button primary" type="button">Save</button>
+      </footer>
+    </section>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>
