@@ -1,60 +1,47 @@
-# Click2Cloud — REDOWN V3+1
+# Click2Cloud — V3+1 /scaffold Chrome Product
 
-> **P0 OWNER PRIORITY OVERRIDE — /scaffold IS THE END PRODUCT.** Read [the controlling scaffold-first Codex directive](docs/CODEX_P0_SCAFFOLD_FIRST_DEBUG_API_SURROUNDS_PRODUCT.md) and `scaffold/README.md` **before following older instructions**. Build the actual `/scaffold` GUI, composite **Simple + Narrow + optional additive Depth** real native Chrome menu and verified save pipeline. **Build/extend Glaciaring AROUND the real product/engine** as its low-overhead debug/diagnostic interface, not as the product itself or a prerequisite that postpones the product. Older exclusive-mode/minimal-workbench/1,000-tests-first wording is superseded. Maintain security, live-Chrome, OAuth, provider, resilience and honest proof requirements.
+**Current Codex mission:** Build the REAL Click2Cloud V3+1 product described in [the /scaffold specification](scaffold/README.md), following the [comprehensive Codex build request](docs/CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md). Read [AGENTS.md](AGENTS.md) for the current engineering charter. Glaciaring observes the actual product; it is not a second engine. Older runbooks and legacy testing plans are historical references only and do not control this implementation.
 
-**Agent engineering charter:** Read [AGENTS.md](AGENTS.md) first. Its guiding principle is REDOWN Python Universal File API-style, real-engine iterative testing: expand the [500-case golden atlas](docs/milestones/V3P1_GOLDEN_500_SCENARIO_ATLAS.json) toward 1,000 genuinely distinct journeys and combine independent oracles with Glaciaring to repair V3+1 regressions without hiding failures. The cases are not yet 500 executable test passes; native Chrome and real provider acceptance remain separate gates.
+**Development branch:** feat/glaciaring-agent-debug. REDOWN is read-only; do not transplant to production without explicit authorization.
 
-Click2Cloud develops an isolated V3+1 right-click destination engine and Glaciaring Agent Debug API. The canonical menu, pure resolver, native registrar, independent modes, durable configuration, inventory discovery and verified dispatcher are working libraries with a diagnostic MV3 harness. Live saves require an authorized host supplying the existing REDOWN transports and provider session; the standalone harness does not invent those credentials. See [actual evidence and limitations](docs/GLACIARING_EVIDENCE.md).
+## Target product — authoritative owner decisions
 
-Run `npm test` for the positive/adversarial suite, `node scripts/demo-glaciaring.mjs` for a complete synthetic menu and two-fault agent receipt, and `node --expose-gc scripts/benchmark-glaciaring.mjs` for matched latency/memory measurements. `node scripts/test-native-chrome.mjs` separately checks real Chromium capabilities and IndexedDB; exit 2 reports an explicit administrator policy block on unpacked extensions. It needs an installed Playwright module, configurable via `C2C_PLAYWRIGHT_MODULE`.
+- Installable independent Chrome MV3 extension: Remotes by default, real File Explorer and real native Chrome right-click menus powered by one canonical V3+1 engine and Universal File API.
+- ONE + Right Click popup: Simple, Narrow and Depth configuration tabs. **Show Simple / Narrow / Depth / All / Flat is INSIDE the popup, immediately above Save**, nowhere else. No Explorer hierarchy button. Hidden destinations remain stored.
+- Simple flat leaves, Narrow configured ancestor branches and Depth discovered bucket trees coexist when selected by the popup. Depth DISPLAY bucket depth default 10 but has no app-defined maximum. Independent Google Drive/Dropbox/OneDrive remain flat native leaves.
+- Explorer folder context menu exposes + Right Click, Default Save Selection and Manage Destinations. **Flat** becomes a single directly clickable REDOWN → Cloudflare menu leaf saving to the selected exact folder, without additional Cloudflare nesting.
+- Real Click2Cloud-specific Cloudflare OAuth, authorized account/bucket discovery and verified Worker/R2 save. Existing Worker bindings do NOT replace user OAuth. A menu or test fixture does not prove a real upload.
+- Settings Recovery Mode: Weekly Monday default or Daily, Simple/Narrow recovery ON/OFF, independent per-bucket recovery crawl depths, choice of external Windows Backup Location, CURRENT and monthly journals and dated snapshots.
+- **Restore My Right-Click Menu** uses external validated CURRENT and journals (or verified historical checkpoint) to rehydrate IndexedDB and ACK actual Chrome contextMenus immediately without rescanning the entire cloud.
+- **Save Whole Cloud** at bottom of Recovery Mode: multi-select authorized Cloudflare/S3 accounts; one activation maintains each account's read-only complete bucket/key outline **silently forever**, with dated ISO week-range JSON snapshots, resumable multi-week listing, paused auth and silent resume after next normal same-account login; never interrupt login.
+- Headless **agent-ready V3+1 API** with versioned typed read/inspect/configure/restore commands and optional future MCP/ChatGPT connector through authorized private companion. Glaciaring remains read-only inspection/diagnostic; privileged agent commands use a separate scoped authorized gateway over the SAME engine.
 
-## Invariants
+See [GUI contract](scaffold/gui/README.md), [real Chrome acceptance](scaffold/gui/CHROME_EXTENSION_LIVE_ACCEPTANCE.md), [durable backup](scaffold/MENU_DESTINATIONS_DURABLE_RECOVERY.md), [fast menu restore](scaffold/RESTORE_RIGHT_CLICK_MENU.md), and [silent whole-cloud capture](scaffold/WHOLE_CLOUD_OUTLINE_EXPORT.md).
 
-1. **Three independent mode configurations** produce one canonical deterministic menu specification; the same normalized inputs produce byte-for-byte equivalent output. The legacy bootstrap `compileMenu` remains compatible; new hosts use `compileMenuSpec` and `createEngine`.
-2. **One real dispatcher** is called by both the Portal UI and the Chrome native context-menu adapter. Nothing is marked successful until the destination provider verifies the upload.
-3. **Provider isolation:** Cloudflare R2 exposes Simple, Narrow, Depth; Google Drive, Dropbox, and OneDrive remain flat native leaf entries. Future S3 providers are siblings, never nested under Cloudflare.
-4. **Mode isolation:** Simple, Narrow and Depth are independent projections over a shared canonical folder tree. Narrow contains only configured paths; Depth includes all discovered paths to the selected limit (including unconfigured folders); Simple is flat.
-5. **No silent ambiguity:** Validation catches duplicate menu IDs, duplicate canonical destinations, label collisions, missing folder nodes, invalid ancestry, and context mismatch before registration; policy-driven conflict handling never silently reassigns saves.
-6. **No manual transplant until verified:** REDOWN's current engine remains unchanged during development. Replace it only after fixture, compiler, Portal E2E, native-Chrome, provider-upload, restart, and rollback tests pass.
-7. **Reconciliation:** Chrome menu registration is an idempotent projection of the current specification. On error, surface failure and allow restoring last-known-good state.
-8. **Privacy:** Cloud providers receive file bytes, filename/extension and only required metadata—not original page URL, link URL, or browsing provenance.
+## Current implementation — inspect before claiming completion
 
-## Actual R2 test infrastructure
+The development branch contains useful modules: src/core/engine.mjs, menu-spec.mjs, menu-compiler.mjs, action-resolver.mjs, src/chrome/registrar.mjs, src/persistence/current-store.mjs, src/glaciaring/agent-api.mjs and src/explorer modules.
 
-A real bucket named `redown` was created in Cloudflare R2 on 2026-11-03. It contains an isolated testing prefix `__redown_v3plus1_lab__/` populated with 133 zero-byte trailing-slash directory markers. It includes a depth-spine of 15 nested `level-NN` nodes, a 12×4 broad tree, identical leaves under distinct parents, empty folders, mode-isolation branches, and naming edge cases. See `fixtures/R2_TEST_TREE.md`.
+**These are NOT evidence of a complete /scaffold product.** The checked extension/manifest.json is still a Glaciaring diagnostic lab manifest, and production GUI/OAuth/native-save/external recovery must be built or directly verified. src/glaciaring/agent-api.mjs currently reports executionAuthority:false and offers only diagnostic inspection/fixture-based simulations. The comprehensive Codex request establishes the real agent-ready service/authorized command gateway to build.
 
-R2 stores **objects**, not genuine operating-system directories; trailing-slash marker objects make empty virtual folders visible. **Do not erase or rewrite unrelated bucket contents.**
+Run existing repository tests when relevant to the actual implementation, but do NOT pursue the old 500/1,000-scenario expansion project in this run. Real installed Chrome menus, Cloudflare auth/verified R2 read-back, filesystem recovery and agent security require focused independent evidence.
 
-## Intended architecture
+## Existing R2 laboratory
 
-```
-Provider discovery -> canonical tree -> validated configuration -> pure compiler -> MenuSpec
-                                                                        |-> Portal renderer (real saves)
-                                                                        |-> Chrome native adapter
-Both renderers -> shared SaveIntent dispatcher -> provider byte upload -> verified receipt
-```
+The repository documents a disposable Cloudflare R2 test area under the real redown bucket (see docs/REAL_R2_TEST_TREE.md and fixtures as available). Tests may act only in the explicitly authorized isolated prefix, never unrelated customer or production objects, and only through legitimately granted provider access. A Cloudflare Worker/service binding alone does not establish an accessible browser route.
 
-**Golden right-click atlas:** [500 source-linked scenario descriptions](docs/milestones/V3P1_GOLDEN_500_SCENARIO_ATLAS.json) (337 contract cases + 163 new user journeys). **Codex follow-up:** [expand to 1,000 without filler, implement independent oracles and execute the real engine](docs/CODEX_EXPAND_GOLDEN_500_TO_1000_AND_VALIDATE_V3P1.md). These are **test specifications**, not claims of 500 or 1,000 passing tests. The real Chrome/cloud/performance/rollback gates remain mandatory.
+## Engineering invariants
 
-## Pre-launch Scenario Laboratory — release-blocking milestones
+1. ONE canonical saved model and MenuSpec, exact immutable provider/account/bucket/prefix identity, and one native registrar/dispatcher for all UI and authorized agent paths.
+2. Saving configuration does not imply that its mode is displayed; Show/Flat selection changes visibility without destroying other configs. Popup-only display selection.
+3. Native Chrome applied state requires actual browser ACK; provider success requires actual confirmation/read-back; external backup protection requires validated independent filesystem receipt.
+4. Never guess account routes, leak browsing provenance/secret credentials, create unapproved buckets, silently change billing or run a public unsafe debug listener. Unauthorized/deleted/restored targets cannot save until revalidated.
+5. Separate Depth DISPLAY levels from Settings RECOVERY crawl depth, and separate immutable historical checkpoint cadence from continuously updated CURRENT/journals.
+6. Chrome reinstall restoration uses valid local backup and cached index without a full provider scan; missing OAuth pauses provider actions, not the restored menu identity.
+7. Whole Cloud capture never nags, interrupts normal login or silently renews unauthorized scopes; it can be stopped explicitly and respects provider rate limits and browser responsiveness.
+8. Glaciaring observation is non-mutating and non-blocking. All authorized agent command tools use the same first-party domain service with explicit scopes/grants; external MCP/ChatGPT connectivity is opt-in and not yet established.
+9. Honest PASS/FAIL/BLOCKED/NOT_TESTED proof. No test fixture or documentation alone is a completed installed extension.
 
-**Owner requirement:** [M0–M10 Universal Scenario Laboratory milestones](docs/milestones/V3P1_SCENARIO_LAB_PRELAUNCH.md), modeled on REDOWN's thin Python → authorized extension → Universal File API testing approach. A [machine-readable baseline inventory](docs/milestones/V3P1_CONTRACT_SCENARIOS.json) captures **337 existing behavioral contract cases, 27 illustrative API operations, and 7 acceptance examples**, all honestly marked unverified until individually mapped to tests and required proof.
+## Codex start
 
-The future agent/CLI runner must call the **actual V3+1 JavaScript engine and REDOWN Universal File API adapters**, not a parallel mock implementation. Deterministic property, scenario, state-machine, combinatorial and fault-injection tests validate logical behavior; installed Chrome, authorized live provider receipts, REDOWN migration and latency remain **separate mandatory acceptance gates**. Every scenario must have an inspectable PASS/FAIL/PARTIAL/BLOCKED/NOT_TESTED/UNSUPPORTED/UNKNOWN verdict, Glaciaring evidence, source revision and replay seed. A failed or missing P0 proof blocks public release. The current 121 passing local tests do **not** satisfy the unrun prelaunch catalog.
-
-## Project milestones
-
-- [ ] Capture current REDOWN V3 real behavior and compatibility requirements.
-- [ ] Implement versioned schemas and deterministic pure menu compiler.
-- [ ] Build reusable live R2 tree discovery, pagination, and safe folder creation.
-- [ ] Implement Portal with live image context menu and actual provider save pipeline.
-- [ ] Develop repeatable fixture, property, integration, Chrome E2E and provider verification tests.
-- [ ] Prove restart recovery, idempotent registration, collision behavior and account sign-in gating.
-- [ ] Integrate into REDOWN behind a removable feature flag with rollback.
-- [ ] Remove legacy menu engine only after verified parity and migration.
-
-This repository is a separate development track, not REDOWN's production branch.
-
-## V3+1 Universal Engine API contract
-
-The complete, editable [V3+1 Universal Engine API & Behavioral Contract](docs/V3P1_COMPLETE_CONDITION_TO_BEHAVIOR_CONTRACT.md) specifies state detection, real API operations, dashboard Refresh/Activate behavior, independent Simple/Nested/Depth engines, Chrome menus, live saves, other providers, failure recovery, security and transplant acceptance. This is a target specification, not an assertion that every capability is implemented. Follow the [autonomous Codex runbook](docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md) and its [implementation request](docs/CODEX_BUILD_REAL_V3_PLUS_ONE_NOW.md).
+Read [docs/CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md](docs/CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md) and implement it on feat/glaciaring-agent-debug. Deliver actual code, unpacked extension location, install instructions, verified browser/provider/recovery/agent results and exact blockers; do not merely write a design proposal.
