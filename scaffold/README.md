@@ -114,9 +114,21 @@ The `All Folders` heading above is an **illustrative collision-safe grouping pro
 - **Documentation only:** There is no interactive prototype under `scaffold/`; no functionality, tests or provider receipts are claimed by these notes. Codex must write and test the actual V3+1 implementation independently.
 - Acceptance examples: 0/1/20/21/45 saved entries; Simple/Narrow filtering; page changes; click row → same pop-out editor; Back/Escape without save; real Save updates same ID; X confirmation and cancel; no remote deletion; Chrome shortcut hidden in Settings while Explorer icon/button stay; Depth on/off preserves every manual entry.
 
+## Independent crash/uninstall recovery — REQUIRED BEFORE V3+1 SHIPPING
+
+**[Separate Menu Configuration Durable Recovery Contract](./MENU_DESTINATIONS_DURABLE_RECOVERY.md)** is mandatory and defines a second recovery system **INDEPENDENT FROM DEPTH**.
+
+- **Menu Config:** Exact user-created Simple/Narrow destinations, every Narrow ancestor menu alias, optional Simple title, ordering, stable record identity, per-mode settings. Versioned external `menu-config/CURRENT.json` maintained on EVERY successful edit, append-only semantic JSONL delta journal, immutable historical backup checkpoints **WEEKLY BY DEFAULT** (user may choose DAILY). The weekly/daily choice affects snapshots, NOT live CURRENT writes or the journal.
+- **Depth Directory Index:** A **SEPARATE** `depth-index/CURRENT.json`, its own deltas, snapshots and discovery/completeness metadata. Restores the known folder graph without forcing a full cloud rescan, subject to permissions and recovery integrity.
+- **The independent backup files MUST survive Chrome cache cleanup, profile loss, extension uninstallation and reinstall** when the separately stored files remain present. IndexedDB and chrome.storage.local are working copies, not the only recovery copies. Prefer an authorized native companion/user-selected location outside Chrome's profile; no guarantee if every copy is deleted.
+- On reinstallation/crash: discover and validate an independent snapshot, replay contiguous valid deltas, rehydrate browser IndexedDB, request renewed provider authorization as necessary, then rebuild native menus using exact identities. Never delete user-created menu aliases during cloud inventory refresh.
+- **Do not claim this is implemented.** Existing REDOWN CURRENT, backup and journal code in IndexedDB supplies proven semantics, but **not** an external uninstall-safe `CURRENT.json` file.
+- Acceptance: create 100 Simple/Narrow entries with custom aliases; crash, clear extension storage, uninstall/reinstall; restore identical records and native menus with an external backup, no full scan and no duplicate/wrong-target save. Validate backup policy defaults and failure states.
+
 ## Scaffold contents
 
 - `README.md` (this file): authoritative UX workflow, mode semantics, saved destination manager, architecture separation and V3+1 build/acceptance instructions.
+- `MENU_DESTINATIONS_DURABLE_RECOVERY.md`: independent uninstall-safe menu configuration CURRENT.json + journals + weekly-default backup and restore contract, separate from Depth indexing.
 - No runnable app, HTML prototype, CSS, JavaScript controller or test harness is created by this scaffold. Build those in a future explicitly authorized implementation run.
 
 ## V3+1 engine build plan (later, not part of scaffold)
