@@ -11,11 +11,11 @@ Use this Markdown specification as the starting point for future **V3+1 right-cl
 ## UX contract to implement
 
 1. The Click2Cloud dashboard reuses its own **Universal File API** for a real File Explorer. A user selects a folder; at the top of that Explorer/dashboard is **+ Right Click**. Clicking it opens **one reusable destination editor** for the exact selected account/bucket/prefix. The Explorer may also surface the same command in its local folder context menu.
-2. **Popup Setup tab** is always visible and contains only **Menu Title (OPTIONAL)** and a **Simple / Narrow switch**. There is a **Save** button fixed at the bottom, visible for both modes and both tabs; Cancel alongside it.
+2. **One `+ Right Click` popup has THREE selections: Simple / Narrow / Depth.** Simple and Narrow configure a manually saved exact folder destination with optional title(s). Depth is the THIRD selection and configures bucket-wide auto-hierarchy—not the clicked folder. In Depth, display every authorized bucket with its own ON/OFF participation checkbox and a depth selector per bucket; **default depth is 10 for each newly configured bucket**. Changes are DRAFTS until the user explicitly clicks **Save** (or Cancel discards them). The popup's Save and Cancel stay fixed at the bottom. The Narrow-only **Menu Titles** tab appears only for Narrow; never for Simple or Depth.
 3. **Simple = one submenu pop-out.** Save an exact folder with an optional menu title; native Chrome **REDOWN → Cloudflare → [saved destination title]** displays one destination leaf inside the Cloudflare submenu, without a hierarchy of folders. Multiple saved Simple options may be siblings; an omitted title falls back to the selected folder/bucket name. When **only the default uncustomized `redown` root** exists, **REDOWN → Cloudflare** is itself an actionable leaf, next to other cloud provider leaves.
 4. **Narrow = branches into submenus.** Selecting Narrow INSTANTLY reveals a second popup tab **Menu Titles**. It has **two columns**, top to bottom: actual source bucket/folder segment on LEFT (readonly), corresponding **optional** editable menu display title on RIGHT. It begins at actual bucket, continues through each ancestor, and ends at the exact chosen directory. The Setup Menu Title populates the RIGHT field of the **BOTTOM row**, and changes in that field update Setup bidirectionally. If labels remain blank, use actual segment names in output. Save compiles a natural submenu tree of the configured ancestor path; **not** a single flattened leaf.
 5. Switching **Narrow → Simple** makes **Menu Titles disappear entirely** (not a disabled tab). If the user was on Menu Titles, return to Setup safely. Switching to Narrow again reveals it with unsaved draft values preserved; no actual cloud folders are renamed.
-6. **Depth is an ADDITIVE ON/OFF overlay, not a mutually exclusive mode that replaces Simple or Narrow.** Put a small **hierarchy-tree-icon Depth switch/button right BESIDE the File Explorer's top `+ Right Click` action in the Click2Cloud dashboard** (both obvious and aesthetically integrated). Clicking it enables/disables automatic Depth. When enabled, provide a depth/level selector (1–10 initially, subject to engine limits), and show **ALL currently authorized indexed directory branches for the participating bucket(s) from the bucket/root down to that exact level**, including folders never manually configured through `+ Right Click`. **Keep ALL previously saved Simple options AND Narrow branches both in storage and visible as separately accessible manual right-click choices in the resulting menu.** Depth's generated hierarchy is added to these, not substituted for them. When toggled OFF, remove ONLY automatically generated Depth branches, **without deleting, changing, hiding or resetting any Simple/Narrow saved choices, aliases, IDs or current Depth level**. Turning it back ON immediately restores generated branches at the last chosen depth from valid cached CURRENT/index data. This must not automatically rescan R2 or create cloud folders, and no Depth entry is shown as a manually saved row in the Simple/Narrow management list.
+6. **Depth has TWO DISTINCT CONTROLS, with separate responsibilities.** (A) In the `+ Right Click` popup's **THIRD selection, Depth**, list authorized buckets; each bucket has its own participation ON/OFF and numeric depth (newly configured default **10**). **Save commits the per-bucket configuration**, Cancel discards all pending changes. (B) The **hierarchy-tree icon immediately beside `+ Right Click` at the top of File Explorer** is a **display-only ON/OFF toggle for Chrome's native right-click menu**. It reads the last SAVED per-bucket Depth configuration and shows/hides the automatically generated hierarchy. It must NOT open a per-bucket editor, change bucket checkboxes/depth values, or save a draft. When ON, generate authorized indexed branches from each enabled bucket's root to that bucket's saved depth, including unconfigured folders. When OFF, remove ONLY generated Depth menu nodes, preserving all Simple/Narrow choices and saved Depth configurations. Visibility toggle itself may persist its own show/hide preference; it never silently commits changes to Depth's bucket settings or scans all of R2.
 7. **Manage Destinations** is available from the Click2Cloud File Explorer (top button and Explorer local right-click menu) and from the small circular **pointer icon beneath/right of the dashboard odometer**. In the final native Chrome menu, **REDOWN → Manage Destinations** is an optional sibling entry; a Settings switch can hide only this Chrome shortcut without removing Explorer/dashboard access. This is the required behavior for a future implemented Settings control; there is no working Chrome registration or demo checkbox in this documentation-only scaffold.
 8. The separate **Manage Destinations pop-out is ONE window**, with **one Simple/Narrow filter switch at its top**, a vertically scrollable list of **at most 20 saved entries per page** with Previous/Next pagination, and an **X at the right end of each entry**. The switch changes **which saved category is listed**; it does NOT convert a record between modes. Clicking any row replaces the list **within the SAME pop-out** with an editor for the SAME canonical destination ID. **Directly beneath the switch** show **← Back to Destinations** in edit mode. **Escape or Back** returns to the filtered/paginated list without saving; Escape from the list closes the pop-out. Simple editing is TWO columns: immutable original/current location or directory name on the left; one editable Menu Title on the right, with a persistent Save button at the bottom. Narrow editing uses the TWO-COLUMN top-down sequence of every original directory level on the left and editable menu titles on the right, with the same bottom Save. Save edits the original record in place; never create duplicates, rename cloud folders or delete original files. X removes only the saved right-click configuration after an inline confirmation, not the actual cloud data.
 9. The selected location and its actual path are **immutable** in the popup. Menu titles are aliases for the Chrome menu, never the R2 path or provider identity.
@@ -50,38 +50,54 @@ REDOWN
 
 The three examples above isolate individual menu shapes **for illustration only**. In the FINAL V3+1 model, **saved Simple choices and saved Narrow branches COEXIST**, and **Depth can be toggled ON to add its discovered tree alongside both**. Turning Depth OFF removes only its generated branches. The actual selected folder may be represented differently in Simple and Narrow without changing the cloud destination. Do NOT implement historical mutually exclusive projection semantics.
 
-## Depth controls and resulting composite menu (latest owner decision)
+## Depth configuration vs hierarchy visibility (latest owner decision)
 
-The hierarchy-tree Depth **ON/OFF toggle is next to `+ Right Click` at the TOP of the File Explorer on the Click2Cloud dashboard**, not buried as a replacement selection inside the destination popup. The depth number/slider appears when Depth is ON. All manually saved Simple and Narrow entries remain accessible.
+### Configure Depth — from the SAME `+ Right Click` popup
+
+- On a real folder row in Click2Cloud Explorer, **right-click → `+ Right Click`**; alternatively select a folder and click Explorer toolbar `+ Right Click`. Both open the SAME editor. Its selector has **Simple | Narrow | Depth**.
+- **Simple**: optional flat Menu Title for the exact clicked/selected folder, then **Save**. **Narrow**: same exact folder, optionally customize each ancestor title in the Narrow-only Menu Titles tab, then **Save**.
+- **Depth**: the THIRD option shows the genuine authorized bucket inventory, **one ON/OFF participation checkbox and depth value PER BUCKET**, with **10** as each bucket's initial default. The currently clicked folder does not redefine a bucket root or narrow the Depth index. The user may enable multiple buckets with distinct depths. Expose any missing/unauthorized bucket truthfully.
+- **Save at the bottom is MANDATORY** to commit bucket participation and depth settings. Until Save, updates are only popup-local drafts; Cancel/Escape restores the saved values. Save is a configuration transaction (not a remote folder create/write, not a file upload). Keep separate config revision, collision-safe identities, and last-saved per-bucket values.
+- **Depth has no Menu Titles tab**, no optional destination title or selected-folder-specific Save. Simple and Narrow records coexist unchanged with Depth settings.
+
+### Display saved Depth in real Chrome menu — File Explorer hierarchy button
+
+- **Immediately next to `+ Right Click` at Explorer top**, show a small, clear hierarchy/tree icon toggle. **Its only job is to show or hide the last SAVED Depth hierarchy in Chrome's native context menu.** It is not a per-bucket settings editor and has no per-bucket depth selector beside it.
+- Toggle ON: read only committed Depth bucket participation and each committed depth; render the indexed eligible folder hierarchy from each enabled bucket's root up to its own depth, including unconfigured folder paths. Merge those generated branches into the same menu alongside ALL saved Simple and Narrow destinations.
+- Toggle OFF: remove only the autogenerated Depth nodes from Chrome; never mutate or hide Simple or Narrow destinations, and never erase or reset saved per-bucket Depth settings. Toggle ON again restores exactly those last-saved choices from valid index data, pending truthful reconciliation.
+- Toggle visibility can persist automatically as a separate display preference, **but never substitutes for the popup's mandatory Save**. Unsaved popup changes cannot affect the native menu, even if the hierarchy visibility toggle is ON. Save while visibility is ON should recompile from the newly committed per-bucket settings and apply to Chrome with truthful generation/ACK. Save while visibility is OFF changes saved configuration without showing Depth nodes.
+- No toggle action triggers a full R2 rescan, creates buckets, changes OAuth/Worker bindings or silently changes folder names. Cache freshness, partial index and Chrome limits must be indicated honestly.
+
+### Composite menu illustration
 
 ```text
-Click2Cloud File Explorer                    [+ Right Click]  [🌳 Depth: ON]  Levels: 3
+Click2Cloud Explorer       [+ Right Click]  [🌳 Show Depth: ON]  [Manage]
 
++ Right Click POPUP (three selectable modes)
+  [Simple] [Narrow] [Depth]
+  Depth selected:
+    ☑ redown                 Level: 10
+    ☑ redown-bucket-1        Level: 4
+    ☐ redown-bucket-2        Level: 10 (initial default)
+    [Cancel]                         [Save]
+
+RIGHT-CLICK CHROME MENU AFTER SAVING & TURNING ON HIERARCHY
 REDOWN
   Cloudflare ▸
-    My Photos                   ← Simple: redown/Art/Photography
-    Invoices                    ← Simple: redown/Work/Invoices
-    Creative Work ▸             ← Narrow: user-labeled configured path
-      Photography ▸
-        Approved Shots          ← exact selected destination
-    All Folders ▸              ← Depth GENERATED hierarchy (example grouping)
-      redown ▸
-        Art ▸
-          Photography
-        Work ▸
-          Invoices
-  Google Drive
+    My Photos                 ← saved Simple
+    Invoices                  ← saved Simple
+    Creative Work ▸           ← saved Narrow (branches continue)
+    All Folders ▸             ← generated Depth grouping, example only
+      redown ▸                ← saved bucket enabled, depth 10
+      redown-bucket-1 ▸       ← saved bucket enabled, depth 4
+  Google Drive               ← independent flat provider
   Dropbox
   OneDrive
 ```
 
-The `All Folders` heading above is an **illustrative collision-safe grouping proposal**, not a user-requested literal label. The implementation may choose an equally unambiguous grouping strategy, but **must never silently merge or obscure manually configured items when an automatically discovered folder name/title collides**. The selected depth decides which discovered nodes are visible, not whether Simple/Narrow data survive.
+`All Folders` is illustrative; choose a stable collision-safe grouping where needed, never shadow saved manual options. With default-only `redown` and Depth hidden, Cloudflare can remain one actionable leaf, as specified elsewhere.
 
-**Depth OFF → only remove its automatically generated menu tree.** The existing saved Simple and Narrow destination nodes remain exactly usable. **Depth ON → restore the generated tree** up to the chosen level. Keep the selector level when toggled OFF and ON, and preserve every saved manual destination across refresh, account switch, Chrome service-worker restart and native-menu reconciliation, subject to current permissions.
-
-**When there is only the uncustomized default `redown` root and Depth is OFF,** retain the single actionable `REDOWN → Cloudflare` leaf; **when Depth is ON**, exposing the hierarchy may require Cloudflare to become a submenu. Never make an action-only root and a parent submenu share an ambiguous ID.
-
-**Proof requirements:** test at depth 1/2/3/10; zero/manual Simple/manual Narrow/both manual modes; Depth toggled ON/OFF repeatedly; return to prior depth; missing/partial folder index; 2+ accounts/buckets; identical folder names/aliases; Chrome native menu limits and ACK; output remains deterministic and no configured entries disappear. UI switch should update immediately from cached folder data and show truthful pending status until native menu registration succeeds.
+**Tests MUST cover:** popup Depth drafts vs Save/Cancel/Escape; each bucket individually ON/OFF; independent levels including default 10 and 2+ different values; changes committed while hierarchy hidden vs visible; toggles reading last saved state only; Simple/Narrow untouched by both operations; folder-specific Explorer context menu `+ Right Click` target correct for Simple/Narrow; account switch, invalid/stale inventory, native contextMenus ACK and restart; no implicit remote mutation or full cloud rescan.
 
 ## Manage Destinations pop-out — newest owner decision
 
