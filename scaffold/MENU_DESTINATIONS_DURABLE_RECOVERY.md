@@ -123,6 +123,10 @@ A canonical V3+1 menu edit needs to preserve consistent recorded intent across i
 7. After restore, resume incomplete recovery crawls within authorized limits, not a forced full rescan. If a bucket has disappeared or a folder is now inaccessible, preserve historical indexed knowledge with honest stale/unverified labels; do not pretend a remote file or folder still exists.
 8. Never delete durable backups as part of ordinary extension uninstall. Deleting external copies requires explicit separate informed user consent. Missing authorized external storage or all deleted copies means no guaranteed recovery.
 
+### Fast user-initiated Chrome menu restoration
+
+**Settings → Recovery Mode → Restore My Right-Click Menu** is the user-facing recovery action. The authorized native companion checks both supported external paths (default `%LOCALAPPDATA%\Click2Cloud\Recovery\` and actual Windows Documents `Click2Cloud\Backups\`) and offers existing backup folder selection if necessary. On click, validate latest usable CURRENT + contiguous post-CURRENT journal, otherwise newest valid dated checkpoint + subsequent deltas, restore independent config/index/policy namespaces into working IndexedDB, then compile/register actual native Chrome contextMenus with generation ACK. **NO full cloud scan is a prerequisite.** Preserve exact Simple/Narrow aliases, Depth display settings, popup-only Show, Flat default and cached verified folder index. Account auth may require normal reconnect; no guessed or unauthorized saves. If local working state is healthy and nonempty, preview/confirm any destructive replace. Glaciaring records validation/replay/native ACK without controlling the restore. [Dedicated restore contract](./RESTORE_RIGHT_CLICK_MENU.md).
+
 ## E. Test matrix — focused real scaffold acceptance
 
 - In popup save Simple/Narrow/Depth and Show:Simple/Narrow/Depth/All/Flat; verify journals and CURRENT have exact committed state, including title aliases and exact Flat default target. Hide one category: live stored config remains unchanged. No separate hierarchy toolbar button exists.
