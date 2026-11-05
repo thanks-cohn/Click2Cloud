@@ -21,6 +21,7 @@
 3. `scaffold/gui/CHROME_EXTENSION_LIVE_ACCEPTANCE.md` — native Chrome + real R2 acceptance.
 4. `scaffold/gui/TEST_JOURNEYS.md` and `scaffold/gui/demo-fixtures.json` — product acceptance journeys.
 5. `scaffold/MENU_DESTINATIONS_DURABLE_RECOVERY.md` — Weekly/Daily Recovery Mode, independent menu-config, depth-config, depth-index and recovery-policy durability.
+6a. `scaffold/WHOLE_CLOUD_OUTLINE_EXPORT.md` — REQUIRED Settings → Recovery Mode bottom Save Whole Cloud, multi-connected Cloudflare/S3 accounts, unlimited-week dated read-only outline, durable paused job automatically resuming on the next successful SAME-account OAuth login.
 6. `scaffold/gui/REDOWN_OAUTH_EXTRACTION.md` — separate Click2Cloud auth.
 7. `AGENTS.md` for essential repository constraints. Older Codex runbooks may be consulted only for specific engine/API details after reading the controlling scaffold, never as UI authority or a 1,000-scenario mandate.
 8. `src/glaciaring/agent-api.mjs`, `src/glaciaring/index.mjs`, `src/glaciaring/catalog.mjs`, `src/chrome/debug-host.mjs` — the existing Debug API implementation. Do NOT read the 500/1,000-scenario expansion request.
