@@ -1,0 +1,115 @@
+# P0 NEED TO DO — Right-click Explorer folder → Add to Right-Click (two-tab popup)
+
+**Owner-approved specification:** November 5, 2026  
+**Product:** Click2Cloud V3+1, later transplant candidate for REDOWN  
+**Status:** documentation only; NOT implemented or verified  
+**Authority:** This is the **latest user decision**, superseding earlier documents that incorrectly describe Simple as a single globally marked destination. It complements [instant mode switching](./2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md) and the [FOREVER_WORKS reference](../FOREVER_WORKS/README.md). Preserve current engine boundaries and real Cloudflare TRUE REMOTE.
+
+## The entry point: ONE entry in the Explorer's own context menu
+
+The user opens the **actual REDOWN File Explorer**, locates any currently authorized folder/bucket location, and **right-clicks that location**. The Explorer's context menu presents **Add to Right-Click** as **one command**. It does *not* show separate Simple/Narrow actions, and the user should not have to open a giant legacy destination-tree form.
+
+Clicking **Add to Right-Click** opens a **small popup** anchored to the selected location; route identity is captured as provider/account/bucket/prefix (or equivalent exact authorized Cloudflare destination). This is an *Explorer configuration action*, not a right-click on a random webpage. Do not confuse it with the actual **Chrome web content native right-click menu**, which later consumes the saved configuration to dispatch a cloud save.
+
+## The popup has exactly TWO tabs
+
+### Tab 1 — Setup (the first/default tab)
+
+**Only two settings:**
+1. **Menu Title** — one editable text field. By default use selected folder's last path segment/bucket name, unless the existing menu entry being edited has its saved title.
+2. **Simple / Narrow** — a two-choice switch/toggle. No extra mode builder, no path-editor fields cluttering the first tab.
+
+The popup has an unambiguous **Save** action (and Cancel/close). The mode switch changes how *this configured location* is expressed in the right-click menu. It must never change the underlying actual folder/path or the selected provider transport.
+
+**Simple behavior:**
+- The selected location, with the user-entered **Menu Title**, becomes one **flat labeled destination option** under Cloudflare's submenu; this option invokes **Cloudflare TRUE REMOTE** directly to its exact original bucket/prefix.
+- **Multiple Simple options are allowed** side by side under Cloudflare. Simple means *no ancestral folder nesting for each configured option*, **not** "only one marker in the entire account".
+- Example after the user added folders individually:
+  ```text
+  REDOWN
+    Cloudflare ▸
+      My Photos       → redown/Art/Photography
+      Invoices        → redown/Work/Invoices
+      Downloads       → redown/Downloads
+  ```
+- **Special zero-extra-option default:** If the **only** active Cloudflare destination is the authorized default `redown` bucket root, show **REDOWN → Cloudflare** as a **single directly actionable leaf**, without a Cloudflare submenu, redundant `redown` child, Home or duplicated default option. Adding an explicitly titled Simple destination produces the labeled submenu option(s). Do not let an automatically activated bucket create unintended extra Simple options.
+- Whether an explicitly added root destination also qualifies for the flat default or a labeled option must be handled consistently: default-only state is a distinct default/fallback; an intentional explicitly labeled selection is a configured menu option. Never hide a user's explicit configured label merely because the prefix is empty.
+- Duplicate title/path conflicts should be surfaced and resolved deterministically without silently replacing or misrouting an existing option. Saved action IDs are tied to exact identity, not display strings.
+
+**Narrow behavior:**
+- Configures the same selected destination for naturally nested **manually configured paths**, with user-editable title at *every ancestor level* via Tab 2.
+- Multiple Narrow routes may coexist; include only explicitly configured routes and necessary ancestors, not every cached folder.
+- Narrow preserves the path's order and exact provider/account/bucket/prefix, regardless of displayed title choices.
+
+### Tab 2 — Path Titles (available ONLY in Narrow mode)
+
+This tab is **enabled when Narrow is selected** and **disabled/inaccessible for Simple**. It is a small **two-column top-to-bottom table**, not a graphical tree builder:
+
+| Original location (read-only, left column) | Menu Title (editable, right column) |
+| --- | --- |
+| `redown` | `redown` or custom alias |
+| `Art` | `My Creative World` |
+| `Photography` | `My Photos` |
+
+- Show **every segment from the selected bucket/root down to the final selected folder**, in the *original order*, one row per level.
+- The **left** column is the **actual selected path** and is read-only; the **right** contains the optional/custom **Menu Title** input for that level. Default uncustomized ancestor titles to their real folder names, but do not overwrite an existing saved alias without user action.
+- **Critical inheritance:** If the user has **already typed a Menu Title in Tab 1**, it **automatically appears in the right-hand Menu Title field on the LAST/BOTTOM row** in Path Titles (the destination they right-clicked). Editing this bottom field and returning to Setup must update the single Menu Title field there; both represent the **same draft value**, not two separate values.
+- This prefill also applies when the user switches **Simple → Narrow** after typing a title, or reopens an existing destination for editing. Preserve the draft and all ancestor inputs across tab toggles and mode switches; no loss of focus mid-typing.
+- The user may rename any intermediate **menu-display** segment to create a customized right-click path while the **real original cloud path is unchanged**. Example:
+  ```text
+  Real R2 path: redown / Art / Photography
+  Narrow menu: REDOWN → Cloudflare → My Creative World → Visual Arts → My Photos
+  Transfer target still: redown/Art/Photography
+  ```
+- Do not force everyone to visit this tab. If the user picks Narrow and presses Save immediately, use the real ancestor folder names and the entered final Menu Title.
+- Where two independently configured Narrow routes share a canonical ancestor, **one consistent displayed menu title per shared ancestor** is required within the effective hierarchy. Detect conflicting aliases, ask the user to resolve explicitly, or use a transparent deterministic disambiguation; never silently overwrite previously configured siblings, change folder identity, or create duplicate ambiguous native menu IDs.
+- Preserve per-account/bucket namespace and allow equal visible titles across distinct accounts with safe disambiguation and correct exact IDs.
+
+### Save/Cancel
+
+- **Save:** validate/sanitize user-entered titles; persist the selected destination, chosen Simple/Narrow presentation, final Menu Title, and Narrow per-segment aliases to **one canonical CURRENT IndexedDB-backed model** with a versioned revision. Update the menu projection and apply a native Chrome diff using existing registrar; retain an accurate pending/applied/failure state. No remote folder scan/provision/Cloudflare write is required to *configure* a menu entry.
+- **Cancel:** discard popup-local changes without changing configured paths/labels, cloud contents, authorization or native menu.
+- **Edit existing:** same popup prefilled from CURRENT, including saved mode, final title and path aliases. Reopening is not allowed to make duplicate entries by accident.
+- The popup should be small, keyboard accessible, focus-safe, responsive, and theme-compatible. Use Cancel/Save; no extra wizard pages.
+
+## Depth stays outside this popup
+
+**Depth is a separate ON/OFF (or selected-mode) control and a numerical depth selector in the right-click settings.** It projects the locally cached, authorized folder tree up to the selected level, including eligible folders not hand-added. It does not need an Add to Right-Click command for every folder, and users do not need to configure Path Titles for Depth.
+
+Depth switch should be fast on a warm CURRENT/indexed inventory. No unsolicited R2 scan just to switch away to Simple/Narrow.
+
+## Important: Menu presentation != transfer strategy
+
+All Cloudflare options—default root, Simple labeled choice, Narrow nested choice or Depth folder—must use **TRUE REMOTE**:
+
+```text
+Native Chrome web-content right-click action
+  → exact committed authorized Cloudflare account / bucket / folder prefix
+  → REDOWN sends source URL and control metadata to its matching Cloudflare Worker
+  → Worker fetches file bytes directly from remote website
+  → Worker streams / boundedly ingests into R2
+  → actual R2 object HEAD / receipt validation
+  → verified History / success / counter
+```
+
+**The browser does NOT download the web file bytes for Cloudflare TRUE REMOTE.** The Worker necessarily sees the source URL; do not misrepresent it as byte-only privacy. Drive/Dropbox/OneDrive remain separate flat providers with browser-mediated bytes and no source URL forwarded as cloud upload metadata.
+
+## Nonnegotiable UI/logic acceptance examples
+
+1. Right-click `redown/Art/Photography` in the **Explorer**, choose **Add to Right-Click** → small popup **Setup** selected, editable Menu Title and **Simple/Narrow** switch only.
+2. Type **My Photos**, leave **Simple**, Save → Chrome **REDOWN → Cloudflare → My Photos** is actionable, saves TRUE REMOTE to `redown/Art/Photography`.
+3. Add `redown/Work/Invoices` as Simple title **Invoices** → two Simple **sibling** title options in the Cloudflare submenu; no nested Art/Work folders.
+4. With only the uncustomized default `redown` root present, **REDOWN → Cloudflare** is itself an actionable leaf with no submenu.
+5. Enter **My Photos** in Setup, switch to **Narrow**, open **Path Titles** → left column `redown / Art / Photography` top-down, right column contains editable titles; bottom right **My Photos** already populated.
+6. Edit left row `Art` to title **Visual Arts**; choose another custom root menu alias; save → Narrow Chrome menu titles reflect those aliases while TRUE REMOTE target remains exactly `redown/Art/Photography`.
+7. Change the bottom Path Titles value to **My Pictures**; return to Setup → Menu Title shows **My Pictures** immediately. Cancel does not change canonical state.
+8. Narrow selected but user never opens Path Titles → Save still generates natural ancestry with original parent folder names and entered bottom label.
+9. Duplicate titles, alias collisions, concurrent popup edits, same-named folders in different buckets, cloud authorization changes and stale native IDs never redirect saves.
+10. Changing between Simple, Narrow and Depth uses warmed CURRENT local data quickly; check separate UI paint latency, compiler time, native Chrome ACK, and R2 network reads. No forced refresh for simple preference edits.
+11. No duplicate menu registration, no old "single Simple marker" rule, no accidental breaking of other provider flat leaves, no Chrome-native success claimed without ACK.
+
+## Relationship to older documents
+
+This **latest** popup specification expressly **supersedes** the "one effective Simple marker" interpretation in earlier Nov 5 NEED_TO_DO and FOREVER_WORKS docs. Those documents must be amended to avoid contradictory implementation instructions. Keep REDOWN original-code findings labeled [SOURCE], the newer owner design labeled [OWNER-NEW], and testing/proposed behavior labeled [TARGET/GAP].
+
+**This is a documentation/requirements request, not authorization to modify REDOWN application code or deploy a Worker.**
