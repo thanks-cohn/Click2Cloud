@@ -11,7 +11,7 @@
 This document separates three categories that MUST NOT be confused:
 
 - **[SOURCE]** directly implemented in the pinned REDOWN source; interface and file paths cited.
-- **[OWNER-NEW]** subsequent, authoritative owner requirements that may supersede REDOWN's older behavior, especially a **single Simple marker** and instantaneous mode switching.
+- **[OWNER-NEW]** subsequent, authoritative owner requirements that may supersede REDOWN's older behavior, especially the **Explorer two-tab Add to Right-Click popup, multiple labeled Simple choices, Narrow path-title editing, Shelf saved-row re-editing, and instantaneous mode switching**.
 - **[TARGET/GAP]** proposals or not-yet-demonstrated Click2Cloud capabilities; DO NOT represent them as already implemented, tested, or production-ready.
 
 **The right-click menu chooses WHERE a file is saved. The provider-specific transport chooses HOW. For Cloudflare R2, the original working REDOWN pathway is TRUE REMOTE. These are separate axes.** Rebuilding the menu must NEVER quietly change the transfer to browser byte-fetch.
@@ -63,13 +63,14 @@ No secret values, raw account identifiers, user URLs or personal file contents b
 - project() branches by selected presentation; resolve() rechecks current projection and actual matching prepared profile/identity rather than trusting labels or an obsolete menu ID.
 - Contexts registered for V3: **link, image, video, audio, page**.
 
-**[OWNER-NEW] The final Simple/Narrow/Depth distinction for Click2Cloud, superseding the old Simple extra-options model:**
-1. **Simple = one effective user-marked authorized location**; selecting a bucket/folder marks it Simple. Clicking the SINGLE native flat **REDOWN → Cloudflare** leaf TRUE REMOTE saves exactly there. When no explicit mark exists and only default authorized redown root exists, default is redown root. No extra submenu / Home / redown child for Simple. Keep underlying configured paths intact when marker changes; account ambiguity fails closed.
-2. **Narrow = manually selected labeled nesting**, with as many configured options as needed; use only explicitly configured routes and their required ancestor paths. Existing saved labels matter here. No arbitrary cloud folder scan.
-3. **Depth = automatic indexed hierarchy** to selected depth, may include unconfigured authorized folders; use cached graph and report incomplete state honestly.
-4. All modes retain separate settings, one canonical authority, no transfer-engine replacement.
+**[OWNER-NEW — FINAL NOVEMBER 5 UI DECISION; supersedes previous single Simple-marker proposal]:**
+1. **Explorer right-click → Add to Right-Click** (one command), opening a SMALL TWO-TAB popup. Tab 1 **Setup** has only **Menu Title** and **Simple/Narrow** selection, plus Save/Cancel. **Simple** produces a **flat, user-labeled choice** under Cloudflare's submenu, e.g. REDOWN → Cloudflare → My Photos. **Multiple Simple options are permitted.** When only the uncustomized authorized default redown root is active, REDOWN → Cloudflare itself is an actionable flat leaf, with no needless submenu.
+2. **Narrow** is manual nesting of configured paths. Tab 2 **Path Titles** is available only for Narrow; show original authorized path segments from bucket/root to selected folder **top-down on left**, each with editable per-level Menu Title on right. The title already entered in Setup must **populate the bottom/final destination title** and stay synchronized bidirectionally.
+3. **Shelf saved destinations:** a small circular **pointer icon beneath and toward the right of the odometer section** opens existing saved locations, arranged into **Simple and Narrow subsections** with **scrollable, paginated rows**. **Click ANY saved row → reopen SAME prefilled two-tab popup for editing**. Saving updates the existing canonical destination record/identity and the row without creating duplicates; cancelling leaves CURRENT unchanged.
+4. **Depth** is a separate switch/depth selection projecting a cached authorized index, not a third popup tab and not a list of manually saved destinations.
+5. All modes preserve **TRUE REMOTE Cloudflare** and independent provider/auth boundaries. No extra cloud scan for Simple/Narrow or a warm local mode switch.
 
-See [current Click2Cloud NEED_TO_DO](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md) for the latest owner clarification and performance defect.
+See [latest two-tab popup and Shelf requirements](../NEED_TO_DO/2026-11-05_EXPLORER_ADD_TO_RIGHT_CLICK_TWO_TAB_POPUP.md) and [mode-switch performance note](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md). **Source bullets above remain descriptions of REDOWN's older current implementation, not proof that the new popup is implemented.**
 
 ## 3. CURRENT IndexedDB and durable JSON model [SOURCE]
 
@@ -129,7 +130,7 @@ See [current Click2Cloud NEED_TO_DO](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NAR
 **This section is essential. Do not replace or mislabel TRUE REMOTE as browser fetch+upload.**
 
 ### Real sequence
-1. Chrome right-click resolves an authorized Cloudflare V3 menu action to **profile/accountId/bucketName/prefix**. For Simple it is the marked/default path; Narrow/Depth only determine how to choose the path.
+1. Chrome right-click resolves an authorized Cloudflare V3 menu action to **profile/accountId/bucketName/prefix**. For Simple it is the user-selected labeled/default path; Narrow/Depth only determine how to choose the path.
 2. The background identifies the source URL (srcUrl > linkUrl > pageUrl) and validates public HTTPS for ordinary V3 saves.
 3. Background calls **ingestCloudflareAtPrefix(profile, sourceUrl, prefix, filename, receipt, noProvision=true)**. It ensures a prepared Worker/profile, checks exact path capabilities as needed, then POSTs only **control metadata + bearer authorization** to the correct bucket Worker, including **sourceUrl, exact folder and filename**. Browser does **NOT** download original file bytes for this path.
 4. The **Cloudflare Worker** validates Bearer secret, source URL and redirects (public HTTPS; private hosts and unsafe redirects rejected), makes the **remote HTTP fetch itself**, then streams fetched bytes directly into bound **Cloudflare R2 STORAGE**.
@@ -183,12 +184,12 @@ Source: [background.js provider composition lines 2520–2620](https://github.co
 
 | Actual REDOWN source limitation | Required Click2Cloud posture |
 | --- | --- |
-| Old Simple permits extra configured choices/submenu | **Replace with owner's one Simple marker → single Cloudflare leaf; configure multiple choices in Narrow** |
+| Old Simple permits extra configured choices/submenu | **Keep multiple labeled Simple options as a supported target**, but expose each through an Explorer folder's two-tab popup. Maintain flat provider leaf only for sole uncustomized default redown root; never auto-create unintended choices |
 | Menu switch waits for full CURRENT/rebuild ack and storage listener may trigger another rebuild | Optimistic local switch, bounded local projection, serialized native apply without blocking UI; measure each stage and dedupe |
 | CURRENT commitPatch uses getAll over five stores even for a small settings patch | Scope writes/reads by changed records when safe; preserve transaction/journal/backups/ack semantics |
 | Depth cache key includes depth and has TTL; switching depth may invalidate a previously observed tree | Reuse valid per-node indexed folder graph across depth changes; reproject locally; refresh separately on real freshness/permission change |
 | Depth <=10, menu budget 300, discovery <=500 additions / <=80 pages / <=20s | Treat as current limits; adapt to safe larger scopes, Chrome native constraints, lazy/partial completeness; never advertise unlimited without tests |
-| Current Simple fallback/Root uses specific ready redown identity and may list activated extra buckets | One explicit effective authorized Simple marker, nonambiguous account selection, no silent extra provider rows |
+| Current Simple fallback/Root uses specific ready redown identity and may list activated extra buckets | Only uncustomized default redown root yields direct Cloudflare leaf. Explicitly added Simple destinations use user Menu Titles and exact identities; activation must not auto-add unintended entries |
 | Separate chooser tab when native menu overflows | Keep an honest bounded fallback, avoid extra pages in ordinary supported paths; do not fabricate >Chrome max native menus |
 | Manual Browse folder gate in existing editor | Prefer cached tree; lazy discovery with transparent status; no focus loss |
 | TRUE REMOTE unknown-length sources buffered in Worker | Preserve current correct behavior but measure memory/size and improve separately; don't misrepresent as limitless streaming |
@@ -199,25 +200,27 @@ Source: [background.js provider composition lines 2520–2620](https://github.co
 
 ## 10. IF/THEN/OR invariants Codex must carry into Click2Cloud
 
-1. IF exactly one authorized Simple marker exists, THEN REDOWN → Cloudflare is one actionable native leaf that routes to that marked account/bucket/prefix via Cloudflare TRUE REMOTE.
-2. IF no marker exists AND a uniquely authorized redown default exists, THEN route flat Cloudflare to that redown root; ELSE no invented default.
-3. IF multiple destinations are deliberately configured for selection, THEN expose them through Narrow as labeled natural nesting; no arbitrary inventory.
-4. IF Depth selected, THEN project the cached authorized directory graph to chosen depth, including unconfigured folders; ELSE no full Depth traversal for Simple/Narrow.
-5. IF mode changes AND cached authority/config is valid, THEN update editor locally immediately, reproject cheaply, and reconcile Chrome asynchronously; ELSE show clear pending/error, never falsely 'Applied'.
-6. IF native ID clicked, THEN re-resolve against latest committed exact profile/account/bucket/prefix and current permissions; ELSE reject stale/disconnected IDs without saving elsewhere.
-7. IF selected provider is Cloudflare, THEN source URL goes to authorized Worker and Worker fetches/uploads to R2; browser must not stage original bytes; verify by R2 HEAD+receipt before success.
-8. IF selected provider is Google/Dropbox/OneDrive, THEN use the corresponding browser-byte provider adapter with no original source provenance disclosed to that provider; verify provider receipt before success.
-9. IF directory listing is partial, stale, or fails, THEN keep verified authorized previous nodes and report incomplete state; NEVER infer deletion or mint nonexistent paths.
-10. IF CURRENT transaction fails, THEN config/journal/pointer/backup must roll back together; IF new native menu registration fails, THEN saved CURRENT persists and REDOWN root/Manage remains accessible.
-11. IF source URL cannot be fetched safely by Worker, THEN fail with accurate cause; do not call it success and do not automatically convert TRUE REMOTE to browser byte upload.
-12. IF user toggles only presentation, THEN do not change source files, provider credentials, bucket activation, previously configured other modes, saved cloud objects, or default transport.
+1. IF **only the uncustomized authorized redown root** is active, THEN REDOWN → Cloudflare is a single direct native leaf saving TRUE REMOTE to redown root.
+2. IF user right-clicks an authorized Explorer folder and chooses **Add to Right-Click**, THEN open one small popup: Tab 1 Setup = Menu Title and Simple/Narrow switch; Save/Cancel.
+3. IF user saves Simple with a title, THEN add a flat **labeled option** under Cloudflare's submenu to that exact folder. IF other Simple options already exist, preserve them as separately actionable labeled choices; never collapse to a single global marker.
+4. IF user chooses Narrow, THEN enable Tab 2 Path Titles; show original path segments **top-down on the left**, editable alias per level on the right. IF Setup had a menu title, THEN assign it to the final/bottom path row and synchronize edits both directions.
+5. IF user opens the Shelf circular pointer button **beneath/right of odometer**, THEN show **Simple and Narrow** sections of saved location rows with scrolling and pagination. IF user clicks ANY saved row, THEN reopen the exact same popup prefilled; Save changes the existing ID, not a duplicate.
+6. IF Depth selected, THEN project cached authorized folder graph to chosen depth, including eligible unconfigured folders; no full Depth traversal for Simple/Narrow and no unrelated Depth rows in Shelf saved lists.
+7. IF mode changes AND local authority/config valid, THEN update editor locally immediately, reproject cheaply, reconcile Chrome asynchronously; ELSE show truthful pending/error, never falsely 'Applied'.
+8. IF native menu ID clicked, THEN re-resolve the latest committed exact profile/account/bucket/prefix and permissions; ELSE reject stale/disconnected IDs without fallback to wrong bucket.
+9. IF selected provider is Cloudflare, THEN authorized Worker remotely fetches URL bytes and writes them to R2; browser must not stage original bytes; require receipt + R2 HEAD before success.
+10. IF selected provider is Google/Dropbox/OneDrive, THEN use its browser-byte upload adapter with no original source URL in provider upload metadata; verify before success.
+11. IF directory listing is partial, stale or fails, THEN preserve verified authorized known nodes and report incomplete; no inferred deletion or fabricated paths.
+12. IF CURRENT transaction fails, THEN config/journal/pointer/backup roll back together. IF native registration fails, THEN saved CURRENT and root/Manage remain.
+13. IF source URL cannot be fetched safely remotely, THEN fail truthfully; do not relabel browser byte uploading as TRUE REMOTE.
+14. IF user changes only a presentation option, THEN don't alter credentials, bucket activation, other mode's configurations or existing cloud files.
 
 ## 11. Source-bound acceptance / proof requirements
 
-Run relevant pinned tests in Click2Cloud's compatible harness and add equivalent port-specific coverage: pure projections; Simple marker; Narrow/Depth distinction; deterministic IDs; cross-account same labels; CURRENT crash/journal/ack; stale account and revoked auth; source context precedence; Chrome create/update/remove callbacks + startup/restoration; profile activation/refresh separation; true remote Worker fetch and verified R2 object; other-provider flat siblings; side-effect-free mode switching; real Chrome right-click gesture where possible.
+Run relevant pinned tests in Click2Cloud's compatible harness and add equivalent port-specific coverage: pure projections; multiple titled Simple options and default flat root; Narrow two-tab path-title inheritance; Shelf paginated re-edit rows; Depth distinction; deterministic IDs; cross-account same labels; CURRENT crash/journal/ack; stale account and revoked auth; source context precedence; Chrome create/update/remove callbacks + startup/restoration; profile activation/refresh separation; true remote Worker fetch and verified R2 object; other-provider flat siblings; side-effect-free mode switching; real Chrome right-click gesture where possible.
 
 **Required proof ladder**: static code extraction ≠ prior fixture tests ≠ current fresh unit tests ≠ actual Chrome native callback ≠ Worker live upload ≠ provider-confirmed object/byte integrity. State exactly which rung was reached.
 
-**Use next:** [Codex-ready staged porting contract](./CODEX_REBUILD_FROM_REDOWN_CURRENT_V3_EXTRACTION_2026-11-05.md), then current [Click2Cloud V3+1 runbook](../docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md) and [owner mode note](../NEED_TO_DO/2026-11-05_INSTANT_SIMPLE_NARROW_DEPTH_SWITCHING.md). Where historical target docs disagree, resolve against this dated owner update and actual source before implementing; do not silently mutate REDOWN.
+**Use next:** [Codex-ready staged porting contract](./CODEX_REBUILD_FROM_REDOWN_CURRENT_V3_EXTRACTION_2026-11-05.md), then current [Click2Cloud V3+1 runbook](../docs/CODEX_AUTONOMOUS_V3P1_RUNBOOK.md) and [latest popup/Shelf note](../NEED_TO_DO/2026-11-05_EXPLORER_ADD_TO_RIGHT_CLICK_TWO_TAB_POPUP.md). Where historical target docs disagree, resolve against this dated owner update and actual source before implementing; do not silently mutate REDOWN.
 
 **END — source extraction, not shipped implementation.**
