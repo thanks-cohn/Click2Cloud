@@ -17,34 +17,48 @@ The owner sees a noticeable, unacceptable delay switching from **Nested → Dept
 
 **No network scans or OAuth setup as a side effect of an ordinary mode switch.** The editor should respond immediately even if applying the resulting Chrome native menu needs additional asynchronous work. Distinguish **mode selected / editing ready** from **native menu applied** honestly.
 
-## Nonnegotiable Simple menu rules
+## Updated owner model — Simple marker, Narrow nesting, Depth hierarchy
 
-**Important: Simple may expose multiple configured options.** Do not forcibly restrict it to a single destination.
+**Latest owner clarification (November 5, 2026):** The previous text allowing *multiple menu choices inside Simple* is **superseded**. Do not confuse selecting multiple stored destinations with exposing multiple actions in the Simple projection.
 
-**Default when only the `redown` bucket/root is active and no other Simple destination is configured:**
+### Simple — one marked destination, one flat Cloudflare action
 
-```text
-REDOWN
-└── Cloudflare         [direct actionable save to authorized redown bucket root]
-```
-
-- **Cloudflare is one flat/direct leaf**, not an empty wrapper or another nested menu.
-- Do not insert an unnecessary `redown` child, a redundant `Home` item, extra setup rows, or a second submenu merely to save to the root.
-- The save target must be the actual authorized `redown` bucket root. Do not confuse visible menu labels with cloud path/identity.
-- If the user has explicitly configured **additional eligible Simple destinations**, expose those choices using each saved **Menu Label**, retaining the user-intended destinations, collision rules, and correct action routing. A Cloudflare submenu may then be justified to list the multiple choices; do **not** collapse those choices into one or invent intermediate nested folder layers.
-- Keep the separate Google Drive, Dropbox and OneDrive provider rows flat; changes to Cloudflare's mode must not alter their own branches.
-
-**Illustrative multiple-option case (only when configuration warrants it):**
+1. User browses/selects an **authorized bucket or folder location** in Right-click Setup.
+2. User assigns that selected location the **Simple marker** (the one effective Simple destination for the current Cloudflare context). Preserve its exact profile/account/bucket/prefix identity and saved metadata/menu label; the visible Chrome leaf still reads **Cloudflare**.
+3. In **Simple mode**, the native menu is always a direct single Cloudflare action:
 
 ```text
 REDOWN
-└── Cloudflare
-    ├── [User's configured Menu Label A]
-    ├── [User's configured Menu Label B]
-    └── [Default redown root / Home when legitimately offered]
+└── Cloudflare           [direct save to the location marked Simple]
 ```
 
-The single-destination default and configured multi-destination case must both be covered by regression tests. The exact placement of authorized extra actions should honor existing V3 native-menu constraints and established behavior, without duplicate save routes.
+4. Clicking this flat **Cloudflare** row saves directly into the exact authorized **Simple-marked location**. There is **no extra submenu, redown child, Home row, or intervening folder hierarchy**.
+5. **Default / first run:** When no explicit Simple marker has been set and the sole ready default is the authorized `redown` bucket root, use that root as the effective Simple destination. Clicking `REDOWN → Cloudflare` saves to `redown/`. Do not invent a destination if no authorized root is available: show an honest setup/disconnected state without routing to the wrong bucket.
+6. Only **one effective Simple marker** should govern a given Cloudflare flat action at once. Selecting a new Simple-marked location supersedes the previous selection atomically while preserving all underlying saved destinations and independent Narrow/Depth configurations; collisions/multiple accounts must never silently redirect a save. Resolve the configured default Cloudflare identity explicitly where more than one account/bucket could match.
+7. **Multiple configured save choices are still supported**, but their **nested multi-choice presentation belongs in Narrow**, not under Simple. A saved Menu Label is used where that destination is presented as a choice (e.g., Narrow), not to create additional Simple leaves.
+8. Google Drive, Dropbox, OneDrive and other flat provider rows remain independent; do not put them under Cloudflare or change their existing auth/save behavior.
+
+### Narrow — the straightforward nesting option
+
+**Narrow is the user's simple, manually configured nesting mode.** It takes the paths the user explicitly selected, preserves custom Menu Labels, and constructs only the necessary parent/child hierarchy to expose those choices. It **does not** scan unrelated cloud directories, inherit all Depth folders, or become a second Simple-default marker.
+
+- Multiple destinations and labels can coexist in Narrow, including distinct folders or authorized bucket roots.
+- Natural hierarchy and explicit `Save here` when appropriate must remain correct; preserve collision handling and exact destination IDs.
+- Switching from Simple to Narrow reuses the existing configured route records. Switching back returns immediately to the one Simple-marked location.
+
+### Depth — automatic full-depth projection of cached authorized folders
+
+Depth projects the authorized discovered folder index up to the selected depth, including eligible unconfigured folders. It may have many rows but should use the local CURRENT/IndexedDB index once populated, rather than delaying the selector on network rescan. An incomplete/stale index must be reported truthfully, and unavailable/revoked routes must fail closed.
+
+### Acceptance examples
+
+**No explicit Simple selection, only default `redown` active:** `REDOWN → Cloudflare` directly saves to `redown` bucket root.
+
+**User marks `redown/Art/Photos` Simple:** `REDOWN → Cloudflare` directly saves to `redown/Art/Photos` with one click, **not** `REDOWN → Cloudflare → Art → Photos`.
+
+**User configured `redown/Art/Photos` and `redown/Work/Docs` for Narrow:** Narrow displays only those configured routes and necessary ancestors with their labels. Simple still shows just one flat Cloudflare leaf aimed at the independently Simple-marked location.
+
+**Mode switching is inexpensive:** `Depth → Simple → Narrow → Simple` does not rescan folders or alter the Simple marker, Narrow entries, Depth setting, or cloud files; editor response is immediate and native registration remains truthful.
 
 ## CURRENT / IndexedDB / JSON clarification
 
@@ -82,10 +96,10 @@ Potential delay sources are therefore **storage restore/transaction cost, serial
 - [ ] Update only affected UI/projection/native menu entries where safe; deduplicate rebuilds, and do not block visible editor feedback on native menu registration.
 - [ ] If native Chrome registration remains pending, communicate pending/applied/retry status truthfully without freezing the selector, applying stale menu generations or allowing an old mode's action IDs to save.
 - [ ] Test **Depth → Simple → Narrow → Depth** repeatedly on a warm populated tree and on cold worker start; prove no unexpected cloud reads on warm transitions and preserve independent saved mode configurations.
-- [ ] Test **only `redown` active** → exactly one direct actionable `REDOWN → Cloudflare` leaf; test **multiple Simple destinations** → correct saved Menu Labels, no gratuitous folder nesting, and verified exact destination routing.
+- [ ] Test **only `redown` active** → exactly one direct actionable `REDOWN → Cloudflare` leaf to its root; **Simple-marked non-root location** → same flat leaf routes to the selected exact path; **multiple Narrow destinations** → labeled nested choices; changing Simple marker preserves Narrow/Depth and never silently redirects across accounts.
 - [ ] Test thousands of indexed folders, large configured route sets, malformed/stale/revoked snapshots, simultaneous settings windows, crashes/restarts, and menu registration failures; no false success.
 - [ ] Produce reproducible trace/benchmarks and root-cause explanation **before** changing engine internals. No copy/paste alternate compiler, new engine, broad refactor or blanket cache invalidation.
 
-**One-line contract:** Once CURRENT is populated and authorized, switching Simple/Narrow/Depth is an inexpensive local projection. **Only `redown` active = direct `REDOWN → Cloudflare` leaf. Extra explicitly configured Simple destinations = properly labeled, actionable choices.**
+**One-line contract:** Once CURRENT is populated and authorized, switching Simple/Narrow/Depth is an inexpensive local projection. **Simple = select one authorized location, assign the Simple marker, then `REDOWN → Cloudflare` saves directly there with no submenu (default: authorized `redown` root). Narrow = manually configured labeled nesting for multiple routes. Depth = cached indexed folder hierarchy.**
 
 **This file is a NEED_TO_DO note, not a Codex implementation command, and changes no application code.**
