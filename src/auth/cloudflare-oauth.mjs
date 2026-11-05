@@ -64,8 +64,17 @@ export function createClick2CloudCloudflareOAuth({
   let connecting=null,refreshing=null;
 
   const withLock=(name,fn)=>locks?.request?locks.request('click2cloud-'+name,fn):fn();
-  const getSaved=async()=> (await chromeApi.storage.local.get(CLOUDFLARE_AUTH_KEY))[CLOUDFLARE_AUTH_KEY]||null;
-  const store=async auth=>chromeApi.storage.local.set({[CLOUDFLARE_AUTH_KEY]:auth});
+  let protectedStorage=null;
+  async function ensureProtectedStorage() {
+    if(!protectedStorage) {
+      if(typeof chromeApi.storage.local.setAccessLevel!=='function')
+        throw problem('UNSAFE_TOKEN_STORAGE','Chrome must restrict Cloudflare tokens to trusted extension contexts.');
+      protectedStorage=chromeApi.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}).catch(e=>{protectedStorage=null;throw e;});
+    }
+    return protectedStorage;
+  }
+  const getSaved=async()=> {await ensureProtectedStorage();return (await chromeApi.storage.local.get(CLOUDFLARE_AUTH_KEY))[CLOUDFLARE_AUTH_KEY]||null;};
+  const store=async auth=>{await ensureProtectedStorage();return chromeApi.storage.local.set({[CLOUDFLARE_AUTH_KEY]:auth});};
   const eraseAttempt=()=>chromeApi.storage.session.remove(ATTEMPT_KEY);
 
   async function postToken(fields) {
@@ -206,6 +215,7 @@ export function createClick2CloudCloudflareOAuth({
     return Object.freeze({phase:'connected',accounts});
   }
   async function disconnect() {
+    await ensureProtectedStorage();
     await chromeApi.storage.local.remove(CLOUDFLARE_AUTH_KEY);
     await eraseAttempt();
     // Deliberately preserve menu choices, Narrow aliases, Depth and backups.
