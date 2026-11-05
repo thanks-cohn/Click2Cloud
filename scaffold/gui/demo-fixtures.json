@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "kind": "click2cloud-v3p1-gui-demo-fixture",
+  "demoOnly": true,
+  "warnings": [
+    "Synthetic sample data only. No cloud credentials, provider API calls, real Chrome menus or actual upload receipts.",
+    "The future GUI must use the real V3+1 compiler for its menu preview; these records are seed inputs, not pre-rendered menu output."
+  ],
+  "initialView": "remotes",
+  "cloudAccounts": [
+    {
+      "id": "demo-cf-a",
+      "provider": "cloudflare-r2",
+      "accountId": "demo-account-a",
+      "name": "Demo Cloud A",
+      "connectionState": "simulated-connected"
+    },
+    {
+      "id": "demo-cf-b",
+      "provider": "cloudflare-r2",
+      "accountId": "demo-account-b",
+      "name": "Demo Cloud B",
+      "connectionState": "simulated-connected"
+    }
+  ],
+  "buckets": [
+    {
+      "id": "demo-bucket-redown",
+      "profileId": "demo-cf-a",
+      "accountId": "demo-account-a",
+      "bucketName": "redown"
+    },
+    {
+      "id": "demo-bucket-other",
+      "profileId": "demo-cf-b",
+      "accountId": "demo-account-b",
+      "bucketName": "portfolio"
+    }
+  ],
+  "folders": [
+    {
+      "profileId": "demo-cf-a",
+      "accountId": "demo-account-a",
+      "bucketName": "redown",
+      "paths": [
+        "",
+        "Art",
+        "Art/Photography",
+        "Art/Photography/Portraits",
+        "Art/Photography/Landscapes",
+        "Art/Illustration",
+        "Work",
+        "Work/Invoices",
+        "Work/Invoices/2026",
+        "Work/Reports",
+        "Work/Reports/2026",
+        "Projects",
+        "Projects/Designs",
+        "Projects/Designs/Screens",
+        "Archive",
+        "Archive/Images",
+        "Archive/Images/Family",
+        "Personal",
+        "Personal/Music",
+        "Personal/Videos",
+        "Not Manually Configured",
+        "Not Manually Configured/Subfolder"
+      ]
+    },
+    {
+      "profileId": "demo-cf-b",
+      "accountId": "demo-account-b",
+      "bucketName": "portfolio",
+      "paths": [
+        "",
+        "Art",
+        "Art/Photography",
+        "Work",
+        "Work/Invoices",
+        "Samples",
+        "Samples/2026"
+      ]
+    }
+  ],
+  "manualDestinations": {
+    "simple": [
+      {
+        "id": "simple-photos",
+        "profileId": "demo-cf-a",
+        "accountId": "demo-account-a",
+        "bucketName": "redown",
+        "prefix": "Art/Photography",
+        "menuTitle": "My Photos",
+        "enabled": true,
+        "order": 0
+      },
+      {
+        "id": "simple-invoices",
+        "profileId": "demo-cf-a",
+        "accountId": "demo-account-a",
+        "bucketName": "redown",
+        "prefix": "Work/Invoices",
+        "menuTitle": "Invoices",
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "simple-untitled",
+        "profileId": "demo-cf-a",
+        "accountId": "demo-account-a",
+        "bucketName": "redown",
+        "prefix": "Personal/Music",
+        "menuTitle": "",
+        "enabled": true,
+        "order": 2
+      }
+    ],
+    "narrow": [
+      {
+        "id": "narrow-portraits",
+        "profileId": "demo-cf-a",
+        "accountId": "demo-account-a",
+        "bucketName": "redown",
+        "prefix": "Art/Photography/Portraits",
+        "menuTitle": "Portrait Albums",
+        "ancestorTitles": [
+          {
+            "prefix": "",
+            "menuTitle": "redown"
+          },
+          {
+            "prefix": "Art",
+            "menuTitle": "Creative"
+          },
+          {
+            "prefix": "Art/Photography",
+            "menuTitle": "Photo Library"
+          },
+          {
+            "prefix": "Art/Photography/Portraits",
+            "menuTitle": "Portrait Albums"
+          }
+        ],
+        "enabled": true,
+        "order": 0
+      },
+      {
+        "id": "narrow-reports",
+        "profileId": "demo-cf-a",
+        "accountId": "demo-account-a",
+        "bucketName": "redown",
+        "prefix": "Work/Reports/2026",
+        "menuTitle": "Annual Reports",
+        "ancestorTitles": [
+          {
+            "prefix": "",
+            "menuTitle": ""
+          },
+          {
+            "prefix": "Work",
+            "menuTitle": "Business"
+          },
+          {
+            "prefix": "Work/Reports",
+            "menuTitle": ""
+          },
+          {
+            "prefix": "Work/Reports/2026",
+            "menuTitle": "Annual Reports"
+          }
+        ],
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "narrow-other-account",
+        "profileId": "demo-cf-b",
+        "accountId": "demo-account-b",
+        "bucketName": "portfolio",
+        "prefix": "Art/Photography",
+        "menuTitle": "Other Account Photos",
+        "ancestorTitles": [
+          {
+            "prefix": "",
+            "menuTitle": "portfolio"
+          },
+          {
+            "prefix": "Art",
+            "menuTitle": ""
+          },
+          {
+            "prefix": "Art/Photography",
+            "menuTitle": "Other Account Photos"
+          }
+        ],
+        "enabled": true,
+        "order": 2
+      }
+    ]
+  },
+  "depth": {
+    "enabled": false,
+    "maxLevel": 3,
+    "lastChosenLevel": 3,
+    "participatingBucketIds": [
+      "demo-bucket-redown",
+      "demo-bucket-other"
+    ],
+    "inventoryCompleteness": "demo-complete"
+  },
+  "otherProviders": [
+    {
+      "provider": "google-drive",
+      "name": "Google Drive",
+      "menuStyle": "flat-leaf",
+      "connectionState": "simulated-disconnected"
+    },
+    {
+      "provider": "dropbox",
+      "name": "Dropbox",
+      "menuStyle": "flat-leaf",
+      "connectionState": "simulated-disconnected"
+    },
+    {
+      "provider": "onedrive",
+      "name": "OneDrive",
+      "menuStyle": "flat-leaf",
+      "connectionState": "simulated-disconnected"
+    }
+  ],
+  "preferences": {
+    "showManageDestinationsInChromeMenu": true,
+    "menuConfigurationBackupCadence": "weekly",
+    "depthBackupCadence": "weekly"
+  },
+  "stressScenarios": [
+    {
+      "id": "empty",
+      "description": "0 manually saved destinations, Depth OFF; single default root should be actionable"
+    },
+    {
+      "id": "page-boundary",
+      "description": "Programmatically generate 21 Simple and 21 Narrow distinct records to test 20/page pagination"
+    },
+    {
+      "id": "large-manager",
+      "description": "Generate 100 user-created Narrow destinations and full ancestor aliases for independent menu-config restore"
+    },
+    {
+      "id": "deep-index",
+      "description": "Generate 5000 folder nodes across 2 buckets including 11-level chains and repeated sibling names; assert bounded display and completeness notice"
+    },
+    {
+      "id": "collision",
+      "description": "Two different Cloudflare accounts share a bucket/folder display name; route ID must include exact account identity"
+    }
+  ]
+}
