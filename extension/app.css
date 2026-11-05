@@ -35,3 +35,29 @@
   outline-offset:-2px;
 }
 .explorer-context-menu button[role=menuitem]:disabled {color:#718097;}
+
+/* One source-owned native menu mirror; nested branches remain inspectable. */
+.explorer-menu-node {position:relative; flex:0 0 auto;}
+.explorer-menu-node > button[role=menuitem] {width:100%;}
+.explorer-context-submenu {
+  display:none;
+  position:absolute;
+  top:-5px;
+  left:calc(100% - 2px);
+  z-index:10001;
+  min-width:230px;
+  max-height:min(70vh,650px);
+  overflow-y:auto;
+  overflow-x:visible;
+  padding:5px;
+  border:1px solid #b9c8db;
+  border-radius:11px;
+  background:white;
+  box-shadow:0 15px 40px #16294038;
+}
+.explorer-menu-node:hover > .explorer-context-submenu,
+.explorer-menu-node:focus-within > .explorer-context-submenu,
+.explorer-menu-node > button[aria-expanded=true] + .explorer-context-submenu {display:flex; flex-direction:column;}
+.explorer-context-menu:has(.explorer-context-submenu){overflow:visible;}
+.explorer-context-menu small {padding:8px 12px;color:#667e9c;max-width:230px;}
+.explorer-context-menu button[aria-haspopup=menu] {display:flex;justify-content:space-between;}
