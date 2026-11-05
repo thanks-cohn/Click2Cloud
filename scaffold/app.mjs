@@ -14,6 +14,7 @@ const state = {
   selectedPath: 'Art/Photography',
   depthEnabled: false,
   depth: 3,
+  chromeManageVisible: true, // Demo setting: affects preview only, not native Chrome.
   page: { simple: 1, narrow: 1 },
   pageSize: 3,
   nextId: 10,
@@ -28,6 +29,12 @@ const state = {
   ]
 };
 
+// The manager is a separate ONE-POP-OUT flow: list ↔ editor; never open a second dialog.
+const managerState = {
+  mode: 'simple', selectedId: null, draft: null,
+  pages: {simple:1,narrow:1}, pageSize:20,
+  confirmId: null, previousFocus: null
+};
 const pathParts = path => ['redown', ...(path ? path.split('/') : [])];
 const leaf = path => path ? path.split('/').at(-1) : 'redown';
 const labelFor = record => record.title.trim() || leaf(record.path);
@@ -53,7 +60,12 @@ function renderExplorer() {
     button.append(name,locator);
     button.addEventListener('click',()=>{state.selectedPath=path;renderExplorer();});
     button.addEventListener('dblclick',()=>openEditor({path}));
-    button.addEventListener('contextmenu',event=>{event.preventDefault();state.selectedPath=path;renderExplorer();openEditor({path});});
+    button.addEventListener('contextmenu',event=>{
+      event.preventDefault();
+      state.selectedPath=path;
+      renderExplorer();
+      showExplorerContext(event.clientX,event.clientY);
+    });
     list.append(button);
   }
   byId('selected-path').textContent = actualPath(state.selectedPath);
@@ -191,7 +203,7 @@ function savedGroup(mode) {
     const secondary=elem('span','saved-path',actualPath(record.path));
     const info=elem('span','saved-row-info');info.append(primary,secondary);
     row.append(info,elem('span','saved-arrow','›'));
-    row.addEventListener('click',()=>openEditor({record}));
+    row.addEventListener('click',()=>openManager(mode,record.id));
     rows.append(row);
   }
   if (!records.length) rows.append(elem('p','hint','No saved '+mode+' destinations.'));
@@ -279,6 +291,13 @@ function renderMenu() {
     combined.replaceChildren();menuRow(combined,'REDOWN');menuRow(combined,'Cloudflare · direct default redown/',1,true);
   }
   for(const label of ['Google Drive','Dropbox','OneDrive'])menuRow(combined,label,1,true);
+  if (state.chromeManageVisible) {
+    const manage = elem('button','preview-action','↗ Manage Destinations · demo Chrome shortcut');
+    manage.type='button';
+    manage.title='Preview of the optional Chrome REDOWN → Manage Destinations entry';
+    manage.addEventListener('click',()=>openManager('simple'));
+    combined.append(manage);
+  }
 }
 
 function updateDepth() {
@@ -300,10 +319,210 @@ function toast(message) {
   Promise.resolve().then(()=>{if(current===toastId)node.scrollIntoView({block:'nearest'});});
 }
 
+
+function showExplorerContext(x,y) {
+  const menu=byId('explorer-context');
+  menu.hidden=false;
+  menu.style.left=Math.max(8,Math.min(x,window.innerWidth-220))+'px';
+  menu.style.top=Math.max(8,Math.min(y,window.innerHeight-100))+'px';
+  byId('explorer-context-add').focus();
+}
+function hideExplorerContext() { byId('explorer-context').hidden=true; }
+
+function openManager(mode='simple',recordId=null) {
+  hideExplorerContext();
+  // A popup is never stacked above another popup.
+  if (!byId('editor-backdrop').hidden) {
+    byId('editor-backdrop').hidden=true;
+    state.editing=null;
+  }
+  managerState.previousFocus=document.activeElement;
+  managerState.mode=mode==='narrow'?'narrow':'simple';
+  managerState.selectedId=null;
+  managerState.draft=null;
+  managerState.confirmId=null;
+  byId('manager-backdrop').hidden=false;
+  if (recordId!==null) editManagerRecord(recordId);
+  else renderManager();
+  byId('manager-close').focus();
+}
+function closeManager() {
+  byId('manager-backdrop').hidden=true;
+  managerState.selectedId=null;
+  managerState.draft=null;
+  managerState.confirmId=null;
+  const focus=managerState.previousFocus;
+  managerState.previousFocus=null;
+  if (focus && focus.isConnected && typeof focus.focus==='function') focus.focus();
+  else byId('open-manager-explorer').focus();
+}
+function backToManager() {
+  managerState.selectedId=null;
+  managerState.draft=null;
+  managerState.confirmId=null;
+  renderManager();
+  byId('manager-back').hidden=true;
+  byId('manager-simple').focus();
+}
+function switchManagerMode(mode) {
+  if (!['simple','narrow'].includes(mode)) return;
+  managerState.mode=mode;
+  managerState.selectedId=null;
+  managerState.draft=null;
+  managerState.confirmId=null;
+  renderManager();
+}
+function editManagerRecord(recordId) {
+  const record=state.records.find(r=>r.id===recordId);
+  if (!record) {toast('This demo destination no longer exists.');renderManager();return;}
+  managerState.mode=record.mode;
+  managerState.selectedId=recordId;
+  managerState.draft={
+    id:record.id,mode:record.mode,path:record.path,
+    title:record.title,aliases:{...record.aliases}
+  };
+  managerState.confirmId=null;
+  renderManager();
+}
+function managerListPage(mode) {
+  const relevant=state.records.filter(r=>r.mode===mode);
+  const totalPages=Math.max(1,Math.ceil(relevant.length/managerState.pageSize));
+  managerState.pages[mode]=Math.min(Math.max(1,managerState.pages[mode]),totalPages);
+  return {relevant,totalPages,page:managerState.pages[mode]};
+}
+function renderManager() {
+  const mode=managerState.mode;
+  const inEdit=managerState.selectedId!==null;
+  for (const item of ['simple','narrow']){
+    const button=byId('manager-'+item);
+    const current=item===mode;
+    button.classList.toggle('chosen',current);
+    button.setAttribute('aria-pressed',String(current));
+  }
+  byId('manager-back').hidden=!inEdit;
+  byId('manager-list').hidden=inEdit;
+  byId('manager-editor').hidden=!inEdit;
+  byId('manager-footer').hidden=!inEdit;
+  if (inEdit) renderManagerEditor();
+  else renderManagerList();
+}
+function renderManagerList() {
+  const mode=managerState.mode;
+  const root=byId('manager-list');
+  root.replaceChildren();
+  const {relevant,page,totalPages}=managerListPage(mode);
+  const count=elem('div','manager-list-head');
+  count.append(
+    elem('strong','',mode==='simple'?'Simple destinations':'Narrow destinations'),
+    elem('span','',relevant.length+' saved · 20 per page')
+  );
+  root.append(count);
+  const entries=relevant.slice((page-1)*managerState.pageSize,page*managerState.pageSize);
+  if (!entries.length) root.append(elem('p','manager-empty','No saved '+mode+' destinations. Add one from the File Explorer using + Right Click.'));
+  for (const record of entries) {
+    const row=elem('div','manager-row');
+    const open=elem('button','manager-row-open');
+    open.type='button';
+    open.append(elem('strong','',labelFor(record)),elem('span','',actualPath(record.path)));
+    open.setAttribute('aria-label','Edit '+labelFor(record)+' at '+actualPath(record.path));
+    open.addEventListener('click',()=>editManagerRecord(record.id));
+    const remove=elem('button','row-remove','×');
+    remove.type='button';
+    remove.title='Remove destination from the right-click menu';
+    remove.setAttribute('aria-label','Remove saved menu destination '+labelFor(record));
+    remove.addEventListener('click',()=>{managerState.confirmId=record.id;renderManager();});
+    row.append(open,remove);
+    root.append(row);
+    if (managerState.confirmId===record.id) {
+      const confirmation=elem('div','manager-confirm');
+      confirmation.append(elem('span','', 'Remove “'+labelFor(record)+'” from saved menu destinations? Cloud files remain untouched.'));
+      const yes=elem('button','button danger','Remove');
+      const no=elem('button','button subtle','Keep');
+      yes.type='button';no.type='button';
+      yes.addEventListener('click',()=>{
+        const index=state.records.findIndex(x=>x.id===record.id);
+        if(index>=0)state.records.splice(index,1);
+        managerState.confirmId=null;
+        renderSaved();renderMenu();renderManager();
+        toast('Demo removed '+labelFor(record)+' from the menu; no cloud file was deleted.');
+      });
+      no.addEventListener('click',()=>{managerState.confirmId=null;renderManager();});
+      confirmation.append(yes,no);
+      root.append(confirmation);
+      no.focus();
+    }
+  }
+  const nav=elem('nav','pagination');
+  nav.setAttribute('aria-label',mode+' destinations pages');
+  const previous=elem('button','page-button','‹ Previous');
+  previous.type='button';previous.disabled=page<=1;
+  previous.addEventListener('click',()=>{managerState.pages[mode]--;renderManager();root.scrollTop=0;});
+  const indicator=elem('span','page-current','Page '+page+' of '+totalPages);
+  const next=elem('button','page-button','Next ›');
+  next.type='button';next.disabled=page>=totalPages;
+  next.addEventListener('click',()=>{managerState.pages[mode]++;renderManager();root.scrollTop=0;});
+  nav.append(previous,indicator,next);root.append(nav);
+}
+function renderManagerEditor() {
+  const draft=managerState.draft;
+  const root=byId('manager-editor');
+  root.replaceChildren();
+  if (!draft) {backToManager();return;}
+  const current=elem('div','editor-location','Actual destination: Cloudflare R2 · '+actualPath(draft.path));
+  root.append(current);
+  const headings=elem('div','manager-grid-head');
+  headings.append(elem('span','','ACTUAL DIRECTORY · READ ONLY'),elem('span','','MENU TITLE · EDITABLE'));
+  root.append(headings);
+  const rows=elem('div','manager-title-rows');
+  const pieces=pathParts(draft.path);
+  // Simple: ONE row. Narrow: every ancestor and the selected directory.
+  const indices=draft.mode==='simple'?[pieces.length-1]:pieces.map((_,i)=>i);
+  for (const i of indices) {
+    const isFinal=i===pieces.length-1;
+    const label=pieces[i];
+    const key=i===0?'redown':pieces.slice(1,i+1).join('/');
+    const row=elem('div','manager-title-row');
+    const left=elem('div','original-name');
+    left.append(elem('span','folder-glyph','▣'),elem('span','',label));
+    left.title='Original cloud directory name: cannot be edited';
+    const input=elem('input','title-input');
+    input.type='text';input.maxLength=60;
+    input.placeholder=label;
+    input.value=isFinal?draft.title:(draft.aliases[key]??'');
+    input.setAttribute('aria-label','Editable menu title for original '+label);
+    input.addEventListener('input',()=>{
+      if(isFinal)draft.title=input.value;
+      else draft.aliases[key]=input.value;
+    });
+    row.append(left,input);rows.append(row);
+  }
+  root.append(rows);
+  const note=elem('p','hint',draft.mode==='simple'
+    ? 'Simple: one editable title for one destination. No directory branches.'
+    : 'Narrow: each optional title customizes only its matching menu branch; actual cloud folder names remain unchanged.');
+  note.style.marginTop='14px';root.append(note);
+}
+function saveManagerEditor() {
+  const draft=managerState.draft;
+  if(!draft)return;
+  const existing=state.records.find(r=>r.id===draft.id);
+  if(!existing){toast('Destination was removed; no changes saved.');backToManager();return;}
+  const title=labelFor(draft);
+  if(draft.mode==='simple'&&state.records.some(r=>r.id!==draft.id&&r.mode==='simple'&&labelFor(r)===title)){
+    toast('This Simple menu title is already used. Choose another.');return;
+  }
+  existing.title=draft.title.trim();
+  existing.aliases={...draft.aliases};
+  // Manager mode switch is a FILTER, never a conversion operation.
+  renderSaved();renderMenu();backToManager();
+  toast('Demo updated '+title+' in place. No new destination, no cloud change.');
+}
+
 function wire() {
   byId('add-right-click').addEventListener('click',()=>openEditor({path:state.selectedPath}));
-  byId('open-saved').addEventListener('click',()=>byId('saved-groups').scrollIntoView({behavior:'smooth',block:'center'}));
-  byId('refresh-view').addEventListener('click',()=>byId('saved-groups').scrollIntoView({behavior:'smooth',block:'start'}));
+  byId('open-saved').addEventListener('click',()=>openManager('simple'));
+  byId('refresh-view').addEventListener('click',()=>openManager('simple'));
+  byId('open-manager-explorer').addEventListener('click',()=>openManager('simple'));
   byId('editor-close').addEventListener('click',closeEditor);
   byId('editor-cancel').addEventListener('click',closeEditor);
   byId('editor-backdrop').addEventListener('mousedown',event=>{if(event.target===byId('editor-backdrop'))closeEditor();});
@@ -315,7 +534,35 @@ function wire() {
   byId('editor-save').addEventListener('click',saveEditor);
   byId('depth-toggle').addEventListener('click',()=>{state.depthEnabled=!state.depthEnabled;updateDepth();});
   byId('depth-range').addEventListener('input',event=>{state.depth=Number(event.target.value);updateDepth();});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!byId('editor-backdrop').hidden)closeEditor();});
+  byId('chrome-manage-visible').addEventListener('change',event=>{
+    state.chromeManageVisible=event.target.checked;
+    renderMenu();
+    toast('Demo setting updated. Chrome native context menus are NOT connected in this scaffold.');
+  });
+  byId('explorer-context-add').addEventListener('click',()=>{hideExplorerContext();openEditor({path:state.selectedPath});});
+  byId('explorer-context-manage').addEventListener('click',()=>{hideExplorerContext();openManager('simple');});
+  document.addEventListener('click',event=>{
+    const menu=byId('explorer-context');
+    if(!menu.hidden && !menu.contains(event.target))hideExplorerContext();
+  });
+  byId('manager-close').addEventListener('click',closeManager);
+  byId('manager-back').addEventListener('click',backToManager);
+  byId('manager-simple').addEventListener('click',()=>switchManagerMode('simple'));
+  byId('manager-narrow').addEventListener('click',()=>switchManagerMode('narrow'));
+  byId('manager-save').addEventListener('click',saveManagerEditor);
+  byId('manager-backdrop').addEventListener('mousedown',event=>{if(event.target===byId('manager-backdrop'))closeManager();});
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape')return;
+    if(!byId('manager-backdrop').hidden){
+      event.preventDefault();
+      if(managerState.selectedId!==null)backToManager();
+      else closeManager();
+    } else if (!byId('editor-backdrop').hidden){
+      event.preventDefault();closeEditor();
+    } else if (!byId('explorer-context').hidden){
+      event.preventDefault();hideExplorerContext();
+    }
+  });
 }
 
 wire();
