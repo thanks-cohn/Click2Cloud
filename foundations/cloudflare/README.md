@@ -115,6 +115,66 @@ flowchart TD
 
 ---
 
+## 1B. Provider-first native right-click and minimal login panel (owner-approved diagrams)
+
+### Diagram 1 — Always-visible providers, authorize once, then save
+
+```mermaid
+flowchart TD
+    A["Right-click a supported file, image, or link"] --> M["Click2Cloud native context menu"]
+    M --> GD["Google Drive"]
+    M --> DB["Dropbox"]
+    M --> OD["OneDrive"]
+    M --> CF["Cloudflare R2"]
+
+    GD --> CHECK{"Selected provider authorized<br/>and save-ready?"}
+    DB --> CHECK
+    OD --> CHECK
+    CF --> CHECK
+
+    CHECK -- "YES" --> SAVE["SAVE IMMEDIATELY<br/>to the exact selected/default destination"]
+    SAVE --> VERIFY["Verify the actual provider upload"]
+    VERIFY --> HISTORY["Update History and matching File Explorer location"]
+
+    CHECK -- "NO: not authorized" --> CARD["Open the SMALL Click2Cloud extension panel<br/>show only the selected provider's login card"]
+    CARD --> CONSENT["User clicks Sign in and grants access"]
+    CONSENT --> READY["Reuse authorization on future clicks<br/>finish only genuinely needed first-time setup"]
+    READY --> NEXT["Next fresh right-click saves directly"]
+
+    CHECK -- "NO: missing destination/connection readiness" --> REPAIR["Show only the specific missing setup/repair action<br/>in the compact provider UI, not the full dashboard"]
+    REPAIR --> NEXT
+```
+
+### Diagram 2 — Returning, authorized user: no dashboard
+
+```mermaid
+flowchart LR
+    A["Right-click a supported file"] --> B["Choose a connected, ready provider"]
+    B --> C["Use its saved exact destination"]
+    C --> D["SAVE NOW"]
+    D --> E["Verified provider result"]
+    E --> F["File visible in Explorer + History"]
+
+    A -. "NEVER on a ready save" .-> X["Full Click2Cloud dashboard / extra setup tab"]
+```
+
+### Diagram 3 — Unconnected provider: the entire mini-panel
+
+```mermaid
+flowchart TD
+    A["Right-click → Choose provider"] --> B{"Authorized to Click2Cloud?"}
+    B -- "No" --> P["Compact Click2Cloud extension panel"]
+    P --> CARD["One Click Away!<br/><br/>[ Provider icon ]<br/>Google Drive<br/><br/>[ Sign in to Google Drive ]"]
+    CARD --> C["Use same card template for Dropbox,<br/>OneDrive, or Cloudflare R2 — selected provider only"]
+    C --> D["User approves this provider's OAuth"]
+    D --> E["Remember authorized connection<br/>and finish only necessary approved setup"]
+    E --> F["Next fresh click → direct save"]
+    B -- "Yes and ready" --> G["Direct save now; no panel or dashboard"]
+    B -- "Yes but action required" --> H["Same compact provider panel:<br/>only the required repair/destination action"]
+```
+
+---
+
 ## 2. The native right-click default (before the user customizes it)
 
 Inside Chrome's extension-created grouping, display **four direct, actionable, one-click provider entries in exactly this order**:
