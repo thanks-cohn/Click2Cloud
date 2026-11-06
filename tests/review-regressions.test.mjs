@@ -48,14 +48,14 @@ test('review: thrown auth and cancelled capture report exact outcomes with expli
 test('review: capture deadline and abort settle even if host fetch, reader or cancel never settles',async()=>{
   const source={filename:'source.png',url:'https://approved.invalid/image'};
   const stalled=()=>new Promise(()=>{});
-  await assert.rejects(captureSelectedBytes(source,{authorizeSource:()=>true,fetchSource:stalled,requestTimeoutMs:5}),{code:'CAPTURE_TIMEOUT'});
+  await assert.rejects(captureSelectedBytes(source,{maxBytes:1024,authorizeSource:()=>true,fetchSource:stalled,requestTimeoutMs:5}),{code:'CAPTURE_TIMEOUT'});
   let cancelled=false;
   const body={getReader:()=>({read:stalled,cancel:()=>{cancelled=true;return stalled();}})};
-  await assert.rejects(captureSelectedBytes(source,{authorizeSource:()=>true,fetchSource:async()=>({ok:true,body}),requestTimeoutMs:5}),{code:'CAPTURE_TIMEOUT'});
+  await assert.rejects(captureSelectedBytes(source,{maxBytes:1024,authorizeSource:()=>true,fetchSource:async()=>({ok:true,body}),requestTimeoutMs:5}),{code:'CAPTURE_TIMEOUT'});
   assert.equal(cancelled,true);
-  const controller=new AbortController();const result=captureSelectedBytes(source,{authorizeSource:()=>true,fetchSource:stalled,signal:controller.signal});
+  const controller=new AbortController();const result=captureSelectedBytes(source,{maxBytes:1024,authorizeSource:()=>true,fetchSource:stalled,signal:controller.signal});
   controller.abort();await assert.rejects(result,{name:'AbortError',code:'CAPTURE_INTERRUPTED'});
-  await assert.rejects(captureSelectedBytes(source,{authorizeSource:()=>true,fetchSource:async()=>({ok:true,redirected:true,body})}),{code:'CAPTURE_DENIED'});
+  await assert.rejects(captureSelectedBytes(source,{maxBytes:1024,authorizeSource:()=>true,fetchSource:async()=>({ok:true,redirected:true,body})}),{code:'CAPTURE_DENIED'});
 });
 test('review: a completed subtree scan never claims complete bucket inventory',async()=>{
   const discovery=createInventoryDiscovery({fileApi:{run:async()=>({state:'completed',data:{entries:[],cursor:''}})}});

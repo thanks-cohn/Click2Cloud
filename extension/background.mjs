@@ -17,34 +17,39 @@ import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
-import {SOURCE_HOSTS} from '../src/cloudflare/deployment.mjs';
+import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {scopeKey,targetKey,normalizeTarget} from '../src/core/menu-identity.mjs';
 const storageReady=Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'})));
 const diagnostics=createDiagnostics(),current=createCurrentStore({sink:diagnostics});
 const oauth=createCloudflareOAuth({chrome});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 const provisioner=createProvisioner({request:oauth.request,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking||!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))return false;const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();return r.ok&&b.success===true;},authorizeSource:async s=>{try{const u=new URL(s.url);return u.protocol==='https:'&&SOURCE_HOSTS.includes(u.hostname)&&!u.username&&!u.password&&!s.bytes;}catch{return false;}}});
+const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking||!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))return false;const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();return r.ok&&b.success===true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
-const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async t=>{await provisioner.markVerified(t);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await chrome.storage.session.get('cloudflareRepairTarget')).cloudflareRepairTarget,openShelf:async(provider,target)=>{if(target)await chrome.storage.session.set({cloudflareRepairTarget:target});else await chrome.storage.session.remove('cloudflareRepairTarget');return chrome.tabs.create({url:chrome.runtime.getURL('extension/app.html')+(provider?'#provider='+encodeURIComponent(provider):'#cloudflare')});},openActivation:url=>chrome.tabs.create({url}),record:result=>current.recordRemoteResult(result),history:()=>current.readRemoteResults()});
+const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await chrome.storage.session.get('cloudflareRepairTarget')).cloudflareRepairTarget,openShelf:async(provider,target)=>{if(target)await chrome.storage.session.set({cloudflareRepairTarget:target});else await chrome.storage.session.remove('cloudflareRepairTarget');return chrome.tabs.create({url:chrome.runtime.getURL('extension/app.html')+(provider?'#provider='+encodeURIComponent(provider):'#cloudflare')});},openActivation:url=>chrome.tabs.create({url}),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
+async function recordRemote(value){
+ const saved=await current.recordRemoteResult(value);
+ try{await chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}});}catch{/* No open app is normal; durable results remain inspectable. */}
+ return saved;
+}
 async function send(message) {
   let path,field;
-  if(message.type==='cfAccounts'){path='/accounts?per_page=50';field='accounts';}
+  if(message.type==='cfAccounts'){const status=await oauth.status();return {ok:true,accounts:status.accounts??[],cursor:''};}
   else if(message.type==='cfBuckets'){
     const status=await oauth.status();if(!status.accounts?.some(a=>a.id===message.accountId))throw Error('SCOPE_UNAUTHORIZED');
-    path='/accounts/'+encodeURIComponent(message.accountId)+'/r2/buckets?per_page=1000'+(message.cursor?'&cursor='+encodeURIComponent(message.cursor):'');field='buckets';
+    const page=/^page:([1-9][0-9]*)$/.exec(message.cursor??'');path='/accounts/'+encodeURIComponent(message.accountId)+'/r2/buckets?per_page=1000'+(page?'&page='+page[1]:message.cursor?'&cursor='+encodeURIComponent(message.cursor):'');field='buckets';
   } else throw Object.assign(Error('AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'),{code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'});
   const response=await oauth.request(path),body=await response.json();
   if(!response.ok||body.success!==true)throw Object.assign(Error('PROVIDER_READ_FAILED'),{code:'PROVIDER_READ_FAILED'});
-  if((body.result_info?.total_pages??1)>1&&!body.result_info?.cursor)throw Error('PROVIDER_PAGINATION_UNAVAILABLE');
-  return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??''};
+  const numericPage=Number(/^page:([1-9][0-9]*)$/.exec(message.cursor??'')?.[1]??1),nextPage=numericPage<(body.result_info?.total_pages??1)?'page:'+(numericPage+1):'';if((body.result?.truncated||body.result_info?.is_truncated)&&!body.result?.cursor&&!body.result_info?.cursor&&!nextPage)throw Error('PROVIDER_PAGINATION_UNAVAILABLE');
+  return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
 const fileApi=Object.freeze({...baseFileApi,async run(operation,input={},options={}) {
   // Unconfigured Worker transport is blocked before staging any object bytes.
-  if(!['accounts','buckets','list','listRaw','stat','preview','readStream'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
+  if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
   if(operation==='list'&&result.state==='completed') {
     const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+input.source.accountId,...input.source,prefix:''});
@@ -61,24 +66,24 @@ async function getInventory() {
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
   const state=await current.read(),savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
-  return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:await remoteReady(s.target)})))};
+  return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:await remoteReady(s.target),folders:await Promise.all(s.folders.map(async p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:await remoteReady({...s.target,prefix})};}))})))};
 }
 const getAuthorization=async()=>{
   if(revoking)return null;
   try{const a=await oauth.authority(),state=await current.read(),inv=await getInventory();
     const targets=[...(registrar.inspect().desired?.rows??[]).filter(r=>r.role==='save').map(r=>({target:r.target})),...state.configs.simple.destinations,...state.configs.nested.destinations].map(d=>d.target).concat(state.product.defaultTarget?[state.product.defaultTarget]:[]);
-    return {sessionId:a.sessionId,authorizedTargets:targets.filter(t=>inv.scopes.some(s=>scopeKey(s.target)===scopeKey(t)&&s.authorized&&s.workerReady))};
+    return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>inv.scopes.some(s=>scopeKey(s.target)===scopeKey(t)&&s.authorized)&&await remoteReady(t)?t:null))).filter(Boolean)};
   }catch{return null;}
 };
-const registrar=createChromeRegistrar({chrome,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
+const registrar=createChromeRegistrar({chrome,beforeClick:()=>ready,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
   dispatch:async(action,{info})=>{
-    if(action.reconnectOnly)return cloudflare.invoke({provider:'cloudflare',requestedTarget:action.target,setupOnly:true});
+    await ready;
     let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
-    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,context:info.srcUrl?'image':'link',source});
-  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK'}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
+    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',source});
+  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
-  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};const out=await remote.save(input);try{await current.recordRemoteResult(out);}catch{return {...out,completionPending:true};}return out;},onProviderAction:input=>revoking?{state:'blocked',code:'DISCONNECTING'}:cloudflare.invoke(input),
+  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:input=>revoking?{state:'blocked',code:'DISCONNECTING'}:cloudflare.invoke(input),
   authorizeSource:async s=>{if(s.bytes instanceof Uint8Array)return true;try{const u=new URL(s.url);return ['https:','http:'].includes(u.protocol)&&await chrome.permissions.contains({origins:[u.origin+'/*']});}catch{return false;}},fetchSource:fetch});
 async function external(){const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('EXTERNAL_RECOVERY_UNAVAILABLE');return createExternalRecovery({files:directoryFiles(h)});}
 const recovery={choose:async()=>{
@@ -107,7 +112,7 @@ const oauthForApi={...oauth,disconnect:async()=>{
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
-const api=createEngineApi({engine,current,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,
+const api=createEngineApi({engine,current,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});

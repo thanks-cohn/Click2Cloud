@@ -25,7 +25,7 @@ function normalizeInventory(value={}) {
       if(explicit.has(prefix)&&explicit.get(prefix)!==writable)throw new MenuSpecError('INVENTORY_INVALID','Contradictory folder permission observations.');
       explicit.set(prefix,writable);
       for(const ancestor of ancestors(prefix))if(!folders.has(ancestor))folders.set(ancestor,{target:normalizeTarget({...target,prefix:ancestor}),writable:scope.writable!==false,observed:false});
-      folders.set(prefix,{target:normalizeTarget({...target,prefix}),writable,observed:true});
+      folders.set(prefix,{target:normalizeTarget({...target,prefix}),writable,observed:true,...(typeof raw==='object'&&typeof raw.workerReady==='boolean'?{workerReady:raw.workerReady}:{})});
     }
     return {target,authorized:scope.authorized===true,workerReady:scope.workerReady===true,stale:scope.stale===true,complete:scope.complete===true,folders:[...folders.values()].sort((a,b)=>compare(a.target.prefix,b.target.prefix))};
   }).sort((a,b)=>compare(scopeKey(a.target),scopeKey(b.target)));
@@ -57,11 +57,11 @@ export function compileMenuSpec(options={}) {
       emit(options,'modes.'+mode,projection.omissions.some(x=>x.kind!=='excluded')?'partial':'ok',projection.omissions.some(x=>x.kind!=='excluded')?'PROJECTION_PARTIAL':'PROJECTION_OK');
     } catch(error) {emit(options,'modes.'+mode,'failed','PROJECTION_FAILED');throw error;}
     const rows=[],omissions=[...projection.omissions],byId=new Map(),identities=new Map(),siblings=new Map();
-    const maxRows=options.maxRows??10000,maxOmissions=options.maxOmissions??10000;
+    const maxRows=options.maxRows??Number.MAX_SAFE_INTEGER,maxOmissions=options.maxOmissions??Number.MAX_SAFE_INTEGER;
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
-    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link'],visible=true,providerAction=null}) {
+    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio'],visible=true,providerAction=null}) {
       if(composite&&role!=='separator') {
         const peers=siblings.get(parentId)??[];
         if(peers.some(p=>p.label===label))label+=' ['+stableId('label',placement+JSON.stringify(target)).slice(-6)+']';
@@ -79,18 +79,16 @@ export function compileMenuSpec(options={}) {
       const peers=siblings.get(parentId)??[];
       if(role!=='separator'&&peers.some(peer=>peer.role!=='separator'&&peer.label===label))throw new MenuSpecError('LABEL_COLLISION','Sibling menu labels collide; resolve explicitly before applying.');
       const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;
-      if(setupProvider)enabled=true;
-      const row={...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
+      if(setupProvider){enabled=true;label+=' · Set up';}
+      const row={actionKind:setupProvider?'setup':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
-    const bootstrap=composite&&options.product?.menuCustomized===false&&!show.flat&&!Object.values(options.configs??{}).some(c=>(c.destinations?.length??c.scopes?.length??0)>0);
-    if(bootstrap){
-      for(const [provider,label]of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])add({id:stableId('provider-entry',provider),label,role:'provider-action',target:provider==='cloudflare'?(options.defaultTarget??options.product?.defaultTarget??null):null,providerAction:provider,origin:{mode:null,provider},reason:'PROVIDER_ACTION'});
-    } else if(composite) {
+    if(composite) {
       const placement=options.product?.placement??{}, quickTargets=new Set(), parents=new Map(), projected=new Map();
       const quick=projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick);
       for(const row of quick){quickTargets.add(targetKey(row.target));add({...row,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider},reason:row.reason});}
-      const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
+      for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])add({id:stableId('provider-entry',provider),label,role:'provider-action',providerAction:provider,target:provider==='cloudflare'?(options.defaultTarget??null):null,origin:{mode:null,provider},reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});
+      const defaultTarget=options.defaultTarget&&(options.product?.menuCustomized!==false||show.flat||projection.rows.length)?normalizeTarget(options.defaultTarget):null;
       if(show.flat) {
         if(defaultTarget&&defaultTarget.provider==='cloudflare') {
           const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);

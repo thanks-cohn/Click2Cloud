@@ -37,7 +37,11 @@ export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.
       const identityResponse=await fetch('https://api.cloudflare.com/client/v4/accounts?per_page=50',{headers:{authorization:'Bearer '+data.access_token},redirect:'error',signal:AbortSignal.timeout(30000)});
       const identity=await identityResponse.json();
       if(!identityResponse.ok||identity.success!==true||!Array.isArray(identity.result)||!identity.result.length)throw failure('OAUTH_IDENTITY_UNVERIFIED');
-      if((identity.result_info?.total_pages??1)>1)throw failure('ACCOUNT_PAGINATION_REQUIRED');
+      for(let page=2;page<=(identity.result_info?.total_pages??1);page++){
+       const next=await fetch('https://api.cloudflare.com/client/v4/accounts?per_page=50&page='+page,{headers:{authorization:'Bearer '+data.access_token},redirect:'error',signal:AbortSignal.timeout(30000)}),body=await next.json();
+       if(!next.ok||body.success!==true||!Array.isArray(body.result))throw failure('OAUTH_IDENTITY_UNVERIFIED');identity.result.push(...body.result);
+       if(epoch!==generation)throw failure('OAUTH_CANCELLED');
+      }
       if((await chrome.storage.session.get('click2cloudOAuthCancelled')).click2cloudOAuthCancelled===state)throw failure('OAUTH_CANCELLED');
       const session={accounts:identity.result.map(a=>({id:a.id,name:a.name})),sessionId:random(),accessToken:data.access_token,refreshToken:data.refresh_token??null,expiresAt:clock()+Number(data.expires_in)*1000,scopes:typeof data.scope==='string'?data.scope.split(' '):scopes};
       await store(session,epoch);await onConnected();return status();
@@ -56,8 +60,8 @@ export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.
   }
   async function request(path,options={}) {
     if(typeof path!=='string'||!path.startsWith('/accounts')||path.includes('..'))throw failure('PROVIDER_PATH_DENIED');
-    const session=await access();const headers=new Headers(options.headers);headers.set('authorization','Bearer '+session.accessToken);
-    const response=await fetch('https://api.cloudflare.com/client/v4'+path,{...options,headers,redirect:'error',signal:options.signal??AbortSignal.timeout(30000)});
+    const {timeoutMs=30000,...fetchOptions}=options;const session=await access();const headers=new Headers(fetchOptions.headers);headers.set('authorization','Bearer '+session.accessToken);
+    const response=await fetch('https://api.cloudflare.com/client/v4'+path,{...fetchOptions,headers,redirect:'error',signal:fetchOptions.signal??AbortSignal.timeout(timeoutMs)});
     if((await read())?.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');
     if(response.status===401){await store({...session,reconnectRequired:true});throw failure('PROVIDER_AUTH_REJECTED');}return response;
   }

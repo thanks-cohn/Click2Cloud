@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{} } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -179,8 +179,9 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     return result;
   }
   async function handleClick(info = {}, tab) {
+    try{await beforeClick();}catch{const out=freeze({state:'blocked',code:'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
     if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
-      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:info.srcUrl?'image':'link',authorizedTargets:[]});
+      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',authorizedTargets:[]});
       if(r.state!=='completed'||!dispatch)return r;
       try{const out=await dispatch(r.action,{info,tab});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
@@ -195,7 +196,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       try { onOutcome?.(result); } catch {}
       return result;
     }
-    const result = resolveClick({ itemId: String(info.menuItemId), generation: acknowledged?.generation, context: info.mediaType === 'image' || info.srcUrl ? 'image' : info.linkUrl ? 'link' : 'page', authorizedTargets: authorization.authorizedTargets });
+    const result = resolveClick({ itemId: String(info.menuItemId), generation: acknowledged?.generation, context: ['video','audio'].includes(info.mediaType)?info.mediaType:info.mediaType === 'image' || info.srcUrl ? 'image' : info.linkUrl ? 'link' : 'page', authorizedTargets: authorization.authorizedTargets });
     if(result.state!=='completed'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(result.code)){const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));if(row&&dispatch){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab});onOutcome?.(out);return out;}catch{}}}
     if (result.state !== 'completed') { try { onOutcome?.(result); } catch {} return result; }
     if (!dispatch) {

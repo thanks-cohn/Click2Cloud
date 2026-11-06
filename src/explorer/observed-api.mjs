@@ -3,7 +3,7 @@ import {classifyProviderFailure} from './failure-classification.mjs';
 import {observe,operationIdentity,errorOutcome} from '../core/boundary-observation.mjs';
 const resultCodes={completed:'FILE_API_COMPLETED',started:'FILE_API_STARTED',failed:'FILE_API_FAILED',partial:'FILE_API_PARTIAL',uncertain:'FILE_API_UNCERTAIN',cancelled:'FILE_API_CANCELLED'};
 const outcomes={completed:'ok',started:'started',failed:'failed',partial:'partial',uncertain:'uncertain',cancelled:'cancelled'};
-const operations=new Set(['listRaw','readStream','connectionStatus','connect','disconnect','accounts','buckets','list','stat','upload','download','mkdir','copy','move','rename','delete','remoteIngest','preview','publicUrls','createBucket','profiles','prepareBucket','transferHistory','archiveEntries','archiveEntryUrl','extractArchiveEntry','inspect']);
+const operations=new Set(['readChunk','listRaw','readStream','connectionStatus','connect','disconnect','accounts','buckets','list','stat','upload','download','mkdir','copy','move','rename','delete','remoteIngest','preview','publicUrls','createBucket','profiles','prepareBucket','transferHistory','archiveEntries','archiveEntryUrl','extractArchiveEntry','inspect']);
 function workerReason(data) {
   if(data?.ready===true)return 'WORKER_READY';
   if(data?.reason==='This bucket can be browsed, but file changes need its REDOWN Worker. Use Set up right-click destination.')return 'WORKER_NOT_PREPARED';

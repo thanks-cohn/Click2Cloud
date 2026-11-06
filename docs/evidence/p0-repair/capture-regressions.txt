@@ -1,0 +1,20 @@
+✔ inventory resumes pagination fairly across same-named buckets without writes or implicit authorization (7.720613ms)
+✔ repeated cursors, malformed paths and budget limits retain known inventory as incomplete (2.283909ms)
+✔ read cancellation and concurrent scan are explicit; diagnostic sink cannot break discovery (4.040926ms)
+✔ source bytes remain exact; no provenance in capture output; source permission always checked (10.496414ms)
+✔ capture source failures, redirects, size limits and aborts are distinguishable and safe (15.909606ms)
+✔ review: generation changes during asynchronous auth block source acquisition as well as upload (30.704762ms)
+✔ review: generation changes during capture block dispatch under the old ACK (17.197363ms)
+✔ review: thrown auth and cancelled capture report exact outcomes with explicit downstream dependency signals (12.316384ms)
+✔ review: capture deadline and abort settle even if host fetch, reader or cancel never settles (26.037468ms)
+✔ review: a completed subtree scan never claims complete bucket inventory (2.728449ms)
+✔ review: descendant-first inventory scans natural ancestors and preserves sibling coverage (3.116215ms)
+✔ review: a partially ingested failed inventory page advances immutable revision and discloses retained nodes (0.343987ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 351.277918

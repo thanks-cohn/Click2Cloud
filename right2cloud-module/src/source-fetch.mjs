@@ -1,32 +1,29 @@
-import {fail,wait} from './common.mjs';
-export function publicUrl(raw,allowedHosts){
- let u;try{u=new URL(raw);}catch{fail('SOURCE_INVALID');}
- const h=u.hostname.toLowerCase();
- // Conservative: reject all IP literals, local names and non-default ports.
- if(u.protocol!=='https:'||u.username||u.password||u.hash||u.port||!h.includes('.')||h.endsWith('.')||h.includes(':')||/^\d+(\.\d+)*$/.test(h)||/(^|\.)(localhost|local|internal|test|invalid|example)$/.test(h)||!allowedHosts?.includes(h))fail('SOURCE_DENIED');
- return u;
-}
-export async function sourceFetch(raw,{fetch:fetcher,allowedHosts,signal,maxBytes,maxBufferBytes}){
- let u=publicUrl(raw,allowedHosts),res;
- for(let hop=0;hop<=5;hop++){
-  res=await wait(fetcher(u.href,{redirect:'manual',credentials:'omit',referrerPolicy:'no-referrer',headers:{},signal}),signal);
+import {fail,wait,filename} from './common.mjs';
+import {sourceURL} from './public-address.mjs';
+export const publicUrl=raw=>sourceURL(raw);
+export async function sourceFetch(raw,{fetch:fetcher,signal,maxBytes=Number.MAX_SAFE_INTEGER,onProgress=()=>{},idleTimeoutMs=30000}){
+ const idle=async promise=>{let timer;try{return await wait(Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('SOURCE_STALLED'),{code:'SOURCE_STALLED'})),idleTimeoutMs);})]),signal);}finally{clearTimeout(timer);}};
+ let u=publicUrl(raw),res;const visited=new Set();
+ while(true){
+  if(visited.has(u.href))fail('REDIRECT_LOOP');visited.add(u.href);
+  res=await idle(fetcher(u.href,{redirect:'manual',credentials:'omit',referrerPolicy:'no-referrer',headers:{},signal}));
   if(![301,302,303,307,308].includes(res.status))break;
-  const location=res.headers.get('location');await res.body?.cancel();if(!location||hop===5)fail('REDIRECT_DENIED');u=publicUrl(new URL(location,u).href,allowedHosts);
+  const location=res.headers.get('location');await res.body?.cancel();if(!location)fail('REDIRECT_DENIED');u=publicUrl(new URL(location,u).href);
  }
- if(!res.ok||!res.body||res.redirected)fail('SOURCE_UNAVAILABLE');
- const rawLength=res.headers.get('content-length');const length=rawLength===null?null:Number(rawLength);
- if(length!==null&&(!Number.isSafeInteger(length)||length<0))fail('SOURCE_LENGTH_INVALID');
+ if(!res.ok||!res.body||res.redirected){await res.body?.cancel();fail('SOURCE_UNAVAILABLE');}
+ const rawLength=res.headers.get('content-length'),length=rawLength===null?null:Number(rawLength);
+ if(length!==null&&(!/^\d+$/.test(rawLength)||!Number.isSafeInteger(length)||length<0))fail('SOURCE_LENGTH_INVALID');
  if(length>maxBytes){await res.body.cancel();fail('SIZE_LIMIT');}
- const type=res.headers.get('content-type')||'application/octet-stream';
- if(type.split(';')[0].trim().toLowerCase()==='text/html'){await res.body.cancel();fail('HTML_NOT_SUPPORTED');}
- let count=0;
- const reader=res.body.getReader();
- const body=new ReadableStream({async pull(c){try{const r=await wait(reader.read(),signal);if(r.done){if(length!==null&&count!==length)fail('LENGTH_MISMATCH');c.close();return;}count+=r.value.byteLength;if(count>maxBytes||(length!==null&&count>length))fail('SIZE_LIMIT');c.enqueue(r.value);}catch(e){void reader.cancel().catch(()=>{});c.error(e);}},cancel(r){return reader.cancel(r);}});
- if(length!==null)return {body,length,contentType:type};
- const chunks=[];let size=0;const bounded=body.getReader();
- try{while(true){const r=await wait(bounded.read(),signal);if(r.done)break;size+=r.value.length;if(size>maxBufferBytes)fail('BUFFER_LIMIT');chunks.push(r.value);}}catch(e){void bounded.cancel().catch(()=>{});throw e;}
- const bytes=new Uint8Array(size);let at=0;for(const chunk of chunks){bytes.set(chunk,at);at+=chunk.length;}
- return {body:bytes,length:size,contentType:type};
+ const type=(res.headers.get('content-type')||'application/octet-stream').split(';')[0].trim();
+ const contentType=/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/.test(type)?type:'application/octet-stream';
+ let suggestedFilename;const disposition=res.headers.get('content-disposition');
+ if(disposition){const extended=/filename\*\s*=\s*UTF-8''([^;]+)/i.exec(disposition),plain=/filename\s*=\s*(?:"([^"\r\n]*)"|([^;\r\n]+))/i.exec(disposition);try{const n=extended?decodeURIComponent(extended[1]):plain?.[1]??plain?.[2]?.trim();if(n)suggestedFilename=filename(n);}catch{/* Invalid server filename never replaces a validated caller name. */}}
+ let count=0;const reader=res.body.getReader();
+ const body=new ReadableStream({async pull(c){try{const r=await idle(reader.read());if(r.done){if(length!==null&&count!==length)fail('LENGTH_MISMATCH');c.close();return;}count+=r.value.byteLength;if(!Number.isSafeInteger(count)||count>maxBytes||(length!==null&&count>length))fail('SIZE_LIMIT');await onProgress(count);c.enqueue(r.value);}catch(e){void reader.cancel().catch(()=>{});c.error(e);}},cancel(r){return reader.cancel(r);}});
+ return {body,length,contentType,suggestedFilename};
 }
-export function sourceFromClick(info){const url=info.srcUrl||info.linkUrl||info.pageUrl;if(!url)fail('SOURCE_MISSING');let name;try{name=decodeURIComponent(new URL(url).pathname.split('/').pop())||'download';}catch{fail('SOURCE_INVALID');}return {url,filename:filenameSafe(name)};}
-function filenameSafe(n){if(/[\\/\x00-\x1f]/.test(n))fail('FILENAME_INVALID');return n;}
+export function sourceFromClick(info){
+ const url=info.srcUrl||info.linkUrl;if(!url)fail('SOURCE_MISSING');const u=publicUrl(url);let name;
+ try{name=decodeURIComponent(u.pathname.split('/').pop())||'download';}catch{fail('SOURCE_INVALID');}
+ const queryName=u.searchParams.get('filename')||u.searchParams.get('download');if(queryName)try{name=filename(queryName);}catch{}return {url:u.href,filename:filename(name),responseFilename:true};
+}

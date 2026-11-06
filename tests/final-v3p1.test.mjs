@@ -25,16 +25,16 @@ test('Narrow hidden final, shared children, overlapping paths and different acco
 });
 test('hidden Quick persists but is omitted; shown Quick wins over duplicate exact default',()=>{
  const t={...base,prefix:'deep/folder/'},configs={simple:{destinations:[{id:'x',target:t,quick:true,hidden:true}]}};
- assert.equal(compile(configs).rows.length,0);configs.simple.destinations[0].hidden=false;
+ assert.equal(compile(configs).rows.filter(r=>r.role==='save').length,0);assert.equal(compile(configs).rows.filter(r=>r.role==='provider-action').length,4);configs.simple.destinations[0].hidden=false;
  const product=productState({defaultTarget:t});const spec=compile(configs,product);
  assert.equal(spec.rows.filter(r=>r.role==='save').length,1);assert.equal(spec.rows[0].parentId,null);
- assert.equal(spec.rows[0].target.prefix,t.prefix);assert.equal(spec.rows.length,1);
+ assert.equal(spec.rows[0].target.prefix,t.prefix);assert.equal(spec.rows.filter(r=>r.role!=='provider-action').length,1);
 });
 test('composite modes preserve configs, Flat is exclusive and missing default cannot guess',()=>{
  const configs={simple:{destinations:[{target:{...base,prefix:'one/'}}]},nested:{destinations:[{target:{...base,prefix:'two/three/'}}]},depth:{scopes:[{target:base,maxDepth:50}]}};
  const before=JSON.stringify(configs),p=productState({show:{simple:true,nested:true,depth:true,flat:true},defaultTarget:{...base,prefix:'exact/'}});
- const spec=compile(configs,p);assert.equal(spec.rows.length,1);assert.equal(spec.rows[0].target.prefix,'exact/');assert.equal(JSON.stringify(configs),before);
- const missing=compile(configs,productState({show:p.show}));assert.equal(missing.rows.length,0);assert(missing.omissions.some(r=>r.reason==='DEFAULT_LOCATION_REQUIRED'));
+ const spec=compile(configs,p);assert.equal(spec.rows.filter(r=>r.role!=='provider-action').length,1);assert.equal(spec.rows.find(r=>r.role==='save').target.prefix,'exact/');assert.equal(JSON.stringify(configs),before);
+ const missing=compile(configs,productState({show:p.show}));assert.equal(missing.rows.filter(r=>r.role==='save').length,0);assert.equal(missing.rows.filter(r=>r.role==='provider-action').length,4);assert(missing.omissions.some(r=>r.reason==='DEFAULT_LOCATION_REQUIRED'));
 });
 test('Quick order is stable, all promoted actions stay ahead of selectively nested providers',()=>{
  const configs={simple:{destinations:[0,1,2,3].map(i=>({target:{...base,prefix:'p'+i+'/'},quick:i<3,order:i}))}};

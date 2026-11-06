@@ -44,11 +44,11 @@ test('read cancellation and concurrent scan are explicit; diagnostic sink cannot
 test('source bytes remain exact; no provenance in capture output; source permission always checked',async()=>{
   const bytes=Uint8Array.of(0,255,17),events=[];
   const source={filename:'original.png',bytes,url:'https://private.example/image',pageUrl:'https://private.example/page'};
-  const out=await captureSelectedBytes(source,{authorizeSource:async()=>true,sink:e=>events.push(e),operationId:1});
+  const out=await captureSelectedBytes(source,{maxBytes:1024,authorizeSource:async()=>true,sink:e=>events.push(e),operationId:1});
   assert.equal(out.bytes,bytes);assert.deepEqual(Object.keys(out),['filename','contentType','bytes']);
   assert(!JSON.stringify(events).includes('private.example'));
   await assert.rejects(captureSelectedBytes(source),{code:'CAPTURE_DENIED'});
-  await assert.rejects(captureSelectedBytes(source,{authorizeSource:()=>false}),{code:'CAPTURE_DENIED'});
+  await assert.rejects(captureSelectedBytes(source,{maxBytes:1024,authorizeSource:()=>false}),{code:'CAPTURE_DENIED'});
 });
 test('capture source failures, redirects, size limits and aborts are distinguishable and safe',async()=>{
   const options={authorizeSource:()=>true,operationId:1,sink(){throw Error('sink');}};
@@ -58,7 +58,7 @@ test('capture source failures, redirects, size limits and aborts are distinguish
     [{filename:'a',bytes:new Uint8Array(2)},{maxBytes:1},'CAPTURE_SIZE_LIMIT'],
     [{filename:'a',bytes:new Uint8Array()},{signal:AbortSignal.abort()},'CAPTURE_INTERRUPTED'],
     [{filename:'a',url:'https://source.test'},{fetchSource:async()=>({ok:false})},'CAPTURE_UNAVAILABLE']
-  ]) await assert.rejects(captureSelectedBytes(source,{...options,...extra}),{code});
+  ]) await assert.rejects(captureSelectedBytes(source,{maxBytes:1024,...options,...extra}),{code});
   let cancelled=false;
   const stream=new ReadableStream({start(c){c.enqueue(Uint8Array.of(1,2));},cancel(){cancelled=true;}});
   await assert.rejects(captureSelectedBytes({filename:'a',url:'https://source.test'},{...options,maxBytes:1,fetchSource:async(url,init)=>{assert.equal(init.redirect,'error');assert.equal(init.credentials,'omit');return {ok:true,body:stream};}}),{code:'CAPTURE_SIZE_LIMIT'});

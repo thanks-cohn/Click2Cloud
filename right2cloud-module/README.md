@@ -1,17 +1,11 @@
-# right2cloud-module — isolated review candidate
+# right2cloud-module — Click2Cloud remote transfer core
 
-Extracted and deliberately hardened from actual REDOWN source, not preservation documents. This is executable Worker-compatible remote-fetch/R2 code with injected authority and transport ports. It is not integrated, deployed, or live verified. No Chrome, application state, external package, or REDOWN runtime import is required.
+The imported coordinator, source parser, conditional R2 writer and receipt verifier are integrated through `src/cloudflare/`. They have no REDOWN runtime dependency. The original extraction records (`SOURCE_TRACE.md`, `INTEGRITY.json`, `TEST_RESULTS.txt`, `CHANGE_REVIEW.txt`, `REVIEW_GATE.md`) are historical artifacts, not hashes or certification of this repair.
 
-Run from Click2Cloud:
+Run `node --test right2cloud-module/tests/*.test.mjs`. Run `npm run test:focused` for the integrated host. See [current repair evidence](../docs/evidence/CLICK2CLOUD_P0_REAL_RIGHT_CLICK_REPAIR.md) for exact proof classes and limitations. Local workerd and injected-source tests are not live Cloudflare proof.
 
-```sh
-node --test --test-reporter=tap right2cloud-module/tests/*.test.mjs
-```
+`source-fetch.mjs` validates HTTPS redirects, strips fragments, streams known/unknown lengths, counts bytes and enforces idle progress. The host's `public-egress.mjs` resolves through trusted DoH, rejects nonpublic/mixed answers and connects TLS to a validated literal IP with original-host SNI/certificate validation. There is no website allowlist. Standalone callers MUST provide an equivalent enforcing `fetch` port; ordinary hostname fetch alone is not DNS-rebinding protection.
 
-Read [the source trace](SOURCE_TRACE.md), [API contract](API_CONTRACT.md), [inheritance audit](KEEP_ADAPT_REJECT.md), [security limits](SECURITY_PRIVACY_LIMITS.md), [future writer contract](FUTURE_S3_ADAPTER_CONTRACT.md), and [review handoff](REVIEW_GATE.md). Exact local output is in TEST_RESULTS.txt. INTEGRITY.json and CHANGE_REVIEW.txt record source/checkout hashes and scope checks.
+`cloudflare-r2-writer.mjs` uses conditional creation and fresh HEAD verification. Unknown lengths spool to conditional 4 MiB objects in the exact destination prefix before the conditional known-length final PUT. Spool objects are retained; this consumes extra operations/storage. R2's single-PUT service boundary remains; safe conditional multipart finalization is not established. No MEGA or generic S3 driver is included.
 
-`src/index.mjs`: callable coordinator and public exports. `cloudflare-worker.mjs`: authenticated remote compute handler. `source-fetch.mjs`: HTTPS/redirect policy, known-length stream and bounded unknown-length buffering. `cloudflare-r2-writer.mjs`: real R2 binding calls, conditional creation and independent HEAD. `verification.mjs`: receipt reconciliation. `common.mjs`: exact identities, paths and cancellation helpers.
-
-Deliberate adaptations: no automatic provisioning, no public assets/read routes, no source URL in object metadata, exact trusted per-prefix authority, conservative source host allowlist, explicit deployment-specific resource limits, operation deduplication port. Unicode filenames are preserved rather than REDOWN's ASCII substitution. Content-type extension inference is omitted; supplied filename is exact. Site-specific gallery capture is excluded; this module saves eligible direct public HTTPS files only.
-
-A future host must implement the trusted ports, including durable operation claims. They are security prerequisites, not mock production implementations. Current local tests use fake external HTTP and R2 storage while executing the shipped coordinator, Worker and R2 writer. They prove isolation and protocol behavior, not Cloudflare platform conformance.
+Read [API contract](API_CONTRACT.md) and [security constraints](SECURITY_PRIVACY_LIMITS.md). Four provider menu rows do not mean four implemented storage drivers.

@@ -1,53 +1,39 @@
-// Source acquisition is local to an explicitly authorized browser host. Its URL
-// never enters diagnostics or the bytes-only destination-provider payload.
+// Browser-source acquisition for eligible non-R2 adapters. Cloudflare bypasses this owner.
 import {operationIdentity} from './boundary-observation.mjs';
-export async function captureSelectedBytes(source,{authorizeSource,fetchSource,sink,signal,maxBytes=32*1024*1024,requestTimeoutMs=30000,operationId=0}={}) {
-  operationId=operationIdentity({operationId});
-  let previous=0;
-  const emit=(outcome,code)=>{try{previous=(typeof sink==='function'?sink:sink?.emit)?.({stage:'capture.acquire',outcome,code,operationId,requires:previous?[previous]:[]})||0;}catch{}};
-  emit('started','CAPTURE_STARTED');
-  const controller=new AbortController();let timer;
-  const interrupted=()=>Object.assign(Error('Source capture interrupted'),{name:'AbortError',code:'CAPTURE_INTERRUPTED'});
-  const abort=()=>controller.abort(interrupted());
-  const waitFor=promise=>new Promise((resolve,reject)=>{
-    const aborted=()=>{cleanup();reject(controller.signal.reason);};
-    const cleanup=()=>controller.signal.removeEventListener('abort',aborted);
-    Promise.resolve(promise).then(value=>{cleanup();resolve(value);},error=>{cleanup();reject(error);});
-    if(controller.signal.aborted)aborted();else controller.signal.addEventListener('abort',aborted,{once:true});
-  });
-  try {
-    if(!Number.isSafeInteger(maxBytes)||maxBytes<1||!Number.isSafeInteger(requestTimeoutMs)||requestTimeoutMs<1) throw Object.assign(Error('Invalid capture limit'),{code:'CAPTURE_INVALID'});
-    if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
-    timer=setTimeout(()=>controller.abort(Object.assign(Error('Source capture deadline exceeded'),{name:'TimeoutError',code:'CAPTURE_TIMEOUT'})),requestTimeoutMs);
-    if(typeof authorizeSource!=='function'||await waitFor(authorizeSource(source))!==true) throw Object.assign(Error('Source permission is required'),{code:'CAPTURE_DENIED'});
-    controller.signal.throwIfAborted();
-    if(typeof source?.filename!=='string'||!source.filename||/[\/\\\0]/.test(source.filename)) throw Object.assign(Error('A safe filename is required'),{code:'CAPTURE_INVALID'});
-    let bytes=source.bytes;
-    if(!(bytes instanceof Uint8Array)) {
-      let url;try{url=new URL(source.url);}catch{throw Object.assign(Error('Invalid source'),{code:'CAPTURE_INVALID'});}
-      if(!['https:','http:','blob:'].includes(url.protocol)||url.username||url.password||typeof fetchSource!=='function') throw Object.assign(Error('Unsupported source'),{code:'CAPTURE_DENIED'});
-      const response=await waitFor(fetchSource(url.href,{signal:controller.signal,credentials:'omit',redirect:'error'}));
-      if(response?.redirected===true)throw Object.assign(Error('Source redirected outside the approved request'),{code:'CAPTURE_DENIED'});
-      if(!response?.ok||!response.body?.getReader) throw Object.assign(Error('Source acquisition failed'),{code:'CAPTURE_UNAVAILABLE'});
-      const reader=response.body.getReader(),chunks=[];let count=0;
-      try {
-        while(true) {
-          controller.signal.throwIfAborted();const {value,done}=await waitFor(reader.read());if(done)break;
-          if(!(value instanceof Uint8Array))throw Object.assign(Error('Invalid source byte stream'),{code:'CAPTURE_INVALID'});
-          count+=value.byteLength;
-          if(count>maxBytes) throw Object.assign(Error('Source exceeds supported byte limit'),{code:'CAPTURE_SIZE_LIMIT'});
-          chunks.push(value);
-        }
-      } catch(error) {try{void Promise.resolve(reader.cancel()).catch(()=>{});}catch{}throw error;}
-      bytes=new Uint8Array(count);let at=0;for(const chunk of chunks){bytes.set(chunk,at);at+=chunk.length;}
-    }
-    if(bytes.byteLength>maxBytes) throw Object.assign(Error('Source exceeds supported byte limit'),{code:'CAPTURE_SIZE_LIMIT'});
-    controller.signal.throwIfAborted();emit('ok','CAPTURE_COMPLETE');
-    return Object.freeze({filename:source.filename,contentType:source.contentType??'application/octet-stream',bytes});
-  } catch(error) {
-    const known=['CAPTURE_DENIED','CAPTURE_INVALID','CAPTURE_UNAVAILABLE','CAPTURE_SIZE_LIMIT','CAPTURE_TIMEOUT'];
-    const code=error?.name==='AbortError'?'CAPTURE_INTERRUPTED':known.includes(error?.code)?error.code:'CAPTURE_FAILED';
-    emit(code==='CAPTURE_INTERRUPTED'?'cancelled':'failed',code);
-    throw Object.assign(Error(code==='CAPTURE_DENIED'?'Source permission is required':'The original source could not be acquired'),{code,name:code==='CAPTURE_INTERRUPTED'?'AbortError':'Error'});
-  } finally {clearTimeout(timer);signal?.removeEventListener('abort',abort);}
+const issue=code=>Object.assign(Error(code),{code,...(code==='CAPTURE_INTERRUPTED'?{name:'AbortError'}:{})});
+export async function captureSelectedStream(source,{authorizeSource,fetchSource,sink,signal,requestTimeoutMs=30000,maxBytes=Number.MAX_SAFE_INTEGER,operationId=0}={}){
+ operationId=operationIdentity({operationId});
+ const emit=(outcome,code)=>{try{(typeof sink==='function'?sink:sink?.emit)?.({stage:'capture.acquire',outcome,code,operationId});}catch{}};
+ const controller=new AbortController(),abort=()=>controller.abort(issue('CAPTURE_INTERRUPTED'));signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
+ const finish=()=>signal?.removeEventListener('abort',abort);
+ const idle=async promise=>{let timer;try{controller.signal.throwIfAborted();return await Promise.race([promise,new Promise((_,reject)=>{const interrupted=()=>{controller.signal.removeEventListener('abort',interrupted);reject(issue('CAPTURE_INTERRUPTED'));};controller.signal.addEventListener('abort',interrupted,{once:true});timer=setTimeout(()=>{controller.signal.removeEventListener('abort',interrupted);reject(issue('CAPTURE_TIMEOUT'));},requestTimeoutMs);Promise.resolve(promise).finally(()=>controller.signal.removeEventListener('abort',interrupted)).catch(()=>{});})]);}finally{clearTimeout(timer);}};
+ emit('started','CAPTURE_STARTED');
+ try{
+  if(!Number.isSafeInteger(maxBytes)||maxBytes<1||!Number.isSafeInteger(requestTimeoutMs)||requestTimeoutMs<1)throw issue('CAPTURE_INVALID');
+  if(typeof authorizeSource!=='function'||await idle(Promise.resolve(authorizeSource(source)))!==true)throw issue('CAPTURE_DENIED');
+  if(typeof source?.filename!=='string'||!source.filename||/[\/\\\0]/.test(source.filename))throw issue('CAPTURE_INVALID');
+  let original,length=null,contentType=source.contentType??'application/octet-stream';
+  if(source.bytes instanceof Uint8Array){let offset=0;length=source.bytes.length;original=new ReadableStream({pull(c){if(offset===length){c.close();return;}const end=Math.min(length,offset+65536);c.enqueue(source.bytes.subarray(offset,end));offset=end;}});}
+  else if(source.body instanceof ReadableStream){original=source.body;length=source.length??null;}
+  else{
+   let u;try{u=new URL(source.url);}catch{throw issue('CAPTURE_INVALID');}
+   if(!['https:','http:','blob:'].includes(u.protocol)||u.username||u.password||typeof fetchSource!=='function')throw issue('CAPTURE_DENIED');
+   const response=await idle(fetchSource(u.href,{signal:controller.signal,credentials:'omit',redirect:'error'}));
+   if(response?.redirected)throw issue('CAPTURE_DENIED');if(!response?.ok||!response.body?.getReader)throw issue('CAPTURE_UNAVAILABLE');original=response.body;
+   const declared=response.headers?.get('content-length');if(declared!==null&&declared!==undefined)length=Number(declared);contentType=response.headers?.get('content-type')??contentType;
+  }
+  if(length!==null&&(!Number.isSafeInteger(length)||length<0||length>maxBytes))throw issue('CAPTURE_SIZE_LIMIT');
+  const reader=original.getReader();let count=0,complete=false;
+  const body=new ReadableStream({async pull(c){try{const next=await idle(reader.read());if(next.done){if(length!==null&&count!==length)throw issue('CAPTURE_INVALID');complete=true;finish();emit('ok','CAPTURE_COMPLETE');c.close();return;}if(!(next.value instanceof Uint8Array))throw issue('CAPTURE_INVALID');count+=next.value.length;if(!Number.isSafeInteger(count)||count>maxBytes||length!==null&&count>length)throw issue('CAPTURE_SIZE_LIMIT');c.enqueue(next.value);}catch(e){controller.abort();finish();void reader.cancel().catch(()=>{});emit('failed',e.code??'CAPTURE_FAILED');c.error(e);}},cancel(r){controller.abort();finish();void reader.cancel(r).catch(()=>{});}}, {highWaterMark:0});
+  return Object.freeze({filename:source.filename,contentType,body,cancel(reason){controller.abort();finish();void reader.cancel(reason).catch(()=>{});return Promise.resolve();},get byteLength(){return count;},get complete(){return complete;}});
+ }catch(e){controller.abort();finish();const code=/^CAPTURE_[A-Z_]+$/.test(e.code??'')?e.code:'CAPTURE_FAILED';emit(code==='CAPTURE_INTERRUPTED'?'cancelled':'failed',code);throw issue(code);}
+}
+
+// Compatibility for already-resident bytes. Buffering a URL requires an explicit caller budget;
+// production URL/Explorer transfers use captureSelectedStream, never an implicit whole-file buffer.
+export async function captureSelectedBytes(source,options={}){
+ if(!(source?.bytes instanceof Uint8Array)&&options.maxBytes===undefined)throw issue('STREAMING_PROVIDER_REQUIRED');
+ const stream=await captureSelectedStream(source,options);
+ if(source.bytes instanceof Uint8Array){const reader=stream.body.getReader();while(!(await reader.read()).done){}return Object.freeze({filename:stream.filename,contentType:stream.contentType,bytes:source.bytes});}
+ const chunks=[];let count=0;const reader=stream.body.getReader();while(true){const r=await reader.read();if(r.done)break;count+=r.value.length;chunks.push(r.value);}const bytes=new Uint8Array(count);let at=0;for(const c of chunks){bytes.set(c,at);at+=c.length;}return Object.freeze({filename:stream.filename,contentType:stream.contentType,bytes});
 }

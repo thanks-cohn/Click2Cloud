@@ -23,7 +23,7 @@ export function validateModeConfig(mode,raw) {
   if(raw.schemaVersion!==undefined&&raw.schemaVersion!==1||raw.mode!==undefined&&raw.mode!==mode)fail();
   if(raw.revision!==undefined)integer(raw.revision);
   const values=raw[mode==='depth'?'scopes':'destinations']??[];
-  if(!Array.isArray(values)||values.length>MAX_RECORDS)fail();
+  if(!Array.isArray(values))fail();
   for(const d of values) {
     closed(d,mode==='depth'?['target','maxDepth']:['id','target','label','hidden','quick','order','levels','aliases']);target(d.target);
     if(mode==='depth'){if(d.maxDepth!==undefined&&(!Number.isSafeInteger(d.maxDepth)||d.maxDepth<1))fail();}
@@ -43,7 +43,7 @@ export function validateBundle(raw) {
   integer(raw.exportedAt);integer(raw.journalEvicted);closed(raw.configs,['simple','nested','depth']);
   for(const [mode,config] of Object.entries(raw.configs))validateModeConfig(mode,config);
   validateGeneration(raw.generation);
-  if(!Array.isArray(raw.journal)||raw.journal.length>MAX_RECORDS||!Array.isArray(raw.checkpoints)||raw.checkpoints.length>MAX_RECORDS)fail();
+  if(!Array.isArray(raw.journal)||!Array.isArray(raw.checkpoints))fail();
   let sequence=raw.journalEvicted;
   const latestConfigs=new Map();let latestGeneration=null,latestProduct=null;
   const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);

@@ -1,0 +1,104 @@
+{
+  "at": "2026-11-06T17:28:36.295341+00:00",
+  "status": "PARTIAL; implemented locally, live blocked",
+  "baseMain": "5918f9679de6c2d81c46c2ca27982a8723960531",
+  "buildBeforeDeliveryCommit": {
+    "extensionVersion": "0.3.2",
+    "revision": "5918f9679de6c2d81c46c2ca27982a8723960531",
+    "sourceDigest": "9558e047e0b23b29a389dc693e76d17d6f67db97166f6232fb4a21b0acf5b5cb",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "note": "Build revision is the base before the delivery commit; sourceDigest identifies tested source. Rebuilding after commit embeds final SHA. Documentation/evidence do not affect sourceDigest.",
+  "results": [
+    {
+      "name": "focused",
+      "command": "npm run test:focused",
+      "state": "PASS",
+      "tests": 152,
+      "output": "focused.txt"
+    },
+    {
+      "name": "module",
+      "command": "node --test right2cloud-module/tests/*.test.mjs",
+      "state": "PASS",
+      "tests": 49,
+      "output": "module.txt"
+    },
+    {
+      "name": "capture-regressions",
+      "command": "node --test tests/review-regressions.test.mjs tests/inventory-capture.test.mjs",
+      "state": "PASS",
+      "tests": 12,
+      "output": "capture-regressions.txt"
+    },
+    {
+      "name": "long-local-runtime",
+      "command": "C2C_LONG_TEST=1 C2C_RUNTIME_EVIDENCE_DIR=docs/evidence/p0-repair node --test --test-name-pattern='real workerd runtime' tests/cloudflare-integration.test.mjs",
+      "state": "PASS",
+      "tests": 1,
+      "output": "long-local-runtime.txt"
+    },
+    {
+      "name": "strict-types",
+      "command": "npx --yes --package typescript@5.9.3 tsc --noEmit --strict --lib ES2023,DOM --module nodenext --moduleResolution nodenext src/api/service.d.ts",
+      "state": "PASS"
+    },
+    {
+      "name": "build",
+      "command": "npm run build:extension",
+      "state": "PASS",
+      "output": "build.txt"
+    },
+    {
+      "name": "browser",
+      "command": "C2C_EVIDENCE_DIR=docs/evidence/p0-repair/browser npm run test:browser",
+      "fixturePass": 10,
+      "installedExtension": "BLOCKED_ADMINISTRATOR_POLICY",
+      "liveOAuth": "NOT_TESTED",
+      "liveSave": "BLOCKED",
+      "output": "browser/browser-results.json"
+    }
+  ],
+  "allAuditDispositions": 78,
+  "configuredCredentialValueScan": "PASS; no configured credential values found in changed artifacts",
+  "diffWhitespace": "PASS",
+  "REDOWN": {
+    "head": "a6c17f8d0be22131d5cc38b060da4f8f3544800f",
+    "clean": true,
+    "modified": false
+  },
+  "cloudMutations": 0,
+  "officialDocumentation": [
+    {
+      "document": "c2c-doc-r2-platform-limits.mdx",
+      "sha256": "67465f868efca73349315fb8f00340a6f0a7305bbd3c6a574a540e37658e412e",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    },
+    {
+      "document": "c2c-doc-workers-platform-limits.mdx",
+      "sha256": "db1e59ef967a5933c770b4dd0b17e16d547b854ecd1484ae9322f18855d74b9a",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    },
+    {
+      "document": "c2c-impl-tls.md",
+      "sha256": "64116d122b7257cf76d952360457c126f3a5b20493a7649ba1b59f67e61d4973",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    },
+    {
+      "document": "c2c-impl-tcp.md",
+      "sha256": "99d084a4d88151ed92cdf0db4f6d1c9da34d5331b7f7052cbb4bed563b2995ea",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    },
+    {
+      "document": "c2c-impl-dostate.md",
+      "sha256": "7c5756084b05a2ba23f607e8696cd8f48d46247590528ae951fa359dd1e97221",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    },
+    {
+      "document": "c2c-impl-s3.md",
+      "sha256": "cfa565d89837b4f3ee3ff874dcc71daf86da1f62adeffd4b5fe82e3837df36e7",
+      "source": "official Cloudflare cloudflare-docs production branch on raw.githubusercontent.com"
+    }
+  ]
+}

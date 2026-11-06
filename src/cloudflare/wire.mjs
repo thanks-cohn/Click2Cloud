@@ -1,5 +1,5 @@
 import {destination} from '../../right2cloud-module/src/common.mjs';
-export const PROTOCOL='click2cloud-remote-1';
+export const PROTOCOL='click2cloud-remote-2';
 export const fail=code=>{throw Object.assign(Error(code),{code});};
 export function remoteDestination(t){
  if(t?.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId)fail('DESTINATION_INVALID');
@@ -12,7 +12,7 @@ export async function digest(value){return b64(new Uint8Array(await crypto.subtl
 const hmac=secret=>crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);
 export async function signGrant(secret,payload){const data=b64(encoder.encode(JSON.stringify(payload)));return data+'.'+b64(new Uint8Array(await crypto.subtle.sign('HMAC',await hmac(secret),encoder.encode(data))));}
 export async function verifyGrant(secret,token){
- try{if(typeof token!=='string'||token.length>8192)fail('CAPABILITY_DENIED');const [data,sig,extra]=token.split('.');if(extra||!await crypto.subtle.verify('HMAC',await hmac(secret),unb64(sig),encoder.encode(data)))fail('CAPABILITY_DENIED');const p=JSON.parse(new TextDecoder().decode(unb64(data)));if(p.protocol!==PROTOCOL||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now()||p.expiresAt>Date.now()+300001||typeof p.principal!=='string'||!p.principal||typeof p.sessionId!=='string'||!p.sessionId||!['save','status','revoke'].includes(p.use))fail('CAPABILITY_DENIED');destination(p.destination);return p;}catch{fail('CAPABILITY_DENIED');}
+ try{if(typeof token!=='string'||token.length>8192)fail('CAPABILITY_DENIED');const [data,sig,extra]=token.split('.');if(extra||!await crypto.subtle.verify('HMAC',await hmac(secret),unb64(sig),encoder.encode(data)))fail('CAPABILITY_DENIED');const p=JSON.parse(new TextDecoder().decode(unb64(data)));if(p.protocol!==PROTOCOL||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now()||p.expiresAt>Date.now()+300001||typeof p.principal!=='string'||!p.principal||typeof p.sessionId!=='string'||!p.sessionId||!['save','status','revoke','probe','cancel'].includes(p.use))fail('CAPABILITY_DENIED');destination(p.destination);return p;}catch{fail('CAPABILITY_DENIED');}
 }
 export async function boundedJSON(response,max=65536){
  const reader=response.body?.getReader();if(!reader)fail('RESPONSE_INVALID');let size=0;const chunks=[];

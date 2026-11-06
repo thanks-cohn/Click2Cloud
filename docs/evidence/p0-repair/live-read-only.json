@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-06T17:14:51.665303+00:00",
+  "mode": "READ_ONLY; no cloud mutations",
+  "dataPlane": {
+    "method": "GET unsigned",
+    "blocked": true,
+    "errorType": "URLError",
+    "httpStatus": null,
+    "proxyConnect403": true
+  },
+  "controlPlane": {
+    "method": "GET settings",
+    "httpStatus": 200,
+    "success": true,
+    "R2_redown_bound": true,
+    "claimsBinding": true,
+    "secretDeclared": true
+  }
+}

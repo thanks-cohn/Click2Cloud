@@ -162,8 +162,11 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     });
   }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{const rows=(await request(s.state.get('remoteResults')))?.value??[];const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,at:clock()};s.state.put({id:'remoteResults',value:[safe,...rows.filter(r=>r.operationId!==value.operationId)].slice(0,100)});return safe;}),
-    readRemoteResults:()=>transact('readonly',async s=>(await request(s.state.get('remoteResults')))?.value??[]),
+    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
+    readRemoteResults:({cursor,limit}={})=>transact('readonly',async s=>{const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const start=cursor?all.findIndex(x=>x.operationId===cursor)+1:0,items=all.slice(start,start+limit);return {items,nextCursor:start+limit<all.length?items.at(-1)?.operationId:null};}),
+    readSetupOperation:id=>transact('readonly',async s=>(await request(s.state.get('setup:'+id)))?.value??null),
+    writeSetupOperation:(id,value)=>transact('readwrite',async s=>{s.state.put({id:'setup:'+id,value});return value;}),
     read,getModeConfig,saveModeConfig,commitProduct,
     findRetry:id=>transact('readonly',async s=>(await request(s.state.get('retry:'+id)))?.value??null),
     reserveOperation:(id,fingerprint)=>transact('readwrite',async s=>{const key='operation:'+id;if(await request(s.state.get(key)))return false;s.state.put({id:key,value:{fingerprint,at:clock(),state:'RESERVED_INSPECT_BEFORE_RETRY'}});return true;}),

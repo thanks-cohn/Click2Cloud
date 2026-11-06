@@ -2,7 +2,7 @@ import {compileComposite} from './composite-menu.mjs';
 // Narrow composition of the existing owners. Diagnostics has no write authority.
 import {compileMenuSpec} from './menu-spec.mjs';
 import {resolveMenuAction} from './action-resolver.mjs';
-import {captureSelectedBytes} from './source-capture.mjs';
+import {captureSelectedBytes,captureSelectedStream} from './source-capture.mjs';
 import {dispatchSave} from './save-dispatcher.mjs';
 import {operationIdentity,observe} from './boundary-observation.mjs';
 import {location,key} from '../explorer/file-api.mjs';
@@ -93,9 +93,11 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         return finish(out);
       }
       activeStage='capture.acquire';
-      const file=await captureSelectedBytes(source,{authorizeSource:async source=>trustedExplorerSources.has(source)||await authorizeSource(source),fetchSource,sink:saveSink,signal,operationId});
+      const provider=providers?.[resolved.action.target.provider];if(!provider)return finish({state:'blocked',code:'PROVIDER_NOT_IMPLEMENTED',operationId});
+      const streamed=typeof provider.uploadStream==='function';if(!streamed&&!(source?.bytes instanceof Uint8Array))return finish({state:'blocked',code:'STREAMING_PROVIDER_REQUIRED',operationId});
+      const file=await (streamed?captureSelectedStream:captureSelectedBytes)(source,{authorizeSource:async source=>trustedExplorerSources.has(source)||await authorizeSource(source),fetchSource,sink:saveSink,signal,operationId});
       activeStage='intent';
-      const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
+      try{const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
         // Recheck current authority after source capture and before upload.
         authorize:async intent=>{
           const latest=await getAuthorization();
@@ -105,12 +107,12 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
           return resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:registration.acknowledgedGeneration,
             authorizedTargets:latest.authorizedTargets}).state==='completed';
         },onVerifiedCompletion});
-      return finish({state:result.completion==='pending'?'partial':'completed',operationId,...result});
+      return finish({state:result.completion==='pending'?'partial':'completed',operationId,...result});}finally{await file.cancel?.().catch(()=>{});}
     } catch(error) {
       // No raw host/provider errors enter the UI/export; uncertain writes must not be replayed.
       if(activeStage==='capture.acquire')blockRemaining('capture.acquire');
       if(activeStage==='resolver'){observe(saveSink,'resolver','failed','RESOLVE_FAILED',scope);blockRemaining('resolver');}
-      const safeCodes=['AUTH_REVOKED','AUTH_CHECK_FAILED','CAPTURE_DENIED','CAPTURE_INVALID','CAPTURE_UNAVAILABLE','CAPTURE_SIZE_LIMIT','CAPTURE_INTERRUPTED','CAPTURE_TIMEOUT','CAPTURE_FAILED','UPLOAD_UNCONFIRMED','VERIFIER_UNAVAILABLE','RECEIPT_UNVERIFIED','VERIFY_UNCERTAIN'];
+      const safeCodes=['STREAMING_PROVIDER_REQUIRED','AUTH_REVOKED','AUTH_CHECK_FAILED','CAPTURE_DENIED','CAPTURE_INVALID','CAPTURE_UNAVAILABLE','CAPTURE_SIZE_LIMIT','CAPTURE_INTERRUPTED','CAPTURE_TIMEOUT','CAPTURE_FAILED','UPLOAD_UNCONFIRMED','VERIFIER_UNAVAILABLE','RECEIPT_UNVERIFIED','VERIFY_UNCERTAIN'];
       const code=safeCodes.includes(error?.code)?error.code:'SAVE_FAILED';
       return finish({state:error?.uncertain||code.includes('UNCONFIRMED')||code.includes('UNVERIFIED')?'uncertain':error?.name==='AbortError'||code==='CAPTURE_INTERRUPTED'?'cancelled':code==='AUTH_REVOKED'?'blocked':'failed',code,operationId});
     }
@@ -129,28 +131,16 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       filename=entry?.displayName??keyName.split('/').at(-1);
       if(typeof filename!=='string'||!filename||/[\\/\\\\\\0]/.test(filename))throw Error('INVALID_FILENAME');
     }catch{return {state:'blocked',code:'INVALID_EXPLORER_SOURCE'};}
-    const limit=32*1024*1024;
+    if(typeof providers?.[destination?.provider]?.uploadStream!=='function')return {state:'blocked',code:'STREAMING_PROVIDER_REQUIRED'};
     const stat=await fileApi.run('stat',{source:cloud,key:keyName},{signal});
-    if(stat.state!=='completed'||!stat.data?.object)return {state:'blocked',code:'SOURCE_NOT_VERIFIED'};
-    const size=Number(stat.data.object.size);
-    if(!Number.isSafeInteger(size)||size<0||size>limit)return {state:'blocked',code:'CAPTURE_SIZE_LIMIT'};
-    const chunks=[];let total=0;
-    let response;
-    try {
-      response=await fileApi.run('readStream',{source:cloud,key:keyName},{signal,onChunk:chunk=>{
-        if(!(chunk instanceof Uint8Array))throw Error('INVALID_SOURCE_CHUNK');
-        total+=chunk.byteLength;
-        if(total>limit||total>size)throw Error('CAPTURE_SIZE_LIMIT');
-        chunks.push(chunk);
-      }});
-    }catch{return {state:'failed',code:'SOURCE_READ_FAILED'};}
-    if(response.state!=='completed'||total!==size)return {state:'uncertain',code:'SOURCE_READ_UNCONFIRMED'};
-    const bytes=new Uint8Array(total);let offset=0;
-    for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
-    const captured={filename,bytes,contentType:entry.contentType??'application/octet-stream'};
-    trustedExplorerSources.add(captured);
-    try{return await save({itemId,generation,context,source:captured,signal});}
-    finally{trustedExplorerSources.delete(captured);}
+    const size=Number(stat.data?.object?.size);if(stat.state!=='completed'||!Number.isSafeInteger(size)||size<0)return {state:'blocked',code:'SOURCE_NOT_VERIFIED'};
+    const transfer=new TransformStream();let started=false;
+    const lazy=new ReadableStream({async pull(c){
+      if(!started){started=true;const writer=transfer.writable.getWriter();void (async()=>{try{const result=await fileApi.run('readStream',{source:cloud,key:keyName},{signal,onChunk:chunk=>writer.write(chunk)});if(result.state!=='completed')throw Error('SOURCE_READ_UNCONFIRMED');await writer.close();}catch(e){await writer.abort(e).catch(()=>{});}})();}
+      this.reader??=transfer.readable.getReader();const r=await this.reader.read();if(r.done)c.close();else c.enqueue(r.value);
+    },cancel(r){return this.reader?.cancel(r);}}, {highWaterMark:0});
+    const captured={filename,body:lazy,length:size,contentType:entry.contentType??'application/octet-stream'};trustedExplorerSources.add(captured);
+    try{return await save({itemId,generation,context,source:captured,signal});}finally{trustedExplorerSources.delete(captured);if(!lazy.locked)void lazy.cancel().catch(()=>{});}
   }
   return Object.freeze({compile,compileComposite:async options=>compileComposite({...options,sink}),apply,save,saveExplorerEntry,
     getMenu:generation=>menus.get(generation)??null,

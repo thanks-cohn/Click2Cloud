@@ -53,7 +53,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
   }
   async function stat({source,key:k},options={}) {
     const exact=key(k);let cursor='';const seen=new Set();let pages=0;
-    do {if(++pages>1000)throw Error('Metadata lookup exceeded its page limit.');const p=await page(source,exact,cursor,'',options);const object=p.objects.find(o=>(o.key||o.name)===exact);if(object)return {object:{...object,key:exact}};cursor=p.cursor;if(seen.has(cursor)&&cursor)throw Error('Repeated metadata page.');seen.add(cursor);}while(cursor);
+    do {const p=await page(source,exact,cursor,'',options);const object=p.objects.find(o=>(o.key||o.name)===exact);if(object)return {object:{...object,key:exact}};cursor=p.cursor;if(seen.has(cursor)&&cursor)throw Error('Repeated metadata page.');seen.add(cursor);}while(cursor);
     return {object:null};
   }
   async function verifyUpload(l,staging,file,options) {
@@ -178,7 +178,6 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       options=resolveOptions('upload',{},options);const {signal,onProgress}=options;
       const l=location(source);key(k);
       if(!file || !Number.isSafeInteger(file.size)||file.size<0)throw Error('Choose a local file.');
-      if(file.size>300000000)throw Error('This beta uses the existing 300 MB direct upload route. Larger multipart uploads are unfinished.');
       if(!['skip','keep','replace'].includes(conflict))throw Error('Choose a conflict policy.');
       // A unique temporary key keeps the original untouched until the proven
       // Worker conditionally commits the final destination. Never replay PUT.
@@ -203,6 +202,18 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,cause:error});
         throw error;
       }
+    },
+    async readChunk({source,key:k,offset=0,length=65536,etag},{signal,requestTimeoutMs}={}) {
+      if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(length)||length<1||length>65536)throw Error('INVALID_RANGE');
+      const response=await http.request(base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,headers:{Range:'bytes='+offset+'-'+(offset+length-1),...(etag?{'If-Match':etag}:{})}});
+      const currentEtag=response.headers.get('etag');if(etag&&currentEtag!==etag){await response.body?.cancel();throw Error('OBJECT_CHANGED');}
+      if(response.status===416){const m=/^bytes \*\/(\d+)$/.exec(response.headers.get('content-range')??'');if(m&&Number(m[1])===offset)return {bytes:[],offset,total:offset,done:true};}
+      if(!response.ok||!response.body)throw Error('OBJECT_READ_FAILED');
+      const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('content-range')??'');
+      if(response.status!==206||!range||Number(range[1])!==offset||Number(range[2])>=offset+length||Number(range[3])<=Number(range[2])){await response.body.cancel();throw Error('RANGE_NOT_SUPPORTED');}
+      const reader=response.body.getReader(),chunks=[];let count=0;try{while(true){const part=await reader.read();if(part.done)break;count+=part.value.length;if(count>length)throw Error('RANGE_RESPONSE_INVALID');chunks.push(part.value);}}finally{await reader.cancel();}
+      if(count!==Number(range[2])-offset+1)throw Error('RANGE_RESPONSE_INVALID');const bytes=new Uint8Array(count);let at=0;for(const c of chunks){bytes.set(c,at);at+=c.length;}
+      return {bytes:Array.from(bytes),offset,etag:currentEtag,total:Number(range[3]),done:offset+count===Number(range[3])};
     },
     async readStream({source,key:k},{signal,onChunk,requestTimeoutMs}={}) {
       if(typeof onChunk!=='function')throw Error('A streaming sink is required.');
