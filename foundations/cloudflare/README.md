@@ -8,7 +8,7 @@
 
 ## 1. Foundational user-experience decision chart
 
-This chart is the primary behavioral reference for implementation.
+This chart is the **first-run onboarding reference only**. After initial setup, the post-onboarding flow below takes precedence and must preserve the user's own saved configuration.
 
 ```mermaid
 flowchart TD
@@ -59,6 +59,62 @@ flowchart TD
 
 **Interpretation:** The ordinary *first* click may start onboarding instead of transferring. After readiness is established, the *next* click saves instantly. A pending source from before activation is **never replayed automatically** after OAuth, checkout, or uncertain upload. Do not confuse website sign-in with application authorization.
 
+## 1A. Returning user — normal right-click decision chart (authoritative after onboarding)
+
+**The R2 activation link is not an ordinary save step.** Once OAuth, R2 and the user-configured destination are ready, a normal right-click saves directly. The extension checks live authorization and exact destination readiness as needed, but must not reopen signup, overwrite a custom configuration, or silently restore a deleted bucket.
+
+```mermaid
+flowchart TD
+    A["Right-click → Cloudflare R2"]
+    B{"Click2Cloud OAuth<br/>valid for selected account?"}
+    C["Open existing Shelf OAuth login"]
+    D{"R2 usable?"}
+    E["Only if confirmed inactive:<br/>offer R2 activation link"]
+    F{"Saved Cloudflare<br/>destination configured?"}
+    G{"Exact chosen bucket/path<br/>and TRUE REMOTE Worker ready?"}
+    H["TRUE REMOTE save to THAT destination<br/>→ independent verification"]
+    I["First-run setup still pending?<br/>User approved auto-setup?"]
+    J["Create/reuse redown once<br/>and set initial destination"]
+    K["Choose destination; preserve customization<br/>do NOT recreate redown"]
+    L["Show Repair / Reconnect / Choose another<br/>Never silently fall back to redown"]
+    M["No success; retain exact chosen destination"]
+
+    A --> B
+    B -- "No" --> C
+    C -- "After authorization" --> D
+    B -- "Yes" --> D
+    D -- "Yes" --> F
+    D -- "Confirmed inactive" --> E
+    E -- "After activation / Check again" --> D
+    D -- "Error / permission unknown" --> M
+    F -- "Yes" --> G
+    F -- "No" --> I
+    I -- "Yes" --> J
+    I -- "No / previously configured" --> K
+    J --> G
+    K -- "User chooses exact target" --> G
+    G -- "Yes" --> H
+    G -- "No, deleted / disconnected / inaccessible" --> L
+    L -- "After explicit repair or new choice" --> G
+```
+
+### Returning-user rules (nonnegotiable)
+
+1. **Existing valid custom destination wins.** The native Cloudflare item saves to the user's currently selected *exact* Cloudflare connection, account, bucket and folder prefix. `redown` was only the **initial first-run default**, never a permanent destination override.
+2. **No repeated R2 link.** For an already activated account with valid authorization, no activation page appears. Show that page only when a trusted R2 readiness check actually establishes that activation is missing. An expired token prompts the existing Shelf OAuth flow instead; an API outage or missing permission is not interpreted as "R2 not purchased."
+3. **If `redown` was deleted, disconnected or unbound but another configured destination works,** the Cloudflare flat menu saves to that other destination as normal. Do not search for or recreate `redown`.
+4. **If the selected destination itself is deleted, disconnected, inaccessible, or its Worker binding is broken,** do not save elsewhere. Show "Destination unavailable" with **Reconnect / Repair / Choose another bucket**. A repair of a removed bucket or infrastructure requires explicit user authorization; no silent bucket recreation, surprise rebinding or upload replay.
+5. **If the user removed their destination configuration after onboarding,** show Choose destination. Do not treat an empty config as first-run onboarding. A persisted `onboardingCompleted` / `defaultWasExplicitlyChosen` marker (or equivalent migration-safe state) distinguishes *never configured* from *intentionally removed*. Do not reset it merely because the user logged out, cleared a menu entry or deleted the original bucket.
+6. **Cloudflare remains TRUE REMOTE only.** A successful save requires Worker-to-selected-bucket conditional write and independent verification. No browser-byte fallback, guessing, redirected destination, or success feedback after an unconfirmed transfer.
+7. **No forced R2 polling every right-click.** Reuse a short-lived, explicitly validated readiness snapshot where safe, but revalidate authorization and exact target as required for secure dispatch. The Worker must remain authoritative at write time. Cache usability for UX, never as a substitute for upload authorization.
+8. **Menu configuration is independent of transfer mode.** Existing Simple/Narrow/Depth/Quick Select/custom layouts are respected. This post-onboarding logic is an adapter/action routing rule behind the canonical V3+1 menu engine, not an alternate registrar or menu compiler.
+
+**Example:** The user began at `Cloudflare R2 / redown /`, later changed their default to `Cloudflare R2 / photos / saved /`, then deleted `redown`. Their next Cloudflare right-click goes to `photos/saved/` after ordinary authorization and readiness checks. It does **not** ask them to activate R2 again or recreate `redown`.
+
+**Different example:** They kept `redown/` selected and deleted that bucket. The next click reports that the selected destination is missing and offers repair or a new selection; it cannot silently create `redown` again or save to another bucket.
+
+---
+
 ## 2. The native right-click default (before the user customizes it)
 
 Inside Chrome's extension-created grouping, display **four direct, actionable, one-click provider entries in exactly this order**:
@@ -90,7 +146,7 @@ Once an authenticated API check establishes usable R2 access **and** the user ha
 
 1. Read the selected account's bucket inventory or specifically check bucket `redown` with appropriately scoped credentials.
 2. If `redown` exists and is accessible in that account, **reuse it**. Never clear, delete, reconfigure, or overwrite its objects.
-3. If absent, call Cloudflare's authorized R2 bucket-creation API to create the exact lowercase name `redown`. Treat already-exists races idempotently by re-reading the actual account.
+3. If absent **during authorized first-run setup only**, call Cloudflare's R2 bucket-creation API to create the exact lowercase name `redown`. Treat already-exists races idempotently by re-reading the actual account. **Never infer permission to recreate `redown` solely from its later absence**; the user may have intentionally deleted or disconnected it.
 4. Bind or verify the Worker to **that selected authorized account + exact bucket**, not an arbitrary bucket supplied by an untrusted menu item.
 5. Prepare durable operation claims, authenticated Worker transport, source-host protections, scoped capability, and independent R2 HEAD/readback verification. A bucket's mere existence is **not** proof that TRUE REMOTE is functional.
 6. After verified readiness, make `Cloudflare R2 / redown /` the **initial** default destination **only if the user has not explicitly chosen another default**. Subsequent logins/reconnects must not reset the user's choice. If the user later chooses a different Cloudflare folder, honor the configured destination.
@@ -150,4 +206,4 @@ The first-run setup is an authorized, idempotent infrastructure action. Never cr
 
 ### Foundation invariant
 
-**Four flat providers initially (Google Drive → Dropbox → OneDrive → Cloudflare R2). Existing Shelf OAuth for Cloudflare. R2 activation only if needed. Authorized automatic `redown` bucket creation/reuse and initial default. Cloudflare TRUE REMOTE only. Same V3+1 menu engine and Universal File API for everything. The user should never need to understand or manually configure buckets, Workers or adapters.**
+**Four flat providers initially (Google Drive → Dropbox → OneDrive → Cloudflare R2). Existing Shelf OAuth for Cloudflare. Offer R2 activation only when actually unactivated. Create/reuse `redown` only during approved first-run initialization; it is the initial default, never a forced permanent destination. Always honor the user's configured exact Cloudflare target, and never silently recreate a removed bucket. Cloudflare TRUE REMOTE only. One V3+1 menu engine and Universal File API. Users should never have to configure buckets or Workers manually unless they deliberately customize or repair them.**
