@@ -1,4 +1,6 @@
 # Codex addendum — Simple one-click Hide/Show; Narrow multi-select Hide Levels
+
+> **FINAL REQUEST SUPERSEDES CONFLICTING UX RULES (Nov. 5):** [CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) is the controlling next Codex implementation contract. Older layout, threshold, Quick Select, default/favorite and GUI behavior here are historical wherever they conflict. Keep only non-conflicting engineering/security requirements. This is NOT evidence of product implementation.
 Date: 2026-11-05
 Branch: feat/glaciaring-agent-debug
 Status: Owner-approved NEXT GUI baseline requirement. This document does not claim implementation.
