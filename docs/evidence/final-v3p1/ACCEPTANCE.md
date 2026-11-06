@@ -102,7 +102,7 @@ extension toolbar action. The first view is Remotes. Exact registered callback:
 
 `https://ajppphdiamdobknpamcheohmdbdbeoal.chromiumapp.org/cloudflare`
 
-The ZIP deliverable contains this same unpacked extension. No CRX signature or
+The generated directory is the installable unpacked build. No CRX signature or
 Chrome Web Store publication is claimed.
 
 ## Source inventory and API use
