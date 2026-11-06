@@ -1,10 +1,10 @@
 # CODEX MISSION — Extract REDOWN's REAL Cloudflare right-click save into right2cloud-module
 
 **Date:** 2026-11-06  
-**Source repository:** \`thanks-cohn/REDOWN\` — READ ONLY  
-**Destination repository:** \`thanks-cohn/Click2Cloud\`  
-**Destination branch:** \`feat/glaciaring-agent-debug\` (or the owner's current authorized Click2Cloud working branch; do not silently choose main)  
-**Module directory:** \`Click2Cloud/right2cloud-module/\` at the repository root. **NOT inside FOREVER_WORKS.**  
+**Source repository:** `thanks-cohn/REDOWN` — READ ONLY  
+**Destination repository:** `thanks-cohn/Click2Cloud`  
+**Destination branch:** `feat/glaciaring-agent-debug` (or the owner's current authorized Click2Cloud working branch; do not silently choose main)  
+**Module directory:** `Click2Cloud/right2cloud-module/` at the repository root. **NOT inside FOREVER_WORKS.**  
 **This run:** DIRECT SOURCE EXTRACTION → ISOLATED IMPLEMENTATION → TESTS → CONTAMINATION AUDIT → STOP FOR OWNER + CHATGPT REVIEW.  
 **Future runs only:** Integrate into V3+1, deploy, run live cloud transfers, implement MEGA S4 / Amazon S3 adapters.
 
@@ -12,7 +12,7 @@
 
 The owner will provide the Codex agent access to **both full repositories**. Examine the REAL implementation in REDOWN directly, reading its actual source code and following live call dependencies. **Do NOT rely on, consult, summarize, cite as source, or use any previous FOREVER_WORKS extraction or documentation in either repository.** Do not substitute existing docs, diagrams, old agent summaries, assumptions or paraphrases for reading source. Docs may be useful outside this assignment, but **this extraction must stand entirely on its own with REDOWN implementation evidence.**
 
-Do not assume two checkouts share a parent directory. First locate both working trees, verify each \`git remote\` / repository identity and relevant checked-out commit, and record the exact REDOWN source SHA. If REDOWN source is unavailable or not the expected repository, STOP without inventing code. If multiple REDOWN branches exist, identify which current implementation actually contains the Cloudflare right-click-to-R2 save pipeline; use its exact SHA, not a guessed branch. Do not reset, pull or mutate either repository to force a match.
+Do not assume two checkouts share a parent directory. First locate both working trees, verify each `git remote` / repository identity and relevant checked-out commit, and record the exact REDOWN source SHA. If REDOWN source is unavailable or not the expected repository, STOP without inventing code. If multiple REDOWN branches exist, identify which current implementation actually contains the Cloudflare right-click-to-R2 save pipeline; use its exact SHA, not a guessed branch. Do not reset, pull or mutate either repository to force a match.
 
 ## 0. THE GOAL — ONLY THE WORKING CLOUD SAVE MECHANISM
 
@@ -51,7 +51,7 @@ Extract **EVERY necessary part** of REDOWN V3's actual Cloudflare TRUE REMOTE sa
 
 **Do not import REDOWN V3 as a dependency.** Extract the required mechanism into clear new code and explain any original source logic that had to be adapted.
 
-## 1. SCOPE — KEEP THE CLOUDFARE SAVE, LEAVE V3 BEHIND
+## 1. SCOPE — KEEP THE CLOUDFLARE SAVE, LEAVE V3 BEHIND
 
 What we are extracting:
 - What the right-click user gesture gives REDOWN (source URL type, filename and type hints, appropriate target identity).
@@ -79,19 +79,19 @@ The generic Chrome right-click menu remains owned by V3+1; **right2cloud-module 
 
 Read REDOWN source directly. START with these likely anchors; confirm function names/locations against actual checkout instead of trusting these hints:
 
-- \`REDOWN/extension/background.js\`:
-  - Native \`chrome.contextMenus.onClicked\` entry and source-selection inputs.
-  - Right-click dispatcher / \`saveResolvedRightClick\` if present.
+- `REDOWN/extension/background.js`:
+  - Native `chrome.contextMenus.onClicked` entry and source-selection inputs.
+  - Right-click dispatcher / `saveResolvedRightClick` if present.
   - Cloudflare destination/account resolution and prepared Worker handshake.
-  - \`ingestCloudflareAtPrefix\`, actual HTTP Worker ingest request and response, if present.
-  - \`verifyCloudflareReceipt\`, actual independent HEAD/metadata/object validation, if present.
-  - The embedded \`WORKER_SOURCE\` string: request handlers, bearer secret validation, source URL validation, redirect controls, bytes acquisition, key selection, \`env.STORAGE\` R2 upload, HEAD/stats and error handling.
+  - `ingestCloudflareAtPrefix`, actual HTTP Worker ingest request and response, if present.
+  - `verifyCloudflareReceipt`, actual independent HEAD/metadata/object validation, if present.
+  - The embedded `WORKER_SOURCE` string: request handlers, bearer secret validation, source URL validation, redirect controls, bytes acquisition, key selection, `env.STORAGE` R2 upload, HEAD/stats and error handling.
 - Any **actually invoked** helpers/modules needed for that specific Cloudflare save path. Follow imports, callbacks, Worker routes and dynamic dispatch edges end-to-end.
 - Tests exercising that same path; classify what they demonstrate versus not.
 
-Directly inspect code from the native click handler **through the actual Worker R2 write and return verification**. Draw a source-pinned call graph with each function, caller, callee, parameters, outputs, auth/trust context, side effects, failure/uncertain branches and file:line + commit. Include any relevant Worker code embedded in template strings, not just external \`worker/src\` if that file is unrelated.
+Directly inspect code from the native click handler **through the actual Worker R2 write and return verification**. Draw a source-pinned call graph with each function, caller, callee, parameters, outputs, auth/trust context, side effects, failure/uncertain branches and file:line + commit. Include any relevant Worker code embedded in template strings, not just external `worker/src` if that file is unrelated.
 
-**Don't assume \`REDOWN/worker/src/index.js\` is the Worker used by the extension:** determine which Worker REDOWN's real save requests actually reach. Source-ground it.
+**Don't assume `REDOWN/worker/src/index.js` is the Worker used by the extension:** determine which Worker REDOWN's real save requests actually reach. Source-ground it.
 
 If crucial behavior is in a large mixed REDOWN function, extract/refactor *just that behavior* and explicitly document anything excluded. If an essential part appears broken/unverified in code, report it; don't assert old code is perfect merely because the product description says it works.
 
@@ -126,17 +126,17 @@ All names except the root directory are suggestions; use the smallest readable m
 
 Never edit:
 - REDOWN (anything).
-- Click2Cloud \`extension/\`, \`src/\`, \`manifest*\`, \`package.json\`, build scripts, CI, root readme, existing tests, or any preexisting file outside the dedicated module.
-- Do not create/change \`FOREVER_WORKS/\` files.
+- Click2Cloud `extension/`, `src/`, `manifest*`, `package.json`, build scripts, CI, root readme, existing tests, or any preexisting file outside the dedicated module.
+- Do not create/change `FOREVER_WORKS/` files.
 - Do not attach/import/activate the module in Click2Cloud runtime yet.
 - Do not deploy, provision, perform a live write, update cloud objects, or attempt live OAuth. Those require separate authorization.
 
 If the required extracted code needs a runtime primitive supplied by the future V3+1 host, define a small **injected port** and a runnable local test double; do not break the allowlist by editing the host. If an extracted Worker requires specific bindings or deployment config, describe exact prerequisites without deploying.
 
-## 4. COMPLETE CLOUDFARE R2 TRUE REMOTE EXTRACTION
+## 4. COMPLETE CLOUDFLARE R2 TRUE REMOTE EXTRACTION
 
 ### 4A. Browser-facing operation, without V3 menu baggage
-Design an importable \`right2cloud-module\` operation that receives a valid host-supplied source reference and an exact immutable destination. Example shape (refine if the source requires it):
+Design an importable `right2cloud-module` operation that receives a valid host-supplied source reference and an exact immutable destination. Example shape (refine if the source requires it):
 
     saveRemote({
       operationId,
@@ -152,7 +152,7 @@ Design an importable \`right2cloud-module\` operation that receives a valid host
 
 Keep native menu listener, Chrome registration and menu ID resolution **out**. V3+1 will later feed this operation; it must not infer a bucket from last-use state, human-readable label or stale menu label.
 
-Trusted dependencies may include \`authorize\`, \`getPreparedWorkerCapability\`, \`authenticatedRequest\`, \`recheckAuthorization\`, \`verifyObject\`, \`clock\` and logging with redaction. Avoid requiring preexisting REDOWN state stores.
+Trusted dependencies may include `authorize`, `getPreparedWorkerCapability`, `authenticatedRequest`, `recheckAuthorization`, `verifyObject`, `clock` and logging with redaction. Avoid requiring preexisting REDOWN state stores.
 
 ### 4B. Exact permission boundaries
 - Validate exact provider, Cloudflare account, bucket and prefix against trusted approved identities, not merely untrusted string fields.
@@ -162,7 +162,7 @@ Trusted dependencies may include \`authorize\`, \`getPreparedWorkerCapability\`,
 - Worker provisioning and OAuth login are separately owned by the future host; no silent activation.
 
 ### 4C. Worker remote-fetch source validation
-- Cloudflare Worker receives \`sourceUrl\` to fetch a public remote source. **This is the defining TRUE REMOTE mechanism.**
+- Cloudflare Worker receives `sourceUrl` to fetch a public remote source. **This is the defining TRUE REMOTE mechanism.**
 - Strictly validate HTTPS, target hosts/ports, redirect chains, forbidden/private/loopback/reserved hosts, dangerous URL forms, network redirects and timeouts. Include tests for known tricky cases and document network-level limits (DNS rebinding/re-resolution and Worker platform constraints).
 - Never forward user's browser cookies, local credentials, login tokens, referrer, page URL or other browser provenance.
 - Handle fetch errors, inaccessible/authenticated source pages, response types and binary bytes faithfully; never claim every website can be fetched.
@@ -177,18 +177,18 @@ Trusted dependencies may include \`authorize\`, \`getPreparedWorkerCapability\`,
 - Respect Cloudflare size, execution/memory, streaming and object limits; no arbitrary pretend 'no cap'.
 - Await the actual write, return a receipt containing enough exact identity/size info for independent verification.
 - Do not upload to user's local Downloads folder as a staging step.
-- After a possibly committed write times out, produce \`UNCERTAIN\` and read-only reconciliation guidance; do not blindly repeat writes.
+- After a possibly committed write times out, produce `UNCERTAIN` and read-only reconciliation guidance; do not blindly repeat writes.
 
 ### 4E. Independent verification
 - Extract REDOWN's independent R2 HEAD/readback flow or adapt it into a safe equivalent inside isolated code.
 - Verify exact account/bucket/prefix/key identity and expected bytes; use cryptographic content proof where actually available and identify ETag/HEAD limitations.
 - An HTTP success response from the Worker alone is **not** verified storage.
-- Original V3 may have checked/stored \`sourceUrl\` in R2 custom metadata. **DO NOT inherit source provenance as object metadata.** Replace that check with a privacy-respecting proof/identity mechanism. Explicitly flag the difference.
+- Original V3 may have checked/stored `sourceUrl` in R2 custom metadata. **DO NOT inherit source provenance as object metadata.** Replace that check with a privacy-respecting proof/identity mechanism. Explicitly flag the difference.
 - No green success / completed state until independent verification evidence is accepted. History and visual effects remain V3+1 responsibilities.
 
 ### 4F. Errors, uncertainty, cancellation, retries
 At minimum preserve typed outcomes:
-\`verified\`, \`failed\`, \`blocked\`, \`uncertain\`, \`cancelled\`.
+`verified`, `failed`, `blocked`, `uncertain`, `cancelled`.
 Include safe machine-readable error codes; operationId; destination/provider identity; confirmed key/size/proof when known; reconciliation hints without secrets.
 Distinguish:
 - Failure before Worker dispatch (safe no-write).
@@ -207,7 +207,7 @@ Exactly one logical save per operation and no implicit duplicate write attempts;
 
 **Now:** Working Cloudflare Worker → Cloudflare R2 writer, extracted from REDOWN source.
 
-**Later:** The *same* Cloudflare Worker remote-fetch source pipeline → MEGA S4, Amazon S3, and any approved S3-compatible storage through a small \`DestinationWriter\` interface.
+**Later:** The *same* Cloudflare Worker remote-fetch source pipeline → MEGA S4, Amazon S3, and any approved S3-compatible storage through a small `DestinationWriter` interface.
 
 Design this extension point NOW, but **do not build S3 credentials, signed requests, live S3 implementation or MEGA/Amazon adapters in this extraction run**.
 
@@ -230,11 +230,11 @@ Desired architecture:
 The Cloudflare Worker is the remote transfer **compute** layer. Cloudflare R2 is one possible destination, not an obligatory intermediate hop. When the user later selects MEGA S4 or Amazon S3, the future writer should save there directly; do not route to R2 first by default.
 
 A minimal conceptual Worker-side writer port might have:
-- \`kind\`, \`capabilities\`, \`validateAuthorizedDestination\`
-- \`prepare({destination, filename, sourceMetadata, operationId})\`
-- \`write({prepared, bytesStream, length?, contentType?, signal?})\`
-- \`verify({prepared, writeReceipt, expectedProof?})\`
-- optional \`inspectPending\` and \`abortPending\`.
+- `kind`, `capabilities`, `validateAuthorizedDestination`
+- `prepare({destination, filename, sourceMetadata, operationId})`
+- `write({prepared, bytesStream, length?, contentType?, signal?})`
+- `verify({prepared, writeReceipt, expectedProof?})`
+- optional `inspectPending` and `abortPending`.
 
 Refine to match actual Worker constraints, but keep the mandatory interface small. Provide a **contract-only sample** for a future S3 writer and a test double. Do not present it as functional real MEGA/Amazon storage support.
 
@@ -255,12 +255,12 @@ Future writer requirements to document now:
 ## 6. V3+1 FUTURE ACCEPTANCE CONTRACT — DOCUMENT ONLY
 
 You have both repos. Inspect Click2Cloud's **existing runtime source** READ ONLY to make the extracted module easy to accept later. Suitable anchors if present:
-- \`Click2Cloud/extension/background.mjs\`
-- \`Click2Cloud/src/core/engine.mjs\`
-- \`Click2Cloud/src/core/save-dispatcher.mjs\`
-- \`Click2Cloud/src/core/source-capture.mjs\`
-- \`Click2Cloud/src/chrome/registrar.mjs\`
-- \`Click2Cloud/src/explorer/file-api.mjs\` and relevant API adapters
+- `Click2Cloud/extension/background.mjs`
+- `Click2Cloud/src/core/engine.mjs`
+- `Click2Cloud/src/core/save-dispatcher.mjs`
+- `Click2Cloud/src/core/source-capture.mjs`
+- `Click2Cloud/src/chrome/registrar.mjs`
+- `Click2Cloud/src/explorer/file-api.mjs` and relevant API adapters
 
 Describe (do not implement) the exact integration seam:
 1. V3+1 native context-menu event gives source / selected action.
@@ -320,7 +320,7 @@ Tests must include at least:
 13. HEAD missing, wrong key/bucket/prefix/size/content evidence → not VERIFIED.
 14. Cancellation before dispatch and after possible write.
 15. Fake future S3 writer can satisfy the port; no real provider credential or network.
-16. Every changed file is inside \`Click2Cloud/right2cloud-module/\`.
+16. Every changed file is inside `Click2Cloud/right2cloud-module/`.
 17. REDOWN remains byte-for-byte unchanged, V3+1 runtime remains unchanged.
 
 Use commands that work without editing root build scripts, e.g.:
@@ -337,12 +337,12 @@ Before stopping, create within the new module directory:
 
 - **Actual code** for an isolated right2cloud transfer coordinator, Worker remote-fetch implementation, complete R2 writer, and independent verification (with precise host-provided capabilities where required).
 - Tests and exact test-results report; both passing and failing results shown truthfully.
-- \`SOURCE_TRACE.md\`: original REDOWN code call graph sourced directly from checked-out code with pinned SHA, file:line and behavior.
-- \`API_CONTRACT.md\`: import/export signatures, SaveIntent/results, trusted boundaries, future V3+1 caller sketch.
-- \`KEEP_ADAPT_REJECT.md\`: precise inheritance contamination audit.
-- \`FUTURE_S3_ADAPTER_CONTRACT.md\`: realistic MEGA S4 / Amazon S3 / generic S3 future insertion path, capabilities and auth/stream/security constraints.
-- \`SECURITY_PRIVACY_LIMITS.md\`: truth about source URLs reaching Cloudflare, forbidden metadata leakage, redirects/SSRF, authorization and current file-size/streaming limits.
-- \`REVIEW_GATE.md\`: owner + ChatGPT inspection checklist with every nontrivial imported source behavior and all unresolved decisions.
+- `SOURCE_TRACE.md`: original REDOWN code call graph sourced directly from checked-out code with pinned SHA, file:line and behavior.
+- `API_CONTRACT.md`: import/export signatures, SaveIntent/results, trusted boundaries, future V3+1 caller sketch.
+- `KEEP_ADAPT_REJECT.md`: precise inheritance contamination audit.
+- `FUTURE_S3_ADAPTER_CONTRACT.md`: realistic MEGA S4 / Amazon S3 / generic S3 future insertion path, capabilities and auth/stream/security constraints.
+- `SECURITY_PRIVACY_LIMITS.md`: truth about source URLs reaching Cloudflare, forbidden metadata leakage, redirects/SSRF, authorization and current file-size/streaming limits.
+- `REVIEW_GATE.md`: owner + ChatGPT inspection checklist with every nontrivial imported source behavior and all unresolved decisions.
 - File diff and Git status proving source REDOWN unchanged and target existing V3+1 unchanged.
 
 An extraction is not complete if it consists only of a handoff document, if the real Worker implementation is absent, or if the R2 writer is fake. The code must be legitimately ready for a future integration run, even though live deployment and actual Chrome/provider proof are deferred.
@@ -366,11 +366,11 @@ The final Codex handoff must end with this clear status:
 
 ## LIGHTWEIGHT STARTER PROMPT FOR CODEX
 
-**Both repositories are available to you.** Work in the Click2Cloud working branch and read \`Click2Cloud/right2cloud-module/CODEX_EXTRACTION_REQUEST.md\` as the controlling instruction.
+**Both repositories are available to you.** Work in the Click2Cloud working branch and read `Click2Cloud/right2cloud-module/CODEX_EXTRACTION_REQUEST.md` as the controlling instruction.
 
 **Extract directly from REDOWN's ACTUAL SOURCE CODE**, not from FOREVER_WORKS or any other prior extraction documents.
 
-Trace and isolate the complete working REDOWN V3 Cloudflare right-click TRUE REMOTE flow—including browser coordinator, authenticated Worker request, actual Worker remote HTTPS fetch, R2 object writer, independent verification and failure/uncertainty logic. Build it as executable, isolated \`Click2Cloud/right2cloud-module/\` code and self-contained tests.
+Trace and isolate the complete working REDOWN V3 Cloudflare right-click TRUE REMOTE flow—including browser coordinator, authenticated Worker request, actual Worker remote HTTPS fetch, R2 object writer, independent verification and failure/uncertainty logic. Build it as executable, isolated `Click2Cloud/right2cloud-module/` code and self-contained tests.
 
 Keep ALL V3 menus, Simple/Narrow/Depth, UI, storage/state and unrelated code OUT. Do NOT extract Google Drive, Dropbox or OneDrive.
 
