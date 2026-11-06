@@ -1,5 +1,7 @@
 # Click2Cloud — V3+1 /scaffold Chrome Product
 
+> **CURRENT FINAL CODEX MISSION:** See [docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) for the authoritative next product GUI/login/Explorer/API request. It supersedes conflicting earlier UX/placement examples. Read AGENTS.md first.
+
 **Current Codex mission:** Build the REAL Click2Cloud V3+1 product described in [the /scaffold specification](scaffold/README.md), following the [comprehensive Codex build request](docs/CODEX_P0_BUILD_SCAFFOLD_V3P1_AGENT_READY.md). Read [AGENTS.md](AGENTS.md) for the current engineering charter. Glaciaring observes the actual product; it is not a second engine. Older runbooks and legacy testing plans are historical references only and do not control this implementation.
 
 **Development branch:** feat/glaciaring-agent-debug. REDOWN is read-only; do not transplant to production without explicit authorization.
