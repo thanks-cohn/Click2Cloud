@@ -7,9 +7,10 @@ READ first: AGENTS.md and the current /scaffold instructions. This addendum refi
 
 ## 1. Simple destination manager — immediate at-a-glance toggle
 
-Every Simple destination row visibly includes a small, elegant **Hide / Show** control without opening an edit page:
-- Visible destination: button reads **Hide**.
-- Hidden destination: button reads **Show**, and row remains present, slightly muted with a readable hidden state.
+Every Simple destination row has **exactly ONE always-visible button**. Its label and color change on click; there are NOT two separate Hide and Show buttons and no modal:
+- When the destination is visible, the single button reads **Hide** (neutral/dark outline, clear affordance). Clicking it hides the shortcut.
+- When hidden, that SAME button reads **Show** (red accent), and the row remains in place, subtly muted with readable "Hidden" status. Clicking it shows the shortcut again.
+- The button label names the next available action, while row status makes the current state obvious. Do not rely on color alone.
 - One click toggles just the displayed shortcut; no confirmation, extra modal, destructive action, or editing required.
 - Preserve account, bucket, full prefix, alias, canonical ID, order, saved state, journal/backups, and any unrelated mode configuration. No cloud folder/object changes.
 - Optimistically indicate "Updating…" if needed, then only report "Applied" on real Chrome native menu ACK. On failure, show a compact "Retry" affordance and coherent persisted-vs-applied status; no false success.
@@ -19,19 +20,20 @@ Every Simple destination row visibly includes a small, elegant **Hide / Show** c
 
 ## 2. Narrow two-column Menu Titles editor — SELECT MODE IS MANDATORY
 
-The user's example `.hide` was illustrative, not a requirement. **Do not require or prioritize typing `.hide` anywhere**. The primary interaction is an obvious **Select levels** mode.
+**Select Mode is the only required level-hiding interaction.** Do not implement a magic text command, parser, or alias syntax for hiding levels. Users interact with rows and a single action button, not keywords.
 
 The existing two-column editor remains: original exact path segment (immutable) on left, editable presentation Menu Title on right, ordered bucket root → final selected folder. Selecting a row does NOT edit its real directory name.
 
 In Select mode:
 - Display a compact checkbox/selection square on each level row, with click selection, Shift-click range selection and Ctrl/Cmd-click toggles for nonadjacent rows. Plain checkbox selection without modifiers must work. Keyboard navigation/selection and visible focus required.
-- Add **Select all**, **Clear**, selected count, and a compact action bar with **Hide selected**, **Show selected**, **Cancel selection**.
-- One action changes visibility of all chosen levels as an editable draft; clicking popup **Save** commits it atomically to canonical CURRENT and reconciles native Chrome. Cancel/Escape discards unsaved drafts.
+- Add small **Select all**, **Clear selection**, selected count, and ONE action button directly **ABOVE the bottom Save / Cancel row**. The button is **Hide selected** (neutral/dark outline) for selected visible or mixed levels; click hides them in the unsaved draft, then that SAME button changes to **Show selected** (red accent) when the selected levels are all hidden. Clicking again restores them in the draft. A mixed set deterministically defaults to Hide selected; never silently flip only part of the selection.
+- That one action button must be unmistakable but not decorative. A compact "Selected: 8" and "Hidden: 8" status lets the user understand what will happen without relying on color alone. No separate floating action panel or second Show/Hide button.
+- All changes remain **DRAFTS** until the user explicitly hits the fixed-bottom **Save** beneath the action button. Only Save commits atomically to canonical CURRENT and reconciles native Chrome. Cancel/Escape discards unsaved drafts; no Chrome changes leak from selection or preview.
 - Hidden level rows remain visible in editor, clearly but subtly dimmed/marked, and can be reselected and shown. Show restores the previous menu title and original order.
 - Long ancestor lists must scroll within the popup without losing sticky controls, focus or selection.
 - Compact Pinterest-inspired near-black/red/white visual language from companion request, no excessive panels or flourishes.
 
-A whole Narrow destination may also have a manager-level **Hide destination** button, but this is a DIFFERENT operation from **Hide level(s)**. The former removes the configured destination from menu presentation; the latter compresses that destination's visible ancestor chain while retaining its save action.
+A whole Narrow destination may also have a manager-level **Hide destination** button, but this is a DIFFERENT operation from **Hide level(s)**. The former removes the configured destination from menu presentation; the latter compresses that destination's visible ancestor chain while retaining its save action. The manager-level destination toggle follows the SAME single-button Hide/Show convention as Simple.
 
 ## 3. Compression semantics: menu presentation only
 
@@ -46,9 +48,13 @@ Shared branch complication: two different configured Narrow paths may share a vi
 
 A live popup menu preview must use the SAME compiled model as the real native menu. Actual applied status requires Chrome registration ACK, and live save status requires provider-confirmed receipt.
 
-## 4. Programmatic operation and tests
+## 4. Layout default from owner clarification
 
-Expose one typed batch command with semantics equivalent to `setNarrowLevelVisibility({destinationId, segmentPrefixes:[...], visible:false, expectedRevision, idempotencyKey})`; the GUI calls exactly this command through the same engine as future authorized agents. Include a corresponding read/inspect and preview change endpoint. No magic `.hide` string in the runtime schema. An optional explicit text shortcut can be considered later only if it cannot conflict with legitimate labels.
+The Settings **Flat · Providers first** layout is the default. **REDOWN grouped** is displayed only after the user explicitly requests it. Actual native Chrome can auto-group multiple extension items under its own extension parent; Flat means *no additional developer-created REDOWN submenu*. A true outermost provider-first menu is available inside the app-owned Explorer context menu. Do not pretend Chrome can show four independent outermost extension menu entries. This Settings layout is independent of the existing popup Show-in-Chrome Flat (exclusive direct Cloudflare save).
+
+## 5. Programmatic operation and tests
+
+Expose one typed batch command with semantics equivalent to `setNarrowLevelVisibility({destinationId, segmentPrefixes:[...], visible:false, expectedRevision, idempotencyKey})`; the GUI calls exactly this command through the same engine as future authorized agents. Include a corresponding read/inspect and preview change endpoint. No reserved text command exists for hiding. No hidden parser or special alias syntax; the API receives typed boolean visibility fields with immutable level identities.
 
 Run focused acceptance for:
 1. Simple row Hide then Show without Edit and without changing target/ID/path; retry native failures; survive restart and restore.
