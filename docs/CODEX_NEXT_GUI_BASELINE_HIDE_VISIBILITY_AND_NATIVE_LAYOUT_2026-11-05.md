@@ -1,4 +1,6 @@
 # NEXT CODEX REQUEST — Click2Cloud V3+1 premium popup baseline, per-destination Hide, and honest Chrome layout choices
+
+> **FINAL REQUEST SUPERSEDES CONFLICTING UX RULES (Nov. 5):** [CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) is the controlling next Codex implementation contract. Older layout, threshold, Quick Select, default/favorite and GUI behavior here are historical wherever they conflict. Keep only non-conflicting engineering/security requirements. This is NOT evidence of product implementation.
 Date: 2026-11-05
 Repository: thanks-cohn/Click2Cloud
 Target branch: feat/glaciaring-agent-debug
