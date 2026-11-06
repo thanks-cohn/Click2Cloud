@@ -5,14 +5,14 @@
 **Destination repository:** `thanks-cohn/Click2Cloud`  
 **Destination branch:** `feat/glaciaring-agent-debug` (or the owner's current authorized Click2Cloud working branch; do not silently choose main)  
 **Module directory:** `Click2Cloud/right2cloud-module/` at the repository root. **NOT inside FOREVER_WORKS.**  
-**This run:** DIRECT SOURCE EXTRACTION → ISOLATED IMPLEMENTATION → TESTS → CONTAMINATION AUDIT → STOP FOR OWNER + CHATGPT REVIEW.  
+**This run:** DIRECT SOURCE EXTRACTION → ISOLATED IMPLEMENTATION → TESTS → CONTAMINATION AUDIT → COMPLETE HANDOFF FOR OWNER + CHATGPT REVIEW.  
 **Future runs only:** Integrate into V3+1, deploy, run live cloud transfers, implement MEGA S4 / Amazon S3 adapters.
 
 ## NONNEGOTIABLE FIRST INSTRUCTION — BOTH REPOS ARE PROVIDED
 
 The owner will provide the Codex agent access to **both full repositories**. Examine the REAL implementation in REDOWN directly, reading its actual source code and following live call dependencies. **Do NOT rely on, consult, summarize, cite as source, or use any previous FOREVER_WORKS extraction or documentation in either repository.** Do not substitute existing docs, diagrams, old agent summaries, assumptions or paraphrases for reading source. Docs may be useful outside this assignment, but **this extraction must stand entirely on its own with REDOWN implementation evidence.**
 
-Do not assume two checkouts share a parent directory. First locate both working trees, verify each `git remote` / repository identity and relevant checked-out commit, and record the exact REDOWN source SHA. If REDOWN source is unavailable or not the expected repository, STOP without inventing code. If multiple REDOWN branches exist, identify which current implementation actually contains the Cloudflare right-click-to-R2 save pipeline; use its exact SHA, not a guessed branch. Do not reset, pull or mutate either repository to force a match.
+Do not assume two checkouts share a parent directory. First locate both working trees, verify each `git remote` / repository identity and relevant checked-out commit, and record the exact REDOWN source SHA. If REDOWN source is unavailable or not the expected repository, report the source-access blocker in the handoff rather than inventing code. If multiple REDOWN branches exist, identify which current implementation actually contains the Cloudflare right-click-to-R2 save pipeline; use its exact SHA, not a guessed branch. Do not reset, pull or mutate either repository to force a match.
 
 ## 0. THE GOAL — ONLY THE WORKING CLOUD SAVE MECHANISM
 
@@ -331,7 +331,7 @@ If test support dependencies would require modifying root package files, avoid t
 
 If local tests cannot fully emulate Cloudflare's R2 bindings, document those test fidelity limits. Do not fabricate a live success claim.
 
-## 9. DELIVERABLES AND STOP GATE
+## 9. DELIVERABLES AND REVIEW HANDOFF
 
 Before stopping, create within the new module directory:
 
@@ -349,7 +349,7 @@ An extraction is not complete if it consists only of a handoff document, if the 
 
 Do not conceal unavoidable missing dependencies. If a critical REDOWN function cannot be safely extracted without rewriting unrelated runtime, isolate an explicit port and document exact missing integration requirements; report **PARTIAL** instead of claiming complete.
 
-**WHEN THE ISOLATED EXTRACTION + TESTS + AUDIT ARE COMPLETE, STOP. Do NOT integrate or deploy.** The owner and ChatGPT will review whether any V3 legacy problems crossed the boundary. A separate authorized Codex run will connect the approved module to V3+1, and still later runs can implement Worker-side MEGA S4, Amazon S3 and additional S3 writer adapters.
+**WHEN THE ISOLATED EXTRACTION + TESTS + AUDIT ARE COMPLETE, PRODUCE THE FULL HANDOFF. Do NOT integrate or deploy.** The owner and ChatGPT will review whether any V3 legacy problems crossed the boundary. A separate authorized Codex run will connect the approved module to V3+1, and still later runs can implement Worker-side MEGA S4, Amazon S3 and additional S3 writer adapters.
 
 The final Codex handoff must end with this clear status:
 
@@ -378,4 +378,4 @@ Make the Cloudflare Worker source-fetch engine accept a small **Worker-compatibl
 
 Do not modify any preexisting Click2Cloud runtime files, REDOWN source, manifests or build scripts. Do not integrate into V3+1, deploy, authenticate to live services or perform real cloud writes.
 
-Provide a source-pinned KEEP/ADAPT/REJECT audit, tests, privacy/security limits and a strict owner + ChatGPT review gate. **STOP after extraction.**
+Provide a source-pinned KEEP/ADAPT/REJECT audit, tests, privacy/security limits and a strict owner + ChatGPT review gate. **When the extraction and tests are complete, produce a comprehensive handoff for owner + ChatGPT review.**
