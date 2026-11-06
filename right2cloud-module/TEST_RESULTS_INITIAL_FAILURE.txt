@@ -1,0 +1,322 @@
+TAP version 13
+# Subtest: import is Chrome/storage independent and media click selection is minimal
+ok 1 - import is Chrome/storage independent and media click selection is minimal
+  ---
+  duration_ms: 2.722303
+  type: 'test'
+  ...
+# Subtest: end-to-end Worker fetch, real writer, separate HEAD; unknown=false
+ok 2 - end-to-end Worker fetch, real writer, separate HEAD; unknown=false
+  ---
+  duration_ms: 43.739237
+  type: 'test'
+  ...
+# Subtest: end-to-end Worker fetch, real writer, separate HEAD; unknown=true
+ok 3 - end-to-end Worker fetch, real writer, separate HEAD; unknown=true
+  ---
+  duration_ms: 1.684098
+  type: 'test'
+  ...
+# Subtest: Unicode exact prefix, keep both suffix, repeat invocation and durable duplicate gate
+ok 4 - Unicode exact prefix, keep both suffix, repeat invocation and durable duplicate gate
+  ---
+  duration_ms: 2.909735
+  type: 'test'
+  ...
+# Subtest: capability denied: missing
+ok 5 - capability denied: missing
+  ---
+  duration_ms: 0.628447
+  type: 'test'
+  ...
+# Subtest: capability denied: expired
+ok 6 - capability denied: expired
+  ---
+  duration_ms: 0.199681
+  type: 'test'
+  ...
+# Subtest: capability denied: account
+ok 7 - capability denied: account
+  ---
+  duration_ms: 0.152961
+  type: 'test'
+  ...
+# Subtest: capability denied: connection
+ok 8 - capability denied: connection
+  ---
+  duration_ms: 0.113582
+  type: 'test'
+  ...
+# Subtest: capability denied: bucket
+ok 9 - capability denied: bucket
+  ---
+  duration_ms: 0.204548
+  type: 'test'
+  ...
+# Subtest: capability denied: prefix
+ok 10 - capability denied: prefix
+  ---
+  duration_ms: 0.309917
+  type: 'test'
+  ...
+# Subtest: missing and revoked authority block before dispatch
+ok 11 - missing and revoked authority block before dispatch
+  ---
+  duration_ms: 0.38467
+  type: 'test'
+  ...
+# Subtest: source rejects http://files.public.net/a
+ok 12 - source rejects http://files.public.net/a
+  ---
+  duration_ms: 0.229326
+  type: 'test'
+  ...
+# Subtest: source rejects https://127.1/a
+ok 13 - source rejects https://127.1/a
+  ---
+  duration_ms: 0.302055
+  type: 'test'
+  ...
+# Subtest: source rejects https://2130706433/a
+ok 14 - source rejects https://2130706433/a
+  ---
+  duration_ms: 0.123366
+  type: 'test'
+  ...
+# Subtest: source rejects https://0x7f000001/a
+ok 15 - source rejects https://0x7f000001/a
+  ---
+  duration_ms: 0.135354
+  type: 'test'
+  ...
+# Subtest: source rejects https://[::1]/
+ok 16 - source rejects https://[::1]/
+  ---
+  duration_ms: 0.107061
+  type: 'test'
+  ...
+# Subtest: source rejects https://[::ffff:127.0.0.1]/
+ok 17 - source rejects https://[::ffff:127.0.0.1]/
+  ---
+  duration_ms: 0.057998
+  type: 'test'
+  ...
+# Subtest: source rejects https://169.254.169.254/
+ok 18 - source rejects https://169.254.169.254/
+  ---
+  duration_ms: 0.052619
+  type: 'test'
+  ...
+# Subtest: source rejects https://10.0.0.1/
+ok 19 - source rejects https://10.0.0.1/
+  ---
+  duration_ms: 0.091838
+  type: 'test'
+  ...
+# Subtest: source rejects https://100.64.0.1/
+ok 20 - source rejects https://100.64.0.1/
+  ---
+  duration_ms: 0.116135
+  type: 'test'
+  ...
+# Subtest: source rejects https://user:pass@files.public.net/
+ok 21 - source rejects https://user:pass@files.public.net/
+  ---
+  duration_ms: 0.055673
+  type: 'test'
+  ...
+# Subtest: source rejects https://files.public.net:444/a
+ok 22 - source rejects https://files.public.net:444/a
+  ---
+  duration_ms: 0.047572
+  type: 'test'
+  ...
+# Subtest: source rejects https://localhost/a
+ok 23 - source rejects https://localhost/a
+  ---
+  duration_ms: 0.042234
+  type: 'test'
+  ...
+# Subtest: source rejects https://private.internal/
+ok 24 - source rejects https://private.internal/
+  ---
+  duration_ms: 0.063376
+  type: 'test'
+  ...
+# Subtest: source rejects file:///a
+ok 25 - source rejects file:///a
+  ---
+  duration_ms: 0.039129
+  type: 'test'
+  ...
+# Subtest: source rejects https://files.public.net./
+ok 26 - source rejects https://files.public.net./
+  ---
+  duration_ms: 0.038958
+  type: 'test'
+  ...
+# Subtest: redirect validation, missing location, loops and stripped credentials
+ok 27 - redirect validation, missing location, loops and stripped credentials
+  ---
+  duration_ms: 2.852479
+  type: 'test'
+  ...
+# Subtest: relative public redirect succeeds
+ok 28 - relative public redirect succeeds
+  ---
+  duration_ms: 0.394865
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"status":403}
+ok 29 - failure is never verified {"status":403}
+  ---
+  duration_ms: 1.342032
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"length":2048}
+ok 30 - failure is never verified {"length":2048}
+  ---
+  duration_ms: 0.639514
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"length":2}
+ok 31 - failure is never verified {"length":2}
+  ---
+  duration_ms: 1.774444
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"length":9}
+ok 32 - failure is never verified {"length":9}
+  ---
+  duration_ms: 0.954469
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"fetchError":true}
+ok 33 - failure is never verified {"fetchError":true}
+  ---
+  duration_ms: 0.597952
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"putError":true}
+ok 34 - failure is never verified {"putError":true}
+  ---
+  duration_ms: 0.88911
+  type: 'test'
+  ...
+# Subtest: failure is never verified {"conflict":true}
+ok 35 - failure is never verified {"conflict":true}
+  ---
+  duration_ms: 1001.037651
+  type: 'test'
+  ...
+# Subtest: unknown body cap and HTML rejection
+ok 36 - unknown body cap and HTML rejection
+  ---
+  duration_ms: 0.741938
+  type: 'test'
+  ...
+# Subtest: lost commit response is uncertain and not replayed
+ok 37 - lost commit response is uncertain and not replayed
+  ---
+  duration_ms: 1.480801
+  type: 'test'
+  ...
+# Subtest: malformed transport response and missing HEAD are uncertain
+ok 38 - malformed transport response and missing HEAD are uncertain
+  ---
+  duration_ms: 1.067659
+  type: 'test'
+  ...
+# Subtest: proof mismatch matrix never accepted
+ok 39 - proof mismatch matrix never accepted
+  ---
+  duration_ms: 0.197127
+  type: 'test'
+  ...
+# Subtest: cancellation before dispatch vs possible commit
+ok 40 - cancellation before dispatch vs possible commit
+  ---
+  duration_ms: 0.283046
+  type: 'test'
+  ...
+# Subtest: wrong Worker principal and binding scope blocked
+ok 41 - wrong Worker principal and binding scope blocked
+  ---
+  duration_ms: 0.483438
+  type: 'test'
+  ...
+# Subtest: unsafe filename and prefix never dispatch
+ok 42 - unsafe filename and prefix never dispatch
+  ---
+  duration_ms: 0.323687
+  type: 'test'
+  ...
+# Subtest: deadline cancels hung source before write
+ok 43 - deadline cancels hung source before write
+  ---
+  duration_ms: 6.193633
+  type: 'test'
+  ...
+# Subtest: future writer port is structural only and receives no source URL
+ok 44 - future writer port is structural only and receives no source URL
+  ---
+  duration_ms: 0.323076
+  type: 'test'
+  ...
+# Subtest: same operation ID with different intent is blocked
+ok 45 - same operation ID with different intent is blocked
+  ---
+  duration_ms: 0.898614
+  type: 'test'
+  ...
+# Subtest: partial source stream error never yields verified
+ok 46 - partial source stream error never yields verified
+  ---
+  duration_ms: 0.912996
+  type: 'test'
+  ...
+# Subtest: absent Worker FixedLengthStream fails conservatively rather than claiming write success
+ok 47 - absent Worker FixedLengthStream fails conservatively rather than claiming write success
+  ---
+  duration_ms: 0.456488
+  type: 'test'
+  ...
+# Subtest: write null preserves existing object with explicit conflict
+not ok 48 - write null preserves existing object with explicit conflict
+  ---
+  duration_ms: 1002.610497
+  type: 'test'
+  location: '/workspace/Click2Cloud/right2cloud-module/tests/module.test.mjs:40:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'uncertain'
+    - 'failed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'uncertain'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///workspace/Click2Cloud/right2cloud-module/tests/module.test.mjs:40:147)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: expired Worker authorization and prewrite revocation perform no PUT
+ok 49 - expired Worker authorization and prewrite revocation perform no PUT
+  ---
+  duration_ms: 4.385474
+  type: 'test'
+  ...
+1..49
+# tests 49
+# suites 0
+# pass 48
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2170.697277

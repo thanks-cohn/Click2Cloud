@@ -1,0 +1,5 @@
+PASS: tracked bytes match HEAD in both repositories; untracked changes are module-only
+?? right2cloud-module/
+Tracked git diff HEAD is empty in both applications. REDOWN status is empty. Click2Cloud status contains only the new module. Runtime contamination search above returned no matches.
+Integrity check found REDOWN build-windows.bat uses declared text/eol=crlf checkout conversion; after configured newline normalization it exactly matches HEAD. No file was rewritten for this check.
+Final isolated suite: 49 tests passed, zero failed/skipped. TEST_RESULTS_INITIAL_FAILURE.txt preserves the earlier 48 pass / 1 fail stream-conflict bug. Fixed by aborting the unused pipe without awaiting blocked cancellation when conditional PUT returns null; rerun is TEST_RESULTS.txt. A superseded intermediate diagnostic run was stopped after identifying blocked cleanup.

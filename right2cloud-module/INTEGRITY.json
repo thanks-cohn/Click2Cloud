@@ -1,0 +1,27 @@
+{
+  "observedAt": "2026-11-06T08:42:50.467861+00:00",
+  "repositories": {
+    "Click2Cloud": {
+      "head": "c859fa43d7faf1d3719b252ec1279379140561e1",
+      "branch": "work",
+      "trackedFilesChecked": 176,
+      "aggregateSha256": "0fffa2545def3fdc590eb69bc766f8bdc85a034b74befa631d55754a1b6f5ce0",
+      "mismatchedOrMissingTrackedFiles": [],
+      "declaredCrlfCheckoutNormalization": [],
+      "status": "?? right2cloud-module/API_CONTRACT.md\n?? right2cloud-module/CHANGE_REVIEW.txt\n?? right2cloud-module/CODEX_EXTRACTION_REQUEST.md\n?? right2cloud-module/FUTURE_S3_ADAPTER_CONTRACT.md\n?? right2cloud-module/INTEGRITY.json\n?? right2cloud-module/KEEP_ADAPT_REJECT.md\n?? right2cloud-module/README.md\n?? right2cloud-module/REVIEW_GATE.md\n?? right2cloud-module/SECURITY_PRIVACY_LIMITS.md\n?? right2cloud-module/SOURCE_TRACE.md\n?? right2cloud-module/TEST_RESULTS.txt\n?? right2cloud-module/TEST_RESULTS_INITIAL_FAILURE.txt\n?? right2cloud-module/src/cloudflare-r2-writer.mjs\n?? right2cloud-module/src/cloudflare-worker.mjs\n?? right2cloud-module/src/common.mjs\n?? right2cloud-module/src/index.mjs\n?? right2cloud-module/src/source-fetch.mjs\n?? right2cloud-module/src/verification.mjs\n?? right2cloud-module/tests/module.test.mjs\n?? right2cloud-module/verify-integrity.py\n",
+      "trackedDiff": ""
+    },
+    "REDOWN": {
+      "head": "a6c17f8d0be22131d5cc38b060da4f8f3544800f",
+      "branch": "work",
+      "trackedFilesChecked": 2310,
+      "aggregateSha256": "2e568b97ab2b548547cd552bc52866d23db9fa7937b8d4784631559b95d3b827",
+      "mismatchedOrMissingTrackedFiles": [],
+      "declaredCrlfCheckoutNormalization": [
+        "build-windows.bat"
+      ],
+      "status": "",
+      "trackedDiff": ""
+    }
+  }
+}
