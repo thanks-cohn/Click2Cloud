@@ -1,5 +1,10 @@
 # AGENTS.md — Click2Cloud /scaffold-first engineering instructions
 
+## CURRENT OWNER-APPROVED CODEX REQUEST — NOVEMBER 5, 2026
+
+**READ THIS FIRST:** [docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md). This is the ONE controlling final UX and functional scope for the next Codex implementation pass: quiet one-click provider login, conventional Windows-style Explorer, Light/Dark theme, Simple Hide/Quick row toggles with pencil/trash preserved, Narrow Select-to-hide menu levels, explicit Default Location only, future-only Favorite Cloud marker, user-controlled provider nesting/Quick priority, 7+ entry optional suggestion, and UNIVERSAL secure typed programmatic API coverage. It overrides conflicting UI/threshold/layout text in the earlier November 5 addenda and older scaffold descriptions, while preserving non-conflicting real-engine, OAuth, recovery, privacy, authorization and evidence requirements below. Do NOT include the removed V3-versus-V3+1 comparison roadmap in this implementation request. Implement actual code and real acceptance, not only another proposal. Work only on feat/glaciaring-agent-debug; do not deploy or merge without authorization.
+
+
 ## ACTIVE OWNER-APPROVED CODEX MISSION
 
 **READ FIRST:**
