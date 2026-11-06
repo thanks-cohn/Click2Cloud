@@ -1,10 +1,32 @@
 {
   "manifest_version": 3,
-  "name": "Click2Cloud Glaciaring Lab",
-  "version": "0.1.0",
-  "description": "Isolated native MenuSpec and read-only diagnostic harness. No provider credentials or public routes.",
-  "permissions": ["contextMenus", "storage"],
-  "background": { "service_worker": "extension/background.mjs", "type": "module" },
-  "action": { "default_popup": "extension/mirror.html" },
-  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" }
+  "name": "Click2Cloud",
+  "version": "0.3.1",
+  "description": "Click2Cloud \u2014 cloud Explorer and secure V3+1 native save destinations.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "identity",
+    "alarms",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "extension/background.mjs",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Click2Cloud \u2014 Remotes"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu2FOFIYSlNnsFqHpF2AfbFseeW3kTQjN/swVY1iEOgCphfSmW1riR7heWs9zkPM912k+hnVtECOp0B2ppbqZP9PBHHAYdHf/VQ3CSndq561O0M3LeVc/S6OIU03g92TWTs5EncYbgCshNNhJlxkAcxxYXBPGraQt6Y6JxDoSQMW9oYxSC2+1ROSvnjuqD9B+UcIi91h0n4qzgzbmriaGMbaSOBxZrq6Q3PjdIIypNJHk9vjnRoZ1qFmv9M5B8gtQxXCwy1EO6MXsaCmboBh0NB5Wq8en1cIZyhTu8WmTU7HP60wWfNSwhvOQCT650orihJCZWTuyVRCLXhBB+L1kdQIDAQAB",
+  "host_permissions": [
+    "https://api.cloudflare.com/*",
+    "https://dash.cloudflare.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ]
 }

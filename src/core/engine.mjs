@@ -17,9 +17,9 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     menus.set(spec.generation,spec);
     while(menus.size>maxSnapshots){menus.delete(menus.keys().next().value);evictedGenerations++;}
   }
-  async function compile({mode,inventory,defaultTarget,flatProviders=[],generation}={}) {
+  async function compile({mode,inventory,defaultTarget,flatProviders=[],generation,product,configs}={}) {
     const state=await current.read();
-    return compileMenuSpec({mode,inventory,defaultTarget,flatProviders,configs:state.configs,
+    return compileMenuSpec({mode,inventory,defaultTarget,flatProviders,product:product??state.product,configs:configs??state.configs,
       generation:generation??state.generation.desired+1,sink,operationId:operationIdentity()});
   }
   async function apply(spec) {

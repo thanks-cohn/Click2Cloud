@@ -40,14 +40,20 @@ export function compileMenuSpec(options={}) {
   try {
     const generation=options.generation??1;
     if(!Number.isSafeInteger(generation)||generation<1)throw new MenuSpecError('INVALID_GENERATION','Menu generation must be a positive safe integer.');
-    const module=(options.modules??modeModules)[mode];
+    const composite=mode==='composite',show=options.product?.show??{simple:true,nested:true,depth:false,flat:false};
+    const module=composite?simple:(options.modules??modeModules)[mode];
     if(!module?.project||!module?.createConfig)throw new MenuSpecError('INVALID_MODE','Unsupported independent mode.');
     const inventory=normalizeInventory(options.inventory),revision=validateRevision(options.revision??0);
     emit(options,'modes.'+mode,'started','PROJECTION_STARTED');
     let projection;
     try {
-      const config=module.createConfig(options.configs?.[mode]??{});
-      projection=module.project({config,inventory});
+      if(composite) {
+        const parts=Object.entries(modeModules).filter(([m])=>show[m]&&!show.flat).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
+        projection={revision:options.product?.revision??0,rows:parts.flatMap(p=>p.rows.map(r=>({...r,sourceMode:p.m}))),omissions:parts.flatMap(p=>p.omissions)};
+      } else {
+        const config=module.createConfig(options.configs?.[mode]??{});
+        projection=module.project({config,inventory});
+      }
       emit(options,'modes.'+mode,projection.omissions.some(x=>x.kind!=='excluded')?'partial':'ok',projection.omissions.some(x=>x.kind!=='excluded')?'PROJECTION_PARTIAL':'PROJECTION_OK');
     } catch(error) {emit(options,'modes.'+mode,'failed','PROJECTION_FAILED');throw error;}
     const rows=[],omissions=[...projection.omissions],byId=new Map(),identities=new Map(),siblings=new Map();
@@ -56,6 +62,10 @@ export function compileMenuSpec(options={}) {
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
     function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link'],visible=true}) {
+      if(composite&&role!=='separator') {
+        const peers=siblings.get(parentId)??[];
+        if(peers.some(p=>p.label===label))label+=' ['+stableId('label',placement+JSON.stringify(target)).slice(-6)+']';
+      }
       const actionId=target&&role==='save'?stableId('action',targetKey(target)):null;
       const identity=JSON.stringify([origin.mode,origin.provider,placement,parentId,role,actionId]);
       id??=stableId('item',identity);
@@ -71,6 +81,42 @@ export function compileMenuSpec(options={}) {
       const row={id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:role==='save'?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
+    if(composite) {
+      const placement=options.product?.placement??{}, quickTargets=new Set(), parents=new Map(), projected=new Map();
+      const quick=projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick);
+      for(const row of quick){quickTargets.add(targetKey(row.target));add({...row,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider},reason:row.reason});}
+      const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
+      if(show.flat) {
+        if(defaultTarget&&defaultTarget.provider==='cloudflare') {
+          const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
+          add({label:'REDOWN → Cloudflare',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE',placement:'flat-default'});
+          for(const reason of reasons)omissions.push({target:defaultTarget,reason,kind:'ineligible'});
+        } else omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
+      } else {
+        const providers=[...new Set(projection.rows.map(r=>r.target.provider).concat(defaultTarget?[defaultTarget.provider]:[]))];
+        const needsOther=providers.some(p=>placement[p]==='other');
+        // Quick entries precede direct providers; the optional extra parent comes last.
+        let other=null;
+        for(const p of providers.filter(p=>placement[p]!=='other'))parents.set(p,add({label:p==='cloudflare'?'Cloudflare':p,placement:'provider:'+p,origin:{mode:null,provider:p}}));
+        if(needsOther)other=add({label:'Other Clouds',placement:'other',origin:{mode:null,provider:null}});
+        for(const p of providers.filter(p=>placement[p]==='other'))parents.set(p,add({parentId:other,label:p==='cloudflare'?'Cloudflare':p,placement:'provider:'+p,origin:{mode:null,provider:p}}));
+        const placements=new Map();
+        for(const row of projection.rows) {
+          const parentId=row.parentPlacement===null?parents.get(row.target.provider):placements.get(row.sourceMode+':'+row.parentPlacement);
+          if(parentId===undefined)throw new MenuSpecError('INVALID_MENU_PARENT','Projection lost its parent.');
+          if(row.role==='save'&&quickTargets.has(targetKey(row.target)))continue;
+          const key=JSON.stringify([parentId,row.role,targetKey(row.target)]);
+          let id=projected.get(key);
+          if(!id){id=add({...row,parentId,placement:row.sourceMode+':'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});projected.set(key,id);}
+          placements.set(row.sourceMode+':'+row.placement,id);
+        }
+        if(defaultTarget&&!quickTargets.has(targetKey(defaultTarget))&&!projection.rows.some(r=>r.role==='save'&&targetKey(r.target)===targetKey(defaultTarget))) {
+          const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
+          add({parentId:parents.get(defaultTarget.provider),label:'Default Location',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_HOME_SAVE',placement:'default'});
+        }
+      }
+      for(const peer of options.flatProviders??[])add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
+    } else {
     const root=add({id:'c2c:root',label:'REDOWN',origin:{mode:null,provider:null}});
     const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
     const defaultCandidate=defaultTarget?findCandidate(inventory,defaultTarget):null;
@@ -108,6 +154,13 @@ export function compileMenuSpec(options={}) {
         add({parentId:cloud,role:'separator',placement:'default-separator',reason:'HOME_SEPARATOR'});
         add({parentId:cloud,label:'Home',role:'save',target:defaultTarget,enabled:!defaultAvailability,reason:defaultAvailability??'DEFAULT_HOME_SAVE',placement:'default-home'});
       }
+    }
+    }
+    if(composite) {
+      const needed=new Set(rows.filter(r=>r.role==='save').map(r=>r.id));
+      for(let i=rows.length-1;i>=0;i--)if(needed.has(rows[i].id)&&rows[i].parentId)needed.add(rows[i].parentId);
+      for(let i=rows.length-1;i>=0;i--)if(rows[i].role==='branch'&&!needed.has(rows[i].id))rows.splice(i,1);
+      const indices=new Map();for(const r of rows){const n=indices.get(r.parentId)??0;r.siblingIndex=r.index=n;indices.set(r.parentId,n+1);}
     }
     const retained=omissions.slice(0,maxOmissions),omissionDropped=omissions.length-retained.length;
     const unavailable=omissions.some(x=>['ineligible','unknown-descendants','budget'].includes(x.kind));

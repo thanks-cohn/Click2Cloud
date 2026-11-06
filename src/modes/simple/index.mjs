@@ -13,13 +13,14 @@ export function migrateConfig(snapshot={}) {
 export function project({config,inventory}) {
   const own=createConfig(config), rows=[],omissions=[],selected=new Set();
   for(const destination of own.destinations) {
+    if(destination.hidden){omissions.push({target:destination.target,reason:'DESTINATION_HIDDEN',kind:'excluded'});continue;}
     const {target}=destination,key=targetKey(target),{scope,folder}=findCandidate(inventory,target);
     const reasons=availabilityReasons(scope,folder),reason=reasons[0];
     selected.add(key);
-    rows.push({placement:key,parentPlacement:null,label:destination.label??targetLabel(target),target,role:'save',enabled:!reason,reason:reason??'SIMPLE_CONFIGURED'});
+    rows.push({placement:key,parentPlacement:null,label:destination.label??targetLabel(target),target,role:'save',enabled:!reason,reason:reason??'SIMPLE_CONFIGURED',quick:destination.quick===true,order:destination.order??own.destinations.indexOf(destination)});
     for(const reason of reasons)omissions.push({target,reason,placement:key,kind:'ineligible'});
   }
-  rows.sort((a,b)=>compare(a.label,b.label)||compare(a.placement,b.placement));
+  rows.sort((a,b)=>a.order-b.order||compare(a.placement,b.placement));
   for(const scope of inventory.scopes)for(const folder of scope.folders)
     if(!selected.has(targetKey(folder.target)))omissions.push({target:folder.target,reason:'NOT_CONFIGURED',kind:'excluded'});
   return {mode:'simple',revision:own.revision,rows,omissions};
