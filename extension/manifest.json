@@ -23,7 +23,8 @@
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu2FOFIYSlNnsFqHpF2AfbFseeW3kTQjN/swVY1iEOgCphfSmW1riR7heWs9zkPM912k+hnVtECOp0B2ppbqZP9PBHHAYdHf/VQ3CSndq561O0M3LeVc/S6OIU03g92TWTs5EncYbgCshNNhJlxkAcxxYXBPGraQt6Y6JxDoSQMW9oYxSC2+1ROSvnjuqD9B+UcIi91h0n4qzgzbmriaGMbaSOBxZrq6Q3PjdIIypNJHk9vjnRoZ1qFmv9M5B8gtQxXCwy1EO6MXsaCmboBh0NB5Wq8en1cIZyhTu8WmTU7HP60wWfNSwhvOQCT650orihJCZWTuyVRCLXhBB+L1kdQIDAQAB",
   "host_permissions": [
     "https://api.cloudflare.com/*",
-    "https://dash.cloudflare.com/*"
+    "https://dash.cloudflare.com/*",
+    "https://*.workers.dev/*"
   ],
   "optional_host_permissions": [
     "https://*/*",

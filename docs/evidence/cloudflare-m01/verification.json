@@ -1,0 +1,73 @@
+{
+  "observedAt": "2026-11-06T12:24:48.993550+00:00",
+  "implementationBranch": "feat/cloudflare-true-remote-m01",
+  "baseCommit": "b2a6979e1bd6c174046f1859442d2345d1715912",
+  "node": "v24.22.1",
+  "commands": [
+    {
+      "command": "npm run test:focused",
+      "tests": 129,
+      "pass": 129,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node --test --test-isolation=none right2cloud-module/tests/module.test.mjs",
+      "tests": 49,
+      "pass": 49,
+      "fail": 0,
+      "skipped": 0
+    },
+    {
+      "command": "npm run build:extension",
+      "state": "PASS"
+    },
+    {
+      "command": "npm run test:browser",
+      "passingFixtureGates": 7,
+      "installedExtension": "BLOCKED_ADMINISTRATOR_POLICY"
+    },
+    {
+      "command": "npm exec --package=typescript@5.9.3 -- tsc --noEmit --strict --lib es2022,dom src/api/service.d.ts",
+      "state": "PASS"
+    }
+  ],
+  "moduleSyntaxChecks": 30,
+  "configuredSecretValueScan": "PASS",
+  "redownUnchanged": true,
+  "importedModuleSourceUnchanged": true,
+  "sourceSha256": {
+    "extension/app.mjs": "3f906431c729cd8f6af0bde45ea3a8bbbdceb9b99eed8ec15d39045a55ca4009",
+    "extension/background.mjs": "2dca654284b49eb4b9bf09f812c54202ce5311138d67eb093e205e8c4b43a0b3",
+    "extension/manifest.json": "69bb756150a9c1480828dd7d8dc1ebec84998cdef69ed3f767488c38bdc1a1b7",
+    "src/api/config.mjs": "68da4b044e615e313960d740294d08a3b50c5ca5af4815865a3065d90fe5be34",
+    "src/api/menu-view.mjs": "b9d6c598caf7c8b6ffbb2a3c4166a8d96065c2f69cf5db6fc173e63b8e06cb72",
+    "src/api/permissions.mjs": "100feb03b96a1f38c1c14c4a5bee8f513d39864288816a79c4168f2792912927",
+    "src/api/service.d.ts": "636a508f6b5588147f52860127f4556a5d523bb3742fab920ac6561527e9278c",
+    "src/api/service.mjs": "e9c6ce4d3b3e0fafa353b221c5c7fc61f0cac9a903b2c09da2c21fea94c0d2c6",
+    "src/chrome/registrar.mjs": "209680cb30eff842d79aa2939150a0b52316309f3643ac16f57bb9711f73a384",
+    "src/chrome/trusted-sender.mjs": "55210aefdf3343ea936318db505152af0fa198108f42b9a77d894454ffd363a6",
+    "src/cloudflare/deployment.mjs": "a5773ebeb075cb23ba42a6d6ed991f2ab911b3383b45b55d3195c4e72127f4c7",
+    "src/cloudflare/onboarding.mjs": "9d4ad5ab6deccb0aa502969d5822c75b1ce45b582d2c7e89077a10d7a19fab2e",
+    "src/cloudflare/transport.mjs": "46ea71ea8fd063f113380209a420edbc71b0c6ea8335b88322e881f991235ffc",
+    "src/cloudflare/wire.mjs": "16d709fa1681d0930e4faccf11b85f03f7c4bf304ba54d47777409779b84f3e4",
+    "src/cloudflare/worker.mjs": "6b8a475b174b119a308b7e0dfb50f34de080a0ccf94de74bb1d06a3ae496afbd",
+    "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
+    "src/core/action-resolver.mjs": "1a54cc365d08be67bc2f28ec92b3d1c0830189c82929e32b02b5ae0ea72a3cb6",
+    "src/core/engine.mjs": "e718a77bff7c8821770b5eeed5bd4f3ce968240989e84cf3ef9008a2cb878b01",
+    "src/core/menu-spec.mjs": "258ff6a341e6568588cc5f009ba374497ad683922ff9b55e531a3ed7616780c1",
+    "src/glaciaring/catalog.mjs": "a2280b7c903a55068896b54d273a39cfeda724604dc650f4d6f31cf8477ed9cd",
+    "src/persistence/current-store.mjs": "7837876a877b29e3e642f3dafb9be771b2b62b3889ae079b29112efd900a32a9"
+  },
+  "blockers": [
+    "WORKER_HOST_PROXY_CONNECT_403",
+    "GITHUB_API_PROXY_FORBIDDEN",
+    "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  ],
+  "notVerified": [
+    "real OAuth consent",
+    "live Worker execution",
+    "live R2 write/readback",
+    "real native context-menu click and restart"
+  ]
+}

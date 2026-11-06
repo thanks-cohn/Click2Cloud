@@ -161,7 +161,10 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       return receipt;
     });
   }
-  return Object.freeze({read,getModeConfig,saveModeConfig,commitProduct,
+  return Object.freeze({
+    recordRemoteResult:value=>transact('readwrite',async s=>{const rows=(await request(s.state.get('remoteResults')))?.value??[];const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,at:clock()};s.state.put({id:'remoteResults',value:[safe,...rows.filter(r=>r.operationId!==value.operationId)].slice(0,100)});return safe;}),
+    readRemoteResults:()=>transact('readonly',async s=>(await request(s.state.get('remoteResults')))?.value??[]),
+    read,getModeConfig,saveModeConfig,commitProduct,
     findRetry:id=>transact('readonly',async s=>(await request(s.state.get('retry:'+id)))?.value??null),
     reserveOperation:(id,fingerprint)=>transact('readwrite',async s=>{const key='operation:'+id;if(await request(s.state.get(key)))return false;s.state.put({id:key,value:{fingerprint,at:clock(),state:'RESERVED_INSPECT_BEFORE_RETRY'}});return true;}),
     stageBackupRoot:handle=>transact('readwrite',async s=>{s.state.put({id:'backupRootCandidate',value:handle});return true;}),

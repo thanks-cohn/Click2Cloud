@@ -71,6 +71,15 @@ try{
  assert.deepEqual(apiChecks,{first:'completed',replay:true,unchanged:true,stale:'REVISION_CONFLICT',badVersion:'VERSION_OR_METHOD_UNSUPPORTED',unauthorized:'PERMISSION_DENIED',agent:'completed',wrongActor:true,mainMigration:true,restored:true,reconnect:true});
  results.push({gate:'GUI-and-shared-API',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB',checks:apiChecks});
  await page.setViewportSize({width:680,height:700});await page.screenshot({path:join(evidence,'narrow-window-fixture.png'),fullPage:true});
+ const onboardingPage=await context.newPage();onboardingPage.on('pageerror',e=>errors.push(e.message));onboardingPage.on('dialog',d=>d.accept());
+ await onboardingPage.addInitScript(()=>{const host=import('/tests/product-browser-host.mjs');globalThis.chrome={runtime:{sendMessage:async message=>(await host).invoke({version:message.version,method:message.method,params:message.params})}};});
+ await onboardingPage.goto(origin+'/extension/app.html?fixtureOnboarding=1');await onboardingPage.getByRole('button',{name:'Log in',exact:true}).click();await onboardingPage.getByRole('button',{name:'Cloudflare setup / status'}).click();
+ await onboardingPage.locator('#cf-account').selectOption('fixture-account');await onboardingPage.getByRole('button',{name:'Continue / Check R2'}).click();await onboardingPage.screenshot({path:join(evidence,'cloudflare-setup-fixture.png'),fullPage:true});await onboardingPage.getByRole('button',{name:'Approve initial setup'}).click();await onboardingPage.locator('#dialog').getByText('Ready to save',{exact:true}).waitFor();
+ const onboarding=await onboardingPage.evaluate(async()=>{const f=window.productFixture;return {state:await f.current.read(),menu:(await f.api.invoke({version:'3+1.1',method:'previewNativeMenu',params:{}},'gui')).data};});
+ assert.equal(onboarding.state.product.defaultTarget.bucketName,'redown');assert.deepEqual(onboarding.menu.rows.map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare R2']);
+ await onboardingPage.getByRole('button',{name:'Close',exact:true}).click();await onboardingPage.getByRole('button',{name:'Dropbox',exact:true}).click();await onboardingPage.getByText('This provider is not available yet. No file was saved.',{exact:true}).waitFor();
+ await onboardingPage.getByRole('button',{name:'Save results'}).click();await onboardingPage.getByRole('heading',{name:'Save results',exact:true}).waitFor();await onboardingPage.screenshot({path:join(evidence,'cloudflare-save-results-fixture.png'),fullPage:true});await onboardingPage.close();
+ results.push({gate:'Cloudflare-onboarding-controls-and-programmatic-owner',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB'});
  assert.deepEqual(errors,[]);results.push({gate:'browser-runtime-errors',state:'PASS',errors});
  const boot=await context.newPage();await boot.goto(origin+'/');
  const bootResult=await boot.evaluate(async()=>{
@@ -80,6 +89,6 @@ try{
   const capabilities=await globalThis.click2cloud.api.invoke({version:'3+1.1',method:'describeCapabilities',params:{}},'gui');
   return {ready:ready.state,api:capabilities.state,tools:capabilities.data.tools.length};
  });assert.deepEqual(bootResult,{ready:'completed',api:'completed',tools:toolRegistry.length});results.push({gate:'actual-product-background-module-boot',state:'PASS',evidenceClass:'browser-module-with-fake-Chrome-transport',...bootResult});await boot.close();
- results.push({gate:'native-rendering-click-restart',state:'BLOCKED',code:'EXTENSION_INSTALL_POLICY'},{gate:'live-provider-OAuth-consent',state:'BLOCKED',code:'DASH_CLOUDFLARE_NOT_IN_NETWORK_ALLOWLIST'},{gate:'live-native-save-readback',state:'BLOCKED',code:'INSTALLED_EXTENSION_AND_AUTHORIZED_WORKER_TRANSPORT_REQUIRED'});
+ results.push({gate:'native-rendering-click-restart',state:'BLOCKED',code:'EXTENSION_INSTALL_POLICY'},{gate:'live-provider-OAuth-consent',state:'NOT_TESTED',code:'INSTALLED_EXTENSION_CONSENT_NOT_EXECUTED'},{gate:'live-native-save-readback',state:'BLOCKED',code:'INSTALLED_EXTENSION_AND_AUTHORIZED_WORKER_TRANSPORT_REQUIRED'});
  await writeFile(join(evidence,'browser-results.json'),JSON.stringify({browser:context.browser().version(),results},null,2)+'\n');console.log(JSON.stringify(results,null,2));
 }catch(error){results.push({gate:'browser-run',state:'FAIL',reason:error.message});await writeFile(join(evidence,'browser-results.json'),JSON.stringify({results},null,2)+'\n');throw error;}finally{await context?.close();if(server)await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});}

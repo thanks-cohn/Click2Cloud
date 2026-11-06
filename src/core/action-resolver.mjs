@@ -15,6 +15,10 @@ export function resolveMenuAction(spec,selection={}) {
   if(acknowledgedGeneration!==spec.generation)return blocked('STALE_GENERATION');
   const row=spec.rows.find(item=>item?.id===(selection.itemId??selection.id));
   if(!row)return blocked('ITEM_UNKNOWN');
+  if(row.role==='provider-action'){
+    if(!['google-drive','dropbox','onedrive','cloudflare'].includes(row.providerAction)||row.actionId!==stableId('provider-action',row.providerAction)||!row.visible||!row.enabled||!row.contexts.includes(context))return blocked('PROVIDER_ACTION_INVALID');
+    return freeze({state:'completed',code:'PROVIDER_ACTION',generation:spec.generation,action:{actionId:row.actionId,itemId:row.id,providerAction:row.providerAction}});
+  }
   if(row.role!=='save'||!row.actionId||!row.target)return blocked('NOT_ACTIONABLE');
   if(!row.enabled||!row.visible)return blocked('ITEM_DISABLED');
   if(!Array.isArray(row.contexts))return blocked('MENU_INVALID');

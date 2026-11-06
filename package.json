@@ -13,6 +13,10 @@
     "test:engine-api": "node tests/final-v3p1.test.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "miniflare": "4.20260730.0"
   }
 }

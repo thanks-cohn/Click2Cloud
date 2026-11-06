@@ -8,7 +8,7 @@ import {operationIdentity,observe} from './boundary-observation.mjs';
 import {location,key} from '../explorer/file-api.mjs';
 
 export function createEngine({current,registrar,providers,getAuthorization,authorizeSource,fetchSource,
-  diagnostics,onVerifiedCompletion,onSaveOutcome=()=>{},fileApi,maxSnapshots=16}={}) {
+  diagnostics,remoteSave,remoteSavers={},onProviderAction,providerSetupActions=false,onVerifiedCompletion,onSaveOutcome=()=>{},fileApi,maxSnapshots=16}={}) {
   if(typeof current?.read!=='function'||typeof registrar?.apply!=='function'||typeof getAuthorization!=='function') throw TypeError('Trusted current state, native registrar and authorization owner required');
   if(!Number.isSafeInteger(maxSnapshots)||maxSnapshots<1||maxSnapshots>256)throw TypeError('Invalid menu retention budget');
   const sink=typeof diagnostics==='function'?diagnostics:diagnostics?.emit;
@@ -22,7 +22,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
   }
   async function compile({mode,inventory,defaultTarget,flatProviders=[],generation,product,configs}={}) {
     const state=await current.read();
-    return compileMenuSpec({mode,inventory,defaultTarget,flatProviders,product:product??state.product,configs:configs??state.configs,
+    return compileMenuSpec({mode,inventory,defaultTarget,flatProviders,providerSetupActions,product:product??state.product,configs:configs??state.configs,
       generation:generation??state.generation.desired+1,sink,operationId:operationIdentity()});
   }
   async function apply(spec) {
@@ -38,7 +38,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     return result;
   }
   async function save({itemId,generation,context='image',source,signal}={}) {
-    const operationId=operationIdentity(),scope={operationId,generation};
+    const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
     // These are actual sequential prerequisites in this owner, not inferred
     // correlations between temporally adjacent independent operations.
@@ -57,12 +57,21 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     const finish=outcome=>{try{onSaveOutcome(outcome);}catch{}return outcome;};
     try {
       const spec=menus.get(generation);
+      const providerRow=spec?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
+      if(providerRow){
+        const native=registrar.inspect(),resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:!native.pending&&native.desired?.generation===generation?native.acknowledgedGeneration:null,authorizedTargets:[]});
+        if(resolved.state!=='completed')return finish(resolved);
+        if(!onProviderAction)return finish({state:'blocked',code:'PROVIDER_SETUP_UNAVAILABLE'});
+        return finish(await onProviderAction({provider:resolved.action.providerAction,source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
+      }
       let auth;
       try{auth=await getAuthorization();}
       catch{observe(saveSink,'auth.check','failed','AUTH_CHECK_FAILED',scope);blockRemaining('auth.check');throw Object.assign(Error('Authorization could not be checked'),{code:'AUTH_CHECK_FAILED'});}
       if(!auth?.sessionId||!Array.isArray(auth.authorizedTargets)) {
         observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
         blockRemaining('auth.check');
+        const row=spec?.rows.find(r=>r.id===itemId);
+        const n=registrar.inspect();if(row?.role==='save'&&row.target?.provider==='cloudflare'&&row.enabled&&row.visible&&row.contexts.includes(context)&&!n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true}));
         return finish({state:'blocked',code:'AUTH_REQUIRED',operationId});
       }
       observe(saveSink,'auth.check','ok','AUTH_VERIFIED',scope);
@@ -73,7 +82,16 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       const resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:
         native.pending||native.desired?.generation!==generation?null:native.acknowledgedGeneration,
         authorizedTargets:auth.authorizedTargets,sink:saveSink,operationId});
-      if(resolved.state!=='completed'){blockRemaining('resolver');return finish({...resolved,operationId});}
+      if(resolved.state!=='completed'){blockRemaining('resolver');const row=spec?.rows.find(r=>r.id===itemId);if(row?.target?.provider==='cloudflare'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(resolved.code)&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true}));return finish({...resolved,operationId});}
+      const selectedRemote=resolved.action.target.provider==='cloudflare'?remoteSave:remoteSavers[resolved.action.target.provider];
+      if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
+        observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
+        if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
+        const authorize=async()=>{const latest=await getAuthorization(),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const out=await selectedRemote({target:resolved.action.target,source,operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
+        if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
+        return finish(out);
+      }
       activeStage='capture.acquire';
       const file=await captureSelectedBytes(source,{authorizeSource:async source=>trustedExplorerSources.has(source)||await authorizeSource(source),fetchSource,sink:saveSink,signal,operationId});
       activeStage='intent';
@@ -101,6 +119,8 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
   // reads exact bytes through the authoritative Universal File API, never a URL
   // sent to the provider. Only this host-created byte source is whitelisted.
   async function saveExplorerEntry({itemId,generation,context='link',source,entry,signal}={}) {
+    const destination=menus.get(generation)?.rows.find(r=>r.id===itemId)?.target;
+    if(destination?.provider==='cloudflare'||typeof remoteSavers[destination?.provider]==='function')return {state:'blocked',code:'REMOTE_EXPLORER_SOURCE_UNAVAILABLE'};
     if(typeof fileApi?.run!=='function')return {state:'blocked',code:'FILE_API_UNAVAILABLE'};
     let cloud,keyName,filename;
     try {

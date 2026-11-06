@@ -13,7 +13,7 @@ export function describeCanonicalContextMenu(spec,{context='link',nativeAcknowle
       itemId:row.id,parentId:row.parentId,actionId:row.actionId??null,
       label:row.label,role:row.role,kind:row.kind,
       enabled:row.enabled===true,reason:row.reason,
-      target:row.target??null,children:[]
+      target:row.target??null,providerAction:row.providerAction??null,children:[]
     };
     byId.set(row.id,item);
     if(row.parentId===null)roots.push(item);

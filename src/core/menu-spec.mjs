@@ -61,27 +61,32 @@ export function compileMenuSpec(options={}) {
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
-    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link'],visible=true}) {
+    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link'],visible=true,providerAction=null}) {
       if(composite&&role!=='separator') {
         const peers=siblings.get(parentId)??[];
         if(peers.some(p=>p.label===label))label+=' ['+stableId('label',placement+JSON.stringify(target)).slice(-6)+']';
       }
-      const actionId=target&&role==='save'?stableId('action',targetKey(target)):null;
+      const actionId=role==='provider-action'?stableId('provider-action',providerAction):target&&role==='save'?stableId('action',targetKey(target)):null;
       const identity=JSON.stringify([origin.mode,origin.provider,placement,parentId,role,actionId]);
       id??=stableId('item',identity);
       if(byId.has(id))throw new MenuSpecError('DUPLICATE_ITEM','Duplicate native item identity.');
       if(identities.has(id)&&identities.get(id)!==identity)throw new MenuSpecError('ID_COLLISION','Stable item identity collision.');
-      if(actionId&&identities.has(actionId)&&identities.get(actionId)!==targetKey(target))throw new MenuSpecError('ID_COLLISION','Stable action identity collision.');
-      identities.set(id,identity);if(actionId)identities.set(actionId,targetKey(target));
+      if(actionId&&role==='save'&&identities.has(actionId)&&identities.get(actionId)!==targetKey(target))throw new MenuSpecError('ID_COLLISION','Stable action identity collision.');
+      identities.set(id,identity);if(actionId)identities.set(actionId,role==='provider-action'?providerAction:targetKey(target));
       if(rows.length>=maxRows||parentId&&!byId.has(parentId)) {
         droppedRows++;omissions.push({target,itemId:id,parentId,reason:'ROW_LIMIT',kind:'budget'});return null;
       }
       const peers=siblings.get(parentId)??[];
       if(role!=='separator'&&peers.some(peer=>peer.role!=='separator'&&peer.label===label))throw new MenuSpecError('LABEL_COLLISION','Sibling menu labels collide; resolve explicitly before applying.');
-      const row={id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:role==='save'?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
+      const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;
+      if(setupProvider)enabled=true;
+      const row={...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
-    if(composite) {
+    const bootstrap=composite&&options.product?.menuCustomized===false&&!show.flat&&!Object.values(options.configs??{}).some(c=>(c.destinations?.length??c.scopes?.length??0)>0);
+    if(bootstrap){
+      for(const [provider,label]of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])add({id:stableId('provider-entry',provider),label,role:'provider-action',target:provider==='cloudflare'?(options.defaultTarget??options.product?.defaultTarget??null):null,providerAction:provider,origin:{mode:null,provider},reason:'PROVIDER_ACTION'});
+    } else if(composite) {
       const placement=options.product?.placement??{}, quickTargets=new Set(), parents=new Map(), projected=new Map();
       const quick=projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick);
       for(const row of quick){quickTargets.add(targetKey(row.target));add({...row,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider},reason:row.reason});}
@@ -157,7 +162,7 @@ export function compileMenuSpec(options={}) {
     }
     }
     if(composite) {
-      const needed=new Set(rows.filter(r=>r.role==='save').map(r=>r.id));
+      const needed=new Set(rows.filter(r=>['save','provider-action'].includes(r.role)).map(r=>r.id));
       for(let i=rows.length-1;i>=0;i--)if(needed.has(rows[i].id)&&rows[i].parentId)needed.add(rows[i].parentId);
       for(let i=rows.length-1;i>=0;i--)if(rows[i].role==='branch'&&!needed.has(rows[i].id))rows.splice(i,1);
       const indices=new Map();for(const r of rows){const n=indices.get(r.parentId)??0;r.siblingIndex=r.index=n;indices.set(r.parentId,n+1);}

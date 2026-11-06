@@ -28,7 +28,7 @@ export function generateChromePlan(spec) {
     const expectedIndex = siblingCounts.get(parentKey) ?? 0;
     if (row.siblingIndex !== expectedIndex) throw issue('INVALID_SIBLING_INDEX');
     siblingCounts.set(parentKey, expectedIndex + 1);
-    if (!['branch', 'save', 'separator', 'navigation'].includes(row.role) || typeof row.enabled !== 'boolean' || typeof row.visible !== 'boolean') throw issue('INVALID_NATIVE_STATE');
+    if (!['branch', 'save', 'separator', 'navigation', 'provider-action'].includes(row.role) || typeof row.enabled !== 'boolean' || typeof row.visible !== 'boolean') throw issue('INVALID_NATIVE_STATE');
     if (row.parentId != null && (!seen.has(row.parentId) || parents.get(row.parentId) !== 'branch')) throw issue('INVALID_MENU_PARENT');
     if (!['normal', 'separator'].includes(row.type) || !Array.isArray(row.contexts) || !row.contexts.length || row.contexts.some(x => !contextNames.has(x))) throw issue('INVALID_NATIVE_PROPERTIES');
     if (row.type === 'separator' && row.role !== 'separator') throw issue('INVALID_SEPARATOR');
@@ -179,16 +179,24 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     return result;
   }
   async function handleClick(info = {}, tab) {
+    if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
+      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:info.srcUrl?'image':'link',authorizedTargets:[]});
+      if(r.state!=='completed'||!dispatch)return r;
+      try{const out=await dispatch(r.action,{info,tab});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
+    }
     let authorization;
     try { authorization = await getAuthorization?.(info, tab); }
     catch { authorization = null; }
     if (!authorization || !Array.isArray(authorization.authorizedTargets)) {
+      const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));
+      if(row&&dispatch&&!pending&&desired?.generation===acknowledged.generation){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab});onOutcome?.(out);return out;}catch{return {state:'blocked',code:'PROVIDER_ACTION_FAILED'};}}
       const result = freeze({ state: 'blocked', code: 'CURRENT_AUTHORIZATION_REQUIRED' });
       emit('auth.check', 'blocked', result.code, nextId(), acknowledged?.generation);
       try { onOutcome?.(result); } catch {}
       return result;
     }
     const result = resolveClick({ itemId: String(info.menuItemId), generation: acknowledged?.generation, context: info.mediaType === 'image' || info.srcUrl ? 'image' : info.linkUrl ? 'link' : 'page', authorizedTargets: authorization.authorizedTargets });
+    if(result.state!=='completed'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(result.code)){const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));if(row&&dispatch){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab});onOutcome?.(out);return out;}catch{}}}
     if (result.state !== 'completed') { try { onOutcome?.(result); } catch {} return result; }
     if (!dispatch) {
       const blocked = freeze({ state: 'blocked', code: 'AUTHORIZED_DISPATCHER_REQUIRED' });

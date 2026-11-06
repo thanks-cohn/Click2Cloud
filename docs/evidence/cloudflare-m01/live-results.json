@@ -1,0 +1,26 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_DEPLOYMENT_TRANSFER_PENDING",
+  "accountFingerprint": "Erk4ChJUoqEF5Y_Nts7nuV0M_i8Q1BwUo1R7O98mdoQ",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "isolated-worker-deployment",
+      "state": "PASS"
+    },
+    {
+      "gate": "authenticated-worker-readiness",
+      "state": "blocked",
+      "code": "TRANSPORT_UNAVAILABLE"
+    }
+  ],
+  "limits": {
+    "knownLength": 67108864,
+    "unknownLength": 8388608
+  },
+  "codeDigest": "-nCJNeVPbHOwJmtC27_4gVX_PjfqVYwRrmNN7OgxMnE",
+  "worker": "click2cloud-r2-4bb6187ab91f42b081f9",
+  "workerHost": "click2cloud-r2-4bb6187ab91f42b081f9.officialmahasbiz.workers.dev",
+  "state": "BLOCKED",
+  "code": "TRANSPORT_UNAVAILABLE"
+}

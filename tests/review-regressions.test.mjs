@@ -4,7 +4,7 @@ import {createEngine} from '../src/core/engine.mjs';
 import {createDiagnostics} from '../src/glaciaring/index.mjs';
 import {createInventoryDiscovery} from '../src/inventory/discovery.mjs';
 import {captureSelectedBytes} from '../src/core/source-capture.mjs';
-const target={provider:'cloudflare',connectionId:'connection',accountId:'account',bucketName:'bucket',prefix:'Selected/'};
+const target={provider:'fixture-browser',connectionId:'connection',accountId:'account',bucketName:'bucket',prefix:'Selected/'};
 async function engineFixture({readAuth,authorizeSource}={}) {
   const diagnostics=createDiagnostics(),outcomes=[];let uploads=0,captures=0;
   const auth={sessionId:'session',authorizedTargets:[target]};
@@ -16,7 +16,7 @@ async function engineFixture({readAuth,authorizeSource}={}) {
   const engine=createEngine({current,registrar,diagnostics,
     getAuthorization:()=>readAuth?readAuth(auth,supersede):auth,
     authorizeSource:async source=>{captures++;return authorizeSource?authorizeSource(source,supersede):true;},
-    providers:{cloudflare:{upload:async()=>{uploads++;return {confirmed:true};},verifyReceipt:async()=>({verified:true,independent:true,byteLength:1,destinationMatches:true,evidenceClass:'provider-readback'})}},
+    providers:{'fixture-browser':{upload:async()=>{uploads++;return {confirmed:true};},verifyReceipt:async()=>({verified:true,independent:true,byteLength:1,destinationMatches:true,evidenceClass:'provider-readback'})}},
     onSaveOutcome:result=>outcomes.push(result)});
   const spec=await engine.compile({mode:'simple',inventory:{scopes:[{...target,authorized:true,workerReady:true,complete:true,folders:['Selected/']}]}});
   await engine.apply(spec);

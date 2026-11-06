@@ -1,0 +1,13 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_CONTROL_PLANE_NOT_LIVE_TRANSFER",
+  "observedAt": "2026-11-06T12:17:37.978236+00:00",
+  "worker": "click2cloud-r2-4bb6187ab91f42b081f9",
+  "settingsHttp": 200,
+  "bindingAccountMatches": true,
+  "bindingBucketMatches": true,
+  "prefixScopeMatches": true,
+  "durableObjectBinding": true,
+  "signingSecretBinding": true,
+  "codeDigestMatches": true,
+  "workersDevEnabled": true
+}

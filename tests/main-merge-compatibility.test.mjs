@@ -3,7 +3,7 @@ import {createEngine} from '../src/core/engine.mjs';import {createChromeRegistra
 import {compileComposite} from '../src/core/composite-menu.mjs';import {compileMenuSpec} from '../src/core/menu-spec.mjs';
 const target={provider:'cloudflare',connectionId:'cloudflare:account',accountId:'account',bucketName:'bucket',prefix:'exact/deep/'};
 const inventory={scopes:[{target:{...target,prefix:''},folders:[target.prefix],authorized:true,workerReady:true,complete:true}]};
-test('retained Explorer file-save path reads Universal File API bytes and uses the existing verified dispatcher',async()=>{
+test('Cloudflare Explorer file-save path refuses unsupported remote sources without staging bytes',async()=>{
  let generation={desired:0,applied:null};const calls=[],uploads=[];
  const chrome={runtime:{},contextMenus:{create:(_p,cb)=>cb(),removeAll:cb=>cb(),onClicked:{addListener(){},removeListener(){}}}};
  const configs={simple:{destinations:[{id:'preserved-destination',target}]},nested:{destinations:[]},depth:{scopes:[]}},product=productState();
@@ -13,7 +13,7 @@ test('retained Explorer file-save path reads Universal File API bytes and uses t
  const engine=createEngine({current,registrar:createChromeRegistrar({chrome}),fileApi,providers,getAuthorization:async()=>({sessionId:'fixture-session',authorizedTargets:[target]})});
  const spec=await engine.compile({mode:'composite',inventory});await engine.apply(spec);const row=spec.rows.find(r=>r.role==='save');
  const result=await engine.saveExplorerEntry({itemId:row.id,generation:spec.generation,source:{accountId:'source-account',bucketName:'source-bucket',prefix:'source/'},entry:{key:'source/picture.bin',folder:false}});
- assert.equal(result.confirmed,true);assert.deepEqual(calls.map(c=>c.operation),['stat','readStream']);assert.equal(uploads.length,1);assert.deepEqual([...uploads[0].bytes],[1,2,3]);assert.equal(uploads[0].destination.path,'exact/deep');assert(!JSON.stringify(uploads[0]).includes('source-account'));
+ assert.equal(result.state,'blocked');assert.equal(result.code,'REMOTE_EXPLORER_SOURCE_UNAVAILABLE');assert.deepEqual(calls,[]);assert.deepEqual(uploads,[]);
 });
 test('old composite entrypoint delegates to the single canonical compiler',()=>{
  const state={product:productState(),configs:{simple:{destinations:[{target}]},nested:{destinations:[]},depth:{scopes:[]}}};

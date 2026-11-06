@@ -21,6 +21,9 @@ export type Change =
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
 export interface Methods {
+ inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
+ approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
+ invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string};idempotencyKey:string};inspectRemoteHistory:{};inspectRemoteReceipt:{operationId:string};
  inspectExplorerContextMenu:{target:Target};previewContextMenu:{context?:'image'|'link'|'page'|'selection'|'video'|'audio'};describeCapabilities:{};getConfiguration:{};getEngineHealth:{};getProviderConnections:{};
  loginBegin:{};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
@@ -37,7 +40,20 @@ export interface Methods {
 export type Request<K extends keyof Methods=keyof Methods> = K extends keyof Methods?{version:Version;method:K;params:Methods[K]}:never;
 export interface Receipt {operationId:string;method:string;before?:number;after?:number;replayed?:boolean}
 export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt}
-export interface EngineApi {invoke(request:Request,authenticatedActor:string):Promise<Response>;readonly tools:readonly Tool[]}
-export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local'}
-export interface Grant {actor:string;methods:(keyof Methods)[];accounts:string[];expiresAt:number;allConfiguration?:boolean}
+export type CloudflareReadinessState = 'READY'|'ACTIVE'|'NOT_ACTIVATED'|'RECONNECT_REQUIRED'|'INSUFFICIENT_PERMISSION'|'ACCOUNT_AMBIGUOUS'|'NETWORK_UNAVAILABLE'|'UNKNOWN'|'CHOOSE_DESTINATION'|'DESTINATION_UNAVAILABLE'|'REPAIR_REQUIRED'|'SETUP_APPROVAL_REQUIRED';
+export interface CloudflareReadiness {state:CloudflareReadinessState;statusCheckMs?:number;fromCache?:boolean;checkedAt?:number;code?:string;accountId?:string;target?:Target;accounts?:{id:string;name?:string}[];worker?:{state:'READY'|'PREPARED'|'blocked';code?:string;checkedAt?:number;maxBytes?:number;maxBufferBytes?:number;allowedHosts?:string[]}}
+export interface RemoteDestination {provider:'cloudflare-r2';connectionId:string;accountId:string;bucketName:string;prefix:string;conflictPolicy:'keep-both'}
+export interface RemoteReceipt {destination:RemoteDestination;operationId:string;key:string;size:number;etag:string;version:string;workerTimings?:Record<string,number>}
+export interface RemoteOperation {state:'verified'|'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;operationId?:string|number;remoteOperationId?:string;kind?:'save'|'readiness';destination?:RemoteDestination;receipt?:RemoteReceipt;proofKind?:'independent-head-version-size';durationMs?:number;timings?:Record<string,number>;reconciliation?:RemoteOperation}
+export interface CloudflareSetupResult {state:'completed'|'blocked'|'uncertain';code:string;target?:Target;probe?:RemoteReceipt;provisionMs?:number;durationMs?:number;probeRetention?:string}
+export interface Results {
+ inspectCloudflare:{onboarding:{initialized:string[];pending:string[];selectedAccountId:string|null};status:CloudflareReadiness;limits:{knownLength:number;unknownLength:number};sourcePolicy:string[]};
+ checkCloudflareR2:CloudflareReadiness;selectCloudflareAccount:CloudflareReadiness;
+ openCloudflareActivation:{state:'completed'|'blocked';code?:string;url?:string;setupPending?:boolean;accountId?:string};
+ approveCloudflareSetup:CloudflareSetupResult;repairCloudflareDestination:CloudflareSetupResult;invokeProviderAction:RemoteOperation;dispatchSave:RemoteOperation;
+ inspectRemoteHistory:RemoteOperation[];inspectRemoteReceipt:RemoteOperation;
+}
+export interface EngineApi {invoke<K extends keyof Methods>(request:Request<K>,authenticatedActor:string):Promise<Response<K extends keyof Results?Results[K]:unknown>>;readonly tools:readonly Tool[]}
+export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local'}
+export interface Grant {actor:string;methods:(keyof Methods)[];accounts:string[];expiresAt:number;allConfiguration?:boolean;interactiveAuth?:boolean}
 export interface AgentGateway {request(handle:string,request:Request,authenticatedActor:string):Promise<Response>;grant(grant:Grant):string;revoke(handle:string):boolean}

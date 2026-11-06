@@ -1,0 +1,76 @@
+{
+  "browser": "155.0.8059.79",
+  "results": [
+    {
+      "gate": "installed-extension",
+      "state": "BLOCKED",
+      "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+    },
+    {
+      "gate": "quiet-login-wiring",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture"
+    },
+    {
+      "gate": "Explorer-keyboard-and-folder-navigation",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser"
+    },
+    {
+      "gate": "Narrow-20-level-editor-draft-and-commit",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB"
+    },
+    {
+      "gate": "GUI-and-shared-API",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB",
+      "checks": {
+        "first": "completed",
+        "replay": true,
+        "unchanged": true,
+        "stale": "REVISION_CONFLICT",
+        "badVersion": "VERSION_OR_METHOD_UNSUPPORTED",
+        "unauthorized": "PERMISSION_DENIED",
+        "agent": "completed",
+        "wrongActor": true,
+        "mainMigration": true,
+        "restored": true,
+        "reconnect": true
+      }
+    },
+    {
+      "gate": "Cloudflare-onboarding-controls-and-programmatic-owner",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB"
+    },
+    {
+      "gate": "browser-runtime-errors",
+      "state": "PASS",
+      "errors": []
+    },
+    {
+      "gate": "actual-product-background-module-boot",
+      "state": "PASS",
+      "evidenceClass": "browser-module-with-fake-Chrome-transport",
+      "ready": "completed",
+      "api": "completed",
+      "tools": 45
+    },
+    {
+      "gate": "native-rendering-click-restart",
+      "state": "BLOCKED",
+      "code": "EXTENSION_INSTALL_POLICY"
+    },
+    {
+      "gate": "live-provider-OAuth-consent",
+      "state": "NOT_TESTED",
+      "code": "INSTALLED_EXTENSION_CONSENT_NOT_EXECUTED"
+    },
+    {
+      "gate": "live-native-save-readback",
+      "state": "BLOCKED",
+      "code": "INSTALLED_EXTENSION_AND_AUTHORIZED_WORKER_TRANSPORT_REQUIRED"
+    }
+  ]
+}

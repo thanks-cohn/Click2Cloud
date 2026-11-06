@@ -4,7 +4,7 @@ import {createEngine} from '../src/core/engine.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createDiagnostics} from '../src/glaciaring/index.mjs';
 import {callbackChrome,target} from '../scripts/glaciaring-fixtures.mjs';
-const t=target('Pictures/');
+const t={...target('Pictures/'),provider:'fixture-browser'};
 async function fixture({sinkMode='normal',authFailure=false,completionFailure=false,uploadFailure=false}={}) {
   const diagnostics=createDiagnostics(), outcomes=[],calls=[];
   let auth={sessionId:'fixture-session',authorizedTargets:[t]},state={configs:{simple:{destinations:[{id:'pictures',target:t}]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:null}};
@@ -12,10 +12,10 @@ async function fixture({sinkMode='normal',authFailure=false,completionFailure=fa
   const sink=sinkMode==='throwing'?()=>{throw Error('bad diagnostic sink');}:sinkMode==='off'?undefined:diagnostics.emit;
   const registrar=createChromeRegistrar({...callbackChrome(),sink});
   const engine=createEngine({current,registrar,diagnostics:sinkMode==='normal'?diagnostics:sink,
-    providers:{cloudflare:{upload:async p=>{calls.push(p);if(uploadFailure)throw Object.assign(Error('private-source-url'),{uncertain:true});return {confirmed:true,id:'fixture-receipt'};},verifyReceipt:async()=>({verified:true,independent:true,byteLength:3,destinationMatches:true,evidenceClass:'provider-readback'})}},
+    providers:{'fixture-browser':{upload:async p=>{calls.push(p);if(uploadFailure)throw Object.assign(Error('private-source-url'),{uncertain:true});return {confirmed:true,id:'fixture-receipt'};},verifyReceipt:async()=>({verified:true,independent:true,byteLength:3,destinationMatches:true,evidenceClass:'provider-readback'})}},
     getAuthorization:async()=>authFailure?null:auth,authorizeSource:()=>true,
     onVerifiedCompletion:async()=>{if(completionFailure)throw Error('private-filename');},onSaveOutcome:o=>outcomes.push(o)});
-  const spec=await engine.compile({mode:'simple',inventory:{revision:1,scopes:[{...target(),authorized:true,workerReady:true,complete:true,folders:['Pictures/']}]}});
+  const spec=await engine.compile({mode:'simple',inventory:{revision:1,scopes:[{...target(),provider:'fixture-browser',authorized:true,workerReady:true,complete:true,folders:['Pictures/']}]}});
   await engine.apply(spec);
   return {engine,spec,registrar,diagnostics,outcomes,calls,revoke(){auth={sessionId:'different-session',authorizedTargets:[]};}};
 }

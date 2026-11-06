@@ -1,0 +1,101 @@
+{
+  "evidenceClass": "INTEGRATION_WORKERD_NOT_LIVE_R2",
+  "storage": "local R2 and persistent SQLite Durable Object",
+  "source": "injected public-source response",
+  "first": {
+    "state": "verified",
+    "receipt": {
+      "key": "exact/雪.bin",
+      "size": 3,
+      "etag": "900150983cd24fb0d6963f7d28e17f72",
+      "version": "8f20549ff4d5d2fa697d44e21fa90396",
+      "operationId": "d768f372-e091-459d-9214-31923106c282",
+      "workerTimings": {
+        "authenticationMs": 1,
+        "claimMs": 3,
+        "sourceHeadersMs": 8,
+        "sourcePreparationMs": 9,
+        "destinationPrepareMs": 1,
+        "streamAndWriteMs": 6
+      },
+      "destination": {
+        "provider": "cloudflare-r2",
+        "connectionId": "cloudflare:a",
+        "accountId": "a",
+        "bucketName": "bucket",
+        "prefix": "exact",
+        "conflictPolicy": "keep-both"
+      }
+    },
+    "timings": {
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 31,
+      "verificationMs": 6
+    },
+    "durationMs": 40
+  },
+  "engine": {
+    "state": "completed",
+    "receipt": {
+      "key": "exact/engine.bin",
+      "size": 3,
+      "etag": "900150983cd24fb0d6963f7d28e17f72",
+      "version": "e3366603a687e4b8fce15bcd4b097531",
+      "operationId": "4a9c514a-360e-4203-bd69-73c5630d5b90",
+      "workerTimings": {
+        "authenticationMs": 1,
+        "claimMs": 2,
+        "sourceHeadersMs": 3,
+        "sourcePreparationMs": 3,
+        "destinationPrepareMs": 1,
+        "streamAndWriteMs": 6
+      },
+      "destination": {
+        "provider": "cloudflare-r2",
+        "connectionId": "cloudflare:a",
+        "accountId": "a",
+        "bucketName": "bucket",
+        "prefix": "exact",
+        "conflictPolicy": "keep-both"
+      }
+    },
+    "remoteOperationId": "4a9c514a-360e-4203-bd69-73c5630d5b90",
+    "timings": {
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 0,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 25,
+      "verificationMs": 6
+    },
+    "durationMs": 33
+  },
+  "restartClaim": "OPERATION_ALREADY_CLAIMED",
+  "anonymous": "CAPABILITY_DENIED",
+  "foreignAccount": "BINDING_MISMATCH",
+  "privateSource": "blocked",
+  "oversized": "blocked",
+  "concurrentCollisions": [
+    {
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "key": "exact/collision.bin"
+    },
+    {
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "key": "exact/collision-1.bin"
+    },
+    {
+      "state": "failed",
+      "code": "CONFLICT"
+    }
+  ],
+  "revocation": "blocked",
+  "browserCaptureCalls": 0,
+  "metadata": [
+    "operationId"
+  ]
+}
