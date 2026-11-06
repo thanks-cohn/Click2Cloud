@@ -100,3 +100,8 @@ For each, list CURRENT state, expected projected node IDs + parents, user-visibl
 - Do not merge or transplant into REDOWN V3 yet. Once Click2Cloud's actual GUI and behavior are proven, use V3 as a controlled comparison baseline; extract observational parity cases and only then plan a non-destructive V3 stabilization/migration. Do not claim V3+1 parity merely because mocks or snapshots agree.
 
 Success criterion: A new user can pick any deep folder, add it in one popup, see the actual immediate menu entry, Hide it without deleting, Show it instantly, and perform a verified save—with exact accessible GUI and programmatic receipts. A clean native layout with real browser constraints is better than a beautiful but impossible promise.
+
+
+## OWNER CLARIFICATION — CONTROLLING HIDE INTERACTION ADDENDUM
+
+**READ AND IMPLEMENT:** [`CODEX_NARROW_SELECT_HIDE_LEVELS_AND_SIMPLE_ONE_CLICK_TOGGLE_2026-11-05.md`](CODEX_NARROW_SELECT_HIDE_LEVELS_AND_SIMPLE_ONE_CLICK_TOGGLE_2026-11-05.md). It supersedes any wording here implying Narrow Hide only removes a terminal Save action. **Simple rows must have an immediate at-a-glance one-click Hide/Show control (no editor/modal); Narrow's two-column Menu Titles view must support multi-select of arbitrary ancestor levels and one batch Hide Selected/Show Selected action that compresses visible menu branches without modifying real cloud folder paths.** The `.hide` token was only an example, not a required command or persistence representation. Whole-destination Hide and individual Narrow-level Hide are distinct. Shared engine, CURRENT persistence, native ACK, recovery and typed API contracts apply to both.
