@@ -11,24 +11,35 @@ export function migrateConfig(snapshot={}) {
   return createConfig(snapshot);
 }
 export function project({config,inventory}) {
-  const own=createConfig(config),selected=new Map(),tree=new Map(),aliases=new Map(),omissions=[];
+  const own=createConfig(config),selected=new Map(),tree=new Map(),omissions=[];
   for(const destination of own.destinations) {
+    if(destination.hidden){omissions.push({target:destination.target,reason:'DESTINATION_HIDDEN',kind:'excluded'});continue;}
     const {target}=destination,key=targetKey(target),{scope,folder}=findCandidate(inventory,target);
     const reasons=availabilityReasons(scope,folder),reason=reasons[0];
     selected.set(key,{...destination,reason});
+    let parent=null;
     for(const prefix of ['',...ancestors(target.prefix)]) {
       const t={...target,prefix},k=targetKey(t);
-      const level=prefix.split('/').filter(Boolean).length,alias=destination.aliases?.[level];
-      if(alias){if(aliases.has(k)&&aliases.get(k)!==alias)throw new TypeError('Conflicting ancestor aliases');aliases.set(k,alias);}
-      tree.set(k,{placement:k,target:t,parentPlacement:prefix?targetKey({...t,prefix:ancestors(prefix).at(-2)??''}):null});
+      if(destination.levels?.[prefix]?.hidden)continue;
+      // Include projected parent in identity: two paths may hide different shared
+      // levels without moving an independent sibling or corrupting its ancestry.
+      const naturalParent=prefix?targetKey({...t,prefix:ancestors(prefix).at(-2)??''}):null;
+      const placement=parent===naturalParent?k:JSON.stringify([k,parent]);
+      if(!tree.has(placement))tree.set(placement,{placement,target:t,parentPlacement:parent,label:destination.levels?.[prefix]?.label});
+      parent=placement;
+    }
+    const final=tree.get(parent);
+    if(final){
+      if(final.target.prefix===target.prefix)final.destination={...destination,reason};
+      else tree.set(key+':hidden-save',{placement:key+':hidden-save',target,parentPlacement:parent,destination:{...destination,reason},hiddenSave:true});
     }
     for(const reason of reasons)omissions.push({target,reason,placement:key,kind:'ineligible'});
   }
   const branches=new Set([...tree.values()].map(x=>x.parentPlacement).filter(Boolean));
   const rows=[];
   for(const row of [...tree.values()].sort((a,b)=>(a.target.prefix.split('/').length-b.target.prefix.split('/').length)||compare(scopeKey(a.target),scopeKey(b.target))||compare(a.target.prefix,b.target.prefix))) {
-    const destination=selected.get(row.placement),hasChildren=branches.has(row.placement);
-    const label=destination?.label??aliases.get(row.placement)??targetLabel(row.target);
+    const destination=row.destination,hasChildren=branches.has(row.placement);
+    const label=row.hiddenSave?'Save here — '+(destination.label??targetLabel(row.target)):row.label??destination?.label??targetLabel(row.target);
     rows.push({...row,label,role:destination&&!hasChildren?'save':'branch',enabled:hasChildren||!destination?.reason,reason:destination?.reason??(destination?'NESTED_CONFIGURED':'NATURAL_ANCESTOR')});
     if(destination&&hasChildren)rows.push({placement:row.placement+':save-here',parentPlacement:row.placement,label:'Save here',target:row.target,role:'save',enabled:!destination.reason,reason:destination.reason??'ACTIONABLE_BRANCH'});
   }

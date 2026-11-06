@@ -1,5 +1,7 @@
 # CODEX P0 — BUILD THE REAL CLICK2CLOUD V3+1 PRODUCT FROM /scaffold, AGENT-READY
 
+> **FINAL REQUEST SUPERSEDES CONFLICTING UX RULES (Nov. 5):** [CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) is the controlling next Codex implementation contract. Older layout, threshold, Quick Select, default/favorite and GUI behavior here are historical wherever they conflict. Keep only non-conflicting engineering/security requirements. This is NOT evidence of product implementation.
+
 **Owner-approved implementation request — November 5, 2026**
 **Repository:** thanks-cohn/Click2Cloud
 **Implementation branch:** feat/glaciaring-agent-debug

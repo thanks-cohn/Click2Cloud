@@ -1,4 +1,6 @@
-# V3+1 Engine API v1
+# V3+1 Engine API v1 — historical contract
+
+**Superseded:** the current runtime negotiates `version:"3+1.1"`. Use `src/api/service.d.ts`, the runtime `toolRegistry`, and `docs/evidence/main-merge/MAIN_MERGE.md`. The v1 request/preview shapes below are retained for history and are not current instructions. Saved v1 product state and aliases migrate without changing targets.
 
 The foundation is `src/api/service.mjs` over `createEngine`, the existing mode projectors, CURRENT and Chrome registrar. The GUI and the in-process agent gateway invoke `api.invoke({version:1, method, params}, actor)`. Glaciaring remains a separate read-only observer. No HTTP, public localhost, external Chrome message or MCP server is opened.
 

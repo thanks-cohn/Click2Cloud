@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Click2Cloud",
-  "version": "0.2.0",
-  "description": "V3+1 destinations, native Chrome menus and permission-gated engine API.",
+  "version": "0.3.1",
+  "description": "Click2Cloud \u2014 cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",
     "storage",

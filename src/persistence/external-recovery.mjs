@@ -22,7 +22,7 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
     }
     if(!point)throw Error('NO_VALID_RECOVERY_POINT');return point;
   }
-  async function writeNamespace(namespace,value,{cadence='weekly'}={}) {
+  async function writeNamespace(namespace,value,{cadence='weekly',checkpointValue=value}={}) {
     let prior=null;try{prior=await readNamespace(namespace);}catch(e){if(e.message!=='NO_VALID_RECOVERY_POINT')throw e;}
     const sequence=(prior?.sequence??0)+1,text=await encode(namespace,value,sequence),date=new Date(clock()),month=date.toISOString().slice(0,7),journal=namespace+'/journal/'+month+'.jsonl';
     let previous='';try{previous=await files.read(journal);}catch(e){if(e.code!=='ENOENT'&&e.name!=='NotFoundError')throw e;}
@@ -32,7 +32,8 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
     const verified=await decode(await files.read(namespace+'/CURRENT.json'),namespace);
     if(verified.sequence!==sequence)throw Error('BACKUP_READBACK_FAILED');
     const {year,week}=isoWeek(date),stamp=cadence==='daily'?date.toISOString().slice(0,10):`${year}-W${String(week).padStart(2,'0')}`,snapshot=namespace+'/backups/'+stamp+'.json';
-    const created=await files.create(snapshot,text);const checkpoint=created?text:await files.read(snapshot);await decode(checkpoint,namespace);await files.replace(namespace+'/backups/'+cadence+'.json',checkpoint);
+    const checkpointText=await encode(namespace,checkpointValue,sequence);
+    const created=await files.create(snapshot,checkpointText);const checkpoint=created?checkpointText:await files.read(snapshot);await decode(checkpoint,namespace);await files.replace(namespace+'/backups/'+cadence+'.json',checkpoint);
     return {state:'VERIFIED',namespace,sequence,checksum:JSON.parse(text).checksum,evidenceClass:'external-filesystem-readback'};
   }
   return Object.freeze({readNamespace,writeNamespace,
@@ -44,13 +45,18 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
       return {state:'VERIFIED',filename,checksum:JSON.parse(text).checksum,complete:verified.value.complete===true};
     },
     async writeVerified(product) {
-      const p=validateProduct(product),menu={...p,configs:{...p.configs,depth:{schemaVersion:1,mode:'depth',revision:0,scopes:[]}}};
-      const options={cadence:p.recoveryPolicy.cadence};const menuReceipt=await writeNamespace('menu-config',menu,options),depthReceipt=await writeNamespace('depth-config',p.configs.depth,options);
-      const policyReceipt=await writeNamespace('recovery-policy',p.recoveryPolicy,options);
+      const p=validateProduct({product:product.product,configs:product.configs}),menu={...p,configs:{...p.configs,depth:{schemaVersion:1,mode:'depth',revision:0,scopes:[]}}};
+      const options={cadence:p.product.recovery.cadence};
+      const checkpoint=structuredClone(menu),excludedModes=[];
+      for(const mode of ['simple','nested'])if(!p.product.recovery[mode]){excludedModes.push(mode);checkpoint.configs[mode]={schemaVersion:1,mode,revision:0,destinations:[]};}
+      if(excludedModes.length)checkpoint.excludedModes=excludedModes;
+      const menuReceipt=await writeNamespace('menu-config',menu,{...options,checkpointValue:checkpoint}),depthReceipt=await writeNamespace('depth-config',p.configs.depth,options);
+      const policyReceipt=await writeNamespace('recovery-policy',p.product.recovery,options);
       return {state:'VERIFIED',receipts:[menuReceipt,depthReceipt,policyReceipt]};
-    },async readVerified() {
-      const menu=await readNamespace('menu-config');const p=structuredClone(menu.value);
-      try{p.configs.depth=(await readNamespace('depth-config')).value;}catch{}try{p.recoveryPolicy=(await readNamespace('recovery-policy')).value;}catch{}return validateProduct(p);
+    },async readVerified(current) {
+      const menu=await readNamespace('menu-config');let p=structuredClone(menu.value);if(!p.product)p=validateProduct(p);
+      for(const mode of p.excludedModes??[]){if(!['simple','nested'].includes(mode)||!current?.configs?.[mode])throw Error('RECOVERY_PARTIAL_REQUIRES_MERGE');p.configs[mode]=structuredClone(current.configs[mode]);}delete p.excludedModes;
+      try{p.configs.depth=(await readNamespace('depth-config')).value;}catch{}try{p.product.recovery=(await readNamespace('recovery-policy')).value;}catch{}return validateProduct(p);
     }
   });
 }
@@ -62,4 +68,19 @@ export function directoryFiles(root) {
     async create(path,text){const {dir,name}=await locate(path,true);try{await dir.getFileHandle(name);return false;}catch(e){if(e.name!=='NotFoundError')throw e;}const w=await (await dir.getFileHandle(name,{create:true})).createWritable();await w.write(text);await w.close();return true;},
     async list(path){let dir=root;try{for(const part of path.split('/'))dir=await dir.getDirectoryHandle(part);}catch{return [];}const rows=[];for await(const [name,h] of dir.entries())if(h.kind==='file')rows.push(path+'/'+name);return rows;}
   });
+}
+
+// Copy every existing file before switching roots; verify bytes independently.
+export async function copyRecoveryDirectory(from,to) {
+  let count=0;
+  async function copy(source,destination){
+    for await(const [name,h] of source.entries()) {
+      if(h.kind==='directory'){await copy(h,await destination.getDirectoryHandle(name,{create:true}));continue;}
+      const before=new Uint8Array(await (await h.getFile()).arrayBuffer());
+      const out=await destination.getFileHandle(name,{create:true}),w=await out.createWritable();await w.write(before);await w.close();
+      const after=new Uint8Array(await (await out.getFile()).arrayBuffer());
+      if(before.length!==after.length||before.some((v,i)=>v!==after[i]))throw Error('BACKUP_COPY_READBACK_FAILED');count++;
+    }
+  }
+  await copy(from,to);return {files:count,evidenceClass:'external-filesystem-readback'};
 }

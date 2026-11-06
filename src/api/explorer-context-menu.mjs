@@ -4,9 +4,9 @@
 import {normalizeTarget,freeze} from '../core/menu-identity.mjs';
 
 const actions=Object.freeze([
-  {id:'explorer.open',label:'Open folder',kind:'navigate'},
+  {id:'explorer.open',label:'Open',kind:'navigate'},
   {id:'explorer.rightClickSetup',label:'+ Right Click',kind:'configure'},
-  {id:'explorer.setFlatDefault',label:'Default Save Selection',kind:'configure'},
+  {id:'explorer.setFlatDefault',label:'Make Default',kind:'configure'},
   {id:'explorer.manageDestinations',label:'Manage Destinations',kind:'navigate'}
 ]);
 

@@ -1,0 +1,47 @@
+[
+  {
+    "gate": "registered-oauth-client",
+    "http": 200,
+    "state": "PASS",
+    "registration": {
+      "client_id": "59535938bc4cc093003b4385a7e2b005",
+      "grant_types": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "redirect_uris": [
+        "https://ajppphdiamdobknpamcheohmdbdbeoal.chromiumapp.org/cloudflare"
+      ],
+      "scopes": [
+        "workers-r2.read",
+        "workers-r2.write",
+        "workers-scripts.content_read",
+        "workers-scripts.edit",
+        "offline_access"
+      ],
+      "token_endpoint_auth_method": "none"
+    }
+  },
+  {
+    "gate": "account-buckets",
+    "http": 200,
+    "state": "PASS",
+    "bucketCount": 20,
+    "proofClass": "environment-credential-provider-read-only; not extension OAuth"
+  },
+  {
+    "gate": "lab-worker-subdomain",
+    "http": 200,
+    "state": "PASS",
+    "result": {
+      "enabled": false,
+      "previews_enabled": false
+    },
+    "proofClass": "management-read-only; not user OAuth or upload"
+  },
+  {
+    "gate": "oauth-authorize-network",
+    "state": "BLOCKED",
+    "code": "URLError"
+  }
+]

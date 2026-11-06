@@ -1,3 +1,14 @@
+# Current OAuth status
+
+The Click2Cloud client is registered. Its exact scopes and callback were verified
+through a read-only management lookup; see `docs/evidence/final-v3p1/provider-read-only.json`.
+Current source is `cloudflare-oauth.mjs` (`createCloudflareOAuth`); current tests are
+`tests/oauth-v3p1.test.mjs`. Real user consent remains BLOCKED in the test environment,
+and no live login/save is claimed. Do not register another client.
+
+The remainder is historical extraction context. Its old registration, export-name,
+and missing-GUI statements do not describe the current build.
+
 # Click2Cloud Cloudflare OAuth — new independent implementation
 
 **Implementation source:** [`cloudflare-oauth.mjs`](./cloudflare-oauth.mjs)  

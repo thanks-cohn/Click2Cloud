@@ -53,7 +53,13 @@ export function createWholeCloudJobs({recovery,fileApi,isAuthorized,clock=Date.n
       const start=isoWeek(job.startedAt),end=isoWeek(clock());start.week=String(start.week).padStart(2,'0');end.week=String(end.week).padStart(2,'0');
       const range=start.year===end.year?`week${start.week}${start.week===end.week?'':'-'+end.week}-${end.year}`:`week${start.week}-${start.year}-to-week${end.week}-${end.year}`;
       job.exportName=`backup-${identity.provider}-${range}-${key}-r${job.revision}.json`;
-      job.exportReceipt=await recovery.exportVerified(job.exportName,{schemaVersion:1,kind:'whole-cloud-outline',identity,revision:job.revision,startedAt:job.startedAt,completedAt:clock(),complete:true,consistency:'observed-over-time-not-atomic',pageCount:job.page,pageNamespace:key+'-page-'+job.revision,pageFilePattern:'<pageNamespace>-<zero-based-index>/CURRENT.json',pageChain:job.pageChain,verification:'SHA256 chain of canonical decoded page values in index order; each CURRENT envelope has its own SHA256'});job.revision++;await save(job);return job;
+      const pages=[];let inlineBytes=0,standalone=true;
+      for(let page=0;page<job.page;page++){
+        const value=(await recovery.readNamespace(key+'-page-'+job.revision+'-'+page)).value;
+        inlineBytes+=new TextEncoder().encode(JSON.stringify(value)).length;
+        if(inlineBytes>8*1024*1024){standalone=false;pages.length=0;break;}pages.push(value);
+      }
+      job.exportReceipt=await recovery.exportVerified(job.exportName,{schemaVersion:1,kind:'whole-cloud-outline',standalone,pages:standalone?pages:undefined,identity,revision:job.revision,startedAt:job.startedAt,completedAt:clock(),complete:true,consistency:'observed-over-time-not-atomic',pageCount:job.page,pageNamespace:key+'-page-'+job.revision,pageFilePattern:'<pageNamespace>-<zero-based-index>/CURRENT.json',pageChain:job.pageChain,verification:'SHA256 chain of canonical decoded page values in index order; each CURRENT envelope has its own SHA256'});job.revision++;await save(job);return job;
     }catch(e){if(signal?.aborted)return {state:'CANCELLED'};throw e;}finally{busy.delete(key);}
   }
   return Object.freeze({list,enable,inspect:read,tick,async disable(identity){const job=await read(identity);job.enabled=false;job.state='STOPPED';await save(job);return job;},async onSameAccountLogin(identity){const job=await read(identity);return job.enabled&&job.state==='PAUSED_AUTH'?tick(identity):job;}});

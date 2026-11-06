@@ -2,6 +2,7 @@
 import * as simple from '../modes/simple/index.mjs';
 import * as nested from '../modes/nested/index.mjs';
 import * as depth from '../modes/depth/index.mjs';
+import {productState} from '../api/config.mjs';
 export const modeModules=Object.freeze({simple,nested,depth});
 export const BACKUP_FORMAT='click2cloud-current';
 export const MAX_RECORDS=4096;
@@ -24,9 +25,9 @@ export function validateModeConfig(mode,raw) {
   const values=raw[mode==='depth'?'scopes':'destinations']??[];
   if(!Array.isArray(values)||values.length>MAX_RECORDS)fail();
   for(const d of values) {
-    closed(d,mode==='depth'?['target','maxDepth']:['id','target','label','aliases']);target(d.target);
+    closed(d,mode==='depth'?['target','maxDepth']:['id','target','label','hidden','quick','order','levels','aliases']);target(d.target);
     if(mode==='depth'){if(d.maxDepth!==undefined&&(!Number.isSafeInteger(d.maxDepth)||d.maxDepth<1))fail();}
-    else {if(d.aliases!==undefined&&(!Array.isArray(d.aliases)||d.aliases.some(a=>typeof a!=='string'||a.length>256||/[\x00-\x1f]/.test(a))))fail();if(d.id!==undefined)text(d.id,128);if(d.label!==undefined)text(d.label,256);}
+    else {if(d.id!==undefined)text(d.id,128);if(d.label!==undefined)text(d.label,256);}
   }
   return modeModules[mode].createConfig(raw);
 }
@@ -36,14 +37,15 @@ export function validateGeneration(g) {
   return g;
 }
 export function validateBundle(raw) {
-  closed(raw,['format','schemaVersion','requiresReconnect','exportedAt','configs','generation','journal','journalEvicted','checkpoints']);
+  closed(raw,['format','schemaVersion','requiresReconnect','exportedAt','configs','product','generation','journal','journalEvicted','checkpoints']);
   if(raw.format!==BACKUP_FORMAT||raw.schemaVersion!==1||raw.requiresReconnect!==true)fail();
+  if(raw.product!==undefined)productState(raw.product);
   integer(raw.exportedAt);integer(raw.journalEvicted);closed(raw.configs,['simple','nested','depth']);
   for(const [mode,config] of Object.entries(raw.configs))validateModeConfig(mode,config);
   validateGeneration(raw.generation);
   if(!Array.isArray(raw.journal)||raw.journal.length>MAX_RECORDS||!Array.isArray(raw.checkpoints)||raw.checkpoints.length>MAX_RECORDS)fail();
   let sequence=raw.journalEvicted;
-  const latestConfigs=new Map();let latestGeneration=null;
+  const latestConfigs=new Map();let latestGeneration=null,latestProduct=null;
   const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
   for(const row of raw.journal) {
     closed(row,['sequence','kind','mode','at','previous','current']);integer(row.sequence);integer(row.at);
@@ -58,8 +60,13 @@ export function validateBundle(raw) {
       if(row.mode!==null)fail();validateGeneration(row.previous);validateGeneration(row.current);
       if(row.current.desired<row.previous.desired||latestGeneration&&!same(row.previous,latestGeneration))fail();
       latestGeneration=row.current;
+    } else if(row.kind==='product') {
+      productState(row.previous);productState(row.current);
+      if(row.mode!==null||row.current.revision!==row.previous.revision+1||latestProduct&&!same(latestProduct,row.previous))fail();
+      latestProduct=row.current;
     } else fail();
   }
+  if(latestProduct&&!same(latestProduct,raw.product))fail();
   for(const [mode,config] of latestConfigs)if(!same(raw.configs[mode],config))fail();
   if(latestGeneration&&!same(raw.generation,latestGeneration))fail();
   const ids=new Set();
