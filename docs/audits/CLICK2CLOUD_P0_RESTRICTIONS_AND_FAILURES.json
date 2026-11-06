@@ -1,0 +1,2228 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-11-06",
+  "baseline_commit": "c7135ee12b1596097ae96b66086445d63cd8e91c",
+  "scope": "Diagnosis only; no runtime/test/manifest/browser-state/cloud/REDOWN modifications",
+  "verification_meaning": "verified=true confirms inspected source behavior or stated local reproduction, never live product functionality; false means unresolved incident/platform claim. Classes apply to primary issue; security concepts and arbitrary numeric choices can be separate entries.",
+  "classification_legend": {
+    "A": "Arbitrary internal cap or policy value",
+    "B": "Prototype/test artifact or implementation defect",
+    "C": "Externally documented constraint",
+    "D": "Essential security/resource-input boundary",
+    "E": "Explicit owner-approved policy/customization",
+    "F": "Unproven or needs investigation"
+  },
+  "severity_legend": {
+    "P0": "Blocks core promise/security/live acceptance",
+    "P1": "High-impact correctness/recovery/UX gap",
+    "P2": "Important capacity/parity/scale gap",
+    "P3": "Low-impact disclosure/configuration detail"
+  },
+  "totals": {
+    "entries": 78,
+    "classification": {
+      "A": 20,
+      "B": 27,
+      "C": 1,
+      "D": 13,
+      "E": 5,
+      "F": 12
+    },
+    "severity": {
+      "P0": 19,
+      "P1": 30,
+      "P2": 24,
+      "P3": 5
+    }
+  },
+  "evidence": {
+    "tests": {
+      "focused": {
+        "command": "npm run test:focused",
+        "passed": 129,
+        "failed": 0,
+        "skipped": 0,
+        "duration_ms": 7924.286238
+      },
+      "imported": {
+        "command": "node --test right2cloud-module/tests/*.test.mjs",
+        "passed": 49,
+        "failed": 0,
+        "skipped": 0,
+        "duration_ms": 446.666359
+      }
+    },
+    "probes": {
+      "initial": {
+        "customized": false,
+        "default": null,
+        "rows": [
+          {
+            "label": "Google Drive",
+            "role": "provider-action",
+            "enabled": true,
+            "reason": "PROVIDER_ACTION"
+          },
+          {
+            "label": "Dropbox",
+            "role": "provider-action",
+            "enabled": true,
+            "reason": "PROVIDER_ACTION"
+          },
+          {
+            "label": "OneDrive",
+            "role": "provider-action",
+            "enabled": true,
+            "reason": "PROVIDER_ACTION"
+          },
+          {
+            "label": "Cloudflare R2",
+            "role": "provider-action",
+            "enabled": true,
+            "reason": "PROVIDER_ACTION"
+          }
+        ]
+      },
+      "createResult": "completed",
+      "created": {
+        "customized": true,
+        "default": null,
+        "rows": [
+          {
+            "label": "Cloudflare",
+            "role": "branch",
+            "enabled": true,
+            "reason": "STRUCTURE"
+          },
+          {
+            "label": "photos",
+            "role": "save",
+            "enabled": true,
+            "reason": "WORKER_UNVERIFIED",
+            "setupProvider": "cloudflare"
+          }
+        ]
+      },
+      "deleteResult": "completed",
+      "deleted": {
+        "customized": true,
+        "default": null,
+        "rows": []
+      },
+      "migratedPreferenceOnly": {
+        "customized": true,
+        "default": null,
+        "rows": []
+      },
+      "afterDeleteReadiness": {
+        "state": "CHOOSE_DESTINATION",
+        "accountId": "a",
+        "fromCache": false,
+        "statusCheckMs": 76
+      },
+      "afterDeleteClick": {
+        "state": "blocked",
+        "code": "CHOOSE_DESTINATION",
+        "accountId": "a"
+      },
+      "effects": {
+        "shelves": 1,
+        "saves": 0
+      },
+      "public": "SOURCE_DENIED",
+      "private": "SOURCE_DENIED",
+      "allowed": "accepted",
+      "knownOver64": "SIZE_LIMIT",
+      "unknownOverBuffer": "BUFFER_LIMIT",
+      "html": "HTML_NOT_SUPPORTED",
+      "sourceFilename": {
+        "url": "https://raw.githubusercontent.com/download?id=file.png",
+        "filename": "download"
+      },
+      "nativeHashBoot": {
+        "name": "ReferenceError",
+        "message": "Cannot access 'readinessNames' before initialization"
+      }
+    },
+    "read_only_network": [
+      {
+        "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/r2/platform/limits.mdx",
+        "status": 200,
+        "sha256": "67465f868efca73349315fb8f00340a6f0a7305bbd3c6a574a540e37658e412e"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/workers/platform/limits.mdx",
+        "status": 200,
+        "sha256": "db1e59ef967a5933c770b4dd0b17e16d547b854ecd1484ae9322f18855d74b9a"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/r2/api/workers/workers-api-reference.mdx",
+        "status": 200,
+        "sha256": "94996ef18693f1124ed026346ee694d1a6b8ba3a8790468313cdd9879939f661"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/production/src/content/docs/r2/objects/multipart-objects.mdx",
+        "error": "HTTP Error 404: Not Found"
+      },
+      {
+        "workerUnsignedGET": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      {
+        "controlPlaneGET": 200,
+        "success": true,
+        "R2_redown_bound": true,
+        "claimsBinding": true,
+        "secretDeclared": true
+      }
+    ],
+    "redown_commit": "a6c17f8d0be22131d5cc38b060da4f8f3544800f",
+    "browser": "Not run in this audit: browser-state changes explicitly prohibited. Prior committed evidence reviewed.",
+    "additional_probes": {
+      "extraContentTypeAuthentication": "CAPABILITY_DENIED",
+      "resultPersistenceFailure": {
+        "writes": 1,
+        "httpStatus": 403,
+        "result": {
+          "state": "blocked",
+          "code": "REQUEST_REJECTED"
+        }
+      }
+    }
+  },
+  "entries": [
+    {
+      "id": "MENU-001",
+      "area": "menu",
+      "severity": "P0",
+      "classification": "B",
+      "file": "src/core/menu-spec.mjs",
+      "line": 86,
+      "symbol_or_guard": "bootstrap",
+      "user_observed_symptom": "Four entries absent until manual destination; disappear on removal.",
+      "actual_behavior": "Four provider actions require composite + menuCustomized=false + not Flat + empty configs. Provider access is coupled to custom destination presence.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 86,
+          "excerpt": "    const bootstrap=composite&&options.product?.menuCustomized===false&&!show.flat&&!Object.values(options.configs??{}).some(c=>(c.destinations?.length??c.scopes?.length??0)>0);"
+        }
+      ],
+      "test_coverage": "Fresh-only test; custom test explicitly expects no provider-actions (tests/cloudflare-integration.test.mjs:17-22).",
+      "downstream_effects": "Four provider actions require composite + menuCustomized=false + not Flat + empty configs. Provider access is coupled to custom destination presence.",
+      "required_next_run_change": "Project stable provider access through the existing compiler independently of destination configuration; preserve custom order, Quick and explicit Flat meaning.",
+      "tests_needed": "Pristine, custom, delete-last, hidden-all, restart and disconnected matrices.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-002",
+      "area": "migration",
+      "severity": "P0",
+      "classification": "B",
+      "file": "src/api/config.mjs",
+      "line": 7,
+      "symbol_or_guard": "menuCustomized ?? revision>0",
+      "user_observed_symptom": "Normal installation initially lacks provider entries; installed preexisting state unknown.",
+      "actual_behavior": "Any legacy positive product revision is inferred customized, including a revision caused solely by theme/preferences. Empty configs can migrate to zero rows.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/config.mjs",
+          "line": 7,
+          "excerpt": "    menuCustomized:raw?.menuCustomized??(Number(raw?.revision)>0),cloudflare:{initialized:[],pending:[],selectedAccountId:null},favorites:[],placement:{},suggestionDismissed:null,view:'details',recovery:{cadence:'weekly',simple:true,nested:true,buckets:[],location:'automatic'},wholeCloud:{connections:[],enabled:false}};"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Any legacy positive product revision is inferred customized, including a revision caused solely by theme/preferences. Empty configs can migrate to zero rows.",
+      "required_next_run_change": "Migrate explicit menu intent separately from unrelated product revision; do not reset returning-user customization.",
+      "tests_needed": "Migrate old preference-only state and intentional empty custom layout; compare exact preserved configs.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-003",
+      "area": "menu",
+      "severity": "P0",
+      "classification": "B",
+      "file": "src/api/service.mjs",
+      "line": 63,
+      "symbol_or_guard": "applyChanges customization latch",
+      "user_observed_symptom": "Manual Cloudflare/lab row then disappearance on delete.",
+      "actual_behavior": "create/update/delete/makeDefault/show/placement set menuCustomized=true; delete last never restores provider access. If no default/other visible modes remain, zero rows are ACKed.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/service.mjs",
+          "line": 63,
+          "excerpt": "    if(['createDestination','updateDestination','deleteDestinationConfig','setShowInChrome','setDepthDisplayBuckets','setProviderPlacement','makeDefault'].includes(c.type))p.menuCustomized=true;"
+        }
+      ],
+      "test_coverage": "Audit inline API probe reproduced 4 -> 2 -> 0 rows.",
+      "downstream_effects": "create/update/delete/makeDefault/show/placement set menuCustomized=true; delete last never restores provider access. If no default/other visible modes remain, zero rows are ACKed.",
+      "required_next_run_change": "Keep customization marker; make provider access independent. Define clear-default/removal semantics explicitly.",
+      "tests_needed": "Run actual API create/delete/restart; assert provider access and no bucket recreation.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-004",
+      "area": "menu",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/core/menu-spec.mjs",
+      "line": 81,
+      "symbol_or_guard": "setupProvider enabled=true",
+      "user_observed_symptom": "Enabled setup item still reports WORKER_UNVERIFIED.",
+      "actual_behavior": "Unready Cloudflare save leaves become enabled, retaining role=save and reason WORKER_UNVERIFIED/SCOPE_UNAUTHORIZED. Setup semantics are not included in menu-view output.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 81,
+          "excerpt": "      const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;"
+        }
+      ],
+      "test_coverage": "Probe reproduced enabled WORKER_UNVERIFIED; src/api/menu-view.mjs:12-16 omits setupProvider.",
+      "downstream_effects": "Unready Cloudflare save leaves become enabled, retaining role=save and reason WORKER_UNVERIFIED/SCOPE_UNAUTHORIZED. Setup semantics are not included in menu-view output.",
+      "required_next_run_change": "Expose an honest action state/requiresSetup in canonical rows, preview and native title/feedback without changing target identities.",
+      "tests_needed": "Disabled/unready row and provider setup/save previews must agree.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-005",
+      "area": "menu",
+      "severity": "P2",
+      "classification": "E",
+      "file": "src/core/menu-spec.mjs",
+      "line": 94,
+      "symbol_or_guard": "show.flat",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Explicit legacy Flat is Cloudflare-default-only; absent/non-Cloudflare default yields no action. Custom modes all off or hidden also yield zero actions; branch pruning removes empty headings (165-168).",
+      "intended_behavior": "Preserve deliberate V3+1 arrangements while retaining honest provider access.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 94,
+          "excerpt": "      if(show.flat) {"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Explicit legacy Flat is Cloudflare-default-only; absent/non-Cloudflare default yields no action. Custom modes all off or hidden also yield zero actions; branch pruning removes empty headings (165-168).",
+      "required_next_run_change": "Preserve intentional layout and Flat; define independent discoverable provider access with owner intent, not force unhide custom destinations.",
+      "tests_needed": "Explicit Flat with/without default, all hidden/all off, Depth unselected.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-006",
+      "area": "menu-budget",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/core/menu-spec.mjs",
+      "line": 60,
+      "symbol_or_guard": "maxRows/maxOmissions=10000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Logical row/omission budget is internal. Engine blocks applying incomplete row coverage (engine:29), so large menu cannot register rather than silently truncate.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 60,
+          "excerpt": "    const maxRows=options.maxRows??10000,maxOmissions=options.maxOmissions??10000;"
+        }
+      ],
+      "test_coverage": "Canonical budget tests; no official proof that 10000 is Chrome limit.",
+      "downstream_effects": "Logical row/omission budget is internal. Engine blocks applying incomplete row coverage (engine:29), so large menu cannot register rather than silently truncate.",
+      "required_next_run_change": "Use scalable inspection/projection and explicit native feasibility reporting; no invented Chrome six-web-entry limit.",
+      "tests_needed": "Above 10000 projected rows, omissions page completeness and native feasibility.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-007",
+      "area": "config-budget",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/persistence/schema.mjs",
+      "line": 8,
+      "symbol_or_guard": "MAX_RECORDS=4096",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Config destinations/scopes and journal/checkpoints share 4096 record ceiling (26,46); API arrays also cap4096.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/persistence/schema.mjs",
+          "line": 8,
+          "excerpt": "export const MAX_RECORDS=4096;"
+        }
+      ],
+      "test_coverage": "Persistence tests cover bounds, not product scale.",
+      "downstream_effects": "Config destinations/scopes and journal/checkpoints share 4096 record ceiling (26,46); API arrays also cap4096.",
+      "required_next_run_change": "Separate retention/resource controls from product capacity; page storage/config changes and migrate safely.",
+      "tests_needed": "More than4096 targets/records with coverage and recovery.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-008",
+      "area": "menu-depth",
+      "severity": "P3",
+      "classification": "E",
+      "file": "src/modes/depth/index.mjs",
+      "line": 6,
+      "symbol_or_guard": "maxDepth ??10",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Depth default10 is user configurable positive safe integer, not a global10-level restriction; Narrow has no equivalent depth cap.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/modes/depth/index.mjs",
+          "line": 6,
+          "excerpt": "    const target=normalizeTarget({...item.target,prefix:''}),key=scopeKey(target),maxDepth=item.maxDepth??10;"
+        }
+      ],
+      "test_coverage": "Existing Narrow20 browser fixture; source confirms configurable Depth.",
+      "downstream_effects": "Depth default10 is user configurable positive safe integer, not a global10-level restriction; Narrow has no equivalent depth cap.",
+      "required_next_run_change": "Retain explicit user Depth choice, avoid advertising default as provider limit.",
+      "tests_needed": "Depth >10, Narrow20 and hidden ancestors.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "MENU-009",
+      "area": "inspection-pages",
+      "severity": "P3",
+      "classification": "D",
+      "file": "src/core/menu-spec.mjs",
+      "line": 181,
+      "symbol_or_guard": "limit<=1000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Menu inspection page size1000 and destination page20 (service:29,150-152) have continuation; they are per-page bounds, not total transfer/menu capacity.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 181,
+          "excerpt": "  if(!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new RangeError('Page limit must be between 1 and 1000.');"
+        }
+      ],
+      "test_coverage": "Existing menu/API pagination tests.",
+      "downstream_effects": "Menu inspection page size1000 and destination page20 (service:29,150-152) have continuation; they are per-page bounds, not total transfer/menu capacity.",
+      "required_next_run_change": "Keep bounded pages and stable cursors; ensure callers consume every page.",
+      "tests_needed": "Multi-page traversal, stale generation/revision, no omitted tail.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "BOOT-001",
+      "area": "native-lifecycle",
+      "severity": "P1",
+      "classification": "F",
+      "file": "extension/background.mjs",
+      "line": 123,
+      "symbol_or_guard": "ready/api.reconcile",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Every MV3 evaluation reads inventory then reconciles via API. Native onClicked listener is installed before ready finishes; registrar has no ACK until reapply. A very early click may be blocked; incident timing unavailable.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 123,
+          "excerpt": "const ready=(async()=>{await storageReady;inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return api.reconcile();})();"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Every MV3 evaluation reads inventory then reconciles via API. Native onClicked listener is installed before ready finishes; registrar has no ACK until reapply. A very early click may be blocked; incident timing unavailable.",
+      "required_next_run_change": "Queue/fence lifecycle events until ready; retain only valid generation, report boot errors without treating saved ACK as current.",
+      "tests_needed": "Kill/restart MV3 and click before/during/after reconciliation; no duplicates.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "BOOT-002",
+      "area": "native-ACK",
+      "severity": "P2",
+      "classification": "F",
+      "file": "src/chrome/registrar.mjs",
+      "line": 45,
+      "symbol_or_guard": "timeoutMs=3000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Each Chrome callback has fixed3s deadline; removeAll invalidates prior ACK, partial failures block normal dispatch. No measured proof3s fits all native environments.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/chrome/registrar.mjs",
+          "line": 45,
+          "excerpt": "export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId } = {}) {"
+        }
+      ],
+      "test_coverage": "Registrar tests cover ACK failures; installed Chrome absent.",
+      "downstream_effects": "Each Chrome callback has fixed3s deadline; removeAll invalidates prior ACK, partial failures block normal dispatch. No measured proof3s fits all native environments.",
+      "required_next_run_change": "Preserve callback ACK/generation fences; expose recoverable slow/failing registration and measured timeout policy.",
+      "tests_needed": "Lost/delayed callback, create failures, removeAll failure, cold boot.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "GUI-001",
+      "area": "onboarding-launch",
+      "severity": "P0",
+      "classification": "B",
+      "file": "extension/app.mjs",
+      "line": 201,
+      "symbol_or_guard": "await cloudflarePanel before const readinessNames",
+      "user_observed_symptom": "Native click opens dashboard instead of completing setup/save; whether user saw this error is unknown.",
+      "actual_behavior": "Connected #cloudflare launch awaits panel, whose paint at208 reads readinessNames declared at203. Module evaluation cannot initialize it while awaiting; ReferenceError aborts launch.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/app.mjs",
+          "line": 201,
+          "excerpt": "await refreshState();await connections();await show('remotes');$$('header button, footer button').forEach(b=>b.disabled=false);status('Ready · Connect an account to browse real folders.');if(location.hash==='#cloudflare'&&connection.state==='CONNECTED')await cloudflarePanel();"
+        }
+      ],
+      "test_coverage": "Audit executed unchanged app body in Node with DOM/Chrome doubles: ReferenceError before initialization.",
+      "downstream_effects": "Connected #cloudflare launch awaits panel, whose paint at208 reads readinessNames declared at203. Module evaluation cannot initialize it while awaiting; ReferenceError aborts launch.",
+      "required_next_run_change": "Initialize presentation constants before bootstrap; retain same API/state owners.",
+      "tests_needed": "Load exact app.html#cloudflare already connected and disconnected then focus; assert no pageerror.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-001",
+      "area": "first-run-classification",
+      "severity": "P0",
+      "classification": "B",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 32,
+      "symbol_or_guard": "initialized || menuCustomized",
+      "user_observed_symptom": "inspectCloudflare completed OK / status CHOOSE_DESTINATION, no selected bucket.",
+      "actual_behavior": "Any menu customization with no default returns CHOOSE_DESTINATION even if Cloudflare never initialized; approved setup also refuses it at42. Native setup cannot progress automatically from a harmless manual menu configuration.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 32,
+          "excerpt": "  return {state:s.product.cloudflare.initialized.includes(accountId)||s.product.menuCustomized?'CHOOSE_DESTINATION':'SETUP_APPROVAL_REQUIRED',accountId};"
+        }
+      ],
+      "test_coverage": "Audit after-delete probe CHOOSE_DESTINATION; onboarding tests only initialized-removal.",
+      "downstream_effects": "Any menu customization with no default returns CHOOSE_DESTINATION even if Cloudflare never initialized; approved setup also refuses it at42. Native setup cannot progress automatically from a harmless manual menu configuration.",
+      "required_next_run_change": "Separate provider onboarding lifecycle from menu customization and explicit destination removal; preserve user target/default precedence.",
+      "tests_needed": "New Cloudflare with existing unrelated/custom menu; approved initial setup vs intentional removal.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-002",
+      "area": "destination-selection",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 23,
+      "symbol_or_guard": "selectedAccountId before default account",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "selectedAccountId wins even when stored default belongs to another authorized account; with multiple accounts and no selected account, exact default does not infer account. check returns ambiguous/CHOOSE_DESTINATION.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 23,
+          "excerpt": "  const a=await oauth.status(),s=await current.read();accountId??=s.product.cloudflare.selectedAccountId;"
+        }
+      ],
+      "test_coverage": "One/multiple account test exists, not default-selection mismatch.",
+      "downstream_effects": "selectedAccountId wins even when stored default belongs to another authorized account; with multiple accounts and no selected account, exact default does not infer account. check returns ambiguous/CHOOSE_DESTINATION.",
+      "required_next_run_change": "Resolve exact selected target first, derive its authorized account; request account choice only without exact intent.",
+      "tests_needed": "Two accounts, stale selection, default account differs; no silent target swap.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-003",
+      "area": "delete-default",
+      "severity": "P1",
+      "classification": "F",
+      "file": "src/api/service.mjs",
+      "line": 74,
+      "symbol_or_guard": "splice only",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Deleting config does not clear product.defaultTarget. Default can keep an action present; disappearance occurs only with no surviving default/visible config. Deleting a row may differ from removing save destination.",
+      "intended_behavior": "Do not infer clear-default or recreate resources from empty config; distinguish user actions.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/service.mjs",
+          "line": 74,
+          "excerpt": "        if(c.type==='deleteDestinationConfig')all.splice(i,1);"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Deleting config does not clear product.defaultTarget. Default can keep an action present; disappearance occurs only with no surviving default/visible config. Deleting a row may differ from removing save destination.",
+      "required_next_run_change": "Specify separate delete-configuration vs clear-default operations; preserve intent and initialized tombstones.",
+      "tests_needed": "Delete selected/nonselected/default row, explicitly clear default, restart.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-004",
+      "area": "exact-target-security",
+      "severity": "P1",
+      "classification": "D",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 43,
+      "symbol_or_guard": "initial redown vs original",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "redown is used only with no original target; initialized/customized/repair/missing selected bucket guards block recreation (42-49). Exact nondefault configured repairs preserve global default.",
+      "intended_behavior": "Exact selected target wins; only approved genuine initial setup may create redown.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 43,
+          "excerpt": "  const target=original??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''};"
+        }
+      ],
+      "test_coverage": "Focused onboarding positive/negative tests.",
+      "downstream_effects": "redown is used only with no original target; initialized/customized/repair/missing selected bucket guards block recreation (42-49). Exact nondefault configured repairs preserve global default.",
+      "required_next_run_change": "Retain these invariants while decoupling onboarding from menu state. Never restore a deleted bucket implicitly.",
+      "tests_needed": "Custom photos target with redown absent; selected missing bucket; nondefault repair.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-005",
+      "area": "readiness-source",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 53,
+      "symbol_or_guard": "Node.gitignore readiness URL",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "All setup requires a fixed Github text probe. Source outage/filter could block readiness for unrelated usable sources. Probe save proves metadata HEAD, not actual byte readback.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 53,
+          "excerpt": "  const probe=await transport.save({target:probeTarget,operationId,source:{url:'https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore',filename:'readiness.txt'},authorize:async()=>{if((await oauth.authority()).sessionId!==auth.sessionId)return false;const now=await current.read();return repairTarget?[now.product.defaultTarget,...Object.values(now.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean).some(t=>targetKey(t)===targetKey(target)):targetKey(now.product.defaultTarget??target)===targetKey(target);}});"
+        }
+      ],
+      "test_coverage": "Fixtures replace transport; local workerd mocks source.",
+      "downstream_effects": "All setup requires a fixed Github text probe. Source outage/filter could block readiness for unrelated usable sources. Probe save proves metadata HEAD, not actual byte readback.",
+      "required_next_run_change": "Use a controlled verifiable small probe with independent digest/readback, fail specifically if probe source unreachable; no demo-host product whitelist.",
+      "tests_needed": "Probe unavailable, binary bytes/digest, exact path and no replay.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-006",
+      "area": "probe-retention",
+      "severity": "P3",
+      "classification": "E",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 52,
+      "symbol_or_guard": "retained readiness prefix",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Readiness creates new .click2cloud-readiness/<uuid>/readiness.txt in selected path and retains it; GUI consent explicitly explains atapp213. Repair repeats new probe.",
+      "intended_behavior": "Explicitly consented small readiness mutation, separate from user-file save.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 52,
+          "excerpt": "  const operationId=crypto.randomUUID(),probeTarget={...target,prefix:target.prefix+'.click2cloud-readiness/'+operationId+'/'};"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Readiness creates new .click2cloud-readiness/<uuid>/readiness.txt in selected path and retains it; GUI consent explicitly explains atapp213. Repair repeats new probe.",
+      "required_next_run_change": "Keep transparent consent; offer exact verified probe cleanup with separate permission if desired; do not delete unrelated keys.",
+      "tests_needed": "Record setup kind, cleanup only proven own keys, uncertain probe inspect.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-007",
+      "area": "setup-resumption",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 46,
+      "symbol_or_guard": "reserveOperation before pending",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Duplicate setup idempotency key returns SETUP_RETRY_REQUIRES_INSPECTION; pending tracks account only. No setup-specific operation lookup exposes stage/progress needed to safely resume uncertain bucket/Worker/probe.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 46,
+          "excerpt": "  if(!await current.reserveOperation('cloudflare-setup:'+idempotencyKey,JSON.stringify({accountId,target})))return {state:'blocked',code:'SETUP_RETRY_REQUIRES_INSPECTION'};"
+        }
+      ],
+      "test_coverage": "Provisioner pending fixture tests only, not complete coordinator crash lifecycle.",
+      "downstream_effects": "Duplicate setup idempotency key returns SETUP_RETRY_REQUIRES_INSPECTION; pending tracks account only. No setup-specific operation lookup exposes stage/progress needed to safely resume uncertain bucket/Worker/probe.",
+      "required_next_run_change": "Persist inspectable setup stages with exact account/target/worker/opID; reconcile read-only before authorized continuation.",
+      "tests_needed": "Crash after bucket, upload, subdomain, probe and default commit; same key resumes/inspects without replay.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-008",
+      "area": "R2-pagination",
+      "severity": "P1",
+      "classification": "A",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 15,
+      "symbol_or_guard": "reject cursor/truncation",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "R2 readiness reads only first1000 buckets; pagination/truncation returns UNKNOWN instead of discovering exact chosen bucket.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 15,
+          "excerpt": "   if(!Array.isArray(b.result?.buckets)||(b.result_info?.total_pages??1)>1||b.result?.cursor||b.result_info?.cursor||b.result?.truncated)return {state:'UNKNOWN',accountId};return {state:'ACTIVE',accountId,buckets:b.result.buckets.map(x=>({name:x.name}))};"
+        }
+      ],
+      "test_coverage": "No many-bucket coordinator regression.",
+      "downstream_effects": "R2 readiness reads only first1000 buckets; pagination/truncation returns UNKNOWN instead of discovering exact chosen bucket.",
+      "required_next_run_change": "Implement official continuation or exact bucket read; handle repeated cursors/errors safely.",
+      "tests_needed": "Chosen bucket after first1000, multi-page inventory and denied exact bucket.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SETUP-009",
+      "area": "activation-classification",
+      "severity": "P2",
+      "classification": "F",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 12,
+      "symbol_or_guard": "English inactive regex before403",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Text matching R2 ... not enabled/activated can classify any failing status inactive before403 permission handling. Otherwise403 is correctly insufficient permission,5xx/network distinct. Official error-code mapping not proven.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 12,
+          "excerpt": "   const b=await r.json();if(!r.ok&&b.errors?.some(e=>/\\bR2\\b.*\\bnot (enabled|activated)\\b/i.test(e.message??'')))return {state:'NOT_ACTIVATED',accountId};if(r.status===403)return {state:'INSUFFICIENT_PERMISSION',accountId};"
+        }
+      ],
+      "test_coverage": "Focused tests use English invented fixture strings, not live inactive account.",
+      "downstream_effects": "Text matching R2 ... not enabled/activated can classify any failing status inactive before403 permission handling. Otherwise403 is correctly insufficient permission,5xx/network distinct. Official error-code mapping not proven.",
+      "required_next_run_change": "Use documented structured activation/permission signals, unknown fail closed; no activation on generic403/outage.",
+      "tests_needed": "Localized/combined errors,403,401,5xx, non-JSON and confirmed inactive.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "AUTH-001",
+      "area": "OAuth-account-pagination",
+      "severity": "P1",
+      "classification": "A",
+      "file": "src/auth/cloudflare-oauth.mjs",
+      "line": 40,
+      "symbol_or_guard": "ACCOUNT_PAGINATION_REQUIRED",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "OAuth requests first50 accounts then aborts if total_pages>1. Explorer cfAccounts also requests50 and rejects noncursor multipage (background34,41).",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/auth/cloudflare-oauth.mjs",
+          "line": 40,
+          "excerpt": "      if((identity.result_info?.total_pages??1)>1)throw failure('ACCOUNT_PAGINATION_REQUIRED');"
+        }
+      ],
+      "test_coverage": "OAuth mocks; no large real account inventory.",
+      "downstream_effects": "OAuth requests first50 accounts then aborts if total_pages>1. Explorer cfAccounts also requests50 and rejects noncursor multipage (background34,41).",
+      "required_next_run_change": "Page complete authorized account inventory without guessing account identity.",
+      "tests_needed": "51+ accounts; selected account late page; cancellation during pages.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "AUTH-002",
+      "area": "OAuth-live-permissions",
+      "severity": "P0",
+      "classification": "F",
+      "file": "src/auth/cloudflare-oauth.mjs",
+      "line": 8,
+      "symbol_or_guard": "registeredScopes",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Scopes name R2 read/write and workers-scripts content_read/edit plus offline_access. Real OAuth scope sufficiency for DO migrations, Worker secrets/settings/subdomain and account discovery has not been proven; dev-token deployment does not prove it.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/auth/cloudflare-oauth.mjs",
+          "line": 8,
+          "excerpt": "  const registeredScopes=['workers-r2.read','workers-r2.write','workers-scripts.content_read','workers-scripts.edit','offline_access'];"
+        }
+      ],
+      "test_coverage": "Real OAuth NOT_TESTED; control-plane token GET200 only.",
+      "downstream_effects": "Scopes name R2 read/write and workers-scripts content_read/edit plus offline_access. Real OAuth scope sufficiency for DO migrations, Worker secrets/settings/subdomain and account discovery has not been proven; dev-token deployment does not prove it.",
+      "required_next_run_change": "Verify real registered app grant and actual deployment APIs; report exact denied endpoint/scope with no token substitution.",
+      "tests_needed": "Real OAuth consent + read-only checks then separately approved isolated setup.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "READY-001",
+      "area": "readiness-proof",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/transport.mjs",
+      "line": 22,
+      "symbol_or_guard": "plan.verifiedAt",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "READY uses bucket plan verifiedAt boolean plus capabilities list/digest handshake. No expiry/session/exact-prefix scope of historical probe, no current write/readback. Worker list limit1 probes whole bucket; list permission may exceed prefix-only usability.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/transport.mjs",
+          "line": 22,
+          "excerpt": "  async status(target){try{const c=await cap(target),r=await post(c,'/capabilities',{});if(!await recheck(c,target))fail('AUTHORIZATION_REVOKED');if(r.state!=='completed'||r.protocol!==PROTOCOL||!equal(r.destination,c.destination)||!r.storageBound||!r.durableClaims||!r.conditionalCreate)fail(r.code??'WORKER_NOT_READY');const plan=await lookup(target);if(plan.codeDigest&&r.codeDigest!==plan.codeDigest)fail('WORKER_BUILD_MISMATCH');return {state:plan.verifiedAt?'READY':'PREPARED',destination:target,allowedHosts:r.allowedHosts,maxBytes:r.maxBytes,maxBufferBytes:r.maxBufferBytes,checkedAt:clock()};}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},"
+        }
+      ],
+      "test_coverage": "Local tests; no live write proof.",
+      "downstream_effects": "READY uses bucket plan verifiedAt boolean plus capabilities list/digest handshake. No expiry/session/exact-prefix scope of historical probe, no current write/readback. Worker list limit1 probes whole bucket; list permission may exceed prefix-only usability.",
+      "required_next_run_change": "Retain authoritative write checks; make readiness freshness/proof scope explicit, invalidate on binding/auth/code changes and test exact target.",
+      "tests_needed": "Old verifiedAt, permission loss, changed prefix/build/binding; no falseREADY.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "READY-002",
+      "area": "running-version",
+      "severity": "P1",
+      "classification": "F",
+      "file": "scripts/build-extension.mjs",
+      "line": 14,
+      "symbol_or_guard": "api-tools generated but no runtime build handshake",
+      "user_observed_symptom": "inspectCloudflare initially unsupported, recognized only after extension reload.",
+      "actual_behavior": "Build generates45 tools but manifest version remains0.3.1, API3+1.1; no durable executing-source SHA handshake. A source checkout does not reload Windows Chrome worker; old33-method runtime is a separate executing version.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "scripts/build-extension.mjs",
+          "line": 14,
+          "excerpt": "await writeFile(new URL('api-tools.json',output),JSON.stringify({version:'3+1.1',tools:toolRegistry},null,2)+'\\n');"
+        }
+      ],
+      "test_coverage": "User observed33 then45 after reload; current installed revision not accessible.",
+      "downstream_effects": "Build generates45 tools but manifest version remains0.3.1, API3+1.1; no durable executing-source SHA handshake. A source checkout does not reload Windows Chrome worker; old33-method runtime is a separate executing version.",
+      "required_next_run_change": "Expose nonsecret running build ID/API capabilities and verify installed path/reload before diagnosis.",
+      "tests_needed": "Stale dist/source, reload worker33->45 and native plan version.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "READY-003",
+      "area": "plan-upgrade",
+      "severity": "P2",
+      "classification": "F",
+      "file": "src/cloudflare/deployment.mjs",
+      "line": 8,
+      "symbol_or_guard": "reuse ready plan before current source digest",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Existing ready plans are reused without comparing bundled current source digest (computed onlyat21). Handshake compares saved plan digest to Worker, so both can remain old after extension upgrade.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/deployment.mjs",
+          "line": 8,
+          "excerpt": "  let plan=await load(key);if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.protocol!==PROTOCOL||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')||!/^[a-f0-9]{64}$/.test(plan.secret??'')))fail('TRANSPORT_PLAN_INVALID');prefixScope??=plan?.prefixScope??'';if(plan?.state==='ready'&&!rebuild)return plan;"
+        }
+      ],
+      "test_coverage": "Deployment tests cover reuse, not product update.",
+      "downstream_effects": "Existing ready plans are reused without comparing bundled current source digest (computed onlyat21). Handshake compares saved plan digest to Worker, so both can remain old after extension upgrade.",
+      "required_next_run_change": "Explicit approved upgrade/reconcile strategy keyed to current source identity; no surprise deploy during normal save.",
+      "tests_needed": "Old matching plan+Worker versus new extension source, pending partial deployment.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-001",
+      "area": "source-host-whitelist",
+      "severity": "P0",
+      "classification": "B",
+      "file": "src/cloudflare/deployment.mjs",
+      "line": 3,
+      "symbol_or_guard": "SOURCE_HOSTS",
+      "user_observed_symptom": "Common right-click sources cannot save regardless of menu readiness.",
+      "actual_behavior": "Only raw.githubusercontent.com and upload.wikimedia.org allowed in host authorization(background27), Worker binding(deployment28) and inspect policy(onboarding74). Legitimate arbitrary public HTTPS files are blocked even if ready.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/deployment.mjs",
+          "line": 3,
+          "excerpt": "export const SOURCE_HOSTS=Object.freeze(['raw.githubusercontent.com','upload.wikimedia.org']);"
+        }
+      ],
+      "test_coverage": "Audit public python host SOURCE_DENIED; integration mocks only Github.",
+      "downstream_effects": "Only raw.githubusercontent.com and upload.wikimedia.org allowed in host authorization(background27), Worker binding(deployment28) and inspect policy(onboarding74). Legitimate arbitrary public HTTPS files are blocked even if ready.",
+      "required_next_run_change": "Replace exact website list with enforcing general safe egress policy; validate initial URL, all redirects and actual resolved/connect addresses. Do not merely allow wildcard domains.",
+      "tests_needed": "Safe public hosts outside list, CDN redirects, IPv4/IPv6/private/rebinding targets, no credential forwarding.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-002",
+      "area": "SSRF-network",
+      "severity": "P0",
+      "classification": "F",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 27,
+      "symbol_or_guard": "platform egress assumption",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Worker uses ordinary global fetch; string validation does not resolve/pin DNS addresses. No enforcing DNS-rebinding/private-address mechanism demonstrated; controlled host list narrows exposure but is not universal SSRF proof.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 27,
+          "excerpt": "    // Exact administrator-approved hosts only. Worker fetch uses platform egress;"
+        }
+      ],
+      "test_coverage": "Imported SECURITY_PRIVACY_LIMITS.md:13 acknowledges unresolved limitation.",
+      "downstream_effects": "Worker uses ordinary global fetch; string validation does not resolve/pin DNS addresses. No enforcing DNS-rebinding/private-address mechanism demonstrated; controlled host list narrows exposure but is not universal SSRF proof.",
+      "required_next_run_change": "Before removing whitelist, prove platform enforceable public egress or introduce smallest controlled resolver/egress transport with redirect revalidation and connect-time destination guarantees.",
+      "tests_needed": "Rebind between DNS/connect, public redirect to RFC1918/ULA/metadata/loopback/link-local, alternative IP encodings.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "SRC-003",
+      "area": "URL-security",
+      "severity": "P1",
+      "classification": "D",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 6,
+      "symbol_or_guard": "HTTPS/no credentials/local names",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "HTTPS, no embedded credentials, private/local/special names, control-free filename and safe redirects are essential security concepts. Never forward cookies/referrer/auth from source browser.",
+      "intended_behavior": "Broad public HTTPS retrieval with enforced private-network and credential isolation.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 6,
+          "excerpt": " if(u.protocol!=='https:'||u.username||u.password||u.hash||u.port||!h.includes('.')||h.endsWith('.')||h.includes(':')||/^\\d+(\\.\\d+)*$/.test(h)||/(^|\\.)(localhost|local|internal|test|invalid|example)$/.test(h)||!allowedHosts?.includes(h))fail('SOURCE_DENIED');"
+        }
+      ],
+      "test_coverage": "Imported negative tests; local private source denied.",
+      "downstream_effects": "HTTPS, no embedded credentials, private/local/special names, control-free filename and safe redirects are essential security concepts. Never forward cookies/referrer/auth from source browser.",
+      "required_next_run_change": "Retain/generalize network safety; distinguish true private ranges from all-IP and port policies.",
+      "tests_needed": "Every hop checks credential injection, scheme change, private address and local suffix.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-004",
+      "area": "public-IP-and-port",
+      "severity": "P2",
+      "classification": "A",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 6,
+      "symbol_or_guard": "reject every IP literal/custom port/fragment",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Current source validator excludes public IP HTTPS and all nondefault ports, plus URL fragment rather than safely stripping it. These are conservative internal policies beyond private-network protection.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 6,
+          "excerpt": " if(u.protocol!=='https:'||u.username||u.password||u.hash||u.port||!h.includes('.')||h.endsWith('.')||h.includes(':')||/^\\d+(\\.\\d+)*$/.test(h)||/(^|\\.)(localhost|local|internal|test|invalid|example)$/.test(h)||!allowedHosts?.includes(h))fail('SOURCE_DENIED');"
+        }
+      ],
+      "test_coverage": "Imported denies whole categories, no supported safe variants.",
+      "downstream_effects": "Current source validator excludes public IP HTTPS and all nondefault ports, plus URL fragment rather than safely stripping it. These are conservative internal policies beyond private-network protection.",
+      "required_next_run_change": "Permit demonstrably public resolved addresses/TLS-safe allowed ports when egress guarantees hold; strip fragment only in explicit source canonicalization.",
+      "tests_needed": "Public IP vs private/reserved ranges, public8443 if supported, fragments, IPv6 zone/obfuscated IP.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-005",
+      "area": "redirect-budget",
+      "severity": "P2",
+      "classification": "A",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 11,
+      "symbol_or_guard": "hop<=5",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "At most5 redirects, missing Location or6th fails REDIRECT_DENIED. Finite loops/time defense necessary;5 is not documented provider limit.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 11,
+          "excerpt": " for(let hop=0;hop<=5;hop++){"
+        }
+      ],
+      "test_coverage": "Imported redirect tests; long legitimate chain not supported.",
+      "downstream_effects": "At most5 redirects, missing Location or6th fails REDIRECT_DENIED. Finite loops/time defense necessary;5 is not documented provider limit.",
+      "required_next_run_change": "Use cycle detection and bounded execution budget tied to transfer capability; distinguish loop, unsafe hop and exhausted navigation.",
+      "tests_needed": "Six safe redirects, cycles, private redirect, credential redirect.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-006",
+      "area": "source-contexts",
+      "severity": "P1",
+      "classification": "A",
+      "file": "src/core/menu-spec.mjs",
+      "line": 64,
+      "symbol_or_guard": "contexts=['image','link']",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Native entries default image/link only; API dispatch accepts only image/link(service38-39) although previews advertise page/selection/video/audio. No selection/video/audio product extraction route.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/menu-spec.mjs",
+          "line": 64,
+          "excerpt": "    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link'],visible=true,providerAction=null}) {"
+        }
+      ],
+      "test_coverage": "Imported source extraction; no installed all-context acceptance.",
+      "downstream_effects": "Native entries default image/link only; API dispatch accepts only image/link(service38-39) although previews advertise page/selection/video/audio. No selection/video/audio product extraction route.",
+      "required_next_run_change": "Add genuine file media contexts through existing extractor/API; pages are not automatically downloadable files or archives. Define unsupported cases honestly.",
+      "tests_needed": "Image wrapped bylink media-first, video/audio srcUrl, page HTML, selection and srcset/blob.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-007",
+      "area": "HTML-filter",
+      "severity": "P2",
+      "classification": "A",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 21,
+      "symbol_or_guard": "HTML_NOT_SUPPORTED",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Every text/html body rejected, including legitimate downloadable HTML. No page/archive implementation should be inferred.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 21,
+          "excerpt": " if(type.split(';')[0].trim().toLowerCase()==='text/html'){await res.body.cancel();fail('HTML_NOT_SUPPORTED');}"
+        }
+      ],
+      "test_coverage": "Audit inline HTML rejection; imported tests assert denial.",
+      "downstream_effects": "Every text/html body rejected, including legitimate downloadable HTML. No page/archive implementation should be inferred.",
+      "required_next_run_change": "Distinguish selected downloadable HTML vs web page; safe attachment/content handling without executing content.",
+      "tests_needed": "HTML attachment, page link, mislabelled content, text/html with parameters.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SRC-008",
+      "area": "filename-and-type",
+      "severity": "P1",
+      "classification": "B",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 31,
+      "symbol_or_guard": "pathname-only sourceFromClick",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Filename comes only from decoded last pathname, fallback download. Ignores Content-Disposition, redirected final name, MIME extension, query download name. Type normalized by Worker29, invalid MIME silently falls back,127 char cutoff unproven.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 31,
+          "excerpt": "export function sourceFromClick(info){const url=info.srcUrl||info.linkUrl||info.pageUrl;if(!url)fail('SOURCE_MISSING');let name;try{name=decodeURIComponent(new URL(url).pathname.split('/').pop())||'download';}catch{fail('SOURCE_INVALID');}return {url,filename:filenameSafe(name)};}"
+        }
+      ],
+      "test_coverage": "Audit query filename=download; imported filename validation tests.",
+      "downstream_effects": "Filename comes only from decoded last pathname, fallback download. Ignores Content-Disposition, redirected final name, MIME extension, query download name. Type normalized by Worker29, invalid MIME silently falls back,127 char cutoff unproven.",
+      "required_next_run_change": "Trusted source result returns sanitized suggested name/type; preserve valid extension and explicit name, prevent path/control/header injection.",
+      "tests_needed": "Query download URLs, redirects, percent slash, Unicode, disposition, no extension, MIME mismatch.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SIZE-001",
+      "area": "remote-size",
+      "severity": "P0",
+      "classification": "A",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 16,
+      "symbol_or_guard": "maxBytes64MiB",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Known-length remote source stops above67108864bytes. Host inspect/UI repeat it; not documented R2 object limit.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 16,
+          "excerpt": "  return {...p,destination:d,storage:e.STORAGE,allowedHosts:JSON.parse(e.SOURCE_HOSTS),maxBytes:64*1024*1024,maxBufferBytes:8*1024*1024,timeoutMs:60000};"
+        }
+      ],
+      "test_coverage": "Integration oversized test asserts current cap; audit header-only probe SIZE_LIMIT.",
+      "downstream_effects": "Known-length remote source stops above67108864bytes. Host inspect/UI repeat it; not documented R2 object limit.",
+      "required_next_run_change": "Stream up to verified provider/runtime capabilities; remove product64MiB cap with correct accounting and scalable larger-file strategy.",
+      "tests_needed": ">64MiB real binary streaming with peak memory, source truncation/extra bytes, provider max error.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SIZE-002",
+      "area": "unknown-size",
+      "severity": "P0",
+      "classification": "A",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 16,
+      "symbol_or_guard": "maxBufferBytes8MiB",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Unknown/decompressed bodies fail above8388608bytes regardless of actual R2 capacity.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 16,
+          "excerpt": "  return {...p,destination:d,storage:e.STORAGE,allowedHosts:JSON.parse(e.SOURCE_HOSTS),maxBytes:64*1024*1024,maxBufferBytes:8*1024*1024,timeoutMs:60000};"
+        }
+      ],
+      "test_coverage": "Audit generic sourceFetch tiny-budget probe BUFFER_LIMIT; imported buffer tests.",
+      "downstream_effects": "Unknown/decompressed bodies fail above8388608bytes regardless of actual R2 capacity.",
+      "required_next_run_change": "Use bounded-memory multipart/segmented remote pipeline where no-overwrite can be proven; resource-sized buffers are not total-file caps.",
+      "tests_needed": "Unknown-length >8MiB and large chunk stream with constrained memory.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SIZE-003",
+      "area": "buffering-strategy",
+      "severity": "P1",
+      "classification": "B",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 26,
+      "symbol_or_guard": "chunks plus combined buffer",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Unknown lengths fully accumulate chunks then allocate second Uint8Array; roughly2x payload+overhead. Known length streams through FixedLengthStream and strict length counting.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 26,
+          "excerpt": " const chunks=[];let size=0;const bounded=body.getReader();"
+        }
+      ],
+      "test_coverage": "Local source mocks, no memory benchmark.",
+      "downstream_effects": "Unknown lengths fully accumulate chunks then allocate second Uint8Array; roughly2x payload+overhead. Known length streams through FixedLengthStream and strict length counting.",
+      "required_next_run_change": "Keep constant per-part memory; persist multipart progress and provider receipts. Do not remove bound and risk isolate OOM.",
+      "tests_needed": "Chunk stream much larger than memory, compressed/chunked sources, no heap growth with file size.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SIZE-004",
+      "area": "single-put-only",
+      "severity": "P0",
+      "classification": "B",
+      "file": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+      "line": 12,
+      "symbol_or_guard": "storage.put only",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "No multipart, source-range resumption or durable part manifest. Raising cap alone does not deliver large/slow transfers; resume must not refetch changing source without identity checks.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+          "line": 12,
+          "excerpt": "  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),httpMetadata:{contentType},customMetadata:{operationId}});"
+        }
+      ],
+      "test_coverage": "Official API documents parts but Workers complete has no conditional option; feasibility gate remains.",
+      "downstream_effects": "No multipart, source-range resumption or durable part manifest. Raising cap alone does not deliver large/slow transfers; resume must not refetch changing source without identity checks.",
+      "required_next_run_change": "Extend minimal R2 writer/remote job ports only after proving final atomic no-overwrite. Use known-length streaming first; durable segmented retrieval with ETag/If-Range for stable resumable sources; fail nonresumable sources honestly.",
+      "tests_needed": "Real multipart conditional completion conformance, crash/resume, changing source/ignored Range, final HEAD/readback.",
+      "risk": "Do not replace atomic conditional save with head-then-multipart-complete; may overwrite.",
+      "verified": true
+    },
+    {
+      "id": "SIZE-005",
+      "area": "source-length-integrity",
+      "severity": "P1",
+      "classification": "D",
+      "file": "right2cloud-module/src/source-fetch.mjs",
+      "line": 24,
+      "symbol_or_guard": "byte counting/exact length",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Known-length counts detect short/long bodies; FixedLengthStream supplies R2 known-length requirement. HTTP missing/bad length must not imply wrong size success.",
+      "intended_behavior": "No verified success with missing/truncated/extra bytes.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/source-fetch.mjs",
+          "line": 24,
+          "excerpt": " const body=new ReadableStream({async pull(c){try{const r=await wait(reader.read(),signal);if(r.done){if(length!==null&&count!==length)fail('LENGTH_MISMATCH');c.close();return;}count+=r.value.byteLength;if(count>maxBytes||(length!==null&&count>length))fail('SIZE_LIMIT');c.enqueue(r.value);}catch(e){void reader.cancel().catch(()=>{});c.error(e);}},cancel(r){return reader.cancel(r);}});"
+        }
+      ],
+      "test_coverage": "Imported partial/short/long tests; local Workerd conditional write.",
+      "downstream_effects": "Known-length counts detect short/long bodies; FixedLengthStream supplies R2 known-length requirement. HTTP missing/bad length must not imply wrong size success.",
+      "required_next_run_change": "Retain strict source size validation and independent proof across new transports.",
+      "tests_needed": "Lying content-length, cancellation, partial read, range mismatch.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SIZE-006",
+      "area": "compression",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 29,
+      "symbol_or_guard": "delete encoded content-length",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Wrapper asks identity; on any nonidentity encoding drops length/encoding, forcing8MiB buffer branch. Actual Worker decompression/Response behavior on gzip/br not live verified.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 29,
+          "excerpt": "    fetch:async(url,options)=>{const started=performance.now();const response=await globalThis.fetch(url,{...options,headers:{'accept-encoding':'identity'}});workerTimings.sourceHeadersMs=(workerTimings.sourceHeadersMs??0)+Math.round(performance.now()-started);if(response.redirected)return response;const headers=new Headers(response.headers),mime=(headers.get('content-type')??'application/octet-stream').split(';')[0].trim();headers.set('content-type',mime.length<=127&&/^[a-zA-Z0-9!#$&^_.+-]+\\/[a-zA-Z0-9!#$&^_.+-]+$/.test(mime)?mime:'application/octet-stream');if(headers.has('content-encoding')&&headers.get('content-encoding')!=='identity'){headers.delete('content-length');headers.delete('content-encoding');}return new Response(response.body,{status:response.status,headers});}"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Wrapper asks identity; on any nonidentity encoding drops length/encoding, forcing8MiB buffer branch. Actual Worker decompression/Response behavior on gzip/br not live verified.",
+      "required_next_run_change": "Verify actual runtime decoding semantics; preserve file representation/name consistently and stream safely without trusting compressed length.",
+      "tests_needed": "Real gzip/br/chunked/ignored identity source; independent digest readback.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "TIME-001",
+      "area": "remote-deadline",
+      "severity": "P0",
+      "classification": "A",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 16,
+      "symbol_or_guard": "timeoutMs60000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Worker transfer wall deadline60s includes source acquisition/name probes/write, independently of actual external CPU limits.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 16,
+          "excerpt": "  return {...p,destination:d,storage:e.STORAGE,allowedHosts:JSON.parse(e.SOURCE_HOSTS),maxBytes:64*1024*1024,maxBufferBytes:8*1024*1024,timeoutMs:60000};"
+        }
+      ],
+      "test_coverage": "Imported timeout tests; no long real stream test.",
+      "downstream_effects": "Worker transfer wall deadline60s includes source acquisition/name probes/write, independently of actual external CPU limits.",
+      "required_next_run_change": "Use progress-aware cancellation and durable transfer jobs for long operations; finite safety bounds must reflect measured platform resources rather than total-file product ceiling.",
+      "tests_needed": "Slow active stream beyond60s, stall, cancel pre/post commit.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "TIME-002",
+      "area": "host-deadline",
+      "severity": "P0",
+      "classification": "A",
+      "file": "src/cloudflare/transport.mjs",
+      "line": 16,
+      "symbol_or_guard": "AbortSignal.timeout65000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Each host POST capped65s; long saves become transport uncertainty even if cloud continues. Error normalized TRANSPORT_UNAVAILABLE and saver maps dispatched errors to RECONCILE_READ_ONLY.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/transport.mjs",
+          "line": 16,
+          "excerpt": "  const deadline=AbortSignal.any([AbortSignal.timeout(65000),...(signal?[signal]:[])]);"
+        }
+      ],
+      "test_coverage": "Local transport tests; no live prolonged transfer.",
+      "downstream_effects": "Each host POST capped65s; long saves become transport uncertainty even if cloud continues. Error normalized TRANSPORT_UNAVAILABLE and saver maps dispatched errors to RECONCILE_READ_ONLY.",
+      "required_next_run_change": "Separate job submission/status from transfer lifetime, propagate precise sanitized stage and reconcile rather than resend.",
+      "tests_needed": "Lose response after commit, >65s active transfer, inspect same opID.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "TIME-003",
+      "area": "capability-expiry",
+      "severity": "P1",
+      "classification": "D",
+      "file": "src/cloudflare/transport.mjs",
+      "line": 11,
+      "symbol_or_guard": "expiresAt+120000",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "2min signed capability (Worker max5min in wire15) bounds replay/offline revocation. Existing whole transfer tied to expiry; increasing total size needs authenticated continuation, not unbounded token.",
+      "intended_behavior": "Scoped short-lived authority even for long-lived transfer jobs.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/transport.mjs",
+          "line": 11,
+          "excerpt": "  const destination=remoteDestination(target),expiresAt=clock()+120000;"
+        }
+      ],
+      "test_coverage": "Imported capability/authority tests.",
+      "downstream_effects": "2min signed capability (Worker max5min in wire15) bounds replay/offline revocation. Existing whole transfer tied to expiry; increasing total size needs authenticated continuation, not unbounded token.",
+      "required_next_run_change": "Keep finite scoped capabilities and revocation; renew per authorized job/part without replaying writes.",
+      "tests_needed": "Expiry during upload/verification, reconnect changes session, revocation propagation.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "TIME-004",
+      "area": "control-bounds",
+      "severity": "P3",
+      "classification": "D",
+      "file": "right2cloud-module/src/cloudflare-worker.mjs",
+      "line": 9,
+      "symbol_or_guard": "16KiB/5s request parse",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Control JSON16KiB/5s, tokens8192chars, responses64KiB(wire17), verify8KiB/operation1KiB(worker40,48) bound hostile input. Not file-size caps.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/cloudflare-worker.mjs",
+          "line": 9,
+          "excerpt": "  const reader=request.body?.getReader();if(!reader)fail('REQUEST_INVALID');let text='',size=0;const decoder=new TextDecoder();const readSignal=AbortSignal.timeout(5000);try{while(true){const r=await wait(reader.read(),readSignal);if(r.done)break;size+=r.value.length;if(size>16384)fail('REQUEST_TOO_LARGE');text+=decoder.decode(r.value,{stream:true});}text+=decoder.decode();}catch(e){void reader.cancel().catch(()=>{});throw e;}const intent=JSON.parse(text);validateIntent(intent);operationId=intent.operationId;dest=intent.destination;"
+        }
+      ],
+      "test_coverage": "Imported bounded parsing tests; no stalled post-header JSON regression.",
+      "downstream_effects": "Control JSON16KiB/5s, tokens8192chars, responses64KiB(wire17), verify8KiB/operation1KiB(worker40,48) bound hostile input. Not file-size caps.",
+      "required_next_run_change": "Retain bounded envelopes; stream/phase read timeouts and schema-specific safe sizes, no file bytes in JSON.",
+      "tests_needed": "Oversized/slow controls and response body stall, long signed source within schema.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "NAME-001",
+      "area": "collision-count",
+      "severity": "P2",
+      "classification": "A",
+      "file": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+      "line": 7,
+      "symbol_or_guard": "n<10000 suffix scan",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Sequential HEAD probes hard-stop after10000 and can consume transfer deadline even earlier; no adaptive naming.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+          "line": 7,
+          "excerpt": "  for(let n=0;n<10000;n++){const key=n?keyFor(destination,`${stem}-${n}${ext}`):requested;if(!await wait(storage.head(key),signal))return {key};}fail('CONFLICT');"
+        }
+      ],
+      "test_coverage": "Sequential collision + concurrent local workerd checks.",
+      "downstream_effects": "Sequential HEAD probes hard-stop after10000 and can consume transfer deadline even earlier; no adaptive naming.",
+      "required_next_run_change": "Efficient collision-resistant Keep Both strategy with conditional atomic creation; bounded per-attempt work, no product total-name cap.",
+      "tests_needed": "Dense collision namespace, concurrent same-name saves, preserved extensions.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "NAME-002",
+      "area": "conditional-no-overwrite",
+      "severity": "P0",
+      "classification": "D",
+      "file": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+      "line": 12,
+      "symbol_or_guard": "If-None-Match:*",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Conditional put is the actual no-overwrite protection; HEAD search alone is insufficient. Concurrent selection race can failCONFLICT and never overwrite.",
+      "intended_behavior": "Atomic Keep Both, no overwrites or blind retries.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+          "line": 12,
+          "excerpt": "  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),httpMetadata:{contentType},customMetadata:{operationId}});"
+        }
+      ],
+      "test_coverage": "Local Workerd verified; live R2 conditional conformance remains unverified.",
+      "downstream_effects": "Conditional put is the actual no-overwrite protection; HEAD search alone is insufficient. Concurrent selection race can failCONFLICT and never overwrite.",
+      "required_next_run_change": "Preserve conditional create; retry only proven no-write conflict under same logical operation with durable stage rules.",
+      "tests_needed": "Real concurrent R2 collision, no existing-object mutation.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "WRITE-001",
+      "area": "postwrite-error-classification",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 31,
+      "symbol_or_guard": "authenticate/store after written",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "After inner written response, outer reauth and result persistence can throw. Outer catch54 returns blocked403 even though bytes may already be committed; saver trusts explicit blocked result(index22).",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 31,
+          "excerpt": "    const value=await boundedJSON(result.clone());if(value.state==='written'){const cap=await this.authenticate(request);await this.state.storage.put('result:'+cap.principal+':'+value.receipt.operationId,value.receipt);}"
+        }
+      ],
+      "test_coverage": "Audit executed actual RemoteClaims with fake HTTP/R2/KV; one fake PUT committed before injected result-storage failure, response403 blocked/REQUEST_REJECTED. No cloud mutation.",
+      "downstream_effects": "After inner written response, outer reauth and result persistence can throw. Outer catch54 returns blocked403 even though bytes may already be committed; saver trusts explicit blocked result(index22).",
+      "required_next_run_change": "Track possibleWrite through wrapper; postwrite storage/auth/serialization failures must remain uncertain with inspectable opID/key.",
+      "tests_needed": "Inject result-storage failure/expiry after successful PUT; no blocked-no-write inference or new-ID retry.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "WRITE-002",
+      "area": "durable-claims",
+      "severity": "P1",
+      "classification": "D",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 24,
+      "symbol_or_guard": "transaction claim",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Durable claim precedes source fetch. Duplicate operation stays uncertain/read-only inspect, not automatic retry; safe retention survives local restart.",
+      "intended_behavior": "At-most-one logical transfer dispatch across runtime restarts.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 24,
+          "excerpt": "    claimOperation:async(c,id,intent)=>{const started=performance.now();const result=await this.state.storage.transaction(async tx=>{const k='claim:'+c.principal+':'+id;if(await tx.get(k))return false;await tx.put(k,{fingerprint:await digest(intent),at:Date.now()});return true;});workerTimings.claimMs=Math.round(performance.now()-started);sourceStarted=performance.now();return result;},"
+        }
+      ],
+      "test_coverage": "Focused real local SQLite restart test.",
+      "downstream_effects": "Durable claim precedes source fetch. Duplicate operation stays uncertain/read-only inspect, not automatic retry; safe retention survives local restart.",
+      "required_next_run_change": "Keep durable claims; add durable transfer state transitions, read-only reconciliation, no timeout-based unsafe release.",
+      "tests_needed": "Duplicate across isolates/restarts, conflicting intent sameID, lost response.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "WRITE-003",
+      "area": "claim-storage-growth",
+      "severity": "P2",
+      "classification": "F",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 24,
+      "symbol_or_guard": "claims/results/revocations never expire",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Claims, results and revoked sessions accumulate. One named DO per Worker(worker59) handles all transfers for its bucket, with no application admission/rate policy. Throughput/memory/storage ceiling unmeasured.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 24,
+          "excerpt": "    claimOperation:async(c,id,intent)=>{const started=performance.now();const result=await this.state.storage.transaction(async tx=>{const k='claim:'+c.principal+':'+id;if(await tx.get(k))return false;await tx.put(k,{fingerprint:await digest(intent),at:Date.now()});return true;});workerTimings.claimMs=Math.round(performance.now()-started);sourceStarted=performance.now();return result;},"
+        }
+      ],
+      "test_coverage": "Restart test only; no sustained real load.",
+      "downstream_effects": "Claims, results and revoked sessions accumulate. One named DO per Worker(worker59) handles all transfers for its bucket, with no application admission/rate policy. Throughput/memory/storage ceiling unmeasured.",
+      "required_next_run_change": "Measure concurrency and provider quotas; safe retention/tombstone lifecycle and per-job storage/dispatch; never delete claims before replay window/reconciliation safe.",
+      "tests_needed": "Concurrent streams, storage quota failures, orphan results/claims, cost visibility.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "VERIFY-001",
+      "area": "proof-class",
+      "severity": "P1",
+      "classification": "D",
+      "file": "right2cloud-module/src/verification.mjs",
+      "line": 2,
+      "symbol_or_guard": "acceptProof",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Fresh authorized HEAD compares exact key/destination/opID/version/etag/size. It is independent of initial write response but same Worker trust domain, not source checksum or byte comparison.",
+      "intended_behavior": "Never label metadata HEAD as cryptographic source equality.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/verification.mjs",
+          "line": 2,
+          "excerpt": "export function acceptProof(intent,receipt,proof){"
+        }
+      ],
+      "test_coverage": "Imported negative proof tests; local bytes3 checked; live data not verified.",
+      "downstream_effects": "Fresh authorized HEAD compares exact key/destination/opID/version/etag/size. It is independent of initial write response but same Worker trust domain, not source checksum or byte comparison.",
+      "required_next_run_change": "Retain strict R2 proof; add independent GET/digest evidence for real acceptance and scalable integrity where available; label proof honestly.",
+      "tests_needed": "Wrong key/version/opID/size, content mismatch despite metadata, external GET readback.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "VERIFY-002",
+      "area": "reconciliation-discovery",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 75,
+      "symbol_or_guard": "history find before /operation",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Receipt inspection requires local history operation. Native process death before record can leave durable Worker receipt with no local inspect path; claim stores digest not prepared key. Write after response-loss may lack result record.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 75,
+          "excerpt": "  async receipt({operationId}){const saved=(await history()).find(x=>x.operationId===operationId);if(!saved)return {state:'blocked',code:'OPERATION_UNKNOWN'};const d=saved.destination;if(!d)return saved;const target={provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''};return {...saved,reconciliation:await transport.inspectOperation(target,operationId)};}"
+        }
+      ],
+      "test_coverage": "Local restart test claims only; history-loss recovery absent.",
+      "downstream_effects": "Receipt inspection requires local history operation. Native process death before record can leave durable Worker receipt with no local inspect path; claim stores digest not prepared key. Write after response-loss may lack result record.",
+      "required_next_run_change": "Persist minimal job/opID/target before dispatch; expose authorized operation status without requiring successful local history; durable prepared/final receipt state.",
+      "tests_needed": "MV3 killed after dispatch, outer storage fail, PUT resolves after timeout; inspect no replay.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "VIS-001",
+      "area": "Explorer-refresh",
+      "severity": "P0",
+      "classification": "B",
+      "file": "extension/background.mjs",
+      "line": 81,
+      "symbol_or_guard": "record result but no completion/refresh port",
+      "user_observed_symptom": "File absent in Explorer; no proof object ever written, so stale view only contributing possibility.",
+      "actual_behavior": "Background records remote result but supplies no onVerifiedCompletion/onSaveOutcome notification to open app. No storage/runtime subscription invalidates Explorer listing on native save. Existing Refresh fetches list(app75,88).",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 81,
+          "excerpt": "  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};const out=await remote.save(input);try{await current.recordRemoteResult(out);}catch{return {...out,completionPending:true};}return out;},onProviderAction:input=>revoking?{state:'blocked',code:'DISCONNECTING'}:cloudflare.invoke(input),"
+        }
+      ],
+      "test_coverage": "Browser fixtures navigate fake lists; no live native-to-list result test.",
+      "downstream_effects": "Background records remote result but supplies no onVerifiedCompletion/onSaveOutcome notification to open app. No storage/runtime subscription invalidates Explorer listing on native save. Existing Refresh fetches list(app75,88).",
+      "required_next_run_change": "Publish minimal nonsecret verified destination invalidation through canonical result owner; UI refresh only matching current listing/tree. Never refresh/signal success before proof.",
+      "tests_needed": "Ready native save while Explorer open; auto update exact folder, unrelated view preserved; failure does not fake insertion.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "VIS-002",
+      "area": "history-usability",
+      "severity": "P1",
+      "classification": "B",
+      "file": "extension/app.mjs",
+      "line": 220,
+      "symbol_or_guard": "remoteHistory receipt only",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "History shows state/key/receipt; no GO TO exact destination, live update or Explorer invalidation. Native lastSave only state/code(background78), not transfer stage/operation identity.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/app.mjs",
+          "line": 220,
+          "excerpt": "async function remoteHistory(){const rows=await api('inspectRemoteHistory');dialog('Save results',rows.length?rows.map(r=>`<div><strong>${esc(r.state)}</strong> · ${esc(names[r.code]??r.code)}<p>${esc(r.receipt?.key??'No verified key')} · ${esc(r.durationMs??'—')} ms</p><button data-receipt=\"${esc(r.operationId)}\">Inspect receipt</button></div>`).join(''):'<p>No remote operations recorded.</p>');$$('[data-receipt]').forEach(b=>b.onclick=async()=>{const r=await api('inspectRemoteReceipt',{operationId:b.dataset.receipt});dialog('Remote receipt',`<pre>${esc(JSON.stringify(r,null,2))}</pre>`);});}"
+        }
+      ],
+      "test_coverage": "Fixture opens history only; no verified native history navigation.",
+      "downstream_effects": "History shows state/key/receipt; no GO TO exact destination, live update or Explorer invalidation. Native lastSave only state/code(background78), not transfer stage/operation identity.",
+      "required_next_run_change": "Add API-backed exact result navigation/status and live result observation; distinguish readiness from save and ACK from save.",
+      "tests_needed": "Success/blocked/uncertain history, go to exact target, reload and readonly reconcile.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "VIS-003",
+      "area": "result-retention",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/persistence/current-store.mjs",
+      "line": 165,
+      "symbol_or_guard": "slice0,100",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Only latest100 results retained; inspectRemoteReceipt depends on retained history. Older unsettled operations lose UI reconciliation even though claims remain.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/persistence/current-store.mjs",
+          "line": 165,
+          "excerpt": "    recordRemoteResult:value=>transact('readwrite',async s=>{const rows=(await request(s.state.get('remoteResults')))?.value??[];const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,at:clock()};s.state.put({id:'remoteResults',value:[safe,...rows.filter(r=>r.operationId!==value.operationId)].slice(0,100)});return safe;}),"
+        }
+      ],
+      "test_coverage": "No long-history recovery regression.",
+      "downstream_effects": "Only latest100 results retained; inspectRemoteReceipt depends on retained history. Older unsettled operations lose UI reconciliation even though claims remain.",
+      "required_next_run_change": "Page history with explicit retention and preserve unresolved jobs until resolved; bounded UI pages need not cap retained operation access.",
+      "tests_needed": ">100 results incl unresolved first, operation lookup after eviction.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-001",
+      "area": "Explorer-remote-source",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/core/engine.mjs",
+      "line": 123,
+      "symbol_or_guard": "REMOTE_EXPLORER_SOURCE_UNAVAILABLE",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "All Cloudflare Explorer saves blocked before checking for an authorized remote source. GUI still offers Save to cloud for files and confirmed dispatch, including bootstrap setup actions (app123-127).",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/engine.mjs",
+          "line": 123,
+          "excerpt": "    if(destination?.provider==='cloudflare'||typeof remoteSavers[destination?.provider]==='function')return {state:'blocked',code:'REMOTE_EXPLORER_SOURCE_UNAVAILABLE'};"
+        }
+      ],
+      "test_coverage": "Current tests enshrine unconditional refusal, not future permitted source.",
+      "downstream_effects": "All Cloudflare Explorer saves blocked before checking for an authorized remote source. GUI still offers Save to cloud for files and confirmed dispatch, including bootstrap setup actions (app123-127).",
+      "required_next_run_change": "Use existing Universal File API to offer only legal remote source capability (server-to-server read/copy or scoped source), otherwise explicit unsupported before dialog. No browser fallback.",
+      "tests_needed": "Permitted remote source and private-only source, no stat/byte staging for rejected source.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "LOCAL-001",
+      "area": "browser-capture",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/core/source-capture.mjs",
+      "line": 4,
+      "symbol_or_guard": "32MiB/30s",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Eligible non-R2 browser capture buffers all file bytes up to32MiB and30s; Cloudflare bypasses this branch(engine86-96). Not Cloudflare64MiB cap cause.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/core/source-capture.mjs",
+          "line": 4,
+          "excerpt": "export async function captureSelectedBytes(source,{authorizeSource,fetchSource,sink,signal,maxBytes=32*1024*1024,requestTimeoutMs=30000,operationId=0}={}) {"
+        }
+      ],
+      "test_coverage": "Focused engine capture mocks.",
+      "downstream_effects": "Eligible non-R2 browser capture buffers all file bytes up to32MiB and30s; Cloudflare bypasses this branch(engine86-96). Not Cloudflare64MiB cap cause.",
+      "required_next_run_change": "For future actual non-R2 drivers use streaming/session upload with resource buffers; never route R2 here.",
+      "tests_needed": ">32MiB non-R2 source, constant memory, R2 capture count0.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "LOCAL-002",
+      "area": "local-picker/API",
+      "severity": "P2",
+      "classification": "A",
+      "file": "extension/app.mjs",
+      "line": 129,
+      "symbol_or_guard": "32MiB local file cap",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "GUI picker hard cap32MiB and arrayBuffer copies, filters Cloudflare targets. API byte-array schema max33554432(service39); engine Explorer buffer limit32MiB(engine132).",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/app.mjs",
+          "line": 129,
+          "excerpt": "async function chooseSave(file){if(!file)return;if(file.size>33554432)throw Error('Select a file no larger than 32 MiB.');const native=await api('inspectNativeACK'),menu=native.desired;if(!menu||native.acknowledgedGeneration!==menu.generation)throw Error('Chrome menu is not acknowledged yet.');const leaves=menu.rows.filter(r=>r.role==='save'&&r.target?.provider!=='cloudflare');dialog('Save to cloud',`<p>${esc(file.name)}</p>${leaves.length?leaves.map((r,i)=>`<button data-save=\"${i}\" ${!r.enabled?'disabled':''}>${esc(r.label)}${!r.enabled?' · '+esc(r.reason):''}</button>`).join(''):'<p>No visible save destinations. Add a folder with + Right Click.</p>'}`);$$('[data-save]').forEach(b=>b.onclick=async()=>{try{if(!confirm('Save this file to '+leaves[b.dataset.save].label+'?'))return;status('Saving…');const bytes=[...new Uint8Array(await file.arrayBuffer())];const r=await api('dispatchSave',{itemId:leaves[b.dataset.save].id,generation:menu.generation,context:'image',source:{filename:file.name,contentType:file.type||'application/octet-stream',bytes},idempotencyKey:crypto.randomUUID()});status(r.confirmed?'Save verified by provider readback.':r.code);closeDialog();}catch(error){status(error.message);}});}"
+        }
+      ],
+      "test_coverage": "Local fixture only; providers={} in productionbackground80.",
+      "downstream_effects": "GUI picker hard cap32MiB and arrayBuffer copies, filters Cloudflare targets. API byte-array schema max33554432(service39); engine Explorer buffer limit32MiB(engine132).",
+      "required_next_run_change": "Remove arbitrary local-transfer cap through actual supported non-R2 streaming transport/API; keep R2remote-only and useful unsupported UI.",
+      "tests_needed": ">32MiB local file, parity, no R2 browser staging.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-002",
+      "area": "preview-api-cap",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/api/service.mjs",
+      "line": 144,
+      "symbol_or_guard": "readFile8MiB",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "All GUI Open/Download previews use readFile: buffers8MiB then converts bytes to number array. App download is preview blob(app109-112), not independent streaming Download, so larger object download unavailable there.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/service.mjs",
+          "line": 144,
+          "excerpt": "            const result=await fileApi.run('readStream',{source:s,key:params.entry.key},{onChunk:chunk=>{size+=chunk.length;if(size>8*1024*1024)fail('PREVIEW_SIZE_LIMIT');chunks.push(chunk);}});"
+        }
+      ],
+      "test_coverage": "Explorer API tests small fixtures.",
+      "downstream_effects": "All GUI Open/Download previews use readFile: buffers8MiB then converts bytes to number array. App download is preview blob(app109-112), not independent streaming Download, so larger object download unavailable there.",
+      "required_next_run_change": "Separate bounded preview from streaming authorized download; expose API parity without giant JSON arrays.",
+      "tests_needed": ">8MiB preview fallback and usable streaming download, no source credentials leak.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-003",
+      "area": "preview-defaults",
+      "severity": "P3",
+      "classification": "A",
+      "file": "src/explorer/configuration.mjs",
+      "line": 6,
+      "symbol_or_guard": "64MiB/512KiB preview",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Library preview defaults64MiB/512KiB text, tunable. Production app uses readFile8MiB instead. Preview bound is memory safety but value not total-file/provider limit.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/explorer/configuration.mjs",
+          "line": 6,
+          "excerpt": "  progressIntervalMs:100,previewMaxBytes:64*1024*1024,textPreviewMaxBytes:512*1024,batchConcurrency:1"
+        }
+      ],
+      "test_coverage": "Library tests options; actual app different path.",
+      "downstream_effects": "Library preview defaults64MiB/512KiB text, tunable. Production app uses readFile8MiB instead. Preview bound is memory safety but value not total-file/provider limit.",
+      "required_next_run_change": "Keep bounded preview/progressive text and independent download; report active limit not dormant default.",
+      "tests_needed": "Large preview shows honest truncation and download path.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-004",
+      "area": "legacy-upload-artifact",
+      "severity": "P2",
+      "classification": "B",
+      "file": "src/explorer/r2-adapter.mjs",
+      "line": 181,
+      "symbol_or_guard": "beta300MB upload",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Imported Universal File API has300000000byte beta upload cap/staging .redown-beta-uploads. Production wrapper blocks upload before this code(background47); not an active R2remote cap. Direct library use can still stage browser bytes.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/explorer/r2-adapter.mjs",
+          "line": 181,
+          "excerpt": "      if(file.size>300000000)throw Error('This beta uses the existing 300 MB direct upload route. Larger multipart uploads are unfinished.');"
+        }
+      ],
+      "test_coverage": "Source reachability; no production adapter upload enabled.",
+      "downstream_effects": "Imported Universal File API has300000000byte beta upload cap/staging .redown-beta-uploads. Production wrapper blocks upload before this code(background47); not an active R2remote cap. Direct library use can still stage browser bytes.",
+      "required_next_run_change": "Keep Cloudflare product wrapperremote-only; label library legacy routes and prevent accidental future wiring. Do not fix audit by enabling old upload.",
+      "tests_needed": "Reachability guard proves no cloud browser upload from GUI/API.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-005",
+      "area": "library-mutation-gap",
+      "severity": "P1",
+      "classification": "E",
+      "file": "extension/background.mjs",
+      "line": 47,
+      "symbol_or_guard": "read-only fileApi allow operations",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Only accounts/buckets/list/listRaw/stat/preview/readStream allowed in installed Universal File API wrapper; copy/move/mkdir/delete/upload blocked. It preserves safety of unconfigured legacy mutation ports, not proof every library feature works.",
+      "intended_behavior": "Honest supported File API surface without accidental production mutations.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 47,
+          "excerpt": "  if(!['accounts','buckets','list','listRaw','stat','preview','readStream'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};"
+        }
+      ],
+      "test_coverage": "Missing focused regression",
+      "downstream_effects": "Only accounts/buckets/list/listRaw/stat/preview/readStream allowed in installed Universal File API wrapper; copy/move/mkdir/delete/upload blocked. It preserves safety of unconfigured legacy mutation ports, not proof every library feature works.",
+      "required_next_run_change": "Expose supported capabilities precisely; add only separately authorized tested operations in future scope. Do not enable legacy mutators as remote-save fix.",
+      "tests_needed": "Every advertised operation supported or explicit blocked, sameGUI/API.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXP-006",
+      "area": "metadata-page-budget",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/explorer/r2-adapter.mjs",
+      "line": 56,
+      "symbol_or_guard": "1000 stat pages",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Metadata lookup scans prefix pages and stops1000; active listing per_page1000 has cursor and repeated/truncated guard. Bucket discovery background41 may refuse page-number APIs.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/explorer/r2-adapter.mjs",
+          "line": 56,
+          "excerpt": "    do {if(++pages>1000)throw Error('Metadata lookup exceeded its page limit.');const p=await page(source,exact,cursor,'',options);const object=p.objects.find(o=>(o.key||o.name)===exact);if(object)return {object:{...object,key:exact}};cursor=p.cursor;if(seen.has(cursor)&&cursor)throw Error('Repeated metadata page.');seen.add(cursor);}while(cursor);"
+        }
+      ],
+      "test_coverage": "Library listing tests; not scale.",
+      "downstream_effects": "Metadata lookup scans prefix pages and stops1000; active listing per_page1000 has cursor and repeated/truncated guard. Bucket discovery background41 may refuse page-number APIs.",
+      "required_next_run_change": "Use exact authorized HEAD/stat where supported and complete paging; no fixed total page-count refusal for legitimate large scopes.",
+      "tests_needed": "Target after page1000, repeated cursor, API envelope variants.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "NET-001",
+      "area": "OAuth-read-timeout",
+      "severity": "P2",
+      "classification": "A",
+      "file": "src/auth/cloudflare-oauth.mjs",
+      "line": 60,
+      "symbol_or_guard": "default30s request",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Default OAuth fetch signal30s includes object read stream after headers. R2 adapter requestTimeout option is passed as timeoutMs but OAuth request does not consume it, so selected adapter options do not actually override default. readFile8MiB adds tightercap.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/auth/cloudflare-oauth.mjs",
+          "line": 60,
+          "excerpt": "    const response=await fetch('https://api.cloudflare.com/client/v4'+path,{...options,headers,redirect:'error',signal:options.signal??AbortSignal.timeout(30000)});"
+        }
+      ],
+      "test_coverage": "No real slow-stream API test.",
+      "downstream_effects": "Default OAuth fetch signal30s includes object read stream after headers. R2 adapter requestTimeout option is passed as timeoutMs but OAuth request does not consume it, so selected adapter options do not actually override default. readFile8MiB adds tightercap.",
+      "required_next_run_change": "Align source owner request timeout options; distinguish control-call deadline from progressive body streaming.",
+      "tests_needed": "Slow active object stream >30s, specified timeout honored, stall cancellation.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "API-001",
+      "area": "result-envelope",
+      "severity": "P2",
+      "classification": "D",
+      "file": "src/api/service.mjs",
+      "line": 219,
+      "symbol_or_guard": "completed inspection envelope",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "inspectCloudflare outer completed/OK means inspection succeeded, not Cloudflare READY. Nested status can CHOOSE_DESTINATION, blocked or REPAIR_REQUIRED. API schemas allow untyped data{}; easy for callers to conflate.",
+      "intended_behavior": "Successful diagnosis is separate from successful save.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/service.mjs",
+          "line": 219,
+          "excerpt": "        return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,receipt:{operationId,method,before:receipt?.before??state.product.revision,after:receipt?.after??state.product.revision,replayed:receipt?.replayed??false}};"
+        }
+      ],
+      "test_coverage": "User observed valid inspection, not upload receipt.",
+      "downstream_effects": "inspectCloudflare outer completed/OK means inspection succeeded, not Cloudflare READY. Nested status can CHOOSE_DESTINATION, blocked or REPAIR_REQUIRED. API schemas allow untyped data{}; easy for callers to conflate.",
+      "required_next_run_change": "Document typed action/readiness states and completion evidence; UI/native consume inner state and expose exact prerequisite.",
+      "tests_needed": "Inspect completed + notready never shown as save success; zero receipt.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "API-002",
+      "area": "native/API-dispatch-divergence",
+      "severity": "P1",
+      "classification": "B",
+      "file": "extension/background.mjs",
+      "line": 75,
+      "symbol_or_guard": "native reconnect bridge",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Native reconnect dispatch calls onboarding.invoke directly; API dispatchSave enters engine. Native gets registrar.setupOnly before source extraction; API saves reserve first and engine may lose precise source errors. Same business owners but different orchestration/error surfaces.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 75,
+          "excerpt": "    if(action.reconnectOnly)return cloudflare.invoke({provider:'cloudflare',requestedTarget:action.target,setupOnly:true});"
+        }
+      ],
+      "test_coverage": "Separate fixture route tests, no cross-surface ready/nonready equivalence.",
+      "downstream_effects": "Native reconnect dispatch calls onboarding.invoke directly; API dispatchSave enters engine. Native gets registrar.setupOnly before source extraction; API saves reserve first and engine may lose precise source errors. Same business owners but different orchestration/error surfaces.",
+      "required_next_run_change": "Canonical shared action route and inspectable intent/result; preserve native event bridge, ACK, exact target, one engine.",
+      "tests_needed": "Native/API source+state matrix identical outcomes, no forced physical click for API.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "API-003",
+      "area": "source-signature-mismatch",
+      "severity": "P1",
+      "classification": "B",
+      "file": "src/cloudflare/transport.mjs",
+      "line": 12,
+      "symbol_or_guard": "digest(source) vs canonical intent",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "cap signs caller source object; imported saver serializes onlyurl+filename(index14). API dispatchSave allows contentType, which is dropped from intent but remains digest. Worker compares digest(intent.source) at15 and denies.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/transport.mjs",
+          "line": 12,
+          "excerpt": "  const payload={protocol:PROTOCOL,use,principal:target.connectionId,sessionId:a.sessionId,destination,expiresAt,...(operationId?{operationId,sourceDigest:await digest(source)}:{})};"
+        }
+      ],
+      "test_coverage": "Audit actual RemoteClaims.authenticate rejects canonical intent signed from same source plus optional contentType: CAPABILITY_DENIED.",
+      "downstream_effects": "cap signs caller source object; imported saver serializes onlyurl+filename(index14). API dispatchSave allows contentType, which is dropped from intent but remains digest. Worker compares digest(intent.source) at15 and denies.",
+      "required_next_run_change": "Canonicalize source once before digest and transport serialization; reject unsupported fields consistently without dropping authority data.",
+      "tests_needed": "Identical URL/filename with optional API contentType accepted appropriately; no tampering.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "API-004",
+      "area": "GUI-bypass-and-navigation",
+      "severity": "P2",
+      "classification": "B",
+      "file": "extension/app.mjs",
+      "line": 188,
+      "symbol_or_guard": "direct CURRENT backup staging",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Directory picker writes backup handle directly via new CURRENT owner then callsAPI; Explorer navigation/selection/back/forward/Refresh are GUI-local, although data listing API exists. No stable browse-view/refresh/save-result GO TO command.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/app.mjs",
+          "line": 188,
+          "excerpt": "    const {createCurrentStore}=await import('../src/persistence/current-store.mjs');const local=createCurrentStore();try{await local.stageBackupRoot(h);await api('chooseBackupLocation');status('External folder attached and verified.');}finally{await local.close();}await renderSettings();"
+        }
+      ],
+      "test_coverage": "Existing fixture GUI/API coverage not exhaustive.",
+      "downstream_effects": "Directory picker writes backup handle directly via new CURRENT owner then callsAPI; Explorer navigation/selection/back/forward/Refresh are GUI-local, although data listing API exists. No stable browse-view/refresh/save-result GO TO command.",
+      "required_next_run_change": "Add minimal trusted host handle-registration port; expose meaningful navigation/result refresh contracts through existing API while keeping ephemeral DOM rendering local.",
+      "tests_needed": "API performs every meaningful GUI workflow without scraping; no duplicate persistence business owner.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "API-005",
+      "area": "queue-and-confirmation",
+      "severity": "P2",
+      "classification": "B",
+      "file": "src/api/service.mjs",
+      "line": 223,
+      "symbol_or_guard": "serialized work queue",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Provision/config/save methods share queue, so long save can block unrelated UI commands; auth/inspect exceptions bypass queue. All mutating GUI API confirms automatically(background111), actual consent lives in app confirm dialogs; trusted host agent grants remain separate.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/api/service.mjs",
+          "line": 223,
+          "excerpt": "      const task=queue.then(work,work);queue=task.catch(()=>{});return await task;"
+        }
+      ],
+      "test_coverage": "Focused grant tests; long UI contention not measured.",
+      "downstream_effects": "Provision/config/save methods share queue, so long save can block unrelated UI commands; auth/inspect exceptions bypass queue. All mutating GUI API confirms automatically(background111), actual consent lives in app confirm dialogs; trusted host agent grants remain separate.",
+      "required_next_run_change": "Split short revision/claim transaction from awaited transfer; explicit stable consent intents for provision and destructive operations, no duplicate engine.",
+      "tests_needed": "Concurrent long job + config/status/disconnect; API consent parity.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SEC-001",
+      "area": "trusted-IPC-and-grants",
+      "severity": "P0",
+      "classification": "D",
+      "file": "extension/background.mjs",
+      "line": 117,
+      "symbol_or_guard": "trustedAppSender and no external listener",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Exact extension app/document sender, trusted storage access(background22), expiring method/account grants(permissions11-26), HMAC binding/destination/revocation remain essential. No arbitrary external endpoint/content script added.",
+      "intended_behavior": "Do not trade real security for broad source support.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 117,
+          "excerpt": "  if(!trustedAppSender(chrome.runtime,sender))return false;"
+        }
+      ],
+      "test_coverage": "Focused permissions/sender tests.",
+      "downstream_effects": "Exact extension app/document sender, trusted storage access(background22), expiring method/account grants(permissions11-26), HMAC binding/destination/revocation remain essential. No arbitrary external endpoint/content script added.",
+      "required_next_run_change": "Preserve closed schemas, trusted local gateway, exact destination and scoped capabilities during repairs.",
+      "tests_needed": "Forged sender, external web page, otheraccount, expired/revoked grant/capability, scope escape.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SEC-002",
+      "area": "privacy",
+      "severity": "P0",
+      "classification": "D",
+      "file": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+      "line": 12,
+      "symbol_or_guard": "minimal object metadata",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Only operationId + MIME type written to R2 metadata, not URL/referrer. Host history selects redacted fields(current165); source URL necessarily reaches source-fetch Worker. Claims store fingerprint, not URL. Observability disabled(deployment25).",
+      "intended_behavior": "Only necessary transient source transport; no provider metadata browsing provenance.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+          "line": 12,
+          "excerpt": "  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),httpMetadata:{contentType},customMetadata:{operationId}});"
+        }
+      ],
+      "test_coverage": "Local privacy tests, live metadata not read.",
+      "downstream_effects": "Only operationId + MIME type written to R2 metadata, not URL/referrer. Host history selects redacted fields(current165); source URL necessarily reaches source-fetch Worker. Claims store fingerprint, not URL. Observability disabled(deployment25).",
+      "required_next_run_change": "Keep provenance out of object metadata, history/export/logs; verify platform logging and source signed-query redaction independently.",
+      "tests_needed": "Metadata/durable history/diagnostics inspect, no secrets or browsing URLs; raw error injection.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SEC-003",
+      "area": "bound-path-and-key",
+      "severity": "P1",
+      "classification": "D",
+      "file": "right2cloud-module/src/common.mjs",
+      "line": 11,
+      "symbol_or_guard": "1024 UTF8 key bytes",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "R2 object key max1024bytes is external documented constraint. Prefix+filename checked atwriter.prepare. Core prefix already can be1024bytes before filename, so saved config can be unsaveable after joining. Global key limit on future providers should be capability-specific.",
+      "intended_behavior": "Exact path preserved, actionable early error at actual provider constraint.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "right2cloud-module/src/common.mjs",
+          "line": 11,
+          "excerpt": "export function keyFor(d,name){const key=(d.prefix?d.prefix+'/':'')+filename(name);if(new TextEncoder().encode(key).length>1024)fail('KEY_TOO_LONG');return key;}"
+        }
+      ],
+      "test_coverage": "Imported key test; official R2 limit corroborates.",
+      "downstream_effects": "R2 object key max1024bytes is external documented constraint. Prefix+filename checked atwriter.prepare. Core prefix already can be1024bytes before filename, so saved config can be unsaveable after joining. Global key limit on future providers should be capability-specific.",
+      "required_next_run_change": "Validate full final key early per actual provider; retain traversal/control protection; no hard arbitrary folder-depth limit.",
+      "tests_needed": "1024byte total,1025, Unicode, suffix growth, prefix scopes, dot segments.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EXT-001",
+      "area": "external-runtime",
+      "severity": "P2",
+      "classification": "C",
+      "file": "src/cloudflare/worker.mjs",
+      "line": 29,
+      "symbol_or_guard": "Cloudflare Worker/R2 runtime",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Official docs:128MB Worker memory,6 outgoing connections/request, plan-dependent activeCPU, R2 known-length stream requirement and documented object/part/key limits. None proves64/8MiB or60/65s product ceilings.",
+      "intended_behavior": "Largest technically supported transfer without internal arbitrary total-size/site ceilings.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 29,
+          "excerpt": "    fetch:async(url,options)=>{const started=performance.now();const response=await globalThis.fetch(url,{...options,headers:{'accept-encoding':'identity'}});workerTimings.sourceHeadersMs=(workerTimings.sourceHeadersMs??0)+Math.round(performance.now()-started);if(response.redirected)return response;const headers=new Headers(response.headers),mime=(headers.get('content-type')??'application/octet-stream').split(';')[0].trim();headers.set('content-type',mime.length<=127&&/^[a-zA-Z0-9!#$&^_.+-]+\\/[a-zA-Z0-9!#$&^_.+-]+$/.test(mime)?mime:'application/octet-stream');if(headers.has('content-encoding')&&headers.get('content-encoding')!=='identity'){headers.delete('content-length');headers.delete('content-encoding');}return new Response(response.body,{status:response.status,headers});}"
+        }
+      ],
+      "test_coverage": "Official source docs fetchedHTTP200; live data path blocked.",
+      "downstream_effects": "Official docs:128MB Worker memory,6 outgoing connections/request, plan-dependent activeCPU, R2 known-length stream requirement and documented object/part/key limits. None proves64/8MiB or60/65s product ceilings.",
+      "required_next_run_change": "Measure selected plan + actual DO/Worker route; bounded per-part memory/concurrency and resource-aware strategy. Do not confuse tiny inbound control JSON with remote source bytes.",
+      "tests_needed": "Real memory/CPU/longstream/conditional-multipart measurements on authorized isolated resources.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "PROVIDER-001",
+      "area": "provider-support",
+      "severity": "P2",
+      "classification": "E",
+      "file": "src/cloudflare/onboarding.mjs",
+      "line": 61,
+      "symbol_or_guard": "nonCloudflare NOT_IMPLEMENTED",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Drive/Dropbox/OneDrive open Shelf then return PROVIDER_NOT_IMPLEMENTED; production providers={}background80. Four rows do not mean four working upload drivers.",
+      "intended_behavior": "Owner-approved initial placeholders, Cloudflare must actually save.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/onboarding.mjs",
+          "line": 61,
+          "excerpt": "  if(provider!=='cloudflare'){await openShelf(provider);return {state:'blocked',code:'PROVIDER_NOT_IMPLEMENTED',provider};}"
+        }
+      ],
+      "test_coverage": "Focused blocked placeholder and browser fixture.",
+      "downstream_effects": "Drive/Dropbox/OneDrive open Shelf then return PROVIDER_NOT_IMPLEMENTED; production providers={}background80. Four rows do not mean four working upload drivers.",
+      "required_next_run_change": "Keep honest placeholders and stable API/provider identities; future drivers separately authorized and verified. Current next run focus Cloudflare.",
+      "tests_needed": "Each placeholder zero file fetch/write/success counters, clear feedback without fake login.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "SEAM-001",
+      "area": "writer-extensibility",
+      "severity": "P2",
+      "classification": "F",
+      "file": "src/cloudflare/writer-registry.mjs",
+      "line": 4,
+      "symbol_or_guard": "R2 production writer only",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Trusted factory seam checks kind/conditionalCreate/methods. Common.destination and verifier still R2specific; injected double proves structural call shape only, not drop-inMEGA or genericS3.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "src/cloudflare/writer-registry.mjs",
+          "line": 4,
+          "excerpt": "export function destinationWriter(cap,ports={},factories={'cloudflare-r2':c=>cloudflareR2Writer(c.storage,ports)}){"
+        }
+      ],
+      "test_coverage": "Structural local test only.",
+      "downstream_effects": "Trusted factory seam checks kind/conditionalCreate/methods. Common.destination and verifier still R2specific; injected double proves structural call shape only, not drop-inMEGA or genericS3.",
+      "required_next_run_change": "Retain small tested writer seam; when a real later provider is authorized add its intent/proof/capability adapter rather than weaken R2 proof or rewrite menus.",
+      "tests_needed": "Structural alternative writer no browsingURL, future provider-specific proof without R2 version assumption.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "EVID-001",
+      "area": "live-environment",
+      "severity": "P0",
+      "classification": "F",
+      "file": "docs/evidence/cloudflare-m01/browser/browser-results.json",
+      "line": 1,
+      "symbol_or_guard": "installed extension blocked",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Prior Chromium155 unpacked load administrator-blocked; seven app fixtures are doubles, not native save. Current audit intentionally does not alter browser state. Windows installed profile and executing Worker inaccessible.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "docs/evidence/cloudflare-m01/browser/browser-results.json",
+          "line": 1,
+          "excerpt": "{"
+        }
+      ],
+      "test_coverage": "Prior committed evidence + user observations; no rerun installed Chrome.",
+      "downstream_effects": "Prior Chromium155 unpacked load administrator-blocked; seven app fixtures are doubles, not native save. Current audit intentionally does not alter browser state. Windows installed profile and executing Worker inaccessible.",
+      "required_next_run_change": "Next authorized run obtain administrator-approved installed Chrome; record build/API/generation/click/request/receipt/readback separately.",
+      "tests_needed": "Actual image/link click plus restart and exact destination save in Windows.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "EVID-002",
+      "area": "live-egress",
+      "severity": "P0",
+      "classification": "F",
+      "file": "docs/evidence/cloudflare-m01/live-results.json",
+      "line": 1,
+      "symbol_or_guard": "CONNECT403",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Read-only GET to existing testWorker host again blocked proxyCONNECT403. Settings GET200 proves R2 redown binding,DO/secret declaration only; no data-plane execution/write/readback. Do not redeploy to solve proxy denial.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "docs/evidence/cloudflare-m01/live-results.json",
+          "line": 1,
+          "excerpt": "{"
+        }
+      ],
+      "test_coverage": "Audit current network GET and sanitized control-plane GET; docs/evidence historical BLOCKED.",
+      "downstream_effects": "Read-only GET to existing testWorker host again blocked proxyCONNECT403. Settings GET200 proves R2 redown binding,DO/secret declaration only; no data-plane execution/write/readback. Do not redeploy to solve proxy denial.",
+      "required_next_run_change": "Apply supported network setting separately if authorized; reuse owned isolated resource only for later approved verification. No proxy bypass or token request.",
+      "tests_needed": "Signed status before authorized disposable object write/readback; no production Worker changes.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": false
+    },
+    {
+      "id": "EVID-003",
+      "area": "test-spec-gap",
+      "severity": "P1",
+      "classification": "B",
+      "file": "tests/cloudflare-integration.test.mjs",
+      "line": 21,
+      "symbol_or_guard": "assert no provider-actions customized",
+      "user_observed_symptom": "No direct installed incident attribution",
+      "actual_behavior": "Tests intentionally assert no provider-actions for customized layout, assert oversized rejection and unconditional Explorer refusal; green suite certifies narrowed behavior. Browser fixtures never open connected native #cloudflare bootstrap.",
+      "intended_behavior": "Right-click to exact authorized destination, independently verified, with honest prerequisite actions",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "tests/cloudflare-integration.test.mjs",
+          "line": 21,
+          "excerpt": " assert(saved.rows.some(r=>r.role==='save'&&r.target.prefix==='exact/'));assert(!saved.rows.some(r=>r.role==='provider-action'));"
+        }
+      ],
+      "test_coverage": "Current129+49PASS; historical7fixturePASS distinct from native proof.",
+      "downstream_effects": "Tests intentionally assert no provider-actions for customized layout, assert oversized rejection and unconditional Explorer refusal; green suite certifies narrowed behavior. Browser fixtures never open connected native #cloudflare bootstrap.",
+      "required_next_run_change": "Use foundations/current request as acceptance authority; add lifecycle/native launch/public source/large stream/live receipt tests before repair.",
+      "tests_needed": "See next-run gates; no retired scenario atlas.",
+      "risk": "Preserve authorization, exact target, privacy and no-overwrite semantics",
+      "verified": true
+    },
+    {
+      "id": "READY-004",
+      "area": "prefix-readiness",
+      "severity": "P1",
+      "classification": "B",
+      "file": "extension/background.mjs",
+      "line": 64,
+      "symbol_or_guard": "remoteReady(s.target) on bucket-root scope",
+      "user_observed_symptom": "Unready configured row; no incident binding data available",
+      "actual_behavior": "getInventory tests Worker readiness at bucket-root scope, even for a saved nested target. A Worker whose immutable PREFIX_SCOPE allows only that nested prefix rejects root capability binding, so otherwise valid exact-target saves are excluded from authorizedTargets. Default production provisioning uses empty prefixScope; isolated test deployment is prefix-scoped.",
+      "intended_behavior": "Assess readiness for exact selected authorized target without broadening Worker prefix authority.",
+      "evidence": [
+        {
+          "type": "source",
+          "path": "extension/background.mjs",
+          "line": 64,
+          "excerpt": "  return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:await remoteReady(s.target)})))};"
+        },
+        {
+          "type": "source",
+          "path": "src/cloudflare/worker.mjs",
+          "line": 13,
+          "excerpt": "  if(d.accountId!==e.ACCOUNT_ID||d.bucketName!==e.BUCKET_NAME||d.connectionId!=='cloudflare:'+e.ACCOUNT_ID||((e.PREFIX_SCOPE??'')&&d.prefix!==e.PREFIX_SCOPE&&!d.prefix.startsWith(e.PREFIX_SCOPE+'/')))fail('BINDING_MISMATCH');"
+        }
+      ],
+      "test_coverage": "Source confirmed; no dedicated configured-prefix-only Worker regression. No incident/live save proof.",
+      "downstream_effects": "Valid scoped Worker can be classified unready at inventory gate and route to repair instead of exact-target save.",
+      "required_next_run_change": "Cache/check Worker and authority readiness by exact target/prefix; use permitted read checks at that prefix. Preserve immutable prefix restrictions.",
+      "tests_needed": "Exact configured folder under nonempty PREFIX_SCOPE ready; root/sibling/parent out of scope denied.",
+      "risk": "Do not widen binding or probe unrelated bucket keys to make readiness pass.",
+      "verified": true
+    }
+  ]
+}
