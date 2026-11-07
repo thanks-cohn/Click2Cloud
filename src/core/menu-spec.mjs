@@ -92,7 +92,9 @@ export function compileMenuSpec(options={}) {
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])if(options.product?.providerVisibility?.[provider]!==false)add({id:stableId('provider-entry',provider),label,role:'provider-action',providerAction:provider,target:provider==='cloudflare'?(options.defaultTarget??null):null,origin:{mode:null,provider},reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});
       const defaultTarget=options.defaultTarget&&(options.product?.menuCustomized!==false||show.flat||projection.rows.length)?normalizeTarget(options.defaultTarget):null;
       if(show.flat) {
-        if(defaultTarget&&defaultTarget.provider==='cloudflare'&&options.product?.providerVisibility?.cloudflare!==false) {
+        if(options.product?.providerVisibility?.cloudflare===false) {
+          // Hide all Cloudflare-native rows, retaining its Flat destination for re-enabling.
+        } else if(defaultTarget&&defaultTarget.provider==='cloudflare') {
           const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
           add({label:'REDOWN → Cloudflare',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE',placement:'flat-default'});
           for(const reason of reasons)omissions.push({target:defaultTarget,reason,kind:'ineligible'});
