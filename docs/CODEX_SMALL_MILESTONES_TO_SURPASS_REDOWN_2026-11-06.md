@@ -41,12 +41,12 @@ Milestones are **small checkpoints within a continuous working session**, not li
 
 ### M01 — Native menu: exactly four flat provider leaves, one Cloudflare
 - **Inspect:** Click2Cloud `src/core/menu-spec.mjs`, `src/core/action-resolver.mjs`, `src/chrome/registrar.mjs`; REDOWN `extension/right-click-v3.js`.
-- **Fix:** Initial Click2Cloud grouping displays exactly **Google Drive, Dropbox, OneDrive, Cloudflare**; no duplicate "Cloudflare R2" + "Cloudflare", no unnecessary REDOWN menu, no premature nesting. Stable native IDs and ACK; Chrome constraints observed.
+- **Fix:** Initial Click2Cloud grouping displays exactly **Google Drive, Dropbox, OneDrive, Cloudflare**, **even with no account, no bucket and no configured destination**; Cloudflare is clickable and routes to minimal login/setup until ready, then becomes the same direct-save leaf. No duplicate "Cloudflare R2" + "Cloudflare", no unnecessary REDOWN menu, no premature nesting. Stable native IDs and ACK; Chrome constraints observed.
 - **PASS:** Fresh / signed-in / reloaded / last custom destination deleted: exactly one Cloudflare leaf while no extras. Independently inspect native menu, not just generated model. Other three are visible but must not pretend to have working upload adapters.
 
 ### M02 — Cloudflare `redown` is the one-time initial default
 - **Inspect:** `src/cloudflare/onboarding.mjs`, `src/api/config.mjs`, `src/persistence/current-store.mjs`, `src/core/menu-spec.mjs`.
-- **Fix:** Once a single authorized Cloudflare account is known, the user's approved initial setup creates **or reuses lowercase `redown` exactly once** and prepares/verifies its transfer capability, then selects `redown/` with no manual bucket/default menu configuration. Readiness and authorization cannot be fabricated. Later explicit custom default wins, but `redown` remains a selectable active destination until **explicitly** removed; intentionally deleted buckets must not be silently recreated. Handle multiple accounts without guessing.
+- **Fix:** On an authorized, approved first-time single-account connection, check whether exact lowercase bucket `redown` exists. **If YES, reuse it; if NO (including zero R2 buckets), create `redown` once as the initial setup**, then prepare/verify transfer capability and select the root of bucket `redown` (prefix `''`) as default. No manual bucket naming, location selection, extra R2 bucket, or mode configuration. The flat native Cloudflare leaf must be present and clickable even before the bucket exists; until ready it launches the tiny One Click Away! login/setup card, not a fake save. Later explicit custom default wins, and `redown` remains available until explicitly removed; intentionally deleted buckets are never silently recreated. Handle multiple accounts without guessing.
 - **PASS:** New account starts with a working `redown` after consent/setup; returning user does not redo setup; custom target preserved; deleting `redown` does not trigger silent recreation. The `menuCustomized` flag never hides a legitimate default.
 
 ### M03 — Single Cloudflare entry changes to ONE submenu only with extras
@@ -133,7 +133,7 @@ Milestones are **small checkpoints within a continuous working session**, not li
 ## Exact default menu and default-bucket examples
 
 ```text
-FIRST INSTALL / ONLY redown:
+FIRST INSTALL / ZERO CLOUDFLARE BUCKETS / ONLY redown AFTER APPROVED SETUP:
 Click2Cloud
   Google Drive
   Dropbox
@@ -160,10 +160,12 @@ READY CLOUD PROVIDER:
 native right-click → select provider → save to exact location → verified result
 NO dashboard / extra setup tab / login loop.
 
-NOT CONNECTED:
-native right-click → select provider → compact 'One Click Away!' panel
-provider icon + name + Sign in → consent
-next fresh right-click saves when provider and destination are genuinely ready.
+NOT CONNECTED / NO R2 BUCKET YET:
+flat native Cloudflare entry is already visible and clickable
+right-click → Cloudflare → compact 'One Click Away!' Cloudflare login
+provider OAuth and approved first-run setup → check for redown → reuse or create redown
+verify Worker and save destination → subsequent fresh clicks save directly to redown
+never present authorization/setup as a successful save.
 ```
 
 Notes: The `redown` bucket is an approved initial default, not permission to recreate an intentionally deleted bucket. A user-chosen default takes precedence while `redown` remains an option until explicitly removed. Where Chrome itself groups the extension under one parent, that Chrome grouping is accepted; do not add a redundant in-extension parent.
