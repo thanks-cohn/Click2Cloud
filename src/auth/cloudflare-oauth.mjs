@@ -1,17 +1,21 @@
 export const CLIENT_ID='59535938bc4cc093003b4385a7e2b005';
+// Accept REDOWN main's canonical Workers write grant as well as existing sessions.
+// The actual API request still enforces account/resource authorization.
+export const hasWorkerWriteScope=scopes=>Array.isArray(scopes)&&['workers-scripts.write','workers-scripts.edit'].some(s=>scopes.includes(s));
 const base64=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const random=()=>base64(crypto.getRandomValues(new Uint8Array(32)));
 const localLocks=new WeakMap();
 const failure=(code,diagnostic)=>Object.assign(Error(code),{code,...(diagnostic?{diagnostic}:{})});
 export function diagnoseCloudflare(response,body,{context='r2',scopes,requiredScopes=[]}={}){
- const httpStatus=response?.status??null,challenge=response?.headers?.get('www-authenticate')??'',messages=[body?.error,...(body?.errors??[]).map(e=>e.message)].filter(x=>typeof x==='string').join(' ').toLowerCase();
- const providerCodes=(body?.errors??[]).map(e=>e.code).filter(c=>typeof c==='number'&&Number.isSafeInteger(c)||typeof c==='string'&&/^[0-9]{1,16}$/.test(c));
+ const errors=Array.isArray(body?.errors)?body.errors:[];
+ const httpStatus=response?.status??null,challenge=response?.headers?.get('www-authenticate')??'',messages=[body?.error,...errors.map(e=>e?.message)].filter(x=>typeof x==='string').join(' ').toLowerCase();
+ const providerCodes=errors.map(e=>e?.code).filter(c=>typeof c==='number'&&Number.isSafeInteger(c)||typeof c==='string'&&/^[0-9]{1,16}$/.test(c));
  const missingScopes=Array.isArray(scopes)?requiredScopes.filter(s=>!scopes.includes(s)):[];
  let code='R2_STATUS_UNKNOWN',evidence='status-only';
  if(body?.error==='invalid_grant'){code='REAUTH_REQUIRED';evidence='oauth-invalid-grant';}
  else if(['invalid_client','unauthorized_client','access_denied'].includes(body?.error)){code='PROVIDER_AUTH_POLICY_DENIED';evidence='oauth-policy-error';}
  else if(/insufficient_scope/i.test(challenge)||missingScopes.length||/insufficient scope|missing (?:required )?scope|required scope/.test(messages)){code='INSUFFICIENT_SCOPE';evidence=missingScopes.length?'verified-grants':'provider-scope-error';}
- else if(/invalid_token/i.test(challenge)||/invalid (?:access )?token|authentication error|token (?:has )?expired/.test(messages)||httpStatus===401){code=/expired/.test(messages)?'TOKEN_EXPIRED':'REAUTH_REQUIRED';evidence=/invalid_token/i.test(challenge)?'www-authenticate':httpStatus===401?'http-401':'provider-auth-error';}
+ else if(/invalid_token/i.test(challenge)||/invalid (?:access )?token|token (?:has )?expired/.test(messages)||httpStatus===401){code=/expired/.test(messages)?'TOKEN_EXPIRED':'REAUTH_REQUIRED';evidence=/invalid_token/i.test(challenge)?'www-authenticate':httpStatus===401?'http-401':'provider-auth-error';}
  else if(/account mismatch|invalid account identifier|account (?:id|identifier) (?:is )?invalid|account.*does not match/.test(messages)){code='WRONG_ACCOUNT';evidence='provider-account-error';}
  else if(/\br2\b.*\bnot (?:enabled|activated)\b|\br2\b.*\bsubscription (?:is )?(?:inactive|disabled)\b/.test(messages)){code='R2_CONFIRMED_INACTIVE';evidence='explicit-r2-unavailable';}
  else if(httpStatus===429||httpStatus===408||httpStatus>=500){code='TRANSIENT_API_FAILURE';evidence='http-transient';}
@@ -94,7 +98,7 @@ export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.
  async function cancel(){generation++;connecting=false;await chrome.storage.session.set({[fenceKey]:random(),[attemptKey]:{phase:'cancelled'}});return status();}
  async function status(){const s=await read(),a=await attempt(),busy=['authorizing','exchanging','verifying'].includes(a?.phase)&&a.expires>clock(),verified=s&&Array.isArray(s.accounts)&&s.accounts.length>0&&!s.identityPending,live=s&&!s.reconnectRequired&&(s.expiresAt>clock()||s.refreshToken);
   const result={state:busy||connecting?'CONNECTING':live&&s.identityPending?'VERIFYING':live&&verified?'CONNECTED':'DISCONNECTED',authenticated:!!live,identityVerified:!!verified,diagnostic:s?.diagnostic??(a?.code?{code:a.code}:null),provider:'cloudflare',connections:live&&verified?s.accounts.map(a=>({provider:'cloudflare',connectionId:'cloudflare:'+a.id,accountId:a.id,connected:true})):[],accounts:live&&verified?s.accounts:[],scopes:live?s.scopes:[],scopeEvidence:s?.scopeEvidence??'legacy',redirectUri:registeredRedirect};try{onStatus(result);}catch{}return result;}
- async function authority(){let s=await access();if(s.identityPending){await verifyIdentity(s.sessionId);s=await read();}if(!Array.isArray(s.accounts)||!s.accounts.length)throw failure('OAUTH_IDENTITY_UNVERIFIED');return {sessionId:s.sessionId,accounts:s.accounts,scopes:s.scopes};}
+ async function authority(){let s=await access();if(s.identityPending){await verifyIdentity(s.sessionId);s=await read();}if(!Array.isArray(s.accounts)||!s.accounts.length)throw failure('OAUTH_IDENTITY_UNVERIFIED');return {sessionId:s.sessionId,accounts:s.accounts,scopes:s.scopes,scopeEvidence:s.scopeEvidence??'legacy'};}
  // Exact registered callback + state/expiry + single claim, with no tab/window owner.
  chrome.webNavigation?.onBeforeNavigate?.addListener(details=>{if(details.frameId===0)void completeCallback(details.url,{fromEvent:true}).catch(()=>{});},{url:[{hostEquals:new URL(registeredRedirect).hostname}]});
  return Object.freeze({connect,request,status,authority,cancel,async disconnect(){await cancel();await critical(async()=>{const task=mutations.then(()=>chrome.storage.local.remove(key));mutations=task.catch(()=>{});await task;});return status();}});

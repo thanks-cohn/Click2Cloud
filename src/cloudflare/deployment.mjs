@@ -1,36 +1,69 @@
-import {diagnoseCloudflare} from '../auth/cloudflare-oauth.mjs';
+import {diagnoseCloudflare,hasWorkerWriteScope} from '../auth/cloudflare-oauth.mjs';
 import {PROTOCOL,remoteDestination,fail,digest} from './wire.mjs';
 export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
-export function createProvisioner({request,readModule,load,store}){
- async function json(path,options={}){const r=await request(path,options);let body;try{body=await r.json();}catch{fail('CLOUDFLARE_RESPONSE_INVALID');}if(!r.ok||body.success!==true)fail([401,403,429].includes(r.status)||r.status>=500?diagnoseCloudflare(r,body,{context:'worker'}).code:'CLOUDFLARE_SETUP_FAILED');return body.result;}
- return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false}={}){
+// Official endpoint permission alternatives are recorded in the accompanying
+// Cloudflare OpenAPI evidence. OAuth scope names are not account-role grants.
+const WORKER_OPERATIONS={
+ 'account-subdomain-read':{method:'GET',endpoint:'/accounts/{account_id}/workers/subdomain',permissions:['Workers Scripts Write','Workers Scripts Read']},
+ 'script-settings-read':{method:'GET',endpoint:'/accounts/{account_id}/workers/scripts/{script_name}/settings',permissions:['Workers Scripts Write','Workers Scripts Read','Workers Admin','Workers Editor','Workers Content Read-Only','Workers Metadata Read-Only','Individual Workers Admin','Individual Workers Editor','Individual Workers Content Read-Only','Individual Workers Metadata Read-Only','Workers Tail Read']},
+ 'script-upload':{method:'PUT',endpoint:'/accounts/{account_id}/workers/scripts/{script_name}',permissions:['Workers Scripts Write','Workers Admin','Workers Editor','Individual Workers Admin','Individual Workers Editor']},
+ 'script-subdomain-enable':{method:'POST',endpoint:'/accounts/{account_id}/workers/scripts/{script_name}/subdomain',permissions:['Workers Scripts Write','Workers Admin','Workers Editor','Individual Workers Admin','Individual Workers Editor']}
+};
+const PUBLIC_SCOPES=['workers-r2.read','workers-r2.write','workers-scripts.content_read','workers-scripts.edit','workers-scripts.read','workers-scripts.write','offline_access'];
+export function safeWorkerDiagnostic(value){
+ const op=WORKER_OPERATIONS[value?.operation];if(!op)return null;
+ const rawScopes=Array.isArray(value.sessionScopes)?value.sessionScopes:Array.isArray(value.grantedScopes)?value.grantedScopes:[],sessionScopes=rawScopes.filter(s=>PUBLIC_SCOPES.includes(s)),omittedScopeCount=Math.max(rawScopes.length-sessionScopes.length,Number.isSafeInteger(value.omittedScopeCount)&&value.omittedScopeCount>=0?value.omittedScopeCount:0);
+ const classification=['OAUTH_SCOPE_MISSING','AUTHENTICATION_REJECTED','AUTHORIZATION_UNRESOLVED','REQUEST_REJECTED','TRANSIENT_API_FAILURE','RESPONSE_INVALID','ACCOUNT_CONFIGURATION_REQUIRED'].includes(value.classification)?value.classification:'AUTHORIZATION_UNRESOLVED';
+ const workerIntent=['create','update','inspect','account-settings'].includes(value.workerIntent)?value.workerIntent:'unknown';
+ const correctiveAction=workerIntent==='create'&&classification==='AUTHORIZATION_UNRESOLVED'?'Creating a NEW Worker requires Workers Admin at the Workers product scope. Editor can update existing Workers but cannot create one. Verify both the selected account role and this OAuth client’s approved/issued create-capable grant; renewing setup approval does not grant it. Keep the same pending Worker and resume only after correction.':classification==='OAUTH_SCOPE_MISSING'?'Check the registered OAuth client and issued grants for the required Workers scope. Reconnect only after that is corrected; setup approval is already saved.':classification==='AUTHENTICATION_REJECTED'?'Reconnect Cloudflare to renew rejected authorization, then explicitly resume the existing setup.':classification==='ACCOUNT_CONFIGURATION_REQUIRED'?'Have the selected account administrator configure its Workers.dev subdomain in Cloudflare, then resume the same setup. Click2Cloud will not create an account subdomain or request billing activation.':classification==='REQUEST_REJECTED'?'The deployment request was rejected. Review this endpoint and Cloudflare error code against the API schema; do not repeat setup approval.':classification==='RESPONSE_INVALID'?'The API response was not valid Cloudflare JSON. Inspect the endpoint, HTTP status and network route before changing permissions; setup approval remains saved.':classification==='TRANSIENT_API_FAILURE'?'Cloudflare is temporarily unavailable. Keep the existing setup and retry its inspection later.':'Cloudflare denied this operation. REDOWN main requests Workers read/write; this client still requests content_read/edit, whose registration must be verified rather than assumed equivalent. Verify the OAuth client/grants and your selected-account membership has one of the listed API permissions for this resource. Setup approval cannot grant Cloudflare permissions. After correction, explicitly resume the existing setup.';
+ return {kind:'cloudflare-worker-access',observedAt:/^\d{4}-\d\d-\d\dT[0-9:.]+Z$/.test(value.observedAt??'')?value.observedAt:null,requestId:/^[a-f0-9]{12,24}(?:-[A-Z]{3})?$/.test(value.requestId??'')?value.requestId:null,challenge:['invalid_token','insufficient_scope'].includes(value.challenge)?value.challenge:null,operation:value.operation,workerIntent,requiredCreationRole:workerIntent==='create'?'Workers Admin at Workers product scope':null,creationPermissionEvidence:workerIntent==='create'?'Official Workers roles guidance; current account role not observed':null,method:op.method,endpoint:op.endpoint,code:['WORKER_PERMISSION_DENIED','INSUFFICIENT_SCOPE','REAUTH_REQUIRED','TOKEN_EXPIRED','WORKER_REQUEST_REJECTED','CLOUDFLARE_RESPONSE_INVALID','TRANSIENT_API_FAILURE','WORKERS_SUBDOMAIN_UNAVAILABLE'].includes(value.code)?value.code:'WORKER_PERMISSION_DENIED',httpStatus:Number.isInteger(value.httpStatus)&&value.httpStatus>=100&&value.httpStatus<=599?value.httpStatus:null,providerCodes:(Array.isArray(value.providerCodes)?value.providerCodes:[]).filter(c=>typeof c==='number'&&Number.isSafeInteger(c)||typeof c==='string'&&/^\d{1,16}$/.test(c)).slice(0,16),omittedScopeCount,scopeListComplete:omittedScopeCount===0,missingScopes:(Array.isArray(value.missingScopes)?value.missingScopes:[]).filter(s=>PUBLIC_SCOPES.includes(s)),grantedScopes:value.scopeEvidence==='provider-returned'?sessionScopes:null,sessionScopes,scopeEvidence:['provider-returned','oauth-default-requested','legacy','unavailable'].includes(value.scopeEvidence)?value.scopeEvidence:'unavailable',selectedAccountVerified:value.selectedAccountVerified===true,requestedWorkerScopes:['workers-scripts.content_read','workers-scripts.edit'],referenceWorkerScopes:['workers-scripts.read','workers-scripts.write'],requiredPermissionAnyOf:[...op.permissions],classification,correctiveAction};
+}
+const workerError=diagnostic=>Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});
+export function createProvisioner({request,readModule,load,store,authority=async()=>null}){
+ async function json(path,options={},operation,auth,allowMissing=false){
+  let r,body;try{r=await request(path,options);body=await r.json();}catch(error){
+   const diagnostic=safeWorkerDiagnostic({operation,code:error.code??(r?'CLOUDFLARE_RESPONSE_INVALID':'TRANSIENT_API_FAILURE'),classification:r?'RESPONSE_INVALID':error.code==='REAUTH_REQUIRED'||error.code==='TOKEN_EXPIRED'?'AUTHENTICATION_REJECTED':'TRANSIENT_API_FAILURE',httpStatus:r?.status??error.diagnostic?.httpStatus,providerCodes:error.diagnostic?.providerCodes,challenge:error.diagnostic?.challenge,observedAt:new Date().toISOString(),requestId:r?.headers?.get('cf-ray'),grantedScopes:auth?.scopes,scopeEvidence:auth?.scopeEvidence,selectedAccountVerified:auth?.selectedAccountVerified,workerIntent:auth?.workerIntent});throw workerError(diagnostic);
+  }
+  if(allowMissing&&r.status===404)return null;
+  if(!r.ok||body?.success!==true){const d=diagnoseCloudflare(r,body,{context:'worker',scopes:auth?.scopes,requiredScopes:['script-upload','script-subdomain-enable'].includes(operation)&&!hasWorkerWriteScope(auth?.scopes)?['workers-scripts.write']:[]});const noSubdomain=operation==='account-subdomain-read'&&r.status===404,code=noSubdomain?'WORKERS_SUBDOMAIN_UNAVAILABLE':r.status===400||r.status===422?'WORKER_REQUEST_REJECTED':d.code;
+   throw workerError(safeWorkerDiagnostic({...d,operation,code,observedAt:new Date().toISOString(),requestId:r.headers?.get('cf-ray'),classification:noSubdomain?'ACCOUNT_CONFIGURATION_REQUIRED':d.code==='INSUFFICIENT_SCOPE'?'OAUTH_SCOPE_MISSING':['REAUTH_REQUIRED','TOKEN_EXPIRED'].includes(d.code)?'AUTHENTICATION_REJECTED':r.status===400||r.status===422?'REQUEST_REJECTED':d.code==='TRANSIENT_API_FAILURE'?'TRANSIENT_API_FAILURE':'AUTHORIZATION_UNRESOLVED',grantedScopes:auth?.scopes,scopeEvidence:auth?.scopeEvidence,selectedAccountVerified:auth?.selectedAccountVerified,workerIntent:auth?.workerIntent}));
+  }return body.result;
+ }
+
+ return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false}={}){
   if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]);
-  let plan=await load(key);if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')||!/^[a-f0-9]{64}$/.test(plan.secret??'')))fail('TRANSPORT_PLAN_INVALID');prefixScope??=plan?.prefixScope??'';const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);if(plan?.state==='ready'&&!rebuild){if(plan.codeDigest!==codeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');return plan;}
-  let recoveredMissing=false;
+  const identity=await authority();let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
+  let plan=await load(key);
+  try{if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')||!/^[a-f0-9]{64}$/.test(plan.secret??'')))fail('TRANSPORT_PLAN_INVALID');if(plan?.failure&&!retryDenied)throw workerError(safeWorkerDiagnostic(plan.failure));
+  if(identity&&!auth.selectedAccountVerified)fail('WRONG_ACCOUNT');
+  prefixScope??=plan?.prefixScope??'';const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);if(plan?.state==='ready'&&!rebuild){if(plan.codeDigest!==codeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');return plan;}
+  const base='/accounts/'+encodeURIComponent(d.accountId)+'/workers';
+  const sub=await json(base+'/subdomain',{},'account-subdomain-read',{...auth,workerIntent:'account-settings'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
+  let recoveredMissing=false,workerIntent=plan?'update':'create';
   if(plan?.state==='pending'||plan&&rebuild){
-   const base='/accounts/'+encodeURIComponent(d.accountId)+'/workers';
-   const response=await request(base+'/scripts/'+plan.name+'/settings');
-   if(response.ok){const b=await response.json(),bindings=b.result?.bindings??[];
+   const settings=await json(base+'/scripts/'+plan.name+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true);
+   if(settings){const bindings=settings.bindings??[];
     if(!bindings.some(x=>x.name==='STORAGE'&&x.bucket_name===d.bucketName)||!bindings.some(x=>x.name==='ACCOUNT_ID'&&x.text===d.accountId))fail('PROVISION_RECONCILE_REQUIRED');
     if(!bindings.some(x=>x.name==='PREFIX_SCOPE'&&x.text===(plan.prefixScope??'')))fail('PROVISION_RECONCILE_REQUIRED');
-    if(plan.state==='pending'&&plan.codeDigest===codeDigest&&bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest)){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})});const sub=await json(base+'/subdomain');if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
+    if(plan.state==='pending'&&plan.codeDigest===codeDigest&&bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest)){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');delete plan.failure;plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
     if(plan.state==='pending'&&!rebuild)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
-   }else if(response.status===404)recoveredMissing=true;else fail('PROVISION_RECONCILE_REQUIRED');
+   }else{recoveredMissing=true;workerIntent='create';}
   }
   if(plan&&!['ready','pending'].includes(plan.state))fail('PROVISION_RECONCILE_REQUIRED');
+  auth={...auth,workerIntent};
   const updating=!!plan&&!recoveredMissing;
   const name=plan?.name??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=plan?.secret??Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
   plan={name,secret,codeDigest,state:'pending',accountId:d.accountId,bucketName:d.bucketName,prefixScope,protocol:PROTOCOL};await store(key,plan);
-  const base='/accounts/'+encodeURIComponent(d.accountId)+'/workers';
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify({main_module:'src/cloudflare/worker.mjs',compatibility_date:'2026-01-01',compatibility_flags:['nodejs_compat'],observability:{enabled:false},
    bindings:[{name:'STORAGE',type:'r2_bucket',bucket_name:d.bucketName},{name:'CLAIMS',type:'durable_object_namespace',class_name:'RemoteClaims'},
     {name:'CODE_DIGEST',type:'plain_text',text:codeDigest},{name:'ACCOUNT_ID',type:'plain_text',text:d.accountId},{name:'BUCKET_NAME',type:'plain_text',text:d.bucketName},{name:'PREFIX_SCOPE',type:'plain_text',text:prefixScope},
     {name:'SIGNING_KEY',type:'secret_text',text:secret}],...(!updating?{migrations:{new_tag:'v1',new_sqlite_classes:['RemoteClaims']}}:{})})],{type:'application/json'}));
   for(const [path,source] of sources)form.append(path,new Blob([source],{type:'application/javascript+module'}),path);
-  await json(base+'/scripts/'+name,{method:'PUT',body:form});
-  await json(base+'/scripts/'+name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})});
-  const sub=await json(base+'/subdomain');if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
-  plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;
+  await json(base+'/scripts/'+name,{method:'PUT',body:form},'script-upload',auth);
+  await json(base+'/scripts/'+name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});
+ if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
+  delete plan.failure;plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;
+  }catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(diagnostic){if(plan)await store(key,{...plan,failure:diagnostic});throw workerError(diagnostic);}throw error;}
  },async markVerified(target,sessionId){const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]),plan=await load(key);if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');await store(key,{...plan,verifiedAt:Date.now(),verifiedTargets:{...plan.verifiedTargets,[d.prefix]:{at:Date.now(),sessionId,codeDigest:plan.codeDigest}}});},async lookup(target){const d=remoteDestination(target);return load(await digest([d.accountId,d.bucketName]));}});
 }
