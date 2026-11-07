@@ -12,10 +12,10 @@ const arr=items=>({type:'array',items,maxItems:Number.MAX_SAFE_INTEGER});
 const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested','depth','flat']);
 const level=obj({hidden:bool,label:str});
 const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
-  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list']},connectionId:str,favorite:bool,provider:str,placement:{enum:['direct','other']},
+  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list']},connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
-const changeFields={createDestination:['mode','target','label','levels'],updateDestination:['mode','id','label','levels','hidden','quick','order'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+const changeFields={createDestination:['mode','target','label','levels'],updateDestination:['mode','id','label','levels','hidden','quick','order'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const definitions={
   inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
@@ -61,7 +61,7 @@ function applyChanges(state,changes) {
   const allowed=changeFields;
   for(const c of changes) {
     if(!Object.hasOwn(allowed,c.type)||Object.keys(c).some(k=>k!=='type'&&!allowed[c.type].includes(k)))fail('INVALID_CHANGE');
-    if(['createDestination','updateDestination','deleteDestinationConfig','setShowInChrome','setDepthDisplayBuckets','setProviderPlacement','makeDefault'].includes(c.type))p.menuCustomized=true;
+    if(['createDestination','updateDestination','deleteDestinationConfig','setShowInChrome','setDepthDisplayBuckets','setProviderPlacement','setProviderMenuVisibility','makeDefault'].includes(c.type))p.menuCustomized=true;
     const m=c.mode==='narrow'?'nested':c.mode;
     if(c.type.endsWith('Destination')||c.type==='deleteDestinationConfig') {
       if(!['simple','nested'].includes(m))fail('INVALID_MODE');
@@ -83,6 +83,7 @@ function applyChanges(state,changes) {
     else if(c.type==='setView')p.view=c.view;
     else if(c.type==='setFavorite'){p.favorites=p.favorites.filter(x=>x!==c.connectionId);if(c.favorite)p.favorites.push(c.connectionId);}
     else if(c.type==='setProviderPlacement')p.placement[c.provider]=c.placement;
+    else if(c.type==='setProviderMenuVisibility'){if(!Object.hasOwn(p.providerVisibility,c.provider))fail('INVALID_PROVIDER');p.providerVisibility[c.provider]=c.visible;}
     else if(c.type==='dismissOrganizationSuggestion')p.suggestionDismissed=c.signature;
     else if(c.type==='updateRecoveryPolicy')p.recovery=c.policy;
   }
