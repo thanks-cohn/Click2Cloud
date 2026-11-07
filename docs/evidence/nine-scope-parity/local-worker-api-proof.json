@@ -1,0 +1,13 @@
+{
+  "evidenceClass": "ACTUAL_LOCAL_WORKERD_R2_DO_WITH_SIMULATED_OAUTH_MANAGEMENT_AND_SOURCE_NOT_LIVE_CLOUDFLARE",
+  "saveState": "completed",
+  "completion": "verified",
+  "nativeACK": "simulated Chrome callbacks acknowledged",
+  "key": "exact/api-parity.bin",
+  "size": 3,
+  "independentReadback": "abc",
+  "reconciliation": "verified",
+  "explorerFound": true,
+  "historyFound": true,
+  "goToKey": "exact/api-parity.bin"
+}

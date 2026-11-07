@@ -1,0 +1,25 @@
+{
+  "runtimeRevision": "6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2",
+  "implementationCommits": [
+    "ebae853",
+    "6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2"
+  ],
+  "version": "0.3.7",
+  "focusedTests": {
+    "pass": 229,
+    "fail": 0
+  },
+  "browserGates": {
+    "PASS": 17,
+    "FAIL": 0,
+    "BLOCKED": 3,
+    "NOT_TESTED": 1
+  },
+  "localWorkerR2": "PASS: actual local workerd/R2/DO; control plane, OAuth and source fixtures",
+  "liveCloudflareReadOnly": "GET checks passed using environment API token; not owner OAuth proof",
+  "realInstalledChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+  "ownerOAuthGrants": "NOT_TESTED",
+  "liveWorkerCreationAndNativeR2Save": "NOT_TESTED",
+  "remoteMutations": false,
+  "redownModified": false
+}

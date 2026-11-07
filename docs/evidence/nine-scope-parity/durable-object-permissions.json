@@ -1,0 +1,5 @@
+{
+  "source": "https://github.com/cloudflare/cloudflare-docs/blob/53ce9b502646fdc019b8184b29b9f1054939e1b6/src/content/docs/workers/authorization/durable-objects.mdx",
+  "sha256": "c402402661697cb74d2a3bb81e94c60f3cffc01ada8c43ab38ac33a9d72020a6",
+  "excerpt": "Durable Objects do not have separate roles or permissions. Access is determined by the implementing Worker."
+}

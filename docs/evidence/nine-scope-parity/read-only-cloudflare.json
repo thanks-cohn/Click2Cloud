@@ -1,0 +1,36 @@
+{
+  "time": "2026-11-07T16:21:48.022039+00:00",
+  "mode": "READ_ONLY_GET_INHERITED_PROXY_TLS_VERIFIED",
+  "identity": "environment API token, NOT owner extension OAuth or nine-grant proof",
+  "mutations": false,
+  "checks": [
+    {
+      "name": "redown-discovery",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets",
+      "httpStatus": 200,
+      "success": true,
+      "providerCodes": [],
+      "redownPresent": true
+    },
+    {
+      "name": "workers-subdomain",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/workers/subdomain",
+      "httpStatus": 200,
+      "success": true,
+      "providerCodes": [],
+      "accountSubdomainConfigured": true
+    },
+    {
+      "name": "existing-isolated-worker",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/workers/scripts/{owned_test_worker}/settings",
+      "httpStatus": 200,
+      "success": true,
+      "providerCodes": [],
+      "R2BindingDeclared": true,
+      "DObindingDeclared": true
+    }
+  ]
+}

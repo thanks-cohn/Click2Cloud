@@ -1,0 +1,5 @@
+
+> click2cloud@0.3.7 build:extension
+> node scripts/build-extension.mjs
+
+{"extension":"/workspace/Click2Cloud/dist/click2cloud","extensionId":"ajppphdiamdobknpamcheohmdbdbeoal","oauthRedirect":"https://ajppphdiamdobknpamcheohmdbdbeoal.chromiumapp.org/cloudflare"}

@@ -1,0 +1,28 @@
+✔ approved first setup creates redown only when missing; default is established only after verified probe (44.992389ms)
+✔ returning custom default always wins, and no missing selected bucket is recreated (4.323306ms)
+✔ intentional removal, missing permission, outage and positive inactive status stay distinct (9.777343ms)
+✔ passive click does not initialize an empty account outside the next explicit login (4.127325ms)
+✔ login and unavailable providers never replay pending sources or claim success (0.398371ms)
+✔ readiness never silently falls back after setup and custom selection is preserved during reconnect (1.055395ms)
+✔ new API operations have closed schemas, account grants and separate provisioning confirmation (4.386105ms)
+✔ OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation (0.338122ms)
+✔ repair of a configured non-default destination never changes the global default (2.071363ms)
+✔ one verified account needs no extra account-selection step; multiple accounts remain explicit (1.444869ms)
+✔ setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write (3.148795ms)
+✔ zero active native assignments open manager even when a hidden default remains ready (0.338972ms)
+✔ exact owner-registered nine-scope authorization with Admin/item/routes, same identity and no offline_access (10.760258ms)
+✔ requested scopes are not mislabeled as provider-issued grants when scope is absent (2.166736ms)
+✔ partial grant remains authenticated but explicitly requires reconsent instead of pretending Admin was issued (1.436497ms)
+✔ cancelled or invalid-scope reconsent preserves existing access/refresh tokens, account and session (2.156983ms)
+✔ refresh and rotation work without requesting offline_access and retain the nine-grant provenance (3.480605ms)
+✔ known edit-only token cannot create a Worker, but already owned existing Workers can still be updated (6.480647ms)
+✔ a newly provider-issued Admin grant resumes a preserved create denial once without renewed setup approval (3.094789ms)
+✔ known missing Admin prevents even initial bucket creation and retains the approved setup intent (1.375598ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 221.165235

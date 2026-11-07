@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "2498da593138c0ef596c4809a8c130a5ad57acdd",
+    "sourceCommit": "6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2",
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -12174,7 +12174,7 @@
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare."
     },
-    "sourceState": "Working-tree hash-bound runtime snapshot; source, map and tests committed together.",
+    "sourceState": "Committed runtime snapshot at 6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2; later evidence-only changes do not alter runtime hashes.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13496,7 +13496,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "8cb01639566c232e2c83411987e729fd73b42bedc3d8036975f774c91ada22dd"
+    "digest": "757827cf13872a86bde1b34ea8638ab229f649f1a65711c6941e479c602ba9fc"
   },
   "changeLog": [
     {
