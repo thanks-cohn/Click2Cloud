@@ -4,6 +4,14 @@
 
 **AUTHORITATIVE FOR ALL NEXT CODEX WORK AFFECTING THE NATIVE RIGHT-CLICK MENU OR DEFAULT DESTINATION.** This owner-approved rule supersedes conflicting menu-layout, naming, default-selection, mode-visibility and run-cadence language in earlier November 5 requests, `scaffold/README.md`, historical examples, and existing source code. **Apply this rule through the existing single V3+1 compiler, registrar, dispatcher and versioned File API.** Preserve non-conflicting Simple/Narrow/Depth customization, OAuth, security, provider capability, backup and recovery requirements.
 
+### First-run zero-configuration rule (MANDATORY)
+
+- The flat native **Cloudflare** entry is registered **immediately on extension installation**, even with **zero** configured cloud accounts, **zero** R2 buckets, or **zero** saved destinations. A missing bucket must NOT hide, disable beyond clickability, nest, duplicate, or relabel this entry.
+- **New account; does `redown` already exist?** YES → reuse that exact bucket. NO → as part of the user's authorized/approved initial setup, create lowercase `redown` exactly once; verify Worker readiness and select the bucket's root as the default. **Other buckets are irrelevant**: do not require the user to find, pick, activate in a custom menu, or create a destination manually.
+- Clicking the flat Cloudflare entry **before authorization/readiness** opens only the compact provider-specific **One Click Away!** connection/setup surface (and any real provider-required consent). On completing approved initial setup, all subsequent clicks save **directly** to `redown`. Never promise or report a save before an actual authorized R2 write and verification.
+- **One configured Cloudflare save destination** → flat **Cloudflare** leaf. **Two or more configured destinations** → one **Cloudflare** submenu with `redown` and the user's added destinations. Remove the last extra → the exact same flat **Cloudflare** leaf returns. The primary `redown` choice stays present until the user explicitly removes it.
+- Preserve intentional changes: a user-selected different default wins, intentional bucket deletion is not undone, multiple Cloudflare accounts require explicit account selection. These exceptions do not impose any manual configuration on a new single-account user.
+
 ### Mandatory native Chrome presentation
 
 ```text
