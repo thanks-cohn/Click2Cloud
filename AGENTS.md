@@ -6,6 +6,8 @@
 
 ### Conflict-resolution precedence and Codex source baseline
 
+**Current executable Codex assignment (P0):** [`docs/CODEX_NOV06_STRICT_NATIVE_MENU_AND_EXPLORER_PARITY_30MIN.md`](docs/CODEX_NOV06_STRICT_NATIVE_MENU_AND_EXPLORER_PARITY_30MIN.md). It requires exact native Cloudflare menu-rule compliance and REDOWN-equivalent-or-better File Explorer traversal/responsiveness, actual source repairs and real evidence. It is subordinate to the November 6 owner rules in this file and foundation diagrams, and uses the continuous ~30-minute working session and factual handoff contract.
+
 **One current source of truth:** this November 6 rule → `foundations/cloudflare/README.md` diagrams 2A/2B and associated acceptance matrix → `docs/CODEX_SMALL_MILESTONES_TO_SURPASS_REDOWN_2026-11-06.md` → older November 5 documents for non-conflicting functionality only. Older statements that another file is the "single controlling" specification are historical.
 
 **Codex source branch:** the newer real product, diagrams and roadmap are on **`main`**. The historical `feat/glaciaring-agent-debug` branch diverged and lacks these documents. For the next Codex work, begin with the latest `main` commit and create a fresh development branch from it. Keep the new implementation commits on that branch; no merge, publish or deployment without further owner authorization. The older feature branch remains untouched unless explicitly chosen later.
