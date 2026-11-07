@@ -69,7 +69,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   const status=await oauth.status();
   if(status.state!=='CONNECTED'){await openShelf(undefined,requestedTarget);try{await oauth.connect();return {state:'blocked',code:'FRESH_CLICK_REQUIRED'};}catch(e){return {state:'blocked',code:e.code??'LOGIN_REQUIRED'};}}
   const readiness=await check(requestedTarget?.accountId,requestedTarget,{force:false});
-  if(readiness.state!=='READY'){if(['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED'].includes(readiness.state))await openShelf(undefined,requestedTarget);return {state:'blocked',code:readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
+  if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations');else if(['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED'].includes(readiness.state))await openShelf(undefined,requestedTarget);return {state:'blocked',code:readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
   if(setupOnly)return {state:'blocked',code:'FRESH_CLICK_REQUIRED',target:requestedTarget};
   if(!source?.url||source.bytes)return {state:'blocked',code:'REMOTE_SOURCE_REQUIRED'};
   const target=readiness.target,out=await transport.save({target,source,signal,dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&targetKey((await current.read()).product.defaultTarget??{})===targetKey(target)});
