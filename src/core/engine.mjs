@@ -57,15 +57,16 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     const finish=outcome=>{try{onSaveOutcome(outcome);}catch{}return outcome;};
     try {
       const spec=menus.get(generation);
+      if(!spec)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const providerRow=spec?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
       if(providerRow){
         const native=registrar.inspect(),resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:!native.pending&&native.desired?.generation===generation?native.acknowledgedGeneration:null,authorizedTargets:[]});
         if(resolved.state!=='completed')return finish(resolved);
         if(!onProviderAction)return finish({state:'blocked',code:'PROVIDER_SETUP_UNAVAILABLE'});
-        return finish(await onProviderAction({provider:resolved.action.providerAction,source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
+        return finish(await onProviderAction({provider:resolved.action.providerAction,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
       }
       let auth;
-      try{auth=await getAuthorization();}
+      try{auth=await getAuthorization(spec?.rows.find(r=>r.id===itemId)?.target);}
       catch{observe(saveSink,'auth.check','failed','AUTH_CHECK_FAILED',scope);blockRemaining('auth.check');throw Object.assign(Error('Authorization could not be checked'),{code:'AUTH_CHECK_FAILED'});}
       if(!auth?.sessionId||!Array.isArray(auth.authorizedTargets)) {
         observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
@@ -87,7 +88,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
-        const authorize=async()=>{const latest=await getAuthorization(),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const authorize=async()=>{const latest=await getAuthorization(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
         const out=await selectedRemote({target:resolved.action.target,source,operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
@@ -100,7 +101,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       try{const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
         // Recheck current authority after source capture and before upload.
         authorize:async intent=>{
-          const latest=await getAuthorization();
+          const latest=await getAuthorization(resolved.action.target);
           if(latest?.sessionId!==auth.sessionId)return false;
           const registration=registrar.inspect();
           if(registration.pending||registration.desired?.generation!==generation)return false;

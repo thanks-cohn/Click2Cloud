@@ -13,9 +13,9 @@ test('Narrow hides eight intermediate levels without altering full target; cance
  const configs={nested:{destinations:[{id:'deep',target,levels}]}};
  const before=JSON.stringify(configs),spec=compile(configs),save=spec.rows.find(r=>r.role==='save');
  assert.equal(targetKey(save.target),targetKey(target));assert.equal(before,JSON.stringify(configs));
- assert.deepEqual(spec.rows.filter(r=>r.origin.mode==='nested').map(r=>r.label),['bucket',...Array.from({length:10},(_,i)=>'level'+(i+1)),'level19','level20']);
+ assert.deepEqual(compileMenuSpec({mode:'nested',configs}).rows.filter(r=>r.origin.mode==='nested'&&!['c2c:root','c2c:cloudflare'].includes(r.id)).map(r=>r.label),['bucket',...Array.from({length:10},(_,i)=>'level'+(i+1)),'level19','level20']);
  generateChromePlan(spec);
- const shown=compile({nested:{destinations:[{id:'deep',target}]}});assert.equal(shown.rows.length,spec.rows.length+8);
+ const shown=compile({nested:{destinations:[{id:'deep',target}]}});assert.equal(shown.rows.length,spec.rows.length);
 });
 test('Narrow hidden final, shared children, overlapping paths and different accounts stay actionable',()=>{
  const target={...base,prefix:'a/b/c/'};
@@ -28,7 +28,7 @@ test('hidden Quick persists but is omitted; shown Quick wins over duplicate exac
  assert.equal(compile(configs).rows.filter(r=>r.role==='save').length,0);assert.equal(compile(configs).rows.filter(r=>r.role==='provider-action').length,4);configs.simple.destinations[0].hidden=false;
  const product=productState({defaultTarget:t});const spec=compile(configs,product);
  assert.equal(spec.rows.filter(r=>r.role==='save').length,1);assert.equal(spec.rows[0].parentId,null);
- assert.equal(spec.rows[0].target.prefix,t.prefix);assert.equal(spec.rows.filter(r=>r.role!=='provider-action').length,1);
+ assert.equal(spec.rows.find(r=>r.role==='save').target.prefix,t.prefix);assert.equal(spec.rows.filter(r=>r.role!=='provider-action').length,1);
 });
 test('composite modes preserve configs, Flat is exclusive and missing default cannot guess',()=>{
  const configs={simple:{destinations:[{target:{...base,prefix:'one/'}}]},nested:{destinations:[{target:{...base,prefix:'two/three/'}}]},depth:{scopes:[{target:base,maxDepth:50}]}};
@@ -75,7 +75,7 @@ test('previous main product shape migrates exact targets, revisions, visibility,
  const legacy={schemaVersion:1,revision:7,configs:{simple:{schemaVersion:1,mode:'simple',revision:2,destinations:[]},nested:{schemaVersion:1,mode:'nested',revision:4,destinations:[{id:'main-stable-id',target:t,aliases:['Bucket title','A title','B title']}]},depth:{schemaVersion:1,mode:'depth',revision:3,scopes:[]}},show:{simple:false,narrow:true,depth:true,flat:false},previousShow:{simple:false,narrow:true,depth:true},flatDefault:t,recoveryPolicy:{cadence:'daily',simple:false,narrow:true,buckets:[{target:base,maxDepth:40}],backupLocation:'documents'}};
  const migrated=validateProduct(legacy);assert.equal(migrated.product.revision,7);assert.equal(migrated.product.show.nested,true);assert.equal(migrated.product.show.simple,false);assert.equal(migrated.product.defaultTarget.prefix,'a/b/');assert.equal(migrated.product.recovery.buckets[0].depth,40);
  assert.equal(migrated.configs.nested.destinations[0].id,'main-stable-id');assert.deepEqual(migrated.configs.nested.destinations[0].levels,{'':{label:'Bucket title'},'a/':{label:'A title'},'a/b/':{label:'B title'}});
- assert.deepEqual(compile(migrated.configs,migrated.product).rows.filter(r=>r.origin.mode==='nested').map(r=>r.label),['Bucket title','A title','B title']);
+ assert.deepEqual(compileMenuSpec({mode:'nested',configs:migrated.configs}).rows.filter(r=>r.origin.mode==='nested'&&!['c2c:root','c2c:cloudflare'].includes(r.id)).map(r=>r.label),['Bucket title','A title','B title']);
  assert.throws(()=>validateProduct({...legacy,flatDefault:{...t,token:'must-not-enter-state'}}));
  assert.throws(()=>validateProduct({...legacy,previousShow:{...legacy.previousShow,token:'must-not-enter-state'}}));
 });

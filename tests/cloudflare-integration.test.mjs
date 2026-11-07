@@ -16,10 +16,10 @@ const target={provider:'cloudflare',connectionId:'cloudflare:a',accountId:'a',bu
 const configs={simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}};
 test('fresh canonical menu has four actionable siblings; custom configurations and Flat retain their meaning',()=>{
  const rows=compileMenuSpec({mode:'composite',product:productState(),configs,inventory:{scopes:[]}}).rows;
- assert.deepEqual(rows.map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare R2']);assert(rows.every(r=>r.parentId===null&&r.enabled&&r.role==='provider-action'&&r.kind==='action'));
+ assert.deepEqual(rows.map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare']);assert(rows.every(r=>r.parentId===null&&r.enabled&&r.role==='provider-action'&&r.kind==='action'));
  const saved=compileMenuSpec({mode:'composite',product:productState({defaultTarget:target,menuCustomized:true}),defaultTarget:target,configs,inventory:{scopes:[{target,authorized:true,workerReady:true,folders:['exact/']}]}});
- assert(saved.rows.some(r=>r.role==='save'&&r.target.prefix==='exact/'));assert.equal(saved.rows.filter(r=>r.role==='provider-action').length,4);
- const flat=compileMenuSpec({mode:'composite',product:productState({show:{simple:true,nested:true,depth:true,flat:true},defaultTarget:target}),configs,inventory:{scopes:[]}});assert.equal(flat.rows.filter(r=>r.role==='provider-action').length,4);
+ assert(saved.rows.some(r=>r.role==='save'&&r.target.prefix==='exact/'));assert.equal(saved.rows.filter(r=>r.parentId===null).length,4);
+ const flat=compileMenuSpec({mode:'composite',product:productState({show:{simple:true,nested:true,depth:true,flat:true},defaultTarget:target}),configs,inventory:{scopes:[]}});assert.equal(flat.rows.filter(r=>r.parentId===null).length,4);
 });
 test('Cloudflare remote path precedes browser capture and Explorer refuses byte staging',async()=>{
  let state={configs:{...configs,simple:{destinations:[{target}]}},product:productState({menuCustomized:true}),generation:{desired:0,applied:null}},captures=0,remote=0;

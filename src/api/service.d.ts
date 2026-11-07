@@ -22,7 +22,7 @@ export type Change =
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
 export interface Methods {
- inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
+ openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
  invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
  inspectExplorerContextMenu:{target:Target};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'|'video'|'audio'};describeCapabilities:{};getConfiguration:{};getEngineHealth:{};getProviderConnections:{};
@@ -48,6 +48,7 @@ export interface RemoteReceipt {destination:RemoteDestination;operationId:string
 export interface RemoteOperation {cause?:string;state:'pending'|'verified'|'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;operationId?:string|number;remoteOperationId?:string;kind?:'save'|'readiness';destination?:RemoteDestination;receipt?:RemoteReceipt;stage?:string;bytes?:number;proofKind?:'independent-head-version-size'|'independent-get-byte-comparison';durationMs?:number;timings?:Record<string,number>;reconciliation?:RemoteOperation}
 export interface CloudflareSetupResult {state:'completed'|'blocked'|'uncertain';code:string;target?:Target;probe?:RemoteReceipt;provisionMs?:number;durationMs?:number;probeRetention?:string}
 export interface Results {
+ openCloudflareDestinations:{state:'completed'};
  inspectCloudflare:{onboarding:{initialized:string[];pending:string[];selectedAccountId:string|null;removed:string[]};status:CloudflareReadiness;limits:{totalFilePolicy:null;buffering:string};sourcePolicy:{kind:string;privateNetworks:boolean;browserCredentials:boolean;platformBlocker:string}};
  checkCloudflareR2:CloudflareReadiness;selectCloudflareAccount:CloudflareReadiness;
  openCloudflareActivation:{state:'completed'|'blocked';code?:string;url?:string;setupPending?:boolean;accountId?:string};

@@ -81,48 +81,39 @@ export function compileMenuSpec(options={}) {
       const peers=siblings.get(parentId)??[];
       if(role!=='separator'&&peers.some(peer=>peer.role!=='separator'&&peer.label===label))throw new MenuSpecError('LABEL_COLLISION','Sibling menu labels collide; resolve explicitly before applying.');
       const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;
-      if(setupProvider){enabled=true;label+=' · Set up';}
+      if(setupProvider){enabled=true;if(id!==stableId('provider-entry','cloudflare'))label+=' · Set up';}
       const row={actionKind:setupProvider?'setup':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
     if(composite) {
-      const placement=options.product?.placement??{}, quickTargets=new Set(), parents=new Map(), projected=new Map();
-      const quick=projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick);
-      for(const row of quick){quickTargets.add(targetKey(row.target));add({...row,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider},reason:row.reason});}
-      for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])if(options.product?.providerVisibility?.[provider]!==false)add({id:stableId('provider-entry',provider),label,role:'provider-action',providerAction:provider,target:provider==='cloudflare'?(options.defaultTarget??null):null,origin:{mode:null,provider},reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});
-      const defaultTarget=options.defaultTarget&&(options.product?.menuCustomized!==false||show.flat||projection.rows.length)?normalizeTarget(options.defaultTarget):null;
-      if(show.flat) {
-        if(options.product?.providerVisibility?.cloudflare===false) {
-          // Hide all Cloudflare-native rows, retaining its Flat destination for re-enabling.
-        } else if(defaultTarget&&defaultTarget.provider==='cloudflare') {
-          const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
-          add({label:'REDOWN → Cloudflare',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE',placement:'flat-default'});
-          for(const reason of reasons)omissions.push({target:defaultTarget,reason,kind:'ineligible'});
-        } else omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
-      } else {
-        const providers=[...new Set(projection.rows.map(r=>r.target.provider).concat(defaultTarget&&options.product?.providerVisibility?.[defaultTarget.provider]!==false?[defaultTarget.provider]:[]))];
-        const needsOther=providers.some(p=>placement[p]==='other');
-        // Quick entries precede direct providers; the optional extra parent comes last.
-        let other=null;
-        for(const p of providers.filter(p=>placement[p]!=='other'))parents.set(p,add({label:p==='cloudflare'?'Cloudflare':p,placement:'provider:'+p,origin:{mode:null,provider:p}}));
-        if(needsOther)other=add({label:'Other Clouds',placement:'other',origin:{mode:null,provider:null}});
-        for(const p of providers.filter(p=>placement[p]==='other'))parents.set(p,add({parentId:other,label:p==='cloudflare'?'Cloudflare':p,placement:'provider:'+p,origin:{mode:null,provider:p}}));
-        const placements=new Map();
-        for(const row of projection.rows) {
-          const parentId=row.parentPlacement===null?parents.get(row.target.provider):placements.get(row.sourceMode+':'+row.parentPlacement);
-          if(parentId===undefined)throw new MenuSpecError('INVALID_MENU_PARENT','Projection lost its parent.');
-          if(row.role==='save'&&quickTargets.has(targetKey(row.target)))continue;
-          const key=JSON.stringify([parentId,row.role,targetKey(row.target)]);
-          let id=projected.get(key);
-          if(!id){id=add({...row,parentId,placement:row.sourceMode+':'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});projected.set(key,id);}
-          placements.set(row.sourceMode+':'+row.placement,id);
-        }
-        if(defaultTarget&&options.product?.providerVisibility?.[defaultTarget.provider]!==false&&!quickTargets.has(targetKey(defaultTarget))&&!projection.rows.some(r=>r.role==='save'&&targetKey(r.target)===targetKey(defaultTarget))) {
-          const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
-          add({parentId:parents.get(defaultTarget.provider),label:'Default Location',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_HOME_SAVE',placement:'default'});
-        }
+      // A provider has one canonical native owner. Presentation counts assigned
+      // save targets, never discovered buckets or repeated mode projections.
+      const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
+      const candidates=new Map();
+      for(const row of projection.rows)if(row.role==='save'&&row.target.provider==='cloudflare'){
+        const key=targetKey(row.target);if(!candidates.has(key))candidates.set(key,row);
       }
-      for(const peer of options.flatProviders??[])if(options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
+      const hiddenDefault=defaultTarget&&Object.entries(options.configs??{}).some(([m,c])=>show[m]&&(c.destinations??[]).some(d=>d.hidden&&targetKey(d.target)===targetKey(defaultTarget)))&&!candidates.has(targetKey(defaultTarget));
+      if(defaultTarget?.provider==='cloudflare'&&!hiddenDefault&&(show.flat||show.simple||show.nested||show.depth)){
+        const key=targetKey(defaultTarget),c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
+        if(!candidates.has(key))candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});
+      }
+      if(show.flat&&!defaultTarget)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
+      const active=show.flat?[...candidates.values()].filter(r=>defaultTarget&&targetKey(r.target)===targetKey(defaultTarget)):[...candidates.values()];
+      // Explicit Quick shortcuts stay independent, but never duplicate the sole
+      // provider leaf or manufacture another provider-labelled root.
+      for(const row of projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick))if(row.target.provider!=='cloudflare'||active.length>1)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider}});
+      for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
+        if(options.product?.providerVisibility?.[provider]===false)continue;
+        const id=stableId('provider-entry',provider),origin={mode:null,provider};
+        if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
+        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin,contexts:['image','link','video','audio']});
+        if(active.length===1)save(active[0],null,id);
+        else {const parent=add({id,label,origin,placement:'provider:cloudflare'});for(const row of active)save(row,parent,stableId('assigned-entry',targetKey(row.target)));}
+      }
+      // Trusted future contributors remain independent flat actions. No second
+      // Cloudflare owner or legacy REDOWN/provider parent is accepted here.
+      for(const peer of options.flatProviders??[])if(peer.target?.provider!=='cloudflare'&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
     } else {
     const root=add({id:'c2c:root',label:'REDOWN',origin:{mode:null,provider:null}});
     const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;

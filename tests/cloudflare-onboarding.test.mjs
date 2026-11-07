@@ -24,7 +24,7 @@ test('connected returning account with no assigned destinations opens Manage Des
  assert.equal(f.calls.some(c=>c?.source),false);
 });
 
-test('login and unavailable providers never replay pending sources or claim success',async()=>{const f=fixture({connected:false});const r=await f.c.invoke({provider:'cloudflare',source:{url:'https://source.org/private',filename:'file'}});assert.equal(r.code,'FRESH_CLICK_REQUIRED');assert(!f.calls.some(x=>x?.source));assert.equal((await f.c.invoke({provider:'dropbox'})).code,'PROVIDER_NOT_IMPLEMENTED');});
+test('login and unavailable providers never replay pending sources or claim success',async()=>{const f=fixture({connected:false});const r=await f.c.invoke({provider:'cloudflare',source:{url:'https://source.org/private',filename:'file'}});assert.equal(r.code,'LOGIN_REQUIRED');assert(!f.calls.includes('login'));assert(!f.calls.some(x=>x?.source));assert.equal((await f.c.invoke({provider:'dropbox'})).code,'PROVIDER_NOT_IMPLEMENTED');});
 test('readiness never silently falls back after setup and custom selection is preserved during reconnect',async()=>{const f=fixture({chosen:t,initialized:true});assert.equal((await f.c.invoke({provider:'cloudflare',source:{url:'https://source.org/file',filename:'file'}})).code,'REPAIR_REQUIRED');assert.deepEqual(f.state.product.defaultTarget,t);assert(!f.calls.some(x=>x?.source));});
 test('new API operations have closed schemas, account grants and separate provisioning confirmation',async()=>{
  const f=fixture(),permissions=createPermissions();const api=createEngineApi({current:f.current,engine:{},authorize:r=>permissions.authorize(r),confirm:r=>permissions.confirm(r),cloudflare:f.c});
@@ -53,3 +53,5 @@ test('setup completion loss resumes by read-only probe identity without redeploy
  const result=await f.c.setup({accountId:'a',expectedRevision:f.state.product.revision,idempotencyKey:'resume'});assert.equal(result.code,'CLOUDFLARE_READY');assert.equal(reads,1);assert.deepEqual(counts(),before);
  const replay=await f.c.setup({accountId:'a',expectedRevision:0,idempotencyKey:'resume'});assert.deepEqual(replay,result);assert.deepEqual(counts(),before);
 });
+
+test('zero active native assignments open manager even when a hidden default remains ready',async()=>{const f=fixture({chosen:t,initialized:true});const result=await f.c.invoke({provider:'cloudflare',emptyAssignment:true,source:{url:'https://public.org/file',filename:'file'}});assert.equal(result.code,'CHOOSE_DESTINATION');assert(!f.calls.some(x=>x?.source||x==='POST'));assert(f.calls.includes('manage'));});

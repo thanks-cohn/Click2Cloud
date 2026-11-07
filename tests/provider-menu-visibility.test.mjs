@@ -56,5 +56,5 @@ test('hiding all providers yields no native provider or descendant rows; prefere
   const hidden=compileMenuSpec({...input,product:productState({...input.product,providerVisibility:{'google-drive':false,dropbox:false,onedrive:false,cloudflare:false}})});
   assert.equal(hidden.rows.length,0);
   const restored=compileMenuSpec(input);
-  assert.deepEqual(restored.rows.filter(r=>r.role==='provider-action').map(r=>r.providerAction),['google-drive','dropbox','onedrive','cloudflare']);
+  assert.deepEqual(restored.rows.filter(r=>r.parentId===null).map(r=>r.origin.provider),['google-drive','dropbox','onedrive','cloudflare']);
 });

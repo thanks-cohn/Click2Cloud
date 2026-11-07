@@ -14,7 +14,7 @@ import {RemoteClaims} from '../src/cloudflare/worker.mjs';
 import {signGrant,remoteDestination,PROTOCOL} from '../src/cloudflare/wire.mjs';
 const target={provider:'cloudflare',connectionId:'cloudflare:a',accountId:'a',bucketName:'photos',prefix:'chosen/'};
 const empty=()=>({simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}});
-const providers=['Google Drive','Dropbox','OneDrive','Cloudflare R2'];
+const providers=['Google Drive','Dropbox','OneDrive','Cloudflare'];
 function fakeTLS(response,{authorized=true}={}){
  const calls=[];return {calls,connect(options){const socket=new Duplex({read(){},write(data,encoding,done){calls.push({request:data.toString()});socket.push(Buffer.from(response));socket.push(null);done();}});socket.authorized=authorized;socket.setTimeout=ms=>{calls.push({idle:ms});};calls.push({options});queueMicrotask(()=>socket.emit('secureConnect'));return socket;}};
 }
@@ -47,7 +47,7 @@ test('actual API create/delete, migrated revision and restart retain permanent f
  let state={product:productState({revision:7}),configs:empty(),generation:{desired:0,applied:null}};
  const current={read:async()=>structuredClone(state),findRetry:async()=>null,commitProduct:async n=>{state={...state,product:{...n.product,revision:state.product.revision+1},configs:n.configs};return {};},setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;}};
  const make=()=>{const chrome={runtime:{},contextMenus:{create:(_p,cb)=>cb(),removeAll:cb=>cb(),onClicked:{addListener(){},removeListener(){}}}},registrar=createChromeRegistrar({chrome});const engine=createEngine({current,registrar,getAuthorization:async()=>null});const api=createEngineApi({engine,current,authorize:async()=>true,confirm:async()=>true,getInventory:async()=>({scopes:[{target,authorized:true,workerReady:false,folders:['chosen/']}] }),recovery:{writeVerified:async()=>({})}});return {api,engine};};
- const verify=async api=>{const r=await api.invoke({version:'3+1.1',method:'previewNativeMenu',params:{}},'gui');assert.deepEqual(r.data.rows.filter(r=>r.role==='provider-action').map(r=>r.label),providers);};let {api}=make();await verify(api);
+ const verify=async api=>{const r=await api.invoke({version:'3+1.1',method:'previewNativeMenu',params:{}},'gui');assert.deepEqual(r.data.rows.filter(r=>r.parentId===null).map(r=>r.label),providers);};let {api}=make();await verify(api);
  const change=changes=>api.invoke({version:'3+1.1',method:'commitConfigChange',params:{changes,expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()}},'gui');
  assert.equal((await change([{type:'createDestination',mode:'simple',target}])).state,'completed');await verify(api);const id=state.configs.simple.destinations[0].id;await change([{type:'deleteDestinationConfig',mode:'simple',id}]);await verify(api);({api}=make());await api.reconcile();await verify(api);assert(state.product.cloudflare.removed.includes('a'));
 });

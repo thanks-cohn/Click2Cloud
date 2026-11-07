@@ -4,3 +4,5 @@ for(const p of ['menu-compiler','canonical-menu','engine','chrome-registrar','pe
 await import('./p0-repair.test.mjs');
 
 await import('./provider-menu-visibility.test.mjs');
+
+await import("./nov06-native-menu.test.mjs");

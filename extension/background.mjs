@@ -1,3 +1,4 @@
+import {openProviderPanel} from '../src/chrome/provider-panel.mjs';
 import {trustedAppSender} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
@@ -27,7 +28,7 @@ const provisioner=createProvisioner({request:oauth.request,readModule:async path
 const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking||!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))return false;const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();return r.ok&&b.success===true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
-const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await chrome.storage.session.get('cloudflareRepairTarget')).cloudflareRepairTarget,openShelf:async(provider,target)=>{if(target)await chrome.storage.session.set({cloudflareRepairTarget:target});else await chrome.storage.session.remove('cloudflareRepairTarget');return chrome.tabs.create({url:chrome.runtime.getURL('extension/app.html')+(provider==='manage-destinations'?'#manage-destinations':provider?'#provider='+encodeURIComponent(provider):'#cloudflare')});},openActivation:url=>chrome.tabs.create({url}),record:recordRemote,history:options=>current.readRemoteResults(options)});
+const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await chrome.storage.session.get('cloudflareRepairTarget')).cloudflareRepairTarget,openShelf:async(provider,target)=>{if(target)await chrome.storage.session.set({cloudflareRepairTarget:target});else await chrome.storage.session.remove('cloudflareRepairTarget');return openProviderPanel(chrome,provider??'cloudflare');},openActivation:url=>chrome.tabs.create({url}),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
  const saved=await current.recordRemoteResult(value);
@@ -66,13 +67,13 @@ async function getInventory() {
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
   const state=await current.read(),savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
-  return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:await remoteReady(s.target),folders:await Promise.all(s.folders.map(async p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:await remoteReady({...s.target,prefix})};}))})))};
+  return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:snapshots.get(targetKey(s.target))?.ready??false,folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})})))};
 }
-const getAuthorization=async()=>{
+const getAuthorization=async selection=>{
   if(revoking)return null;
-  try{const a=await oauth.authority(),state=await current.read(),inv=await getInventory();
-    const targets=[...(registrar.inspect().desired?.rows??[]).filter(r=>r.role==='save').map(r=>({target:r.target})),...state.configs.simple.destinations,...state.configs.nested.destinations].map(d=>d.target).concat(state.product.defaultTarget?[state.product.defaultTarget]:[]);
-    return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>inv.scopes.some(s=>scopeKey(s.target)===scopeKey(t)&&s.authorized)&&await remoteReady(t)?t:null))).filter(Boolean)};
+  try{const a=await oauth.authority(),selected=selection?.provider?selection:registrar.inspect().desired?.rows.find(r=>r.id===String(selection?.menuItemId))?.target;
+    const targets=selected?[selected]:(registrar.inspect().desired?.rows??[]).filter(r=>r.role==='save').map(r=>r.target);
+    return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>a.accounts.some(x=>x.id===t.accountId)&&await remoteReady(t)?t:null))).filter(Boolean)};
   }catch{return null;}
 };
 const registrar=createChromeRegistrar({chrome,beforeClick:()=>ready,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
