@@ -1,5 +1,7 @@
 # CODEX P0 — Perfect native menu-rule alignment and REDOWN-class File Explorer responsiveness
 
+**NOVEMBER 7 MASTER PRECEDENCE:** [docs/CODEX_MASTER_2026-11-07_SINGLE_ENGINE_REDOWN_PARITY_AND_WORKINGS.md](./CODEX_MASTER_2026-11-07_SINGLE_ENGINE_REDOWN_PARITY_AND_WORKINGS.md) is the current source of desired behavior and [11.2026/workings/right-click-workings.json](../11.2026/workings/right-click-workings.json) is the incomplete source-grounded actual-behavior bootstrap Codex must complete before refactoring. Older details here are historical when inconsistent: no automatic R2 activation/checkout website navigation or cloud actions if R2 is inactive/unknown; new user with active R2 gets one approved reuse-or-create redown setup and subsequent direct saves. The four-provider native menu rules and permanent redown deletion are unchanged. Use one current V3+1 engine and the existing trusted API.
+
 **Owner-approved working-session contract · 2026-11-06**  
 **Repository:** `thanks-cohn/Click2Cloud`  
 **Source:** latest `main`; create a **new development branch** for the implementation. Preserve historical `feat/glaciaring-agent-debug`, REDOWN and production infrastructure.  
