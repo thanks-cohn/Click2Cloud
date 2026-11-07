@@ -8,7 +8,7 @@
 
 ## 1. Foundational user-experience decision chart
 
-This chart is the **first-run onboarding reference only**. After initial setup, the post-onboarding flow below takes precedence and must preserve the user's own saved configuration.
+This chart is the **first-run onboarding reference only**. After initial setup, the post-onboarding flow below takes precedence and must preserve the user's own saved configuration. In the native menu the provider is labeled **Cloudflare**, although older onboarding diagrams use the service name Cloudflare R2.
 
 ```mermaid
 flowchart TD
@@ -115,11 +115,11 @@ flowchart TD
 
 ---
 
-## 1B. Cloudflare R2 — right-click and minimal login card
+## 1B. Cloudflare — right-click and minimal login card
 
 ```mermaid
 flowchart TD
-    A["Right-click supported file → Cloudflare R2"] --> B{"Authorized and save-ready?"}
+    A["Right-click supported file → Cloudflare"] --> B{"Authorized and save-ready?"}
     B -- "YES" --> C["Save immediately to exact selected R2 bucket/folder"]
     C --> D["Verify TRUE REMOTE upload"]
     D --> E["Show verified file in Explorer + History"]
@@ -136,12 +136,14 @@ flowchart TD
 
 ## 2. The native right-click default (before the user customizes it)
 
+**NOVEMBER 6 OWNER PRIORITY — native menu projection (overrides older Simple/Flat examples):** At initialization render exactly one `Cloudflare` leaf which saves directly into bucket `redown` (root prefix) after its approved initial setup/readiness. No `Cloudflare R2` sibling or duplicated Cloudflare parent. When one additional Cloudflare destination is added, change that same item to **Cloudflare → redown / extra user destination**. When the extra destination is removed, return to the direct flat `Cloudflare` leaf. Keep `redown` available until the user explicitly removes it; honor an expressly changed default without silently reverting. With one remaining configured Cloudflare destination, that one destination is the leaf target. Additional hierarchy modes are deliberately configured options, never a prerequisite for this default. **These are presentation and routing rules for the single canonical engine, not permission to create cloud resources or new menu engines.** See `AGENTS.md` for exact acceptance and priority.
+
 Inside Chrome's extension-created grouping, display **four direct, actionable, one-click provider entries in exactly this order**:
 
 1. Google Drive
 2. Dropbox
 3. OneDrive
-4. **Cloudflare R2** — last
+4. **Cloudflare** — last (R2 service; native name is Cloudflare)
 
 No initial provider submenus, no unnecessary second REDOWN submenu, and no user-required Simple/Narrow/Depth configuration. Provider rows must remain clickable when disconnected: in that state the action is **connect/setup**, not save. When connected and ready, the same provider row is **save**. Connected providers must target their explicit configured destination; no guessed account or folder.
 
@@ -225,4 +227,4 @@ The first-run setup is an authorized, idempotent infrastructure action. Never cr
 
 ### Foundation invariant
 
-**Four flat providers initially (Google Drive → Dropbox → OneDrive → Cloudflare R2). Existing Shelf OAuth for Cloudflare. Offer R2 activation only when actually unactivated. Create/reuse `redown` only during approved first-run initialization; it is the initial default, never a forced permanent destination. Always honor the user's configured exact Cloudflare target, and never silently recreate a removed bucket. Cloudflare TRUE REMOTE only. One V3+1 menu engine and Universal File API. Users should never have to configure buckets or Workers manually unless they deliberately customize or repair them.**
+**Four flat providers initially (Google Drive → Dropbox → OneDrive → Cloudflare). Existing Shelf OAuth for Cloudflare. Offer R2 activation only when actually unactivated. Create/reuse `redown` only during approved first-run initialization; it is the initial default, never a forced permanent destination. Always honor the user's configured exact Cloudflare target, and never silently recreate a removed bucket. Cloudflare TRUE REMOTE only. One V3+1 menu engine and Universal File API. Users should never have to configure buckets or Workers manually unless they deliberately customize or repair them.**
