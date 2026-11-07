@@ -56,6 +56,8 @@ export function compileMenuSpec(options={}) {
       }
       emit(options,'modes.'+mode,projection.omissions.some(x=>x.kind!=='excluded')?'partial':'ok',projection.omissions.some(x=>x.kind!=='excluded')?'PROJECTION_PARTIAL':'PROJECTION_OK');
     } catch(error) {emit(options,'modes.'+mode,'failed','PROJECTION_FAILED');throw error;}
+    // Native provider visibility is a presentation-only filter: retained configurations and OAuth remain untouched.
+    if(composite)projection={...projection,rows:projection.rows.filter(row=>options.product?.providerVisibility?.[row.target?.provider??row.origin?.provider]!==false)};
     const rows=[],omissions=[...projection.omissions],byId=new Map(),identities=new Map(),siblings=new Map();
     const maxRows=options.maxRows??Number.MAX_SAFE_INTEGER,maxOmissions=options.maxOmissions??Number.MAX_SAFE_INTEGER;
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
@@ -87,16 +89,16 @@ export function compileMenuSpec(options={}) {
       const placement=options.product?.placement??{}, quickTargets=new Set(), parents=new Map(), projected=new Map();
       const quick=projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick);
       for(const row of quick){quickTargets.add(targetKey(row.target));add({...row,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider},reason:row.reason});}
-      for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])add({id:stableId('provider-entry',provider),label,role:'provider-action',providerAction:provider,target:provider==='cloudflare'?(options.defaultTarget??null):null,origin:{mode:null,provider},reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});
+      for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare R2']])if(options.product?.providerVisibility?.[provider]!==false)add({id:stableId('provider-entry',provider),label,role:'provider-action',providerAction:provider,target:provider==='cloudflare'?(options.defaultTarget??null):null,origin:{mode:null,provider},reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});
       const defaultTarget=options.defaultTarget&&(options.product?.menuCustomized!==false||show.flat||projection.rows.length)?normalizeTarget(options.defaultTarget):null;
       if(show.flat) {
-        if(defaultTarget&&defaultTarget.provider==='cloudflare') {
+        if(defaultTarget&&defaultTarget.provider==='cloudflare'&&options.product?.providerVisibility?.cloudflare!==false) {
           const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
           add({label:'REDOWN → Cloudflare',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE',placement:'flat-default'});
           for(const reason of reasons)omissions.push({target:defaultTarget,reason,kind:'ineligible'});
         } else omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
       } else {
-        const providers=[...new Set(projection.rows.map(r=>r.target.provider).concat(defaultTarget?[defaultTarget.provider]:[]))];
+        const providers=[...new Set(projection.rows.map(r=>r.target.provider).concat(defaultTarget&&options.product?.providerVisibility?.[defaultTarget.provider]!==false?[defaultTarget.provider]:[]))];
         const needsOther=providers.some(p=>placement[p]==='other');
         // Quick entries precede direct providers; the optional extra parent comes last.
         let other=null;
@@ -113,12 +115,12 @@ export function compileMenuSpec(options={}) {
           if(!id){id=add({...row,parentId,placement:row.sourceMode+':'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});projected.set(key,id);}
           placements.set(row.sourceMode+':'+row.placement,id);
         }
-        if(defaultTarget&&!quickTargets.has(targetKey(defaultTarget))&&!projection.rows.some(r=>r.role==='save'&&targetKey(r.target)===targetKey(defaultTarget))) {
+        if(defaultTarget&&options.product?.providerVisibility?.[defaultTarget.provider]!==false&&!quickTargets.has(targetKey(defaultTarget))&&!projection.rows.some(r=>r.role==='save'&&targetKey(r.target)===targetKey(defaultTarget))) {
           const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
           add({parentId:parents.get(defaultTarget.provider),label:'Default Location',role:'save',target:defaultTarget,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_HOME_SAVE',placement:'default'});
         }
       }
-      for(const peer of options.flatProviders??[])add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
+      for(const peer of options.flatProviders??[])if(options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
     } else {
     const root=add({id:'c2c:root',label:'REDOWN',origin:{mode:null,provider:null}});
     const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
