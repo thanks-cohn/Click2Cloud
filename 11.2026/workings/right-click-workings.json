@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T10:00:37.153324+00:00",
+  "generatedAt": "2026-11-07T10:02:49.856013+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9198,11 +9198,11 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "643aa33c648d57bb45fd44a27a13e2ead3696811",
+    "sourceCommit": "9ebaf3bf4cd006caeecc8fefce247dbacb2a34d8",
     "sourceFiles": {
       "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "a3f53a15b681d0810ab84f562c83685c7031c43c7c8fc81dff2c701d279812bf",
+      "extension/app.mjs": "c0342a0b7455004073877fb5428bf0ed29f67127b5b18807f2da12753b710dbb",
       "extension/background.mjs": "ed96b9a504c938853d2910becd5702d1e29d5b71cd4102ccfb634fca490651f6",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest.json": "16f1103d2a21623a1774b451167c9f146dee2d11f6d7f58b2b832fe55a5d302d",
@@ -11897,7 +11897,7 @@
     "verification": {
       "source": "PASS: hash-bound source behavior",
       "unit": "Updated focused run recorded in docs/evidence/nov07-master",
-      "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; see browser/browser-results.json",
+      "installedChrome": "BLOCKED_ADMINISTRATOR_POLICY; retry attempted by browser runner",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized"
     },
@@ -13163,11 +13163,11 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "10f10ed40ab93272680ef4af5c219268e22c84e70b2f4d221a6a022f948928dd"
+    "digest": "60886ffb97e788d47405377657f87f330d8b7dbdd965ab0fd70ea66717a714ae"
   },
   "changeLog": [
     {
-      "sourceCommit": "643aa33c648d57bb45fd44a27a13e2ead3696811",
+      "sourceCommit": "9ebaf3bf4cd006caeecc8fefce247dbacb2a34d8",
       "behaviorIds": [
         "ENTRY_TOOLBAR",
         "ENTRY_ATTENTION",

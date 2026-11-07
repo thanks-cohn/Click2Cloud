@@ -21,7 +21,9 @@
       "cfRay": "a56b7f138e6551ae-LAX",
       "success": null,
       "providerCodes": [],
-      "meaning": "Unsigned GET only, no transfer or object mutation"
+      "meaning": "Unsigned GET only, no transfer or object mutation",
+      "bodyClassification": "unclassified-non-json-denial",
+      "authorizationProof": "No authenticated transport request performed; do not infer its result from this GET"
     }
   ]
 }
