@@ -212,8 +212,9 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
         }
         if(await authorize({actor,scope,method,params,result:data,phase:'response'})!==true)fail('PERMISSION_DENIED');
-        const status=data?.native&&data.native.state!=='completed'?'partial':data?.state;
-        return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,method,before:receipt?.before??state.product.revision,after:receipt?.after??state.product.revision,replayed:receipt?.replayed??false}};
+        const inspection=method==='inspectRemoteReceipt';
+        const status=inspection?'completed':data?.native&&data.native.state!=='completed'?'partial':data?.state;
+        return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,method,before:receipt?.before??state.product.revision,after:receipt?.after??state.product.revision,replayed:receipt?.replayed??false}};
       };
       // Auth must remain cancellable while a provider sign-in window is pending.
       if(scope==='inspect'||['initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();

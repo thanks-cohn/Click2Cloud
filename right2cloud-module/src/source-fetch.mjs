@@ -10,7 +10,7 @@ export async function sourceFetch(raw,{fetch:fetcher,signal,maxBytes=Number.MAX_
   if(![301,302,303,307,308].includes(res.status))break;
   const location=res.headers.get('location');await res.body?.cancel();if(!location)fail('REDIRECT_DENIED');u=publicUrl(new URL(location,u).href);
  }
- if(!res.ok||!res.body||res.redirected){await res.body?.cancel();fail('SOURCE_UNAVAILABLE');}
+ if(!res.ok||!res.body||res.redirected){await res.body?.cancel();throw Object.assign(Error('SOURCE_UNAVAILABLE'),{code:'SOURCE_UNAVAILABLE',httpStatus:res.status,sourceStage:'headers'});}
  const rawLength=res.headers.get('content-length'),length=rawLength===null?null:Number(rawLength);
  if(length!==null&&(!/^\d+$/.test(rawLength)||!Number.isSafeInteger(length)||length<0))fail('SOURCE_LENGTH_INVALID');
  if(length>maxBytes){await res.body.cancel();fail('SIZE_LIMIT');}

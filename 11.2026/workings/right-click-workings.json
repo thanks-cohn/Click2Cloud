@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T16:23:51.419782+00:00",
+  "generatedAt": "2026-11-07T17:29:54.171799+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,19 +9202,19 @@
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "95394bf78fab8bd48eb22eaa17f33b95b7c62c6293f86ff5aa791fd81e8a8b5c",
+      "extension/app.mjs": "584522403d144dee296fcfdee04fdf00445e3bfd6fda84e54ff76279aff09141",
       "extension/background.mjs": "3a377c5304fa2f1195c30a9331e42ec7abf45c4cffdb1b9693feefdfb107b893",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "132956fc4e1711dd05400e7d4b67d55b019a62bf34313af49466be5b77927101",
+      "extension/manifest.json": "403f09155ea40df29b17d38e26e812a2a4abfdc93a5ca2330be46193f5212fc2",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
       "right2cloud-module/src/cloudflare-r2-writer.mjs": "820c94f0232b8ceaa3dd5a20667a86123492eb3f153276c64980427c89d83749",
-      "right2cloud-module/src/cloudflare-worker.mjs": "ec0187606a89ffd3d5793c16d007306506eaca6fcae3df62ff4ac3eb5db7b2ab",
-      "right2cloud-module/src/common.mjs": "e6d5c660fe6cb76623408b340ccc21b633c0b9009e230e78591554541fce16d5",
-      "right2cloud-module/src/index.mjs": "1c1fa0b3d5b6f395335d0c7daadaf935d0589148c5c34ac4616393ddd6ed05c0",
+      "right2cloud-module/src/cloudflare-worker.mjs": "2550e3daac3de1d1c50146dfec609f8a02ab8138a12dc1743b6c78346b1cfdb4",
+      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
+      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
       "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "a2890403f13dc26bc591594866a9854fc7e69b647efd9b105e9a91df47525deb",
+      "right2cloud-module/src/source-fetch.mjs": "d7e1c3230238fc7e5104808b98b52eebcd7b08fae21d2793ae20cbdbfeefc947",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
@@ -9222,10 +9222,10 @@
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
-      "src/api/service.mjs": "58e1850b168c129a1d2abcf20c949bc49ea684769627a9db74450766a22266f3",
+      "src/api/service.mjs": "c14d6f86f366dbdbd757ec3ba7655a82e0d7de9d6c49264c92849844ef94d92c",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
-      "src/build-info.mjs": "4f518db1cd2b6fa130e5c8f1087f4f5264171fab67ea5e70f3b95ff2fe485b31",
+      "src/build-info.mjs": "33f704076033996c1f0376d2de4fc22bd4819a75ee1c07df7ff6be163ca0868d",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
@@ -9235,7 +9235,7 @@
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
       "src/cloudflare/onboarding.mjs": "b39f21af21c7f43312933cc88f26f846af184e183cb5fbf9d877c27ff03ebcd7",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
-      "src/cloudflare/public-egress.mjs": "6f2a08150b528e391ef3af6543bfa5c455ec8419546eb7644cd494c1e66f87a2",
+      "src/cloudflare/public-egress.mjs": "88aa8bd821066fb8d7e281d8c7f6e3703e22a4766c4c782424e15c6cfe578d34",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
       "src/cloudflare/transport.mjs": "890b2f71a77a4986e924b6b32d0e8295bc92aab6b2a37033b17c9e3e559fdf13",
       "src/cloudflare/wire.mjs": "dd00cd16d698f0076a5d09bc83aafa94602428c3e92f13229bcdaf8f1cdea6a5",
@@ -9271,7 +9271,7 @@
       "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "d3846e7faa8ad258a07b998f8d01cd7c3120673f329460b7eef8b19fbf0ecca7",
+      "src/persistence/current-store.mjs": "6f6b4eb2432d231b1de561b5f2b75505f20b0cfdf1dfab114f98b00e01a9df8a",
       "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
       "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
@@ -10723,10 +10723,10 @@
         "preconditions": "Worker fetches eligible HTTPS",
         "trigger": "save",
         "guard": "Trusted DoH all-answer public check; connect literal TLS with original-host certificate",
-        "actual": "Public pinned HTTPS and redirect validation; Cloudflare-owned TCP destinations externally blocked",
+        "actual": "Pinned public HTTPS uses manual/fail-closed DNS redirect handling and runtime-compatible TLS options. Exact validated-IP routing and original-host certificate verification retained. Cloudflare-owned TCP destinations remain an external restriction; diagnostics identify DNS/connect/TLS/headers failures without source URLs or exception messages.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Public pinned HTTPS and redirect validation; Cloudflare-owned TCP destinations externally blocked",
+        "nextState": "Pinned public HTTPS uses manual/fail-closed DNS redirect handling and runtime-compatible TLS options. Exact validated-IP routing and original-host certificate verification retained. Cloudflare-owned TCP destinations remain an external restriction; diagnostics identify DNS/connect/TLS/headers failures without source URLs or exception messages.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10736,15 +10736,14 @@
           {
             "path": "src/cloudflare/public-egress.mjs",
             "symbol": "createPublicEgress",
-            "line": 12
+            "line": 13
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/p0-repair.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
         },
         "contractViolation": null
       },
@@ -10845,12 +10844,12 @@
         "preconditions": "Potential write but response/persistence lost",
         "trigger": "save",
         "guard": "Durable prepared key and final expected length/opID",
-        "actual": "Inspect read-only; never clear claim or blindly replay",
+        "actual": "Read-only inspectRemoteReceipt completes the API request independently of stored transfer state/code. Original failed result remains nested data; reconciliation stays separate. Actual inspection exceptions yield failed envelope and visible Shelf error with saved result retained; no write replay.",
         "apiMethods": [
           "inspectRemoteReceipt"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Inspect read-only; never clear claim or blindly replay",
+        "nextState": "Read-only inspectRemoteReceipt completes the API request independently of stored transfer state/code. Original failed result remains nested data; reconciliation stays separate. Actual inspection exceptions yield failed envelope and visible Shelf error with saved result retained; no write replay.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10864,11 +10863,10 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/p0-repair.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
         },
         "contractViolation": null
       },
@@ -10909,13 +10907,13 @@
         "preconditions": "Each transfer progress/outcome",
         "trigger": "history",
         "guard": "Redacted fields and per-operation durable record",
-        "actual": "No latest100 eviction; pages and explicit lookup; no source URL persisted",
+        "actual": "No latest100 eviction; explicit lookup retains original failed result plus whitelisted remote stage/type/reason/runtime code. Shelf receipt viewer displays blocked results and catches transport errors while retaining the saved result.",
         "apiMethods": [
           "inspectRemoteHistory",
           "inspectRemoteReceipt"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "No latest100 eviction; pages and explicit lookup; no source URL persisted",
+        "nextState": "No latest100 eviction; explicit lookup retains original failed result plus whitelisted remote stage/type/reason/runtime code. Shelf receipt viewer displays blocked results and catches transport errors while retaining the saved result.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "CURRENT operation record",
@@ -10925,15 +10923,14 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "recordRemoteResult:",
-            "line": 165
+            "line": 166
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "scripts/test-product-browser.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
         },
         "contractViolation": null
       },
@@ -11244,7 +11241,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "commitProduct",
-            "line": 135
+            "line": 136
           }
         ],
         "verification": {
@@ -12172,9 +12169,10 @@
       "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; actual Windows denied request unobserved",
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
-      "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare."
+      "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
+      "saveRepair": "Receipt API and browser error handling tested separately from production Worker egress and provider-backed R2 evidence; see docs/evidence/save-receipt-repair."
     },
-    "sourceState": "Committed runtime snapshot at 6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2; later evidence-only changes do not alter runtime hashes.",
+    "sourceState": "Hash-bound save/receipt repair working tree; exact runtime revision will be pinned after commit.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -12238,20 +12236,29 @@
         "NOT_SUPPORTED",
         "OPERATION_ALREADY_CLAIMED",
         "POST",
-        "REQUEST_FAILED",
+        "REMOTE_STAGE_FAILED",
         "REQUEST_INVALID",
         "REQUEST_TOO_LARGE",
         "ROUTE_DENIED",
         "WRITE_UNCONFIRMED"
       ],
       "right2cloud-module/src/common.mjs": [
+        "CERT_HAS_EXPIRED",
         "DESTINATION_INVALID",
+        "ECONNREFUSED",
+        "ECONNRESET",
+        "ENOTFOUND",
+        "ERR_METHOD_NOT_IMPLEMENTED",
+        "ERR_OPTION_NOT_IMPLEMENTED",
+        "ERR_TLS_CERT_ALTNAME_INVALID",
+        "ETIMEDOUT",
         "FILENAME_INVALID",
         "INTERRUPTED",
         "KEY_TOO_LONG",
         "OPERATION_INVALID",
         "PREFIX_INVALID",
-        "SOURCE_INVALID"
+        "SOURCE_INVALID",
+        "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
       ],
       "right2cloud-module/src/index.mjs": [
         "ABORTED_BEFORE_DISPATCH",
@@ -12555,7 +12562,6 @@
       "src/cloudflare/public-egress.mjs": [
         "AAAA",
         "LENGTH_MISMATCH",
-        "SOURCE_",
         "SOURCE_ADDRESS_DENIED",
         "SOURCE_CANCELLED",
         "SOURCE_DNS_UNAVAILABLE",
@@ -13496,7 +13502,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "757827cf13872a86bde1b34ea8638ab229f649f1a65711c6941e479c602ba9fc"
+    "digest": "b7ae5f0c2de2a98e9d800222a10b1717b6d9dc56b693f78adbe7dd38c94b6e2f"
   },
   "changeLog": [
     {
@@ -13963,5 +13969,15 @@
       "Known edit-only creation could reach PUT and fail403",
       "Newly authorized Admin could remain stuck behind saved denial without explicit recovery"
     ]
+  },
+  "saveRepairBefore": {
+    "sourceCommit": "6dc4142c795a7173f47b34aed2ec3b879337c820",
+    "confirmedWindowsEvidence": "Owner: provisioning and 57-byte readiness readback pass; four ordinary saves blocked REQUEST_FAILED; inspection incorrectly blocked; viewer rejection unhandled. Numeric source exception not captured.",
+    "sourceFiles": {
+      "extension/app.mjs": "95394bf78fab8bd48eb22eaa17f33b95b7c62c6293f86ff5aa791fd81e8a8b5c",
+      "right2cloud-module/src/cloudflare-worker.mjs": "ec0187606a89ffd3d5793c16d007306506eaca6fcae3df62ff4ac3eb5db7b2ab",
+      "src/api/service.mjs": "58e1850b168c129a1d2abcf20c949bc49ea684769627a9db74450766a22266f3",
+      "src/cloudflare/public-egress.mjs": "6f2a08150b528e391ef3af6543bfa5c455ec8419546eb7644cd494c1e66f87a2"
+    }
   }
 }

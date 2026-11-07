@@ -1,4 +1,4 @@
-import {canonicalSource,destination,validateIntent,equal,wait} from './common.mjs';
+import {canonicalSource,destination,validateIntent,equal,wait,safeRemoteDiagnostic} from './common.mjs';
 import {acceptProof} from './verification.mjs';
 export {sourceFromClick} from './source-fetch.mjs';
 export {createWorker} from './cloudflare-worker.mjs';
@@ -19,7 +19,7 @@ async function run(input,p){let dispatched=false;let intent;const result=(state,
   if(await wait(p.recheckAuthorization(intent,cap),signal)!==true)return result('blocked','AUTHORIZATION_REVOKED');
   signal?.throwIfAborted();dispatched=true;
   const response=await wait(p.authenticatedRequest(cap,intent,{signal}),signal);
-  if(['blocked','failed','uncertain'].includes(response?.state))return result(response.state,/^[A-Z_]+$/.test(response.code)?response.code:'REMOTE_REJECTED',/^[A-Z_]+$/.test(response.cause??'')?{cause:response.cause}:{});
+  if(['blocked','failed','uncertain'].includes(response?.state))return result(response.state,/^[A-Z_]+$/.test(response.code)?response.code:'REMOTE_REJECTED',{...(/^[A-Z_]+$/.test(response.cause??'')?{cause:response.cause}:{}),...(safeRemoteDiagnostic(response.diagnostic)?{diagnostic:safeRemoteDiagnostic(response.diagnostic)}:{})});
   if(response?.state!=='written')return result('uncertain','MALFORMED_RECEIPT');
   const receipt=response.receipt;
   const proof=await wait(p.verifyObject(cap,receipt,{signal}),signal);

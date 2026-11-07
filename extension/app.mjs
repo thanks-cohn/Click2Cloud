@@ -280,7 +280,12 @@ async function cloudflarePanel(){
 async function remoteHistory(cursor=null,append=[]){
  const result=await api('inspectRemoteHistory',{limit:20,...(cursor?{cursor}:{})}),page=Array.isArray(result)?{items:result,nextCursor:null}:result,rows=[...append,...page.items];
  dialog('Save results',rows.length?rows.map(r=>`<div><strong>${esc(r.state)}</strong> · ${esc(names[r.code]??r.code)}<p>${esc(r.receipt?.key??r.stage??'No verified key')} · ${esc(r.durationMs??'—')} ms</p><button data-receipt="${esc(r.operationId)}">Inspect receipt</button>${['pending','uncertain'].includes(r.state)&&r.kind!=='readiness'?'<button data-cancel-operation="'+esc(r.operationId)+'">Request cancellation</button>':''}${r.state==='verified'&&r.kind!=='readiness'?'<button data-goto="'+esc(r.operationId)+'">GO TO</button>':''}</div>`).join(''):'<p>No remote operations recorded.</p>',page.nextCursor?'<button id="more-results">Load more</button>':'');
- $$('[data-receipt]').forEach(b=>b.onclick=async()=>{const r=await api('inspectRemoteReceipt',{operationId:b.dataset.receipt});dialog('Remote receipt',`<pre>${esc(JSON.stringify(r,null,2))}</pre>`);});
+ $$('[data-receipt]').forEach(b=>b.onclick=async()=>{
+  const saved=rows.find(r=>r.operationId===b.dataset.receipt);
+  dialog('Remote receipt',`<p role="status">Inspecting…</p><pre>${esc(JSON.stringify(saved,null,2))}</pre>`);
+  try{const r=await api('inspectRemoteReceipt',{operationId:b.dataset.receipt},{quiet:true});dialog('Remote receipt',`<pre>${esc(JSON.stringify(r,null,2))}</pre>`);}
+  catch(error){dialog('Remote receipt',`<p role="alert">Inspection failed · ${esc(error.code??'ENGINE_REQUEST_FAILED')}. The saved result is preserved.</p><pre>${esc(JSON.stringify(saved,null,2))}</pre>`);status('Receipt inspection failed · '+(error.code??'ENGINE_REQUEST_FAILED'));}
+ });
  $$('[data-goto]').forEach(b=>b.onclick=async()=>{const result=await api('openRemoteResult',{operationId:b.dataset.goto});closeDialog();await navigate(result.target);selected=new Set([result.highlightKey]);updateSelection();});
  $$('[data-cancel-operation]').forEach(b=>b.onclick=async()=>{const result=await api('cancelRemoteOperation',{operationId:b.dataset.cancelOperation,target:(()=>{const d=rows.find(r=>r.operationId===b.dataset.cancelOperation).destination;return {provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''};})()});status(result.code??'Cancellation requested; inspect the receipt before retrying.');b.disabled=true;});
  listen('#more-results','click',()=>remoteHistory(page.nextCursor,rows));
@@ -297,7 +302,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(message?.channel!=='remote-result')return;
  void (async()=>{const result=message.result;if(result.kind==='readiness')return;
   if(result.state==='verified'){
-   const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status('Save verification is pending. Inspect the receipt before retrying.');return;}
+   const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status(current.reconciliation?.code??current.code??'Save verification is pending. Inspect the receipt before retrying.');return;}
    listingReader.invalidate();const d=current.receipt?.destination??current.destination;
    if(d&&source&&view==='explorer'&&source.accountId===d.accountId&&source.bucketName===d.bucketName&&source.prefix===(d.prefix?d.prefix+'/':''))await loadListing();status('Saved and independently verified.');
   }else status(result.state==='pending'?'Saving remotely · '+(result.stage??'accepted'):names[result.code]??result.code??result.state);

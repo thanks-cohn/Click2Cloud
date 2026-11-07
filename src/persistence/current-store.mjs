@@ -1,3 +1,4 @@
+import {safeRemoteDiagnostic} from '../../right2cloud-module/src/common.mjs';
 // Adapted transaction/journal/desired-applied fences from REDOWN right-click-current.js
 // blob 2590a47f7eaa032cbadc18dc2de9e82d8dcc60e5 at 89211efc08bfb6f4370f9293cc98ebea2050f859.
 // Chrome and cloud operations stay outside CURRENT; config never carries authorization.
@@ -162,7 +163,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     });
   }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResults:({cursor,limit}={})=>transact('readonly',async s=>{const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const start=cursor?all.findIndex(x=>x.operationId===cursor)+1:0,items=all.slice(start,start+limit);return {items,nextCursor:start+limit<all.length?items.at(-1)?.operationId:null};}),
     readSetupOperation:id=>transact('readonly',async s=>(await request(s.state.get('setup:'+id)))?.value??null),

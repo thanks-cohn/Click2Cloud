@@ -110,7 +110,7 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
 test('native onboarding fragments retain the exact trusted app sender boundary',()=>{const runtime={id:'installed',getURL:p=>'chrome-extension://installed/'+p},sender={id:'installed',documentId:'document',url:runtime.getURL('extension/app.html')};assert(trustedAppSender(runtime,sender));assert(trustedAppSender(runtime,{...sender,url:sender.url+'#cloudflare'}));for(const altered of [{id:'other'},{documentId:''},{url:'https://host/extension/app.html'},{url:sender.url+'?other'},{url:runtime.getURL('extension/mirror.html')}])assert.equal(trustedAppSender(runtime,{...sender,...altered}),false);});
 
 test('production TLS egress module loads in actual workerd with node compatibility (no network proof)',async()=>{
- const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',external:['node:*']})).outputFiles[0].text;
+ const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',external:['node:*','cloudflare:*']})).outputFiles[0].text;
  const mf=new Miniflare({modules:true,script:code,compatibilityDate:'2026-01-01',compatibilityFlags:['nodejs_compat'],r2Buckets:['STORAGE'],durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},bindings:{SIGNING_KEY:'fixture'}});
  try{await mf.ready;const response=await mf.dispatchFetch('https://worker.invalid/remote-save',{method:'POST'});assert.equal(response.status,403);assert.equal((await response.json()).code,'CAPABILITY_DENIED');}finally{await mf.dispose();}
 });

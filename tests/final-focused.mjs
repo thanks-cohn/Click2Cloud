@@ -19,3 +19,5 @@ await import('./issue4-v1.test.mjs');
 await import('./worker-permission.test.mjs');
 
 await import('./nine-scopes-parity.test.mjs');
+
+await import('./save-receipt-repair.test.mjs');

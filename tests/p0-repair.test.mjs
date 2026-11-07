@@ -27,7 +27,7 @@ test('three unrelated public HTTPS hosts connect to validated literal IP with or
  for(const host of ['www.python.org','nodejs.org','www.rust-lang.org']){
   const tls=fakeTLS('HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nabc');
   const fetch=createPublicEgress({resolve:async()=>['93.184.216.34'],connect:tls.connect});const r=await fetch('https://'+host+'/file?q=1#fragment');assert.equal(await r.text(),'abc');
-  assert.equal(tls.calls[0].options.host,'93.184.216.34');assert.equal(tls.calls[0].options.servername,host);assert.equal(tls.calls[0].options.rejectUnauthorized,true);
+  assert.equal(tls.calls[0].options.host,'93.184.216.34');assert.equal(tls.calls[0].options.servername,host);assert.equal(tls.calls[0].options.rejectUnauthorized,true);assert(!('ALPNProtocols' in tls.calls[0].options));
   const request=tls.calls.find(x=>x.request).request;assert(request.includes('GET /file?q=1 HTTP/1.1'));assert(!/Cookie:|Authorization:|Referer:|fragment/i.test(request));
  }
 });
