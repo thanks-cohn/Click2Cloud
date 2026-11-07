@@ -1,14 +1,14 @@
 # CODEX REQUEST — Click2Cloud V3+1 final GUI, quiet login, Windows-style Explorer, and programmatic API
 Date: 2026-11-05
 Repository: thanks-cohn/Click2Cloud
-Implementation branch: feat/glaciaring-agent-debug
+Historical implementation branch: feat/glaciaring-agent-debug (not the next-run branch; see AGENTS.md)
 Status: FINAL OWNER-APPROVED CONSOLIDATED REQUEST, NOT A CLAIM OF IMPLEMENTATION.
 
 > **Updated owner priority (2026-11-06):** This November 5 document is a historical reference **for non-conflicting requirements only**. The controlling native-menu shape, Cloudflare naming, automatic initial `redown` destination, flat-to-nested transition and continuous ~30-minute Codex working cadence are in `AGENTS.md` and `docs/CODEX_SMALL_MILESTONES_TO_SURPASS_REDOWN_2026-11-06.md`. Earlier assertions here that this is the single controlling request do **not** override those newer instructions. Preserve other approved UI/API behavior.
 >
 ## Authority and scope
 
-**THIS IS THE SINGLE CONTROLLING OWNER UX/BEHAVIOR REQUEST FOR THE NEXT CODEX RUN.** It replaces conflicting earlier November 5 menu-layout, Quick Select, threshold, Hide and GUI drafts:
+**HISTORICAL NOVEMBER 5 OWNER UX/BEHAVIOR REQUEST.** The newer November 6 menu rules and current main-based Codex branch instructions in AGENTS.md take precedence. It replaces conflicting earlier November 5 menu-layout, Quick Select, threshold, Hide and GUI drafts:
 - docs/CODEX_NEXT_GUI_BASELINE_HIDE_VISIBILITY_AND_NATIVE_LAYOUT_2026-11-05.md
 - docs/CODEX_NARROW_SELECT_HIDE_LEVELS_AND_SIMPLE_ONE_CLICK_TOGGLE_2026-11-05.md
 - docs/CODEX_QUICK_SELECT_SIMPLE_PRIORITY_MENU_2026-11-05.md
@@ -148,6 +148,6 @@ Preserve original Recovery Mode and Save Whole Cloud features where supported, b
 - **User-initiated, quiet working OAuth login** and real authenticated provider listing.
 - Working + Right Click, Simple and Narrow manager, Quick Select, Hide/Show, Default Location, favorite-only marker, and selective provider organization from small circular sliders popup.
 - A **significantly expanded headless typed V3+1 programmatic API** covering all meaningful user operations, using the same engine and permission model as GUI.
-- Source-backed concise acceptance report, installed extension path, native menu ACK, verified save receipts and explicit blockers; commits to feat/glaciaring-agent-debug only.
+- Source-backed concise acceptance report, installed extension path, native menu ACK, verified save receipts and explicit blockers; commits to the new development branch created from the latest main, under the November 6 AGENTS.md rule.
 
 **Definition of done:** user logs in normally, browses a familiar standard Explorer, manages exact cloud destinations with simple direct controls, obtains reliable Chrome Quick Saves, and can inspect/automate every meaningful permitted operation via the same secure V3+1 API.
