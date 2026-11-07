@@ -1,12 +1,12 @@
 # CODEX P0 — BUILD THE REAL CLICK2CLOUD V3+1 PRODUCT FROM /scaffold, AGENT-READY
 
-> **FINAL REQUEST SUPERSEDES CONFLICTING UX RULES (Nov. 5):** [CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) is the controlling next Codex implementation contract. Older layout, threshold, Quick Select, default/favorite and GUI behavior here are historical wherever they conflict. Keep only non-conflicting engineering/security requirements. This is NOT evidence of product implementation.
+> **NOVEMBER 6 PRECEDENCE:** AGENTS.md and foundations/cloudflare/README.md are authoritative for provider naming, default redown lifecycle, flat/nested menu, Settings provider show/hide, empty destination routing, branch selection, and continuous 30-minute Codex sessions. [The November 5 consolidated request](CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) is a historical reference for non-conflicting requirements. Older layout, threshold, Quick Select, default/favorite and GUI behavior here are historical wherever they conflict. Keep only non-conflicting engineering/security requirements. This is NOT evidence of product implementation.
 
 **Owner-approved implementation request — November 5, 2026**
 **Repository:** thanks-cohn/Click2Cloud
-**Implementation branch:** feat/glaciaring-agent-debug
+**Historical implementation branch:** feat/glaciaring-agent-debug; use a fresh development branch from current main for the next Codex work.
 **Delivery:** Real installed Chrome MV3 extension, real V3+1 engine, real right-click saves, durable Windows recovery, working File Explorer, source-owned Glaciaring inspection, and secure first-party agent control interfaces.
-**Status of this file:** Binding Codex task; it is NOT proof anything has been implemented.
+**Status of this file:** Historical supplemental engineering reference for non-conflicting behavior only; it is NOT proof anything has been implemented.
 
 ## 0. Absolute priority and scope
 
@@ -22,7 +22,7 @@
    - docs/CODEX_P0_SCAFFOLD_FIRST_DEBUG_API_SURROUNDS_PRODUCT.md
 2. **V3+1 is ONE REAL headless programmatically controllable engine.** Explorer GUI, Chrome native context menu, authorized agent interface, and future MCP/ChatGPT bridges are clients/adapters of the SAME engine, CURRENT data and action resolver. The owner's existing Universal File API is the sole file-operation abstraction; do not create a replacement engine, uploader, or parallel cloud tree.
 3. **Glaciaring wraps/observes real engine boundaries.** It does not own user choices, mutate config, perform uploads or become an execution proxy. Debug OFF and ON MUST yield the same authorized behavior and cloud writes. Existing Glaciaring inspection API is READ-ONLY, not permission to execute mutations.
-4. **STOP treating a giant scenario program as the project.** Do NOT read, run, expand, repair, enumerate or prioritize the historic 500/1,000 golden test atlas, scenario expansion document, or M0–M10 Scenario Laboratory during this implementation. Do only focused scaffold acceptance, real browser/provider integration, failure/recovery and agent-security tests that establish this product. Do NOT let older AGENTS.md/runbooks override these requirements.
+4. **Keep the project focused on real product verification instead of the retired giant scenario program.** Do NOT read, run, expand, repair, enumerate or prioritize the historic 500/1,000 golden test atlas, scenario expansion document, or M0–M10 Scenario Laboratory during this implementation. Do only focused scaffold acceptance, real browser/provider integration, failure/recovery and agent-security tests that establish this product. Do NOT let older AGENTS.md/runbooks override these requirements.
 5. **No fake product acceptance.** DOM context menu ≠ actual native Chrome contextMenus; existing Worker ≠ authenticated browser OAuth; an ACK timer ≠ provider-confirmed upload; a unit fixture ≠ real file listings; IndexedDB ≠ uninstall-surviving backup. Report PASS / FAIL / BLOCKED / NOT TESTED for every end-to-end claim.
 6. Work on the requested development branch, keep REDOWN read-only, protect production buckets/Workers and account billing, do not transplant or deploy a release without further authorization. Preserve existing proven code instead of rewriting for cosmetic parity. Prefer working vertical slice over massive preliminary audit.
 
