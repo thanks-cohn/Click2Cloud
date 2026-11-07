@@ -13,5 +13,5 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       # Maintained owner-approved suite; never imports the retired scenario atlas.
       - run: npm run test:focused
-      - run: node --test --test-isolation=none right2cloud-module/tests/module.test.mjs
+      - run: node --test right2cloud-module/tests/module.test.mjs
       - run: npm run build:extension
