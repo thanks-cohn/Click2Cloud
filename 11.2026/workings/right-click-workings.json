@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": "Click2Cloud",
+  "documentRole": "CURRENT_IMPLEMENTATION_BEHAVIOR_TRUTH",
+  "canonicalLocation": "11.2026/workings/right-click-workings.json",
+  "humanReadableRuleContract": "docs/CODEX_MASTER_2026-11-07_SINGLE_ENGINE_REDOWN_PARITY_AND_WORKINGS.md",
+  "auditStatus": "INCOMPLETE_BOOTSTRAP_REQUIRES_FULL_CODE_AUDIT",
+  "oneToOneVerified": false,
+  "warning": "This file is a preliminary source-grounded index, NOT yet a complete 1:1 behavior map. Codex MUST audit all entrypoints and branch paths, preserve the verified pre-change baseline here and then keep current implementation synchronized with source changes and executable tests. Do not treat desired behavior from the contract as existing implementation.",
+  "implementationAt": {
+    "referenceBranch": "main",
+    "sourceCommitBeforeContract": "ae806f2ec3151fc9dabc04eafd7ed48f17e594f4",
+    "sourceRevisionPolicy": "Track actual relevant module hashes or a reproducible tracked-files digest, not the moving HEAD alone; documentation-only commits must not mislabel unchanged code",
+    "comparisonRepository": "thanks-cohn/REDOWN",
+    "comparisonMode": "read_only_behavioral_reference"
+  },
+  "baselineBeforeRefactor": {
+    "auditStatus": "SOURCE_REVIEW_PARTIAL",
+    "sourceCommit": "ae806f2ec3151fc9dabc04eafd7ed48f17e594f4",
+    "facts": [
+      {
+        "id": "BASELINE_NATIVE_CLICK_DISPATCH",
+        "kind": "CODE_INSPECTION",
+        "source": "extension/background.mjs:80-89",
+        "observed": "Native registrar dispatch calls engine.save with acknowledged menu generation and derived source; no verified installed-Chrome proof here",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_CLOUDFLARE_CHECK",
+        "kind": "CODE_INSPECTION",
+        "source": "src/cloudflare/onboarding.mjs:11-17",
+        "observed": "R2 readBuckets API check maps any HTTP 403 to INSUFFICIENT_PERMISSION; inactive only detected by an error-message regex",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_DEFAULT_TARGET",
+        "kind": "CODE_INSPECTION",
+        "source": "src/cloudflare/onboarding.mjs:35-65",
+        "observed": "Approved setup reuses selected target or picks lowercase bucket redown root prefix ''; creates redown if absent under coded conditions, prepares Worker and probe, then persists default if unset",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_INITIALIZED_REMOVED",
+        "kind": "CODE_INSPECTION",
+        "source": "src/cloudflare/onboarding.mjs:27-44",
+        "observed": "Known initialized or removed markers prevent treating a missing default as a fresh first-use setup",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_PROVIDER_PANEL",
+        "kind": "CODE_INSPECTION",
+        "source": "src/chrome/provider-panel.mjs:1-7",
+        "observed": "Provider attention currently opens a separate Chrome popup window or fallback tab rather than toolbar-anchored action popup/Shelf",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_TOOLBAR_CLICK",
+        "kind": "CODE_INSPECTION",
+        "source": "extension/background.mjs:128",
+        "observed": "Toolbar action onClicked opens extension/app.html in a new tab",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_OAUTH_SCOPES",
+        "kind": "CODE_INSPECTION",
+        "source": "src/auth/cloudflare-oauth.mjs:8-27",
+        "observed": "OAuth requests R2 read/write, Workers content_read/edit and offline_access; authorization uses Chrome identity",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_TOKEN_REFRESH",
+        "kind": "CODE_INSPECTION",
+        "source": "src/auth/cloudflare-oauth.mjs:50-66",
+        "observed": "Refresh-token path refreshes expiring access tokens; HTTP 401 marks reconnect required",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_NATIVE_PROVIDER_MENU",
+        "kind": "CODE_INSPECTION",
+        "source": "src/core/menu-spec.mjs:90-120",
+        "observed": "Composite-menu branch contributes four named provider entries; Cloudflare becomes flat for one active assigned target, one submenu for multiple; output requires actual Chrome verification",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_LEGACY_MENU_BRANCH",
+        "kind": "CODE_INSPECTION",
+        "source": "src/core/menu-spec.mjs:121-160",
+        "observed": "Non-composite legacy mode branch still contains Cloudflare R2 and REDOWN grouping; must audit reachability before removing or consolidating",
+        "runtimeEvidence": "NOT_TESTED"
+      },
+      {
+        "id": "BASELINE_TRUE_REMOTE",
+        "kind": "CODE_INSPECTION",
+        "source": "src/cloudflare/transport.mjs",
+        "observed": "Remote transport obtains authorized Worker capability, uploads through Worker and inspects provider verification; requires live R2 proof",
+        "runtimeEvidence": "NOT_TESTED"
+      }
+    ],
+    "entrypointsRemainingToAudit": [
+      "extension/manifest.json",
+      "extension/background.mjs",
+      "src/chrome/registrar.mjs",
+      "src/core/engine.mjs",
+      "src/core/action-resolver.mjs",
+      "src/core/menu-spec.mjs",
+      "src/api/service.mjs",
+      "src/api/config.mjs",
+      "src/cloudflare/onboarding.mjs",
+      "src/cloudflare/inventory.mjs",
+      "src/cloudflare/deployment.mjs",
+      "src/cloudflare/transport.mjs",
+      "src/auth/cloudflare-oauth.mjs",
+      "extension/app.mjs",
+      "extension/connect.mjs",
+      "src/chrome/provider-panel.mjs",
+      "src/explorer/",
+      "src/persistence/",
+      "right2cloud-module/"
+    ],
+    "transitions": [],
+    "testMappings": [],
+    "errorBranches": [],
+    "apiParity": [],
+    "sideEffects": [],
+    "unknowns": [
+      "Complete native event-to-provider route conditions and disabled-path branches",
+      "Actual live Chrome menu topology per configuration and restart",
+      "Actual R2 account readiness; real OAuth token grants and 403 provider evidence",
+      "Complete R2/Worker durable provisioning and exact first-use side effects",
+      "All error and reauthorization branch outcomes",
+      "File Explorer traversal/selection/preview and context-menu behavior",
+      "Provider adapter real availability and independent live upload receipts",
+      "Complete API parity, state persistence and migration coverage"
+    ]
+  },
+  "currentImplementation": {
+    "auditStatus": "SAME_AS_PARTIAL_BASELINE_UNTIL_CODE_CHANGES",
+    "sourceCommit": "ae806f2ec3151fc9dabc04eafd7ed48f17e594f4",
+    "fullBehaviorEntries": [],
+    "stateTransitions": [],
+    "apiMappings": [],
+    "observableOutcomes": [],
+    "verifiedRunEvidence": []
+  },
+  "changeLog": [],
+  "requiredForOneToOneCertification": [
+    "Review every real production entrypoint, API, permission guard and outcome",
+    "Populate complete state-transition matrix with stable IDs, source file/line or symbol and source hashes",
+    "Verify source paths and reproducible behavior tests; explicitly mark real-browser and live-provider blockers",
+    "Preserve PRE-change baseline and add AFTER-change current mapping in this same JSON",
+    "Add lightweight JSON validator and CI drift check for modified routing/OAuth/menu/Explorer files",
+    "Only change oneToOneVerified=true when coverage is complete and supported by factual code/test evidence",
+    "Never redact real failures into generic success or copy desired contract as purported observed behavior"
+  ]
+}
