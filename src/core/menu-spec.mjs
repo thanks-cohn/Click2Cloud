@@ -93,7 +93,7 @@ export function compileMenuSpec(options={}) {
       for(const row of projection.rows)if(row.role==='save'&&row.target.provider==='cloudflare'){
         const key=targetKey(row.target);if(!candidates.has(key))candidates.set(key,row);
       }
-      const hiddenDefault=defaultTarget&&Object.entries(options.configs??{}).some(([m,c])=>show[m]&&(c.destinations??[]).some(d=>d.hidden&&targetKey(d.target)===targetKey(defaultTarget)))&&!candidates.has(targetKey(defaultTarget));
+      const hiddenDefault=!show.flat&&defaultTarget&&Object.entries(options.configs??{}).some(([m,c])=>show[m]&&(c.destinations??[]).some(d=>d.hidden&&targetKey(d.target)===targetKey(defaultTarget)))&&!candidates.has(targetKey(defaultTarget));
       if(defaultTarget?.provider==='cloudflare'&&!hiddenDefault&&(show.flat||show.simple||show.nested||show.depth)){
         const key=targetKey(defaultTarget),c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
         if(!candidates.has(key)){const assigned=[...candidates];candidates.clear();candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});for(const [k,row] of assigned)candidates.set(k,row);}
