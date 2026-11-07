@@ -1,12 +1,15 @@
 import {validateModeConfig} from '../persistence/schema.mjs';
 import {normalizeTarget} from '../core/menu-identity.mjs';
 export const fail=code=>{throw Object.assign(Error(code),{code});};
+export const DEFAULT_PROVIDER_VISIBILITY=Object.freeze({'google-drive':true,dropbox:true,onedrive:true,cloudflare:true});
 export function productState(raw={}) {
   if(raw?.configs)return migrateLegacyProduct(raw).product;
   const defaults={schemaVersion:1,revision:0,theme:'dark',show:{simple:true,nested:true,depth:false,flat:false},defaultTarget:null,
-    menuCustomized:raw?.menuCustomized??(Number(raw?.revision)>0),cloudflare:{initialized:[],pending:[],selectedAccountId:null,removed:[]},favorites:[],placement:{},suggestionDismissed:null,view:'details',recovery:{cadence:'weekly',simple:true,nested:true,buckets:[],location:'automatic'},wholeCloud:{connections:[],enabled:false}};
+    menuCustomized:raw?.menuCustomized??(Number(raw?.revision)>0),providerVisibility:{...DEFAULT_PROVIDER_VISIBILITY},cloudflare:{initialized:[],pending:[],selectedAccountId:null,removed:[]},favorites:[],placement:{},suggestionDismissed:null,view:'details',recovery:{cadence:'weekly',simple:true,nested:true,buckets:[],location:'automatic'},wholeCloud:{connections:[],enabled:false}};
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>!Object.hasOwn(defaults,k)))fail('INVALID_STATE');
   const s={...defaults,...structuredClone(raw)};s.cloudflare={removed:[],...s.cloudflare};
+  if(!s.providerVisibility||typeof s.providerVisibility!=='object'||Array.isArray(s.providerVisibility)||Object.keys(s.providerVisibility).some(k=>!Object.hasOwn(DEFAULT_PROVIDER_VISIBILITY,k))||Object.values(s.providerVisibility).some(v=>typeof v!=='boolean'))fail('INVALID_STATE');
+  s.providerVisibility={...DEFAULT_PROVIDER_VISIBILITY,...s.providerVisibility};
   if(s.schemaVersion!==1||!Number.isSafeInteger(s.revision)||s.revision<0||!['dark','light'].includes(s.theme)||!['details','list'].includes(s.view))fail('INVALID_STATE');
   if(!s.show||Object.keys(s.show).sort().join()!=='depth,flat,nested,simple'||Object.values(s.show).some(v=>typeof v!=='boolean'))fail('INVALID_STATE');
   if(typeof s.menuCustomized!=='boolean'||!s.cloudflare||Object.keys(s.cloudflare).sort().join()!=='initialized,pending,removed,selectedAccountId'||!['initialized','pending','removed'].every(k=>Array.isArray(s.cloudflare[k])&&s.cloudflare[k].every(a=>typeof a==='string'&&a))||s.cloudflare.selectedAccountId!==null&&typeof s.cloudflare.selectedAccountId!=='string')fail('INVALID_STATE');
