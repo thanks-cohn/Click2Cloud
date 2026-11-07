@@ -1,5 +1,12 @@
 # AGENTS.md — Click2Cloud /scaffold-first engineering instructions
 
+## REQUIRED RIGHT-CLICK SOURCE ↔ API DOCUMENTATION — OWNER RULE (NOVEMBER 7, 2026)
+
+**Read [latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md](latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md) before changing the right-click engine, Simple/Narrow/Depth mode projectors, menu configuration, Quick Select/Default rules, Chrome registrar, dispatcher or related typed API.** Every meaningful mechanism must be documented in or alongside source, naming its exact existing `3+1.1` API owner and describing inputs, IF/THEN/ELSE, permission checks, persisted/native/provider effects, observability, failure cases and tests. Keep the narrative map and `11.2026/workings/right-click-workings.json` CURRENT synchronized with source changes, preserving the immutable pre-change baseline. Never treat a desired rule, fixture or Chrome ACK as verified installed-Chrome behavior. The owner wants **Click2Cloud's own Simple/Narrow/Depth engine**, using REDOWN as read-only functional reference for *right-click and File Explorer capabilities only*, not a transplant of all REDOWN features.
+
+The current-source map documents a known discrepancy: Quick Select still appears in both root and Cloudflare's nested list under certain configurations. Follow [latest/right-click-rules/README.md](latest/right-click-rules/README.md) for the newly approved desired placement; do not claim the source already implements it.
+
+
 ## CURRENT OAUTH PROFILE — OWNER-CONFIRMED NINE PERMISSIONS
 
 Execute `docs/requests/P0-CLICK2CLOUD-V3PLUS1-REDOWN-PARITY.md` for the latest scope/profile and end-to-end acceptance contract. The owner explicitly authorized the nine listed permissions, including Workers Admin, bucket-item read/write and Routes read/write; they replace the old five/seven-scope requests. Do not request unconfirmed offline_access. Preserve valid sessions/refresh and destinations; reconsent uses the same client, callback and API. Editor is not create authority; use actual issued grants/provider authorization and never claim a Windows/live pass from fixtures. Do not modify REDOWN or silently deploy production resources.
