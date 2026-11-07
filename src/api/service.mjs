@@ -89,7 +89,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         let state=await current.read(),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
-        if(method==='initializeCloudflare')bindings.push(...((await oauth.status()).accounts??[]));
+        if(method==='initializeCloudflare')bindings.push(...((await oauth.status()).accounts??[]).map(a=>({accountId:a.id})));
         if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);}
         for(const c of params.changes??[])if(c.id){const d=Object.values(state.configs).flatMap(c=>c.destinations??[]).find(d=>d.id===c.id);if(d)bindings.push(d.target);}
         if(method==='invokeProviderAction'){
@@ -125,7 +125,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(['loginBegin','loginCancel','disconnect'].includes(method)) {
           if(await confirm({actor,method,params})!==true)fail('HUMAN_INTERACTION_REQUIRED');
           data=await oauth[{loginBegin:'connect',loginCancel:'cancel',disconnect:'disconnect'}[method]]();
-          if(method==='loginBegin'&&data?.state==='CONNECTED'&&cloudflare?.initialize){if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:data.accounts})===true){try{data={...data,initialization:await finishInitialization(await cloudflare.initialize())};}catch(e){data={...data,initialization:{state:'blocked',code:e.code??'INITIALIZATION_UNAVAILABLE'}};}}else data={...data,initialization:{state:'blocked',code:'SETUP_AUTHORITY_REQUIRED'}};}
+          if(method==='loginBegin'&&data?.state==='CONNECTED'&&cloudflare?.initialize){if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:{accounts:data.accounts}})===true){try{data={...data,initialization:await finishInitialization(await cloudflare.initialize())};}catch(e){data={...data,initialization:{state:'blocked',code:e.code??'INITIALIZATION_UNAVAILABLE'}};}}else data={...data,initialization:{state:'blocked',code:'SETUP_AUTHORITY_REQUIRED'}};}
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);

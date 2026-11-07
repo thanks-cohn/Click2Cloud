@@ -7,3 +7,4 @@
 #files tbody tr[data-index] td{height:40px;padding-top:8px;padding-bottom:8px;line-height:24px}
 #files .row-spacer{height:auto;pointer-events:none}
 #files.list td:not(:first-child),#files.list th:not(:first-child){display:none}
+.dest-row .badge{display:inline-block;margin:6px 0;padding:2px 8px;border:1px solid var(--accent);border-radius:12px;background:var(--selected);font-size:12px;font-weight:600}

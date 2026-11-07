@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T13:19:31.898624+00:00",
+  "generatedAt": "2026-11-07T13:25:07.114442+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9200,7 +9200,7 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e",
     "sourceFiles": {
-      "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
+      "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
       "extension/app.mjs": "3b696e8ccaf63f14d1fcef80d2c1f69be0040a41085853611106e20454d3b2fd",
       "extension/background.mjs": "b999810f67562409ce622fdf308d7e12fd616fe881802f9d41256409f4f3404c",
@@ -9222,7 +9222,7 @@
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
-      "src/api/service.mjs": "22cbfa6ab2ae3a376c61335133345ca44846b5ad54d8b929d826b3da99d81328",
+      "src/api/service.mjs": "ee29eae23081068ec06dc084d3162304b1bf4067ade95fe65e4fe44c4a360f59",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "6e8eec8c3293e45e6589f36cd14857e2ab5288c555a5efe5e32d59f349373e8a",
       "src/build-info.mjs": "9c129009be914f9e0b20f1e5e529f941c18dc9bcca29c654385449da9c4ae63a",
@@ -13362,7 +13362,7 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "fbadd2e2779c5781c4eeaab455ac0e9780debf0b6fc80ca07d736ac773d7cca7"
+    "digest": "9093b282c33b3408d709583498fb6932c4de8952b5765d6071ca7d8b605f3473"
   },
   "changeLog": [
     {

@@ -66,3 +66,8 @@ test('explicit setup completion loss is resumed by next login using the same pro
  const f=fixture();const mark=f.provisioner.markVerified;f.provisioner.markVerified=async()=>{throw Error('completion lost');};const first=await f.c.setup({accountId:'a',expectedRevision:0,idempotencyKey:'explicit'});assert.equal(first.code,'SETUP_COMPLETION_PENDING');const count=f.calls.filter(x=>x?.probe).length;
  const duplicate=await f.c.setup({accountId:'a',expectedRevision:f.state.product.revision,idempotencyKey:'new-key'});assert.equal(duplicate.code,'SETUP_IN_PROGRESS');f.provisioner.markVerified=mark;f.transport.probeStatus=async(_t,id)=>({state:'verified',operationId:id,receipt:{key:'readiness'}});assert.equal((await f.c.initialize()).code,'CLOUDFLARE_READY');assert.equal(f.calls.filter(x=>x?.probe).length,count);assert.equal(rows(f).length,1);
 });
+test('initializeCloudflare binds verified account IDs before any domain mutation',async()=>{
+ const {createPermissions}=await import('../src/api/permissions.mjs');const f=fixture();const p=createPermissions();p.issue({actor:'agent',methods:['initializeCloudflare'],accounts:['a'],allConfiguration:true,expiresAt:Date.now()+10000});
+ f.oauth.status=async()=>({state:'CONNECTED',accounts:[{id:'b'}]});const api=createEngineApi({current:f.current,oauth:f.oauth,cloudflare:f.c,engine:{},authorize:r=>p.authorize(r),confirm:r=>p.confirm(r)});
+ const result=await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'agent');assert.equal(result.code,'PERMISSION_DENIED');assert.equal(f.calls.length,0);assert.equal(rows(f).length,0);
+});
