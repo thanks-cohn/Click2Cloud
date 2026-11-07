@@ -1,0 +1,51 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+  "baselineRevision": "6dc4142",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "existing-isolated-ownership",
+      "httpStatus": 200,
+      "state": "PASS"
+    },
+    {
+      "gate": "repaired-isolated-update",
+      "state": "PASS",
+      "codeDigest": "iWy2r5g_DcdoJ2oxwZDZXa5z9qT0-m5ANzGCSKjVYJ0"
+    },
+    {
+      "gate": "repaired-capability",
+      "state": "PREPARED"
+    },
+    {
+      "gate": "repaired-save",
+      "state": "blocked",
+      "code": "SOURCE_HTTP_INVALID",
+      "diagnostic": {
+        "kind": "remote-save-stage",
+        "stage": "source.fetch",
+        "errorKind": "Error",
+        "sourceReason": "http-empty-response",
+        "causeCode": "SOURCE_HTTP_INVALID",
+        "sourceStage": "headers"
+      },
+      "operationId": "873e1532-af89-411f-a91d-554ce1d3c96a",
+      "inspection": {
+        "state": "blocked",
+        "code": "SOURCE_HTTP_INVALID",
+        "diagnostic": {
+          "kind": "remote-save-stage",
+          "stage": "source.fetch",
+          "errorKind": "Error",
+          "sourceReason": "http-empty-response",
+          "causeCode": "SOURCE_HTTP_INVALID",
+          "sourceStage": "headers"
+        }
+      }
+    }
+  ],
+  "sourceFixture": "github-node-gitignore",
+  "state": "BLOCKED",
+  "code": "SOURCE_HTTP_INVALID"
+}

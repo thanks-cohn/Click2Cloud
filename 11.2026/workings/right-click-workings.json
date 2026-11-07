@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "6f8641db6ee732e07e5826ff9f312c4d8fa7b9f2",
+    "sourceCommit": "a44c9d07426edb73c067c26ec1074b70194d0a33",
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -12170,9 +12170,9 @@
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
-      "saveRepair": "Receipt API and browser error handling tested separately from production Worker egress and provider-backed R2 evidence; see docs/evidence/save-receipt-repair."
+      "saveRepair": "234 focused tests and 18 real-browser fixture gates pass. Actual original Worker REQUEST_FAILED reproduced. Final isolated provider source-fetch stream ends before HTTP headers, SOURCE_HTTP_INVALID/http-empty-response; independent R2 readback NOT REACHED; end-to-end remains BLOCKED. Real installed Chrome checked separately."
     },
-    "sourceState": "Hash-bound save/receipt repair working tree; exact runtime revision will be pinned after commit.",
+    "sourceState": "Committed runtime at a44c9d07426edb73c067c26ec1074b70194d0a33; evidence-only changes do not alter runtime hashes.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13502,7 +13502,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "b7ae5f0c2de2a98e9d800222a10b1717b6d9dc56b693f78adbe7dd38c94b6e2f"
+    "digest": "9f37c0b02c5b9e05b245fd3661c20620f4ca5bd4d0c32a49e546badfbd3c7eaa"
   },
   "changeLog": [
     {

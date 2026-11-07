@@ -1,0 +1,44 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+  "baselineRevision": "6dc4142",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "existing-isolated-ownership",
+      "httpStatus": 200,
+      "state": "PASS"
+    },
+    {
+      "gate": "baseline-isolated-update",
+      "state": "PASS",
+      "codeDigest": "da4vwWXQRSFe1x3ZTMd0gCivAcAgykHWeuKClnqq7zQ"
+    },
+    {
+      "gate": "baseline-capability",
+      "state": "PREPARED"
+    },
+    {
+      "gate": "baseline-save",
+      "state": "blocked",
+      "code": "REQUEST_FAILED",
+      "operationId": "e8fe1311-7932-4df6-bef2-6f9dc2d57c74",
+      "inspection": {
+        "state": "blocked",
+        "code": "REQUEST_FAILED"
+      }
+    },
+    {
+      "gate": "repaired-isolated-update",
+      "state": "PASS",
+      "codeDigest": "kdIVgPrgFpBSS1Ldqt-2uDeEyICBnFbV08zZL3QiuFU"
+    },
+    {
+      "gate": "repaired-capability",
+      "state": "blocked",
+      "code": "WORKER_BUILD_MISMATCH"
+    }
+  ],
+  "state": "BLOCKED",
+  "code": "WORKER_BUILD_MISMATCH"
+}

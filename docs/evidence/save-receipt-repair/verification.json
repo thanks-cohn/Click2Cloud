@@ -1,0 +1,57 @@
+{
+  "runtimeRevision": "a44c9d07426edb73c067c26ec1074b70194d0a33",
+  "extensionVersion": "0.3.8",
+  "workerCodeDigest": "iWy2r5g_DcdoJ2oxwZDZXa5z9qT0-m5ANzGCSKjVYJ0",
+  "focused": {
+    "pass": 234,
+    "fail": 0
+  },
+  "browserFixtureGates": {
+    "PASS": 18,
+    "FAIL": 0,
+    "BLOCKED": 3,
+    "NOT_TESTED": 1
+  },
+  "realExtension": {
+    "result": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "sourceRevision": "a44c9d07426edb73c067c26ec1074b70194d0a33"
+  },
+  "baselineLive": "REQUEST_FAILED reproduced",
+  "finalLive": "BLOCKED",
+  "finalSave": {
+    "gate": "repaired-save",
+    "state": "blocked",
+    "code": "SOURCE_HTTP_INVALID",
+    "diagnostic": {
+      "kind": "remote-save-stage",
+      "stage": "source.fetch",
+      "errorKind": "Error",
+      "sourceReason": "http-empty-response",
+      "causeCode": "SOURCE_HTTP_INVALID",
+      "sourceStage": "headers"
+    },
+    "operationId": "873e1532-af89-411f-a91d-554ce1d3c96a",
+    "inspection": {
+      "state": "blocked",
+      "code": "SOURCE_HTTP_INVALID",
+      "diagnostic": {
+        "kind": "remote-save-stage",
+        "stage": "source.fetch",
+        "errorKind": "Error",
+        "sourceReason": "http-empty-response",
+        "causeCode": "SOURCE_HTTP_INVALID",
+        "sourceStage": "headers"
+      }
+    }
+  },
+  "independentProviderReadback": "NOT_REACHED",
+  "endToEnd": "BLOCKED_UNRESOLVED_SOURCE_HTTP_EOF",
+  "productionResourcesModified": false,
+  "isolatedExistingTestWorkerUpdated": true,
+  "newWorkers": 0,
+  "newBuckets": 0,
+  "redownRepositoryModified": false,
+  "oauthConfigurationModified": false,
+  "pushed": false
+}

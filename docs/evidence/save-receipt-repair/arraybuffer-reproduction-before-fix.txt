@@ -1,0 +1,24 @@
+✔ successful read-only inspection completes independently of blocked stored transfer; errors remain errors (6.279313ms)
+✔ unexpected pre-write exceptions identify bounded stage; saver retains safe diagnostics (15.960533ms)
+✔ actual workerd production egress handles DNS redirects without unsupported redirect:error; no TLS or R2 write (3275.167004ms)
+✔ actual workerd confirms the former ALPN option throws before a TLS connection (3113.145328ms)
+✖ workerd native TLS transport pins IP, verifies original hostname and parses a streamed HTTP response (141.699697ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8829.92787
+
+✖ failing tests:
+
+test at tests/save-receipt-repair.test.mjs:36:1
+✖ workerd native TLS transport pins IP, verifies original hostname and parses a streamed HTTP response (141.699697ms)
+  SyntaxError [Error]: Unexpected token 'E', "Error: SOU"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at parseJSONFromBytes (/workspace/Click2Cloud/node_modules/undici/lib/web/infra/index.js:164:15)
+      at successSteps (/workspace/Click2Cloud/node_modules/undici/lib/web/fetch/body.js:445:23)
+      at readAllBytes (/workspace/Click2Cloud/node_modules/undici/lib/web/fetch/util.js:998:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)

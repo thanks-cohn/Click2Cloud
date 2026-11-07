@@ -1,0 +1,650 @@
+[
+  {
+    "attempt": "propagation-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "kdIVgPrgFpBSS1Ldqt-2uDeEyICBnFbV08zZL3QiuFU"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "blocked",
+          "code": "CAPABILITY_DENIED"
+        }
+      ],
+      "state": "BLOCKED",
+      "code": "CAPABILITY_DENIED"
+    }
+  },
+  {
+    "attempt": "source-connect-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "kdIVgPrgFpBSS1Ldqt-2uDeEyICBnFbV08zZL3QiuFU"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_EGRESS_UNAVAILABLE",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+            "sourceStage": "connect"
+          },
+          "operationId": "1735cc5d-5459-4bdb-9605-db7a625c97dc",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_EGRESS_UNAVAILABLE",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+              "sourceStage": "connect"
+            }
+          }
+        }
+      ],
+      "state": "BLOCKED",
+      "code": "SOURCE_EGRESS_UNAVAILABLE"
+    }
+  },
+  {
+    "attempt": "source-tls-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "iTQHeY5Nqg00A4SlOnMqyCoJveUVyPM0stQvT-rTQ1E"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_EGRESS_UNAVAILABLE",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+            "sourceStage": "tls"
+          },
+          "operationId": "1312a674-baab-40d0-bd93-0403b6e9625e",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_EGRESS_UNAVAILABLE",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+              "sourceStage": "tls"
+            }
+          }
+        }
+      ],
+      "state": "BLOCKED",
+      "code": "SOURCE_EGRESS_UNAVAILABLE"
+    }
+  },
+  {
+    "attempt": "source-outbound-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "xSO5n32PKsXlUZMxJgc3eYncobkHoS79sfi6yzFQ71k"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_EGRESS_UNAVAILABLE",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "outbound-address-blocked",
+            "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+            "sourceStage": "tls"
+          },
+          "operationId": "64614d2e-3879-4bb8-8fe2-4cbc89eea96a",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_EGRESS_UNAVAILABLE",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "outbound-address-blocked",
+              "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+              "sourceStage": "tls"
+            }
+          }
+        }
+      ],
+      "state": "BLOCKED",
+      "code": "SOURCE_EGRESS_UNAVAILABLE"
+    }
+  },
+  {
+    "attempt": "google-node-tls-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "xSO5n32PKsXlUZMxJgc3eYncobkHoS79sfi6yzFQ71k"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_EGRESS_UNAVAILABLE",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "outbound-address-blocked",
+            "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+            "sourceStage": "tls"
+          },
+          "operationId": "8dbd0a0e-fe1b-4c9a-a757-c95a50f58a70",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_EGRESS_UNAVAILABLE",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "outbound-address-blocked",
+              "causeCode": "SOURCE_EGRESS_UNAVAILABLE",
+              "sourceStage": "tls"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "google-robots",
+      "state": "BLOCKED",
+      "code": "SOURCE_EGRESS_UNAVAILABLE"
+    }
+  },
+  {
+    "attempt": "native-tls-live-attempt.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "G4bHvZ2azPNAsnjo21WtUn_fza9G-LbhdLtvIVbffvw"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "network-error",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "d9fbbb7d-6794-4c43-8102-08212eb8ab1c",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "network-error",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "parser-deployment-propagation.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "pBytfcehbISpHG-qJy3ZvWIZh-V59ZzKs1OwpUFdvqA"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "blocked",
+          "code": "WORKER_BUILD_MISMATCH"
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "WORKER_BUILD_MISMATCH"
+    }
+  },
+  {
+    "attempt": "github-native-parser.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "pBytfcehbISpHG-qJy3ZvWIZh-V59ZzKs1OwpUFdvqA"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "http-truncated",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "7632fb2c-5308-4adf-9ac6-b198821b4499",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "http-truncated",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "google-native-parser.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "pBytfcehbISpHG-qJy3ZvWIZh-V59ZzKs1OwpUFdvqA"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "http-truncated",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "7bded93f-8493-4493-8a6b-561a151ef469",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "http-truncated",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "google-robots",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "tcp-open-deployment-propagation.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "LyJBfKscJi-1G-eSj1Snr5SGqT_h0NRzslFh_4tH5Uo"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "blocked",
+          "code": "WORKER_BUILD_MISMATCH"
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "WORKER_BUILD_MISMATCH"
+    }
+  },
+  {
+    "attempt": "tcp-open-native-parser.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "LyJBfKscJi-1G-eSj1Snr5SGqT_h0NRzslFh_4tH5Uo"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "http-truncated",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "3a67e34a-99ea-40cb-9d54-05b9029f177d",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "http-truncated",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "github-empty-response.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "cwHnsRdn-kRqQVwiVlUYeAD00cegsLuE3GqdF8lS3A8"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "http-empty-response",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "42c98f9a-973e-46b8-af24-d7e6ed5875c8",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "http-empty-response",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "httpbin-empty-response.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-reuse",
+          "state": "PASS",
+          "codeDigest": "cwHnsRdn-kRqQVwiVlUYeAD00cegsLuE3GqdF8lS3A8"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "PREPARED"
+        },
+        {
+          "gate": "repaired-save",
+          "state": "blocked",
+          "code": "SOURCE_HTTP_INVALID",
+          "diagnostic": {
+            "kind": "remote-save-stage",
+            "stage": "source.fetch",
+            "errorKind": "Error",
+            "sourceReason": "http-empty-response",
+            "causeCode": "SOURCE_HTTP_INVALID",
+            "sourceStage": "headers"
+          },
+          "operationId": "0c44b28b-2089-443c-b755-21734b64eae1",
+          "inspection": {
+            "state": "blocked",
+            "code": "SOURCE_HTTP_INVALID",
+            "diagnostic": {
+              "kind": "remote-save-stage",
+              "stage": "source.fetch",
+              "errorKind": "Error",
+              "sourceReason": "http-empty-response",
+              "causeCode": "SOURCE_HTTP_INVALID",
+              "sourceStage": "headers"
+            }
+          }
+        }
+      ],
+      "sourceFixture": "httpbin-fixed-base64",
+      "state": "BLOCKED",
+      "code": "SOURCE_HTTP_INVALID"
+    }
+  },
+  {
+    "attempt": "chunk-deployment-propagation.json",
+    "evidence": {
+      "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+      "baselineRevision": "6dc4142",
+      "bucket": "redown",
+      "prefix": "__click2cloud_true_remote_test__/",
+      "results": [
+        {
+          "gate": "existing-isolated-ownership",
+          "httpStatus": 200,
+          "state": "PASS"
+        },
+        {
+          "gate": "repaired-isolated-update",
+          "state": "PASS",
+          "codeDigest": "atv8WPELzbIFenhq1ASM-qQbB0MCAJ_oRO32lOrbsao"
+        },
+        {
+          "gate": "repaired-capability",
+          "state": "blocked",
+          "code": "WORKER_BUILD_MISMATCH"
+        }
+      ],
+      "sourceFixture": "github-node-gitignore",
+      "state": "BLOCKED",
+      "code": "WORKER_BUILD_MISMATCH"
+    }
+  }
+]

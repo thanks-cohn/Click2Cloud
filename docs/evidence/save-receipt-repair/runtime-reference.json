@@ -1,0 +1,10 @@
+{
+  "evidenceClass": "OFFICIAL_SOURCE_AND_LOCAL_RUNTIME_NOT_LIVE_SUCCESS",
+  "tlsReference": "https://github.com/cloudflare/workerd/blob/main/src/node/internal/internal_tls_wrap.ts",
+  "tlsReferenceSHA256": "b34ae5b92da790d3c14f67329c831adb751f924c8b2373fefe6440e98ec8f6d6",
+  "unsupportedOption": "ALPNProtocols throws ERR_OPTION_NOT_IMPLEMENTED; independently reproduced in actual workerd test",
+  "nativeHostnameVerification": "Native startTls({expectedServerHostname: originalHostname}) is the API used by the reference TLS implementation",
+  "halfOpenReference": "https://github.com/cloudflare/workerd/blob/main/src/node/internal/internal_net.ts",
+  "halfOpenReferenceSHA256": "96d2839109416120c47da3e726d31f3d3638de3865e48b0ed1ea344299fa0b33",
+  "halfOpenBehavior": "Reference Node socket uses native allowHalfOpen:true and owns closure explicitly, as does this repaired parser"
+}
