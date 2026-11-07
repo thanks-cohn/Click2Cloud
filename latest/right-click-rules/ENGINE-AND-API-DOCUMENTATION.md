@@ -49,7 +49,7 @@ Destination manager (extension/app.mjs)
 Actual Chrome context-menu click
     └── src/chrome/registrar.mjs: onClicked → handleClick(...)
         ├── verify current acknowledged generation and authorization
-        ├── src/core/menu-resolver.mjs (verify exact import path in current source):
+        ├── src/core/action-resolver.mjs:
         │   resolveMenuAction(...) to select the intended target/action
         └── extension/background.mjs: dispatch
             └── src/core/engine.mjs: save(...)
