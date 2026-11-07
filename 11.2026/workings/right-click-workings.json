@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e",
+    "sourceCommit": "437fa2180e397c7053eb0884e732dd1f3509e4d3",
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -12072,15 +12072,15 @@
     ],
     "verification": {
       "source": "PASS: hash-bound source behavior",
-      "unit": "PASS: 192 focused tests; docs/evidence/shelf-engine/focused.txt",
-      "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; see docs/evidence/nov07-master/browser/browser-results.json",
+      "unit": "PASS:209 focused tests; see docs/evidence/issue4/focused.txt",
+      "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; docs/evidence/issue4/real-shelf-receipt.json",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
-      "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized",
+      "liveR2": "Read-only environment-token discovery HTTP200/redown present; no extension-OAuth save/write/readback performed",
       "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
-      "shelfLocalBrowser": "PASS: 13 actual Chromium local-fixture gates, 0 failures; these are not installed-extension evidence",
+      "shelfLocalBrowser": "PASS:15 actual Chromium local-fixture gates; not installed-extension/live R2 proof",
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED"
     },
-    "sourceState": "Working tree hash-bound snapshot; source, current map and tests are committed together; subsequent evidence commit pins runtime revision.",
+    "sourceState": "Committed runtime snapshot at 437fa2180e397c7053eb0884e732dd1f3509e4d3; sourceFiles hashes match exactly. Following evidence commit changes no runtime source.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13360,9 +13360,21 @@
       "P": "Real Chromium local fixture measurements at100/1000/10000; no Windows/native-extension or identical REDOWN benchmark proof",
       "Q": "53 existing trusted typed API tools; focused/browser checks of touched controls; OS visual gestures remain Chrome-gated",
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
-      "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
+      "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference",
+      "issue4V1": {
+        "tests": "tests/issue4-v1.test.mjs",
+        "before": "issue4Before",
+        "existingAbsent": "Verified local create/reuse, one ordinary root row + default, next engine save",
+        "choices": "Existing entries/defaults preserved; legacy default-only linked",
+        "deletion": "Last-row config deletion permits next-login initialization; survivors never replaced",
+        "security": "No grant/scope/account/active-R2 => no remote mutation; agent account binding checked before domain call",
+        "resumption": "Serialized pointer/probe recovery, create reply loss, explicit-completion loss and concurrent user edit regressions",
+        "gui": "Inline necessary consent, zero normal JS dialogs, ordinary default badge, config delete and re-login reuse",
+        "native": "Actual registrar callbacks in fixtures; installed native gesture BLOCKED",
+        "cloud": "Read-only API-token discovery only; live OAuth/native save+readback NOT_TESTED"
+      }
     },
-    "digest": "9093b282c33b3408d709583498fb6932c4de8952b5765d6071ca7d8b605f3473"
+    "digest": "9b3f03326f04a226bd620f04253ef24e2019e32ed88787b3f1becedbdf8a1971"
   },
   "changeLog": [
     {
@@ -13398,7 +13410,7 @@
       "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e"
     },
     {
-      "sourceCommit": "93410b4b3715dac40afa3f4682aeac998803b3d9",
+      "sourceCommit": "437fa2180e397c7053eb0884e732dd1f3509e4d3",
       "behaviorIds": [
         "AUTH_LOGIN",
         "R2_RETURNING",
@@ -13413,7 +13425,8 @@
         "V1_NATIVE_READY"
       ],
       "summary": "Issue #4 V1 implementation: automatic authorized login setup, canonical ordinary destination registration, choice preservation and zero normal setup popups",
-      "status": "LOCAL_IMPLEMENTATION_LIVE_PROOF_SEPARATE"
+      "status": "LOCAL_IMPLEMENTATION_LIVE_PROOF_SEPARATE",
+      "beforeCommit": "93410b4b3715dac40afa3f4682aeac998803b3d9"
     }
   ],
   "verificationLevels": [

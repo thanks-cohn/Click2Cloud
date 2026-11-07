@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-07T13:20:26.891065+00:00",
+  "mode": "READ_ONLY_GET_INHERITED_PROXY_TLS_VERIFIED",
+  "identityKind": "environment API token; NOT extension OAuth",
+  "mutations": false,
+  "checks": [
+    {
+      "name": "bucket-discovery",
+      "httpStatus": 200,
+      "success": true,
+      "redownPresent": true,
+      "bucketCountInPage": 23,
+      "providerCodes": []
+    }
+  ]
+}

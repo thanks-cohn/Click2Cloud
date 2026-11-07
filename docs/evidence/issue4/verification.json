@@ -1,0 +1,28 @@
+{
+  "runtimeCommit": "437fa2180e397c7053eb0884e732dd1f3509e4d3",
+  "branch": "dev/issue-4-v1-auto-redown",
+  "extensionVersion": "0.3.5",
+  "status": "IMPLEMENTED_LOCAL_PASS_GENUINE_ACCEPTANCE_BLOCKED",
+  "focused": {
+    "pass": 209,
+    "fail": 0
+  },
+  "browserFixtures": {
+    "pass": 15,
+    "fail": 0,
+    "class": "actual app/API/engine/IDB, fake provider and Chrome transport"
+  },
+  "build": "PASS",
+  "strictTypescriptDeclarations": "PASS",
+  "workingsBaselineAndDrift": "PASS",
+  "genuineShelf": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  },
+  "liveR2": "Read-only API-token bucket discovery PASS; actual extension OAuth/save/readback NOT_TESTED",
+  "REDOWN": "UNCHANGED_CLEAN",
+  "cloudMutations": false,
+  "deploy": false,
+  "merge": false,
+  "push": false
+}

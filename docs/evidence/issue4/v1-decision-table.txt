@@ -1,0 +1,37 @@
+✔ approved first setup creates redown only when missing; default is established only after verified probe (66.619234ms)
+✔ returning custom default always wins, and no missing selected bucket is recreated (4.668357ms)
+✔ intentional removal, missing permission, outage and positive inactive status stay distinct (8.344246ms)
+✔ passive click does not initialize an empty account outside the next explicit login (1.278783ms)
+✔ login and unavailable providers never replay pending sources or claim success (0.378515ms)
+✔ readiness never silently falls back after setup and custom selection is preserved during reconnect (1.119922ms)
+✔ new API operations have closed schemas, account grants and separate provisioning confirmation (3.38638ms)
+✔ OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation (0.911528ms)
+✔ repair of a configured non-default destination never changes the global default (1.923948ms)
+✔ one verified account needs no extra account-selection step; multiple accounts remain explicit (1.52727ms)
+✔ setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write (2.366399ms)
+✔ zero active native assignments open manager even when a hidden default remains ready (0.67081ms)
+✔ V1 authorized login reuses redown, ordinary entry/default and verified next save (2.959212ms)
+✔ V1 authorized login creates redown, ordinary entry/default and verified next save (3.172921ms)
+✔ saved assignments without default preserve labels, visibility, order and mode; never add redown (2.934694ms)
+✔ default-only migration links exact custom target to an editable canonical row without implicit remote approval (1.967899ms)
+✔ existing default plus assignments is unchanged and multiple assignments without a default stay ambiguous (2.804765ms)
+✔ configuration-only deletion of last row reinitializes on next login, but never on passive status or restart (3.707859ms)
+✔ deleting redown with a surviving assignment preserves that survivor at next login (2.487823ms)
+✔ missing consent, unknown R2, missing scopes and wrong account never mutate remote resources (3.132054ms)
+✔ partial probe completion resumes after worker restart without a duplicate write or manager entry (4.406882ms)
+✔ a concurrent user destination edit stops setup instead of overwriting choices (1.638352ms)
+✔ login API initializes only with separately authorized provisioning scope and returns actual native ACK (1.675354ms)
+✔ verified provider setup with a failed native ACK is partial, never READY (1.686627ms)
+✔ a bucket create whose reply is lost is discovered after restart without a duplicate POST (2.16185ms)
+✔ two live owners serialize initialization and recover an interrupted bucket-confirmed stage (3.405353ms)
+✔ an approval for another account or forged transferable config cannot grant provisioning (0.942826ms)
+✔ explicit setup completion loss is resumed by next login using the same probe (2.194154ms)
+✔ initializeCloudflare binds verified account IDs before any domain mutation (1.390265ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 265.468916

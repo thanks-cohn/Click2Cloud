@@ -1,0 +1,10 @@
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (11.424599ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.371285ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.752992
