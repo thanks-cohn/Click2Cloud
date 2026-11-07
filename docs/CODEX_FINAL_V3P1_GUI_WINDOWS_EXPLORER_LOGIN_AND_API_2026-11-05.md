@@ -4,6 +4,8 @@ Repository: thanks-cohn/Click2Cloud
 Implementation branch: feat/glaciaring-agent-debug
 Status: FINAL OWNER-APPROVED CONSOLIDATED REQUEST, NOT A CLAIM OF IMPLEMENTATION.
 
+> **Updated owner priority (2026-11-06):** This November 5 document is a historical reference **for non-conflicting requirements only**. The controlling native-menu shape, Cloudflare naming, automatic initial `redown` destination, flat-to-nested transition and continuous ~30-minute Codex working cadence are in `AGENTS.md` and `docs/CODEX_SMALL_MILESTONES_TO_SURPASS_REDOWN_2026-11-06.md`. Earlier assertions here that this is the single controlling request do **not** override those newer instructions. Preserve other approved UI/API behavior.
+>
 ## Authority and scope
 
 **THIS IS THE SINGLE CONTROLLING OWNER UX/BEHAVIOR REQUEST FOR THE NEXT CODEX RUN.** It replaces conflicting earlier November 5 menu-layout, Quick Select, threshold, Hide and GUI drafts:
