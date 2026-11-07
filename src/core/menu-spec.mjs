@@ -32,7 +32,22 @@ function normalizeInventory(value={}) {
   return freeze({revision:validateRevision(value.revision??0),scopes});
 }
 
-/** Pure, full logical menu. Native capability limits are evidence in the registrar, not hidden tree truncation. */
+/**
+ * @responsibility Pure Click2Cloud projection; Simple/Narrow/Depth remain independent.
+ * @api previewNativeMenu, previewContextMenu, inspectMenuTree, previewConfigChange;
+ * commitConfigChange/reconcileNativeMenu own persistence and Chrome effects.
+ * @inputs Validated configs/product, Default, show/visibility flags, inventory and generation.
+ * @decision Deduplicate exact targets; promote visible Simple Quick rows out of
+ * Cloudflare; retain Default, suppress its redundant Quick, count only remaining
+ * Cloudflare choices (0 attention / 1 flat / 2+ branch). Explicit Flat keeps Quick.
+ * @effects None except optional bounded diagnostics; never rewrites config or authorizes.
+ * @returns Frozen full logical rows, omissions, coverage and composition explanation.
+ * @invariants Stable target/action IDs, providers before Quick, no hidden defaults reset,
+ * no website/queue/file caps, no false provider success from menu availability.
+ * @tests tests/latest-quick-rules.test.mjs + existing native/compiler fixtures;
+ * installed Chrome and real cloud confirmation are independent evidence gates.
+ * @rule QUICK_PROMOTION, MENU_ZERO, MENU_ONE, MENU_MULTIPLE in current workings JSON.
+ */
 export function compileMenuSpec(options={}) {
   options={...options,operationId:operationIdentity(options)};
   const mode=options.mode==='narrow'?'nested':options.mode??'simple';
@@ -45,10 +60,10 @@ export function compileMenuSpec(options={}) {
     if(!module?.project||!module?.createConfig)throw new MenuSpecError('INVALID_MODE','Unsupported independent mode.');
     const inventory=normalizeInventory(options.inventory),revision=validateRevision(options.revision??0);
     emit(options,'modes.'+mode,'started','PROJECTION_STARTED');
-    let projection;
+    let projection,composition;
     try {
       if(composite) {
-        const parts=Object.entries(modeModules).filter(([m])=>show[m]&&!show.flat).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
+        const parts=Object.entries(modeModules).filter(([m])=>show[m]&&(!show.flat||m==='simple')).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
         projection={revision:options.product?.revision??0,rows:parts.flatMap(p=>p.rows.map(r=>({...r,sourceMode:p.m}))),omissions:parts.flatMap(p=>p.omissions)};
       } else {
         const config=module.createConfig(options.configs?.[mode]??{});
@@ -63,7 +78,7 @@ export function compileMenuSpec(options={}) {
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
-    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio'],visible=true,providerAction=null}) {
+    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio','page'],visible=true,providerAction=null}) {
       if(composite&&role!=='separator') {
         const peers=siblings.get(parentId)??[];
         if(peers.some(p=>p.label===label))label+=' ['+stableId('label',placement+JSON.stringify(target)).slice(-6)+']';
@@ -99,10 +114,15 @@ export function compileMenuSpec(options={}) {
         if(!candidates.has(key)){const assigned=[...candidates];candidates.clear();candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});for(const [k,row] of assigned)candidates.set(k,row);}
       }
       if(show.flat&&!defaultTarget)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
-      const active=show.flat?[...candidates.values()].filter(r=>defaultTarget&&targetKey(r.target)===targetKey(defaultTarget)):[...candidates.values()];
-      // Explicit Quick shortcuts stay independent, but never duplicate the sole
-      // provider leaf or manufacture another provider-labelled root.
-      for(const row of projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick))if(row.target.provider!=='cloudflare'||active.length>1)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider}});
+      // @rule QUICK_PROMOTION — latest/right-click-rules/README.md sections 1–2.
+      // Quick is an alternate placement, never an extra Cloudflare child. Keep
+      // an eligible Default under Cloudflare even when its stored Quick is ON;
+      // suppress only that redundant shortcut, without mutating preferences.
+      const defaultKey=defaultTarget&&candidates.has(targetKey(defaultTarget))?targetKey(defaultTarget):null;
+      const quickRows=[...new Map(projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick&&r.role==='save').map(r=>[targetKey(r.target),r])).values()].filter(r=>targetKey(r.target)!==defaultKey);
+      const promoted=new Set(quickRows.filter(r=>r.target.provider==='cloudflare').map(r=>targetKey(r.target)));
+      const active=(show.flat?[...candidates.values()].filter(r=>targetKey(r.target)===defaultKey):[...candidates.values()]).filter(r=>!promoted.has(targetKey(r.target)));
+      composition={policy:'quick-promoted',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
         if(options.product?.providerVisibility?.[provider]===false)continue;
         const id=stableId('provider-entry',provider),origin={mode:null,provider};
@@ -111,10 +131,13 @@ export function compileMenuSpec(options={}) {
           if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
         }
         if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
-        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin,contexts:['image','link','video','audio']});
+        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin,contexts:['image','link','video','audio','page']});
         if(active.length===1)save(active[0],null,id);
         else {const parent=add({id,label,origin,placement:'provider:cloudflare'});for(const row of active)save(row,parent,stableId('assigned-entry',targetKey(row.target)));}
       }
+      // Providers lead; independent Quick leaves follow in user-configured order.
+      // Availability stays truthful (including setup actions), independently of placement.
+      for(const row of quickRows)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider}});
       // Trusted future contributors remain independent flat actions. No second
       // Cloudflare owner or legacy REDOWN/provider parent is accepted here.
       for(const peer of options.flatProviders??[])if(!['cloudflare','google-drive','dropbox','onedrive'].includes(peer.target?.provider)&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
@@ -167,7 +190,7 @@ export function compileMenuSpec(options={}) {
     const retained=omissions.slice(0,maxOmissions),omissionDropped=omissions.length-retained.length;
     const unavailable=omissions.some(x=>['ineligible','unknown-descendants','budget'].includes(x.kind));
     const coverage={rowsComplete:droppedRows===0,rowCount:rows.length,omissionsComplete:omissionDropped===0,omissionCount:omissions.length,omissionsRetained:retained.length,omissionsDropped:omissionDropped,rowsDropped:droppedRows,inventoryComplete:inventory.scopes.every(s=>s.complete&&!s.stale),unobservedDescendants:inventory.scopes.filter(s=>!s.complete).map(s=>({target:s.target,reason:'INVENTORY_INCOMPLETE'})),complete:droppedRows===0&&omissionDropped===0&&!unavailable&&inventory.scopes.every(s=>s.complete&&!s.stale)};
-    const spec=freeze({schemaVersion:1,generation,revision,mode,modeRevision:projection.revision,inventoryRevision:inventory.revision,rows,nodes:rows,omissions:retained,coverage});
+    const spec=freeze({schemaVersion:1,generation,revision,mode,modeRevision:projection.revision,inventoryRevision:inventory.revision,rows,nodes:rows,omissions:retained,coverage,...(composition?{composition}:{})});
     emit(options,'menu.compile',coverage.complete?'ok':'partial',coverage.complete?'COMPILE_OK':'COMPILE_PARTIAL');
     return spec;
   } catch(error) {emit(options,'menu.compile','failed',error.code??'COMPILE_FAILED');throw error;}

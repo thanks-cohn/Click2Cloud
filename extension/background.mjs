@@ -1,3 +1,4 @@
+import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
@@ -17,6 +18,7 @@ import {createDiagnostics} from '../src/glaciaring/index.mjs';
 import {createAgentDebugApi} from '../src/glaciaring/agent-api.mjs';
 import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
+import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
@@ -28,7 +30,7 @@ const attention=createShelfAttention({chrome,preference:()=>attentionPreference}
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();if(!loginApiPending)await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'gui');await api.reconcile();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 const provisioner=createProvisioner({request:oauth.request,authority:oauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking)return false;if(!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();if(!r.ok||b.success!==true){const diagnostic=diagnoseCloudflare(r,b,{context:'r2'});throw Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});}return true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
+const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking)return false;if(!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();if(!r.ok||b.success!==true){const diagnostic=diagnoseCloudflare(r,b,{context:'r2'});throw Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});}return true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
 const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
@@ -38,8 +40,11 @@ async function recordRemote(value){
  try{await chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}});}catch{/* No open app is normal; durable results remain inspectable. */}
  return saved;
 }
+const executeFileMessage=createFileTransport({remote});
+
 async function send(message) {
   let path,field;
+  if(['cfCreateFolder','cfTransferObjects','cfRenameEntry','cfDeleteObjects'].includes(message.type))return executeFileMessage(message);
   if(message.type==='cfAccounts'){const status=await oauth.status();return {ok:true,accounts:status.accounts??[],cursor:''};}
   else if(message.type==='cfBuckets'){
     const status=await oauth.status();if(!status.accounts?.some(a=>a.id===message.accountId))throw Error('SCOPE_UNAUTHORIZED');
@@ -51,9 +56,9 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream'].includes(op)),async run(operation,input={},options={}) {
+const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete'].includes(op)),async run(operation,input={},options={}) {
   // Unconfigured Worker transport is blocked before staging any object bytes.
-  if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
+  if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
   if(operation==='list'&&result.state==='completed') {
     const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+input.source.accountId,...input.source,prefix:''});
@@ -85,7 +90,7 @@ const registrar=createChromeRegistrar({chrome,onGesture:(info,tab)=>{const nativ
   dispatch:async(action,{info})=>{
     await ready;
     let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
-    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',source});
+    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,

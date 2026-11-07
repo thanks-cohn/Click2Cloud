@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T17:29:54.171799+00:00",
+  "generatedAt": "2026-11-07T20:06:30.059876+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,64 +9202,66 @@
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "584522403d144dee296fcfdee04fdf00445e3bfd6fda84e54ff76279aff09141",
-      "extension/background.mjs": "3a377c5304fa2f1195c30a9331e42ec7abf45c4cffdb1b9693feefdfb107b893",
+      "extension/app.mjs": "1f5ab116d1c471ad9b59343e4ce5681ff5cc0fa6bf50ef970b3165197eb8ea0a",
+      "extension/background.mjs": "096d0fceccf484fd095987bdfe089285ede465a6a27500d8e32dc685831ebda9",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "403f09155ea40df29b17d38e26e812a2a4abfdc93a5ca2330be46193f5212fc2",
+      "extension/manifest.json": "3050692bb14738f81fd6d894c529ddff9976f0d71d8505054ed9bd171f537d55",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "820c94f0232b8ceaa3dd5a20667a86123492eb3f153276c64980427c89d83749",
-      "right2cloud-module/src/cloudflare-worker.mjs": "2550e3daac3de1d1c50146dfec609f8a02ab8138a12dc1743b6c78346b1cfdb4",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "454657cd04ec8615fe1aad54db199f663e870fb93337764246251da112049f7b",
+      "right2cloud-module/src/cloudflare-worker.mjs": "4af4d3c04f34e080235399a65e2150a24899e1139a53fa5f59f40a275a8b42e6",
       "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
       "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
       "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "d7e1c3230238fc7e5104808b98b52eebcd7b08fae21d2793ae20cbdbfeefc947",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
-      "src/api/explorer-context-menu.mjs": "d5d1e435e0dbea0301d62325d78d1448629899191ae85c9ca1cd64ac57ac2708",
+      "src/api/explorer-context-menu.mjs": "c0447ad9578815f9a58aa837c5d75dd04507039de80f236e60ff552b52a3bea8",
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
-      "src/api/service.mjs": "c14d6f86f366dbdbd757ec3ba7655a82e0d7de9d6c49264c92849844ef94d92c",
+      "src/api/service.mjs": "cabdf92ed0520afd742661be1a4559b8e998f18f5cd975627f1fc0b17e626361",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
-      "src/build-info.mjs": "33f704076033996c1f0376d2de4fc22bd4819a75ee1c07df7ff6be163ca0868d",
+      "src/build-info.mjs": "240c202380ab4ec917393b0ea6239f7b76f47292057f1708df4ea2435b6bbd6e",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
-      "src/chrome/registrar.mjs": "d8bd0a7c94061a621c69c29656efde906aec119cd08b10bda42537509adfc6c6",
+      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/cloudflare/deployment.mjs": "7d6097f2ca61ac81014ee74ae24dc71dd623f1ae420857c120f10bf1cb8b9641",
+      "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
+      "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
+      "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
-      "src/cloudflare/onboarding.mjs": "b39f21af21c7f43312933cc88f26f846af184e183cb5fbf9d877c27ff03ebcd7",
+      "src/cloudflare/onboarding.mjs": "6b7233cda1ade819ebe24c379cfcbce4c823fb29cc52705edbf36a6cca0393db",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
-      "src/cloudflare/public-egress.mjs": "88aa8bd821066fb8d7e281d8c7f6e3703e22a4766c4c782424e15c6cfe578d34",
+      "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "890b2f71a77a4986e924b6b32d0e8295bc92aab6b2a37033b17c9e3e559fdf13",
-      "src/cloudflare/wire.mjs": "dd00cd16d698f0076a5d09bc83aafa94602428c3e92f13229bcdaf8f1cdea6a5",
-      "src/cloudflare/worker.mjs": "d4860ec0c0e20fcc9e1f58de1126404301497779e63a456a649065fd892aa1b2",
+      "src/cloudflare/transport.mjs": "ca2330c9185d8cf03f10dceacd934650a9c2e607cfbc564dcef3a4b70fa79e9c",
+      "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
+      "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
-      "src/core/action-resolver.mjs": "1a54cc365d08be67bc2f28ec92b3d1c0830189c82929e32b02b5ae0ea72a3cb6",
+      "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
       "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
       "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
-      "src/core/menu-spec.mjs": "a2d63d1fba98cb5ce434c10a37c87772c28fb72a87237d3c439c8a7e114b87e1",
+      "src/core/menu-spec.mjs": "2d3843c6198d7c3c0b23ca0c06de24b44c0c6e6afbc6319deb9a80b1e4f941e8",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
       "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
       "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
-      "src/explorer/configuration.mjs": "29610d41625c831714522254851bd903e6c2256f46b575b54f9b65d7e44f4b03",
+      "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
-      "src/explorer/file-api.mjs": "3553750916bfacbcebf285aeb576566581088451334032b2f60c23ce1a20b6ae",
+      "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/listing-view.mjs": "cce2f95fdcd1a05de4e58da4d55012f8801b618e57b1c27654caf3896317b2fa",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
-      "src/explorer/r2-adapter.mjs": "ac2a0997b410252a77987be94b1272225f3ee56741e5b4de0956119f7eaaf3d7",
+      "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
@@ -9271,7 +9273,7 @@
       "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "6f6b4eb2432d231b1de561b5f2b75505f20b0cfdf1dfab114f98b00e01a9df8a",
+      "src/persistence/current-store.mjs": "6f724bbb3c4c8788ecc7d0a4a61b3d0ed6f6c111c930c3d501f3a3e2b99cef94",
       "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
       "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
@@ -9311,7 +9313,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const ready=",
-            "line": 142
+            "line": 147
           }
         ],
         "verification": {
@@ -9344,7 +9346,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "dispatch:async",
-            "line": 85
+            "line": 90
           }
         ],
         "verification": {
@@ -9376,7 +9378,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.action.onClicked",
-            "line": 139
+            "line": 144
           }
         ],
         "verification": {
@@ -9473,7 +9475,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function invoke",
-            "line": 83
+            "line": 86
           }
         ],
         "verification": {
@@ -9490,14 +9492,14 @@
         "preconditions": "No active assigned target",
         "trigger": "menu",
         "guard": "Current active configuration, exact normalized identity and Settings precedence",
-        "actual": "Four flat provider access rows; returning Cloudflare opens manager",
+        "actual": "Four flat provider access rows; returning Cloudflare opens manager Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "apiMethods": [
           "previewNativeMenu",
           "previewContextMenu",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Four flat provider access rows; returning Cloudflare opens manager",
+        "nextState": "Four flat provider access rows; returning Cloudflare opens manager Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -9507,7 +9509,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const active=",
-            "line": 102
+            "line": 124
           }
         ],
         "verification": {
@@ -9524,14 +9526,14 @@
         "preconditions": "One active assigned target",
         "trigger": "menu",
         "guard": "Current active configuration, exact normalized identity and Settings precedence",
-        "actual": "Single exact-target Cloudflare leaf",
+        "actual": "Single exact-target Cloudflare leaf Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "apiMethods": [
           "previewNativeMenu",
           "previewContextMenu",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Single exact-target Cloudflare leaf",
+        "nextState": "Single exact-target Cloudflare leaf Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -9541,7 +9543,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "if(active.length===1)",
-            "line": 115
+            "line": 135
           }
         ],
         "verification": {
@@ -9558,14 +9560,14 @@
         "preconditions": "Two or more active assigned targets",
         "trigger": "menu",
         "guard": "Current active configuration, exact normalized identity and Settings precedence",
-        "actual": "One Cloudflare parent, distinct direct target children",
+        "actual": "One Cloudflare parent, distinct direct target children Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "apiMethods": [
           "previewNativeMenu",
           "previewContextMenu",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "One Cloudflare parent, distinct direct target children",
+        "nextState": "One Cloudflare parent, distinct direct target children Count only unique active non-Quick destinations plus applicable Default; promoted Quick siblings follow the four provider rows. Default Quick flag is retained but redundant shortcut suppressed. See MenuSpec.composition.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -9575,7 +9577,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "else {const parent=",
-            "line": 116
+            "line": 136
           }
         ],
         "verification": {
@@ -9609,7 +9611,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "providerVisibility",
-            "line": 60
+            "line": 75
           }
         ],
         "verification": {
@@ -9643,7 +9645,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const hiddenDefault=",
-            "line": 96
+            "line": 111
           }
         ],
         "verification": {
@@ -9660,14 +9662,14 @@
         "preconditions": "Explicit Quick shortcut",
         "trigger": "menu",
         "guard": "Current active configuration, exact normalized identity and Settings precedence",
-        "actual": "Preserve explicit shortcut; suppress sole-target duplication; protect provider label",
+        "actual": "Visible Simple Quick targets are promoted after the four ordinary provider roots and excluded from Cloudflare child count; redundant Default Quick suppressed without changing stored flags. Explicit Flat retains Quick. Same canonical compiler/API/registrar.",
         "apiMethods": [
           "previewNativeMenu",
           "previewContextMenu",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Preserve explicit shortcut; suppress sole-target duplication; protect provider label",
+        "nextState": "Visible Simple Quick targets are promoted after the four ordinary provider roots and excluded from Cloudflare child count; redundant Default Quick suppressed without changing stored flags. Explicit Flat retains Quick. Same canonical compiler/API/registrar.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -9676,16 +9678,14 @@
         "sourceRefs": [
           {
             "path": "src/core/menu-spec.mjs",
-            "symbol": "for(const row of projection.rows.filter",
-            "line": 105
+            "symbol": "export function compileMenuSpec",
+            "line": 51
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/nov06-native-menu.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "LOCAL_TESTED",
+          "testFile": "tests/latest-quick-rules.test.mjs",
+          "installedChrome": "BLOCKED_PENDING_REAL_EXTENSION_TEST"
         },
         "contractViolation": null
       },
@@ -9711,7 +9711,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const candidates=",
-            "line": 92
+            "line": 107
           }
         ],
         "verification": {
@@ -9745,7 +9745,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const root=",
-            "line": 122
+            "line": 145
           }
         ],
         "verification": {
@@ -10527,12 +10527,12 @@
         "preconditions": "Explicit approved prepare/repair",
         "trigger": "worker",
         "guard": "See exact hash-bound source guard; current behavior: Approved exact binding/digest plan preserved; worker control errors use safe specific diagnostics rather than generic403 permission assertion",
-        "actual": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
+        "actual": "Same existing provisioner/client/Worker/key/bucket binding; build embeds expected Worker module digest. Old deployed code is not READY merely because its own old digest matches a saved plan. Shelf Update existing Worker invokes explicit existing repair API; no silent deployment.",
         "apiMethods": [
           "repairCloudflareDestination"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
+        "nextState": "Same existing provisioner/client/Worker/key/bucket binding; build embeds expected Worker module digest. Old deployed code is not READY merely because its own old digest matches a saved plan. Shelf Update existing Worker invokes explicit existing repair API; no silent deployment.",
         "uiEffect": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
         "externalResourceEffect": "Approved Worker/DO resource creation or update",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
@@ -10548,11 +10548,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/nine-scopes-parity.test.mjs",
-          "integration": "tests/cloudflare-integration.test.mjs",
-          "browser": "scripts/test-product-browser.mjs"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10576,7 +10576,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/probe'",
-            "line": 84
+            "line": 94
           }
         ],
         "verification": {
@@ -10626,12 +10626,12 @@
         "preconditions": "Eligible native file context",
         "trigger": "save",
         "guard": "Image/media before link; HTTPS; signed name policy",
-        "actual": "Worker source fetch only; no page archive/selection/private-source port",
+        "actual": "Worker fetches source remotely, validates redirects/filenames/MIME and decoded byte lengths. Supports native gzip decoding with unknown-length spool when Content-Length describes encoded data. No private Explorer source port yet.",
         "apiMethods": [
           "dispatchSave"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Worker source fetch only; no page archive/selection/private-source port",
+        "nextState": "Worker fetches source remotely, validates redirects/filenames/MIME and decoded byte lengths. Supports native gzip decoding with unknown-length spool when Content-Length describes encoded data. No private Explorer source port yet.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10645,11 +10645,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/p0-repair.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10706,7 +10706,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/remote-save'",
-            "line": 42
+            "line": 43
           }
         ],
         "verification": {
@@ -10723,10 +10723,10 @@
         "preconditions": "Worker fetches eligible HTTPS",
         "trigger": "save",
         "guard": "Trusted DoH all-answer public check; connect literal TLS with original-host certificate",
-        "actual": "Pinned public HTTPS uses manual/fail-closed DNS redirect handling and runtime-compatible TLS options. Exact validated-IP routing and original-host certificate verification retained. Cloudflare-owned TCP destinations remain an external restriction; diagnostics identify DNS/connect/TLS/headers failures without source URLs or exception messages.",
+        "actual": "Cloudflare native fetch owns HTTPS/TLS/HTTP. Validate every public HTTPS hop and preflight DNS public/mixed-address checks. This is not literal-IP pinning: native fetch can resolve again. No socket/parser fallback or website allowlist.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Pinned public HTTPS uses manual/fail-closed DNS redirect handling and runtime-compatible TLS options. Exact validated-IP routing and original-host certificate verification retained. Cloudflare-owned TCP destinations remain an external restriction; diagnostics identify DNS/connect/TLS/headers failures without source URLs or exception messages.",
+        "nextState": "Cloudflare native fetch owns HTTPS/TLS/HTTP. Validate every public HTTPS hop and preflight DNS public/mixed-address checks. This is not literal-IP pinning: native fetch can resolve again. No socket/parser fallback or website allowlist.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10736,14 +10736,15 @@
           {
             "path": "src/cloudflare/public-egress.mjs",
             "symbol": "createPublicEgress",
-            "line": 13
+            "line": 8
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
-          "status": "SEE_SAVE_REPAIR_EVIDENCE",
-          "testFile": "tests/save-receipt-repair.test.mjs",
-          "evidence": "docs/evidence/save-receipt-repair/"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10752,10 +10753,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known streams direct; unknown spools bounded parts then conditional final PUT; single-PUT service boundary",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known streams direct; unknown spools bounded parts then conditional final PUT; single-PUT service boundary",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -10769,11 +10770,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-integration.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10827,7 +10828,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/lease'",
-            "line": 73
+            "line": 83
           }
         ],
         "verification": {
@@ -10859,7 +10860,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "async operation",
-            "line": 20
+            "line": 21
           }
         ],
         "verification": {
@@ -10890,7 +10891,7 @@
           {
             "path": "src/cloudflare/transport.mjs",
             "symbol": "verifyObject:",
-            "line": 42
+            "line": 43
           }
         ],
         "verification": {
@@ -10907,13 +10908,13 @@
         "preconditions": "Each transfer progress/outcome",
         "trigger": "history",
         "guard": "Redacted fields and per-operation durable record",
-        "actual": "No latest100 eviction; explicit lookup retains original failed result plus whitelisted remote stage/type/reason/runtime code. Shelf receipt viewer displays blocked results and catches transport errors while retaining the saved result.",
+        "actual": "Existing durable paged History retains blocked/uncertain/successful saves and file actions. Safe useful source provenance is stored in R2 and receipts, recognizable credential query parameters omitted and metadata budget respected.",
         "apiMethods": [
           "inspectRemoteHistory",
           "inspectRemoteReceipt"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "No latest100 eviction; explicit lookup retains original failed result plus whitelisted remote stage/type/reason/runtime code. Shelf receipt viewer displays blocked results and catches transport errors while retaining the saved result.",
+        "nextState": "Existing durable paged History retains blocked/uncertain/successful saves and file actions. Safe useful source provenance is stored in R2 and receipts, recognizable credential query parameters omitted and metadata budget respected.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "CURRENT operation record",
@@ -10927,10 +10928,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
-          "status": "SEE_SAVE_REPAIR_EVIDENCE",
-          "testFile": "tests/save-receipt-repair.test.mjs",
-          "evidence": "docs/evidence/save-receipt-repair/"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10939,13 +10941,13 @@
         "preconditions": "Verified save result selected",
         "trigger": "history",
         "guard": "Canonical stored verified receipt; exact target/key",
-        "actual": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
+        "actual": "Only verified receipts can GO TO; fresh canonical File API stat must still find exact key/size/ETag. Missing or changed results fail visibly, never select an invented object.",
         "apiMethods": [
           "openRemoteResult",
           "navigateExplorer"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
+        "nextState": "Only verified receipts can GO TO; fresh canonical File API stat must still find exact key/size/ETag. Missing or changed results fail visibly, never select an invented object.",
         "uiEffect": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10955,15 +10957,15 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 280
+            "line": 303
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/nine-scopes-parity.test.mjs",
-          "integration": "tests/cloudflare-integration.test.mjs",
-          "browser": "scripts/test-product-browser.mjs"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": null
       },
@@ -10989,7 +10991,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 126
+            "line": 128
           }
         ],
         "verification": {
@@ -11019,7 +11021,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 158
+            "line": 160
           }
         ],
         "verification": {
@@ -11111,7 +11113,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 161
+            "line": 163
           }
         ],
         "verification": {
@@ -11160,12 +11162,12 @@
         "preconditions": "Copy/move/rename/delete/newfolder/private-save requested",
         "trigger": "explorer",
         "guard": "Installed read-only wrapper and capabilities",
-        "actual": "Mutations disabled; private Explorer-to-R2 not implemented; no fake success",
+        "actual": "Canonical fileAction plus existing Universal File API/provider port now supports same-bucket folder creation, files/folders copy/move/rename/delete, keep/skip/explicit replace, scoped signed intents and durable per-object journals. No automatic replay. R2 DELETE is not atomic against other clients; source version checked before removal and absence checked afterward. Cross-bucket, local upload and archives remain explicit gaps.",
         "apiMethods": [
           "dispatchExplorerSave"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Mutations disabled; private Explorer-to-R2 not implemented; no fake success",
+        "nextState": "Canonical fileAction plus existing Universal File API/provider port now supports same-bucket folder creation, files/folders copy/move/rename/delete, keep/skip/explicit replace, scoped signed intents and durable per-object journals. No automatic replay. R2 DELETE is not atomic against other clients; source version checked before removal and absence checked afterward. Cross-bucket, local upload and archives remain explicit gaps.",
         "uiEffect": "Mutations disabled; private Explorer-to-R2 not implemented; no fake success",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -11175,15 +11177,15 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const fileApi=",
-            "line": 54
+            "line": 59
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "FAIL",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/nov06-explorer.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs",
+          "fileOperations": "tests/restoration-files.test.mjs",
+          "evidence": "docs/evidence/redown-restoration/"
         },
         "contractViolation": "Full practical REDOWN mutation/private-source parity incomplete"
       },
@@ -11273,7 +11275,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 251
+            "line": 274
           }
         ],
         "verification": {
@@ -11303,7 +11305,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const debugApi=",
-            "line": 124
+            "line": 129
           }
         ],
         "verification": {
@@ -11343,7 +11345,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.runtime.onMessage.addListener",
-            "line": 126
+            "line": 131
           },
           {
             "path": "src/chrome/trusted-sender.mjs",
@@ -11391,7 +11393,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 14
+            "line": 15
           }
         ],
         "verification": {
@@ -11474,7 +11476,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const readinessTargets=",
-            "line": 72
+            "line": 77
           }
         ],
         "verification": {
@@ -11568,13 +11570,106 @@
           {
             "path": "extension/app.mjs",
             "symbol": "id=\"shelf-reauthorize\"",
-            "line": 72
+            "line": 74
           }
         ],
         "verification": {
           "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
           "status": "LOCAL_PASS_LIVE_BLOCKED",
           "testFile": "tests/nine-scopes-parity.test.mjs"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SOURCE_PROVENANCE",
+        "preconditions": [
+          "Remote public HTTPS source accepted by per-hop validation"
+        ],
+        "trigger": "SOURCE_PROVENANCE",
+        "guard": "Recognizable credential query keys removed; bounded provider metadata",
+        "actual": "Ordinary safe source URLs, import attribution and timestamp remain useful metadata/History. Remove recognizable credential query parameters, keep provider metadata under its real budget, do not fabricate public URL access.",
+        "apiMethods": [
+          "inspectRemoteReceipt",
+          "inspectRemoteHistory"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Ordinary safe source URLs, import attribution and timestamp remain useful metadata/History. Remove recognizable credential query parameters, keep provider metadata under its real budget, do not fabricate public URL access.",
+        "uiEffect": "Ordinary safe source URLs, import attribution and timestamp remain useful metadata/History. Remove recognizable credential query parameters, keep provider metadata under its real budget, do not fabricate public URL access.",
+        "externalResourceEffect": "Provenance on newly saved R2 object only",
+        "persistence": "R2 custom metadata and existing receipt History",
+        "errors": [
+          "SOURCE_DENIED",
+          "SOURCE_UNAVAILABLE"
+        ],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "right2cloud-module/src/source-fetch.mjs",
+            "symbol": "export function sourceMetadata",
+            "line": 32
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "Original source",
+            "line": 305
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "EXPLORER_FILE_ACTION",
+        "preconditions": [
+          "Trusted account-scoped API actor",
+          "Existing authorized destination",
+          "Explicit confirmation for destructive file actions"
+        ],
+        "trigger": "EXPLORER_FILE_ACTION",
+        "guard": "Canonical account/prefix authorization and existing file-action confirmation",
+        "actual": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
+        "apiMethods": [
+          "fileAction",
+          "inspectExplorerContextMenu",
+          "inspectRemoteReceipt"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
+        "uiEffect": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
+        "externalResourceEffect": "Authorized R2 file/folder mutation; same-bucket only",
+        "persistence": "Existing History and Worker operation journal",
+        "errors": [
+          "FILE_SCOPE_MISMATCH",
+          "FILE_SOURCE_CHANGED",
+          "FILE_COPY_UNCONFIRMED",
+          "FILE_DELETE_UNCONFIRMED",
+          "CROSS_BUCKET_TRANSFER_UNAVAILABLE"
+        ],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "method==='fileAction'",
+            "line": 134
+          },
+          {
+            "path": "src/cloudflare/files.mjs",
+            "symbol": "export async function runFileIntent",
+            "line": 15
+          },
+          {
+            "path": "src/cloudflare/file-transport.mjs",
+            "symbol": "export function createFileTransport",
+            "line": 3
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
+          "status": "SEE_RESTORATION_EVIDENCE",
+          "testFile": "tests/redown-restoration.test.mjs"
         },
         "contractViolation": null
       }
@@ -11652,8 +11747,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectShelfAttention",
@@ -11661,8 +11756,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "openCloudflareDestinations",
@@ -11670,8 +11765,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectCloudflare",
@@ -11679,8 +11774,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "checkCloudflareR2",
@@ -11688,8 +11783,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "selectCloudflareAccount",
@@ -11697,8 +11792,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "openCloudflareActivation",
@@ -11706,8 +11801,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "approveCloudflareSetup",
@@ -11715,8 +11810,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "repairCloudflareDestination",
@@ -11724,8 +11819,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "invokeProviderAction",
@@ -11733,8 +11828,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectRemoteHistory",
@@ -11742,8 +11837,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectRemoteReceipt",
@@ -11751,8 +11846,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectCloudflareSetup",
@@ -11760,8 +11855,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "cancelRemoteOperation",
@@ -11769,8 +11864,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "openRemoteResult",
@@ -11778,8 +11873,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "refreshExplorer",
@@ -11787,8 +11882,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "navigateExplorer",
@@ -11796,8 +11891,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "readFileChunk",
@@ -11805,8 +11900,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectExplorerContextMenu",
@@ -11814,8 +11909,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "previewContextMenu",
@@ -11823,8 +11918,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "describeCapabilities",
@@ -11832,8 +11927,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "getConfiguration",
@@ -11841,8 +11936,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "getEngineHealth",
@@ -11850,8 +11945,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "getProviderConnections",
@@ -11859,8 +11954,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "loginBegin",
@@ -11868,8 +11963,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "loginStatus",
@@ -11877,8 +11972,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "loginCancel",
@@ -11886,8 +11981,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "disconnect",
@@ -11895,8 +11990,17 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+      },
+      {
+        "method": "fileAction",
+        "scope": "execute",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "listAccounts",
@@ -11904,8 +12008,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "listAuthorizedBuckets",
@@ -11913,8 +12017,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "listFolders",
@@ -11922,8 +12026,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "fileMetadata",
@@ -11931,8 +12035,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "readFile",
@@ -11940,8 +12044,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "listDestinations",
@@ -11949,8 +12053,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectMenuTree",
@@ -11958,8 +12062,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "previewNativeMenu",
@@ -11967,8 +12071,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectNativeACK",
@@ -11976,8 +12080,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "getOrganizationSuggestion",
@@ -11985,8 +12089,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "previewConfigChange",
@@ -11994,8 +12098,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "commitConfigChange",
@@ -12003,8 +12107,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "reconcileNativeMenu",
@@ -12012,8 +12116,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "chooseBackupLocation",
@@ -12021,8 +12125,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectRecoveryCoverage",
@@ -12030,8 +12134,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "runRecoveryPage",
@@ -12039,8 +12143,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectBackupRoots",
@@ -12048,8 +12152,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "listRecoveryPolicies",
@@ -12057,8 +12161,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "writeRecovery",
@@ -12066,8 +12170,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "requestRestorePreview",
@@ -12075,8 +12179,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "restoreRightClickMenu",
@@ -12084,8 +12188,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -12093,8 +12197,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "enableWholeCloudJob",
@@ -12102,8 +12206,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "disableWholeCloudJob",
@@ -12111,8 +12215,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "dispatchExplorerSave",
@@ -12120,8 +12224,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       },
       {
         "method": "dispatchSave",
@@ -12129,8 +12233,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
-        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
+        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
+        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
       }
     ],
     "errorBranches": {
@@ -12164,15 +12268,16 @@
       "unit": "PASS221 focused tests; docs/evidence/worker-permission/focused.txt",
       "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; source-pinned receipt in docs/evidence/worker-permission",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
-      "liveR2": "Read-only environment-token discovery HTTP200/redown present; no extension-OAuth save/write/readback performed",
+      "liveR2": "LIVE CLOUDFLARE PASS for explicit restoration matrix, not installed Chrome proof. Prior failure receipts retained as historical evidence.",
       "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
       "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; actual Windows denied request unobserved",
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
-      "saveRepair": "234 focused tests and 18 real-browser fixture gates pass. Actual original Worker REQUEST_FAILED reproduced. Final isolated provider source-fetch stream ends before HTTP headers, SOURCE_HTTP_INVALID/http-empty-response; independent R2 readback NOT REACHED; end-to-end remains BLOCKED. Real installed Chrome checked separately."
+      "saveRepair": "234 focused tests and 18 real-browser fixture gates pass. Actual original Worker REQUEST_FAILED reproduced. Final isolated provider source-fetch stream ends before HTTP headers, SOURCE_HTTP_INVALID/http-empty-response; independent R2 readback NOT REACHED; end-to-end remains BLOCKED. Real installed Chrome checked separately.",
+      "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration."
     },
-    "sourceState": "Committed runtime at a44c9d07426edb73c067c26ec1074b70194d0a33; evidence-only changes do not alter runtime hashes.",
+    "sourceState": "Restoration working tree, exact source hashes; baseline 9dfe415 preserved separately.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -12185,6 +12290,7 @@
         "ENGINE_REQUEST_FAILED",
         "ENGINE_RESPONSE_CHANNEL_CLOSED",
         "ENGINE_RESPONSE_INVALID",
+        "FILE_ACTION_UNCONFIRMED",
         "LOGIN_REQUIRED",
         "PREVIEW_SIZE_LIMIT",
         "PROVISIONING_BLOCKED",
@@ -12194,7 +12300,8 @@
         "REPAIR_REQUIRED",
         "SETUP_APPROVAL_REQUIRED",
         "SHELF_START_FAILED",
-        "VERIFYING"
+        "VERIFYING",
+        "WORKER_UPGRADE_APPROVAL_REQUIRED"
       ],
       "extension/background.mjs": [
         "AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE",
@@ -12227,7 +12334,8 @@
         "PUT_RECEIPT_INVALID",
         "R2_SINGLE_PUT_LIMIT",
         "STAGING_CONFLICT",
-        "STAGING_UNVERIFIED"
+        "STAGING_UNVERIFIED",
+        "VERIFICATION_MISMATCH"
       ],
       "right2cloud-module/src/cloudflare-worker.mjs": [
         "AUTHORIZATION_DENIED",
@@ -12299,7 +12407,9 @@
         "INVALID_PROVIDER",
         "INVALID_STATE"
       ],
-      "src/api/explorer-context-menu.mjs": [],
+      "src/api/explorer-context-menu.mjs": [
+        "REMOTE_EXPLORER_SOURCE_UNAVAILABLE"
+      ],
       "src/api/gateway.mjs": [
         "PERMISSION_DENIED"
       ],
@@ -12321,6 +12431,9 @@
         "CONNECTION_UNKNOWN",
         "DESTINATION_NOT_READY",
         "EXTERNAL_RECOVERY_UNAVAILABLE",
+        "FILE_ACTION_PENDING",
+        "FILE_ACTION_RESULT",
+        "FILE_RETRY_REQUIRES_INSPECTION",
         "GENERATION_CONFLICT",
         "GENERATION_REQUIRED",
         "HUMAN_INTERACTION_REQUIRED",
@@ -12337,6 +12450,9 @@
         "READY",
         "RECOVERY_NOT_ENABLED",
         "REPAIR_REQUIRED",
+        "RESULT_CHANGED",
+        "RESULT_LOOKUP_FAILED",
+        "RESULT_NOT_FOUND",
         "REVISION_CONFLICT",
         "SAVE_RETRY_REQUIRES_INSPECTION",
         "SCOPE_UNAUTHORIZED",
@@ -12499,6 +12615,28 @@
         "WORKER_UPGRADE_APPROVAL_REQUIRED",
         "WRONG_ACCOUNT"
       ],
+      "src/cloudflare/file-transport.mjs": [
+        "CROSS_BUCKET_TRANSFER_UNAVAILABLE"
+      ],
+      "src/cloudflare/files.mjs": [
+        "AUTHORIZATION_REVOKED",
+        "FILES_SKIPPED",
+        "FILE_ACTION_VERIFIED",
+        "FILE_CONFLICT",
+        "FILE_CONFLICT_POLICY_INVALID",
+        "FILE_COPY_UNCONFIRMED",
+        "FILE_DELETE_UNCONFIRMED",
+        "FILE_INTENT_INVALID",
+        "FILE_KEY_INVALID",
+        "FILE_NOT_FOUND",
+        "FILE_SAME_DESTINATION",
+        "FILE_SCOPE_MISMATCH",
+        "FILE_SOURCE_CHANGED",
+        "FOLDER_ALREADY_EXISTS",
+        "FOLDER_CREATE_UNCONFIRMED",
+        "FOLDER_DESCENDANT_DESTINATION",
+        "FOLDER_VERIFIED"
+      ],
       "src/cloudflare/inventory.mjs": [
         "PROVIDER_CURSOR_REPEATED",
         "PROVIDER_PAGINATION_UNAVAILABLE",
@@ -12561,18 +12699,10 @@
       "src/cloudflare/public-address.mjs": [],
       "src/cloudflare/public-egress.mjs": [
         "AAAA",
-        "LENGTH_MISMATCH",
         "SOURCE_ADDRESS_DENIED",
         "SOURCE_CANCELLED",
         "SOURCE_DNS_UNAVAILABLE",
-        "SOURCE_EGRESS_UNAVAILABLE",
-        "SOURCE_ENCODING_UNSUPPORTED",
-        "SOURCE_HEADERS_TOO_LARGE",
-        "SOURCE_HTTP_INVALID",
-        "SOURCE_LENGTH_INVALID",
-        "SOURCE_STALLED",
-        "SOURCE_TLS_DENIED",
-        "SOURCE_UPGRADE_UNSUPPORTED"
+        "SOURCE_EGRESS_UNAVAILABLE"
       ],
       "src/cloudflare/resources.mjs": [],
       "src/cloudflare/transport.mjs": [
@@ -12597,9 +12727,11 @@
         "TRANSPORT_UNAVAILABLE",
         "WORKER_ADDRESS_INVALID",
         "WORKER_BUILD_MISMATCH",
+        "WORKER_FILE_API_REPAIR_REQUIRED",
         "WORKER_NOT_READY",
         "WORKER_SETUP_REQUIRED",
-        "WORKER_UNAVAILABLE"
+        "WORKER_UNAVAILABLE",
+        "WORKER_UPGRADE_APPROVAL_REQUIRED"
       ],
       "src/cloudflare/wire.mjs": [
         "CAPABILITY_DENIED",
@@ -12613,6 +12745,7 @@
         "BINDING_MISMATCH",
         "CANCELLATION_REQUESTED_INSPECT",
         "CAPABILITY_DENIED",
+        "FILE_ACTION_ACCEPTED",
         "LEASE_DENIED",
         "NOT_VERIFIED",
         "OPERATION_ALREADY_CLAIMED",
@@ -13502,7 +13635,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "9f37c0b02c5b9e05b245fd3661c20620f4ca5bd4d0c32a49e546badfbd3c7eaa"
+    "digest": "c88ef5e2544208fab82c94335feb888df9a0b34405ac7916e3c5269691725ad8"
   },
   "changeLog": [
     {
@@ -13979,5 +14112,1379 @@
       "src/api/service.mjs": "58e1850b168c129a1d2abcf20c949bc49ea684769627a9db74450766a22266f3",
       "src/cloudflare/public-egress.mjs": "6f2a08150b528e391ef3af6543bfa5c455ec8419546eb7644cd494c1e66f87a2"
     }
+  },
+  "restorationBefore": {
+    "sourceCommit": "9dfe415a7efe1c0333f9c71a3391c21f7d143995",
+    "canonicalSnapshot": "11.2026/workings/right-click-workings.json@9dfe415a7efe1c0333f9c71a3391c21f7d143995",
+    "snapshotDigest": "9f37c0b02c5b9e05b245fd3661c20620f4ca5bd4d0c32a49e546badfbd3c7eaa",
+    "sourceFiles": {
+      "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
+      "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
+      "extension/app.mjs": "584522403d144dee296fcfdee04fdf00445e3bfd6fda84e54ff76279aff09141",
+      "extension/background.mjs": "3a377c5304fa2f1195c30a9331e42ec7abf45c4cffdb1b9693feefdfb107b893",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "403f09155ea40df29b17d38e26e812a2a4abfdc93a5ca2330be46193f5212fc2",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "820c94f0232b8ceaa3dd5a20667a86123492eb3f153276c64980427c89d83749",
+      "right2cloud-module/src/cloudflare-worker.mjs": "2550e3daac3de1d1c50146dfec609f8a02ab8138a12dc1743b6c78346b1cfdb4",
+      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
+      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "d7e1c3230238fc7e5104808b98b52eebcd7b08fae21d2793ae20cbdbfeefc947",
+      "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
+      "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
+      "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
+      "src/api/explorer-context-menu.mjs": "d5d1e435e0dbea0301d62325d78d1448629899191ae85c9ca1cd64ac57ac2708",
+      "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
+      "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
+      "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
+      "src/api/service.mjs": "c14d6f86f366dbdbd757ec3ba7655a82e0d7de9d6c49264c92849844ef94d92c",
+      "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
+      "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
+      "src/build-info.mjs": "33f704076033996c1f0376d2de4fc22bd4819a75ee1c07df7ff6be163ca0868d",
+      "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
+      "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
+      "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
+      "src/chrome/registrar.mjs": "d8bd0a7c94061a621c69c29656efde906aec119cd08b10bda42537509adfc6c6",
+      "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
+      "src/cloudflare/deployment.mjs": "7d6097f2ca61ac81014ee74ae24dc71dd623f1ae420857c120f10bf1cb8b9641",
+      "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
+      "src/cloudflare/onboarding.mjs": "b39f21af21c7f43312933cc88f26f846af184e183cb5fbf9d877c27ff03ebcd7",
+      "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
+      "src/cloudflare/public-egress.mjs": "88aa8bd821066fb8d7e281d8c7f6e3703e22a4766c4c782424e15c6cfe578d34",
+      "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
+      "src/cloudflare/transport.mjs": "890b2f71a77a4986e924b6b32d0e8295bc92aab6b2a37033b17c9e3e559fdf13",
+      "src/cloudflare/wire.mjs": "dd00cd16d698f0076a5d09bc83aafa94602428c3e92f13229bcdaf8f1cdea6a5",
+      "src/cloudflare/worker.mjs": "d4860ec0c0e20fcc9e1f58de1126404301497779e63a456a649065fd892aa1b2",
+      "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
+      "src/core/action-resolver.mjs": "1a54cc365d08be67bc2f28ec92b3d1c0830189c82929e32b02b5ae0ea72a3cb6",
+      "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
+      "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
+      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
+      "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
+      "src/core/menu-spec.mjs": "a2d63d1fba98cb5ce434c10a37c87772c28fb72a87237d3c439c8a7e114b87e1",
+      "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
+      "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
+      "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
+      "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
+      "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+      "src/explorer/configuration.mjs": "29610d41625c831714522254851bd903e6c2256f46b575b54f9b65d7e44f4b03",
+      "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
+      "src/explorer/file-api.mjs": "3553750916bfacbcebf285aeb576566581088451334032b2f60c23ce1a20b6ae",
+      "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
+      "src/explorer/listing-view.mjs": "cce2f95fdcd1a05de4e58da4d55012f8801b618e57b1c27654caf3896317b2fa",
+      "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
+      "src/explorer/r2-adapter.mjs": "ac2a0997b410252a77987be94b1272225f3ee56741e5b4de0956119f7eaaf3d7",
+      "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
+      "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
+      "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
+      "src/glaciaring/catalog.mjs": "925a0a5d0691edfa901eda70783ae362467433afcd57436544dd04509a343d26",
+      "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
+      "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
+      "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
+      "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
+      "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
+      "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
+      "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
+      "src/persistence/current-store.mjs": "6f6b4eb2432d231b1de561b5f2b75505f20b0cfdf1dfab114f98b00e01a9df8a",
+      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
+      "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
+      "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
+      "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
+    },
+    "behaviors": [
+      {
+        "id": "ENTRY_REGISTER",
+        "actual": "Compile composite and apply one registrar after loading saved inventory",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const ready=",
+            "line": 142
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/chrome-registrar.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "ENTRY_NATIVE",
+        "actual": "Extract eligible source then engine.save, no alternate save owner",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "dispatch:async",
+            "line": 85
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "ENTRY_TOOLBAR",
+        "actual": "Manual toolbar gesture opens the same integrated Shelf; no new tab/window",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "chrome.action.onClicked",
+            "line": 139
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "ENTRY_ATTENTION",
+        "actual": "One Shelf adapter, canonical auto-attention preference, synchronous known-needs gesture attempt and notification/badge fallback; never OAuth on open",
+        "sourceRefs": [
+          {
+            "path": "src/chrome/provider-panel.mjs",
+            "symbol": "createShelfAttention",
+            "line": 2
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "ENTRY_SHELF",
+        "actual": "Existing app is Chrome side_panel default_path; dedicated connect popup files removed",
+        "sourceRefs": [
+          {
+            "path": "extension/manifest.json",
+            "symbol": "side_panel",
+            "line": 36
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "ENTRY_API",
+        "actual": "Invoke same domain owners; responses include outer envelope and nested state",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "async function invoke",
+            "line": 83
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/final-v3p1.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_ZERO",
+        "actual": "Four flat provider access rows; returning Cloudflare opens manager",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "const active=",
+            "line": 102
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_ONE",
+        "actual": "Single exact-target Cloudflare leaf",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "if(active.length===1)",
+            "line": 115
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_MULTIPLE",
+        "actual": "One Cloudflare parent, distinct direct target children",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "else {const parent=",
+            "line": 116
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_VISIBILITY",
+        "actual": "Provider and descendants omitted; OAuth and assignments retained",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "providerVisibility",
+            "line": 60
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_FLAT",
+        "actual": "Use selected default independent of hidden inactive mode",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "const hiddenDefault=",
+            "line": 96
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_QUICK",
+        "actual": "Preserve explicit shortcut; suppress sole-target duplication; protect provider label",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "for(const row of projection.rows.filter",
+            "line": 105
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_MODE_DEDUP",
+        "actual": "Deduplicate target identity; discovered buckets do not add assignments",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "const candidates=",
+            "line": 92
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "MENU_LEGACY_LIBRARY",
+        "actual": "Retained nonproduction mode projection contains historical REDOWN/Cloudflare R2 names",
+        "sourceRefs": [
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "const root=",
+            "line": 122
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "CONFIG_REMOVE_DEFAULT",
+        "actual": "Config deletion never deletes remote objects. Canonical survivor/default behavior remains. Empty configuration may initialize again on next explicit login despite old removed/initialized markers; passive checks/boot never do so.",
+        "sourceRefs": [
+          {
+            "path": "src/api/config.mjs",
+            "symbol": "const survivors=",
+            "line": 68
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "CONFIG_ISOLATION",
+        "actual": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
+        "sourceRefs": [
+          {
+            "path": "src/api/config.mjs",
+            "symbol": "export function applyConfigChanges",
+            "line": 49
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "AUTH_LOGIN",
+        "actual": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function connect",
+            "line": 70
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "AUTH_CALLBACK",
+        "actual": "Exact registered path/state/expiry and persistent single-claim phase; one token exchange, trusted storage only",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function completeCallback",
+            "line": 56
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "AUTH_RESTART",
+        "actual": "Filtered callback listener in same OAuth owner can claim persisted attempt after restart; actual Chrome identity event delivery remains unverified",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "chrome.webNavigation",
+            "line": 106
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "AUTH_IDENTITY",
+        "actual": "Store issued tokens as authenticated pending identity; retain on network/identity denial and allow read-only verification recovery",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function verifyIdentity",
+            "line": 47
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "AUTH_STATUS",
+        "actual": "Authenticated state stays separate from permission completeness. Public permissions describes requested nine, provider-issued grants or null, missing grants, needsReconsent and createGrant true/false/unknown; refreshSupported is boolean only.",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function status",
+            "line": 102
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "AUTH_REFRESH",
+        "actual": "Legacy and new refresh tokens remain supported without requesting offline_access; rotation stays single-flight and provider-returned scope provenance updates on refresh.",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function access",
+            "line": 80
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "AUTH_REFRESH_TRANSIENT",
+        "actual": "Transient token/network/provider failures preserve refresh token and session; invalid_grant requires reauthorization",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function token",
+            "line": 41
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "AUTH_REQUEST_401",
+        "actual": "Refresh and retry one rejected safe read only; write is not replayed, refreshed session retained, repeated401 requires reauth",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function request",
+            "line": 90
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "AUTH_REQUEST_403",
+        "actual": "Generic Cloudflare403 Authentication error / code10000 is not proof of invalid token. Only evidenced auth rejection permits safe-read refresh; scope/permission denial preserves session. Canonical REDOWN Workers write scope is accepted without changing this client request profile.",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "diagnoseCloudflare",
+            "line": 11
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
+          "testFile": "tests/worker-permission.test.mjs"
+        }
+      },
+      {
+        "id": "AUTH_CANCEL_LOGOUT",
+        "actual": "Reject late callback; logout removes tokens but retains menu configuration",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function cancel",
+            "line": 101
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/oauth-v3p1.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "R2_READ_ONLY",
+        "actual": "GET bucket inventory only; empty success still establishes API usability",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/inventory.mjs",
+            "symbol": "readBuckets",
+            "line": 2
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/p0-repair.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "R2_FORBIDDEN",
+        "actual": "Unknown403 stays R2_STATUS_UNKNOWN; only positive grant/challenge/message evidence establishes a more specific cause",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const diagnostic=",
+            "line": 21
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "R2_INACTIVE",
+        "actual": "Explicit inactive R2 remains unavailable, returns before resource changes; legacy activation API is read-only manual-remedy status with no navigation",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async activation",
+            "line": 146
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "R2_UNKNOWN",
+        "actual": "Unknown, transient, pending identity, wrong account and revoked session remain distinct without mutating cloud state",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function r2",
+            "line": 17
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        }
+      },
+      {
+        "id": "R2_ACCOUNT",
+        "actual": "Multiple unselected accounts need choice; no arbitrary account default",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function checkFresh",
+            "line": 29
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "R2_RETURNING",
+        "actual": "Respect saved default and all manager/depth targets. Unambiguous assigned target can be prepared without forcing a default. Default-only target is linked locally to one normal Simple row.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function initializeAccount",
+            "line": 52
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "SETUP_REUSE",
+        "actual": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const exists=",
+            "line": 95
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "SETUP_CREATE",
+        "actual": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "bucket-create-dispatched",
+            "line": 112
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "SETUP_DENIED",
+        "actual": "Return before any provisioning",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function setupLocked",
+            "line": 77
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SETUP_RESUME",
+        "actual": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const recovered=",
+            "line": 108
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "SETUP_COMMIT",
+        "actual": "Use shared applyConfigChanges createDestination + makeDefault semantics in one CURRENT transaction. Preserve existing default/manager entries, labels, visibility, modes and order; native ACK follows.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "await provisioner.markVerified",
+            "line": 121
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
+        }
+      },
+      {
+        "id": "WORKER_PREPARE",
+        "actual": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/deployment.mjs",
+            "symbol": "async prepare",
+            "line": 33
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "WORKER_PROBE",
+        "actual": "Generate small bytes in Worker, conditionally write, independently GET and compare",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/worker.mjs",
+            "symbol": "path==='/probe'",
+            "line": 84
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-integration.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_EXACT",
+        "actual": "Cloudflare remote path before browser capture; no UI on success",
+        "sourceRefs": [
+          {
+            "path": "src/core/engine.mjs",
+            "symbol": "const selectedRemote=",
+            "line": 87
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_SOURCE",
+        "actual": "Worker source fetch only; no page archive/selection/private-source port",
+        "sourceRefs": [
+          {
+            "path": "right2cloud-module/src/source-fetch.mjs",
+            "symbol": "sourceFromClick",
+            "line": 25
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/p0-repair.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_UNREADY",
+        "actual": "Shelf shows precise last failed endpoint/method/status/numeric codes and corrective action, with safe diagnostics and explicit Resume after correction; no repeated setup approval or new wizard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function invoke",
+            "line": 131
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
+          "testFile": "tests/worker-permission.test.mjs"
+        }
+      },
+      {
+        "id": "SAVE_JOB",
+        "actual": "Return pending and process async durable job; duplicate is uncertain",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/worker.mjs",
+            "symbol": "path==='/remote-save'",
+            "line": 42
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-integration.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_EGRESS",
+        "actual": "Pinned public HTTPS uses manual/fail-closed DNS redirect handling and runtime-compatible TLS options. Exact validated-IP routing and original-host certificate verification retained. Cloudflare-owned TCP destinations remain an external restriction; diagnostics identify DNS/connect/TLS/headers failures without source URLs or exception messages.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/public-egress.mjs",
+            "symbol": "createPublicEgress",
+            "line": 13
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
+        }
+      },
+      {
+        "id": "SAVE_STREAM",
+        "actual": "Known streams direct; unknown spools bounded parts then conditional final PUT; single-PUT service boundary",
+        "sourceRefs": [
+          {
+            "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+            "symbol": "async write",
+            "line": 14
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-integration.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_KEEP_BOTH",
+        "actual": "Never overwrite; concurrent race can CONFLICT",
+        "sourceRefs": [
+          {
+            "path": "right2cloud-module/src/cloudflare-r2-writer.mjs",
+            "symbol": "async prepare",
+            "line": 9
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "right2cloud-module/tests/module.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_LEASE_CANCEL",
+        "actual": "Idle progress rather than whole65s timeout; cancel may remain uncertain",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/worker.mjs",
+            "symbol": "path==='/lease'",
+            "line": 73
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-integration.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "SAVE_UNCERTAIN",
+        "actual": "Read-only inspectRemoteReceipt completes the API request independently of stored transfer state/code. Original failed result remains nested data; reconciliation stays separate. Actual inspection exceptions yield failed envelope and visible Shelf error with saved result retained; no write replay.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/worker.mjs",
+            "symbol": "async operation",
+            "line": 20
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
+        }
+      },
+      {
+        "id": "SAVE_VERIFY",
+        "actual": "Verified only after fresh proof; no source cryptographic equality claim",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/transport.mjs",
+            "symbol": "verifyObject:",
+            "line": 42
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-integration.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "HISTORY_PERSIST",
+        "actual": "No latest100 eviction; explicit lookup retains original failed result plus whitelisted remote stage/type/reason/runtime code. Shelf receipt viewer displays blocked results and catches transport errors while retaining the saved result.",
+        "sourceRefs": [
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "recordRemoteResult:",
+            "line": 166
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_ISOLATED_LIVE",
+          "status": "SEE_SAVE_REPAIR_EVIDENCE",
+          "testFile": "tests/save-receipt-repair.test.mjs",
+          "evidence": "docs/evidence/save-receipt-repair/"
+        }
+      },
+      {
+        "id": "HISTORY_GO_TO",
+        "actual": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function remoteHistory",
+            "line": 280
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "EXPLORER_LIST",
+        "actual": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function loadListing",
+            "line": 126
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
+        }
+      },
+      {
+        "id": "EXPLORER_SELECT",
+        "actual": "Ctrl/Shift selection and context focus; no repeated full sorts or network on selection",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "function selectRow",
+            "line": 158
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "scripts/measure-explorer.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "EXPLORER_WINDOW",
+        "actual": "Logical full listing with visible DOM rows only",
+        "sourceRefs": [
+          {
+            "path": "src/explorer/listing-view.mjs",
+            "symbol": "rowWindow",
+            "line": 6
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-explorer.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "EXPLORER_READ_COALESCE",
+        "actual": "Coalesce metadata only, never streams/writes, reject stale session",
+        "sourceRefs": [
+          {
+            "path": "src/explorer/read-coalescer.mjs",
+            "symbol": "coalesceFileReads",
+            "line": 3
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-explorer.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "EXPLORER_PREVIEW",
+        "actual": "Bound text DOM slice; revoke blob on close/navigation; offer full download",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function openEntry",
+            "line": 161
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "scripts/measure-explorer.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "EXPLORER_DOWNLOAD",
+        "actual": "Write to user-chosen file with backpressure; refuse changed object",
+        "sourceRefs": [
+          {
+            "path": "src/explorer/r2-adapter.mjs",
+            "symbol": "async readChunk",
+            "line": 206
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/p0-repair.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "EXPLORER_MUTATIONS",
+        "actual": "Mutations disabled; private Explorer-to-R2 not implemented; no fake success",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const fileApi=",
+            "line": 54
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "FAIL",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-explorer.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "PROVIDER_OTHER",
+        "actual": "Honest unimplemented state with attention UI; no upload",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "provider!=='cloudflare'",
+            "line": 35
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "PERSIST_RECOVERY",
+        "actual": "Persist config/generation and journal; external verified backups separate",
+        "sourceRefs": [
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "commitProduct",
+            "line": 136
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/persistence.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "RECOVERY_HANDLE_PARITY",
+        "actual": "Stage opaque handle with same store from GUI; API verifies and attaches",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "stageBackupRoot",
+            "line": 251
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "FAIL",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/external-recovery-v3p1.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        }
+      },
+      {
+        "id": "DIAGNOSTICS",
+        "actual": "One closed sanitizer redacts account/script identifiers, raw error text, headers, tokens, keys and request bodies. Separates provider-returned grants from assumed/legacy session scopes; no claimed real Windows root cause without evidence.",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const debugApi=",
+            "line": 124
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
+          "testFile": "tests/worker-permission.test.mjs"
+        }
+      },
+      {
+        "id": "ENTRY_MESSAGE",
+        "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "chrome.runtime.onMessage.addListener",
+            "line": 126
+          },
+          {
+            "path": "src/chrome/trusted-sender.mjs",
+            "symbol": "export function appSenderDecision",
+            "line": 4
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_SHELF_BLOCKED",
+          "testFile": "tests/shelf-message-boundary.test.mjs",
+          "browserFixture": "scripts/test-product-browser.mjs",
+          "realAcceptance": "scripts/test-shelf-extension.mjs",
+          "runtime": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+        }
+      },
+      {
+        "id": "ENTRY_CLIENT_RESPONSE",
+        "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function api",
+            "line": 14
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_SHELF_BLOCKED",
+          "testFile": "tests/shelf-message-boundary.test.mjs",
+          "browserFixture": "scripts/test-product-browser.mjs",
+          "realAcceptance": "scripts/test-shelf-extension.mjs",
+          "runtime": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+        }
+      },
+      {
+        "id": "V1_INITIALIZATION",
+        "actual": "Preserves V1 destination/default rules and billable consent. Accepts REDOWN canonical Workers read/write grants; no OAuth client ID/requested-scope changes or permission bypass.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function initializeAccount",
+            "line": 52
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
+          "testFile": "tests/worker-permission.test.mjs"
+        }
+      },
+      {
+        "id": "V1_NATIVE_READY",
+        "actual": "Saved exact targets receive bounded read-only readiness checks before menu compilation. API reports native ACK failure/disabled target truthfully.",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const readinessTargets=",
+            "line": 72
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs"
+        }
+      },
+      {
+        "id": "WORKER_FAILURE_EVIDENCE",
+        "actual": "Capture safe operation/method/endpoint template, HTTPstatus, numeric Cloudflare codes, requestID, session-versus-issued scopes, permission alternatives; retain last failure in existing owned plan/setup ledger and suppress automatic retry Creation intent includes the documented product-level Workers Admin requirement; current member/token role is not guessed.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/deployment.mjs",
+            "symbol": "export function safeWorkerDiagnostic",
+            "line": 13
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "worker-preparation-blocked",
+            "line": 115
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_REAL_WINDOWS_ERROR_NOT_CAPTURED",
+          "testFile": "tests/worker-permission.test.mjs"
+        }
+      },
+      {
+        "id": "AUTH_NINE_SCOPES",
+        "actual": "Requests nine registered scopes including Admin/item/routes; reports partial or unreported grants, preserves session on cancellation/rejection, supports refresh, and resumes known old create denial after newly issued Admin without setup reapproval",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "export const CLOUDFLARE_SCOPES",
+            "line": 3
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "failure.sessionScopes.length>0",
+            "line": 66
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "id=\"shelf-reauthorize\"",
+            "line": 72
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs"
+        }
+      }
+    ],
+    "apiMethods": [
+      "initializeCloudflare",
+      "inspectShelfAttention",
+      "openCloudflareDestinations",
+      "inspectCloudflare",
+      "checkCloudflareR2",
+      "selectCloudflareAccount",
+      "openCloudflareActivation",
+      "approveCloudflareSetup",
+      "repairCloudflareDestination",
+      "invokeProviderAction",
+      "inspectRemoteHistory",
+      "inspectRemoteReceipt",
+      "inspectCloudflareSetup",
+      "cancelRemoteOperation",
+      "openRemoteResult",
+      "refreshExplorer",
+      "navigateExplorer",
+      "readFileChunk",
+      "inspectExplorerContextMenu",
+      "previewContextMenu",
+      "describeCapabilities",
+      "getConfiguration",
+      "getEngineHealth",
+      "getProviderConnections",
+      "loginBegin",
+      "loginStatus",
+      "loginCancel",
+      "disconnect",
+      "listAccounts",
+      "listAuthorizedBuckets",
+      "listFolders",
+      "fileMetadata",
+      "readFile",
+      "listDestinations",
+      "inspectMenuTree",
+      "previewNativeMenu",
+      "inspectNativeACK",
+      "getOrganizationSuggestion",
+      "previewConfigChange",
+      "commitConfigChange",
+      "reconcileNativeMenu",
+      "chooseBackupLocation",
+      "inspectRecoveryCoverage",
+      "runRecoveryPage",
+      "inspectBackupRoots",
+      "listRecoveryPolicies",
+      "writeRecovery",
+      "requestRestorePreview",
+      "restoreRightClickMenu",
+      "inspectWholeCloudJobs",
+      "enableWholeCloudJob",
+      "disableWholeCloudJob",
+      "dispatchExplorerSave",
+      "dispatchSave"
+    ],
+    "oneToOneVerified": false,
+    "observedLiveBaseline": "Original Worker REQUEST_FAILED reproduced; 0.3.8 SOURCE_HTTP_INVALID source.fetch/headers/http-empty-response. See docs/evidence/save-receipt-repair; no independently read ordinary object.",
+    "digest": "5c2493dc407422a860e08c6f393a9590c5172bfed2568727f431ae336dcf045b"
+  },
+  "quickSelectBefore": {
+    "sourceCommit": "5a12e1a",
+    "rule": "latest/right-click-rules/README.md",
+    "menuSpecSHA256": "a2d63d1fba98cb5ce434c10a37c87772c28fb72a87237d3c439c8a7e114b87e1",
+    "actual": "Quick rows precede providers and remain in the active Cloudflare count; default + Quick duplicates and nests. Existing Simple/Narrow/Depth owners retained.",
+    "verification": "Source-verified; not installed Chrome evidence"
   }
 }

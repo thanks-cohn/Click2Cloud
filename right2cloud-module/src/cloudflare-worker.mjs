@@ -1,5 +1,5 @@
 import {validateIntent,equal,fail,wait,safeRemoteDiagnostic} from './common.mjs';
-import {sourceFetch} from './source-fetch.mjs';
+import {sourceFetch,sourceMetadata,responseFilename} from './source-fetch.mjs';
 import {cloudflareR2Writer} from './cloudflare-r2-writer.mjs';
 // ports.authenticate must validate bearer/principal and resolve exact binding from trusted config.
 export function createWorker(ports){return {async fetch(request,env){
@@ -19,10 +19,10 @@ export function createWorker(ports){return {async fetch(request,env){
   stage='writer';const writer=ports.writer?ports.writer(cap):cloudflareR2Writer(cap.storage,ports);
   if(writer.kind!==dest.provider||writer.capabilities.conditionalCreate!==true)fail('NOT_SUPPORTED');
   stage='source.fetch';const src=source=await sourceFetch(intent.source.url,{fetch:ports.fetch||fetch,signal,maxBytes,onProgress:ports.onProgress,idleTimeoutMs:cap.idleTimeoutMs??30000});
-  stage='destination.prepare';const prepared=await writer.prepare({destination:dest,filename:intent.source.responseFilename?(src.suggestedFilename??intent.source.filename):intent.source.filename,operationId,signal});
+  stage='destination.prepare';const prepared=await writer.prepare({destination:dest,filename:intent.source.responseFilename?responseFilename(src.suggestedFilename??intent.source.filename,src.contentType):intent.source.filename,operationId,signal});
   stage='authorization.recheck';if(await wait(ports.recheckAuthorization(cap,intent),signal)!==true)fail('AUTHORIZATION_REVOKED');
   stage='destination.record';await ports.recordPrepared?.(cap,prepared);signal.throwIfAborted();possibleWrite=true;
-  stage='destination.write';const result=await writer.write({prepared,...src,operationId,signal});
+  stage='destination.write';const result=await writer.write({prepared,...src,operationId,signal,provenance:sourceMetadata(intent.source.url)});
   if(result.conflict)return Response.json({state:'failed',code:'CONFLICT',operationId});
   return Response.json({state:'written',receipt:{...result,destination:dest}});
  }catch(e){const causeCode=typeof e?.code==='string'&&/^[A-Z][A-Z0-9_]{0,63}$/.test(e.code)?e.code:null;

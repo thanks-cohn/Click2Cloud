@@ -2,7 +2,12 @@ import {freeze,targetKey,stableId,intentFor} from './menu-identity.mjs';
 import {operationIdentity} from './boundary-observation.mjs';
 const signal=(sink,event)=>{try{if(typeof sink==='function')sink(event);else sink?.emit?.(event);}catch{/* Observation must not change resolution. */}};
 
-/** Shared native/mirror/simulation resolution. This function cannot fetch or mutate anything. */
+/** Internal owner for dispatchSave/dispatchExplorerSave and native engine.save.
+ * Read the acknowledged generation, context, bound action ID and fresh target authorization;
+ * reject stale/hidden/unknown/mismatched rows before returning a target intent.
+ * Pure: never fetches, persists, provisions or treats a prior menu as present authority.
+ * Observe through inspectNativeACK/previewNativeMenu; tests/chrome-registrar.test.mjs.
+ */
 export function resolveMenuAction(spec,selection={}) {
   const {generation,acknowledgedGeneration,context='image',authorizedTargets,sink}=selection;
   const operationId=operationIdentity(selection);

@@ -4,8 +4,15 @@
 
 **Read [latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md](latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md) before changing the right-click engine, Simple/Narrow/Depth mode projectors, menu configuration, Quick Select/Default rules, Chrome registrar, dispatcher or related typed API.** Every meaningful mechanism must be documented in or alongside source, naming its exact existing `3+1.1` API owner and describing inputs, IF/THEN/ELSE, permission checks, persisted/native/provider effects, observability, failure cases and tests. Keep the narrative map and `11.2026/workings/right-click-workings.json` CURRENT synchronized with source changes, preserving the immutable pre-change baseline. Never treat a desired rule, fixture or Chrome ACK as verified installed-Chrome behavior. The owner wants **Click2Cloud's own Simple/Narrow/Depth engine**, using REDOWN as read-only functional reference for *right-click and File Explorer capabilities only*, not a transplant of all REDOWN features.
 
-The current-source map documents a known discrepancy: Quick Select still appears in both root and Cloudflare's nested list under certain configurations. Follow [latest/right-click-rules/README.md](latest/right-click-rules/README.md) for the newly approved desired placement; do not claim the source already implements it.
+The restoration branch repairs Quick promotion through the existing compiler. Follow [latest/right-click-rules/README.md](latest/right-click-rules/README.md); local and browser fixtures do not establish installed-Chrome rendering.
 
+## CURRENT OWNER SCOPE — CLICK2CLOUD ARCHITECTURE + REDOWN FUNCTIONAL POWER
+
+Keep Click2Cloud Simple/Narrow/Depth/Quick Select/default/config/compiler/registrar and canonical API. REDOWN is read-only functional reference for the complete applicable right-click workflow and essential Explorer, not an architecture to transplant or an instruction to clone unrelated features. Latest `latest/right-click-rules/README.md` governs Quick promotion. Report working, repaired, missing, blocked and independently verified capabilities separately.
+
+## CURRENT RESTORATION CONTRACT
+
+The owner-invoked `docs/requests/P0-REDOWN-BASELINE-CLICK2CLOUD-RIGHT-CLICK-RESTORATION-2026-11-07.md` controls this run. Use REDOWN native Cloudflare fetch semantics instead of the defective custom TLS parser; preserve concrete public-network checks and disclose residual DNS-rebinding risk. Preserve useful safe source provenance rather than treating it as an inherent bug. Keep canonical V3+1 ownership and report all functional/API gaps truthfully.
 
 ## CURRENT OAUTH PROFILE — OWNER-CONFIRMED NINE PERMISSIONS
 

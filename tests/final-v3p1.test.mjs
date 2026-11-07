@@ -36,10 +36,10 @@ test('composite modes preserve configs, Flat is exclusive and missing default ca
  const spec=compile(configs,p);assert.equal(spec.rows.filter(r=>r.role!=='provider-action').length,1);assert.equal(spec.rows.find(r=>r.role==='save').target.prefix,'exact/');assert.equal(JSON.stringify(configs),before);
  const missing=compile(configs,productState({show:p.show}));assert.equal(missing.rows.filter(r=>r.role==='save').length,0);assert.equal(missing.rows.filter(r=>r.role==='provider-action').length,4);assert(missing.omissions.some(r=>r.reason==='DEFAULT_LOCATION_REQUIRED'));
 });
-test('Quick order is stable, all promoted actions stay ahead of selectively nested providers',()=>{
+test('Quick order is stable, promoted actions follow the four providers without duplicated children',()=>{
  const configs={simple:{destinations:[0,1,2,3].map(i=>({target:{...base,prefix:'p'+i+'/'},quick:i<3,order:i}))}};
  const direct=compile(configs),nested=compile(configs,productState({placement:{cloudflare:'other'}}));
- assert.deepEqual(direct.rows.filter(r=>r.parentId===null).slice(0,3).map(r=>r.target.prefix),['p0/','p1/','p2/']);
+ assert.deepEqual(direct.rows.filter(r=>r.parentId===null).slice(4).map(r=>r.target.prefix),['p0/','p1/','p2/']);
  assert.deepEqual(nested.rows.filter(r=>r.role==='save').map(r=>r.actionId).sort(),direct.rows.filter(r=>r.role==='save').map(r=>r.actionId).sort());
  assert(nested.rows.slice(0,3).every(r=>r.parentId===null));generateChromePlan(nested);
 });

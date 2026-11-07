@@ -1,6 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Duplex} from 'node:stream';
 import {createPublicEgress} from '../src/cloudflare/public-egress.mjs';
 import {publicAddress,sourceURL} from '../src/cloudflare/public-address.mjs';
 import {sourceFetch} from '../right2cloud-module/src/source-fetch.mjs';
@@ -15,30 +14,24 @@ import {signGrant,remoteDestination,PROTOCOL} from '../src/cloudflare/wire.mjs';
 const target={provider:'cloudflare',connectionId:'cloudflare:a',accountId:'a',bucketName:'photos',prefix:'chosen/'};
 const empty=()=>({simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}});
 const providers=['Google Drive','Dropbox','OneDrive','Cloudflare'];
-function fakeTLS(response,{authorized=true}={}){
- const calls=[];return {calls,connect(options){const socket=new Duplex({read(){},write(data,encoding,done){calls.push({request:data.toString()});socket.push(Buffer.from(response));socket.push(null);done();}});socket.authorized=authorized;socket.setTimeout=ms=>{calls.push({idle:ms});};calls.push({options});queueMicrotask(()=>socket.emit('secureConnect'));return socket;}};
-}
 test('public address classification blocks special-use IPv4/IPv6 including encoded URL literals',()=>{
  for(const ip of ['127.0.0.1','10.0.0.1','100.64.0.1','169.254.169.254','172.16.1.1','192.168.0.1','192.0.2.1','198.18.0.1','198.51.100.1','203.0.113.1','224.1.1.1','255.255.255.255','::1','::ffff:8.8.8.8','64:ff9b::a00:1','fc00::1','fe80::1','ff02::1','2001:db8::1','2002::1','3fff::1'])assert.equal(publicAddress(ip),false,ip);
  for(const ip of ['1.1.1.1','8.8.8.8','93.184.216.34','2606:4700:4700::1111','2001:4860:4860::8888'])assert(publicAddress(ip),ip);
  for(const url of ['https://127.1/','https://0x7f000001/','https://2130706433/','https://user:secret@public.org/','http://public.org/'])assert.throws(()=>sourceURL(url));
 });
-test('three unrelated public HTTPS hosts connect to validated literal IP with original SNI and no credentials',async()=>{
- for(const host of ['www.python.org','nodejs.org','www.rust-lang.org']){
-  const tls=fakeTLS('HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nabc');
-  const fetch=createPublicEgress({resolve:async()=>['93.184.216.34'],connect:tls.connect});const r=await fetch('https://'+host+'/file?q=1#fragment');assert.equal(await r.text(),'abc');
-  assert.equal(tls.calls[0].options.host,'93.184.216.34');assert.equal(tls.calls[0].options.servername,host);assert.equal(tls.calls[0].options.rejectUnauthorized,true);assert(!('ALPNProtocols' in tls.calls[0].options));
-  const request=tls.calls.find(x=>x.request).request;assert(request.includes('GET /file?q=1 HTTP/1.1'));assert(!/Cookie:|Authorization:|Referer:|fragment/i.test(request));
- }
+test('three unrelated HTTPS hosts use native fetch with no credentials and manual redirects',async()=>{
+ for(const host of ['www.python.org','nodejs.org','www.rust-lang.org']){let call;const f=createPublicEgress({resolve:async()=>['93.184.216.34'],fetch:async(u,o)=>{call={u,o};return new Response('abc');}});assert.equal(await (await f('https://'+host+'/file?q=1#fragment')).text(),'abc');assert.equal(call.u,'https://'+host+'/file?q=1');assert.equal(call.o.redirect,'manual');assert.equal(call.o.credentials,'omit');assert.equal(call.o.referrerPolicy,'no-referrer');assert(!Object.keys(call.o.headers).some(k=>/authorization|cookie|referer/i.test(k)));}
 });
-test('DNS rebinding/mixed/private answers never reach TLS and an untrusted certificate fails closed',async()=>{
- let connects=0;for(const addresses of [['10.0.0.1'],['93.184.216.34','127.0.0.1'],['::ffff:127.0.0.1'],[]]){const f=createPublicEgress({resolve:async()=>addresses,connect:()=>{connects++;}});await assert.rejects(f('https://public.org/file'),{code:'SOURCE_ADDRESS_DENIED'});}assert.equal(connects,0);
- const tls=fakeTLS('',{authorized:false});await assert.rejects(createPublicEgress({resolve:async()=>['93.184.216.34'],connect:tls.connect})('https://public.org/file'),{code:'SOURCE_TLS_DENIED'});
+
+test('known private/mixed DNS answers fail closed; native TLS/network failure remains visible',async()=>{
+ let calls=0;for(const addresses of [['10.0.0.1'],['93.184.216.34','127.0.0.1'],['::ffff:127.0.0.1'],[]])await assert.rejects(createPublicEgress({resolve:async()=>addresses,fetch:async()=>{calls++;}})('https://public.org/file'),{code:'SOURCE_ADDRESS_DENIED'});assert.equal(calls,0);
+ await assert.rejects(createPublicEgress({resolve:async()=>['93.184.216.34'],fetch:async()=>{throw TypeError('certificate failed at secret source');}})('https://public.org/file'),{code:'SOURCE_EGRESS_UNAVAILABLE',sourceStage:'headers'});
 });
-test('chunked public response is streamed and ambiguous HTTP framing is rejected',async()=>{
- const good=fakeTLS('HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n3\r\nabc\r\n2\r\nde\r\n0\r\n\r\n');const r=await createPublicEgress({resolve:async()=>['8.8.8.8'],connect:good.connect})('https://public.org/file');assert.equal(await r.text(),'abcde');assert.equal(r.headers.get('content-length'),null);
- const bad=fakeTLS('HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\nContent-Length: 3\r\n\r\nabc');await assert.rejects(createPublicEgress({resolve:async()=>['8.8.8.8'],connect:bad.connect})('https://public.org/file'),{code:'SOURCE_HTTP_INVALID'});
+
+test('native chunked response remains streaming and unknown length',async()=>{
+ const f=createPublicEgress({resolve:async()=>['8.8.8.8'],fetch:async()=>new Response(new ReadableStream({start(c){c.enqueue(new TextEncoder().encode('abc'));c.close();}}))});const r=await f('https://public.org/file');assert.equal(await r.text(),'abc');assert.equal(r.headers.get('content-length'),null);
 });
+
 test('more than five safe redirects work; cycles and private redirects fail closed',async()=>{
  const s=await sourceFetch('https://public.org/0',{fetch:async u=>{const i=Number(new URL(u).pathname.slice(1));return i<8?new Response(null,{status:302,headers:{location:'/'+(i+1)}}):new Response('done');}});assert.equal(await new Response(s.body).text(),'done');
  await assert.rejects(sourceFetch('https://public.org/0',{fetch:async()=>new Response(null,{status:302,headers:{location:'https://127.0.0.1/'}})}),{code:'SOURCE_DENIED'});
@@ -108,19 +101,10 @@ test('memory-derived admission backpressure rejects before claim or source fetch
  const token=await signGrant('fixture',{protocol:PROTOCOL,use:'save',principal:target.connectionId,sessionId:'s',destination:d,expiresAt:Date.now()+120000,operationId:id,sourceDigest:await digest(source)});
  const r=await obj.fetch(new Request('https://worker/remote-save',{method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({operationId:id,destination:d,source})}));assert.equal((await r.json()).code,'RESOURCE_BUSY');assert.equal(claims,0);assert.equal(fetches,0);
 });
-test('HTTP early hints are consumed before the actual file response',async()=>{
- const tls=fakeTLS('HTTP/1.1 103 Early Hints\r\nLink: </a>\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nabc');const r=await createPublicEgress({resolve:async()=>['93.184.216.34'],connect:tls.connect})('https://public.org/file');assert.equal(r.status,200);assert.equal(await r.text(),'abc');
-});
-test('real local Node TLS verifies original hostname while the connection selector stays a literal IP',async()=>{
- const {mkdtemp,readFile,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path'),{execFileSync}=await import('node:child_process'),tls=await import('node:tls');const directory=await mkdtemp(join(tmpdir(),'c2c-tls-'));
- let server;try{
-  execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout','key.pem','-out','cert.pem','-subj','/CN=public.org','-addext','subjectAltName=DNS:public.org','-days','1'],{cwd:directory,stdio:'ignore'});
-  const cert=await readFile(join(directory,'cert.pem')),key=await readFile(join(directory,'key.pem'));
-  server=tls.createServer({key,cert},socket=>{socket.on('error',()=>{});socket.once('data',()=>socket.end('HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nabc'));});await new Promise(r=>server.listen(0,'127.0.0.1',r));
-  const fetch=createPublicEgress({resolve:async()=>['93.184.216.34'],connect:options=>{assert.equal(options.host,'93.184.216.34');return tls.connect({...options,host:'127.0.0.1',port:server.address().port,ca:cert});}});
-  assert.equal(await (await fetch('https://public.org/file')).text(),'abc');await assert.rejects(fetch('https://wrong-host.org/file'),{code:'SOURCE_EGRESS_UNAVAILABLE'});
- }finally{if(server)await new Promise(r=>server.close(r));await rm(directory,{recursive:true,force:true});}
-});
+
+
+
+
 test('browser streaming port handles more than 32MiB with backpressure and no provenance in provider payload',async()=>{
  const {captureSelectedStream}=await import('../src/core/source-capture.mjs'),{dispatchSave}=await import('../src/core/save-dispatcher.mjs');let produced=0,stored=0;const total=40*1024*1024;
  const file=await captureSelectedStream({filename:'large.bin',url:'https://private-source-name.test/file'},{authorizeSource:async()=>true,fetchSource:async()=>new Response(new ReadableStream({pull(c){if(produced===total){c.close();return;}const n=Math.min(65536,total-produced);produced+=n;c.enqueue(new Uint8Array(n));}}),{headers:{'content-length':String(total)}})});

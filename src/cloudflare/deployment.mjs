@@ -1,6 +1,6 @@
 import {diagnoseCloudflare,hasWorkerWriteScope,hasWorkerCreateScope,CLOUDFLARE_SCOPES} from '../auth/cloudflare-oauth.mjs';
 import {PROTOCOL,remoteDestination,fail,digest} from './wire.mjs';
-export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
+export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/files.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
 // Official endpoint permission alternatives are recorded in the accompanying
 // Cloudflare OpenAPI evidence. OAuth scope names are not account-role grants.
 const WORKER_OPERATIONS={

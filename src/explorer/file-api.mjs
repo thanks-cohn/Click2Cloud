@@ -21,9 +21,10 @@ export function createFileApi(adapter) {
     getDefaults(){return {...adapter.configuration?.defaults};},
     setPreferences(value={}){if(!adapter.configuration)throw Error('This adapter has no runtime preferences.');preferences=adapter.configuration.validate(value);return {...preferences};},
     async run(operation,input={},options={}) {
-    const id=crypto.randomUUID();
+    const id=options.operationId??crypto.randomUUID();
     if(!methods.includes(operation)||typeof adapter[operation]!=='function')return {id,state:'failed',error:'This operation is not implemented.'};
     try {
+      if(['mkdir','copy','move','rename','delete'].includes(operation))options={...options,operationId:id};
       const {testItCorrelation,...providerOptions}=options;options=providerOptions;
       options=adapter.configuration?adapter.configuration.resolve(operation,preferences,options):options;
       if(testItCorrelation)options={...options,testItCorrelation};
@@ -47,7 +48,7 @@ export function createFileApi(adapter) {
       while(next<items.length&&!halted&&!options.signal?.aborted){
         const index=next++;
         try{options.onProgress?.({operation,phase:'item',index,total:items.length});}catch{/* Presentation only. */}
-        const result=await api.run(operation,items[index],itemOptions);results[index]=result;
+        const result=await api.run(operation,items[index],{...itemOptions,...(options.operationId?{operationId:options.operationId+'_'+index}:{})});results[index]=result;
         if(result.state==='uncertain')halted=true;
       }
     }

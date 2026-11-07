@@ -1,3 +1,5 @@
+import {fileOperationTarget} from '../cloudflare/file-transport.mjs';
+import {digest,remoteDestination} from '../cloudflare/wire.mjs';
 import {safeWorkerDiagnostic} from '../cloudflare/deployment.mjs';
 import {BUILD_INFO} from '../build-info.mjs';
 import {describeExplorerContextMenu} from './explorer-context-menu.mjs';
@@ -23,8 +25,9 @@ const definitions={
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
-  inspectExplorerContextMenu:['inspect',obj({target},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj()],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj()],getProviderConnections:['inspect',obj()],
+  inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj()],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj()],getProviderConnections:['inspect',obj()],
   loginBegin:['auth',obj()],loginStatus:['inspect',obj()],loginCancel:['auth',obj()],disconnect:['auth',obj()],
+  fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete']},source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
   listAccounts:['inspect',obj()],listAuthorizedBuckets:['inspect',obj({accountId:str,cursor:str},['accountId'])],
   listFolders:['inspect',obj({source:target,cursor:str},['source'])],fileMetadata:['inspect',obj({source:target,key:str},['source','key'])],
   readFile:['inspect',obj({source:target,entry:obj({key:str,folder:bool},['key','folder'])},['source','entry'])],
@@ -37,8 +40,8 @@ const definitions={
   requestRestorePreview:['restore',obj()],restoreRightClickMenu:['restore',obj({expectedRevision:num,idempotencyKey:str},['expectedRevision','idempotencyKey'])],
   inspectWholeCloudJobs:['inspect',obj()],enableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId']),cadence:{enum:['weekly','daily']}},['identity'])],
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
-  dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
-  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])]
+  dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
+  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])]
 };
 export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope),transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
 export function validate(schema,value) {
@@ -117,9 +120,9 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='openCloudflareDestinations'){if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');data=await cloudflare.manage();}
         else if(method==='inspectCloudflareSetup')data=await cloudflare.setupStatus(params);
         else if(method==='cancelRemoteOperation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await cloudflare.cancel(params);}
-        else if(method==='openRemoteResult'){const saved=await current.readRemoteResult(params.operationId);if(!saved?.receipt||saved.state!=='verified')fail('VERIFIED_RESULT_REQUIRED');const d=saved.receipt.destination??saved.destination;data={target:{provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},highlightKey:saved.receipt.key};}
+        else if(method==='openRemoteResult'){const saved=await current.readRemoteResult(params.operationId);if(!saved?.receipt||saved.state!=='verified')fail('VERIFIED_RESULT_REQUIRED');const d=saved.receipt.destination??saved.destination;const checked=await fileApi.run('stat',{source:{accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},key:saved.receipt.key});if(checked.state!=='completed')fail('RESULT_LOOKUP_FAILED');const object=checked.data?.object;if(!object)fail('RESULT_NOT_FOUND');if(Number(object.size)!==saved.receipt.size||object.etag&&object.etag!==saved.receipt.etag)fail('RESULT_CHANGED');data={target:{provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},highlightKey:saved.receipt.key};}
         else if(method==='navigateExplorer'){const t=params.target,a=await oauth.status();if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===t.accountId))fail('SCOPE_UNAUTHORIZED');await navigate(t,actor);data={state:'completed',target:t};}
-        else if(method==='describeCapabilities')data={version:'3+1.1',build:BUILD_INFO,tools:toolRegistry,publicEndpoint:false,destructiveRemoteOperations:false,remoteInfrastructureChanges:'explicit-provision-scope-and-confirmation',cloudflareTransfer:'true-remote-only',sourceCaptureMaxBytes:null,browserTransfer:'streaming-adapter-or-resident-bytes',explorer:{operations:fileApi?.capabilities??[],mutations:false},providers:{cloudflare:{implemented:true,transfer:'true-remote-only',explorerSource:false,localFile:false},'google-drive':{implemented:false},dropbox:{implemented:false},onedrive:{implemented:false}},idempotencyRetention:256};
+        else if(method==='describeCapabilities')data={version:'3+1.1',build:BUILD_INFO,tools:toolRegistry,publicEndpoint:false,destructiveRemoteOperations:fileApi?.capabilities?.includes('delete')===true,remoteInfrastructureChanges:'explicit-provision-scope-and-confirmation',cloudflareTransfer:'true-remote-only',sourceCaptureMaxBytes:null,browserTransfer:'streaming-adapter-or-resident-bytes',explorer:{operations:fileApi?.capabilities??[],mutations:fileApi?.capabilities?.includes('mkdir')===true},providers:{cloudflare:{implemented:true,transfer:'true-remote-only',explorerSource:false,localFile:false},'google-drive':{implemented:false},dropbox:{implemented:false},onedrive:{implemented:false}},idempotencyRetention:256};
         else if(method==='getConfiguration')data=state;
         else if(method==='getEngineHealth')data={revision:state.product.revision,generation:state.generation,native:engine.getEvidence().coverage,externalRecovery:await recovery.status()};
         else if(method==='getProviderConnections'||method==='loginStatus')data=await oauth.status();
@@ -127,6 +130,19 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(await confirm({actor,method,params})!==true)fail('HUMAN_INTERACTION_REQUIRED');
           data=await oauth[{loginBegin:'connect',loginCancel:'cancel',disconnect:'disconnect'}[method]]();
           if(method==='loginBegin'&&data?.state==='CONNECTED'&&cloudflare?.initialize){if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:{accounts:data.accounts}})===true){try{data={...data,initialization:await finishInitialization(await cloudflare.initialize())};}catch(e){data={...data,initialization:{state:'blocked',code:e.code??'INITIALIZATION_UNAVAILABLE',...(safeWorkerDiagnostic(e.diagnostic)?{diagnostic:safeWorkerDiagnostic(e.diagnostic)}:{})}};}}else data={...data,initialization:{state:'blocked',code:'SETUP_AUTHORITY_REQUIRED'}};}
+        }
+        else if(method==='fileAction'){
+          const s=normalizeTarget(params.source),d=normalizeTarget(params.destination??s),a=await oauth.status();
+          if([s,d].some(t=>t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||!a.accounts?.some(x=>x.id===t.accountId))||a.state!=='CONNECTED')fail('SCOPE_UNAUTHORIZED');
+          if(params.action==='mkdir'?!params.name:!params.entry||!params.entry.key.startsWith(s.prefix))fail('SOURCE_SCOPE_MISMATCH');
+          if(['rename'].includes(params.action)&&!params.name||['copy','move'].includes(params.action)&&!params.destination)fail('INVALID_REQUEST');
+          if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+          if(!await current.reserveOperation(actor+':files:'+params.idempotencyKey,await digest(params)))fail('FILE_RETRY_REQUIRES_INSPECTION');
+          const input={source:s,...(params.destination?{destination:d}:{}),...(params.entry?{entry:params.entry,entries:[params.entry]}:{}),...(params.name?{name:params.name,newName:params.name}:{}),conflict:params.conflict??'keep'};
+          const operationTarget=fileOperationTarget(s,d),destination=remoteDestination(operationTarget);
+          await current.recordRemoteResult?.({kind:'file-action',operationId,state:'pending',code:'FILE_ACTION_PENDING',destination});
+          data=await fileApi.run(params.action,input,{operationId});
+          const r=data.data;await current.recordRemoteResult?.({kind:'file-action',operationId,state:data.state==='completed'&&r?.receipt?'verified':data.state,code:r?.code??data.code??'FILE_ACTION_RESULT',destination,receipt:r?.receipt});
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);
@@ -149,7 +165,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const rows=state.configs[m].destinations;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
         }
         else if(method==='inspectMenuTree'){const spec=engine.getMenu(params.generation);if(!spec)fail('STALE_GENERATION');data=inspectMenuTree(spec,params);}
-        else if(method==='inspectExplorerContextMenu')data=describeExplorerContextMenu(params.target);
+        else if(method==='inspectExplorerContextMenu')data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,mutations:fileApi?.capabilities?.includes('mkdir')===true});
         else if(method==='previewContextMenu') {
           const evidence=engine.getEvidence(),generation=evidence.acknowledgedGeneration;
           const installed=generation!==null&&!evidence.pending&&evidence.desired?.generation===generation?engine.getMenu(generation):null;

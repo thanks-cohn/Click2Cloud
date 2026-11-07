@@ -10,14 +10,14 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     options.signal?.throwIfAborted();
     let timer,abort,dispatched=false;const writes=['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfCreateBucket','cfProvision','cfExtractArchive'].includes(type);
     try {
-      const transport=Promise.resolve().then(()=>{options.signal?.throwIfAborted();dispatched=true;return send({type,...input,...(['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfArchiveEntries','cfArchiveEntryUrl','cfExtractArchive'].includes(type)?{betaNoProvision:true}:{})});}).catch(error=>{if(writes&&dispatched)throw Object.assign(new Error('Connection lost before a final result. Refresh both locations before retrying.'),{uncertain:true,cause:error});throw error;});
+      const transport=Promise.resolve().then(()=>{options.signal?.throwIfAborted();dispatched=true;return send({type,...input,...(options.operationId?{operationId:options.operationId}:{}),...(['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfArchiveEntries','cfArchiveEntryUrl','cfExtractArchive'].includes(type)?{betaNoProvision:true}:{})});}).catch(error=>{if(writes&&dispatched)throw Object.assign(new Error('Connection lost before a final result. Refresh both locations before retrying.'),{uncertain:true,cause:error});throw error;});
       const result=await Promise.race([transport,new Promise((_,reject)=>{
-        timer=setTimeout(()=>reject(Object.assign(Error(writes?'No final response. Refresh both locations before retrying; the operation may have changed files.':'No final response. Refresh and try the read again.'),{uncertain:writes&&dispatched})),options.messageTimeoutMs??providerDefaults.messageTimeoutMs);
+        if(!(writes&&options.operationId))timer=setTimeout(()=>reject(Object.assign(Error(writes?'No final response. Refresh both locations before retrying; the operation may have changed files.':'No final response. Refresh and try the read again.'),{uncertain:writes&&dispatched})),options.messageTimeoutMs??providerDefaults.messageTimeoutMs);
         abort=()=>reject(Object.assign(new Error(writes&&dispatched?'Cancellation requested after dispatch. The cloud operation may still complete; inspect before retrying.':'Operation cancelled.'),{name:'AbortError',uncertain:writes&&dispatched}));
         options.signal?.addEventListener('abort',abort,{once:true});
         if(options.signal?.aborted)abort();
       })]);
-      if(!result?.ok)throw Object.assign(Error(result?.error || 'Cloudflare did not confirm this request.'),{code:result?.code || result?.diagnosticError?.code,uncertain:writes&&(/did not confirm|may have|not confirmed|timed out|fetch failed|failed to fetch|network/i.test(result?.error||'')||/EXPLORER_(REQUEST_TIMEOUT|RESULT_UNCONFIRMED|NETWORK_ERROR)/.test(result?.diagnosticError?.code||result?.code||''))});
+      if(!result?.ok)throw Object.assign(Error(result?.error || 'Cloudflare did not confirm this request.'),{code:result?.code || result?.diagnosticError?.code,uncertain:writes&&(['uncertain','partial'].includes(result?.state)||/did not confirm|may have|not confirmed|timed out|fetch failed|failed to fetch|network/i.test(result?.error||'')||/EXPLORER_(REQUEST_TIMEOUT|RESULT_UNCONFIRMED|NETWORK_ERROR)/.test(result?.diagnosticError?.code||result?.code||''))});
       return result;
     } finally {clearTimeout(timer);options.signal?.removeEventListener('abort',abort);}
   }

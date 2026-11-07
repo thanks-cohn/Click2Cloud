@@ -24,8 +24,8 @@ export function validatePreferences(value={}) {
 }
 export function resolveOptions(operation,preferences,options={}) {
   const allowed=operationOptions[operation]||[];
-  const overrides=Object.fromEntries(Object.entries(options).filter(([k])=>!['signal','onProgress',...(operation==='readStream'?['onChunk']:[])].includes(k)));
+  const overrides=Object.fromEntries(Object.entries(options).filter(([k])=>!['signal','onProgress','operationId',...(operation==='readStream'?['onChunk']:[])].includes(k)));
   validatePreferences(overrides);
   for(const k of Object.keys(overrides))if(!allowed.includes(k))throw Error(k+' is not supported for '+operation+'.');
-  return {...Object.fromEntries(allowed.map(k=>[k,options[k]??preferences[k]??providerDefaults[k]])),signal:options.signal,onProgress:options.onProgress,...(operation==='readStream'?{onChunk:options.onChunk}:{})};
+  return {...Object.fromEntries(allowed.map(k=>[k,options[k]??preferences[k]??providerDefaults[k]])),signal:options.signal,onProgress:options.onProgress,operationId:options.operationId,...(operation==='readStream'?{onChunk:options.onChunk}:{})};
 }

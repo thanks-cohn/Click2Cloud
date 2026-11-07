@@ -181,7 +181,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
   async function handleClick(info = {}, tab) {
     try{await beforeClick();}catch{const out=freeze({state:'blocked',code:'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
     if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
-      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',authorizedTargets:[]});
+      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',authorizedTargets:[]});
       if(r.state!=='completed'||!dispatch)return r;
       try{const out=await dispatch(r.action,{info,tab});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }

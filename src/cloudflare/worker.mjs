@@ -1,3 +1,4 @@
+import {validateFileIntent,runFileIntent} from './files.mjs';
 import {createWorker} from '../../right2cloud-module/src/cloudflare-worker.mjs';
 import {equal,destination,validateIntent,keyFor} from '../../right2cloud-module/src/common.mjs';
 import {verifyGrant,PROTOCOL,digest,boundedJSON,fail} from './wire.mjs';
@@ -23,7 +24,7 @@ export class RemoteClaims {
   const receipt=job.result?.receipt??(!this.running.has(key)&&job.stage==='writing'&&job.key&&Number.isSafeInteger(job.expectedSize)?{key:job.key,size:job.expectedSize,operationId:id,destination:cap.destination}:null);
   if(receipt){
    const proof=await destinationWriter(cap).verify({receipt});
-   if(proof&&proof.operationId===id&&proof.size===receipt.size&&(!receipt.etag||proof.etag===receipt.etag)&&(!receipt.version||proof.version===receipt.version))return {state:'verified',code:'R2_HEAD_VERSION_SIZE',operationId:id,receipt:{...proof,destination:cap.destination},proofKind:'independent-head-version-size'};
+   if(proof&&proof.operationId===id&&proof.size===receipt.size&&(!receipt.etag||proof.etag===receipt.etag)&&(!receipt.version||proof.version===receipt.version))return {state:'verified',code:'R2_HEAD_VERSION_SIZE',operationId:id,receipt:{...proof,destination:receipt.destination??cap.destination,...(receipt.provenance?{provenance:receipt.provenance}:{}),...(receipt.transfer?{transfer:receipt.transfer}:{}),...(receipt.stagingCleanup?{stagingCleanup:receipt.stagingCleanup}:{})},proofKind:'independent-head-version-size'};
    if(job.result?.state==='written')return {state:'uncertain',code:'VERIFICATION_MISMATCH',operationId:id};
   }
   if(job.result)return {...job.result,operationId:id};
@@ -66,13 +67,22 @@ export class RemoteClaims {
     return Response.json({state:'pending',code:'REMOTE_ACCEPTED',operationId},{status:202});
    }
    const cap=await this.authenticate(request);
+   if(path==='/files'&&cap.use==='files'){
+    const intent=await boundedJSON(request,65536);operationId=intent.operationId;validateFileIntent(intent,cap);if(cap.operationId!==operationId||cap.fileDigest!==await digest(intent))fail('CAPABILITY_DENIED');
+    const key=this.key(cap,operationId);if(this.admitted>=JOB_CAPACITY)return Response.json({state:'blocked',code:'RESOURCE_BUSY',operationId});
+    const claimed=await this.state.storage.transaction(async tx=>{if(await tx.get(key))return false;await tx.put(key,{destination:cap.destination,sessionId:cap.sessionId,fileDigest:cap.fileDigest,leaseUntil:cap.expiresAt,stage:'file-accepted',at:Date.now()});return true;});
+    if(!claimed)return Response.json({state:'uncertain',code:'OPERATION_ALREADY_CLAIMED',operationId});
+    this.admitted++;this.running.add(key);
+    const task=(async()=>{let result;try{result=await runFileIntent(intent,cap,{journal:(n,v)=>this.state.storage.put(key+':file:'+n,v),readJournal:n=>this.state.storage.get(key+':file:'+n),alive:()=>this.live(cap,key),progress:v=>this.update(key,j=>({...j,...v}))});}catch(e){result={state:'uncertain',code:safeCode(e),operationId};}try{await this.update(key,j=>({...j,result,finishedAt:Date.now()}));}finally{this.running.delete(key);this.admitted--;}})();
+    this.state.waitUntil(task);return Response.json({state:'pending',code:'FILE_ACTION_ACCEPTED',operationId},{status:202});
+   }
    if(path==='/capabilities'&&cap.use==='status'){
     const list=await this.env.STORAGE.list({prefix:cap.destination.prefix?cap.destination.prefix+'/':'',limit:1});
-    return Response.json({state:'completed',protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,sourcePolicy:'public-https-pinned-tls',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
+    return Response.json({state:'completed',protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
    }
-   if(path==='/lease'&&cap.use==='save'){
+   if(path==='/lease'&&['save','files'].includes(cap.use)){
     const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);
-    if(!job||job.sessionId!==cap.sessionId||job.sourceDigest!==cap.sourceDigest||!equal(job.destination,cap.destination)||job.leaseUntil<=Date.now())fail('LEASE_DENIED');
+    if(!job||job.sessionId!==cap.sessionId||(cap.use==='files'?job.fileDigest!==cap.fileDigest:job.sourceDigest!==cap.sourceDigest)||!equal(job.destination,cap.destination)||job.leaseUntil<=Date.now())fail('LEASE_DENIED');
     await this.update(key,j=>({...j,leaseUntil:cap.expiresAt}));return Response.json({state:'completed',operationId:cap.operationId});
    }
    if(path==='/cancel'&&cap.use==='cancel'){const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);if(!job||!equal(job.destination,cap.destination))fail('OPERATION_UNKNOWN');await this.update(key,j=>({...j,leaseUntil:0,cancelRequested:true}));return Response.json({state:'uncertain',code:'CANCELLATION_REQUESTED_INSPECT',operationId:cap.operationId});}
