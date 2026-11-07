@@ -142,7 +142,7 @@ async function openEntry(e){
   if(ticket!==previewEpoch||targetKey(captured)!==targetKey(source))return;
   const bytes=new Uint8Array(r.data.bytes),ext=e.key.split('.').at(-1).toLowerCase(),types={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',txt:'text/plain',md:'text/plain',json:'text/plain',csv:'text/plain',log:'text/plain'};
   const type=types[ext]??'application/octet-stream';previewUrl=URL.createObjectURL(new Blob([bytes],{type}));
-  dialog(e.displayName,`${type.startsWith('image/')?'<img class="preview" alt="File preview" src="'+esc(previewUrl)+'">':type==='text/plain'?'<pre id="preview-text">'+esc(new TextDecoder().decode(bytes))+'</pre>':'<p>Inline preview unavailable for this type.</p>'}<p><button id="download-stream">Download</button></p>`);listen('#download-stream','click',()=>downloadEntry(e));
+  dialog(e.displayName,`${type.startsWith('image/')?'<img class="preview" alt="File preview" src="'+esc(previewUrl)+'">':type==='text/plain'?'<pre id="preview-text">'+esc(new TextDecoder().decode(bytes.subarray(0,512*1024)))+'</pre>'+(bytes.length>512*1024?'<p>Showing the first 512 KiB. Download the full file for all contents.</p>':''):'<p>Inline preview unavailable for this type.</p>'}<p><button id="download-stream">Download</button></p>`);listen('#download-stream','click',()=>downloadEntry(e));
 }
 
 function hideContext(){$('#context').hidden=true;$('#context').replaceChildren();}
