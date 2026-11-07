@@ -13,3 +13,5 @@ await import("./nov07-auth-shelf.test.mjs");
 
 await import("./workings.test.mjs");
 await import('./shelf-message-boundary.test.mjs');
+
+await import('./issue4-v1.test.mjs');

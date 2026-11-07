@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T12:02:38.037207+00:00",
+  "generatedAt": "2026-11-07T13:19:31.898624+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,10 +9202,10 @@
     "sourceFiles": {
       "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "02c2f8543b4485899c4b49bd7db9d0fd3a6bd03e03a302c0143b0172f559bf1c",
-      "extension/background.mjs": "9a2591eabd7ec3a6a2679d038e4f1de699d0b1199858f12ab381e62f79a8c123",
+      "extension/app.mjs": "3b696e8ccaf63f14d1fcef80d2c1f69be0040a41085853611106e20454d3b2fd",
+      "extension/background.mjs": "b999810f67562409ce622fdf308d7e12fd616fe881802f9d41256409f4f3404c",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "adeb80fcd796d268bb189e8ba98b7d480b6be990571b30d7a1c1cb4d2493ca4f",
+      "extension/manifest.json": "d05713b5578c0fa7ded5f9f9e001d988105554924bc038d1b4d1347fd27ff9c1",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9217,15 +9217,15 @@
       "right2cloud-module/src/source-fetch.mjs": "a2890403f13dc26bc591594866a9854fc7e69b647efd9b105e9a91df47525deb",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
-      "src/api/config.mjs": "5957f8770d8faf3352b9eb5544b77406afa2d7aaec176d50c9903a712219de7f",
+      "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
       "src/api/explorer-context-menu.mjs": "d5d1e435e0dbea0301d62325d78d1448629899191ae85c9ca1cd64ac57ac2708",
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
-      "src/api/permissions.mjs": "100feb03b96a1f38c1c14c4a5bee8f513d39864288816a79c4168f2792912927",
-      "src/api/service.mjs": "86a1d340d4124dbd22b5856535b875276ee0eda3b8f1567ecfd0dbaeade3b7de",
+      "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
+      "src/api/service.mjs": "22cbfa6ab2ae3a376c61335133345ca44846b5ad54d8b929d826b3da99d81328",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "6e8eec8c3293e45e6589f36cd14857e2ab5288c555a5efe5e32d59f349373e8a",
-      "src/build-info.mjs": "53a012485ec83b80679caa1af5f3b27c58ae66b0677e8e86991127ab666497c3",
+      "src/build-info.mjs": "9c129009be914f9e0b20f1e5e529f941c18dc9bcca29c654385449da9c4ae63a",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
@@ -9233,7 +9233,7 @@
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "fade0a752d2d912dd05955f82e9cf5a52cebd9d6775cfb8abce622e1dc107eb0",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
-      "src/cloudflare/onboarding.mjs": "a6f88d0564ad091432961727b34df37c8b5dea841be42f9096ed1fb8572ef8ed",
+      "src/cloudflare/onboarding.mjs": "efc02e054a8895038ddd12a51f1a7978fed66ca6e48ec81bcbac8f6bff1b918d",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "6f2a08150b528e391ef3af6543bfa5c455ec8419546eb7644cd494c1e66f87a2",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
@@ -9311,7 +9311,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const ready=",
-            "line": 133
+            "line": 142
           }
         ],
         "verification": {
@@ -9344,7 +9344,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "dispatch:async",
-            "line": 83
+            "line": 85
           }
         ],
         "verification": {
@@ -9376,7 +9376,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.action.onClicked",
-            "line": 130
+            "line": 139
           }
         ],
         "verification": {
@@ -9473,7 +9473,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function invoke",
-            "line": 111
+            "line": 82
           }
         ],
         "verification": {
@@ -9762,30 +9762,29 @@
         "preconditions": "Explicit last representation of default deleted",
         "trigger": "config",
         "guard": "Same target no longer represented; count active survivors",
-        "actual": "Persist sole survivor as default or null; preserve removal marker",
+        "actual": "Config deletion never deletes remote objects. Canonical survivor/default behavior remains. Empty configuration may initialize again on next explicit login despite old removed/initialized markers; passive checks/boot never do so.",
         "apiMethods": [
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Persist sole survivor as default or null; preserve removal marker",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Config deletion never deletes remote objects. Canonical survivor/default behavior remains. Empty configuration may initialize again on next explicit login despite old removed/initialized markers; passive checks/boot never do so.",
+        "uiEffect": "Config deletion never deletes remote objects. Canonical survivor/default behavior remains. Empty configuration may initialize again on next explicit login despite old removed/initialized markers; passive checks/boot never do so.",
         "externalResourceEffect": "none",
         "persistence": "CURRENT product/config atomic revision",
         "errors": [],
         "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
         "sourceRefs": [
           {
-            "path": "src/api/service.mjs",
+            "path": "src/api/config.mjs",
             "symbol": "const survivors=",
-            "line": 77
+            "line": 68
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/nov06-native-menu.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -9794,31 +9793,30 @@
         "preconditions": "Edit Simple/Narrow/Depth/visibility",
         "trigger": "config",
         "guard": "Revision, closed changes, discovered exact target, actor scope",
-        "actual": "Change selected config only; other modes retained",
+        "actual": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
         "apiMethods": [
           "previewConfigChange",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Change selected config only; other modes retained",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
+        "uiEffect": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
         "externalResourceEffect": "none",
         "persistence": "CURRENT and journal",
         "errors": [],
         "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
         "sourceRefs": [
           {
-            "path": "src/api/service.mjs",
-            "symbol": "function applyChanges",
-            "line": 58
+            "path": "src/api/config.mjs",
+            "symbol": "export function applyConfigChanges",
+            "line": 49
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/final-v3p1.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -9827,13 +9825,13 @@
         "preconditions": "Explicit Log in",
         "trigger": "auth",
         "guard": "Exact registered redirect/scopes, PKCE, persisted unexpired attempt and same-owner connecting guard; explicit user gesture",
-        "actual": "User-triggered native Chrome identity consent; no cloud provisioning; exact callback claimed once",
+        "actual": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
         "apiMethods": [
           "loginBegin"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "CONNECTING then VERIFYING or CONNECTED; provider denial/cancellation retains safe diagnostic",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
+        "uiEffect": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
         "externalResourceEffect": "none",
         "persistence": "Session PKCE attempt; tokens local trusted storage",
         "errors": [
@@ -9850,11 +9848,10 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/oauth-v3p1.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10213,7 +10210,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const diagnostic=",
-            "line": 15
+            "line": 20
           }
         ],
         "verification": {
@@ -10248,7 +10245,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async activation",
-            "line": 84
+            "line": 142
           }
         ],
         "verification": {
@@ -10282,7 +10279,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function r2",
-            "line": 11
+            "line": 16
           }
         ],
         "verification": {
@@ -10315,7 +10312,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function checkFresh",
-            "line": 23
+            "line": 28
           }
         ],
         "verification": {
@@ -10332,14 +10329,14 @@
         "preconditions": "Initialized or intentionally removed default",
         "trigger": "r2",
         "guard": "Marker guard precedes initial creation",
-        "actual": "Missing selected bucket does not trigger recreation",
+        "actual": "Respect saved default and all manager/depth targets. Unambiguous assigned target can be prepared without forcing a default. Default-only target is linked locally to one normal Simple row.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Missing selected bucket does not trigger recreation",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Respect saved default and all manager/depth targets. Unambiguous assigned target can be prepared without forcing a default. Default-only target is linked locally to one normal Simple row.",
+        "uiEffect": "Respect saved default and all manager/depth targets. Unambiguous assigned target can be prepared without forcing a default. Default-only target is linked locally to one normal Simple row.",
         "externalResourceEffect": "none",
         "persistence": "Initialized/removed markers retained",
         "errors": [],
@@ -10347,16 +10344,15 @@
         "sourceRefs": [
           {
             "path": "src/cloudflare/onboarding.mjs",
-            "symbol": "const initialized=",
-            "line": 43
+            "symbol": "async function initializeAccount",
+            "line": 51
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-onboarding.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10365,15 +10361,15 @@
         "preconditions": "Approved first setup; redown exists",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Reuse root with empty prefix; no object overwrite",
+        "actual": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Reuse root with empty prefix; no object overwrite",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
+        "uiEffect": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
         "externalResourceEffect": "Necessary approved Worker/DO/probe only",
         "persistence": "Staged setup operation and CURRENT revision",
         "errors": [],
@@ -10382,15 +10378,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const exists=",
-            "line": 46
+            "line": 91
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-onboarding.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10399,15 +10394,15 @@
         "preconditions": "Approved first setup; confirmed active and redown absent",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Create exact lowercase redown once; reread create races",
+        "actual": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Create exact lowercase redown once; reread create races",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
+        "uiEffect": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
         "externalResourceEffect": "Bucket create plus necessary approved Worker/DO/probe",
         "persistence": "Staged setup operation and CURRENT revision",
         "errors": [],
@@ -10416,15 +10411,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "bucket-create-dispatched",
-            "line": 55
+            "line": 108
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-onboarding.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10449,8 +10443,8 @@
         "sourceRefs": [
           {
             "path": "src/cloudflare/onboarding.mjs",
-            "symbol": "async function setup",
-            "line": 35
+            "symbol": "async function setupLocked",
+            "line": 75
           }
         ],
         "verification": {
@@ -10467,15 +10461,15 @@
         "preconditions": "Prior probe dispatch or lost completion",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Inspect original readiness object; avoid duplicate probe and setup",
+        "actual": "Private existing setup ledger stores consent, pending pointer and progress. Whole initialization is serialized; uncertain probe recovers read-only. Concurrent user edits stop setup rather than overwrite choices.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Inspect original readiness object; avoid duplicate probe and setup",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Private existing setup ledger stores consent, pending pointer and progress. Whole initialization is serialized; uncertain probe recovers read-only. Concurrent user edits stop setup rather than overwrite choices.",
+        "uiEffect": "Private existing setup ledger stores consent, pending pointer and progress. Whole initialization is serialized; uncertain probe recovers read-only. Concurrent user edits stop setup rather than overwrite choices.",
         "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
         "persistence": "Staged setup operation and CURRENT revision",
         "errors": [],
@@ -10484,15 +10478,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const recovered=",
-            "line": 51
+            "line": 104
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-onboarding.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10501,15 +10494,15 @@
         "preconditions": "Independent readiness succeeded",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Persist proof and initial root default only if no custom choice",
+        "actual": "Use shared applyConfigChanges createDestination + makeDefault semantics in one CURRENT transaction. Preserve existing default/manager entries, labels, visibility, modes and order; native ACK follows.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Persist proof and initial root default only if no custom choice",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Use shared applyConfigChanges createDestination + makeDefault semantics in one CURRENT transaction. Preserve existing default/manager entries, labels, visibility, modes and order; native ACK follows.",
+        "uiEffect": "Use shared applyConfigChanges createDestination + makeDefault semantics in one CURRENT transaction. Preserve existing default/manager entries, labels, visibility, modes and order; native ACK follows.",
         "externalResourceEffect": "No further resource change",
         "persistence": "Staged setup operation and CURRENT revision",
         "errors": [],
@@ -10518,15 +10511,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "await provisioner.markVerified",
-            "line": 64
+            "line": 117
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/cloudflare-onboarding.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10666,13 +10658,13 @@
         "preconditions": "Unready/disconnected/empty provider action",
         "trigger": "save",
         "guard": "See exact hash-bound source guard; current behavior: Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
-        "actual": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "actual": "Necessary login/permission/setup cause is inline in the one Shelf/Remotes surface; no normal setup modal, required Continue step or redundant destination selector. Missing billable consent is explicit, never inferred from OAuth.",
         "apiMethods": [
           "invokeProviderAction"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
-        "uiEffect": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "nextState": "Necessary login/permission/setup cause is inline in the one Shelf/Remotes surface; no normal setup modal, required Continue step or redundant destination selector. Missing billable consent is explicit, never inferred from OAuth.",
+        "uiEffect": "Necessary login/permission/setup cause is inline in the one Shelf/Remotes surface; no normal setup modal, required Continue step or redundant destination selector. Missing billable consent is explicit, never inferred from OAuth.",
         "externalResourceEffect": "none",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
         "errors": [
@@ -10683,15 +10675,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function invoke",
-            "line": 69
+            "line": 127
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
-          "status": "PASS",
-          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
-          "testFile": "tests/nov07-auth-shelf.test.mjs",
-          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs",
+          "meaning": "No installed/native/live R2 proof claimed"
         },
         "contractViolation": null
       },
@@ -10968,7 +10959,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 267
+            "line": 270
           }
         ],
         "verification": {
@@ -11002,7 +10993,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 112
+            "line": 116
           }
         ],
         "verification": {
@@ -11032,7 +11023,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 144
+            "line": 148
           }
         ],
         "verification": {
@@ -11124,7 +11115,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 147
+            "line": 151
           }
         ],
         "verification": {
@@ -11220,7 +11211,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "provider!=='cloudflare'",
-            "line": 29
+            "line": 34
           }
         ],
         "verification": {
@@ -11286,7 +11277,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 236
+            "line": 241
           }
         ],
         "verification": {
@@ -11316,7 +11307,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const debugApi=",
-            "line": 122
+            "line": 124
           }
         ],
         "verification": {
@@ -11358,7 +11349,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.runtime.onMessage.addListener",
-            "line": 124
+            "line": 126
           },
           {
             "path": "src/chrome/trusted-sender.mjs",
@@ -11416,6 +11407,86 @@
           "browserFixture": "scripts/test-product-browser.mjs",
           "realAcceptance": "scripts/test-shelf-extension.mjs",
           "runtime": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "V1_INITIALIZATION",
+        "preconditions": "Selected verified Cloudflare account",
+        "trigger": "Explicit login/initialization; native readiness read before compile",
+        "guard": "Separate provision authority, private persisted approval, exact account/target and revision fences",
+        "actual": "Explicit login or initializeCloudflare: existing choices preserved, default-only linked, empty account uses saved approval for ordinary redown setup. Private ledger consent is not transferable configuration.",
+        "apiMethods": [
+          "loginBegin",
+          "initializeCloudflare",
+          "approveCloudflareSetup"
+        ],
+        "identity": "Exact selected authorized account/bucket/prefix; no redown fallback over saved choices",
+        "nextState": "Explicit login or initializeCloudflare: existing choices preserved, default-only linked, empty account uses saved approval for ordinary redown setup. Private ledger consent is not transferable configuration.",
+        "uiEffect": "Inline necessary approval or READY after verified probe and real native ACK; no normal setup modal",
+        "externalResourceEffect": "Only approved bucket create/Worker prepare/readiness probe; blocked inactive/unknown/account/scope cases have zero remote mutation",
+        "persistence": "Existing private setup ledger plus canonical CURRENT configs/product transaction; no new owner",
+        "errors": [
+          "SETUP_APPROVAL_REQUIRED",
+          "WRONG_ACCOUNT",
+          "INSUFFICIENT_SCOPE",
+          "DESTINATIONS_CHANGED_DURING_SETUP",
+          "SETUP_COMPLETION_PENDING",
+          "BUCKET_CREATE_UNCONFIRMED",
+          "NATIVE_APPLY_INCOMPLETE"
+        ],
+        "retry": "Serialize initialization; reuse dispatched operation identity; inspect uncertainty, never replay a save",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function initializeAccount",
+            "line": 51
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "V1_NATIVE_READY",
+        "preconditions": "Selected verified Cloudflare account",
+        "trigger": "Explicit login/initialization; native readiness read before compile",
+        "guard": "Separate provision authority, private persisted approval, exact account/target and revision fences",
+        "actual": "Saved exact targets receive bounded read-only readiness checks before menu compilation. API reports native ACK failure/disabled target truthfully.",
+        "apiMethods": [
+          "inspectCloudflare",
+          "inspectNativeACK",
+          "initializeCloudflare"
+        ],
+        "identity": "Exact selected authorized account/bucket/prefix; no redown fallback over saved choices",
+        "nextState": "Saved exact targets receive bounded read-only readiness checks before menu compilation. API reports native ACK failure/disabled target truthfully.",
+        "uiEffect": "Inline necessary approval or READY after verified probe and real native ACK; no normal setup modal",
+        "externalResourceEffect": "Only approved bucket create/Worker prepare/readiness probe; blocked inactive/unknown/account/scope cases have zero remote mutation",
+        "persistence": "Existing private setup ledger plus canonical CURRENT configs/product transaction; no new owner",
+        "errors": [
+          "SETUP_APPROVAL_REQUIRED",
+          "WRONG_ACCOUNT",
+          "INSUFFICIENT_SCOPE",
+          "DESTINATIONS_CHANGED_DURING_SETUP",
+          "SETUP_COMPLETION_PENDING",
+          "BUCKET_CREATE_UNCONFIRMED",
+          "NATIVE_APPLY_INCOMPLETE"
+        ],
+        "retry": "Serialize initialization; reuse dispatched operation identity; inspect uncertainty, never replay a save",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const readinessTargets=",
+            "line": 72
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/issue4-v1.test.mjs"
         },
         "contractViolation": null
       }
@@ -11488,13 +11559,22 @@
     ],
     "apiParity": [
       {
+        "method": "initializeCloudflare",
+        "scope": "provision",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
+      },
+      {
         "method": "inspectShelfAttention",
         "scope": "inspect",
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "openCloudflareDestinations",
@@ -11502,8 +11582,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectCloudflare",
@@ -11511,8 +11591,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "checkCloudflareR2",
@@ -11520,8 +11600,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "selectCloudflareAccount",
@@ -11529,8 +11609,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "openCloudflareActivation",
@@ -11538,8 +11618,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "approveCloudflareSetup",
@@ -11547,8 +11627,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "repairCloudflareDestination",
@@ -11556,8 +11636,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "invokeProviderAction",
@@ -11565,8 +11645,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectRemoteHistory",
@@ -11574,8 +11654,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectRemoteReceipt",
@@ -11583,8 +11663,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectCloudflareSetup",
@@ -11592,8 +11672,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "cancelRemoteOperation",
@@ -11601,8 +11681,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "openRemoteResult",
@@ -11610,8 +11690,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "refreshExplorer",
@@ -11619,8 +11699,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "navigateExplorer",
@@ -11628,8 +11708,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "readFileChunk",
@@ -11637,8 +11717,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectExplorerContextMenu",
@@ -11646,8 +11726,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "previewContextMenu",
@@ -11655,8 +11735,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "describeCapabilities",
@@ -11664,8 +11744,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "getConfiguration",
@@ -11673,8 +11753,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "getEngineHealth",
@@ -11682,8 +11762,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "getProviderConnections",
@@ -11691,8 +11771,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "loginBegin",
@@ -11700,8 +11780,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "loginStatus",
@@ -11709,8 +11789,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "loginCancel",
@@ -11718,8 +11798,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "disconnect",
@@ -11727,8 +11807,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "listAccounts",
@@ -11736,8 +11816,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "listAuthorizedBuckets",
@@ -11745,8 +11825,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "listFolders",
@@ -11754,8 +11834,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "fileMetadata",
@@ -11763,8 +11843,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "readFile",
@@ -11772,8 +11852,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "listDestinations",
@@ -11781,8 +11861,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectMenuTree",
@@ -11790,8 +11870,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "previewNativeMenu",
@@ -11799,8 +11879,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectNativeACK",
@@ -11808,8 +11888,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "getOrganizationSuggestion",
@@ -11817,8 +11897,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "previewConfigChange",
@@ -11826,8 +11906,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "commitConfigChange",
@@ -11835,8 +11915,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "reconcileNativeMenu",
@@ -11844,8 +11924,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "chooseBackupLocation",
@@ -11853,8 +11933,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectRecoveryCoverage",
@@ -11862,8 +11942,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "runRecoveryPage",
@@ -11871,8 +11951,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectBackupRoots",
@@ -11880,8 +11960,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "listRecoveryPolicies",
@@ -11889,8 +11969,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "writeRecovery",
@@ -11898,8 +11978,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "requestRestorePreview",
@@ -11907,8 +11987,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "restoreRightClickMenu",
@@ -11916,8 +11996,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -11925,8 +12005,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "enableWholeCloudJob",
@@ -11934,8 +12014,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "disableWholeCloudJob",
@@ -11943,8 +12023,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "dispatchExplorerSave",
@@ -11952,8 +12032,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       },
       {
         "method": "dispatchSave",
@@ -11961,8 +12041,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Existing closed schemas, scoped actor/account grants and applicable confirmation",
-        "coverage": "LOCAL tests; external proof separately blocked"
+        "authorization": "Existing actor/account grants plus applicable confirmation; private setup consent is separate from OAuth",
+        "coverage": "Local tests only; genuine installed/live proof blocked"
       }
     ],
     "errorBranches": {
@@ -11997,16 +12077,16 @@
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized",
       "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
-      "shelfLocalBrowser": "PASS: 13 actual Chromium local-fixture gates, 0 failures; these are not installed-extension evidence"
+      "shelfLocalBrowser": "PASS: 13 actual Chromium local-fixture gates, 0 failures; these are not installed-extension evidence",
+      "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED"
     },
-    "sourceState": "Committed runtime source snapshot; sourceFiles exactly match implementation commit 3a19ac1723458ff137037fb6d5f09b330e54f52e. This evidence-only update changes no runtime source.",
+    "sourceState": "Working tree hash-bound snapshot; source, current map and tests are committed together; subsequent evidence commit pins runtime revision.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
-        "CHOOSE_DESTINATION",
+        "CLOUDFLARE_READY",
         "CONNECTED",
         "CONNECTING",
-        "DESTINATION_UNAVAILABLE",
         "ENGINE_MESSAGE_SEND_FAILED",
         "ENGINE_NO_RESPONSE",
         "ENGINE_RECEIVER_MISSING",
@@ -12109,6 +12189,11 @@
       "right2cloud-module/src/verification.mjs": [],
       "src/api/client.mjs": [],
       "src/api/config.mjs": [
+        "DESTINATION_EXISTS",
+        "DESTINATION_NOT_FOUND",
+        "INVALID_CHANGE",
+        "INVALID_MODE",
+        "INVALID_PROVIDER",
         "INVALID_STATE"
       ],
       "src/api/explorer-context-menu.mjs": [],
@@ -12131,17 +12216,14 @@
         "CONFIRMATION_REQUIRED",
         "CONNECTED",
         "CONNECTION_UNKNOWN",
-        "DESTINATION_EXISTS",
-        "DESTINATION_NOT_FOUND",
+        "DESTINATION_NOT_READY",
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "GENERATION_CONFLICT",
         "GENERATION_REQUIRED",
         "HUMAN_INTERACTION_REQUIRED",
         "IDEMPOTENCY_CONFLICT",
         "IDEMPOTENT_REPLAY",
-        "INVALID_CHANGE",
-        "INVALID_MODE",
-        "INVALID_PROVIDER",
+        "INITIALIZATION_UNAVAILABLE",
         "INVALID_REQUEST",
         "NATIVE_ACK_UNAVAILABLE",
         "NATIVE_APPLY_INCOMPLETE",
@@ -12149,10 +12231,13 @@
         "OPERATION_FAILED",
         "PERMISSION_DENIED",
         "PREVIEW_SIZE_LIMIT",
+        "READY",
         "RECOVERY_NOT_ENABLED",
+        "REPAIR_REQUIRED",
         "REVISION_CONFLICT",
         "SAVE_RETRY_REQUIRES_INSPECTION",
         "SCOPE_UNAUTHORIZED",
+        "SETUP_AUTHORITY_REQUIRED",
         "SOURCE_SCOPE_MISMATCH",
         "STALE_CURSOR",
         "STALE_GENERATION",
@@ -12313,7 +12398,8 @@
         "COMPLETION_PENDING",
         "CONNECTED",
         "CONNECTING",
-        "DEFAULT_CHANGED_DURING_SETUP",
+        "DEFAULT_ACCOUNT_MISMATCH",
+        "DESTINATIONS_CHANGED_DURING_SETUP",
         "DESTINATION_UNAVAILABLE",
         "DISCONNECTED",
         "FRESH_CLICK_REQUIRED",
@@ -12338,12 +12424,13 @@
         "REMOTE_SOURCE_REQUIRED",
         "REPAIR_REQUIRED",
         "REVISION_CONFLICT",
-        "SCOPE_UNAUTHORIZED",
         "SELECTED_BUCKET_MISSING",
         "SETUP_APPROVAL_REQUIRED",
         "SETUP_COMPLETION_PENDING",
+        "SETUP_IN_PROGRESS",
+        "SETUP_LEDGER_UNAVAILABLE",
         "SETUP_PROBE_REQUIRES_INSPECTION",
-        "SETUP_RETRY_REQUIRES_INSPECTION",
+        "SETUP_RESULT_STALE",
         "TARGET_NOT_CONFIGURED",
         "TOKEN_EXPIRED",
         "TRANSIENT_API_FAILURE",
@@ -13275,7 +13362,7 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "ea4178e0c5348422432fe7b82eb5c83ab354f14d77389629bca620eab3538b30"
+    "digest": "fbadd2e2779c5781c4eeaab455ac0e9780debf0b6fc80ca07d736ac773d7cca7"
   },
   "changeLog": [
     {
@@ -13309,6 +13396,24 @@
       "summary": "Remove optional-documentId hard failure, preserve exact Chrome provenance, structured message failures and precise Shelf startup causes; real acceptance runner, no user/cloud state migrations",
       "status": "LOCAL_PASS_INSTALLED_SHELF_BLOCKED",
       "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e"
+    },
+    {
+      "sourceCommit": "93410b4b3715dac40afa3f4682aeac998803b3d9",
+      "behaviorIds": [
+        "AUTH_LOGIN",
+        "R2_RETURNING",
+        "SETUP_REUSE",
+        "SETUP_CREATE",
+        "SETUP_COMMIT",
+        "SETUP_RESUME",
+        "CONFIG_REMOVE_DEFAULT",
+        "SAVE_UNREADY",
+        "CONFIG_ISOLATION",
+        "V1_INITIALIZATION",
+        "V1_NATIVE_READY"
+      ],
+      "summary": "Issue #4 V1 implementation: automatic authorized login setup, canonical ordinary destination registration, choice preservation and zero normal setup popups",
+      "status": "LOCAL_IMPLEMENTATION_LIVE_PROOF_SEPARATE"
     }
   ],
   "verificationLevels": [
@@ -13319,5 +13424,329 @@
     "INSTALLED_CHROME",
     "LIVE_PROVIDER"
   ],
-  "coverageNote": "Finite source control states and source-wide code inventory audited; no assertion of formal exhaustive paths, live authentication, or full REDOWN parity. oneToOneVerified remains false until external and unsupported gates are satisfied."
+  "coverageNote": "Finite source control states and source-wide code inventory audited; no assertion of formal exhaustive paths, live authentication, or full REDOWN parity. oneToOneVerified remains false until external and unsupported gates are satisfied.",
+  "issue4Before": {
+    "sourceCommit": "93410b4b3715dac40afa3f4682aeac998803b3d9",
+    "captureMethod": "Reconstructed from immutable latest-main Git objects, independently checked against source before implementation; prior master baseline retained unchanged",
+    "behaviors": [
+      {
+        "id": "CONFIG_REMOVE_DEFAULT",
+        "preconditions": "Explicit last representation of default deleted",
+        "trigger": "config",
+        "guard": "Same target no longer represented; count active survivors",
+        "actual": "Persist sole survivor as default or null; preserve removal marker",
+        "apiMethods": [
+          "commitConfigChange"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Persist sole survivor as default or null; preserve removal marker",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "none",
+        "persistence": "CURRENT product/config atomic revision",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "const survivors=",
+            "line": 77
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/nov06-native-menu.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "CONFIG_ISOLATION",
+        "preconditions": "Edit Simple/Narrow/Depth/visibility",
+        "trigger": "config",
+        "guard": "Revision, closed changes, discovered exact target, actor scope",
+        "actual": "Change selected config only; other modes retained",
+        "apiMethods": [
+          "previewConfigChange",
+          "commitConfigChange"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Change selected config only; other modes retained",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "none",
+        "persistence": "CURRENT and journal",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "function applyChanges",
+            "line": 58
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/final-v3p1.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "AUTH_LOGIN",
+        "preconditions": "Explicit Log in",
+        "trigger": "auth",
+        "guard": "Exact registered redirect/scopes, PKCE, persisted unexpired attempt and same-owner connecting guard; explicit user gesture",
+        "actual": "User-triggered native Chrome identity consent; no cloud provisioning; exact callback claimed once",
+        "apiMethods": [
+          "loginBegin"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "CONNECTING then VERIFYING or CONNECTED; provider denial/cancellation retains safe diagnostic",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "none",
+        "persistence": "Session PKCE attempt; tokens local trusted storage",
+        "errors": [
+          "LOGIN_IN_PROGRESS",
+          "OAUTH_CALLBACK_REJECTED",
+          "OAUTH_SCOPE_MISMATCH"
+        ],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "async function connect",
+            "line": 63
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/oauth-v3p1.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "R2_RETURNING",
+        "preconditions": "Initialized or intentionally removed default",
+        "trigger": "r2",
+        "guard": "Marker guard precedes initial creation",
+        "actual": "Missing selected bucket does not trigger recreation",
+        "apiMethods": [
+          "approveCloudflareSetup",
+          "repairCloudflareDestination"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Missing selected bucket does not trigger recreation",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "none",
+        "persistence": "Initialized/removed markers retained",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const initialized=",
+            "line": 43
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SETUP_REUSE",
+        "preconditions": "Approved first setup; redown exists",
+        "trigger": "setup",
+        "guard": "Explicit provision approval and exact CURRENT/session/target guards",
+        "actual": "Reuse root with empty prefix; no object overwrite",
+        "apiMethods": [
+          "approveCloudflareSetup",
+          "repairCloudflareDestination",
+          "inspectCloudflareSetup"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Reuse root with empty prefix; no object overwrite",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "Necessary approved Worker/DO/probe only",
+        "persistence": "Staged setup operation and CURRENT revision",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const exists=",
+            "line": 46
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SETUP_CREATE",
+        "preconditions": "Approved first setup; confirmed active and redown absent",
+        "trigger": "setup",
+        "guard": "Explicit provision approval and exact CURRENT/session/target guards",
+        "actual": "Create exact lowercase redown once; reread create races",
+        "apiMethods": [
+          "approveCloudflareSetup",
+          "repairCloudflareDestination",
+          "inspectCloudflareSetup"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Create exact lowercase redown once; reread create races",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "Bucket create plus necessary approved Worker/DO/probe",
+        "persistence": "Staged setup operation and CURRENT revision",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "bucket-create-dispatched",
+            "line": 55
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SETUP_RESUME",
+        "preconditions": "Prior probe dispatch or lost completion",
+        "trigger": "setup",
+        "guard": "Explicit provision approval and exact CURRENT/session/target guards",
+        "actual": "Inspect original readiness object; avoid duplicate probe and setup",
+        "apiMethods": [
+          "approveCloudflareSetup",
+          "repairCloudflareDestination",
+          "inspectCloudflareSetup"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Inspect original readiness object; avoid duplicate probe and setup",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
+        "persistence": "Staged setup operation and CURRENT revision",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const recovered=",
+            "line": 51
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SETUP_COMMIT",
+        "preconditions": "Independent readiness succeeded",
+        "trigger": "setup",
+        "guard": "Explicit provision approval and exact CURRENT/session/target guards",
+        "actual": "Persist proof and initial root default only if no custom choice",
+        "apiMethods": [
+          "approveCloudflareSetup",
+          "repairCloudflareDestination",
+          "inspectCloudflareSetup"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Persist proof and initial root default only if no custom choice",
+        "uiEffect": "Reported through existing GUI/API outcome",
+        "externalResourceEffect": "No further resource change",
+        "persistence": "Staged setup operation and CURRENT revision",
+        "errors": [],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "await provisioner.markVerified",
+            "line": 64
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED",
+          "status": "PASS",
+          "meaning": "Source behavior observed, not live certification",
+          "testFile": "tests/cloudflare-onboarding.test.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "SAVE_UNREADY",
+        "preconditions": "Unready/disconnected/empty provider action",
+        "trigger": "save",
+        "guard": "See exact hash-bound source guard; current behavior: Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "actual": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "apiMethods": [
+          "invokeProviderAction"
+        ],
+        "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
+        "nextState": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "uiEffect": "Provider-focused Shelf/manager or cause-specific notification; no popup/tab fallback and no false login for pending identity",
+        "externalResourceEffect": "none",
+        "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
+        "errors": [
+          "See current sourceErrorInventory and exact source branch"
+        ],
+        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function invoke",
+            "line": 69
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
+          "status": "PASS",
+          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
+          "testFile": "tests/nov07-auth-shelf.test.mjs",
+          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+        },
+        "contractViolation": null
+      }
+    ],
+    "observedDefects": [
+      "Setup wrote product.defaultTarget without ordinary manager registration",
+      "Login did not initialize an approved empty account",
+      "Old removal markers blocked next-login initialization forever",
+      "Setup status used modal Continue / Check R2 and Current Default Location choices",
+      "Inventory did not populate remote readiness for saved targets before native compilation"
+    ],
+    "sourceFiles": {
+      "src/cloudflare/onboarding.mjs": "a6f88d0564ad091432961727b34df37c8b5dea841be42f9096ed1fb8572ef8ed",
+      "src/api/config.mjs": "5957f8770d8faf3352b9eb5544b77406afa2d7aaec176d50c9903a712219de7f",
+      "src/api/service.mjs": "86a1d340d4124dbd22b5856535b875276ee0eda3b8f1567ecfd0dbaeade3b7de",
+      "extension/app.mjs": "02c2f8543b4485899c4b49bd7db9d0fd3a6bd03e03a302c0143b0172f559bf1c",
+      "extension/background.mjs": "9a2591eabd7ec3a6a2679d038e4f1de699d0b1199858f12ab381e62f79a8c123"
+    }
+  }
 }
