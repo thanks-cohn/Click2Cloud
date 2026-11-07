@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "8805d50eda024700dbb4f8221067de0a4a76cfaf",
+    "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e",
     "sourceFiles": {
       "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -11359,6 +11359,11 @@
             "path": "extension/background.mjs",
             "symbol": "chrome.runtime.onMessage.addListener",
             "line": 124
+          },
+          {
+            "path": "src/chrome/trusted-sender.mjs",
+            "symbol": "export function appSenderDecision",
+            "line": 4
           }
         ],
         "verification": {
@@ -11987,13 +11992,14 @@
     ],
     "verification": {
       "source": "PASS: hash-bound source behavior",
-      "unit": "Updated focused run recorded in docs/evidence/nov07-master",
+      "unit": "PASS: 192 focused tests; docs/evidence/shelf-engine/focused.txt",
       "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; see docs/evidence/nov07-master/browser/browser-results.json",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized",
-      "liveShelfEngine": "BLOCKED: managed ExtensionInstallBlocklist [*]. No real describeCapabilities response captured; see docs/evidence/shelf-engine/real-shelf-receipt.json"
+      "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
+      "shelfLocalBrowser": "PASS: 13 actual Chromium local-fixture gates, 0 failures; these are not installed-extension evidence"
     },
-    "sourceState": "Working-tree source hashes authoritative; source and map will be committed together; receipt pins final committed source.",
+    "sourceState": "Committed runtime source snapshot; sourceFiles exactly match implementation commit 3a19ac1723458ff137037fb6d5f09b330e54f52e. This evidence-only update changes no runtime source.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13269,7 +13275,7 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "cd27ea77ae0fde08baf3c05efbeb9d0712533dfd3afec1c5d3b956886dbbae2e"
+    "digest": "ea4178e0c5348422432fe7b82eb5c83ab354f14d77389629bca620eab3538b30"
   },
   "changeLog": [
     {
@@ -13301,7 +13307,8 @@
         "ENTRY_CLIENT_RESPONSE"
       ],
       "summary": "Remove optional-documentId hard failure, preserve exact Chrome provenance, structured message failures and precise Shelf startup causes; real acceptance runner, no user/cloud state migrations",
-      "status": "LOCAL_PASS_INSTALLED_SHELF_BLOCKED"
+      "status": "LOCAL_PASS_INSTALLED_SHELF_BLOCKED",
+      "sourceCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e"
     }
   ],
   "verificationLevels": [

@@ -1,0 +1,32 @@
+{
+  "runtimeCommit": "3a19ac1723458ff137037fb6d5f09b330e54f52e",
+  "extensionVersion": "0.3.4",
+  "branch": "dev/p0-shelf-engine-communication",
+  "status": "IMPLEMENTED_LOCAL_PASS_REAL_SHELF_BLOCKED",
+  "focused": {
+    "pass": 192,
+    "fail": 0
+  },
+  "localChromiumFixture": {
+    "pass": 13,
+    "fail": 0,
+    "meaning": "Actual app/background with mocked Chrome transport, not genuine extension"
+  },
+  "genuineShelf": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "request": {
+      "channel": "engine",
+      "version": "3+1.1",
+      "method": "describeCapabilities",
+      "params": {}
+    },
+    "response": null
+  },
+  "build": "PASS",
+  "strictTypescriptDeclarations": "PASS",
+  "REDOWN": "UNCHANGED_CLEAN_a6c17f8",
+  "cloudResourceMutations": false,
+  "push": false,
+  "merge": false
+}

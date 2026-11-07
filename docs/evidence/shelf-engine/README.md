@@ -1,10 +1,12 @@
 # P0 Shelf → engine communication
 
+Implementation commit: `3a19ac1723458ff137037fb6d5f09b330e54f52e` on `dev/p0-shelf-engine-communication`, from main `d01a2c09cc3fa4f29862c1a3984845c139edd5a5`.
+
 Status: implementation and local regressions PASS; genuine installed Shelf acceptance BLOCKED here. Do not treat this report as a verified repair on Windows Chrome.
 
 ## Reproduced failure mechanism
 
-Before this repair, `src/chrome/trusted-sender.mjs:trustedAppSender` required a nonempty `sender.documentId`. Chrome's MessageSender metadata makes documentId optional. The existing background listener returned false without responding whenever that condition failed, even when Chrome supplied the correct extension ID and exact `extension/app.html` URL. The engine being initialized did not affect this earlier guard.
+Before this repair, `src/chrome/trusted-sender.mjs:trustedAppSender` required a nonempty `sender.documentId`. Chrome's [official MessageSender documentation](https://developer.chrome.com/docs/extensions/reference/api/runtime#type-MessageSender) makes documentId optional; the fetched public reference excerpt is saved in official-runtime-reference.json. The existing background listener returned false without responding whenever that condition failed, even when Chrome supplied the correct extension ID and exact `extension/app.html` URL. The engine being initialized did not affect this earlier guard.
 
 The Shelf awaited runtime.sendMessage. When it received undefined, it constructed an error with an undefined code; bootstrap replaced that with ENGINE_UNAVAILABLE. Separately, any ready/invoke rejection became ENGINE_UNAVAILABLE in the background. Thus the reported engine message concealed at least three distinct failure stages. A prematurely closed port is consistent with the response lifecycle failing, but the owner's exact Windows sender fields were not captured in this run. Missing documentId is a source-reproduced defect, not a fabricated observation of the owner's machine. A different URL/origin will now produce its actual rejection reason.
 
@@ -33,6 +35,8 @@ The permanent workings JSON preserves its original baseline digest and adds ENTR
 - `scripts/test-shelf-extension.mjs`: **real unpacked extension only**, isolated disposable profile, real runtime messages and the real production app. Chrome must confirm a SIDE_PANEL context and a distinct genuine Shelf target. It checks service-worker readiness, Shelf describeCapabilities (including the exact build), structured invalid-method response, actual Shelf bootstrap/reload, and real query-changed page denial. It does not stub runtime.sendMessage, inject sender objects or substitute an ordinary tab for the Shelf. It never starts OAuth or calls a cloud-write API. playwright-core is the one development dependency added for this portable browser runner; no browser or production dependency is bundled.
 
 Managed Chromium in this environment declares `ExtensionInstallBlocklist: ["*"]`. The unpacked load attempt returned `UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR`. No policy was bypassed. `real-shelf-receipt.json` records BLOCKED, the exact request and a null response because no Shelf response could be obtained. No installed-Shelf PASS is claimed. Real Windows consent/account/cloud behavior is outside this communication-only test and was not exercised.
+
+Recorded checks: **192/192 focused tests**, **13/13 real-Chromium local-fixture gates**, extension build and strict TypeScript API declaration check PASS. See focused.txt, target.txt, build.txt, types.txt, browser/browser-results.json and real-shelf-receipt.json. The genuine acceptance result is **BLOCKED**, not PASS. Baseline remains immutable; CURRENT now has 64 behavior entries and 76 runtime source hashes.
 
 ## Run the genuine test in Windows CMD
 

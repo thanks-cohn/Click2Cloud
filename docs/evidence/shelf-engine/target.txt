@@ -1,0 +1,12 @@
+✔ Chrome-authenticated Shelf identity does not depend on optional documentId (1.127464ms)
+✔ optional metadata never overrides extension/page provenance; malformed or conflicting metadata is denied (1.061917ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (13.898445ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.151836ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 136.589835
