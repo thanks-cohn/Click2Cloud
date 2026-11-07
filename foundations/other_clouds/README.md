@@ -47,3 +47,8 @@ flowchart TD
     B -- "YES" --> SAVE["Save immediately; no panel or dashboard"]
     B -- "Connected but destination unavailable" --> ACTION["Compact provider panel:<br/>only the needed destination/repair action"]
 ```
+
+
+## Settings — choose which cloud providers appear in Chrome
+
+All four providers start visible. In Settings → Right-click menu, Google Drive, Dropbox, OneDrive and Cloudflare each have an independent Show/Hide checkbox. Hiding a provider removes its Chrome menu entry, not its connection, files or saved destinations. Re-enabling it restores its configured menu action after native registration. The settings use the same versioned API that drives the GUI. See the companion Cloudflare diagram 2B in `foundations/cloudflare/README.md`.
