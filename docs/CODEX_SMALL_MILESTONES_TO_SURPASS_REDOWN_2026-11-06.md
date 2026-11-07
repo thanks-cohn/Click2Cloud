@@ -50,8 +50,8 @@ Milestones are **small checkpoints within a continuous working session**, not li
 - **PASS:** New account starts with a working `redown` after consent/setup; returning user does not redo setup; custom target preserved; deleting `redown` does not trigger silent recreation. The `menuCustomized` flag never hides a legitimate default.
 
 ### M03 — Single Cloudflare entry changes to ONE submenu only with extras
-- **Fix:** Cloudflare's native menu shape is driven by the **count of assigned Cloudflare save locations** (not all R2 buckets). Zero assignments: flat clickable provider login/setup; one assignment: flat direct-save leaf to the sole exact location (initially `redown/` after approved setup). Assign a second bucket/folder (e.g., Photos): immediately produce ONE **Cloudflare → redown / Photos** submenu, no duplicate Cloudflare R2 item. Creating a second R2 bucket without assigning it does not nest the menu. Deliberately delete/remove `redown` while Photos remains assigned: remove `redown` from menu/config, update default to the sole survivor, and return to one flat **Cloudflare** leaf saving to Photos. Never silently recreate removed `redown` or confuse network errors with deletion. Preserve named destinations, Narrow/Depth behavior, canonical API and native ACK.
-- **PASS:** Test 0/1/2/3 assigned destinations, creation without assignment, second assignment, removal of second, explicit deletion of `redown` with one survivor, deletion of last assigned destination, user-chosen default, reload, and exact account/bucket/prefix resolution. Each transition gives exactly one Cloudflare provider row and correct leaf/submenu shape with real native ACK.
+- **Fix:** Cloudflare's native menu shape is driven by the **count of assigned Cloudflare save locations** (not all R2 buckets). Zero assignments: flat clickable provider login/approved first-time setup if new, **or opens Manage Destinations when a connected returning user has no assigned locations**; one assignment: flat direct-save leaf to the sole exact location (initially `redown/` after approved setup). Assign a second bucket/folder (e.g., Photos): immediately produce ONE **Cloudflare → redown / Photos** submenu, no duplicate Cloudflare R2 item. Creating a second R2 bucket without assigning it does not nest the menu. Deliberately delete/remove `redown` while Photos remains assigned: remove `redown` from menu/config, update default to the sole survivor, and return to one flat **Cloudflare** leaf saving to Photos. Never silently recreate removed `redown` or confuse network errors with deletion. Preserve named destinations, Narrow/Depth behavior, canonical API and native ACK.
+- **PASS:** Test 0/1/2/3 assigned destinations including an initialized account with no location that opens Manage Destinations, creation without assignment, second assignment, removal of second, explicit deletion of `redown` with one survivor, deletion of last assigned destination, user-chosen default, reload, and exact account/bucket/prefix resolution. Each transition gives exactly one Cloudflare provider row and correct leaf/submenu shape with real native ACK.
 
 ### M04 — Native right-click READY means SAVE, not dashboard
 - **Inspect:** `extension/background.mjs` dispatch, `src/chrome/registrar.mjs`, `src/core/engine.mjs`, `src/cloudflare/onboarding.mjs`.
@@ -129,6 +129,13 @@ Milestones are **small checkpoints within a continuous working session**, not li
 
 ### M21 — Aesthetics LAST
 - Clean Windows-like Explorer naming, minimal cards, hover options, optional themes/mascot, verified-success effects. Copy REDOWN's polish selectively, not its coupled animation logic. **PASS:** no essential action hidden behind effects, no perceptible performance regression, animations only after verified save.
+
+## Provider visibility and empty-Cloudflare navigation (current P0 acceptance)
+
+- Settings has four independent ON-by-default native provider toggles (Google Drive, Dropbox, OneDrive, Cloudflare). Hiding one removes its native menu rows but preserves account authorization and saved destination config. Restoring it reuses its existing configuration and canonical API with native ACK.
+- Cloudflare with no remaining chosen/assigned destinations **after initial onboarding** is still a flat clickable provider entry. Connected: open **Manage Destinations**. Disconnected: sign-in first, then Manage Destinations. Never recreate previously deleted `redown`.
+- Code owner: existing product configuration API, MenuSpec registrar and the existing Manage Destinations surface, not a new engine.
+- See `foundations/cloudflare/README.md` Diagram 2A/2B.
 
 ## Exact default menu and default-bucket examples
 
