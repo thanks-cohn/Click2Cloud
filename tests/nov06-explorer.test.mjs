@@ -14,3 +14,5 @@ test('slow listing never holds the configuration/inspection queue or blocks unre
  const api=createEngineApi({engine:{},current:{read:async()=>({product:productState(),configs:{}})},oauth:{status:async()=>({state:'CONNECTED',accounts:[{id:'a'}]})},authorize:async()=>true,fileApi:{run:async(_op,input)=>{if(input.source.prefix==='slow/'){started();await slow;}return {state:'completed',data:{entries:[]}};}}});
  const call=prefix=>api.invoke({version:'3+1.1',method:'listFolders',params:{source:{...target,prefix}}},'gui'),first=call('slow/');await start;try{const result=await Promise.race([call('fast/'),new Promise((_,no)=>setTimeout(()=>no(Error('listing blocked queue')),200))]);assert.equal(result.state,'completed');}finally{release();await first;}
 });
+
+test('viewport stays valid after a shrinking listing with a stale scroll offset',()=>{assert.deepEqual(rowWindow(0,1000000,600),{start:0,end:0,top:0});const range=rowWindow(3,1000000,600);assert(range.start<range.end);assert.equal(range.end,3);});
