@@ -6,3 +6,5 @@ await import('./p0-repair.test.mjs');
 await import('./provider-menu-visibility.test.mjs');
 
 await import("./nov06-native-menu.test.mjs");
+
+await import("./nov06-explorer.test.mjs");

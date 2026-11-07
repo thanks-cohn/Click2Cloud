@@ -1,3 +1,4 @@
+import {createListingOrder,createListingReader,rowWindow} from '../src/explorer/listing-view.mjs';
 import {ancestors,targetKey} from '../src/core/menu-identity.mjs';
 const readinessNames={READY:'Ready to save',NOT_ACTIVATED:'Activate R2 in Cloudflare to continue.',RECONNECT_REQUIRED:'Log in to reconnect Cloudflare.',INSUFFICIENT_PERMISSION:'Cloudflare did not grant the required access. Reconnect with the necessary permissions.',NETWORK_UNAVAILABLE:'Cloudflare could not be reached. Try again when the connection is available.',ACCOUNT_AMBIGUOUS:'Choose the Cloudflare account to use.',UNKNOWN:'R2 readiness is not confirmed. Retry Check R2 or review account permissions.',REPAIR_REQUIRED:'This destination needs its private save connection prepared or repaired.',SETUP_APPROVAL_REQUIRED:'Approve initial setup to make Cloudflare saving ready.',CHOOSE_DESTINATION:'Choose a folder in Explorer and make it your default.',DESTINATION_UNAVAILABLE:'The selected destination is unavailable. Reconnect or choose another.'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -6,10 +7,12 @@ const status=s=>{$('#status').textContent=s;};
 const names={AUTHORIZATION_DENIED:'This save is not authorized. Check the destination and public HTTPS source.',SOURCE_DENIED:'This source is not eligible public HTTPS.',SOURCE_ADDRESS_DENIED:'The source resolves to a private or special-use network address.',SOURCE_EGRESS_UNAVAILABLE:'The source could not be reached through secure public egress. Cloudflare TCP blocks Cloudflare-owned destination IPs.',SOURCE_STALLED:'The source stopped making progress.',RESOURCE_BUSY:'Remote capacity is busy. No write was attempted; try a fresh click later.',R2_SINGLE_PUT_LIMIT:'This file exceeds the current conditional R2 upload service limit. Safe multipart completion is not verified.',OPERATION_INTERRUPTED:'This remote operation was interrupted. Inspect it before any new save.',SOURCE_UNAVAILABLE:'The remote source could not be read. No verified save was reported.',SIZE_LIMIT:'The source exceeds the supported remote-transfer limit.',BUFFER_LIMIT:'This source needs more buffering than the supported limit.',WRITE_UNCONFIRMED:'The write is uncertain. Inspect the destination before retrying.',RECONCILE_READ_ONLY:'The transfer result is uncertain. Inspect the receipt before retrying.',OPERATION_ALREADY_CLAIMED:'This operation was already submitted. Inspect its receipt; it was not replayed.',VERIFICATION_MISMATCH:'Destination verification did not match. Inspect before retrying.',TRANSPORT_UNAVAILABLE:'The private save connection could not be reached. Check Cloudflare setup/status.',PROVIDER_NOT_IMPLEMENTED:'This provider is not available yet. No file was saved.',REMOTE_SOURCE_REQUIRED:'Cloudflare saves require an eligible public HTTPS source; local file bytes are not uploaded.',REMOTE_EXPLORER_SOURCE_UNAVAILABLE:'This Explorer file has no authorized remote-fetch source. Cloudflare cannot stage it through the browser.',WORKER_SETUP_REQUIRED:'Prepare Cloudflare in Remotes before saving.',AUTH_REQUIRED:'Log in to browse this connection.',OAUTH_CANCELLED_OR_UNAVAILABLE:'Sign-in cancelled or unavailable. Retry when ready.',OAUTH_REDIRECT_SETUP_REQUIRED:'Connection setup required. The registered callback does not match this installation.',AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE:'Saving needs an authenticated Click2Cloud Worker transport. No bytes were uploaded.',EXTERNAL_RECOVERY_UNAVAILABLE:'Choose and authorize an external backup folder first.',REVISION_CONFLICT:'Configuration changed. Refresh and try again.',SCOPE_UNAUTHORIZED:'This account is not authorized.',PROVIDER_READ_FAILED:'The provider could not list this location. Retry Refresh.'};
 let state,connection,view='remotes',source=null,entries=[],selected=new Set(),history=[],historyAt=-1,cursor='',loading=false,sort={key:'displayName',direction:1},anchor=0,listingEpoch=0;
 let suggestionDue=false;
-const treeFolders=new Map(),bucketTargets=[];let previewUrl;
-async function api(method,params={}) {
+const treeFolders=new Map(),treeNodes=new Map(),bucketTargets=[];let previewUrl,previewEpoch=0,navigationEpoch=0,focusIndex=0,listingError='',renderedWindow=null,capabilities=null,contextReturnElement=null,treeEpoch=0;
+const listingOrder=createListingOrder();
+const listingReader=createListingReader(async(t,cursor)=>{const r=await api('listFolders',{source:t,...(cursor?{cursor}:{})},{quiet:true});if(r.state!=='completed')throw Error(names[r.code]??r.code??'Provider listing unavailable.');return r.data;});
+async function api(method,params={}, {quiet=false}={}) {
   const result=await chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method,params});
-  if(!result||result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const err=Object.assign(Error(names[result?.code]??result?.code??'Extension unavailable.'),{code:result?.code});status(err.message);throw err;}
+  if(!result||result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const err=Object.assign(Error(names[result?.code]??result?.code??'Extension unavailable.'),{code:result?.code});if(!quiet)status(err.message);throw err;}
   return result.data;
 }
 async function refreshState(){state=await api('getConfiguration');document.documentElement.dataset.theme=state.product.theme;return state;}
@@ -23,13 +26,13 @@ async function change(changes,{confirmed=false}={}) {
   return r;
 }
 function listen(selector,event,fn){$(selector)?.addEventListener(event,e=>{Promise.resolve(fn(e)).catch(error=>status(error.message));});}
-function closeDialog(){if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}$('#dialog').close();}
+function closeDialog(){previewEpoch++;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}$('#dialog').close();}
 function dialog(title,body,footer='') {
   hideContext();$('#dialog-content').innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2><button id="close-dialog" aria-label="Close">×</button></div><div class="dialog-body">${body}</div>${footer}`;
   listen('#close-dialog','click',closeDialog);if(!$('#dialog').open)$('#dialog').showModal();
 }
 async function connections() {
-  connection=await api('loginStatus');
+  const before=JSON.stringify([connection?.state,connection?.accounts]);connection=await api('loginStatus');if(before!==JSON.stringify([connection.state,connection.accounts])){listingReader.invalidate();treeFolders.clear();treeEpoch++;treeNodes.clear();$('#tree').replaceChildren();bucketTargets.length=0;if(connection.state!=='CONNECTED'){navigationEpoch++;listingEpoch++;entries=[];selected.clear();source=null;history=[];historyAt=-1;if(view==='explorer')renderExplorer();}}
   $('#connection').innerHTML=`<strong>☁ Cloudflare</strong><p class="muted">${esc(connection.state==='CONNECTED'?'Connected':connection.state==='CONNECTING'?'Signing in…':'Not connected')}</p>${connection.state==='CONNECTED'?'<button id="browse">Open File Explorer</button>':connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':'<button id="login">Log in</button>'}`;
   listen('#login','click',login);listen('#cancel-login','click',async()=>{await api('loginCancel');await connections();});listen('#browse','click',async()=>{await show('explorer');await loadTree();});
 }
@@ -47,32 +50,43 @@ function renderRemotes(){
   void api('inspectRemoteHistory').then(rows=>{const last=rows.find(r=>r.kind!=='readiness');if(view==='remotes'&&last)status((last.state==='verified'?'Saved and verified. ':last.state==='uncertain'?'Save uncertain. Inspect before retrying. ':'Not saved. ')+(names[last.code]??last.code??''));}).catch(()=>{});
 }
 async function loadTree(){
-  $('#tree').textContent='Loading accounts…';bucketTargets.length=0;
+  const ticket=++treeEpoch;$('#tree').textContent='Loading accounts…';bucketTargets.length=0;treeNodes.clear();
   try {
-    const a=await api('listAccounts');if(a.state!=='completed')throw Error(names[a.code]??a.code??'Unable to list accounts.');
+    const a=await api('listAccounts');if(ticket!==treeEpoch)return;if(a.state!=='completed')throw Error(names[a.code]??a.code??'Unable to list accounts.');
     $('#tree').replaceChildren();
     for(const account of a.data.accounts) {
-      const branch=document.createElement('div'),button=document.createElement('button'),children=document.createElement('div');children.className='children';button.textContent='▸ '+account.name;button.setAttribute('role','treeitem');button.setAttribute('aria-expanded','false');branch.append(button,children);$('#tree').append(branch);
+      const branch=document.createElement('div'),button=document.createElement('button'),children=document.createElement('div');children.className='children';button.textContent='▸ '+account.name;button.setAttribute('role','treeitem');button.setAttribute('aria-expanded','false');branch.append(button,children);$('#tree').append(branch);treeKeyboard(button,children);
       button.onclick=async()=>{if(button.getAttribute('aria-expanded')==='true'){children.hidden=true;button.setAttribute('aria-expanded','false');return;}children.hidden=false;button.setAttribute('aria-expanded','true');if(children.childElementCount)return;
-        try{let next='';do {const r=await api('listAuthorizedBuckets',{accountId:account.id,...(next?{cursor:next}:{})});if(r.state!=='completed')throw Error(names[r.code]??r.code??'Bucket listing failed.');for(const b of r.data.buckets){const t={provider:'cloudflare',connectionId:'cloudflare:'+account.id,accountId:account.id,bucketName:b.name,prefix:''};bucketTargets.push(t);treeNode(children,t,b.name);}next=r.data.cursor??'';}while(next);}catch(error){status(error.message);}
+        try{let next='';do {const r=await api('listAuthorizedBuckets',{accountId:account.id,...(next?{cursor:next}:{})});if(ticket!==treeEpoch||!button.isConnected)return;if(r.state!=='completed')throw Error(names[r.code]??r.code??'Bucket listing failed.');for(const b of r.data.buckets){const t={provider:'cloudflare',connectionId:'cloudflare:'+account.id,accountId:account.id,bucketName:b.name,prefix:''};bucketTargets.push(t);treeNode(children,t,b.name);}next=r.data.cursor??'';}while(next);}catch(error){status(error.message);}
       };
     }
   }catch(error){$('#tree').textContent=error.message;}
 }
+function treeKeyboard(button,children){
+ children.setAttribute('role','group');button.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();
+  if(e.key==='ArrowRight'){if(button.getAttribute('aria-expanded')!=='true')button.click();else children.querySelector('button')?.focus();}
+  else if(e.key==='ArrowLeft'){if(button.getAttribute('aria-expanded')==='true'){children.hidden=true;button.setAttribute('aria-expanded','false');}else button.parentElement.parentElement.closest('.children')?.parentElement.querySelector(':scope > button')?.focus();}
+  else {const items=$$('#tree button[role="treeitem"]').filter(x=>x.getClientRects().length),i=items.indexOf(button),n=e.key==='Home'?0:e.key==='End'?items.length-1:Math.max(0,Math.min(items.length-1,i+(e.key==='ArrowDown'?1:-1)));items[n]?.focus();}
+ };
+}
+function syncTreePage(t,data){
+ const slot=treeNodes.get(targetKey(t));if(!slot)return;slot.more?.remove();
+ if(data.completeListing){const present=new Set(data.entries.filter(e=>e.folder).map(e=>e.key));for(const key of slot.keys)if(!present.has(key)){slot.nodes.get(key)?.remove();slot.nodes.delete(key);slot.keys.delete(key);}for(const [key,node] of treeNodes)if(!node.children.isConnected)treeNodes.delete(key);}
+ for(const f of data.entries.filter(e=>e.folder))if(!slot.keys.has(f.key)){slot.keys.add(f.key);slot.nodes.set(f.key,treeNode(slot.children,{...t,prefix:f.key},f.displayName??f.key));}
+ if(data.cursor){const more=document.createElement('button');slot.more=more;more.textContent='Load more folders';more.onclick=async()=>{more.disabled=true;try{const next=await listingReader.page(t,data.cursor);syncTreePage(t,next);}catch(e){status(e.message);more.disabled=false;}};slot.children.append(more);}
+}
 function treeNode(parent,t,label){
-  const node=document.createElement('div'),button=document.createElement('button'),children=document.createElement('div');children.className='children';children.hidden=true;button.textContent='▸ 📁 '+label;button.setAttribute('role','treeitem');button.setAttribute('aria-expanded','false');node.append(button,children);parent.append(node);
-  button.onclick=async()=>{
-    await navigate(t);children.hidden=!children.hidden;button.setAttribute('aria-expanded',String(!children.hidden));
-    if(!children.hidden&&!children.childElementCount)for(const f of treeFolders.get(targetKey(t))??[])treeNode(children,{...t,prefix:f.key},f.displayName);
-  };
-  button.oncontextmenu=e=>{e.preventDefault();contextFor(t,null,e.clientX,e.clientY);};
+ const node=document.createElement('div'),button=document.createElement('button'),children=document.createElement('div');children.className='children';children.hidden=true;button.textContent='▸ 📁 '+label;button.setAttribute('role','treeitem');button.setAttribute('aria-expanded','false');node.append(button,children);parent.append(node);treeKeyboard(button,children);
+ treeNodes.set(targetKey(t),{children,keys:new Set(),nodes:new Map()});
+ button.onclick=async()=>{const expand=button.getAttribute('aria-expanded')!=='true';children.hidden=!expand;button.setAttribute('aria-expanded',String(expand));if(!expand)return;try{await navigate(t);if(!button.isConnected||!source||targetKey(source)!==targetKey(t))return;const data=await listingReader.page(t);syncTreePage(t,data);}catch(e){status(e.message);}};
+ button.oncontextmenu=e=>{e.preventDefault();contextFor(t,null,e.clientX,e.clientY);};return node;
 }
 async function show(next){view=next;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='remotes')renderRemotes();if(view==='explorer')renderExplorer();if(view==='settings')await renderSettings();}
 function renderExplorer(){
   $('#main').innerHTML=`<div class="toolbar" aria-label="Explorer toolbar"><button id="back" aria-label="Back" ${historyAt<=0?'disabled':''}>←</button><button id="forward" aria-label="Forward" ${historyAt>=history.length-1?'disabled':''}>→</button><button id="up" aria-label="Up" ${!source?.prefix?'disabled':''}>↑</button><button id="refresh" aria-label="Refresh">⟳</button><div class="address" aria-label="Address"></div><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option></select><button id="add-location" ${!source?'disabled':''}>+ Right Click</button><button id="destinations">Manage Destinations</button></div><div id="suggestion"></div><div id="files" class="file-scroll ${state.product.view==='list'?'list':''}"></div><div class="toolbar"><span id="item-count" class="muted"></span><button id="more" hidden>Load more</button><span class="muted">Cloudflare uses remote HTTPS sources. Local-file providers are not implemented yet.</span></div>`;
   $('#view-switch').value=state.product.view;
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
-  listen('#up','click',()=>navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',()=>source?navigate(source,false):loadTree());
+  listen('#up','click',()=>navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',()=>{if(loading)return;listingReader.invalidate();return source?navigate(source,false):loadTree();});
   listen('#view-switch','change',async e=>{await change({type:'setView',view:e.target.value});renderExplorer();});listen('#add-location','click',()=>openPopup(selectedFolder()));listen('#destinations','click',()=>manager());
   listen('#more','click',()=>loadListing(true));
   renderAddress();renderFiles();void suggestion();
@@ -80,35 +94,52 @@ function renderExplorer(){
 function selectedFolder(){const row=entries.find(e=>selected.has(e.key));return row?.folder?{...source,prefix:row.key}:source;}
 function renderAddress(){const el=$('.address');if(!el)return;el.replaceChildren();if(!source){el.textContent='Choose a cloud folder';return;}const paths=['',...ancestors(source.prefix)];for(const p of paths){const b=document.createElement('button');b.textContent=p?p.split('/').at(-2):source.bucketName;b.onclick=()=>navigate({...source,prefix:p}).catch(e=>status(e.message));el.append(b);}}
 async function navigate(t,push=true,fromAPI=false){
-  if(!fromAPI)await api('navigateExplorer',{target:t});
-  source=structuredClone(t);selected.clear();entries=[];cursor='';
-  if(push){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer')await show('explorer');else renderExplorer();await loadListing();
+  const ticket=++navigationEpoch;listingEpoch++;previewEpoch++;hideContext();closeDialog();
+  source=structuredClone(t);selected.clear();entries=[];cursor='';focusIndex=0;anchor=0;loading=true;listingError='';
+  if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
+  if(view!=='explorer')await show('explorer');else renderExplorer();
+  try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch)status(e.message);}
 }
 async function loadListing(more=false){
-  if(!source)return;const epoch=++listingEpoch,t=structuredClone(source),scroll=$('#main').scrollTop;loading=true;if(!more)renderFiles();
-  try{const r=await api(more?'listFolders':'refreshExplorer',{source:t,...(more&&cursor?{cursor}:{})});if(epoch!==listingEpoch)return;if(r.state!=='completed')throw Error(names[r.code]??r.code??'Provider listing unavailable.');entries=more?[...entries,...r.data.entries]:r.data.entries;cursor=r.data.cursor??'';treeFolders.set(targetKey(t),entries.filter(e=>e.folder));status(`${entries.length} items · ${t.bucketName}`);}
-  catch(error){if(epoch===listingEpoch){entries=[];$('#files').innerHTML=`<div class="empty">${esc(error.message)}<p>Use Refresh to retry.</p></div>`;}}
-  finally{if(epoch===listingEpoch){loading=false;if(entries.length)renderFiles();else if($('#files')?.textContent==='Loading…')renderFiles();$('#more').hidden=!cursor;$('#item-count').textContent=`${entries.length} items${selected.size?' · '+selected.size+' selected':''}`;if(more)$('#main').scrollTop=scroll;}}
+  if(!source||more&&loading)return;const epoch=++listingEpoch,t=structuredClone(source),scroll=$('#files')?.scrollTop??0;loading=true;listingError='';if(!entries.length)renderFiles();
+  try{const data=await listingReader.page(t,more?cursor:'');if(epoch!==listingEpoch||targetKey(t)!==targetKey(source))return;
+    entries=[...new Map([...(more?entries:[]),...data.entries].map(e=>[e.key,e])).values()];cursor=data.cursor??'';treeFolders.set(targetKey(t),entries.filter(e=>e.folder));syncTreePage(t,{entries,cursor,completeListing:!cursor});status(`${entries.length} items · ${t.bucketName}`);
+  }catch(error){if(epoch===listingEpoch&&view==='explorer'){listingError=error.message;status(error.message+(entries.length?' · Showing previous results.':''));}}
+  finally{if(epoch===listingEpoch){loading=false;if(view==='explorer'){renderFiles();$('#more').hidden=!cursor;$('#item-count').textContent=`${entries.length} items${selected.size?' · '+selected.size+' selected':''}`;if(more)$('#files').scrollTop=scroll;}}}
 }
-function ordered(){return [...entries].sort((a,b)=>(Number(b.folder)-Number(a.folder))||sort.direction*String(a[sort.key]??'').localeCompare(String(b[sort.key]??''),undefined,{numeric:true}));}
+function ordered(){return listingOrder.read(entries,sort);}
 function renderFiles(){
   const el=$('#files');if(!el)return;
-  if(loading){el.innerHTML='<div class="empty">Loading…</div>';return;}
-  if(!entries.length){el.innerHTML=`<div class="empty">${source?'This folder is empty.':'Choose an account and bucket in the navigation pane.'}</div>`;return;}
-  const rows=ordered();el.innerHTML=`<table role="grid" aria-label="Files" aria-multiselectable="true"><thead><tr>${[['Name','displayName'],['Date Modified','uploaded'],['Type','folder'],['Size','size']].map(([label,k])=>`<th><button data-sort="${k}">${label}</button></th>`).join('')}</tr></thead><tbody>${rows.map((e,i)=>`<tr tabindex="${i===0?'0':'-1'}" data-index="${i}" aria-selected="${selected.has(e.key)}"><td><span class="${e.folder?'folder-icon':'file-icon'}" aria-hidden="true">${e.folder?'📁':'▤'}</span>${esc(e.displayName??e.key)}</td><td>${esc(e.uploaded??e.last_modified??'—')}</td><td>${e.folder?'File folder':esc(e.key.split('.').at(-1)?.toUpperCase()??'File')}</td><td>${e.folder?'':Number.isFinite(Number(e.size))?Number(e.size).toLocaleString()+' B':'—'}</td></tr>`).join('')}</tbody></table>`;
-  $$('[data-sort]').forEach(b=>b.onclick=()=>{sort={key:b.dataset.sort,direction:sort.key===b.dataset.sort?-sort.direction:1};renderFiles();});
-  $$('tbody tr').forEach(tr=>{const i=Number(tr.dataset.index),e=rows[i];
-    tr.onclick=event=>{if(event.shiftKey){for(let j=Math.min(anchor,i);j<=Math.max(anchor,i);j++)selected.add(rows[j].key);}else if(event.ctrlKey||event.metaKey){if(selected.has(e.key))selected.delete(e.key);else selected.add(e.key);anchor=i;}else {selected=new Set([e.key]);anchor=i;}updateSelection();tr.focus();};
-    tr.ondblclick=()=>openEntry(e).catch(err=>status(err.message));
-    tr.oncontextmenu=event=>{event.preventDefault();selected=new Set([e.key]);updateSelection();contextFor(e.folder?{...source,prefix:e.key}:source,e,event.clientX,event.clientY);};
-    tr.onkeydown=event=>{if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();const n=Math.max(0,Math.min(rows.length-1,i+(event.key==='ArrowDown'?1:-1)));if(!event.shiftKey)selected.clear();selected.add(rows[n].key);updateSelection();$$('tbody tr')[n]?.focus();}else if(event.key==='Enter'){event.preventDefault();void openEntry(e).catch(err=>status(err.message));}else if(event.key==='F10'&&event.shiftKey){event.preventDefault();const r=tr.getBoundingClientRect();contextFor(e.folder?{...source,prefix:e.key}:source,e,r.left+20,r.top+20);}else if(event.key==='Escape'){selected.clear();updateSelection();hideContext();}else if((event.ctrlKey||event.metaKey)&&event.key==='a'){event.preventDefault();selected=new Set(rows.map(e=>e.key));updateSelection();}};
-  });
+  if(!entries.length){el.innerHTML=`<div class="empty">${loading?'Loading…':listingError?esc(listingError)+' · Use Refresh to retry.':source?'This folder is empty.':'Choose an account and bucket in the navigation pane.'}</div>`;return;}
+  el.innerHTML=`<table role="grid" aria-label="Files" aria-multiselectable="true" aria-rowcount="${entries.length+1}"><thead><tr>${[['Name','displayName'],['Date Modified','uploaded'],['Type','folder'],['Size','size']].map(([label,k])=>`<th><button data-sort="${k}">${label}</button></th>`).join('')}</tr></thead><tbody></tbody></table>`;
+  el.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{sort={key:b.dataset.sort,direction:sort.key===b.dataset.sort?-sort.direction:1};focusIndex=0;el.scrollTop=0;renderWindow();});
+  let scheduled=false;el.onscroll=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;if(el.isConnected)renderWindow();});}};
+  el.onclick=event=>{const tr=event.target.closest('tr[data-index]');if(!tr)return;selectRow(Number(tr.dataset.index),event);tr.focus({preventScroll:true});};
+  el.ondblclick=event=>{const tr=event.target.closest('tr[data-index]');if(tr)void openEntry(ordered()[Number(tr.dataset.index)]).catch(e=>status(e.message));};
+  el.oncontextmenu=event=>{const tr=event.target.closest('tr[data-index]');if(!tr)return;event.preventDefault();const i=Number(tr.dataset.index),e=ordered()[i];if(!selected.has(e.key))selectRow(i,{});focusIndex=i;contextFor(e.folder?{...source,prefix:e.key}:source,e,event.clientX,event.clientY);};
+  el.onkeydown=event=>{const tr=event.target.closest('tr[data-index]');if(!tr)return;const rows=ordered(),i=Number(tr.dataset.index);let n;
+    if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();n=event.key==='Home'?0:event.key==='End'?rows.length-1:Math.max(0,Math.min(rows.length-1,i+(event.key==='ArrowDown'?1:-1)));selectRow(n,event);focusRow(n);}
+    else if(event.key==='Enter'){event.preventDefault();void openEntry(rows[i]).catch(e=>status(e.message));}
+    else if(event.key==='F10'&&event.shiftKey){event.preventDefault();if(!selected.has(rows[i].key))selectRow(i,{});const r=tr.getBoundingClientRect();contextFor(rows[i].folder?{...source,prefix:rows[i].key}:source,rows[i],r.left+20,r.top+20);}
+    else if(event.key==='Escape'){selected.clear();updateSelection();hideContext();}
+    else if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'){event.preventDefault();selected=new Set(rows.map(e=>e.key));updateSelection();}
+  };
+  renderWindow();
 }
-function updateSelection(){$$('tbody tr').forEach(tr=>tr.setAttribute('aria-selected',String(selected.has(ordered()[Number(tr.dataset.index)].key))));if($('#item-count'))$('#item-count').textContent=`${entries.length} items · ${selected.size} selected`;}
+function renderWindow(){
+ const el=$('#files'),body=el?.querySelector('tbody');if(!body)return;const rows=ordered(),range=rowWindow(rows.length,el.scrollTop,el.clientHeight||400);
+ if(renderedWindow?.body===body&&renderedWindow.rows===rows&&renderedWindow.start===range.start&&renderedWindow.end===range.end)return;renderedWindow={body,rows,start:range.start,end:range.end};
+ const spacer=height=>height?`<tr aria-hidden="true" class="row-spacer"><td colspan="4" style="height:${height}px;padding:0;border:0"></td></tr>`:'';
+ body.innerHTML=spacer(range.top)+rows.slice(range.start,range.end).map((e,j)=>{const i=range.start+j;return `<tr tabindex="${i===focusIndex?'0':'-1'}" data-index="${i}" aria-rowindex="${i+2}" aria-selected="${selected.has(e.key)}"><td><span class="${e.folder?'folder-icon':'file-icon'}" aria-hidden="true">${e.folder?'📁':'▤'}</span>${esc(e.displayName??e.key)}</td><td>${esc(e.uploaded??e.last_modified??'—')}</td><td>${e.folder?'File folder':esc(e.key.split('.').at(-1)?.toUpperCase()??'File')}</td><td>${e.folder?'':Number.isFinite(Number(e.size))?Number(e.size).toLocaleString()+' B':'—'}</td></tr>`;}).join('')+spacer((rows.length-range.end)*40);
+}
+function selectRow(i,event){const rows=ordered(),e=rows[i];if(!e)return;if(event.shiftKey){if(!event.ctrlKey&&!event.metaKey)selected.clear();for(let j=Math.min(anchor,i);j<=Math.max(anchor,i);j++)selected.add(rows[j].key);}else if(event.ctrlKey||event.metaKey){if(selected.has(e.key))selected.delete(e.key);else selected.add(e.key);anchor=i;}else{selected=new Set([e.key]);anchor=i;}focusIndex=i;updateSelection();}
+function focusRow(i){const el=$('#files');if(i*40<el.scrollTop)el.scrollTop=i*40;else if((i+2)*40>el.scrollTop+el.clientHeight)el.scrollTop=(i+2)*40-el.clientHeight;renderWindow();el.querySelector(`[data-index="${i}"]`)?.focus({preventScroll:true});}
+function updateSelection(){const rows=ordered();$('#files')?.querySelectorAll('tr[data-index]').forEach(tr=>{const i=Number(tr.dataset.index),value=String(selected.has(rows[i]?.key));if(tr.getAttribute('aria-selected')!==value)tr.setAttribute('aria-selected',value);tr.tabIndex=i===focusIndex?0:-1;});if($('#item-count'))$('#item-count').textContent=`${entries.length} items · ${selected.size} selected`;}
 async function openEntry(e){
   if(e.folder)return navigate({...source,prefix:e.key});
-  let r;try{r=await api('readFile',{source,entry:{key:e.key,folder:false}});}catch(error){if(error.code!=='PREVIEW_SIZE_LIMIT')throw error;dialog(e.displayName,'<p>This file needs streaming Download rather than an in-memory preview.</p><button id="download-stream">Download</button>');listen('#download-stream','click',()=>downloadEntry(e));return;}if(r.state!=='completed')throw Error(names[r.code]??r.code??'Preview unavailable.');
+  const ticket=++previewEpoch,captured=structuredClone(source);if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
+  let r;try{r=await api('readFile',{source:captured,entry:{key:e.key,folder:false}});}catch(error){if(ticket!==previewEpoch)return;if(error.code!=='PREVIEW_SIZE_LIMIT')throw error;dialog(e.displayName,'<p>This file needs streaming Download rather than an in-memory preview.</p><button id="download-stream">Download</button>');listen('#download-stream','click',()=>downloadEntry(e));return;}if(r.state!=='completed')throw Error(names[r.code]??r.code??'Preview unavailable.');
+  if(ticket!==previewEpoch||targetKey(captured)!==targetKey(source))return;
   const bytes=new Uint8Array(r.data.bytes),ext=e.key.split('.').at(-1).toLowerCase(),types={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',txt:'text/plain',md:'text/plain',json:'text/plain',csv:'text/plain',log:'text/plain'};
   const type=types[ext]??'application/octet-stream';previewUrl=URL.createObjectURL(new Blob([bytes],{type}));
   dialog(e.displayName,`${type.startsWith('image/')?'<img class="preview" alt="File preview" src="'+esc(previewUrl)+'">':type==='text/plain'?'<pre id="preview-text">'+esc(new TextDecoder().decode(bytes))+'</pre>':'<p>Inline preview unavailable for this type.</p>'}<p><button id="download-stream">Download</button></p>`);listen('#download-stream','click',()=>downloadEntry(e));
@@ -116,10 +147,13 @@ async function openEntry(e){
 
 function hideContext(){$('#context').hidden=true;$('#context').replaceChildren();}
 function contextFor(t,entry,x,y){
-  const el=$('#context');el.replaceChildren();const action=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.setAttribute('role','menuitem');b.onclick=()=>{hideContext();Promise.resolve(fn()).catch(e=>status(e.message));};el.append(b);};
+  contextReturnElement=entry?$('#files')?.querySelector(`[data-index="${focusIndex}"]`):document.activeElement;
+  const el=$('#context');el.replaceChildren();const action=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.setAttribute('role','menuitem');b.onclick=()=>{hideContext();Promise.resolve(fn()).catch(e=>status(e.message));};el.append(b);return b;};
   action('Open',()=>entry?openEntry(entry):navigate(t));
+  if(entry&&!entry.folder){action('Preview',()=>openEntry(entry));action('Download',()=>downloadEntry(entry));}
   if(!entry||entry.folder){action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>change({type:'makeDefault',target:structuredClone(t)}));action('Manage Destinations',()=>manager());}
-  else {action('Save to cloud…',()=>chooseRemoteSave(entry));}
+  else {const save=action('Save to cloud…',()=>chooseRemoteSave(entry));if(capabilities?.providers?.cloudflare?.explorerSource===false){save.disabled=true;save.title='No authorized remote source is available for this private Explorer file.';}}
+  for(const label of entry?['Copy','Move','Rename','Delete']:['New Folder','Paste']){const b=action(label,()=>{});b.disabled=true;b.title='This connection currently supports read-only Explorer actions.';}
   el.hidden=false;const r=el.getBoundingClientRect();el.style.left=Math.max(8,Math.min(x,innerWidth-r.width-8))+'px';el.style.top=Math.max(8,Math.min(y,innerHeight-r.height-8))+'px';el.querySelector('button')?.focus();
 }
 async function chooseRemoteSave(entry){const capabilities=await api('describeCapabilities');if(capabilities.providers?.cloudflare?.explorerSource===false){dialog('Save to cloud','<p>This private Explorer file has no authorized remote source transfer. Cloudflare never stages file bytes through your browser.</p><button id="download-stream">Download instead</button>');listen('#download-stream','click',()=>downloadEntry(entry));return;}
@@ -200,9 +234,10 @@ async function renderSettings(){
   listen('#capabilities','click',async()=>{const c=await api('describeCapabilities');$('#api-info').textContent=JSON.stringify({version:c.version,tools:c.tools.map(t=>({name:t.name,scope:t.scope})),publicEndpoint:c.publicEndpoint},null,2);});
 }
 $$('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view).catch(e=>status(e.message)));listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
-document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape')hideContext();if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button')],i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
-$('#dialog').addEventListener('cancel',()=>{if(previewUrl)URL.revokeObjectURL(previewUrl);});
-await refreshState();await connections();await show('remotes');$$('header button, footer button').forEach(b=>b.disabled=false);status('Ready · Connect an account to browse real folders.');if(location.hash==='#cloudflare'&&connection.state==='CONNECTED')await cloudflarePanel();else if(location.hash==='#manage-destinations'&&connection.state==='CONNECTED')await manager();else if(location.hash.startsWith('#provider='))dialog('Provider unavailable','<p>This provider is not implemented yet. No file was saved.</p>');
+document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled)')],i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
+$('#dialog').addEventListener('cancel',()=>{previewEpoch++;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}});
+async function bootstrap(){try{await refreshState();await connections();capabilities=await api('describeCapabilities');await show('remotes');$$('header button, footer button').forEach(b=>b.disabled=false);status('Ready · Connect an account to browse real folders.');if(location.hash==='#cloudflare'&&connection.state==='CONNECTED')await cloudflarePanel();else if(location.hash==='#manage-destinations'&&connection.state==='CONNECTED')await manager();else if(location.hash.startsWith('#provider='))dialog('Provider unavailable','<p>This provider is not implemented yet. No file was saved.</p>');}catch(error){status('Click2Cloud could not start · '+(error.code??'ENGINE_UNAVAILABLE'));$('#main').innerHTML='<section class="page"><h1>Connection unavailable</h1><p>Your configuration has been preserved.</p><button id="retry-start">Retry</button></section>';listen('#retry-start','click',bootstrap);}}
+await bootstrap();
 
 async function cloudflarePanel(){
  const result=await api('inspectCloudflare'),accounts=connection?.accounts??[];let currentAccount=result.onboarding.selectedAccountId;
@@ -240,7 +275,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  void (async()=>{const result=message.result;if(result.kind==='readiness')return;
   if(result.state==='verified'){
    const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status('Save verification is pending. Inspect the receipt before retrying.');return;}
-   const d=current.receipt?.destination??current.destination;
+   listingReader.invalidate();const d=current.receipt?.destination??current.destination;
    if(d&&source&&view==='explorer'&&source.accountId===d.accountId&&source.bucketName===d.bucketName&&source.prefix===(d.prefix?d.prefix+'/':''))await loadListing();status('Saved and independently verified.');
   }else status(result.state==='pending'?'Saving remotely · '+(result.stage??'accepted'):names[result.code]??result.code??result.state);
  })().catch(e=>status(e.message));

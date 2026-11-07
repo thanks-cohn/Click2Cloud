@@ -96,7 +96,7 @@ export function compileMenuSpec(options={}) {
       const hiddenDefault=defaultTarget&&Object.entries(options.configs??{}).some(([m,c])=>show[m]&&(c.destinations??[]).some(d=>d.hidden&&targetKey(d.target)===targetKey(defaultTarget)))&&!candidates.has(targetKey(defaultTarget));
       if(defaultTarget?.provider==='cloudflare'&&!hiddenDefault&&(show.flat||show.simple||show.nested||show.depth)){
         const key=targetKey(defaultTarget),c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
-        if(!candidates.has(key))candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});
+        if(!candidates.has(key)){const assigned=[...candidates];candidates.clear();candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});for(const [k,row] of assigned)candidates.set(k,row);}
       }
       if(show.flat&&!defaultTarget)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
       const active=show.flat?[...candidates.values()].filter(r=>defaultTarget&&targetKey(r.target)===targetKey(defaultTarget)):[...candidates.values()];
@@ -106,6 +106,10 @@ export function compileMenuSpec(options={}) {
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
         if(options.product?.providerVisibility?.[provider]===false)continue;
         const id=stableId('provider-entry',provider),origin={mode:null,provider};
+        if(provider!=='cloudflare'){
+          const peers=(options.flatProviders??[]).filter(p=>p.target?.provider===provider),peer=peers.length===1?peers[0]:peers.find(p=>defaultTarget&&targetKey(p.target)===targetKey(defaultTarget));
+          if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
+        }
         if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
         const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin,contexts:['image','link','video','audio']});
         if(active.length===1)save(active[0],null,id);
@@ -113,7 +117,7 @@ export function compileMenuSpec(options={}) {
       }
       // Trusted future contributors remain independent flat actions. No second
       // Cloudflare owner or legacy REDOWN/provider parent is accepted here.
-      for(const peer of options.flatProviders??[])if(peer.target?.provider!=='cloudflare'&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
+      for(const peer of options.flatProviders??[])if(!['cloudflare','google-drive','dropbox','onedrive'].includes(peer.target?.provider)&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});
     } else {
     const root=add({id:'c2c:root',label:'REDOWN',origin:{mode:null,provider:null}});
     const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;

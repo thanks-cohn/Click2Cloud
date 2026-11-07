@@ -1,3 +1,4 @@
+import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {openProviderPanel} from '../src/chrome/provider-panel.mjs';
 import {trustedAppSender} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
@@ -48,7 +49,7 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const fileApi=Object.freeze({...baseFileApi,async run(operation,input={},options={}) {
+const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream'].includes(op)),async run(operation,input={},options={}) {
   // Unconfigured Worker transport is blocked before staging any object bytes.
   if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
@@ -60,7 +61,7 @@ const fileApi=Object.freeze({...baseFileApi,async run(operation,input={},options
     inventory.revision++;await chrome.storage.local.set({discoveredInventory:inventory});
   }
   return result;
-}});
+}}),{authority:oauth.authority});
 async function getInventory() {
   const status=await oauth.status();
   const policy=(await current.read()).product.recovery;

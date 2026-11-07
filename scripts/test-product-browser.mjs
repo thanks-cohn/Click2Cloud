@@ -45,7 +45,7 @@ try{
  const narrowState=await page.evaluate(async()=>({state:await window.productFixture.current.read(),menu:(await window.productFixture.api.invoke({version:'3+1.1',method:'previewNativeMenu',params:{}},'gui')).data}));
  assert.equal(narrowState.state.configs.nested.destinations[0].target.prefix.split('/').filter(Boolean).length,20);
  assert.equal(Object.values(narrowState.state.configs.nested.destinations[0].levels).filter(v=>v.hidden).length,8);
- assert(!narrowState.menu.rows.some(r=>r.label==='level11'));assert(narrowState.menu.rows.some(r=>r.label==='level19'));
+ assert.equal(narrowState.menu.rows.filter(r=>r.parentId===null&&r.label==='Cloudflare').length,1);assert(narrowState.menu.rows.some(r=>r.role==='save'&&r.target.prefix===narrowState.state.configs.nested.destinations[0].target.prefix));
  await page.getByRole('button',{name:'Close',exact:true}).click();
  results.push({gate:'Narrow-20-level-editor-draft-and-commit',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB'});
  await page.getByRole('button',{name:'Remotes',exact:true}).click();if(await page.getByRole('button',{name:'Log in',exact:true}).count())await page.getByRole('button',{name:'Log in',exact:true}).click();await page.getByRole('button',{name:'Open File Explorer'}).first().click();await page.getByRole('treeitem',{name:'▸ Fixture account'}).click();await page.getByRole('treeitem',{name:/fixture-bucket/}).click();await page.getByRole('grid',{name:'Files'}).waitFor();
@@ -83,7 +83,7 @@ try{
  await onboardingPage.goto(origin+'/extension/app.html?fixtureOnboarding=1');await onboardingPage.getByRole('button',{name:'Log in',exact:true}).click();await onboardingPage.getByRole('button',{name:'Cloudflare setup / status'}).click();
  await onboardingPage.locator('#cf-account').selectOption('fixture-account');await onboardingPage.getByRole('button',{name:'Continue / Check R2'}).click();await onboardingPage.screenshot({path:join(evidence,'cloudflare-setup-fixture.png'),fullPage:true});await onboardingPage.getByRole('button',{name:'Approve initial setup'}).click();await onboardingPage.locator('#dialog').getByText('Ready to save',{exact:true}).waitFor();
  const onboarding=await onboardingPage.evaluate(async()=>{const f=window.productFixture;return {state:await f.current.read(),menu:(await f.api.invoke({version:'3+1.1',method:'previewNativeMenu',params:{}},'gui')).data};});
- assert.equal(onboarding.state.product.defaultTarget.bucketName,'redown');assert.deepEqual(onboarding.menu.rows.map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare R2']);
+ assert.equal(onboarding.state.product.defaultTarget.bucketName,'redown');assert.deepEqual(onboarding.menu.rows.map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare']);
  await onboardingPage.getByRole('button',{name:'Close',exact:true}).click();await onboardingPage.getByRole('button',{name:'Dropbox',exact:true}).click();await onboardingPage.getByText('This provider is not available yet. No file was saved.',{exact:true}).waitFor();
  await onboardingPage.getByRole('button',{name:'Save results'}).click();await onboardingPage.getByRole('heading',{name:'Save results',exact:true}).waitFor();await onboardingPage.screenshot({path:join(evidence,'cloudflare-save-results-fixture.png'),fullPage:true});await onboardingPage.close();
  results.push({gate:'Cloudflare-onboarding-controls-and-programmatic-owner',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB'});

@@ -19,3 +19,5 @@ async function refresh(){
 }
 async function manage(){await api('openCloudflareDestinations');window.close();}
 void refresh().catch(e=>{status.textContent=e.message;button('Retry',refresh);});
+
+window.addEventListener('hashchange',()=>location.reload());
