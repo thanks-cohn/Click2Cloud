@@ -8,11 +8,11 @@
 
 ## 1. Foundational user-experience decision chart
 
-This chart is the **first-run onboarding reference only**. After initial setup, the post-onboarding flow below takes precedence and must preserve the user's own saved configuration. In the native menu the provider is labeled **Cloudflare**, although older onboarding diagrams use the service name Cloudflare R2.
+This chart is the **approved first-run onboarding reference only**: ordinary login itself does not create buckets. After first-run authorization and separate setup approval, the post-onboarding flow takes precedence and preserves the user's saved configuration. In every native menu diagram the provider is labeled **Cloudflare** (R2 is its service type). Explicit Settings provider visibility OFF hides the Cloudflare entry; the default state is visible.
 
 ```mermaid
 flowchart TD
-    A["User right-clicks a file → Cloudflare R2<br/>(flat, one-click provider item)"]
+    A["User right-clicks a file → Cloudflare<br/>(flat, one-click provider item)"]
     B{"Cloudflare authorized<br/>in Click2Cloud?"}
     C["Launch the EXISTING Shelf Cloudflare OAuth login/consent"]
     D{"OAuth approved and<br/>account identity verified?"}
@@ -65,7 +65,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["Right-click → Cloudflare R2"]
+    A["Right-click → Cloudflare action<br/>(sole leaf or selected submenu child)"]
     B{"Click2Cloud OAuth<br/>valid for selected account?"}
     C["Open existing Shelf OAuth login"]
     D{"R2 usable?"}
@@ -75,7 +75,7 @@ flowchart TD
     H["TRUE REMOTE save to THAT destination<br/>→ independent verification"]
     I["First-run setup still pending?<br/>User approved auto-setup?"]
     J["Create/reuse redown once<br/>and set initial destination"]
-    K["Choose destination; preserve customization<br/>do NOT recreate redown"]
+    K["Open Manage Destinations<br/>keep customization, never recreate redown"]
     L["Show Repair / Reconnect / Choose another<br/>Never silently fall back to redown"]
     M["No success; retain exact chosen destination"]
 
@@ -138,6 +138,8 @@ flowchart TD
 
 ### Diagram 2A — Chosen Cloudflare destinations, permanent deletion, and empty-menu routing
 
+**Precedence for all diagrams:** an explicit Settings "Hide Cloudflare" selection removes its native entry entirely; otherwise the provider is always shown. The 0/1/2+ calculation counts **distinct user-assigned Cloudflare save targets actively displayed by the current menu configuration** (not discovered buckets, hidden destinations, disabled modes or duplicate Simple/Narrow projections). A returning account with zero active targets uses **Manage Destinations**. A brand-new first-use account may create/reuse `redown` only in its separately approved setup. Hiding or unassigning a destination never deletes an actual R2 bucket. Explicit deletion of the real `redown` bucket is respected permanently until a fresh user-requested creation.
+
 ```mermaid
 flowchart TD
     A["Right-click: Cloudflare<br/>Always one provider entry when visible"] --> B{"Signed in?"}
@@ -150,12 +152,12 @@ flowchart TD
     FIRST -- "No" --> CREATE["Create redown ONCE<br/>only during approved first use"]
     CREATE --> REUSE
     REUSE --> ASSIGN["Assign redown as initial default<br/>after verified readiness"]
-    ASSIGN --> COUNT{"Number of deliberately<br/>ASSIGNED Cloudflare locations?"}
+    ASSIGN --> COUNT{"Number of distinct user-assigned,<br/>ACTIVE menu save targets?"}
     INIT -- "Yes, returning user" --> COUNT
     COUNT -- "0" --> MANAGE["Flat Cloudflare click<br/>opens Manage Destinations<br/>NEVER recreates deleted redown"]
     COUNT -- "1" --> FLAT["Flat Cloudflare<br/>save directly to the one chosen location"]
     COUNT -- "2 or more" --> NEST["One Cloudflare submenu<br/>each chosen location is a direct leaf"]
-    ADD["User creates a bucket<br/>without ASSIGNING it"] -. "No change" .-> COUNT
+    ADD["A bucket exists but is unassigned<br/>or a saved destination is hidden"] -. "No change" .-> COUNT
     CHOOSE["User explicitly assigns<br/>an additional destination"] --> COUNT
     DELETE["User intentionally deletes/unassigns redown"] --> COUNT
     DELETE -. "No automatic recreation" .-> NOREMAKE["Preserve explicit deletion marker"]
@@ -184,7 +186,7 @@ Provider visibility defaults to ON for all four. An OFF provider has no native m
 
 ### Cloudflare destination-count rule (definitive)
 
-**Count actual user-assigned Cloudflare save destinations, not every bucket visible in the account.** The same native provider item changes shape as the number of assigned destinations changes:
+**Count distinct, explicitly assigned Cloudflare save targets active in the current menu, not every bucket visible in the account.** Hidden destinations, modes not selected for display, and duplicate representations of the same exact target do not increase this count. Explicit Settings provider OFF hides Cloudflare entirely. The same native provider item changes shape as the number of assigned destinations changes:
 
 | Cloudflare assigned destinations | One native Cloudflare item | Action |
 | --- | --- | --- |
@@ -196,7 +198,7 @@ Provider visibility defaults to ON for all four. An OFF provider has no native m
 
 The **moment** a user explicitly assigns a second bucket/folder to Cloudflare, the compiler changes the one existing Cloudflare entry into a submenu; no separate Cloudflare R2 menu row, no third nesting layer. Creating an R2 bucket without assigning it to the menu **does not** trigger nesting. Removing an assigned destination triggers a menu recompile and native ACK. Intentional deletion of `redown` removes its assignment and does not trigger automatic recreation; with exactly one surviving assigned destination, that sole destination is the direct-save target (including updated persisted default). A temporary network failure or missing permission cannot be mistaken for an intentional deletion. **This is a menu/configuration rule, not permission to delete real cloud objects without user authorization.**
 
-**ZERO-CONFIGURATION ACCEPTANCE RULE:** On install there are four flat, clickable providers, **including one Cloudflare leaf even if no bucket/account/destination has been set up yet**. If the user selects Cloudflare while unconnected, the minimal **One Click Away!** Cloudflare login card initiates the existing approved OAuth/setup route. After authorization: (1) check whether bucket `redown` exists in the selected account, (2) reuse it if present, otherwise create exactly `redown` during the user's approved first-time setup, (3) prepare and verify TRUE REMOTE, (4) set bucket `redown`, root prefix `''`, as the initial default, and (5) future right-click Cloudflare actions save directly with no dashboard. **No destination editor or bucket selector is needed for a normal first-time single-account user.** The presence or absence of *other* R2 buckets does not alter this. Creating a bucket or completing provider activation may require the user's authorization; these are setup actions, not a pretend successful save. Only an intentional additional Cloudflare destination makes Cloudflare nested.
+**ZERO-CONFIGURATION ACCEPTANCE RULE:** On install there are four flat, clickable providers, **including one Cloudflare leaf even if no bucket/account/destination has been set up yet**. If the user selects Cloudflare while unconnected, the minimal **One Click Away!** Cloudflare login card initiates the existing approved OAuth/setup route. After authorization: (1) check whether bucket `redown` exists in the selected account, (2) reuse it if present, otherwise create exactly `redown` during the user's approved first-time setup, (3) prepare and verify TRUE REMOTE, (4) set bucket `redown`, root prefix `''`, as the initial default, and (5) future right-click Cloudflare actions save directly with no dashboard. **No destination editor or bucket selector is needed for a normal first-time single-account user.** The presence or absence of *other* R2 buckets does not alter this. Creating a bucket or completing provider activation may require the user's authorization; these are setup actions, not a pretend successful save. Only a second actively assigned, displayed Cloudflare save destination makes Cloudflare nested.
 
 **NOVEMBER 6 OWNER PRIORITY — native menu projection (overrides older Simple/Flat examples):** At initialization show one flat `Cloudflare` entry even with no assigned destinations; its initial authorized first-time target is bucket `redown` (root prefix). No `Cloudflare R2` sibling or duplicated Cloudflare parent. When the user **assigns** a second Cloudflare save location, change the one entry into **Cloudflare → redown / extra assigned destination**. With exactly one assigned destination, use a flat Cloudflare leaf to that sole target. If the user deletes/unassigns `redown` and exactly one other assignment remains, that survivor becomes the flat target; never recreate `redown`. Merely creating a bucket without assigning it does not add a submenu. A custom user-chosen default is honored unless intentionally removed. Additional hierarchy modes remain opt-in. **These are presentation/routing rules for the single canonical engine, not permission to create cloud resources or a new engine.** See `AGENTS.md`.
 
