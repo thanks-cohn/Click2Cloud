@@ -3,7 +3,7 @@
 **Documentation contract and current-source map | November 7, 2026**  
 **Applies to:** Click2Cloud's own Simple / Narrow / Depth engine, Quick Select, Default, the native Chrome context menu, destination configuration and right-click save dispatcher.  
 **Scope boundary:** The REDOWN repository is a **read-only functional reference** for useful right-click transfer and File Explorer capabilities; **Click2Cloud owns its menu system and configuration rules**. This does **not** authorize copying all of REDOWN.  
-**Evidence baseline:** Click2Cloud `main` at source-review commit `34eb3f56ccbbc51c45ee9711e0b99e492ed98e16`. Source was inspected, but **the source map is not a claim of installed-Chrome verification or comprehensive runtime-test coverage**. Read latest source again before implementing or declaring verified.
+**Historical evidence baseline:** Click2Cloud `main` at `34eb3f56ccbbc51c45ee9711e0b99e492ed98e16`. **Current restoration source:** `9e8a16d09a53bb1b414d5fd1e34a190a3861160d`; sections 4–5 describe its repaired behavior. Source was inspected, but **the source map is not a claim of installed-Chrome verification or comprehensive runtime-test coverage**. Read latest source again before implementing or declaring verified.
 
 ## 1. Owner's non-negotiable documentation requirement
 
@@ -184,56 +184,41 @@ Example: promoting an existing Simple destination to Quick Select, *after obtain
 - **Manager → Organize**: `setProviderPlacement`; inspect the actual compiler for whether each desired placement is honored before claiming visual parity.
 - **Native right-click → Save**: Chrome registrar → canonical resolver → `engine.save`; the programmatic sibling is `dispatchSave`, subject to the same authority, target, generation and completion contract. Native user gestures and provider OAuth consent are not impersonated by an API caller.
 
-## 4. Actual current menu-rule behavior (NOT the newer desired result)
+## 4. Restoration implementation — source revision 9e8a16d
 
-The current composite compiler in `src/core/menu-spec.mjs`:
+`compileMenuSpec` remains the production owner. It projects the existing independent modes, filters provider visibility, deduplicates exact Cloudflare targets and includes the eligible Default. It then promotes visible Simple Quick targets out of the ordinary Cloudflare list. A Default with Quick ON retains that stored flag but its redundant shortcut is suppressed. Only remaining Cloudflare choices determine attention (zero), flat save (one), or submenu (two or more). Four ordinary provider roots precede Quick siblings. Explicit Flat preserves Quick shortcuts. No available Default is guessed when only Quick assignments survive.
 
-1. Takes active mode projections selected by `product.show`, honoring hidden destination exclusions and visibility.
-2. Deduplicates Cloudflare save candidates by `targetKey`, not by displayed label.
-3. Includes a separately selected Default where configured/eligible, with special display/hide cases.
-4. Uses the **`active` candidate count** to decide flat versus nested Cloudflare: `active.length === 1` → flat direct-save; more than one → Cloudflare branch containing all candidates; zero → provider action.
-5. **Separately adds Quick shortcuts** from Simple mode while keeping the corresponding candidate in Cloudflare when there is more than one active candidate.
-6. Gives setup-required Cloudflare entries their truthful ` · Set up` behavior when appropriate.
-7. Applies sibling-label collision handling and stable item identities in the compiler, then validates parent/sibling ordering in `generateChromePlan`.
-8. Applies native menu changes by `chrome.contextMenus.removeAll` followed by ordered `create` operations and acknowledgment tracking; it does not rely on residual old entries to manufacture the current menu.
+`previewNativeMenu.data.composition` explains `defaultKey`, `quickTargets`, `defaultQuickSuppressed`, `cloudflareChoiceCount` and `cloudflareShape`; it does not write preferences. `previewConfigChange` returns candidate configuration and diff; `commitConfigChange` persists with revision/idempotency checks and reconciles through the existing registrar. Simple, Narrow and Depth configuration stores remain independent. No REDOWN menu engine is imported.
 
-**Concrete collision in CURRENT code:** Default `redown` + Quick `4chan` can produce Quick `4chan` at the top level **and** a Cloudflare submenu containing both `redown` and `4chan`. This is consistent with CURRENT code but conflicts with the approved latest menu rule. It is a **code-versus-specification mismatch**, not proof that Chrome randomly duplicates entries.
+| Input | Canonical output |
+| --- | --- |
+| Default redown + Quick 4chan | Flat Cloudflare → redown, then sibling 4chan |
+| Quick OFF on 4chan | One Cloudflare submenu with redown and 4chan |
+| Default redown + Quick 4chan + ordinary Photos | Cloudflare submenu redown/Photos; 4chan sibling |
+| All non-default destinations Quick | Flat Cloudflare → Default, Quick siblings |
+| Default also Quick | Preserve flag, suppress redundant Default shortcut |
+| Cloudflare visibility OFF | No Cloudflare target rows; retain destinations/session |
+| No Default and only Quick | Flat attention Cloudflare plus Quick; do not invent Default |
 
-## 5. Approved desired rule — NOT YET IMPLEMENTED as of this audit
+Tests: `tests/latest-quick-rules.test.mjs` proves decision cases, preview/commit, callback ACK, exact routing, stale ID rejection, stored flags and restart with fixture Chrome callbacks. `scripts/test-product-browser.mjs` proves API assignment → genuine app manager Quick toggle → API topology readback in real Chromium with fixture transport/registrar. Neither establishes installed native rendering. The genuine unpacked-extension attempt is BLOCKED by administrator policy; see `docs/evidence/redown-restoration/real-shelf-receipt.json`.
 
-**Authority:** [`latest/right-click-rules/README.md`](README.md).
+## 5. Source acquisition and operational API ownership
 
-> A destination promoted to Quick Select ordinarily stops occupying a duplicate slot inside the Cloudflare submenu. Count the destinations **remaining under Cloudflare**, not every configured destination, to decide flat versus nested.
+Native page/link/image/audio/video contexts use media → link → page source precedence. The canonical `dispatchSave` schema accepts these contexts. Ordinary page saving is HTML response acquisition, not a rendered/offline page archive. `sourceFromClick` validates HTTPS and provides filename intent; Worker response metadata can infer an extension. No file-type allowlist limits ordinary opaque bytes.
 
-Owner-approved example:
+Cloudflare native `fetch` replaces the custom socket/TLS/parser path. Every redirect undergoes public URL and DNS checks; native fetch re-resolves, so this is not an IP-pinning guarantee. The existing writer provides known-length streaming, bounded unknown-length staging, conditional Keep Both and fresh R2 verification. See the functional parity matrix for real limits and unimplemented source workflows.
 
-```text
-Configured:
-  redown — Cloudflare Default; Quick OFF
-  4chan — configured Cloudflare destination; Quick ON
+| Mechanism | Canonical API / effects / evidence |
+| --- | --- |
+| Remote save | `dispatchSave`, existing native `engine.save`; account authorization, signed operation, live independent R2 bytes verified |
+| Existing Worker update | `repairCloudflareDestination`; explicit Shelf button, same Worker/binding/plan; build digest mismatch blocks stale READY, no silent production deploy |
+| File/folder mutations | `fileAction` execute scope; source/destination account/prefix checks, explicit destructive confirmation and idempotency; existing File API → same signed Worker/DO owner |
+| Context descriptors | `inspectExplorerContextMenu`; pure enabled/action descriptors used by GUI; clipboard carries transient intent, effects go through fileAction |
+| Result inspection | `inspectRemoteReceipt` read-only completed envelope even for stored blocked transfer; original state/code retained in data |
+| GO TO | `openRemoteResult`; verified recorded receipt plus fresh stat/size/ETag; missing/changed object cannot claim success |
+| Provenance | `inspectRemoteReceipt`/`inspectRemoteHistory`; recognizable credential parameters removed before bounded source metadata persistence |
 
-Desired Chrome grouping:
-  Click2Cloud >
-    Google Drive
-    Dropbox
-    OneDrive
-    Cloudflare     [flat save -> redown]
-    4chan          [Quick save -> 4chan]
-
-CURRENT at reviewed commit:
-  Click2Cloud >
-    4chan
-    Google Drive
-    Dropbox
-    OneDrive
-    Cloudflare >
-      redown
-      4chan          [repeated]
-```
-
-**Default and Quick are independent settings; do not prohibit Default + Quick.** The UI may avoid a redundant additional shortcut for a Default destination by default, while preserving the user's configured choice. Do not silently change the Default.
-
-The *actual implementation* and CURRENT behavior map must be updated only when a future coding change is verified. **Never present a documented desired rule as a fact about running code.**
+Same-bucket mkdir/copy/move/rename/delete supports files and recursive folders with durable per-object journaling, conditional copy and post-write HEAD verification. There is no automatic uncertain replay. R2 does not support conditional DELETE; externally concurrent replacement can race a checked delete (`atomicDelete:false`). Cross-bucket/private source transfers, uploads, archives and three non-Cloudflare providers are not completed. Do not infer full parity from method names or adapter capabilities.
 
 ## 6. Correctness and predictability contract
 
@@ -297,7 +282,7 @@ For **each** exposed right-click and configuration mechanism, tests must verify:
 
 ## 9. Work and deployment limits
 
-This file establishes **documentation requirements and a source-verified starting map**, not a silent code edit. It does **not** mean in-source JSDoc already covers all functions, that every interface is currently API-equivalent, or that the newer Quick placement rule is already implemented.
+This file establishes **documentation requirements and a source-verified starting map**, not a silent code edit. It does **not** mean in-source JSDoc already covers all functions, that every interface is currently API-equivalent, or that installed Chrome rendering is proven. The Quick placement repair has source/local/browser-fixture evidence as described above.
 
 Subsequent Codex source changes must complete the in-source annotations and maintain the mapping as part of the same work. Do not clone REDOWN's legacy menu engine. Do not edit REDOWN, modify user settings, alter OAuth provider registrations, or deploy production Workers merely because this document exists.
 

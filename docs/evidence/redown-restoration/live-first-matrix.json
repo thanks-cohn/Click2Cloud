@@ -1,0 +1,233 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_CHROME_OR_OWNER_OAUTH",
+  "branchBaseline": "9dfe415",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "existing-isolated-ownership",
+      "state": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "gate": "update-existing-test-worker",
+      "state": "PASS"
+    },
+    {
+      "gate": "matching-deployed-digest-and-capability",
+      "state": "PASS"
+    },
+    {
+      "gate": "text",
+      "operationId": "ee01d34a-966c-4d00-b7a4-cbfb7a37864c",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-ee01d34a-966c-4d00-b7a4-cbfb7a37864c-native-text.txt",
+        "size": 2262,
+        "etag": "f51efa72c6c22912336e9309fd517f03",
+        "version": "7e5e489dfe8ad8bb5522859b22994492",
+        "transfer": "bounded-spool",
+        "stagingCleanup": {
+          "removed": 1,
+          "retained": 0
+        }
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 2262,
+        "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "f51efa72c6c22912336e9309fd517f03"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "image",
+      "operationId": "037e04cc-0ed1-450d-a8ff-45da03038029",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-037e04cc-0ed1-450d-a8ff-45da03038029-native-image.png",
+        "size": 10380,
+        "etag": "229d139e05d84c9a99480c3dc9f53dd4",
+        "version": "7e5e489df289b5655b94fa6398571a7a",
+        "transfer": "known-length-stream"
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 10380,
+        "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "229d139e05d84c9a99480c3dc9f53dd4"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "redirect",
+      "operationId": "675a0d88-6401-4088-b730-8bcacb66b172",
+      "saveState": "blocked",
+      "code": "SOURCE_UNAVAILABLE",
+      "diagnostic": {
+        "kind": "remote-save-stage",
+        "stage": "source.fetch",
+        "errorKind": "Error",
+        "causeCode": "SOURCE_UNAVAILABLE",
+        "httpStatus": 403,
+        "sourceStage": "headers"
+      },
+      "inspection": {
+        "state": "blocked",
+        "code": "SOURCE_UNAVAILABLE"
+      },
+      "state": "FAIL"
+    },
+    {
+      "gate": "unknown-length",
+      "operationId": "b93ece50-9b13-40bd-bf0c-9c6cea22c3d4",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-b93ece50-9b13-40bd-bf0c-9c6cea22c3d4-native-unknown.bin",
+        "size": 1048576,
+        "etag": "240e18cc57b83f5979e4125dc07bec15",
+        "version": "7e5e489de2aa52112e68d4468ee3c7e1",
+        "transfer": "bounded-spool",
+        "stagingCleanup": {
+          "removed": 1,
+          "retained": 0
+        }
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 1048576,
+        "sha256": "3ae577f51f02990716912139fa92c2aa8ad8d492eda34007b429e456ea719975",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "240e18cc57b83f5979e4125dc07bec15"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "invalid-certificate",
+      "operationId": "7e1cdd38-9daf-4ae9-a5fe-11eacc1adaf6",
+      "saveState": "blocked",
+      "code": "SOURCE_UNAVAILABLE",
+      "diagnostic": {
+        "kind": "remote-save-stage",
+        "stage": "source.fetch",
+        "errorKind": "Error",
+        "causeCode": "SOURCE_UNAVAILABLE",
+        "httpStatus": 526,
+        "sourceStage": "headers"
+      },
+      "inspection": {
+        "state": "blocked",
+        "code": "SOURCE_UNAVAILABLE"
+      },
+      "state": "PASS",
+      "evidence": "Negative outcome; certificate attribution only if diagnostic/provider code establishes it"
+    },
+    {
+      "gate": "private-literal",
+      "operationId": "e3a94a3a-4145-4bd7-bf3d-ba8db2317653",
+      "saveState": "blocked",
+      "code": "SOURCE_DENIED",
+      "inspection": {
+        "state": "uncertain",
+        "code": "OPERATION_UNKNOWN"
+      },
+      "state": "PASS",
+      "evidence": "Negative outcome; certificate attribution only if diagnostic/provider code establishes it"
+    },
+    {
+      "gate": "live-File-API-folder-copy-rename-independent-readback",
+      "state": "PASS",
+      "copiedKey": "__click2cloud_true_remote_test__/file-actions-f210bd89-d886-4321-bdc3-19ac2bf9d52c/restoration-ee01d34a-966c-4d00-b7a4-cbfb7a37864c-native-text.txt",
+      "renamedKey": "__click2cloud_true_remote_test__/file-actions-f210bd89-d886-4321-bdc3-19ac2bf9d52c/renamed.txt",
+      "size": 2262,
+      "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+      "oldKeyAbsence": 404
+    },
+    {
+      "gate": "live-File-API-folder-delete",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-ee01d34a-966c-4d00-b7a4-cbfb7a37864c-native-text.txt",
+      "state": "BLOCKED_IDENTITY_UNCONFIRMED"
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-037e04cc-0ed1-450d-a8ff-45da03038029-native-image.png",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-b93ece50-9b13-40bd-bf0c-9c6cea22c3d4-native-unknown.bin",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-f210bd89-d886-4321-bdc3-19ac2bf9d52c/.redown",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-f210bd89-d886-4321-bdc3-19ac2bf9d52c/restoration-ee01d34a-966c-4d00-b7a4-cbfb7a37864c-native-text.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-f210bd89-d886-4321-bdc3-19ac2bf9d52c/renamed.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    }
+  ],
+  "workerCodeDigest": "yPHO5VH4C0jdU4G-ot_zx98NmHOvCsplJRT9TfKvTpA",
+  "state": "PARTIAL"
+}

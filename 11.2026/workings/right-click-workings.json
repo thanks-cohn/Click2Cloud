@@ -12265,19 +12265,19 @@
     ],
     "verification": {
       "source": "PASS: hash-bound source behavior",
-      "unit": "PASS221 focused tests; docs/evidence/worker-permission/focused.txt",
-      "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; source-pinned receipt in docs/evidence/worker-permission",
+      "unit": "PASS238 focused tests at restoration source 9e8a16d; docs/evidence/redown-restoration/focused.txt",
+      "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; restoration real-shelf-receipt.json source 9e8a16d",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "LIVE CLOUDFLARE PASS for explicit restoration matrix, not installed Chrome proof. Prior failure receipts retained as historical evidence.",
-      "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
-      "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; actual Windows denied request unobserved",
-      "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
+      "liveShelfEngine": "BLOCKED: genuine unpacked installation denied at 9e8a16d; no describeCapabilities response obtained",
+      "shelfLocalBrowser": "PASS20 actual Chromium fixture gates; not installed extension",
+      "issue4": "LOCAL/BROWSER lifecycle pass; historical owner Windows readiness; current live isolated saves pass under environment token, not installed owner OAuth.",
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
-      "saveRepair": "234 focused tests and 18 real-browser fixture gates pass. Actual original Worker REQUEST_FAILED reproduced. Final isolated provider source-fetch stream ends before HTTP headers, SOURCE_HTTP_INVALID/http-empty-response; independent R2 readback NOT REACHED; end-to-end remains BLOCKED. Real installed Chrome checked separately.",
+      "saveRepair": "Historical source.fetch blocker preserved in restorationBefore/saveRepairBefore and old evidence; replaced by native fetch. Current isolated LIVE text/image/redirect/unknown-length independent byte readbacks PASS. Windows installed-click remains unverified.",
       "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration."
     },
-    "sourceState": "Restoration working tree, exact source hashes; baseline 9dfe415 preserved separately.",
+    "sourceState": "Restoration source 9e8a16d09a53bb1b414d5fd1e34a190a3861160d; exact source hashes, immutable restorationBefore and baseline preserved.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13635,7 +13635,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "c88ef5e2544208fab82c94335feb888df9a0b34405ac7916e3c5269691725ad8"
+    "digest": "a430b5e3085686ac9878bbada99a0b5483c96695a9773018dc464ff8d09839b2"
   },
   "changeLog": [
     {

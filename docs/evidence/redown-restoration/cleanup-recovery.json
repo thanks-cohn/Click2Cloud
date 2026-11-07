@@ -1,0 +1,8 @@
+{
+  "gate": "prior-test-text-cleanup-after-identity-encoding-check",
+  "key": "__click2cloud_true_remote_test__/restoration-ee01d34a-966c-4d00-b7a4-cbfb7a37864c-native-text.txt",
+  "state": "PASS",
+  "deleteStatus": 204,
+  "absenceStatus": 404,
+  "reason": "Request identity content encoding so S3 HEAD reports original size and strong ETag; no resource rewrite was needed."
+}

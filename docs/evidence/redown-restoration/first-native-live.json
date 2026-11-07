@@ -1,0 +1,54 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_EXISTING_ISOLATED_WORKER_ENVIRONMENT_TOKEN_NOT_WINDOWS_OAUTH",
+  "baselineRevision": "6dc4142",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "existing-isolated-ownership",
+      "httpStatus": 200,
+      "state": "PASS"
+    },
+    {
+      "gate": "repaired-isolated-update",
+      "state": "PASS",
+      "codeDigest": "cxBbOtLVnxLdc-gP_Av4tM727OIDi5zgPUGFUg-_pYs"
+    },
+    {
+      "gate": "repaired-capability",
+      "state": "PREPARED"
+    },
+    {
+      "gate": "repaired-save",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "operationId": "b8368c25-2fcf-4dc1-a578-78ecb370c0ef",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/save-repair-b8368c25-2fcf-4dc1-a578-78ecb370c0ef.gitignore",
+        "size": 2262,
+        "etag": "f51efa72c6c22912336e9309fd517f03",
+        "version": "7e5e48b9324c6b2435d1835ac08e0b6a"
+      }
+    },
+    {
+      "gate": "independent-provider-S3-readback",
+      "state": "PASS",
+      "httpStatus": 200,
+      "size": 2262,
+      "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+      "sourceMatches": true
+    },
+    {
+      "gate": "exact-new-test-object-cleanup",
+      "deleteStatus": 204,
+      "absenceStatus": 404,
+      "state": "PASS"
+    }
+  ],
+  "sourceFixture": "github-node-gitignore",
+  "state": "PASS"
+}

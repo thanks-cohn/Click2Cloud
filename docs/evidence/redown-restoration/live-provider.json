@@ -1,0 +1,259 @@
+{
+  "evidenceClass": "LIVE_CLOUDFLARE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_CHROME_OR_OWNER_OAUTH",
+  "branchBaseline": "9dfe415",
+  "bucket": "redown",
+  "prefix": "__click2cloud_true_remote_test__/",
+  "results": [
+    {
+      "gate": "existing-isolated-ownership",
+      "state": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "gate": "update-existing-test-worker",
+      "state": "PASS"
+    },
+    {
+      "gate": "matching-deployed-digest-and-capability",
+      "state": "PASS"
+    },
+    {
+      "gate": "text",
+      "operationId": "85be832b-ba24-496a-9f09-71ba29d8dc08",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-85be832b-ba24-496a-9f09-71ba29d8dc08-native-text.txt",
+        "size": 2262,
+        "etag": "f51efa72c6c22912336e9309fd517f03",
+        "version": "7e5e4861b155cd661eb382eec1ea493d",
+        "transfer": "bounded-spool",
+        "stagingCleanup": {
+          "removed": 1,
+          "retained": 0
+        }
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 2262,
+        "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "f51efa72c6c22912336e9309fd517f03"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "image",
+      "operationId": "1ac285f4-400f-4c31-a4e5-949987c0aef5",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-1ac285f4-400f-4c31-a4e5-949987c0aef5-native-image.png",
+        "size": 10380,
+        "etag": "229d139e05d84c9a99480c3dc9f53dd4",
+        "version": "7e5e4861a42cada4fad91cd02287bb31",
+        "transfer": "known-length-stream"
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 10380,
+        "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "229d139e05d84c9a99480c3dc9f53dd4"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "redirect",
+      "operationId": "743983ed-8616-4267-bc73-fce0ac1f682b",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-743983ed-8616-4267-bc73-fce0ac1f682b-native-redirect.txt",
+        "size": 2262,
+        "etag": "f51efa72c6c22912336e9309fd517f03",
+        "version": "7e5e486198201ff911d434a24373b2d5",
+        "transfer": "bounded-spool",
+        "stagingCleanup": {
+          "removed": 1,
+          "retained": 0
+        }
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 2262,
+        "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "f51efa72c6c22912336e9309fd517f03"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "unknown-length",
+      "operationId": "dbe7d295-a584-4c59-a440-c54b12bdf883",
+      "saveState": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "inspection": {
+        "state": "verified",
+        "code": "R2_HEAD_VERSION_SIZE"
+      },
+      "state": "PASS",
+      "receipt": {
+        "key": "__click2cloud_true_remote_test__/restoration-dbe7d295-a584-4c59-a440-c54b12bdf883-native-unknown.bin",
+        "size": 1048576,
+        "etag": "240e18cc57b83f5979e4125dc07bec15",
+        "version": "7e5e48618a1c5f1d876329c22d480f21",
+        "transfer": "bounded-spool",
+        "stagingCleanup": {
+          "removed": 1,
+          "retained": 0
+        }
+      },
+      "independent": {
+        "httpStatus": 200,
+        "size": 1048576,
+        "sha256": "3ae577f51f02990716912139fa92c2aa8ad8d492eda34007b429e456ea719975",
+        "sourceMatches": true
+      },
+      "explorer": {
+        "stat": "completed",
+        "listed": "completed",
+        "exactKey": true,
+        "etag": "240e18cc57b83f5979e4125dc07bec15"
+      },
+      "provenance": {
+        "stored": true,
+        "credentialsExported": false
+      }
+    },
+    {
+      "gate": "invalid-certificate",
+      "operationId": "75012fb0-30d2-4ff1-8db0-32bd598e631b",
+      "saveState": "blocked",
+      "code": "SOURCE_UNAVAILABLE",
+      "diagnostic": {
+        "kind": "remote-save-stage",
+        "stage": "source.fetch",
+        "errorKind": "Error",
+        "causeCode": "SOURCE_UNAVAILABLE",
+        "httpStatus": 526,
+        "sourceStage": "headers"
+      },
+      "inspection": {
+        "state": "blocked",
+        "code": "SOURCE_UNAVAILABLE"
+      },
+      "state": "PASS",
+      "evidence": "Negative outcome; certificate attribution only if diagnostic/provider code establishes it"
+    },
+    {
+      "gate": "private-literal",
+      "operationId": "11a9d49d-35ae-4e31-90a5-f41f2677e4d4",
+      "saveState": "blocked",
+      "code": "SOURCE_DENIED",
+      "inspection": {
+        "state": "uncertain",
+        "code": "OPERATION_UNKNOWN"
+      },
+      "state": "PASS",
+      "evidence": "Negative outcome; certificate attribution only if diagnostic/provider code establishes it"
+    },
+    {
+      "gate": "live-File-API-folder-copy-rename-independent-readback",
+      "state": "PASS",
+      "copiedKey": "__click2cloud_true_remote_test__/file-actions-1e7b1569-6a42-4412-a684-d0ef4787e5f8/restoration-85be832b-ba24-496a-9f09-71ba29d8dc08-native-text.txt",
+      "renamedKey": "__click2cloud_true_remote_test__/file-actions-1e7b1569-6a42-4412-a684-d0ef4787e5f8/renamed.txt",
+      "size": 2262,
+      "sha256": "c005855bbdbd73acfb5fae712c85beedc9954c9a84216e461f367c73b86e17c4",
+      "oldKeyAbsence": 404
+    },
+    {
+      "gate": "live-File-API-folder-delete",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-85be832b-ba24-496a-9f09-71ba29d8dc08-native-text.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-1ac285f4-400f-4c31-a4e5-949987c0aef5-native-image.png",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-743983ed-8616-4267-bc73-fce0ac1f682b-native-redirect.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/restoration-dbe7d295-a584-4c59-a440-c54b12bdf883-native-unknown.bin",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-1e7b1569-6a42-4412-a684-d0ef4787e5f8/.redown",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-1e7b1569-6a42-4412-a684-d0ef4787e5f8/restoration-85be832b-ba24-496a-9f09-71ba29d8dc08-native-text.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    },
+    {
+      "gate": "cleanup",
+      "key": "__click2cloud_true_remote_test__/file-actions-1e7b1569-6a42-4412-a684-d0ef4787e5f8/renamed.txt",
+      "state": "PASS",
+      "absenceStatus": 404
+    }
+  ],
+  "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+  "state": "PASS"
+}

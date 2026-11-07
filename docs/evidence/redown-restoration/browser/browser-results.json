@@ -1,0 +1,199 @@
+{
+  "browser": "155.0.8059.79",
+  "results": [
+    {
+      "gate": "installed-extension",
+      "state": "BLOCKED",
+      "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+    },
+    {
+      "gate": "quiet-login-wiring",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture"
+    },
+    {
+      "gate": "Explorer-keyboard-and-folder-navigation",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser"
+    },
+    {
+      "gate": "Narrow-20-level-editor-draft-and-commit",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB"
+    },
+    {
+      "gate": "verified-notification-checks-canonical-receipt-and-refreshes-matching-Explorer",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB-not-live-receipt"
+    },
+    {
+      "gate": "Settings-attention-and-provider-visibility-independent-canonical-commits",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB"
+    },
+    {
+      "gate": "GUI-and-shared-API",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB",
+      "checks": {
+        "first": "completed",
+        "replay": true,
+        "unchanged": true,
+        "stale": "REVISION_CONFLICT",
+        "badVersion": "VERSION_OR_METHOD_UNSUPPORTED",
+        "unauthorized": "PERMISSION_DENIED",
+        "agent": "completed",
+        "wrongActor": true,
+        "mainMigration": true,
+        "restored": true,
+        "reconnect": true
+      }
+    },
+    {
+      "gate": "V1-one-canonical-native-action-save-receipt-history-go-to",
+      "state": "PASS",
+      "evidenceClass": "actual-engine-browser-IDB-with-fake-provider-not-live-R2",
+      "checks": {
+        "state": "completed",
+        "completion": "verified",
+        "goState": "completed",
+        "goBucket": "redown",
+        "goKey": "verified.txt"
+      }
+    },
+    {
+      "gate": "Quick-programmatic-assignment-GUI-toggle-API-identical-topology",
+      "state": "PASS",
+      "evidenceClass": "actual-GUI-API-IDB-with-fixture-registrar-not-installed-native-menu",
+      "checks": {
+        "roots": [
+          "Google Drive",
+          "Dropbox",
+          "OneDrive",
+          "Cloudflare",
+          "Quick projects"
+        ],
+        "shape": "flat-save",
+        "quick": true,
+        "children": 0
+      }
+    },
+    {
+      "gate": "V1-ordinary-manager-delete-next-login-auto-reuse-no-approval-popup",
+      "state": "PASS",
+      "evidenceClass": "actual-GUI-API-IDB-with-fake-provider-not-installed-Chrome",
+      "checks": {
+        "state": "completed",
+        "bucket": "redown",
+        "rows": 1,
+        "creates": 1
+      }
+    },
+    {
+      "gate": "Cloudflare-onboarding-controls-and-programmatic-owner",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB"
+    },
+    {
+      "gate": "Worker-denial-precise-safe-evidence-no-repeat-approval-and-explicit-resume",
+      "state": "PASS",
+      "evidenceClass": "actual-app-API-IDB-with-simulated-403-not-Windows-live-error",
+      "checks": {
+        "prepare": 2,
+        "create": 1
+      }
+    },
+    {
+      "gate": "Nine-scope-reconsent-resumes-existing-operation-and-GUI-Explorer-History-GO-TO",
+      "state": "PASS",
+      "evidenceClass": "actual-app-API-IDB-with-simulated-OAuth-and-provider-not-live",
+      "checks": {
+        "loginCalls": 1,
+        "prepareCalls": 1,
+        "bucketCreates": 0,
+        "theme": "light",
+        "rows": 1,
+        "pendingCompleted": "CLOUDFLARE_READY",
+        "save": "verified"
+      }
+    },
+    {
+      "gate": "canonical-file-actions-GUI-copy-paste-API-rename-GUI-delete",
+      "state": "PASS",
+      "evidenceClass": "actual-GUI-API-IDB-with-simulated-file-provider",
+      "errors": []
+    },
+    {
+      "gate": "failed-receipt-completed-inspection-visible-transport-error-and-preserved-IDB",
+      "state": "PASS",
+      "evidenceClass": "actual-GUI-API-IDB-simulated-provider",
+      "errors": []
+    },
+    {
+      "gate": "durable-history-beyond-100-and-API-pagination",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser-IDB",
+      "firstRetained": true,
+      "unique": 129,
+      "total": 129
+    },
+    {
+      "gate": "connected-native-cloudflare-hash-bootstrap",
+      "state": "PASS",
+      "evidenceClass": "isolated-fixture-real-browser"
+    },
+    {
+      "gate": "browser-runtime-errors",
+      "state": "PASS",
+      "errors": []
+    },
+    {
+      "gate": "actual-product-background-module-boot",
+      "state": "PASS",
+      "evidenceClass": "browser-module-with-fake-Chrome-transport",
+      "ready": "completed",
+      "api": "completed",
+      "tools": 55,
+      "bridge": {
+        "withoutDocumentId": "completed",
+        "denied": "UNTRUSTED_APP_SENDER",
+        "reason": "APP_URL_MISMATCH",
+        "invalid": "VERSION_OR_METHOD_UNSUPPORTED"
+      }
+    },
+    {
+      "gate": "accepted-request-reports-startup-rejection-without-port-loss",
+      "state": "PASS",
+      "evidenceClass": "actual-background-local-Chrome-fixture",
+      "response": {
+        "version": "3+1.1",
+        "state": "failed",
+        "code": "ENGINE_STARTUP_FAILED",
+        "diagnostic": {
+          "stage": "startup",
+          "causeCode": "STORAGE_ACCESS_FAILED"
+        }
+      }
+    },
+    {
+      "gate": "Shelf-message-failures-identify-actual-stage-and-cause",
+      "state": "PASS",
+      "evidenceClass": "actual-app-local-transport-fixture-not-installed-extension"
+    },
+    {
+      "gate": "native-rendering-click-restart",
+      "state": "BLOCKED",
+      "code": "EXTENSION_INSTALL_POLICY"
+    },
+    {
+      "gate": "live-provider-OAuth-consent",
+      "state": "NOT_TESTED",
+      "code": "INSTALLED_EXTENSION_CONSENT_NOT_EXECUTED"
+    },
+    {
+      "gate": "live-native-save-readback",
+      "state": "BLOCKED",
+      "code": "INSTALLED_EXTENSION_AND_AUTHORIZED_WORKER_TRANSPORT_REQUIRED"
+    }
+  ]
+}

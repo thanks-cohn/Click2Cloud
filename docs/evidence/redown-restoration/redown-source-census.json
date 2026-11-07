@@ -1,0 +1,5156 @@
+{
+  "revision": "e58bf99f4851f635cecc572e483ae35e184677f2",
+  "mode": "Read-only fresh bare clone; original REDOWN checkout unchanged",
+  "classification": "SOURCE_VERIFIED inventory; not proof that every path was live tested",
+  "modules": [
+    {
+      "path": "extension/background.js",
+      "sha256": "9d519f2bbaeb57eccd68ed856d123ec055f44e0d25dbaf1d95dd3ce4ae88451f",
+      "lines": 3290,
+      "functions": [
+        {
+          "name": "privateHost",
+          "line": 57
+        },
+        {
+          "name": "cleanName",
+          "line": 66
+        },
+        {
+          "name": "cleanPrefix",
+          "line": 72
+        },
+        {
+          "name": "explorerWire",
+          "line": 77
+        },
+        {
+          "name": "fingerprint",
+          "line": 83
+        },
+        {
+          "name": "payload",
+          "line": 90
+        },
+        {
+          "name": "explorerWorkerError",
+          "line": 93
+        },
+        {
+          "name": "exactObjectKey",
+          "line": 94
+        },
+        {
+          "name": "exactFolder",
+          "line": 98
+        },
+        {
+          "name": "checksumHex",
+          "line": 105
+        },
+        {
+          "name": "verifiedObjectPut",
+          "line": 109
+        },
+        {
+          "name": "copyVerifiedObject",
+          "line": 116
+        },
+        {
+          "name": "uniqueKey",
+          "line": 149
+        },
+        {
+          "name": "putNewDownload",
+          "line": 163
+        },
+        {
+          "name": "extensionForContentType",
+          "line": 168
+        },
+        {
+          "name": "filenameWithInferredExtension",
+          "line": 190
+        },
+        {
+          "name": "safePublicBase",
+          "line": 196
+        },
+        {
+          "name": "checkedFetch",
+          "line": 209
+        },
+        {
+          "name": "bytesHex",
+          "line": 228
+        },
+        {
+          "name": "readSignature",
+          "line": 229
+        },
+        {
+          "name": "signedReadUrl",
+          "line": 233
+        },
+        {
+          "name": "validSignedRead",
+          "line": 238
+        },
+        {
+          "name": "objectBytes",
+          "line": 248
+        },
+        {
+          "name": "safeArchiveName",
+          "line": 253
+        },
+        {
+          "name": "archiveEntries",
+          "line": 262
+        },
+        {
+          "name": "archiveEntryBytes",
+          "line": 293
+        },
+        {
+          "name": "bytesToBase64Url",
+          "line": 740
+        },
+        {
+          "name": "randomString",
+          "line": 745
+        },
+        {
+          "name": "sha256Base64Url",
+          "line": 749
+        },
+        {
+          "name": "selectedUrl",
+          "line": 753
+        },
+        {
+          "name": "categoryForContext",
+          "line": 758
+        },
+        {
+          "name": "basenameFromUrl",
+          "line": 768
+        },
+        {
+          "name": "joinPath",
+          "line": 775
+        },
+        {
+          "name": "safeSlug",
+          "line": 780
+        },
+        {
+          "name": "getProfiles",
+          "line": 784
+        },
+        {
+          "name": "setProfiles",
+          "line": 788
+        },
+        {
+          "name": "paintToolbarBrand",
+          "line": 807
+        },
+        {
+          "name": "createToolbarFeedback",
+          "line": 819
+        },
+        {
+          "name": "recordTransfer",
+          "line": 888
+        },
+        {
+          "name": "notify",
+          "line": 905
+        },
+        {
+          "name": "cloudflareErrorMessage",
+          "line": 918
+        },
+        {
+          "name": "cfFetch",
+          "line": 921
+        },
+        {
+          "name": "cfJson",
+          "line": 924
+        },
+        {
+          "name": "connectCloudflare",
+          "line": 991
+        },
+        {
+          "name": "disconnectCloudflare",
+          "line": 992
+        },
+        {
+          "name": "listCloudflareAccounts",
+          "line": 1007
+        },
+        {
+          "name": "listBuckets",
+          "line": 1022
+        },
+        {
+          "name": "createBucket",
+          "line": 1043
+        },
+        {
+          "name": "setupRedownQuickDestination",
+          "line": 1056
+        },
+        {
+          "name": "ensureWorkersSubdomain",
+          "line": 1097
+        },
+        {
+          "name": "isVerifiedWorkerHealth",
+          "line": 1116
+        },
+        {
+          "name": "provisionCloudflareProfile",
+          "line": 1120
+        },
+        {
+          "name": "deployCloudflareProfile",
+          "line": 1123
+        },
+        {
+          "name": "normalizeWebOrigin",
+          "line": 1296
+        },
+        {
+          "name": "configureBucketAssetCors",
+          "line": 1313
+        },
+        {
+          "name": "configureAssetDomain",
+          "line": 1371
+        },
+        {
+          "name": "finish",
+          "line": 1402
+        },
+        {
+          "name": "bucketPublicAddresses",
+          "line": 1422
+        },
+        {
+          "name": "enableBucketPublicAccess",
+          "line": 1444
+        },
+        {
+          "name": "publicAssetUrl",
+          "line": 1473
+        },
+        {
+          "name": "listObjectsPage",
+          "line": 1478
+        },
+        {
+          "name": "listObjects",
+          "line": 1509
+        },
+        {
+          "name": "listAllObjects",
+          "line": 1512
+        },
+        {
+          "name": "explorerSearchScore",
+          "line": 1523
+        },
+        {
+          "name": "searchExplorerObjects",
+          "line": 1549
+        },
+        {
+          "name": "listFolderPrefixes",
+          "line": 1593
+        },
+        {
+          "name": "listFolderChildren",
+          "line": 1615
+        },
+        {
+          "name": "cleanExplorerPrefix",
+          "line": 1643
+        },
+        {
+          "name": "cleanExplorerKey",
+          "line": 1649
+        },
+        {
+          "name": "cleanExplorerName",
+          "line": 1653
+        },
+        {
+          "name": "workerAcceptsProfile",
+          "line": 1659
+        },
+        {
+          "name": "preparedProfile",
+          "line": 1682
+        },
+        {
+          "name": "callBucketWorker",
+          "line": 1699
+        },
+        {
+          "name": "run",
+          "line": 1700
+        },
+        {
+          "name": "expandExplorerEntries",
+          "line": 1740
+        },
+        {
+          "name": "probeExplorerSource",
+          "line": 1759
+        },
+        {
+          "name": "assertExplorerTransferSettings",
+          "line": 1817
+        },
+        {
+          "name": "explorerDirectoryExists",
+          "line": 1827
+        },
+        {
+          "name": "transferExplorerObjects",
+          "line": 1833
+        },
+        {
+          "name": "deleteExplorerObjects",
+          "line": 1926
+        },
+        {
+          "name": "renameExplorerEntry",
+          "line": 1937
+        },
+        {
+          "name": "createExplorerFolder",
+          "line": 1946
+        },
+        {
+          "name": "objectKeyFromLocation",
+          "line": 1958
+        },
+        {
+          "name": "renameCloudflareTransfer",
+          "line": 1970
+        },
+        {
+          "name": "renameTransferHistoryItem",
+          "line": 1990
+        },
+        {
+          "name": "ensureGitHubWorkflow",
+          "line": 2010
+        },
+        {
+          "name": "ingestCloudflareAtPrefix",
+          "line": 2038
+        },
+        {
+          "name": "verifyCloudflareReceipt",
+          "line": 2085
+        },
+        {
+          "name": "ingestCloudflare",
+          "line": 2109
+        },
+        {
+          "name": "ingestGitHub",
+          "line": 2113
+        },
+        {
+          "name": "ingest",
+          "line": 2136
+        },
+        {
+          "name": "sanitizeMenuId",
+          "line": 2145
+        },
+        {
+          "name": "addNestedLocations",
+          "line": 2149
+        },
+        {
+          "name": "saveStoragePreferences",
+          "line": 2157
+        },
+        {
+          "name": "v3MenuTransaction",
+          "line": 2173
+        },
+        {
+          "name": "withCurrentMenu",
+          "line": 2217
+        },
+        {
+          "name": "currentMenuStore",
+          "line": 2220
+        },
+        {
+          "name": "commitV3Current",
+          "line": 2221
+        },
+        {
+          "name": "restoreDurableV3",
+          "line": 2228
+        },
+        {
+          "name": "ensureV3Only",
+          "line": 2245
+        },
+        {
+          "name": "activateAllBuckets",
+          "line": 2261
+        },
+        {
+          "name": "runGlobalActivation",
+          "line": 2294
+        },
+        {
+          "name": "resumeGlobalActivation",
+          "line": 2342
+        },
+        {
+          "name": "v3PresentationSnapshot",
+          "line": 2350
+        },
+        {
+          "name": "restoreV3MenuSnapshot",
+          "line": 2354
+        },
+        {
+          "name": "persistV3MenuSnapshot",
+          "line": 2362
+        },
+        {
+          "name": "writeV3MenuSnapshot",
+          "line": 2366
+        },
+        {
+          "name": "refreshV3Inventory",
+          "line": 2379
+        },
+        {
+          "name": "rightClickV3Snapshot",
+          "line": 2408
+        },
+        {
+          "name": "resolveActiveRightClick",
+          "line": 2416
+        },
+        {
+          "name": "menuApplicationKey",
+          "line": 2425
+        },
+        {
+          "name": "rebuildMenus",
+          "line": 2438
+        },
+        {
+          "name": "reconcileMenus",
+          "line": 2451
+        },
+        {
+          "name": "acknowledgeMenu",
+          "line": 2497
+        },
+        {
+          "name": "ensureMenuAccess",
+          "line": 2508
+        },
+        {
+          "name": "buildMenus",
+          "line": 2520
+        },
+        {
+          "name": "addMenuControls",
+          "line": 2622
+        },
+        {
+          "name": "readHitomiQueue",
+          "line": 2644
+        },
+        {
+          "name": "markHitomiQueue",
+          "line": 2648
+        },
+        {
+          "name": "retryPendingHitomi",
+          "line": 2655
+        },
+        {
+          "name": "hitomiDestination",
+          "line": 2680
+        },
+        {
+          "name": "initiateHitomiCapture",
+          "line": 2683
+        },
+        {
+          "name": "handleHitomiCaptureMessage",
+          "line": 2728
+        },
+        {
+          "name": "requestMenuRebuild",
+          "line": 2791
+        },
+        {
+          "name": "launchSaveDroplet",
+          "line": 2827
+        },
+        {
+          "name": "openRedownHome",
+          "line": 2915
+        },
+        {
+          "name": "saveResolvedRightClick",
+          "line": 2971
+        }
+      ],
+      "commands": [
+        "activateAllBuckets",
+        "applyRightClickV3",
+        "bootV1",
+        "cfAccounts",
+        "cfArchiveEntries",
+        "cfArchiveEntryUrl",
+        "cfBuckets",
+        "cfConnect",
+        "cfCreateBucket",
+        "cfCreateFolder",
+        "cfDeleteObjects",
+        "cfDestinationFolders",
+        "cfDisconnect",
+        "cfDownloadObject",
+        "cfEnablePublicAccess",
+        "cfEnsurePrefixes",
+        "cfExtractArchive",
+        "cfFolderChildren",
+        "cfFolderPrefixes",
+        "cfLoginCancel",
+        "cfLoginStatus",
+        "cfObjectProperties",
+        "cfObjects",
+        "cfPrepareBucket",
+        "cfPrivateObjectUrl",
+        "cfProvision",
+        "cfPublicAddresses",
+        "cfRenameEntry",
+        "cfSearchCancel",
+        "cfSearchObjects",
+        "cfSearchRetry",
+        "cfSearchStart",
+        "cfSearchStep",
+        "cfSetAssetCors",
+        "cfSetAssetDomain",
+        "cfSetupRedownQuick",
+        "cfTransferArchive",
+        "cfTransferObjects",
+        "deliveryCount",
+        "explorerDiagnosticsV1",
+        "hitomiCaptureChunk",
+        "hitomiCaptureError",
+        "hitomiCaptureStart",
+        "ingest",
+        "profiles",
+        "recordLocalTransfer",
+        "redown-cloudflare-token",
+        "redown-provision-profile",
+        "refreshRightClickV3Inventory",
+        "renameTransfer",
+        "rfisExport",
+        "rightClickChooserList",
+        "rightClickRestoreCommitted",
+        "rightClickV3Snapshot",
+        "runtimeDiagnosticsV1",
+        "saveRightClickV3",
+        "saveStoragePreferences",
+        "setRightClickV3LevelScopes",
+        "setRightClickV3Presentation",
+        "transferHistory"
+      ],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.contextMenus.onClicked",
+        "chrome.runtime.onInstalled",
+        "chrome.runtime.onMessage",
+        "chrome.runtime.onStartup",
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/beta/account-picker.js",
+      "sha256": "6666992bf1b1c0828951c4c2b29d0bdfee6d8bbaf29f58c4d033cd6d7aea472b",
+      "lines": 123,
+      "functions": [
+        {
+          "name": "close",
+          "line": 13
+        },
+        {
+          "name": "sync",
+          "line": 21
+        },
+        {
+          "name": "focusItem",
+          "line": 36
+        },
+        {
+          "name": "choose",
+          "line": 43
+        },
+        {
+          "name": "show",
+          "line": 54
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/archive-browser.mjs",
+      "sha256": "a483718f0c026bb9a5e391a0211ead5cdd92e9761949d2b2f72e6da77555d2e8",
+      "lines": 43,
+      "functions": [
+        {
+          "name": "normalizeArchiveEntries",
+          "line": 5
+        },
+        {
+          "name": "archiveFolder",
+          "line": 15
+        },
+        {
+          "name": "archiveParent",
+          "line": 29
+        },
+        {
+          "name": "archiveCrumbs",
+          "line": 34
+        },
+        {
+          "name": "archiveAdjacent",
+          "line": 40
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/configuration.mjs",
+      "sha256": "3f6c1cf638db85604bd6936f632c881a40514be9f0d88c882324593aaf8113b7",
+      "lines": 31,
+      "functions": [
+        {
+          "name": "validatePreferences",
+          "line": 16
+        },
+        {
+          "name": "resolveOptions",
+          "line": 25
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/dropped-files.mjs",
+      "sha256": "cde6f2bac605ccce3dc3cc6bb208a60d621e9bd061102b5d96b0763d4ad934fd",
+      "lines": 21,
+      "functions": [
+        {
+          "name": "collectDroppedFiles",
+          "line": 3
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/explorer.mjs",
+      "sha256": "f14aacf7c849cddfb6e552fe27fe9194e69eb464e9ec9230bde2eac2b755bc07",
+      "lines": 1222,
+      "functions": [
+        {
+          "name": "clearActivationGlow",
+          "line": 27
+        },
+        {
+          "name": "showActivationGlow",
+          "line": 31
+        },
+        {
+          "name": "loadGlobalActivation",
+          "line": 42
+        },
+        {
+          "name": "paintActivation",
+          "line": 46
+        },
+        {
+          "name": "resetActivation",
+          "line": 65
+        },
+        {
+          "name": "checkActivation",
+          "line": 66
+        },
+        {
+          "name": "paintLogout",
+          "line": 91
+        },
+        {
+          "name": "syncAccountPicker",
+          "line": 98
+        },
+        {
+          "name": "accountVisual",
+          "line": 99
+        },
+        {
+          "name": "connectionState",
+          "line": 134
+        },
+        {
+          "name": "failure",
+          "line": 135
+        },
+        {
+          "name": "rememberLocation",
+          "line": 136
+        },
+        {
+          "name": "announceUrlSelection",
+          "line": 140
+        },
+        {
+          "name": "status",
+          "line": 150
+        },
+        {
+          "name": "button",
+          "line": 151
+        },
+        {
+          "name": "paintDeletePreferences",
+          "line": 156
+        },
+        {
+          "name": "controls",
+          "line": 162
+        },
+        {
+          "name": "visible",
+          "line": 184
+        },
+        {
+          "name": "render",
+          "line": 185
+        },
+        {
+          "name": "invokeCommand",
+          "line": 213
+        },
+        {
+          "name": "guideAction",
+          "line": 214
+        },
+        {
+          "name": "paintSelection",
+          "line": 215
+        },
+        {
+          "name": "progress",
+          "line": 216
+        },
+        {
+          "name": "request",
+          "line": 224
+        },
+        {
+          "name": "listing",
+          "line": 228
+        },
+        {
+          "name": "navigate",
+          "line": 236
+        },
+        {
+          "name": "run",
+          "line": 245
+        },
+        {
+          "name": "ensureWorker",
+          "line": 251
+        },
+        {
+          "name": "outcome",
+          "line": 257
+        },
+        {
+          "name": "openModal",
+          "line": 263
+        },
+        {
+          "name": "dialog",
+          "line": 264
+        },
+        {
+          "name": "beginInlineFolder",
+          "line": 271
+        },
+        {
+          "name": "cancelInlineFolder",
+          "line": 277
+        },
+        {
+          "name": "upload",
+          "line": 351
+        },
+        {
+          "name": "droppedFiles",
+          "line": 360
+        },
+        {
+          "name": "showMenu",
+          "line": 378
+        },
+        {
+          "name": "explorerPreviewKind",
+          "line": 384
+        },
+        {
+          "name": "moveGridItem",
+          "line": 392
+        },
+        {
+          "name": "scrollDocumentPreview",
+          "line": 422
+        },
+        {
+          "name": "navigateSelectedArrow",
+          "line": 429
+        },
+        {
+          "name": "paintBuckets",
+          "line": 481
+        },
+        {
+          "name": "loadBuckets",
+          "line": 496
+        },
+        {
+          "name": "loadAccounts",
+          "line": 509
+        },
+        {
+          "name": "refreshConnection",
+          "line": 539
+        },
+        {
+          "name": "loadProfiles",
+          "line": 578
+        },
+        {
+          "name": "activationChanged",
+          "line": 599
+        },
+        {
+          "name": "paintPreferences",
+          "line": 611
+        },
+        {
+          "name": "setLightbox",
+          "line": 622
+        },
+        {
+          "name": "lightboxControl",
+          "line": 636
+        },
+        {
+          "name": "rememberPreview",
+          "line": 641
+        },
+        {
+          "name": "stopPreviewMedia",
+          "line": 642
+        },
+        {
+          "name": "closePreview",
+          "line": 643
+        },
+        {
+          "name": "layoutPreview",
+          "line": 650
+        },
+        {
+          "name": "presentPreview",
+          "line": 664
+        },
+        {
+          "name": "setPreviewMode",
+          "line": 671
+        },
+        {
+          "name": "syncSideSelection",
+          "line": 700
+        },
+        {
+          "name": "showPreview",
+          "line": 709
+        },
+        {
+          "name": "openDirectoryReader",
+          "line": 750
+        },
+        {
+          "name": "showDirectoryPage",
+          "line": 787
+        },
+        {
+          "name": "openArchiveReader",
+          "line": 831
+        },
+        {
+          "name": "readerBrowseButton",
+          "line": 850
+        },
+        {
+          "name": "showReaderPage",
+          "line": 853
+        },
+        {
+          "name": "adjacentPreview",
+          "line": 872
+        },
+        {
+          "name": "resizePreview",
+          "line": 877
+        },
+        {
+          "name": "chooseTransfer",
+          "line": 889
+        },
+        {
+          "name": "destinationBuckets",
+          "line": 895
+        },
+        {
+          "name": "chooseDestination",
+          "line": 905
+        },
+        {
+          "name": "archiveControls",
+          "line": 912
+        },
+        {
+          "name": "stopArchivePreview",
+          "line": 919
+        },
+        {
+          "name": "archivePreviewButtons",
+          "line": 926
+        },
+        {
+          "name": "archiveShowEntry",
+          "line": 933
+        },
+        {
+          "name": "renderArchiveFolder",
+          "line": 978
+        },
+        {
+          "name": "stepArchivePreview",
+          "line": 1011
+        },
+        {
+          "name": "useHistoryNavigation",
+          "line": 1075
+        },
+        {
+          "name": "providerControls",
+          "line": 1138
+        },
+        {
+          "name": "loadMega",
+          "line": 1149
+        },
+        {
+          "name": "switchProvider",
+          "line": 1159
+        },
+        {
+          "name": "paintMegaTransferMode",
+          "line": 1184
+        },
+        {
+          "name": "paintMegaEndpoint",
+          "line": 1197
+        }
+      ],
+      "commands": [
+        "accounts",
+        "archiveEntries",
+        "archiveEntryUrl",
+        "buckets",
+        "connect",
+        "connectionStatus",
+        "createBucket",
+        "disconnect",
+        "list",
+        "mkdir",
+        "preview",
+        "profiles",
+        "publicUrls",
+        "rename",
+        "stat"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/beta/file-api.mjs",
+      "sha256": "0efa16667c92e527eba88324c4b153bdcdcd84cfc2fd861262257d54a05cce66",
+      "lines": 58,
+      "functions": [
+        {
+          "name": "location",
+          "line": 2
+        },
+        {
+          "name": "key",
+          "line": 6
+        },
+        {
+          "name": "prefix",
+          "line": 10
+        },
+        {
+          "name": "name",
+          "line": 11
+        },
+        {
+          "name": "entry",
+          "line": 14
+        },
+        {
+          "name": "createFileApi",
+          "line": 16
+        },
+        {
+          "name": "worker",
+          "line": 46
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/guided-interaction.mjs",
+      "sha256": "d27a1bb5df1aa221e0065eb1422df139e90b2f48dad61603b28c42a766ff4d3d",
+      "lines": 148,
+      "functions": [
+        {
+          "name": "createGuide",
+          "line": 2
+        },
+        {
+          "name": "activeModal",
+          "line": 6
+        },
+        {
+          "name": "modalOpened",
+          "line": 7
+        },
+        {
+          "name": "modalClosed",
+          "line": 8
+        },
+        {
+          "name": "clearHighlight",
+          "line": 11
+        },
+        {
+          "name": "position",
+          "line": 12
+        },
+        {
+          "name": "placeManual",
+          "line": 54
+        },
+        {
+          "name": "installGrip",
+          "line": 59
+        },
+        {
+          "name": "installResize",
+          "line": 81
+        },
+        {
+          "name": "schedule",
+          "line": 103
+        },
+        {
+          "name": "stop",
+          "line": 104
+        },
+        {
+          "name": "dismissHistory",
+          "line": 113
+        },
+        {
+          "name": "exit",
+          "line": 114
+        },
+        {
+          "name": "keydown",
+          "line": 115
+        },
+        {
+          "name": "signal",
+          "line": 116
+        },
+        {
+          "name": "show",
+          "line": 117
+        },
+        {
+          "name": "qUpdate",
+          "line": 126
+        },
+        {
+          "name": "advance",
+          "line": 127
+        },
+        {
+          "name": "start",
+          "line": 128
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/history-preview-landing.mjs",
+      "sha256": "5226e2a08872942f3acca37b7f7d423eb06106ec2064bb40e62564855f2fff96",
+      "lines": 18,
+      "functions": [
+        {
+          "name": "positionHistoryGoToLanding",
+          "line": 3
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/history-target.mjs",
+      "sha256": "ebb26b78ebee2f8febe025b38535bc8769ae9bd43f34ffde32c111d31b19acdb",
+      "lines": 12,
+      "functions": [
+        {
+          "name": "resolveHistoryTarget",
+          "line": 2
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/lab.mjs",
+      "sha256": "3502072578a1b589f4101530e6e69434ea662df77783968058eab48919e79703",
+      "lines": 57,
+      "functions": [
+        {
+          "name": "executeCommand",
+          "line": 4
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/provider-router.mjs",
+      "sha256": "78f54e053dd2a5329d5b2a16ab2cab91dfa1839106cb86fe7ebb95dc66b8e59a",
+      "lines": 16,
+      "functions": [
+        {
+          "name": "createProviderRouter",
+          "line": 3
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/quick-links.js",
+      "sha256": "779e252782521e31a67d83bb30be6aac9c4599707ead809110ac6934ddce82f8",
+      "lines": 250,
+      "functions": [
+        {
+          "name": "request",
+          "line": 13
+        },
+        {
+          "name": "buttons",
+          "line": 20
+        },
+        {
+          "name": "selectTab",
+          "line": 27
+        },
+        {
+          "name": "loadAccounts",
+          "line": 46
+        },
+        {
+          "name": "loadBuckets",
+          "line": 65
+        },
+        {
+          "name": "renderAddresses",
+          "line": 92
+        },
+        {
+          "name": "loadUrls",
+          "line": 129
+        },
+        {
+          "name": "honorSavedObjectLookup",
+          "line": 224
+        }
+      ],
+      "commands": [
+        "cfAccounts",
+        "cfBuckets",
+        "cfProvision",
+        "cfPublicAddresses",
+        "cfSetAssetDomain",
+        "profiles"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/beta/r2-adapter.mjs",
+      "sha256": "1d29907ae5696cd3b8557c1f4c78cbe6e7f7ede95c44fb6a305ddc753482c057",
+      "lines": 257,
+      "functions": [
+        {
+          "name": "previewType",
+          "line": 3
+        },
+        {
+          "name": "createR2Adapter",
+          "line": 8
+        },
+        {
+          "name": "message",
+          "line": 9
+        },
+        {
+          "name": "page",
+          "line": 26
+        },
+        {
+          "name": "stat",
+          "line": 54
+        },
+        {
+          "name": "verifyUpload",
+          "line": 59
+        },
+        {
+          "name": "read",
+          "line": 64
+        },
+        {
+          "name": "transfer",
+          "line": 91
+        }
+      ],
+      "commands": [
+        "cfAccounts",
+        "cfArchiveEntries",
+        "cfArchiveEntryUrl",
+        "cfBuckets",
+        "cfConnect",
+        "cfCreateBucket",
+        "cfCreateFolder",
+        "cfDeleteObjects",
+        "cfDisconnect",
+        "cfExtractArchive",
+        "cfProvision",
+        "cfPublicAddresses",
+        "cfRenameEntry",
+        "cfTransferObjects",
+        "ingest",
+        "profiles",
+        "transferHistory"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/beta/remote-dialog.mjs",
+      "sha256": "47d545ada40e86c7243f0d4b28e2c0f18e590dd4f00063098fccb8c1a671dafa",
+      "lines": 21,
+      "functions": [
+        {
+          "name": "installRemoteDialog",
+          "line": 2
+        },
+        {
+          "name": "preview",
+          "line": 4
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/right-click-v3-ui.js",
+      "sha256": "9880cbbb4fcbaf590a586c65c2e74efcf8d5f2258195b43e02adee6640fabddc",
+      "lines": 255,
+      "functions": [
+        {
+          "name": "button",
+          "line": 11
+        },
+        {
+          "name": "paintApply",
+          "line": 13
+        },
+        {
+          "name": "dirty",
+          "line": 19
+        },
+        {
+          "name": "applyFailed",
+          "line": 20
+        },
+        {
+          "name": "paintScopes",
+          "line": 27
+        },
+        {
+          "name": "saveScopes",
+          "line": 41
+        },
+        {
+          "name": "menuFeedback",
+          "line": 57
+        },
+        {
+          "name": "paintPresentation",
+          "line": 66
+        },
+        {
+          "name": "savePresentation",
+          "line": 79
+        },
+        {
+          "name": "note",
+          "line": 107
+        },
+        {
+          "name": "validate",
+          "line": 108
+        },
+        {
+          "name": "change",
+          "line": 109
+        },
+        {
+          "name": "flush",
+          "line": 110
+        },
+        {
+          "name": "focusSelected",
+          "line": 114
+        },
+        {
+          "name": "select",
+          "line": 115
+        },
+        {
+          "name": "rename",
+          "line": 116
+        },
+        {
+          "name": "remove",
+          "line": 117
+        },
+        {
+          "name": "move",
+          "line": 118
+        },
+        {
+          "name": "add",
+          "line": 119
+        },
+        {
+          "name": "browse",
+          "line": 120
+        },
+        {
+          "name": "draw",
+          "line": 121
+        },
+        {
+          "name": "row",
+          "line": 133
+        },
+        {
+          "name": "destinations",
+          "line": 155
+        },
+        {
+          "name": "cloud",
+          "line": 157
+        },
+        {
+          "name": "load",
+          "line": 168
+        },
+        {
+          "name": "refreshActivatedDestinations",
+          "line": 172
+        },
+        {
+          "name": "queueActivatedDestinationsRefresh",
+          "line": 210
+        }
+      ],
+      "commands": [
+        "applyRightClickV3",
+        "cfDestinationFolders",
+        "refreshRightClickV3Inventory",
+        "rightClickV3Snapshot",
+        "saveRightClickV3",
+        "setRightClickV3LevelScopes",
+        "setRightClickV3Presentation"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/beta/s3-adapter.mjs",
+      "sha256": "3bd2d4d6dc584aa2b280c6e07e719650ac7e26059676104bad77b7b078d8739c",
+      "lines": 111,
+      "functions": [
+        {
+          "name": "chooseMegaTransferMode",
+          "line": 9
+        },
+        {
+          "name": "megaEndpoint",
+          "line": 15
+        },
+        {
+          "name": "createS3Adapter",
+          "line": 22
+        },
+        {
+          "name": "request",
+          "line": 26
+        },
+        {
+          "name": "bounded",
+          "line": 46
+        },
+        {
+          "name": "stat",
+          "line": 53
+        },
+        {
+          "name": "page",
+          "line": 54
+        },
+        {
+          "name": "upload",
+          "line": 62
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/sidebar-settings.js",
+      "sha256": "743161819bc6e142004c6f8f2c71b6197a152cce423e4e0611588cf88b598669",
+      "lines": 64,
+      "functions": [
+        {
+          "name": "openPage",
+          "line": 20
+        },
+        {
+          "name": "openShelf",
+          "line": 29
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/standard-breadcrumbs.mjs",
+      "sha256": "720c517effdc2930285bacd5a0c1bea4594b5e62b0c2c4562b47550b4c9a00aa",
+      "lines": 34,
+      "functions": [
+        {
+          "name": "orderedBreadcrumbPath",
+          "line": 1
+        },
+        {
+          "name": "createBreadcrumbs",
+          "line": 7
+        },
+        {
+          "name": "paint",
+          "line": 11
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/test-it-history.mjs",
+      "sha256": "c334bdb51603dd986f72164fcae36aa8ac405a21a3ee24302419d47bf0254801",
+      "lines": 37,
+      "functions": [
+        {
+          "name": "questionHistory",
+          "line": 2
+        },
+        {
+          "name": "begin",
+          "line": 9
+        },
+        {
+          "name": "finish",
+          "line": 18
+        },
+        {
+          "name": "jump",
+          "line": 27
+        },
+        {
+          "name": "reach",
+          "line": 34
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/test-it-session.mjs",
+      "sha256": "1ac90122cff5f466f5f545a37d394792156aa0666e96c1411a936e70456764fc",
+      "lines": 205,
+      "functions": [
+        {
+          "name": "createPracticeSession",
+          "line": 8
+        },
+        {
+          "name": "persist",
+          "line": 13
+        },
+        {
+          "name": "snapshot",
+          "line": 14
+        },
+        {
+          "name": "save",
+          "line": 19
+        },
+        {
+          "name": "saveProgress",
+          "line": 22
+        },
+        {
+          "name": "ownershipChanged",
+          "line": 23
+        },
+        {
+          "name": "emitEvidence",
+          "line": 24
+        },
+        {
+          "name": "read",
+          "line": 25
+        },
+        {
+          "name": "owned",
+          "line": 26
+        },
+        {
+          "name": "capability",
+          "line": 27
+        },
+        {
+          "name": "involved",
+          "line": 34
+        },
+        {
+          "name": "quarantined",
+          "line": 35
+        },
+        {
+          "name": "reserved",
+          "line": 36
+        },
+        {
+          "name": "originalIdentity",
+          "line": 40
+        },
+        {
+          "name": "check",
+          "line": 47
+        },
+        {
+          "name": "originals",
+          "line": 48
+        },
+        {
+          "name": "source",
+          "line": 49
+        },
+        {
+          "name": "destination",
+          "line": 50
+        },
+        {
+          "name": "validate",
+          "line": 56
+        },
+        {
+          "name": "perform",
+          "line": 83
+        },
+        {
+          "name": "reconcile",
+          "line": 135
+        },
+        {
+          "name": "run",
+          "line": 180
+        },
+        {
+          "name": "restart",
+          "line": 184
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/test-it-tools.mjs",
+      "sha256": "e7b7c852790b1024eb1ec0cbd1835b4ffa3ffa00b8ddd730399ba1bc93548667",
+      "lines": 22,
+      "functions": [
+        {
+          "name": "installTestItTools",
+          "line": 2
+        },
+        {
+          "name": "close",
+          "line": 5
+        },
+        {
+          "name": "open",
+          "line": 6
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/test-it.mjs",
+      "sha256": "ae6475c50e70b3e068440ddcae944d41357ebb486d91c06f31cf34cdedb0253e",
+      "lines": 263,
+      "functions": [
+        {
+          "name": "installTestIt",
+          "line": 68
+        },
+        {
+          "name": "save",
+          "line": 74
+        },
+        {
+          "name": "evidence",
+          "line": 75
+        },
+        {
+          "name": "applyEvidence",
+          "line": 87
+        },
+        {
+          "name": "pass",
+          "line": 118
+        },
+        {
+          "name": "snapshot",
+          "line": 119
+        },
+        {
+          "name": "observe",
+          "line": 120
+        },
+        {
+          "name": "workingCopy",
+          "line": 169
+        },
+        {
+          "name": "originalFor",
+          "line": 170
+        },
+        {
+          "name": "instruction",
+          "line": 171
+        },
+        {
+          "name": "paintOwnership",
+          "line": 185
+        },
+        {
+          "name": "verifyOriginalAutomatically",
+          "line": 198
+        },
+        {
+          "name": "start",
+          "line": 203
+        },
+        {
+          "name": "input",
+          "line": 226
+        },
+        {
+          "name": "downloadJson",
+          "line": 229
+        },
+        {
+          "name": "exportResults",
+          "line": 233
+        }
+      ],
+      "commands": [
+        "Explorer",
+        "First",
+        "Good",
+        "Moved",
+        "New",
+        "Progress",
+        "REDOWN",
+        "Test",
+        "The",
+        "This",
+        "Your"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/beta/tour.mjs",
+      "sha256": "8569270933757cf148b3d2bdf0660e101ee453df7fdeddefe5c48926810df549",
+      "lines": 36,
+      "functions": [
+        {
+          "name": "installTour",
+          "line": 2
+        },
+        {
+          "name": "start",
+          "line": 25
+        },
+        {
+          "name": "toggleMenu",
+          "line": 26
+        },
+        {
+          "name": "outside",
+          "line": 27
+        },
+        {
+          "name": "menuKey",
+          "line": 28
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/url-list.mjs",
+      "sha256": "10a6803447af2ae6d9643842aa2bd8154a161a28505568a3abfa8cacb20c0f20",
+      "lines": 11,
+      "functions": [
+        {
+          "name": "parseUrlList",
+          "line": 2
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/beta/window-preview.mjs",
+      "sha256": "83ff3d6337b6ca05f7f20ff34f26eacf242a5d5c29c689bff3053b413f22a036",
+      "lines": 63,
+      "functions": [
+        {
+          "name": "renderPreview",
+          "line": 3
+        },
+        {
+          "name": "createWindowPreview",
+          "line": 13
+        },
+        {
+          "name": "failure",
+          "line": 21
+        },
+        {
+          "name": "clear",
+          "line": 22
+        },
+        {
+          "name": "finish",
+          "line": 23
+        },
+        {
+          "name": "close",
+          "line": 28
+        },
+        {
+          "name": "exitTop",
+          "line": 29
+        },
+        {
+          "name": "open",
+          "line": 30
+        },
+        {
+          "name": "adjacent",
+          "line": 54
+        }
+      ],
+      "commands": [
+        "preview"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/boot.js",
+      "sha256": "58a65995d6b031ede4148e644c78b6178e682cb71572f797cf14ef18ed0559c4",
+      "lines": 74,
+      "functions": [
+        {
+          "name": "status",
+          "line": 15
+        },
+        {
+          "name": "history",
+          "line": 38
+        },
+        {
+          "name": "audit",
+          "line": 43
+        },
+        {
+          "name": "repair",
+          "line": 51
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/brand-icon.js",
+      "sha256": "b77e38b8311a786076898ef4b55ef0f30dc25c7c215ad628c9bd2842ba02c1cd",
+      "lines": 62,
+      "functions": [
+        {
+          "name": "colors",
+          "line": 14
+        },
+        {
+          "name": "svg",
+          "line": 18
+        },
+        {
+          "name": "paint",
+          "line": 31
+        },
+        {
+          "name": "imageData",
+          "line": 41
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/chute-content.js",
+      "sha256": "576d36c3b58381c7f878c945a8adf91f147132df76b2e1bad7b10f563397d3fe",
+      "lines": 73,
+      "functions": [
+        {
+          "name": "idFor",
+          "line": 10
+        },
+        {
+          "name": "notice",
+          "line": 16
+        },
+        {
+          "name": "deliver",
+          "line": 22
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/chute-drag.mjs",
+      "sha256": "1ffd3ea78d6efec4f4db9d816922044b57f3c563c53ae5b1c2478f9441b362f1",
+      "lines": 107,
+      "functions": [
+        {
+          "name": "createDragBridge",
+          "line": 3
+        },
+        {
+          "name": "discard",
+          "line": 11
+        },
+        {
+          "name": "release",
+          "line": 12
+        },
+        {
+          "name": "cancel",
+          "line": 21
+        },
+        {
+          "name": "suspend",
+          "line": 22
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/chute-image-targets.js",
+      "sha256": "670f8dbecf24f38014371233e7a8d433ec80a037e41e0e1196e4e5cdd7182048",
+      "lines": 264,
+      "functions": [
+        {
+          "name": "activateChuteDrag",
+          "line": 52
+        },
+        {
+          "name": "finishChuteDrag",
+          "line": 61
+        },
+        {
+          "name": "textFor",
+          "line": 69
+        },
+        {
+          "name": "visible",
+          "line": 88
+        },
+        {
+          "name": "imageFiles",
+          "line": 96
+        },
+        {
+          "name": "imageInputScore",
+          "line": 102
+        },
+        {
+          "name": "bestImageInput",
+          "line": 124
+        },
+        {
+          "name": "triggerScore",
+          "line": 137
+        },
+        {
+          "name": "bestImageTrigger",
+          "line": 164
+        },
+        {
+          "name": "transferFor",
+          "line": 179
+        },
+        {
+          "name": "putFilesIntoInput",
+          "line": 187
+        },
+        {
+          "name": "waitForImageInput",
+          "line": 201
+        },
+        {
+          "name": "routeImageDrop",
+          "line": 211
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/chute-stage.js",
+      "sha256": "524d9b2c1038c9c3eef352a37cc924e1237adcb45b5f66056fd0b394e832c1c5",
+      "lines": 90,
+      "functions": [
+        {
+          "name": "createStage",
+          "line": 7
+        },
+        {
+          "name": "db",
+          "line": 9
+        },
+        {
+          "name": "transaction",
+          "line": 14
+        },
+        {
+          "name": "purge",
+          "line": 22
+        },
+        {
+          "name": "capacity",
+          "line": 25
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/chute-worker.js",
+      "sha256": "42ddc61a589ecc406a0fcd883613279e2aa34a09ee5b97a284b910419abd6f2b",
+      "lines": 79,
+      "functions": [
+        {
+          "name": "trace",
+          "line": 10
+        },
+        {
+          "name": "appendTrace",
+          "line": 11
+        },
+        {
+          "name": "handle",
+          "line": 17
+        }
+      ],
+      "commands": [
+        "redownChuteV1"
+      ],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.runtime.onMessage"
+      ]
+    },
+    {
+      "path": "extension/click-feedback.js",
+      "sha256": "106057feca32f0c3167aa92ecd7267a927825cfa400d6e62f175b3caa9f0103a",
+      "lines": 33,
+      "functions": [
+        {
+          "name": "providerFor",
+          "line": 15
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged",
+        "chrome.tabs.onRemoved",
+        "chrome.webNavigation.onCommitted"
+      ]
+    },
+    {
+      "path": "extension/click-origin.js",
+      "sha256": "422c459380d94ed1835c020f1fdb83fccedaa1ebfc2453aaa171a38cd2c04936",
+      "lines": 9,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/cloudflare-api.js",
+      "sha256": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+      "lines": 185,
+      "functions": [
+        {
+          "name": "boundedFetch",
+          "line": 4
+        },
+        {
+          "name": "auth",
+          "line": 10
+        },
+        {
+          "name": "authenticationRejected",
+          "line": 39
+        },
+        {
+          "name": "request",
+          "line": 46
+        },
+        {
+          "name": "objectPath",
+          "line": 99
+        },
+        {
+          "name": "publicObjectUrl",
+          "line": 106
+        },
+        {
+          "name": "readableResponse",
+          "line": 116
+        },
+        {
+          "name": "preview",
+          "line": 126
+        },
+        {
+          "name": "download",
+          "line": 143
+        }
+      ],
+      "commands": [
+        "redown-cloudflare-token"
+      ],
+      "events": [
+        "chrome.downloads.onChanged"
+      ]
+    },
+    {
+      "path": "extension/cloudflare-auth.js",
+      "sha256": "3b75d87d43b902f7822dfde93bd337019a71a440cf6779718694260826c96912",
+      "lines": 271,
+      "functions": [
+        {
+          "name": "bytesToBase64Url",
+          "line": 9
+        },
+        {
+          "name": "randomString",
+          "line": 14
+        },
+        {
+          "name": "sha256Base64Url",
+          "line": 18
+        },
+        {
+          "name": "cloudflareErrorMessage",
+          "line": 22
+        },
+        {
+          "name": "storeCloudflareToken",
+          "line": 25
+        },
+        {
+          "name": "cloudflareLoginStatus",
+          "line": 46
+        },
+        {
+          "name": "finishCloudflareLogin",
+          "line": 55
+        },
+        {
+          "name": "finishCloudflareLoginLocked",
+          "line": 58
+        },
+        {
+          "name": "expireCloudflareLogin",
+          "line": 69
+        },
+        {
+          "name": "startCloudflareLogin",
+          "line": 76
+        },
+        {
+          "name": "startCloudflareLoginUnlocked",
+          "line": 79
+        },
+        {
+          "name": "connectCloudflare",
+          "line": 138
+        },
+        {
+          "name": "cloudflareLoginJson",
+          "line": 144
+        },
+        {
+          "name": "completeCloudflareLogin",
+          "line": 158
+        },
+        {
+          "name": "registerListeners",
+          "line": 240
+        }
+      ],
+      "commands": [
+        "redown-cloudflare-login-start",
+        "redown-cloudflare-token"
+      ],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.windows.onRemoved",
+        "event"
+      ]
+    },
+    {
+      "path": "extension/daily-save-badge.js",
+      "sha256": "755c9647757e0751903567d8afa311e9fecb88b62fd237d848f5fad7442ea0c4",
+      "lines": 65,
+      "functions": [
+        {
+          "name": "create",
+          "line": 9
+        },
+        {
+          "name": "scheduleMidnight",
+          "line": 32
+        },
+        {
+          "name": "refresh",
+          "line": 37
+        },
+        {
+          "name": "install",
+          "line": 42
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.runtime.onInstalled",
+        "chrome.runtime.onStartup",
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/destination-config.js",
+      "sha256": "20edf0063d59481dac271e96d20effe08363bf09e73be18ec02cb9eb2f3fde9e",
+      "lines": 25,
+      "functions": [
+        {
+          "name": "prefix",
+          "line": 4
+        },
+        {
+          "name": "resolve",
+          "line": 5
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/dropbox-api.js",
+      "sha256": "455af29ad34e0b4d8d00c81aad2fc7aa2614177a06fdd9162836e3c740baef2b",
+      "lines": 153,
+      "functions": [
+        {
+          "name": "sourceURL",
+          "line": 6
+        },
+        {
+          "name": "filename",
+          "line": 14
+        },
+        {
+          "name": "selectFilename",
+          "line": 22
+        },
+        {
+          "name": "sourceSnapshot",
+          "line": 47
+        },
+        {
+          "name": "create",
+          "line": 51
+        },
+        {
+          "name": "call",
+          "line": 52
+        },
+        {
+          "name": "proof",
+          "line": 73
+        },
+        {
+          "name": "upload",
+          "line": 82
+        },
+        {
+          "name": "append",
+          "line": 119
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/dropbox-auth.js",
+      "sha256": "76459a8dfa8a2f2af0f197304fa57dfa0c6f27662605e9d148292e03460380e0",
+      "lines": 90,
+      "functions": [
+        {
+          "name": "create",
+          "line": 7
+        },
+        {
+          "name": "secure",
+          "line": 11
+        },
+        {
+          "name": "redirect",
+          "line": 14
+        },
+        {
+          "name": "request",
+          "line": 15
+        },
+        {
+          "name": "token",
+          "line": 16
+        },
+        {
+          "name": "rpcWith",
+          "line": 23
+        },
+        {
+          "name": "verify",
+          "line": 27
+        },
+        {
+          "name": "connect",
+          "line": 41
+        },
+        {
+          "name": "ready",
+          "line": 73
+        },
+        {
+          "name": "invalidate",
+          "line": 85
+        },
+        {
+          "name": "disconnect",
+          "line": 86
+        }
+      ],
+      "commands": [
+        "https:"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/dropbox-menu.js",
+      "sha256": "10fd49df96a3c8941e096ffc9da48f253fa0f4a742c96fca9810dcf3deae81f7",
+      "lines": 13,
+      "functions": [
+        {
+          "name": "fragment",
+          "line": 5
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/dropbox-provider.js",
+      "sha256": "0762197c17b8d50915b9aaa24681a1319686a8b442cc61f5cf3dfbdee2eadd34",
+      "lines": 153,
+      "functions": [
+        {
+          "name": "create",
+          "line": 5
+        },
+        {
+          "name": "save",
+          "line": 10
+        },
+        {
+          "name": "receipt",
+          "line": 11
+        },
+        {
+          "name": "pump",
+          "line": 21
+        },
+        {
+          "name": "enqueue",
+          "line": 42
+        },
+        {
+          "name": "captureDownloadName",
+          "line": 48
+        },
+        {
+          "name": "dispatch",
+          "line": 63
+        },
+        {
+          "name": "wake",
+          "line": 112
+        },
+        {
+          "name": "message",
+          "line": 117
+        },
+        {
+          "name": "install",
+          "line": 144
+        }
+      ],
+      "commands": [
+        "dropboxCancel",
+        "dropboxConnect",
+        "dropboxDisconnect",
+        "dropboxStatus"
+      ],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.runtime.onInstalled",
+        "chrome.runtime.onStartup"
+      ]
+    },
+    {
+      "path": "extension/entry-bootstrap.js",
+      "sha256": "2ee2c52e4e99828559d2eefbd4cc15533ab0152a33f4f6f7767d1974c0b71601",
+      "lines": 152,
+      "functions": [
+        {
+          "name": "entryEvidence",
+          "line": 5
+        },
+        {
+          "name": "applyToolbarOpenMode",
+          "line": 19
+        },
+        {
+          "name": "boundedEntry",
+          "line": 44
+        },
+        {
+          "name": "verifyShelf",
+          "line": 48
+        },
+        {
+          "name": "launchIndication",
+          "line": 62
+        },
+        {
+          "name": "recoverAttached",
+          "line": 66
+        },
+        {
+          "name": "openToolbarInterface",
+          "line": 107
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.action.onClicked",
+        "chrome.runtime.onInstalled",
+        "chrome.runtime.onStartup",
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/explorer-destination-menu.js",
+      "sha256": "e15612fb1b5841992f2b9902236a5508aa00e47594aa90a72cf2b9ac8f2ccb4d",
+      "lines": 125,
+      "functions": [
+        {
+          "name": "create",
+          "line": 3
+        },
+        {
+          "name": "cachedPage",
+          "line": 5
+        },
+        {
+          "name": "keyboard",
+          "line": 22
+        },
+        {
+          "name": "position",
+          "line": 40
+        },
+        {
+          "name": "branch",
+          "line": 46
+        },
+        {
+          "name": "open",
+          "line": 49
+        },
+        {
+          "name": "render",
+          "line": 76
+        },
+        {
+          "name": "attach",
+          "line": 96
+        },
+        {
+          "name": "children",
+          "line": 104
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/explorer-diagnostics-bridge.js",
+      "sha256": "ffe1f37ab83f88b0a3bf799d1651d7a675a8a0043ece7d2035a5472705775c6c",
+      "lines": 97,
+      "functions": [
+        {
+          "name": "install",
+          "line": 5
+        },
+        {
+          "name": "persist",
+          "line": 13
+        },
+        {
+          "name": "begin",
+          "line": 15
+        },
+        {
+          "name": "event",
+          "line": 16
+        },
+        {
+          "name": "summary",
+          "line": 17
+        },
+        {
+          "name": "beginMessage",
+          "line": 27
+        },
+        {
+          "name": "accept",
+          "line": 32
+        },
+        {
+          "name": "workerEvents",
+          "line": 40
+        },
+        {
+          "name": "complete",
+          "line": 46
+        },
+        {
+          "name": "reply",
+          "line": 47
+        },
+        {
+          "name": "fail",
+          "line": 54
+        },
+        {
+          "name": "wrap",
+          "line": 60
+        },
+        {
+          "name": "direct",
+          "line": 67
+        },
+        {
+          "name": "wire",
+          "line": 81
+        },
+        {
+          "name": "query",
+          "line": 82
+        }
+      ],
+      "commands": [
+        "cfTransferObjects"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/explorer-diagnostics-ui.js",
+      "sha256": "14482bcec6c690689d4e4e913068b2a35137dfb4855d7435b4cdad8bba46c809",
+      "lines": 37,
+      "functions": [
+        {
+          "name": "install",
+          "line": 4
+        },
+        {
+          "name": "query",
+          "line": 11
+        },
+        {
+          "name": "flush",
+          "line": 15
+        },
+        {
+          "name": "show",
+          "line": 16
+        },
+        {
+          "name": "list",
+          "line": 17
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/explorer-diagnostics.js",
+      "sha256": "e7ee43dc9a94d39023cca4e63791667541f448e136900c02595bc7bb93eeb9e7",
+      "lines": 167,
+      "functions": [
+        {
+          "name": "classify",
+          "line": 37
+        },
+        {
+          "name": "failure",
+          "line": 44
+        },
+        {
+          "name": "safeEvent",
+          "line": 48
+        },
+        {
+          "name": "create",
+          "line": 73
+        },
+        {
+          "name": "prune",
+          "line": 75
+        },
+        {
+          "name": "begin",
+          "line": 76
+        },
+        {
+          "name": "record",
+          "line": 82
+        },
+        {
+          "name": "finish",
+          "line": 87
+        },
+        {
+          "name": "keySeed",
+          "line": 93
+        },
+        {
+          "name": "fingerprint",
+          "line": 94
+        },
+        {
+          "name": "identity",
+          "line": 100
+        },
+        {
+          "name": "exportBundle",
+          "line": 106
+        },
+        {
+          "name": "ingest",
+          "line": 107
+        },
+        {
+          "name": "tree",
+          "line": 123
+        },
+        {
+          "name": "diagnose",
+          "line": 128
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/explorer-status.js",
+      "sha256": "59aaee3294cb2c34b38f00bb9f8af731067c8c5e16b254a9d6e937878b0ee348",
+      "lines": 22,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 6
+        },
+        {
+          "name": "create",
+          "line": 11
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/explorer-theme.js",
+      "sha256": "0c5b9ad736b8e8aa5a050682ea0feca7a1ccb1ef9d796d81433a9fcca46eb745",
+      "lines": 203,
+      "functions": [
+        {
+          "name": "clearEntrance",
+          "line": 26
+        },
+        {
+          "name": "interruptEntrance",
+          "line": 41
+        },
+        {
+          "name": "canEnter",
+          "line": 46
+        },
+        {
+          "name": "arrivalOutlines",
+          "line": 53
+        },
+        {
+          "name": "flood",
+          "line": 69
+        },
+        {
+          "name": "finishInitialPaint",
+          "line": 87
+        },
+        {
+          "name": "paintPalette",
+          "line": 118
+        },
+        {
+          "name": "paint",
+          "line": 140
+        },
+        {
+          "name": "refresh",
+          "line": 163
+        },
+        {
+          "name": "save",
+          "line": 179
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/google-drive-api.mjs",
+      "sha256": "71aba1768de6c69e419c72d12691b16d5fb8fe2cf65cb46d2effbfa337a2ff45",
+      "lines": 104,
+      "functions": [
+        {
+          "name": "sourceURL",
+          "line": 6
+        },
+        {
+          "name": "folderValid",
+          "line": 11
+        },
+        {
+          "name": "makeDrive",
+          "line": 12
+        },
+        {
+          "name": "auth",
+          "line": 15
+        },
+        {
+          "name": "http",
+          "line": 23
+        },
+        {
+          "name": "json",
+          "line": 31
+        },
+        {
+          "name": "lookup",
+          "line": 32
+        },
+        {
+          "name": "connectInner",
+          "line": 33
+        },
+        {
+          "name": "connect",
+          "line": 60
+        },
+        {
+          "name": "disconnect",
+          "line": 61
+        },
+        {
+          "name": "bytes",
+          "line": 62
+        },
+        {
+          "name": "upload",
+          "line": 74
+        }
+      ],
+      "commands": [
+        "redown-google-drive-connection"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/google-drive-auth.js",
+      "sha256": "9990415b8da2a17092e3afe16d86a0654baa7fcd3a6ec6981b988fe6d268a5cb",
+      "lines": 90,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 15
+        },
+        {
+          "name": "getToken",
+          "line": 25
+        },
+        {
+          "name": "about",
+          "line": 33
+        },
+        {
+          "name": "verify",
+          "line": 42
+        },
+        {
+          "name": "login",
+          "line": 52
+        },
+        {
+          "name": "restore",
+          "line": 69
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/google-drive-menu.js",
+      "sha256": "ef434b5ffcbdcb1b4580f237f182fff78812e957264ea4eb122ad58b2db4cd87",
+      "lines": 38,
+      "functions": [
+        {
+          "name": "fragment",
+          "line": 6
+        },
+        {
+          "name": "compose",
+          "line": 14
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/google-drive-provider.js",
+      "sha256": "1deaa80762723fc4bec731f0fee2b521109bb7fe03a37354fb50c5f7df15f36e",
+      "lines": 88,
+      "functions": [
+        {
+          "name": "create",
+          "line": 5
+        },
+        {
+          "name": "save",
+          "line": 12
+        },
+        {
+          "name": "receipt",
+          "line": 17
+        },
+        {
+          "name": "pump",
+          "line": 22
+        },
+        {
+          "name": "wake",
+          "line": 37
+        },
+        {
+          "name": "enqueue",
+          "line": 42
+        },
+        {
+          "name": "connect",
+          "line": 47
+        },
+        {
+          "name": "dispatch",
+          "line": 52
+        },
+        {
+          "name": "message",
+          "line": 68
+        },
+        {
+          "name": "install",
+          "line": 78
+        }
+      ],
+      "commands": [
+        "googleDriveCancel",
+        "googleDriveOpen",
+        "googleDriveStatus"
+      ],
+      "events": [
+        "chrome.alarms.onAlarm",
+        "chrome.runtime.onInstalled",
+        "chrome.runtime.onStartup"
+      ]
+    },
+    {
+      "path": "extension/google-drive-stream.js",
+      "sha256": "ac19df9115dbbe2a5d0c1fc54d0a30350fd415597c6db55cd6553be1b277c348",
+      "lines": 128,
+      "functions": [
+        {
+          "name": "sourceURL",
+          "line": 6
+        },
+        {
+          "name": "create",
+          "line": 7
+        },
+        {
+          "name": "authorize",
+          "line": 9
+        },
+        {
+          "name": "endpoint",
+          "line": 16
+        },
+        {
+          "name": "http",
+          "line": 17
+        },
+        {
+          "name": "json",
+          "line": 23
+        },
+        {
+          "name": "identity",
+          "line": 24
+        },
+        {
+          "name": "connect",
+          "line": 31
+        },
+        {
+          "name": "proof",
+          "line": 32
+        },
+        {
+          "name": "acknowledged",
+          "line": 40
+        },
+        {
+          "name": "upload",
+          "line": 45
+        },
+        {
+          "name": "send",
+          "line": 90
+        },
+        {
+          "name": "preview",
+          "line": 115
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/google-drive-transfer.mjs",
+      "sha256": "6506363408f1be1c0219b7f8e9a15a18f7f051e14cf75bf61f9283254050caf0",
+      "lines": 48,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 5
+        },
+        {
+          "name": "connect",
+          "line": 6
+        },
+        {
+          "name": "save",
+          "line": 10
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/history-archive.js",
+      "sha256": "1b9be21c39a6e3ea6419013f3442cb7ac022581de0e3e89ab496e9a828f3a104",
+      "lines": 98,
+      "functions": [
+        {
+          "name": "create",
+          "line": 8
+        },
+        {
+          "name": "write",
+          "line": 32
+        },
+        {
+          "name": "page",
+          "line": 44
+        },
+        {
+          "name": "today",
+          "line": 69
+        },
+        {
+          "name": "migrateLegacy",
+          "line": 82
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/history-image-placeholder.js",
+      "sha256": "bf58e6674bb5fcce5e8c5f981aab4bdc5c68094ecdd4bb81d04295c2b95fd025",
+      "lines": 11,
+      "functions": [
+        {
+          "name": "render",
+          "line": 4
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/history-image-source.js",
+      "sha256": "7360f2a8157030279ffa3cef34ab7ff1b0d68f521743693b719b06ab2c9a9422",
+      "lines": 103,
+      "functions": [
+        {
+          "name": "sourceURL",
+          "line": 7
+        },
+        {
+          "name": "eligible",
+          "line": 10
+        },
+        {
+          "name": "imageBlob",
+          "line": 16
+        },
+        {
+          "name": "readWithAbort",
+          "line": 28
+        },
+        {
+          "name": "create",
+          "line": 39
+        },
+        {
+          "name": "cloud",
+          "line": 43
+        },
+        {
+          "name": "resolve",
+          "line": 77
+        }
+      ],
+      "commands": [
+        "https:"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/history-navigation.js",
+      "sha256": "f98bef4efaf6c1c2c4a418416b0842cf734b0d8c2fc3fe28a2c29cdb282eb368",
+      "lines": 343,
+      "functions": [
+        {
+          "name": "locator",
+          "line": 4
+        },
+        {
+          "name": "cloudTarget",
+          "line": 19
+        },
+        {
+          "name": "legacyR2",
+          "line": 54
+        },
+        {
+          "name": "legacyAssetKey",
+          "line": 75
+        },
+        {
+          "name": "savedDropboxTarget",
+          "line": 98
+        },
+        {
+          "name": "valid",
+          "line": 125
+        },
+        {
+          "name": "report",
+          "line": 133
+        },
+        {
+          "name": "waitFor",
+          "line": 140
+        },
+        {
+          "name": "probe",
+          "line": 148
+        },
+        {
+          "name": "verifyPair",
+          "line": 157
+        },
+        {
+          "name": "chooseInstance",
+          "line": 165
+        },
+        {
+          "name": "tab",
+          "line": 204
+        },
+        {
+          "name": "sendShelf",
+          "line": 236
+        },
+        {
+          "name": "receiveShelf",
+          "line": 249
+        },
+        {
+          "name": "open",
+          "line": 275
+        },
+        {
+          "name": "receive",
+          "line": 325
+        }
+      ],
+      "commands": [
+        "redown-history-tab"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/history-quick-glance.js",
+      "sha256": "3ed2d12e143e44e9de833656c0981862f14fa505a9c581e5f948be67908e63ce",
+      "lines": 128,
+      "functions": [
+        {
+          "name": "decode",
+          "line": 5
+        },
+        {
+          "name": "create",
+          "line": 17
+        },
+        {
+          "name": "release",
+          "line": 22
+        },
+        {
+          "name": "windowAt",
+          "line": 30
+        },
+        {
+          "name": "admit",
+          "line": 36
+        },
+        {
+          "name": "pump",
+          "line": 40
+        },
+        {
+          "name": "attach",
+          "line": 78
+        },
+        {
+          "name": "scan",
+          "line": 94
+        },
+        {
+          "name": "start",
+          "line": 105
+        },
+        {
+          "name": "dispose",
+          "line": 120
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/hitomi-capture.js",
+      "sha256": "4231ffde298f2e97b35647c9a54f4546717ec77c35a9ef770e0e54f89f2e3dc1",
+      "lines": 32,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/local-demo.mjs",
+      "sha256": "170681fb71fd672172ec9848965e949ea4faa1656c3a152d0e296040d0b8d0a3",
+      "lines": 38,
+      "functions": [
+        {
+          "name": "withLocalDemo",
+          "line": 7
+        },
+        {
+          "name": "bytes",
+          "line": 9
+        },
+        {
+          "name": "listing",
+          "line": 10
+        },
+        {
+          "name": "verifiedOtherProvider",
+          "line": 31
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/menu-reorder.js",
+      "sha256": "8871bcc1b6781fbe2f4e5649d501553325942d8c5b9e53319fd8a4d046d71ace",
+      "lines": 86,
+      "functions": [
+        {
+          "name": "attach",
+          "line": 5
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/nested-locations.js",
+      "sha256": "344c8002a55e01ee0f7f3c1686a7e7a7df4b2da02b77696c90b3bb74207f5a6c",
+      "lines": 58,
+      "functions": [
+        {
+          "name": "name",
+          "line": 3
+        },
+        {
+          "name": "path",
+          "line": 8
+        },
+        {
+          "name": "destinations",
+          "line": 9
+        },
+        {
+          "name": "walk",
+          "line": 12
+        },
+        {
+          "name": "nestedEntries",
+          "line": 28
+        },
+        {
+          "name": "menuEntries",
+          "line": 38
+        },
+        {
+          "name": "menuMode",
+          "line": 51
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/odometer.js",
+      "sha256": "fa89d0954795ccc3b21166832ce71abf591b2d0299d4038b1f2fa8c4a28ce842",
+      "lines": 36,
+      "functions": [
+        {
+          "name": "plan",
+          "line": 4
+        },
+        {
+          "name": "create",
+          "line": 18
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/onedrive-api.js",
+      "sha256": "3f22663ab51981a06e16089b15e0864714d2d8d602d5eeb5cbce506dba5ad660",
+      "lines": 333,
+      "functions": [
+        {
+          "name": "publicHostname",
+          "line": 18
+        },
+        {
+          "name": "sourceURL",
+          "line": 27
+        },
+        {
+          "name": "fileName",
+          "line": 42
+        },
+        {
+          "name": "dispositionName",
+          "line": 80
+        },
+        {
+          "name": "magicExtension",
+          "line": 91
+        },
+        {
+          "name": "uploadFileName",
+          "line": 119
+        },
+        {
+          "name": "sourceSnapshot",
+          "line": 135
+        },
+        {
+          "name": "knownUploadHost",
+          "line": 160
+        },
+        {
+          "name": "validUploadURL",
+          "line": 165
+        },
+        {
+          "name": "create",
+          "line": 178
+        },
+        {
+          "name": "request",
+          "line": 179
+        },
+        {
+          "name": "graph",
+          "line": 191
+        },
+        {
+          "name": "upload",
+          "line": 200
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/onedrive-auth.js",
+      "sha256": "9292c47e4537ce5d90727d0fa30af78d9d563f3bd86453d377fdebc1ff98532d",
+      "lines": 171,
+      "functions": [
+        {
+          "name": "create",
+          "line": 16
+        },
+        {
+          "name": "secure",
+          "line": 21
+        },
+        {
+          "name": "redirect",
+          "line": 25
+        },
+        {
+          "name": "request",
+          "line": 31
+        },
+        {
+          "name": "aadsts",
+          "line": 35
+        },
+        {
+          "name": "exchange",
+          "line": 39
+        },
+        {
+          "name": "graph",
+          "line": 52
+        },
+        {
+          "name": "verify",
+          "line": 57
+        },
+        {
+          "name": "connect",
+          "line": 71
+        },
+        {
+          "name": "ready",
+          "line": 124
+        },
+        {
+          "name": "disconnect",
+          "line": 162
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/onedrive-menu.js",
+      "sha256": "608bbcce8978fec0c4487d897fe33a4ae31d0b97b1efba6f7fd900b80b29ae1a",
+      "lines": 32,
+      "functions": [
+        {
+          "name": "fragment",
+          "line": 7
+        },
+        {
+          "name": "compose",
+          "line": 11
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/onedrive-oauth-diagnostic.js",
+      "sha256": "e45b1f81dd22e96d6293b22fd594d1a250ea1de5cbff8f1a8c3f8e20a028224f",
+      "lines": 99,
+      "functions": [
+        {
+          "name": "aadsts",
+          "line": 16
+        },
+        {
+          "name": "create",
+          "line": 22
+        },
+        {
+          "name": "request",
+          "line": 26
+        },
+        {
+          "name": "run",
+          "line": 29
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/onedrive-provider.js",
+      "sha256": "1efa18fceb49a92a2b5bcc857a6b5a1a74c038fccd5c724091457a1a1b499aed",
+      "lines": 152,
+      "functions": [
+        {
+          "name": "create",
+          "line": 6
+        },
+        {
+          "name": "replayVerifiedReceipt",
+          "line": 17
+        },
+        {
+          "name": "saveRecord",
+          "line": 25
+        },
+        {
+          "name": "begin",
+          "line": 49
+        },
+        {
+          "name": "dispatch",
+          "line": 82
+        },
+        {
+          "name": "message",
+          "line": 101
+        },
+        {
+          "name": "install",
+          "line": 138
+        }
+      ],
+      "commands": [
+        "onedriveCancel",
+        "onedriveConnect",
+        "onedriveDiagnostic",
+        "onedriveDisconnect",
+        "onedriveStatus"
+      ],
+      "events": [
+        "chrome.runtime.onStartup"
+      ]
+    },
+    {
+      "path": "extension/options.js",
+      "sha256": "0588b8a93f45ca91bb39d8a8dfd5f0b4618727224a84add55296f7ca077a231d",
+      "lines": 3755,
+      "functions": [
+        {
+          "name": "uid",
+          "line": 23
+        },
+        {
+          "name": "safeUiMessage",
+          "line": 24
+        },
+        {
+          "name": "setStatus",
+          "line": 30
+        },
+        {
+          "name": "send",
+          "line": 36
+        },
+        {
+          "name": "saveProfiles",
+          "line": 48
+        },
+        {
+          "name": "displayName",
+          "line": 54
+        },
+        {
+          "name": "scheduleSave",
+          "line": 56
+        },
+        {
+          "name": "ensureProfileMenuPrefixes",
+          "line": 60
+        },
+        {
+          "name": "assetCorsControl",
+          "line": 75
+        },
+        {
+          "name": "renderProfiles",
+          "line": 143
+        },
+        {
+          "name": "field",
+          "line": 165
+        },
+        {
+          "name": "selectField",
+          "line": 172
+        },
+        {
+          "name": "formatBytes",
+          "line": 181
+        },
+        {
+          "name": "publicObjectUrl",
+          "line": 190
+        },
+        {
+          "name": "r2Profiles",
+          "line": 194
+        },
+        {
+          "name": "uploadTarget",
+          "line": 195
+        },
+        {
+          "name": "uploadProfile",
+          "line": 208
+        },
+        {
+          "name": "ensureUploadProfile",
+          "line": 213
+        },
+        {
+          "name": "ensureUploadLocationOption",
+          "line": 222
+        },
+        {
+          "name": "uploadLocationMatchScore",
+          "line": 234
+        },
+        {
+          "name": "chooseBestUploadLocation",
+          "line": 252
+        },
+        {
+          "name": "uploadBuilderChildren",
+          "line": 271
+        },
+        {
+          "name": "fetchUploadBuilderChildren",
+          "line": 286
+        },
+        {
+          "name": "syncUploadBuilderPrefix",
+          "line": 313
+        },
+        {
+          "name": "materializeUploadBuilderPrefix",
+          "line": 320
+        },
+        {
+          "name": "renderUploadLocationBuilder",
+          "line": 338
+        },
+        {
+          "name": "loadUploadLocations",
+          "line": 452
+        },
+        {
+          "name": "renderWorkspaceProfiles",
+          "line": 514
+        },
+        {
+          "name": "categoryFromPrefix",
+          "line": 554
+        },
+        {
+          "name": "inspectLocalUploadObject",
+          "line": 563
+        },
+        {
+          "name": "uploadLocalFiles",
+          "line": 575
+        },
+        {
+          "name": "objectContentType",
+          "line": 700
+        },
+        {
+          "name": "isTextPreview",
+          "line": 715
+        },
+        {
+          "name": "appendDetails",
+          "line": 721
+        },
+        {
+          "name": "showWorkspacePreview",
+          "line": 745
+        },
+        {
+          "name": "setWorkspacePreviewProgress",
+          "line": 863
+        },
+        {
+          "name": "enableWorkspaceImageZoom",
+          "line": 869
+        },
+        {
+          "name": "workspaceLightboxLayer",
+          "line": 903
+        },
+        {
+          "name": "workspaceLightboxOpen",
+          "line": 906
+        },
+        {
+          "name": "syncWorkspaceLightboxButtons",
+          "line": 909
+        },
+        {
+          "name": "setWorkspacePreviewExpanded",
+          "line": 921
+        },
+        {
+          "name": "mountWorkspaceLightboxMedia",
+          "line": 930
+        },
+        {
+          "name": "setWorkspacePreviewLightbox",
+          "line": 940
+        },
+        {
+          "name": "normalizePrefix",
+          "line": 1066
+        },
+        {
+          "name": "accountName",
+          "line": 1074
+        },
+        {
+          "name": "explorerSource",
+          "line": 1077
+        },
+        {
+          "name": "iconSvg",
+          "line": 1084
+        },
+        {
+          "name": "fileKind",
+          "line": 1106
+        },
+        {
+          "name": "itemType",
+          "line": 1148
+        },
+        {
+          "name": "itemDate",
+          "line": 1171
+        },
+        {
+          "name": "buildDirectoryItems",
+          "line": 1176
+        },
+        {
+          "name": "sortedVisibleItems",
+          "line": 1217
+        },
+        {
+          "name": "explorerSearchTargets",
+          "line": 1236
+        },
+        {
+          "name": "runExplorerSearch",
+          "line": 1255
+        },
+        {
+          "name": "scheduleExplorerSearch",
+          "line": 1329
+        },
+        {
+          "name": "goToSearchResult",
+          "line": 1335
+        },
+        {
+          "name": "setExplorerBusy",
+          "line": 1349
+        },
+        {
+          "name": "setExplorerStatus",
+          "line": 1356
+        },
+        {
+          "name": "setOperation",
+          "line": 1363
+        },
+        {
+          "name": "renderOperation",
+          "line": 1368
+        },
+        {
+          "name": "finishOperation",
+          "line": 1385
+        },
+        {
+          "name": "isTransientBucketAccessError",
+          "line": 1399
+        },
+        {
+          "name": "friendlyError",
+          "line": 1403
+        },
+        {
+          "name": "refreshProfiles",
+          "line": 1408
+        },
+        {
+          "name": "ensurePrepared",
+          "line": 1412
+        },
+        {
+          "name": "rememberLocation",
+          "line": 1467
+        },
+        {
+          "name": "goLocation",
+          "line": 1480
+        },
+        {
+          "name": "updateNavButtons",
+          "line": 1550
+        },
+        {
+          "name": "renderExplorerChrome",
+          "line": 1556
+        },
+        {
+          "name": "renderSources",
+          "line": 1628
+        },
+        {
+          "name": "showBucketRows",
+          "line": 1677
+        },
+        {
+          "name": "loadExplorerInventory",
+          "line": 1719
+        },
+        {
+          "name": "browseWorkspace",
+          "line": 1765
+        },
+        {
+          "name": "renderFileItems",
+          "line": 1854
+        },
+        {
+          "name": "createFileRow",
+          "line": 1974
+        },
+        {
+          "name": "previewableExplorerItems",
+          "line": 2061
+        },
+        {
+          "name": "previewExplorerItem",
+          "line": 2066
+        },
+        {
+          "name": "selectSingleExplorerItem",
+          "line": 2087
+        },
+        {
+          "name": "navigateExplorerSelection",
+          "line": 2101
+        },
+        {
+          "name": "navigatePreview",
+          "line": 2110
+        },
+        {
+          "name": "selectExplorerItem",
+          "line": 2120
+        },
+        {
+          "name": "rootRow",
+          "line": 2140
+        },
+        {
+          "name": "openExplorerItem",
+          "line": 2145
+        },
+        {
+          "name": "openArchive",
+          "line": 2180
+        },
+        {
+          "name": "renderArchiveFolder",
+          "line": 2190
+        },
+        {
+          "name": "previewArchiveEntry",
+          "line": 2207
+        },
+        {
+          "name": "extractArchiveSelection",
+          "line": 2213
+        },
+        {
+          "name": "selectedExplorerItems",
+          "line": 2223
+        },
+        {
+          "name": "clipboardEntries",
+          "line": 2226
+        },
+        {
+          "name": "setExplorerClipboard",
+          "line": 2236
+        },
+        {
+          "name": "pasteExplorer",
+          "line": 2261
+        },
+        {
+          "name": "moveSelectionTo",
+          "line": 2360
+        },
+        {
+          "name": "deleteSelection",
+          "line": 2373
+        },
+        {
+          "name": "beginExplorerRename",
+          "line": 2404
+        },
+        {
+          "name": "beginNewFolder",
+          "line": 2460
+        },
+        {
+          "name": "explorerDownload",
+          "line": 2500
+        },
+        {
+          "name": "showProperties",
+          "line": 2525
+        },
+        {
+          "name": "renderProperties",
+          "line": 2550
+        },
+        {
+          "name": "urlPopover",
+          "line": 2569
+        },
+        {
+          "name": "copyItemUrl",
+          "line": 2589
+        },
+        {
+          "name": "explorerUploadFiles",
+          "line": 2593
+        },
+        {
+          "name": "handleLocalDrop",
+          "line": 2602
+        },
+        {
+          "name": "dropOnBucket",
+          "line": 2606
+        },
+        {
+          "name": "menuButton",
+          "line": 2615
+        },
+        {
+          "name": "urlMenuButton",
+          "line": 2630
+        },
+        {
+          "name": "destinationMenus",
+          "line": 2640
+        },
+        {
+          "name": "showExplorerMenu",
+          "line": 2656
+        },
+        {
+          "name": "hideExplorerMenu",
+          "line": 2796
+        },
+        {
+          "name": "wireWorkspace",
+          "line": 2800
+        },
+        {
+          "name": "navigateHistory",
+          "line": 2960
+        },
+        {
+          "name": "transferKey",
+          "line": 2969
+        },
+        {
+          "name": "transferDisplayParts",
+          "line": 2979
+        },
+        {
+          "name": "compactFilename",
+          "line": 3015
+        },
+        {
+          "name": "formatTransferDate",
+          "line": 3024
+        },
+        {
+          "name": "openTransferLocation",
+          "line": 3036
+        },
+        {
+          "name": "beginRename",
+          "line": 3064
+        },
+        {
+          "name": "renderHistory",
+          "line": 3102
+        },
+        {
+          "name": "invalidateCloudflareView",
+          "line": 3208
+        },
+        {
+          "name": "refreshCloudflare",
+          "line": 3212
+        },
+        {
+          "name": "refreshCloudflareState",
+          "line": 3218
+        },
+        {
+          "name": "refreshBuckets",
+          "line": 3264
+        },
+        {
+          "name": "addBucketPreset",
+          "line": 3373
+        },
+        {
+          "name": "loginRequest",
+          "line": 3430
+        },
+        {
+          "name": "waitForCloudflareLogin",
+          "line": 3441
+        },
+        {
+          "name": "refreshDownloadsOnAccess",
+          "line": 3573
+        },
+        {
+          "name": "isSetupDestination",
+          "line": 3581
+        },
+        {
+          "name": "applyOnboarding",
+          "line": 3584
+        },
+        {
+          "name": "checkR2OnReturn",
+          "line": 3594
+        },
+        {
+          "name": "wireSettingsDisclosure",
+          "line": 3600
+        },
+        {
+          "name": "closeR2Ask",
+          "line": 3620
+        },
+        {
+          "name": "applyDebugMode",
+          "line": 3643
+        },
+        {
+          "name": "applyBetaMode",
+          "line": 3651
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/popup-recovery.js",
+      "sha256": "23792be4efe6c76efec27dca10c65ac5522acabec56c8df1f0b4010bc6566124",
+      "lines": 40,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/popup.js",
+      "sha256": "cf3bd1445591d3ec7f0c7f5484b0cd7ee247be814a7f2146f7a93716b9025132",
+      "lines": 167,
+      "functions": [
+        {
+          "name": "setStatus",
+          "line": 3
+        },
+        {
+          "name": "paintConnection",
+          "line": 4
+        },
+        {
+          "name": "request",
+          "line": 8
+        },
+        {
+          "name": "checkConnection",
+          "line": 13
+        },
+        {
+          "name": "followLogin",
+          "line": 27
+        },
+        {
+          "name": "paintCount",
+          "line": 71
+        },
+        {
+          "name": "savePreferences",
+          "line": 93
+        },
+        {
+          "name": "paintSound",
+          "line": 99
+        },
+        {
+          "name": "prepareAudio",
+          "line": 102
+        },
+        {
+          "name": "playClick",
+          "line": 109
+        },
+        {
+          "name": "renderCount",
+          "line": 122
+        },
+        {
+          "name": "loadPreferences",
+          "line": 139
+        },
+        {
+          "name": "refreshCount",
+          "line": 149
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/preview-navigation.mjs",
+      "sha256": "94941eeb70bd95a6f3dfdd823391925c997508fc392d3a2a8227fb289c922c2f",
+      "lines": 12,
+      "functions": [
+        {
+          "name": "previewDirection",
+          "line": 3
+        },
+        {
+          "name": "watchPreviewAxis",
+          "line": 8
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/provider-opening.js",
+      "sha256": "f41c55befb544e92d954656f6c1394a88682d060e04aaaeb42d7ae25867ffb6d",
+      "lines": 83,
+      "functions": [],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/public-addresses.js",
+      "sha256": "b2c6897408f1ead7c4e33a77e5329a2c7eac921174cf34c1fc97978eba240a69",
+      "lines": 184,
+      "functions": [
+        {
+          "name": "refreshVisible",
+          "line": 5
+        },
+        {
+          "name": "addresses",
+          "line": 16
+        },
+        {
+          "name": "disclosure",
+          "line": 28
+        },
+        {
+          "name": "refresh",
+          "line": 31
+        },
+        {
+          "name": "classify",
+          "line": 62
+        },
+        {
+          "name": "popover",
+          "line": 67
+        },
+        {
+          "name": "close",
+          "line": 70
+        },
+        {
+          "name": "place",
+          "line": 76
+        },
+        {
+          "name": "show",
+          "line": 85
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/rfis-index.js",
+      "sha256": "9f5a18349521a398ea2f0e85b1a1978830fc8aa5caf06e93f1806502e14d8f1f",
+      "lines": 100,
+      "functions": [
+        {
+          "name": "db",
+          "line": 7
+        },
+        {
+          "name": "txDone",
+          "line": 26
+        },
+        {
+          "name": "asPromise",
+          "line": 33
+        },
+        {
+          "name": "digest",
+          "line": 41
+        },
+        {
+          "name": "metadata",
+          "line": 42
+        },
+        {
+          "name": "observe",
+          "line": 49
+        },
+        {
+          "name": "all",
+          "line": 85
+        },
+        {
+          "name": "exportJSON",
+          "line": 92
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-backup-settings.js",
+      "sha256": "f5df5b74f272bca8632a769c2bd6249ff8c71858e570dcd2178df8c62dd403df",
+      "lines": 39,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-backup.js",
+      "sha256": "085158a8ca3328d3b2f27ceee4b63f31d5cb794ea92791ee92eced2ab52013db",
+      "lines": 69,
+      "functions": [
+        {
+          "name": "validate",
+          "line": 9
+        },
+        {
+          "name": "key",
+          "line": 47
+        },
+        {
+          "name": "encode",
+          "line": 52
+        },
+        {
+          "name": "decode",
+          "line": 58
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-chooser.js",
+      "sha256": "6996603ac3cf37f2cc144d941d8a25d6606fadf555dc3c9d4d23b19082576bb0",
+      "lines": 16,
+      "functions": [
+        {
+          "name": "draw",
+          "line": 6
+        }
+      ],
+      "commands": [
+        "rightClickChooserList",
+        "rightClickChooserSave"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-current.js",
+      "sha256": "4bbbcb5ed307a63f454ecce9ca3d400a61b348fc9148c71e23b5a1f34aaba7b2",
+      "lines": 124,
+      "functions": [
+        {
+          "name": "namespace",
+          "line": 15
+        },
+        {
+          "name": "period",
+          "line": 18
+        },
+        {
+          "name": "create",
+          "line": 23
+        },
+        {
+          "name": "readState",
+          "line": 32
+        },
+        {
+          "name": "commitPatch",
+          "line": 47
+        },
+        {
+          "name": "dump",
+          "line": 98
+        },
+        {
+          "name": "generations",
+          "line": 103
+        },
+        {
+          "name": "acknowledge",
+          "line": 106
+        },
+        {
+          "name": "restore",
+          "line": 110
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-engine-settings.js",
+      "sha256": "eeed4e5516bbce76f2023bc1b524280cc16e1ed1120e08339dc8a5658c18f882",
+      "lines": 19,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-legacy.js",
+      "sha256": "f348d5917b257f32a8655319b397f0d9e79688cded29663928f3ab692bf6e582",
+      "lines": 30,
+      "functions": [
+        {
+          "name": "entries",
+          "line": 8
+        },
+        {
+          "name": "resolve",
+          "line": 19
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/right-click-v3.js",
+      "sha256": "e5867f4d7fb06a20654f5f38a80c7927c1a6e4f23b3d2d908b34d509ebd13975",
+      "lines": 301,
+      "functions": [
+        {
+          "name": "validate",
+          "line": 7
+        },
+        {
+          "name": "eligible",
+          "line": 27
+        },
+        {
+          "name": "narrowEntries",
+          "line": 34
+        },
+        {
+          "name": "walk",
+          "line": 45
+        },
+        {
+          "name": "narrowResolve",
+          "line": 57
+        },
+        {
+          "name": "remove",
+          "line": 62
+        },
+        {
+          "name": "presentation",
+          "line": 70
+        },
+        {
+          "name": "validatePresentation",
+          "line": 73
+        },
+        {
+          "name": "validateScopes",
+          "line": 79
+        },
+        {
+          "name": "roots",
+          "line": 88
+        },
+        {
+          "name": "inventoryKey",
+          "line": 93
+        },
+        {
+          "name": "fresh",
+          "line": 96
+        },
+        {
+          "name": "childPrefixes",
+          "line": 98
+        },
+        {
+          "name": "rememberedNodes",
+          "line": 113
+        },
+        {
+          "name": "discover",
+          "line": 121
+        },
+        {
+          "name": "levelProjection",
+          "line": 168
+        },
+        {
+          "name": "simpleTargets",
+          "line": 192
+        },
+        {
+          "name": "simpleProjection",
+          "line": 215
+        },
+        {
+          "name": "project",
+          "line": 228
+        },
+        {
+          "name": "entries",
+          "line": 250
+        },
+        {
+          "name": "resolve",
+          "line": 251
+        },
+        {
+          "name": "migrate",
+          "line": 272
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/runtime-diagnostics.js",
+      "sha256": "25f10ac7cef201cefb899f88a8ff1ef18db31839bca1c33e42372330b0cd4141",
+      "lines": 44,
+      "functions": [
+        {
+          "name": "create",
+          "line": 6
+        },
+        {
+          "name": "record",
+          "line": 12
+        },
+        {
+          "name": "query",
+          "line": 24
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/search-session.js",
+      "sha256": "875f1687a6c708ee73a41b2f6e3ecf7b24711418256c25df2af4b43ac8408dce",
+      "lines": 56,
+      "functions": [
+        {
+          "name": "create",
+          "line": 3
+        },
+        {
+          "name": "get",
+          "line": 5
+        },
+        {
+          "name": "start",
+          "line": 11
+        },
+        {
+          "name": "step",
+          "line": 18
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/service-worker.js",
+      "sha256": "93da15c4f5de2382e721b914b86ea7c64f696f8fe0a45850f1f6f1eb41680eac",
+      "lines": 49,
+      "functions": [],
+      "commands": [],
+      "events": [
+        "chrome.runtime.onMessage"
+      ]
+    },
+    {
+      "path": "extension/settings-choices.js",
+      "sha256": "e734c680639b5e07b535d0c85dd495b7732fed02ead6526c4f06f41556aee485",
+      "lines": 25,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 19
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/settings-mascot.js",
+      "sha256": "ff0a7ed5a804737a185c5aaa96e589172688a0c553430ac21b603968ccf09b85",
+      "lines": 18,
+      "functions": [],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/shelf-celestial.js",
+      "sha256": "f569f1aafb213f29e535676d065f62cc8d23062d0d63f661dfac1200c949a7fe",
+      "lines": 178,
+      "functions": [
+        {
+          "name": "flightModel",
+          "line": 5
+        },
+        {
+          "name": "flight",
+          "line": 7
+        },
+        {
+          "name": "add",
+          "line": 12
+        },
+        {
+          "name": "horizontal",
+          "line": 40
+        },
+        {
+          "name": "at",
+          "line": 46
+        },
+        {
+          "name": "refresh",
+          "line": 73
+        },
+        {
+          "name": "cancel",
+          "line": 86
+        },
+        {
+          "name": "select",
+          "line": 87
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/shelf-click-feedback.js",
+      "sha256": "df63c77cd2ea6e235ea41dcbdabd65c93f657ad00ea83376492286eefb08ddaa",
+      "lines": 73,
+      "functions": [
+        {
+          "name": "reset",
+          "line": 31
+        },
+        {
+          "name": "arrive",
+          "line": 32
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.runtime.onMessage",
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-destinations.js",
+      "sha256": "2b132b3cef71419026fb10169148d20b3611cfd9b64e2e1ca67e5fd4b61de93d",
+      "lines": 98,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 13
+        },
+        {
+          "name": "save",
+          "line": 21
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-dropbox.js",
+      "sha256": "bab8e24c2bbbbefce363b9a69bb235dd2154bdc7b10a3becf82b78a3d31d84de",
+      "lines": 32,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 11
+        },
+        {
+          "name": "send",
+          "line": 25
+        }
+      ],
+      "commands": [
+        "dropboxCancel",
+        "dropboxConnect",
+        "dropboxDisconnect",
+        "dropboxStatus"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-explorer-model.mjs",
+      "sha256": "365a4b17ac6467bd980148f2186abafdc3474cecb94aed1037e07ce274aca448",
+      "lines": 61,
+      "functions": [
+        {
+          "name": "windowRange",
+          "line": 3
+        },
+        {
+          "name": "createExplorerModel",
+          "line": 7
+        },
+        {
+          "name": "request",
+          "line": 10
+        },
+        {
+          "name": "queue",
+          "line": 15
+        },
+        {
+          "name": "children",
+          "line": 19
+        },
+        {
+          "name": "navigate",
+          "line": 35
+        },
+        {
+          "name": "offsetRange",
+          "line": 56
+        }
+      ],
+      "commands": [
+        "list"
+      ],
+      "events": []
+    },
+    {
+      "path": "extension/shelf-explorer.mjs",
+      "sha256": "e4f4d1cf35637871a7209dfb5182d4294abcc5cbdb22894c4c11138466ce59bf",
+      "lines": 394,
+      "functions": [
+        {
+          "name": "mountExplorer",
+          "line": 13
+        },
+        {
+          "name": "safe",
+          "line": 27
+        },
+        {
+          "name": "closeSide",
+          "line": 30
+        },
+        {
+          "name": "side",
+          "line": 32
+        },
+        {
+          "name": "setFolderWidth",
+          "line": 47
+        },
+        {
+          "name": "resetSplit",
+          "line": 61
+        },
+        {
+          "name": "toggleExpand",
+          "line": 64
+        },
+        {
+          "name": "resizePreview",
+          "line": 83
+        },
+        {
+          "name": "persist",
+          "line": 91
+        },
+        {
+          "name": "select",
+          "line": 95
+        },
+        {
+          "name": "openEntry",
+          "line": 101
+        },
+        {
+          "name": "browseImage",
+          "line": 105
+        },
+        {
+          "name": "paintPreviewNavigation",
+          "line": 117
+        },
+        {
+          "name": "paintActions",
+          "line": 125
+        },
+        {
+          "name": "renderRows",
+          "line": 133
+        },
+        {
+          "name": "paintThumb",
+          "line": 200
+        },
+        {
+          "name": "pumpThumb",
+          "line": 201
+        },
+        {
+          "name": "clearThumbs",
+          "line": 213
+        },
+        {
+          "name": "paint",
+          "line": 214
+        },
+        {
+          "name": "navigate",
+          "line": 225
+        },
+        {
+          "name": "treeNode",
+          "line": 230
+        },
+        {
+          "name": "folders",
+          "line": 255
+        },
+        {
+          "name": "showWelcome",
+          "line": 262
+        },
+        {
+          "name": "showDemo",
+          "line": 268
+        },
+        {
+          "name": "discover",
+          "line": 275
+        },
+        {
+          "name": "one",
+          "line": 291
+        },
+        {
+          "name": "download",
+          "line": 292
+        },
+        {
+          "name": "ask",
+          "line": 293
+        },
+        {
+          "name": "mutate",
+          "line": 297
+        },
+        {
+          "name": "paintViewMode",
+          "line": 304
+        },
+        {
+          "name": "showMenu",
+          "line": 320
+        },
+        {
+          "name": "setActive",
+          "line": 343
+        },
+        {
+          "name": "revealHistory",
+          "line": 352
+        }
+      ],
+      "commands": [
+        "accounts",
+        "buckets",
+        "download",
+        "preview"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-google-drive.js",
+      "sha256": "fb62a1123aaa2a0692b0e882121298969b7c52c9f5f37bffb073fbc4b9453629",
+      "lines": 11,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 5
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-history.js",
+      "sha256": "b24e26a6d83d5c5a8b9f64539b981efc76adf05a88b8b0ef4bbf8055599e1c61",
+      "lines": 490,
+      "functions": [
+        {
+          "name": "group",
+          "line": 16
+        },
+        {
+          "name": "describe",
+          "line": 32
+        },
+        {
+          "name": "organize",
+          "line": 82
+        },
+        {
+          "name": "section",
+          "line": 136
+        },
+        {
+          "name": "safeWebUrl",
+          "line": 158
+        },
+        {
+          "name": "addProvenance",
+          "line": 164
+        },
+        {
+          "name": "dayRows",
+          "line": 304
+        },
+        {
+          "name": "drawDays",
+          "line": 329
+        },
+        {
+          "name": "drawWeek",
+          "line": 335
+        },
+        {
+          "name": "render",
+          "line": 339
+        },
+        {
+          "name": "refresh",
+          "line": 388
+        },
+        {
+          "name": "expandToday",
+          "line": 427
+        },
+        {
+          "name": "open",
+          "line": 438
+        },
+        {
+          "name": "pageTo",
+          "line": 453
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-odometer.js",
+      "sha256": "297250fcd0ec4319c476225c9a5df89ab8facedd746a10192a2e5d64a1420b4d",
+      "lines": 112,
+      "functions": [],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-onedrive.js",
+      "sha256": "ba8c1a232a78de543b560d1b23f53e53834cfce7717ecff84aa6c73ad9b899c0",
+      "lines": 56,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 8
+        }
+      ],
+      "commands": [
+        "onedriveCancel",
+        "onedriveDisconnect",
+        "onedriveStatus"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-save-feedback.js",
+      "sha256": "507e2eed41f009ea1db74b17847c514052d801bf0c16622511b93f5d5a21f969",
+      "lines": 199,
+      "functions": [
+        {
+          "name": "cleanup",
+          "line": 14
+        },
+        {
+          "name": "celebrate",
+          "line": 18
+        },
+        {
+          "name": "fit",
+          "line": 74
+        },
+        {
+          "name": "paint",
+          "line": 106
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf-theme.js",
+      "sha256": "61ce3551b1d6328d89972eece68ff8ca04cb83b2f8bac1d2452944afc9119eff",
+      "lines": 149,
+      "functions": [
+        {
+          "name": "paintIconBackgroundMode",
+          "line": 10
+        }
+      ],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/shelf.js",
+      "sha256": "a08a1387fe7eaa2888f632253da717c1590e4ce18c47764d7b02760476862b28",
+      "lines": 293,
+      "functions": [
+        {
+          "name": "updateConnectionSummary",
+          "line": 4
+        },
+        {
+          "name": "settleEntrance",
+          "line": 21
+        },
+        {
+          "name": "refreshPrepared",
+          "line": 59
+        },
+        {
+          "name": "route",
+          "line": 76
+        },
+        {
+          "name": "useShelfOpenIntent",
+          "line": 109
+        },
+        {
+          "name": "refreshPreference",
+          "line": 142
+        },
+        {
+          "name": "refreshStartViewMode",
+          "line": 157
+        },
+        {
+          "name": "paintMembership",
+          "line": 173
+        },
+        {
+          "name": "refreshMembership",
+          "line": 176
+        },
+        {
+          "name": "refreshConnection",
+          "line": 196
+        },
+        {
+          "name": "paintShelfFailureLaser",
+          "line": 222
+        },
+        {
+          "name": "refreshDragLimit",
+          "line": 272
+        },
+        {
+          "name": "saveDragLimit",
+          "line": 273
+        }
+      ],
+      "commands": [
+        "redownShelfReady"
+      ],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/storage-signals.js",
+      "sha256": "2254f2d8eb25d54e5324c1e9d2388e6e8b9ae7f6a72aa4452b210da754c8637d",
+      "lines": 108,
+      "functions": [
+        {
+          "name": "paint",
+          "line": 11
+        },
+        {
+          "name": "wireBucketExpansion",
+          "line": 30
+        },
+        {
+          "name": "fit",
+          "line": 35
+        },
+        {
+          "name": "enter",
+          "line": 45
+        },
+        {
+          "name": "dismiss",
+          "line": 46
+        },
+        {
+          "name": "mountTraining",
+          "line": 61
+        },
+        {
+          "name": "stop",
+          "line": 75
+        },
+        {
+          "name": "later",
+          "line": 76
+        },
+        {
+          "name": "show",
+          "line": 77
+        },
+        {
+          "name": "start",
+          "line": 82
+        },
+        {
+          "name": "advance",
+          "line": 89
+        },
+        {
+          "name": "exit",
+          "line": 100
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/toolbar-appearance.js",
+      "sha256": "1ba0687a058cbae7f2c4cdc1e62c8375d3a62f149706500965ebc3a2315adc2a",
+      "lines": 38,
+      "functions": [
+        {
+          "name": "clean",
+          "line": 6
+        },
+        {
+          "name": "feedbackTitle",
+          "line": 26
+        }
+      ],
+      "commands": [],
+      "events": []
+    },
+    {
+      "path": "extension/toolbar-preferences.js",
+      "sha256": "b6f3edda2a15c5864b0eb8b1b3a30f0c2418b1c741d105c7720623c375fcbf68",
+      "lines": 11,
+      "functions": [],
+      "commands": [],
+      "events": [
+        "chrome.storage.onChanged"
+      ]
+    },
+    {
+      "path": "extension/transfer-counter.js",
+      "sha256": "c315a555692f987f2189984e223e2171dc5ea7152594f78b135ae5e0e39272ae",
+      "lines": 128,
+      "functions": [
+        {
+          "name": "create",
+          "line": 3
+        },
+        {
+          "name": "state",
+          "line": 11
+        },
+        {
+          "name": "increment",
+          "line": 59
+        },
+        {
+          "name": "dailyState",
+          "line": 69
+        }
+      ],
+      "commands": [
+        "redown-transfer-history"
+      ],
+      "events": []
+    }
+  ]
+}

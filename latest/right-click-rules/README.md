@@ -8,7 +8,7 @@ This rules document describes the *desired* Quick Select/Cloudflare behavior. Th
 
 
 **Owner-approved design clarification — November 7, 2026**  
-**Status:** Requirement/documentation only. **Not implemented or verified by this document.**  
+**Status:** Normative owner rule. Implemented in restoration source `9e8a16d` with local and browser-fixture evidence; installed Chrome rendering remains BLOCKED. This document alone is not proof.
 **Scope:** Cloudflare default destination, Quick Select, and native Chrome menu placement.
 
 ## 1. Primary rule — Quick Select does not force Cloudflare to nest
@@ -76,7 +76,7 @@ The Default remains reachable through the canonical Cloudflare leaf, even if a u
 
 **Availability is not a shortcut to false success.** A saved Quick item that requires setup (e.g. `4chan · Set up`) may continue to display the actual setup state, but it must never claim to have saved a file. Menu layout and provider readiness must be evaluated separately and truthfully.
 
-## 3. Why current code nests and duplicates
+## 3. Historical defect before restoration
 
 As audited on Click2Cloud main around commit `9dfe415`:
 

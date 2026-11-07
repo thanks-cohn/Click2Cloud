@@ -10,3 +10,5 @@ test('workings baseline remains immutable and current map covers source paths, r
 test('routing, OAuth, onboarding or Explorer source changes require a current workings update',()=>{
  const paths=[];const walk=dir=>{for(const x of readdirSync(new URL('../'+dir+'/',import.meta.url),{withFileTypes:true})){const path=dir+'/'+x.name;if(x.isDirectory())walk(path);else if(/\.(mjs|js|json|html|css|png)$/.test(path))paths.push(path);}};for(const dir of ['src','extension','right2cloud-module/src'])walk(dir);assert.deepEqual(Object.keys(map.currentImplementation.sourceFiles).sort(),paths.sort());for(const path of paths)assert.equal(hash(readFileSync(new URL('../'+path,import.meta.url))),map.currentImplementation.sourceFiles[path],'Stale workings map: '+path);
 });
+
+test('restoration baseline remains immutable and distinct from repaired CURRENT',()=>{const {digest,...before}=map.restorationBefore;assert.equal(hash(JSON.stringify(canonical(before))),digest);assert.equal(digest,'5c2493dc407422a860e08c6f393a9590c5172bfed2568727f431ae336dcf045b');assert.equal(before.sourceCommit,'9dfe415a7efe1c0333f9c71a3391c21f7d143995');});
