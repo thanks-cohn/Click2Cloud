@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{} } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},onGesture } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -207,7 +207,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     try { const outcome = await dispatch(result.action, { info, tab, authorization }); try { onOutcome?.(outcome); } catch {} return outcome; }
     catch { const failed = freeze({ state: 'failed', code: 'DISPATCH_FAILED' }); emit('intent', 'failed', failed.code, nextId(), acknowledged?.generation); try { onOutcome?.(failed); } catch {} return failed; }
   }
-  const listener = (info, tab) => { void handleClick(info, tab); };
+  const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab); };
   chrome.contextMenus.onClicked?.addListener(listener);
   const owner = freeze({ apply, inspect, resolveClick, handleClick,
     async recover(spec) {

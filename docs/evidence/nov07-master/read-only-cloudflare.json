@@ -1,0 +1,27 @@
+{
+  "time": "2026-11-07T10:01:23.192133+00:00",
+  "mode": "READ_ONLY_GET_ONLY_INHERITED_PROXY_TLS_VERIFIED",
+  "credentialsPresent": true,
+  "results": [
+    {
+      "name": "existing-worker-settings",
+      "httpStatus": 200,
+      "contentType": "application/json; charset=UTF-8",
+      "cfRay": "a56b7f10f9160788-LAX",
+      "success": true,
+      "providerCodes": [],
+      "meaning": "Declared bindings only, not OAuth/resource health/save proof",
+      "r2BindingDeclared": true,
+      "durableObjectBindingDeclared": true
+    },
+    {
+      "name": "existing-worker-route",
+      "httpStatus": 403,
+      "contentType": "text/plain; charset=UTF-8",
+      "cfRay": "a56b7f138e6551ae-LAX",
+      "success": null,
+      "providerCodes": [],
+      "meaning": "Unsigned GET only, no transfer or object mutation"
+    }
+  ]
+}

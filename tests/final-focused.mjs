@@ -8,3 +8,7 @@ await import('./provider-menu-visibility.test.mjs');
 await import("./nov06-native-menu.test.mjs");
 
 await import("./nov06-explorer.test.mjs");
+
+await import("./nov07-auth-shelf.test.mjs");
+
+await import("./workings.test.mjs");

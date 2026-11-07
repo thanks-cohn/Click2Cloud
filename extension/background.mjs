@@ -1,5 +1,5 @@
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
-import {openProviderPanel} from '../src/chrome/provider-panel.mjs';
+import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
 import {trustedAppSender} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
@@ -8,7 +8,7 @@ import {createEngine} from '../src/core/engine.mjs';
 import {createEngineApi} from '../src/api/service.mjs';
 import {createPermissions} from '../src/api/permissions.mjs';
 import {createAgentGateway} from '../src/api/gateway.mjs';
-import {createCloudflareOAuth} from '../src/auth/cloudflare-oauth.mjs';
+import {createCloudflareOAuth,diagnoseCloudflare} from '../src/auth/cloudflare-oauth.mjs';
 import {createClick2CloudFileApi} from '../src/explorer/index.mjs';
 import {createExternalRecovery,directoryFiles,copyRecoveryDirectory} from '../src/persistence/external-recovery.mjs';
 import {createRecoveryCrawl} from '../src/persistence/recovery-crawl.mjs';
@@ -23,13 +23,15 @@ import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {scopeKey,targetKey,normalizeTarget} from '../src/core/menu-identity.mjs';
 const storageReady=Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'})));
 const diagnostics=createDiagnostics(),current=createCurrentStore({sink:diagnostics});
-const oauth=createCloudflareOAuth({chrome});
+let connectionObservation=null,attentionPreference=null;
+const attention=createShelfAttention({chrome,preference:()=>attentionPreference});
+const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();await api.reconcile();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 const provisioner=createProvisioner({request:oauth.request,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking||!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))return false;const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();return r.ok&&b.success===true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
+const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking)return false;if(!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();if(!r.ok||b.success!==true){const diagnostic=diagnoseCloudflare(r,b,{context:'r2'});throw Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});}return true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
-const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await chrome.storage.session.get('cloudflareRepairTarget')).cloudflareRepairTarget,openShelf:async(provider,target)=>{if(target)await chrome.storage.session.set({cloudflareRepairTarget:target});else await chrome.storage.session.remove('cloudflareRepairTarget');return openProviderPanel(chrome,provider??'cloudflare');},openActivation:url=>chrome.tabs.create({url}),record:recordRemote,history:options=>current.readRemoteResults(options)});
+const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
  const saved=await current.recordRemoteResult(value);
@@ -66,7 +68,7 @@ async function getInventory() {
   const status=await oauth.status();
   const policy=(await current.read()).product.recovery;
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
-  const state=await current.read(),savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
+  const state=await current.read();attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
   return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:snapshots.get(targetKey(s.target))?.ready??false,folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})})))};
 }
@@ -77,11 +79,11 @@ const getAuthorization=async selection=>{
     return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>a.accounts.some(x=>x.id===t.accountId)&&await remoteReady(t)?t:null))).filter(Boolean)};
   }catch{return null;}
 };
-const registrar=createChromeRegistrar({chrome,beforeClick:()=>ready,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
+const registrar=createChromeRegistrar({chrome,onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:()=>ready,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
   dispatch:async(action,{info})=>{
     await ready;
     let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
-    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',source});
+    return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':'link',source});
   },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
@@ -114,7 +116,7 @@ const oauthForApi={...oauth,disconnect:async()=>{
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
-const api=createEngineApi({engine,current,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const api=createEngineApi({engine,current,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
@@ -125,7 +127,8 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(message?.channel!=='engine')return false;
   ready.then(()=>api.invoke({version:message.version,method:message.method,params:message.params},'gui')).then(respond,()=>respond({state:'failed',code:'ENGINE_UNAVAILABLE'}));return true;
 });
-chrome.action.onClicked.addListener(()=>chrome.tabs.create({url:chrome.runtime.getURL('extension/app.html')}));
+chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
+void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
 const ready=(async()=>{await storageReady;inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return api.reconcile();})();
 // Developer/native-companion integration only: no externally_connectable manifest,

@@ -37,7 +37,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     }
     return result;
   }
-  async function save({itemId,generation,context='image',source,signal}={}) {
+  async function save({itemId,generation,context='image',source,signal,attentionContext}={}) {
     const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
     // These are actual sequential prerequisites in this owner, not inferred
@@ -63,7 +63,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         const native=registrar.inspect(),resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:!native.pending&&native.desired?.generation===generation?native.acknowledgedGeneration:null,authorizedTargets:[]});
         if(resolved.state!=='completed')return finish(resolved);
         if(!onProviderAction)return finish({state:'blocked',code:'PROVIDER_SETUP_UNAVAILABLE'});
-        return finish(await onProviderAction({provider:resolved.action.providerAction,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
+        return finish(await onProviderAction({provider:resolved.action.providerAction,attentionContext,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
       }
       let auth;
       try{auth=await getAuthorization(spec?.rows.find(r=>r.id===itemId)?.target);}
@@ -72,7 +72,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
         blockRemaining('auth.check');
         const row=spec?.rows.find(r=>r.id===itemId);
-        const n=registrar.inspect();if(row?.role==='save'&&row.target?.provider==='cloudflare'&&row.enabled&&row.visible&&row.contexts.includes(context)&&!n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true}));
+        const n=registrar.inspect();if(row?.role==='save'&&row.target?.provider==='cloudflare'&&row.enabled&&row.visible&&row.contexts.includes(context)&&!n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext}));
         return finish({state:'blocked',code:'AUTH_REQUIRED',operationId});
       }
       observe(saveSink,'auth.check','ok','AUTH_VERIFIED',scope);
@@ -83,7 +83,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       const resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:
         native.pending||native.desired?.generation!==generation?null:native.acknowledgedGeneration,
         authorizedTargets:auth.authorizedTargets,sink:saveSink,operationId});
-      if(resolved.state!=='completed'){blockRemaining('resolver');const row=spec?.rows.find(r=>r.id===itemId);if(row?.target?.provider==='cloudflare'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(resolved.code)&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true}));return finish({...resolved,operationId});}
+      if(resolved.state!=='completed'){blockRemaining('resolver');const row=spec?.rows.find(r=>r.id===itemId);if(row?.target?.provider==='cloudflare'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(resolved.code)&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext}));return finish({...resolved,operationId});}
       const selectedRemote=resolved.action.target.provider==='cloudflare'?remoteSave:remoteSavers[resolved.action.target.provider];
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);

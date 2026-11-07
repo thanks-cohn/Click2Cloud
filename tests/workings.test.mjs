@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,readdirSync} from 'node:fs';import {createHash} from 'node:crypto';import {toolRegistry} from '../src/api/service.mjs';
+const hash=value=>createHash('sha256').update(value).digest('hex'),map=JSON.parse(readFileSync(new URL('../11.2026/workings/right-click-workings.json',import.meta.url)));
+const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])])):value;
+test('workings baseline remains immutable and current map covers source paths, rules and API operations',()=>{
+ const {digest,...baseline}=map.baselineBeforeRefactor;assert.equal(hash(JSON.stringify(canonical(baseline))),digest);assert.equal(digest,'12996d2f272b0f8697fdcf5d9ed4dc8c792fdf977822a942dccefdb372eed49b');assert.equal(baseline.sourceCommit,'8f0b9961ef83c1e6462caeffa2451dacbb4f7bf0');assert.equal(map.oneToOneVerified,false);
+ const current=map.currentImplementation,ids=new Set(current.behaviors.map(r=>r.id));for(const id of ['ENTRY_NATIVE','ENTRY_TOOLBAR','ENTRY_SHELF','MENU_ZERO','MENU_ONE','MENU_MULTIPLE','AUTH_LOGIN','AUTH_RESTART','AUTH_REFRESH_TRANSIENT','AUTH_REQUEST_403','R2_FORBIDDEN','R2_INACTIVE','SETUP_CREATE','SETUP_REUSE','SETUP_DENIED','SAVE_EXACT','SAVE_UNCERTAIN','EXPLORER_SELECT','EXPLORER_LIST'])assert(ids.has(id),id);
+ for(const r of current.behaviors)for(const ref of r.sourceRefs){const text=readFileSync(new URL('../'+ref.path,import.meta.url),'utf8');assert(text.includes(ref.symbol),r.id+' missing source symbol '+ref.symbol);assert(current.sourceFiles[ref.path],ref.path);}
+ assert.deepEqual(current.apiParity.map(a=>a.method).sort(),toolRegistry.map(t=>t.name).sort());assert(current.unknowns.length);assert(map.baselineBeforeRefactor.behaviors.some(r=>r.contractViolation));
+});
+test('routing, OAuth, onboarding or Explorer source changes require a current workings update',()=>{
+ const paths=[];const walk=dir=>{for(const x of readdirSync(new URL('../'+dir+'/',import.meta.url),{withFileTypes:true})){const path=dir+'/'+x.name;if(x.isDirectory())walk(path);else if(/\.(mjs|js|json|html|css|png)$/.test(path))paths.push(path);}};for(const dir of ['src','extension','right2cloud-module/src'])walk(dir);assert.deepEqual(Object.keys(map.currentImplementation.sourceFiles).sort(),paths.sort());for(const path of paths)assert.equal(hash(readFileSync(new URL('../'+path,import.meta.url))),map.currentImplementation.sourceFiles[path],'Stale workings map: '+path);
+});

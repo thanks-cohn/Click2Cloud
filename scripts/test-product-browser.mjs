@@ -56,6 +56,10 @@ try{
  results.push({gate:'verified-notification-checks-canonical-receipt-and-refreshes-matching-Explorer',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB-not-live-receipt'});
 
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByLabel('Theme',{exact:true}).selectOption('light');await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');await page.screenshot({path:join(evidence,'settings-light-fixture.png'),fullPage:true});
+ await page.getByLabel('Automatically open login/attention',{exact:true}).uncheck();await page.waitForFunction(()=>window.productFixture.current.read().then(s=>s.product.autoOpenAttention===false));
+ await page.getByLabel('Show Dropbox in Chrome right-click menu',{exact:true}).uncheck();await page.waitForFunction(()=>window.productFixture.current.read().then(s=>s.product.providerVisibility.dropbox===false));
+ assert.equal(await page.evaluate(()=>window.productFixture.current.read().then(s=>s.product.autoOpenAttention)),false);
+ results.push({gate:'Settings-attention-and-provider-visibility-independent-canonical-commits',state:'PASS',evidenceClass:'isolated-fixture-real-browser-IDB'});
  const apiChecks=await page.evaluate(async()=>{
   const {api,current,gateway,grants}=window.productFixture,invoke=(method,params={})=>api.invoke({version:'3+1.1',method,params},'gui');
   let s=await current.read();const params={expectedRevision:s.product.revision,idempotencyKey:'browser-replay',changes:[{type:'setTheme',theme:'dark'}]};

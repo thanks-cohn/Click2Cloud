@@ -8,7 +8,10 @@
     "storage",
     "identity",
     "alarms",
-    "activeTab"
+    "activeTab",
+    "sidePanel",
+    "notifications",
+    "webNavigation"
   ],
   "background": {
     "service_worker": "extension/background.mjs",
@@ -29,5 +32,8 @@
   "optional_host_permissions": [
     "https://*/*",
     "http://*/*"
-  ]
+  ],
+  "side_panel": {
+    "default_path": "extension/app.html"
+  }
 }

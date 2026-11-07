@@ -1,28 +1,29 @@
+import {diagnoseCloudflare} from '../auth/cloudflare-oauth.mjs';
 import {readBuckets} from './inventory.mjs';
 import {fail} from './wire.mjs';
 import {targetKey} from '../core/menu-identity.mjs';
-export const ACTIVATION_URL='https://dash.cloudflare.com/?to=%2F%3Aaccount%2Fr2%2Foverview';
-export function createCloudflareOnboarding({current,oauth,provisioner,transport,openShelf=async()=>{},openActivation=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
+export function createCloudflareOnboarding({current,oauth,provisioner,transport,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
  async function commit(mutator,key=crypto.randomUUID()){
   const s=await current.read(),next=structuredClone(s);mutator(next.product);
   await current.commitProduct({...next,expectedRevision:s.product.revision,idempotencyKey:'cloudflare:'+key,fingerprint:JSON.stringify(next.product)});
  }
  async function account(accountId){const a=await oauth.authority();if(!a.accounts.some(x=>x.id===accountId))fail('SCOPE_UNAUTHORIZED');return a;}
  async function r2(accountId){
-  try{await account(accountId);const result=await readBuckets(oauth,accountId);if(result.buckets)return {state:'ACTIVE',accountId,buckets:result.buckets};const {response:r,body:b}=result;
-   if(r.status===401)return {state:'RECONNECT_REQUIRED',accountId};
-   if(r.status===403)return {state:'INSUFFICIENT_PERMISSION',accountId};
-   const inactive=b.errors?.some(e=>/\bR2\b.*\bnot (enabled|activated)\b/i.test(e.message??''));return {state:inactive?'NOT_ACTIVATED':r.status>=500?'NETWORK_UNAVAILABLE':'UNKNOWN',accountId};
-  }catch(e){return {state:['AUTH_REQUIRED','PROVIDER_AUTH_REJECTED','AUTH_SESSION_CHANGED'].includes(e.code)?'RECONNECT_REQUIRED':'NETWORK_UNAVAILABLE',accountId};}
+  try{const a=await account(accountId),missing=['workers-r2.read'].filter(scope=>!a.scopes?.includes(scope));
+   if(Array.isArray(a.scopes)&&missing.length)return {state:'INSUFFICIENT_PERMISSION',code:'INSUFFICIENT_SCOPE',accountId,diagnostic:{code:'INSUFFICIENT_SCOPE',evidence:'verified-grants',missingScopes:missing}};
+   const result=await readBuckets(oauth,accountId);if(result.buckets)return {state:'ACTIVE',accountId,buckets:result.buckets};
+   const diagnostic=diagnoseCloudflare(result.response,result.body,{context:'r2',scopes:a.scopes,requiredScopes:['workers-r2.read']}),code=diagnostic.code;
+   return {state:code==='R2_CONFIRMED_INACTIVE'?'NOT_ACTIVATED':code==='INSUFFICIENT_SCOPE'?'INSUFFICIENT_PERMISSION':['TOKEN_EXPIRED','REAUTH_REQUIRED'].includes(code)?'RECONNECT_REQUIRED':code==='TRANSIENT_API_FAILURE'?'NETWORK_UNAVAILABLE':'UNKNOWN',code,accountId,diagnostic};
+  }catch(e){const code=e.code??'TRANSIENT_API_FAILURE';return {state:['AUTH_REQUIRED','REAUTH_REQUIRED','TOKEN_EXPIRED','AUTH_SESSION_CHANGED'].includes(code)?'RECONNECT_REQUIRED':code==='WRONG_ACCOUNT'?'ACCOUNT_AMBIGUOUS':code==='INSUFFICIENT_SCOPE'?'INSUFFICIENT_PERMISSION':code==='TRANSIENT_API_FAILURE'?'NETWORK_UNAVAILABLE':'UNKNOWN',code,accountId,...(e.diagnostic?{diagnostic:e.diagnostic}:{})};}
  }
  const readyCache=new Map();
  async function check(accountId,selectedTarget,{force=true}={}){
-  const statusStarted=performance.now(),s=await current.read();accountId??=selectedTarget?.accountId??s.product.defaultTarget?.accountId??s.product.cloudflare.selectedAccountId;let a;try{a=await oauth.authority();}catch{return {state:'RECONNECT_REQUIRED'};}if(!accountId&&!selectedTarget&&a.accounts.length===1)accountId=a.accounts[0].id;const key=JSON.stringify([a.sessionId,accountId,selectedTarget??s.product.defaultTarget]),cached=readyCache.get(key);if(!force&&cached&&Date.now()-cached.checkedAt<10000)return {...cached,fromCache:true,statusCheckMs:Math.round(performance.now()-statusStarted)};const result=await checkFresh(accountId,selectedTarget);if(result.state==='READY'){readyCache.set(key,{...result,checkedAt:Date.now()});if(readyCache.size>16)readyCache.delete(readyCache.keys().next().value);}return {...result,fromCache:false,statusCheckMs:Math.round(performance.now()-statusStarted)};
+  const statusStarted=performance.now(),s=await current.read();accountId??=selectedTarget?.accountId??s.product.defaultTarget?.accountId??s.product.cloudflare.selectedAccountId;let a;try{a=await oauth.authority();}catch(e){const code=e.code??'TRANSIENT_API_FAILURE';return {state:['AUTH_REQUIRED','REAUTH_REQUIRED','TOKEN_EXPIRED'].includes(code)?'RECONNECT_REQUIRED':code==='INSUFFICIENT_SCOPE'?'INSUFFICIENT_PERMISSION':code==='TRANSIENT_API_FAILURE'?'NETWORK_UNAVAILABLE':'UNKNOWN',code,...(e.diagnostic?{diagnostic:e.diagnostic}:{})};}if(!accountId&&!selectedTarget&&a.accounts.length===1)accountId=a.accounts[0].id;const key=JSON.stringify([a.sessionId,accountId,selectedTarget??s.product.defaultTarget]),cached=readyCache.get(key);if(!force&&cached&&Date.now()-cached.checkedAt<10000)return {...cached,fromCache:true,statusCheckMs:Math.round(performance.now()-statusStarted)};const result=await checkFresh(accountId,selectedTarget);if(result.state==='READY'){readyCache.set(key,{...result,checkedAt:Date.now()});if(readyCache.size>16)readyCache.delete(readyCache.keys().next().value);}return {...result,fromCache:false,statusCheckMs:Math.round(performance.now()-statusStarted)};
  }
  async function checkFresh(accountId,selectedTarget){
   const a=await oauth.status(),s=await current.read();accountId??=selectedTarget?.accountId??s.product.defaultTarget?.accountId??s.product.cloudflare.selectedAccountId;
   if(a.state!=='CONNECTED')return {state:'RECONNECT_REQUIRED'};
-  if(!accountId||!a.accounts.some(x=>x.id===accountId))return {state:'ACCOUNT_AMBIGUOUS',accounts:a.accounts};
+  if(!accountId||!a.accounts.some(x=>x.id===accountId))return {state:'ACCOUNT_AMBIGUOUS',...(accountId?{code:'WRONG_ACCOUNT'}:{}),accounts:a.accounts};
   const readiness=await r2(accountId);if(readiness.state!=='ACTIVE')return readiness;
   const target=selectedTarget??s.product.defaultTarget;
   if(target){if(target.provider!=='cloudflare'||target.accountId!==accountId)return {state:'CHOOSE_DESTINATION',accountId};
@@ -33,7 +34,8 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  }
  async function setup({accountId,expectedRevision,idempotencyKey,repair=false,target:repairTarget}){
   const started=performance.now(),auth=await account(accountId),s=await current.read(),setupId=accountId+':'+idempotencyKey,prior=await current.readSetupOperation?.(setupId);if(prior?.result)return prior.result;if(s.product.revision!==expectedRevision)fail('REVISION_CONFLICT');
-  const status=await r2(accountId);if(status.state!=='ACTIVE')return {state:'blocked',code:status.state};
+  const status=await r2(accountId);if(status.state!=='ACTIVE')return {state:'blocked',code:status.code??status.state,diagnostic:status.diagnostic};
+  if(Array.isArray(auth.scopes)&&!auth.scopes.includes('workers-r2.write'))return {state:'blocked',code:'INSUFFICIENT_SCOPE',diagnostic:{code:'INSUFFICIENT_SCOPE',evidence:'verified-grants',missingScopes:['workers-r2.write']}};
   const configured=[s.product.defaultTarget,...Object.values(s.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   if(repairTarget&&(!repair||!configured.some(t=>targetKey(t)===targetKey(repairTarget))))fail('TARGET_NOT_CONFIGURED');
   const original=repairTarget??s.product.defaultTarget;
@@ -64,13 +66,14 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   await commit(p=>{if(!p.defaultTarget&&!repairTarget)p.defaultTarget=target;p.cloudflare.initialized=[...new Set([...p.cloudflare.initialized,accountId])];p.cloudflare.pending=p.cloudflare.pending.filter(x=>x!==accountId);});
   const result={state:'completed',code:'CLOUDFLARE_READY',target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started),probeRetention:'Small verified readiness object retained; delete explicitly in provider dashboard if desired.'};await progress('complete',{operationId,result});return result;}catch(e){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(e.code??'')?e.code:'LOCAL_COMPLETION_UNCONFIRMED',operationId};}
  }
- async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs}){
-  if(provider!=='cloudflare'){await openShelf(provider);return {state:'blocked',code:'PROVIDER_NOT_IMPLEMENTED',provider};}
+ async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs,attentionContext}){
+  if(provider!=='cloudflare'){await openShelf(provider,undefined,{code:'PROVIDER_NOT_IMPLEMENTED',context:attentionContext});return {state:'blocked',code:'PROVIDER_NOT_IMPLEMENTED',provider};}
   const status=await oauth.status();
-  if(status.state!=='CONNECTED'){await openShelf(undefined,requestedTarget);return {state:'blocked',code:'LOGIN_REQUIRED'};}
-  if(emptyAssignment){const s=await current.read(),known=s.product.defaultTarget||s.product.cloudflare.initialized.length||s.product.cloudflare.removed?.length||Object.values(s.configs??{}).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'));if(known){await openShelf('manage-destinations');return {state:'blocked',code:'CHOOSE_DESTINATION'};}}
+  if(status.state==='DISCONNECTED'){await openShelf('cloudflare',requestedTarget,{code:'LOGIN_REQUIRED',context:attentionContext});return {state:'blocked',code:'LOGIN_REQUIRED'};}
+  if(status.state==='CONNECTING'){await openShelf('cloudflare',requestedTarget,{code:'LOGIN_IN_PROGRESS',context:attentionContext});return {state:'blocked',code:'LOGIN_IN_PROGRESS'};}
+  if(emptyAssignment){const s=await current.read(),known=s.product.defaultTarget||s.product.cloudflare.initialized.length||s.product.cloudflare.removed?.length||Object.values(s.configs??{}).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'));if(known){await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});return {state:'blocked',code:'CHOOSE_DESTINATION'};}}
   const readiness=await check(requestedTarget?.accountId,requestedTarget,{force:false});
-  if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations');else if(['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED'].includes(readiness.state))await openShelf(undefined,requestedTarget);return {state:'blocked',code:readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
+  if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});else if(['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED','INSUFFICIENT_PERMISSION','UNKNOWN','NETWORK_UNAVAILABLE'].includes(readiness.state))await openShelf('cloudflare',requestedTarget,{code:readiness.code??readiness.worker?.code??readiness.state,context:attentionContext});return {state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
   if(setupOnly)return {state:'blocked',code:'FRESH_CLICK_REQUIRED',target:requestedTarget};
   if(!source?.url||source.bytes)return {state:'blocked',code:'REMOTE_SOURCE_REQUIRED'};
   const target=readiness.target,out=await transport.save({target,source,signal,dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&targetKey((await current.read()).product.defaultTarget??{})===targetKey(target)});
@@ -78,7 +81,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  }
  return Object.freeze({check,setup,invoke,history,async manage(){await openShelf('manage-destinations');return {state:'completed'};},cancel:({target,operationId})=>transport.cancel(target,operationId),setupStatus:({accountId,idempotencyKey})=>current.readSetupOperation?.(accountId+':'+idempotencyKey),
   async select(accountId){await account(accountId);if((await current.read()).product.cloudflare.selectedAccountId===accountId)return check(accountId);await commit(p=>{p.cloudflare.selectedAccountId=accountId;});return check(accountId);},
-  async activation(accountId){await account(accountId);const state=await r2(accountId);if(state.state!=='NOT_ACTIVATED')return {state:'blocked',code:state.state==='ACTIVE'?'R2_ALREADY_ACTIVE':state.state};await commit(p=>{p.cloudflare.pending=[...new Set([...p.cloudflare.pending,accountId])];});await openActivation(ACTIVATION_URL);return {state:'completed',url:ACTIVATION_URL,setupPending:true,accountId};},
+  async activation(accountId){await account(accountId);const result=await r2(accountId);return {state:'blocked',code:result.state==='ACTIVE'?'R2_ALREADY_ACTIVE':'R2_MANUAL_ACTION_REQUIRED',readiness:result};},
   async inspect(){const s=await current.read(),candidate=await readRequestedTarget(),valid=[s.product.defaultTarget,...Object.values(s.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean).find(t=>candidate&&targetKey(t)===targetKey(candidate));return {onboarding:s.product.cloudflare,status:await check(valid?.accountId,valid),limits:{totalFilePolicy:null,buffering:'bounded spool; final R2 conditional PUT service limits apply'},sourcePolicy:{kind:'public-https-pinned-tls',privateNetworks:false,browserCredentials:false,platformBlocker:'Cloudflare TCP cannot connect to Cloudflare-owned IP ranges'}};},
   async receipt({operationId,target:explicitTarget}){
    const saved=await current.readRemoteResult?.(operationId)??(await history()).find(x=>x.operationId===operationId);const d=saved?.destination;

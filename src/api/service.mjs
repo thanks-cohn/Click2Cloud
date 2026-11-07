@@ -15,10 +15,10 @@ const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,targe
   levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list']},connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
-const changeFields={createDestination:['mode','target','label','levels'],updateDestination:['mode','id','label','levels','hidden','quick','order'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+const changeFields={createDestination:['mode','target','label','levels'],updateDestination:['mode','id','label','levels','hidden','quick','order'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const definitions={
-  openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
+  inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
@@ -56,7 +56,7 @@ export function validate(schema,value) {
   if(schema.type==='boolean'&&typeof value!=='boolean')fail('INVALID_REQUEST');
 }
 function applyChanges(state,changes) {
-  if(!changes.length||changes.length>64)fail('INVALID_CHANGE');
+  if(!changes.length)fail('INVALID_CHANGE');
   const next=structuredClone(state),p=next.product;
   const allowed=changeFields;
   for(const c of changes) {
@@ -84,6 +84,7 @@ if(removed.target.provider==='cloudflare'&&!next.product.defaultTarget&&!Object.
     else if(c.type==='setDepthDisplayBuckets')next.configs.depth.scopes=c.scopes;
     else if(c.type==='makeDefault'){p.defaultTarget=normalizeTarget(c.target);p.cloudflare.removed=p.cloudflare.removed.filter(a=>a!==c.target.accountId);}
     else if(c.type==='clearDefault'){if(p.defaultTarget?.provider==='cloudflare')p.cloudflare.removed=[...new Set([...p.cloudflare.removed,p.defaultTarget.accountId])];p.defaultTarget=null;}
+    else if(c.type==='setAutoOpenAttention')p.autoOpenAttention=c.visible;
     else if(c.type==='setTheme')p.theme=c.theme;
     else if(c.type==='setView')p.view=c.view;
     else if(c.type==='setFavorite'){p.favorites=p.favorites.filter(x=>x!==c.connectionId);if(c.favorite)p.favorites.push(c.connectionId);}
@@ -102,7 +103,7 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve();
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
@@ -138,6 +139,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='inspectRemoteHistory')data=await cloudflare.history(params);
           if(method==='inspectRemoteReceipt')data=await cloudflare.receipt(params);
         }
+        else if(method==='inspectShelfAttention')data=await attention?.read()??null;
         else if(method==='openCloudflareDestinations'){if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');data=await cloudflare.manage();}
         else if(method==='inspectCloudflareSetup')data=await cloudflare.setupStatus(params);
         else if(method==='cancelRemoteOperation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await cloudflare.cancel(params);}

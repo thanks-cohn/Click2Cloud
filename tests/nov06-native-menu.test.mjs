@@ -35,10 +35,9 @@ test('Nov6 real registrar ACK click uses engine exact target without provider/da
  assert.equal(saved,2);assert.equal(panels,0);assert(selected.every(t=>targetKey(t)===targetKey(photos)));
 });
 
-test('Nov6 compact attention surface is provider-specific and trusted without widening query/origin boundary',async()=>{
- const {openProviderPanel}=await import('../src/chrome/provider-panel.mjs'),{trustedAppSender}=await import('../src/chrome/trusted-sender.mjs');const windows=[],tabs=[],runtime={id:'installed',getURL:path=>'chrome-extension://installed/'+path},chrome={runtime,windows:{create:async p=>windows.push(p)},tabs:{create:async p=>tabs.push(p)}};
- for(const provider of ['google-drive','dropbox','onedrive','cloudflare'])await openProviderPanel(chrome,provider);assert.equal(windows.length,4);assert(windows.every(x=>x.type==='popup'&&x.url.includes('extension/connect.html#')));assert.equal(tabs.length,0);await openProviderPanel(chrome,'manage-destinations');assert.equal(tabs[0].url,runtime.getURL('extension/app.html')+'#manage-destinations');
- const sender={id:'installed',documentId:'doc',url:runtime.getURL('extension/connect.html')+'#cloudflare'};assert(trustedAppSender(runtime,sender));assert(!trustedAppSender(runtime,{...sender,url:runtime.getURL('extension/connect.html')+'?token=bad'}));assert(!trustedAppSender(runtime,{...sender,id:'foreign'}));
+test('Shelf attention replaces legacy popup and retains the exact trusted app boundary',async()=>{
+ const {createShelfAttention}=await import('../src/chrome/provider-panel.mjs'),{trustedAppSender}=await import('../src/chrome/trusted-sender.mjs');const opened=[],data={},runtime={id:'installed',getURL:p=>'chrome-extension://installed/'+p,sendMessage:async()=>{}},chrome={runtime,storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},sidePanel:{open:async p=>opened.push(p)},action:{setBadgeText:async()=>{}},windows:{getLastFocused:async()=>({id:7})}};
+ const shelf=createShelfAttention({chrome});await shelf.attend('cloudflare',undefined,{code:'LOGIN_REQUIRED'});assert.equal(opened.length,1);assert.equal((await shelf.read()).provider,'cloudflare');assert(trustedAppSender(runtime,{id:'installed',documentId:'doc',url:runtime.getURL('extension/app.html')}));assert(!trustedAppSender(runtime,{id:'installed',documentId:'doc',url:runtime.getURL('extension/connect.html')}));
 });
 
 test('future trusted flat provider ports replace their one canonical entry, never add a second provider row',()=>{
