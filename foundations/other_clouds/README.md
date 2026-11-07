@@ -1,5 +1,7 @@
 # Other clouds — right-click and minimal login diagrams
 
+**November 7 owner presentation update:** [`docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md`](../../docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md) controls all provider login surfaces. When the Settings auto-login presentation toggle is ON: try the Chrome toolbar popup with the selected provider login; a failed popup opening is recorded in diagnostics and opens the Shelf to that provider. When OFF: show only the notification `Please log in to Google Drive/Dropbox/OneDrive` (the exact selected provider), without any automatic popup or Shelf. This toggle does not change provider menu visibility or provider implementation status.
+
 ## Diagram 1 — Google Drive, Dropbox and OneDrive: visible from the start
 
 ```mermaid
