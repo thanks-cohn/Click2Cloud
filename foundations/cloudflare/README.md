@@ -1,5 +1,7 @@
 # Cloudflare foundation — Click2Cloud / REDOWN
 
+**November 7 presentation precedence:** The current single-click disconnected authentication route is documented in [`docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md`](../../docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md): toolbar-anchored popup first when Settings auto-login presentation is ON; on an opening failure record diagnostics then open the REDOWN-style Shelf with the exact provider selected; when that setting is OFF, show only the notification `Please log in to Cloudflare`. Read the older diagrams' references to `Shelf` or `small panel` as their requested *login content*, not a mandatory surface. They do not override the new presentation/fallback preference. Connected and ready saves remain direct; first-time provisioning, assigned menu target counts and permanent `redown` removal rules stay unchanged.
+
 > **Status:** Owner-approved product behavior and implementation foundation, **not yet an implemented or live-verified feature**.
 >
 > **Canonical location:** `/foundations/cloudflare/README.md`
