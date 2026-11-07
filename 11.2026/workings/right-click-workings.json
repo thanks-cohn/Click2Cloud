@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "9ebaf3bf4cd006caeecc8fefce247dbacb2a34d8",
+    "sourceCommit": "8805d50eda024700dbb4f8221067de0a4a76cfaf",
     "sourceFiles": {
       "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -11897,11 +11897,11 @@
     "verification": {
       "source": "PASS: hash-bound source behavior",
       "unit": "Updated focused run recorded in docs/evidence/nov07-master",
-      "installedChrome": "BLOCKED_ADMINISTRATOR_POLICY; retry attempted by browser runner",
+      "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; see docs/evidence/nov07-master/browser/browser-results.json",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized"
     },
-    "sourceState": "Working-tree content-addressed snapshot; hashes authoritative, next commit includes source and map together.",
+    "sourceState": "Committed implementation snapshot; runtime source files exactly match this commit and sourceFiles hashes. Documentation-only evidence commit follows.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13163,7 +13163,7 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "60886ffb97e788d47405377657f87f330d8b7dbdd965ab0fd70ea66717a714ae"
+    "digest": "2d62cd5990bc7e00904ab7623e0d14f6e6364c146a51a1d36381388ba01b6725"
   },
   "changeLog": [
     {

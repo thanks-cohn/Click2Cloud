@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-11-07T10:05:01.015066+00:00",
+  "branch": "dev/nov07-shelf-oauth-workings",
+  "runtimeCommit": "8805d50eda024700dbb4f8221067de0a4a76cfaf",
+  "status": "PARTIAL_LIVE_ACCEPTANCE_BLOCKED",
+  "checks": {
+    "focused": {
+      "pass": 190,
+      "fail": 0
+    },
+    "transferModule": {
+      "pass": 49,
+      "fail": 0
+    },
+    "realBrowserLocalFixture": {
+      "pass": 11,
+      "fail": 0,
+      "blocked": 3,
+      "notTested": 1
+    },
+    "extensionBuild": "PASS",
+    "strictTypescriptDeclarations": "PASS",
+    "workingsDriftGate": "PASS"
+  },
+  "mutations": {
+    "cloudResources": false,
+    "REDOWN": false,
+    "merge": false,
+    "deploy": false,
+    "push": false
+  },
+  "commands": [
+    "npm run test:focused",
+    "node --test right2cloud-module/tests/*.test.mjs",
+    "npm run build:extension",
+    "C2C_EVIDENCE_DIR=docs/evidence/nov07-master/browser npm run test:browser",
+    "npx --yes --package typescript@5.9.3 tsc --noEmit --strict --lib ES2023,DOM --module nodenext --moduleResolution nodenext src/api/service.d.ts",
+    "C2C_MEASURE_SIZES=100,1000,10000 C2C_MEASURE_BEHAVIORS=1 C2C_MEASURE_OUTPUT=docs/evidence/nov07-master/explorer-current.json node scripts/measure-explorer.mjs"
+  ]
+}

@@ -6,9 +6,9 @@
 
 - `643aa33`: recorded actual pre-refactor source behavior before changing runtime code, including known defects and uncertainty.
 - `9ebaf3b`: repaired the existing OAuth owner; integrated the existing app as the sole Shelf; removed extension connect popup files; corrected permission diagnosis; added preference/API parity and focused regressions with the current workings map.
-- Follow-up implementation/evidence commit: corrected pending-verification UI so retained authorization is checked rather than unnecessarily requesting fresh consent; records final evidence and current source snapshot.
+- `8805d50`: follow-up implementation/evidence commit: corrected pending-verification UI so retained authorization is checked rather than unnecessarily requesting fresh consent; records final evidence and current source snapshot.
 
-The immutable baseline is in `11.2026/workings/right-click-workings.json`, digest `12996d2f272b0f8697fdcf5d9ed4dc8c792fdf977822a942dccefdb372eed49b`. It contains 62 behavior entries, 77 source hashes and 52 API operations. CURRENT contains 62 behavior entries, 76 source hashes and 53 API operations, plus source-wide error inventory and acceptance evidence links. Source hashes are authoritative when sourceCommit identifies the preceding coherent implementation commit. `oneToOneVerified` remains false: this map is source-grounded and test-bound, not exhaustive live certification. `tests/workings.test.mjs` pins the baseline and rejects runtime drift.
+The immutable baseline is in `11.2026/workings/right-click-workings.json`, digest `12996d2f272b0f8697fdcf5d9ed4dc8c792fdf977822a942dccefdb372eed49b`. It contains 62 behavior entries, 77 source hashes and 52 API operations. CURRENT contains 62 behavior entries, 76 source hashes and 53 API operations, plus source-wide error inventory and acceptance evidence links. CURRENT sourceCommit is `8805d50eda024700dbb4f8221067de0a4a76cfaf`; its runtime source hashes match the final implementation exactly. The following evidence-only commit changes no runtime source. `oneToOneVerified` remains false: this map is source-grounded and test-bound, not exhaustive live certification. `tests/workings.test.mjs` pins the baseline and rejects runtime drift.
 
 ## Sections 5 / 5A: actual changes
 
