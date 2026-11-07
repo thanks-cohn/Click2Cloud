@@ -1,5 +1,7 @@
 # Click2Cloud V3+1 — Documentation-Only Scaffold
 
+> **Updated owner priority (2026-11-06):** The earlier Simple/Flat native-menu examples below are superseded wherever they conflict with the current **single Cloudflare entry** rule: four initial flat leaves (Google Drive, Dropbox, OneDrive, Cloudflare), Cloudflare saving directly into the authorized initial `redown` bucket, and a single Cloudflare submenu only after an extra Cloudflare destination is added. Removing the extra returns to one flat Cloudflare entry. The bucket remains an option until explicitly removed, while deliberate changes to the selected default are honored. See `AGENTS.md`, `foundations/cloudflare/README.md`, and `docs/CODEX_SMALL_MILESTONES_TO_SURPASS_REDOWN_2026-11-06.md`. The explicit Flat editor control remains available for customization but is not a prerequisite for automatic default behavior. Milestones are checkpoints within continuous ~30-minute Codex sessions.
+>
 **Status: DOCUMENTATION ONLY. This is the design and implementation handoff for Codex; no UI prototype, production V3+1 engine, provider auth, live cloud operations, native Chrome menu changes, or CURRENT storage work is implemented by this scaffold.**
 
 Use this Markdown specification as the starting point for future **V3+1 right-click engine** construction. Existing Click2Cloud code, REDOWN source references, and the Universal File API boundary remain architectural inputs, not completed integration. No runnable demo or live save is supplied here.
