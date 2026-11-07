@@ -136,6 +136,8 @@ flowchart TD
 
 ## 2. The native right-click default (before the user customizes it)
 
+**ZERO-CONFIGURATION ACCEPTANCE RULE:** On install there are four flat, clickable providers, **including one Cloudflare leaf even if no bucket/account/destination has been set up yet**. If the user selects Cloudflare while unconnected, the minimal **One Click Away!** Cloudflare login card initiates the existing approved OAuth/setup route. After authorization: (1) check whether bucket `redown` exists in the selected account, (2) reuse it if present, otherwise create exactly `redown` during the user's approved first-time setup, (3) prepare and verify TRUE REMOTE, (4) set bucket `redown`, root prefix `''`, as the initial default, and (5) future right-click Cloudflare actions save directly with no dashboard. **No destination editor or bucket selector is needed for a normal first-time single-account user.** The presence or absence of *other* R2 buckets does not alter this. Creating a bucket or completing provider activation may require the user's authorization; these are setup actions, not a pretend successful save. Only an intentional additional Cloudflare destination makes Cloudflare nested.
+
 **NOVEMBER 6 OWNER PRIORITY — native menu projection (overrides older Simple/Flat examples):** At initialization render exactly one `Cloudflare` leaf which saves directly into bucket `redown` (root prefix) after its approved initial setup/readiness. No `Cloudflare R2` sibling or duplicated Cloudflare parent. When one additional Cloudflare destination is added, change that same item to **Cloudflare → redown / extra user destination**. When the extra destination is removed, return to the direct flat `Cloudflare` leaf. Keep `redown` available until the user explicitly removes it; honor an expressly changed default without silently reverting. With one remaining configured Cloudflare destination, that one destination is the leaf target. Additional hierarchy modes are deliberately configured options, never a prerequisite for this default. **These are presentation and routing rules for the single canonical engine, not permission to create cloud resources or new menu engines.** See `AGENTS.md` for exact acceptance and priority.
 
 Inside Chrome's extension-created grouping, display **four direct, actionable, one-click provider entries in exactly this order**:
@@ -162,6 +164,8 @@ The owner may later customize layout, Quick Select, Simple/Narrow/Depth, provide
 - Distinguish R2 not activated, insufficient OAuth scopes, account mismatch, API outage, and revoked authorization. Each gives a comprehensible next action rather than a generic login loop.
 
 ## 4. Automatic `redown` bucket and default
+
+**Decision: Is this a new, authorized first-time connection with no previously selected destination?** If yes, test the selected account for `redown`. If present, use it. If absent, create it through the approved initial setup. After verified transfer readiness, make it the default without prompting for bucket names, picking another bucket, or opening the full dashboard. This is true even when there are zero existing R2 buckets. A flat, clickable **Cloudflare** menu item exists even before this setup; it triggers the minimal login/setup path until saving is ready. Later explicit removal and custom choices remain authoritative.
 
 Once an authenticated API check establishes usable R2 access **and** the user has approved the extension's first-run auto-setup:
 
