@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T16:17:21.453636+00:00",
+  "generatedAt": "2026-11-07T16:23:51.419782+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,7 +9202,7 @@
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "57c1af33301bf5fada65301cecdeb39ae47decc811345b65cd6e4b1a31518acc",
+      "extension/app.mjs": "95394bf78fab8bd48eb22eaa17f33b95b7c62c6293f86ff5aa791fd81e8a8b5c",
       "extension/background.mjs": "3a377c5304fa2f1195c30a9331e42ec7abf45c4cffdb1b9693feefdfb107b893",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest.json": "132956fc4e1711dd05400e7d4b67d55b019a62bf34313af49466be5b77927101",
@@ -12190,6 +12190,7 @@
         "LOGIN_REQUIRED",
         "PREVIEW_SIZE_LIMIT",
         "PROVISIONING_BLOCKED",
+        "READY",
         "REAUTH_REQUIRED",
         "RECONNECT_REQUIRED",
         "REPAIR_REQUIRED",
@@ -13495,7 +13496,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "00c41e38ff056359365bfd9bab8a158b64aee8d5c2ecd105566c63546d03d454"
+    "digest": "8cb01639566c232e2c83411987e729fd73b42bedc3d8036975f774c91ada22dd"
   },
   "changeLog": [
     {
