@@ -1,0 +1,33 @@
+{
+  "runtimeCommit": "2498da593138c0ef596c4809a8c130a5ad57acdd",
+  "version": "0.3.6",
+  "branch": "dev/p0-worker-permission-diagnostics",
+  "focused": {
+    "pass": 221,
+    "fail": 0
+  },
+  "browserFixture": {
+    "PASS": 16,
+    "FAIL": 0,
+    "BLOCKED": 3,
+    "NOT_TESTED": 1
+  },
+  "redownScopeVMTest": "PASS1, not live",
+  "genuineShelf": "BLOCKED_ADMIN_POLICY",
+  "originalWindowsFailure": {
+    "reportedCode": "WORKER_PERMISSION_DENIED",
+    "httpStatus": "inferred403",
+    "endpoint": null,
+    "method": null,
+    "providerCode": null,
+    "actualIssuedScopes": null
+  },
+  "verifiedRoleRequirement": "Workers Editor cannot create new Worker; Workers product Admin required",
+  "oauthRequestedScopesChanged": false,
+  "clientChanged": false,
+  "cloudMutations": false,
+  "REDOWNEdited": false,
+  "merge": false,
+  "deploy": false,
+  "push": false
+}

@@ -1,0 +1,12 @@
+{
+  "source": "https://github.com/cloudflare/cloudflare-docs/blob/53ce9b502646fdc019b8184b29b9f1054939e1b6/src/content/docs/workers/authorization/workers.mdx",
+  "sha256": "2ddf3cb5fb65d347d74f99fb6ccc85435e72d0c29a94b6c339585b525332ab83",
+  "excerpts": [
+    "| Editor             | Edit          | Can read, update, deploy, and rename existing Workers, including script content, settings, schedules, versions, deployments, and observability. Cannot create or delete Workers.                     |",
+    "Per-Worker roles apply only to the Workers you select. You cannot grant per-Worker access to a Worker that does not exist yet. Creating new Workers requires product-level `Admin` access.",
+    "These legacy permissions and roles are being replaced by the new Workers roles. There is no deprecation date right now. Existing permissions and roles continue to work, and customers will receive advance notice before any deprecation.",
+    "| Workers Scripts Edit                  | `Editor` at the Workers product scope                |",
+    "To deploy a Worker that has [bindings](/workers/runtime-apis/bindings/) to resources like [Workers KV](/kv/), [R2](/r2/), or [D1](/d1/), you need `Editor` access to the Worker. You do not need separate permissions on the bound resources to deploy the Worker.",
+    "- Creating a new Worker requires Workers Admin because per-Worker permissions can only apply to Workers that already exist."
+  ]
+}

@@ -1,0 +1,5 @@
+
+> click2cloud@0.3.6 test:shelf:extension
+> node scripts/test-shelf-extension.mjs
+
+{"result":"BLOCKED","blocker":"UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR","receipt":"/workspace/Click2Cloud/docs/evidence/worker-permission/real-shelf-receipt.json"}

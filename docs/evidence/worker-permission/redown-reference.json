@@ -1,0 +1,25 @@
+{
+  "repository": "thanks-cohn/REDOWN",
+  "ref": "main",
+  "commit": "e58bf99f4851f635cecc572e483ae35e184677f2",
+  "mode": "immutable GitHub source copied to temporary read-only reference; original checkout unchanged",
+  "files": {
+    "tests/worker-bootstrap-first-install.test.mjs": "e5bdb99fd47c09e6ed7583bd2cef8a5258bb013d9129bb0c1ddb145263bf5094",
+    "tests/cloudflare-login.test.mjs": "d8d4e902f877782d9c58aaeddfff362061fbe8f1488a63a7fea01d63bfc4e9b8",
+    "extension/search-session.js": "875f1687a6c708ee73a41b2f6e3ecf7b24711418256c25df2af4b43ac8408dce",
+    "extension/transfer-counter.js": "c315a555692f987f2189984e223e2171dc5ea7152594f78b135ae5e0e39272ae",
+    "extension/chute-worker.js": "42ddc61a589ecc406a0fcd883613279e2aa34a09ee5b97a284b910419abd6f2b",
+    "extension/explorer-diagnostics-bridge.js": "ffe1f37ab83f88b0a3bf799d1651d7a675a8a0043ece7d2035a5472705775c6c",
+    "extension/options.js": "0588b8a93f45ca91bb39d8a8dfd5f0b4618727224a84add55296f7ca077a231d",
+    "extension/service-worker.js": "93da15c4f5de2382e721b914b86ea7c64f696f8fe0a45850f1f6f1eb41680eac",
+    "extension/rfis-index.js": "9f5a18349521a398ea2f0e85b1a1978830fc8aa5caf06e93f1806502e14d8f1f",
+    "extension/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+    "extension/background.js": "9d519f2bbaeb57eccd68ed856d123ec055f44e0d25dbaf1d95dd3ce4ae88451f",
+    "extension/cloudflare-auth.js": "3b75d87d43b902f7822dfde93bd337019a71a440cf6779718694260826c96912",
+    "extension/nested-locations.js": "344c8002a55e01ee0f7f3c1686a7e7a7df4b2da02b77696c90b3bb74207f5a6c",
+    "extension/runtime-diagnostics.js": "25f10ac7cef201cefb899f88a8ff1ef18db31839bca1c33e42372330b0cd4141",
+    "extension/manifest.json": "6a4ea8181fd9a3db9d20ca2cdf81e4827c1f44785af0fa73842c6ca026a0a7ad",
+    "extension/explorer-diagnostics.js": "e7ee43dc9a94d39023cca4e63791667541f448e136900c02595bc7bb93eeb9e7",
+    "extension/shelf.js": "a08a1387fe7eaa2888f632253da717c1590e4ce18c47764d7b02760476862b28"
+  }
+}

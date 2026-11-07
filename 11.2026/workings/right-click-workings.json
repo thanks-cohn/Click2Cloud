@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "0659915cc42af76ffe4c51d6da3bcca29161cabc",
+    "sourceCommit": "2498da593138c0ef596c4809a8c130a5ad57acdd",
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
@@ -11487,7 +11487,7 @@
         "preconditions": "Authorized selected-account setup encounters a Workers API failure",
         "trigger": "Existing provisioner json boundary; no second API owner",
         "guard": "Exact endpoint operation descriptors, real HTTP result, fixed public field allowlist; unknown403 cause stays unresolved",
-        "actual": "Capture safe operation/method/endpoint template, HTTPstatus, numeric Cloudflare codes, requestID, session-versus-issued scopes, permission alternatives; retain last failure in existing owned plan/setup ledger and suppress automatic retry",
+        "actual": "Capture safe operation/method/endpoint template, HTTPstatus, numeric Cloudflare codes, requestID, session-versus-issued scopes, permission alternatives; retain last failure in existing owned plan/setup ledger and suppress automatic retry Creation intent includes the documented product-level Workers Admin requirement; current member/token role is not guessed.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
@@ -11513,12 +11513,12 @@
           {
             "path": "src/cloudflare/deployment.mjs",
             "symbol": "export function safeWorkerDiagnostic",
-            "line": 14
+            "line": 13
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "worker-preparation-blocked",
-            "line": 1
+            "line": 113
           }
         ],
         "verification": {
@@ -12116,11 +12116,11 @@
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
       "liveR2": "Read-only environment-token discovery HTTP200/redown present; no extension-OAuth save/write/readback performed",
       "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
-      "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; live Windows request/role not captured",
+      "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; actual Windows denied request unobserved",
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
-      "workerPermission": "Official API schema and latest REDOWN source verified; actual Windows failing endpoint/numeric code/scopes remain uncaptured. Environment-token GETs200 do not establish extension OAuth permissions."
+      "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made."
     },
-    "sourceState": "Working-tree hash-bound source; runtime/map/tests committed together; final receipt pins implementation commit.",
+    "sourceState": "Committed runtime snapshot 2498da593138c0ef596c4809a8c130a5ad57acdd; subsequent evidence commit changes no runtime source.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -13437,7 +13437,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "829cdc4ad1171752c97620ea250fc662d939d214b435dae96776ee0b54fd4ef2"
+    "digest": "7baf34cbe5e23167f8326c397ab9e6c9dd963777e950b2120d308b304e076f25"
   },
   "changeLog": [
     {
@@ -13492,7 +13492,7 @@
       "beforeCommit": "93410b4b3715dac40afa3f4682aeac998803b3d9"
     },
     {
-      "sourceCommit": "0659915cc42af76ffe4c51d6da3bcca29161cabc",
+      "sourceCommit": "2498da593138c0ef596c4809a8c130a5ad57acdd",
       "behaviorIds": [
         "AUTH_REQUEST_403",
         "WORKER_PREPARE",

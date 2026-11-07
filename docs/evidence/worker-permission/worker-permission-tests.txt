@@ -1,0 +1,32 @@
+✔ approved first setup creates redown only when missing; default is established only after verified probe (49.313551ms)
+✔ returning custom default always wins, and no missing selected bucket is recreated (3.806012ms)
+✔ intentional removal, missing permission, outage and positive inactive status stay distinct (7.903181ms)
+✔ passive click does not initialize an empty account outside the next explicit login (1.163244ms)
+✔ login and unavailable providers never replay pending sources or claim success (0.242936ms)
+✔ readiness never silently falls back after setup and custom selection is preserved during reconnect (1.29853ms)
+✔ new API operations have closed schemas, account grants and separate provisioning confirmation (4.684509ms)
+✔ OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation (0.904247ms)
+✔ repair of a configured non-default destination never changes the global default (1.765348ms)
+✔ one verified account needs no extra account-selection step; multiple accounts remain explicit (1.063064ms)
+✔ setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write (2.176902ms)
+✔ zero active native assignments open manager even when a hidden default remains ready (0.555885ms)
+✔ Worker denial retains exact safe account-subdomain-read evidence without assuming scope versus account role (13.507372ms)
+✔ Worker denial retains exact safe script-upload evidence without assuming scope versus account role (3.201865ms)
+✔ Worker denial retains exact safe script-subdomain-enable evidence without assuming scope versus account role (2.07375ms)
+✔ Worker denial retains exact safe script-settings-read evidence without assuming scope versus account role (3.253421ms)
+✔ denied enable step is not automatically retried; explicit resume preserves Worker, key, scope and upload (3.998951ms)
+✔ scope, authentication, invalid request and account subdomain configuration have different remedies (3.505831ms)
+✔ diagnostic serializer rejects injected endpoints, scopes, headers, messages and secret values (0.651851ms)
+✔ onboarding keeps approval, bucket, ledger identity and diagnostic; only explicit resume retries preparation (3.70039ms)
+✔ canonical API returns safe operation/status/provider-code diagnostics with a blocked response (1.426361ms)
+✔ REDOWN canonical Workers read/write grants are accepted without replacing OAuth client or saved authority (1.338125ms)
+✔ new Worker creation and existing Worker edit have different documented role diagnostics (11.017205ms)
+✔ resolved permission denial does not mask a later local completion failure or force new approval (3.318913ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 237.004327

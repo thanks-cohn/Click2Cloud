@@ -1,0 +1,163 @@
+{
+  "source": "https://github.com/cloudflare/api-schemas/blob/main/openapi.yaml",
+  "sourceSHA256": "9923cc831ac55f9e63bca3ee31911e5397d9915ae6e21108b0468ebfde87702f",
+  "operations": {
+    "/accounts/{account_id}/workers/scripts/{script_name}": {
+      "get": {
+        "operationId": "worker-script-download-worker",
+        "summary": "Download Worker Script",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Tail Read",
+          "Workers Scripts Write",
+          "Workers Scripts Read",
+          "Workers Admin",
+          "Workers Editor",
+          "Workers Content Read-Only",
+          "Individual Workers Admin",
+          "Individual Workers Editor",
+          "Individual Workers Content Read-Only"
+        ]
+      },
+      "put": {
+        "operationId": "worker-script-upload-worker-module",
+        "summary": "Upload Worker",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Scripts Write",
+          "Workers Admin",
+          "Workers Editor",
+          "Individual Workers Admin",
+          "Individual Workers Editor"
+        ]
+      }
+    },
+    "/accounts/{account_id}/workers/scripts/{script_name}/settings": {
+      "get": {
+        "operationId": "worker-script-get-settings",
+        "summary": "Get Worker Script and Version Settings",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Tail Read",
+          "Workers Scripts Write",
+          "Workers Scripts Read",
+          "Workers Admin",
+          "Workers Editor",
+          "Workers Content Read-Only",
+          "Workers Metadata Read-Only",
+          "Individual Workers Admin",
+          "Individual Workers Editor",
+          "Individual Workers Content Read-Only",
+          "Individual Workers Metadata Read-Only"
+        ]
+      }
+    },
+    "/accounts/{account_id}/workers/scripts/{script_name}/subdomain": {
+      "get": {
+        "operationId": "worker-script-get-subdomain",
+        "summary": "Get Worker Script Subdomain",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Tail Read",
+          "Workers Scripts Write",
+          "Workers Scripts Read",
+          "Workers Admin",
+          "Workers Editor",
+          "Workers Content Read-Only",
+          "Workers Metadata Read-Only",
+          "Individual Workers Admin",
+          "Individual Workers Editor",
+          "Individual Workers Content Read-Only",
+          "Individual Workers Metadata Read-Only"
+        ]
+      },
+      "post": {
+        "operationId": "worker-script-post-subdomain",
+        "summary": "Update Worker Script Subdomain",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Scripts Write",
+          "Workers Admin",
+          "Workers Editor",
+          "Individual Workers Admin",
+          "Individual Workers Editor"
+        ]
+      }
+    },
+    "/accounts/{account_id}/workers/subdomain": {
+      "get": {
+        "operationId": "worker-subdomain-get-subdomain",
+        "summary": "Get a Workers Subdomain",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Scripts Write",
+          "Workers Scripts Read"
+        ]
+      },
+      "put": {
+        "operationId": "worker-subdomain-create-subdomain",
+        "summary": "Create a Workers Subdomain",
+        "security": [
+          {
+            "api_token": []
+          },
+          {
+            "api_email": [],
+            "api_key": []
+          }
+        ],
+        "x-api-token-group": [
+          "Workers Scripts Write"
+        ]
+      }
+    }
+  }
+}

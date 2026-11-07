@@ -1,0 +1,24 @@
+{
+  "identity": "configured environment API token, NOT Windows extension OAuth",
+  "mode": "GET_ONLY_READ_ONLY",
+  "checks": [
+    {
+      "operation": "account-workers-subdomain",
+      "endpointTemplate": "/accounts/{account_id}/workers/subdomain",
+      "method": "GET",
+      "httpStatus": 200,
+      "cloudflareSuccess": true,
+      "providerCodes": [],
+      "subdomainReturned": true
+    },
+    {
+      "operation": "existing-owned-script-settings",
+      "endpointTemplate": "/accounts/{account_id}/workers/scripts/{script_name}/settings",
+      "method": "GET",
+      "httpStatus": 200,
+      "cloudflareSuccess": true,
+      "providerCodes": [],
+      "subdomainReturned": null
+    }
+  ]
+}
