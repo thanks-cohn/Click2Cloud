@@ -117,6 +117,47 @@ For every new abstraction or removed legacy subsystem, show concrete reason. Do 
 
 Deliver: precise REDOWN↔Click2Cloud difference table; original defect and root-cause analysis; source modules kept/replaced/removed; actual committed repair on a new branch; tests and exact classifications; independent live R2 receipts where authorized; installed Windows proof when possible; accurate remaining blockers; commit SHA; no merge or production deployment without owner permission.
 
+## 9A. OWNER CLARIFICATION — FULL REDOWN FUNCTIONALITY, FULL API PARITY, NO SEVERE DEFECTS
+
+**This section is the controlling goal of the next Codex implementation.** Codex has access to **both full repositories**: `thanks-cohn/REDOWN` (READ ONLY) and `thanks-cohn/Click2Cloud` (implementation target). **INSPECT REDOWN ITSELF IN DEPTH.** Do not use this handoff, its selected excerpts, or a short list of known files as a substitute for reading and tracing the source. Discover actual capabilities and behavior throughout REDOWN.
+
+### Outcome precedence — FUNCTIONALITY FIRST
+
+1. **WORKING REDOWN-EQUIVALENT FUNCTIONALITY is the number-one acceptance condition.** Click2Cloud must actually perform REDOWN's practical, useful workflows as REDOWN does for the user, with the same or better results, responsiveness and behavior. Most of the application should retain REDOWN's functional experience. Click2Cloud's primary reason for existing is to make the native RIGHT-CLICK system reliable, fully documented and tested. Right-click is the P0, not a justification to silently omit the rest.
+2. **FULL PROGRAMMATIC ACCESS is a coequal required property of that working result**, not a replacement for it: every meaningful REDOWN capability translated into Click2Cloud must also be reachable through the existing trusted, versioned, typed V3+1 / Universal File API, with equivalent validation, authorization, side effects, outcomes and inspection. The GUI and native menu are **clients of the canonical API/business logic**. No GUI-only hidden business logic, shadow APIs or duplicate engines. API tests passing while the actual product fails does **NOT** count as DONE.
+3. **Do not inherit severe REDOWN defects.** Extract REDOWN's useful mechanisms and semantics; detect and correct genuine source-demonstrable or reproduced severe issues (false success, damaged/missing files, lost state, wrong destination, dangerous authorization/security errors, memory explosions, destructive writes, severe Explorer/History failures). Preserve the *capability* while fixing the bad implementation. Avoid speculative "improvements" that change otherwise working features.
+4. **Make the change that needs to be made.** Replace a whole broken subsystem if warranted; keep a sound one intact. Not "smallest possible patch," not gratuitous rewrite. NO BLOAT.
+
+### Direct REDOWN-to-Click2Cloud extraction and translation
+
+Codex MUST perform a repository-wide discovery and trace of **all consequential REDOWN functionality**, including capabilities not listed here. Inspect native menus; modes/destination management; OAuth/account lifecycle; Cloudflare and other providers; source fetching; TRUE REMOTE transfers; file/folder manipulation; Explorer, navigation, selection and previews; History/GO TO/Quick Glance; URL/metadata features; settings; import/export; and recovery. For each capability, identify the actual REDOWN entrypoint, code owner, state, data and network flow, observable result, failure behavior, and specific serious defects if any.
+
+Build an evidence-linked translation matrix containing for EACH real REDOWN capability:
+**REDOWN source/code path → observed/source-verified REDOWN user behavior → corresponding Click2Cloud code/UI → canonical typed API operation → authorization and user-gesture/consent constraints → inputs/state/side effects → desired matching working outcome → actual tests and remaining gaps.**
+
+A feature without a matching working Click2Cloud outcome is a FUNCTIONAL GAP. A feature without equivalent programmatic access is an API GAP. Neither gap may be silently dropped, marked complete, or "fixed" by removing the feature. An unsupported REDOWN feature or platform-impossible programmatic gesture must be identified specifically and truthfully, not faked.
+
+**Functional equivalence means real operations, not screenshots or architecture diagrams.** For instance, if REDOWN saves a right-clicked remote image into an R2 folder and makes it findable in Explorer/History, the Click2Cloud GUI AND programmatic operation must genuinely perform and confirm the same task on an actual authorized account. If REDOWN has a navigable/usable feature, the Click2Cloud counterpart must actually be navigable/usable—not merely show the corresponding button.
+
+### Transparent, predictable, conditionally deterministic, fully inspectable
+
+Use the following precise terminology in code/documentation:
+- **Deterministic decision logic:** Given the same explicit inputs, configured menu generation, authorizations, persisted state and relevant observations, routing and validation yield the same decision/target. No hidden GUI-only precedence, unpredictable fallbacks, cross-mode state mutation or time-based "success."
+- **Predictable external outcomes:** Actual network, provider, concurrency and OAuth outcomes are NOT deterministic. Define observable states, bounded errors, operation IDs, idempotency, exact authorization/confirmation, reconciliation and independent receipts; make interrupted/uncertain cases safely inspectable instead of pretending they succeeded.
+- **Transparent:** Programmatic callers can read what is configured, why an operation resolves or fails, what was attempted and whether a provider independently confirmed completion, via safe structured codes and read-only inspection APIs.
+- **API-equivalent:** GUI and API call the **same domain operation**, with the same permission checks, data model, validation, durable state and provider side effects. Real Chrome user gestures, browser file pickers, and provider OAuth consent cannot be impersonated; expose equivalent authorized intent/configuration/state/result where direct invocation is platform-restricted. Never bypass user consent to manufacture parity.
+
+### Non-negotiable test and documentation gates
+
+- First preserve the **immutable actual pre-change baseline** in `11.2026/workings/right-click-workings.json`; update CURRENT after changes. Source-backed IF/THEN/ELSE mapping must match implemented state, API, native menu, GUI and provider effects.
+- Run paired REDOWN↔Click2Cloud **functional behavior tests**, not just comparison of code signatures. Test representative files, downloads, right-click 0/1/2+ menus, state persistence, folder/tree behavior, login, History/GO TO and any other discovered high-value workflows. Compare both correct and failing outcomes.
+- For each meaningful GUI action, test the API equivalent and **cross-surface continuity**: programmatic changes appear in the GUI/native menu; GUI changes appear in API readback; both produce the same verified cloud result. Log all unmapped and unimplemented operations.
+- Keep actual installed Chrome proof and authorized **live** Cloudflare/R2 source-byte readback as hard gates; simulations, fixtures, readiness probe or API contract success do not stand in for true user functionality.
+- Distinguish SOURCE-VERIFIED, LOCAL-TESTED, BROWSER-FIXTURE-TESTED, LIVE-CLOUDFLARE-VERIFIED, INSTALLED-CHROME-VERIFIED, BLOCKED and NOT-TESTED. Do not claim complete parity if REDOWN-wide extraction or a key scenario remains untested.
+- Handoff must enumerate REDOWN capabilities **preserved, translated, repaired, deliberately rejected for proven severe defect, not yet implemented** with links to both repo sources, associated API method, tests and exact evidence. No hidden scope reduction.
+
+**FINAL OWNER ACCEPTANCE:** The user should get a **working product JUST AS REDOWN functions**, with the improved reliable right-click system, **all meaningful functions programmatically accessible through the canonical API**, transparent and predictable decisions, and severe defects not carried forward. Nothing short of actual working behavior is accepted. FUNCTIONALITY FIRST. FULL PARITY. NO BLOAT.
+
 ## 10. Definition of DONE
 
 Click2Cloud is NOT fixed when only OAuth succeeds, a Worker responds READY, a simulated API test passes, or a 57-byte readiness file is verified.
