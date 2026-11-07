@@ -158,7 +158,7 @@ flowchart TD
     ADD["User creates a bucket<br/>without ASSIGNING it"] -. "No change" .-> COUNT
     CHOOSE["User explicitly assigns<br/>an additional destination"] --> COUNT
     DELETE["User intentionally deletes/unassigns redown"] --> COUNT
-    DELETE -. "No automatic recreation" .-> MANAGE
+    DELETE -. "No automatic recreation" .-> NOREMAKE["Preserve explicit deletion marker"]
 ```
 
 **Decision rule:** Only user-chosen and assigned Cloudflare destinations count. A new bucket by itself changes nothing. With `redown` + `Photos` assigned, Cloudflare shows one submenu containing both. If `redown` is intentionally deleted and `Photos` alone remains, Cloudflare becomes flat and saves to `Photos`. If no assigned locations remain, clicking flat Cloudflare opens **Manage Destinations** (or provider sign-in first if disconnected). Explicit deletion is permanent unless the user explicitly requests creation again.
