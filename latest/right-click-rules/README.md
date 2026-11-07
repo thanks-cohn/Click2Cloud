@@ -1,5 +1,12 @@
 # Click2Cloud — Latest Right-Click Rules
 
+## Engine implementation and API traceability
+
+For a source-verified explanation of the **actual current right-click engine**, every menu configuration control's corresponding trusted API operation, state changes, Chrome registration pipeline and the documentation/test contract, see **[`ENGINE-AND-API-DOCUMENTATION.md`](ENGINE-AND-API-DOCUMENTATION.md)**.
+
+This rules document describes the *desired* Quick Select/Cloudflare behavior. The engine/API document marks current behavior separately so a new engineer or Codex does not mistake an approved rule for implemented and tested behavior.
+
+
 **Owner-approved design clarification — November 7, 2026**  
 **Status:** Requirement/documentation only. **Not implemented or verified by this document.**  
 **Scope:** Cloudflare default destination, Quick Select, and native Chrome menu placement.
