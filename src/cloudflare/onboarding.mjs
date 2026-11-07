@@ -1,11 +1,11 @@
 import {diagnoseCloudflare} from '../auth/cloudflare-oauth.mjs';
 import {readBuckets} from './inventory.mjs';
 import {fail} from './wire.mjs';
-import {targetKey} from '../core/menu-identity.mjs';
+import {targetKey,stableId} from '../core/menu-identity.mjs';
 export function createCloudflareOnboarding({current,oauth,provisioner,transport,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
  async function commit(mutator,key=crypto.randomUUID()){
-  const s=await current.read(),next=structuredClone(s);mutator(next.product);
-  await current.commitProduct({...next,expectedRevision:s.product.revision,idempotencyKey:'cloudflare:'+key,fingerprint:JSON.stringify(next.product)});
+  const s=await current.read(),next=structuredClone(s);mutator(next.product,next.configs);
+  await current.commitProduct({...next,expectedRevision:s.product.revision,idempotencyKey:'cloudflare:'+key,fingerprint:JSON.stringify({product:next.product,configs:next.configs})});
  }
  async function account(accountId){const a=await oauth.authority();if(!a.accounts.some(x=>x.id===accountId))fail('SCOPE_UNAUTHORIZED');return a;}
  async function r2(accountId){
@@ -63,7 +63,18 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   try{await record({...probe,kind:'readiness',timings:{...probe.timings,provisionMs}});if(probe.state!=='verified')return {state:probe.state==='uncertain'?'uncertain':'blocked',code:probe.code??'READINESS_WRITE_UNVERIFIED'};
   await provisioner.markVerified(target,auth.sessionId);
   const latest=await current.read();if(!repairTarget&&targetKey(latest.product.defaultTarget??target)!==targetKey(target))fail('DEFAULT_CHANGED_DURING_SETUP');
-  await commit(p=>{if(!p.defaultTarget&&!repairTarget)p.defaultTarget=target;p.cloudflare.initialized=[...new Set([...p.cloudflare.initialized,accountId])];p.cloudflare.pending=p.cloudflare.pending.filter(x=>x!==accountId);});
+  await commit((p,configs)=>{
+   if(!repairTarget){
+    // The first-use bucket is a real, ordinary Simple destination, not a hidden default-only shortcut.
+    // Never resurrect a deliberately removed destination or overwrite a user-chosen default.
+    const removed=p.cloudflare.removed.includes(accountId);
+    if(!removed&&!configs.simple.destinations.some(d=>targetKey(d.target)===targetKey(target))){
+     configs.simple.destinations.push({id:stableId('destination','simple'+targetKey(target)),target,label:target.prefix?target.prefix.split('/').filter(Boolean).at(-1):target.bucketName,order:configs.simple.destinations.length});
+    }
+    if(!p.defaultTarget&&!removed)p.defaultTarget=target;
+   }
+   p.cloudflare.initialized=[...new Set([...p.cloudflare.initialized,accountId])];p.cloudflare.pending=p.cloudflare.pending.filter(x=>x!==accountId);
+  });
   const result={state:'completed',code:'CLOUDFLARE_READY',target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started),probeRetention:'Small verified readiness object retained; delete explicitly in provider dashboard if desired.'};await progress('complete',{operationId,result});return result;}catch(e){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(e.code??'')?e.code:'LOCAL_COMPLETION_UNCONFIRMED',operationId};}
  }
  async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs,attentionContext}){
