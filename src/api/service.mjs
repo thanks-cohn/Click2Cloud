@@ -119,6 +119,11 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         const bindings=[];
         if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);}
         for(const c of params.changes??[])if(c.id){const d=Object.values(state.configs).flatMap(c=>c.destinations??[]).find(d=>d.id===c.id);if(d)bindings.push(d.target);}
+        if(method==='invokeProviderAction'){
+          const spec=params.generation===undefined?null:engine.getMenu(params.generation),row=spec?.rows.find(r=>r.id===stableId('provider-entry',params.provider)&&r.role==='save');
+          const target=row?.target??(state.product.defaultTarget?.provider===params.provider?state.product.defaultTarget:null);if(target)bindings.push(target);
+        }
+        if((params.changes??[]).some(c=>c.type==='clearDefault')&&state.product.defaultTarget)bindings.push(state.product.defaultTarget);
         if(params.itemId){const row=engine.getMenu(params.generation)?.rows.find(r=>r.id===params.itemId);if(row?.target)bindings.push(row.target);}
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
         if(['inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
@@ -186,7 +191,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
           const next=replay?state:applyChanges(state,params.changes);
-          if(await authorize({actor,scope,method,params,bindings:next.configs})!==true)fail('PERMISSION_DENIED');
+          if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
             if(params.changes.some(c=>c.type==='deleteDestinationConfig')&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
