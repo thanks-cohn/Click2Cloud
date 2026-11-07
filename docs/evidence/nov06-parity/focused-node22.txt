@@ -1,0 +1,1066 @@
+TAP version 13
+# Subtest: same normalized input generates an identical result independent of folder order
+ok 1 - same normalized input generates an identical result independent of folder order
+  ---
+  duration_ms: 11.974803
+  type: 'test'
+  ...
+# Subtest: Simple destinations are flat Cloudflare leaf entries
+ok 2 - Simple destinations are flat Cloudflare leaf entries
+  ---
+  duration_ms: 4.446333
+  type: 'test'
+  ...
+# Subtest: Other cloud providers are single native leaf siblings, not submenus
+ok 3 - Other cloud providers are single native leaf siblings, not submenus
+  ---
+  duration_ms: 0.783995
+  type: 'test'
+  ...
+# Subtest: Narrow includes only configured paths and ancestors
+ok 4 - Narrow includes only configured paths and ancestors
+  ---
+  duration_ms: 1.16695
+  type: 'test'
+  ...
+# Subtest: Depth 10 includes unconfigured folders but hides levels beyond 10
+ok 5 - Depth 10 includes unconfigured folders but hides levels beyond 10
+  ---
+  duration_ms: 6.289631
+  type: 'test'
+  ...
+# Subtest: Depth 16 reaches the deepest marker path and has an actionable leaf
+ok 6 - Depth 16 reaches the deepest marker path and has an actionable leaf
+  ---
+  duration_ms: 6.001244
+  type: 'test'
+  ...
+# Subtest: Each mode changes only its own projection
+ok 7 - Each mode changes only its own projection
+  ---
+  duration_ms: 3.324389
+  type: 'test'
+  ...
+# Subtest: No sibling label collision is silently accepted
+ok 8 - No sibling label collision is silently accepted
+  ---
+  duration_ms: 2.267534
+  type: 'test'
+  ...
+# Subtest: Unavailable destination and path traversal are rejected
+ok 9 - Unavailable destination and path traversal are rejected
+  ---
+  duration_ms: 0.789191
+  type: 'test'
+  ...
+# Subtest: Native submenu parents expose explicit Save here leaf
+ok 10 - Native submenu parents expose explicit Save here leaf
+  ---
+  duration_ms: 1.132959
+  type: 'test'
+  ...
+# Subtest: Upload is not acknowledged until provider confirms it
+ok 11 - Upload is not acknowledged until provider confirms it
+  ---
+  duration_ms: 3.74818
+  type: 'test'
+  ...
+# Subtest: canonical MenuSpec preserves full arbitrary supported depth, row order, role and immutable exact identity
+ok 12 - canonical MenuSpec preserves full arbitrary supported depth, row order, role and immutable exact identity
+  ---
+  duration_ms: 10.237774
+  type: 'test'
+  ...
+# Subtest: input permutations compile byte-identical canonical output without mutation
+ok 13 - input permutations compile byte-identical canonical output without mutation
+  ---
+  duration_ms: 6.142485
+  type: 'test'
+  ...
+# Subtest: single default is a direct Cloudflare save; extra destination expands with native separator and Home last
+ok 14 - single default is a direct Cloudflare save; extra destination expands with native separator and Home last
+  ---
+  duration_ms: 2.821711
+  type: 'test'
+  ...
+# Subtest: same named bucket and path in different accounts retain separate canonical actions
+ok 15 - same named bucket and path in different accounts retain separate canonical actions
+  ---
+  duration_ms: 8.960332
+  type: 'test'
+  ...
+# Subtest: provider-neutral S3 modes are siblings of Cloudflare and unchanged flat provider native IDs survive all modes
+ok 16 - provider-neutral S3 modes are siblings of Cloudflare and unchanged flat provider native IDs survive all modes
+  ---
+  duration_ms: 8.935621
+  type: 'test'
+  ...
+# Subtest: independent mode configurations own migrations, revisions and pure projections; replacement leaves peers exact
+ok 17 - independent mode configurations own migrations, revisions and pure projections; replacement leaves peers exact
+  ---
+  duration_ms: 4.191062
+  type: 'test'
+  ...
+# Subtest: Nested natural ancestors never accidentally save; selected parents receive explicit Save here
+ok 18 - Nested natural ancestors never accidentally save; selected parents receive explicit Save here
+  ---
+  duration_ms: 1.604216
+  type: 'test'
+  ...
+# Subtest: unwritable actionable ancestor stays a navigable branch without concealing a writable descendant
+ok 19 - unwritable actionable ancestor stays a navigable branch without concealing a writable descendant
+  ---
+  duration_ms: 3.876597
+  type: 'test'
+  ...
+# Subtest: read-only paging retrieves every nested row and omission, and rejects stale cursors or scope changes
+ok 20 - read-only paging retrieves every nested row and omission, and rejects stale cursors or scope changes
+  ---
+  duration_ms: 4.077142
+  type: 'test'
+  ...
+# Subtest: partial Depth scans, bounded omissions, invalid targets and budget omissions stay explicitly incomplete
+ok 21 - partial Depth scans, bounded omissions, invalid targets and budget omissions stay explicitly incomplete
+  ---
+  duration_ms: 4.199542
+  type: 'test'
+  ...
+# Subtest: ineligible scope/default remains visible and blocked; unknown inventory is never healthy
+ok 22 - ineligible scope/default remains visible and blocked; unknown inventory is never healthy
+  ---
+  duration_ms: 3.618877
+  type: 'test'
+  ...
+# Subtest: all simultaneous scope faults remain inspectable and contradictory observations fail explicitly
+ok 23 - all simultaneous scope faults remain inspectable and contradictory observations fail explicitly
+  ---
+  duration_ms: 4.28608
+  type: 'test'
+  ...
+# Subtest: native, mirror and agent simulation resolve identical action without reads writes or feedback
+ok 24 - native, mirror and agent simulation resolve identical action without reads writes or feedback
+  ---
+  duration_ms: 4.029457
+  type: 'test'
+  ...
+# Subtest: resolver rejects all stale unknown unacknowledged disabled context and revoked selections without rerouting
+ok 25 - resolver rejects all stale unknown unacknowledged disabled context and revoked selections without rerouting
+  ---
+  duration_ms: 2.806499
+  type: 'test'
+  ...
+# Subtest: forged stored action binding cannot resolve an authorized target to a different intent
+ok 26 - forged stored action binding cannot resolve an authorized target to a different intent
+  ---
+  duration_ms: 3.403673
+  type: 'test'
+  ...
+# Subtest: structured generation diff detects lost flat peers, misrouting, stale baselines and mode output changes
+ok 27 - structured generation diff detects lost flat peers, misrouting, stale baselines and mode output changes
+  ---
+  duration_ms: 10.092232
+  type: 'test'
+  ...
+# Subtest: duplicate logical labels, duplicate targets and identities fail visibly instead of silently rerouting
+ok 28 - duplicate logical labels, duplicate targets and identities fail visibly instead of silently rerouting
+  ---
+  duration_ms: 4.016292
+  type: 'test'
+  ...
+# Subtest: diagnostics disabled or throwing cannot alter compile or resolution, and decision evidence is source-owned
+ok 29 - diagnostics disabled or throwing cannot alter compile or resolution, and decision evidence is source-owned
+  ---
+  duration_ms: 12.399319
+  type: 'test'
+  ...
+# Subtest: shared engine composes native ACK, exact canonical route, local capture and independently verified completion
+ok 30 - shared engine composes native ACK, exact canonical route, local capture and independently verified completion
+  ---
+  duration_ms: 613.275078
+  type: 'test'
+  ...
+# Subtest: stale/revoked selections never capture or upload; source errors still notify with debug off
+ok 31 - stale/revoked selections never capture or upload; source errors still notify with debug off
+  ---
+  duration_ms: 4.01385
+  type: 'test'
+  ...
+# Subtest: uncertain write and failed verified completion do not replay or falsely count
+ok 32 - uncertain write and failed verified completion do not replay or falsely count
+  ---
+  duration_ms: 21.14585
+  type: 'test'
+  ...
+# Subtest: native plan and human mirror preserve every ordered canonical row without invented semantics
+ok 33 - native plan and human mirror preserve every ordered canonical row without invented semantics
+  ---
+  duration_ms: 0.821427
+  type: 'test'
+  ...
+# Subtest: single registrar tracks desired generated ACK and independent observation separately; unchanged no-op
+ok 34 - single registrar tracks desired generated ACK and independent observation separately; unchanged no-op
+  ---
+  duration_ms: 3.115045
+  type: 'test'
+  ...
+# Subtest: failed child ACK does not conceal independently failed sibling; blocked descendants visible
+ok 35 - failed child ACK does not conceal independently failed sibling; blocked descendants visible
+  ---
+  duration_ms: 0.641123
+  type: 'test'
+  ...
+# Subtest: lost callback is uncertainty even when create returned correct-looking ID
+ok 36 - lost callback is uncertainty even when create returned correct-looking ID
+  ---
+  duration_ms: 11.020285
+  type: 'test'
+  ...
+# Subtest: removeAll missing ACK invalidates old generation and never claims installed state
+ok 37 - removeAll missing ACK invalidates old generation and never claims installed state
+  ---
+  duration_ms: 5.011808
+  type: 'test'
+  ...
+# Subtest: serial generations reject stale/conflicting plans; restart does not trust historical ACK; sink throws harmlessly
+ok 38 - serial generations reject stale/conflicting plans; restart does not trust historical ACK; sink throws harmlessly
+  ---
+  duration_ms: 1.57214
+  type: 'test'
+  ...
+# Subtest: persistence failure cannot be described as complete durable readiness; actual native ACK remains explicit
+ok 39 - persistence failure cannot be described as complete durable readiness; actual native ACK remains explicit
+  ---
+  duration_ms: 0.38222
+  type: 'test'
+  ...
+# Subtest: native user failure feedback survives missing auth/dispatcher and disabled diagnostics
+ok 40 - native user failure feedback survives missing auth/dispatcher and disabled diagnostics
+  ---
+  duration_ms: 2.078448
+  type: 'test'
+  ...
+# Subtest: privileged debug host refuses external senders, unknown routes, absent consent, writes and export
+ok 41 - privileged debug host refuses external senders, unknown routes, absent consent, writes and export
+  ---
+  duration_ms: 0.731936
+  type: 'test'
+  ...
+# Subtest: duplicate owners rejected, immutable acknowledged models and retry repair preserve identity
+ok 42 - duplicate owners rejected, immutable acknowledged models and retry repair preserve identity
+  ---
+  duration_ms: 0.597939
+  type: 'test'
+  ...
+# Subtest: failed persistence cannot turn into success merely by reapplying same generation
+ok 43 - failed persistence cannot turn into success merely by reapplying same generation
+  ---
+  duration_ms: 1.158109
+  type: 'test'
+  ...
+# Subtest: debug and one-page export grants are expiring, document-bound and distinct
+ok 44 - debug and one-page export grants are expiring, document-bound and distinct
+  ---
+  duration_ms: 0.828765
+  type: 'test'
+  ...
+# Subtest: every row outcome has canonical ordinal and explicit prerequisite links, including blocked descendants
+ok 45 - every row outcome has canonical ordinal and explicit prerequisite links, including blocked descendants
+  ---
+  duration_ms: 0.637638
+  type: 'test'
+  ...
+# Subtest: local encrypted backup retains schema, authenticates payload and requires a distinct explicit authorization
+ok 46 - local encrypted backup retains schema, authenticates payload and requires a distinct explicit authorization
+  ---
+  duration_ms: 172.016333
+  type: 'test'
+  ...
+# Subtest: closed persistence schema rejects credentials hidden behind unknown fields at every accepted level
+ok 47 - closed persistence schema rejects credentials hidden behind unknown fields at every accepted level
+  ---
+  duration_ms: 0.726927
+  type: 'test'
+  ...
+# Subtest: backup rejects namespace mismatch, revision mismatch, duplicate journal and unsupported schemas
+ok 48 - backup rejects namespace mismatch, revision mismatch, duplicate journal and unsupported schemas
+  ---
+  duration_ms: 0.455398
+  type: 'test'
+  ...
+# Subtest: unavailable CURRENT reports a setup failure while throwing diagnostic sinks cannot mask the outcome
+ok 49 - unavailable CURRENT reports a setup failure while throwing diagnostic sinks cannot mask the outcome
+  ---
+  duration_ms: 1.512491
+  type: 'test'
+  ...
+# Subtest: REDOWN core path and destination normalization preserved
+ok 50 - REDOWN core path and destination normalization preserved
+  ---
+  duration_ms: 0.34016
+  type: 'test'
+  ...
+# Subtest: no privileged transport defaults are silently allowed into Click2Cloud host
+ok 51 - no privileged transport defaults are silently allowed into Click2Cloud host
+  ---
+  duration_ms: 0.26154
+  type: 'test'
+  ...
+# Subtest: Click2Cloud calls the extracted real R2 listing adapter via the universal operation API
+ok 52 - Click2Cloud calls the extracted real R2 listing adapter via the universal operation API
+  ---
+  duration_ms: 5.24357
+  type: 'test'
+  ...
+# Subtest: Unimplemented operation does not fabricate a successful result
+ok 53 - Unimplemented operation does not fabricate a successful result
+  ---
+  duration_ms: 0.162387
+  type: 'test'
+  ...
+# Subtest: Ambiguous writes stay uncertain and never auto-replay during a batch
+ok 54 - Ambiguous writes stay uncertain and never auto-replay during a batch
+  ---
+  duration_ms: 0.542855
+  type: 'test'
+  ...
+# Subtest: Provider preferences stay configurable but pagination is not exposed as a preference
+ok 55 - Provider preferences stay configurable but pagination is not exposed as a preference
+  ---
+  duration_ms: 0.412216
+  type: 'test'
+  ...
+# Subtest: The API exposes partial responses and dispatch-time progress, not false completion
+ok 56 - The API exposes partial responses and dispatch-time progress, not false completion
+  ---
+  duration_ms: 0.335401
+  type: 'test'
+  ...
+# Subtest: all catalog stages retain every critical fault outcome; no first-fault early stop
+ok 57 - all catalog stages retain every critical fault outcome; no first-fault early stop
+  ---
+  duration_ms: 3.366086
+  type: 'test'
+  ...
+# Subtest: misleading green parent does not hide child, cascade or independent sibling
+ok 58 - misleading green parent does not hide child, cascade or independent sibling
+  ---
+  duration_ms: 1.019042
+  type: 'test'
+  ...
+# Subtest: missing, in-flight, stale generation, epoch, evictions, dependencies, drops and restart stay visible
+ok 59 - missing, in-flight, stale generation, epoch, evictions, dependencies, drops and restart stay visible
+  ---
+  duration_ms: 1.255331
+  type: 'test'
+  ...
+# Subtest: disabled/throwing instrumentation is fail-open without inventing health
+ok 60 - disabled/throwing instrumentation is fail-open without inventing health
+  ---
+  duration_ms: 1.08494
+  type: 'test'
+  ...
+# Subtest: future provider boundary registration requires safe source manifest, preserves vocabulary
+ok 61 - future provider boundary registration requires safe source manifest, preserves vocabulary
+  ---
+  duration_ms: 1.064904
+  type: 'test'
+  ...
+# Subtest: API denies unknown/expired grants, sender spoofing and write methods
+ok 62 - API denies unknown/expired grants, sender spoofing and write methods
+  ---
+  duration_ms: 2.575164
+  type: 'test'
+  ...
+# Subtest: API paginates immutable complete available traces and scoped menu aliases; no private strings exported
+ok 63 - API paginates immutable complete available traces and scoped menu aliases; no private strings exported
+  ---
+  duration_ms: 3.450462
+  type: 'test'
+  ...
+# Subtest: export grant distinct from debug read grant; bounded errors and cursor scopes are safe
+ok 64 - export grant distinct from debug read grant; bounded errors and cursor scopes are safe
+  ---
+  duration_ms: 0.751678
+  type: 'test'
+  ...
+# Subtest: source manifest anchors exist and all source-defined typed codes remain in the vocabulary
+ok 65 - source manifest anchors exist and all source-defined typed codes remain in the vocabulary
+  ---
+  duration_ms: 33.556387
+  type: 'test'
+  ...
+# Subtest: desired/generated/ACK/observed states and omissions differ independently, without invented proof
+ok 66 - desired/generated/ACK/observed states and omissions differ independently, without invented proof
+  ---
+  duration_ms: 1.583229
+  type: 'test'
+  ...
+# Subtest: external skipped checks and unobservable mandatory boundaries cannot be healthy
+ok 67 - external skipped checks and unobservable mandatory boundaries cannot be healthy
+  ---
+  duration_ms: 0.44671
+  type: 'test'
+  ...
+# Subtest: fixture authorized simulation resolves selected aliases without disclosing routes or granting live authority
+ok 68 - fixture authorized simulation resolves selected aliases without disclosing routes or granting live authority
+  ---
+  duration_ms: 1.149168
+  type: 'test'
+  ...
+# Subtest: one green native ACK cannot conceal an entirely absent child checkpoint
+ok 69 - one green native ACK cannot conceal an entirely absent child checkpoint
+  ---
+  duration_ms: 0.745607
+  type: 'test'
+  ...
+# Subtest: failure storms paginate every available gap and keep each authorized export inside its actual byte cap
+ok 70 - failure storms paginate every available gap and keep each authorized export inside its actual byte cap
+  ---
+  duration_ms: 69.56816
+  type: 'test'
+  ...
+# Subtest: unrepresentable revision metadata is a visible diagnostic gap instead of silent correlation
+ok 71 - unrepresentable revision metadata is a visible diagnostic gap instead of silent correlation
+  ---
+  duration_ms: 0.461509
+  type: 'test'
+  ...
+# Subtest: a green checkpoint on another operation cannot conceal a declared absent checkpoint
+ok 72 - a green checkpoint on another operation cannot conceal a declared absent checkpoint
+  ---
+  duration_ms: 0.527228
+  type: 'test'
+  ...
+# Subtest: aggregate current ACK cannot conceal missing failed uncertain or stale per-item proof; extra generated rows stay visible
+ok 73 - aggregate current ACK cannot conceal missing failed uncertain or stale per-item proof; extra generated rows stay visible
+  ---
+  duration_ms: 1.172742
+  type: 'test'
+  ...
+# Subtest: save off/on/throwing diagnostics preserves exact provider bytes and verified business outcome
+ok 74 - save off/on/throwing diagnostics preserves exact provider bytes and verified business outcome
+  ---
+  duration_ms: 0.806973
+  type: 'test'
+  ...
+# Subtest: dispatcher exposes invalid intent, auth failure/revocation, capability and verifier blocks without upload
+ok 75 - dispatcher exposes invalid intent, auth failure/revocation, capability and verifier blocks without upload
+  ---
+  duration_ms: 0.455805
+  type: 'test'
+  ...
+# Subtest: upload failures/cancel/uncertainty and false confirmation never verify or commit feedback
+ok 76 - upload failures/cancel/uncertainty and false confirmation never verify or commit feedback
+  ---
+  duration_ms: 0.44337
+  type: 'test'
+  ...
+# Subtest: Boolean receipt, mismatched destination/bytes and unavailable final readback cannot count as saved
+ok 77 - Boolean receipt, mismatched destination/bytes and unavailable final readback cannot count as saved
+  ---
+  duration_ms: 0.501421
+  type: 'test'
+  ...
+# Subtest: verified upload with failed History handoff stays verified and explicitly pending; no replay
+ok 78 - verified upload with failed History handoff stays verified and explicitly pending; no replay
+  ---
+  duration_ms: 0.149814
+  type: 'test'
+  ...
+# Subtest: independent provider faults retain distinct operation correlation and dependency chains
+ok 79 - independent provider faults retain distinct operation correlation and dependency chains
+  ---
+  duration_ms: 0.353418
+  type: 'test'
+  ...
+# Subtest: existing File API run wrapper preserves all terminal states and discloses partial inventory
+ok 80 - existing File API run wrapper preserves all terminal states and discloses partial inventory
+  ---
+  duration_ms: 0.477407
+  type: 'test'
+  ...
+# Subtest: API progress, unsupported operations, rejected calls, batch uncertainty and throwing sink preserve semantics
+ok 81 - API progress, unsupported operations, rejected calls, batch uncertainty and throwing sink preserve semantics
+  ---
+  duration_ms: 1.17879
+  type: 'test'
+  ...
+# Subtest: transport wrappers do not log credentials, request bodies, URLs or hostile returned errors
+ok 82 - transport wrappers do not log credentials, request bodies, URLs or hostile returned errors
+  ---
+  duration_ms: 0.556526
+  type: 'test'
+  ...
+# Subtest: REDOWN upload adaptation independently verifies the FINAL destination bytes and rejects fabricated receipts
+ok 83 - REDOWN upload adaptation independently verifies the FINAL destination bytes and rejects fabricated receipts
+  ---
+  duration_ms: 3.666575
+  type: 'test'
+  ...
+# Subtest: Dashboard instrumented failures do not leak auth and do not activate from Refresh
+ok 84 - Dashboard instrumented failures do not leak auth and do not activate from Refresh
+  ---
+  duration_ms: 1.074975
+  type: 'test'
+  ...
+# Subtest: actual extracted R2 upload + staged readback + final byte verification runs through observed transports
+ok 85 - actual extracted R2 upload + staged readback + final byte verification runs through observed transports
+  ---
+  duration_ms: 11.049098
+  type: 'test'
+  ...
+# Subtest: provider adapter rejects cross-account resolution and wrong parent/leaf receipts before success
+ok 86 - provider adapter rejects cross-account resolution and wrong parent/leaf receipts before success
+  ---
+  duration_ms: 3.454119
+  type: 'test'
+  ...
+# Subtest: two account discovery failures are both observed even when the first rejects early
+ok 87 - two account discovery failures are both observed even when the first rejects early
+  ---
+  duration_ms: 0.680907
+  type: 'test'
+  ...
+# Subtest: source-backed provider failure catalog retains each material rejection category without private strings
+ok 88 - source-backed provider failure catalog retains each material rejection category without private strings
+  ---
+  duration_ms: 1.923314
+  type: 'test'
+  ...
+# Subtest: green connection-status gateway cannot conceal a blocked Worker child or legacy URL-forwarding privacy
+ok 89 - green connection-status gateway cannot conceal a blocked Worker child or legacy URL-forwarding privacy
+  ---
+  duration_ms: 0.507977
+  type: 'test'
+  ...
+# Subtest: actual protected R2 listing rejects malformed pages, auth denial and repeated metadata cursors distinctly
+ok 90 - actual protected R2 listing rejects malformed pages, auth denial and repeated metadata cursors distinctly
+  ---
+  duration_ms: 4.010556
+  type: 'test'
+  ...
+# Subtest: actual protected R2 Worker gates distinguish missing preparation, rejected auth and capability mismatch
+ok 91 - actual protected R2 Worker gates distinguish missing preparation, rejected auth and capability mismatch
+  ---
+  duration_ms: 1.3262
+  type: 'test'
+  ...
+# Subtest: actual extracted R2 adversarial staging corpus distinguishes extra, short, mismatched, stalled and unconfirmed bytes
+ok 92 - actual extracted R2 adversarial staging corpus distinguishes extra, short, mismatched, stalled and unconfirmed bytes
+  ---
+  duration_ms: 17.899954
+  type: 'test'
+  ...
+# Subtest: Narrow hides eight intermediate levels without altering full target; cancel source stays immutable
+ok 93 - Narrow hides eight intermediate levels without altering full target; cancel source stays immutable
+  ---
+  duration_ms: 4.880145
+  type: 'test'
+  ...
+# Subtest: Narrow hidden final, shared children, overlapping paths and different accounts stay actionable
+ok 94 - Narrow hidden final, shared children, overlapping paths and different accounts stay actionable
+  ---
+  duration_ms: 1.476244
+  type: 'test'
+  ...
+# Subtest: hidden Quick persists but is omitted; shown Quick wins over duplicate exact default
+ok 95 - hidden Quick persists but is omitted; shown Quick wins over duplicate exact default
+  ---
+  duration_ms: 1.129408
+  type: 'test'
+  ...
+# Subtest: composite modes preserve configs, Flat is exclusive and missing default cannot guess
+ok 96 - composite modes preserve configs, Flat is exclusive and missing default cannot guess
+  ---
+  duration_ms: 0.597531
+  type: 'test'
+  ...
+# Subtest: Quick order is stable, all promoted actions stay ahead of selectively nested providers
+ok 97 - Quick order is stable, all promoted actions stay ahead of selectively nested providers
+  ---
+  duration_ms: 1.463314
+  type: 'test'
+  ...
+# Subtest: organization trigger is exactly >=7 direct entries; dismiss signature changes only on relevant projection
+ok 98 - organization trigger is exactly >=7 direct entries; dismiss signature changes only on relevant projection
+  ---
+  duration_ms: 0.389714
+  type: 'test'
+  ...
+# Subtest: closed schemas reject malformed params and credentials; typed registry has all meaningful GUI families
+ok 99 - closed schemas reject malformed params and credentials; typed registry has all meaningful GUI families
+  ---
+  duration_ms: 1.131036
+  type: 'test'
+  ...
+# Subtest: trusted scoped grants bind hidden record identities, response accounts, expiry, revocation and approval
+ok 100 - trusted scoped grants bind hidden record identities, response accounts, expiry, revocation and approval
+  ---
+  duration_ms: 0.746854
+  type: 'test'
+  ...
+# Subtest: previous main product shape migrates exact targets, revisions, visibility, recovery and ancestor aliases
+ok 101 - previous main product shape migrates exact targets, revisions, visibility, recovery and ancestor aliases
+  ---
+  duration_ms: 1.236564
+  type: 'test'
+  ...
+# Subtest: PKCE login uses verified scopes and exact redirect; verifies identity before safe connected status
+ok 102 - PKCE login uses verified scopes and exact redirect; verifies identity before safe connected status
+  ---
+  duration_ms: 3.987137
+  type: 'test'
+  ...
+# Subtest: OAuth state mismatch never exchanges code; failed identity never becomes Connected
+ok 103 - OAuth state mismatch never exchanges code; failed identity never becomes Connected
+  ---
+  duration_ms: 4.385934
+  type: 'test'
+  ...
+# Subtest: cancel pending login prevents late callback from reauthorizing; duplicate login is rejected
+ok 104 - cancel pending login prevents late callback from reauthorizing; duplicate login is rejected
+  ---
+  duration_ms: 2.035884
+  type: 'test'
+  ...
+# Subtest: a legacy main token without verified account identity returns disconnected and requires normal login
+ok 105 - a legacy main token without verified account identity returns disconnected and requires normal login
+  ---
+  duration_ms: 0.343208
+  type: 'test'
+  ...
+# Subtest: actual temporary disk CURRENT and monthly journal preserve preferences and recover corrupted CURRENT
+ok 106 - actual temporary disk CURRENT and monthly journal preserve preferences and recover corrupted CURRENT
+  ---
+  duration_ms: 73.167596
+  type: 'test'
+  ...
+# Subtest: whole-cloud external job pauses without auth UI and resumes only the same opted-in account
+ok 107 - whole-cloud external job pauses without auth UI and resumes only the same opted-in account
+  ---
+  duration_ms: 67.517062
+  type: 'test'
+  ...
+# Subtest: per-bucket recovery crawl uses independent explicit depth and an actual disk checkpoint
+ok 108 - per-bucket recovery crawl uses independent explicit depth and an actual disk checkpoint
+  ---
+  duration_ms: 29.074129
+  type: 'test'
+  ...
+# Subtest: Simple/Narrow history toggles omit disabled records from dated checkpoints while CURRENT retains both
+ok 109 - Simple/Narrow history toggles omit disabled records from dated checkpoints while CURRENT retains both
+  ---
+  duration_ms: 46.539279
+  type: 'test'
+  ...
+# Subtest: Cloudflare Explorer file-save path refuses unsupported remote sources without staging bytes
+ok 110 - Cloudflare Explorer file-save path refuses unsupported remote sources without staging bytes
+  ---
+  duration_ms: 1.093996
+  type: 'test'
+  ...
+# Subtest: old composite entrypoint delegates to the single canonical compiler
+ok 111 - old composite entrypoint delegates to the single canonical compiler
+  ---
+  duration_ms: 0.797617
+  type: 'test'
+  ...
+# Subtest: fresh canonical menu has four actionable siblings; custom configurations and Flat retain their meaning
+ok 112 - fresh canonical menu has four actionable siblings; custom configurations and Flat retain their meaning
+  ---
+  duration_ms: 0.620309
+  type: 'test'
+  ...
+# Subtest: Cloudflare remote path precedes browser capture and Explorer refuses byte staging
+ok 113 - Cloudflare remote path precedes browser capture and Explorer refuses byte staging
+  ---
+  duration_ms: 1.036062
+  type: 'test'
+  ...
+# Subtest: setup actions remain actionable without authorization and cannot impersonate saved routes
+ok 114 - setup actions remain actionable without authorization and cannot impersonate saved routes
+  ---
+  duration_ms: 0.845819
+  type: 'test'
+  ...
+# Subtest: minimal trusted writer seam accepts a structural test writer without menu/source changes
+ok 115 - minimal trusted writer seam accepts a structural test writer without menu/source changes
+  ---
+  duration_ms: 0.649035
+  type: 'test'
+  ...
+# Subtest: real workerd runtime: R2 conditional writes, independent HEAD, durable claim replay and revocation
+ok 116 - real workerd runtime: R2 conditional writes, independent HEAD, durable claim replay and revocation
+  ---
+  duration_ms: 40051.805741
+  type: 'test'
+  ...
+# Subtest: native onboarding fragments retain the exact trusted app sender boundary
+ok 117 - native onboarding fragments retain the exact trusted app sender boundary
+  ---
+  duration_ms: 0.49442
+  type: 'test'
+  ...
+# Subtest: production TLS egress module loads in actual workerd with node compatibility (no network proof)
+ok 118 - production TLS egress module loads in actual workerd with node compatibility (no network proof)
+  ---
+  duration_ms: 227.288292
+  type: 'test'
+  ...
+# Subtest: approved first setup creates redown only when missing; default is established only after verified probe
+ok 119 - approved first setup creates redown only when missing; default is established only after verified probe
+  ---
+  duration_ms: 3.528443
+  type: 'test'
+  ...
+# Subtest: returning custom default always wins, and no missing selected bucket is recreated
+ok 120 - returning custom default always wins, and no missing selected bucket is recreated
+  ---
+  duration_ms: 1.167246
+  type: 'test'
+  ...
+# Subtest: intentional removal, missing permission, outage and positive inactive status stay distinct
+ok 121 - intentional removal, missing permission, outage and positive inactive status stay distinct
+  ---
+  duration_ms: 3.185764
+  type: 'test'
+  ...
+# Subtest: connected returning account with no assigned destinations opens Manage Destinations and never recreates redown
+ok 122 - connected returning account with no assigned destinations opens Manage Destinations and never recreates redown
+  ---
+  duration_ms: 0.623938
+  type: 'test'
+  ...
+# Subtest: login and unavailable providers never replay pending sources or claim success
+ok 123 - login and unavailable providers never replay pending sources or claim success
+  ---
+  duration_ms: 0.283552
+  type: 'test'
+  ...
+# Subtest: readiness never silently falls back after setup and custom selection is preserved during reconnect
+ok 124 - readiness never silently falls back after setup and custom selection is preserved during reconnect
+  ---
+  duration_ms: 0.734964
+  type: 'test'
+  ...
+# Subtest: new API operations have closed schemas, account grants and separate provisioning confirmation
+ok 125 - new API operations have closed schemas, account grants and separate provisioning confirmation
+  ---
+  duration_ms: 3.122552
+  type: 'test'
+  ...
+# Subtest: OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation
+ok 126 - OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation
+  ---
+  duration_ms: 0.37183
+  type: 'test'
+  ...
+# Subtest: repair of a configured non-default destination never changes the global default
+ok 127 - repair of a configured non-default destination never changes the global default
+  ---
+  duration_ms: 1.260287
+  type: 'test'
+  ...
+# Subtest: one verified account needs no extra account-selection step; multiple accounts remain explicit
+ok 128 - one verified account needs no extra account-selection step; multiple accounts remain explicit
+  ---
+  duration_ms: 0.616933
+  type: 'test'
+  ...
+# Subtest: setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write
+ok 129 - setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write
+  ---
+  duration_ms: 1.825259
+  type: 'test'
+  ...
+# Subtest: zero active native assignments open manager even when a hidden default remains ready
+ok 130 - zero active native assignments open manager even when a hidden default remains ready
+  ---
+  duration_ms: 0.353435
+  type: 'test'
+  ...
+# Subtest: provisioning requires explicit approval and records exact immutable R2/DO/secret bindings
+ok 131 - provisioning requires explicit approval and records exact immutable R2/DO/secret bindings
+  ---
+  duration_ms: 5.741144
+  type: 'test'
+  ...
+# Subtest: interrupted owned deployment is inspected and resumed without reupload or rebinding
+ok 132 - interrupted owned deployment is inspected and resumed without reupload or rebinding
+  ---
+  duration_ms: 2.591291
+  type: 'test'
+  ...
+# Subtest: explicit repair updates only an owned matching Worker and preserves its existing prefix scope
+ok 133 - explicit repair updates only an owned matching Worker and preserves its existing prefix scope
+  ---
+  duration_ms: 3.970992
+  type: 'test'
+  ...
+# Subtest: public address classification blocks special-use IPv4/IPv6 including encoded URL literals
+ok 134 - public address classification blocks special-use IPv4/IPv6 including encoded URL literals
+  ---
+  duration_ms: 1.203315
+  type: 'test'
+  ...
+# Subtest: three unrelated public HTTPS hosts connect to validated literal IP with original SNI and no credentials
+ok 135 - three unrelated public HTTPS hosts connect to validated literal IP with original SNI and no credentials
+  ---
+  duration_ms: 5.664197
+  type: 'test'
+  ...
+# Subtest: DNS rebinding/mixed/private answers never reach TLS and an untrusted certificate fails closed
+ok 136 - DNS rebinding/mixed/private answers never reach TLS and an untrusted certificate fails closed
+  ---
+  duration_ms: 1.469373
+  type: 'test'
+  ...
+# Subtest: chunked public response is streamed and ambiguous HTTP framing is rejected
+ok 137 - chunked public response is streamed and ambiguous HTTP framing is rejected
+  ---
+  duration_ms: 1.86858
+  type: 'test'
+  ...
+# Subtest: more than five safe redirects work; cycles and private redirects fail closed
+ok 138 - more than five safe redirects work; cycles and private redirects fail closed
+  ---
+  duration_ms: 1.988932
+  type: 'test'
+  ...
+# Subtest: actual API create/delete, migrated revision and restart retain permanent four providers
+ok 139 - actual API create/delete, migrated revision and restart retain permanent four providers
+  ---
+  duration_ms: 5.811263
+  type: 'test'
+  ...
+# Subtest: customized never-initialized menu offers initial setup; explicit removal and chosen account win
+ok 140 - customized never-initialized menu offers initial setup; explicit removal and chosen account win
+  ---
+  duration_ms: 1.809331
+  type: 'test'
+  ...
+# Subtest: prepared-key recovery after a missing receipt independently checks operation ID and size
+ok 141 - prepared-key recovery after a missing receipt independently checks operation ID and size
+  ---
+  duration_ms: 5.631668
+  type: 'test'
+  ...
+# Subtest: actual outer Worker receipt persistence failure cannot claim blocked/no-write after PUT
+ok 142 - actual outer Worker receipt persistence failure cannot claim blocked/no-write after PUT
+  ---
+  duration_ms: 4.710395
+  type: 'test'
+  ...
+# Subtest: ranged download uses the canonical File API and rejects ignored ranges without buffering whole objects
+ok 143 - ranged download uses the canonical File API and rejects ignored ranges without buffering whole objects
+  ---
+  duration_ms: 1.738432
+  type: 'test'
+  ...
+# Subtest: clearing default preserves provider access and an explicit removal tombstone
+ok 144 - clearing default preserves provider access and an explicit removal tombstone
+  ---
+  duration_ms: 1.168601
+  type: 'test'
+  ...
+# Subtest: source signature canonicalization permits API contentType without allowing changed source intent
+ok 145 - source signature canonicalization permits API contentType without allowing changed source intent
+  ---
+  duration_ms: 2.10041
+  type: 'test'
+  ...
+# Subtest: exact folder proof is required for READY, not merely an old bucket-wide timestamp
+ok 146 - exact folder proof is required for READY, not merely an old bucket-wide timestamp
+  ---
+  duration_ms: 1.917585
+  type: 'test'
+  ...
+# Subtest: memory-derived admission backpressure rejects before claim or source fetch, not by file size
+ok 147 - memory-derived admission backpressure rejects before claim or source fetch, not by file size
+  ---
+  duration_ms: 1.894758
+  type: 'test'
+  ...
+# Subtest: HTTP early hints are consumed before the actual file response
+ok 148 - HTTP early hints are consumed before the actual file response
+  ---
+  duration_ms: 0.849503
+  type: 'test'
+  ...
+# Subtest: real local Node TLS verifies original hostname while the connection selector stays a literal IP
+ok 149 - real local Node TLS verifies original hostname while the connection selector stays a literal IP
+  ---
+  duration_ms: 92.450021
+  type: 'test'
+  ...
+# Subtest: browser streaming port handles more than 32MiB with backpressure and no provenance in provider payload
+ok 150 - browser streaming port handles more than 32MiB with backpressure and no provenance in provider payload
+  ---
+  duration_ms: 51.389244
+  type: 'test'
+  ...
+# Subtest: streaming upload cannot report verified without consuming the complete source
+ok 151 - streaming upload cannot report verified without consuming the complete source
+  ---
+  duration_ms: 0.955399
+  type: 'test'
+  ...
+# Subtest: bucket discovery traverses numeric and opaque pages without a 1000 bucket ceiling
+ok 152 - bucket discovery traverses numeric and opaque pages without a 1000 bucket ceiling
+  ---
+  duration_ms: 2.906215
+  type: 'test'
+  ...
+# Subtest: native click waits for cold-boot reconciliation before resolving current ACK
+ok 153 - native click waits for cold-boot reconciliation before resolving current ACK
+  ---
+  duration_ms: 1.316931
+  type: 'test'
+  ...
+# Subtest: download continuation binds the original ETag and refuses changed range objects
+ok 154 - download continuation binds the original ETag and refuses changed range objects
+  ---
+  duration_ms: 0.860558
+  type: 'test'
+  ...
+# Subtest: all four provider visibility preferences default ON and migrate absent historical field
+ok 155 - all four provider visibility preferences default ON and migrate absent historical field
+  ---
+  duration_ms: 0.397714
+  type: 'test'
+  ...
+# Subtest: per-provider configuration changes have a typed, permission-scoped API schema
+ok 156 - per-provider configuration changes have a typed, permission-scoped API schema
+  ---
+  duration_ms: 1.030715
+  type: 'test'
+  ...
+# Subtest: hiding Cloudflare removes all of its menu entries without mutating saved targets
+ok 157 - hiding Cloudflare removes all of its menu entries without mutating saved targets
+  ---
+  duration_ms: 1.646711
+  type: 'test'
+  ...
+# Subtest: hiding all providers yields no native provider or descendant rows; preferences can be restored
+ok 158 - hiding all providers yields no native provider or descendant rows; preferences can be restored
+  ---
+  duration_ms: 0.726856
+  type: 'test'
+  ...
+# Subtest: Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity
+ok 159 - Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity
+  ---
+  duration_ms: 3.187513
+  type: 'test'
+  ...
+# Subtest: Nov6 discovered buckets, duplicate modes, hidden assignments and disabled modes do not inflate count
+ok 160 - Nov6 discovered buckets, duplicate modes, hidden assignments and disabled modes do not inflate count
+  ---
+  duration_ms: 0.97816
+  type: 'test'
+  ...
+# Subtest: Nov6 each Settings toggle removes whole native branch and restores exact target without mutation
+ok 161 - Nov6 each Settings toggle removes whole native branch and restores exact target without mutation
+  ---
+  duration_ms: 12.899672
+  type: 'test'
+  ...
+# Subtest: Nov6 two accounts with identical display names keep distinct exact targets and disambiguated labels
+ok 162 - Nov6 two accounts with identical display names keep distinct exact targets and disambiguated labels
+  ---
+  duration_ms: 0.974976
+  type: 'test'
+  ...
+# Subtest: Nov6 deliberate default assignment deletion persists sole survivor and does not recreate deleted target
+ok 163 - Nov6 deliberate default assignment deletion persists sole survivor and does not recreate deleted target
+  ---
+  duration_ms: 2.815983
+  type: 'test'
+  ...
+# Subtest: Nov6 real registrar ACK click uses engine exact target without provider/dashboard detour, including restart
+ok 164 - Nov6 real registrar ACK click uses engine exact target without provider/dashboard detour, including restart
+  ---
+  duration_ms: 2.271367
+  type: 'test'
+  ...
+# Subtest: Nov6 compact attention surface is provider-specific and trusted without widening query/origin boundary
+ok 165 - Nov6 compact attention surface is provider-specific and trusted without widening query/origin boundary
+  ---
+  duration_ms: 0.971093
+  type: 'test'
+  ...
+# Subtest: future trusted flat provider ports replace their one canonical entry, never add a second provider row
+ok 166 - future trusted flat provider ports replace their one canonical entry, never add a second provider row
+  ---
+  duration_ms: 0.778306
+  type: 'test'
+  ...
+# Subtest: explicit Quick labels cannot rename or duplicate a canonical provider heading
+ok 167 - explicit Quick labels cannot rename or duplicate a canonical provider heading
+  ---
+  duration_ms: 0.789473
+  type: 'test'
+  ...
+# Subtest: explicit Flat uses its selected default even when that destination is hidden in an inactive custom mode
+ok 168 - explicit Flat uses its selected default even when that destination is hidden in an inactive custom mode
+  ---
+  duration_ms: 0.315445
+  type: 'test'
+  ...
+# Subtest: programmatic provider action binds the sole canonical target before dispatch, even without a stored default
+ok 169 - programmatic provider action binds the sole canonical target before dispatch, even without a stored default
+  ---
+  duration_ms: 1.230772
+  type: 'test'
+  ...
+# Subtest: ordering is cached by immutable listing and sort revision, with numeric size and natural names
+ok 170 - ordering is cached by immutable listing and sort revision, with numeric size and natural names
+  ---
+  duration_ms: 3.659688
+  type: 'test'
+  ...
+# Subtest: viewport bounds DOM work without limiting logical directory capacity
+ok 171 - viewport bounds DOM work without limiting logical directory capacity
+  ---
+  duration_ms: 0.425899
+  type: 'test'
+  ...
+# Subtest: listing reader coalesces pending requests, expires pages and invalidates stale cache fills
+ok 172 - listing reader coalesces pending requests, expires pages and invalidates stale cache fills
+  ---
+  duration_ms: 0.739049
+  type: 'test'
+  ...
+# Subtest: a failed page does not poison retries and request coalescing never drops the next cursor
+ok 173 - a failed page does not poison retries and request coalescing never drops the next cursor
+  ---
+  duration_ms: 0.939548
+  type: 'test'
+  ...
+# Subtest: canonical metadata reads coalesce only within a session and never reuse mutation or stale-session results
+ok 174 - canonical metadata reads coalesce only within a session and never reuse mutation or stale-session results
+  ---
+  duration_ms: 3.750974
+  type: 'test'
+  ...
+# Subtest: slow listing never holds the configuration/inspection queue or blocks unrelated folder navigation
+ok 175 - slow listing never holds the configuration/inspection queue or blocks unrelated folder navigation
+  ---
+  duration_ms: 0.822668
+  type: 'test'
+  ...
+# Subtest: viewport stays valid after a shrinking listing with a stale scroll offset
+ok 176 - viewport stays valid after a shrinking listing with a stale scroll offset
+  ---
+  duration_ms: 0.102804
+  type: 'test'
+  ...
+1..176
+# tests 176
+# suites 0
+# pass 176
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42163.733996

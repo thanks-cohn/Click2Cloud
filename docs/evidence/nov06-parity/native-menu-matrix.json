@@ -1,0 +1,570 @@
+{
+  "proof": "PURE_PRODUCTION_COMPILER_FIXTURE; NOT_NATIVE_RENDER_OR_CLOUD_SAVE",
+  "cases": {
+    "newInstall": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:89a372375b51a98e",
+        "actionKind": "provider"
+      }
+    ],
+    "approvedInitial": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      }
+    ],
+    "secondAssigned": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "actionId": null,
+        "actionKind": "branch"
+      },
+      {
+        "id": "c2c:assigned-entry:8c843b0c4722ff9e",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "redown",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bce7e1d887d64452",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "Photos",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      }
+    ],
+    "soleSurvivor": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      }
+    ],
+    "threeAssigned": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "actionId": null,
+        "actionKind": "branch"
+      },
+      {
+        "id": "c2c:assigned-entry:8c843b0c4722ff9e",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "redown",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bce7e1d887d64452",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "Photos",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bf06cd7c9fd5057b",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "archive",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "archive",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bf06cd7c9fd5057b",
+        "actionKind": "save"
+      }
+    ],
+    "zeroReturning": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:89a372375b51a98e",
+        "actionKind": "provider"
+      }
+    ],
+    "explicitFlat": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      }
+    ],
+    "hidden-google-drive": [
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "actionId": null,
+        "actionKind": "branch"
+      },
+      {
+        "id": "c2c:assigned-entry:8c843b0c4722ff9e",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "redown",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bce7e1d887d64452",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "Photos",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      }
+    ],
+    "hidden-dropbox": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "actionId": null,
+        "actionKind": "branch"
+      },
+      {
+        "id": "c2c:assigned-entry:8c843b0c4722ff9e",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "redown",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bce7e1d887d64452",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "Photos",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      }
+    ],
+    "hidden-onedrive": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "actionId": null,
+        "actionKind": "branch"
+      },
+      {
+        "id": "c2c:assigned-entry:8c843b0c4722ff9e",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "redown",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "redown",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:8c843b0c4722ff9e",
+        "actionKind": "save"
+      },
+      {
+        "id": "c2c:assigned-entry:bce7e1d887d64452",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "Photos",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "photos",
+          "prefix": ""
+        },
+        "actionId": "c2c:action:bce7e1d887d64452",
+        "actionKind": "save"
+      }
+    ],
+    "hidden-cloudflare": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "actionKind": "provider"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "actionKind": "provider"
+      }
+    ]
+  }
+}

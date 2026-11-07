@@ -1,0 +1,19 @@
+{
+  "mode": "READ_ONLY; no cloud mutation/deployment",
+  "worker": {
+    "method": "GET unsigned",
+    "errorType": "HTTPError",
+    "httpStatus": 403,
+    "proxyConnect403": false,
+    "responseJSON": false,
+    "cloudflareRayHeader": true
+  },
+  "cloudflare": {
+    "method": "GET settings",
+    "httpStatus": 200,
+    "success": true,
+    "R2BindingDeclared": true,
+    "DObindingDeclared": true,
+    "signingSecretDeclared": true
+  }
+}

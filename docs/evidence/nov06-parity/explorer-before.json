@@ -1,0 +1,68 @@
+{
+  "evidenceClass": "PRODUCTION_APP_REAL_CHROMIUM_WITH_LOCAL_API_FIXTURE_NOT_INSTALLED_OR_LIVE_R2",
+  "browser": "155.0.8059.79",
+  "root": "/tmp/c2c-nov06-before",
+  "runs": [
+    {
+      "size": 200,
+      "traversalMs": 181,
+      "values": [
+        {
+          "type": "click",
+          "synchronousMs": 202.70000000006985
+        },
+        {
+          "type": "contextmenu",
+          "synchronousMs": 252.70000000006985
+        }
+      ],
+      "domRows": 200,
+      "totalDOMRows": 200,
+      "selected": 1,
+      "longTasks": [
+        {
+          "start": 887.4000000000233,
+          "duration": 460
+        }
+      ],
+      "jsHeapUsedBytes": 3792400,
+      "dom": {
+        "documents": 3,
+        "nodes": 2586,
+        "jsEventListeners": 1007
+      },
+      "listRequests": 2
+    },
+    {
+      "size": 1000,
+      "traversalMs": 217,
+      "values": [
+        {
+          "type": "click",
+          "synchronousMs": 4629.199999999953
+        },
+        {
+          "type": "contextmenu",
+          "synchronousMs": 4637.20000000007
+        }
+      ],
+      "domRows": 1000,
+      "totalDOMRows": 1000,
+      "selected": 1,
+      "longTasks": [
+        {
+          "start": 1613.5,
+          "duration": 9267
+        }
+      ],
+      "jsHeapUsedBytes": 3961216,
+      "dom": {
+        "documents": 1,
+        "nodes": 13396,
+        "jsEventListeners": 4873
+      },
+      "listRequests": 3
+    }
+  ],
+  "errors": []
+}

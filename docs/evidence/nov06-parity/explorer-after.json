@@ -1,0 +1,93 @@
+{
+  "evidenceClass": "PRODUCTION_APP_REAL_CHROMIUM_WITH_LOCAL_API_FIXTURE_NOT_INSTALLED_OR_LIVE_R2",
+  "browser": "155.0.8059.79",
+  "root": "/workspace/Click2Cloud",
+  "runs": [
+    {
+      "size": 200,
+      "traversalMs": 81,
+      "values": [
+        {
+          "type": "click",
+          "synchronousMs": 0.8999999999068677
+        },
+        {
+          "type": "contextmenu",
+          "synchronousMs": 1.5
+        }
+      ],
+      "domRows": 30,
+      "totalDOMRows": 31,
+      "selected": 1,
+      "longTasks": [],
+      "jsHeapUsedBytes": 3789792,
+      "dom": {
+        "documents": 3,
+        "nodes": 735,
+        "jsEventListeners": 223
+      },
+      "listRequests": 2
+    },
+    {
+      "size": 1000,
+      "traversalMs": 71,
+      "values": [
+        {
+          "type": "click",
+          "synchronousMs": 0.7999999998137355
+        },
+        {
+          "type": "contextmenu",
+          "synchronousMs": 0.8000000000465661
+        }
+      ],
+      "domRows": 30,
+      "totalDOMRows": 31,
+      "selected": 1,
+      "longTasks": [],
+      "jsHeapUsedBytes": 4014128,
+      "dom": {
+        "documents": 3,
+        "nodes": 1166,
+        "jsEventListeners": 259
+      },
+      "listRequests": 3
+    },
+    {
+      "size": 10000,
+      "traversalMs": 69,
+      "values": [
+        {
+          "type": "click",
+          "synchronousMs": 0.8000000000465661
+        },
+        {
+          "type": "contextmenu",
+          "synchronousMs": 1.1999999999534339
+        }
+      ],
+      "domRows": 30,
+      "totalDOMRows": 31,
+      "selected": 1,
+      "longTasks": [],
+      "jsHeapUsedBytes": 7767900,
+      "dom": {
+        "documents": 3,
+        "nodes": 1597,
+        "jsEventListeners": 295
+      },
+      "listRequests": 4
+    }
+  ],
+  "behavior": {
+    "multiselectionPreserved": 2,
+    "endAndArrowKeyboard": true,
+    "domRowsAfterEnd": 22,
+    "selectionMadeNoListingRequests": true,
+    "staleNavigationIgnored": true,
+    "compactLoginNoAutomaticProvision": true,
+    "pagingDeduplicatesAndPreservesSelection": true,
+    "startupRetryWithoutStorageReset": true
+  },
+  "errors": []
+}

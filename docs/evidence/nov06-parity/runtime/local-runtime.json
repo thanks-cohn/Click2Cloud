@@ -1,0 +1,122 @@
+{
+  "evidenceClass": "INTEGRATION_WORKERD_NOT_LIVE_R2",
+  "storage": "local R2 and persistent SQLite Durable Object",
+  "source": "injected public-source response; production TLS egress replaced explicitly in this test",
+  "streamingEvidence": [
+    {
+      "host": "www.python.org",
+      "path": "large.bin",
+      "size": 73400320,
+      "readbackBytes": 73400320,
+      "allBytes": 37,
+      "state": "verified",
+      "durationMs": 2577,
+      "key": "exact/large.bin"
+    },
+    {
+      "host": "nodejs.org",
+      "path": "unknown.bin",
+      "size": 9437184,
+      "readbackBytes": 9437184,
+      "allBytes": 37,
+      "state": "verified",
+      "durationMs": 662,
+      "key": "exact/unknown.bin"
+    },
+    {
+      "host": "www.rust-lang.org",
+      "path": "slow.bin",
+      "size": 67,
+      "readbackBytes": 67,
+      "allBytes": 37,
+      "state": "verified",
+      "durationMs": 66236,
+      "key": "exact/slow.bin"
+    }
+  ],
+  "probe": {
+    "state": "verified",
+    "recovered": "verified"
+  },
+  "first": {
+    "state": "verified",
+    "receipt": {
+      "key": "exact/雪.bin",
+      "size": 3,
+      "etag": "900150983cd24fb0d6963f7d28e17f72",
+      "version": "30d7571727024beae50aba2169172ae1",
+      "operationId": "0d2d0f14-aa1a-4d2d-9db5-b36fc56faccf",
+      "destination": {
+        "provider": "cloudflare-r2",
+        "connectionId": "cloudflare:a",
+        "accountId": "a",
+        "bucketName": "bucket",
+        "prefix": "exact",
+        "conflictPolicy": "keep-both"
+      }
+    },
+    "timings": {
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 2,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 45,
+      "verificationMs": 8
+    },
+    "durationMs": 58
+  },
+  "engine": {
+    "state": "completed",
+    "receipt": {
+      "key": "exact/engine.bin",
+      "size": 3,
+      "etag": "900150983cd24fb0d6963f7d28e17f72",
+      "version": "589930218acee591a6d5e57bd2727a16",
+      "operationId": "8f0b044a-f4a4-47f5-b493-1edb8f2656f4",
+      "destination": {
+        "provider": "cloudflare-r2",
+        "connectionId": "cloudflare:a",
+        "accountId": "a",
+        "bucketName": "bucket",
+        "prefix": "exact",
+        "conflictPolicy": "keep-both"
+      }
+    },
+    "remoteOperationId": "8f0b044a-f4a4-47f5-b493-1edb8f2656f4",
+    "timings": {
+      "dispatchPreparationMs": 1,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 32,
+      "verificationMs": 4
+    },
+    "durationMs": 37
+  },
+  "restartClaim": "OPERATION_ALREADY_CLAIMED",
+  "anonymous": "CAPABILITY_DENIED",
+  "foreignAccount": "BINDING_MISMATCH",
+  "privateSource": "blocked",
+  "truncated": "uncertain",
+  "concurrentCollisions": [
+    {
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "key": "exact/collision.bin"
+    },
+    {
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "key": "exact/collision-3c5041fb-2b75-4fcc-af80-3af2c37b82f1.bin"
+    },
+    {
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "key": "exact/collision-06e82f3d-cc91-41c1-a19d-b0a480898f3b.bin"
+    }
+  ],
+  "revocation": "blocked",
+  "browserCaptureCalls": 0,
+  "metadata": [
+    "operationId"
+  ]
+}

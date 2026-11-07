@@ -1,0 +1,92 @@
+{
+  "status": "PARTIAL: local repair verified; live installed Chrome and Worker-R2 chain unverified",
+  "branch": "dev/nov06-native-menu-explorer-parity",
+  "baseMain": "eb5ee8bce185be21c1aa88a17a1ea06bd38884dc",
+  "codeCommit": "731ad164702cebde6dc2569e080fc77f94ef2314",
+  "build": {
+    "extensionVersion": "0.3.3",
+    "revision": "731ad164702cebde6dc2569e080fc77f94ef2314",
+    "sourceDigest": "f4a92ceb47c68e7ff9692f58428ba41037392af0e2123bbae88a3211dd3c6126",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "workWindow": {
+    "startUTC": "2026-11-07T04:52:28+00:00",
+    "evidenceFinalizedUTC": "2026-11-07T05:22:45.522658+00:00",
+    "minutes": 30.29,
+    "note": "Measured engineering window after executor recovery; source docs inspected, code repaired, measured, tested and committed. No fabricated wait duration."
+  },
+  "tests": [
+    {
+      "name": "focused-node22",
+      "command": "npx --yes --package node@22 node tests/final-focused.mjs",
+      "state": "PASS",
+      "pass": 176,
+      "artifact": "focused-node22.txt"
+    },
+    {
+      "name": "module-node22",
+      "command": "npx --yes --package node@22 node --test right2cloud-module/tests/module.test.mjs",
+      "state": "PASS",
+      "pass": 49,
+      "artifact": "module-node22.txt"
+    },
+    {
+      "name": "regressions",
+      "command": "node --test tests/review-regressions.test.mjs tests/inventory-capture.test.mjs",
+      "state": "PASS",
+      "pass": 12,
+      "artifact": "regressions.txt"
+    },
+    {
+      "name": "native-tests",
+      "command": "node --test tests/nov06-native-menu.test.mjs",
+      "state": "PASS",
+      "pass": 11,
+      "artifact": "native-tests.txt"
+    },
+    {
+      "name": "runtime",
+      "command": "C2C_LONG_TEST=1 C2C_RUNTIME_EVIDENCE_DIR=docs/evidence/nov06-parity/runtime node --test --test-name-pattern='real workerd runtime' tests/cloudflare-integration.test.mjs",
+      "state": "PASS",
+      "pass": 1,
+      "artifact": "runtime.txt"
+    }
+  ],
+  "browser": {
+    "fixturePass": 10,
+    "installed": "BLOCKED_ADMINISTRATOR_POLICY",
+    "OAuth": "NOT_TESTED",
+    "liveR2": "UNVERIFIED",
+    "artifact": "browser/browser-results.json"
+  },
+  "explorer": {
+    "baseline": "explorer-before.json",
+    "after": "explorer-after.json",
+    "fixturePerformanceOnly": true,
+    "REDOWNFullUIComparison": "NOT_TESTED"
+  },
+  "strictTypeCheck": {
+    "state": "PASS",
+    "command": "npx --yes --package typescript@5.9.3 tsc --noEmit --strict --lib ES2023,DOM --module nodenext --moduleResolution nodenext src/api/service.d.ts"
+  },
+  "credentialValueScan": "PASS; no configured credential values found in changed artifacts",
+  "REDOWN": {
+    "head": "a6c17f8d0be22131d5cc38b060da4f8f3544800f",
+    "clean": true,
+    "unchanged": true
+  },
+  "scope": {
+    "cloudMutations": 0,
+    "deployments": 0,
+    "merges": 0,
+    "pushes": 0,
+    "repositorySelectionChanges": 0
+  },
+  "CI": {
+    "baseline": "failure in module command; build skipped",
+    "originalCommandNode22": "bad option: --test-isolation=none",
+    "fixedCommandNode22": "49 PASS",
+    "newHostedRun": "NOT_RUN; development branch local only"
+  }
+}

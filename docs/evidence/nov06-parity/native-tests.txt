@@ -1,0 +1,19 @@
+✔ Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity (8.756213ms)
+✔ Nov6 discovered buckets, duplicate modes, hidden assignments and disabled modes do not inflate count (3.920783ms)
+✔ Nov6 each Settings toggle removes whole native branch and restores exact target without mutation (6.177343ms)
+✔ Nov6 two accounts with identical display names keep distinct exact targets and disambiguated labels (0.633923ms)
+✔ Nov6 deliberate default assignment deletion persists sole survivor and does not recreate deleted target (7.601815ms)
+✔ Nov6 real registrar ACK click uses engine exact target without provider/dashboard detour, including restart (8.696551ms)
+✔ Nov6 compact attention surface is provider-specific and trusted without widening query/origin boundary (1.268744ms)
+✔ future trusted flat provider ports replace their one canonical entry, never add a second provider row (1.130874ms)
+✔ explicit Quick labels cannot rename or duplicate a canonical provider heading (1.221875ms)
+✔ explicit Flat uses its selected default even when that destination is hidden in an inactive custom mode (0.729155ms)
+✔ programmatic provider action binds the sole canonical target before dispatch, even without a stored default (2.888701ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.151057
