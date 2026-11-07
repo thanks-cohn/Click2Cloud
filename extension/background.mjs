@@ -1,6 +1,6 @@
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
-import {trustedAppSender} from '../src/chrome/trusted-sender.mjs';
+import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createCurrentStore} from '../src/persistence/current-store.mjs';
@@ -122,10 +122,17 @@ const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
-  if(sender.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
-  if(!trustedAppSender(chrome.runtime,sender))return false;
+  if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel!=='engine')return false;
-  ready.then(()=>api.invoke({version:message.version,method:message.method,params:message.params},'gui')).then(respond,()=>respond({state:'failed',code:'ENGINE_UNAVAILABLE'}));return true;
+  const senderDecision=appSenderDecision(chrome.runtime,sender);
+  if(!senderDecision.accepted){respond({version:'3+1.1',state:'blocked',code:'UNTRUSTED_APP_SENDER',diagnostic:{stage:'sender-validation',reason:senderDecision.reason}});return false;}
+  // Returning literal true keeps Chrome's response channel alive across startup
+  // and async API work. Every accepted request settles through this one owner.
+  const failed=(code,stage,error)=>{const cause=error?.code??error?.message;return {version:'3+1.1',state:'failed',code,diagnostic:{stage,...(/^[A-Z][A-Z0-9_]{2,79}$/.test(cause??'')?{causeCode:cause}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error?.name)?{causeName:error.name}:{})}};};
+  ready.then(async()=>{
+    try{const result=await api.invoke({version:message.version,method:message.method,params:message.params},'gui');return result&&typeof result==='object'&&typeof result.state==='string'?result:failed('ENGINE_RESPONSE_INVALID','invoke');}
+    catch(error){return failed('ENGINE_INVOCATION_FAILED','invoke',error);}
+  },error=>failed('ENGINE_STARTUP_FAILED','startup',error)).then(respond);return true;
 });
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});

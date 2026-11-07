@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T10:02:49.856013+00:00",
+  "generatedAt": "2026-11-07T12:02:38.037207+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,10 +9202,10 @@
     "sourceFiles": {
       "extension/app.css": "0bf543e975cec04f5c90abeaaa6252e1b4e1f4654d5bfa9c49e01a3c113d96ac",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "c0342a0b7455004073877fb5428bf0ed29f67127b5b18807f2da12753b710dbb",
-      "extension/background.mjs": "ed96b9a504c938853d2910becd5702d1e29d5b71cd4102ccfb634fca490651f6",
+      "extension/app.mjs": "02c2f8543b4485899c4b49bd7db9d0fd3a6bd03e03a302c0143b0172f559bf1c",
+      "extension/background.mjs": "9a2591eabd7ec3a6a2679d038e4f1de699d0b1199858f12ab381e62f79a8c123",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "16f1103d2a21623a1774b451167c9f146dee2d11f6d7f58b2b832fe55a5d302d",
+      "extension/manifest.json": "adeb80fcd796d268bb189e8ba98b7d480b6be990571b30d7a1c1cb4d2493ca4f",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9225,12 +9225,12 @@
       "src/api/service.mjs": "86a1d340d4124dbd22b5856535b875276ee0eda3b8f1567ecfd0dbaeade3b7de",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "6e8eec8c3293e45e6589f36cd14857e2ab5288c555a5efe5e32d59f349373e8a",
-      "src/build-info.mjs": "f68c084da81c39a8376ded879b64c418413516bab16c9e961d48d83abec0f33d",
+      "src/build-info.mjs": "53a012485ec83b80679caa1af5f3b27c58ae66b0677e8e86991127ab666497c3",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
       "src/chrome/registrar.mjs": "d8bd0a7c94061a621c69c29656efde906aec119cd08b10bda42537509adfc6c6",
-      "src/chrome/trusted-sender.mjs": "d09292bc5f64053cf3ad6b01f9768f31dc2ea9affc00a2fd42768e3b2630a8b1",
+      "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "fade0a752d2d912dd05955f82e9cf5a52cebd9d6775cfb8abce622e1dc107eb0",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
       "src/cloudflare/onboarding.mjs": "a6f88d0564ad091432961727b34df37c8b5dea841be42f9096ed1fb8572ef8ed",
@@ -9285,7 +9285,9 @@
       "ENTRY_SHELF",
       "ENTRY_API",
       "EXPLORER_SELECT",
-      "CONFIG_ISOLATION"
+      "CONFIG_ISOLATION",
+      "ENTRY_MESSAGE",
+      "ENTRY_CLIENT_RESPONSE"
     ],
     "behaviors": [
       {
@@ -11325,6 +11327,92 @@
           "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
         },
         "contractViolation": null
+      },
+      {
+        "id": "ENTRY_MESSAGE",
+        "preconditions": "Shelf engine-channel message",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
+        "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
+        "apiMethods": [
+          "describeCapabilities",
+          "getConfiguration"
+        ],
+        "identity": "Same Chrome extension / exact app document; message-body identity is never trusted",
+        "nextState": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
+        "uiEffect": "Explicit safe cause on failure; normal existing app on success",
+        "externalResourceEffect": "none",
+        "persistence": "No new persistent state; OAuth, CURRENT, destinations and cloud configuration unchanged",
+        "errors": [
+          "UNTRUSTED_APP_SENDER",
+          "ENGINE_STARTUP_FAILED",
+          "ENGINE_INVOCATION_FAILED",
+          "ENGINE_RESPONSE_INVALID",
+          "ENGINE_NO_RESPONSE",
+          "ENGINE_RECEIVER_MISSING",
+          "ENGINE_RESPONSE_CHANNEL_CLOSED",
+          "ENGINE_MESSAGE_SEND_FAILED"
+        ],
+        "retry": "Explicit existing startup Retry; no cloud operation replay",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "chrome.runtime.onMessage.addListener",
+            "line": 124
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_SHELF_BLOCKED",
+          "testFile": "tests/shelf-message-boundary.test.mjs",
+          "browserFixture": "scripts/test-product-browser.mjs",
+          "realAcceptance": "scripts/test-shelf-extension.mjs",
+          "runtime": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "ENTRY_CLIENT_RESPONSE",
+        "preconditions": "Shelf engine-channel message",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
+        "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
+        "apiMethods": [
+          "describeCapabilities",
+          "getConfiguration"
+        ],
+        "identity": "Same Chrome extension / exact app document; message-body identity is never trusted",
+        "nextState": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
+        "uiEffect": "Explicit safe cause on failure; normal existing app on success",
+        "externalResourceEffect": "none",
+        "persistence": "No new persistent state; OAuth, CURRENT, destinations and cloud configuration unchanged",
+        "errors": [
+          "UNTRUSTED_APP_SENDER",
+          "ENGINE_STARTUP_FAILED",
+          "ENGINE_INVOCATION_FAILED",
+          "ENGINE_RESPONSE_INVALID",
+          "ENGINE_NO_RESPONSE",
+          "ENGINE_RECEIVER_MISSING",
+          "ENGINE_RESPONSE_CHANNEL_CLOSED",
+          "ENGINE_MESSAGE_SEND_FAILED"
+        ],
+        "retry": "Explicit existing startup Retry; no cloud operation replay",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function api",
+            "line": 14
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_SHELF_BLOCKED",
+          "testFile": "tests/shelf-message-boundary.test.mjs",
+          "browserFixture": "scripts/test-product-browser.mjs",
+          "realAcceptance": "scripts/test-shelf-extension.mjs",
+          "runtime": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+        },
+        "contractViolation": null
       }
     ],
     "stateTransitions": [
@@ -11389,7 +11477,9 @@
       "PROVIDER_OTHER",
       "PERSIST_RECOVERY",
       "RECOVERY_HANDLE_PARITY",
-      "DIAGNOSTICS"
+      "DIAGNOSTICS",
+      "ENTRY_MESSAGE",
+      "ENTRY_CLIENT_RESPONSE"
     ],
     "apiParity": [
       {
@@ -11892,16 +11982,18 @@
       "Existing Worker read-only reachability and declared bindings recorded in read-only-cloudflare.json; this cannot establish a working transfer.",
       "R2 single-PUT boundary, conditional multipart completion, very long source continuation and TCP Cloudflare-owned destination reach remain external/engineering gaps.",
       "Explorer mutations/private remote source and three non-Cloudflare storage drivers are not implemented.",
-      "Read-only source inspection cannot establish full practical REDOWN parity or exhaustive runtime coverage."
+      "Read-only source inspection cannot establish full practical REDOWN parity or exhaustive runtime coverage.",
+      "Windows owner report did not include actual MessageSender metadata. Missing documentId rejection is source-reproduced; exact Windows sender-field cause is not independently captured. Genuine Shelf acceptance is blocked here by administrator policy."
     ],
     "verification": {
       "source": "PASS: hash-bound source behavior",
       "unit": "Updated focused run recorded in docs/evidence/nov07-master",
       "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; see docs/evidence/nov07-master/browser/browser-results.json",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
-      "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized"
+      "liveR2": "NOT_TESTED; no deployment or cloud mutation authorized",
+      "liveShelfEngine": "BLOCKED: managed ExtensionInstallBlocklist [*]. No real describeCapabilities response captured; see docs/evidence/shelf-engine/real-shelf-receipt.json"
     },
-    "sourceState": "Committed implementation snapshot; runtime source files exactly match this commit and sourceFiles hashes. Documentation-only evidence commit follows.",
+    "sourceState": "Working-tree source hashes authoritative; source and map will be committed together; receipt pins final committed source.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -11909,13 +12001,19 @@
         "CONNECTED",
         "CONNECTING",
         "DESTINATION_UNAVAILABLE",
-        "ENGINE_UNAVAILABLE",
+        "ENGINE_MESSAGE_SEND_FAILED",
+        "ENGINE_NO_RESPONSE",
+        "ENGINE_RECEIVER_MISSING",
+        "ENGINE_REQUEST_FAILED",
+        "ENGINE_RESPONSE_CHANNEL_CLOSED",
+        "ENGINE_RESPONSE_INVALID",
         "LOGIN_REQUIRED",
         "PREVIEW_SIZE_LIMIT",
         "REAUTH_REQUIRED",
         "RECONNECT_REQUIRED",
         "REPAIR_REQUIRED",
         "SETUP_APPROVAL_REQUIRED",
+        "SHELF_START_FAILED",
         "VERIFYING"
       ],
       "extension/background.mjs": [
@@ -11927,7 +12025,9 @@
         "DEBUG_REQUEST_FAILED",
         "DISCONNECTED",
         "DISCONNECTING",
-        "ENGINE_UNAVAILABLE",
+        "ENGINE_INVOCATION_FAILED",
+        "ENGINE_RESPONSE_INVALID",
+        "ENGINE_STARTUP_FAILED",
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "INSUFFICIENT_SCOPE",
         "PREVIOUS_BACKUP_PERMISSION_REQUIRED",
@@ -11937,6 +12037,7 @@
         "SCOPE_UNAUTHORIZED",
         "SOURCE_INVALID",
         "TRUSTED_CONTEXTS",
+        "UNTRUSTED_APP_SENDER",
         "VERIFIED",
         "WORKER_MODULE_UNAVAILABLE"
       ],
@@ -12165,7 +12266,12 @@
         "STALE_GENERATION",
         "UNCHANGED_ACK_REUSED"
       ],
-      "src/chrome/trusted-sender.mjs": [],
+      "src/chrome/trusted-sender.mjs": [
+        "APP_ORIGIN_MISMATCH",
+        "APP_URL_MISMATCH",
+        "EXTENSION_ID_MISMATCH",
+        "INVALID_DOCUMENT_METADATA"
+      ],
       "src/cloudflare/deployment.mjs": [
         "ACCOUNT_ID",
         "BUCKET_NAME",
@@ -13163,7 +13269,7 @@
       "R": "Pinned immutable baseline, 62 current behavior entries,76 source hashes, stale map gate; oneToOneVerified remains false",
       "U": "REDOWN source comparison in docs/evidence/NOV07_MASTER_HANDOFF.md; source-only behavioral reference"
     },
-    "digest": "2d62cd5990bc7e00904ab7623e0d14f6e6364c146a51a1d36381388ba01b6725"
+    "digest": "cd27ea77ae0fde08baf3c05efbeb9d0712533dfd3afec1c5d3b956886dbbae2e"
   },
   "changeLog": [
     {
@@ -13188,6 +13294,14 @@
       ],
       "summary": "Existing OAuth repaired, Shelf replaces popup, no-R2-no-action diagnosis, settings/API parity; baseline immutable",
       "status": "LOCAL_IMPLEMENTATION_EXTERNAL_AUTH_UNVERIFIED"
+    },
+    {
+      "behaviorIds": [
+        "ENTRY_MESSAGE",
+        "ENTRY_CLIENT_RESPONSE"
+      ],
+      "summary": "Remove optional-documentId hard failure, preserve exact Chrome provenance, structured message failures and precise Shelf startup causes; real acceptance runner, no user/cloud state migrations",
+      "status": "LOCAL_PASS_INSTALLED_SHELF_BLOCKED"
     }
   ],
   "verificationLevels": [
