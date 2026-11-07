@@ -136,13 +136,59 @@ flowchart TD
 
 ## 2. The native right-click default (before the user customizes it)
 
+### Diagram 2A — Chosen Cloudflare destinations, permanent deletion, and empty-menu routing
+
+```mermaid
+flowchart TD
+    A["Right-click: Cloudflare<br/>Always one provider entry when visible"] --> B{"Signed in?"}
+    B -- "No" --> LOGIN["One Click Away!<br/>Cloudflare icon + Sign in"]
+    LOGIN --> AUTH["Complete provider authorization"]
+    AUTH --> INIT{"Approved initial setup<br/>ever completed?"}
+    B -- "Yes" --> INIT
+    INIT -- "No, first use" --> FIRST{"Does redown exist?"}
+    FIRST -- "Yes" --> REUSE["Reuse redown"]
+    FIRST -- "No" --> CREATE["Create redown ONCE<br/>only during approved first use"]
+    CREATE --> REUSE
+    REUSE --> ASSIGN["Assign redown as initial default<br/>after verified readiness"]
+    ASSIGN --> COUNT{"Number of deliberately<br/>ASSIGNED Cloudflare locations?"}
+    INIT -- "Yes, returning user" --> COUNT
+    COUNT -- "0" --> MANAGE["Flat Cloudflare click<br/>opens Manage Destinations<br/>NEVER recreates deleted redown"]
+    COUNT -- "1" --> FLAT["Flat Cloudflare<br/>save directly to the one chosen location"]
+    COUNT -- "2 or more" --> NEST["One Cloudflare submenu<br/>each chosen location is a direct leaf"]
+    ADD["User creates a bucket<br/>without ASSIGNING it"] -. "No change" .-> COUNT
+    CHOOSE["User explicitly assigns<br/>an additional destination"] --> COUNT
+    DELETE["User intentionally deletes/unassigns redown"] --> COUNT
+    DELETE -. "No automatic recreation" .-> MANAGE
+```
+
+**Decision rule:** Only user-chosen and assigned Cloudflare destinations count. A new bucket by itself changes nothing. With `redown` + `Photos` assigned, Cloudflare shows one submenu containing both. If `redown` is intentionally deleted and `Photos` alone remains, Cloudflare becomes flat and saves to `Photos`. If no assigned locations remain, clicking flat Cloudflare opens **Manage Destinations** (or provider sign-in first if disconnected). Explicit deletion is permanent unless the user explicitly requests creation again.
+
+### Diagram 2B — Settings: independently show/hide providers in the Chrome menu
+
+```mermaid
+flowchart TD
+    A["Settings → Right-click menu"] --> B["Google Drive: Show / Hide"]
+    A --> C["Dropbox: Show / Hide"]
+    A --> D["OneDrive: Show / Hide"]
+    A --> E["Cloudflare: Show / Hide"]
+    B --> F["Commit visibility through versioned configuration API"]
+    C --> F
+    D --> F
+    E --> F
+    F --> G["Canonical menu compiler → native Chrome ACK"]
+    G --> H["Only selected providers appear"]
+    H --> I["Cloud accounts, OAuth, files and assigned locations are unchanged"]
+```
+
+Provider visibility defaults to ON for all four. An OFF provider has no native menu children; its settings and assigned destinations remain saved for later re-enabling.
+
 ### Cloudflare destination-count rule (definitive)
 
 **Count actual user-assigned Cloudflare save destinations, not every bucket visible in the account.** The same native provider item changes shape as the number of assigned destinations changes:
 
 | Cloudflare assigned destinations | One native Cloudflare item | Action |
 | --- | --- | --- |
-| 0, including brand-new users | Flat clickable leaf | Open minimal provider login/approved first-time setup or Choose destination; no claimed save until ready |
+| 0, including brand-new users | Flat clickable leaf | Unconnected first-time: minimal provider login/approved first setup; connected returning user with no assignments: open **Manage Destinations**, never recreate deleted redown |
 | 1: `redown` | Flat clickable leaf | Save directly to `redown` when ready |
 | 1: only another user-assigned bucket, after `redown` was removed/deleted | Flat clickable leaf | Save directly to the remaining bucket when ready |
 | 2: `redown` + `Photos` | One submenu | `Cloudflare → redown / Photos`; each child saves to its exact target |
@@ -179,7 +225,7 @@ The owner may later customize layout, Quick Select, Simple/Narrow/Depth, provide
 
 ## 4. Automatic `redown` bucket and default
 
-**Decision: Is this a new, authorized first-time connection with no previously selected destination?** If yes, test the selected account for `redown`. If present, use it. If absent, create it through the approved initial setup. After verified transfer readiness, make it the default without prompting for bucket names, picking another bucket, or opening the full dashboard. This is true even when there are zero existing R2 buckets. A flat, clickable **Cloudflare** menu item exists even before this setup; it triggers the minimal login/setup path until saving is ready. Later explicit removal and custom choices remain authoritative.
+**Decision: Is this a new, authorized first-time connection with no previously selected destination?** If yes, test the selected account for `redown`. If present, use it. If absent, create it through the approved initial setup. After verified transfer readiness, make it the default without prompting for bucket names, picking another bucket, or opening the full dashboard. This is true even when there are zero existing R2 buckets. A flat, clickable **Cloudflare** menu item exists even before this setup; it triggers minimal sign-in/approved first setup for new users, or **Manage Destinations** when a returning connected user intentionally has no locations. Later explicit removal and custom choices remain authoritative.
 
 Once an authenticated API check establishes usable R2 access **and** the user has approved the extension's first-run auto-setup:
 
