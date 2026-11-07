@@ -1,5 +1,7 @@
 # Cloudflare foundation — Click2Cloud / REDOWN
 
+**CURRENT NOVEMBER 7 OWNER OVERRIDE — READ BEFORE ANY DIAGRAM:** [Master implementation and NO-BLOAT contract](../../docs/CODEX_MASTER_2026-11-07_SINGLE_ENGINE_REDOWN_PARITY_AND_WORKINGS.md). The real source behavior is mapped in [right-click-workings.json](../../11.2026/workings/right-click-workings.json), which requires a complete code audit before it can be labeled 1:1 verified. **R2 is unavailable / inactive / unknown? Do NOTHING in Cloudflare and never redirect to signup: the user enables or repairs R2 manually.** **R2 confirmed available?** During one user-approved first-use setup, reuse bucket redown if it exists or create it otherwise; prepare necessary Worker and independently verify remote write/readback, set its bucket root as initial default unless user chose another. Thereafter native Cloudflare right-click saves directly. Explicit deletion or default changes remain binding. No extra engines, no automatic R2-website navigation. Older diagrams below are historical where they differ; do not execute their obsolete navigation arrows.
+
 **November 7 presentation precedence:** The current single-click disconnected authentication route is documented in [`docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md`](../../docs/CODEX_P0_REDOWN_RIGHT_CLICK_LOGIN_FALLBACK_SETTINGS_2026-11-07.md): toolbar-anchored popup first when Settings auto-login presentation is ON; on an opening failure record diagnostics then open the REDOWN-style Shelf with the exact provider selected; when that setting is OFF, show only the notification `Please log in to Cloudflare`. Read the older diagrams' references to `Shelf` or `small panel` as their requested *login content*, not a mandatory surface. They do not override the new presentation/fallback preference. Connected and ready saves remain direct; first-time provisioning, assigned menu target counts and permanent `redown` removal rules stay unchanged.
 
 > **Status:** Owner-approved product behavior and implementation foundation, **not yet an implemented or live-verified feature**.
@@ -16,14 +18,14 @@ This chart is the **approved first-run onboarding reference only**: ordinary log
 flowchart TD
     A["User right-clicks a file → Cloudflare<br/>(flat, one-click provider item)"]
     B{"Cloudflare authorized<br/>in Click2Cloud?"}
-    C["Launch the EXISTING Shelf Cloudflare OAuth login/consent"]
+    C["Show selected-provider login interface; OAuth begins only when user chooses Log in"]
     D{"OAuth approved and<br/>account identity verified?"}
     E["Explain cancellation/error and offer Retry<br/>without claiming ready"]
     F{"R2 activated for<br/>the authorized account?"}
-    G["Open official Cloudflare R2 activation page<br/>and mark setup pending"]
-    H["On return / Continue / focus, recheck<br/>authorized R2 readiness via API"]
+    G["R2 unavailable: NO cloud setup or redirection; user fixes manually"]
+    H["Only after explicit Check again: read-only R2 readiness verification"]
     I{"R2 now active?"}
-    J["Show Activate R2 / Retry check<br/>without requiring a new login"]
+    J["R2 still unavailable: no actions; user may manually fix and Check again"]
     K{"Does bucket `redown` exist<br/>in the selected account?"}
     L["Create `redown` in that account<br/>with authorized R2 permissions"]
     M["Reuse existing `redown` bucket<br/>without deleting or replacing contents"]
@@ -69,9 +71,9 @@ flowchart TD
 flowchart TD
     A["Right-click → Cloudflare action<br/>(sole leaf or selected submenu child)"]
     B{"Click2Cloud OAuth<br/>valid for selected account?"}
-    C["Open existing Shelf OAuth login"]
+    C["Show selected-provider login; wait for explicit Log in"]
     D{"R2 usable?"}
-    E["Only if confirmed inactive:<br/>offer R2 activation link"]
+    E["Confirmed inactive: NO action or redirect; user fixes R2 independently"]
     F{"Saved Cloudflare<br/>destination configured?"}
     G{"Exact chosen bucket/path<br/>and TRUE REMOTE Worker ready?"}
     H["TRUE REMOTE save to THAT destination<br/>→ independent verification"]
@@ -215,17 +217,15 @@ No initial provider submenus, no unnecessary second REDOWN submenu, and no user-
 
 The owner may later customize layout, Quick Select, Simple/Narrow/Depth, provider organization or exact defaults using existing V3+1 tools. **Do not rebuild or replace the canonical MenuSpec, native registrar, action resolver or mode configurations.** The four-item first-run layout is a default *projection/registration policy*, not a new right-click engine.
 
-## 3. Cloudflare login versus R2 activation
+## 3. Cloudflare login, manual R2 availability, and separate initial setup
 
-- The **Shelf's Cloudflare Log in/Connect button always launches Click2Cloud's existing first-party Cloudflare OAuth flow**, matching the current REDOWN-style authorization experience. Never substitute an API-token popup or Cloudflare R2 checkout for Shelf login.
-- On a Cloudflare native right-click when not authorized, launch that **same trusted Shelf authorization action** (or bring the Shelf's Cloudflare connect surface forward and invoke it through the same API). There is **one** authorization owner, no parallel login implementation.
-- After OAuth, inspect the exact authorized Cloudflare account and R2 API readiness. A Cloudflare website login or successful OAuth consent **does not prove R2 is activated**.
-- If R2 is not active, open the official activation destination:
-  `https://dash.cloudflare.com/?to=%2F%3Aaccount%2Fr2%2Foverview`
-  (the navigation route must be verified against Cloudflare's current dashboard; use a safe official dashboard fallback if it changes).
-- The user completes any Cloudflare-controlled account, billing or R2 activation step. **Click2Cloud never bills, subscribes, or accepts Cloudflare terms on the user's behalf.**
-- Click2Cloud records `setupPending` for the authorized account, rechecks when the app is foregrounded or the user selects **Continue/Check R2**, and can offer another nonintrusive retry. Do not promise an automatic provider callback from R2 checkout or infinite background polling.
-- Distinguish R2 not activated, insufficient OAuth scopes, account mismatch, API outage, and revoked authorization. Each gives a comprehensible next action rather than a generic login loop.
+- When a provider requires authorization, Click2Cloud presents its existing login action through one shared OAuth owner. The currently approved UI preference is toolbar-anchored popup first, diagnostics-recorded Shelf fallback if the popup cannot open, and notification if both fail. Settings may disable automatic UI opening and instead show the correct provider-specific notification. These are clients of ONE authorization owner. A login UI does not start OAuth until the user selects Log in. The provider-controlled OAuth consent window is permitted.
+- After authorized login, perform **read-only** R2 availability and exact selected-account checks. OAuth success alone does not prove R2 is usable.
+- **If R2 is confirmed inactive/unavailable, requires subscription, or cannot be verified as active, NO cloud action occurs.** Do not visit an activation website, create buckets, deploy Workers or Durable Objects, write readiness objects, start billing, poll continuously, guess a new account, or retry provisioning. User must resolve R2 manually outside Click2Cloud. A user-selected Check again may perform a read-only recheck.
+- **Never classify an HTTP 403 alone as inactive R2.** Distinguish permission denial, wrong account, expired/revoked OAuth, API/network failure, and confirmed subscription inactivity. Do not mask these with a false login loop.
+- If R2 is confirmed active, the **separately approved, first-use** redown/Worker readiness process described below may proceed. A single clear approval describes the necessary infrastructure and potential costs. Signing in alone does not authorize billable resource creation.
+- Ready returning users save immediately, without user-facing setup pages or redirections. No source selected before login may be replayed automatically.
+
 
 ## 4. Automatic `redown` bucket and default
 
