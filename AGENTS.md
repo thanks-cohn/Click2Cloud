@@ -1,5 +1,9 @@
 # AGENTS.md — Click2Cloud /scaffold-first engineering instructions
 
+## CURRENT OAUTH PROFILE — OWNER-CONFIRMED NINE PERMISSIONS
+
+Execute `docs/requests/P0-CLICK2CLOUD-V3PLUS1-REDOWN-PARITY.md` for the latest scope/profile and end-to-end acceptance contract. The owner explicitly authorized the nine listed permissions, including Workers Admin, bucket-item read/write and Routes read/write; they replace the old five/seven-scope requests. Do not request unconfirmed offline_access. Preserve valid sessions/refresh and destinations; reconsent uses the same client, callback and API. Editor is not create authority; use actual issued grants/provider authorization and never claim a Windows/live pass from fixtures. Do not modify REDOWN or silently deploy production resources.
+
 ## CURRENT V1 OVERRIDE — GITHUB ISSUE #4
 
 The owner's current [Issue #4](https://github.com/thanks-cohn/Click2Cloud/issues/4) supersedes older tombstone/one-time-only and setup-modal rules below. On explicit login/initialization, inspect both the saved default and manager assignments. Preserve any existing choice; locally link a default-only target to an ordinary Simple row. Only when both are absent, use existing account-specific setup approval to create/reuse exact `redown`, atomically register a normal editable/deletable Simple root entry and mark it Default. Deleting the last assignment permits initialization again at the next login; passive boot/status/ticks never create resources. OAuth alone is not billable consent. Persist consent in the existing private setup ledger, never in transferable configuration. No normal setup popup/wizard, mandatory status check or manual destination gate. Wait for verified provider readiness and actual native ACK. The canonical workings JSON baseline remains immutable and CURRENT must track code. No live mutation/deployment without separate authorization.

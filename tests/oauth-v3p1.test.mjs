@@ -8,7 +8,7 @@ function fixture({badState=false,denied=false}={}){
 }
 test('PKCE login uses verified scopes and exact redirect; verifies identity before safe connected status',async()=>{
  const f=fixture(),status=await f.auth.connect();assert.equal(status.state,'CONNECTED');assert.deepEqual(status.accounts,[{id:'fixture-account',name:'Fixture account'}]);assert(!JSON.stringify(status).includes('private-'));
- const u=f.calls[0][1];assert.equal(u.searchParams.get('code_challenge_method'),'S256');assert.equal(u.searchParams.get('scope'),'workers-r2.read workers-r2.write workers-scripts.content_read workers-scripts.edit offline_access');
+ const u=f.calls[0][1];assert.equal(u.searchParams.get('code_challenge_method'),'S256');assert.equal(u.searchParams.get('scope'),'workers-scripts.admin workers-scripts.content_read workers-scripts.edit workers-r2-bucket-item.read workers-r2-bucket-item.write workers-r2.read workers-r2.write workers-routes.read workers-routes.write');
  assert.equal(f.calls.length,3);assert(!f.calls.some(c=>/bucket|worker|object/.test(String(c[0]))));
 });
 test('OAuth state mismatch never exchanges code; denied identity remains authenticated pending verification',async()=>{

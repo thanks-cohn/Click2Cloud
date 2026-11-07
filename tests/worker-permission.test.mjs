@@ -4,7 +4,7 @@ import {diagnoseCloudflare} from '../src/auth/cloudflare-oauth.mjs';
 import {digest} from '../src/cloudflare/wire.mjs';
 import {fixture as onboardingFixture} from './cloudflare-onboarding.test.mjs';
 const target={provider:'cloudflare',connectionId:'cloudflare:a',accountId:'a',bucketName:'redown',prefix:''};
-const scopes=['workers-r2.read','workers-r2.write','workers-scripts.content_read','workers-scripts.edit','offline_access'];
+const scopes=['workers-scripts.admin','workers-r2.read','workers-r2.write','workers-scripts.content_read','workers-scripts.edit'];
 function fixture(){const calls=[],plans=new Map();let metadata,deny,body={errors:[{code:10000,message:'Authentication error'}]},status=403;const authority=async()=>({sessionId:'session',accounts:[{id:'a'}],scopes,scopeEvidence:'provider-returned'});
  const request=async(path,options={})=>{const method=options.method??'GET',operation=path.endsWith('/settings')?'script-settings-read':method==='PUT'?'script-upload':method==='POST'?'script-subdomain-enable':'account-subdomain-read';calls.push({operation,method});
   if(operation===deny)return Response.json({success:false,...body},{status,headers:{'cf-ray':'a123456789abcdef-LAX'}});

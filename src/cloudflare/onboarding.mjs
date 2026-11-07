@@ -3,7 +3,7 @@ import {applyConfigChanges} from '../api/config.mjs';
 const setupLocks=new WeakMap();
 const managerTargets=s=>Object.values(s.configs).flatMap(c=>(c.destinations??[]).map(d=>d.target)).filter(t=>t?.provider==='cloudflare');
 const savedTargets=s=>[...new Map([s.product.defaultTarget,...Object.values(s.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(t=>t?.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];
-import {diagnoseCloudflare,hasWorkerWriteScope} from '../auth/cloudflare-oauth.mjs';
+import {diagnoseCloudflare,hasWorkerWriteScope,hasWorkerCreateScope} from '../auth/cloudflare-oauth.mjs';
 import {readBuckets} from './inventory.mjs';
 import {fail} from './wire.mjs';
 import {targetKey} from '../core/menu-identity.mjs';
@@ -50,7 +50,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   return withSetupLock(accountId,()=>initializeAccount(accountId,options));
  }
  async function initializeAccount(accountId,{resume=false}={}){
-  await account(accountId);const s=await current.read(),configured=savedTargets(s);
+  const auth=await account(accountId);const s=await current.read(),configured=savedTargets(s);
   if(s.product.defaultTarget&&(s.product.defaultTarget.provider!=='cloudflare'||s.product.defaultTarget.accountId!==accountId))return {state:'blocked',code:'DEFAULT_ACCOUNT_MISMATCH'};
   const targets=configured.filter(t=>t.accountId===accountId),manager=managerTargets(s).filter(t=>t.accountId===accountId);
   // Link a legacy default-only target locally, without requiring cloud mutations.
@@ -63,7 +63,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!await setupApproved(accountId))return {state:'blocked',code:'SETUP_APPROVAL_REQUIRED',accountId};
   const chosen=target??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''};
   const pointer=await current.readSetupOperation?.('initialization:'+accountId),pending=pointer&&await current.readSetupOperation?.(accountId+':'+pointer.idempotencyKey);
-  const failure=safeWorkerDiagnostic(pending?.failure);if(failure&&!resume)return {state:'blocked',code:failure.code,accountId,diagnostic:failure};
+  const failure=safeWorkerDiagnostic(pending?.failure);resume=resume||!!(failure&&auth.scopeEvidence==='provider-returned'&&auth.scopes?.includes('workers-scripts.admin')&&failure.sessionScopes.length>0&&!failure.sessionScopes.includes('workers-scripts.admin'));if(failure&&!resume)return {state:'blocked',code:failure.code,accountId,diagnostic:failure};
   const idempotencyKey=pending&&!pending.result&&targetKey(pending.target)===targetKey(chosen)?pointer.idempotencyKey:'v1:'+crypto.randomUUID();
   await current.writeSetupOperation?.('initialization:'+accountId,{idempotencyKey});
   return setupLocked({accountId,target,repair:!!target,automatic:true,resume,expectedRevision:(await current.read()).product.revision,idempotencyKey});
@@ -87,7 +87,9 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   const target=original??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''},initial=!original;
   if(prior&&targetKey(prior.target)!==targetKey(target))fail('IDEMPOTENCY_CONFLICT');
   const status=await r2(accountId);if(status.state!=='ACTIVE')return {state:'blocked',code:status.code??status.state,diagnostic:status.diagnostic};
+  if(!automatic&&!await setupApproved(accountId)){if(typeof current.writeSetupOperation!=='function')fail('SETUP_LEDGER_UNAVAILABLE');await current.writeSetupOperation('approval:'+accountId,{accountId,approved:true});}
   const missing=['workers-r2.write'].filter(scope=>!auth.scopes?.includes(scope));if(!hasWorkerWriteScope(auth.scopes))missing.push('workers-scripts.write');
+  if(initial&&!status.buckets.some(b=>b.name===target.bucketName)&&!hasWorkerCreateScope(auth.scopes)){const diagnostic=safeWorkerDiagnostic({operation:'script-upload',workerIntent:'create',code:'WORKER_CREATE_PERMISSION_REQUIRED',classification:'OAUTH_SCOPE_MISSING',missingScopes:['workers-scripts.admin'],grantedScopes:auth.scopes,scopeEvidence:auth.scopeEvidence,selectedAccountVerified:true});return {state:'blocked',code:diagnostic.code,accountId,target,diagnostic};}
   if(!Array.isArray(auth.scopes)||missing.length)return {state:'blocked',code:'INSUFFICIENT_SCOPE',diagnostic:{code:'INSUFFICIENT_SCOPE',missingScopes:missing}};
   if(automatic&&!await setupApproved(accountId))return {state:'blocked',code:'SETUP_APPROVAL_REQUIRED',accountId};
   const exists=status.buckets.some(b=>b.name===target.bucketName);

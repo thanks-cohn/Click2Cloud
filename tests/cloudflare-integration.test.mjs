@@ -3,6 +3,9 @@ import {mkdtemp,rm,mkdir,writeFile} from 'node:fs/promises';import {tmpdir} from
 import assert from 'node:assert/strict';
 import {Miniflare,createFetchMock} from 'miniflare';
 import {build} from 'esbuild';
+import {createEngineApi} from '../src/api/service.mjs';
+import {createClick2CloudFileApi} from '../src/explorer/index.mjs';
+import {CLOUDFLARE_SCOPES} from '../src/auth/cloudflare-oauth.mjs';
 import {trustedAppSender} from '../src/chrome/trusted-sender.mjs';
 import {compileMenuSpec} from '../src/core/menu-spec.mjs';
 import {productState} from '../src/api/config.mjs';
@@ -64,6 +67,24 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
   const operationId=crypto.randomUUID(),source={url:'https://raw.githubusercontent.com/approved.bin',filename:'雪.bin'};
   const result=await transport.save({target,operationId,source});assert.equal(result.state,'verified',JSON.stringify(result));assert.equal(result.receipt.key,'exact/雪.bin');
   const bucket=await mf.getR2Bucket('STORAGE'),object=await bucket.get(result.receipt.key);assert.equal(await object.text(),'abc');const storedMetadata={...object.customMetadata};assert.deepEqual(storedMetadata,{operationId});
+  {
+  // One canonical API -> real workerd/R2/DO -> File API -> History/GO TO.
+  // OAuth/management discovery and source HTTPS are explicit local fixtures.
+  const records=new Map(),reserved=new Set(),state={product:productState({defaultTarget:target}),configs:{simple:{destinations:[{id:'actual-r2',target}]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:null}};
+  const current={read:async()=>structuredClone(state),setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;},reserveOperation:async id=>{if(reserved.has(id))return false;reserved.add(id);return true;},recordRemoteResult:async value=>{records.set(value.operationId,structuredClone(value));return value;},readRemoteResult:async id=>records.get(id),readRemoteResults:async()=>[...records.values()]};
+  const oauth={status:async()=>({state:'CONNECTED',accounts:[{id:'a'}]}),authority:async()=>({sessionId:'s',accounts:[{id:'a'}],scopes:[...CLOUDFLARE_SCOPES],scopeEvidence:'provider-returned'})};
+  const fileApi=createClick2CloudFileApi({send:async()=>({ok:true}),http:{boundedFetch:fetch,request:async path=>{const u=new URL(path,'https://api.cloudflare.com');assert(u.pathname.startsWith('/accounts/a/r2/buckets/bucket/objects'));const page=await bucket.list({prefix:u.searchParams.get('prefix')??''});return Response.json({success:true,result:{objects:page.objects.map(o=>({key:o.key,size:o.size,etag:o.etag,uploaded:o.uploaded.toISOString()})),truncated:false,cursor:''}});}}});
+  const chrome={runtime:{},contextMenus:{create:(_p,cb)=>cb(),removeAll:cb=>cb(),onClicked:{addListener(){},removeListener(){}}}},registrar=createChromeRegistrar({chrome});
+  const engine=createEngine({current,registrar,getAuthorization:async()=>({sessionId:'s',authorizedTargets:[target]}),remoteSave:transport.save,onVerifiedCompletion:current.recordRemoteResult});
+  const domain=createCloudflareOnboarding({current,oauth,transport,provisioner:{},history:current.readRemoteResults});
+  const api=createEngineApi({engine,current,oauth,fileApi,cloudflare:domain,authorize:async()=>true,confirm:async()=>true,getInventory:async()=>({scopes:[{target:{...target,prefix:''},authorized:true,workerReady:true,folders:['exact/']}]})});
+  await api.reconcile();const native=registrar.inspect(),leaf=native.desired.rows.find(r=>r.role==='save');assert(leaf.enabled);assert.equal(native.acknowledgedGeneration,native.desired.generation);
+  const call=(method,params={})=>api.invoke({version:'3+1.1',method,params},'gui');
+  const saved=await call('dispatchSave',{generation:native.acknowledgedGeneration,itemId:leaf.id,context:'link',source:{url:'https://raw.githubusercontent.com/approved.bin',filename:'api-parity.bin'},idempotencyKey:'actual-local-r2-save'});assert.equal(saved.state,'completed',JSON.stringify(saved));assert.equal(saved.data.completion,'verified');
+  const history=await call('inspectRemoteHistory'),record=history.data.find(r=>r.receipt?.key==='exact/api-parity.bin');assert(record);const inspected=await call('inspectRemoteReceipt',{operationId:record.operationId});assert.equal(inspected.data.reconciliation.state,'verified');
+  const go=await call('openRemoteResult',{operationId:record.operationId}),listing=await call('listFolders',{source:go.data.target});assert.equal(go.data.highlightKey,record.receipt.key);assert(listing.data.data.entries.some(e=>e.key===record.receipt.key));assert.equal(await (await bucket.get(record.receipt.key)).text(),'abc');
+  if(process.env.C2C_PARITY_EVIDENCE){await mkdir(process.env.C2C_PARITY_EVIDENCE,{recursive:true});await writeFile(join(process.env.C2C_PARITY_EVIDENCE,'local-worker-api-proof.json'),JSON.stringify({evidenceClass:'ACTUAL_LOCAL_WORKERD_R2_DO_WITH_SIMULATED_OAUTH_MANAGEMENT_AND_SOURCE_NOT_LIVE_CLOUDFLARE',saveState:saved.state,completion:saved.data.completion,nativeACK:'simulated Chrome callbacks acknowledged',key:record.receipt.key,size:record.receipt.size,independentReadback:'abc',reconciliation:inspected.data.reconciliation.state,explorerFound:true,historyFound:true,goToKey:go.data.highlightKey},null,2)+'\n');}
+  }
   const replay=await transport.save({target,operationId,source});assert.equal(replay.state,'uncertain');assert.equal(replay.code,'OPERATION_ALREADY_CLAIMED');assert.equal((await transport.inspectOperation(target,operationId)).state,'verified');await mf.dispose();mf=new Miniflare(options);await mf.ready;assert.equal((await transport.save({target,operationId,source})).code,'OPERATION_ALREADY_CLAIMED');
   const second=await transport.save({target,source});assert.equal(second.state,'verified');assert.match(second.receipt.key,/^exact\/雪-[a-f0-9-]+\.bin$/);
   const truncated=await transport.save({target,source:{url:'https://raw.githubusercontent.com/oversized.bin',filename:'oversized.bin'}});assert.notEqual(truncated.state,'verified');assert.equal(await (await mf.getR2Bucket('STORAGE')).head('exact/oversized.bin'),null);

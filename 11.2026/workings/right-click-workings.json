@@ -7,7 +7,7 @@
   "auditStatus": "SOURCE_VERIFIED",
   "oneToOneVerified": false,
   "generatedBy": "Codex source audit; no private runtime data",
-  "generatedAt": "2026-11-07T15:07:42.486721+00:00",
+  "generatedAt": "2026-11-07T16:17:21.453636+00:00",
   "sourceRevisionPolicy": "Exact source hashes; documentation-only commits do not invalidate unchanged source. Runtime certification remains separate.",
   "bootstrapPriorToAudit": {
     "schemaVersion": "1.0.0",
@@ -9202,10 +9202,10 @@
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "94747255daf49f3b5e49c7c6c9cb68c9d62131c0e7c27ff448f5e771b1776b37",
+      "extension/app.mjs": "57c1af33301bf5fada65301cecdeb39ae47decc811345b65cd6e4b1a31518acc",
       "extension/background.mjs": "3a377c5304fa2f1195c30a9331e42ec7abf45c4cffdb1b9693feefdfb107b893",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "cb5f7cb8e00a3fd9ee728b4e486ecfe261df57a76ad64134d7e7487c9ed88cd6",
+      "extension/manifest.json": "132956fc4e1711dd05400e7d4b67d55b019a62bf34313af49466be5b77927101",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9224,16 +9224,16 @@
       "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
       "src/api/service.mjs": "58e1850b168c129a1d2abcf20c949bc49ea684769627a9db74450766a22266f3",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
-      "src/auth/cloudflare-oauth.mjs": "e5f7d058e8470816f958bde789c98aa66565807fe1d5bafa8837c5f0bbd1743c",
-      "src/build-info.mjs": "626d916974e74fd2b50f8bb756f86e3b1cbbbc0676fd83e281bbc85a7bf9ba82",
+      "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
+      "src/build-info.mjs": "4f518db1cd2b6fa130e5c8f1087f4f5264171fab67ea5e70f3b95ff2fe485b31",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
       "src/chrome/registrar.mjs": "d8bd0a7c94061a621c69c29656efde906aec119cd08b10bda42537509adfc6c6",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/cloudflare/deployment.mjs": "7417a12288eaf735e47d1bbefebeed21dd925cedd48c259b7e8e484bbc793e08",
+      "src/cloudflare/deployment.mjs": "7d6097f2ca61ac81014ee74ae24dc71dd623f1ae420857c120f10bf1cb8b9641",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
-      "src/cloudflare/onboarding.mjs": "ccdf681f52d03fb9b9e4b64c49ed7539125b8a260e07941b4015c08bf873232f",
+      "src/cloudflare/onboarding.mjs": "b39f21af21c7f43312933cc88f26f846af184e183cb5fbf9d877c27ff03ebcd7",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "6f2a08150b528e391ef3af6543bfa5c455ec8419546eb7644cd494c1e66f87a2",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
@@ -9825,13 +9825,13 @@
         "preconditions": "Explicit Log in",
         "trigger": "auth",
         "guard": "Exact registered redirect/scopes, PKCE, persisted unexpired attempt and same-owner connecting guard; explicit user gesture",
-        "actual": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
+        "actual": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
         "apiMethods": [
           "loginBegin"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
-        "uiEffect": "After explicit successful OAuth, canonical API initializes the selected account only under separately granted provision scope and persisted private setup consent; auth success remains distinct from setup result. Restart callback invokes same initializeCloudflare API.",
+        "nextState": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
+        "uiEffect": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
         "externalResourceEffect": "none",
         "persistence": "Session PKCE attempt; tokens local trusted storage",
         "errors": [
@@ -9844,14 +9844,15 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function connect",
-            "line": 67
+            "line": 70
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
           "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/issue4-v1.test.mjs",
-          "meaning": "No installed/native/live R2 proof claimed"
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -9877,7 +9878,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function completeCallback",
-            "line": 53
+            "line": 56
           }
         ],
         "verification": {
@@ -9911,7 +9912,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "chrome.webNavigation",
-            "line": 103
+            "line": 106
           }
         ],
         "verification": {
@@ -9946,7 +9947,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function verifyIdentity",
-            "line": 44
+            "line": 47
           }
         ],
         "verification": {
@@ -9963,14 +9964,14 @@
         "preconditions": "Inspect connection",
         "trigger": "auth",
         "guard": "See exact hash-bound source guard; current behavior: Separate CONNECTING, VERIFYING, CONNECTED and DISCONNECTED; expose safe diagnostics but no credentials",
-        "actual": "Separate CONNECTING, VERIFYING, CONNECTED and DISCONNECTED; expose safe diagnostics but no credentials",
+        "actual": "Authenticated state stays separate from permission completeness. Public permissions describes requested nine, provider-issued grants or null, missing grants, needsReconsent and createGrant true/false/unknown; refreshSupported is boolean only.",
         "apiMethods": [
           "loginStatus",
           "getProviderConnections"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Separate CONNECTING, VERIFYING, CONNECTED and DISCONNECTED; expose safe diagnostics but no credentials",
-        "uiEffect": "Safe status/diagnostic through canonical API; no token exposure or automatic resource mutation",
+        "nextState": "Authenticated state stays separate from permission completeness. Public permissions describes requested nine, provider-issued grants or null, missing grants, needsReconsent and createGrant true/false/unknown; refreshSupported is boolean only.",
+        "uiEffect": "Authenticated state stays separate from permission completeness. Public permissions describes requested nine, provider-issued grants or null, missing grants, needsReconsent and createGrant true/false/unknown; refreshSupported is boolean only.",
         "externalResourceEffect": "none",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
         "errors": [
@@ -9981,15 +9982,15 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function status",
-            "line": 99
+            "line": 102
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
-          "status": "PASS",
-          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
-          "testFile": "tests/nov07-auth-shelf.test.mjs",
-          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -9998,13 +9999,13 @@
         "preconditions": "Access within sixty seconds of expiry",
         "trigger": "auth",
         "guard": "See exact hash-bound source guard; current behavior: Same-owner single flight and Chrome lock serialize rotation, persistent fence rejects stale-session stores, account identity retained",
-        "actual": "Same-owner single flight and Chrome lock serialize rotation, persistent fence rejects stale-session stores, account identity retained",
+        "actual": "Legacy and new refresh tokens remain supported without requesting offline_access; rotation stays single-flight and provider-returned scope provenance updates on refresh.",
         "apiMethods": [
           "loginStatus"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Same-owner single flight and Chrome lock serialize rotation, persistent fence rejects stale-session stores, account identity retained",
-        "uiEffect": "Safe status/diagnostic through canonical API; no token exposure or automatic resource mutation",
+        "nextState": "Legacy and new refresh tokens remain supported without requesting offline_access; rotation stays single-flight and provider-returned scope provenance updates on refresh.",
+        "uiEffect": "Legacy and new refresh tokens remain supported without requesting offline_access; rotation stays single-flight and provider-returned scope provenance updates on refresh.",
         "externalResourceEffect": "none",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
         "errors": [
@@ -10015,15 +10016,15 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function access",
-            "line": 77
+            "line": 80
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
-          "status": "PASS",
-          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
-          "testFile": "tests/nov07-auth-shelf.test.mjs",
-          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -10047,7 +10048,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function token",
-            "line": 38
+            "line": 41
           }
         ],
         "verification": {
@@ -10079,7 +10080,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function request",
-            "line": 87
+            "line": 90
           }
         ],
         "verification": {
@@ -10111,7 +10112,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "diagnoseCloudflare",
-            "line": 9
+            "line": 11
           }
         ],
         "verification": {
@@ -10142,7 +10143,7 @@
           {
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function cancel",
-            "line": 98
+            "line": 101
           }
         ],
         "verification": {
@@ -10243,7 +10244,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async activation",
-            "line": 144
+            "line": 146
           }
         ],
         "verification": {
@@ -10376,7 +10377,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const exists=",
-            "line": 93
+            "line": 95
           }
         ],
         "verification": {
@@ -10409,7 +10410,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "bucket-create-dispatched",
-            "line": 110
+            "line": 112
           }
         ],
         "verification": {
@@ -10459,15 +10460,15 @@
         "preconditions": "Prior probe dispatch or lost completion",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Existing private setup ledger and owned plan retain sanitized failure. Repeated initialization cannot retry a denied step; explicit initializeCloudflare resume:true reuses approval, Worker identity, key, bucket and pending operation.",
+        "actual": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Existing private setup ledger and owned plan retain sanitized failure. Repeated initialization cannot retry a denied step; explicit initializeCloudflare resume:true reuses approval, Worker identity, key, bucket and pending operation.",
-        "uiEffect": "Existing private setup ledger and owned plan retain sanitized failure. Repeated initialization cannot retry a denied step; explicit initializeCloudflare resume:true reuses approval, Worker identity, key, bucket and pending operation.",
+        "nextState": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
+        "uiEffect": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
         "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
         "persistence": "Staged setup operation and CURRENT revision",
         "errors": [],
@@ -10476,13 +10477,15 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const recovered=",
-            "line": 106
+            "line": 108
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
-          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
-          "testFile": "tests/worker-permission.test.mjs"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -10508,7 +10511,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "await provisioner.markVerified",
-            "line": 119
+            "line": 121
           }
         ],
         "verification": {
@@ -10524,13 +10527,13 @@
         "preconditions": "Explicit approved prepare/repair",
         "trigger": "worker",
         "guard": "See exact hash-bound source guard; current behavior: Approved exact binding/digest plan preserved; worker control errors use safe specific diagnostics rather than generic403 permission assertion",
-        "actual": "Read account Workers.dev subdomain before any upload/enable; retain per-operation safe status/code/grants/permission evidence; inspect matching owned Worker on resume and never reupload it just to retry subdomain enable.",
+        "actual": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
         "apiMethods": [
           "repairCloudflareDestination"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Read account Workers.dev subdomain before any upload/enable; retain per-operation safe status/code/grants/permission evidence; inspect matching owned Worker on resume and never reupload it just to retry subdomain enable.",
-        "uiEffect": "Read account Workers.dev subdomain before any upload/enable; retain per-operation safe status/code/grants/permission evidence; inspect matching owned Worker on resume and never reupload it just to retry subdomain enable.",
+        "nextState": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
+        "uiEffect": "Admin or supported legacy write enables local create capability; known edit-only creation is blocked before PUT, existing owned Editor updates remain possible. Actual HTTP/probe authorization still decides success; missing provider scope evidence is not claimed as issued authority.",
         "externalResourceEffect": "Approved Worker/DO resource creation or update",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
         "errors": [
@@ -10545,9 +10548,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
-          "status": "LOCAL_IMPLEMENTATION_WINDOWS_DENIAL_NOT_CAPTURED",
-          "testFile": "tests/worker-permission.test.mjs"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -10670,7 +10675,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function invoke",
-            "line": 129
+            "line": 131
           }
         ],
         "verification": {
@@ -10937,14 +10942,14 @@
         "preconditions": "Verified save result selected",
         "trigger": "history",
         "guard": "Canonical stored verified receipt; exact target/key",
-        "actual": "GO TO navigates/highlights saved object, not original source",
+        "actual": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
         "apiMethods": [
           "openRemoteResult",
           "navigateExplorer"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "GO TO navigates/highlights saved object, not original source",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "nextState": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
+        "uiEffect": "Same canonical receipt, independent inspection, History object identity and GO TO key are checked against an actual local R2 object and GUI fixture; live Windows proof remains blocked.",
         "externalResourceEffect": "none",
         "persistence": "none",
         "errors": [],
@@ -10953,15 +10958,15 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 279
+            "line": 280
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "scripts/test-product-browser.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -10970,15 +10975,15 @@
         "preconditions": "Navigate or page listing",
         "trigger": "explorer",
         "guard": "Epoch before API await; exact target, cursor; dedup key",
-        "actual": "Ignore stale completion; page cache bounded, no file-count ceiling",
+        "actual": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
         "apiMethods": [
           "listFolders",
           "refreshExplorer",
           "navigateExplorer"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Ignore stale completion; page cache bounded, no file-count ceiling",
-        "uiEffect": "Ignore stale completion; page cache bounded, no file-count ceiling",
+        "nextState": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
+        "uiEffect": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
         "externalResourceEffect": "none",
         "persistence": "none",
         "errors": [],
@@ -10987,15 +10992,15 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 125
+            "line": 126
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/nov06-explorer.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs",
+          "integration": "tests/cloudflare-integration.test.mjs",
+          "browser": "scripts/test-product-browser.mjs"
         },
         "contractViolation": null
       },
@@ -11017,7 +11022,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 157
+            "line": 158
           }
         ],
         "verification": {
@@ -11109,7 +11114,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 160
+            "line": 161
           }
         ],
         "verification": {
@@ -11271,7 +11276,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 250
+            "line": 251
           }
         ],
         "verification": {
@@ -11518,13 +11523,61 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "worker-preparation-blocked",
-            "line": 113
+            "line": 115
           }
         ],
         "verification": {
           "level": "SOURCE_AND_LOCAL_FIXTURE",
           "status": "LOCAL_PASS_REAL_WINDOWS_ERROR_NOT_CAPTURED",
           "testFile": "tests/worker-permission.test.mjs"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "AUTH_NINE_SCOPES",
+        "trigger": "Explicit user Update Cloudflare permissions / loginBegin",
+        "preconditions": "Existing session may remain connected; owner authorized exact nine scopes",
+        "guard": "Same trusted API and OAuth owner; state/PKCE/callback/account fences; provider grants separate from requested/default assumptions",
+        "actual": "Requests nine registered scopes including Admin/item/routes; reports partial or unreported grants, preserves session on cancellation/rejection, supports refresh, and resumes known old create denial after newly issued Admin without setup reapproval",
+        "apiMethods": [
+          "loginBegin",
+          "loginStatus",
+          "initializeCloudflare",
+          "inspectCloudflare"
+        ],
+        "identity": "Unchanged client ID, extension ID and callback; same authorized account/bucket/Worker",
+        "nextState": "Verified login + provider-controlled creation/probe/native ACK before READY; unknown/denied scope remains truthful",
+        "uiEffect": "One inline Update permissions action / real provider consent; no disconnect/reset/setup wizard",
+        "externalResourceEffect": "Only already-approved exact destination setup; no routing operations despite requested Routes access",
+        "persistence": "Existing OAuth session, CURRENT and private setup/transport owners only",
+        "errors": [
+          "OAUTH_REGISTERED_SCOPES_REJECTED",
+          "WORKER_CREATE_PERMISSION_REQUIRED",
+          "WORKER_PERMISSION_DENIED",
+          "SETUP_AUTHORITY_REQUIRED"
+        ],
+        "retry": "No denied-write replay; same-token failure remains cached; fresh issued Admin upgrade may resume the preserved operation once",
+        "sourceRefs": [
+          {
+            "path": "src/auth/cloudflare-oauth.mjs",
+            "symbol": "export const CLOUDFLARE_SCOPES",
+            "line": 3
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "failure.sessionScopes.length>0",
+            "line": 66
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "id=\"shelf-reauthorize\"",
+            "line": 72
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
+          "status": "LOCAL_PASS_LIVE_BLOCKED",
+          "testFile": "tests/nine-scopes-parity.test.mjs"
         },
         "contractViolation": null
       }
@@ -11602,8 +11655,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectShelfAttention",
@@ -11611,8 +11664,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "openCloudflareDestinations",
@@ -11620,8 +11673,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectCloudflare",
@@ -11629,8 +11682,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "checkCloudflareR2",
@@ -11638,8 +11691,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "selectCloudflareAccount",
@@ -11647,8 +11700,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "openCloudflareActivation",
@@ -11656,8 +11709,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "approveCloudflareSetup",
@@ -11665,8 +11718,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "repairCloudflareDestination",
@@ -11674,8 +11727,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "invokeProviderAction",
@@ -11683,8 +11736,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectRemoteHistory",
@@ -11692,8 +11745,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectRemoteReceipt",
@@ -11701,8 +11754,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectCloudflareSetup",
@@ -11710,8 +11763,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "cancelRemoteOperation",
@@ -11719,8 +11772,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "openRemoteResult",
@@ -11728,8 +11781,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "refreshExplorer",
@@ -11737,8 +11790,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "navigateExplorer",
@@ -11746,8 +11799,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "readFileChunk",
@@ -11755,8 +11808,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectExplorerContextMenu",
@@ -11764,8 +11817,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "previewContextMenu",
@@ -11773,8 +11826,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "describeCapabilities",
@@ -11782,8 +11835,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "getConfiguration",
@@ -11791,8 +11844,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "getEngineHealth",
@@ -11800,8 +11853,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "getProviderConnections",
@@ -11809,8 +11862,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "loginBegin",
@@ -11818,8 +11871,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "loginStatus",
@@ -11827,8 +11880,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "loginCancel",
@@ -11836,8 +11889,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "disconnect",
@@ -11845,8 +11898,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "listAccounts",
@@ -11854,8 +11907,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "listAuthorizedBuckets",
@@ -11863,8 +11916,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "listFolders",
@@ -11872,8 +11925,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "fileMetadata",
@@ -11881,8 +11934,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "readFile",
@@ -11890,8 +11943,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "listDestinations",
@@ -11899,8 +11952,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectMenuTree",
@@ -11908,8 +11961,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "previewNativeMenu",
@@ -11917,8 +11970,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectNativeACK",
@@ -11926,8 +11979,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "getOrganizationSuggestion",
@@ -11935,8 +11988,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "previewConfigChange",
@@ -11944,8 +11997,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "commitConfigChange",
@@ -11953,8 +12006,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "reconcileNativeMenu",
@@ -11962,8 +12015,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "chooseBackupLocation",
@@ -11971,8 +12024,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectRecoveryCoverage",
@@ -11980,8 +12033,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "runRecoveryPage",
@@ -11989,8 +12042,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectBackupRoots",
@@ -11998,8 +12051,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "listRecoveryPolicies",
@@ -12007,8 +12060,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "writeRecovery",
@@ -12016,8 +12069,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "requestRestorePreview",
@@ -12025,8 +12078,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "restoreRightClickMenu",
@@ -12034,8 +12087,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -12043,8 +12096,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "enableWholeCloudJob",
@@ -12052,8 +12105,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "disableWholeCloudJob",
@@ -12061,8 +12114,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "dispatchExplorerSave",
@@ -12070,8 +12123,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       },
       {
         "method": "dispatchSave",
@@ -12079,8 +12132,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Unchanged actor/account/provision gates; explicit resume does not mint consent",
-        "coverage": "Local tests, no Windows OAuth denial response captured"
+        "authorization": "Same actor/account grants and applicable approval; permissions update uses existing loginBegin",
+        "coverage": "Source/local tests; live owner grant and cloud writes not verified here"
       }
     ],
     "errorBranches": {
@@ -12118,9 +12171,10 @@
       "liveShelfEngine": "BLOCKED at commit 3a19ac1723458ff137037fb6d5f09b330e54f52e: managed unpacked extension installation denial; describeCapabilities response not obtained",
       "shelfLocalBrowser": "PASS16 actual Chromium local-fixture gates; actual Windows denied request unobserved",
       "issue4": "SOURCE + local decision table/browser fixture; installed Windows Chrome and live save/readback BLOCKED/NOT_TESTED",
-      "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made."
+      "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
+      "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare."
     },
-    "sourceState": "Committed runtime snapshot 2498da593138c0ef596c4809a8c130a5ad57acdd; subsequent evidence commit changes no runtime source.",
+    "sourceState": "Working-tree hash-bound runtime snapshot; source, map and tests committed together.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "BLOCKED",
@@ -12314,6 +12368,7 @@
         "OAUTH_CANCELLED_OR_UNAVAILABLE",
         "OAUTH_IDENTITY_UNVERIFIED",
         "OAUTH_REDIRECT_SETUP_REQUIRED",
+        "OAUTH_REGISTERED_SCOPES_REJECTED",
         "OAUTH_REGISTERED_SCOPES_REQUIRED",
         "OAUTH_RESPONSE_INVALID",
         "POST",
@@ -12429,6 +12484,7 @@
         "TRANSPORT_PLAN_INVALID",
         "WORKERS_SUBDOMAIN_UNAVAILABLE",
         "WORKER_ADDRESS_UNAVAILABLE",
+        "WORKER_CREATE_PERMISSION_REQUIRED",
         "WORKER_PERMISSION_DENIED",
         "WORKER_REQUEST_REJECTED",
         "WORKER_SETUP_REQUIRED",
@@ -12465,6 +12521,7 @@
         "LOGIN_REQUIRED",
         "NETWORK_UNAVAILABLE",
         "NOT_ACTIVATED",
+        "OAUTH_SCOPE_MISSING",
         "OPERATION_UNKNOWN",
         "POST",
         "PROVIDER_NOT_IMPLEMENTED",
@@ -12490,6 +12547,7 @@
         "TOKEN_EXPIRED",
         "TRANSIENT_API_FAILURE",
         "UNKNOWN",
+        "WORKER_CREATE_PERMISSION_REQUIRED",
         "WRONG_ACCOUNT"
       ],
       "src/cloudflare/public-address.mjs": [],
@@ -13437,7 +13495,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "7baf34cbe5e23167f8326c397ab9e6c9dd963777e950b2120d308b304e076f25"
+    "digest": "00c41e38ff056359365bfd9bab8a158b64aee8d5c2ecd105566c63546d03d454"
   },
   "changeLog": [
     {
@@ -13505,6 +13563,21 @@
       "summary": "Worker permission: learn from REDOWN main, precise safe error evidence, read-only subdomain preflight, same-plan explicit recovery and canonical scope acceptance",
       "status": "LOCAL_IMPLEMENTATION_LIVE_DENIAL_CAUSE_UNKNOWN",
       "beforeCommit": "7ba73eaea7b8efb4e139b9a8d99c5bd0e7072706"
+    },
+    {
+      "sourceCommit": "67a6d35babef2ea4550566d395bb31948def5cc2",
+      "behaviorIds": [
+        "AUTH_LOGIN",
+        "AUTH_STATUS",
+        "AUTH_REFRESH",
+        "WORKER_PREPARE",
+        "SETUP_RESUME",
+        "EXPLORER_LIST",
+        "HISTORY_GO_TO",
+        "AUTH_NINE_SCOPES"
+      ],
+      "summary": "Owner-authorized nine-scope OAuth + safe reconsent and preserved denied setup recovery; actual local Worker/R2/API/Explorer/History proof",
+      "status": "LOCAL_IMPLEMENTATION_LIVE_BLOCKED"
     }
   ],
   "verificationLevels": [
@@ -13864,5 +13937,30 @@
       "grantedScopes": null,
       "meaning": "Owner explicitly confirmed details were not captured. Actual Windows authorization cause remains undetermined."
     }
+  },
+  "nineScopeBefore": {
+    "sourceCommit": "67a6d35babef2ea4550566d395bb31948def5cc2",
+    "requestContract": "docs/requests/P0-CLICK2CLOUD-V3PLUS1-REDOWN-PARITY.md",
+    "contractSHA256": "4563144e50109f9a29866c7abba0a1d1c7dc779085e6713d49b98f0db57913ef",
+    "confirmedWindowsFailure": {
+      "method": "PUT",
+      "endpoint": "/accounts/{account_id}/workers/scripts/{script_name}",
+      "httpStatus": 403,
+      "providerCodes": null,
+      "intent": "create",
+      "source": "Owner-confirmed new request; numeric code not available"
+    },
+    "sourceFiles": {
+      "src/auth/cloudflare-oauth.mjs": "e5f7d058e8470816f958bde789c98aa66565807fe1d5bafa8837c5f0bbd1743c",
+      "src/cloudflare/deployment.mjs": "7417a12288eaf735e47d1bbefebeed21dd925cedd48c259b7e8e484bbc793e08",
+      "src/cloudflare/onboarding.mjs": "ccdf681f52d03fb9b9e4b64c49ed7539125b8a260e07941b4015c08bf873232f",
+      "extension/app.mjs": "94747255daf49f3b5e49c7c6c9cb68c9d62131c0e7c27ff448f5e771b1776b37"
+    },
+    "before": [
+      "Requested edit/content_read/offline_access without Workers Admin or item/routes permissions",
+      "No connected-user permission update path",
+      "Known edit-only creation could reach PUT and fail403",
+      "Newly authorized Admin could remain stuck behind saved denial without explicit recovery"
+    ]
   }
 }
