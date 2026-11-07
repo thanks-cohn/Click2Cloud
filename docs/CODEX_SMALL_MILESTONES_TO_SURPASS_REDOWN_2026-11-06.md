@@ -32,7 +32,7 @@
 
 ## P0 — It MUST open, right-click, save and remain responsive
 
-Each numbered milestone is a **separate Codex run / one reviewable commit or small PR**, not a massive rewrite. Begin with M00. Do not mark a milestone PASS until its specific checks pass. If installed Chrome or provider access is blocked in Codex, mark **BLOCKED / NOT LIVE VERIFIED**, deliver local fixes/tests and exact owner steps rather than calling a fixture a live pass.
+Milestones are **small checkpoints within a continuous working session**, not limits on how much Codex should accomplish. The owner wants **approximately 30 minutes of continuous work per session**, advancing through as many high-priority fixes as practical, followed by a detailed handoff. Begin with broken startup, real native right-click saving, and Explorer freezes. Each checkpoint needs truthful evidence: PASS only with required validation; BLOCKED / NOT LIVE VERIFIED when an external resource is unavailable. Continue with unblocked work rather than substituting fixture results for live proof.
 
 ### M00 — Startup: click the extension icon and OPEN Click2Cloud
 - **Inspect:** `extension/manifest.json`, `extension/background.mjs`, `extension/app.mjs`, `scripts/build-extension.mjs`, `src/build-info.mjs`; compare REDOWN `extension/entry-bootstrap.js` and `extension/boot.js`.
@@ -168,19 +168,19 @@ next fresh right-click saves when provider and destination are genuinely ready.
 
 Notes: The `redown` bucket is an approved initial default, not permission to recreate an intentionally deleted bucket. A user-chosen default takes precedence while `redown` remains an option until explicitly removed. Where Chrome itself groups the extension under one parent, that Chrome grouping is accepted; do not add a redundant in-extension parent.
 
-## One-Codex-run-at-a-time contract
+## Continuous 30-minute Codex working-session contract
 
 1. **First read AGENTS.md, the two foundation diagram files, this roadmap, and the specific REDOWN comparison module(s) for the current milestone.**
-2. Execute **ONE numbered milestone per run**, smallest effective production change, focused regression test, independent evidence and one concise diff. Do not rewrite the menu engine, Explorer API or other modes. M00–M08 outrank all other work.
+2. **Work continuously for approximately 30 minutes, moving through multiple numbered milestones.** Milestones are progress checkpoints; complete as many connected P0 fixes as practical. Repair startup, native menu layout, direct R2 saving, and Explorer responsiveness in priority order. While live Chrome or provider testing is blocked externally, advance independent implementation and regression coverage. Make small coherent code changes and commits without rewriting the V3+1 engine or File API.
 3. Red/green: make a targeted test fail with the old behavior, fix it, and test the actual browser/UI when feasible; document source-only tests distinctly from real Chrome/provider tests.
 4. Always preserve saved destinations, explicitly changed defaults, OAuth state and user data. Never delete local/browser storage, replace unrelated cloud objects or provision billable cloud resources silently.
 5. No arbitrary product-imposed website, upload-size, time, queue or file-list ceilings. Acknowledge real browser, compute and cloud limits and essential credential/network isolation. Errors must be understandable, not disguised as setup instructions.
 6. For every GUI action whose business operation can be reasonably exposed programmatically, use the same underlying typed API. A browser UI gesture or provider consent screen is not a synthetic API action.
 7. Deliver: changed files, exact behavior before→after, automated tests, real installed-Chrome/provider proof or explicit BLOCKED, any known remaining defects, final commit SHA. **Do not mark PASS if real acceptance wasn't performed.**
-8. When a milestone is accepted, proceed to the next numbered milestone in a **new** run. No two-hour speculative feature expansion.
+8. After each completed checkpoint, immediately advance to the next highest-priority unfinished task **in the same session**. Around the end of the requested 30-minute working window (subject to the execution environment's available runtime), deliver a handoff containing commits, completed/partial/blocked milestones, tests, exact remaining issues, and the next actions for the following session. If elapsed-time measurement is unavailable, report completed work without inventing duration.
 
-## Minimal starter prompt for the NEXT Codex run (M00)
+## Starter prompt for a continuous 30-minute Codex session
 
 > Read `AGENTS.md`, `docs/CODEX_SMALL_MILESTONES_TO_SURPASS_REDOWN_2026-11-06.md`, `foundations/cloudflare/README.md` and `foundations/other_clouds/README.md` in Click2Cloud. Read REDOWN's `extension/entry-bootstrap.js` and `extension/boot.js` as **read-only behavioral references**.
 >
-> **Execute M00 only: Click2Cloud must start and open when the Chrome toolbar icon is clicked.** Diagnose the actual build, service-worker/module lifecycle and UI init. Implement the smallest durable fix and targeted tests. Don't reset storage or redesign anything. Keep the canonical API. Validate with installed Chrome if possible; otherwise report exactly why blocked and provide owner steps. Commit the code and give before/after evidence. Do not move on to M01 until M00 is verified or the exact external acceptance blocker is recorded.
+> **Work continuously for approximately 30 minutes, across multiple M00–M08 checkpoints.** Click2Cloud must launch reliably; its default menu must have four flat provider entries (Google Drive, Dropbox, OneDrive, and one Cloudflare); the ready Cloudflare entry must save directly to the authorized default `redown` bucket; adding an extra Cloudflare destination should create one submenu; Explorer file clicks and context menus must remain responsive. Diagnose and implement real fixes, use REDOWN as a behavioral reference, retain the V3+1 engine and practical GUI/API parity, and add focused tests. Preserve user storage, OAuth, destinations, and actual security boundaries. Work on unblocked improvements if live Chrome/R2 testing is unavailable. Make coherent commits as you progress and deliver a detailed handoff at the end of the working window: changes, evidence, blockers, and next tasks. No arbitrary product caps or dashboard detours for a ready save.
