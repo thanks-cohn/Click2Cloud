@@ -50,8 +50,8 @@ Milestones are **small checkpoints within a continuous working session**, not li
 - **PASS:** New account starts with a working `redown` after consent/setup; returning user does not redo setup; custom target preserved; deleting `redown` does not trigger silent recreation. The `menuCustomized` flag never hides a legitimate default.
 
 ### M03 — Single Cloudflare entry changes to ONE submenu only with extras
-- **Fix:** With only `redown/`: **Cloudflare** is a flat direct-save leaf. On adding another Cloudflare destination, replace that leaf with **Cloudflare → redown / Other chosen locations** (one additional native menu level for Simple configuration). Never render an independent Cloudflare R2 sibling or a second Cloudflare branch. With removal of last extra, return to flat **Cloudflare**. Preserve chosen default and named destinations, Narrow/Depth behavior where configured.
-- **PASS:** Stable tree/IDs, no duplicate labels or branches, and exact account/bucket/prefix resolution through add/edit/remove and reload.
+- **Fix:** Cloudflare's native menu shape is driven by the **count of assigned Cloudflare save locations** (not all R2 buckets). Zero assignments: flat clickable provider login/setup; one assignment: flat direct-save leaf to the sole exact location (initially `redown/` after approved setup). Assign a second bucket/folder (e.g., Photos): immediately produce ONE **Cloudflare → redown / Photos** submenu, no duplicate Cloudflare R2 item. Creating a second R2 bucket without assigning it does not nest the menu. Deliberately delete/remove `redown` while Photos remains assigned: remove `redown` from menu/config, update default to the sole survivor, and return to one flat **Cloudflare** leaf saving to Photos. Never silently recreate removed `redown` or confuse network errors with deletion. Preserve named destinations, Narrow/Depth behavior, canonical API and native ACK.
+- **PASS:** Test 0/1/2/3 assigned destinations, creation without assignment, second assignment, removal of second, explicit deletion of `redown` with one survivor, deletion of last assigned destination, user-chosen default, reload, and exact account/bucket/prefix resolution. Each transition gives exactly one Cloudflare provider row and correct leaf/submenu shape with real native ACK.
 
 ### M04 — Native right-click READY means SAVE, not dashboard
 - **Inspect:** `extension/background.mjs` dispatch, `src/chrome/registrar.mjs`, `src/core/engine.mjs`, `src/cloudflare/onboarding.mjs`.
@@ -154,7 +154,21 @@ Click2Cloud
   Google Drive
   Dropbox
   OneDrive
-  Cloudflare                  ← flat direct save again
+  Cloudflare                  ← flat direct save to sole assigned destination
+
+AFTER USER DELETES/UNASSIGNS redown BUT KEEPS Photos:
+Click2Cloud
+  Google Drive
+  Dropbox
+  OneDrive
+  Cloudflare                  ← flat direct save to Photos; redown is absent
+
+SECOND BUCKET EXISTS BUT WAS NOT ASSIGNED TO CLOUDFLARE:
+Click2Cloud
+  Google Drive
+  Dropbox
+  OneDrive
+  Cloudflare                  ← stays flat, still targets sole assigned destination
 
 READY CLOUD PROVIDER:
 native right-click → select provider → save to exact location → verified result
@@ -168,7 +182,7 @@ verify Worker and save destination → subsequent fresh clicks save directly to 
 never present authorization/setup as a successful save.
 ```
 
-Notes: The `redown` bucket is an approved initial default, not permission to recreate an intentionally deleted bucket. A user-chosen default takes precedence while `redown` remains an option until explicitly removed. Where Chrome itself groups the extension under one parent, that Chrome grouping is accepted; do not add a redundant in-extension parent.
+Notes: The `redown` bucket is the approved initial default, not permission to recreate an intentionally deleted bucket. Native nesting counts **assigned destinations**, not all existing buckets. An explicitly selected default takes precedence until intentionally removed; if it is deliberately removed and one assigned destination survives, that sole survivor becomes the direct-save/default target. If deletion is unconfirmed, preserve safety and show a clear error rather than guessing. Where Chrome groups extension entries under one parent, accept that browser grouping; do not add a redundant extension-authored parent.
 
 ## Continuous 30-minute Codex working-session contract
 
