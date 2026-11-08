@@ -41,14 +41,14 @@ test('partial probe completion resumes after worker restart without a duplicate 
 test('a concurrent user destination edit stops setup instead of overwriting choices',async()=>{
  const f=fixture({buckets:['redown','photos']});await approve(f);f.provisioner.prepare=async()=>{await configure(f,[{type:'createDestination',mode:'simple',target:t,label:'User choice'},{type:'makeDefault',target:t}]);};await assert.rejects(f.c.initialize(),{code:'DESTINATIONS_CHANGED_DURING_SETUP'});assert.deepEqual(f.state.product.defaultTarget,t);assert.equal(rows(f).length,1);assert.equal(rows(f)[0].label,'User choice');
 });
-test('login API initializes only with separately authorized provisioning scope and returns actual native ACK',async()=>{
+test('login is auth-only even with saved setup approval; explicit initialization retains provisioning scope and native ACK',async()=>{
  const f=fixture();await approve(f);let reconciled=0;const api=createEngineApi({current:f.current,oauth:{...f.oauth,connect:()=>f.oauth.status()},cloudflare:f.c,engine:{compile:async()=>({}),apply:async()=>{reconciled++;return {state:'completed'};}},getInventory:async()=>({scopes:[]}),authorize:async r=>r.actor==='gui'||r.method!=='initializeCloudflare',confirm:async()=>true});
- const denied=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'auth-only-agent');assert.equal(denied.data.initialization.code,'SETUP_AUTHORITY_REQUIRED');assert.equal(rows(f).length,0);
- const login=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(login.data.initialization.code,'CLOUDFLARE_READY');assert.equal(login.data.initialization.native.state,'completed');assert(reconciled);
+ const denied=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'auth-only-agent');assert.equal(denied.data.state,'CONNECTED');assert.equal(denied.data.initialization,undefined);assert.equal(rows(f).length,0);
+ const login=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(login.data.state,'CONNECTED');assert.equal(reconciled,0);assert.equal(rows(f).length,0);const deniedSetup=await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'auth-only-agent');assert.equal(deniedSetup.code,'PERMISSION_DENIED');const setup=await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'gui');assert.equal(setup.data.code,'CLOUDFLARE_READY');assert.equal(setup.data.native.state,'completed');assert(reconciled);
 });
 test('verified provider setup with a failed native ACK is partial, never READY',async()=>{
  const f=fixture();await approve(f);const api=createEngineApi({current:f.current,oauth:{...f.oauth,connect:()=>f.oauth.status()},cloudflare:f.c,engine:{compile:async()=>({}),apply:async()=>({state:'blocked',code:'CHROME_UNAVAILABLE'}),getEvidence:()=>({pending:true,acknowledgedGeneration:null,desired:{generation:1}})},getInventory:async()=>({scopes:[]}),authorize:async()=>true,confirm:async()=>true});
- const login=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(login.data.initialization.state,'partial');assert.equal(login.data.initialization.code,'NATIVE_APPLY_INCOMPLETE');
+ const setup=await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'gui');assert.equal(setup.data.state,'partial');assert.equal(setup.data.code,'NATIVE_APPLY_INCOMPLETE');
  const inspected=await api.invoke({version:'3+1.1',method:'inspectCloudflare',params:{}},'gui');assert.equal(inspected.data.status.code,'NATIVE_APPLY_INCOMPLETE');
 });
 test('a bucket create whose reply is lost is discovered after restart without a duplicate POST',async()=>{

@@ -23,11 +23,13 @@ import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {scopeKey,targetKey,normalizeTarget} from '../src/core/menu-identity.mjs';
-const storageReady=Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'})));
+// Coalesce trusted-storage access, but never retain a rejected startup attempt.
+let storageReady;
+function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
 const diagnostics=createDiagnostics(),current=createCurrentStore({sink:diagnostics});
-let connectionObservation=null,attentionPreference=null,loginApiPending=false;
+let connectionObservation=null,attentionPreference=null;
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference});
-const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();if(!loginApiPending)await api.invoke({version:'3+1.1',method:'initializeCloudflare',params:{}},'gui');await api.reconcile();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
+const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 const provisioner=createProvisioner({request:oauth.request,authority:oauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
 const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking)return false;if(!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();if(!r.ok||b.success!==true){const diagnostic=diagnoseCloudflare(r,b,{context:'r2'});throw Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});}return true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
@@ -89,9 +91,9 @@ const getAuthorization=async selection=>{
     return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>a.accounts.some(x=>x.id===t.accountId)&&await remoteReady(t)?t:null))).filter(Boolean)};
   }catch{return null;}
 };
-const registrar=createChromeRegistrar({chrome,onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:()=>ready,sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
+const registrar=createChromeRegistrar({chrome,onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:()=>nativeReady(),sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
   dispatch:async(action,{info})=>{
-    await ready;
+    await nativeReady();
     let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({itemId:String(info.menuItemId),generation:registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
@@ -110,7 +112,7 @@ const recovery={choose:async()=>{
 },status:async()=>{try{await external();return {state:'AVAILABLE',evidence:'user-authorized-directory',windowsKnownFolder:'BLOCKED_NATIVE_COMPANION_REQUIRED'};}catch{return {state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE',windowsKnownFolder:'BLOCKED_NATIVE_COMPANION_REQUIRED'};}},...Object.fromEntries(['readNamespace','writeNamespace','readVerified','writeVerified','exportVerified'].map(m=>[m,async(...args)=>(await external())[m](...args)]))};
 const cloudJobs=createWholeCloudJobs({recovery,fileApi,isAuthorized:async i=>{const stopped=(await chrome.storage.local.get('outlineStoppedAccounts')).outlineStoppedAccounts??[];if(stopped.includes(i.accountId))return false;const s=await oauth.status();return i.provider==='cloudflare'&&i.connectionId==='cloudflare:'+i.accountId&&s.state==='CONNECTED'&&s.accounts.some(a=>a.id===i.accountId);}});
 const wholeCloud={...cloudJobs,enable:async(i,options)=>{const result=await cloudJobs.enable(i,options);const stopped=(await chrome.storage.local.get('outlineStoppedAccounts')).outlineStoppedAccounts??[];await chrome.storage.local.set({outlineStoppedAccounts:stopped.filter(a=>a!==i.accountId)});return result;}};
-const oauthForApi={...oauth,connect:async()=>{loginApiPending=true;try{return await oauth.connect();}finally{loginApiPending=false;}},disconnect:async()=>{
+const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
   const status=await oauth.status();revoking=true;snapshots.clear();
   try{
     try{
@@ -126,7 +128,7 @@ const oauthForApi={...oauth,connect:async()=>{loginApiPending=true;try{return aw
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
-const api=createEngineApi({engine,current,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const api=createEngineApi({engine,current,readState:readCurrent,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
@@ -139,27 +141,26 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   // Returning literal true keeps Chrome's response channel alive across startup
   // and async API work. Every accepted request settles through this one owner.
   const failed=(code,stage,error)=>{const cause=error?.code??error?.message;return {version:'3+1.1',state:'failed',code,diagnostic:{stage,...(/^[A-Z][A-Z0-9_]{2,79}$/.test(cause??'')?{causeCode:cause}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error?.name)?{causeName:error.name}:{})}};};
-  // Canonical inspect methods need validated local state, not native-menu IPC.
-  // This changes no sender/scope gate; effectful calls retain engine startup.
-  const prerequisite=api.tools.some(t=>t.name===message.method&&t.scope==='inspect')?dataReady:ready;
-  prerequisite.then(async()=>{
+  // The API owns each operation's dependencies. Auth needs only trusted Chrome
+  // credential storage; data operations still validate CURRENT through readCurrent.
+  trustedStorage().then(async()=>{
     try{const result=await api.invoke({version:message.version,method:message.method,params:message.params},'gui');return result&&typeof result==='object'&&typeof result.state==='string'?result:failed('ENGINE_RESPONSE_INVALID','invoke');}
     catch(error){return failed('ENGINE_INVOCATION_FAILED','invoke',error);}
-  },error=>failed('ENGINE_STARTUP_FAILED','startup',error)).then(respond);return true;
+  },error=>failed('STORAGE_ACCESS_UNAVAILABLE','credential-storage',error)).then(respond);return true;
 });
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
-const dataReady=(async()=>{await storageReady;// An existing native registration is independent evidence of prior CURRENT.
-// If IndexedDB vanished, do not classify that installation as a new user.
-const prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration,saved=await current.read();if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;})();
-const ready=dataReady.then(()=>api.reconcile());
-// Observe rejection without replacing the promise: effectful callers and the
-// public ready diagnostic still receive the original startup failure.
-void ready.catch(()=>{});
+// Fresh validation on every state-dependent request; failures do not poison auth
+// or future read attempts. Never reinterpret an established missing CURRENT as empty.
+async function readCurrent(){await trustedStorage();const saved=await current.read(),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return saved;}
+let nativeAttempt;
+async function nativeReady(){const state=await readCurrent(),e=registrar.inspect();if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null)return e.lastOutcome;if(!nativeAttempt){const attempt=api.reconcile();nativeAttempt=attempt;attempt.finally(()=>{if(nativeAttempt===attempt)nativeAttempt=null;}).catch(()=>{});}return nativeAttempt;}
+// Menu maintenance has explicit lifecycle/save owners, never Shelf open or OAuth.
+for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(()=>{void nativeReady().catch(()=>{});});
 // Developer/native-companion integration only: no externally_connectable manifest,
 // external messages, content scripts, localhost server, or client-issued grants.
-Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,ready,
+Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,get ready(){return readCurrent().then(()=>({state:'completed',code:'LOCAL_STATE_READY'}));},
   grantAgent(g){const handle=gateway.grant(g);permissions.issue(g);return handle;},
   revokeAgent:actor=>permissions.revoke(actor),
   approveAgent:(actor,method,params)=>permissions.approve(actor,method,params)

@@ -30,7 +30,7 @@ export interface Methods {
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
  invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
  inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'};describeCapabilities:{};getConfiguration:{};getEngineHealth:{};getProviderConnections:{};
- loginBegin:{};loginStatus:{};loginCancel:{};disconnect:{};
+ loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
  listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
@@ -59,6 +59,7 @@ export interface MenuComposition {policy:'quick-promoted';defaultKey:string|null
 export interface MenuRow {actionKind?:'save'|'attention'|'provider'|'branch'|'separator'|'navigation';setupProvider?:string;id:string;itemId:string;parentId:string|null;label:string;role:string;actionId:string|null;target:Target|null;enabled:boolean;visible:boolean;contexts:string[];reason:string;siblingIndex:number}
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface Results {
+ getEngineHealth:{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};native:unknown;externalRecovery:unknown};
  commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
  listDestinations:{items:(Destination|{target:Target;maxDepth:number})[];total:number;nextCursor:string|null};
@@ -66,7 +67,7 @@ export interface Results {
  fileAction:{state:string;code?:string;id:string;data?:{operationId:string;completed:number;skipped?:number;receipt?:RemoteReceipt;verification?:string;atomicDelete?:boolean}};
  enterExplorer:{state:string;code?:string;accounts:{id:string;name?:string}[];buckets:{name:string}[];target:Target|null;preferred:Target|null;accountId?:string};
  initializeCloudflare:CloudflareSetupResult;
- loginBegin:Results['loginStatus'] & {initialization?:CloudflareSetupResult};
+ loginBegin:Results['loginStatus'];
  loginStatus:{state:'CONNECTED'|'CONNECTING'|'VERIFYING'|'DISCONNECTED';authenticated:boolean;refreshSupported?:boolean;identityVerified:boolean;permissions?:CloudflareGrantStatus;diagnostic?:{code:string}|null};
  inspectShelfAttention:{provider:string;view:'provider'|'manage-destinations';code:string;opening:{state:string;code?:string};target?:Target}|null;openCloudflareDestinations:{state:'completed'};
  inspectCloudflare:{onboarding:{initialized:string[];pending:string[];selectedAccountId:string|null;removed:string[];setupAuthorized?:boolean};status:CloudflareReadiness;limits:{totalFilePolicy:null;buffering:string};sourcePolicy:{kind:string;privateNetworks:boolean;browserCredentials:boolean;networkGuarantee:string}};

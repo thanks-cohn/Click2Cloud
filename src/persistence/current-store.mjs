@@ -15,7 +15,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
   const signal=(stage,outcome,code,operationId,revision=0)=>{
     try {const event={stage,outcome,code,operationId,revision};if(typeof sink==='function')sink(event);else sink?.emit?.(event);}catch{/* Observations never participate in a state transaction. */}
   };
-  const open=()=>opening??=new Promise((resolve,reject)=>{
+  const open=()=>{if(opening)return opening;const pending=new Promise((resolve,reject)=>{
     if(!indexedDB){reject(error('STORAGE_UNAVAILABLE'));return;}
     let r;try{r=indexedDB.open(dbName,1);}catch{reject(error('STORAGE_UNAVAILABLE'));return;}
     r.onupgradeneeded=()=>{
@@ -24,9 +24,9 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     r.onsuccess=()=>{r.result.onversionchange=()=>{r.result.close();opening=null;};resolve(r.result);};
     r.onerror=()=>{opening=null;reject(error('STORAGE_UNAVAILABLE'));};
     r.onblocked=()=>{opening=null;reject(error('STORAGE_UNAVAILABLE'));};
-  });
+  });opening=pending;pending.catch(()=>{if(opening===pending)opening=null;});return pending;};
   async function transact(mode,fn) {
-    const db=await open(),tx=db.transaction(['state','journal','checkpoints'],mode),finished=done(tx);
+    const db=await open();let tx;try{tx=db.transaction(['state','journal','checkpoints'],mode);}catch(e){if(e.name==='InvalidStateError')opening=null;throw e;}const finished=done(tx);
     // Mark rejected completion handled immediately; the originating request still propagates.
     finished.catch(()=>{});
     try {
