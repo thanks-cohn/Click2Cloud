@@ -26,3 +26,5 @@ await import('./redown-restoration.test.mjs');
 await import('./restoration-files.test.mjs');
 
 await import('./latest-quick-rules.test.mjs');
+
+await import('./permanent-destinations.test.mjs');

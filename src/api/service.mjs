@@ -24,14 +24,14 @@ const definitions={
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
-  inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
+  inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
   inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj()],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj()],getProviderConnections:['inspect',obj()],
   loginBegin:['auth',obj()],loginStatus:['inspect',obj()],loginCancel:['auth',obj()],disconnect:['auth',obj()],
   fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete']},source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
   listAccounts:['inspect',obj()],listAuthorizedBuckets:['inspect',obj({accountId:str,cursor:str},['accountId'])],
   listFolders:['inspect',obj({source:target,cursor:str},['source'])],fileMetadata:['inspect',obj({source:target,key:str},['source','key'])],
   readFile:['inspect',obj({source:target,entry:obj({key:str,folder:bool},['key','folder'])},['source','entry'])],
-  listDestinations:['inspect',obj({mode:{enum:['simple','nested','narrow']},cursor:str,limit:{type:'integer',minimum:1,maximum:20}})],
+  listDestinations:['inspect',obj({mode:{enum:['simple','nested','narrow','depth']},cursor:str,limit:{type:'integer',minimum:1,maximum:20}})],
   inspectMenuTree:['inspect',obj({generation:num,cursor:str,limit:{type:'integer',minimum:1,maximum:1000},parentId:str,recursive:bool,includeOmissions:bool},['generation'])],previewNativeMenu:['inspect',obj()],inspectNativeACK:['inspect',obj()],getOrganizationSuggestion:['inspect',obj()],
   previewConfigChange:['configure',obj({changes:arr(change),expectedRevision:num},['changes','expectedRevision'])],
   commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str},['changes','expectedRevision','idempotencyKey'])],
@@ -121,7 +121,27 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='inspectCloudflareSetup')data=await cloudflare.setupStatus(params);
         else if(method==='cancelRemoteOperation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await cloudflare.cancel(params);}
         else if(method==='openRemoteResult'){const saved=await current.readRemoteResult(params.operationId);if(!saved?.receipt||saved.state!=='verified')fail('VERIFIED_RESULT_REQUIRED');const d=saved.receipt.destination??saved.destination;const checked=await fileApi.run('stat',{source:{accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},key:saved.receipt.key});if(checked.state!=='completed')fail('RESULT_LOOKUP_FAILED');const object=checked.data?.object;if(!object)fail('RESULT_NOT_FOUND');if(Number(object.size)!==saved.receipt.size||object.etag&&object.etag!==saved.receipt.etag)fail('RESULT_CHANGED');data={target:{provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},highlightKey:saved.receipt.key};}
-        else if(method==='navigateExplorer'){const t=params.target,a=await oauth.status();if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===t.accountId))fail('SCOPE_UNAUTHORIZED');await navigate(t,actor);data={state:'completed',target:t};}
+        // One canonical startup decision for Shelf and trusted API. Never rewrites
+        // Default or destinations. Only explicit navigateExplorer remembers user intent.
+        else if(method==='enterExplorer'){
+          const preferred=await current.readExplorerLocation?.()??null,a=await oauth.status();
+          if(a.state!=='CONNECTED')data={state:'RECONNECT_REQUIRED',code:'AUTH_REQUIRED',preferred,accounts:[],buckets:[],target:null};
+          else {
+            const listed=await fileApi.run('accounts',{});if(listed.state!=='completed')fail(listed.code??'PROVIDER_READ_FAILED');
+            const accounts=listed.data.accounts.filter(x=>a.accounts.some(y=>y.id===x.id)),valid=t=>t?.provider==='cloudflare'&&t.connectionId==='cloudflare:'+t.accountId&&accounts.some(x=>x.id===t.accountId);
+            const candidates=[preferred,state.product.defaultTarget].filter(valid),byAccount=new Map();
+            const bucketsFor=async accountId=>{if(byAccount.has(accountId))return byAccount.get(accountId);let cursor,buckets=[];do{const r=await fileApi.run('buckets',{accountId,...(cursor?{cursor}:{})});if(r.state!=='completed')fail(r.code??'PROVIDER_READ_FAILED');buckets.push(...r.data.buckets);cursor=r.data.cursor;}while(cursor);byAccount.set(accountId,buckets);return buckets;};
+            let chosen;for(const t of candidates)if((await bucketsFor(t.accountId)).some(b=>b.name===t.bucketName)){chosen=t;break;}
+            const accountId=chosen?.accountId??(accounts.some(x=>x.id===state.product.cloudflare.selectedAccountId)?state.product.cloudflare.selectedAccountId:null)??(accounts.length===1?accounts[0].id:null);
+            if(!accountId)data={state:'CHOOSE_ACCOUNT',accounts,buckets:[],target:null,preferred};
+            else {
+              const buckets=await bucketsFor(accountId),bucket=chosen?.bucketName??buckets.find(b=>b.name==='redown')?.name??(buckets.length===1?buckets[0].name:null),t=chosen??(bucket?{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:bucket,prefix:''}:null);
+              if(t){if(await authorize({actor,scope,method,params,bindings:t})!==true)fail('PERMISSION_DENIED');await navigate(t,actor);}
+              data={state:t?'completed':'CHOOSE_BUCKET',accounts,accountId,buckets,target:t,preferred};
+            }
+          }
+        }
+        else if(method==='navigateExplorer'){const t=params.target,a=await oauth.status();if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===t.accountId))fail('SCOPE_UNAUTHORIZED');await current.writeExplorerLocation?.(t);await navigate(t,actor);data={state:'completed',target:t};}
         else if(method==='describeCapabilities')data={version:'3+1.1',build:BUILD_INFO,tools:toolRegistry,publicEndpoint:false,destructiveRemoteOperations:fileApi?.capabilities?.includes('delete')===true,remoteInfrastructureChanges:'explicit-provision-scope-and-confirmation',cloudflareTransfer:'true-remote-only',sourceCaptureMaxBytes:null,browserTransfer:'streaming-adapter-or-resident-bytes',explorer:{operations:fileApi?.capabilities??[],mutations:fileApi?.capabilities?.includes('mkdir')===true},providers:{cloudflare:{implemented:true,transfer:'true-remote-only',explorerSource:false,localFile:false},'google-drive':{implemented:false},dropbox:{implemented:false},onedrive:{implemented:false}},idempotencyRetention:256};
         else if(method==='getConfiguration')data=state;
         else if(method==='getEngineHealth')data={revision:state.product.revision,generation:state.generation,native:engine.getEvidence().coverage,externalRecovery:await recovery.status()};
@@ -162,7 +182,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='listDestinations') {
           const m=params.mode==='narrow'?'nested':params.mode??'simple',limit=params.limit??20;let offset=0;
           if(params.cursor){const c=JSON.parse(params.cursor);if(c.revision!==state.product.revision||c.mode!==m||!Number.isSafeInteger(c.offset)||c.offset<0)fail('STALE_CURSOR');offset=c.offset;}
-          const rows=state.configs[m].destinations;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
+          const rows=state.configs[m].destinations??state.configs[m].scopes;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
         }
         else if(method==='inspectMenuTree'){const spec=engine.getMenu(params.generation);if(!spec)fail('STALE_GENERATION');data=inspectMenuTree(spec,params);}
         else if(method==='inspectExplorerContextMenu')data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,mutations:fileApi?.capabilities?.includes('mkdir')===true});
@@ -187,7 +207,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
-            if(params.changes.some(c=>c.type==='deleteDestinationConfig')&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
             receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params)});
             const native=receipt.replayed?engine.getEvidence().lastOutcome??{state:'blocked',code:'NATIVE_ACK_UNAVAILABLE'}:await reconcile();let backup;
             if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}

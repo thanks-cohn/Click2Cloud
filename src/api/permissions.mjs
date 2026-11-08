@@ -8,7 +8,7 @@ export function createPermissions({clock=Date.now}={}) {
     for(const child of Object.values(value))if(child&&typeof child==='object')accountsIn(child,result);
     return result;
   }
-  const fullConfig=new Set(['initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview']);
+  const fullConfig=new Set(['enterExplorer','initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview']);
   function authorize(r) {
     const g=grants.get(r.actor);
     if(!g||g.expiresAt<=clock()||!g.methods.includes(r.method))return false;

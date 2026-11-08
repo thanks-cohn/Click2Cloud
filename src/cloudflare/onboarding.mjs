@@ -1,7 +1,9 @@
 import {safeWorkerDiagnostic} from './deployment.mjs';
 import {applyConfigChanges} from '../api/config.mjs';
 const setupLocks=new WeakMap();
-const managerTargets=s=>Object.values(s.configs).flatMap(c=>(c.destinations??[]).map(d=>d.target)).filter(t=>t?.provider==='cloudflare');
+// initializeCloudflare/loginBegin: emptiness is durable, global and independent of OAuth/inventory.
+const hasAssignments=s=>Object.values(s.configs).some(c=>(c.destinations??c.scopes??[]).length>0);
+const hasSaved=s=>!!s.product.defaultTarget||hasAssignments(s);
 const savedTargets=s=>[...new Map([s.product.defaultTarget,...Object.values(s.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(t=>t?.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];
 import {diagnoseCloudflare,hasWorkerWriteScope,hasWorkerCreateScope} from '../auth/cloudflare-oauth.mjs';
 import {readBuckets} from './inventory.mjs';
@@ -34,9 +36,9 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   const choices=savedTargets(s).filter(t=>t.accountId===accountId),target=selectedTarget??s.product.defaultTarget??(choices.length===1?choices[0]:null);
   if(target){if(target.provider!=='cloudflare'||target.accountId!==accountId)return {state:'CHOOSE_DESTINATION',accountId};
    if(!readiness.buckets.some(b=>b.name===target.bucketName))return {state:'DESTINATION_UNAVAILABLE',accountId,target,code:'SELECTED_BUCKET_MISSING'};
-   const worker=await transport.status(target);return {state:worker.state==='READY'?'READY':'REPAIR_REQUIRED',accountId,target,worker};
+   const worker=await transport.status(target);if(worker.state!=='READY'&&s.product.cloudflare.initialized.includes(accountId)&&!await setupApproved(accountId))return {state:'SETUP_APPROVAL_RECORD_MISSING',code:'SETUP_APPROVAL_RECORD_MISSING',accountId,target,worker};return {state:worker.state==='READY'?'READY':'REPAIR_REQUIRED',accountId,target,worker};
   }
-  return {state:savedTargets(s).some(t=>t.accountId===accountId)?'CHOOSE_DESTINATION':'SETUP_APPROVAL_REQUIRED',accountId};
+  const state=hasSaved(s)?'CHOOSE_DESTINATION':await setupApproved(accountId)?'SETUP_RESUME_REQUIRED':s.product.cloudflare.initialized.includes(accountId)?'SETUP_APPROVAL_RECORD_MISSING':'SETUP_APPROVAL_REQUIRED';return {state,...(state==='SETUP_APPROVAL_RECORD_MISSING'?{code:state}:{}),accountId};
  }
  // Only explicit login/initialization invokes this path; status and boot stay read-only.
  let initializing;
@@ -52,15 +54,16 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  async function initializeAccount(accountId,{resume=false}={}){
   const auth=await account(accountId);const s=await current.read(),configured=savedTargets(s);
   if(s.product.defaultTarget&&(s.product.defaultTarget.provider!=='cloudflare'||s.product.defaultTarget.accountId!==accountId))return {state:'blocked',code:'DEFAULT_ACCOUNT_MISMATCH'};
-  const targets=configured.filter(t=>t.accountId===accountId),manager=managerTargets(s).filter(t=>t.accountId===accountId);
+  const targets=configured.filter(t=>t.accountId===accountId);
   // Link a legacy default-only target locally, without requiring cloud mutations.
-  if(s.product.defaultTarget&&!manager.length){const next=applyConfigChanges(s,[{type:'createDestination',mode:'simple',target:s.product.defaultTarget}]);await current.commitProduct({...next,expectedRevision:s.product.revision,idempotencyKey:'link-default:'+s.product.revision,fingerprint:targetKey(s.product.defaultTarget)});}
+  if(s.product.defaultTarget&&!hasAssignments(s)){const next=applyConfigChanges(s,[{type:'createDestination',mode:'simple',target:s.product.defaultTarget}]);await current.commitProduct({...next,expectedRevision:s.product.revision,idempotencyKey:'link-default:'+s.product.revision,fingerprint:targetKey(s.product.defaultTarget)});}
   const target=s.product.defaultTarget??(targets.length===1?targets[0]:null);
-  if(!target&&targets.length)return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
+  if(!target&&hasSaved(s))return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
   const readiness=await check(accountId,target);
   if(readiness.state==='READY')return {state:'completed',code:'CLOUDFLARE_READY',target:readiness.target};
-  if(!['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','CHOOSE_DESTINATION'].includes(readiness.state))return {state:'blocked',code:readiness.code??readiness.state,accountId};
-  if(!await setupApproved(accountId))return {state:'blocked',code:'SETUP_APPROVAL_REQUIRED',accountId};
+  if(!['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','REPAIR_REQUIRED','CHOOSE_DESTINATION'].includes(readiness.state))return {state:'blocked',code:readiness.code??readiness.state,accountId};
+  if(readiness.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED')return {state:'blocked',code:readiness.worker.code,accountId,target,worker:readiness.worker};
+  if(!await setupApproved(accountId))return {state:'blocked',code:s.product.cloudflare.initialized.includes(accountId)?'SETUP_APPROVAL_RECORD_MISSING':'SETUP_APPROVAL_REQUIRED',accountId,target};
   const chosen=target??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''};
   const pointer=await current.readSetupOperation?.('initialization:'+accountId),pending=pointer&&await current.readSetupOperation?.(accountId+':'+pointer.idempotencyKey);
   const failure=safeWorkerDiagnostic(pending?.failure);resume=resume||!!(failure&&auth.scopeEvidence==='provider-returned'&&auth.scopes?.includes('workers-scripts.admin')&&failure.sessionScopes.length>0&&!failure.sessionScopes.includes('workers-scripts.admin'));if(failure&&!resume)return {state:'blocked',code:failure.code,accountId,diagnostic:failure};
@@ -79,11 +82,12 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   const setupId=accountId+':'+idempotencyKey,prior=await current.readSetupOperation?.(setupId);
   if(prior?.result){if(prior.accountId!==accountId||repairTarget&&targetKey(prior.target)!==targetKey(repairTarget))fail('IDEMPOTENCY_CONFLICT');if(!savedTargets(s).some(t=>targetKey(t)===targetKey(prior.target)))return {state:'blocked',code:'SETUP_RESULT_STALE'};return prior.result;}
   if(s.product.revision!==expectedRevision)fail('REVISION_CONFLICT');
+  if(s.product.cloudflare.initialized.includes(accountId)&&!await setupApproved(accountId))return {state:'blocked',code:'SETUP_APPROVAL_RECORD_MISSING',accountId};
   const selected=s.product.defaultTarget,configured=savedTargets(s).filter(t=>t.accountId===accountId);
   if(selected&&(selected.provider!=='cloudflare'||selected.accountId!==accountId))fail('WRONG_ACCOUNT');
   if(repairTarget&&(!repair||!configured.some(t=>targetKey(t)===targetKey(repairTarget))))fail('TARGET_NOT_CONFIGURED');
   const original=repairTarget??selected??(configured.length===1?configured[0]:null);
-  if(!original&&configured.length)return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
+  if(!original&&hasSaved(s))return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
   const target=original??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''},initial=!original;
   if(prior&&targetKey(prior.target)!==targetKey(target))fail('IDEMPOTENCY_CONFLICT');
   const status=await r2(accountId);if(status.state!=='ACTIVE')return {state:'blocked',code:status.code??status.state,diagnostic:status.diagnostic};
@@ -100,7 +104,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   await current.writeSetupOperation?.('initialization:'+accountId,{idempotencyKey});
   let progressRecord=prior??{};
   const progress=async(stage,extra={})=>{progressRecord={...progressRecord,accountId,target,stage,...extra};await current.writeSetupOperation?.(setupId,progressRecord);};
-  const stillSelected=async()=>{if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');const now=await current.read();if(initial){if(now.product.defaultTarget||savedTargets(now).some(t=>t.accountId===accountId))fail('DESTINATIONS_CHANGED_DURING_SETUP');}else if(!savedTargets(now).some(t=>targetKey(t)===targetKey(target))||targetKey(now.product.defaultTarget??{})!==targetKey(selected??{}))fail('DESTINATIONS_CHANGED_DURING_SETUP');return now;};
+  const stillSelected=async()=>{if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');const now=await current.read();if(initial){if(hasSaved(now))fail('DESTINATIONS_CHANGED_DURING_SETUP');}else if(!savedTargets(now).some(t=>targetKey(t)===targetKey(target))||targetKey(now.product.defaultTarget??{})!==targetKey(selected??{}))fail('DESTINATIONS_CHANGED_DURING_SETUP');return now;};
   // Consent is persisted only by this explicitly approved API transition. Login
   // alone cannot add it; automatic callers must already have account approval.
   if(typeof current.writeSetupOperation!=='function'||typeof current.readSetupOperation!=='function')fail('SETUP_LEDGER_UNAVAILABLE');
@@ -121,9 +125,9 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    await stillSelected();await provisioner.markVerified(target,auth.sessionId);
    const latest=await stillSelected(),changes=[];
    if(initial){changes.push({type:'createDestination',mode:'simple',target,label:'redown'},{type:'makeDefault',target});}
-   else if(selected&&!managerTargets(latest).some(t=>t.accountId===accountId))changes.push({type:'createDestination',mode:'simple',target:selected});
+   else if(selected&&!hasAssignments(latest))changes.push({type:'createDestination',mode:'simple',target:selected});
    const next=changes.length?applyConfigChanges(latest,changes):structuredClone(latest);
-   next.product.cloudflare.selectedAccountId=accountId;next.product.cloudflare.initialized=[...new Set([...next.product.cloudflare.initialized,accountId])];next.product.cloudflare.pending=next.product.cloudflare.pending.filter(x=>x!==accountId);
+   if(initial)next.product.cloudflare.selectedAccountId=accountId;next.product.cloudflare.initialized=[...new Set([...next.product.cloudflare.initialized,accountId])];next.product.cloudflare.pending=next.product.cloudflare.pending.filter(x=>x!==accountId);
    await current.commitProduct({...next,expectedRevision:latest.product.revision,idempotencyKey:'setup-complete:'+setupId,fingerprint:JSON.stringify({target,changes})});
    readyCache.clear();const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started)};await progress('complete',{operationId,result});return result;
   }catch(e){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(e.code??'')?e.code:'LOCAL_COMPLETION_UNCONFIRMED',operationId};}
@@ -135,7 +139,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(status.state==='CONNECTING'){await openShelf('cloudflare',requestedTarget,{code:'LOGIN_IN_PROGRESS',context:attentionContext});return {state:'blocked',code:'LOGIN_IN_PROGRESS'};}
   if(emptyAssignment){const s=await current.read(),known=s.product.defaultTarget||s.product.cloudflare.initialized.length||s.product.cloudflare.removed?.length||Object.values(s.configs??{}).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'));if(known){await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});return {state:'blocked',code:'CHOOSE_DESTINATION'};}}
   const readiness=await check(requestedTarget?.accountId,requestedTarget,{force:false});
-  if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});else if(['SETUP_APPROVAL_REQUIRED','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED','INSUFFICIENT_PERMISSION','UNKNOWN','NETWORK_UNAVAILABLE'].includes(readiness.state))await openShelf('cloudflare',requestedTarget,{code:readiness.code??readiness.worker?.code??readiness.state,context:attentionContext});return {state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
+  if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});else if(['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED','INSUFFICIENT_PERMISSION','UNKNOWN','NETWORK_UNAVAILABLE'].includes(readiness.state))await openShelf('cloudflare',requestedTarget,{code:readiness.code??readiness.worker?.code??readiness.state,context:attentionContext});return {state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
   if(setupOnly)return {state:'blocked',code:'FRESH_CLICK_REQUIRED',target:requestedTarget};
   if(!source?.url||source.bytes)return {state:'blocked',code:'REMOTE_SOURCE_REQUIRED'};
   const target=readiness.target,out=await transport.save({target,source,signal,dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&savedTargets(await current.read()).some(t=>targetKey(t)===targetKey(target))});

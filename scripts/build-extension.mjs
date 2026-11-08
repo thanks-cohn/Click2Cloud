@@ -1,5 +1,5 @@
 import {mkdir,rm,cp,copyFile,readFile,readdir} from 'node:fs/promises';
-import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {WORKER_MODULES} from '../src/cloudflare/deployment.mjs';
@@ -21,4 +21,4 @@ const manifest=JSON.parse(await readFile(new URL('manifest.json',output),'utf8')
 const id=createHash('sha256').update(Buffer.from(manifest.key,'base64')).digest('hex').slice(0,32).replace(/[0-9a-f]/g,x=>String.fromCharCode(97+parseInt(x,16)));
 if(id!=='ajppphdiamdobknpamcheohmdbdbeoal')throw Error('OAUTH_EXTENSION_ID_MISMATCH');
 await writeFile(new URL('api-tools.json',output),JSON.stringify({version:'3+1.1',tools:toolRegistry},null,2)+'\n');
-console.log(JSON.stringify({extension:resolve(output.pathname),extensionId:id,oauthRedirect:'https://'+id+'.chromiumapp.org/cloudflare'}));
+console.log(JSON.stringify({extension:fileURLToPath(output),extensionId:id,oauthRedirect:'https://'+id+'.chromiumapp.org/cloudflare'}));

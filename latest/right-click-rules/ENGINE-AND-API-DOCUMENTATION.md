@@ -287,3 +287,22 @@ This file establishes **documentation requirements and a source-verified startin
 Subsequent Codex source changes must complete the in-source annotations and maintain the mapping as part of the same work. Do not clone REDOWN's legacy menu engine. Do not edit REDOWN, modify user settings, alter OAuth provider registrations, or deploy production Workers merely because this document exists.
 
 **OWNER SUMMARY: Document the entire Click2Cloud right-click engine and configuration system according to what it ACTUALLY does, naming its real API, with a continuously updated proof-backed 1:1 mapping. Preserve Click2Cloud's Simple/Narrow/Depth design, and use REDOWN as a functional reference for the right-click/Explorer power—not an instruction to clone all of REDOWN.**
+
+## Permanent destinations / one-click Explorer repair (0.3.10)
+
+The active implementation request is `docs/requests/P0_FIX_PERMANENT_DESTINATIONS_SETUP_AND_EXPLORER_2026-11-07.md`. Persisted entries in **any mode/account/provider**, including hidden/inactive/Quick, or an existing Default take precedence over initialization. Account auth/inventory failure changes usability, never saved membership.
+
+| Source mechanism | Exact trusted API / decisions and effects |
+| --- | --- |
+| CURRENT `loadState/read/getModeConfig` | `getConfiguration`, `listDestinations` and all writers share validation. Established missing/corrupt/conflicting rows produce recovery errors, not fresh empty defaults. Presence marker holds no duplicate settings. |
+| CURRENT `commitProduct/saveModeConfig` | `commitConfigChange` and initialization use atomic transactions. Missing standalone mode rows are materialized during legacy migration even if identical; product and every mode revision fence stale writers. |
+| Onboarding `initializeAccount/setupLocked` | `loginBegin` → `initializeCloudflare` reads durable state before fallback; global nonempty guard is rechecked during setup. Default-only links exact target. Genuine empty state + next authorized login + retained/new actual consent may create/reuse redown and persist Simple root + Default after verification. Passive status never provisions. |
+| Account approval | `inspectCloudflare.onboarding.setupAuthorized` reports a nonsecret boolean. Saved consent is independent of OAuth sessions; read-only readiness reports `SETUP_RESUME_REQUIRED`. Known previous initialization with missing consent reports `SETUP_APPROVAL_RECORD_MISSING`, never fabricates consent or offers first-run setup. |
+| Saved manager | `getConfiguration/listDestinations` work offline; manager exposes Simple/Narrow/Depth counts, Default and paginated rows. Depth removal uses existing setDepthDisplayBuckets transaction and confirmation. Local membership never depends on cloud enumeration. |
+| Explorer entry | New `enterExplorer` inspect-scope operation returns current accounts/buckets, target or RECONNECT_REQUIRED/CHOOSE_ACCOUNT/CHOOSE_BUCKET. Uses same File API/auth owner; trusted agents need all-configuration authority because preferred/default and account choices can span accounts. GUI top tab, reconnect and legacy entry buttons use it. |
+| Explicit Explorer navigation | Existing `navigateExplorer` verifies current Cloudflare identity/account, then stores nonsecret target in CURRENT and uses existing navigation host. `enterExplorer` reads it, validates account/bucket availability, does not rewrite Default or stored choices. |
+| Startup | Existing native-registration evidence plus missing CURRENT generation blocks with CONFIGURATION_RECORD_MISSING. Shelf displays recovery/retry, not a fresh-install empty view. Unavailable OAuth status permits viewing saved local rows. |
+
+Inspection schemas remain closed and versioned `3+1.1`; `listDestinations` now accepts depth and returns scopes as well as destinations. Configuration writes keep expectedRevision/idempotency and destructive confirmation. Existing native Quick promotion and independent Simple/Narrow/Depth projectors are unchanged. Every transfer action still rechecks live authority.
+
+See `docs/evidence/permanent-destinations/ROOT-CAUSES.md`, browser regression receipts and handoff for proof classifications. No claim of Windows installed-Chrome success follows from real browser IndexedDB or fixture native callbacks. The immutable `permanenceBefore` snapshot and CURRENT source hashes are maintained in the canonical workings map.

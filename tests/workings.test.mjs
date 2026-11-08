@@ -12,3 +12,5 @@ test('routing, OAuth, onboarding or Explorer source changes require a current wo
 });
 
 test('restoration baseline remains immutable and distinct from repaired CURRENT',()=>{const {digest,...before}=map.restorationBefore;assert.equal(hash(JSON.stringify(canonical(before))),digest);assert.equal(digest,'5c2493dc407422a860e08c6f393a9590c5172bfed2568727f431ae336dcf045b');assert.equal(before.sourceCommit,'9dfe415a7efe1c0333f9c71a3391c21f7d143995');});
+
+test('pre-permanence behavior/source snapshot is immutable',()=>{assert.equal(hash(JSON.stringify(canonical(map.permanenceBefore))),'fdd5e6f673e52d9db8b62316b59199ca1b05999f53fd5ac707705dacd46ccf55');assert.equal(map.permanenceBefore.sourceCommit,'a6a0d92a23fcc3c2c3d189230b93535b470608f1');});

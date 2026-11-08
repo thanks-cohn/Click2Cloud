@@ -27,12 +27,12 @@ export interface Methods {
  fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete';source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
- invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
- inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'page'|'selection'|'video'|'audio'};describeCapabilities:{};getConfiguration:{};getEngineHealth:{};getProviderConnections:{};
+ invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
+ inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'};describeCapabilities:{};getConfiguration:{};getEngineHealth:{};getProviderConnections:{};
  loginBegin:{};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
- listDestinations:{mode?:Mode;cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
+ listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
  previewConfigChange:{changes:Change[];expectedRevision:number};
  commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string};
  reconcileNativeMenu:{expectedGeneration:number};inspectRecoveryCoverage:{target:Target};runRecoveryPage:{target:Target};inspectBackupRoots:{};chooseBackupLocation:{};listRecoveryPolicies:{};writeRecovery:{};
@@ -44,7 +44,7 @@ export interface Methods {
 export type Request<K extends keyof Methods=keyof Methods> = K extends keyof Methods?{version:Version;method:K;params:Methods[K]}:never;
 export interface Receipt {operationId:string;method:string;before?:number;after?:number;replayed?:boolean}
 export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt;diagnostic?:WorkerAccessDiagnostic}
-export type CloudflareReadinessState = 'READY'|'ACTIVE'|'NOT_ACTIVATED'|'RECONNECT_REQUIRED'|'INSUFFICIENT_PERMISSION'|'ACCOUNT_AMBIGUOUS'|'NETWORK_UNAVAILABLE'|'UNKNOWN'|'CHOOSE_DESTINATION'|'DESTINATION_UNAVAILABLE'|'REPAIR_REQUIRED'|'SETUP_APPROVAL_REQUIRED'|'NATIVE_APPLY_INCOMPLETE'|'PROVISIONING_BLOCKED';
+export type CloudflareReadinessState = 'READY'|'ACTIVE'|'NOT_ACTIVATED'|'RECONNECT_REQUIRED'|'INSUFFICIENT_PERMISSION'|'ACCOUNT_AMBIGUOUS'|'NETWORK_UNAVAILABLE'|'UNKNOWN'|'CHOOSE_DESTINATION'|'DESTINATION_UNAVAILABLE'|'REPAIR_REQUIRED'|'SETUP_APPROVAL_REQUIRED'|'SETUP_RESUME_REQUIRED'|'SETUP_APPROVAL_RECORD_MISSING'|'NATIVE_APPLY_INCOMPLETE'|'PROVISIONING_BLOCKED';
 export interface CloudflareReadiness {state:CloudflareReadinessState;statusCheckMs?:number;fromCache?:boolean;checkedAt?:number;code?:string;accountId?:string;target?:Target;accounts?:{id:string;name?:string}[];diagnostic?:WorkerAccessDiagnostic;worker?:{state:'READY'|'PREPARED'|'blocked';code?:string;checkedAt?:number;sourcePolicy?:string;transfer?:string;multipartConditionalCompletion?:'NOT_VERIFIED'}}
 export interface RemoteDestination {provider:'cloudflare-r2';connectionId:string;accountId:string;bucketName:string;prefix:string;conflictPolicy:'keep-both'}
 export interface RemoteReceipt {destination:RemoteDestination;operationId:string;key:string;size:number;etag:string;version:string;workerTimings?:Record<string,number>;transfer?:'bounded-spool'|'known-length-stream';stagingCleanup?:{removed:number;retained:number};provenance?:{sourceUrl:string;sourceRedacted:'true'|'false';importedBy:string;importedAt:string}}
@@ -59,9 +59,10 @@ export interface MenuRow {id:string;itemId:string;parentId:string|null;label:str
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface Results {
  previewNativeMenu:MenuSpec;
- listDestinations:{items:Destination[];total:number;nextCursor:string|null};
+ listDestinations:{items:(Destination|{target:Target;maxDepth:number})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};
  fileAction:{state:string;code?:string;id:string;data?:{operationId:string;completed:number;skipped?:number;receipt?:RemoteReceipt;verification?:string;atomicDelete?:boolean}};
+ enterExplorer:{state:string;code?:string;accounts:{id:string;name?:string}[];buckets:{name:string}[];target:Target|null;preferred:Target|null;accountId?:string};
  initializeCloudflare:CloudflareSetupResult;
  loginBegin:Results['loginStatus'] & {initialization?:CloudflareSetupResult};
  loginStatus:{state:'CONNECTED'|'CONNECTING'|'VERIFYING'|'DISCONNECTED';authenticated:boolean;refreshSupported?:boolean;identityVerified:boolean;permissions?:CloudflareGrantStatus;diagnostic?:{code:string}|null};

@@ -9202,10 +9202,10 @@
     "sourceFiles": {
       "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "1f5ab116d1c471ad9b59343e4ce5681ff5cc0fa6bf50ef970b3165197eb8ea0a",
-      "extension/background.mjs": "096d0fceccf484fd095987bdfe089285ede465a6a27500d8e32dc685831ebda9",
+      "extension/app.mjs": "a8f38ea505986b88030b3be0b1fe6caced8d8c5f621aaa1128167888a0db2426",
+      "extension/background.mjs": "6e5dd00ad8c066cf72dff02caa48b4c01b2969ca16d3d94c587ecd939fba5ee8",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "3050692bb14738f81fd6d894c529ddff9976f0d71d8505054ed9bd171f537d55",
+      "extension/manifest.json": "f1d70927668c30140c00b1567bd694932192981d265030c36d0dc8be131a1821",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9221,11 +9221,11 @@
       "src/api/explorer-context-menu.mjs": "c0447ad9578815f9a58aa837c5d75dd04507039de80f236e60ff552b52a3bea8",
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
-      "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
-      "src/api/service.mjs": "cabdf92ed0520afd742661be1a4559b8e998f18f5cd975627f1fc0b17e626361",
+      "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
+      "src/api/service.mjs": "4f22d7389445aebc5cca20b540dbbd44b1382a55afaf7c669afa3fdb7938259f",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
-      "src/build-info.mjs": "240c202380ab4ec917393b0ea6239f7b76f47292057f1708df4ea2435b6bbd6e",
+      "src/build-info.mjs": "aabae2c5992081f575e908a798781955fa019a18cbad06e4e73f609d8d3aab41",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
@@ -9235,7 +9235,7 @@
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
       "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
-      "src/cloudflare/onboarding.mjs": "6b7233cda1ade819ebe24c379cfcbce4c823fb29cc52705edbf36a6cca0393db",
+      "src/cloudflare/onboarding.mjs": "2622fff26b0706213ddc3e2bb15b238ba2386e96a1cb9c21a47581513d510ab4",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
@@ -9265,7 +9265,7 @@
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
-      "src/glaciaring/catalog.mjs": "925a0a5d0691edfa901eda70783ae362467433afcd57436544dd04509a343d26",
+      "src/glaciaring/catalog.mjs": "66142923c8f58c7c1683e86fc0badb02a4a30662b30117ecb2c7aae8819a7982",
       "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -9273,7 +9273,7 @@
       "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "6f724bbb3c4c8788ecc7d0a4a61b3d0ed6f6c111c930c3d501f3a3e2b99cef94",
+      "src/persistence/current-store.mjs": "542a377040aa84ab408ee9ed2ea5115c76edf1d3374a4d9585f443855718887a",
       "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
       "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
@@ -9793,13 +9793,13 @@
         "preconditions": "Edit Simple/Narrow/Depth/visibility",
         "trigger": "config",
         "guard": "Revision, closed changes, discovered exact target, actor scope",
-        "actual": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
+        "actual": "CURRENT transactions materialize every missing mode record before replacing a legacy embedded product envelope, including identical configurations. Per-mode revisions reject stale cross-owner writes. Missing/corrupt/conflicting established records are recovery failures, never empty settings. Presence-only integrity marker in existing store; existing native-registration evidence guards full CURRENT loss at startup.",
         "apiMethods": [
           "previewConfigChange",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
+        "nextState": "CURRENT transactions materialize every missing mode record before replacing a legacy embedded product envelope, including identical configurations. Per-mode revisions reject stale cross-owner writes. Missing/corrupt/conflicting established records are recovery failures, never empty settings. Presence-only integrity marker in existing store; existing native-registration evidence guards full CURRENT loss at startup.",
         "uiEffect": "One shared configuration mutation function in config.mjs serves manual and automatic registration. Revision/actor/account/discovery guards remain at existing API/domain boundaries; modes independent.",
         "externalResourceEffect": "none",
         "persistence": "CURRENT and journal",
@@ -9813,10 +9813,10 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/issue4-v1.test.mjs",
-          "meaning": "No installed/native/live R2 proof claimed"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -10127,13 +10127,13 @@
         "preconditions": "Cancel or disconnect",
         "trigger": "auth",
         "guard": "Generation fence and persisted cancellation flag",
-        "actual": "Reject late callback; logout removes tokens but retains menu configuration",
+        "actual": "Explicit logout removes OAuth tokens only. All durable mode rows, Default, account selection, setup approval and Explorer preference remain; unauthorized usage blocks. GUI keeps locally saved rows and honest offline state, including when loginStatus itself fails.",
         "apiMethods": [
           "loginCancel",
           "disconnect"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Reject late callback; logout removes tokens but retains menu configuration",
+        "nextState": "Explicit logout removes OAuth tokens only. All durable mode rows, Default, account selection, setup approval and Explorer preference remain; unauthorized usage blocks. GUI keeps locally saved rows and honest offline state, including when loginStatus itself fails.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "Attempt cancellation; local credential removal",
@@ -10147,11 +10147,10 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/oauth-v3p1.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -10209,7 +10208,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const diagnostic=",
-            "line": 21
+            "line": 23
           }
         ],
         "verification": {
@@ -10244,7 +10243,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async activation",
-            "line": 146
+            "line": 150
           }
         ],
         "verification": {
@@ -10278,7 +10277,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function r2",
-            "line": 17
+            "line": 19
           }
         ],
         "verification": {
@@ -10311,7 +10310,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function checkFresh",
-            "line": 29
+            "line": 31
           }
         ],
         "verification": {
@@ -10344,7 +10343,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function initializeAccount",
-            "line": 52
+            "line": 54
           }
         ],
         "verification": {
@@ -10360,14 +10359,14 @@
         "preconditions": "Approved first setup; redown exists",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
+        "actual": "Before any initialization, read and validate durable configuration. ANY saved assignment in ANY mode/provider/account (including inactive/hidden) or Default blocks redown fallback. Same-account existing target/READY uses read-only checks and retained approval. Default-only can link exact target locally. Empty genuine state initializes only on explicit authorized login.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
+        "nextState": "Before any initialization, read and validate durable configuration. ANY saved assignment in ANY mode/provider/account (including inactive/hidden) or Default blocks redown fallback. Same-account existing target/READY uses read-only checks and retained approval. Default-only can link exact target locally. Empty genuine state initializes only on explicit authorized login.",
         "uiEffect": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
         "externalResourceEffect": "Necessary approved Worker/DO/probe only",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -10377,14 +10376,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const exists=",
-            "line": 95
+            "line": 99
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/issue4-v1.test.mjs",
-          "meaning": "No installed/native/live R2 proof claimed"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -10393,14 +10392,14 @@
         "preconditions": "Approved first setup; confirmed active and redown absent",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
+        "actual": "Only globally empty valid durable configuration with no Default, authorized account, active R2 and saved/new explicit account approval may initialize redown on next user login. Passive status/deletion/restart never creates resources. Recheck global saved state during setup; concurrent foreign-account assignments abort fallback.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
+        "nextState": "Only globally empty valid durable configuration with no Default, authorized account, active R2 and saved/new explicit account approval may initialize redown on next user login. Passive status/deletion/restart never creates resources. Recheck global saved state during setup; concurrent foreign-account assignments abort fallback.",
         "uiEffect": "Only an approved demonstrably-active selected account with required grants and empty configuration creates redown once. Dispatch ledger + read-only rediscovery handles lost create responses.",
         "externalResourceEffect": "Bucket create plus necessary approved Worker/DO/probe",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -10410,14 +10409,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "bucket-create-dispatched",
-            "line": 112
+            "line": 116
           }
         ],
         "verification": {
-          "level": "SOURCE_AND_LOCAL_FIXTURE",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/issue4-v1.test.mjs",
-          "meaning": "No installed/native/live R2 proof claimed"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -10443,7 +10442,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function setupLocked",
-            "line": 77
+            "line": 80
           }
         ],
         "verification": {
@@ -10460,14 +10459,14 @@
         "preconditions": "Prior probe dispatch or lost completion",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
+        "actual": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
           "inspectCloudflareSetup"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
+        "nextState": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements.",
         "uiEffect": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
         "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -10477,15 +10476,14 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const recovered=",
-            "line": 108
+            "line": 112
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/nine-scopes-parity.test.mjs",
-          "integration": "tests/cloudflare-integration.test.mjs",
-          "browser": "scripts/test-product-browser.mjs"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -10511,7 +10509,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "await provisioner.markVerified",
-            "line": 121
+            "line": 125
           }
         ],
         "verification": {
@@ -10675,7 +10673,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function invoke",
-            "line": 131
+            "line": 135
           }
         ],
         "verification": {
@@ -10924,7 +10922,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "recordRemoteResult:",
-            "line": 166
+            "line": 185
           }
         ],
         "verification": {
@@ -10957,7 +10955,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 303
+            "line": 315
           }
         ],
         "verification": {
@@ -10974,14 +10972,14 @@
         "preconditions": "Navigate or page listing",
         "trigger": "explorer",
         "guard": "Epoch before API await; exact target, cursor; dedup key",
-        "actual": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
+        "actual": "Top File Explorer enters through canonical enterExplorer: current authorized accounts/buckets, durable last explicit location then saved Default then selected/sole account actual redown or unambiguous bucket. Multiple unselected accounts require choice. Populate/expand/select tree and list on first click; reconnect while visible restores intent. Remotes remains startup tab.",
         "apiMethods": [
           "listFolders",
           "refreshExplorer",
           "navigateExplorer"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
+        "nextState": "Top File Explorer enters through canonical enterExplorer: current authorized accounts/buckets, durable last explicit location then saved Default then selected/sole account actual redown or unambiguous bucket. Multiple unselected accounts require choice. Populate/expand/select tree and list on first click; reconnect while visible restores intent. Remotes remains startup tab.",
         "uiEffect": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -10991,15 +10989,14 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 128
+            "line": 140
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_AND_LOCAL_WORKERD",
-          "status": "LOCAL_PASS_LIVE_BLOCKED",
-          "testFile": "tests/nine-scopes-parity.test.mjs",
-          "integration": "tests/cloudflare-integration.test.mjs",
-          "browser": "scripts/test-product-browser.mjs"
+          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
+          "testFile": "tests/permanent-destinations.test.mjs",
+          "evidence": "docs/evidence/permanent-destinations/",
+          "installedWindows": "NOT_VERIFIED"
         },
         "contractViolation": null
       },
@@ -11021,7 +11018,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 160
+            "line": 172
           }
         ],
         "verification": {
@@ -11113,7 +11110,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 163
+            "line": 175
           }
         ],
         "verification": {
@@ -11209,7 +11206,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "provider!=='cloudflare'",
-            "line": 35
+            "line": 37
           }
         ],
         "verification": {
@@ -11243,7 +11240,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "commitProduct",
-            "line": 136
+            "line": 153
           }
         ],
         "verification": {
@@ -11275,7 +11272,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 274
+            "line": 286
           }
         ],
         "verification": {
@@ -11393,7 +11390,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 15
+            "line": 25
           }
         ],
         "verification": {
@@ -11436,7 +11433,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function initializeAccount",
-            "line": 52
+            "line": 54
           }
         ],
         "verification": {
@@ -11522,7 +11519,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "worker-preparation-blocked",
-            "line": 115
+            "line": 119
           }
         ],
         "verification": {
@@ -11565,12 +11562,12 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "failure.sessionScopes.length>0",
-            "line": 66
+            "line": 69
           },
           {
             "path": "extension/app.mjs",
             "symbol": "id=\"shelf-reauthorize\"",
-            "line": 74
+            "line": 85
           }
         ],
         "verification": {
@@ -11611,7 +11608,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 305
+            "line": 317
           }
         ],
         "verification": {
@@ -11653,7 +11650,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 134
+            "line": 154
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -11747,8 +11744,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectShelfAttention",
@@ -11756,8 +11753,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "openCloudflareDestinations",
@@ -11765,8 +11762,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectCloudflare",
@@ -11774,8 +11771,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "checkCloudflareR2",
@@ -11783,8 +11780,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "selectCloudflareAccount",
@@ -11792,8 +11789,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "openCloudflareActivation",
@@ -11801,8 +11798,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "approveCloudflareSetup",
@@ -11810,8 +11807,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "repairCloudflareDestination",
@@ -11819,8 +11816,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "invokeProviderAction",
@@ -11828,8 +11825,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectRemoteHistory",
@@ -11837,8 +11834,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectRemoteReceipt",
@@ -11846,8 +11843,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectCloudflareSetup",
@@ -11855,8 +11852,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "cancelRemoteOperation",
@@ -11864,8 +11861,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "openRemoteResult",
@@ -11873,8 +11870,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "refreshExplorer",
@@ -11882,8 +11879,17 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+      },
+      {
+        "method": "enterExplorer",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "navigateExplorer",
@@ -11891,8 +11897,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "readFileChunk",
@@ -11900,8 +11906,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectExplorerContextMenu",
@@ -11909,8 +11915,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "previewContextMenu",
@@ -11918,8 +11924,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "describeCapabilities",
@@ -11927,8 +11933,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "getConfiguration",
@@ -11936,8 +11942,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "getEngineHealth",
@@ -11945,8 +11951,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "getProviderConnections",
@@ -11954,8 +11960,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "loginBegin",
@@ -11963,8 +11969,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "loginStatus",
@@ -11972,8 +11978,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "loginCancel",
@@ -11981,8 +11987,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "disconnect",
@@ -11990,8 +11996,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "fileAction",
@@ -11999,8 +12005,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "listAccounts",
@@ -12008,8 +12014,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "listAuthorizedBuckets",
@@ -12017,8 +12023,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "listFolders",
@@ -12026,8 +12032,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "fileMetadata",
@@ -12035,8 +12041,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "readFile",
@@ -12044,8 +12050,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "listDestinations",
@@ -12053,8 +12059,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectMenuTree",
@@ -12062,8 +12068,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "previewNativeMenu",
@@ -12071,8 +12077,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectNativeACK",
@@ -12080,8 +12086,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "getOrganizationSuggestion",
@@ -12089,8 +12095,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "previewConfigChange",
@@ -12098,8 +12104,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "commitConfigChange",
@@ -12107,8 +12113,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "reconcileNativeMenu",
@@ -12116,8 +12122,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "chooseBackupLocation",
@@ -12125,8 +12131,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectRecoveryCoverage",
@@ -12134,8 +12140,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "runRecoveryPage",
@@ -12143,8 +12149,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectBackupRoots",
@@ -12152,8 +12158,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "listRecoveryPolicies",
@@ -12161,8 +12167,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "writeRecovery",
@@ -12170,8 +12176,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "requestRestorePreview",
@@ -12179,8 +12185,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "restoreRightClickMenu",
@@ -12188,8 +12194,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -12197,8 +12203,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "enableWholeCloudJob",
@@ -12206,8 +12212,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "disableWholeCloudJob",
@@ -12215,8 +12221,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "dispatchExplorerSave",
@@ -12224,8 +12230,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       },
       {
         "method": "dispatchSave",
@@ -12233,8 +12239,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Same trusted actor/account grant plus applicable operation confirmation; no diagnostic mutation bypass",
-        "coverage": "See redown-restoration evidence; installed Windows remains a separate gate"
+        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
+        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
       }
     ],
     "errorBranches": {
@@ -12275,15 +12281,19 @@
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
       "saveRepair": "Historical source.fetch blocker preserved in restorationBefore/saveRepairBefore and old evidence; replaced by native fetch. Current isolated LIVE text/image/redirect/unknown-length independent byte readbacks PASS. Windows installed-click remains unverified.",
-      "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration."
+      "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration.",
+      "permanence": "See docs/evidence/permanent-destinations: real IndexedDB before/after legacy-loss regression, 1/2/100/1000 per-mode logout/login/reload/full-process restart, retained approval, one-click Explorer and reconnect. Fixture provider/OAuth/native registrar, not Windows."
     },
-    "sourceState": "Restoration source 9e8a16d09a53bb1b414d5fd1e34a190a3861160d; exact source hashes, immutable restorationBefore and baseline preserved.",
+    "sourceState": "Permanent-destinations development branch from a6a0d92; exact source hashes. permanenceBefore preserved. No owner Windows pass claimed.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
+        "AUTH_STATUS_UNAVAILABLE",
         "BLOCKED",
+        "CHOOSE_ACCOUNT",
         "CLOUDFLARE_READY",
         "CONNECTED",
         "CONNECTING",
+        "DISCONNECTED",
         "ENGINE_MESSAGE_SEND_FAILED",
         "ENGINE_NO_RESPONSE",
         "ENGINE_RECEIVER_MISSING",
@@ -12299,6 +12309,7 @@
         "RECONNECT_REQUIRED",
         "REPAIR_REQUIRED",
         "SETUP_APPROVAL_REQUIRED",
+        "SETUP_RESUME_REQUIRED",
         "SHELF_START_FAILED",
         "VERIFYING",
         "WORKER_UPGRADE_APPROVAL_REQUIRED"
@@ -12308,6 +12319,7 @@
         "AVAILABLE",
         "BLOCKED",
         "BLOCKED_NATIVE_COMPANION_REQUIRED",
+        "CONFIGURATION_RECORD_MISSING",
         "CONNECTED",
         "DEBUG_REQUEST_FAILED",
         "DISCONNECTED",
@@ -12425,6 +12437,8 @@
         "AUTH_REQUIRED",
         "BLOCKED",
         "CANONICAL_ACTION_UNAVAILABLE",
+        "CHOOSE_ACCOUNT",
+        "CHOOSE_BUCKET",
         "CLOUDFLARE_HOST_UNAVAILABLE",
         "CONFIRMATION_REQUIRED",
         "CONNECTED",
@@ -12447,7 +12461,9 @@
         "OPERATION_FAILED",
         "PERMISSION_DENIED",
         "PREVIEW_SIZE_LIMIT",
+        "PROVIDER_READ_FAILED",
         "READY",
+        "RECONNECT_REQUIRED",
         "RECOVERY_NOT_ENABLED",
         "REPAIR_REQUIRED",
         "RESULT_CHANGED",
@@ -12683,17 +12699,20 @@
         "REPAIR_REQUIRED",
         "REVISION_CONFLICT",
         "SELECTED_BUCKET_MISSING",
+        "SETUP_APPROVAL_RECORD_MISSING",
         "SETUP_APPROVAL_REQUIRED",
         "SETUP_COMPLETION_PENDING",
         "SETUP_IN_PROGRESS",
         "SETUP_LEDGER_UNAVAILABLE",
         "SETUP_PROBE_REQUIRES_INSPECTION",
         "SETUP_RESULT_STALE",
+        "SETUP_RESUME_REQUIRED",
         "TARGET_NOT_CONFIGURED",
         "TOKEN_EXPIRED",
         "TRANSIENT_API_FAILURE",
         "UNKNOWN",
         "WORKER_CREATE_PERMISSION_REQUIRED",
+        "WORKER_UPGRADE_APPROVAL_REQUIRED",
         "WRONG_ACCOUNT"
       ],
       "src/cloudflare/public-address.mjs": [],
@@ -13213,6 +13232,9 @@
         "COMPLETION_COMMITTED",
         "COMPLETION_FAILED",
         "COMPLETION_PENDING",
+        "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_RECORD_MISSING",
         "CONFIG_INVALID",
         "CONSENT_REQUIRED",
         "CONTEXT_MISMATCH",
@@ -13550,6 +13572,9 @@
         "BACKUP_ENCRYPTED",
         "BACKUP_INVALID",
         "BACKUP_STARTED",
+        "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_RECORD_MISSING",
         "IDEMPOTENCY_CONFLICT",
         "JOURNAL_EVICTED",
         "MIGRATION_QUARANTINED",
@@ -13635,7 +13660,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "a430b5e3085686ac9878bbada99a0b5483c96695a9773018dc464ff8d09839b2"
+    "digest": "5b4acc4a0c771a7680961f15f92bb3f903c24d8b7179ad771d1eb4fce7f89fa2"
   },
   "changeLog": [
     {
@@ -15486,5 +15511,90 @@
     "menuSpecSHA256": "a2d63d1fba98cb5ce434c10a37c87772c28fb72a87237d3c439c8a7e114b87e1",
     "actual": "Quick rows precede providers and remain in the active Cloudflare count; default + Quick duplicates and nests. Existing Simple/Narrow/Depth owners retained.",
     "verification": "Source-verified; not installed Chrome evidence"
+  },
+  "permanenceBefore": {
+    "sourceCommit": "a6a0d92a23fcc3c2c3d189230b93535b470608f1",
+    "currentDigest": "a430b5e3085686ac9878bbada99a0b5483c96695a9773018dc464ff8d09839b2",
+    "sourceFiles": {
+      "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
+      "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
+      "extension/app.mjs": "1f5ab116d1c471ad9b59343e4ce5681ff5cc0fa6bf50ef970b3165197eb8ea0a",
+      "extension/background.mjs": "096d0fceccf484fd095987bdfe089285ede465a6a27500d8e32dc685831ebda9",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "3050692bb14738f81fd6d894c529ddff9976f0d71d8505054ed9bd171f537d55",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "454657cd04ec8615fe1aad54db199f663e870fb93337764246251da112049f7b",
+      "right2cloud-module/src/cloudflare-worker.mjs": "4af4d3c04f34e080235399a65e2150a24899e1139a53fa5f59f40a275a8b42e6",
+      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
+      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
+      "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
+      "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
+      "src/api/explorer-context-menu.mjs": "c0447ad9578815f9a58aa837c5d75dd04507039de80f236e60ff552b52a3bea8",
+      "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
+      "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
+      "src/api/permissions.mjs": "3818f0ca7b0ba7bf1984665164443b30b1938a46061d158b029451977f558a67",
+      "src/api/service.mjs": "cabdf92ed0520afd742661be1a4559b8e998f18f5cd975627f1fc0b17e626361",
+      "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
+      "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
+      "src/build-info.mjs": "240c202380ab4ec917393b0ea6239f7b76f47292057f1708df4ea2435b6bbd6e",
+      "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
+      "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
+      "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
+      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
+      "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
+      "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
+      "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
+      "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
+      "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
+      "src/cloudflare/onboarding.mjs": "6b7233cda1ade819ebe24c379cfcbce4c823fb29cc52705edbf36a6cca0393db",
+      "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
+      "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
+      "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
+      "src/cloudflare/transport.mjs": "ca2330c9185d8cf03f10dceacd934650a9c2e607cfbc564dcef3a4b70fa79e9c",
+      "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
+      "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
+      "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
+      "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
+      "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
+      "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
+      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
+      "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
+      "src/core/menu-spec.mjs": "2d3843c6198d7c3c0b23ca0c06de24b44c0c6e6afbc6319deb9a80b1e4f941e8",
+      "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
+      "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
+      "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
+      "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
+      "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+      "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
+      "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
+      "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
+      "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
+      "src/explorer/listing-view.mjs": "cce2f95fdcd1a05de4e58da4d55012f8801b618e57b1c27654caf3896317b2fa",
+      "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
+      "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
+      "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
+      "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
+      "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
+      "src/glaciaring/catalog.mjs": "925a0a5d0691edfa901eda70783ae362467433afcd57436544dd04509a343d26",
+      "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
+      "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
+      "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
+      "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
+      "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
+      "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
+      "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
+      "src/persistence/current-store.mjs": "6f724bbb3c4c8788ecc7d0a4a61b3d0ed6f6c111c930c3d501f3a3e2b99cef94",
+      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
+      "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
+      "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
+      "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
+    },
+    "observed": "OWNER: disappearing destinations/approval/default; source: per-account fallback, missing mode defaults, manager only Simple/Narrow, Explorer tab does not load tree. Actual Windows storage-loss boundary unobserved."
   }
 }

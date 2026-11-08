@@ -119,7 +119,7 @@ const oauthForApi={...oauth,connect:async()=>{loginApiPending=true;try{return aw
       for(const identity of await wholeCloud.list())if(status.accounts.some(a=>a.id===identity.accountId))try{await wholeCloud.disable(identity);}catch{}
     }catch{/* Local credential removal still proceeds when ancillary state is unavailable. */}
     return await oauth.disconnect();
-  }finally{revoking=false;}
+  }finally{revoking=false;try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
@@ -144,7 +144,9 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
-const ready=(async()=>{await storageReady;inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return api.reconcile();})();
+const ready=(async()=>{await storageReady;// An existing native registration is independent evidence of prior CURRENT.
+// If IndexedDB vanished, do not classify that installation as a new user.
+const prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration,saved=await current.read();if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return api.reconcile();})();
 // Developer/native-companion integration only: no externally_connectable manifest,
 // external messages, content scripts, localhost server, or client-issued grants.
 Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,ready,

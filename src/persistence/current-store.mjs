@@ -4,6 +4,7 @@ import {safeRemoteDiagnostic} from '../../right2cloud-module/src/common.mjs';
 // Chrome and cloud operations stay outside CURRENT; config never carries authorization.
 import {modeModules,validateModeConfig,validateBundle,validateGeneration,integer,BACKUP_FORMAT,MAX_RECORDS} from './schema.mjs';
 import {encodeBackup,decodeBackup} from './backup.mjs';
+import {normalizeTarget} from '../core/menu-identity.mjs';
 import {operationIdentity} from '../core/boundary-observation.mjs';
 import {productState,fail} from '../api/config.mjs';
 const request=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
@@ -41,12 +42,32 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     if(meta.next>MAX_RECORDS) {stores.journal.delete(meta.next-MAX_RECORDS);meta.evicted++;}
     stores.state.put({id:'journalMeta',value:{next:meta.next+1,evicted:meta.evicted}});
   }
+  /** getConfiguration/listDestinations and every config writer share this read.
+   * Missing established rows are a recovery error, never proof of empty settings.
+   * Integrity stores record presence only, not a competing copy of destinations.
+   */
+  async function loadState(stores) {
+    const rows=await request(stores.state.getAll()),map=Object.fromEntries(rows.map(r=>[r.id,r.value]));
+    if(Object.hasOwn(map,'configurationIntegrity')&&(!map.configurationIntegrity||map.configurationIntegrity.version!==1||!Array.isArray(map.configurationIntegrity.required)||map.configurationIntegrity.required.some(k=>!['product','mode:simple','mode:nested','mode:depth'].includes(k))))throw error('CONFIGURATION_CORRUPT');
+    if(Object.hasOwn(map,'product')&&(!map.product||map.product.schemaVersion!==1||!Number.isSafeInteger(map.product.revision)||!map.product.show||!Object.hasOwn(map.product,'defaultTarget')&&!map.product.configs))throw error('CONFIGURATION_CORRUPT');
+    const required=new Set(map.configurationIntegrity?.required??[]);
+    if(rows.some(r=>r.id.startsWith('setup:')&&r.value?.stage==='complete'))required.add('product');
+    // Legacy installations have no marker yet: their own journal is evidence.
+    if(!map.configurationIntegrity){for(const j of await request(stores.journal.getAll())){if(j.kind==='product')required.add('product');if(j.kind==='config')required.add('mode:'+j.mode);}}
+    for(const id of required)if(!Object.hasOwn(map,id)&&!(id.startsWith('mode:')&&map.product?.configs?.[id.slice(5)]))throw error('CONFIGURATION_RECORD_MISSING');
+    const configs={};for(const mode of Object.keys(modeModules)){
+      const id='mode:'+mode,raw=Object.hasOwn(map,id)?map[id]:map.product?.configs?.[mode];
+      if((Object.hasOwn(map,id)||raw!==undefined)&&(!raw||!Array.isArray(raw[mode==='depth'?'scopes':'destinations'])))throw error('CONFIGURATION_CORRUPT');
+      configs[mode]=validateModeConfig(mode,raw??modeModules[mode].createConfig());
+      const embedded=map.product?.configs?.[mode];if(Object.hasOwn(map,id)&&embedded){const legacy=validateModeConfig(mode,embedded);if(legacy.revision>=configs[mode].revision&&JSON.stringify(legacy)!==JSON.stringify(configs[mode]))throw error('CONFIGURATION_CONFLICT');}
+    }
+    const generation=Object.hasOwn(map,'generation')?map.generation:defaultGeneration();validateGeneration(generation);
+    return {map,configs,product:productState(map.product),generation};
+  }
+  function rememberRows(stores,map,ids){const required=[...new Set([...(map.configurationIntegrity?.required??[]),...Object.keys(map).filter(k=>k==='product'||k.startsWith('mode:')),...ids])];stores.state.put({id:'configurationIntegrity',value:{version:1,required}});}
   async function getModeConfig(mode) {
     if(!Object.hasOwn(modeModules,mode))throw error('BACKUP_INVALID');
-    return transact('readonly',async stores=>{
-      const value=(await request(stores.state.get('mode:'+mode)))?.value??(await request(stores.state.get('product')))?.value?.configs?.[mode]??modeModules[mode].createConfig();
-      return validateModeConfig(mode,value);
-    });
+    return transact('readonly',async stores=>(await loadState(stores)).configs[mode]);
   }
   async function saveModeConfig(mode,config,{expectedRevision}={}) {
     const operationId=operationIdentity();signal('persistence.commit','started','PERSIST_STARTED',operationId);
@@ -54,13 +75,13 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       // Validate before entering IDB; unknown fields are rejected, never silently dropped.
       const normalized=validateModeConfig(mode,config);integer(expectedRevision);
       const result=await transact('readwrite',async stores=>{
-        const prior=(await request(stores.state.get('mode:'+mode)))?.value??null;
+        const saved=await loadState(stores),prior=saved.configs[mode];
         if((prior?.revision??0)!==expectedRevision)throw error('REVISION_CONFLICT');
         const current=validateModeConfig(mode,{...normalized,revision:expectedRevision+1});
         const at=clock();integer(at);
         const checkpointId=mode+':'+new Date(at).toISOString().slice(0,10);
         if(prior&&!await request(stores.checkpoints.get(checkpointId)))stores.checkpoints.add({id:checkpointId,mode,at,config:prior});
-        stores.state.put({id:'mode:'+mode,value:current});
+        stores.state.put({id:'mode:'+mode,value:current});rememberRows(stores,saved.map,['mode:'+mode]);
         await append(stores,{kind:'config',mode,at,previous:prior,current});
         return current;
       });
@@ -82,12 +103,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     } catch(e) {signal('persistence.commit','failed',e?.code==='REVISION_CONFLICT'?'REVISION_CONFLICT':'STORAGE_COMMIT_FAILED',operationId);throw e;}
   }
   async function read() {
-    return transact('readonly',async stores=>{
-      const rows=await request(stores.state.getAll()),map=Object.fromEntries(rows.map(row=>[row.id,row.value]));
-      const configs={};for(const mode of Object.keys(modeModules))configs[mode]=validateModeConfig(mode,map['mode:'+mode]??map.product?.configs?.[mode]??modeModules[mode].createConfig());
-      const generation=map.generation??defaultGeneration();validateGeneration(generation);
-      return {schemaVersion:1,configs,product:productState(map.product),generation,requiresReconnect:true,journalEvicted:map.journalMeta?.evicted??0};
-    });
+    return transact('readonly',async stores=>{const {map,configs,product,generation}=await loadState(stores);return {schemaVersion:1,configs,product,generation,requiresReconnect:true,journalEvicted:map.journalMeta?.evicted??0};});
   }
   async function journal({after=0,limit=100}={}) {
     integer(after);if(!Number.isSafeInteger(limit)||limit<1||limit>500)throw error('BACKUP_INVALID');
@@ -99,6 +115,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
   }
   async function bundle() {
     return transact('readonly',async stores=>{
+      await loadState(stores);
       const [rows,journal,checkpoints]=await Promise.all([request(stores.state.getAll()),request(stores.journal.getAll()),request(stores.checkpoints.getAll())]);
       const map=Object.fromEntries(rows.map(row=>[row.id,row.value])),configs={};
       for(const mode of Object.keys(modeModules)){const c=map['mode:'+mode]??map.product?.configs?.[mode];if(c)configs[mode]=c;}
@@ -118,9 +135,9 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       const restored=await decodeBackup(text,options);
       await transact('readwrite',async (stores,tx)=>{
         const rows=await request(stores.state.getAll());
-        if(rows.some(row=>row.id.startsWith('mode:')||row.id==='generation'))throw error('RESTORE_NOT_EMPTY');
+        if(rows.some(row=>row.id.startsWith('mode:')||['product','generation','configurationIntegrity'].includes(row.id)))throw error('RESTORE_NOT_EMPTY');
         for(const [mode,value] of Object.entries(restored.configs))stores.state.add({id:'mode:'+mode,value});
-        stores.state.put({id:'product',value:productState(restored.product)});
+        stores.state.put({id:'product',value:productState(restored.product)});rememberRows(stores,{},['product',...Object.keys(restored.configs).map(m=>'mode:'+m)]);
         stores.state.add({id:'generation',value:{desired:restored.generation.desired,applied:null}});
         const next=(restored.journal.at(-1)?.sequence??restored.journalEvicted)+1;
         stores.state.put({id:'journalMeta',value:{next,evicted:restored.journalEvicted}});
@@ -138,16 +155,18 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const normalizedConfigs={};
     for(const mode of Object.keys(modeModules))normalizedConfigs[mode]=validateModeConfig(mode,configs[mode]);
     return transact('readwrite',async stores=>{
+      const durable=await loadState(stores);
       const retry=(await request(stores.state.get('retry:'+idempotencyKey)))?.value;
       if(retry){if(retry.fingerprint!==fingerprint)fail('IDEMPOTENCY_CONFLICT');return {...retry,replayed:true};}
       const savedProduct=(await request(stores.state.get('product')))?.value;
-      const previous=productState(savedProduct);
+      const previous=durable.product;
+      for(const mode of Object.keys(modeModules))if(normalizedConfigs[mode].revision!==durable.configs[mode].revision)fail('REVISION_CONFLICT');
       if(previous.revision!==expectedRevision)fail('REVISION_CONFLICT');
       const current=productState({...normalized,revision:expectedRevision+1});
-      stores.state.put({id:'product',value:current});
+      stores.state.put({id:'product',value:current});rememberRows(stores,durable.map,['product',...Object.keys(modeModules).map(m=>'mode:'+m)]);
       for(const [mode,config] of Object.entries(normalizedConfigs)) {
         const prior=(await request(stores.state.get('mode:'+mode)))?.value??savedProduct?.configs?.[mode]??null;
-        if(JSON.stringify(prior)!==JSON.stringify(config)) {
+        if(!Object.hasOwn(durable.map,'mode:'+mode)||JSON.stringify(prior)!==JSON.stringify(config)) {
           const next=validateModeConfig(mode,{...config,revision:(prior?.revision??0)+1});
           stores.state.put({id:'mode:'+mode,value:next});
           await append(stores,{kind:'config',mode,at:clock(),previous:prior,current:next});
@@ -166,6 +185,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResults:({cursor,limit}={})=>transact('readonly',async s=>{const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const start=cursor?all.findIndex(x=>x.operationId===cursor)+1:0,items=all.slice(start,start+limit);return {items,nextCursor:start+limit<all.length?items.at(-1)?.operationId:null};}),
+    readExplorerLocation:()=>transact('readonly',async s=>(await request(s.state.get('explorerLocation')))?.value??null),
+    writeExplorerLocation:target=>transact('readwrite',async s=>{const value=normalizeTarget(target);s.state.put({id:'explorerLocation',value});return value;}),
     readSetupOperation:id=>transact('readonly',async s=>(await request(s.state.get('setup:'+id)))?.value??null),
     writeSetupOperation:(id,value)=>transact('readwrite',async s=>{s.state.put({id:'setup:'+id,value});return value;}),
     read,getModeConfig,saveModeConfig,commitProduct,
