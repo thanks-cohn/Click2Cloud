@@ -27,6 +27,20 @@ User confirms Explorer did not show this message before updating/connecting. No 
 
 **CRITICAL:** Do **not** suggest or execute `chrome.storage.local.remove('nativeRegistration')`, `clear()`, `indexedDB.deleteDatabase()`, blindly setting generation 583, forcing generation 0 into native registration, or bypassing the readCurrent guard. A workaround that merely hides this error while silently discarding old destination bindings is unacceptable.
 
+## Further owner live proof: generation record is physically absent
+
+**2026-11-08, owner installed Windows Chrome extension, service-worker DevTools read-only IndexedDB inspection.** The owner queried `indexedDB.databases()` and opened `click2cloud-current-v1`, then `db.transaction('state','readonly').objectStore('state').get('generation')`. Result:
+
+```json
+{"generationRecordPresent":false,"generationDesired":null}
+```
+
+Earlier same-session read-only outputs: `click2cloud.current.read()` = success with default `generation.desired:0`; `nativeRegistration.desired.generation:583`.
+
+**Confirmed:** the `generation` key is physically missing in CURRENT's `state` store; its desired=0 is a `defaultGeneration()` substitution from `src/persistence/current-store.mjs`, not a persisted zero. The existing `extension/background.mjs:readCurrent()` prior native registration guard is exactly the observed immediate blocker. Still **not** proven whether this was deleted, left unpersisted by a migration, or is a mismatch from another lifecycle. Do not assert the user's destinations are missing because generation is missing; the `current.read()` succeeded and validated other required record invariants. Auth is independently working.
+
+**Highest-value next gate:** inspect metadata-only presence of `product`, `mode:simple`, `mode:nested`, `mode:depth`, `configurationIntegrity` in the same CURRENT state store, and summarize the existing bounded `journal` by event kinds and `generation` events' *numeric desired only*. Compare available journal generation event progression and current native registration's desired/applied metadata with the last known valid user saved configuration. Do not print raw state/config/journal objects, account IDs, filenames, tokens, object keys or paths. Preserve records; no reset/clear/manual generation write. Only formulate a narrow owner-approved recovery after evidence proves the safe source of truth.
+
 ## Source-backed two-branch fault analysis — DO NOT GUESS
 
 There are at least TWO distinct emitters of **the exact same error code**:
