@@ -80,6 +80,11 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     const map=Object.fromEntries(evidence.state.map(r=>[r.id,r.value]));
     if(!present)for(const [id,value] of [['product',candidate.product],...Object.entries(candidate.configs).map(([m,c])=>['mode:'+m,c])])if(Object.hasOwn(map,id)&&JSON.stringify(map[id])!==JSON.stringify(value))return {available:false,current:local,reason:'CONFIGURATION_CONFLICT',nativeSalvage:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'};
     if(!present)for(const row of evidence.journal){const value=row.kind==='product'?candidate.product:row.kind==='config'?candidate.configs[row.mode]:null;if(value&&row.current.revision>value.revision)return {available:false,current:local,reason:'RECOVERY_STALE'};}
+    if(!present){
+      const last=new Map();for(const row of evidence.journal)if(row.kind==='product'||row.kind==='config')last.set(row.kind==='product'?'product':row.mode,row.current);
+      for(const row of evidence.checkpoints)if(row.config&&(!last.has(row.mode)||last.get(row.mode).revision<=row.config.revision))last.set(row.mode,row.config);
+      for(const [key,value] of last){const proposed=key==='product'?candidate.product:candidate.configs[key];if(!proposed||value.revision>proposed.revision)return {available:false,current:local,reason:'RECOVERY_STALE'};if(value.revision===proposed.revision&&JSON.stringify(value)!==JSON.stringify(proposed))return {available:false,current:local,reason:'CONFIGURATION_CONFLICT'};}
+    }
     // A backup older than retained durable evidence is not an exact recovery.
     const retainedRevision=Math.max(map.product?.revision??0,...evidence.journal.filter(r=>r.kind==='product').map(r=>r.current?.revision??0));
     if(candidate.product.revision<retainedRevision)return {available:false,current:local,reason:'RECOVERY_STALE'};
