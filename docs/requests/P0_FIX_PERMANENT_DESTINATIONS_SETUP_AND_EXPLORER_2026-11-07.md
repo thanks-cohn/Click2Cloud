@@ -6,6 +6,41 @@
 **Code baseline:** Reinspect latest Click2Cloud source before edits; initial audit against `main:f062983c062ec0fa55d935848025d0919ef99a16`.  
 **Scope:** Click2Cloud only. REDOWN is read-only reference. NO production Cloudflare mutations, no auth client replacement, no clearing user stores, no unconditional reset, no REDOWN edit.
 
+## ABSOLUTE IMPLEMENTATION PRECEDENCE — USER'S SAVED CONFIGURATION ALWAYS WINS
+
+The most important owner requirement supersedes any weaker first-login/redown rule:
+
+```text
+durable = readAuthoritativePersistedConfiguration()
+if read fails, storage is missing unexpectedly, schema is corrupt, or migration is uncertain:
+    STOP with diagnostic/recovery; DO NOT initialize redown
+else if durable has ANY saved destinations in ANY mode/account OR a saved Default:
+    preserve every recorded entry and choice
+    do not modify existing destinations/default due to login, auth, inventory or setup
+    if Default-only, link exact target as ordinary manager entry without replacement
+    if destinations exist but no Default, present selection/repair; do not substitute redown
+    reconnect and project existing config into GUI/API/Chrome as permissions permit
+else:  # proven genuine zero saved destination records AND no saved Default
+    on NEXT successful authorized user login only:
+        reuse existing lowercase redown bucket, or create when absent and authorized
+        reuse prior account-specific setup approval, or request necessary new consent once
+        verify Worker/R2; persist redown bucket ROOT as editable Simple row AND Default
+    never trigger fallback on passive boot/status, deletion alone or failed auth
+```
+
+**Nonempty means ANY saved record**, including hidden/disabled/Quick destination entries, inactive display modes, Narrow/Depth assignments, saved records for another account and an existing Default with no manager row. Do **not** decide emptiness by current Chrome-visible menu item count, authorized bucket scan, currently selected account subset, cloud availability, or whether the user is logged in. Never overwrite, delete or recalculate a user's labels, target identities, bucket/prefixes, defaults, flags or ordering merely because login succeeded.
+
+**Explicit acceptance assertions:**
+- 1, 2, 100 and 1000 saved destinations remain identical across disconnect/login/restart, even when all are hidden, inactive, inaccessible, or under another account.
+- A saved Default without any Simple row remains the same target, and may be linked to an ordinary editable manager row without destructive replacement.
+- Saved assignments without Default remain untouched, with a clear selection state; `redown` is not auto-created.
+- Zero stored destinations + `defaultTarget:null` after a confirmed successful durable read => the NEXT authorized login creates/reuses `redown`, saves an ordinary Simple root row plus Default and never asks for already retained account approval again.
+- Delete the final destination, with no remaining Default => next authorized login triggers exactly the same empty-state fallback. A surviving destination in any mode/account cancels fallback.
+- Failed IndexedDB read / account mismatch / expired OAuth / unknown R2 / missing bucket / no native visible rows => NOT a confirmed zero state and must not create or silently reset user data.
+- GUI `getConfiguration`/`listDestinations`/menu preview and actual native menu must agree on what is *stored* versus what is *currently executable*. Preserve immutable pre-change snapshots; prove before/after with tests and Windows installed-Chrome evidence.
+
+**This rule is the release gate.** No other onboarding convenience is allowed to run before this persisted-state precedence decision.
+
 ## Owner's direction
 
 **A user logs into Click2Cloud once, approves a required initial setup once, and then simply uses it.** Even when Cloudflare requires a normal future OAuth login, **the user never loses their configured right-click destinations and does not have to approve creation/preparation of the same `redown` bucket again** unless a genuinely new resource/permission change requires explicit, scoped consent.
