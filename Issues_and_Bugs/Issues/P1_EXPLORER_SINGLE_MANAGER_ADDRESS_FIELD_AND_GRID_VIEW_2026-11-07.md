@@ -1,7 +1,7 @@
 # Click2Cloud Explorer UX issues — one Manage Destinations entry, standard location field, Grid view
 
-**Reported:** November 7, 2026 · **Category:** Issues / usability and missing features · **Status:** Owner-approved requirements; not yet implemented.  
-**Area:** Click2Cloud extension Shelf File Explorer. Not the native web-page context menu.  
+**Reported:** November 7, 2026 · **Category:** Issues / usability and missing features · **Status:** Implemented in 0.3.11 candidate; owner Windows acceptance pending (see implementation note below).
+**Area:** Click2Cloud extension Shelf File Explorer. Not the native web-page context menu.
 **Related P0 bug:** [Explorer context-menu latency and responsiveness](../Bugs/P0_EXPLORER_CONTEXT_MENU_LATENCY_AND_RESPONSIVENESS_2026-11-07.md). All UI work here must remain fast.
 
 ## User's exact intent
@@ -72,3 +72,7 @@ View: [Details | List | Grid]
 6. Test the actual installed Windows Chrome extension as a separate acceptance class from unit/browser fixtures. Never claim installed-Chrome/Cloudflare PASS without real evidence.
 
 **Scope:** Click2Cloud Explorer only. Do not modify REDOWN, bucket resources, OAuth registrations, private saved destination data, or the Chrome web-page native menu as side effects. **NO BLOAT · ONE MANAGER BUTTON · FULL ADDRESS · THREE VIEWS · FAST BY DESIGN.**
+
+## Implementation candidate — November 8, 2026
+
+Runtime candidate `97c2806` (0.3.11) implements the production-source repair on `dev/p0-zero-stutter`. See [source findings](../../docs/evidence/zero-stutter/SOURCE.md), [handoff and Windows acceptance](../../docs/evidence/zero-stutter/HANDOFF.md), and [measured fixture comparison](../../docs/evidence/zero-stutter/PERFORMANCE.md). Original observations above are historical baseline evidence. This issue is **not closed as owner-verified**: genuine installed Chrome is blocked by administrator policy, and live new-destination save/readback remains blocked by unavailable existing test-Worker signing authority. Passing fixtures are separately classified.

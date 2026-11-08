@@ -1,0 +1,143 @@
+{
+  "runtimeRevision": "97c2806eeb1f656ab69e7843085517e189663968",
+  "evidenceClass": "SEPARATE_60_SECOND_FIXTURE_CPU_DIAGNOSTIC_NOT_FINAL_ACCEPTANCE_MATRIX",
+  "instrumentation": "Standard CDP Profiler.enable/start immediately before stress, Profiler.stop afterward; same production app, 10000 entries, 1 bucket, 1 repeat, 60 seconds. CPU profiling can perturb execution.",
+  "stress": {
+    "seconds": 60,
+    "samples": 530,
+    "maxDOM": 261,
+    "frames": {
+      "samples": 3524,
+      "p50": 16.69999999999709,
+      "p95": 16.799999999999272,
+      "p99": 16.80000000000291,
+      "max": 216.70000000000073
+    },
+    "longTasks": []
+  },
+  "cpuDurationMs": 60139.9,
+  "topSelfSamples": [
+    {
+      "function": "(idle)",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 53461.461
+    },
+    {
+      "function": "(program)",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 3245.732
+    },
+    {
+      "function": "renderWindow",
+      "script": "app.mjs",
+      "zeroBasedLine": 184,
+      "sampledSelfMs": 1039.432
+    },
+    {
+      "function": "loadListing",
+      "script": "app.mjs",
+      "zeroBasedLine": 154,
+      "sampledSelfMs": 711.036
+    },
+    {
+      "function": "renderExplorer",
+      "script": "app.mjs",
+      "zeroBasedLine": 131,
+      "sampledSelfMs": 250.359
+    },
+    {
+      "function": "(anonymous)",
+      "script": "app.mjs",
+      "zeroBasedLine": 189,
+      "sampledSelfMs": 231.295
+    },
+    {
+      "function": "(garbage collector)",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 222.951
+    },
+    {
+      "function": "renderAddress",
+      "script": "app.mjs",
+      "zeroBasedLine": 146,
+      "sampledSelfMs": 220.201
+    },
+    {
+      "function": "(anonymous)",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 104.522
+    },
+    {
+      "function": "requestAnimationFrame",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 90.402
+    },
+    {
+      "function": "syncTreePage",
+      "script": "app.mjs",
+      "zeroBasedLine": 116,
+      "sampledSelfMs": 66.064
+    },
+    {
+      "function": "navigate",
+      "script": "app.mjs",
+      "zeroBasedLine": 147,
+      "sampledSelfMs": 60.998
+    },
+    {
+      "function": "renderFiles",
+      "script": "app.mjs",
+      "zeroBasedLine": 162,
+      "sampledSelfMs": 54.375
+    },
+    {
+      "function": "(anonymous)",
+      "script": "",
+      "zeroBasedLine": 0,
+      "sampledSelfMs": 42.738
+    },
+    {
+      "function": "querySelector",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 40.636
+    },
+    {
+      "function": "(anonymous)",
+      "script": "listing-view.mjs",
+      "zeroBasedLine": 3,
+      "sampledSelfMs": 21.016
+    },
+    {
+      "function": "querySelectorAll",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 19.619
+    },
+    {
+      "function": "structuredClone",
+      "script": "",
+      "zeroBasedLine": -1,
+      "sampledSelfMs": 18.515
+    },
+    {
+      "function": "frame",
+      "script": "",
+      "zeroBasedLine": 0,
+      "sampledSelfMs": 17.19
+    },
+    {
+      "function": "read",
+      "script": "listing-view.mjs",
+      "zeroBasedLine": 3,
+      "sampledSelfMs": 14.152
+    }
+  ],
+  "profileSha256": "092097feeaa9cac53c169f9e0019482b0e92368db220261a85433b969091529a",
+  "conclusion": "Long-task tails from the 10-minute run did not recur in this shorter sample (530 navigations, no observed Long Tasks); frame max still 216.7ms. Sample mostly idle, renderWindow/loadListing are largest named app self-time. This does not establish the cause of prior 568ms task or 1050ms frame gap; scheduler/GC/render attribution remains unproven."
+}

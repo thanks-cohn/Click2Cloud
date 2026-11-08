@@ -46,3 +46,7 @@ Reviewed against `main` (source inspected November 7, 2026):
 A user can right-click any file or folder and get prompt, stable visual feedback without noticeable freeze, with correctly permission-gated context actions. The UI remains responsive while remote/cloud operations occur asynchronously. **Do not call this fixed based only on a unit test, an API response or an animation.**
 
 **Guiding principle:** **PERFORMANCE IS THE PRODUCT.** Click2Cloud's cloud power must not make ordinary Explorer interactions slower or less usable than a conventional local file explorer. **NO BLOAT · NO UNNECESSARY WAITING · NO GUI/API DIVERGENCE.**
+
+## Implementation candidate — November 8, 2026
+
+Runtime candidate `97c2806` (0.3.11) implements the production-source repair on `dev/p0-zero-stutter`. See [source findings](../../docs/evidence/zero-stutter/SOURCE.md), [handoff and Windows acceptance](../../docs/evidence/zero-stutter/HANDOFF.md), and [measured fixture comparison](../../docs/evidence/zero-stutter/PERFORMANCE.md). Original observations above are historical baseline evidence. This issue is **not closed as owner-verified**: genuine installed Chrome is blocked by administrator policy, and live new-destination save/readback remains blocked by unavailable existing test-Worker signing authority. Passing fixtures are separately classified.

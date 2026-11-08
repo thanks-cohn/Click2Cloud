@@ -67,3 +67,7 @@ These are **aspirational release targets**, not measurements or guarantees for a
 The real owner Windows build is responsive during ordinary browsing and after cold start, not just fast in fixtures. The requested before/after trace shows where latency was removed. Negative network/auth tests prove the UI stays fluid *while accurately indicating unavailable cloud data*. No cloud result is fabricated, no saved destination disappears, and no private source URLs are forwarded to cloud providers. If live Windows Chrome can't be measured, **mark acceptance BLOCKED, not PASS**.
 
 **Owner directive: ZERO PERCEPTIBLE LAG is the design target. SPEED FIRST, without correctness, privacy, accessibility, or authorization shortcuts.**
+
+## Implementation candidate — November 8, 2026
+
+Runtime candidate `97c2806` (0.3.11) implements the production-source repair on `dev/p0-zero-stutter`. See [source findings](../../docs/evidence/zero-stutter/SOURCE.md), [handoff and Windows acceptance](../../docs/evidence/zero-stutter/HANDOFF.md), and [measured fixture comparison](../../docs/evidence/zero-stutter/PERFORMANCE.md). Original observations above are historical baseline evidence. This issue is **not closed as owner-verified**: genuine installed Chrome is blocked by administrator policy, and live new-destination save/readback remains blocked by unavailable existing test-Worker signing authority. Passing fixtures are separately classified.

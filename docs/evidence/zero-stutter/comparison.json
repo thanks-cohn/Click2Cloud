@@ -1,0 +1,473 @@
+{
+  "runtimeRevision": "97c2806eeb1f656ab69e7843085517e189663968",
+  "baselineRevision": "04644f431a960b7ea61c231fa28e3fba33f166e2",
+  "evidenceClass": "LINUX_CHROMIUM_PRODUCTION_APP_WITH_FIXTURE_API",
+  "method": "visible DOM plus two RAF paint opportunities; not physical paint or native-input EventTiming",
+  "matrix": [
+    {
+      "buckets": 1,
+      "before": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.79999999701977,
+            "p95": 33.400000002235174,
+            "p99": 34.70000000298023,
+            "max": 34.70000000298023
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 66.60000000149012,
+            "p95": 68.89999999850988,
+            "p99": 78.10000000149012,
+            "max": 78.10000000149012
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 2166.10000000149,
+            "p95": 2167.10000000149,
+            "p99": 2167.10000000149,
+            "max": 2167.10000000149
+          },
+          "frames": {
+            "samples": 4354,
+            "p50": 16.69999999999709,
+            "p95": 16.799999999995634,
+            "p99": 16.80000000000291,
+            "max": 50
+          },
+          "longTasks": []
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "listFolders": 16,
+          "navigateExplorer": 15,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 22,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 526,
+          "RecalcStyleCount": 839,
+          "LayoutDuration": 0.530419,
+          "RecalcStyleDuration": 0.244056,
+          "JSHeapUsedSize": 5187936
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 1333,
+          "jsEventListeners": 72
+        },
+        "stress": {
+          "seconds": 0,
+          "samples": 0,
+          "maxDOM": 0,
+          "frames": null,
+          "longTasks": []
+        }
+      },
+      "after": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.899999998509884,
+            "p95": 33.30000000074506,
+            "p99": 34.70000000298023,
+            "max": 34.70000000298023
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 33.29999999701977,
+            "p95": 34.5,
+            "p99": 43.899999998509884,
+            "max": 43.899999998509884
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 32.600000001490116,
+            "p95": 33.30000000074506,
+            "p99": 33.30000000074506,
+            "max": 33.30000000074506
+          },
+          "frames": {
+            "samples": 2628,
+            "p50": 16.69999999999709,
+            "p95": 16.700000000004366,
+            "p99": 16.80000000000291,
+            "max": 33.39999999999782
+          },
+          "longTasks": []
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "listFolders": 16,
+          "navigateExplorer": 15,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 23,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 646,
+          "RecalcStyleCount": 1202,
+          "LayoutDuration": 0.501848,
+          "RecalcStyleDuration": 0.233505,
+          "JSHeapUsedSize": 5229208
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 1352,
+          "jsEventListeners": 64
+        },
+        "stress": {
+          "seconds": 600,
+          "samples": 5418,
+          "maxDOM": 261,
+          "frames": {
+            "samples": 35418,
+            "p50": 16.699999999982538,
+            "p95": 16.79999999993015,
+            "p99": 16.800000000046566,
+            "max": 1050
+          },
+          "longTasks": [
+            {
+              "at": 88971.60000000149,
+              "ms": 57
+            },
+            {
+              "at": 127056.69999999925,
+              "ms": 180
+            },
+            {
+              "at": 165382.5,
+              "ms": 119
+            },
+            {
+              "at": 165502.1000000015,
+              "ms": 97
+            },
+            {
+              "at": 170554.5,
+              "ms": 568
+            },
+            {
+              "at": 432214.5,
+              "ms": 111
+            },
+            {
+              "at": 432894.1000000015,
+              "ms": 76
+            },
+            {
+              "at": 540727.6000000015,
+              "ms": 97
+            },
+            {
+              "at": 611833.6999999993,
+              "ms": 120
+            }
+          ]
+        }
+      }
+    },
+    {
+      "buckets": 10,
+      "before": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.80000000074506,
+            "p95": 33.5,
+            "p99": 52.19999999925494,
+            "max": 52.19999999925494
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 66.60000000149012,
+            "p95": 68.69999999925494,
+            "p99": 129.5,
+            "max": 129.5
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 2166,
+            "p95": 2167.800000000745,
+            "p99": 2167.800000000745,
+            "max": 2167.800000000745
+          },
+          "frames": {
+            "samples": 4349,
+            "p50": 16.69999999999709,
+            "p95": 16.70000000001164,
+            "p99": 16.80000000000291,
+            "max": 150.10000000000218
+          },
+          "longTasks": [
+            {
+              "at": 67856.10000000149,
+              "ms": 83,
+              "phase": "listing-or-fixture-setup"
+            }
+          ]
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "navigateExplorer": 16,
+          "listFolders": 16,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 22,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 527,
+          "RecalcStyleCount": 840,
+          "LayoutDuration": 0.49888,
+          "RecalcStyleDuration": 0.23438,
+          "JSHeapUsedSize": 5310676
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 2194,
+          "jsEventListeners": 99
+        },
+        "stress": {
+          "seconds": 0,
+          "samples": 0,
+          "maxDOM": 0,
+          "frames": null,
+          "longTasks": []
+        }
+      },
+      "after": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.899999998509884,
+            "p95": 33.600000001490116,
+            "p99": 34.19999999925494,
+            "max": 34.19999999925494
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 33.30000000074506,
+            "p95": 33.900000002235174,
+            "p99": 50.399999998509884,
+            "max": 50.399999998509884
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 33,
+            "p95": 34.899999998509884,
+            "p99": 34.899999998509884,
+            "max": 34.899999998509884
+          },
+          "frames": {
+            "samples": 2631,
+            "p50": 16.69999999999709,
+            "p95": 16.700000000004366,
+            "p99": 16.80000000000291,
+            "max": 116.69999999999709
+          },
+          "longTasks": [
+            {
+              "at": 40545.5,
+              "ms": 119,
+              "phase": "interaction"
+            }
+          ]
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "navigateExplorer": 16,
+          "listFolders": 16,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 23,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 646,
+          "RecalcStyleCount": 1202,
+          "LayoutDuration": 0.567874,
+          "RecalcStyleDuration": 0.267896,
+          "JSHeapUsedSize": 5292064
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 1989,
+          "jsEventListeners": 91
+        },
+        "stress": {
+          "seconds": 0,
+          "samples": 0,
+          "maxDOM": 0,
+          "frames": null,
+          "longTasks": []
+        }
+      }
+    },
+    {
+      "buckets": 100,
+      "before": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.80000000074506,
+            "p95": 34,
+            "p99": 41.900000002235174,
+            "max": 41.900000002235174
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 66.60000000149012,
+            "p95": 67.60000000149012,
+            "p99": 69.40000000223517,
+            "max": 69.40000000223517
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 2165.900000002235,
+            "p95": 2182.699999999255,
+            "p99": 2182.699999999255,
+            "max": 2182.699999999255
+          },
+          "frames": {
+            "samples": 4319,
+            "p50": 16.69999999999709,
+            "p95": 16.799999999995634,
+            "p99": 16.80000000000291,
+            "max": 100.09999999999854
+          },
+          "longTasks": [
+            {
+              "at": 35801.199999999255,
+              "ms": 103,
+              "phase": "interaction"
+            },
+            {
+              "at": 62511.300000000745,
+              "ms": 72,
+              "phase": "interaction"
+            }
+          ]
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "navigateExplorer": 16,
+          "listFolders": 16,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 22,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 527,
+          "RecalcStyleCount": 840,
+          "LayoutDuration": 0.473462,
+          "RecalcStyleDuration": 0.224809,
+          "JSHeapUsedSize": 5426000
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 3134,
+          "jsEventListeners": 369
+        },
+        "stress": {
+          "seconds": 0,
+          "samples": 0,
+          "maxDOM": 0,
+          "frames": null,
+          "longTasks": []
+        }
+      },
+      "after": {
+        "summary": {
+          "selection": {
+            "samples": 96,
+            "p50": 32.79999999701977,
+            "p95": 33.599999997764826,
+            "p99": 64.80000000074506,
+            "max": 64.80000000074506
+          },
+          "menu": {
+            "samples": 96,
+            "p50": 33.30000000074506,
+            "p95": 34.5,
+            "p99": 119.40000000223517,
+            "max": 119.40000000223517
+          },
+          "slowMenu": {
+            "samples": 12,
+            "p50": 32.900000002235174,
+            "p95": 35.400000002235174,
+            "p99": 35.400000002235174,
+            "max": 35.400000002235174
+          },
+          "frames": {
+            "samples": 2633,
+            "p50": 16.69999999999709,
+            "p95": 16.799999999995634,
+            "p99": 16.80000000000291,
+            "max": 100
+          },
+          "longTasks": []
+        },
+        "calls": {
+          "getConfiguration": 1,
+          "loginStatus": 1,
+          "describeCapabilities": 1,
+          "inspectShelfAttention": 1,
+          "inspectRemoteHistory": 1,
+          "enterExplorer": 1,
+          "navigateExplorer": 16,
+          "listFolders": 16,
+          "inspectExplorerContextMenu": 108
+        },
+        "renderedRowsMax": 23,
+        "shellPreservedAll": true,
+        "lastCumulativeCDPMetrics": {
+          "LayoutCount": 647,
+          "RecalcStyleCount": 1203,
+          "LayoutDuration": 0.467641,
+          "RecalcStyleDuration": 0.22779,
+          "JSHeapUsedSize": 6175760
+        },
+        "lastDOMCounters": {
+          "documents": 1,
+          "nodes": 7087,
+          "jsEventListeners": 497
+        },
+        "stress": {
+          "seconds": 0,
+          "samples": 0,
+          "maxDOM": 0,
+          "frames": null,
+          "longTasks": []
+        }
+      }
+    }
+  ]
+}

@@ -12335,9 +12335,25 @@
       "saveRepair": "Historical source.fetch blocker preserved in restorationBefore/saveRepairBefore and old evidence; replaced by native fetch. Current isolated LIVE text/image/redirect/unknown-length independent byte readbacks PASS. Windows installed-click remains unverified.",
       "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration.",
       "permanence": "See docs/evidence/permanent-destinations: real IndexedDB before/after legacy-loss regression, 1/2/100/1000 per-mode logout/login/reload/full-process restart, retained approval, one-click Explorer and reconnect. Fixture provider/OAuth/native registrar, not Windows.",
-      "zeroStutter": "See zero-stutter before/after fixture paint opportunities and regression tests. Real installed Chrome and live new-destination workflow unverified; Worker source unchanged."
+      "zeroStutter": {
+        "runtimeRevision": "97c2806eeb1f656ab69e7843085517e189663968",
+        "focused": {
+          "pass": 260,
+          "fail": 0
+        },
+        "chromiumProductionAppFixtures": {
+          "pass": 30,
+          "blocked": 3,
+          "notTested": 1,
+          "runtimeSourceDirty": false
+        },
+        "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+        "liveNewDestinationSave": "BLOCKED: EXISTING_TEST_SIGNING_KEY_NOT_READABLE; no Worker deployment or credential rotation",
+        "performance": "docs/evidence/zero-stutter/PERFORMANCE.md: fixture double-RAF paint opportunities, not owner Windows native-input measurements",
+        "handoff": "docs/evidence/zero-stutter/HANDOFF.md"
+      }
     },
-    "sourceState": "Zero-stutter development branch from main 04644f4; exact source hashes. zeroStutterBefore preserved; no Windows acceptance claim.",
+    "sourceState": "Runtime candidate 97c2806eeb1f656ab69e7843085517e189663968, 0.3.11, dev/p0-zero-stutter from main 04644f4. Evidence-only handoff follows; immutable zeroStutterBefore retained.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -13720,7 +13736,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "b80accfd9c192b5250e4903343a8607846d4794cbea61e942ca8571c36a487c0"
+    "digest": "fa75992a05f480777d56a44f5b43ab8f4d274bf49193de579b703e66e98befd2"
   },
   "changeLog": [
     {
