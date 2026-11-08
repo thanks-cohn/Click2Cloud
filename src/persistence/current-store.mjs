@@ -60,7 +60,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     if(map.configurationProvenance&&(map.configurationProvenance.version!==1||map.configurationProvenance.established!==true))throw error('CONFIGURATION_CORRUPT');
     // A retained checkpoint or generation-only journal is historical evidence too.
     if(!configIds.some(id=>Object.hasOwn(map,id))){
-      if((await request(stores.checkpoints.count()))>0||(await request(stores.journal.count()))>0||Object.keys(map).some(k=>k.startsWith('setup:')))missing('HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION');
+      if((await request(stores.checkpoints.count()))>0||(await request(stores.journal.count()))>0||Object.keys(map).some(k=>k.startsWith('setup:'))||Object.hasOwn(map,'backupRoot'))missing('HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION');
     }
     if(Object.hasOwn(map,'configurationIntegrity')&&(!map.configurationIntegrity||map.configurationIntegrity.version!==1||!Array.isArray(map.configurationIntegrity.required)||map.configurationIntegrity.required.some(k=>!['product','mode:simple','mode:nested','mode:depth'].includes(k))))throw error('CONFIGURATION_CORRUPT');
     if(Object.hasOwn(map,'product')&&(!map.product||map.product.schemaVersion!==1||!Number.isSafeInteger(map.product.revision)||!map.product.show||!Object.hasOwn(map.product,'defaultTarget')&&!map.product.configs))throw error('CONFIGURATION_CORRUPT');
@@ -228,7 +228,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
   // Private owner evidence: never returned by diagnostics/API. Retained only in a
   // user-authorized external directory before an explicit recovery apply.
   async function evidence(){if(typeof indexedDB?.databases==='function'&&!(await indexedDB.databases()).some(d=>d.name===dbName))return {schemaVersion:1,database:dbName,establishment:await readEstablishment(),state:[],journal:[],checkpoints:[],preservationCoverage:'JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE'};return transact('readonly',snapshotEvidence);}
-  async function snapshotEvidence(s){const state=await request(s.state.getAll());return {schemaVersion:1,database:dbName,establishment:s.establishment,state:state.map(r=>r.value?.kind==='directory'||r.value?.kind==='file'?{id:r.id,value:{opaqueFilesystemHandle:true,kind:r.value.kind}}:r),journal:await request(s.journal.getAll()),checkpoints:await request(s.checkpoints.getAll()),preservationCoverage:'JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE'};}
+  async function snapshotEvidence(s){const state=await request(s.state.getAll());return {schemaVersion:1,database:dbName,establishment:s.establishment,state:state.map(r=>['directory','file'].includes(r.value?.kind)&&typeof r.value?.isSameEntry==='function'?{id:r.id,value:{opaqueFilesystemHandle:true,kind:r.value.kind}}:r),journal:await request(s.journal.getAll()),checkpoints:await request(s.checkpoints.getAll()),preservationCoverage:'JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE'};}
   async function readRecoveryCandidate(){
     const e=await evidence(),latest={configs:{}};let generation;
     for(const row of e.journal){if(row.kind==='product')latest.product=row.current;else if(row.kind==='config')latest.configs[row.mode]=row.current;else if(row.kind==='generation')generation=row.current;}
@@ -274,7 +274,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     stageBackupRoot:handle=>transact('readwrite',async s=>{s.state.put({id:'backupRootCandidate',value:handle});return true;}),
     readBackupCandidate:()=>transact('readonly',async s=>(await request(s.state.get('backupRootCandidate')))?.value??null),
     readBackupRoot:()=>transact('readonly',async s=>(await request(s.state.get('backupRoot')))?.value??null),
-    setBackupRoot:handle=>transact('readwrite',async s=>{s.state.put({id:'backupRoot',value:handle});return true;}),
+    setBackupRoot:handle=>commitBoundary(async s=>{const saved=await loadState(s);boundary(s,saved);s.state.put({id:'backupRoot',value:handle});return true;}),
     setDesiredGeneration:(g,o)=>generationChange(g,o),acknowledgeGeneration:g=>generationChange(g,{acknowledge:true}),journal,exportEncrypted,restoreEncrypted,
     async close(){if(opening){const db=await opening;db.close();opening=null;}}
   });

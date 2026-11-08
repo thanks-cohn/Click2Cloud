@@ -112,5 +112,8 @@ export async function runCurrentRecoveryTests(){
  await check('C2C-PERSIST-6-partial-journal-same-revision-disagreement-is-conflict',async()=>{
   const donor=createCurrentStore({dbName:'partial-proof-donor'}),saved=await seed(donor),fs=files(),recovery=createExternalRecovery({files:fs});await recovery.writeVerified(saved);const base=createCurrentStore({dbName:'partial-proof'});await base.read();await base.close();await put('partial-proof',s=>s.journal.put({sequence:1,kind:'product',mode:null,at:1,previous:{...saved.product,revision:0},current:{...saved.product,theme:'light'}}));const c=createCurrentStore({dbName:'partial-proof'}),h=host(c,recovery),p=await h.call('requestRestorePreview');assert(!p.data.available&&p.data.reason==='CONFIGURATION_CONFLICT','same revision contradictory history was accepted');assert(h.mutations()===0,'conflict cleared menus');await c.close();await donor.close();
  });
+ await check('C2C-PERSIST-6-opaque-filesystem-handle-preserved-in-original-IDB',async()=>{
+  const c=createCurrentStore({dbName:'opaque-evidence'});await seed(c);const root=await navigator.storage.getDirectory();await c.setBackupRoot(root);await c.writeSetupOperation('json-kind',{kind:'directory',approved:true});const e=await c.evidence();assert(e.state.find(r=>r.id==='backupRoot').value.opaqueFilesystemHandle===true,'opaque handle masqueraded as exported JSON');assert(e.state.find(r=>r.id==='setup:json-kind').value.approved===true,'ordinary JSON directory record was dropped');assert(await (await c.readBackupRoot()).isSameEntry(root),'original handle lost');await c.close();
+ });
  return results;
 }
