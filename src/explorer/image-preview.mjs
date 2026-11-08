@@ -46,7 +46,9 @@ export function createImageReader(read,{maxBytes=32*1024*1024,maxEntries=24,ttl=
   const key=JSON.stringify([source.connectionId,source.accountId,source.bucketName,entry.key,entry.etag??entry.version??entry.uploaded??'',entry.size??null]),old=cache.get(key);
   signal?.throwIfAborted();if(old&&clock()-old.at<ttl){if(old.value.total>limit)fail('PREVIEW_SIZE_LIMIT');cache.delete(key);cache.set(key,old);return old.value;}
   const result=await readPreviewBytes(read,{source,key:entry.key,...(entry.etag?{etag:entry.etag}:{})},{limit,signal,concurrency});
-  const header=new Uint8Array(await result.blob.slice(0,65536).arrayBuffer()),type=imageType(header),value={...result,...imageDimensions(header,type),blob:result.blob.slice(0,result.blob.size,type)};signal?.throwIfAborted();
+  const header=new Uint8Array(await result.blob.slice(0,65536).arrayBuffer()),type=imageType(header);let dimensions;
+  try{dimensions=imageDimensions(header,type);}catch(error){if(type!=='image/jpeg'||error.code!=='IMAGE_HEADER_UNAVAILABLE'||result.blob.size<=65536)throw error;/* JPEG metadata may precede SOF beyond 64 KiB. Bytes are already bounded and authenticated; no new network read. */dimensions=imageDimensions(new Uint8Array(await result.blob.arrayBuffer()),type);}
+  const value={...result,...dimensions,blob:result.blob.slice(0,result.blob.size,type)};signal?.throwIfAborted();
   if(value.total<=maxBytes){if(old){bytes-=old.value.total;cache.delete(key);}cache.set(key,{value,at:clock()});bytes+=value.total;while(bytes>maxBytes||cache.size>maxEntries){const first=cache.keys().next().value;bytes-=cache.get(first).value.total;cache.delete(first);}}
   return value;
  },inspect:()=>({entries:cache.size,bytes})};

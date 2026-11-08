@@ -9259,7 +9259,7 @@
       "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
-      "src/explorer/image-preview.mjs": "f403126f8ae847dd62a439147b376a64b422e0f5c2bd2798dbc7fa50c6a94c76",
+      "src/explorer/image-preview.mjs": "87994238bc461c6f48e765124c52bd339e391911778bc864a87d3c4c8d9f8d07",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
       "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
@@ -13788,7 +13788,7 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "3797142f03adf2712a7897a947eb3ec1f57830b836edc3109d8cd0640804d6ef"
+    "digest": "1c83b22f56049fbca37e4c36fc2e2785341ac98ad184a5a391a96ab87399b8d0"
   },
   "changeLog": [
     {
