@@ -37,14 +37,14 @@ export interface Methods {
  previewConfigChange:{changes:Change[];expectedRevision:number};
  commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string};
  reconcileNativeMenu:{expectedGeneration:number};inspectRecoveryCoverage:{target:Target};runRecoveryPage:{target:Target};inspectBackupRoots:{};chooseBackupLocation:{};listRecoveryPolicies:{};writeRecovery:{};
- requestRestorePreview:{};restoreRightClickMenu:{expectedRevision:number;idempotencyKey:string};
+ requestRestorePreview:{};restoreRightClickMenu:{expectedRevision?:number;previewToken:string;idempotencyKey:string};
  inspectWholeCloudJobs:{};enableWholeCloudJob:{identity:Identity;cadence?:'weekly'|'daily'};disableWholeCloudJob:{identity:Identity};
  dispatchExplorerSave:{itemId:string;generation:number;context?:'image'|'link'|'video'|'audio'|'page';source:Target;entry:{key:string;folder:false;displayName?:string;contentType?:string};idempotencyKey:string};
  dispatchSave:{itemId:string;generation:number;context?:'image'|'link'|'video'|'audio'|'page';source:{filename:string;url?:string;bytes?:number[];contentType?:string;responseFilename?:boolean};idempotencyKey:string};
 }
 export type Request<K extends keyof Methods=keyof Methods> = K extends keyof Methods?{version:Version;method:K;params:Methods[K]}:never;
 export interface Receipt {operationId:string;method:string;before?:number|null;after?:number|null;replayed?:boolean}
-export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt;diagnostic?:WorkerAccessDiagnostic|{stage:'current-read';causeName?:'AbortError'|'InvalidStateError'|'QuotaExceededError'|'SecurityError'|'VersionError'|'UnknownError'}}
+export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt;diagnostic?:WorkerAccessDiagnostic|{stage:'current-read';origin?:'CURRENT_STORE'|'BACKGROUND_NATIVE_FENCE';subreason?:'ESTABLISHED_BOUNDARY_MISSING'|'HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION'|'REQUIRED_RECORD_MISSING'|'GENERATION_RECORD_MISSING'|'NATIVE_GENERATION_WITH_ZERO_CURRENT';causeName?:'AbortError'|'InvalidStateError'|'QuotaExceededError'|'SecurityError'|'VersionError'|'UnknownError'}}
 export type CloudflareReadinessState = 'READY'|'ACTIVE'|'NOT_ACTIVATED'|'RECONNECT_REQUIRED'|'INSUFFICIENT_PERMISSION'|'ACCOUNT_AMBIGUOUS'|'NETWORK_UNAVAILABLE'|'UNKNOWN'|'CHOOSE_DESTINATION'|'DESTINATION_UNAVAILABLE'|'REPAIR_REQUIRED'|'SETUP_APPROVAL_REQUIRED'|'SETUP_RESUME_REQUIRED'|'SETUP_APPROVAL_RECORD_MISSING'|'NATIVE_APPLY_INCOMPLETE'|'PROVISIONING_BLOCKED';
 export interface CloudflareReadiness {state:CloudflareReadinessState;statusCheckMs?:number;fromCache?:boolean;checkedAt?:number;code?:string;accountId?:string;target?:Target;accounts?:{id:string;name?:string}[];diagnostic?:WorkerAccessDiagnostic;worker?:{state:'READY'|'PREPARED'|'blocked';code?:string;checkedAt?:number;sourcePolicy?:string;transfer?:string;multipartConditionalCompletion?:'NOT_VERIFIED'}}
 export interface RemoteDestination {provider:'cloudflare-r2';connectionId:string;accountId:string;bucketName:string;prefix:string;conflictPolicy:'keep-both'}
@@ -58,8 +58,10 @@ export interface CloudflareSetupResult {state:'completed'|'partial'|'blocked'|'u
 export interface MenuComposition {policy:'quick-promoted';defaultKey:string|null;providerVisible:boolean;cloudflareChoiceCount:number;quickTargets:Target[];defaultQuickSuppressed:boolean;cloudflareShape:'hidden'|'flat-save'|'submenu'|'attention'}
 export interface MenuRow {actionKind?:'save'|'attention'|'provider'|'branch'|'separator'|'navigation';setupProvider?:string;id:string;itemId:string;parentId:string|null;label:string;role:string;actionId:string|null;target:Target|null;enabled:boolean;visible:boolean;contexts:string[];reason:string;siblingIndex:number}
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
+export interface RestorePreview {available:boolean;reason?:string;current:ConfigurationHealth;previewToken?:string;product?:unknown;configs?:unknown;provenance?:'VALIDATED_COMPLETE_LOCAL_JOURNAL'|'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED';requiresPreservation?:boolean;nativeSalvage?:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'}
 export interface Results {
- getEngineHealth:{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};native:unknown;externalRecovery:unknown};
+ requestRestorePreview:RestorePreview;restoreRightClickMenu:{configuration:unknown;native:{state:string;code?:string};preservation?:{state:'VERIFIED';checksum:string;filename:string;evidenceClass:'external-filesystem-readback'};requiresReconnect:true};
+ getEngineHealth:{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};configuration?:ConfigurationHealth;origin:{extensionId:string|null;schemaVersion:1};native:unknown;externalRecovery:unknown};
  commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
  listDestinations:{items:(Destination|{target:Target;maxDepth:number})[];total:number;nextCursor:string|null};
@@ -81,3 +83,5 @@ export interface EngineApi {invoke<K extends keyof Methods>(request:Request<K>,a
 export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local'}
 export interface Grant {actor:string;methods:(keyof Methods)[];accounts:string[];expiresAt:number;allConfiguration?:boolean;interactiveAuth?:boolean}
 export interface AgentGateway {request(handle:string,request:Request,authenticatedActor:string):Promise<Response>;grant(grant:Grant):string;revoke(handle:string):boolean}
+
+export interface ConfigurationHealth {state:'UNKNOWN'|'FRESH_VERIFIED'|'ESTABLISHED_VALID'|'ESTABLISHED_MISSING'|'ESTABLISHED_CORRUPT'|'RECOVERY_CONFLICT';code?:string;subreason?:string;database:{name:string;present:boolean;version?:number;stores?:string[];sameOriginDatabaseCount?:number|null};records:Record<string,boolean>;remainingRecords?:number;generation?:{desired:number;applied:number|null}|null;journal:{count:number;firstSequence?:number|null;lastSequence?:number|null};checkpoints:{count:number};establishment?:{external:boolean;nativeGeneration:number|null};internalRecovery?:{journalPresent:boolean;checkpointsPresent:boolean;completeness:'NOT_PROVEN'}}

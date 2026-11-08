@@ -37,6 +37,7 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
     return {state:'VERIFIED',namespace,sequence,checksum:JSON.parse(text).checksum,evidenceClass:'external-filesystem-readback'};
   }
   return Object.freeze({readNamespace,writeNamespace,
+    async preserveEvidence(value){const text=await encode('local-current-forensic-evidence',value,1),checksum=JSON.parse(text).checksum,filename='current-evidence-'+checksum+'.json';if(!await files.create(filename,text)){const prior=await files.read(filename);if(prior!==text){const decoded=await decode(prior,'local-current-forensic-evidence');if(JSON.stringify(decoded.value)!==JSON.stringify(value))throw Error('BACKUP_READBACK_FAILED');}}const verified=await decode(await files.read(filename),'local-current-forensic-evidence');if(JSON.stringify(verified.value)!==JSON.stringify(value))throw Error('BACKUP_READBACK_FAILED');return {state:'VERIFIED',checksum,filename,evidenceClass:'external-filesystem-readback'};},
     async exportVerified(filename,value){
       if(typeof filename!=='string'||! /^[a-zA-Z0-9._-]+\.json$/.test(filename))throw Error('INVALID_EXPORT_NAME');
       const text=await encode('whole-cloud-export',value,1);
@@ -52,11 +53,17 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
       if(excludedModes.length)checkpoint.excludedModes=excludedModes;
       const menuReceipt=await writeNamespace('menu-config',menu,{...options,checkpointValue:checkpoint}),depthReceipt=await writeNamespace('depth-config',p.configs.depth,options);
       const policyReceipt=await writeNamespace('recovery-policy',p.product.recovery,options);
-      return {state:'VERIFIED',receipts:[menuReceipt,depthReceipt,policyReceipt]};
+      const points=await Promise.all(['menu-config','depth-config','recovery-policy'].map(async namespace=>{const point=await readNamespace(namespace);return [namespace,{sequence:point.sequence,checksum:await digest(JSON.stringify(point.value))}];}));
+      const boundary=await writeNamespace('configuration-boundary',{schemaVersion:1,revision:p.product.revision,namespaces:Object.fromEntries(points)});
+      return {state:'VERIFIED',receipts:[menuReceipt,depthReceipt,policyReceipt,boundary]};
     },async readVerified(current) {
-      const menu=await readNamespace('menu-config');let p=structuredClone(menu.value);if(!p.product)p=validateProduct(p);
+      let boundary;try{boundary=(await readNamespace('configuration-boundary')).value;}catch{throw Error('RECOVERY_BOUNDARY_UNVERIFIED');}
+      if(boundary?.schemaVersion!==1||Object.keys(boundary.namespaces??{}).sort().join()!=='depth-config,menu-config,recovery-policy')throw Error('BACKUP_SCHEMA_INVALID');
+      for(const namespace of Object.keys(boundary.namespaces)){const point=await readNamespace(namespace),expected=boundary.namespaces[namespace];if(point.sequence!==expected.sequence||await digest(JSON.stringify(point.value))!==expected.checksum)throw Error('RECOVERY_NAMESPACE_CONFLICT');}
+      const menu=await readNamespace('menu-config');if(menu.value.product?.revision!==boundary.revision)throw Error('RECOVERY_NAMESPACE_CONFLICT');let p=structuredClone(menu.value);if(!p.product)p=validateProduct(p);
       for(const mode of p.excludedModes??[]){if(!['simple','nested'].includes(mode)||!current?.configs?.[mode])throw Error('RECOVERY_PARTIAL_REQUIRES_MERGE');p.configs[mode]=structuredClone(current.configs[mode]);}delete p.excludedModes;
-      try{p.configs.depth=(await readNamespace('depth-config')).value;}catch{}try{p.product.recovery=(await readNamespace('recovery-policy')).value;}catch{}return validateProduct(p);
+      // Missing independent namespaces are partial evidence, never empty Depth/default policy.
+      p.configs.depth=(await readNamespace('depth-config')).value;p.product.recovery=(await readNamespace('recovery-policy')).value;return validateProduct(p);
     }
   });
 }

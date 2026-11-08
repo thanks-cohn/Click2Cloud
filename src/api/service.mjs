@@ -37,13 +37,13 @@ const definitions={
   commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str},['changes','expectedRevision','idempotencyKey'])],
   reconcileNativeMenu:['configure',obj({expectedGeneration:num},['expectedGeneration'])],
   chooseBackupLocation:['restore',obj()],inspectRecoveryCoverage:['inspect',obj({target},['target'])],runRecoveryPage:['restore',obj({target},['target'])],inspectBackupRoots:['inspect',obj()],listRecoveryPolicies:['inspect',obj()],writeRecovery:['restore',obj()],
-  requestRestorePreview:['restore',obj()],restoreRightClickMenu:['restore',obj({expectedRevision:num,idempotencyKey:str},['expectedRevision','idempotencyKey'])],
+  requestRestorePreview:['restore',obj()],restoreRightClickMenu:['restore',obj({expectedRevision:num,previewToken:str,idempotencyKey:str},['previewToken','idempotencyKey'])],
   inspectWholeCloudJobs:['inspect',obj()],enableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId']),cadence:{enum:['weekly','daily']}},['identity'])],
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
   dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
   dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])]
 };
-export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope),transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
+export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
 export function validate(schema,value) {
   if(schema.oneOf){let matches=0;for(const variant of schema.oneOf)try{validate(variant,value);matches++;}catch{}if(matches!==1)fail('INVALID_REQUEST');}
 
@@ -69,9 +69,22 @@ export function organizationSuggestion(spec,product) {
 export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,readState=()=>current.read()}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve();
-  async function loadCurrent(){try{return await readState();}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
+  async function loadCurrent(){try{return await readState();}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
   async function reconcile(){return engine.apply(await compile(await current.read()));}
+  async function restorePreview(){
+    const local=await current.inspect(),evidence=await current.evidence();
+    let present;if(local.database?.present!==false)try{present=await loadCurrent();}catch{};
+    let candidate,internal;try{internal=await current.readRecoveryCandidate?.();}catch{fail('RECOVERY_CONFLICT');}
+    try{candidate=validateProduct(await recovery.readVerified(present));if(internal&&JSON.stringify(internal)!==JSON.stringify(candidate))fail('RECOVERY_CONFLICT');}catch(e){if(e.code==='RECOVERY_CONFLICT')throw e;if(internal)candidate=internal;else return {available:false,current:local,reason:/^[A-Z][A-Z0-9_]+$/.test(e.code??e.message)?e.code??e.message:'NO_VALID_RECOVERY_POINT',nativeSalvage:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'};}
+    const map=Object.fromEntries(evidence.state.map(r=>[r.id,r.value]));
+    if(!present)for(const [id,value] of [['product',candidate.product],...Object.entries(candidate.configs).map(([m,c])=>['mode:'+m,c])])if(Object.hasOwn(map,id)&&JSON.stringify(map[id])!==JSON.stringify(value))return {available:false,current:local,reason:'CONFIGURATION_CONFLICT',nativeSalvage:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'};
+    if(!present)for(const row of evidence.journal){const value=row.kind==='product'?candidate.product:row.kind==='config'?candidate.configs[row.mode]:null;if(value&&row.current.revision>value.revision)return {available:false,current:local,reason:'RECOVERY_STALE'};}
+    // A backup older than retained durable evidence is not an exact recovery.
+    const retainedRevision=Math.max(map.product?.revision??0,...evidence.journal.filter(r=>r.kind==='product').map(r=>r.current?.revision??0));
+    if(candidate.product.revision<retainedRevision)return {available:false,current:local,reason:'RECOVERY_STALE'};
+    return {available:true,...candidate,current:local,previewToken:await digest({candidate,evidence}),provenance:internal?'VALIDATED_COMPLETE_LOCAL_JOURNAL':'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED',requiresPreservation:true};
+  }
   function nativeReadiness(readiness){
     const evidence=engine.getEvidence?.();
     if(readiness?.state!=='READY'||!evidence)return readiness;
@@ -92,7 +105,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth'].includes(method);
+        const independent=['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots'].includes(method);
         let state=independent?null:await loadCurrent(),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -147,7 +160,13 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='navigateExplorer'){const t=params.target,a=await oauth.status();if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===t.accountId))fail('SCOPE_UNAUTHORIZED');await current.writeExplorerLocation?.(t);await navigate(t,actor);data={state:'completed',target:t};}
         else if(method==='describeCapabilities')data={version:'3+1.1',build:BUILD_INFO,tools:toolRegistry,publicEndpoint:false,destructiveRemoteOperations:fileApi?.capabilities?.includes('delete')===true,remoteInfrastructureChanges:'explicit-provision-scope-and-confirmation',cloudflareTransfer:'true-remote-only',sourceCaptureMaxBytes:null,browserTransfer:'streaming-adapter-or-resident-bytes',explorer:{operations:fileApi?.capabilities??[],mutations:fileApi?.capabilities?.includes('mkdir')===true},providers:{cloudflare:{implemented:true,transfer:'true-remote-only',explorerSource:false,localFile:false},'google-drive':{implemented:false},dropbox:{implemented:false},onedrive:{implemented:false}},idempotencyRetention:256};
         else if(method==='getConfiguration')data=state;
-        else if(method==='getEngineHealth'){let storage;try{state=await loadCurrent();storage={state:'available'};}catch(error){storage={state:'blocked',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'CURRENT_READ_UNAVAILABLE'};}let externalRecovery;try{externalRecovery=await recovery?.status();}catch{externalRecovery={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}data={revision:state?.product.revision??null,generation:state?.generation??null,storage,native:engine.getEvidence().coverage,externalRecovery};}
+        else if(method==='getEngineHealth'){
+          let configuration;try{configuration=await current.inspect?.();}catch{configuration={state:'UNKNOWN',code:'STORAGE_UNAVAILABLE'};}
+          let storage;if(configuration?.database?.present===false)storage={state:configuration.state==='FRESH_VERIFIED'?'available':'blocked',...(configuration.state==='FRESH_VERIFIED'?{}:{code:'CONFIGURATION_RECORD_MISSING'})};
+          else try{state=await loadCurrent();storage={state:'available'};}catch(error){storage={state:'blocked',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'CURRENT_READ_UNAVAILABLE'};}
+          let externalRecovery;try{externalRecovery=await recovery?.status();}catch{externalRecovery={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
+          const native=engine.getEvidence();data={revision:state?.product.revision??null,generation:state?.generation??null,storage,configuration,origin:{extensionId:globalThis.chrome?.runtime?.id??null,schemaVersion:1},native:{coverage:native.coverage,desiredGeneration:native.desired?.generation??null,acknowledgedGeneration:native.acknowledgedGeneration??null,pending:native.pending??null},externalRecovery};
+        }
         else if(method==='getProviderConnections'||method==='loginStatus')data=await oauth.status();
         else if(['loginBegin','loginCancel','disconnect'].includes(method)) {
           if(await confirm({actor,method,params})!==true)fail('HUMAN_INTERACTION_REQUIRED');
@@ -230,13 +249,23 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='inspectBackupRoots')data=await recovery.status();
         else if(method==='listRecoveryPolicies')data=state.product.recovery;
         else if(method==='writeRecovery')data=await recovery.writeVerified(state);
-        else if(method==='requestRestorePreview')data=await recovery.readVerified(state);
+        else if(method==='requestRestorePreview')data=await restorePreview();
         else if(method==='restoreRightClickMenu') {
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-          const restored=validateProduct(await recovery.readVerified(state));
-          if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
-          receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params)});
-          data={configuration:await current.read(),native:await reconcile(),requiresReconnect:true};
+          const retry=await current.findRetry(actor+':'+params.idempotencyKey);
+          if(retry){if(retry.fingerprint!==params.previewToken)fail('IDEMPOTENCY_CONFLICT');receipt={...retry,replayed:true};data={configuration:await current.read(),native:engine.getEvidence().lastOutcome??{state:'partial',code:'NATIVE_ACK_UNAVAILABLE'},requiresReconnect:true};}
+          else{
+            const preview=await restorePreview();if(!preview.available)fail(preview.reason??'NO_VALID_RECOVERY_POINT');if(preview.previewToken!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');
+            const restored=validateProduct({product:preview.product,configs:preview.configs});
+            if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
+            const evidence=await current.evidence();if(await digest({candidate:restored,evidence})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');const preservation=await recovery.preserveEvidence(evidence);
+            if(preservation?.state!=='VERIFIED')fail('RECOVERY_PRESERVATION_REQUIRED');
+            // Revalidate after external I/O; no CURRENT writes precede the verified preimage.
+            let readable;try{readable=await loadCurrent();}catch{};
+            if(readable){if(params.expectedRevision!==readable.product.revision)fail('REVISION_CONFLICT');receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:params.previewToken});}
+            else receipt=await current.recoverProduct({candidate:restored,expectedEvidence:evidence,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:params.previewToken,generationFloor:evidence.establishment.nativeGeneration??0});
+            const native=await reconcile();data={configuration:await current.read(),native,preservation,requiresReconnect:true};
+          }
         }
         else if(method==='inspectWholeCloudJobs'){const ids=await wholeCloud.list();data=await Promise.all(ids.map(x=>wholeCloud.inspect(x)));}
         else if(method==='enableWholeCloudJob'||method==='disableWholeCloudJob') {

@@ -9198,15 +9198,15 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "a44c9d07426edb73c067c26ec1074b70194d0a33",
+    "sourceCommit": "See source-pinned docs/evidence/current-recovery/verification.json",
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "8040a6a930ec08681da38f3b3eadd6f955c1094e0f4a6415f0be2392d3a9955e",
-      "extension/app.mjs": "2506e58037b84ed849bcc5ec8789516121fa3a32fd664091aa3445d43589af11",
-      "extension/background.mjs": "756544dcd6fd251b3db9b11f270923ff24bc6c746b7f69dd0233f325658309f2",
+      "extension/app.mjs": "5181f568c66bdf054e709bc7ca9ef6b43f78ba8d2354aa98d1625ea9a3d239c8",
+      "extension/background.mjs": "ee0c5ccc15af74c586c3240e72d1210e68198090969f990ddeb302ed00c7ab06",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "60186ede1e7d444092391bee2a37ce5cb8469b3294d006c45064987e7ac1cdc0",
+      "extension/manifest.json": "703de893e68ca934a4c3d3b8e0852493e8f053a840a0cd4f8c7d401a4f1f4f26",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9223,14 +9223,14 @@
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
-      "src/api/service.mjs": "67f170bcea54d71deaa79522fa0fcc25c888ced2ec606fdb9e45c0cc9f341e56",
+      "src/api/service.mjs": "af23a48724263597d421e86ded48e95614fb8186866870ab69a6d4453cb4b2be",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
-      "src/build-info.mjs": "a734c923aa1f2a6fea9394cb3139c1a54e7645c8cef87d58365e0c1622de7824",
+      "src/build-info.mjs": "33b4cf901e398db4c9c59eea9bc1070c099a5740e8d5e0e071561e43713e78e6",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
-      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
+      "src/chrome/registrar.mjs": "d2f886cde4af5582b1c62657916a26d85b011b36a3804078b327c2e0f497938a",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
@@ -9247,7 +9247,7 @@
       "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
       "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/core/engine.mjs": "14c75000aa4aab1656f34fc6d0ec7be61b2c0f3ce033f8a903bde463e3a67f01",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
       "src/core/menu-spec.mjs": "b5d67ccc3fff3dffa508e28330265add37295eee0750dedc8cfa7b8863f46973",
@@ -9270,7 +9270,7 @@
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
-      "src/glaciaring/catalog.mjs": "66142923c8f58c7c1683e86fc0badb02a4a30662b30117ecb2c7aae8819a7982",
+      "src/glaciaring/catalog.mjs": "5d20d6ea2b10ed892748809dfe3400d75f887ed43b77dec350ebfe2173458adb",
       "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -9278,8 +9278,8 @@
       "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "3e4b1ad14b3e54a94ae5a8998e3adcc7509f42b0f0355f42c3279c3741be29b0",
-      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
+      "src/persistence/current-store.mjs": "61d926b918e3f47fd9f0fa4ec86520d1d2b24b4b91c83b1ea7422b60fed1870c",
+      "src/persistence/external-recovery.mjs": "cbf79a0872de4b2830775dc4a8d2a323731f47cc5a7a4a6bb4f43bbea14aea88",
       "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
       "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
@@ -9480,7 +9480,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function invoke",
-            "line": 87
+            "line": 100
           }
         ],
         "verification": {
@@ -9823,12 +9823,12 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function loadState",
-            "line": 49
+            "line": 53
           },
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function commitProduct",
-            "line": 153
+            "line": 184
           }
         ],
         "verification": {
@@ -10648,7 +10648,7 @@
           {
             "path": "src/core/engine.mjs",
             "symbol": "const selectedRemote=",
-            "line": 87
+            "line": 93
           }
         ],
         "verification": {
@@ -10963,7 +10963,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "recordRemoteResult:",
-            "line": 185
+            "line": 264
           }
         ],
         "verification": {
@@ -10996,7 +10996,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 390
+            "line": 401
           }
         ],
         "verification": {
@@ -11033,12 +11033,12 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 166
+            "line": 177
           },
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='enterExplorer'",
-            "line": 129
+            "line": 142
           },
           {
             "path": "extension/app.mjs",
@@ -11083,7 +11083,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 204
+            "line": 215
           }
         ],
         "verification": {
@@ -11175,7 +11175,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 229
+            "line": 240
           }
         ],
         "verification": {
@@ -11305,7 +11305,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "commitProduct",
-            "line": 153
+            "line": 184
           }
         ],
         "verification": {
@@ -11337,7 +11337,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 354
+            "line": 365
           }
         ],
         "verification": {
@@ -11632,7 +11632,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function renderRemotes",
-            "line": 95
+            "line": 105
           }
         ],
         "verification": {
@@ -11673,7 +11673,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 392
+            "line": 403
           }
         ],
         "verification": {
@@ -11715,7 +11715,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 157
+            "line": 176
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -11734,6 +11734,132 @@
           "testFile": "tests/redown-restoration.test.mjs"
         },
         "contractViolation": null
+      },
+      {
+        "id": "C2C-PERSIST-1",
+        "actual": "Any external native/provenance, local marker/journal/checkpoint/setup evidence prevents established loss from becoming fresh defaults. Direct CURRENT reads and writers reject missing rows with a bounded origin/subreason. Fresh reads explicitly identify FRESH_VERIFIED.",
+        "sourceRefs": [
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "async function loadState",
+            "line": 53
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-2",
+        "actual": "Product/modes/generation/integrity/provenance commit in one transaction with journals/idempotency; separate durable readback precedes success. External provenance is metadata only, not a backup.",
+        "sourceRefs": [
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "async function commitBoundary",
+            "line": 89
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-3",
+        "actual": "Native apply checks CURRENT before queued prepare and before removeAll; prepare persistence failure leaves native menus untouched. Saves revalidate durable desired/applied generation.",
+        "sourceRefs": [
+          {
+            "path": "src/chrome/registrar.mjs",
+            "symbol": "await beforeApply(spec)",
+            "line": 115
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-4",
+        "actual": "Transaction aborts retain previous state; post-commit response loss uses existing retry records. Version change/open failures remain blocked rather than resetting records.",
+        "sourceRefs": [
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "async function transact",
+            "line": 29
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-5",
+        "actual": "Boot/OAuth remain independent; inspection never creates an absent database. No implicit setup, initialization, cloud resource creation or native reconciliation on normal Shelf/login.",
+        "sourceRefs": [
+          {
+            "path": "extension/background.mjs",
+            "symbol": "readEstablishment:",
+            "line": 29
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-6",
+        "actual": "Existing canonical preview/restore supports missing CURRENT without fabricated revision: validated complete journal or manifest-bound external candidate, evidence digest, explicit confirmation, independently retained local preimage, surviving-record conflicts, atomic apply, durable readback and exact native ACK. Native projection alone is not restoration.",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "async function restorePreview",
+            "line": 75
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
+      },
+      {
+        "id": "C2C-PERSIST-7",
+        "actual": "Metadata-only health, recovery card and blocked-state explanations preserve original rows and privacy; missing/incomplete/ambiguous sources never claim recovery. All-copy deletion cannot reconstruct unknown intent.",
+        "sourceRefs": [
+          {
+            "path": "extension/app.mjs",
+            "symbol": "function recoveryCard",
+            "line": 47
+          }
+        ],
+        "verification": {
+          "level": "PRODUCTION_SOURCE_REAL_IDB_FIXTURE",
+          "status": "PASS",
+          "meaning": "Isolated Chromium production modules; owner Windows recovery remains BLOCKED",
+          "testFile": "tests/current-recovery-browser.mjs",
+          "runtime": "NOT_VERIFIED_OWNER_PROFILE"
+        }
       }
     ],
     "stateTransitions": [
@@ -12017,7 +12143,7 @@
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
-        "coverage": "Read-only completed envelope; storage/native/backup availability reported separately; no native initialization required."
+        "coverage": "Safe physical-record, DB, history/checkpoint counts, external provenance, persisted-native relation, independent storage/auth; no raw configuration, no creation of absent DB."
       },
       {
         "method": "getProviderConnections",
@@ -12248,10 +12374,10 @@
         "method": "requestRestorePreview",
         "scope": "restore",
         "version": "3+1.1",
-        "effectful": true,
+        "effectful": false,
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
-        "coverage": "See zero-stutter evidence; installed Windows unverified"
+        "coverage": "Read-only metadata/candidate preview even when CURRENT missing; incomplete native projection blocked; typed preview fingerprint."
       },
       {
         "method": "restoreRightClickMenu",
@@ -12260,7 +12386,7 @@
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
-        "coverage": "See zero-stutter evidence; installed Windows unverified"
+        "coverage": "Preview token + explicit confirm + verified external preservation + atomic conflict-checked recovery + actual native callback ACK; idempotent retry. No fabricated revision zero."
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -12406,7 +12532,7 @@
         "handoff": "docs/evidence/remotes-boot/HANDOFF.md"
       }
     },
-    "sourceState": "Final boot/login runtime 9d3bbe79f2ef5a58573f2a72d2aa1c01f1e0f513 (0.3.13), dev/p0-remotes-boot-login from main 0222969; current source hashes exact, previous immutable snapshots retained.",
+    "sourceState": "P0 CURRENT loss hardening, owner recovery and Windows acceptance remain open",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -12428,6 +12554,7 @@
         "FILE_READ_FAILED",
         "IMAGE_DECODE_FAILED",
         "INSPECTION_FAILED",
+        "NO_VALID_RECOVERY_POINT",
         "PREVIEW_SIZE_LIMIT",
         "PROVISIONING_BLOCKED",
         "READY",
@@ -12446,6 +12573,7 @@
       "extension/background.mjs": [
         "AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE",
         "AVAILABLE",
+        "BACKGROUND_NATIVE_FENCE",
         "BLOCKED",
         "BLOCKED_NATIVE_COMPANION_REQUIRED",
         "CONFIGURATION_RECORD_MISSING",
@@ -12458,12 +12586,14 @@
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "INSUFFICIENT_SCOPE",
         "LOCAL_STATE_READY",
+        "NATIVE_GENERATION_WITH_ZERO_CURRENT",
         "PREVIOUS_BACKUP_PERMISSION_REQUIRED",
         "PROVIDER_PAGINATION_UNAVAILABLE",
         "PROVIDER_READ_FAILED",
         "READY",
         "SCOPE_UNAUTHORIZED",
         "SOURCE_INVALID",
+        "STALE_GENERATION",
         "STORAGE_ACCESS_UNAVAILABLE",
         "TRUSTED_CONTEXTS",
         "UNTRUSTED_APP_SENDER",
@@ -12567,39 +12697,55 @@
       ],
       "src/api/service.mjs": [
         "AUTH_REQUIRED",
+        "BACKGROUND_NATIVE_FENCE",
         "BLOCKED",
         "CANONICAL_ACTION_UNAVAILABLE",
         "CHOOSE_ACCOUNT",
         "CHOOSE_BUCKET",
         "CLOUDFLARE_HOST_UNAVAILABLE",
+        "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_RECORD_MISSING",
         "CONFIRMATION_REQUIRED",
         "CONNECTED",
         "CONNECTION_UNKNOWN",
         "CURRENT_READ_UNAVAILABLE",
+        "CURRENT_STORE",
         "DESTINATION_NATIVE_ACKNOWLEDGED",
         "DESTINATION_NOT_READY",
+        "ESTABLISHED_BOUNDARY_MISSING",
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "FILE_ACTION_PENDING",
         "FILE_ACTION_RESULT",
         "FILE_READ_FAILED",
         "FILE_RETRY_REQUIRES_INSPECTION",
+        "FRESH_VERIFIED",
         "GENERATION_CONFLICT",
+        "GENERATION_RECORD_MISSING",
         "GENERATION_REQUIRED",
+        "HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION",
         "HUMAN_INTERACTION_REQUIRED",
         "IDEMPOTENCY_CONFLICT",
         "IDEMPOTENT_REPLAY",
         "INVALID_REQUEST",
         "NATIVE_ACK_UNAVAILABLE",
         "NATIVE_APPLY_INCOMPLETE",
+        "NATIVE_GENERATION_WITH_ZERO_CURRENT",
         "NOT_REPEATED",
+        "NO_VALID_RECOVERY_POINT",
         "OPERATION_FAILED",
+        "PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE",
         "PERMISSION_DENIED",
         "PREVIEW_SIZE_LIMIT",
         "PROVIDER_READ_FAILED",
         "READY",
         "RECONNECT_REQUIRED",
+        "RECOVERY_CONFLICT",
+        "RECOVERY_EVIDENCE_CHANGED",
         "RECOVERY_NOT_ENABLED",
+        "RECOVERY_PRESERVATION_REQUIRED",
+        "RECOVERY_STALE",
         "REPAIR_REQUIRED",
+        "REQUIRED_RECORD_MISSING",
         "RESULT_CHANGED",
         "RESULT_LOOKUP_FAILED",
         "RESULT_NOT_FOUND",
@@ -12611,6 +12757,10 @@
         "STALE_GENERATION",
         "STORAGE_UNAVAILABLE",
         "TARGET_NOT_DISCOVERED",
+        "UNKNOWN",
+        "USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED",
+        "VALIDATED_COMPLETE_LOCAL_JOURNAL",
+        "VERIFIED",
         "VERIFIED_RESULT_REQUIRED",
         "VERSION_OR_METHOD_UNSUPPORTED"
       ],
@@ -12694,7 +12844,11 @@
         "CHROME_API_ERROR",
         "CHROME_API_THROW",
         "CHROME_UNAVAILABLE",
+        "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_RECORD_MISSING",
         "CURRENT_AUTHORIZATION_REQUIRED",
+        "CURRENT_READ_UNAVAILABLE",
         "DISPATCH_FAILED",
         "DUPLICATE_OR_INVALID_ITEM",
         "GENERATION_CONFLICT",
@@ -12955,6 +13109,9 @@
         "CAPTURE_TIMEOUT",
         "CAPTURE_UNAVAILABLE",
         "COMPLETION_PENDING",
+        "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_RECORD_MISSING",
         "DEPENDENCY_BLOCKED",
         "FILE_API_UNAVAILABLE",
         "FILE_REQUIRED",
@@ -12975,7 +13132,9 @@
         "SCOPE_UNAUTHORIZED",
         "SOURCE_NOT_VERIFIED",
         "SOURCE_READ_UNCONFIRMED",
+        "STALE_CONFIGURATION",
         "STALE_GENERATION",
+        "STORAGE_UNAVAILABLE",
         "STREAMING_PROVIDER_REQUIRED",
         "TRUE_REMOTE_ONLY",
         "UNCONFIRMED",
@@ -13390,6 +13549,8 @@
         "CONTEXT_MISMATCH",
         "COVERAGE_GAP",
         "CURRENT_AUTHORIZATION_REQUIRED",
+        "CURRENT_READ_UNAVAILABLE",
+        "CURRENT_STORE",
         "CURSOR_REPEATED",
         "DECLARATION_EVICTED",
         "DEFAULT_DIRECT_PLACEMENT",
@@ -13413,6 +13574,10 @@
         "DUPLICATE_OR_INVALID_ITEM",
         "DUPLICATE_SCOPE",
         "ENTITLEMENT_UNKNOWN",
+        "ESTABLISHED_BOUNDARY_MISSING",
+        "ESTABLISHED_CORRUPT",
+        "ESTABLISHED_MISSING",
+        "ESTABLISHED_VALID",
         "EXTERNAL_BOUNDARY_UNOBSERVED",
         "FAIL",
         "FAILED",
@@ -13422,6 +13587,7 @@
         "FILE_API_PARTIAL",
         "FILE_API_STARTED",
         "FILE_API_THROWN",
+        "FILE_API_UNAVAILABLE",
         "FILE_API_UNCERTAIN",
         "FILE_API_UNKNOWN",
         "FILE_CANCELLED",
@@ -13430,6 +13596,7 @@
         "FILE_FAILED",
         "FILE_PARTIAL",
         "FILE_PROGRESS",
+        "FILE_REQUIRED",
         "FILE_STARTED",
         "FILE_UNCERTAIN",
         "FILE_UPLOADING",
@@ -13437,11 +13604,14 @@
         "FLAT_PROVIDER",
         "FOLDER_NOT_WRITABLE",
         "FOLDER_UNDISCOVERED",
+        "FRESH_VERIFIED",
         "GENERATION_CONFLICT",
+        "GENERATION_RECORD_MISSING",
         "HANDOFF_COMMITTED",
         "HANDOFF_EXTERNAL",
         "HANDOFF_FAILED",
         "HANDOFF_PENDING",
+        "HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION",
         "HISTORY_COMMITTED",
         "HISTORY_SKIPPED",
         "HOME_SEPARATOR",
@@ -13465,6 +13635,8 @@
         "INVALID_ACTIVATION",
         "INVALID_CONFIG",
         "INVALID_DEPTH",
+        "INVALID_EXPLORER_SOURCE",
+        "INVALID_FILENAME",
         "INVALID_GENERATION",
         "INVALID_INPUT",
         "INVALID_LABEL",
@@ -13498,8 +13670,10 @@
         "ITEM_DISABLED",
         "ITEM_UNKNOWN",
         "JOURNAL_EVICTED",
+        "JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE",
         "LABEL_COLLISION",
         "LOCATION_INVALID",
+        "MENU_BUDGET_EXCEEDED",
         "MENU_INVALID",
         "MIGRATION_QUARANTINED",
         "MODE_INVALID",
@@ -13511,14 +13685,17 @@
         "NATIVE_APPLY_INCOMPLETE",
         "NATIVE_APPLY_OK",
         "NATIVE_GENERATION_UNACKNOWLEDGED",
+        "NATIVE_GENERATION_WITH_ZERO_CURRENT",
         "NATIVE_ITEM_OBSERVATION_MISSING",
         "NATIVE_OBSERVATION_PARTIAL",
         "NATIVE_PLAN_READY",
+        "NATIVE_REGISTRATION_STALE",
         "NATIVE_RENDERING_NOT_OBSERVED",
         "NATURAL_ANCESTOR",
         "NESTED_CONFIGURED",
         "NOT_ACTIONABLE",
         "NOT_CONFIGURED",
+        "NOT_PROVEN",
         "NO_RECEIPT",
         "OBSERVATION_DROPPED",
         "OBSERVATION_EVICTED",
@@ -13563,6 +13740,8 @@
         "RECEIPT_UNVERIFIED",
         "RECEIPT_VERIFIED",
         "RECONCILED",
+        "RECOVERY_CONFLICT",
+        "RECOVERY_EVIDENCE_CHANGED",
         "RECOVERY_REQUIRED",
         "REDOWN",
         "REDOWN_SENDER_REQUIRED",
@@ -13583,6 +13762,7 @@
         "REMOTE_TRANSPORT_REQUIRED",
         "REPLAY_BLOCKED",
         "REQUEST_FAILED",
+        "REQUIRED_RECORD_MISSING",
         "RESERVED_INSPECT_BEFORE_RETRY",
         "RESOLVED",
         "RESOLVE_FAILED",
@@ -13590,11 +13770,13 @@
         "RESOLVE_STARTED",
         "RESTART",
         "RESTORE_NOT_EMPTY",
+        "RESTORE_RECOVERY_REQUIRED",
         "RESTORE_REQUIRES_RECONNECT",
         "RESTORE_STARTED",
         "RESULT_UNCONFIRMED",
         "REVISION_CONFLICT",
         "ROW_LIMIT",
+        "SAVE_FAILED",
         "SCAN_BUSY",
         "SCOPE_UNAUTHORIZED",
         "SCOPE_UNDISCOVERED",
@@ -13603,6 +13785,9 @@
         "SESSION_REVOKED",
         "SIMPLE_CONFIGURED",
         "SKIPPED",
+        "SOURCE_NOT_VERIFIED",
+        "SOURCE_READ_UNCONFIRMED",
+        "STALE_CONFIGURATION",
         "STALE_CURSOR",
         "STALE_EPOCH",
         "STALE_GENERATION",
@@ -13624,11 +13809,13 @@
         "TRUE_REMOTE_ONLY",
         "UNCERTAIN",
         "UNCHANGED_ACK_REUSED",
+        "UNCONFIRMED",
         "UNKNOWN",
         "UNKNOWN_REASON",
         "UNOBSERVABLE_BOUNDARY",
         "UNSELECTED_SCOPE",
         "UNSUPPORTED_OPERATION",
+        "UNVERIFIED",
         "UNVERIFIED_SAVE",
         "UPLOAD_ACKNOWLEDGED",
         "UPLOAD_CANCELLED",
@@ -13725,14 +13912,30 @@
         "CONFIGURATION_CONFLICT",
         "CONFIGURATION_CORRUPT",
         "CONFIGURATION_RECORD_MISSING",
+        "CURRENT_STORE",
+        "ESTABLISHED_BOUNDARY_MISSING",
+        "ESTABLISHED_CORRUPT",
+        "ESTABLISHED_MISSING",
+        "ESTABLISHED_VALID",
+        "FRESH_VERIFIED",
+        "GENERATION_RECORD_MISSING",
+        "HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION",
         "IDEMPOTENCY_CONFLICT",
         "JOURNAL_EVICTED",
+        "JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE",
         "MIGRATION_QUARANTINED",
+        "NATIVE_GENERATION_WITH_ZERO_CURRENT",
+        "NATIVE_REGISTRATION_STALE",
+        "NOT_PROVEN",
         "OPERATION_INVALID",
         "PERSIST_COMMITTED",
         "PERSIST_STARTED",
+        "RECOVERY_CONFLICT",
+        "RECOVERY_EVIDENCE_CHANGED",
+        "REQUIRED_RECORD_MISSING",
         "RESERVED_INSPECT_BEFORE_RETRY",
         "RESTORE_NOT_EMPTY",
+        "RESTORE_RECOVERY_REQUIRED",
         "RESTORE_REQUIRES_RECONNECT",
         "RESTORE_STARTED",
         "REVISION_CONFLICT",
@@ -13748,7 +13951,9 @@
         "EXPORT_ALREADY_EXISTS",
         "INVALID_EXPORT_NAME",
         "NO_VALID_RECOVERY_POINT",
+        "RECOVERY_BOUNDARY_UNVERIFIED",
         "RECOVERY_JOURNAL_GAP",
+        "RECOVERY_NAMESPACE_CONFLICT",
         "RECOVERY_PARTIAL_REQUIRES_MERGE",
         "VERIFIED"
       ],
@@ -13831,7 +14036,22 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "e59a8bb99ac13ae2693f1002e34bd5396140fdf20b997b23bf7ac40096e2fca7"
+    "currentRecovery": {
+      "invariants": [
+        "C2C-PERSIST-1",
+        "C2C-PERSIST-2",
+        "C2C-PERSIST-3",
+        "C2C-PERSIST-4",
+        "C2C-PERSIST-5",
+        "C2C-PERSIST-6",
+        "C2C-PERSIST-7"
+      ],
+      "report": "docs/evidence/current-recovery/FORENSIC-HANDOFF.md",
+      "ownerRestoration": "BLOCKED_ORIGINAL_PROFILE_NOT_AVAILABLE",
+      "originalDestructiveTrigger": "UNKNOWN",
+      "externalResourcesMutated": false
+    },
+    "digest": "b009f30e6213c1b4ed00c2b04add4671fd714f751144649f1bfe207a4e02aa28"
   },
   "changeLog": [
     {
@@ -16039,5 +16259,19 @@
       "bootstrap awaits optional reads before painting and routes old attention/hash",
       "one failed read replaces Remotes with apology/Retry screen"
     ]
+  },
+  "currentLossBefore": {
+    "sourceCommit": "3805acbe1bce14db88077acf5d688fa83bf76b2e",
+    "sourceFiles": {
+      "extension/app.mjs": "2506e58037b84ed849bcc5ec8789516121fa3a32fd664091aa3445d43589af11",
+      "extension/background.mjs": "756544dcd6fd251b3db9b11f270923ff24bc6c746b7f69dd0233f325658309f2",
+      "src/api/service.mjs": "67f170bcea54d71deaa79522fa0fcc25c888ced2ec606fdb9e45c0cc9f341e56",
+      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
+      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/persistence/current-store.mjs": "3e4b1ad14b3e54a94ae5a8998e3adcc7509f42b0f0355f42c3279c3741be29b0",
+      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6"
+    },
+    "observed": "Without config/integrity/journal rows direct CurrentStore read synthesizes generation 0; separate background native>0 guard rejects. Owner deletion trigger unknown.",
+    "evidence": "docs/evidence/current-recovery/baseline.json"
   }
 }

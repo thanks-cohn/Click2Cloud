@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},onGesture } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -112,9 +112,12 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     desired = spec; generated = plan; pending++;
     const planSignal = emit('chrome.plan', 'ok', 'PLAN_GENERATED', id, spec.generation, [], spec.rows.length);
     const work = async () => {
+      try{await beforeApply(spec);}catch(e){pending--;return lastOutcome=freeze({state:'blocked',code:['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CORRUPT','CONFIGURATION_CONFLICT','STALE_GENERATION'].includes(e.code)?e.code:'CURRENT_READ_UNAVAILABLE',generation:spec.generation,appliedGeneration:null});}
       const acks = [];
       const failed = new Set();
       let durable = await save({ desired: spec, appliedGeneration: null, epoch, state: 'applying' }, id, spec.generation);
+      if(!durable){pending--;return lastOutcome=freeze({state:'blocked',code:'REGISTRAR_STATE_WRITE_FAILED',generation:spec.generation,appliedGeneration:null});}
+      try{await beforeApply(spec);}catch{pending--;return lastOutcome=freeze({state:'blocked',code:'CURRENT_READ_UNAVAILABLE',generation:spec.generation,appliedGeneration:null});}
       const applySignal = emit('chrome.apply', 'started', 'APPLY_STARTED', id, spec.generation, planSignal ? [planSignal] : []);
       const rowSignals = new Map();
       const failureSignals = [];

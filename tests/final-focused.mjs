@@ -36,3 +36,5 @@ await import("./destination-ready.test.mjs");
 await import("./image-gallery.test.mjs");
 
 await import("./boot-login.test.mjs");
+
+await import("./current-recovery.test.mjs");

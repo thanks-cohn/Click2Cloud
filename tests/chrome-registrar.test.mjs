@@ -88,9 +88,9 @@ test('serial generations reject stale/conflicting plans; restart does not trust 
   assert.equal((await recovered.recover(spec(2))).state, 'completed');
 });
 
-test('persistence failure cannot be described as complete durable readiness; actual native ACK remains explicit', async () => {
+test('failed prepare persistence blocks native clearing and cannot claim an ACK', async () => {
   const f = fakeChrome(); const r = createChromeRegistrar({ chrome: f.chrome, persist: async () => { throw Error('secret db error'); } });
-  const result = await r.apply(spec()); assert.equal(result.state, 'partial'); assert.equal(result.code, 'PERSISTENCE_FAILED'); assert.equal(result.appliedGeneration, 1);
+  const result = await r.apply(spec()); assert.equal(result.state, 'blocked'); assert.equal(result.code, 'REGISTRAR_STATE_WRITE_FAILED'); assert.equal(result.appliedGeneration, null); assert.deepEqual(f.mutations, []);
 });
 
 test('native user failure feedback survives missing auth/dispatcher and disabled diagnostics', async () => {
@@ -129,8 +129,8 @@ test('duplicate owners rejected, immutable acknowledged models and retry repair 
 
 test('failed persistence cannot turn into success merely by reapplying same generation', async () => {
   const f = fakeChrome(); const r = createChromeRegistrar({ chrome: f.chrome, persist: async () => { throw Error('db unavailable'); } });
-  assert.equal((await r.apply(spec())).state, 'partial');
-  assert.equal((await r.apply(spec())).state, 'partial');
+  assert.equal((await r.apply(spec())).state, 'blocked');
+  assert.equal((await r.apply(spec())).state, 'blocked');
 });
 
 
