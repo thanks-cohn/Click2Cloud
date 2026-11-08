@@ -32,7 +32,7 @@ Fresh documents start on Remotes. Chrome 141+ actual sidePanel.onOpened events a
 
 The existing focused suite, broader product-browser suite and image/layout suite remain separate regression evidence, including local workerd/R2 save/readback. Historical tests expecting automatic setup from login were changed to require an explicit setup invocation; setup permissions, native ACK failure and data preservation assertions remain.
 
-**Evidence limits:** Production-code fixtures are not actual Chrome storage/identity APIs, real MV3 suspension, installed Windows Chrome or live Cloudflare consent. The genuine unpacked-extension attempt is **BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR**. The executor is Linux; actual Windows startup, real MV3 suspension/wake and live OAuth consent were **NOT TESTED**. No live OAuth/R2 pass is inferred from mocks. No cloud resources were deployed or modified. REDOWN and main remain unchanged by this branch.
+**Evidence limits:** Production-code fixtures are not actual Chrome storage/identity APIs, real MV3 suspension, installed Windows Chrome or live Cloudflare consent. The genuine unpacked-extension attempt is **BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR**. The executor is Linux; actual Windows startup, real MV3 suspension/wake and live OAuth consent were **NOT TESTED**. No live OAuth/R2 pass is inferred from mocks. No cloud resources were deployed or modified. REDOWN remains unchanged. After verification, the owner explicitly authorized pushing this repair to main; no cloud deployment is included.
 
 ## Exact code/API ownership
 
@@ -75,3 +75,7 @@ await globalThis.click2cloud.api.invoke({version:'3+1.1',method:'getEngineHealth
 Report only version, state/code, storage/native status and safe stage/causeName. The small Remotes **Local service diagnostics** section likewise preserves the safe failing request/stage. Do not export tokens, Chrome storage dumps, callback URLs, private object data or configuration containing sensitive paths.
 
 The standalone runtime fixture runner is `node scripts/test-boot-login-browser.mjs`. Baseline reproduction expects a read-only git archive of commit 0222969 at /tmp/c2c-boot-before (the managed-environment run records this baseline). It is a production-source fixture test, not an installed-Windows test. Real owner acceptance remains independently required.
+
+## Owner-authorized main delivery
+
+The owner requested main delivery after completion. The verified runtime remains `9d3bbe7`; subsequent commits contain receipts/documentation only. To use the delivered main build, run `git switch main`, `git pull --ff-only`, `npm ci`, and `npm run build:extension`, then reload the existing extension as described above. Windows/live OAuth gates remain open after the merge; publishing code does not convert them to PASS.
