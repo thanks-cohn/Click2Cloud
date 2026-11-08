@@ -9,7 +9,7 @@ export async function runCurrentRecoveryTests(){
   const invoke=new (Object.getPrototypeOf(async()=>{}).constructor)('current','trustedStorage','chrome','inventory',body);
   let blocked;try{await invoke(c,async()=>{}, {storage:{local:{get:async()=>({nativeRegistration:{desired:{generation:583,rows:[{role:'save'}]}}})}}},{});}catch(e){blocked=e.code;}
   assert(s.generation.desired===0&&blocked==='CONFIGURATION_RECORD_MISSING','baseline failure did not reproduce');await c.close();
-  return {state:'REPRODUCED',directRead:{desired:s.generation.desired},getConfigurationGuard:blocked,oauth:'CONNECTED fixture independent; no cloud calls',source:'3805acbe1bce14db88077acf5d688fa83bf76b2e'};
+  return {state:'REPRODUCED',directRead:{desired:s.generation.desired},getConfigurationGuard:blocked,oauth:'NOT_EXERCISED_IN_THIS_GATE; see separate genuine production Shelf lost-state fixture',source:'3805acbe1bce14db88077acf5d688fa83bf76b2e'};
  });
  if(new URLSearchParams(location.search).has('baselineOnly'))return results;
  const {createCurrentStore}=await import('/src/persistence/current-store.mjs');

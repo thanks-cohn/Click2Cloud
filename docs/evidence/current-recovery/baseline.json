@@ -1,0 +1,20 @@
+{
+  "revision": "3805acbe1bce14db88077acf5d688fa83bf76b2e",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "REAL_CHROMIUM_INDEXEDDB_PRODUCTION_MODULES_FIXTURE_CHROME_NOT_OWNER_WINDOWS",
+  "results": [
+    {
+      "gate": "baseline-six-config-rows-absent-native-583",
+      "state": "REPRODUCED",
+      "directRead": {
+        "desired": 0
+      },
+      "getConfigurationGuard": "CONFIGURATION_RECORD_MISSING",
+      "oauth": "CONNECTED fixture independent; no cloud calls",
+      "source": "3805acbe1bce14db88077acf5d688fa83bf76b2e"
+    }
+  ],
+  "limitations": [
+    "The historical OAuth annotation was not an executed authentication check in this early direct-store/guard gate. Connected authentication is independently exercised against the unchanged original app/background in original-shelf/results.json and the repaired Shelf in boot/results.json."
+  ]
+}

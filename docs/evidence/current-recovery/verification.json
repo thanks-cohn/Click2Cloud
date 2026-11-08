@@ -1,0 +1,228 @@
+{
+  "productionSourceRevision": "9ab852767a74b207d082011f66bd1cbe65534834",
+  "baseline": "3805acbe1bce14db88077acf5d688fa83bf76b2e",
+  "ownerBaseline": "df92b33",
+  "branch": "dev/p0-current-recovery",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "build": {
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "extensionVersion": "0.3.14",
+    "revision": "9ab852767a74b207d082011f66bd1cbe65534834",
+    "sourceDigest": "5f99ee63011610f0f0373debc9e491176400ee6bf969c615a355f797e6e58f7b",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "runtimeSourceDirty": false,
+  "focused": {
+    "PASS": 275,
+    "FAIL": 0,
+    "path": "focused.txt"
+  },
+  "invariantAndBaselineGuard": {
+    "PASS": 8,
+    "FAIL": 0,
+    "path": "immutable-and-invariant-tests.txt"
+  },
+  "reports": {
+    "persistence": {
+      "path": "browser.json",
+      "counts": {
+        "PASS": 24,
+        "FAIL": 0,
+        "REPRODUCED": 1,
+        "BLOCKED": 0,
+        "NOT_TESTED": 0
+      }
+    },
+    "boot": {
+      "path": "boot/results.json",
+      "counts": {
+        "PASS": 15,
+        "FAIL": 0,
+        "REPRODUCED": 2,
+        "BLOCKED": 0,
+        "NOT_TESTED": 0
+      }
+    },
+    "product": {
+      "path": "product/browser-results.json",
+      "counts": {
+        "PASS": 30,
+        "FAIL": 0,
+        "REPRODUCED": 0,
+        "BLOCKED": 3,
+        "NOT_TESTED": 1
+      }
+    },
+    "images": {
+      "path": "images/results.json",
+      "counts": {
+        "PASS": 15,
+        "FAIL": 0,
+        "REPRODUCED": 0,
+        "BLOCKED": 0,
+        "NOT_TESTED": 0
+      }
+    },
+    "startupComparison": {
+      "path": "startup-comparison/results.json",
+      "counts": {
+        "PASS": 2,
+        "FAIL": 0,
+        "REPRODUCED": 0,
+        "BLOCKED": 0,
+        "NOT_TESTED": 0
+      }
+    },
+    "originalShelfBaseline": {
+      "path": "original-shelf/results.json",
+      "counts": {
+        "PASS": 0,
+        "FAIL": 0,
+        "REPRODUCED": 1,
+        "BLOCKED": 0,
+        "NOT_TESTED": 0
+      }
+    }
+  },
+  "performance": {
+    "currentReadsMs": {
+      "baseline": {
+        "p50": 0.5999999940395355,
+        "p95": 1.6999999955296516
+      },
+      "fixed": {
+        "p50": 0.5,
+        "p95": 1.2000000029802322
+      }
+    },
+    "startup": [
+      {
+        "gate": "baseline-0.3.13-Shelf-startup",
+        "state": "PASS",
+        "evidenceClass": "same-origin-production-app-background-real-IDB-fixture-Chrome-no-provider-network",
+        "reloads": 30,
+        "visibleRemotesMs": {
+          "p50": 96.5520889999998,
+          "p95": 147.5611100000001,
+          "max": 151.908684
+        },
+        "configurationAndTwoFramesMs": {
+          "p50": 266.8137849999998,
+          "p95": 349.32512199999996,
+          "max": 349.9611329999998
+        },
+        "counts": {
+          "opens": 1,
+          "native": 0,
+          "oauth": 0,
+          "token": 0,
+          "identity": 0,
+          "otherCloud": 0,
+          "resourceWrites": 0,
+          "access": 2
+        }
+      },
+      {
+        "gate": "fixed-0.3.14-Shelf-startup",
+        "state": "PASS",
+        "evidenceClass": "same-origin-production-app-background-real-IDB-fixture-Chrome-no-provider-network",
+        "reloads": 30,
+        "visibleRemotesMs": {
+          "p50": 93.91996900000049,
+          "p95": 121.93518699999913,
+          "max": 127.3578980000002
+        },
+        "configurationAndTwoFramesMs": {
+          "p50": 250.28782800000045,
+          "p95": 267.03093400000216,
+          "max": 283.22686800000156
+        },
+        "counts": {
+          "opens": 1,
+          "native": 0,
+          "oauth": 0,
+          "token": 0,
+          "identity": 0,
+          "otherCloud": 0,
+          "resourceWrites": 0,
+          "access": 2
+        }
+      }
+    ],
+    "limits": "Isolated Linux Chromium synthetic dependency fixtures; no Windows/native-menu latency claim. Warmed IDB read timing is illustrative, not a statistical or installed-storage-performance guarantee. Startup comparison uses 30 reloads per version."
+  },
+  "installedChrome": {
+    "result": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "request": {
+      "channel": "engine",
+      "version": "3+1.1",
+      "method": "describeCapabilities",
+      "params": {}
+    },
+    "response": null,
+    "receipt": "installed/real-shelf-receipt.json"
+  },
+  "ownerProfileRecovery": "BLOCKED_ORIGINAL_PROFILE_AND_VERIFIED_COPY_NOT_AVAILABLE",
+  "physicalDeletionCause": "UNKNOWN",
+  "cloudResourcesMutated": false,
+  "REDOWNModified": false,
+  "remainingVerification": [
+    "actual original-profile Windows preservation and source inventory",
+    "authorized exact owner recovery and real MV3 restart",
+    "installed native rendering and verified provider-backed R2 save",
+    "actual OS power loss and real quota/managed-storage failure behavior"
+  ],
+  "scriptHashes": {
+    "scripts/test-current-recovery-browser.mjs": "e08fdb9798e21a2ca93d93a88bc8676965c21bdd96ad4a56432a8f55bfa6dd27",
+    "scripts/test-boot-login-browser.mjs": "3d1dfdf0ef4a1d67bc6d5076aebe6731bc094ae1e7ba8ea4f25265b585c78dcd",
+    "tests/current-recovery-browser.mjs": "430dc0da611588c73df34950f9c8c0db5a54bac62b2347dbe52274348e13d50c",
+    "tests/current-recovery.test.mjs": "b315d90a905b455666061f5a45323f7af318bf718579a67f88c38304684fca58",
+    "right2cloud-module/tests/module.test.mjs": "7c59ba83c28a458bc80549ed39a794eb9f44d3854adface7db3870b2bd776b37",
+    ".github/workflows/test.yml": "1dcd1dbed50411685d9aeb14dd36f5039a8c9c6abefab25b297be1ecb709742f"
+  },
+  "productionCommits": [
+    {
+      "sha": "84f0e19a1d18936c335e5fc68de50d08c6ec312f",
+      "subject": "Guard established CURRENT loss and add evidence-bound atomic recovery"
+    },
+    {
+      "sha": "bac78861e83f184a1e0fc5358a5dc3ac2956a5c9",
+      "subject": "Preserve existing provider authorization callback with menu-intent fence"
+    },
+    {
+      "sha": "122cc45009bd2c7942ee611f4dc1d020876e8014",
+      "subject": "Reject recovery candidates that contradict surviving partial history"
+    },
+    {
+      "sha": "05f6d5e3b8ba987f110c064e16a38a1cac678f95",
+      "subject": "Preserve opaque recovery handles and fence surviving backup provenance"
+    },
+    {
+      "sha": "9ab852767a74b207d082011f66bd1cbe65534834",
+      "subject": "Keep backup-status inspection read-only when CURRENT database is absent"
+    }
+  ],
+  "delivery": {
+    "branch": "dev/p0-current-recovery",
+    "published": false,
+    "merged": false,
+    "deployed": false
+  },
+  "remoteModule": {
+    "PASS": 49,
+    "FAIL": 0,
+    "path": "remote-module-tests.txt",
+    "baseline": {
+      "PASS": 48,
+      "FAIL": 1,
+      "path": "remote-module-baseline-tests.txt",
+      "cause": "Existing test expected operationId-only metadata for known-length save; unchanged main already writes redacted provenance. Assertion repaired; Worker production source unchanged."
+    }
+  },
+  "hostedCI": {
+    "state": "NOT_TESTED_NOT_PUBLISHED",
+    "change": "Existing workflow now executes real-IDB crash/recovery runner using hosted Chrome and preserved baseline archives; no cloud credentials or new CI system."
+  }
+}

@@ -1,0 +1,83 @@
+✔ import is Chrome/storage independent and media click selection is minimal (3.842473ms)
+✖ end-to-end Worker fetch, real writer, separate HEAD; unknown=false (67.016591ms)
+✔ end-to-end Worker fetch, real writer, separate HEAD; unknown=true (4.051408ms)
+✔ Unicode exact prefix, keep both suffix, repeat invocation and durable duplicate gate (4.052075ms)
+✔ capability denied: missing (0.315457ms)
+✔ capability denied: expired (0.255111ms)
+✔ capability denied: account (0.144807ms)
+✔ capability denied: connection (0.159662ms)
+✔ capability denied: bucket (0.33572ms)
+✔ capability denied: prefix (0.366455ms)
+✔ missing and revoked authority block before dispatch (0.36094ms)
+✔ source rejects http://files.public.net/a (0.128587ms)
+✔ source rejects https://127.1/a (0.357216ms)
+✔ source rejects https://2130706433/a (0.08076ms)
+✔ source rejects https://0x7f000001/a (0.085001ms)
+✔ source rejects https://[::1]/ (0.722154ms)
+✔ source rejects https://[::ffff:127.0.0.1]/ (0.107117ms)
+✔ source rejects https://169.254.169.254/ (2.751701ms)
+✔ source rejects https://10.0.0.1/ (0.13113ms)
+✔ source rejects https://100.64.0.1/ (0.067919ms)
+✔ source rejects https://user:pass@files.public.net/ (0.047138ms)
+✔ source rejects https://localhost/a (0.081451ms)
+✔ source rejects https://private.internal/ (0.048182ms)
+✔ source rejects file:///a (0.149005ms)
+✔ source rejects https://files.public.net./ (0.084905ms)
+✔ redirect validation, missing location, loops and stripped credentials (1.291528ms)
+✔ relative public redirect succeeds (0.583217ms)
+✔ failure is never verified {"status":403} (1.309291ms)
+✔ failure is never verified {"length":2048} (0.961016ms)
+✔ failure is never verified {"length":2} (2.610735ms)
+✔ failure is never verified {"length":9} (1.398584ms)
+✔ failure is never verified {"fetchError":true} (1.679512ms)
+✔ failure is never verified {"putError":true} (1.790329ms)
+✔ failure is never verified {"conflict":true} (1.443542ms)
+✔ HTML and unknown length stream without a whole-file buffer ceiling (0.62287ms)
+✔ lost commit response is uncertain and not replayed (1.418058ms)
+✔ malformed transport response and missing HEAD are uncertain (2.363165ms)
+✔ proof mismatch matrix never accepted (0.206211ms)
+✔ cancellation before dispatch vs possible commit (0.292455ms)
+✔ wrong Worker principal and binding scope blocked (2.155606ms)
+✔ unsafe filename and prefix never dispatch (0.393638ms)
+✔ deadline cancels hung source before write (17.24566ms)
+✔ future writer port is structural only and receives no source URL (0.302981ms)
+✔ same operation ID with different intent is blocked (1.51975ms)
+✔ partial source stream error never yields verified (2.130135ms)
+✔ absent Worker FixedLengthStream fails conservatively rather than claiming write success (0.649296ms)
+✔ write null preserves existing object with explicit conflict (1.460014ms)
+✔ expired Worker authorization and prewrite revocation perform no PUT (1.604886ms)
+✔ public HTTPS custom ports are allowed by URL policy and still require safe connect-time egress (0.113953ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 48
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 237.287597
+
+✖ failing tests:
+
+test at ../../tmp/c2c-current-baseline/right2cloud-module/tests/module.test.mjs:20:35
+✖ end-to-end Worker fetch, real writer, separate HEAD; unknown=false (67.016591ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    {
+  +   importedAt: '2026-11-08T20:28:09.168Z',
+  +   importedBy: 'Click2Cloud',
+      operationId: 'operation_identity_0',
+  +   sourceRedacted: 'true',
+  +   sourceUrl: 'https://files.public.net/file'
+    }
+
+      at TestContext.<anonymous> (file:///tmp/c2c-current-baseline/right2cloud-module/tests/module.test.mjs:20:276)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { operationId: 'operation_identity_0', sourceUrl: 'https://files.public.net/file', sourceRedacted: 'true', importedBy: 'Click2Cloud', importedAt: '2026-11-08T20:28:09.168Z' },
+    expected: { operationId: 'operation_identity_0' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

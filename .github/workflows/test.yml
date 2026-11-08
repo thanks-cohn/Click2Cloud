@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -15,3 +17,13 @@ jobs:
       - run: npm run test:focused
       - run: node --test right2cloud-module/tests/module.test.mjs
       - run: npm run build:extension
+      # Real IndexedDB crash/recovery guard in the existing job. No cloud credentials.
+      - name: CURRENT persistence and native-authority regression
+        env:
+          C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
+          C2C_RECOVERY_EVIDENCE: ${{ runner.temp }}/click2cloud-current-recovery
+        run: |
+          mkdir -p /tmp/c2c-current-baseline /tmp/c2c-boot-before
+          git archive 3805acbe1bce14db88077acf5d688fa83bf76b2e | tar -x -C /tmp/c2c-current-baseline
+          git archive 0222969 | tar -x -C /tmp/c2c-boot-before
+          node scripts/test-current-recovery-browser.mjs

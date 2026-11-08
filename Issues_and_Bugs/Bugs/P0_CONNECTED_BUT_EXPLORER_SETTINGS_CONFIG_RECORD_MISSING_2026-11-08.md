@@ -87,3 +87,11 @@ B. `extension/background.mjs:readCurrent` — `current.read()` succeeds, but per
 After authorized safe repair, existing configuration is read without `CONFIGURATION_RECORD_MISSING`; Explorer and Settings reopen and show original choices, not empty defaults. Login remains connected, no unsolicited setup, native Chrome menu exact targets unchanged or safely reconciled, and real saves still require independent verification. If restoration requires data not present, report BLOCKED transparently and ask owner before any destructive operation.
 
 **Do NOT change REDOWN or modify cloud resources.**
+
+## November 8 implementation update — P0 remains OPEN
+
+Development branch `dev/p0-current-recovery`, production repair `84f0e19`, version 0.3.14. [Forensic handoff, source inventory, state matrix and preview-only Windows procedure](../../docs/evidence/current-recovery/FORENSIC-HANDOFF.md); [source-pinned verification](../../docs/evidence/current-recovery/verification.json).
+
+The original-source six-row-loss/native-583 failure was reproduced in isolated real Chromium IndexedDB. CurrentStore now distinguishes established absence, guards all configuration/generation/setup writers, commits a complete durable boundary and revalidates native/save authority. Existing recovery APIs can preview and apply verified complete sources without fabricating revision zero; exact preimage readback, conflict/fingerprint checks and idempotency precede restoration. Safe health/recovery UI stays available independently of login. Partial native projection and legacy unbound/mixed backups are not falsely accepted.
+
+The original physical deletion cause remains UNKNOWN. The original Windows profile and an independent owner backup are not available in the workspace; no owner recovery was attempted or claimed, and no cloud resources were mutated. Keep this incident OPEN until preservation and original-profile Windows acceptance actually succeed. Fixture passes do not close it.

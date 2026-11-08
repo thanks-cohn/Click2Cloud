@@ -1,0 +1,16 @@
+✔ C2C-PERSIST-3 queued native clear revalidates CURRENT after asynchronous prepare (2.37962ms)
+✔ C2C-PERSIST-6 canonical restore requires an immutable preview, schema rejects fabricated revision-only repairs (0.744199ms)
+✔ C2C-PERSIST CI guard links permanent invariants to production sources and real-IDB regression gates (5.726398ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (18.839926ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (4.351152ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (1.579598ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.526651ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.362908ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 144.345961
