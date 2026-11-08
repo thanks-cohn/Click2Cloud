@@ -6,6 +6,14 @@
 **Code baseline:** Reinspect latest Click2Cloud source before edits; initial audit against `main:f062983c062ec0fa55d935848025d0919ef99a16`.  
 **Scope:** Click2Cloud only. REDOWN is read-only reference. NO production Cloudflare mutations, no auth client replacement, no clearing user stores, no unconditional reset, no REDOWN edit.
 
+## Required account-scoped setup-approval memory (no recurring approval prompts)
+
+**The user has already approved the existing redown setup; that fact MUST persist.** Inspect the existing `approval:<accountId>` record through `readSetupOperation`/`writeSetupOperation`, its identity, and the completed initialization ledger across logout, login, Chrome/extension restart, OAuth token refresh and reconsent. Preserve existing account-scoped approval indefinitely unless the user explicitly revokes it or a valid applicable consent boundary changes; do not bind it to a short-lived OAuth access token/session ID. On subsequent same-account login reuse the saved approval, bucket, Worker bindings and destinations with read-only readiness checks, without recreating or asking the user to reapprove the same resource.
+
+If Cloudflare actually needs the user to log in or reauthorize revoked/changed **OAuth permissions**, request that specific fresh authority and preserve the prior setup approval separately. A previously remembered local approval is not a way around real Cloudflare consent and cannot approve additional billable resources or cross-account scope. A failed auth step, missing permission, setup failure, missing approval record or user refusal may block cloud operations but **must leave all saved destinations, flags, labels, bucket/prefix assignments, Default and manager rows intact and visible**. These are independent domains.
+
+**Must-prove regression:** Save three assignments + custom Default + Quick flag + account-scoped setup approval; sign out and confirm destinations AND approval still present; log in same account → no second setup approval; revoke OAuth authorization and confirm entries/approval still present but cloud writes blocked; reconsent → same entries/Default and no repeated setup approval; restart Chrome → same. Only a truly new unapproved setup requires one-time approval; its non-success never causes destination deletion. Verify actual Windows installed Chrome independently of fixture tests.
+
 ## ABSOLUTE IMPLEMENTATION PRECEDENCE — USER'S SAVED CONFIGURATION ALWAYS WINS
 
 The most important owner requirement supersedes any weaker first-login/redown rule:
