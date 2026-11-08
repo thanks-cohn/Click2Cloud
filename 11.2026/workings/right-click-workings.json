@@ -9202,7 +9202,7 @@
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "8040a6a930ec08681da38f3b3eadd6f955c1094e0f4a6415f0be2392d3a9955e",
-      "extension/app.mjs": "c95e6acc27dff53ac7f6f57184dcb111e677ea17db1cba8321e828b95b5c3341",
+      "extension/app.mjs": "2506e58037b84ed849bcc5ec8789516121fa3a32fd664091aa3445d43589af11",
       "extension/background.mjs": "756544dcd6fd251b3db9b11f270923ff24bc6c746b7f69dd0233f325658309f2",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -9229,7 +9229,7 @@
       "src/build-info.mjs": "a734c923aa1f2a6fea9394cb3139c1a54e7645c8cef87d58365e0c1622de7824",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
-      "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
+      "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
       "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
@@ -10996,7 +10996,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 389
+            "line": 390
           }
         ],
         "verification": {
@@ -11033,7 +11033,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 165
+            "line": 166
           },
           {
             "path": "src/api/service.mjs",
@@ -11043,7 +11043,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function enterExplorer",
-            "line": 25
+            "line": 26
           },
           {
             "path": "src/explorer/image-preview.mjs",
@@ -11083,7 +11083,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 203
+            "line": 204
           }
         ],
         "verification": {
@@ -11175,7 +11175,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 228
+            "line": 229
           }
         ],
         "verification": {
@@ -11337,7 +11337,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 353
+            "line": 354
           }
         ],
         "verification": {
@@ -11455,7 +11455,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 37
+            "line": 38
           }
         ],
         "verification": {
@@ -11632,7 +11632,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function renderRemotes",
-            "line": 94
+            "line": 95
           }
         ],
         "verification": {
@@ -11673,7 +11673,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 391
+            "line": 392
           }
         ],
         "verification": {
@@ -13813,7 +13813,7 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "2eb4727129e066486a5da37f901f0d4caa1ec1c75e42a82313b77656937585e2"
+    "digest": "aa276d58ffe1d46706a72a928d171fb4dacb3aa79c59bab7e134a40b0bc3523b"
   },
   "changeLog": [
     {

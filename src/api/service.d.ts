@@ -43,8 +43,8 @@ export interface Methods {
  dispatchSave:{itemId:string;generation:number;context?:'image'|'link'|'video'|'audio'|'page';source:{filename:string;url?:string;bytes?:number[];contentType?:string;responseFilename?:boolean};idempotencyKey:string};
 }
 export type Request<K extends keyof Methods=keyof Methods> = K extends keyof Methods?{version:Version;method:K;params:Methods[K]}:never;
-export interface Receipt {operationId:string;method:string;before?:number;after?:number;replayed?:boolean}
-export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt;diagnostic?:WorkerAccessDiagnostic}
+export interface Receipt {operationId:string;method:string;before?:number|null;after?:number|null;replayed?:boolean}
+export interface Response<T=unknown> {version:Version;state:'completed'|'partial'|'blocked'|'failed'|'uncertain'|'cancelled';code:string;data?:T;receipt:Receipt;diagnostic?:WorkerAccessDiagnostic|{stage:'current-read';causeName?:'AbortError'|'InvalidStateError'|'QuotaExceededError'|'SecurityError'|'VersionError'|'UnknownError'}}
 export type CloudflareReadinessState = 'READY'|'ACTIVE'|'NOT_ACTIVATED'|'RECONNECT_REQUIRED'|'INSUFFICIENT_PERMISSION'|'ACCOUNT_AMBIGUOUS'|'NETWORK_UNAVAILABLE'|'UNKNOWN'|'CHOOSE_DESTINATION'|'DESTINATION_UNAVAILABLE'|'REPAIR_REQUIRED'|'SETUP_APPROVAL_REQUIRED'|'SETUP_RESUME_REQUIRED'|'SETUP_APPROVAL_RECORD_MISSING'|'NATIVE_APPLY_INCOMPLETE'|'PROVISIONING_BLOCKED';
 export interface CloudflareReadiness {state:CloudflareReadinessState;statusCheckMs?:number;fromCache?:boolean;checkedAt?:number;code?:string;accountId?:string;target?:Target;accounts?:{id:string;name?:string}[];diagnostic?:WorkerAccessDiagnostic;worker?:{state:'READY'|'PREPARED'|'blocked';code?:string;checkedAt?:number;sourcePolicy?:string;transfer?:string;multipartConditionalCompletion?:'NOT_VERIFIED'}}
 export interface RemoteDestination {provider:'cloudflare-r2';connectionId:string;accountId:string;bucketName:string;prefix:string;conflictPolicy:'keep-both'}

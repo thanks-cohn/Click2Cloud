@@ -1,6 +1,8 @@
 // One Chrome Shelf attention adapter. It never starts OAuth or changes cloud state.
 export function createShelfAttention({chrome,preference=()=>true}={}){
  let serial=0,last=null;const gestures=new WeakMap();
+ // Chrome 141+ reports actual panel opening, unlike ordinary focus/OAuth returns.
+ chrome.sidePanel?.onOpened?.addListener(info=>{if(!Number.isInteger(info.windowId)||info.path?.split('#')[0]!=='extension/app.html')return;try{void chrome.runtime.sendMessage({channel:'shelf-opened',windowId:info.windowId}).catch(()=>{});}catch{}});
  const providers=['cloudflare','google-drive','dropbox','onedrive'];
  const message=(provider,code)=>code==='LOGIN_REQUIRED'?'Please log in to '+(provider==='cloudflare'?'Cloudflare':provider==='google-drive'?'Google Drive':provider==='onedrive'?'OneDrive':'Dropbox'):code==='CHOOSE_DESTINATION'?'Choose a Cloudflare destination.':code==='PROVIDER_NOT_IMPLEMENTED'?'This provider is not available yet.':'Cloudflare needs attention: '+code;
  const safeError=e=>/user gesture/i.test(e?.message??'')?'SIDE_PANEL_GESTURE_REQUIRED':/not.*available|undefined|not supported/i.test(e?.message??'')?'SIDE_PANEL_UNAVAILABLE':'SIDE_PANEL_OPEN_FAILED';
