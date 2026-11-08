@@ -6,12 +6,15 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- [P1 — WebP preview displays “OK” instead of image](Bugs/P1_EXPLORER_IMAGE_PREVIEW_DISPLAYS_OK_INSTEAD_OF_IMAGE_2026-11-08.md). Screenshot-reproduced on Windows Chrome; diagnose nested File API status/bytes and verify actual saved object integrity.
+- [P1 — Grid view renders file icons instead of actual image thumbnails](Bugs/P1_EXPLORER_GRID_VIEW_HAS_NO_IMAGE_THUMBNAILS_2026-11-08.md). Source-confirmed: current Grid does not create image elements; fix with authenticated, bounded, visible-only thumbnail reads.
 - [P0 — Explorer right-click menu latency and overall responsiveness](Bugs/P0_EXPLORER_CONTEXT_MENU_LATENCY_AND_RESPONSIVENESS_2026-11-07.md). Core file interaction must feel instant, be secure, and be measured with real before/after Windows Chrome traces.
 - [Earlier P0 — Explorer file left/right click can freeze](../bugs/CRITICAL/P0_EXPLORER_FILE_LEFT_CLICK_RIGHT_CLICK_FREEZES_UI_2026-11-06.md). Existing report lives under the older root `bugs/` directory; it is related, not silently moved or resolved.
 - [Existing P0 — Destinations lost after login; recurring approval; Explorer opens blank](../bugs/CRITICAL/P0_DESTINATION_PERSISTENCE_REAUTH_EXPLORER_STARTUP_2026-11-07.md). Maintain the current owner priority: saved configurations and approvals survive OAuth cycles.
 
 ## Issues (desired UX, controls, presentation, and missing capabilities)
 
+- [Remotes — full-width independent screen without Explorer left navigation](Issues/P1_REMOTES_TAB_MUST_NOT_SHOW_EXPLORER_LEFT_NAVIGATION_PANEL_2026-11-08.md). Hide the entire file tree outside File Explorer; retain login cards and restore Explorer state when returning.
 - [Explorer — one bottom-right Manage Destinations button, conventional full-path address entry, and Grid view](Issues/P1_EXPLORER_SINGLE_MANAGER_ADDRESS_FIELD_AND_GRID_VIEW_2026-11-07.md).
 
 ## Shared requirements
