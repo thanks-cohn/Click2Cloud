@@ -273,7 +273,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     reserveOperation:(id,fingerprint)=>transact('readwrite',async s=>{const key='operation:'+id;if(await request(s.state.get(key)))return false;s.state.put({id:key,value:{fingerprint,at:clock(),state:'RESERVED_INSPECT_BEFORE_RETRY'}});return true;}),
     stageBackupRoot:handle=>transact('readwrite',async s=>{s.state.put({id:'backupRootCandidate',value:handle});return true;}),
     readBackupCandidate:()=>transact('readonly',async s=>(await request(s.state.get('backupRootCandidate')))?.value??null),
-    readBackupRoot:()=>transact('readonly',async s=>(await request(s.state.get('backupRoot')))?.value??null),
+    readBackupRoot:async()=>{if(typeof indexedDB?.databases==='function'&&!(await indexedDB.databases()).some(d=>d.name===dbName))return null;return transact('readonly',async s=>(await request(s.state.get('backupRoot')))?.value??null);},
     setBackupRoot:handle=>commitBoundary(async s=>{const saved=await loadState(s);boundary(s,saved);s.state.put({id:'backupRoot',value:handle});return true;}),
     setDesiredGeneration:(g,o)=>generationChange(g,o),acknowledgeGeneration:g=>generationChange(g,{acknowledge:true}),journal,exportEncrypted,restoreEncrypted,
     async close(){if(opening){const db=await opening;db.close();opening=null;}}

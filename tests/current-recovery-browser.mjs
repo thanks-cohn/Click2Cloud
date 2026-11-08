@@ -115,5 +115,8 @@ export async function runCurrentRecoveryTests(){
  await check('C2C-PERSIST-6-opaque-filesystem-handle-preserved-in-original-IDB',async()=>{
   const c=createCurrentStore({dbName:'opaque-evidence'});await seed(c);const root=await navigator.storage.getDirectory();await c.setBackupRoot(root);await c.writeSetupOperation('json-kind',{kind:'directory',approved:true});const e=await c.evidence();assert(e.state.find(r=>r.id==='backupRoot').value.opaqueFilesystemHandle===true,'opaque handle masqueraded as exported JSON');assert(e.state.find(r=>r.id==='setup:json-kind').value.approved===true,'ordinary JSON directory record was dropped');assert(await (await c.readBackupRoot()).isSameEntry(root),'original handle lost');await c.close();
  });
+ await check('C2C-PERSIST-5-health-backup-status-does-not-create-absent-database',async()=>{
+  const c=createCurrentStore({dbName:'health-no-create'});assert(await c.readBackupRoot()===null,'unexpected root');assert(!(await indexedDB.databases()).some(d=>d.name==='health-no-create'),'backup status created a database');await c.close();
+ });
  return results;
 }

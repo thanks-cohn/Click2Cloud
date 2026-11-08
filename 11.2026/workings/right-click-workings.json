@@ -9278,7 +9278,7 @@
       "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "e11c933c187a25564951e1e308dbce730ae6b0715d1a0490cf7cf327cfa44ebb",
+      "src/persistence/current-store.mjs": "54d4841be19f4525f2dd12cac013c682f2a3bfadd48514fa96af3174f3779b64",
       "src/persistence/external-recovery.mjs": "cbf79a0872de4b2830775dc4a8d2a323731f47cc5a7a4a6bb4f43bbea14aea88",
       "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
@@ -14051,7 +14051,7 @@
       "originalDestructiveTrigger": "UNKNOWN",
       "externalResourcesMutated": false
     },
-    "digest": "439e81499b823a0624e11bfbf35e1cfa358bb48916c0f2ac626af467402b6d07"
+    "digest": "a122689bbc8a6cd239e410acf16ffef6eb7e623b1e3ab6a921f08cf58828eb82"
   },
   "changeLog": [
     {
