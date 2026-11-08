@@ -12365,9 +12365,29 @@
         "performance": "docs/evidence/zero-stutter/PERFORMANCE.md: fixture double-RAF paint opportunities, not owner Windows native-input measurements",
         "handoff": "docs/evidence/zero-stutter/HANDOFF.md"
       },
-      "imageGallery": "Candidate implementation; use final handoff receipts. Owner Windows and exact live image bytes unverified; no cloud writes or Worker deployment."
+      "imageGallery": {
+        "runtimeRevision": "5201ab23a9f01ffab4e86ee60d6233eaf18ce7ad",
+        "focused": {
+          "pass": 269,
+          "fail": 0
+        },
+        "imageBrowser": {
+          "pass": 15,
+          "runtimeSourceDirty": false
+        },
+        "productBrowser": {
+          "pass": 30,
+          "blocked": 3,
+          "notTested": 1,
+          "runtimeSourceDirty": false
+        },
+        "installedChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+        "liveOwnerImage": "UNVERIFIED: root HTTP 404 NoSuchKey; metadata-only configured redown listing 190 objects / zero exact basename matches. Actual account/bucket/object not identified.",
+        "performance": "docs/evidence/image-gallery/PERFORMANCE.md: fixture proxies and outliers, not owner Windows/native input",
+        "handoff": "docs/evidence/image-gallery/HANDOFF.md"
+      }
     },
-    "sourceState": "Image/gallery/Remotes/layout development branch from main 80b8e14; 0.3.12. Source hashes current; owner live object and Windows acceptance remain unverified.",
+    "sourceState": "Final image/gallery/Remotes/layout runtime 5201ab23a9f01ffab4e86ee60d6233eaf18ce7ad (0.3.12), dev/explorer-image-gallery from main 80b8e14. Evidence-only/harness portability handoff follows; immutable prior snapshots preserved.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -13788,7 +13808,7 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "6edab5dc04dea238c6ae13263ce6c8979d95f3feeacc4555bda570902222dbcc"
+    "digest": "43da598b6f9747cd16220b6555ee487f122d871439a3249b40c00b52f2b0805a"
   },
   "changeLog": [
     {

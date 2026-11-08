@@ -1,0 +1,12 @@
+{
+  "evidenceClass": "LIVE_READ_ONLY_R2_METADATA_AND_MATCHED_OBJECT",
+  "resourcesModified": false,
+  "credentialsPrinted": false,
+  "bucketSelection": "existing redown only",
+  "targetSelection": "exact owner-reported basename; metadata-only discovery, no unrelated object content reads",
+  "state": "BLOCKED",
+  "pagesRead": 1,
+  "objectsExamined": 190,
+  "matchingObjects": 0,
+  "code": "REPORTED_BASENAME_NOT_FOUND_IN_CONFIGURED_REDOWN_BUCKET"
+}

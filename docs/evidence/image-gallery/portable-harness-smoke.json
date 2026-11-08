@@ -1,0 +1,197 @@
+{
+  "sourceRevision": "5201ab23a9f01ffab4e86ee60d6233eaf18ce7ad",
+  "sourceHashes": {
+    "extension/app.mjs": "d1b059d47e55dc518b3ddae1084c6ff6749a1f1ee71eac7daa61b738abca543d",
+    "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
+    "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
+    "src/explorer/location-view.mjs": "33b0e2451d2af5f382413565a321f6f95f8a3586b52e831385644ef0e9f1855a",
+    "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
+    "src/api/service.mjs": "349a57d176eccf214cf011429c6a44aab87a89d91b68bc16bd2d247984a9e8c5",
+    "extension/background.mjs": "7797d2f8244bda3e96b42faf4e1b7710f6311b6bf77b7a4f00fd9559a8bbd1df"
+  },
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_FIXTURE_API_NOT_INSTALLED_WINDOWS_OR_LIVE_CLOUD",
+  "method": "event dispatch to visible DOM plus two RAF paint opportunities; not physical display latency or native-input EventTiming",
+  "browser": "155.0.8059.79",
+  "platform": "linux",
+  "viewport": {
+    "width": 1280,
+    "height": 850
+  },
+  "buckets": 1,
+  "repeats": 1,
+  "summary": {
+    "selection": {
+      "samples": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "menu": {
+      "samples": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "slowMenu": {
+      "samples": 0,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null
+    },
+    "frames": {
+      "samples": 45,
+      "p50": 16.699999999999932,
+      "p95": 16.700000000000045,
+      "p99": 16.800000000000068,
+      "max": 16.800000000000068
+    },
+    "longTasks": []
+  },
+  "results": [
+    {
+      "size": 0,
+      "repeat": 0,
+      "samples": {
+        "selection": [],
+        "menu": [],
+        "slowMenu": []
+      },
+      "scrolling": [
+        26.69999999552965,
+        33.100000001490116,
+        33.29999999701977,
+        33.400000005960464,
+        33.19999999552965,
+        33.399999998509884,
+        33.70000000298023,
+        32.899999998509884,
+        33.399999998509884,
+        33.70000000298023,
+        33.399999998509884,
+        32.899999998509884,
+        33.400000005960464,
+        33.19999999552965,
+        33.20000000298023,
+        33.399999998509884,
+        33.600000001490116,
+        33.19999999552965,
+        33.20000000298023,
+        33.69999999552965
+      ],
+      "mainReplacements": 0,
+      "renderedRows": 0,
+      "viewportHeight": 649,
+      "scrollHeight": 649,
+      "frames": [
+        16.600000000000023,
+        16.700000000000045,
+        16.699999999999932,
+        16.700000000000045,
+        16.600000000000023,
+        16.699999999999932,
+        16.700000000000045,
+        16.600000000000023,
+        16.699999999999932,
+        16.600000000000023,
+        16.700000000000045,
+        16.699999999999932,
+        16.700000000000045,
+        16.700000000000045,
+        16.59999999999991,
+        16.600000000000023,
+        16.800000000000068,
+        16.59999999999991,
+        16.700000000000045,
+        16.59999999999991,
+        16.700000000000045,
+        16.600000000000136,
+        16.699999999999818,
+        16.700000000000045,
+        16.600000000000136,
+        16.699999999999818,
+        16.700000000000045,
+        16.600000000000136,
+        16.799999999999955,
+        16.700000000000045,
+        16.59999999999991,
+        16.700000000000045,
+        16.59999999999991,
+        16.700000000000045,
+        16.700000000000045,
+        16.59999999999991,
+        16.600000000000136,
+        16.699999999999818,
+        16.700000000000045,
+        16.700000000000045,
+        16.700000000000045,
+        16.59999999999991,
+        16.700000000000045,
+        16.59999999999991,
+        16.700000000000045
+      ],
+      "longTasks": [],
+      "calls": [
+        {
+          "method": "getConfiguration",
+          "ms": 115.20000000298023
+        },
+        {
+          "method": "loginStatus",
+          "ms": 2.2000000029802322
+        },
+        {
+          "method": "describeCapabilities",
+          "ms": 1.6999999955296516
+        },
+        {
+          "method": "inspectShelfAttention",
+          "ms": 23.899999998509884
+        },
+        {
+          "method": "inspectRemoteHistory",
+          "ms": 26.899999998509884
+        },
+        {
+          "method": "enterExplorer",
+          "ms": 16.69999999552965
+        },
+        {
+          "method": "listFolders",
+          "ms": 5.799999997019768
+        },
+        {
+          "method": "navigateExplorer",
+          "ms": 24.400000005960464
+        },
+        {
+          "method": "listFolders",
+          "ms": 4.4000000059604645
+        }
+      ],
+      "shellPreserved": true,
+      "metrics": {
+        "LayoutCount": 5,
+        "RecalcStyleCount": 10,
+        "LayoutDuration": 0.001038,
+        "RecalcStyleDuration": 0.000972,
+        "JSHeapUsedSize": 3910204
+      },
+      "dom": {
+        "documents": 3,
+        "nodes": 253,
+        "jsEventListeners": 216
+      }
+    }
+  ],
+  "stress": {
+    "seconds": 0,
+    "samples": 0,
+    "maxDOM": 0,
+    "frames": null,
+    "longTasks": []
+  },
+  "errors": []
+}

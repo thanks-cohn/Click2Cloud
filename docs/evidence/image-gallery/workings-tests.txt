@@ -1,0 +1,13 @@
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (14.874699ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (9.008384ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (2.550759ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.660569ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.363001ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.280982

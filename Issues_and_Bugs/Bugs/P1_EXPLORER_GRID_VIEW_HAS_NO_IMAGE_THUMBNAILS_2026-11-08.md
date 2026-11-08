@@ -27,3 +27,7 @@ This is related to but **not identical** to [WebP modal says OK](P1_EXPLORER_IMA
 ## Done
 
 The owner opens Grid for a real cloud folder containing WebP/JPEG/PNG and sees actual thumbnails; clicking one opens a correct full preview. No fake success, privacy leakage, storage resets, Cloudflare provisioning, or per-item blocking of scrolling.
+
+## Implementation candidate — 0.3.12
+
+Production repair is on `dev/explorer-image-gallery` at runtime `5201ab2` (initial implementation `d4703a9`). See [source findings](../../docs/evidence/image-gallery/SOURCE.md) and [test handoff / remaining owner acceptance](../../docs/evidence/image-gallery/HANDOFF.md). This is not closed as owner-installed Chrome/live-object verified. Decoded fixture pixels are separately classified; a read-only check at the reported redown root returned 404/NoSuchKey and does not identify the actual owner object. Metadata-only discovery also found no matching basename among 190 objects in the configured redown bucket. No cloud writes or REDOWN modifications were made.

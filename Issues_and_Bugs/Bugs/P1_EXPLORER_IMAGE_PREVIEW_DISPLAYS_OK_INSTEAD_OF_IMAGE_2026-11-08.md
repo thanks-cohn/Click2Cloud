@@ -27,3 +27,7 @@ In actual Click2Cloud Shelf Explorer, selecting/opening an object labeled `0195_
 5. If stored object contents differ from verified intended bytes, escalate to P0 save-integrity defect; do not declare this resolved with a CSS-only fix.
 
 **Owner evidence:** Screenshot attached to conversation Nov 8, 2026. The bug document intentionally avoids copying the user's image or asserting a local sandbox path.
+
+## Implementation candidate — 0.3.12
+
+Production repair is on `dev/explorer-image-gallery` at runtime `5201ab2` (initial implementation `d4703a9`). See [source findings](../../docs/evidence/image-gallery/SOURCE.md) and [test handoff / remaining owner acceptance](../../docs/evidence/image-gallery/HANDOFF.md). This is not closed as owner-installed Chrome/live-object verified. Decoded fixture pixels are separately classified; a read-only check at the reported redown root returned 404/NoSuchKey and does not identify the actual owner object. Metadata-only discovery also found no matching basename among 190 objects in the configured redown bucket. No cloud writes or REDOWN modifications were made.

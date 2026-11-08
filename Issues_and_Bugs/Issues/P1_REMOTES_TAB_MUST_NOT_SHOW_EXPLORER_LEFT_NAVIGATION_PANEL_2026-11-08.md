@@ -24,3 +24,7 @@
 Selecting **Remotes** shows a **single full-width Remotes panel** with no Explorer folders/tree down the left. Selecting **File Explorer** restores its conventional two-pane view. No destructive cloud or storage changes.
 
 **NO BLOAT · DISTINCT TABS · PRESERVE THE FILE EXPLORER STATE.**
+
+## Implementation candidate — 0.3.12
+
+Production repair is on `dev/explorer-image-gallery` at runtime `5201ab2` (initial implementation `d4703a9`). See [source findings](../../docs/evidence/image-gallery/SOURCE.md) and [test handoff / remaining owner acceptance](../../docs/evidence/image-gallery/HANDOFF.md). This is not closed as owner-installed Chrome/live-object verified. Decoded fixture pixels are separately classified; a read-only check at the reported redown root returned 404/NoSuchKey and does not identify the actual owner object. Metadata-only discovery also found no matching basename among 190 objects in the configured redown bucket. No cloud writes or REDOWN modifications were made.

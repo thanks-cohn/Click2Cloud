@@ -1,0 +1,47 @@
+{
+  "runtimeRevision": "5201ab23a9f01ffab4e86ee60d6233eaf18ce7ad",
+  "version": "0.3.12",
+  "focused": {
+    "pass": 269,
+    "fail": 0
+  },
+  "imageBrowser": {
+    "PASS": 15
+  },
+  "productBrowser": {
+    "BLOCKED": 3,
+    "PASS": 30,
+    "NOT_TESTED": 1
+  },
+  "installedChrome": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  },
+  "liveObject": {
+    "evidenceClass": "LIVE_READ_ONLY_CONFIGURED_R2_OBJECT_CHECK",
+    "resourcesModified": false,
+    "credentialsPrinted": false,
+    "objectIdentity": "Owner-reported WebP filename in existing redown bucket; no broad scan",
+    "state": "BLOCKED",
+    "httpStatus": 404,
+    "code": "NoSuchKey"
+  },
+  "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+  "workerCodeChanged": false,
+  "resourcesModified": false,
+  "redownUnchanged": true,
+  "portableHarnessWindowsExecution": "NOT_TESTED",
+  "acceptance": "Owner-installed Windows Chrome, exact live image bytes and live native-save/readback unverified; no fixtures promoted to live evidence.",
+  "liveImageDiscovery": {
+    "evidenceClass": "LIVE_READ_ONLY_R2_METADATA_AND_MATCHED_OBJECT",
+    "resourcesModified": false,
+    "credentialsPrinted": false,
+    "bucketSelection": "existing redown only",
+    "targetSelection": "exact owner-reported basename; metadata-only discovery, no unrelated object content reads",
+    "state": "BLOCKED",
+    "pagesRead": 1,
+    "objectsExamined": 190,
+    "matchingObjects": 0,
+    "code": "REPORTED_BASENAME_NOT_FOUND_IN_CONFIGURED_REDOWN_BUCKET"
+  }
+}
