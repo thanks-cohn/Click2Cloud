@@ -1,0 +1,110 @@
+# P0 Codex Implementation — Permanent destinations, one-time Cloudflare setup, and one-click Explorer
+
+**Owner-requested emergency repair — November 7, 2026**  
+**Status:** Implementation assignment. Work is **NOT** completed by creation of this file.  
+**First read:** [Source-backed critical defect report](../../bugs/CRITICAL/P0_DESTINATION_PERSISTENCE_REAUTH_EXPLORER_STARTUP_2026-11-07.md) and [right-click source/API map](../../latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md).  
+**Code baseline:** Reinspect latest Click2Cloud source before edits; initial audit against `main:f062983c062ec0fa55d935848025d0919ef99a16`.  
+**Scope:** Click2Cloud only. REDOWN is read-only reference. NO production Cloudflare mutations, no auth client replacement, no clearing user stores, no unconditional reset, no REDOWN edit.
+
+## Owner's direction
+
+**A user logs into Click2Cloud once, approves a required initial setup once, and then simply uses it.** Even when Cloudflare requires a normal future OAuth login, **the user never loses their configured right-click destinations and does not have to approve creation/preparation of the same `redown` bucket again** unless a genuinely new resource/permission change requires explicit, scoped consent.
+
+A customer with 100 or 1,000 saved destinations must not lose one because of sign-out, token refresh, an unavailable API, a stale Worker, browser restart, or a Shelf UI transition.
+
+**Clicking File Explorer in the upper navigation must show the connected cloud on the left and select a valid preferred location immediately.** No additional "Open File Explorer" prompt or button is required when already connected.
+
+We explicitly reject cosmetically hiding the symptoms. Fix the underlying state, initialization and routing. Preserve Click2Cloud's **Simple, Narrow, Depth, Quick Select, Default and single canonical V3+1 engine/API**, with full observable and documented GUI/API parity.
+
+## Required implementation plan — sequential, evidence-driven
+
+### P0-A. Preserve source and user data before change
+
+1. Start from latest real development branch or a new branch based on current main; do not rewrite someone else's in-progress work. Inspect any concurrently running Codex branch/PR and avoid duplicate/conflicting edits.
+2. Capture immutable, safely redacted before-state: product revision, configured Simple/Narrow/Depth assignment IDs/counts/targets (redact private identifiers in evidence), Default, selected Cloudflare account, Quick/hidden/order settings, a nonsecret yes/no per-account setup approval existence, native desired/applied generation and Chrome extension ID. Take an authorized validated backup if present; **do not reset IndexedDB or uninstall/clear browser data**.
+3. Run a reproducible sequence (same ID/profile): connected with several assignments → save current snapshots → explicit disconnect → read same config while logged out → login again → read immediately before/after automatic onboarding and native reconcile → navigate to manager and Explorer. Collect the *first failing boundary*.
+4. Determine whether configuration truly disappears from IndexedDB; manager only presents a filtered/empty view; product vs `mode:<mode>` records diverge; account selection points elsewhere; setup approval ledger became unavailable; or the extension/profile identity changed. Explain with source and evidence.
+5. Establish a Windows Chrome acceptance case; local fixture-only success does not close this issue. Existing workerd and browser fixtures are useful but insufficient proof of restored persistence on owner Windows.
+
+### P0-B. Make configuration permanent across auth transitions
+
+1. Enforce the invariant: `getConfiguration`, `listDestinations`, manager render, menu preview, backed state and saved setup approval are independent of OAuth connection state. Sign-out/auth failure blocks cloud access **only**; it does not call `deleteDestinationConfig`, `clearDefault`, erase a mode store, or reset the current product.
+2. Review `src/persistence/current-store.mjs` `read`/`commitProduct` and mode record precedence carefully. Boot/migration must not treat a read failure, wrong account, unknown cloud inventory, partially loaded DB or schema conflict as a new installation. Fail visibly and preserve last-known durable settings; never silently commit empty config. Preserve versioned schema/revision and atomic transactions. No destructive migration shortcuts.
+3. If appropriate, add a tiny durable initialization marker/schema for distinguishing *genuinely new, never-configured installation* from an *established installation whose records became unavailable*. Do not invent recovered preferences or reset legitimate explicit empty state; do not introduce a second datastore or redundant state authority.
+4. Validate that changes originating from the GUI and trusted API use the same `commitConfigChange` transaction and readback and are preserved for **all modes**. Verify default/account binding, labels, prefixes, hidden flags, Quick Select, display order and provider visibility.
+5. Make `Manage Destinations` useful while disconnected: list saved destinations as locally stored, labeled `Reconnect to use` or equivalent when their provider is unauthorized. Read-only inspection must not require fresh OAuth. It must not display 'No saved destinations' merely because cloud inventory cannot be fetched. Preserve edit/remove affordances according to safe existing authorization rules; distinguish saved configuration from cloud accessibility.
+6. Make the restoration behavior symmetric with authorized API callers. Evidence must show same saved config across sign-out, restart, login, crash/reconnect, transient HTTP 403/5xx, and successful refresh. Persist exact user decisions, not temporary discovery results.
+
+### P0-C. Distinguish OAuth reauthorization from setup approval
+
+1. Investigate `src/auth/cloudflare-oauth.mjs`, `src/cloudflare/onboarding.mjs`, `extension/background.mjs` and `src/api/service.mjs`. **OAuth access grants/tokens and the account-scoped setup-approval ledger are different things.** A user may need to sign in after token expiry/revocation; that cannot itself trigger a second resource-creation consent for the *same verified setup*.
+2. If existing account + saved approval + valid bucket/Worker/default exist: login → read-only verification → reconnect/reconcile → READY → one right-click save. Do not show an "Authorize automatic setup" first-run prompt again. No unnecessary provisioning, no new `redown` create, no duplicate Worker or changed bucket.
+3. If a valid saved custom destination or Default exists, prefer it; **do not recreate or override `redown`**. If `redown` was deliberately deleted/cleared, respect the existing explicit deletion/first-login rule and tombstones; do not restore it as a fallback by mere login.
+4. If a saved assignment exists but its cloud bucket is inaccessible/missing: retain it and report **UNAVAILABLE/MISSING PERMISSION/MISSING BUCKET** precisely. Do not count this as zero configured destinations. If Worker is old/permissions actually changed, clearly label `Repair existing setup` or `Update existing Worker` and require only the necessary action/authority. Preserve saved approval and other destinations.
+5. If a genuinely unconfigured account has no saved Default or assignments and never had setup completed: use the existing explicit approval path to create/reuse lowercase `redown` once, persist a normal editable Simple root entry + Default only after provider verification. No silent R2 activation or billable action. If interrupted, resume the same durable ledger and verify rather than restart.
+6. Multi-account users must keep per-account choices and separate setup ledgers. An account mismatch must never erase other account configuration. Distinguish account selection from authenticated identity.
+7. UI messages must distinguish **"Log in"** from **"Repair existing Worker"**, **"New setup approval required"** and **"Select destination"**. Never present a recurring authorization prompt when only a silent read-only check is necessary. No false Ready/Success.
+8. The exact setup intent and authorization remains guarded by the existing trusted `3+1.1` API; no GUI-only bypass, privilege escalation, replays of uncertain writes, automatic resource mutation or unapproved production deployment.
+
+### P0-D. File Explorer opens directly to the cloud on first click
+
+1. In `extension/app.mjs`, the current top `[data-view=explorer]` handler goes through `show('explorer')` but not necessarily `loadTree`. Introduce **one canonical idempotent Explorer-enter operation** that opens, loads/refreshes the account/bucket tree, resolves selected location and navigates through the existing `navigateExplorer`/File API.
+2. Initial selection precedence, only among verified authenticated/authorized targets:
+   - restore the last deliberately selected Explorer location for the same account if still valid (save a nonsecret, account-bound reference durably as needed);
+   - else the saved Default destination/bucket;
+   - else the owner's saved selected Cloudflare account and its actual existing `redown` root if authorized;
+   - else another unambiguous valid connected account/bucket;
+   - else display a clear account/bucket selector for multiple choices, **without inventing a default or overwriting settings**.
+3. On first click, show connected cloud names and their bucket rows in the LEFT Explorer navigation. The selected account should be expanded, the chosen bucket visible/selected, and the main pane listing it. Explicitly restore after successful login/reconnect when Explorer is visible; no double click.
+4. `connections()` may invalidate outdated cached file listings after an actual identity/permission change, but it must **not destroy durable selected location** or require another "Open File Explorer" click after reconnection. Async loading must ignore stale generations and preserve the most recent user navigation.
+5. Consolidate or remove redundant Explorer-open CTA in Remotes/connection section when it is only an unnecessary extra gate; the top navigation remains the canonical entry. **Remotes remains the default tab on application launch**, as separately required by the owner.
+6. On disconnection, Explorer should keep saved account/location labels for orientation where safe, show accurate "Reconnect" status, and automatically restore available locations after authentication. Never show a fake empty cloud or claim live folder contents while disconnected.
+7. Explorer should work with zero, one, multiple accounts, a missing default, removed bucket, disabled/hidden provider and stale saved location. No empty tree until the user manually presses a second button.
+8. Make the Explorer startup path callable/observable via the existing trusted API, including `listAccounts`, `listAuthorizedBuckets`, `navigateExplorer`, `listFolders`, `getConfiguration` and `loginStatus`. If a genuinely missing public API equivalent is found, add it under the same canonical owner with typed schema, permissions and tests.
+
+### P0-E. Menu, API and evidence alignment
+
+1. Verify the menu still follows the owner-approved flat Cloudflare + promoted Quick Select topology in [latest rules](../../latest/right-click-rules/README.md). Disconnected saved menu rows must not disappear, silently reroute to a different account, or pretend to be live. When reconnecting, reapply the current chosen settings and wait for real Chrome ACK.
+2. Maintain exact source → API → storage → native menu → behavior documentation, including the `11.2026/workings/right-click-workings.json` **CURRENT** source fingerprints, without rewriting the immutable baseline. Update [engine/API map](../../latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md) and source comments in the same change.
+3. Do not conflate a test fixture passing with installed Chrome validation. Provide chronological evidence of account, config revision, mode counts, setup approval presence and native generation before/after each boundary. Tokens, account secrets, private URLs, raw Cloudflare errors and internal credentials must not be emitted.
+
+## Required regression matrix
+
+| Scenario | Must happen | Forbidden |
+| --- | --- | --- |
+| 1 initial login with approval, no prior config | Create/reuse `redown` once; verify; persist Simple root + Default + approval | Fake READY or duplicate setup |
+| 2 same-account logout → login | All configured destinations exactly unchanged; reconnect and save | Repeat setup approval or zeroed manager |
+| 3 token expiry / refresh | Configuration unchanged; refresh if authorized, else precise login request | First-run reset |
+| 4 revoked consent / partial scopes | Preserve entries/Default; report missing authority | Delete destination or silently escalate scopes |
+| 5 restart Chrome/extension service worker | Restore full config, menu and retained setup ledger | User rebuilds menu |
+| 6 extension update with same ID/profile | Data remains; safe migration and re-registration | Write empty defaults over stored state |
+| 7 100+ Simple/Narrow/Depth entries, Quick and custom prefixes | Exact count/labels/ordering/targets survive sign-out and restart | Pagination hiding records presented as loss |
+| 8 custom Default (not `redown`) | Reuse exact custom Default after login | Default overwritten with `redown` |
+| 9 deliberate removal of `redown` | Preserve removal and all surviving assignments | Recreate without required explicit owner-approved condition |
+| 10 Worker upgrade required | Show specific existing-Worker repair/upgrade, preserve approval/config | Present fresh bucket creation as necessary |
+| 11 incorrect/changed Cloudflare account | Preserve both accounts' records, block unauthorized usage, offer selection | Misroute/delete or silently switch account |
+| 12 transient Cloudflare/R2 outage | Show offline/unavailable, preserve settings | Treat unavailable inventory as empty database |
+| 13 Explorer tab first click, one connected account | Left tree populated, correct bucket selected, file list shown | Extra `Open File Explorer` action |
+| 14 Explorer first click, multiple accounts | Restore preferred account or request clear choice | Guess wrong account |
+| 15 Explorer reconnect while open | Location restored after auth; no duplicate scan or race | Blank tree requiring button |
+| 16 Manager while disconnected | Stored destination entries still visible with honest offline state | Blank manager labeled zero saved |
+| 17 storage failure/corrupted state | Explicit error, preserve available recoverable data, no destructive overwrite; offer validated restore | Silently reinitialize fresh |
+| 18 API vs GUI parity | Identical stored config and menu topology/readback across surfaces | GUI-only state or conflicting projection |
+| 19 original logged-in image/link save | Cloudflare remains TRUE REMOTE; independently verified R2 receipt and GO TO | Browser-byte downgrade, timer-based success |
+| 20 full Browser/Windows acceptance | Separate fixture vs real Chrome/Cloudflare pass evidence, including reload | Declare PASS from simulated callback |
+
+## Required artifacts and definition of done
+
+1. A before/after **root-cause report** naming the first proven failing boundary and the exact source branch, including any "lost" versus "not rendered" distinction.
+2. Source implementation with **smallest coherent repair** through the existing persistence/auth/onboarding/UI/API owners; no parallel state store or second registrar/engine. Minimize code bloat, not correctness.
+3. Unit/integration coverage for the entire matrix, real IndexedDB/revision tests and real Chromium app tests. **Real installed Windows Chrome smoke acceptance** must be reported separately; if it cannot run due to environment policy, mark BLOCKED and provide precise owner steps.
+4. Exact saved configuration readback before sign-out, during disconnect, after login and after browser restart; counts, target identities, Default and Quick settings identical unless deliberately changed.
+5. Proof same existing `redown` Worker/bucket reused; zero unauthorized new resource operations, only one initial approval. Genuine insufficient permissions are reported without losing records.
+6. Explorer first top-tab click loads the selected cloud/bucket in the left pane and opens its contents, with no second button.
+7. All source/API docs and CURRENT behavior map updated alongside tests; preserved immutable baseline and explicit unresolved gaps.
+
+**STOP / DO NOT MERGE OR CLAIM READY if any saved destination can disappear after normal auth transition, if a previously approved ready setup asks for first-run setup again, if Explorer needs a second open action, or if a full Chrome release is claimed without evidence.**
+
+**OWNER'S FINAL RULE: Right-click configuration is a durable user asset. Login grants temporary authority to use it; login never owns or deletes it. An already configured account should be 'LOG IN → READY → CLICK' — nothing more.**
+
+**NO BLOAT · NO DESTINATION LOSS · NO UNNECESSARY RE-APPROVAL · ONE-CLICK EXPLORER · FULL GUI/API PARITY.**
