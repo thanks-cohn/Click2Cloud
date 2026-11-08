@@ -41,6 +41,22 @@ Earlier same-session read-only outputs: `click2cloud.current.read()` = success w
 
 **Highest-value next gate:** inspect metadata-only presence of `product`, `mode:simple`, `mode:nested`, `mode:depth`, `configurationIntegrity` in the same CURRENT state store, and summarize the existing bounded `journal` by event kinds and `generation` events' *numeric desired only*. Compare available journal generation event progression and current native registration's desired/applied metadata with the last known valid user saved configuration. Do not print raw state/config/journal objects, account IDs, filenames, tokens, object keys or paths. Preserve records; no reset/clear/manual generation write. Only formulate a narrow owner-approved recovery after evidence proves the safe source of truth.
 
+## Latest Windows owner evidence: CURRENT has no product/config records or relevant journal
+
+**2026-11-08, owner real Chrome service worker, read-only IndexedDB inspection.** All checks refer to `click2cloud-current-v1` / object stores `state` and `journal`.
+
+- `current.read()`: `result="OK", generation.desired=0` (the module substitutes `defaultGeneration()` for missing row).
+- `nativeRegistration.desired.generation=583` in `chrome.storage.local`.
+- `state.get("generation")`: absent.
+- `state.getAllKeys()` presence flags: `product=false`, `mode:simple=false`, `mode:nested=false`, `mode:depth=false`, `generation=false`, `configurationIntegrity=false`.
+- `journal.openCursor()` counters: `generationEvents=0`, `configEvents=0`, `productEvents=0`, `lastGeneration=null`, `highestGeneration=null`.
+
+**Revised conclusion:** CurrentStore is readable but its six relevant configuration records are **all absent** and the associated journal supplies no restoration evidence. `current.read()` returning successfully is **not proof that a user's saved settings survived**: it synthesizes valid empty defaults in absence of integrity/journal provenance. The preserved Chrome-native `nativeRegistration` at generation 583 indicates a historically compiled right-click menu existed, so treating this as an ordinary fresh install is unsafe. This strongly suggests missing/unavailable CURRENT state relative to the prior native registration; it does not establish whether records were cleared, replaced, stored under a different extension origin/profile/database, or lost during a prior lifecycle event. **Do not accuse the login flow of deletion without evidence.**
+
+**Recovery leads, ordered and read-only first:** (1) check if other named IndexedDB databases or a different Chrome extension origin/profile contain older CURRENT (metadata only); (2) inspect **counts and safe metadata only** from CURRENT `state` and `checkpoints` (the six flags and journal counters do not prove every store is empty); (3) inspect persisted native-registration `desired` plan and `appliedGeneration`/ACK metadata without exposing actual account IDs, paths, labels or full rows, to determine whether historically selected destinations can be inferred from the stored snapshot; (4) inspect independently verified external recovery sources/backups, if actually present, without assuming documentation means backups exist. No copy/restore/recompile until source of truth and missingness are established. Save any original evidence/snapshot locally before approved mutation.
+
+**Acceptance addition:** regression fixture for `current.read()` returning synthesized empty defaults while Chrome storage retains generation 583 and a nonempty historical menu. Must never silently regenerate default `redown`, reset menu, or silently classify as fresh install. Ideally provide privacy-preserving UI/API diagnostic differentiating `CURRENT_MISSING_ESTABLISHED_STATE`, `NATIVE_REGISTRATION_STALE`, and `CURRENT_UNINITIALIZED` based on evidence. If no safe complete recovery source exists, report exactly what can/cannot be recovered, preserve existing storage and require explicit owner choice.
+
 ## Source-backed two-branch fault analysis — DO NOT GUESS
 
 There are at least TWO distinct emitters of **the exact same error code**:
