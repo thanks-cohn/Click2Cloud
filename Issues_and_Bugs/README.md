@@ -6,6 +6,7 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P0 URGENT — Shelf startup fails repeatedly; Cloudflare login and Save results unusable:** [owner bug](Bugs/P0_SHELF_BOOT_LOGIN_FAILURE_REMOTES_FIRST_2026-11-08.md) · [next Codex repair task](../docs/requests/CODEX_P0_BOOT_LOGIN_REMOTES_FIRST_2026-11-08.md). Boot must show Remotes and allow login without R2/Worker/menu prerequisites; no apology splash or repeated Retry.
 - [P1 — WebP preview displays “OK” instead of image](Bugs/P1_EXPLORER_IMAGE_PREVIEW_DISPLAYS_OK_INSTEAD_OF_IMAGE_2026-11-08.md). Screenshot-reproduced on Windows Chrome; diagnose nested File API status/bytes and verify actual saved object integrity.
 - [P1 — Grid view renders file icons instead of actual image thumbnails](Bugs/P1_EXPLORER_GRID_VIEW_HAS_NO_IMAGE_THUMBNAILS_2026-11-08.md). Source-confirmed: current Grid does not create image elements; fix with authenticated, bounded, visible-only thumbnail reads.
 - [P0 — Explorer right-click menu latency and overall responsiveness](Bugs/P0_EXPLORER_CONTEXT_MENU_LATENCY_AND_RESPONSIVENESS_2026-11-07.md). Core file interaction must feel instant, be secure, and be measured with real before/after Windows Chrome traces.
