@@ -13,7 +13,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
   if(!Number.isSafeInteger(maxSnapshots)||maxSnapshots<1||maxSnapshots>256)throw TypeError('Invalid menu retention budget');
   const sink=typeof diagnostics==='function'?diagnostics:diagnostics?.emit;
   const menus=new Map(),compiledIntent=new WeakMap();
-  const intent=state=>JSON.stringify({configs:state.configs,...Object.fromEntries(['show','defaultTarget','providerVisibility','placement','favorites','menuCustomized'].map(k=>[k,state.product?.[k]]))});
+  const menuIntent=state=>JSON.stringify({configs:state.configs,...Object.fromEntries(['show','defaultTarget','providerVisibility','placement','favorites','menuCustomized'].map(k=>[k,state.product?.[k]]))});
   let evictedGenerations=0;
   const trustedExplorerSources=new WeakSet();
   const expectedSave=['auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history'];
@@ -26,12 +26,12 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     const state=await current.read();
     const spec=compileMenuSpec({mode,inventory,defaultTarget,flatProviders,providerSetupActions,product:product??state.product,configs:configs??state.configs,
       generation:generation??state.generation.desired+1,sink,operationId:operationIdentity()});
-    compiledIntent.set(spec,intent({configs:configs??state.configs,product:product??state.product}));return spec;
+    compiledIntent.set(spec,menuIntent({configs:configs??state.configs,product:product??state.product}));return spec;
   }
   async function apply(spec) {
     if(spec.coverage?.rowsComplete===false)return {state:'blocked',code:'MENU_BUDGET_EXCEEDED'};
     const state=await current.read();
-    if(compiledIntent.has(spec)&&compiledIntent.get(spec)!==intent(state))return {state:'blocked',code:'STALE_CONFIGURATION'};
+    if(compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(state))return {state:'blocked',code:'STALE_CONFIGURATION'};
     if(spec.generation<state.generation.desired)return {state:'blocked',code:'STALE_GENERATION'};
     if(spec.generation>state.generation.desired)await current.setDesiredGeneration(spec.generation,{expectedGeneration:state.generation.desired});
     retain(spec);
@@ -62,7 +62,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     try {
       const durable=await current.read();if(durable.generation.desired!==generation||durable.generation.applied!==generation)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const spec=menus.get(generation);
-      if(spec&&compiledIntent.has(spec)&&compiledIntent.get(spec)!==intent(durable))return finish({state:'blocked',code:'STALE_CONFIGURATION',operationId});
+      if(spec&&compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(durable))return finish({state:'blocked',code:'STALE_CONFIGURATION',operationId});
       if(!spec)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const providerRow=spec?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
       if(providerRow){
@@ -94,7 +94,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
-        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==intent(saved))return false;const latest=await getAuthorization(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await getAuthorization(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
         const out=await selectedRemote({target:resolved.action.target,source,operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
@@ -107,7 +107,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       try{const result=await dispatchSave({intent:resolved.action.intent,file},{providers,diagnostics:saveSink,context:scope,
         // Recheck current authority after source capture and before upload.
         authorize:async intent=>{
-          const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==intent(saved))return false;
+          const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;
           const latest=await getAuthorization(resolved.action.target);
           if(latest?.sessionId!==auth.sessionId)return false;
           const registration=registrar.inspect();
