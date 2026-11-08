@@ -2,6 +2,8 @@
 
 **Owner-reproduced on 2026-11-08, Click2Cloud v0.3.13 main df92b33, Windows Chrome, existing user profile.** Status: OPEN. First occurrence observed after connecting Cloudflare following the 0.3.13 boot/login repair. This sequence does not prove OAuth caused deletion. **Alpha-blocking state integrity/persistence incident.**
 
+**FULL ENGINEERING ASSIGNMENT:** [CODEX P0 forensic CURRENT loss, safe recovery, root-cause repair and permanent invariants](../../docs/requests/CODEX_P0_CURRENT_STATE_LOSS_FORENSIC_RECOVERY_HARDENING_2026-11-08.md). This incident remains OPEN until original user-profile data integrity and actual Windows Chrome behavior are verified; documentation commits alone do not resolve it.
+
 ## Exact evidence from owner
 
 Remotes reports **Cloudflare: Connected**, and correctly says login is separate from save readiness. But both **File Explorer** and **Settings** are replaced with:
