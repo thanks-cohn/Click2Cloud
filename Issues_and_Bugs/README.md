@@ -6,6 +6,7 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P0 URGENT — Signed in, yet both Explorer and Settings block on `CONFIGURATION_RECORD_MISSING`:** [owner-reproduced incident and no-data-loss repair contract](Bugs/P0_CONNECTED_BUT_EXPLORER_SETTINGS_CONFIG_RECORD_MISSING_2026-11-08.md). Diagnose CurrentStore integrity vs stale native menu generation before any changes; preserve all saved user data.
 - **P0 URGENT — Shelf startup fails repeatedly; Cloudflare login and Save results unusable:** [owner bug](Bugs/P0_SHELF_BOOT_LOGIN_FAILURE_REMOTES_FIRST_2026-11-08.md) · [next Codex repair task](../docs/requests/CODEX_P0_BOOT_LOGIN_REMOTES_FIRST_2026-11-08.md). Boot must show Remotes and allow login without R2/Worker/menu prerequisites; no apology splash or repeated Retry.
 - [P1 — WebP preview displays “OK” instead of image](Bugs/P1_EXPLORER_IMAGE_PREVIEW_DISPLAYS_OK_INSTEAD_OF_IMAGE_2026-11-08.md). Screenshot-reproduced on Windows Chrome; diagnose nested File API status/bytes and verify actual saved object integrity.
 - [P1 — Grid view renders file icons instead of actual image thumbnails](Bugs/P1_EXPLORER_GRID_VIEW_HAS_NO_IMAGE_THUMBNAILS_2026-11-08.md). Source-confirmed: current Grid does not create image elements; fix with authenticated, bounded, visible-only thumbnail reads.
