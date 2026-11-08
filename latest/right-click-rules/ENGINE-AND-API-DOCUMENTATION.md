@@ -325,3 +325,5 @@ The owner follow-up makes `+ Right Click → Save` the complete assignment workf
 | Timing | Opt-in local Performance Timeline (`localStorage.click2cloudPerformance='1'`, reload). Fixed event names and numeric durations only, bounded retention; no paths/URLs/tokens. Two RAF paint opportunities are not physical display latency or a Windows/native-input proof. |
 
 Detailed before/after evidence, source hashes, real-workerd destination byte checks, installed-Chrome blockers and portable Windows measurement commands are in `docs/evidence/zero-stutter/`. No genuine live provider or Windows result is inferred from fixtures or Chrome callback ACKs.
+
+Cold startup uses the same trusted message handler: registry-declared inspect methods wait for validated `dataReady` rather than unrelated Chrome registration callbacks; effectful methods retain `ready`. Storage-integrity rejection still produces structured startup errors. Sender and API authorization gates are identical; native ACK remains a separate fact. A controlled actual-background/browser test holds create callbacks and proves this ordering without claiming genuine installed Chrome timing.

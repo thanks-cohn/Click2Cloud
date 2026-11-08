@@ -9203,7 +9203,7 @@
       "extension/app.css": "21c17512ac181e1110339782efd99c2bd10915d24063dc57577bc070586c0353",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
       "extension/app.mjs": "15df6fc6fd966a244059fb5fdba3871e8ea81c0a022d4b5242e6730a9d8e00c6",
-      "extension/background.mjs": "ab1dc34dc07ac584442df74f8f2358c34497f16b61308d4bda4e678e0035bd4f",
+      "extension/background.mjs": "7797d2f8244bda3e96b42faf4e1b7710f6311b6bf77b7a4f00fd9559a8bbd1df",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest.json": "34c13d0d1c746bd70395d13347c0017fbdbde33c0513a4e6f91de4a756e987cf",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
@@ -9315,7 +9315,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const ready=",
-            "line": 150
+            "line": 156
           }
         ],
         "verification": {
@@ -9380,7 +9380,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.action.onClicked",
-            "line": 147
+            "line": 150
           }
         ],
         "verification": {
@@ -13720,7 +13720,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "9c0ed66090a2ae89b18aa06d6f13fcf8914c50bf6cddc7647b7052471aa219d1"
+    "digest": "b80accfd9c192b5250e4903343a8607846d4794cbea61e942ca8571c36a487c0"
   },
   "changeLog": [
     {

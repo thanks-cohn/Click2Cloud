@@ -139,7 +139,10 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   // Returning literal true keeps Chrome's response channel alive across startup
   // and async API work. Every accepted request settles through this one owner.
   const failed=(code,stage,error)=>{const cause=error?.code??error?.message;return {version:'3+1.1',state:'failed',code,diagnostic:{stage,...(/^[A-Z][A-Z0-9_]{2,79}$/.test(cause??'')?{causeCode:cause}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error?.name)?{causeName:error.name}:{})}};};
-  ready.then(async()=>{
+  // Canonical inspect methods need validated local state, not native-menu IPC.
+  // This changes no sender/scope gate; effectful calls retain engine startup.
+  const prerequisite=api.tools.some(t=>t.name===message.method&&t.scope==='inspect')?dataReady:ready;
+  prerequisite.then(async()=>{
     try{const result=await api.invoke({version:message.version,method:message.method,params:message.params},'gui');return result&&typeof result==='object'&&typeof result.state==='string'?result:failed('ENGINE_RESPONSE_INVALID','invoke');}
     catch(error){return failed('ENGINE_INVOCATION_FAILED','invoke',error);}
   },error=>failed('ENGINE_STARTUP_FAILED','startup',error)).then(respond);return true;
@@ -147,9 +150,13 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
-const ready=(async()=>{await storageReady;// An existing native registration is independent evidence of prior CURRENT.
+const dataReady=(async()=>{await storageReady;// An existing native registration is independent evidence of prior CURRENT.
 // If IndexedDB vanished, do not classify that installation as a new user.
-const prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration,saved=await current.read();if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return api.reconcile();})();
+const prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration,saved=await current.read();if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;})();
+const ready=dataReady.then(()=>api.reconcile());
+// Observe rejection without replacing the promise: effectful callers and the
+// public ready diagnostic still receive the original startup failure.
+void ready.catch(()=>{});
 // Developer/native-companion integration only: no externally_connectable manifest,
 // external messages, content scripts, localhost server, or client-issued grants.
 Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,ready,
