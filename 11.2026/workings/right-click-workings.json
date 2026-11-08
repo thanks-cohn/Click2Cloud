@@ -9202,9 +9202,9 @@
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "0ed845aa4f34c39ea5e4e71bae9ccbbc137b52f2c1af1f536a0fdc306297c241",
-      "extension/app.mjs": "c8567141864cafe24d60d3a73faa24da1023abfb243886508548e9f3dbc2ad78",
+      "extension/app.mjs": "d1b059d47e55dc518b3ddae1084c6ff6749a1f1ee71eac7daa61b738abca543d",
       "extension/background.mjs": "7797d2f8244bda3e96b42faf4e1b7710f6311b6bf77b7a4f00fd9559a8bbd1df",
-      "extension/explorer-layout.mjs": "bf16b1158a262db4649fee564ad36b01364416c25d265f833c8031cc3a90aa00",
+      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest.json": "4a6a398ab7190ea524e3b3cf8e017c81015434d390bfc47ce682fb4cdba677f0",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
@@ -13788,7 +13788,7 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "1c83b22f56049fbca37e4c36fc2e2785341ac98ad184a5a391a96ab87399b8d0"
+    "digest": "6edab5dc04dea238c6ae13263ce6c8979d95f3feeacc4555bda570902222dbcc"
   },
   "changeLog": [
     {
