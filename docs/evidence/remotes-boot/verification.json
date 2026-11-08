@@ -1,0 +1,40 @@
+{
+  "runtimeRevision": "9d3bbe79f2ef5a58573f2a72d2aa1c01f1e0f513",
+  "baselineRevision": "0222969dd1e7d06fa551163f0ff409c8de054211",
+  "extensionVersion": "0.3.13",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "focused": {
+    "pass": 272,
+    "fail": 0
+  },
+  "browserResults": {
+    "boot": {
+      "REPRODUCED": 2,
+      "PASS": 14
+    },
+    "product": {
+      "BLOCKED": 3,
+      "PASS": 30,
+      "NOT_TESTED": 1
+    },
+    "images": {
+      "PASS": 15
+    }
+  },
+  "authScenarios": 11,
+  "implicitSetupOrR2Calls": 0,
+  "implicitNativeRegistrationInNormalOpenLogin": 0,
+  "nativeFailureTests": "Two scenarios explicitly start failed/held maintenance; authentication remains independent",
+  "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+  "workerSourceChanged": false,
+  "installedExtension": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  },
+  "windowsChrome": "NOT_TESTED: managed executor is Linux; unpacked extension installation prohibited by administrator policy",
+  "realMV3SuspendWake": "NOT_TESTED: production module reimports are separate fixture evidence",
+  "liveCloudflareOAuth": "NOT_TESTED: no installed extension consent execution",
+  "cloudResourcesModified": false,
+  "redownUnchanged": true,
+  "evidenceClass": "Production app/background/OAuth/API with real Chromium and IndexedDB, synthetic Chrome APIs/provider replies; not installed Windows or live OAuth"
+}

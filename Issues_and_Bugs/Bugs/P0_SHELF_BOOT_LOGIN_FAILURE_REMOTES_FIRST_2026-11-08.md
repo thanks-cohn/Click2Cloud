@@ -26,3 +26,7 @@ Identify and fix the first failing boot dependency and its transient/permanent e
 Test installed Windows Chrome across repeated Shelf reopen, extension reload, browser restart, MV3 worker wake/suspend, slow storage, rejected native registration, offline R2, cancelled OAuth and existing saved destinations. No repeated Retry ritual. Log in opens real Cloudflare OAuth and ends with an honest authentication state, without altering cloud resources. Other controls do not silently fail; API and GUI match; no data loss, no false readiness or save-success claims. Record fixture versus live results separately.
 
 **Priority:** Boot API + login reliability before further polish. **Do not edit REDOWN.**
+
+## Implementation candidate — 0.3.13
+
+The development branch `dev/p0-remotes-boot-login` implements the controlling login-only policy. Baseline production-runtime tests reproduce both a sticky startup rejection after a single IDB-open error and the whole-Shelf tab click binding that reset descendant controls. See [source findings](../../docs/evidence/remotes-boot/SOURCE.md), [handoff and Windows acceptance](../../docs/evidence/remotes-boot/HANDOFF.md), and source-pinned receipts. This issue is not marked owner-Windows verified from fixture tests; installed Chrome/MV3/live OAuth remain separate acceptance gates. No cloud resources or saved user configuration were reset.

@@ -12386,9 +12386,27 @@
         "performance": "docs/evidence/image-gallery/PERFORMANCE.md: fixture proxies and outliers, not owner Windows/native input",
         "handoff": "docs/evidence/image-gallery/HANDOFF.md"
       },
-      "remotesBoot": "See docs/evidence/remotes-boot for baseline production-module reproduction and current runtime receipts. Installed Windows/MV3/live OAuth not inferred from fixtures."
+      "remotesBoot": {
+        "runtimeRevision": "9d3bbe79f2ef5a58573f2a72d2aa1c01f1e0f513",
+        "focusedPass": 272,
+        "productionRuntimeBrowser": {
+          "REPRODUCED": 2,
+          "PASS": 14
+        },
+        "productBrowser": {
+          "BLOCKED": 3,
+          "PASS": 30,
+          "NOT_TESTED": 1
+        },
+        "imageBrowser": {
+          "PASS": 15
+        },
+        "genuineInstalledChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+        "windowsAndLiveOAuth": "NOT_TESTED; no fixtures promoted to live proof",
+        "handoff": "docs/evidence/remotes-boot/HANDOFF.md"
+      }
     },
-    "sourceState": "Remotes-first login-only development branch from main 0222969, version 0.3.13. Boot/login policy overrides historical automatic initialization; previous snapshots preserved.",
+    "sourceState": "Final boot/login runtime 9d3bbe79f2ef5a58573f2a72d2aa1c01f1e0f513 (0.3.13), dev/p0-remotes-boot-login from main 0222969; current source hashes exact, previous immutable snapshots retained.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -13813,7 +13831,7 @@
       "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
       "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
     },
-    "digest": "aa276d58ffe1d46706a72a928d171fb4dacb3aa79c59bab7e134a40b0bc3523b"
+    "digest": "e59a8bb99ac13ae2693f1002e34bd5396140fdf20b997b23bf7ac40096e2fca7"
   },
   "changeLog": [
     {

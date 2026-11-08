@@ -1,0 +1,830 @@
+
+> click2cloud@0.3.13 test:browser
+> node scripts/test-product-browser.mjs
+
+[
+  {
+    "gate": "installed-extension",
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+  },
+  {
+    "gate": "quiet-login-wiring",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture"
+  },
+  {
+    "gate": "top-Explorer-first-click-expanded-selected-tree-and-file-list",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-canonical-API-fixture-provider",
+    "elapsedMs": 103
+  },
+  {
+    "gate": "background-connection-notification-preserves-Explorer-and-restores-tree",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-with-fixture-OAuth-and-notification"
+  },
+  {
+    "gate": "Explorer-keyboard-and-folder-navigation",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser"
+  },
+  {
+    "gate": "Narrow-20-level-editor-draft-and-commit",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB"
+  },
+  {
+    "gate": "verified-notification-checks-canonical-receipt-and-refreshes-matching-Explorer",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB-not-live-receipt"
+  },
+  {
+    "gate": "Settings-attention-and-provider-visibility-independent-canonical-commits",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB"
+  },
+  {
+    "gate": "GUI-and-shared-API",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB",
+    "checks": {
+      "first": "completed",
+      "replay": true,
+      "unchanged": true,
+      "stale": "REVISION_CONFLICT",
+      "badVersion": "VERSION_OR_METHOD_UNSUPPORTED",
+      "unauthorized": "PERMISSION_DENIED",
+      "agent": "completed",
+      "wrongActor": true,
+      "mainMigration": true,
+      "restored": true,
+      "reconnect": true
+    }
+  },
+  {
+    "gate": "V1-one-canonical-native-action-save-receipt-history-go-to",
+    "state": "PASS",
+    "evidenceClass": "actual-engine-browser-IDB-with-fake-provider-not-live-R2",
+    "checks": {
+      "state": "completed",
+      "completion": "verified",
+      "goState": "completed",
+      "goBucket": "redown",
+      "goKey": "verified.txt"
+    }
+  },
+  {
+    "gate": "Quick-programmatic-assignment-GUI-toggle-API-identical-topology",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-with-fixture-registrar-not-installed-native-menu",
+    "checks": {
+      "roots": [
+        "Google Drive",
+        "Dropbox",
+        "OneDrive",
+        "Cloudflare",
+        "Quick projects"
+      ],
+      "shape": "flat-save",
+      "quick": true,
+      "children": 0
+    }
+  },
+  {
+    "gate": "ordinary-manager-delete-auth-only-login-then-explicit-approved-reuse",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-with-fake-provider-not-installed-Chrome",
+    "checks": {
+      "state": "CONNECTED",
+      "bucket": "redown",
+      "rows": 1,
+      "creates": 1
+    }
+  },
+  {
+    "gate": "Cloudflare-onboarding-controls-and-programmatic-owner",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB"
+  },
+  {
+    "gate": "Worker-denial-precise-safe-evidence-no-repeat-approval-and-explicit-resume",
+    "state": "PASS",
+    "evidenceClass": "actual-app-API-IDB-with-simulated-403-not-Windows-live-error",
+    "checks": {
+      "prepare": 2,
+      "create": 1
+    }
+  },
+  {
+    "gate": "Nine-scope-reconsent-resumes-existing-operation-and-GUI-Explorer-History-GO-TO",
+    "state": "PASS",
+    "evidenceClass": "actual-app-API-IDB-with-simulated-OAuth-and-provider-not-live",
+    "checks": {
+      "loginCalls": 1,
+      "prepareCalls": 1,
+      "bucketCreates": 0,
+      "theme": "light",
+      "rows": 1,
+      "pendingCompleted": "CLOUDFLARE_READY",
+      "save": "verified"
+    }
+  },
+  {
+    "gate": "canonical-file-actions-GUI-copy-paste-API-rename-GUI-delete",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-with-simulated-file-provider",
+    "errors": []
+  },
+  {
+    "gate": "failed-receipt-completed-inspection-visible-transport-error-and-preserved-IDB",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-simulated-provider",
+    "errors": []
+  },
+  {
+    "gate": "durable-history-beyond-100-and-API-pagination",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser-IDB",
+    "firstRetained": true,
+    "unique": 129,
+    "total": 129
+  },
+  {
+    "gate": "old-cloudflare-hash-does-not-override-remotes-startup",
+    "state": "PASS",
+    "evidenceClass": "isolated-fixture-real-browser"
+  },
+  {
+    "gate": "browser-runtime-errors",
+    "state": "PASS",
+    "errors": []
+  },
+  {
+    "gate": "real-IDB-legacy-loss-before-after-mode-race-and-corruption",
+    "state": "PASS",
+    "evidenceClass": "real-Chromium-IndexedDB-not-owner-Windows",
+    "checks": {
+      "oldMigration": {
+        "before": [
+          1,
+          1,
+          1
+        ],
+        "after": [
+          0,
+          0,
+          0
+        ],
+        "preserved": false
+      },
+      "newMigration": {
+        "before": [
+          1,
+          1,
+          1
+        ],
+        "after": [
+          1,
+          1,
+          1
+        ],
+        "preserved": true
+      },
+      "staleWrite": "REVISION_CONFLICT",
+      "savedCount": 1,
+      "missing": "CONFIGURATION_RECORD_MISSING",
+      "corrupt": "CONFIGURATION_CORRUPT",
+      "invalidValues": [
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_CORRUPT",
+        "CONFIGURATION_CORRUPT"
+      ],
+      "marker": "CONFIGURATION_CORRUPT",
+      "restoreGuard": "RESTORE_NOT_EMPTY",
+      "untouched": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "gate": "Explorer-visible-reconnect-restores-durable-location-without-second-click-or-approval",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-fixture-OAuth"
+  },
+  {
+    "gate": "actual-OAuth-refresh-revoke-403-503-decline-reconsent-preserves-real-IDB",
+    "state": "PASS",
+    "evidenceClass": "actual-OAuth-code-and-browser-IDB-synthetic-provider-and-Chrome-storage",
+    "checks": {
+      "stages": [
+        {
+          "boundary": "actual-OAuth-successful-refresh",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-permission-403",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-provider-outage",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-revoked-refresh",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-disconnect",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-declined-login",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        },
+        {
+          "boundary": "actual-OAuth-PKCE-reconsent-and-account-verification",
+          "unchanged": true,
+          "changedKeys": [],
+          "approval": true
+        }
+      ],
+      "refreshes": 3,
+      "credentials": "synthetic fixture values; never owner tokens"
+    }
+  },
+  {
+    "gate": "durable-all-modes-approval-disconnect-login-reload-offline-manager",
+    "state": "PASS",
+    "evidenceClass": "real-GUI-API-IDB-fixture-OAuth-and-native-registrar",
+    "checks": {
+      "results": [
+        {
+          "countPerMode": 1,
+          "approval": true,
+          "stages": [
+            {
+              "boundary": "before-signout",
+              "same": true,
+              "revision": 1,
+              "counts": [
+                1,
+                1,
+                1
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "361b43c6a3e07030a09f08bbc1eac4b17c658089b0656930b191d55ca334534d"
+            },
+            {
+              "boundary": "disconnect",
+              "same": true,
+              "revision": 1,
+              "counts": [
+                1,
+                1,
+                1
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "361b43c6a3e07030a09f08bbc1eac4b17c658089b0656930b191d55ca334534d"
+            },
+            {
+              "boundary": "database-reopen",
+              "same": true,
+              "revision": 1,
+              "counts": [
+                1,
+                1,
+                1
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "361b43c6a3e07030a09f08bbc1eac4b17c658089b0656930b191d55ca334534d"
+            },
+            {
+              "boundary": "login-and-native-reconcile",
+              "same": true,
+              "revision": 1,
+              "counts": [
+                1,
+                1,
+                1
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "361b43c6a3e07030a09f08bbc1eac4b17c658089b0656930b191d55ca334534d"
+            }
+          ]
+        },
+        {
+          "countPerMode": 2,
+          "approval": true,
+          "stages": [
+            {
+              "boundary": "before-signout",
+              "same": true,
+              "revision": 2,
+              "counts": [
+                2,
+                2,
+                2
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "62673e8759494f81bb542dbf45b1ef123935d829b10d2dd7c5882041841964b7"
+            },
+            {
+              "boundary": "disconnect",
+              "same": true,
+              "revision": 2,
+              "counts": [
+                2,
+                2,
+                2
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "62673e8759494f81bb542dbf45b1ef123935d829b10d2dd7c5882041841964b7"
+            },
+            {
+              "boundary": "database-reopen",
+              "same": true,
+              "revision": 2,
+              "counts": [
+                2,
+                2,
+                2
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "62673e8759494f81bb542dbf45b1ef123935d829b10d2dd7c5882041841964b7"
+            },
+            {
+              "boundary": "login-and-native-reconcile",
+              "same": true,
+              "revision": 2,
+              "counts": [
+                2,
+                2,
+                2
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "62673e8759494f81bb542dbf45b1ef123935d829b10d2dd7c5882041841964b7"
+            }
+          ]
+        },
+        {
+          "countPerMode": 100,
+          "approval": true,
+          "stages": [
+            {
+              "boundary": "before-signout",
+              "same": true,
+              "revision": 3,
+              "counts": [
+                100,
+                100,
+                100
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "ac765ef91968f1b173bf80547d61f73ba7bae6333df38e59fe71b066e7772981"
+            },
+            {
+              "boundary": "disconnect",
+              "same": true,
+              "revision": 3,
+              "counts": [
+                100,
+                100,
+                100
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "ac765ef91968f1b173bf80547d61f73ba7bae6333df38e59fe71b066e7772981"
+            },
+            {
+              "boundary": "database-reopen",
+              "same": true,
+              "revision": 3,
+              "counts": [
+                100,
+                100,
+                100
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "ac765ef91968f1b173bf80547d61f73ba7bae6333df38e59fe71b066e7772981"
+            },
+            {
+              "boundary": "login-and-native-reconcile",
+              "same": true,
+              "revision": 3,
+              "counts": [
+                100,
+                100,
+                100
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "ac765ef91968f1b173bf80547d61f73ba7bae6333df38e59fe71b066e7772981"
+            }
+          ]
+        },
+        {
+          "countPerMode": 1000,
+          "approval": true,
+          "stages": [
+            {
+              "boundary": "before-signout",
+              "same": true,
+              "revision": 4,
+              "counts": [
+                1000,
+                1000,
+                1000
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "efba6574c1fa49e63f12cdcabaff52b2ba3f1c346d420a88d7f302713f3c97a5"
+            },
+            {
+              "boundary": "disconnect",
+              "same": true,
+              "revision": 4,
+              "counts": [
+                1000,
+                1000,
+                1000
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "efba6574c1fa49e63f12cdcabaff52b2ba3f1c346d420a88d7f302713f3c97a5"
+            },
+            {
+              "boundary": "database-reopen",
+              "same": true,
+              "revision": 4,
+              "counts": [
+                1000,
+                1000,
+                1000
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "efba6574c1fa49e63f12cdcabaff52b2ba3f1c346d420a88d7f302713f3c97a5"
+            },
+            {
+              "boundary": "login-and-native-reconcile",
+              "same": true,
+              "revision": 4,
+              "counts": [
+                1000,
+                1000,
+                1000
+              ],
+              "defaultTarget": {
+                "provider": "cloudflare",
+                "connectionId": "cloudflare:fixture-account",
+                "accountId": "fixture-account",
+                "bucketName": "fixture-bucket",
+                "prefix": ""
+              },
+              "selectedAccountId": "fixture-account",
+              "approval": true,
+              "nativeGeneration": {
+                "desired": 1,
+                "applied": 1
+              },
+              "configurationSHA256": "efba6574c1fa49e63f12cdcabaff52b2ba3f1c346d420a88d7f302713f3c97a5"
+            }
+          ]
+        }
+      ],
+      "countBefore": 1000,
+      "pageCount": 20,
+      "total": 1000,
+      "provisionCalls": 0
+    },
+    "afterReload": {
+      "counts": [
+        1000,
+        1000,
+        1000
+      ],
+      "approval": true
+    }
+  },
+  {
+    "gate": "GUI-plus-Right-Click-save-canonical-native-action-exact-folder-Simple-Narrow-Depth-reconnect",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-engine-fake-native-ACK-and-provider-NOT-LIVE-R2",
+    "modes": [
+      {
+        "mode": "simple",
+        "nativeGeneration": 4,
+        "destination": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture-account",
+          "accountId": "fixture-account",
+          "bucketName": "fixture-bucket",
+          "prefix": "projects/"
+        },
+        "save": "completed",
+        "key": "projects/simple.png"
+      },
+      {
+        "mode": "nested",
+        "nativeGeneration": 5,
+        "destination": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture-account",
+          "accountId": "fixture-account",
+          "bucketName": "fixture-bucket",
+          "prefix": "projects/"
+        },
+        "save": "completed",
+        "key": "projects/nested.png"
+      },
+      {
+        "mode": "depth",
+        "nativeGeneration": 6,
+        "destination": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture-account",
+          "accountId": "fixture-account",
+          "bucketName": "fixture-bucket",
+          "prefix": "projects/"
+        },
+        "save": "completed",
+        "key": "projects/depth.png"
+      }
+    ]
+  },
+  {
+    "gate": "immediate-disabled-menu-stale-IPC-stable-shell-grid-preview-cancel-address-offline",
+    "state": "PASS",
+    "evidenceClass": "actual-GUI-API-IDB-synthetic-provider-delayed-IPC-no-installed-Chrome"
+  },
+  {
+    "gate": "actual-product-background-module-boot",
+    "state": "PASS",
+    "evidenceClass": "browser-module-with-fake-Chrome-transport",
+    "ready": "completed",
+    "api": "completed",
+    "tools": 56,
+    "bridge": {
+      "withoutDocumentId": "completed",
+      "denied": "UNTRUSTED_APP_SENDER",
+      "reason": "APP_URL_MISMATCH",
+      "invalid": "VERSION_OR_METHOD_UNSUPPORTED"
+    }
+  },
+  {
+    "gate": "cold-background-inspection-completes-before-delayed-native-registration",
+    "state": "PASS",
+    "evidenceClass": "actual-background-API-browser-IDB-with-delayed-Chrome-callbacks-not-installed-extension",
+    "checks": {
+      "inspection": "completed",
+      "nativeStillPending": true,
+      "nativeCompleted": true
+    }
+  },
+  {
+    "gate": "accepted-request-reports-startup-rejection-without-port-loss",
+    "state": "PASS",
+    "evidenceClass": "actual-background-local-Chrome-fixture",
+    "response": {
+      "version": "3+1.1",
+      "state": "failed",
+      "code": "STORAGE_ACCESS_UNAVAILABLE",
+      "diagnostic": {
+        "stage": "credential-storage",
+        "causeCode": "STORAGE_ACCESS_FAILED"
+      }
+    }
+  },
+  {
+    "gate": "Shelf-message-failures-identify-actual-stage-and-cause",
+    "state": "PASS",
+    "evidenceClass": "actual-app-local-transport-fixture-not-installed-extension"
+  },
+  {
+    "gate": "same-profile-full-Chromium-process-restart-durable-records",
+    "state": "PASS",
+    "evidenceClass": "real-Chromium-IndexedDB-not-installed-extension",
+    "checks": {
+      "counts": [
+        1000,
+        1000,
+        1000
+      ],
+      "defaultBucket": "fixture-bucket",
+      "approval": true,
+      "configurationSHA256": "efba6574c1fa49e63f12cdcabaff52b2ba3f1c346d420a88d7f302713f3c97a5",
+      "location": {
+        "provider": "cloudflare",
+        "connectionId": "cloudflare:fixture-account",
+        "accountId": "fixture-account",
+        "bucketName": "fixture-bucket",
+        "prefix": "projects/"
+      }
+    }
+  },
+  {
+    "gate": "native-rendering-click-restart",
+    "state": "BLOCKED",
+    "code": "EXTENSION_INSTALL_POLICY"
+  },
+  {
+    "gate": "live-provider-OAuth-consent",
+    "state": "NOT_TESTED",
+    "code": "INSTALLED_EXTENSION_CONSENT_NOT_EXECUTED"
+  },
+  {
+    "gate": "live-native-save-readback",
+    "state": "BLOCKED",
+    "code": "INSTALLED_EXTENSION_AND_AUTHORIZED_WORKER_TRANSPORT_REQUIRED"
+  }
+]
