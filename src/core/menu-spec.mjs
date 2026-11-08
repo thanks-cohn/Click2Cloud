@@ -96,8 +96,10 @@ export function compileMenuSpec(options={}) {
       const peers=siblings.get(parentId)??[];
       if(role!=='separator'&&peers.some(peer=>peer.role!=='separator'&&peer.label===label))throw new MenuSpecError('LABEL_COLLISION','Sibling menu labels collide; resolve explicitly before applying.');
       const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;
-      if(setupProvider){enabled=true;if(id!==stableId('provider-entry','cloudflare'))label+=' · Set up';}
-      const row={actionKind:setupProvider?'setup':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
+      // Saved destinations keep their chosen label. Unready clicks explain the
+      // actual blocker in the Shelf; never add a second native setup workflow.
+      if(setupProvider)enabled=true;
+      const row={actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
     if(composite) {

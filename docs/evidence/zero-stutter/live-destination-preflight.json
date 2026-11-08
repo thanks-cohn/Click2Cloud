@@ -1,0 +1,11 @@
+{
+  "evidenceClass": "READ_ONLY_EXISTING_ISOLATED_CLOUDFLARE_WORKER",
+  "httpStatus": 200,
+  "ownershipAndExistingBindings": "confirmed",
+  "state": "BLOCKED",
+  "code": "EXISTING_TEST_SIGNING_KEY_NOT_READABLE",
+  "credentialsPrinted": false,
+  "resourcesModified": false,
+  "noDeployment": "Owner excludes deploying Workers for this repair; no test signing-key rotation or production mutation attempted",
+  "nativeAcceptance": "Separately blocked by unpacked-extension installation policy; owner Windows pending"
+}

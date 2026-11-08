@@ -1,0 +1,27 @@
+{
+  "referenceRepository": "thanks-cohn/REDOWN",
+  "referenceRevision": "e58bf99f4851f635cecc572e483ae35e184677f2",
+  "targetBaseline": "04644f431a960b7ea61c231fa28e3fba33f166e2",
+  "referenceSourceFiles": {
+    "extension/shelf-explorer.mjs": "e4f4d1cf35637871a7209dfb5182d4294abcc5cbdb22894c4c11138466ce59bf",
+    "extension/shelf-explorer-model.mjs": "365a4b17ac6467bd980148f2186abafdc3474cecb94aed1037e07ce274aca448",
+    "extension/beta/file-api.mjs": "0efa16667c92e527eba88324c4b153bdcdcd84cfc2fd861262257d54a05cce66",
+    "docs/runtime/verification/storage-popout-performance/summary.json": "2478d111496e51d3b4cae0c15cebf923ef81873b78ea0a775d09dce35f7250d3"
+  },
+  "method": "Read-only source review; no legacy engine or Chute code imported",
+  "patterns": [
+    "scheduleRows passive scroll + RAF",
+    "renderRows stable viewport and cached layout/sort",
+    "showMenu immediate local presentation",
+    "createExplorerModel children metadata TTL/inflight queue + epochs",
+    "independent low-overhead preview cancellation"
+  ],
+  "referenceBenchmarks": "REDOWN storage-popout summary is a historical method reference, not Click2Cloud performance evidence",
+  "rejectedReferenceLimitations": [
+    "fixed history length not copied",
+    "no claims of current Windows speed based on historical REDOWN numbers"
+  ],
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu": "managed executor; unspecified CPU scheduling",
+  "workersModified": false
+}

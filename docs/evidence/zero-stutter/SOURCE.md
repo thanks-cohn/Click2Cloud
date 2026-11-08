@@ -1,0 +1,25 @@
+# Zero-stutter Explorer + complete destination Save: source repair
+
+Baseline Click2Cloud main: `04644f431a960b7ea61c231fa28e3fba33f166e2`. Development branch: `dev/p0-zero-stutter`, version 0.3.11. REDOWN main read-only reference: `e58bf99f4851f635cecc572e483ae35e184677f2`; checksums/patterns in reference.json. No REDOWN or third-party/Chute implementation was imported.
+
+## Causal findings
+
+- Context menu visibility awaited inspectExplorerContextMenu. A controlled 2.1-second injected descriptor delay yielded about 2.17-second visible-menu latency before repair. The same delayed check no longer delays a local disabled shell. The shell is not permission or a fake completed cloud action.
+- Ordinary navigation/render rebuilt main, toolbar, scrollport and handlers. The repaired shell retains toolbar/viewport identity; existing virtualization updates only visible rows on RAF, with resize geometry and focus preservation. Cached immutable pages retain their sorted order across revisits; pending reads coalesce with bounded concurrency. This avoids repeated sorting/DOM work rather than adding a second Explorer engine.
+- Preview acquired a whole serialized body before showing feedback. It now shows loading immediately, uses the existing range API with identity checks and bounded reads (up to three in flight after first identity), and stops scheduling when closed/superseded. Already-sent runtime IPC cannot be physically cancelled; epochs prevent stale display. Existing text/image preview memory budgets are not transfer limits.
+- Menu inventory performed a remote readiness sweep for every saved destination on boot/inspection. It now projects local observations; explicit destination Save refreshes its new exact targets, and every actual transfer independently rechecks fresh authority. View/theme commits persist normally without redundant native registration when the existing ACK is valid.
+- Existing folder readiness required a per-prefix historical write proof even when the same Worker already had a current bucket write proof and accepted the exact scoped capability. A new folder could therefore acquire an unnecessary native `· Set up` action. Readiness now reuses **same-bucket, same-code** verified writes only after the current exact capability/authority check; server binding/prefix checks remain. No Worker/bucket creation, scope widening, probe or deployment is hidden in menu configuration.
+
+## Owner follow-up contract
+
+`+ Right Click → Save` persists the captured exact target, refreshes its prerequisite state, compiles and awaits canonical Chrome ACK. The API returns destinationReadiness alongside configuration/native/backup. A ready target routes directly to the existing TRUE REMOTE saver. Saved native labels never add `· Set up`; genuinely blocked targets retain an attention reason and show their actual blocker in the Shelf. A missing Worker is setup-required, not falsely labeled an existing-Worker upgrade. A constrained Worker reports WORKER_DESTINATION_SCOPE_REQUIRED; no automatic widening or new resources.
+
+Simple/Narrow/Depth/Quick/default rules, stable identities, existing CurrentStore/approval ledger, OAuth profile and extension ID remain. GUI pending View is only transient presentation intent; setView through commitConfigChange is the authoritative stored setting. Grid/address/footer manager are the requested overlapping UX repairs: bounded icon tiles, full copyable account-bound URI with visual middle ellipsis, one footer manager entrypoint. No thumbnail storm or independent configuration store.
+
+## Security and evidence limits
+
+The initial context shell imports the same pure descriptor as the canonical API and disables every action. Trusted reconciliation reflects current account/read/write authority. Stale responses after selection/navigation/close cannot enable controls; dispatch still validates actual authority and target. Metadata caches invalidate on connection notifications. Offline refresh retains verified rows only with a visible stale/unavailable label, never an invented empty or saved result.
+
+Tests execute actual app/API/IndexedDB with fixture OAuth/native callbacks, and actual local workerd/R2 storage tests verify new subfolder bytes. These are not a live-provider or Windows pass. The existing isolated live Worker settings GET succeeded without resource mutation, but its secret signing binding is unreadable; no signing-key rotation/deployment was attempted. Genuine unpacked Chrome installation and owner Windows acceptance remain independent gates.
+
+Performance traces measure event dispatch through visible DOM plus two RAF paint opportunities. This conservative method is not native-input EventTiming, field INP, physical display latency or proof that Cloudflare network calls are instantaneous. Raw before/after records preserve outliers; no universal zero-stutter claim follows from p95. Final handoff distinguishes candidate hashes/revisions, preliminary measurements, long-task tails and external acceptance blockers.

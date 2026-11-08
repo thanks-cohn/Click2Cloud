@@ -8,3 +8,18 @@
 #files .row-spacer{height:auto;pointer-events:none}
 #files.list td:not(:first-child),#files.list th:not(:first-child){display:none}
 .dest-row .badge{display:inline-block;margin:6px 0;padding:2px 8px;border:1px solid var(--accent);border-radius:12px;background:var(--selected);font-size:12px;font-weight:600}
+/* A persistent shell/scrollport; no full panel replacement on ordinary navigation. */
+.explorer-shell{height:100%;min-height:0;display:flex;flex-direction:column}
+.explorer-shell #files{height:auto;flex:1;min-height:0;contain:layout style;overscroll-behavior:contain}
+#files [hidden]{display:none!important}
+#files .grid-tiles:not([hidden]){display:grid;gap:0;align-content:start}
+.file-tile{height:136px;padding:8px;overflow:hidden;cursor:default;border-radius:4px}
+.file-tile>div{height:100%;padding:8px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:5px}
+.file-tile span{display:block;font-size:36px;height:55px}.tile-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-tile:hover>div{background:var(--raised)}.file-tile[aria-selected=true]>div{background:var(--selected)}
+.address{position:relative;overflow:hidden;min-width:100px;height:36px;display:block}
+.address input{width:100%;height:100%;margin:0;padding:7px 10px;color:transparent}
+#location-display{position:absolute;inset:0;padding:8px 10px;white-space:nowrap;overflow:hidden;pointer-events:none}
+.address:focus-within input{color:var(--text)}.address:focus-within #location-display{display:none}
+#context:focus{outline:1px solid var(--line)}
+.tile-row{display:contents}

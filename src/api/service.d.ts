@@ -15,7 +15,7 @@ export type Change =
  | {type:'makeDefault';target:Target}
  | {type:'clearDefault'}
  | {type:'setTheme';theme:'dark'|'light'}
- | {type:'setView';view:'details'|'list'}
+ | {type:'setView';view:'details'|'list'|'grid'}
  | {type:'setFavorite';connectionId:string;favorite:boolean}
  | {type:'setProviderPlacement';provider:string;placement:'direct'|'other'}
  | {type:'setProviderMenuVisibility';provider:'google-drive'|'dropbox'|'onedrive'|'cloudflare';visible:boolean}
@@ -55,9 +55,10 @@ export interface WorkerAccessDiagnostic {code:string;kind:'cloudflare-worker-acc
 export interface CloudflareSetupResult {state:'completed'|'partial'|'blocked'|'uncertain';code:string;accountId?:string;native?:{state:string;code?:string};diagnostic?:WorkerAccessDiagnostic;target?:Target;probe?:RemoteReceipt;provisionMs?:number;durationMs?:number;probeRetention?:string}
 /** Canonical compiler output; composition explains Quick promotion without mutating configuration. */
 export interface MenuComposition {policy:'quick-promoted';defaultKey:string|null;providerVisible:boolean;cloudflareChoiceCount:number;quickTargets:Target[];defaultQuickSuppressed:boolean;cloudflareShape:'hidden'|'flat-save'|'submenu'|'attention'}
-export interface MenuRow {id:string;itemId:string;parentId:string|null;label:string;role:string;actionId:string|null;target:Target|null;enabled:boolean;visible:boolean;contexts:string[];reason:string;siblingIndex:number}
+export interface MenuRow {actionKind?:'save'|'attention'|'provider'|'branch'|'separator'|'navigation';setupProvider?:string;id:string;itemId:string;parentId:string|null;label:string;role:string;actionId:string|null;target:Target|null;enabled:boolean;visible:boolean;contexts:string[];reason:string;siblingIndex:number}
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface Results {
+ commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
  listDestinations:{items:(Destination|{target:Target;maxDepth:number})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};

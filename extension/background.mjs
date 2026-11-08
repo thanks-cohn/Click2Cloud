@@ -69,13 +69,16 @@ const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseF
   }
   return result;
 }}),{authority:oauth.authority});
-async function getInventory() {
+// Menu inspection/boot projects saved observations without a full-cloud network
+// sweep. Destination Save refreshes its exact new targets; every actual save
+// independently rechecks current authority and scoped Worker capability.
+async function getInventory({refreshTargets=[]}={}) {
   const status=await oauth.status();
   const policy=(await current.read()).product.recovery;
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
   const state=await current.read();attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
-  const readinessTargets=[...new Map(savedTargets.map(t=>[targetKey(t),t])).values()];let readinessIndex=0;
-  await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{while(readinessIndex<readinessTargets.length)await remoteReady(readinessTargets[readinessIndex++]);}));
+  const readinessTargets=[...new Map(refreshTargets.filter(t=>t.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];let readinessIndex=0;
+  await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{while(readinessIndex<readinessTargets.length){const target=readinessTargets[readinessIndex++];snapshots.delete(targetKey(target));await remoteReady(target);}}));
   for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
   return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:snapshots.get(targetKey(s.target))?.ready??false,folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})})))};
 }

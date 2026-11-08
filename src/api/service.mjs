@@ -15,7 +15,7 @@ const arr=items=>({type:'array',items,maxItems:Number.MAX_SAFE_INTEGER});
 const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested','depth','flat']);
 const level=obj({hidden:bool,label:str});
 const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
-  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list']},connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
+  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
@@ -185,7 +185,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const rows=state.configs[m].destinations??state.configs[m].scopes;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
         }
         else if(method==='inspectMenuTree'){const spec=engine.getMenu(params.generation);if(!spec)fail('STALE_GENERATION');data=inspectMenuTree(spec,params);}
-        else if(method==='inspectExplorerContextMenu')data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,mutations:fileApi?.capabilities?.includes('mkdir')===true});
+        else if(method==='inspectExplorerContextMenu'){const a=await oauth?.status(),available=a?.state==='CONNECTED'&&a.accounts?.some(x=>x.id===params.target.accountId)&&params.target.connectionId==='cloudflare:'+params.target.accountId,scopes=a?.scopes??a?.permissions?.issuedScopes;data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,available:!!available,mutations:!!available&&(!Array.isArray(scopes)||scopes.includes('workers-r2.write'))&&fileApi?.capabilities?.includes('mkdir')===true});}
         else if(method==='previewContextMenu') {
           const evidence=engine.getEvidence(),generation=evidence.acknowledgedGeneration;
           const installed=generation!==null&&!evidence.pending&&evidence.desired?.generation===generation?engine.getMenu(generation):null;
@@ -209,9 +209,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           else {
             if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
             receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params)});
-            const native=receipt.replayed?engine.getEvidence().lastOutcome??{state:'blocked',code:'NATIVE_ACK_UNAVAILABLE'}:await reconcile();let backup;
+            const added=[...new Map(params.changes.flatMap(c=>c.type==='createDestination'||c.type==='makeDefault'?[c.target]:c.type==='setDepthDisplayBuckets'?c.scopes.map(s=>s.target):[]).map(t=>[targetKey(t),t])).values()];
+            if(!receipt.replayed&&added.length)await getInventory({refreshTargets:added});
+            // Display-only preferences persist through this same transaction without
+            // rebuilding unrelated native menus on every View/Theme click.
+            const displayOnly=params.changes.every(c=>['setView','setTheme'].includes(c.type)),evidence=engine.getEvidence?.();
+            const native=receipt.replayed?evidence?.lastOutcome??{state:'blocked',code:'NATIVE_ACK_UNAVAILABLE'}:displayOnly&&evidence?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true}):await reconcile();let backup;
             if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
-            data={configuration:await current.read(),native,backup};
+            const destinationReadiness=[];for(const target of added){const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));if(row?.enabled&&row.actionKind!=='attention'&&native.state==='completed')destinationReadiness.push({target,state:'READY',code:'DESTINATION_NATIVE_ACKNOWLEDGED'});else{const checked=cloudflare?.check?await cloudflare.check(target.accountId,target):null;destinationReadiness.push({target,state:'blocked',code:checked?.worker?.code??checked?.code??row?.reason??'NATIVE_APPLY_INCOMPLETE'});}}
+            data={configuration:await current.read(),native,backup,destinationReadiness};
           }
         }
         else if(method==='reconcileNativeMenu'){if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await reconcile();}

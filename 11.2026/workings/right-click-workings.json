@@ -9200,12 +9200,12 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "a44c9d07426edb73c067c26ec1074b70194d0a33",
     "sourceFiles": {
-      "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
+      "extension/app.css": "21c17512ac181e1110339782efd99c2bd10915d24063dc57577bc070586c0353",
       "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "a8f38ea505986b88030b3be0b1fe6caced8d8c5f621aaa1128167888a0db2426",
-      "extension/background.mjs": "6e5dd00ad8c066cf72dff02caa48b4c01b2969ca16d3d94c587ecd939fba5ee8",
+      "extension/app.mjs": "15df6fc6fd966a244059fb5fdba3871e8ea81c0a022d4b5242e6730a9d8e00c6",
+      "extension/background.mjs": "ab1dc34dc07ac584442df74f8f2358c34497f16b61308d4bda4e678e0035bd4f",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "f1d70927668c30140c00b1567bd694932192981d265030c36d0dc8be131a1821",
+      "extension/manifest.json": "34c13d0d1c746bd70395d13347c0017fbdbde33c0513a4e6f91de4a756e987cf",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9217,15 +9217,15 @@
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
-      "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
-      "src/api/explorer-context-menu.mjs": "c0447ad9578815f9a58aa837c5d75dd04507039de80f236e60ff552b52a3bea8",
+      "src/api/config.mjs": "bb28da6961f661f4448448ddc1bbf12ef713dc0b4ae8de4576d88202da3172b9",
+      "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
-      "src/api/service.mjs": "4f22d7389445aebc5cca20b540dbbd44b1382a55afaf7c669afa3fdb7938259f",
+      "src/api/service.mjs": "34b490be48577d5e1f71b3584d1af1ac9b4379c0ddedcfe358bd808139274b6a",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
-      "src/build-info.mjs": "aabae2c5992081f575e908a798781955fa019a18cbad06e4e73f609d8d3aab41",
+      "src/build-info.mjs": "7f4bac12977596b98ad7e05d5ba91f19618dbf4ca1f0d23a364fceaa7bfbe7f6",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
@@ -9239,7 +9239,7 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "ca2330c9185d8cf03f10dceacd934650a9c2e607cfbc564dcef3a4b70fa79e9c",
+      "src/cloudflare/transport.mjs": "2df2784e1539d36451992e404aedf546b27e99d491c4ad48c122bf8ed65faf72",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
       "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -9249,7 +9249,7 @@
       "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
-      "src/core/menu-spec.mjs": "2d3843c6198d7c3c0b23ca0c06de24b44c0c6e6afbc6319deb9a80b1e4f941e8",
+      "src/core/menu-spec.mjs": "b5d67ccc3fff3dffa508e28330265add37295eee0750dedc8cfa7b8863f46973",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9259,8 +9259,10 @@
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
-      "src/explorer/listing-view.mjs": "cce2f95fdcd1a05de4e58da4d55012f8801b618e57b1c27654caf3896317b2fa",
+      "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
+      "src/explorer/location-view.mjs": "33b0e2451d2af5f382413565a321f6f95f8a3586b52e831385644ef0e9f1855a",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
+      "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
       "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
@@ -9313,7 +9315,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const ready=",
-            "line": 147
+            "line": 150
           }
         ],
         "verification": {
@@ -9346,7 +9348,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "dispatch:async",
-            "line": 90
+            "line": 93
           }
         ],
         "verification": {
@@ -9378,7 +9380,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.action.onClicked",
-            "line": 144
+            "line": 147
           }
         ],
         "verification": {
@@ -9430,10 +9432,10 @@
         "preconditions": "Shelf requested",
         "trigger": "entry",
         "guard": "See exact hash-bound source guard; current behavior: Existing app is Chrome side_panel default_path; dedicated connect popup files removed",
-        "actual": "Existing app is Chrome side_panel default_path; dedicated connect popup files removed",
+        "actual": "Shelf startup no longer awaits a full remote readiness sweep of all saved destinations. Inventory projects local observations; new destination Save refreshes its specific targets and every actual transfer rechecks fresh authority. No startup cloud writes.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Existing app is Chrome side_panel default_path; dedicated connect popup files removed",
+        "nextState": "Shelf startup no longer awaits a full remote readiness sweep of all saved destinations. Inventory projects local observations; new destination Save refreshes its specific targets and every actual transfer rechecks fresh authority. No startup cloud writes.",
         "uiEffect": "Existing app is Chrome side_panel default_path; dedicated connect popup files removed",
         "externalResourceEffect": "none",
         "persistence": "Existing trusted session/local OAuth or canonical CURRENT owners as applicable; no new token store",
@@ -9449,11 +9451,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED_AND_LOCAL_UNIT_FIXTURE",
-          "status": "PASS",
-          "meaning": "Source and local fixture behavior, not installed/live OAuth certification",
-          "testFile": "tests/nov07-auth-shelf.test.mjs",
-          "runtime": "BLOCKED_INSTALLED_CHROME_NOT_VERIFIED"
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURES",
+          "testFile": "tests/zero-stutter.test.mjs",
+          "destinationTest": "tests/destination-ready.test.mjs",
+          "evidence": "docs/evidence/zero-stutter",
+          "installedWindows": "BLOCKED_UNVERIFIED"
         },
         "contractViolation": null
       },
@@ -9509,7 +9511,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const active=",
-            "line": 124
+            "line": 126
           }
         ],
         "verification": {
@@ -9543,7 +9545,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "if(active.length===1)",
-            "line": 135
+            "line": 137
           }
         ],
         "verification": {
@@ -9577,7 +9579,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "else {const parent=",
-            "line": 136
+            "line": 138
           }
         ],
         "verification": {
@@ -9645,7 +9647,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const hiddenDefault=",
-            "line": 111
+            "line": 113
           }
         ],
         "verification": {
@@ -9662,14 +9664,14 @@
         "preconditions": "Explicit Quick shortcut",
         "trigger": "menu",
         "guard": "Current active configuration, exact normalized identity and Settings precedence",
-        "actual": "Visible Simple Quick targets are promoted after the four ordinary provider roots and excluded from Cloudflare child count; redundant Default Quick suppressed without changing stored flags. Explicit Flat retains Quick. Same canonical compiler/API/registrar.",
+        "actual": "Existing owner Quick promotion and Simple/Narrow/Depth compiler preserved. Destination labels never append Set up; unready attention remains truthful in metadata/Shelf.",
         "apiMethods": [
           "previewNativeMenu",
           "previewContextMenu",
           "commitConfigChange"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Visible Simple Quick targets are promoted after the four ordinary provider roots and excluded from Cloudflare child count; redundant Default Quick suppressed without changing stored flags. Explicit Flat retains Quick. Same canonical compiler/API/registrar.",
+        "nextState": "Existing owner Quick promotion and Simple/Narrow/Depth compiler preserved. Destination labels never append Set up; unready attention remains truthful in metadata/Shelf.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -9683,9 +9685,11 @@
           }
         ],
         "verification": {
-          "level": "LOCAL_TESTED",
-          "testFile": "tests/latest-quick-rules.test.mjs",
-          "installedChrome": "BLOCKED_PENDING_REAL_EXTENSION_TEST"
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURES",
+          "testFile": "tests/zero-stutter.test.mjs",
+          "destinationTest": "tests/destination-ready.test.mjs",
+          "evidence": "docs/evidence/zero-stutter",
+          "installedWindows": "BLOCKED_UNVERIFIED"
         },
         "contractViolation": null
       },
@@ -9711,7 +9715,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const candidates=",
-            "line": 107
+            "line": 109
           }
         ],
         "verification": {
@@ -9745,7 +9749,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const root=",
-            "line": 145
+            "line": 147
           }
         ],
         "verification": {
@@ -10371,7 +10375,7 @@
         "preconditions": "Approved first setup; redown exists",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Before any initialization, read and validate durable configuration. ANY saved assignment in ANY mode/provider/account (including inactive/hidden) or Default blocks redown fallback. Same-account existing target/READY uses read-only checks and retained approval. Default-only can link exact target locally. Empty genuine state initializes only on explicit authorized login.",
+        "actual": "Saved configuration and consent remain authoritative. Destination commit refreshes only exact new target readiness and waits for canonical Chrome ACK. Existing same-bucket verified write plus a current exact scoped Worker capability can serve new folders, without reprovisioning. Genuine scope/build/permission blockers remain in Shelf.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
@@ -10381,7 +10385,7 @@
           "inspectCloudflare"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Before any initialization, read and validate durable configuration. ANY saved assignment in ANY mode/provider/account (including inactive/hidden) or Default blocks redown fallback. Same-account existing target/READY uses read-only checks and retained approval. Default-only can link exact target locally. Empty genuine state initializes only on explicit authorized login.",
+        "nextState": "Saved configuration and consent remain authoritative. Destination commit refreshes only exact new target readiness and waits for canonical Chrome ACK. Existing same-bucket verified write plus a current exact scoped Worker capability can serve new folders, without reprovisioning. Genuine scope/build/permission blockers remain in Shelf.",
         "uiEffect": "On intended login/initialization with no saved target/default, exact existing redown root is reused untouched; ordinary Simple registration and Default are committed after verified probe.",
         "externalResourceEffect": "Necessary approved Worker/DO/probe only",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -10400,10 +10404,11 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
-          "testFile": "tests/permanent-destinations.test.mjs",
-          "evidence": "docs/evidence/permanent-destinations/",
-          "installedWindows": "NOT_VERIFIED"
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURES",
+          "testFile": "tests/zero-stutter.test.mjs",
+          "destinationTest": "tests/destination-ready.test.mjs",
+          "evidence": "docs/evidence/zero-stutter",
+          "installedWindows": "BLOCKED_UNVERIFIED"
         },
         "contractViolation": null
       },
@@ -10922,7 +10927,7 @@
           {
             "path": "src/cloudflare/transport.mjs",
             "symbol": "verifyObject:",
-            "line": 43
+            "line": 46
           }
         ],
         "verification": {
@@ -10988,7 +10993,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 315
+            "line": 351
           }
         ],
         "verification": {
@@ -11005,7 +11010,7 @@
         "preconditions": "Navigate or page listing",
         "trigger": "explorer",
         "guard": "Epoch before API await; exact target, cursor; dedup key",
-        "actual": "Top File Explorer enters through canonical enterExplorer: current authorized accounts/buckets, durable last explicit location then saved Default then selected/sole account actual redown or unambiguous bucket. Multiple unselected accounts require choice. Populate/expand/select tree and list on first click; reconnect while visible restores intent. Remotes remains startup tab.",
+        "actual": "Persistent Explorer shell and scrollport; first-click enterExplorer retained. Metadata pages coalesce under bounded concurrency/TTL, queued stale readers cancel and sent IPC is epoch-discarded. Refresh retains previous verified rows with honest stale/unavailable state. Cached sort and visible-only RAF viewport, Details/List/Grid.",
         "apiMethods": [
           "enterExplorer",
           "listAccounts",
@@ -11015,7 +11020,7 @@
           "navigateExplorer"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Top File Explorer enters through canonical enterExplorer: current authorized accounts/buckets, durable last explicit location then saved Default then selected/sole account actual redown or unambiguous bucket. Multiple unselected accounts require choice. Populate/expand/select tree and list on first click; reconnect while visible restores intent. Remotes remains startup tab.",
+        "nextState": "Persistent Explorer shell and scrollport; first-click enterExplorer retained. Metadata pages coalesce under bounded concurrency/TTL, queued stale readers cancel and sent IPC is epoch-discarded. Refresh retains previous verified rows with honest stale/unavailable state. Cached sort and visible-only RAF viewport, Details/List/Grid.",
         "uiEffect": "Existing Universal File API reads actual verified destination data; local workerd/R2 integration checks management-list adapter against real local bucket objects, separately from browser fixture behavior.",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -11025,7 +11030,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 140
+            "line": 155
           },
           {
             "path": "src/api/service.mjs",
@@ -11035,14 +11040,15 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function enterExplorer",
-            "line": 13
+            "line": 19
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_AND_REAL_BROWSER_IDB_FIXTURE_AUTH",
-          "testFile": "tests/permanent-destinations.test.mjs",
-          "evidence": "docs/evidence/permanent-destinations/",
-          "installedWindows": "NOT_VERIFIED"
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURES",
+          "testFile": "tests/zero-stutter.test.mjs",
+          "destinationTest": "tests/destination-ready.test.mjs",
+          "evidence": "docs/evidence/zero-stutter",
+          "installedWindows": "BLOCKED_UNVERIFIED"
         },
         "contractViolation": null
       },
@@ -11051,10 +11057,10 @@
         "preconditions": "Pointer/keyboard/right-click",
         "trigger": "explorer",
         "guard": "Cached ordered revision and viewport indices",
-        "actual": "Ctrl/Shift selection and context focus; no repeated full sorts or network on selection",
+        "actual": "Visible selection/keyboard updates only; stable keyed identity and focus. Single footer manager; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Ctrl/Shift selection and context focus; no repeated full sorts or network on selection",
+        "nextState": "Visible selection/keyboard updates only; stable keyed identity and focus. Single footer manager; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
         "uiEffect": "Ctrl/Shift selection and context focus; no repeated full sorts or network on selection",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -11064,15 +11070,15 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 172
+            "line": 193
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
-          "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "scripts/measure-explorer.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "level": "SOURCE_AND_LOCAL_BROWSER_FIXTURES",
+          "testFile": "tests/zero-stutter.test.mjs",
+          "destinationTest": "tests/destination-ready.test.mjs",
+          "evidence": "docs/evidence/zero-stutter",
+          "installedWindows": "BLOCKED_UNVERIFIED"
         },
         "contractViolation": null
       },
@@ -11156,7 +11162,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 175
+            "line": 196
           }
         ],
         "verification": {
@@ -11318,7 +11324,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 286
+            "line": 322
           }
         ],
         "verification": {
@@ -11348,7 +11354,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const debugApi=",
-            "line": 129
+            "line": 132
           }
         ],
         "verification": {
@@ -11388,7 +11394,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "chrome.runtime.onMessage.addListener",
-            "line": 131
+            "line": 134
           },
           {
             "path": "src/chrome/trusted-sender.mjs",
@@ -11436,7 +11442,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 25
+            "line": 31
           }
         ],
         "verification": {
@@ -11519,7 +11525,7 @@
           {
             "path": "extension/background.mjs",
             "symbol": "const readinessTargets=",
-            "line": 77
+            "line": 80
           }
         ],
         "verification": {
@@ -11613,7 +11619,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "id=\"shelf-reauthorize\"",
-            "line": 85
+            "line": 93
           }
         ],
         "verification": {
@@ -11654,7 +11660,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 317
+            "line": 353
           }
         ],
         "verification": {
@@ -11790,8 +11796,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectShelfAttention",
@@ -11799,8 +11805,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "openCloudflareDestinations",
@@ -11808,8 +11814,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectCloudflare",
@@ -11817,8 +11823,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "checkCloudflareR2",
@@ -11826,8 +11832,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "selectCloudflareAccount",
@@ -11835,8 +11841,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "openCloudflareActivation",
@@ -11844,8 +11850,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "approveCloudflareSetup",
@@ -11853,8 +11859,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "repairCloudflareDestination",
@@ -11862,8 +11868,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "invokeProviderAction",
@@ -11871,8 +11877,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectRemoteHistory",
@@ -11880,8 +11886,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectRemoteReceipt",
@@ -11889,8 +11895,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectCloudflareSetup",
@@ -11898,8 +11904,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "cancelRemoteOperation",
@@ -11907,8 +11913,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "openRemoteResult",
@@ -11916,8 +11922,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "refreshExplorer",
@@ -11925,8 +11931,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "enterExplorer",
@@ -11934,8 +11940,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "navigateExplorer",
@@ -11943,8 +11949,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "readFileChunk",
@@ -11952,8 +11958,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectExplorerContextMenu",
@@ -11961,8 +11967,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "previewContextMenu",
@@ -11970,8 +11976,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "describeCapabilities",
@@ -11979,8 +11985,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "getConfiguration",
@@ -11988,8 +11994,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "getEngineHealth",
@@ -11997,8 +12003,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "getProviderConnections",
@@ -12006,8 +12012,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "loginBegin",
@@ -12015,8 +12021,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "loginStatus",
@@ -12024,8 +12030,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "loginCancel",
@@ -12033,8 +12039,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "disconnect",
@@ -12042,8 +12048,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "fileAction",
@@ -12051,8 +12057,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "listAccounts",
@@ -12060,8 +12066,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "listAuthorizedBuckets",
@@ -12069,8 +12075,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "listFolders",
@@ -12078,8 +12084,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "fileMetadata",
@@ -12087,8 +12093,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "readFile",
@@ -12096,8 +12102,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "listDestinations",
@@ -12105,8 +12111,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectMenuTree",
@@ -12114,8 +12120,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "previewNativeMenu",
@@ -12123,8 +12129,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectNativeACK",
@@ -12132,8 +12138,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "getOrganizationSuggestion",
@@ -12141,8 +12147,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "previewConfigChange",
@@ -12150,8 +12156,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "commitConfigChange",
@@ -12159,8 +12165,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "reconcileNativeMenu",
@@ -12168,8 +12174,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "chooseBackupLocation",
@@ -12177,8 +12183,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectRecoveryCoverage",
@@ -12186,8 +12192,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "runRecoveryPage",
@@ -12195,8 +12201,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectBackupRoots",
@@ -12204,8 +12210,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "listRecoveryPolicies",
@@ -12213,8 +12219,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "writeRecovery",
@@ -12222,8 +12228,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "requestRestorePreview",
@@ -12231,8 +12237,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "restoreRightClickMenu",
@@ -12240,8 +12246,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "inspectWholeCloudJobs",
@@ -12249,8 +12255,8 @@
         "version": "3+1.1",
         "effectful": false,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "enableWholeCloudJob",
@@ -12258,8 +12264,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "disableWholeCloudJob",
@@ -12267,8 +12273,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "dispatchExplorerSave",
@@ -12276,8 +12282,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
         "method": "dispatchSave",
@@ -12285,8 +12291,8 @@
         "version": "3+1.1",
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted actor scope and applicable account binding/confirmation; no auth bypass",
-        "coverage": "Local regression and genuine browser IDB with fixture OAuth; installed Windows unverified"
+        "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
+        "coverage": "See zero-stutter evidence; installed Windows unverified"
       }
     ],
     "errorBranches": {
@@ -12328,9 +12334,10 @@
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
       "saveRepair": "Historical source.fetch blocker preserved in restorationBefore/saveRepairBefore and old evidence; replaced by native fetch. Current isolated LIVE text/image/redirect/unknown-length independent byte readbacks PASS. Windows installed-click remains unverified.",
       "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration.",
-      "permanence": "See docs/evidence/permanent-destinations: real IndexedDB before/after legacy-loss regression, 1/2/100/1000 per-mode logout/login/reload/full-process restart, retained approval, one-click Explorer and reconnect. Fixture provider/OAuth/native registrar, not Windows."
+      "permanence": "See docs/evidence/permanent-destinations: real IndexedDB before/after legacy-loss regression, 1/2/100/1000 per-mode logout/login/reload/full-process restart, retained approval, one-click Explorer and reconnect. Fixture provider/OAuth/native registrar, not Windows.",
+      "zeroStutter": "See zero-stutter before/after fixture paint opportunities and regression tests. Real installed Chrome and live new-destination workflow unverified; Worker source unchanged."
     },
-    "sourceState": "Permanent-destinations runtime source 9f8c26dee905c94cd0f5a982ef725279af712207 based on main b5c56a6; exact source hashes. Immutable permanenceBefore retained. No owner Windows pass claimed.",
+    "sourceState": "Zero-stutter development branch from main 04644f4; exact source hashes. zeroStutterBefore preserved; no Windows acceptance claim.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -12347,6 +12354,7 @@
         "ENGINE_RESPONSE_CHANNEL_CLOSED",
         "ENGINE_RESPONSE_INVALID",
         "FILE_ACTION_UNCONFIRMED",
+        "INSPECTION_FAILED",
         "LOGIN_REQUIRED",
         "PREVIEW_SIZE_LIMIT",
         "PROVISIONING_BLOCKED",
@@ -12358,6 +12366,7 @@
         "SETUP_RESUME_REQUIRED",
         "SHELF_START_FAILED",
         "VERIFYING",
+        "WORKER_DESTINATION_SCOPE_REQUIRED",
         "WORKER_UPGRADE_APPROVAL_REQUIRED"
       ],
       "extension/background.mjs": [
@@ -12466,6 +12475,7 @@
         "INVALID_STATE"
       ],
       "src/api/explorer-context-menu.mjs": [
+        "AUTH_REQUIRED",
         "REMOTE_EXPLORER_SOURCE_UNAVAILABLE"
       ],
       "src/api/gateway.mjs": [
@@ -12489,6 +12499,7 @@
         "CONFIRMATION_REQUIRED",
         "CONNECTED",
         "CONNECTION_UNKNOWN",
+        "DESTINATION_NATIVE_ACKNOWLEDGED",
         "DESTINATION_NOT_READY",
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "FILE_ACTION_PENDING",
@@ -12792,6 +12803,7 @@
         "TRANSPORT_UNAVAILABLE",
         "WORKER_ADDRESS_INVALID",
         "WORKER_BUILD_MISMATCH",
+        "WORKER_DESTINATION_SCOPE_REQUIRED",
         "WORKER_FILE_API_REPAIR_REQUIRED",
         "WORKER_NOT_READY",
         "WORKER_SETUP_REQUIRED",
@@ -13110,6 +13122,7 @@
       "src/explorer/file-api.mjs": [],
       "src/explorer/index.mjs": [],
       "src/explorer/listing-view.mjs": [],
+      "src/explorer/location-view.mjs": [],
       "src/explorer/observed-api.mjs": [
         "BATCH_COMPLETED",
         "BATCH_FAILED",
@@ -13150,6 +13163,7 @@
         "WORKER_READY",
         "WORKER_UNVERIFIED"
       ],
+      "src/explorer/performance.mjs": [],
       "src/explorer/r2-adapter.mjs": [
         "HTTP_",
         "INVALID_RANGE",
@@ -13706,7 +13720,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "829b1020c3b2287cf001ef74f0e6ec3018dcad614af380390f90be9748f03055"
+    "digest": "9c0ed66090a2ae89b18aa06d6f13fcf8914c50bf6cddc7647b7052471aa219d1"
   },
   "changeLog": [
     {
@@ -15642,5 +15656,91 @@
       "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
     },
     "observed": "OWNER: disappearing destinations/approval/default; source: per-account fallback, missing mode defaults, manager only Simple/Narrow, Explorer tab does not load tree. Actual Windows storage-loss boundary unobserved."
+  },
+  "zeroStutterBefore": {
+    "sourceCommit": "04644f431a960b7ea61c231fa28e3fba33f166e2",
+    "currentDigest": "829b1020c3b2287cf001ef74f0e6ec3018dcad614af380390f90be9748f03055",
+    "sourceFiles": {
+      "extension/app.css": "bb570c8c20d1888d9ea0ae5138dfa0466683f6c61199a066232633648223944e",
+      "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
+      "extension/app.mjs": "a8f38ea505986b88030b3be0b1fe6caced8d8c5f621aaa1128167888a0db2426",
+      "extension/background.mjs": "6e5dd00ad8c066cf72dff02caa48b4c01b2969ca16d3d94c587ecd939fba5ee8",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "f1d70927668c30140c00b1567bd694932192981d265030c36d0dc8be131a1821",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "454657cd04ec8615fe1aad54db199f663e870fb93337764246251da112049f7b",
+      "right2cloud-module/src/cloudflare-worker.mjs": "4af4d3c04f34e080235399a65e2150a24899e1139a53fa5f59f40a275a8b42e6",
+      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
+      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
+      "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
+      "src/api/config.mjs": "4a15d65896b88c3c7ca2d77bde5df653ed1a8c6f2dfb13999171752615db492a",
+      "src/api/explorer-context-menu.mjs": "c0447ad9578815f9a58aa837c5d75dd04507039de80f236e60ff552b52a3bea8",
+      "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
+      "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
+      "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
+      "src/api/service.mjs": "4f22d7389445aebc5cca20b540dbbd44b1382a55afaf7c669afa3fdb7938259f",
+      "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
+      "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
+      "src/build-info.mjs": "aabae2c5992081f575e908a798781955fa019a18cbad06e4e73f609d8d3aab41",
+      "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
+      "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
+      "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
+      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
+      "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
+      "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
+      "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
+      "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
+      "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
+      "src/cloudflare/onboarding.mjs": "2622fff26b0706213ddc3e2bb15b238ba2386e96a1cb9c21a47581513d510ab4",
+      "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
+      "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
+      "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
+      "src/cloudflare/transport.mjs": "ca2330c9185d8cf03f10dceacd934650a9c2e607cfbc564dcef3a4b70fa79e9c",
+      "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
+      "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
+      "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
+      "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
+      "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
+      "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
+      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
+      "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
+      "src/core/menu-spec.mjs": "2d3843c6198d7c3c0b23ca0c06de24b44c0c6e6afbc6319deb9a80b1e4f941e8",
+      "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
+      "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
+      "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
+      "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
+      "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+      "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
+      "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
+      "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
+      "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
+      "src/explorer/listing-view.mjs": "cce2f95fdcd1a05de4e58da4d55012f8801b618e57b1c27654caf3896317b2fa",
+      "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
+      "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
+      "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
+      "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
+      "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
+      "src/glaciaring/catalog.mjs": "66142923c8f58c7c1683e86fc0badb02a4a30662b30117ecb2c7aae8819a7982",
+      "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
+      "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
+      "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
+      "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
+      "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
+      "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
+      "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
+      "src/persistence/current-store.mjs": "542a377040aa84ab408ee9ed2ea5115c76edf1d3374a4d9585f443855718887a",
+      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
+      "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
+      "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
+      "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
+    },
+    "actual": "Context menu awaited trusted IPC; routine navigation rebuilt main/viewport; menu inventory scanned remote readiness for all saved targets; new prefixes required exact per-prefix proof and could show Set up.",
+    "measurement": "docs/evidence/zero-stutter/before.json; fixture paint opportunities, not installed Windows."
   }
 }

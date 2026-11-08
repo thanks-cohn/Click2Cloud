@@ -10,7 +10,7 @@ export function productState(raw={}) {
   const s={...defaults,...structuredClone(raw)};s.cloudflare={removed:[],...s.cloudflare};
   if(!s.providerVisibility||typeof s.providerVisibility!=='object'||Array.isArray(s.providerVisibility)||Object.keys(s.providerVisibility).some(k=>!Object.hasOwn(DEFAULT_PROVIDER_VISIBILITY,k))||Object.values(s.providerVisibility).some(v=>typeof v!=='boolean'))fail('INVALID_STATE');
   s.providerVisibility={...DEFAULT_PROVIDER_VISIBILITY,...s.providerVisibility};
-  if(s.schemaVersion!==1||!Number.isSafeInteger(s.revision)||s.revision<0||!['dark','light'].includes(s.theme)||!['details','list'].includes(s.view))fail('INVALID_STATE');
+  if(s.schemaVersion!==1||!Number.isSafeInteger(s.revision)||s.revision<0||!['dark','light'].includes(s.theme)||!['details','list','grid'].includes(s.view))fail('INVALID_STATE');
   if(!s.show||Object.keys(s.show).sort().join()!=='depth,flat,nested,simple'||Object.values(s.show).some(v=>typeof v!=='boolean'))fail('INVALID_STATE');
   if(typeof s.autoOpenAttention!=='boolean')fail('INVALID_STATE');
   if(typeof s.menuCustomized!=='boolean'||!s.cloudflare||Object.keys(s.cloudflare).sort().join()!=='initialized,pending,removed,selectedAccountId'||!['initialized','pending','removed'].every(k=>Array.isArray(s.cloudflare[k])&&s.cloudflare[k].every(a=>typeof a==='string'&&a))||s.cloudflare.selectedAccountId!==null&&typeof s.cloudflare.selectedAccountId!=='string')fail('INVALID_STATE');

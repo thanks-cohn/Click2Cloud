@@ -28,3 +28,7 @@ await import('./restoration-files.test.mjs');
 await import('./latest-quick-rules.test.mjs');
 
 await import('./permanent-destinations.test.mjs');
+
+await import('./zero-stutter.test.mjs');
+
+await import("./destination-ready.test.mjs");
