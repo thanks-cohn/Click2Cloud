@@ -1,5 +1,10 @@
 # AGENTS.md — Click2Cloud /scaffold-first engineering instructions
 
+## ISSUE REGISTER AND PERFORMANCE-FIRST EXPLORER STANDARD (NOVEMBER 7, 2026)
+
+Read [Issues_and_Bugs/README.md](Issues_and_Bugs/README.md), especially [P0 Explorer context-menu latency](Issues_and_Bugs/Bugs/P0_EXPLORER_CONTEXT_MENU_LATENCY_AND_RESPONSIVENESS_2026-11-07.md) and [Explorer UX improvements](Issues_and_Bugs/Issues/P1_EXPLORER_SINGLE_MANAGER_ADDRESS_FIELD_AND_GRID_VIEW_2026-11-07.md), before further Shelf File Explorer UI work. The owner prioritizes **extreme responsiveness** as a founding product requirement, including fast right-click menu first paint without unnecessary slow API/network waits, while keeping authorization and cloud actions canonical and safe. Shelf Explorer shows **exactly one Manage Destinations button in the bottom-right footer**, a full-path address entry with non-destructive visual middle ellipsis, and a persistent Details/List/**Grid** selection. Investigate, benchmark and repair; do not claim these requests are implemented by the documents. Keep GUI/API parity, permanent destination configuration, safe account-specific setup approval and immutable behavior baseline intact.
+
+
 ## NON-EXPIRING LOCAL SETUP-APPROVAL MEMORY — NO DESTINATION DELETION ON AUTH FAILURE
 
 **A prior explicit account-scoped Cloudflare setup approval is durable user intent.** Once recorded in the existing private setup ledger after actual user consent, it must survive extension/Chrome restarts, OAuth sign-out, refresh/reconnect, reconsent, transient failures, and ordinary extension updates. A normal subsequent login must inspect and reuse that approval; **never ask to approve the same redown bucket / same existing Worker setup again merely because a new OAuth session was created**. Readiness checks should prefer read-only verification of the existing bucket, Worker and exact destination; repair only if genuinely necessary. No second approval just to restore normal operations.
