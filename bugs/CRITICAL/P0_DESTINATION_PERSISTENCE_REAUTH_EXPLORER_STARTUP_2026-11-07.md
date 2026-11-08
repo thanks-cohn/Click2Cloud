@@ -4,6 +4,14 @@
 **Severity:** P0 product reliability / trust / retention. **Status:** Owner-reported behavior, source paths identified, root cause NOT independently reproduced.  
 **Do not mislabel as solved.** This document is a factual defect report, not a code implementation.
 
+## HIGHEST-PRIORITY OWNER CLARIFICATION — Saved state precedes every default initializer
+
+**PERSISTED SAVED DESTINATIONS ARE AUTHORITATIVE.** A nonempty saved state is never eligible for automatic `redown` initialization, regardless of login status, provider inventory, current account, mode visibility or readiness. Check **all** Simple/Narrow/Depth configured destinations, including hidden/disabled/Quick and all stored accounts, **plus** a saved Default. If ANY exists, it takes precedence, must remain unchanged and visible to the manager even while disconnected; if the Default is missing with other entries present, this is a select/repair state, not a `redown` fallback. A Default-only state must also be preserved and surfaced as an ordinary manager entry. Never overwrite any saved destination, prefix, label, Quick flag, Default, selected account or order.
+
+**ONLY after a confirmed successful read of truly empty durable configuration** (no stored destination records across any mode/account and no Default) may the existing next-authorized-login fallback apply: reuse or properly authorize creation of lowercase `redown`, independently verify readiness, persist `redown` bucket ROOT as an editable/deletable Simple destination and mark it Default. An explicit deletion leaving zero saved destinations qualifies on the user's next authorized login, **not on the deletion itself**. A stale/corrupt/missing database, empty UI list, failed API or unauthorized cloud inventory NEVER qualifies as an empty saved state. Reuse account-specific prior setup approval and never repeat it without genuinely new authority requirements.
+
+**Root cause remains unproven:** This rule must not obscure the reported loss of saved locations. Before default fallback, Codex must show that the saved state was genuinely empty rather than lost, filtered or unreadable.
+
 ## Owner report — exact practical consequences
 
 1. After logging out, reconnecting, or logging back into Click2Cloud, **Manage Destinations appears to have lost the user's configured entries**. The user may have many saved Simple, Narrow, Depth, Quick Select, named, hidden and custom destinations. All must be preserved.
