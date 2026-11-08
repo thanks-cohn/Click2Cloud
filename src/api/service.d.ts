@@ -15,6 +15,7 @@ export type Change =
  | {type:'makeDefault';target:Target}
  | {type:'clearDefault'}
  | {type:'setTheme';theme:'dark'|'light'}
+ | {type:'setExplorerLayout';explorerLayout:{split:number;toolbarRows:number}}
  | {type:'setView';view:'details'|'list'|'grid'}
  | {type:'setFavorite';connectionId:string;favorite:boolean}
  | {type:'setProviderPlacement';provider:string;placement:'direct'|'other'}

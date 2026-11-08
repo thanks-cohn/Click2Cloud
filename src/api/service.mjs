@@ -15,7 +15,7 @@ const arr=items=>({type:'array',items,maxItems:Number.MAX_SAFE_INTEGER});
 const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested','depth','flat']);
 const level=obj({hidden:bool,label:str});
 const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
-  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
+  levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},explorerLayout:obj({split:{type:'number',minimum:0,maximum:100},toolbarRows:{type:'integer',minimum:1,maximum:7}},['split','toolbarRows']),connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
@@ -213,7 +213,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(!receipt.replayed&&added.length)await getInventory({refreshTargets:added});
             // Display-only preferences persist through this same transaction without
             // rebuilding unrelated native menus on every View/Theme click.
-            const displayOnly=params.changes.every(c=>['setView','setTheme'].includes(c.type)),evidence=engine.getEvidence?.();
+            const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();
             const native=receipt.replayed?evidence?.lastOutcome??{state:'blocked',code:'NATIVE_ACK_UNAVAILABLE'}:displayOnly&&evidence?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true}):await reconcile();let backup;
             if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
             const destinationReadiness=[];for(const target of added){const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));if(row?.enabled&&row.actionKind!=='attention'&&native.state==='completed')destinationReadiness.push({target,state:'READY',code:'DESTINATION_NATIVE_ACKNOWLEDGED'});else{const checked=cloudflare?.check?await cloudflare.check(target.accountId,target):null;destinationReadiness.push({target,state:'blocked',code:checked?.worker?.code??checked?.code??row?.reason??'NATIVE_APPLY_INCOMPLETE'});}}
@@ -254,6 +254,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
         }
         if(await authorize({actor,scope,method,params,result:data,phase:'response'})!==true)fail('PERMISSION_DENIED');
+        if(['listFolders','refreshExplorer','fileMetadata','readFile','readFileChunk'].includes(method)&&data?.state&&data.state!=='completed'&&(!data.code||data.code==='OK')){const reason=data.error;data={...data,code:/^[A-Z][A-Z0-9_]+$/.test(reason??'')&&reason!=='OK'?reason:'FILE_READ_FAILED'};}
         const inspection=method==='inspectRemoteReceipt';
         const status=inspection?'completed':data?.native&&data.native.state!=='completed'?'partial':data?.state;
         return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,method,before:receipt?.before??state.product.revision,after:receipt?.after??state.product.revision,replayed:receipt?.replayed??false}};

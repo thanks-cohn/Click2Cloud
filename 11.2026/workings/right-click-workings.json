@@ -9200,12 +9200,13 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "a44c9d07426edb73c067c26ec1074b70194d0a33",
     "sourceFiles": {
-      "extension/app.css": "21c17512ac181e1110339782efd99c2bd10915d24063dc57577bc070586c0353",
-      "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
-      "extension/app.mjs": "15df6fc6fd966a244059fb5fdba3871e8ea81c0a022d4b5242e6730a9d8e00c6",
+      "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
+      "extension/app.html": "0ed845aa4f34c39ea5e4e71bae9ccbbc137b52f2c1af1f536a0fdc306297c241",
+      "extension/app.mjs": "c8567141864cafe24d60d3a73faa24da1023abfb243886508548e9f3dbc2ad78",
       "extension/background.mjs": "7797d2f8244bda3e96b42faf4e1b7710f6311b6bf77b7a4f00fd9559a8bbd1df",
+      "extension/explorer-layout.mjs": "bf16b1158a262db4649fee564ad36b01364416c25d265f833c8031cc3a90aa00",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "34c13d0d1c746bd70395d13347c0017fbdbde33c0513a4e6f91de4a756e987cf",
+      "extension/manifest.json": "4a6a398ab7190ea524e3b3cf8e017c81015434d390bfc47ce682fb4cdba677f0",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9217,15 +9218,15 @@
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
-      "src/api/config.mjs": "bb28da6961f661f4448448ddc1bbf12ef713dc0b4ae8de4576d88202da3172b9",
+      "src/api/config.mjs": "c3c6cc33cd2307ff110e62a1784f6550abd8d690edb6a5b5c8f6a8d5f1d22251",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
-      "src/api/service.mjs": "34b490be48577d5e1f71b3584d1af1ac9b4379c0ddedcfe358bd808139274b6a",
+      "src/api/service.mjs": "349a57d176eccf214cf011429c6a44aab87a89d91b68bc16bd2d247984a9e8c5",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
-      "src/build-info.mjs": "7f4bac12977596b98ad7e05d5ba91f19618dbf4ca1f0d23a364fceaa7bfbe7f6",
+      "src/build-info.mjs": "3d4847542f7034be888713dbc4d959e8016b060abf43582ef0bfbf7c291987ae",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
@@ -9258,12 +9259,14 @@
       "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
+      "src/explorer/image-preview.mjs": "f403126f8ae847dd62a439147b376a64b422e0f5c2bd2798dbc7fa50c6a94c76",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
+      "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
       "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
       "src/explorer/location-view.mjs": "33b0e2451d2af5f382413565a321f6f95f8a3586b52e831385644ef0e9f1855a",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
       "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
-      "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
+      "src/explorer/r2-adapter.mjs": "587e64d961f5227d36e8eb74b94045a3580d6a74af6a9c47a37c5c50f165a714",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
@@ -9781,7 +9784,7 @@
           {
             "path": "src/api/config.mjs",
             "symbol": "const survivors=",
-            "line": 68
+            "line": 69
           }
         ],
         "verification": {
@@ -9815,7 +9818,7 @@
           {
             "path": "src/api/config.mjs",
             "symbol": "export function applyConfigChanges",
-            "line": 49
+            "line": 50
           },
           {
             "path": "src/persistence/current-store.mjs",
@@ -10993,7 +10996,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 351
+            "line": 382
           }
         ],
         "verification": {
@@ -11010,7 +11013,7 @@
         "preconditions": "Navigate or page listing",
         "trigger": "explorer",
         "guard": "Epoch before API await; exact target, cursor; dedup key",
-        "actual": "Persistent Explorer shell and scrollport; first-click enterExplorer retained. Metadata pages coalesce under bounded concurrency/TTL, queued stale readers cancel and sent IPC is epoch-discarded. Refresh retains previous verified rows with honest stale/unavailable state. Cached sort and visible-only RAF viewport, Details/List/Grid.",
+        "actual": "Existing authenticated list/read APIs; stable virtual details/list/grid viewport, bounded visible real-image thumbnails, exact address; Remotes/Settings hide Explorer panes without clearing state. See imageGallery source findings.",
         "apiMethods": [
           "enterExplorer",
           "listAccounts",
@@ -11030,7 +11033,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 155
+            "line": 165
           },
           {
             "path": "src/api/service.mjs",
@@ -11040,7 +11043,17 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function enterExplorer",
-            "line": 19
+            "line": 24
+          },
+          {
+            "path": "src/explorer/image-preview.mjs",
+            "symbol": "export function createImageReader",
+            "line": 42
+          },
+          {
+            "path": "extension/explorer-layout.mjs",
+            "symbol": "export function installExplorerLayout",
+            "line": 3
           }
         ],
         "verification": {
@@ -11057,7 +11070,7 @@
         "preconditions": "Pointer/keyboard/right-click",
         "trigger": "explorer",
         "guard": "Cached ordered revision and viewport indices",
-        "actual": "Visible selection/keyboard updates only; stable keyed identity and focus. Single footer manager; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
+        "actual": "Local selection/focus and ordered loaded gallery navigation; range/ETag/signature/dimension/browser decode checked before pixels. Two local accessible splitters persist through existing setExplorerLayout commit, not per-frame IPC.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
         "nextState": "Visible selection/keyboard updates only; stable keyed identity and focus. Single footer manager; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
@@ -11070,7 +11083,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 193
+            "line": 203
           }
         ],
         "verification": {
@@ -11162,7 +11175,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 196
+            "line": 228
           }
         ],
         "verification": {
@@ -11324,7 +11337,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 322
+            "line": 353
           }
         ],
         "verification": {
@@ -11442,7 +11455,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 31
+            "line": 36
           }
         ],
         "verification": {
@@ -11619,7 +11632,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "id=\"shelf-reauthorize\"",
-            "line": 93
+            "line": 102
           }
         ],
         "verification": {
@@ -11660,7 +11673,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 353
+            "line": 384
           }
         ],
         "verification": {
@@ -12351,9 +12364,10 @@
         "liveNewDestinationSave": "BLOCKED: EXISTING_TEST_SIGNING_KEY_NOT_READABLE; no Worker deployment or credential rotation",
         "performance": "docs/evidence/zero-stutter/PERFORMANCE.md: fixture double-RAF paint opportunities, not owner Windows native-input measurements",
         "handoff": "docs/evidence/zero-stutter/HANDOFF.md"
-      }
+      },
+      "imageGallery": "Candidate implementation; use final handoff receipts. Owner Windows and exact live image bytes unverified; no cloud writes or Worker deployment."
     },
-    "sourceState": "Runtime candidate 97c2806eeb1f656ab69e7843085517e189663968, 0.3.11, dev/p0-zero-stutter from main 04644f4. Evidence-only handoff follows; immutable zeroStutterBefore retained.",
+    "sourceState": "Image/gallery/Remotes/layout development branch from main 80b8e14; 0.3.12. Source hashes current; owner live object and Windows acceptance remain unverified.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -12370,6 +12384,8 @@
         "ENGINE_RESPONSE_CHANNEL_CLOSED",
         "ENGINE_RESPONSE_INVALID",
         "FILE_ACTION_UNCONFIRMED",
+        "FILE_READ_FAILED",
+        "IMAGE_DECODE_FAILED",
         "INSPECTION_FAILED",
         "LOGIN_REQUIRED",
         "PREVIEW_SIZE_LIMIT",
@@ -12411,6 +12427,7 @@
         "VERIFIED",
         "WORKER_MODULE_UNAVAILABLE"
       ],
+      "extension/explorer-layout.mjs": [],
       "extension/mirror.mjs": [],
       "right2cloud-module/src/cloudflare-r2-writer.mjs": [
         "FIXED_LENGTH_STREAM_REQUIRED",
@@ -12520,6 +12537,7 @@
         "EXTERNAL_RECOVERY_UNAVAILABLE",
         "FILE_ACTION_PENDING",
         "FILE_ACTION_RESULT",
+        "FILE_READ_FAILED",
         "FILE_RETRY_REQUIRES_INSPECTION",
         "GENERATION_CONFLICT",
         "GENERATION_REQUIRED",
@@ -13136,7 +13154,20 @@
         "WRITE_CANCELLED_AFTER_DISPATCH"
       ],
       "src/explorer/file-api.mjs": [],
+      "src/explorer/image-preview.mjs": [
+        "FILE_READ_FAILED",
+        "IMAGE_BYTES_INVALID",
+        "IMAGE_HEADER_UNAVAILABLE",
+        "PREVIEW_DIMENSIONS_LIMIT",
+        "PREVIEW_SIZE_LIMIT",
+        "RANGE_RESPONSE_INVALID",
+        "RIFF",
+        "VP8L",
+        "VP8X",
+        "WEBP"
+      ],
       "src/explorer/index.mjs": [],
+      "src/explorer/layout.mjs": [],
       "src/explorer/listing-view.mjs": [],
       "src/explorer/location-view.mjs": [],
       "src/explorer/observed-api.mjs": [
@@ -13736,7 +13767,28 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "fa75992a05f480777d56a44f5b43ab8f4d274bf49193de579b703e66e98befd2"
+    "explorerImageGallery": {
+      "apiOwners": [
+        "readFileChunk",
+        "fileMetadata",
+        "listFolders",
+        "getConfiguration",
+        "previewConfigChange",
+        "commitConfigChange"
+      ],
+      "durableChange": "setExplorerLayout: closed split 0..100 and toolbarRows 1..7; default 50/50, one row; same CurrentStore/revision/idempotency/native ACK",
+      "localOnly": [
+        "pointer frames and geometry",
+        "toolbar overflow of existing controls",
+        "galleryStep ordered loaded listing",
+        "image signatures/dimensions/decode and transient focus",
+        "shared bounded image bytes and thumbnail URLs"
+      ],
+      "readFailure": "Never failed code OK: propagate bounded actual read error or FILE_READ_FAILED",
+      "defaultToggle": "Existing makeDefault/clearDefault, exact saved target, one pressed control; no destination removal or infrastructure setup",
+      "evidence": "docs/evidence/image-gallery/HANDOFF.md; Chromium fixtures are not owner live bytes or installed Windows"
+    },
+    "digest": "3797142f03adf2712a7897a947eb3ec1f57830b836edc3109d8cd0640804d6ef"
   },
   "changeLog": [
     {
@@ -15758,5 +15810,96 @@
     },
     "actual": "Context menu awaited trusted IPC; routine navigation rebuilt main/viewport; menu inventory scanned remote readiness for all saved targets; new prefixes required exact per-prefix proof and could show Set up.",
     "measurement": "docs/evidence/zero-stutter/before.json; fixture paint opportunities, not installed Windows."
+  },
+  "imageGalleryBefore": {
+    "sourceCommit": "80b8e14270e37198ab8dafe2e1354cc305170b3f",
+    "sourceFiles": {
+      "extension/app.css": "21c17512ac181e1110339782efd99c2bd10915d24063dc57577bc070586c0353",
+      "extension/app.html": "ad66cf7f7761782566d49d7e20b4fa82edf0cad87f2f5c0b04c7aa8a09bb9ef5",
+      "extension/app.mjs": "15df6fc6fd966a244059fb5fdba3871e8ea81c0a022d4b5242e6730a9d8e00c6",
+      "extension/background.mjs": "7797d2f8244bda3e96b42faf4e1b7710f6311b6bf77b7a4f00fd9559a8bbd1df",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "34c13d0d1c746bd70395d13347c0017fbdbde33c0513a4e6f91de4a756e987cf",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "454657cd04ec8615fe1aad54db199f663e870fb93337764246251da112049f7b",
+      "right2cloud-module/src/cloudflare-worker.mjs": "4af4d3c04f34e080235399a65e2150a24899e1139a53fa5f59f40a275a8b42e6",
+      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
+      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
+      "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
+      "src/api/config.mjs": "bb28da6961f661f4448448ddc1bbf12ef713dc0b4ae8de4576d88202da3172b9",
+      "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
+      "src/api/gateway.mjs": "e1b0a3fc4d5b04e92a5f9b94e807fe3bf7631b89f8260ea744e927e745f08f61",
+      "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
+      "src/api/permissions.mjs": "1d4a9d0a346a048bd3b77cfc3cdc5edf64665830301a100c48f527b7f4387887",
+      "src/api/service.mjs": "34b490be48577d5e1f71b3584d1af1ac9b4379c0ddedcfe358bd808139274b6a",
+      "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
+      "src/auth/cloudflare-oauth.mjs": "60b369a94b8be20e9a0b5208a7a991b9206607796c401e4c084ec9c516d7c696",
+      "src/build-info.mjs": "7f4bac12977596b98ad7e05d5ba91f19618dbf4ca1f0d23a364fceaa7bfbe7f6",
+      "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
+      "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
+      "src/chrome/provider-panel.mjs": "3d8e4ed0f2c082f02b009069af39d18eff33f1d2200615252de19e0ab547201c",
+      "src/chrome/registrar.mjs": "4a8bb590e5d29553d95c7c2e2319b1c952f92d670623d496a2cff348c3ddec2d",
+      "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
+      "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
+      "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
+      "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
+      "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
+      "src/cloudflare/onboarding.mjs": "2622fff26b0706213ddc3e2bb15b238ba2386e96a1cb9c21a47581513d510ab4",
+      "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
+      "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
+      "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
+      "src/cloudflare/transport.mjs": "2df2784e1539d36451992e404aedf546b27e99d491c4ad48c122bf8ed65faf72",
+      "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
+      "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
+      "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
+      "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
+      "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
+      "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
+      "src/core/engine.mjs": "71337e216b22598ae0634baf9c1bf37ed710ac6dccc2883a49d60154af6265fa",
+      "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
+      "src/core/menu-identity.mjs": "d15f0d1b3e4fe5cfdc2b9443a2832f4d3d9fbe931d3e98ce8e72f4b17cbc7f53",
+      "src/core/menu-spec.mjs": "b5d67ccc3fff3dffa508e28330265add37295eee0750dedc8cfa7b8863f46973",
+      "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
+      "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
+      "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
+      "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
+      "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
+      "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
+      "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
+      "src/explorer/file-api.mjs": "4e60401d8ad91331a7c5c9472f56c7ef5b8494594396ed4e9ce2c4a70e07d31c",
+      "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
+      "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
+      "src/explorer/location-view.mjs": "33b0e2451d2af5f382413565a321f6f95f8a3586b52e831385644ef0e9f1855a",
+      "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
+      "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
+      "src/explorer/r2-adapter.mjs": "6eec8dc964a6ebef0ee20fe043b693b62c43df32a3ae114854194ac3a8e189ec",
+      "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
+      "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
+      "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
+      "src/glaciaring/catalog.mjs": "66142923c8f58c7c1683e86fc0badb02a4a30662b30117ecb2c7aae8819a7982",
+      "src/glaciaring/index.mjs": "6599da303c7a025fe4f5068992e4f29920fa258160c4ff1f9baf5421d7a72c68",
+      "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
+      "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
+      "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
+      "src/modes/nested/index.mjs": "a32e4d20f93b21e7cf68229ca4887721d9954421fb635161dd302b2112b50650",
+      "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
+      "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
+      "src/persistence/current-store.mjs": "542a377040aa84ab408ee9ed2ea5115c76edf1d3374a4d9585f443855718887a",
+      "src/persistence/external-recovery.mjs": "341c622fc1263cbe692cd28fc46c873da28a4c7cfb222c7367db55e6f64c8fe6",
+      "src/persistence/node-files.mjs": "3c6689fed58034a14a9927f11e06c3e54140ae274301f117d6dac437d8f353b2",
+      "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
+      "src/persistence/schema.mjs": "0c5ab1456ff00a599f3ee38ea21e6b5ec39eda9727dd0bd273b051fc72076b2e"
+    },
+    "knownDefects": [
+      "failed File API read could produce failed outer envelope with code OK",
+      "Grid rendered only generic icons",
+      "Remotes relied on Explorer aside for login",
+      "CSS minimum/maximum prevented full-range splitter; no toolbar separator/gallery arrows"
+    ]
   }
 }

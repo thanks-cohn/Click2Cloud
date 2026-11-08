@@ -208,7 +208,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       const response=await http.request(base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,headers:{Range:'bytes='+offset+'-'+(offset+length-1),...(etag?{'If-Match':etag}:{})}});
       const currentEtag=response.headers.get('etag');if(etag&&currentEtag!==etag){await response.body?.cancel();throw Error('OBJECT_CHANGED');}
       if(response.status===416){const m=/^bytes \*\/(\d+)$/.exec(response.headers.get('content-range')??'');if(m&&Number(m[1])===offset)return {bytes:[],offset,total:offset,done:true};}
-      if(!response.ok||!response.body)throw Error('OBJECT_READ_FAILED');
+      if(!response.ok||!response.body){await response.body?.cancel();throw Object.assign(Error('OBJECT_READ_FAILED'),{code:'HTTP_'+response.status});}
       const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('content-range')??'');
       if(response.status!==206||!range||Number(range[1])!==offset||Number(range[2])>=offset+length||Number(range[3])<=Number(range[2])){await response.body.cancel();throw Error('RANGE_NOT_SUPPORTED');}
       const reader=response.body.getReader(),chunks=[];let count=0;try{while(true){const part=await reader.read();if(part.done)break;count+=part.value.length;if(count>length)throw Error('RANGE_RESPONSE_INVALID');chunks.push(part.value);}}finally{await reader.cancel();}

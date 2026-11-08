@@ -1,0 +1,9 @@
+{
+  "evidenceClass": "LIVE_READ_ONLY_CONFIGURED_R2_OBJECT_CHECK",
+  "resourcesModified": false,
+  "credentialsPrinted": false,
+  "objectIdentity": "Owner-reported WebP filename in existing redown bucket; no broad scan",
+  "state": "BLOCKED",
+  "httpStatus": 404,
+  "code": "NoSuchKey"
+}

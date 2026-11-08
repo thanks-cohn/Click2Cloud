@@ -32,3 +32,5 @@ await import('./permanent-destinations.test.mjs');
 await import('./zero-stutter.test.mjs');
 
 await import("./destination-ready.test.mjs");
+
+await import("./image-gallery.test.mjs");
