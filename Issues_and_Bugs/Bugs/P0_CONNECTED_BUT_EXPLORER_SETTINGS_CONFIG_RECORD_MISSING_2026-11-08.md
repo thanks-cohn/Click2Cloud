@@ -13,6 +13,20 @@ Remotes has **Local service diagnostics**:
 
 User confirms Explorer did not show this message before updating/connecting. No proof of deleted user destinations or R2 objects. Explicitly protect their existing login, IndexedDB, native registration, menu destinations, Default, approval, cloud files and backups.
 
+## New decisive owner evidence — direct read works, generation guard fires
+
+**2026-11-08, same Windows profile; read-only DevTools execution in the extension service-worker context.** Owner ran the safe diagnostic from the previous incident report:
+
+- `await click2cloud.current.read()` **resolved successfully**; `s.generation.desired === 0`.
+- `(await chrome.storage.local.get('nativeRegistration')).nativeRegistration.desired.generation === 583`.
+- Console's trailing `undefined` is only the normal return value of `console.log`; it is not a failure.
+
+**Confirmed immediate blocker:** `extension/background.mjs:readCurrent()` checks `prior?.desired?.generation > 0 && saved.generation.desired === 0` and deliberately throws `CONFIGURATION_RECORD_MISSING`. These precise live values satisfy that condition. This is **not** a failure to open IndexedDB or the `current-store.mjs:loadState` required-row exception on this read. However, successful validation can still supply default generation zero when the underlying persisted `generation` row is *absent*; this evidence **does not prove** whether generation was lost vs previously never stored vs native metadata stale.
+
+**Next read-only investigation (no resetting):** determine whether an actual `generation` row exists in the CURRENT IndexedDB `state` object store (report presence and numeric desired only); inspect safe journal generation-event counts, configurationIntegrity marker required symbolic IDs, product/mode row presence and non-sensitive destination counts, nativeRegistration desired/applied generation and ACK status. Do not dump destination names, provider account IDs, credentials or URLs. Validate historical upgrade/registration sequencing against source and journal. Reconcile only when enough evidence proves safe non-destructive course.
+
+**CRITICAL:** Do **not** suggest or execute `chrome.storage.local.remove('nativeRegistration')`, `clear()`, `indexedDB.deleteDatabase()`, blindly setting generation 583, forcing generation 0 into native registration, or bypassing the readCurrent guard. A workaround that merely hides this error while silently discarding old destination bindings is unacceptable.
+
 ## Source-backed two-branch fault analysis — DO NOT GUESS
 
 There are at least TWO distinct emitters of **the exact same error code**:
