@@ -1,0 +1,43 @@
+{
+  "runtimeRevision": "9f8c26dee905c94cd0f5a982ef725279af712207",
+  "build": {
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "extensionVersion": "0.3.10",
+    "revision": "9f8c26dee905c94cd0f5a982ef725279af712207",
+    "sourceDigest": "32a8abc11f2ee5459da6a8b7780e104d091c3f51015c58187440570bbcc4612f",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "focused": {
+    "pass": 251,
+    "fail": 0,
+    "artifact": "focused.txt"
+  },
+  "workings": {
+    "pass": 4,
+    "fail": 0,
+    "artifact": "workings.txt"
+  },
+  "browser": {
+    "counts": {
+      "BLOCKED": 3,
+      "PASS": 27,
+      "NOT_TESTED": 1
+    },
+    "artifact": "browser/browser-results.json",
+    "runtimeSourceDirty": false
+  },
+  "installedChrome": {
+    "state": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "receipt": "real-shelf-receipt.json"
+  },
+  "ownerWindows": "NOT_VERIFIED",
+  "liveCloudflare": "NOT_RERUN_NO_CLOUD_MUTATIONS; unchanged Worker digest equals historical independently verified restoration build",
+  "baselinePersistenceSHA256": "6f724bbb3c4c8788ecc7d0a4a61b3d0ed6f6c111c930c3d501f3a3e2b99cef94",
+  "permanenceBeforeSHA256": "fdd5e6f673e52d9db8b62316b59199ca1b05999f53fd5ac707705dacd46ccf55",
+  "credentialScan": "No configured credential values in text artifacts; values not printed",
+  "redownCheckout": "clean unchanged",
+  "mainMerge": "NOT_PERFORMED",
+  "productionDeployment": "NOT_PERFORMED"
+}

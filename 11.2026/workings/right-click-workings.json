@@ -9796,7 +9796,9 @@
         "actual": "CURRENT transactions materialize every missing mode record before replacing a legacy embedded product envelope, including identical configurations. Per-mode revisions reject stale cross-owner writes. Missing/corrupt/conflicting established records are recovery failures, never empty settings. Presence-only integrity marker in existing store; existing native-registration evidence guards full CURRENT loss at startup.",
         "apiMethods": [
           "previewConfigChange",
-          "commitConfigChange"
+          "commitConfigChange",
+          "getConfiguration",
+          "listDestinations"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
         "nextState": "CURRENT transactions materialize every missing mode record before replacing a legacy embedded product envelope, including identical configurations. Per-mode revisions reject stale cross-owner writes. Missing/corrupt/conflicting established records are recovery failures, never empty settings. Presence-only integrity marker in existing store; existing native-registration evidence guards full CURRENT loss at startup.",
@@ -9810,6 +9812,16 @@
             "path": "src/api/config.mjs",
             "symbol": "export function applyConfigChanges",
             "line": 49
+          },
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "async function loadState",
+            "line": 49
+          },
+          {
+            "path": "src/persistence/current-store.mjs",
+            "symbol": "async function commitProduct",
+            "line": 153
           }
         ],
         "verification": {
@@ -10363,7 +10375,10 @@
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
-          "inspectCloudflareSetup"
+          "inspectCloudflareSetup",
+          "initializeCloudflare",
+          "loginBegin",
+          "inspectCloudflare"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
         "nextState": "Before any initialization, read and validate durable configuration. ANY saved assignment in ANY mode/provider/account (including inactive/hidden) or Default blocks redown fallback. Same-account existing target/READY uses read-only checks and retained approval. Default-only can link exact target locally. Empty genuine state initializes only on explicit authorized login.",
@@ -10377,6 +10392,11 @@
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const exists=",
             "line": 99
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function initializeAccount",
+            "line": 54
           }
         ],
         "verification": {
@@ -10459,14 +10479,17 @@
         "preconditions": "Prior probe dispatch or lost completion",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements.",
+        "actual": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements. A known initialized account whose approval record is missing stops with SETUP_APPROVAL_RECORD_MISSING on inspection and setup; no new approval is fabricated.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
-          "inspectCloudflareSetup"
+          "inspectCloudflareSetup",
+          "initializeCloudflare",
+          "loginBegin",
+          "inspectCloudflare"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements.",
+        "nextState": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements. A known initialized account whose approval record is missing stops with SETUP_APPROVAL_RECORD_MISSING on inspection and setup; no new approval is fabricated.",
         "uiEffect": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
         "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -10477,6 +10500,16 @@
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const recovered=",
             "line": 112
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const setupApproved=",
+            "line": 13
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function checkFresh",
+            "line": 31
           }
         ],
         "verification": {
@@ -10974,6 +11007,9 @@
         "guard": "Epoch before API await; exact target, cursor; dedup key",
         "actual": "Top File Explorer enters through canonical enterExplorer: current authorized accounts/buckets, durable last explicit location then saved Default then selected/sole account actual redown or unambiguous bucket. Multiple unselected accounts require choice. Populate/expand/select tree and list on first click; reconnect while visible restores intent. Remotes remains startup tab.",
         "apiMethods": [
+          "enterExplorer",
+          "listAccounts",
+          "listAuthorizedBuckets",
           "listFolders",
           "refreshExplorer",
           "navigateExplorer"
@@ -10990,6 +11026,16 @@
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
             "line": 140
+          },
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "method==='enterExplorer'",
+            "line": 126
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function enterExplorer",
+            "line": 13
           }
         ],
         "verification": {
@@ -12271,12 +12317,12 @@
     ],
     "verification": {
       "source": "PASS: hash-bound source behavior",
-      "unit": "PASS238 focused tests at restoration source 9e8a16d; docs/evidence/redown-restoration/focused.txt",
-      "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; restoration real-shelf-receipt.json source 9e8a16d",
+      "unit": "PASS251 focused tests; docs/evidence/permanent-destinations/focused.txt",
+      "installedChrome": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; permanent-destinations/real-shelf-receipt.json at runtime 9f8c26d",
       "liveOAuth": "NOT_TESTED; no owner consent in installed extension",
-      "liveR2": "LIVE CLOUDFLARE PASS for explicit restoration matrix, not installed Chrome proof. Prior failure receipts retained as historical evidence.",
-      "liveShelfEngine": "BLOCKED: genuine unpacked installation denied at 9e8a16d; no describeCapabilities response obtained",
-      "shelfLocalBrowser": "PASS20 actual Chromium fixture gates; not installed extension",
+      "liveR2": "Historical isolated restoration byte readback PASS at 9e8a16d. Not rerun for this persistence release; Worker modules unchanged. No new Windows live save claim.",
+      "liveShelfEngine": "BLOCKED by genuine unpacked installation policy; no describeCapabilities response obtained at runtime 9f8c26d",
+      "shelfLocalBrowser": "See permanent-destinations/browser/browser-results.json: genuine Chromium app/IndexedDB with fixture provider/Chrome callbacks, including actual OAuth code under synthetic transport.",
       "issue4": "LOCAL/BROWSER lifecycle pass; historical owner Windows readiness; current live isolated saves pass under environment token, not installed owner OAuth.",
       "workerPermission": "Official create-versus-edit rules and endpoint groups verified. REDOWN current main source and scope URL VM test verified. Original Windows endpoint/code/issued grants remain unknown; no registration or outgoing scope changes made.",
       "nineScopeParity": "Exact nine requested and partial/unreported grant handling locally tested; new registration save and actual provider grants require Windows owner consent. Local workerd/R2/DO and browser proof labeled separately from live Cloudflare.",
@@ -12284,7 +12330,7 @@
       "restoration": "Live isolated native-fetch text/image/redirect/unknown-length byte readback and File API copy/rename/folder-delete passed; installed Chrome/OAuth and full REDOWN parity remain separate gates. See docs/evidence/redown-restoration.",
       "permanence": "See docs/evidence/permanent-destinations: real IndexedDB before/after legacy-loss regression, 1/2/100/1000 per-mode logout/login/reload/full-process restart, retained approval, one-click Explorer and reconnect. Fixture provider/OAuth/native registrar, not Windows."
     },
-    "sourceState": "Permanent-destinations development branch from a6a0d92; exact source hashes. permanenceBefore preserved. No owner Windows pass claimed.",
+    "sourceState": "Permanent-destinations runtime source 9f8c26dee905c94cd0f5a982ef725279af712207 based on main b5c56a6; exact source hashes. Immutable permanenceBefore retained. No owner Windows pass claimed.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -13660,7 +13706,7 @@
         "mutations": "Read-only environment-token GETs200 only; no deployment/cloud mutations/REDOWN edits"
       }
     },
-    "digest": "5b4acc4a0c771a7680961f15f92bb3f903c24d8b7179ad771d1eb4fce7f89fa2"
+    "digest": "829b1020c3b2287cf001ef74f0e6ec3018dcad614af380390f90be9748f03055"
   },
   "changeLog": [
     {
