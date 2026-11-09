@@ -1,4 +1,4 @@
-import {freeze,validateRevision,configRevision,normalizedDestinations,findCandidate,availabilityReasons,targetKey,targetLabel,scopeKey,ancestors,compare} from '../../core/menu-identity.mjs';
+import {freeze,validateRevision,configRevision,normalizedDestinations,findCandidate,availabilityReasons,targetKey,targetLabel,scopeKey,ancestors,compare,stableId} from '../../core/menu-identity.mjs';
 export function createConfig(input={}) {
   return freeze({schemaVersion:1,mode:'nested',revision:validateRevision(input.revision??0),destinations:normalizedDestinations(input.destinations)});
 }
@@ -24,7 +24,7 @@ export function project({config,inventory}) {
       // Include projected parent in identity: two paths may hide different shared
       // levels without moving an independent sibling or corrupting its ancestry.
       const label=destination.levels?.[prefix]?.label??(prefix===target.prefix?destination.label:undefined)??targetLabel(t);
-      const placement=JSON.stringify([k,parent,label]);
+      const placement=stableId('nested-placement',JSON.stringify([k,parent,label]));
       if(!tree.has(placement))tree.set(placement,{placement,target:t,parentPlacement:parent,label,explicitLevel:destination.levels?.[prefix]?.label!==undefined});
       parent=placement;
     }

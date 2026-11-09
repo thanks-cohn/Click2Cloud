@@ -15,7 +15,7 @@ test('Narrow hides eight intermediate levels without altering full target; cance
  assert.equal(targetKey(save.target),targetKey(target));assert.equal(before,JSON.stringify(configs));
  assert.deepEqual(compileMenuSpec({mode:'nested',configs}).rows.filter(r=>r.origin.mode==='nested'&&!['c2c:root','c2c:cloudflare'].includes(r.id)).map(r=>r.label),['bucket',...Array.from({length:10},(_,i)=>'level'+(i+1)),'level19','level20']);
  generateChromePlan(spec);
- const shown=compile({nested:{destinations:[{id:'deep',target}]}});assert.equal(shown.rows.length,spec.rows.length);
+ const shown=compile({nested:{destinations:[{id:'deep',target}]}});assert.equal(shown.rows.length,spec.rows.length+8);
 });
 test('Narrow hidden final, shared children, overlapping paths and different accounts stay actionable',()=>{
  const target={...base,prefix:'a/b/c/'};
