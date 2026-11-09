@@ -71,3 +71,10 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .loading-visual{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .loading-visual .loading-media,.loading-visual .loading-geometry{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.65}
 .image-frame:has(.loading-visual) #preview-state{align-items:flex-end;font-size:12px}
+
+.gallery-controls .gallery-arrow{display:grid;place-items:center;width:44px;height:36px;padding:7px;border-radius:10px;background:var(--bg);transition:background-color 120ms,border-color 120ms}
+.gallery-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gallery-controls .gallery-arrow:hover:not(:disabled){border-color:var(--accent);background:var(--raised)}
+.gallery-controls .gallery-arrow:active:not(:disabled){background:var(--selected)}
+.gallery-controls .gallery-arrow:disabled{opacity:.35}
+.gallery-controls span{flex:1;text-align:center}

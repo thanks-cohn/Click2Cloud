@@ -1,3 +1,4 @@
+import {checkGalleryNavigation} from './gallery-navigation-browser-check.mjs';
 import {checkGalleryLoading} from './gallery-loading-browser-check.mjs';
 import {checkGalleryGeometry} from './gallery-geometry-check.mjs';
 import {chromium} from 'playwright-core';import {createServer} from 'node:http';import {readFile,mkdir,writeFile} from 'node:fs/promises';import {resolve,join,sep} from 'node:path';import {fileURLToPath} from 'node:url';import assert from 'node:assert/strict';import {execFileSync} from 'node:child_process';import{createHash}from'node:crypto';
@@ -16,6 +17,7 @@ await page.getByLabel('View',{exact:true}).selectOption('grid');await page.waitF
 for(const ext of ['png','jpg','webp','gif']){await page.getByRole('gridcell').filter({hasText:'picture.'+ext}).dblclick();await page.locator('img.preview:not([hidden])').waitFor();const pixels=await page.locator('img.preview').evaluate(img=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return {width:img.naturalWidth,height:img.naturalHeight,pixel:[...ctx.getImageData(30,30,1,1).data]};});assert(pixels.width>=120);assert(pixels.pixel[0]>150&&pixels.pixel[2]<100);results.push({gate:'actual-image-pixels-'+ext,state:'PASS',...pixels});if(ext==='webp')await page.screenshot({path:join(evidence,'webp-decoded-gallery.png')});await page.keyboard.press('Escape');}
 if(process.env.C2C_GALLERY_GEOMETRY==='1'&&!live)results.push(await checkGalleryGeometry(page,{baseline:process.env.C2C_GALLERY_BASELINE==='1',screenshot:join(evidence,'stable-gallery-frame.png')}));
 if(process.env.C2C_GALLERY_LOADING==='1'&&!live)results.push(await checkGalleryLoading(page,{screenshot:join(evidence,'local-media-loader.png')}));
+if(process.env.C2C_GALLERY_NAVIGATION==='1')results.push(await checkGalleryNavigation(page,{screenshot:join(evidence,'polished-gallery-navigation.png')}));
 // Real browser FileSystemWritableFileStream/OPFS, only the picker is substituted.
 for(const name of ['picture.png','picture.jpg','picture.webp','picture.gif',live?'large.png':'large.jpg']){
  await page.getByRole('gridcell').filter({hasText:name}).dblclick();await page.locator('img.preview:not([hidden])').waitFor();

@@ -270,7 +270,7 @@ async function startGalleryVisual(frame,ticket,signal){
  if(ticket!==previewEpoch||signal.aborted||frame.dataset.loading!=='true')return;stopLoadingVisual?.();stopLoadingVisual=mountLoadingVisual(frame,cachedGalleryVisual);
  }catch{/* Loading artwork never prevents an authenticated object read. */}
 }
-function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" aria-label="Previous image" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}>←</button><span>Images in this loaded folder${cursor?' · more files may be loaded in Explorer':''}</span><button id="gallery-next" aria-label="Next image" ${!galleryStep(ordered(),e.key,1)?'disabled':''}>→</button></div>`;}
+function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" class="gallery-arrow" title="Previous image" aria-label="Previous image" aria-keyshortcuts="ArrowLeft" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>Images in this loaded folder${cursor?' · more files may be loaded in Explorer':''}</span><button id="gallery-next" class="gallery-arrow" title="Next image" aria-label="Next image" aria-keyshortcuts="ArrowRight" ${!galleryStep(ordered(),e.key,1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;}
 function moveGallery(direction){if(!gallery)return;const next=galleryStep(ordered(),gallery.key,direction);if(next)void openEntry(next).catch(e=>status(imageMessage(e.code)));}
 async function openEntry(e){
  if(e.folder)return navigate({...source,prefix:e.key});

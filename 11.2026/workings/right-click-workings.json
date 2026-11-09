@@ -9200,9 +9200,9 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "See docs/evidence/phased-upgrades/phase1/verification.json",
     "sourceFiles": {
-      "extension/app.css": "c734ec91185cd60f088d0343c9f6d10a65333ee041815de71ca3578445729cdc",
+      "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "2571e377933e5a1a576cbad93bb7ba1d90ed587676b471b60e78b19623685720",
+      "extension/app.mjs": "d7c642e2d65d16fc854613c2bc7b3feefd18b8a1e7c43b0cd73a68f035077554",
       "extension/background.mjs": "61ee9d3ad40138be6eda4a83cad5094ed3b3323d13427245aa43e490a3a22757",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -14474,7 +14474,7 @@
         "evidence": "docs/evidence/composition-remaining/gate-b/verification.json"
       }
     },
-    "digest": "c2119e8829ab19e6acfe28d7ff6dfab7f57b9dc1bdd37cd1eecf714b8aa59b58"
+    "digest": "fe871cd42f9d102371211045c21030faa1d67568c9991208f29561412810cbb8"
   },
   "changeLog": [
     {
