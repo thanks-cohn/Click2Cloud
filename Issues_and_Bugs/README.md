@@ -6,6 +6,8 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P1 — Explorer condensed toolbar shows wrong controls:** [one-row slider must show only Back, Forward, Up, Refresh, More](Bugs/P1_EXPLORER_CONDENSED_TOOLBAR_NAVIGATION_ONLY_2026-11-09.md). Preserve every other command inside More and keep expanded toolbar behavior; no application code changed by this report.
+
 - **P0 HIGHEST PRIORITY — established user CURRENT records missing, but Chrome still retains menu generation 583:** [owner's installed-Chrome incident](Bugs/P0_CONNECTED_BUT_EXPLORER_SETTINGS_CONFIG_RECORD_MISSING_2026-11-08.md) · [extensive Codex forensic recovery, repair and prevention assignment](../docs/requests/CODEX_P0_CURRENT_STATE_LOSS_FORENSIC_RECOVERY_HARDENING_2026-11-08.md). Implementation on `dev/p0-current-recovery` (`84f0e19`, 0.3.14): [forensic repair/evidence](../docs/evidence/current-recovery/FORENSIC-HANDOFF.md). **OPEN:** original owner Windows profile/recovery and destructive trigger remain unverified. Protect data first; do not reset native metadata or claim recovery without independent proof.
 - **P0 URGENT — Shelf startup fails repeatedly; Cloudflare login and Save results unusable:** [owner bug](Bugs/P0_SHELF_BOOT_LOGIN_FAILURE_REMOTES_FIRST_2026-11-08.md) · [next Codex repair task](../docs/requests/CODEX_P0_BOOT_LOGIN_REMOTES_FIRST_2026-11-08.md). Boot must show Remotes and allow login without R2/Worker/menu prerequisites; no apology splash or repeated Retry.
 - [P1 — WebP preview displays “OK” instead of image](Bugs/P1_EXPLORER_IMAGE_PREVIEW_DISPLAYS_OK_INSTEAD_OF_IMAGE_2026-11-08.md). Screenshot-reproduced on Windows Chrome; diagnose nested File API status/bytes and verify actual saved object integrity.
