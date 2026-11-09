@@ -18,6 +18,8 @@
 
 ## Issues (desired UX, controls, presentation, and missing capabilities)
 
+- **P1 — Destinations Manager visual clarity and debug/UI separation:** [compact rows with dividers; remove Saved locally/Saved Default diagnostic banners from dialog](Issues/P1_DESTINATIONS_MANAGER_COMPACT_DIVIDED_ROWS_NO_DIAGNOSTIC_BANNER_2026-11-09.md). Keep mode counts, Default identity and connection status accessible through trusted programmatic diagnostics, not dumped above saved destinations.
+
 - [Remotes — full-width independent screen without Explorer left navigation](Issues/P1_REMOTES_TAB_MUST_NOT_SHOW_EXPLORER_LEFT_NAVIGATION_PANEL_2026-11-08.md). Hide the entire file tree outside File Explorer; retain login cards and restore Explorer state when returning.
 - [Explorer — one bottom-right Manage Destinations button, conventional full-path address entry, and Grid view](Issues/P1_EXPLORER_SINGLE_MANAGER_ADDRESS_FIELD_AND_GRID_VIEW_2026-11-07.md).
 
