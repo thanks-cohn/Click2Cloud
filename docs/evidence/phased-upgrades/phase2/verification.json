@@ -1,0 +1,15 @@
+{
+  "phase": 2,
+  "sourceRevision": "bc3e85a96421914c5d7308ce44180106331c9700",
+  "representativeGate": "PASS",
+  "installedAcceptance": "BLOCKED_INHERITED_ADMINISTRATOR_POLICY",
+  "focused": {
+    "pass": 300,
+    "fail": 0
+  },
+  "browser": "browser/results.json",
+  "live": "live.json",
+  "visibilityProof": "full,hide-all,custom use identical physical prefix; independent S3 byte readback for each",
+  "customSettings": "retained across repeated bulk switches/reload/relogin",
+  "testHarnessNote": "A repeat under concurrent load exceeded a 5s dialog wait; standard 30s browser timeout passed. No production timeout was altered."
+}

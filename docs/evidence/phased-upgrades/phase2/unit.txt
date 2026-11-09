@@ -1,0 +1,28 @@
+✔ Narrow hides eight intermediate levels without altering full target; cancel source stays immutable (213.762165ms)
+✔ Narrow hidden final, shared children, overlapping paths and different accounts stay actionable (2.390426ms)
+✔ hidden Quick persists but is omitted; shown Quick wins over duplicate exact default (2.06891ms)
+✔ composite modes preserve configs, Flat is exclusive and missing default cannot guess (1.695206ms)
+✔ Quick order is stable, promoted actions follow the four providers without duplicated children (2.79586ms)
+✔ organization trigger is exactly >=7 direct entries; dismiss signature changes only on relevant projection (36.015331ms)
+✔ closed schemas reject malformed params and credentials; typed registry has all meaningful GUI families (16.007663ms)
+✔ trusted scoped grants bind hidden record identities, response accounts, expiry, revocation and approval (19.55308ms)
+✔ previous main product shape migrates exact targets, revisions, visibility, recovery and ancestor aliases (7.43738ms)
+✔ local encrypted backup retains schema, authenticates payload and requires a distinct explicit authorization (8283.229775ms)
+✔ closed persistence schema rejects credentials hidden behind unknown fields at every accepted level (5.862342ms)
+✔ backup rejects namespace mismatch, revision mismatch, duplicate journal and unsupported schemas (0.837525ms)
+✔ unavailable CURRENT reports a setup failure while throwing diagnostic sinks cannot mask the outcome (1.354337ms)
+✔ phase1-composite-Narrow-retains-real-parent-IDs-and-exact-physical-save (42.072909ms)
+✔ phase1-shared-ancestors-merge-only-when-both-physical-path-and-titles-agree (10.875775ms)
+✔ phase1-ordinary-Simple-single-choice-stays-flat-and-explicit-Flat-remains-an-override (8.402175ms)
+✔ phase1-native-ACK-and-engine-click-dispatch-resolve-exact-Narrow-target (7204.858608ms)
+✔ phase1-deep-placement-identities-stay-bounded-without-escaped-parent-growth (19.484866ms)
+✔ phase2-all-hide-all-custom-are-reversible-and-retain-exact-physical-target (201.360324ms)
+✔ phase2-config-API-shape-persists-only-Narrow-presentation-and-preserves-custom-flags (4.616223ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9390.785924
