@@ -1,0 +1,1 @@
+{"result":"BLOCKED","blocker":"UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR","receipt":"/workspace/Click2Cloud/docs/evidence/phased-upgrades/phase1/installed/real-shelf-receipt.json"}

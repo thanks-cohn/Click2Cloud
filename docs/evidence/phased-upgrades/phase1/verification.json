@@ -1,0 +1,16 @@
+{
+  "phase": 1,
+  "sourceRevision": "72c0432e15d6da059a033f66d26736b10db7d09d",
+  "checkpoint": "3b24320138ff0ebbf50a0e6a912a5d2800038676",
+  "representativeGate": "PASS",
+  "installedAcceptance": "BLOCKED",
+  "focused": {
+    "pass": 298,
+    "fail": 0
+  },
+  "browser": "browser/results.json",
+  "live": "live.json",
+  "installed": "installed/real-shelf-receipt.json",
+  "scope": "Native relationships/ACK are fixture callbacks; actual engine\u2192existing Worker\u2192exact R2 key and independent S3 bytes verified; actual Windows/native click not proved",
+  "nextPhaseAllowed": "Representative executable predecessor gate satisfied; carry installed BLOCKED forward"
+}

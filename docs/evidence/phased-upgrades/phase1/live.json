@@ -1,0 +1,32 @@
+{
+  "sourceRevision": "72c0432e15d6da059a033f66d26736b10db7d09d",
+  "runtimeSourceDirty": false,
+  "proofClass": "LIVE_CANONICAL_MENU_ENGINE_WORKER_R2_S3; FIXTURE_CHROME_ACK_ENV_TOKEN_NOT_EXTENSION_OAUTH",
+  "chain": [
+    "Cloudflare",
+    "human",
+    "money-maker",
+    "guns",
+    "swole"
+  ],
+  "native": {
+    "ack": "completed",
+    "leafParentId": "c2c:item:95fb511e7e596119",
+    "generation": 1,
+    "proofClass": "FIXTURE_CALLBACKS_NOT_INSTALLED"
+  },
+  "dispatch": {
+    "state": "completed",
+    "code": "R2_HEAD_VERSION_SIZE",
+    "operationId": "71e976b1-8691-41a4-81d6-54052dc2500e"
+  },
+  "object": {
+    "key": "__click2cloud_true_remote_test__/phase1-cbbc73d4-6731-47cf-b6a1-68091386c30e/body/arm/bicep/muscle/924a3e76-6fb0-4417-91f4-4c109927aeae.png",
+    "size": 290,
+    "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+    "independentHttp": 200,
+    "exactPrefix": "__click2cloud_true_remote_test__/phase1-cbbc73d4-6731-47cf-b6a1-68091386c30e/body/arm/bicep/muscle/",
+    "bytesMatch": true
+  },
+  "state": "PASS"
+}

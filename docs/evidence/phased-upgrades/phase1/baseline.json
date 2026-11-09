@@ -1,0 +1,43 @@
+{
+  "baseline": "3b24320138ff0ebbf50a0e6a912a5d2800038676",
+  "state": "REPRODUCED",
+  "expected": [
+    "Cloudflare",
+    "human",
+    "money-maker",
+    "guns",
+    "swole"
+  ],
+  "rows": [
+    {
+      "label": "Google Drive",
+      "parentId": null,
+      "role": "provider-action",
+      "target": null
+    },
+    {
+      "label": "Dropbox",
+      "parentId": null,
+      "role": "provider-action",
+      "target": null
+    },
+    {
+      "label": "OneDrive",
+      "parentId": null,
+      "role": "provider-action",
+      "target": null
+    },
+    {
+      "label": "Cloudflare",
+      "parentId": null,
+      "role": "save",
+      "target": {
+        "provider": "cloudflare",
+        "connectionId": "cloudflare:fixture",
+        "accountId": "fixture",
+        "bucketName": "redown",
+        "prefix": "body/arm/bicep/muscle/"
+      }
+    }
+  ]
+}

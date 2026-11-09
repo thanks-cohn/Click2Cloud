@@ -1,0 +1,13 @@
+✔ phase1-composite-Narrow-retains-real-parent-IDs-and-exact-physical-save (24.579875ms)
+✔ phase1-shared-ancestors-merge-only-when-both-physical-path-and-titles-agree (4.374606ms)
+✔ phase1-ordinary-Simple-single-choice-stays-flat-and-explicit-Flat-remains-an-override (2.919096ms)
+✔ phase1-native-ACK-and-engine-click-dispatch-resolve-exact-Narrow-target (11.059937ms)
+✔ phase1-deep-placement-identities-stay-bounded-without-escaped-parent-growth (7.757337ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 195.854357

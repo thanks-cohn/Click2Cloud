@@ -1,0 +1,141 @@
+{
+  "sourceRevision": "72c0432e15d6da059a033f66d26736b10db7d09d",
+  "runtimeSourceDirty": false,
+  "proofClass": "PRODUCTION_SHELF_API_IDB_COMPILER_FIXTURE_CHROME_OAUTH_PROVIDER_NOT_INSTALLED",
+  "results": [
+    {
+      "gate": "phase1-GUI-save-real-IDB-checkpoint-comparison-native-parent-ACK",
+      "state": "PASS",
+      "before": [
+        "Cloudflare"
+      ],
+      "after": [
+        "Cloudflare",
+        "human",
+        "money-maker",
+        "guns",
+        "swole"
+      ],
+      "saved": [
+        {
+          "id": "c2c:destination:927c978941bdd520",
+          "target": {
+            "provider": "cloudflare",
+            "connectionId": "cloudflare:fixture-account",
+            "accountId": "fixture-account",
+            "bucketName": "fixture-bucket",
+            "prefix": "body/arm/bicep/muscle/"
+          },
+          "label": "swole",
+          "order": 0,
+          "levels": {
+            "body/": {
+              "label": "human"
+            },
+            "body/arm/": {
+              "label": "money-maker"
+            },
+            "body/arm/bicep/": {
+              "label": "guns"
+            },
+            "body/arm/bicep/muscle/": {
+              "label": "swole"
+            }
+          }
+        }
+      ],
+      "native": {
+        "desiredGeneration": 2,
+        "acknowledgedGeneration": 2,
+        "pending": 0
+      },
+      "nativeRows": [
+        {
+          "id": "c2c:provider-entry:ddb2a5cd46965023",
+          "parentId": null,
+          "label": "Google Drive",
+          "role": "provider-action",
+          "target": null
+        },
+        {
+          "id": "c2c:provider-entry:0251fec64383f085",
+          "parentId": null,
+          "label": "Dropbox",
+          "role": "provider-action",
+          "target": null
+        },
+        {
+          "id": "c2c:provider-entry:2fd331323c9add35",
+          "parentId": null,
+          "label": "OneDrive",
+          "role": "provider-action",
+          "target": null
+        },
+        {
+          "id": "c2c:provider-entry:89a372375b51a98e",
+          "parentId": null,
+          "label": "Cloudflare",
+          "role": "branch",
+          "target": null
+        },
+        {
+          "id": "c2c:item:74d23868b1747740",
+          "parentId": "c2c:provider-entry:89a372375b51a98e",
+          "label": "human",
+          "role": "branch",
+          "target": {
+            "provider": "cloudflare",
+            "connectionId": "cloudflare:fixture-account",
+            "accountId": "fixture-account",
+            "bucketName": "fixture-bucket",
+            "prefix": "body/"
+          }
+        },
+        {
+          "id": "c2c:item:f0b3aac3cdecaf7b",
+          "parentId": "c2c:item:74d23868b1747740",
+          "label": "money-maker",
+          "role": "branch",
+          "target": {
+            "provider": "cloudflare",
+            "connectionId": "cloudflare:fixture-account",
+            "accountId": "fixture-account",
+            "bucketName": "fixture-bucket",
+            "prefix": "body/arm/"
+          }
+        },
+        {
+          "id": "c2c:item:a54389f4a127cab7",
+          "parentId": "c2c:item:f0b3aac3cdecaf7b",
+          "label": "guns",
+          "role": "branch",
+          "target": {
+            "provider": "cloudflare",
+            "connectionId": "cloudflare:fixture-account",
+            "accountId": "fixture-account",
+            "bucketName": "fixture-bucket",
+            "prefix": "body/arm/bicep/"
+          }
+        },
+        {
+          "id": "c2c:assigned-entry:448ca614d7d0d9b9",
+          "parentId": "c2c:item:a54389f4a127cab7",
+          "label": "swole",
+          "role": "save",
+          "target": {
+            "provider": "cloudflare",
+            "connectionId": "cloudflare:fixture-account",
+            "accountId": "fixture-account",
+            "bucketName": "fixture-bucket",
+            "prefix": "body/arm/bicep/muscle/"
+          }
+        }
+      ]
+    },
+    {
+      "gate": "phase1-reload-preserves-exact-Narrow-levels-and-target",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}
