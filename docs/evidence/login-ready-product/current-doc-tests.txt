@@ -1,0 +1,18 @@
+✔ ratchet-owner-invariant-failure-map-is-exhaustive-and-source-owned (19.036326ms)
+✔ ratchet-permission-and-report-adversaries (14.368415ms)
+✔ ratchet-durable-recorder-bounded-fault-contained-expiring-and-read-only (9.904881ms)
+✔ ratchet-private-copy-verifier-supports-existing-local-agent-filesystem-owner (41.635279ms)
+✔ ratchet-CI-rejects-unexecuted-failed-or-removed-known-failure-cases (1.999423ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (15.965697ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.442776ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (0.814065ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.270497ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.204769ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.864317

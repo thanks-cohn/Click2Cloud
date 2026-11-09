@@ -9848,14 +9848,14 @@
         "preconditions": "Explicit Log in",
         "trigger": "auth",
         "guard": "Exact registered redirect/scopes, PKCE, persisted unexpired attempt and same-owner connecting guard; explicit user gesture",
-        "actual": "loginBegin authenticates and verifies identity only; no CURRENT dependency or automatic R2/Worker/default/native setup. verifyOnly reuses existing identity authority.",
+        "actual": "Normal explicit Login authenticates first independently of CURRENT, then validates durable state and existing provisioning/account authority, authorizes/reuses setup through canonical initialization, verifies readiness and native ACK. OAuth stays CONNECTED if setup is blocked; initialization has a separate operation ID/stage. verifyOnly/status/startup do not provision.",
         "apiMethods": [
           "loginBegin"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
-        "uiEffect": "Explicit login/reconsent requests exactly owner-confirmed nine scopes with Workers Admin and no unregistered offline_access, same client/ID/callback/PKCE; rejected/cancelled upgrade preserves existing credentials and configuration.",
-        "externalResourceEffect": "none",
+        "nextState": "CONNECTED plus separately completed/blocked/partial initialization; never claim READY without native ACK and verified R2 readiness.",
+        "uiEffect": "Remotes Login disclosure includes optional billable setup; no second setup approval for normal Login. Direct Sign out remains usable without Settings.",
+        "externalResourceEffect": "After verified OAuth and authorization: create/reuse redown only for truly empty durable configuration; reuse/prepare Worker; retained readback probe. No provisioning from passive boot/status.",
         "persistence": "Session PKCE attempt; tokens local trusted storage",
         "errors": [
           "LOGIN_IN_PROGRESS",
@@ -9868,6 +9868,16 @@
             "path": "src/auth/cloudflare-oauth.mjs",
             "symbol": "async function connect",
             "line": 70
+          },
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "if(method==='loginBegin'&&!params.verifyOnly",
+            "line": 212
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function initializeAccount",
+            "line": 54
           }
         ],
         "verification": {
@@ -10492,7 +10502,7 @@
         "preconditions": "Prior probe dispatch or lost completion",
         "trigger": "setup",
         "guard": "Explicit provision approval and exact CURRENT/session/target guards",
-        "actual": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements. A known initialized account whose approval record is missing stops with SETUP_APPROVAL_RECORD_MISSING on inspection and setup; no new approval is fabricated.",
+        "actual": "Private account approval survives OAuth sessions. Explicit normal Login supplies disclosed setup consent and retries the same interrupted operation, including a necessary existing Worker update; status/boot never authorize changes. Existing targets/defaults and setup operation identity are preserved. Probe-dispatched recovery inspects the existing operation rather than replaying its write.",
         "apiMethods": [
           "approveCloudflareSetup",
           "repairCloudflareDestination",
@@ -10502,7 +10512,7 @@
           "inspectCloudflare"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Account-scoped private approval is independent of OAuth sessions. Empty approved status is SETUP_RESUME_REQUIRED, not new consent. Existing Worker code upgrade returns its specific code/target and requires existing explicit repair; no silent update. Preserve interrupted setup ledger and fresh authority requirements. A known initialized account whose approval record is missing stops with SETUP_APPROVAL_RECORD_MISSING on inspection and setup; no new approval is fabricated.",
+        "nextState": "Private account approval survives OAuth sessions. Explicit normal Login supplies disclosed setup consent and retries the same interrupted operation, including a necessary existing Worker update; status/boot never authorize changes. Existing targets/defaults and setup operation identity are preserved. Probe-dispatched recovery inspects the existing operation rather than replaying its write.",
         "uiEffect": "New provider-issued Admin compared with the preserved non-Admin denial resumes once under existing setup approval and same Worker/operation. Repeated identical grants do not loop. Unknown grants use explicit resume; no duplicate bucket/Worker.",
         "externalResourceEffect": "Read-only reconciliation if prior probe dispatched",
         "persistence": "Staged setup operation and CURRENT revision",
@@ -11814,7 +11824,7 @@
       },
       {
         "id": "C2C-PERSIST-5",
-        "actual": "Boot/OAuth remain independent; inspection never creates an absent database. No implicit setup, initialization, cloud resource creation or native reconciliation on normal Shelf/login.",
+        "actual": "Boot/status remain independent and never provision. Explicit Login authenticates despite CURRENT failure, then separately attempts authorized save preparation only after durable state validation. Missing/corrupt established state remains preserved and blocks initialization, never OAuth.",
         "sourceRefs": [
           {
             "path": "extension/background.mjs",
@@ -14373,7 +14383,8 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "c0e3d314759cc0615108aa5f49897fd5358986432a2d40016f0f49d6e02c0ec7"
+    "loginReadyEvidence": "docs/evidence/login-ready-product/verification.json: source-pinned fixture, genuine installed attempt and independent live R2 proof classes; Windows original profile remains unverified.",
+    "digest": "94357aac006a0bd5b58caa692ca1fecf8482a46919fc0d84d892561926ecb8c4"
   },
   "changeLog": [
     {

@@ -1,0 +1,25 @@
+{
+  "evidenceClass": "READ_ONLY_LIVE_API_ATTEMPT_NOT_EXTENSION_OAUTH",
+  "operations": [
+    {
+      "id": "token-verify",
+      "method": "GET",
+      "endpoint": "/user/tokens/verify",
+      "http": 401,
+      "state": "BLOCKED",
+      "providerCodes": [
+        1000
+      ],
+      "proxyDenied": false
+    },
+    {
+      "id": "bucket-discovery",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets",
+      "http": 200,
+      "state": "PASS",
+      "providerCodes": [],
+      "redownExists": true
+    }
+  ]
+}

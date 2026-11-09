@@ -1,0 +1,1361 @@
+{
+  "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+  "results": [
+    {
+      "gate": "baseline-transient-IDB-open-poisons-lifetime-startup-and-login",
+      "state": "REPRODUCED",
+      "sourceRevision": "0222969",
+      "receipts": [
+        {
+          "state": "failed",
+          "code": "ENGINE_STARTUP_FAILED",
+          "diagnostic": {
+            "stage": "startup",
+            "causeCode": "STORAGE_UNAVAILABLE"
+          }
+        },
+        {
+          "state": "failed",
+          "code": "ENGINE_STARTUP_FAILED",
+          "diagnostic": {
+            "stage": "startup",
+            "causeCode": "STORAGE_UNAVAILABLE"
+          }
+        },
+        {
+          "state": "failed",
+          "code": "ENGINE_STARTUP_FAILED",
+          "diagnostic": {
+            "stage": "startup",
+            "causeCode": "STORAGE_UNAVAILABLE"
+          }
+        }
+      ]
+    },
+    {
+      "gate": "baseline-nested-control-bubbles-into-layout-container-tab-handler",
+      "state": "REPRODUCED",
+      "sourceRevision": "0222969",
+      "checks": {
+        "containerHasTabHandler": true,
+        "nestedButtonImmediatelyReplacedRemotes": true
+      }
+    },
+    {
+      "gate": "retained-document-reopen-remotes-own-window-only-no-focus-reset",
+      "state": "PASS"
+    },
+    {
+      "gate": "50-reloads-remotes-session-destinations-no-side-effects",
+      "state": "PASS",
+      "timingMs": {
+        "p50": 326,
+        "p95": 515,
+        "max": 735
+      }
+    },
+    {
+      "gate": "full-browser-process-restart-production-modules-real-IDB-fixture-Chrome-storage",
+      "state": "PASS"
+    },
+    {
+      "gate": "production-boot-login-healthy",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-transient",
+      "state": "PASS",
+      "counts": {
+        "opens": 2,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "STORAGE_UNAVAILABLE",
+            "diagnostic": {
+              "stage": "current-read"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-acl",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 4
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "STORAGE_ACCESS_UNAVAILABLE",
+            "diagnostic": {
+              "stage": "credential-storage",
+              "causeName": "UnknownError"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "STORAGE_ACCESS_UNAVAILABLE",
+            "initializationReturned": false,
+            "diagnostic": {
+              "stage": "credential-storage",
+              "causeName": "UnknownError"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "STORAGE_ACCESS_UNAVAILABLE",
+            "diagnostic": {
+              "stage": "credential-storage",
+              "causeName": "UnknownError"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-slow",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-corrupt",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 0,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "blocked",
+        "code": "CONFIGURATION_CORRUPT"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "CONFIGURATION_CORRUPT",
+            "diagnostic": {
+              "stage": "current-read"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": "read blocked; no overwrite"
+    },
+    {
+      "gate": "production-boot-login-missing",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 0,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "blocked",
+        "code": "CONFIGURATION_RECORD_MISSING"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "CONFIGURATION_RECORD_MISSING",
+            "diagnostic": {
+              "stage": "current-read",
+              "origin": "CURRENT_STORE",
+              "subreason": "ESTABLISHED_BOUNDARY_MISSING"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": "read blocked; no overwrite"
+    },
+    {
+      "gate": "real-Shelf-confirmed-rebuild-and-sanitized-Help",
+      "state": "PASS",
+      "proofClass": "production-app/background + real-IDB/OPFS, synthetic manifest/Chrome/OAuth, not actual Windows copy",
+      "checks": {
+        "origin": "OWNER_CONFIRMED_REBUILD",
+        "prefix": "confirmed-new/",
+        "quick": true,
+        "resources": 0
+      }
+    },
+    {
+      "gate": "production-boot-login-lost",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 0,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "blocked",
+        "code": "CONFIGURATION_RECORD_MISSING"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "CONFIGURATION_RECORD_MISSING",
+            "diagnostic": {
+              "stage": "current-read",
+              "origin": "CURRENT_STORE",
+              "subreason": "ESTABLISHED_BOUNDARY_MISSING"
+            }
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": "read blocked; no overwrite"
+    },
+    {
+      "gate": "production-boot-login-native-fail",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 4,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-native-hold",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 1,
+        "oauth": 1,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-offline",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 1,
+        "token": 1,
+        "identity": 2,
+        "otherCloud": 0,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "TRANSIENT_API_FAILURE",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "VERIFYING",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {
+              "verifyOnly": true
+            }
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-token-offline",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 2,
+        "token": 2,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "TRANSIENT_API_FAILURE",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    },
+    {
+      "gate": "production-boot-login-cancel",
+      "state": "PASS",
+      "counts": {
+        "opens": 1,
+        "native": 0,
+        "oauth": 2,
+        "token": 1,
+        "identity": 1,
+        "otherCloud": 1,
+        "resourceWrites": 0,
+        "access": 2
+      },
+      "storage": {
+        "state": "available"
+      },
+      "apiReceipts": [
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "describeCapabilities",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "getConfiguration",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK"
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTING",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginCancel",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "failed",
+            "code": "OAUTH_CANCELLED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "DISCONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginBegin",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": true
+          }
+        },
+        {
+          "request": {
+            "version": "3+1.1",
+            "method": "loginStatus",
+            "params": {}
+          },
+          "response": {
+            "state": "completed",
+            "code": "OK",
+            "authenticationState": "CONNECTED",
+            "initializationReturned": false
+          }
+        }
+      ],
+      "configurationPreserved": true
+    }
+  ],
+  "errors": []
+}

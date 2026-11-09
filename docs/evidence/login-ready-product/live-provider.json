@@ -1,0 +1,160 @@
+{
+  "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "LIVE_CLOUDFLARE_API_TOKEN_WORKER_R2_NOT_EXTENSION_OAUTH_OR_NATIVE_CHROME",
+  "operations": [
+    {
+      "id": "c9921bf9-897d-4bcc-b7ae-2d8163a710ae",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "e7445e9b-a938-44b7-b719-f4b9335aceff",
+      "stage": "worker-capability",
+      "state": "PASS",
+      "code": "PREPARED"
+    },
+    {
+      "id": "42326d44-277a-441c-8a17-36fd555d3d67",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "9417507e-acc4-4136-a840-ff25b257cc8a",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "a082cb9a-7137-47a7-8bca-f773d1f5967c",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "b485ab36-f408-49f2-a826-1346fe16b990",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "e06eccd0-cfbe-4a00-84df-08ec19bc2adb",
+      "stage": "true-remote-save",
+      "state": "PASS",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "timings": {
+        "intentAuthorizationMs": 0,
+        "capabilityMs": 5,
+        "authorizationRecheckMs": 0,
+        "workerRequestMs": 970,
+        "verificationMs": 213
+      }
+    },
+    {
+      "id": "296536ce-29a8-4fe6-9d8a-bc916170defe",
+      "parentOperationId": "e06eccd0-cfbe-4a00-84df-08ec19bc2adb",
+      "stage": "independent-r2-get",
+      "state": "PASS",
+      "httpStatus": 200,
+      "size": 10380,
+      "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+      "sourceMatches": true,
+      "key": "__click2cloud_true_remote_test__/login-f4aca204-dd02-442b-9ad0-0fe9974a8b55/e06eccd0-cfbe-4a00-84df-08ec19bc2adb.png"
+    },
+    {
+      "id": "ac4f58c8-fe06-4251-9b90-63a423f8f036",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "3af41bda-86a2-4edc-8ee4-13f2c1455498",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "1e604d86-2161-4c9d-870d-aaf588b828ec",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "9e61bc0b-b34b-4640-903d-65cbb6ccdd6b",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "e8585b20-41ae-4198-9a67-71375d6c3146",
+      "stage": "worker-http",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "state": "PASS"
+    },
+    {
+      "id": "f59c3760-b840-4b39-9582-18b9b0e3ca1e",
+      "stage": "true-remote-save",
+      "state": "PASS",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "timings": {
+        "intentAuthorizationMs": 0,
+        "capabilityMs": 16,
+        "authorizationRecheckMs": 0,
+        "workerRequestMs": 1216,
+        "verificationMs": 228
+      }
+    },
+    {
+      "id": "1516887f-31f6-47c2-9093-ed1234d9e3e9",
+      "parentOperationId": "f59c3760-b840-4b39-9582-18b9b0e3ca1e",
+      "stage": "independent-r2-get",
+      "state": "PASS",
+      "httpStatus": 200,
+      "size": 10380,
+      "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+      "sourceMatches": true,
+      "key": "__click2cloud_true_remote_test__/login-f4aca204-dd02-442b-9ad0-0fe9974a8b55/f59c3760-b840-4b39-9582-18b9b0e3ca1e.png"
+    }
+  ],
+  "worker": "click2cloud-r2-d178d882e9c5407fa707",
+  "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+  "state": "PASS",
+  "unchanged": {
+    "productionWorkers": true,
+    "existingObjects": true,
+    "REDOWN": true
+  },
+  "retained": "Only newly created isolated test Worker/objects; private signing plan outside repository. No cleanup deletes."
+}

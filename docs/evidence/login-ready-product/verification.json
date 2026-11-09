@@ -1,0 +1,337 @@
+{
+  "overallState": "BLOCKED",
+  "releaseConclusion": "NO_PRODUCTION_SUCCESS_CLAIM",
+  "startingRevision": "3b80df9d43af5d7ae19fd9142f07e2df1ac3bd89",
+  "productionSourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+  "build": {
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "extensionVersion": "0.3.16",
+    "revision": "d5840130ceebd76d09149abfe14ea2695f853477",
+    "sourceDigest": "2cd85d521bf6c0a38ebb70f831eb29ca1488a0a68ce836c1ea409cccc53b11e4",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "branch": "dev/p0-login-ready-product",
+  "runtimeChangesCommitted": true,
+  "merged": false,
+  "pushed": false,
+  "REDOWNModified": false,
+  "existingUserDataDeletedOrReset": false,
+  "existingCloudObjectsDeleted": false,
+  "productionCloudResourcesChanged": false,
+  "newIsolatedWorkersCreated": 1,
+  "liveTestObjects": "New unique PNG objects retained under __click2cloud_true_remote_test__; no deletes",
+  "steps": [
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-1",
+      "operation": "Shelf opens",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "e8ed631c-594e-46e9-b5e1-4bb4243b38c7",
+        "receipt": "workflow/results.json",
+        "stage": "Shelf-opens",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-2",
+      "operation": "Login succeeds",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "69650a48-d763-409d-aa3a-b62ac666026a",
+        "receipt": "workflow/results.json",
+        "stage": "login-1",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-3",
+      "operation": "redown ready",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "69650a48-d763-409d-aa3a-b62ac666026a",
+        "receipt": "workflow/results.json",
+        "stage": "login-1",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      },
+      "provider": {
+        "state": "PASS",
+        "operationId": "e7445e9b-a938-44b7-b719-f4b9335aceff",
+        "stage": "worker-capability",
+        "receipt": "live-provider.json",
+        "proofClass": "LIVE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_EXTENSION"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-4",
+      "operation": "Native registration acknowledged",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "bea7cc01-2430-4aea-bf10-f9d0fdcd726f",
+        "receipt": "workflow/results.json",
+        "stage": "native-registration",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-5",
+      "operation": "Right-click dispatch",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "71f9deca-e4f4-42a8-b2b4-fc3303f62137",
+        "receipt": "workflow/results.json",
+        "stage": "right-click-true-remote",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-6",
+      "operation": "TRUE REMOTE transfer",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "71f9deca-e4f4-42a8-b2b4-fc3303f62137",
+        "receipt": "workflow/results.json",
+        "stage": "right-click-true-remote",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      },
+      "provider": {
+        "state": "PASS",
+        "operationId": "e06eccd0-cfbe-4a00-84df-08ec19bc2adb",
+        "stage": "true-remote-save",
+        "receipt": "live-provider.json",
+        "proofClass": "LIVE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_EXTENSION"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-7",
+      "operation": "Independent R2 verification",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "18fe3d49-e5e2-42a2-965b-ec802e550e45",
+        "receipt": "workflow/results.json",
+        "stage": "independent-local-R2-readback",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      },
+      "provider": {
+        "state": "PASS",
+        "operationId": "296536ce-29a8-4fe6-9d8a-bc916170defe",
+        "stage": "independent-r2-get",
+        "receipt": "live-provider.json",
+        "proofClass": "LIVE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_EXTENSION"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-8",
+      "operation": "Logout succeeds",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "97b420f4-fde0-440f-a7fc-57e074069536",
+        "receipt": "workflow/results.json",
+        "stage": "logout-1",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-9",
+      "operation": "Login again succeeds",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "cd54795c-d8d1-41cb-8325-2de062b60b75",
+        "receipt": "workflow/results.json",
+        "stage": "login-2",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-10",
+      "operation": "Right-click save again",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "0b68ce5a-6f74-456e-a533-c6210f978381",
+        "receipt": "workflow/results.json",
+        "stage": "right-click-true-remote",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      },
+      "provider": {
+        "state": "PASS",
+        "operationId": "f59c3760-b840-4b39-9582-18b9b0e3ca1e",
+        "stage": "true-remote-save",
+        "receipt": "live-provider.json",
+        "proofClass": "LIVE_ENVIRONMENT_API_TOKEN_NOT_INSTALLED_EXTENSION"
+      }
+    },
+    {
+      "id": "C2C-LOGIN-ACCEPTANCE-11",
+      "operation": "Chrome restart preserves functionality",
+      "installedAcceptance": "BLOCKED",
+      "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; owner Windows profile not accessible",
+      "fixture": {
+        "state": "PASS",
+        "observationId": "98ad1875-40e8-42e1-8599-e6c3dced94f4",
+        "receipt": "workflow/results.json",
+        "stage": "full-browser-process-restart-and-save",
+        "proofClass": "PRODUCTION_BROWSER_APP_IDB_LOCAL_WORKERD_WITH_FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE"
+      }
+    }
+  ],
+  "nodeTests": {
+    "focused": {
+      "pass": 286,
+      "fail": 0,
+      "receipt": "focused.txt"
+    },
+    "remoteModule": {
+      "pass": 49,
+      "fail": 0,
+      "receipt": "module.txt"
+    },
+    "currentDocumentation": {
+      "pass": 10,
+      "fail": 0,
+      "receipt": "current-doc-tests.txt"
+    }
+  },
+  "browserReports": {
+    "boot/results.json": {
+      "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+      "runtimeSourceDirty": false,
+      "counts": {
+        "REPRODUCED": 2,
+        "PASS": 16
+      }
+    },
+    "workflow/results.json": {
+      "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+      "runtimeSourceDirty": false,
+      "counts": {
+        "PASS": 1
+      }
+    },
+    "persistence/browser.json": {
+      "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+      "runtimeSourceDirty": false,
+      "counts": {
+        "REPRODUCED": 3,
+        "PASS": 29
+      }
+    },
+    "original-baseline/results.json": {
+      "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+      "runtimeSourceDirty": false,
+      "counts": {
+        "REPRODUCED": 1
+      }
+    }
+  },
+  "reliabilityGate": {
+    "state": "PASS",
+    "knownFailureCases": 6,
+    "browserInvariantCases": 8
+  },
+  "installed": {
+    "state": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "request": {
+      "channel": "engine",
+      "version": "3+1.1",
+      "method": "describeCapabilities",
+      "params": {}
+    },
+    "response": null,
+    "policyBypassed": false,
+    "receipt": "installed/real-shelf-receipt.json"
+  },
+  "liveProvider": {
+    "state": "PASS",
+    "sourceRevision": "d5840130ceebd76d09149abfe14ea2695f853477",
+    "runtimeSourceDirty": false,
+    "receipt": "live-provider.json",
+    "independentGets": [
+      {
+        "id": "296536ce-29a8-4fe6-9d8a-bc916170defe",
+        "parentOperationId": "e06eccd0-cfbe-4a00-84df-08ec19bc2adb",
+        "stage": "independent-r2-get",
+        "state": "PASS",
+        "httpStatus": 200,
+        "size": 10380,
+        "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+        "sourceMatches": true,
+        "key": "__click2cloud_true_remote_test__/login-f4aca204-dd02-442b-9ad0-0fe9974a8b55/e06eccd0-cfbe-4a00-84df-08ec19bc2adb.png"
+      },
+      {
+        "id": "1516887f-31f6-47c2-9093-ed1234d9e3e9",
+        "parentOperationId": "f59c3760-b840-4b39-9582-18b9b0e3ca1e",
+        "stage": "independent-r2-get",
+        "state": "PASS",
+        "httpStatus": 200,
+        "size": 10380,
+        "sha256": "dffd702034de08fc0d11eebc90e0118a3f8615e1d798a1796656646cf862da60",
+        "sourceMatches": true,
+        "key": "__click2cloud_true_remote_test__/login-f4aca204-dd02-442b-9ad0-0fe9974a8b55/f59c3760-b840-4b39-9582-18b9b0e3ca1e.png"
+      }
+    ],
+    "limitations": "API token test; no installed extension OAuth or native dispatch"
+  },
+  "unresolved": [
+    {
+      "stage": "configuration",
+      "code": "CONFIGURATION_RECORD_MISSING",
+      "result": "Known established CURRENT-loss profile remains preserved and blocked, not restored or treated as empty",
+      "originalPhysicalCause": "UNKNOWN"
+    },
+    {
+      "stage": "installed-browser",
+      "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+    },
+    {
+      "stage": "Windows-OAuth-native-reconnect-restart",
+      "code": "NOT_TESTED_OWNER_PROFILE_UNAVAILABLE"
+    }
+  ],
+  "hostedCI": "NOT_EXECUTED_BRANCH_NOT_PUBLISHED",
+  "artifactSha256": {
+    "boot/corrupt-configuration-login-still-works.png": "f11be80bb46c68b55c3f7d74a49a0c32bbae2242dde713417b4153e24bc87211",
+    "boot/lost-configuration-login-still-works.png": "a9f4fbc10963b567e1686d2cded0e7442214c8d8080c90912c03ee8133e21558",
+    "boot/missing-configuration-login-still-works.png": "0a4e37034e06d2287b9c5d8469f3f7cc1d46cce17f81e4b88cc4c725ff063a65",
+    "boot/remotes-login-only.png": "e573d56dff985ac9c919829c085f567b2fac4b7cbbcbef9ba4fde96bb4118e90",
+    "boot/results.json": "1df0c1d26d127f74e006b871584ce0696944a9ac182d60135635131196f2404f",
+    "boot-run.txt": "a0f6a0b5324b0be29f17a906caaa177bcbb0652f0278f06bf5930f0ff87a25c6",
+    "build.txt": "92a7686b538f140ecb847d1183efe1fdc7429230ccaae85269fc69be5fc1ddae",
+    "current-doc-tests.txt": "1f7e92276c7368410f4f4fa562a96cfdcafcbb461c9d5c2c76d729ee75cd7c79",
+    "focused.txt": "b8937d48a6609af5f718463720a73982c5a5cb0765a5b04e48656502baaad4e5",
+    "installed/real-shelf-receipt.json": "7750dbe9ff630366e61b92570d244ce2feb69286195e78362160083ffd35e657",
+    "installed-run.txt": "3842c96c6c590e7f8310d9539d4ec4c3c12a85b98e4b339fe317ee4f0f2c7693",
+    "live-preflight.json": "689e4cb7cb1d4acb996e07c233642db9b70c14c3768ed13f639bf8d0640c0851",
+    "live-provider.json": "f624a96b0d1b496dadcddc62d24daed65091f3f10402b0eaebd89cc74a903c87",
+    "live-run.txt": "cba0d09532bba962366920a08366ee80e99a1671dd930f249335feac3f4a5266",
+    "module.txt": "591f6fd0e8221053ffa86e0f3d3ec008332a6469418c73bdd9360d67555be74d",
+    "original-baseline/results.json": "409380296cc49ee3a3db1874210da3c94a5996f7294360987dae4f3476f11838",
+    "original-baseline-run.txt": "679465d739f5877e6db86accc18829f394653690ac46c70db366f54c49fb0d6b",
+    "persistence/browser.json": "bd3bedd1f46d4a3404babf049b9358e81f81ad6aa49fa35594a4b886f41fbe78",
+    "persistence-run.txt": "2621883e0aa42cc055200c65de919f73c13c74593158c3a5ce153112713e8dc5",
+    "reliability-gate.txt": "1fa349f3c9919a6ce1e8837f9679485eb4efab7b09aad10f51c9e5e2956449bc",
+    "workflow/login-ready.png": "c504f8cfa6ed271c704da8b77d42f04ab97a26217cc859000bd676578b8fd866",
+    "workflow/results.json": "f6665b1009de5a57b98ab32033bcf7a073c0db0e4392a6f0c09a4851a9aa24b5",
+    "workflow-run.txt": "d2c5d9f65d3b2ebd5c11a9203603d34e32b531b1bbc8e466fba9c9f792c930a0"
+  }
+}
