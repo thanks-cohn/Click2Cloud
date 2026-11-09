@@ -86,3 +86,5 @@ Separate actual installed Chrome/R2 evidence from fixture receipts; do not claim
 Related separate UX issue: [Depth entries must not offer Make Default](../Issues/P1_DEPTH_DESTINATIONS_MANAGER_NO_MAKE_DEFAULT_2026-11-09.md).
 
 **No implementation or application-code changes are claimed by this issue record.**
+
+Implementation update: Gate A source58d017f; representative fixture and isolated live Worker/R2 gates PASS. Actual installed Windows native acceptance remains BLOCKED/unverified. Exact receipts: `docs/evidence/composition-remaining/gate-a/verification.json`. Original incident text retained above.

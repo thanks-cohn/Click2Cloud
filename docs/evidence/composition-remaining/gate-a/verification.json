@@ -1,0 +1,29 @@
+{
+  "gate": "A",
+  "sourceRevision": "58d017fe3053685b62c5a8c5de2554c26ef3af0f",
+  "representative": "PASS",
+  "focused": {
+    "pass": 307,
+    "fail": 0
+  },
+  "browser": {
+    "receipt": "browser/results.json",
+    "pass": 7,
+    "includes": "All16 show+Flat combinations; actual app/API/IDB; row eye/reload/relogin; fixture auth/contextMenus"
+  },
+  "live": {
+    "receipt": "live.json",
+    "state": "PASS",
+    "routes": [
+      "Narrow custom",
+      "Narrow natural (same target)",
+      "Depth deep"
+    ],
+    "checks": "Real canonical engine to unchanged existing isolated Worker; independent signed S3 GET exact key/bytes",
+    "chrome": "FIXTURE_CALLBACK_ACK_NOT_NATIVE_USER_CLICK"
+  },
+  "installed": "BLOCKED_INHERITED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+  "network": "Initial Node fetch lacked inherited proxy support: ECONNREFUSED, uncertain. New unique-prefix invocation with NODE_USE_ENV_PROXY=1 passed. No uncertain operation was replayed.",
+  "cloudMutations": "Only new unique PNG objects under previously authorized test prefix; no deployment/provision/delete/overwrite",
+  "baseline": "checkpoint unchanged; all prior Phase1-4 runtime preserved except explicitly superseded target-dedup/Flat rules"
+}
