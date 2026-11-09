@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "See source-pinned docs/evidence/current-recovery/verification.json",
+    "sourceCommit": "See source-pinned docs/evidence/reliability-ratchet/verification.json",
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
@@ -9270,7 +9270,7 @@
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
-      "src/glaciaring/breadcrumbs.mjs": "fffa2f26fd07b220539a4a39b6a2e50563fec4c1189bfbf5931064055bff9e37",
+      "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
       "src/glaciaring/catalog.mjs": "b7d5f297b7915491251c0a4ad9551027ce9b4a15a70baf1c9e6b88728db573d3",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "03bf3f2ba1ccefd4e8eb339c38e442cf3a7e63e4c1a269f3f28142b3c4f64bb8",
@@ -13590,7 +13590,8 @@
         "BREADCRUMB_STORAGE_UNAVAILABLE",
         "PARTIAL",
         "UNKNOWN",
-        "UNOBSERVED"
+        "UNOBSERVED",
+        "UNSUPPORTED_DIAGNOSTIC_SCHEMA_PRESERVED"
       ],
       "src/glaciaring/catalog.mjs": [
         "ABORTED",
@@ -14357,7 +14358,7 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "d25836215a5a85d33ff163c44969d72166ef109662416a4c0c4f9ffa19dcf8af"
+    "digest": "6374a6a0ea93a10085c90d6bc9353a04baa5441ca7d48c481fd245e7888329a0"
   },
   "changeLog": [
     {
