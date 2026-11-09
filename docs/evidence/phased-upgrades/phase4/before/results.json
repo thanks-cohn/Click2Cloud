@@ -1,0 +1,727 @@
+{
+  "sourceRevision": "e6994d901948773934c32a011ec8e926e2449eae",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "CHROMIUM_PRODUCTION_APP_FIXTURE_API_AUTH_NOT_INSTALLED_OR_LIVE_PROVIDER",
+  "results": [
+    {
+      "gate": "fresh-50-50-remotes-no-tree-clean-footer",
+      "state": "PASS"
+    },
+    {
+      "gate": "four-formats-real-decoded-thumbnail-pixels-bounded-two-reads",
+      "state": "PASS",
+      "thumbnails": [
+        {
+          "key": "picture.gif",
+          "width": 128,
+          "height": 78,
+          "decoded": true
+        },
+        {
+          "key": "picture.jpg",
+          "width": 128,
+          "height": 82,
+          "decoded": true
+        },
+        {
+          "key": "picture.png",
+          "width": 120,
+          "height": 80,
+          "decoded": true
+        },
+        {
+          "key": "picture.webp",
+          "width": 128,
+          "height": 80,
+          "decoded": true
+        }
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-png",
+      "state": "PASS",
+      "width": 120,
+      "height": 80,
+      "pixel": [
+        230,
+        40,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-jpg",
+      "state": "PASS",
+      "width": 140,
+      "height": 90,
+      "pixel": [
+        231,
+        75,
+        26,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-webp",
+      "state": "PASS",
+      "width": 160,
+      "height": 100,
+      "pixel": [
+        230,
+        110,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-gif",
+      "state": "PASS",
+      "width": 180,
+      "height": 110,
+      "pixel": [
+        230,
+        145,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "stable-gallery-portrait-landscape-square-GIF-large-failed-slow-rapid-and-viewport-resize",
+      "state": "FAIL",
+      "samples": [
+        {
+          "label": "portrait-pending",
+          "dialog": {
+            "x": 290,
+            "y": 314.15625,
+            "width": 700,
+            "height": 221.6875
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 399.15625,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 483.84375,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "intrinsic": [
+            0,
+            0
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "portrait-decoded",
+          "dialog": {
+            "x": 290,
+            "y": 79,
+            "width": 700,
+            "height": 692
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 164,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 719,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 209,
+            "width": 658,
+            "height": 510
+          },
+          "intrinsic": [
+            240,
+            960
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "geometry-1-landscape.png",
+          "dialog": {
+            "x": 290,
+            "y": 264.375,
+            "width": 700,
+            "height": 321.25
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 406.375,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 533.625,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 451.375,
+            "width": 658,
+            "height": 82.25
+          },
+          "intrinsic": [
+            1600,
+            200
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "geometry-2-square.png",
+          "dialog": {
+            "x": 290,
+            "y": 79,
+            "width": 700,
+            "height": 692
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 164,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 719,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 209,
+            "width": 658,
+            "height": 510
+          },
+          "intrinsic": [
+            900,
+            900
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "picture.gif",
+          "dialog": {
+            "x": 290,
+            "y": 132.9375,
+            "width": 700,
+            "height": 584.109375
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 217.9375,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 665.046875,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 262.9375,
+            "width": 658,
+            "height": 402.109375
+          },
+          "intrinsic": [
+            180,
+            110
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "large.jpg",
+          "dialog": {
+            "x": 290,
+            "y": 122.5,
+            "width": 700,
+            "height": 605
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 207.5,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 675.5,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 252.5,
+            "width": 658,
+            "height": 423
+          },
+          "intrinsic": [
+            140,
+            90
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "broken.png",
+          "dialog": {
+            "x": 290,
+            "y": 314.15625,
+            "width": 700,
+            "height": 221.6875
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 399.15625,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 483.84375,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "intrinsic": [
+            0,
+            0
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "rapid-superseded-portrait",
+          "dialog": {
+            "x": 290,
+            "y": 79,
+            "width": 700,
+            "height": 692
+          },
+          "frame": null,
+          "controls": {
+            "x": 311,
+            "y": 164,
+            "width": 658,
+            "height": 35
+          },
+          "download": {
+            "x": 311,
+            "y": 719,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 311,
+            "y": 209,
+            "width": 658,
+            "height": 510
+          },
+          "intrinsic": [
+            900,
+            900
+          ],
+          "fit": "contain"
+        },
+        {
+          "label": "viewport-resized",
+          "dialog": {
+            "x": 17,
+            "y": 83,
+            "width": 326,
+            "height": 474
+          },
+          "frame": null,
+          "controls": {
+            "x": 30,
+            "y": 164,
+            "width": 300,
+            "height": 35
+          },
+          "download": {
+            "x": 30,
+            "y": 509,
+            "width": 88.625,
+            "height": 35
+          },
+          "image": {
+            "x": 30,
+            "y": 209,
+            "width": 300,
+            "height": 300
+          },
+          "intrinsic": [
+            900,
+            900
+          ],
+          "fit": "contain"
+        }
+      ],
+      "shifts": [
+        {
+          "label": "portrait-pending",
+          "maxShift": 0
+        },
+        {
+          "label": "portrait-decoded",
+          "maxShift": 470.3125
+        },
+        {
+          "label": "geometry-1-landscape.png",
+          "maxShift": 99.5625
+        },
+        {
+          "label": "geometry-2-square.png",
+          "maxShift": 470.3125
+        },
+        {
+          "label": "picture.gif",
+          "maxShift": 362.421875
+        },
+        {
+          "label": "large.jpg",
+          "maxShift": 383.3125
+        },
+        {
+          "label": "broken.png",
+          "maxShift": 0
+        },
+        {
+          "label": "rapid-superseded-portrait",
+          "maxShift": 470.3125
+        }
+      ],
+      "baseline": true
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.png",
+      "state": "PASS",
+      "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "width": 120,
+      "height": 80
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.jpg",
+      "state": "PASS",
+      "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.jpg",
+      "size": 1504,
+      "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.webp",
+      "state": "PASS",
+      "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.webp",
+      "size": 334,
+      "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7",
+      "width": 160,
+      "height": 100
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.gif",
+      "state": "PASS",
+      "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.gif",
+      "size": 418,
+      "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33",
+      "width": 180,
+      "height": 110
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-large.jpg",
+      "state": "PASS",
+      "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "large.jpg",
+      "size": 1050096,
+      "sha256": "b196aa6e88e563343f56a01f836617d03c7f98041bd84fb4ef2be4fdbd95cc13",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "gate": "failed-read-does-not-truncate-existing-file-or-claim-download-complete",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-write-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-close-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-drop-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "literal-OK-and-corrupt-image-truthful-errors-gallery-stays-usable",
+      "state": "PASS"
+    },
+    {
+      "gate": "gallery-display-order-navigation-return-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "rapid-gallery-epochs-and-real-failed-inner-API-envelope-visible",
+      "state": "PASS"
+    },
+    {
+      "gate": "edge-to-edge-pointer-keyboard-resize-seven-positions-no-byte-refetch",
+      "state": "PASS"
+    },
+    {
+      "gate": "narrow-toolbar-overflow-shared-actions-expand-collapse-accessibility",
+      "state": "PASS"
+    },
+    {
+      "gate": "52-tab-transitions-no-list-refetch-settings-separation-reload-layout-persistence",
+      "state": "PASS"
+    },
+    {
+      "gate": "manager-default-A-clear-B-A-canonical-exact-target-no-destination-loss",
+      "state": "PASS"
+    },
+    {
+      "gate": "GUI-sign-out-login-preserves-destinations-and-image-read",
+      "state": "PASS",
+      "authorization": "FIXTURE_OAUTH_NOT_INSTALLED_PROVIDER_CONSENT"
+    },
+    {
+      "gate": "0-1-100-1000-10000-images-visible-window-bounded-scroll",
+      "state": "PASS",
+      "measurements": [
+        {
+          "count": 0,
+          "reads": 0,
+          "gaps": [
+            6.5999999940395355,
+            16.400000005960464,
+            16.799999997019768,
+            16.5,
+            17.400000005960464,
+            16.099999994039536,
+            16.5,
+            16.700000002980232,
+            16.599999994039536,
+            16.799999997019768,
+            16.600000008940697,
+            16.799999997019768,
+            16.599999994039536,
+            16.900000005960464,
+            16.599999994039536,
+            16.5,
+            16.80000001192093,
+            16.399999991059303,
+            17.200000002980232,
+            16.099999994039536,
+            16.80000001192093,
+            16.69999998807907,
+            16.5,
+            18.30000001192093,
+            16.799999997019768,
+            15,
+            16.599999994039536,
+            16.799999997019768,
+            16.5,
+            18.200000002980232
+          ],
+          "rendered": 0,
+          "dom": 92
+        },
+        {
+          "count": 1,
+          "reads": 0,
+          "gaps": [
+            11.700000002980232,
+            16.69999998807907,
+            16.80000001192093,
+            16.5,
+            16.69999998807907,
+            16.700000002980232,
+            19.200000002980232,
+            14.099999994039536,
+            16.700000002980232,
+            16.600000008940697,
+            16.69999998807907,
+            16.700000002980232,
+            16.700000002980232,
+            16.599999994039536,
+            19.200000002980232,
+            14.100000008940697,
+            16.899999991059303,
+            17.299999997019768,
+            15.900000005960464,
+            16.599999994039536,
+            21.5,
+            11.800000011920929,
+            16.799999997019768,
+            16.799999997019768,
+            16.400000005960464,
+            16.799999997019768,
+            16.700000002980232,
+            16.5,
+            16.69999998807907,
+            16.700000002980232
+          ],
+          "rendered": 1,
+          "dom": 97
+        },
+        {
+          "count": 100,
+          "reads": 8,
+          "gaps": [
+            3.2999999970197678,
+            14.599999994039536,
+            16.5,
+            16.799999997019768,
+            17.900000005960464,
+            16.5,
+            18.299999997019768,
+            15.5,
+            20.299999997019768,
+            13.600000008940697,
+            19.5,
+            14.200000002980232,
+            22.899999991059303,
+            7.799999997019768,
+            17.100000008940697,
+            16,
+            16.799999997019768,
+            17.099999994039536,
+            16.100000008940697,
+            16.799999997019768,
+            17.099999994039536,
+            16.700000002980232,
+            16.100000008940697,
+            16.799999997019768,
+            16.5,
+            17.399999991059303,
+            15.900000005960464,
+            16.700000002980232,
+            17,
+            16.399999991059303
+          ],
+          "rendered": 28,
+          "dom": 212
+        },
+        {
+          "count": 1000,
+          "reads": 10,
+          "gaps": [
+            12.799999997019768,
+            20.599999994039536,
+            17.299999997019768,
+            13.600000008940697,
+            15.700000002980232,
+            17.5,
+            15.299999997019768,
+            16.700000002980232,
+            16.799999997019768,
+            16.700000002980232,
+            17.799999997019768,
+            15.399999991059303,
+            17.100000008940697,
+            16.099999994039536,
+            24,
+            9.299999997019768,
+            18.700000002980232,
+            15.5,
+            15.799999997019768,
+            17.5,
+            16.200000002980232,
+            17.200000002980232,
+            16.200000002980232,
+            17.5,
+            17.399999991059303,
+            14.800000011920929,
+            19.099999994039536,
+            16.099999994039536,
+            15.200000002980232,
+            17.600000008940697
+          ],
+          "rendered": 28,
+          "dom": 212
+        },
+        {
+          "count": 10000,
+          "reads": 9,
+          "gaps": [
+            7.299999997019768,
+            19.400000005960464,
+            18.099999994039536,
+            13.200000002980232,
+            19.900000005960464,
+            12.899999991059303,
+            16.400000005960464,
+            17.599999994039536,
+            15.700000002980232,
+            19.400000005960464,
+            18.299999997019768,
+            17.299999997019768,
+            11.700000002980232,
+            20.899999991059303,
+            13.100000008940697,
+            16.599999994039536,
+            18.299999997019768,
+            15.200000002980232,
+            16.400000005960464,
+            19.399999991059303,
+            16.100000008940697,
+            14,
+            16.700000002980232,
+            16.5,
+            18.5,
+            19,
+            15.199999988079071,
+            19.100000008940697,
+            11.599999994039536,
+            16.600000008940697
+          ],
+          "rendered": 28,
+          "dom": 212
+        }
+      ]
+    },
+    {
+      "gate": "browser-runtime-errors",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}

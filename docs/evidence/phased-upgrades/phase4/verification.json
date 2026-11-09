@@ -1,0 +1,33 @@
+{
+  "phase": 4,
+  "sourceRevision": "e6994d901948773934c32a011ec8e926e2449eae",
+  "representativeGate": "PASS",
+  "installedAcceptance": "BLOCKED_UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+  "browser": {
+    "receipt": "browser/results.json",
+    "pass": 26,
+    "fail": 0,
+    "classification": "Real Chromium production GUI/API/decoder/OPFS; HTTP bytes, OAuth, picker and Chrome callbacks are fixtures."
+  },
+  "geometry": {
+    "beforeMaxShiftPx": 470.3125,
+    "afterMaxShiftPx": 0,
+    "beforeAssets": "before/assets.json",
+    "afterSamples": 9,
+    "viewportResize": "responsive frame remains within 360x640 viewport",
+    "cases": "portrait, landscape, square, GIF, large JPEG, slow, decode failure, long title, rapid cancellation"
+  },
+  "focused": {
+    "receipt": "focused.txt",
+    "pass": 302,
+    "fail": 0,
+    "runtimeSourceRevision": "e6994d901948773934c32a011ec8e926e2449eae"
+  },
+  "providerRegression": "Phase3 actual Worker/R2 receipts retained; Phase4 changes only gallery markup/CSS. No new provider writes needed or claimed.",
+  "unchangedWorkerDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+  "notImplemented": [
+    5,
+    6,
+    7
+  ]
+}

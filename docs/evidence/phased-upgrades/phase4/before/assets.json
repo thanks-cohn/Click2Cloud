@@ -1,0 +1,12 @@
+{
+  "harnessRevision": "e6994d901948773934c32a011ec8e926e2449eae",
+  "servedRuntimeAssetsRevision": "0a31e455de371557a75d7fd47e5d868c62e83408",
+  "assets": [
+    "extension/app.mjs",
+    "extension/app.css"
+  ],
+  "otherAssets": "unchanged production assets at harnessRevision",
+  "reason": "Measure pre-Phase4 geometry without swapping the shared working tree. Baseline FAIL is expected and retained; 25 preexisting browser gates pass.",
+  "baselineTag": "ed8a18afcdd67a892693f3b0695d9f40279949ea",
+  "baselineTagUnchanged": true
+}
