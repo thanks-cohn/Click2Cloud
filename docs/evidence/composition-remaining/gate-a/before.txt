@@ -1,0 +1,102 @@
+✔ phase1-composite-Narrow-retains-real-parent-IDs-and-exact-physical-save (10.060828ms)
+✔ phase1-shared-ancestors-merge-only-when-both-physical-path-and-titles-agree (9.005115ms)
+✔ phase1-ordinary-Simple-single-choice-stays-flat-and-explicit-Flat-remains-an-override (3.403269ms)
+✔ phase1-native-ACK-and-engine-click-dispatch-resolve-exact-Narrow-target (16.649635ms)
+✔ phase1-deep-placement-identities-stay-bounded-without-escaped-parent-growth (8.454438ms)
+✔ phase2-all-hide-all-custom-are-reversible-and-retain-exact-physical-target (7.055743ms)
+✔ phase2-config-API-shape-persists-only-Narrow-presentation-and-preserves-custom-flags (2.811883ms)
+✔ phase3A-mutual-exclusion-default-wins-legacy-and-explicit-Quick-clears-global-Default (1.462109ms)
+✔ phase3B-hidden-Default-Quick-do-not-resurrect-and-Depth-scope-visibility-is-not-removal (2.242914ms)
+✖ gateA-before-regression-all8-additive-modes-preserve-Depth-and-Narrow-real-parents-even-with-Flat (2.493087ms)
+✖ gateA-two-Narrow-presentations-same-target-independently-edit-hide-delete-and-route (0.856158ms)
+✖ gateA-identical-Narrow-titles-remain-distinct-IDs-with-readable-collision-labels (0.687578ms)
+✖ gateA-single-Depth-empty-no-fabricated-branch-real-children-depth-bound-and-eye (1.633804ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 9
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.053116
+
+✖ failing tests:
+
+test at tests/composition-remaining.test.mjs:7:1
+✖ gateA-before-regression-all8-additive-modes-preserve-Depth-and-Narrow-real-parents-even-with-Flat (2.493087ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///workspace/Click2Cloud/tests/composition-remaining.test.mjs:7:353)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/composition-remaining.test.mjs:8:1
+✖ gateA-two-Narrow-presentations-same-target-independently-edit-hide-delete-and-route (0.856158ms)
+  Error: DESTINATION_EXISTS
+      at fail (file:///workspace/Click2Cloud/src/api/config.mjs:3:46)
+      at applyConfigChanges (file:///workspace/Click2Cloud/src/api/config.mjs:71:60)
+      at TestContext.<anonymous> (file:///workspace/Click2Cloud/tests/composition-remaining.test.mjs:8:297)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'DESTINATION_EXISTS'
+  }
+
+test at tests/composition-remaining.test.mjs:9:1
+✖ gateA-identical-Narrow-titles-remain-distinct-IDs-with-readable-collision-labels (0.687578ms)
+  Error [MenuSpecError]: Exact destination occurs twice in one mode.
+      at file:///workspace/Click2Cloud/src/core/menu-identity.mjs:68:28
+      at Array.map (<anonymous>)
+      at normalizedDestinations (file:///workspace/Click2Cloud/src/core/menu-identity.mjs:65:17)
+      at Module.createConfig (file:///workspace/Click2Cloud/src/modes/nested/index.mjs:3:106)
+      at file:///workspace/Click2Cloud/src/core/menu-spec.mjs:66:146
+      at Array.map (<anonymous>)
+      at compileMenuSpec (file:///workspace/Click2Cloud/src/core/menu-spec.mjs:66:100)
+      at TestContext.<anonymous> (file:///workspace/Click2Cloud/tests/composition-remaining.test.mjs:9:240)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25) {
+    code: 'DUPLICATE_DESTINATION'
+  }
+
+test at tests/composition-remaining.test.mjs:10:1
+✖ gateA-single-Depth-empty-no-fabricated-branch-real-children-depth-bound-and-eye (1.633804ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Cloudflare',
+  -   'redown',
+  -   'body',
+      'arm'
+    ]
+  
+      at TestContext.<anonymous> (file:///workspace/Click2Cloud/tests/composition-remaining.test.mjs:10:422)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Cloudflare', 'arm' ],
+    expected: [ 'Cloudflare', 'redown', 'body', 'arm' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

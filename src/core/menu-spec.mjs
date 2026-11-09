@@ -37,7 +37,7 @@ function normalizeInventory(value={}) {
  * @api previewNativeMenu, previewContextMenu, inspectMenuTree, previewConfigChange;
  * commitConfigChange/reconcileNativeMenu own persistence and Chrome effects.
  * @inputs Validated configs/product, Default, show/visibility flags, inventory and generation.
- * @decision Deduplicate exact targets; promote visible Simple Quick rows out of
+ * @decision Preserve independently selected mode/presentation routes; promote visible Quick rows out of
  * Cloudflare; retain Default, suppress its redundant Quick, count only remaining
  * Cloudflare choices (0 attention / 1 flat / 2+ branch). Explicit Flat keeps Quick.
  * @effects None except optional bounded diagnostics; never rewrites config or authorizes.
@@ -63,7 +63,7 @@ export function compileMenuSpec(options={}) {
     let projection,composition;
     try {
       if(composite) {
-        const parts=Object.entries(modeModules).filter(([m])=>show[m]&&(!show.flat||m==='simple')).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
+        const parts=Object.entries(modeModules).filter(([m])=>show[m]).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
         projection={revision:options.product?.revision??0,rows:parts.flatMap(p=>p.rows.map(r=>({...r,sourceMode:p.m}))),omissions:parts.flatMap(p=>p.omissions)};
       } else {
         const config=module.createConfig(options.configs?.[mode]??{});
@@ -78,10 +78,10 @@ export function compileMenuSpec(options={}) {
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
-    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio','page'],visible=true,providerAction=null}) {
+    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio','page'],visible=true,providerAction=null,presentationId=null}) {
       if(composite&&role!=='separator') {
         const peers=siblings.get(parentId)??[];
-        if(peers.some(p=>p.label===label))label+=' ['+stableId('label',placement+JSON.stringify(target)).slice(-6)+']';
+        const base=label;let count=2;while(peers.some(p=>p.label===label))label=base+' ('+(count++)+')';
       }
       const actionId=role==='provider-action'?stableId('provider-action',providerAction):target&&role==='save'?stableId('action',targetKey(target)):null;
       const identity=JSON.stringify([origin.mode,origin.provider,placement,parentId,role,actionId]);
@@ -99,33 +99,28 @@ export function compileMenuSpec(options={}) {
       // Saved destinations keep their chosen label. Unready clicks explain the
       // actual blocker in the Shelf; never add a second native setup workflow.
       if(setupProvider)enabled=true;
-      const row={actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
+      const row={...(presentationId?{presentationId}:{}),actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
     if(composite) {
-      // A provider has one canonical native owner. Presentation counts assigned
-      // save targets, never discovered buckets or repeated mode projections.
+      // One provider owner composes all checked mode presentations.
       const defaultTarget=options.defaultTarget?normalizeTarget(options.defaultTarget):null;
-      const candidates=new Map();
-      for(const row of projection.rows)if(row.role==='save'&&row.target.provider==='cloudflare'){
-        const key=targetKey(row.target);if(!candidates.has(key))candidates.set(key,row);
-      }
-      const hiddenDefault=defaultTarget&&!candidates.has(targetKey(defaultTarget))&&Object.entries(options.configs??{}).some(([m,c])=>(c.destinations??c.scopes??[]).some(d=>d.hidden&&(targetKey(d.target)===targetKey(defaultTarget)||m==='depth'&&scopeKey(d.target)===scopeKey(defaultTarget))));
-      if(defaultTarget?.provider==='cloudflare'&&!hiddenDefault&&(show.flat||show.simple||show.nested||show.depth)){
-        const key=targetKey(defaultTarget),c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
-        if(!candidates.has(key)){const assigned=[...candidates];candidates.clear();candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});for(const [k,row] of assigned)candidates.set(k,row);}
+      // Physical authority is target-keyed; menu routes are presentation-keyed.
+      // Flat can expose an otherwise unassigned Default, never veto checked trees.
+      const candidates=projection.rows.filter(r=>r.role==='save'&&r.target.provider==='cloudflare');
+      const assignments=Object.entries(options.configs??{}).flatMap(([m,c])=>(c.destinations??c.scopes??[]).map(d=>({m,d})));
+      const defaultAssigned=defaultTarget&&assignments.some(({m,d})=>targetKey(d.target)===targetKey(defaultTarget)||m==='depth'&&scopeKey(d.target)===scopeKey(defaultTarget));
+      if(defaultTarget?.provider==='cloudflare'&&!defaultAssigned&&(show.flat||show.simple||show.nested||show.depth)){
+        const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
+        candidates.unshift({target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,sourceMode:'simple',placement:'legacy-default',enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});
       }
       if(show.flat&&!defaultTarget)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
-      // @rule QUICK_PROMOTION — latest/right-click-rules/README.md sections 1–2.
-      // Quick is an alternate placement, never an extra Cloudflare child. Keep
-      // an eligible Default under Cloudflare even when its stored Quick is ON;
-      // suppress only that redundant shortcut, without mutating preferences.
-      const defaultKey=defaultTarget&&candidates.has(targetKey(defaultTarget))?targetKey(defaultTarget):null;
-      const quickRows=[...new Map(projection.rows.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&r.role==='save').map(r=>[targetKey(r.target),{...r,label:r.quickLabel??r.label}])).values()].filter(r=>targetKey(r.target)!==defaultKey);
-      const promoted=new Set(quickRows.filter(r=>r.target.provider==='cloudflare').map(r=>targetKey(r.target)));
-      const active=(show.flat?[...candidates.values()].filter(r=>targetKey(r.target)===defaultKey):[...candidates.values()]).filter(r=>!promoted.has(targetKey(r.target)));
-      const narrowActive=active.filter(r=>r.sourceMode==='nested'),narrowHierarchy=narrowActive.length>0&&!show.flat;
-      composition={policy:'quick-promoted',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':narrowHierarchy?'submenu':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
+      const defaultKey=defaultTarget&&candidates.some(r=>targetKey(r.target)===targetKey(defaultTarget))?targetKey(defaultTarget):null;
+      const routeKey=r=>JSON.stringify([r.sourceMode,r.placement]);
+      const quickRows=candidates.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&targetKey(r.target)!==defaultKey).map(r=>({...r,label:r.quickLabel??r.label}));
+      const promoted=new Set(quickRows.map(routeKey)),active=candidates.filter(r=>!promoted.has(routeKey(r)));
+      const hierarchy=active.some(r=>r.sourceMode==='nested'||r.sourceMode==='depth'&&r.parentPlacement!==null);
+      composition={policy:'independent-additive',flatPolicy:'unassigned-default-only; checked hierarchies retained',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':hierarchy?'submenu':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
         if(options.product?.providerVisibility?.[provider]===false)continue;
         const id=stableId('provider-entry',provider),origin={mode:null,provider};
@@ -134,22 +129,22 @@ export function compileMenuSpec(options={}) {
           if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
         }
         if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
-        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
-        if(active.length===1&&!narrowHierarchy)save(active[0],null,id);
+        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+routeKey(row),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
+        if(active.length===1&&!hierarchy)save(active[0],null,id);
         else {
           const parent=add({id,label,origin,placement:'provider:cloudflare'});
-          for(const row of active.filter(r=>r.sourceMode!=='nested'))save(row,parent,stableId('assigned-entry',targetKey(row.target)));
-          // Keep the actual Narrow placements, not just their save endpoints.
-          const nestedRows=projection.rows.filter(r=>r.sourceMode==='nested'),index=new Map(nestedRows.map(r=>[r.placement,r])),needed=new Set(),selected=new Set(narrowActive.map(r=>r.placement)),placements=new Map();
-          for(const row of narrowActive){let r=row;while(r&&!needed.has(r.placement)){needed.add(r.placement);r=index.get(r.parentPlacement);}}
-          for(const row of nestedRows.filter(r=>needed.has(r.placement))){
-            // The provider already names Cloudflare. An unselected natural bucket
-            // wrapper is not a user-edited Narrow folder title.
-            if(row.role==='branch'&&!row.target.prefix&&!row.parentPlacement&&!row.explicitLevel){placements.set(row.placement,parent);continue;}
-            if(row.role==='save'&&!selected.has(row.placement))continue;
-            const parentId=row.parentPlacement===null?parent:placements.get(row.parentPlacement);
-            const nativeId=add({...row,...(row.role==='save'?{id:stableId('assigned-entry',targetKey(row.target))}:{}),parentId:parentId??'missing-parent:'+row.parentPlacement,placement:'nested:'+row.placement,origin:{mode:'nested',provider:'cloudflare'}});
-            if(nativeId)placements.set(row.placement,nativeId);
+          for(const row of active.filter(r=>!['nested','depth'].includes(r.sourceMode)))save(row,parent,stableId('assigned-entry',routeKey(row)));
+          // Both hierarchical projectors own actual parentPlacement, not leaf maps.
+          for(const treeMode of ['nested','depth']){
+            const selectedRows=active.filter(r=>r.sourceMode===treeMode),treeRows=projection.rows.filter(r=>r.sourceMode===treeMode),index=new Map(treeRows.map(r=>[r.placement,r])),needed=new Set(),selected=new Set(selectedRows.map(r=>r.placement)),placements=new Map();
+            for(const row of selectedRows){let r=row;while(r&&!needed.has(r.placement)){needed.add(r.placement);r=index.get(r.parentPlacement);}}
+            for(const row of treeRows.filter(r=>needed.has(r.placement))){
+              if(treeMode==='nested'&&row.role==='branch'&&!row.target.prefix&&!row.parentPlacement&&!row.explicitLevel){placements.set(row.placement,parent);continue;}
+              if(row.role==='save'&&!selected.has(row.placement))continue;
+              const parentId=row.parentPlacement===null?parent:placements.get(row.parentPlacement);
+              const nativeId=add({...row,parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
+              if(nativeId)placements.set(row.placement,nativeId);
+            }
           }
         }
       }

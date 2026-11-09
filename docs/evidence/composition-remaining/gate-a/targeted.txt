@@ -1,0 +1,47 @@
+✔ phase1-composite-Narrow-retains-real-parent-IDs-and-exact-physical-save (20.897726ms)
+✔ phase1-shared-ancestors-merge-only-when-both-physical-path-and-titles-agree (6.719369ms)
+✔ gateA-ordinary-Simple-alone-stays-flat-and-Flat-does-not-veto-checked-Narrow (6.509898ms)
+✔ phase1-native-ACK-and-engine-click-dispatch-resolve-exact-Narrow-target (16.965326ms)
+✔ phase1-deep-placement-identities-stay-bounded-without-escaped-parent-growth (14.395304ms)
+✔ phase2-all-hide-all-custom-are-reversible-and-retain-exact-physical-target (11.781821ms)
+✔ phase2-config-API-shape-persists-only-Narrow-presentation-and-preserves-custom-flags (3.92651ms)
+✔ phase3A-mutual-exclusion-default-wins-legacy-and-explicit-Quick-clears-global-Default (1.692477ms)
+✔ phase3B-hidden-Default-Quick-do-not-resurrect-and-Depth-scope-visibility-is-not-removal (2.245921ms)
+✔ gateA-before-regression-all8-additive-modes-preserve-Depth-and-Narrow-real-parents-even-with-Flat (7.419885ms)
+✔ gateA-two-Narrow-presentations-same-target-independently-edit-hide-delete-and-route (3.611029ms)
+✔ gateA-identical-Narrow-titles-remain-distinct-IDs-with-readable-collision-labels (1.68059ms)
+✔ gateA-single-Depth-empty-no-fabricated-branch-real-children-depth-bound-and-eye (1.233402ms)
+✔ gateA-read-only-Depth-discovery-paginates-real-children-and-rejects-partial-as-empty (1.428506ms)
+✔ Narrow hides eight intermediate levels without altering full target; cancel source stays immutable (22.896678ms)
+✔ Narrow hidden final, shared children, overlapping paths and different accounts stay actionable (1.871839ms)
+✔ hidden Quick persists but is omitted; shown Quick wins over duplicate exact default (2.364633ms)
+✔ composite modes preserve configs and checked trees even with Flat or missing default (4.490898ms)
+✔ Quick order is stable, promoted actions follow the four providers without duplicated children (2.080436ms)
+✔ organization trigger is exactly >=7 direct entries; dismiss signature changes only on relevant projection (0.781902ms)
+✔ closed schemas reject malformed params and credentials; typed registry has all meaningful GUI families (1.868021ms)
+✔ trusted scoped grants bind hidden record identities, response accounts, expiry, revocation and approval (1.403603ms)
+✔ previous main product shape migrates exact targets, revisions, visibility, recovery and ancestor aliases (2.587631ms)
+✔ Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity (23.471614ms)
+✔ gateA discovered buckets do not inflate count; checked overlapping mode routes remain independent (7.261915ms)
+✔ Nov6 each Settings toggle removes whole native branch and restores exact target without mutation (9.533352ms)
+✔ Nov6 two accounts with identical display names keep distinct exact targets and disambiguated labels (1.556297ms)
+✔ Nov6 deliberate default assignment deletion persists sole survivor and does not recreate deleted target (13.147978ms)
+✔ Nov6 real registrar ACK click uses engine exact target without provider/dashboard detour, including restart (4.384777ms)
+✔ Shelf attention replaces legacy popup and retains the exact trusted app boundary (1.691764ms)
+✔ future trusted flat provider ports replace their one canonical entry, never add a second provider row (0.81405ms)
+✔ explicit Quick labels cannot rename or duplicate a canonical provider heading (0.846481ms)
+✔ hidden destination eye wins over Flat without deleting its saved default (1.352853ms)
+✔ programmatic provider action binds the sole canonical target before dispatch, even without a stored default (9.432463ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (19.448008ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (4.748761ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (0.988028ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.624961ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.250049ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 417.877239

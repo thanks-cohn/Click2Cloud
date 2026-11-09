@@ -67,8 +67,10 @@ export function applyConfigChanges(state,changes) {
       if(c.visibilityMode!==undefined&&m!=='nested')fail('INVALID_CONFIG');
       const all=next.configs[m].destinations;
       if(c.type==='createDestination') {
-        const t=normalizeTarget(c.target),id=stableId('destination',m+targetKey(t));
-        if(all.some(d=>targetKey(d.target)===targetKey(t)))fail('DESTINATION_EXISTS');
+        const t=normalizeTarget(c.target);let id=stableId('destination',m+targetKey(t));
+        if(m==='simple'&&all.some(d=>targetKey(d.target)===targetKey(t)))fail('DESTINATION_EXISTS');
+        // Persist route identity once. Preview/retry is deterministic; edits never re-key it.
+        for(let sequence=1;all.some(d=>d.id===id);sequence++)id=stableId('destination',JSON.stringify([m,targetKey(t),p.revision,sequence]));
         all.push({id,target:t,order:all.length,...(c.label?{label:c.label}:{}),...(c.levels?{levels:c.levels}:{}),...(c.visibilityMode?{visibilityMode:c.visibilityMode}:{})});
       } else {
         const i=all.findIndex(d=>d.id===c.id);if(i<0)fail('DESTINATION_NOT_FOUND');

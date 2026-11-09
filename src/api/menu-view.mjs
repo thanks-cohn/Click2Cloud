@@ -10,7 +10,7 @@ export function describeCanonicalContextMenu(spec,{context='link',nativeAcknowle
   for(const row of spec.rows){
     if(row.visible===false||!row.contexts?.includes(context))continue;
     const item={
-      itemId:row.id,parentId:row.parentId,actionId:row.actionId??null,
+      itemId:row.id,presentationId:row.presentationId??null,parentId:row.parentId,actionId:row.actionId??null,
       label:row.label,role:row.role,kind:row.kind,
       enabled:row.enabled===true,reason:row.reason,
       actionKind:row.actionKind??row.role,setupProvider:row.setupProvider??null,target:row.target??null,providerAction:row.providerAction??null,children:[]

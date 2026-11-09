@@ -286,7 +286,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
             receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
             const added=[...new Map(params.changes.flatMap(c=>c.type==='createDestination'||c.type==='makeDefault'?[c.target]:c.type==='setDepthDisplayBuckets'?c.scopes.map(s=>s.target):[]).map(t=>[targetKey(t),t])).values()];
-            if(!receipt.replayed&&added.length)await getInventory({refreshTargets:added});
+            if(!receipt.replayed){const depthRequested=params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);if(added.length||depthRequested)await getInventory({refreshTargets:added,...(depthRequested?{refreshDepthScopes:next.configs.depth.scopes}: {})});}
             // Display-only preferences persist through this same transaction without
             // rebuilding unrelated native menus on every View/Theme click.
             const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();

@@ -1,6 +1,6 @@
 import {freeze,validateRevision,configRevision,normalizedDestinations,findCandidate,availabilityReasons,targetKey,targetLabel,scopeKey,ancestors,compare,stableId,MenuSpecError} from '../../core/menu-identity.mjs';
 export function createConfig(input={}) {
-  return freeze({schemaVersion:1,mode:'nested',revision:validateRevision(input.revision??0),destinations:normalizedDestinations(input.destinations)});
+  return freeze({schemaVersion:1,mode:'nested',revision:validateRevision(input.revision??0),destinations:normalizedDestinations(input.destinations,{multipleTargets:true})});
 }
 export const validateConfig=createConfig;
 export function updateConfig(current,patch,{expectedRevision}={}) {
@@ -36,7 +36,7 @@ export function project({config,inventory}) {
     }
     const final=tree.get(parent);
     if(final){
-      if(final.target.prefix===target.prefix)final.destination={...destination,reason};
+      if(final.target.prefix===target.prefix)(final.destinations??=[]).push({...destination,reason});
       else tree.set(key+':hidden-save',{placement:key+':hidden-save',target,parentPlacement:parent,destination:{...destination,reason},hiddenSave:true});
     }
     for(const reason of reasons)omissions.push({target,reason,placement:key,kind:'ineligible'});
@@ -44,10 +44,13 @@ export function project({config,inventory}) {
   const branches=new Set([...tree.values()].map(x=>x.parentPlacement).filter(Boolean));
   const rows=[];
   for(const row of [...tree.values()].sort((a,b)=>(a.target.prefix.split('/').length-b.target.prefix.split('/').length)||compare(scopeKey(a.target),scopeKey(b.target))||compare(a.target.prefix,b.target.prefix))) {
-    const destination=row.destination,hasChildren=branches.has(row.placement);
-    const label=row.hiddenSave?'Save here — '+(destination.label??targetLabel(row.target)):row.label??destination?.label??targetLabel(row.target);
-    rows.push({...row,label,quick:destination?.quick===true,quickLabel:destination?.label??destination?.levels?.[row.target.prefix]?.label??targetLabel(row.target),role:destination&&!hasChildren?'save':'branch',enabled:hasChildren||!destination?.reason,reason:destination?.reason??(destination?'NESTED_CONFIGURED':'NATURAL_ANCESTOR')});
-    if(destination&&hasChildren)rows.push({placement:row.placement+':save-here',parentPlacement:row.placement,label:'Save here',target:row.target,quick:destination.quick===true,quickLabel:destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target),role:'save',enabled:!destination.reason,reason:destination.reason??'ACTIONABLE_BRANCH'});
+    const destinations=row.destinations??[],hasChildren=branches.has(row.placement);
+    if(hasChildren||!destinations.length)rows.push({...row,label:row.label,role:'branch',enabled:true,reason:'NATURAL_ANCESTOR'});
+    for(const destination of destinations){
+      const quickLabel=destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target);
+      rows.push({...row,placement:row.placement+':route:'+destination.id,parentPlacement:hasChildren?row.placement:row.parentPlacement,presentationId:destination.id,
+        label:hasChildren?'Save here':row.label,quick:destination.quick===true,quickLabel,role:'save',enabled:!destination.reason,reason:destination.reason??(hasChildren?'ACTIONABLE_BRANCH':'NESTED_CONFIGURED')});
+    }
   }
   const represented=new Set([...tree.values()].map(row=>targetKey(row.target)));
   for(const scope of inventory.scopes)for(const folder of scope.folders)

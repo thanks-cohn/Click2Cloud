@@ -1,3 +1,4 @@
+import {discoverDepthScope} from '../src/explorer/depth-inventory.mjs';
 import {createBreadcrumbs} from '../src/glaciaring/breadcrumbs.mjs';
 import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
 import {BUILD_INFO} from '../src/build-info.mjs';
@@ -78,12 +79,22 @@ const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseF
 // Menu inspection/boot projects saved observations without a full-cloud network
 // sweep. Destination Save refreshes its exact new targets; every actual save
 // independently rechecks current authority and scoped Worker capability.
-async function getInventory({refreshTargets=[]}={}) {
+async function getInventory({refreshTargets=[],refreshDepthScopes=[]}={}) {
   const status=await oauth.status();
   const policy=(await current.read()).product.recovery;
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
   const state=await current.read();attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
-  const readinessTargets=[...new Map(refreshTargets.filter(t=>t.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];let readinessIndex=0;
+  // Only explicit configuration actions request discovery; preserve prior observations on failure.
+  const discovered=[];
+  for(const selection of refreshDepthScopes.filter(s=>!s.hidden)){
+    if(status.state!=='CONNECTED'||!status.accounts.some(a=>a.id===selection.target.accountId))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
+    const result=await discoverDepthScope(fileApi,selection);let found=inventory.scopes.find(s=>scopeKey(s.target)===result.scopeKey);
+    if(!found){found={target:result.target,folders:[],complete:false};inventory.scopes.push(found);}
+    found.folders=[...new Set([...found.folders,...result.folders])];found.complete=result.complete;inventory.revision++;
+    discovered.push(result.target,...result.folders.filter(p=>p.split('/').filter(Boolean).length<=selection.maxDepth).map(prefix=>({...result.target,prefix})));
+  }
+  if(refreshDepthScopes.length)await chrome.storage.local.set({discoveredInventory:inventory});
+  const readinessTargets=[...new Map([...refreshTargets,...discovered].filter(t=>t.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];let readinessIndex=0;
   await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{while(readinessIndex<readinessTargets.length){const target=readinessTargets[readinessIndex++];snapshots.delete(targetKey(target));await remoteReady(target);}}));
   for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
   return {...inventory,scopes:await Promise.all(inventory.scopes.map(async s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),workerReady:snapshots.get(targetKey(s.target))?.ready??false,folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})})))};
