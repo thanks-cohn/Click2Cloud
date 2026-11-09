@@ -28,3 +28,11 @@
 
 
 CURRENT incident follow-up: 0.3.15 production repairs and evidence are on `dev/p0-agent-reliability-ratchet` ([handoff](../docs/evidence/reliability-ratchet/HANDOFF.md)). Original physical deletion and owner Windows recovery remain OPEN; assisted rebuild is new owner-confirmed intent, not recovered history. No production-ready claim or live-provider pass.
+
+## November 9 right-click menu corrections (OPEN)
+
+- **P0 BUG — Depth selected-bucket hierarchy does not appear:** [Depth nesting and single-bucket nested exception](Bugs/P0_DEPTH_SINGLE_BUCKET_BRANCH_AND_NESTING_MISSING_2026-11-09.md). An eligible nested Depth bucket must branch even when it is the sole Depth-selected bucket; no artificial submenu when the bucket has no eligible directories.
+- **P0 ARCHITECTURE / UX ISSUE — display checkmarks must be additive and non-destructive:** [Independent Simple/Narrow/Depth display plus per-row Change Visibility](Issues/P0_RIGHT_CLICK_INDEPENDENT_MODE_DISPLAY_AND_ROW_VISIBILITY_2026-11-09.md). User-facing `Narrow` is internal `nested`; `product.show.simple/nested/depth` are independent visibility checkmarks, not exclusive modes. Unchecking a mode never removes its saved destinations or Depth bucket selections.
+- **P1 UX ISSUE — Depth Destinations Manager does not offer Make Default:** [Depth row action rule](Issues/P1_DEPTH_DESTINATIONS_MANAGER_NO_MAKE_DEFAULT_2026-11-09.md).
+
+These entries describe desired behavior and observed defects, not completed fixes. Implement the Depth nesting and menu composition correctly before depending on its menu structure for provenance metadata.
