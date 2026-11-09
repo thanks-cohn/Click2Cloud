@@ -69,9 +69,9 @@ test('actual outer Worker receipt persistence failure cannot claim blocked/no-wr
  const obj=new RemoteClaims({storage:kv,waitUntil:p=>tasks.push(p)},env,{fetch:async()=>new Response('abc',{headers:{'content-length':'3'}}),FixedLengthStream:Fixed});
  const submitted=await obj.fetch(new Request('https://worker/remote-save',{method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({operationId:id,source,destination:d})}));assert.equal((await submitted.json()).state,'pending');await Promise.all(tasks);assert.equal(writes,1);const job=data.get('claim:'+target.connectionId+':'+id);assert.equal(job.result.state,'uncertain');assert.equal(job.result.code,'RESULT_PERSISTENCE_UNCONFIRMED');assert.equal((await obj.operation({principal:target.connectionId,destination:d,storage:r2},id)).state,'verified');
 });
-test('ranged download uses the canonical File API and rejects ignored ranges without buffering whole objects',async()=>{
+test('ranged download keeps canonical File API scope and exact authenticated range bytes',async()=>{
  const {createClick2CloudFileApi}=await import('../src/explorer/index.mjs');let requested;
- const fileApi=createClick2CloudFileApi({send:async()=>({}),http:{boundedFetch:()=>{},request:async(_url,o)=>{requested=o.headers.Range;return new Response('abc',{status:206,headers:{'content-range':'bytes 10-12/13'}});}}});
+ const fileApi=createClick2CloudFileApi({send:async()=>({}),http:{boundedFetch:()=>{},request:async(_url,o)=>{requested=o.headers.Range;return new Response('abc',{status:206,headers:{'content-range':'bytes 10-12/13',etag:'"fixture"'}});}}});
  const api=createEngineApi({engine:{},current:{read:async()=>({product:productState(),configs:empty()})},fileApi,oauth:{status:async()=>({state:'CONNECTED',accounts:[{id:'a'}]})},authorize:async()=>true});
  const response=await api.invoke({version:'3+1.1',method:'readFileChunk',params:{source:target,key:'chosen/file',offset:10,length:3}},'gui');assert.equal(response.state,'completed');assert.equal(response.data.state,'completed');assert.deepEqual(response.data.data.bytes,[97,98,99]);assert.equal(response.data.data.done,true);assert.equal(requested,'bytes=10-12');
  const denied=await api.invoke({version:'3+1.1',method:'readFileChunk',params:{source:target,key:'other/file',offset:0}},'gui');assert.equal(denied.code,'SOURCE_SCOPE_MISMATCH');

@@ -1,5 +1,5 @@
 import {providerDefaults,validatePreferences,resolveOptions} from './configuration.mjs';
-import {location,key,prefix,name,entry} from './file-api.mjs';
+import {location,key,prefix,name,entry,objectETag} from './file-api.mjs';
 export function previewType(objectKey){
   const ext=objectKey.split('.').pop().toLowerCase();
   const types={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',avif:'image/avif',mp4:'video/mp4',webm:'video/webm',mp3:'audio/mpeg',ogg:'audio/ogg',wav:'audio/wav',pdf:'application/pdf',txt:'text/plain',json:'text/plain',md:'text/plain',csv:'text/plain'};
@@ -105,6 +105,32 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     }
     return message('cfTransferObjects',{operation,source:s,destination:d,entries:selected,conflict},options);
   }
+  // Cloudflare management GET ignores Range and can ignore If-Match. Keep
+  // only a forward response reader, not the object, between bounded RPC chunks.
+  // Four idle readers expire in 5s; EOF/error cancels them immediately.
+  const fullReads=new Set();
+  const readError=code=>Object.assign(Error(code),{code});
+  function closeFull(record){clearTimeout(record.timer);fullReads.delete(record);record.windows.clear();record.buffer=new Uint8Array();void record.reader.cancel().catch(()=>{});}
+  function fullWindow(record,offset,length,signal){
+    const windowKey=offset+':'+length;if(record.windows.has(windowKey))return record.windows.get(windowKey);
+    clearTimeout(record.timer);record.next=offset+Math.min(length,record.total-offset);
+    const run=record.queue.then(async()=>{
+      clearTimeout(record.timer);const end=Math.min(offset+length,record.total),bytes=new Uint8Array(end-offset);let used=0;
+      try{
+        while(record.position<end){
+          signal?.throwIfAborted();
+          if(!record.buffer.length){const part=await record.reader.read();if(part.done)throw readError('RANGE_RESPONSE_INVALID');record.buffer=part.value;}
+          const take=Math.min(record.buffer.length,end-record.position),chunk=record.buffer.subarray(0,take),start=Math.max(0,offset-record.position);
+          if(start<take){bytes.set(chunk.subarray(start),used);used+=take-start;}
+          record.buffer=record.buffer.subarray(take);record.position+=take;
+        }
+        if(record.position===record.total){if(record.buffer.length||!(await record.reader.read()).done)throw readError('RANGE_RESPONSE_INVALID');closeFull(record);}
+        else{record.timer=setTimeout(()=>closeFull(record),5000);record.timer.unref?.();}
+        if(used!==bytes.length)throw readError('RANGE_RESPONSE_INVALID');
+        return {bytes:Array.from(bytes),offset,total:record.total,etag:record.etag,done:end===record.total};
+      }catch(error){closeFull(record);throw error;}
+    });record.queue=run.catch(()=>{});record.windows.set(windowKey,run);while(record.windows.size>4)record.windows.delete(record.windows.keys().next().value);return run;
+  }
   return {
     crossBucketCopy:true,
     // Test It uses the same normal R2 Explorer operations after its ledger
@@ -205,15 +231,34 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     },
     async readChunk({source,key:k,offset=0,length=65536,etag},{signal,requestTimeoutMs}={}) {
       if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(length)||length<1||length>65536)throw Error('INVALID_RANGE');
-      const response=await http.request(base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,headers:{Range:'bytes='+offset+'-'+(offset+length-1),...(etag?{'If-Match':etag}:{})}});
-      const currentEtag=response.headers.get('etag');if(etag&&currentEtag!==etag){await response.body?.cancel();throw Error('OBJECT_CHANGED');}
-      if(response.status===416){const m=/^bytes \*\/(\d+)$/.exec(response.headers.get('content-range')??'');if(m&&Number(m[1])===offset)return {bytes:[],offset,total:offset,done:true};}
-      if(!response.ok||!response.body){await response.body?.cancel();throw Object.assign(Error('OBJECT_READ_FAILED'),{code:'HTTP_'+response.status});}
-      const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('content-range')??'');
-      if(response.status!==206||!range||Number(range[1])!==offset||Number(range[2])>=offset+length||Number(range[3])<=Number(range[2])){await response.body.cancel();throw Error('RANGE_NOT_SUPPORTED');}
-      const reader=response.body.getReader(),chunks=[];let count=0;try{while(true){const part=await reader.read();if(part.done)break;count+=part.value.length;if(count>length)throw Error('RANGE_RESPONSE_INVALID');chunks.push(part.value);}}finally{await reader.cancel();}
-      if(count!==Number(range[2])-offset+1)throw Error('RANGE_RESPONSE_INVALID');const bytes=new Uint8Array(count);let at=0;for(const c of chunks){bytes.set(c,at);at+=c.length;}
-      return {bytes:Array.from(bytes),offset,etag:currentEtag,total:Number(range[3]),done:offset+count===Number(range[3])};
+      const wanted=etag===undefined?null:objectETag(etag),path=base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),active=[...fullReads].find(r=>r.path===path&&wanted===r.etag&&(r.next===offset||r.windows.has(offset+':'+length)));
+      if(active)return fullWindow(active,offset,length,signal);
+      const response=await http.request(path,{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,headers:{Range:'bytes='+offset+'-'+(offset+length-1),...(wanted?{'If-Match':'"'+wanted+'"'}:{})}});
+      try{
+        if(response.status===412)throw readError('OBJECT_CHANGED');
+        if(!response.ok&&response.status!==416)throw Object.assign(Error('OBJECT_READ_FAILED'),{code:'HTTP_'+response.status});
+        const currentEtag=objectETag(response.headers.get('etag'));if(wanted&&currentEtag!==wanted)throw readError('OBJECT_CHANGED');
+        if(response.status===416){const m=/^bytes \*\/(\d+)$/.exec(response.headers.get('content-range')??'');if(m&&Number(m[1])===offset)return {bytes:[],offset,total:offset,etag:currentEtag,done:true};throw readError('RANGE_RESPONSE_INVALID');}
+        if(response.status===200){
+          if(response.headers.has('content-range'))throw readError('RANGE_RESPONSE_INVALID');
+          const header=response.headers.get('content-length');let total=header!==null&&/^\d+$/.test(header)?Number(header):NaN;
+          if(header!==null&&!Number.isSafeInteger(total))throw readError('RANGE_RESPONSE_INVALID');
+          if(header===null){const meta=(await stat({source,key:k},{signal,requestTimeoutMs})).object;if(!meta||objectETag(meta.etag)!==currentEtag)throw readError('OBJECT_CHANGED');total=Number(meta.size);}
+          if(!Number.isSafeInteger(total)||total<offset)throw readError('RANGE_RESPONSE_INVALID');
+          if(!response.body){if(total===0&&offset===0)return {bytes:[],offset,total,etag:currentEtag,done:true};throw readError('RANGE_RESPONSE_INVALID');}
+          const record={path,etag:currentEtag,total,position:0,buffer:new Uint8Array(),reader:response.body.getReader(),queue:Promise.resolve(),windows:new Map(),next:offset};
+          // Existing concurrent readers finish independently; only current forward
+          // access is reusable. Never accumulate whole-file byte caches here.
+          while(fullReads.size>=4)closeFull(fullReads.values().next().value);fullReads.add(record);
+          return await fullWindow(record,offset,length,signal);
+        }
+        const range=/^bytes (\d+)-(\d+)\/(\d+)$/.exec(response.headers.get('content-range')??'');
+        if(response.status!==206||!range||Number(range[1])!==offset||Number(range[2])>=offset+length||Number(range[3])<=Number(range[2])||!range.slice(1).every(n=>Number.isSafeInteger(Number(n))))throw readError('RANGE_NOT_SUPPORTED');
+        if(!response.body)throw readError('RANGE_RESPONSE_INVALID');
+        const reader=response.body.getReader(),chunks=[];let count=0;try{while(true){const part=await reader.read();if(part.done)break;count+=part.value.length;if(count>length)throw readError('RANGE_RESPONSE_INVALID');chunks.push(part.value);}}finally{await reader.cancel();}
+        if(count!==Number(range[2])-offset+1)throw readError('RANGE_RESPONSE_INVALID');const bytes=new Uint8Array(count);let at=0;for(const c of chunks){bytes.set(c,at);at+=c.length;}
+        return {bytes:Array.from(bytes),offset,etag:currentEtag,total:Number(range[3]),done:offset+count===Number(range[3])};
+      }finally{if(!response.body?.locked)await response.body?.cancel();}
     },
     async readStream({source,key:k},{signal,onChunk,requestTimeoutMs}={}) {
       if(typeof onChunk!=='function')throw Error('A streaming sink is required.');

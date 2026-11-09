@@ -1,4 +1,12 @@
 /* Ordinary explorer semantics. No dependency on the archived file engine. */
+// R2 REST JSON carries a bare opaque tag; HTTP carries the quoted strong tag.
+// Weak validators cannot protect an If-Match read and must not be strengthened.
+export function objectETag(value) {
+  if(typeof value!=='string')throw Object.assign(Error('OBJECT_IDENTITY_UNAVAILABLE'),{code:'OBJECT_IDENTITY_UNAVAILABLE'});
+  let tag=value.trim();if(/^W\//i.test(tag))throw Object.assign(Error('OBJECT_IDENTITY_UNAVAILABLE'),{code:'OBJECT_IDENTITY_UNAVAILABLE'});if(tag.startsWith('"')&&tag.endsWith('"'))tag=tag.slice(1,-1);
+  if(!tag||/["\x00-\x20\x7f]/.test(tag))throw Object.assign(Error('OBJECT_IDENTITY_UNAVAILABLE'),{code:'OBJECT_IDENTITY_UNAVAILABLE'});
+  return tag;
+}
 export function location(value) {
   if (!value || typeof value.accountId !== 'string' || !value.accountId || typeof value.bucketName !== 'string' || !value.bucketName) throw Error('Choose a cloud account and bucket first.');
   return {accountId:value.accountId,bucketName:value.bucketName,accountName:value.accountName || '',prefix:prefix(value.prefix || '')};

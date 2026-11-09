@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "See docs/evidence/login-ready-product/verification.json",
+  "productionSourceRevision": "See docs/evidence/image-read-download/verification.json",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -8,7 +8,7 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.16",
+      "extensionVersion": "0.3.17",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {
