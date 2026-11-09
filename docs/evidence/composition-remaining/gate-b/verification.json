@@ -1,0 +1,37 @@
+{
+  "gate": "B",
+  "phase": 5,
+  "sourceRevision": "7ea43e143bc391b5b5afc94fb85a6460cccf43d8",
+  "representative": "PASS",
+  "focused": {
+    "pass": 309,
+    "fail": 0
+  },
+  "browser": {
+    "pass": 27,
+    "receipt": "browser/results.json",
+    "classification": "CHROMIUM_PRODUCTION_APP_FIXTURE_API_AUTH_NOT_INSTALLED_OR_LIVE_PROVIDER"
+  },
+  "media": [
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "video/mp4"
+  ],
+  "lifecycle": {
+    "reducedStill": true,
+    "gifStill": true,
+    "created": 22,
+    "revoked": 22,
+    "active": 0,
+    "corruptFallback": true,
+    "missingFallback": true,
+    "plainEmpty": true
+  },
+  "persistence": "Real disposable browser IDB reload; not installed Chrome process restart",
+  "layoutShiftPx": 0,
+  "performance": "Raw frame gaps retained; concurrent stress run has large pauses. No Windows latency/smoothness certification claimed.",
+  "installed": "BLOCKED_INHERITED_ADMINISTRATOR_POLICY",
+  "cloud": "No cloud writes/deployment; unchanged image read and remote transfer engine"
+}
