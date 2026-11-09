@@ -1,0 +1,17 @@
+{
+  "listingStatus": 200,
+  "hasObject": true,
+  "object": {
+    "size": 10380,
+    "etag": "229d139e05d84c9a99480c3dc9f53dd4",
+    "keyHash": "2eb6caf8188609dbe7517bf635b39f08524b303a9d29b02ad67fb24d4503ef2f"
+  },
+  "read": {
+    "status": 200,
+    "etag": "\"229d139e05d84c9a99480c3dc9f53dd4\"",
+    "contentRange": null,
+    "contentLength": "10380",
+    "type": "image/png",
+    "bytes": 10380
+  }
+}

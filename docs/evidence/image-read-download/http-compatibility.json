@@ -1,0 +1,39 @@
+{
+  "sourceRevision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+  "evidenceClass": "LIVE_READ_ONLY_MANAGEMENT_OBJECT_ENDPOINT",
+  "operations": [
+    {
+      "id": "a88ccb02-6553-49c2-9f79-0f0419c5a2fe",
+      "variant": "range-only",
+      "method": "GET",
+      "requestedRange": "bytes=0-9",
+      "httpStatus": 200,
+      "contentRange": null,
+      "returnedBytes": 290,
+      "etagQuoted": true,
+      "etagMatchesListing": true
+    },
+    {
+      "id": "306873f5-d96e-44e0-8fe4-07f1598fa3b6",
+      "variant": "quoted-current",
+      "method": "GET",
+      "requestedRange": "bytes=0-9",
+      "httpStatus": 200,
+      "contentRange": null,
+      "returnedBytes": 290,
+      "etagQuoted": true,
+      "etagMatchesListing": true
+    },
+    {
+      "id": "d7cf1b75-0d18-4c76-94c3-1c0c9c655698",
+      "variant": "quoted-stale",
+      "method": "GET",
+      "requestedRange": "bytes=0-9",
+      "httpStatus": 200,
+      "contentRange": null,
+      "returnedBytes": 290,
+      "etagQuoted": true,
+      "etagMatchesListing": true
+    }
+  ]
+}

@@ -11175,7 +11175,7 @@
         "preconditions": "Open/preview file",
         "trigger": "explorer",
         "guard": "Async read with epoch fence; preview memory budget separate",
-        "actual": "Bound text DOM slice; revoke blob on close/navigation; offer full download",
+        "actual": "Same trusted readFileChunk API validates canonical strong ETag, listed size, exact offsets/totals/counts and EOF for full200 or206 responses. Byte-derived image decode/cache drives thumbnails and enlarged previews. Download streams through this same validator; abort on failure, await close and local file-size readback before completion.",
         "apiMethods": [
           "readFile"
         ],
@@ -11191,14 +11191,28 @@
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
             "line": 264
+          },
+          {
+            "path": "src/explorer/r2-adapter.mjs",
+            "symbol": "async readChunk",
+            "line": 232
+          },
+          {
+            "path": "src/explorer/image-preview.mjs",
+            "symbol": "readPreviewBytes",
+            "line": 25
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "async function downloadEntry",
+            "line": 438
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
+          "level": "REAL_BROWSER_AND_LIVE_R2_COMPONENT_PROOF",
           "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "scripts/measure-explorer.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "meaning": "Source-pinned browser/OPFS and live R2 byte proof; installed Chrome blocked by administrator policy",
+          "evidence": "docs/evidence/image-read-download/verification.json"
         },
         "contractViolation": null
       },
@@ -14392,7 +14406,7 @@
     },
     "loginReadyEvidence": "docs/evidence/login-ready-product/verification.json: source-pinned fixture, genuine installed attempt and independent live R2 proof classes; Windows original profile remains unverified.",
     "imageReadDownloadEvidence": "0.3.17: strong ETag JSON/HTTP normalization; authenticated full200 forward windows; exact206/size/byte verification; download writer abort/close/file-size readback. See docs/evidence/image-read-download/HANDOFF.md.",
-    "digest": "89ee3452f1b08f666f5d442e057242e1da813a433929f672cbce911c030de5c4"
+    "digest": "358da756d241dfe89c4ff78a2f9388967cf419d32687e07245965860d5ecbb8e"
   },
   "changeLog": [
     {

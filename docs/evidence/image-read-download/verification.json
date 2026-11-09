@@ -1,0 +1,367 @@
+{
+  "sourceRevision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+  "startingMain": "3d55dc05024c510af303a07102926c3427a93cdc",
+  "branch": "dev/p0-image-read-download",
+  "build": {
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "extensionVersion": "0.3.17",
+    "revision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+    "sourceDigest": "77b38943357db670974e826a65e68d6485b2568b8eb38bbf4b8d25690b781958",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "implementationState": "IMPLEMENTED_COMPONENT_TESTS_PASS",
+  "installedChainAcceptance": "BLOCKED",
+  "rootCause": {
+    "baseline": "live-provider.json:baseline",
+    "listingETag": "BARE_OPAQUE_STRONG_TAG",
+    "getETag": "QUOTED_SAME_STRONG_TAG",
+    "responseCompatibility": "HTTP200_FULL_BODY_IGNORED_RANGE_AND_IF_MATCH",
+    "liveProof": "http-compatibility.json",
+    "oldAdapterResult": "OBJECT_CHANGED",
+    "afterQuoteOnlyFixWouldFail": "RANGE_NOT_SUPPORTED"
+  },
+  "reference": {
+    "repository": "thanks-cohn/REDOWN",
+    "revision": "a6c17f8d0be22131d5cc38b060da4f8f3544800f",
+    "modified": false,
+    "proofClass": "SOURCE_COMPARISON_NOT_NEW_LIVE_REDOWN_TEST"
+  },
+  "protectedProductionPathsUnchanged": [
+    "src/auth/",
+    "src/core/",
+    "src/chrome/",
+    "src/cloudflare/",
+    "right2cloud-module/"
+  ],
+  "runtimeChangeCommit": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+  "tests": {
+    "focused": {
+      "pass": 293,
+      "fail": 0,
+      "receipt": "focused.txt"
+    },
+    "remoteModule": {
+      "pass": 49,
+      "fail": 0,
+      "receipt": "module.txt"
+    },
+    "readAndSourceDrift": {
+      "pass": 26,
+      "fail": 0,
+      "receipt": "read-regressions.txt"
+    }
+  },
+  "browserProofs": {
+    "browser/results.json": {
+      "sourceRevision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "CHROMIUM_PRODUCTION_APP_FIXTURE_API_AUTH_NOT_INSTALLED_OR_LIVE_PROVIDER",
+      "states": {
+        "PASS": 25
+      },
+      "downloads": [
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.png",
+          "state": "PASS",
+          "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.png",
+          "size": 290,
+          "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+          "width": 120,
+          "height": 80
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.jpg",
+          "state": "PASS",
+          "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.jpg",
+          "size": 1504,
+          "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f",
+          "width": 140,
+          "height": 90
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.webp",
+          "state": "PASS",
+          "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.webp",
+          "size": 334,
+          "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7",
+          "width": 160,
+          "height": 100
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.gif",
+          "state": "PASS",
+          "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.gif",
+          "size": 418,
+          "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33",
+          "width": 180,
+          "height": 110
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-large.jpg",
+          "state": "PASS",
+          "evidenceClass": "HTTP200_QUOTED_ETAG_FIXTURE_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "large.jpg",
+          "size": 1050096,
+          "sha256": "b196aa6e88e563343f56a01f836617d03c7f98041bd84fb4ef2be4fdbd95cc13",
+          "width": 140,
+          "height": 90
+        }
+      ],
+      "failureGuards": [
+        {
+          "gate": "failed-read-does-not-truncate-existing-file-or-claim-download-complete",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-write-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-close-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-drop-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        }
+      ],
+      "reconnect": [
+        {
+          "gate": "GUI-sign-out-login-preserves-destinations-and-image-read",
+          "state": "PASS",
+          "authorization": "FIXTURE_OAUTH_NOT_INSTALLED_PROVIDER_CONSENT"
+        }
+      ]
+    },
+    "live-browser/results.json": {
+      "sourceRevision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "CHROMIUM_PRODUCTION_APP_FIXTURE_API_AUTH_NOT_INSTALLED_OR_LIVE_PROVIDER",
+      "states": {
+        "PASS": 25
+      },
+      "downloads": [
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.png",
+          "state": "PASS",
+          "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.png",
+          "size": 290,
+          "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+          "width": 120,
+          "height": 80
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.jpg",
+          "state": "PASS",
+          "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.jpg",
+          "size": 1504,
+          "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f",
+          "width": 140,
+          "height": 90
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.webp",
+          "state": "PASS",
+          "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.webp",
+          "size": 334,
+          "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7",
+          "width": 160,
+          "height": 100
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.gif",
+          "state": "PASS",
+          "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "picture.gif",
+          "size": 418,
+          "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33",
+          "width": 180,
+          "height": 110
+        },
+        {
+          "gate": "decoded-preview-and-byte-identical-OPFS-download-large.png",
+          "state": "PASS",
+          "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+          "name": "large.png",
+          "size": 3717007,
+          "sha256": "0ace601173165c6847bf414715f608f189d8132865eb0fcbc3080ae93b6ff45c",
+          "width": 1200,
+          "height": 900
+        }
+      ],
+      "failureGuards": [
+        {
+          "gate": "failed-read-does-not-truncate-existing-file-or-claim-download-complete",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-write-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-close-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        },
+        {
+          "gate": "download-drop-failure-no-false-success-existing-file-preserved",
+          "state": "PASS"
+        }
+      ],
+      "reconnect": [
+        {
+          "gate": "GUI-sign-out-login-preserves-destinations-and-image-read",
+          "state": "PASS",
+          "authorization": "FIXTURE_OAUTH_NOT_INSTALLED_PROVIDER_CONSENT"
+        }
+      ]
+    }
+  },
+  "liveProvider": {
+    "state": "PASS",
+    "sourceRevision": "96a3262d2aa9eb4c24ddbcdc1b05c7c3d00d1bab",
+    "runtimeSourceDirty": false,
+    "receipt": "live-provider.json",
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "WorkerMutated": false,
+    "objects": [
+      {
+        "key": "__click2cloud_true_remote_test__/images-d0fccbd1-33ee-4a3f-a225-3752cccaead8/picture.png",
+        "name": "picture.png",
+        "size": 290,
+        "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+        "seed": "UNCHANGED_TRUE_REMOTE",
+        "etag": "47c6e34c29136042da271fd2f6d2557e"
+      },
+      {
+        "key": "__click2cloud_true_remote_test__/images-d0fccbd1-33ee-4a3f-a225-3752cccaead8/picture.jpg",
+        "name": "picture.jpg",
+        "size": 1504,
+        "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f",
+        "seed": "UNCHANGED_TRUE_REMOTE",
+        "etag": "88e051df546e41a9e8c41056a14f6aee"
+      },
+      {
+        "key": "__click2cloud_true_remote_test__/images-d0fccbd1-33ee-4a3f-a225-3752cccaead8/picture.webp",
+        "name": "picture.webp",
+        "size": 334,
+        "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7",
+        "seed": "UNCHANGED_TRUE_REMOTE",
+        "etag": "26dff2043bf10f1338bd0782c184f136"
+      },
+      {
+        "key": "__click2cloud_true_remote_test__/images-d0fccbd1-33ee-4a3f-a225-3752cccaead8/picture.gif",
+        "name": "picture.gif",
+        "size": 418,
+        "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33",
+        "seed": "UNCHANGED_TRUE_REMOTE",
+        "etag": "1b089972929cd32af87ddacb23406b33"
+      },
+      {
+        "key": "__click2cloud_true_remote_test__/images-d0fccbd1-33ee-4a3f-a225-3752cccaead8/large.png",
+        "name": "large.png",
+        "size": 3717007,
+        "sha256": "0ace601173165c6847bf414715f608f189d8132865eb0fcbc3080ae93b6ff45c",
+        "seed": "CONDITIONAL_NEW_S3_TEST_OBJECT_NOT_REMOTE_TRANSFER",
+        "etag": "498665060b4b6233f2a4a960c122fb41"
+      }
+    ],
+    "baseline": {
+      "state": "REPRODUCED",
+      "code": "OBJECT_CHANGED",
+      "sourceRevision": "3d55dc0"
+    },
+    "remoteUploadRegressions": [
+      {
+        "id": "38f2d6d3-2a29-4be9-a2a6-a8cd4dd6be97",
+        "stage": "true-remote-png",
+        "state": "PASS",
+        "code": "R2_HEAD_VERSION_SIZE",
+        "size": 290
+      },
+      {
+        "id": "6289a7c8-6e03-4769-9d92-ff044beeca63",
+        "stage": "true-remote-jpg",
+        "state": "PASS",
+        "code": "R2_HEAD_VERSION_SIZE",
+        "size": 1504
+      },
+      {
+        "id": "12e2a8c1-b637-4a8d-b147-206f88e236cb",
+        "stage": "true-remote-webp",
+        "state": "PASS",
+        "code": "R2_HEAD_VERSION_SIZE",
+        "size": 334
+      },
+      {
+        "id": "e1a853df-2a2d-4852-a0a6-2ad163f84c2f",
+        "stage": "true-remote-gif",
+        "state": "PASS",
+        "code": "R2_HEAD_VERSION_SIZE",
+        "size": 418
+      }
+    ],
+    "independentReadbackCount": 10,
+    "objectMutationPolicy": "Only new unique test-prefix objects; no existing object overwrite/delete; new larger PNG conditional S3 seed, not claimed as remote transfer"
+  },
+  "installed": {
+    "state": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "receipt": "installed/real-shelf-receipt.json",
+    "request": {
+      "channel": "engine",
+      "version": "3+1.1",
+      "method": "describeCapabilities",
+      "params": {}
+    },
+    "response": null,
+    "policyBypassed": false
+  },
+  "remainingLimitations": [
+    "Genuine installed Chrome origin/RPC blocked by administrator policy",
+    "Windows native file picker and disk writes NOT_TESTED; actual OPFS and substituted picker verified",
+    "Live browser R2 bytes are real; authentication/listing host/messaging/picker are explicit fixtures",
+    "Normal image cache retains existing short TTL; complete200 reads are strong validated snapshots; fresh stale identities and206 replacements reject",
+    "Failed native picker may reserve a new empty placeholder; no successful nonempty zero-byte download is claimed"
+  ],
+  "merged": false,
+  "pushed": false,
+  "hostedCI": "NOT_EXECUTED_BRANCH_NOT_PUBLISHED",
+  "artifactSha256": {
+    "baseline-live.json": "880210f9f3c8dc959e2da0b9a7b8c12cec58ff2ed1a15ac5ccfde7128953b4be",
+    "browser/grid-real-fixture-images.png": "15f25605fdbc1c54abeb2e75bd94c78a98b0e03daf116695eaf711453efcb158",
+    "browser/narrow-toolbar-expanded.png": "a7ebc228b866ec49807f8f27caffb04500e6b93e6b4fbdb4b7a680b2a6e2579d",
+    "browser/narrow-toolbar-more.png": "8254e5f6cca6b9c6194905174fe15f7e1b10ceb52f0604aa7645800532166c44",
+    "browser/pane-0-percent.png": "cf1912c2866a7a5782328edb638843d88a814e8f2e2df047a8046b653ee35619",
+    "browser/pane-100-percent.png": "487b500ec175a960bf442035540c443d97a64445dcb8a33a490b3d674aec8987",
+    "browser/pane-50-percent.png": "e0dd0d2fc51094007aa3e9bc382a4acccdcd9b98621ed113b521f6faeff124a1",
+    "browser/results.json": "918090b2f850d702c3835aa80e73fcefefaa58bdc2cacc7b6219b4f19edf2ba0",
+    "browser/webp-decoded-gallery.png": "a786c947e7da72df70ac4001102cfc4287d9da5eae9b0ea9485a5d9f0961cdbc",
+    "browser-run.txt": "6aae2a095564503d23f9751fcd12336ea240294b7f7032f83466407b549986df",
+    "build.txt": "0a1685f513bd7661606f717f269f6025839115ba2b3506f259ff9ac1afe2e328",
+    "focused.txt": "a80c33885f816bdf2251aefe7826bcb93645c61364fc2d973f1025057c7eb0ac",
+    "http-compatibility.json": "1140cada902fc154635bd954bd9f99efc8be951deddae7d4d8035a488a204a8e",
+    "installed/real-shelf-receipt.json": "3a0302264fbc0a313726deb151a3c9047326ee0270c9f66ae6b34f09fa723bdc",
+    "installed-run.txt": "6d8ec09864eee2a7ff32cb2f6d10b44b12e36a7b122585eec974e0cf3947227b",
+    "live-browser/grid-real-fixture-images.png": "3cc56b22ded6a4895a0aa09feb0789c044042d0a1bd4a91106dcd588377709b2",
+    "live-browser/narrow-toolbar-expanded.png": "a7ebc228b866ec49807f8f27caffb04500e6b93e6b4fbdb4b7a680b2a6e2579d",
+    "live-browser/narrow-toolbar-more.png": "514d442c65289cb4eb7285071100bcca627687d3caddc0dfa8b45184bcfadae3",
+    "live-browser/pane-0-percent.png": "914d4d84d618143ca0e32881a0700d3f227cb1171bdc9c660e944fe8e1a9b025",
+    "live-browser/pane-100-percent.png": "487b500ec175a960bf442035540c443d97a64445dcb8a33a490b3d674aec8987",
+    "live-browser/pane-50-percent.png": "21093cc17e16699018ec0a86a1442a106c9beeb86338795a7427cfd6e08ea2c4",
+    "live-browser/results.json": "3800243a14033c9c81be24766f85d8fd62e7e1d0172863f2a6ef0b47c581481c",
+    "live-browser/webp-decoded-gallery.png": "970e1f49d91d5d8f1a4dac91c19d03e473c0ce4ae30fb814069dda16232b716e",
+    "live-browser-run.txt": "5e8f8b60d3c002551cd852acab0eb0239b96a374c17ec003e0f5098c06d09436",
+    "live-provider.json": "30e4f28a3174208a705e72d1246e8d8d082d2830324fcdc71a377568969f5825",
+    "live-run.txt": "251f0ac9e1df08eae7755ed5e55515814a07f85e8e26194e71176f0a6d51ba42",
+    "module.txt": "e586971ebfd8d0c0c08f55567aa0ede1488c3693688d95a555e019750bc1beac",
+    "read-regressions.txt": "70ff5fad9d83c4011c1f29027a7e2b5dfd106b31e1a99d689aaae7c04d1fb6c8"
+  }
+}

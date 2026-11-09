@@ -1,0 +1,34 @@
+✔ image signature detection is byte-derived; literal OK, corrupt formats and wrong ranges never succeed (50.455852ms)
+✔ byte assembly verifies etag, offsets and integrity; cancellation stops subsequent ranges (22.437466ms)
+✔ one image cache isolates account/key/version, bounds memory, and enforces thumbnail budget on reuse (7.631024ms)
+✔ gallery follows display order, skips folders/nonimages and stops at loaded boundaries (0.430937ms)
+✔ layout defaults migrate without data loss and canonical config validates persisted geometry (3.981755ms)
+✔ failed File API read propagates actual bounded code, never outer OK; schema rejects invalid layout (10.224405ms)
+✔ header dimensions preserve four image aspect ratios and reject decoded-pixel bombs before decode (6.480911ms)
+✔ R2 range HTTP failures retain status through File API and typed RPC without raw response bodies (33.101505ms)
+✔ valid JPEG with metadata beyond first 64 KiB retains its actual dimensions without another network owner (30.817063ms)
+✔ Cloudflare quoted HTTP ETags and ignored Range full 200 responses retain bounded complete preview bytes (67.831815ms)
+✔ duplicate first windows and concurrent following chunks share a strong snapshot without cancelling other readers (23.105292ms)
+✔ real changes, weak/missing identities, ignored conditionals and malformed full bodies never become successful reads (2.027297ms)
+✔ 206 keeps strong conditional checks and exact byte/content-range validation (1.652227ms)
+✔ download sink uses the preview byte validator without retaining whole-file blobs and propagates interrupted writes (22.81637ms)
+✔ a genuine object replacement between 206 chunks is detected before a mixed download is committed (5.220847ms)
+✔ an actually empty R2 object is a verified empty read, never confused with truncated nonempty data (0.579203ms)
+✔ ratchet-owner-invariant-failure-map-is-exhaustive-and-source-owned (14.145386ms)
+✔ ratchet-permission-and-report-adversaries (15.824893ms)
+✔ ratchet-durable-recorder-bounded-fault-contained-expiring-and-read-only (6.040029ms)
+✔ ratchet-private-copy-verifier-supports-existing-local-agent-filesystem-owner (109.161518ms)
+✔ ratchet-CI-rejects-unexecuted-failed-or-removed-known-failure-cases (3.56824ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (35.075458ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (7.083615ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (0.777321ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.240794ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.213512ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 514.16964
