@@ -118,6 +118,9 @@ export async function runCurrentRecoveryTests(){
  await check('C2C-PERSIST-5-health-backup-status-does-not-create-absent-database',async()=>{
   const c=createCurrentStore({dbName:'health-no-create'});assert(await c.readBackupRoot()===null,'unexpected root');assert(!(await indexedDB.databases()).some(d=>d.name==='health-no-create'),'backup status created a database');await c.close();
  });
+ await check('composition-and-local-MP4-survive-50-reopens-before-real-browser-crash',async()=>{
+  const c=createCurrentStore({dbName:'lifecycle'}),old=await c.read(),next=applyConfigChanges(old,[{type:'createDestination',mode:'nested',target,label:'Custom'},{type:'createDestination',mode:'nested',target},{type:'setShowInChrome',show:{simple:true,nested:true,depth:true,flat:true}}]);await c.commitProduct({...next,expectedRevision:old.product.revision,idempotencyKey:'composition-media',fingerprint:'composition-media'});const bytes=new Uint8Array(await(await fetch('/tests/fixtures/images/loading.mp4')).arrayBuffer());let binary='';for(const b of bytes)binary+=String.fromCharCode(b);await c.setGalleryLoadingVisual({expectedRevision:0,mode:'media',media:{name:'loading.mp4',type:'video/mp4',base64:btoa(binary)}});const snapshot=JSON.stringify({configuration:await c.read(),visual:await c.readGalleryLoadingVisual(true)});await c.close();for(let i=0;i<50;i++){const reopened=createCurrentStore({dbName:'lifecycle'});assert(JSON.stringify({configuration:await reopened.read(),visual:await reopened.readGalleryLoadingVisual(true)})===snapshot,'configuration or media lost');await reopened.close();}return {opens:50,mediaType:'video/mp4',bytes:bytes.length,narrowPresentations:2,samePhysicalTarget:true};
+ });
  await (await import('/tests/reliability-ratchet-browser.mjs')).runRatchetTests({check,createCurrentStore,seed,files,host,put,rejection,target});
  return results;
 }
