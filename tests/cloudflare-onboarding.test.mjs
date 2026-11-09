@@ -57,3 +57,31 @@ test('setup completion loss resumes by read-only probe identity without redeploy
 test('zero active native assignments open manager even when a hidden default remains ready',async()=>{const f=fixture({chosen:t,initialized:true});const result=await f.c.invoke({provider:'cloudflare',emptyAssignment:true,source:{url:'https://public.org/file',filename:'file'}});assert.equal(result.code,'CHOOSE_DESTINATION');assert(!f.calls.some(x=>x?.source||x==='POST'));assert(f.calls.includes('manage'));});
 
 export {fixture,t};
+
+// Login is the complete approved entry point; fixtures below explicitly stop
+// at dependency boundaries. Workerd and installed/browser receipts are separate.
+function loginApi(f,{allowed=true,nativeFailure=false}={}){
+ f.oauth.connect=async()=>{f.calls.push('login');return f.oauth.status();};
+ return createEngineApi({current:f.current,engine:{compile:async()=>({}),apply:async()=>({state:nativeFailure?'blocked':'completed',code:nativeFailure?'NATIVE_ACK_ERROR':'OK'})},oauth:f.oauth,cloudflare:f.c,getInventory:async()=>({}),authorize:async r=>r.method!=='initializeCloudflare'||allowed,confirm:async()=>true});
+}
+test('explicit Login automatically authorizes and initializes redown; repeated login preserves exact targets and approval',async()=>{
+ const f=fixture({buckets:[]}),api=loginApi(f),call=()=>api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');
+ for(let i=0;i<3;i++){const r=await call();assert.equal(r.state,'completed');assert.equal(r.data.state,'CONNECTED');assert.equal(r.data.initialization.code,'CLOUDFLARE_READY');assert.equal(r.data.initialization.native.state,'completed');assert.equal(f.state.product.defaultTarget.bucketName,'redown');assert.equal(f.state.configs.simple.destinations.length,1);assert.equal((await f.current.readSetupOperation('approval:a')).approved,true);}
+ assert.equal(f.calls.filter(x=>x==='POST').length,1);assert.equal(f.calls.filter(x=>x?.prepare).length,1);assert.equal(f.calls.filter(x=>x?.probe).length,1);
+});
+test('Login cannot silently acquire an agent provisioning grant; authentication remains connected',async()=>{
+ const f=fixture({buckets:[]}),api=loginApi(f,{allowed:false}),r=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'agent');assert.equal(r.state,'completed');assert.equal(r.data.state,'CONNECTED');assert.equal(r.data.initialization.code,'PERMISSION_DENIED');assert.equal(r.data.initialization.stage,'authorization');assert(!f.calls.includes('POST'));assert.equal(await f.current.readSetupOperation('approval:a'),undefined);
+});
+test('Login preserves a custom default; blocked native acknowledgement never claims saving ready',async()=>{
+ const f=fixture({chosen:t,initialized:true}),api=loginApi(f,{nativeFailure:true}),r=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(r.state,'completed');assert.equal(r.data.state,'CONNECTED');assert.equal(r.data.initialization.code,'NATIVE_APPLY_INCOMPLETE');assert.deepEqual(f.state.product.defaultTarget,t);assert(!f.calls.includes('POST'));assert.equal(f.state.configs.simple.destinations.length,1);
+});
+test('Login reports real R2 activation or permission failures while preserving auth and avoiding writes',async()=>{
+ for(const failure of ['R2 is not enabled','permission']){const f=fixture({failure}),api=loginApi(f),r=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(r.state,'completed');assert.equal(r.data.state,'CONNECTED');assert.equal(r.data.initialization.state,'blocked');assert.notEqual(r.data.initialization.code,'CLOUDFLARE_READY');assert(!f.calls.includes('POST'));assert(!f.calls.some(x=>x?.prepare));}
+});
+
+test('new Worker route propagation retries read-only capability before exactly one readiness write',async()=>{
+ const f=fixture({buckets:[]}),status=f.transport.status;let attempts=0;f.transport.status=async()=>++attempts<4?{state:'blocked',code:'RESPONSE_INVALID'}:status();const api=loginApi(f),r=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(r.data.initialization.state,'completed');assert(attempts>=4);assert.equal(f.calls.filter(x=>x?.probe).length,1);assert.equal(f.calls.filter(x=>x?.prepare).length,1);assert.equal(f.calls.filter(x=>x==='POST').length,1);
+});
+test('denied capability stops before readiness write rather than retrying or claiming a usable destination',async()=>{
+ const f=fixture({buckets:[]});f.transport.status=async()=>({state:'blocked',code:'CAPABILITY_DENIED'});const r=await loginApi(f).invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');assert.equal(r.data.state,'CONNECTED');assert.equal(r.data.initialization.state,'blocked');assert.equal(r.data.initialization.code,'CAPABILITY_DENIED');assert.equal(r.data.initialization.stage,'worker-capability');assert(!f.calls.some(x=>x?.probe));assert.equal(f.state.product.defaultTarget,null);
+});

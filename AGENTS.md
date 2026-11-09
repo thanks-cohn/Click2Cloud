@@ -1,3 +1,7 @@
+# CURRENT OWNER OVERRIDE — LOGIN TO VERIFIED SAVE (NOVEMBER 9, 2026)
+
+The owner explicitly supersedes the older login-only/no-initialization rule: an explicit normal Login includes disclosed authorization to prepare/reuse `redown` and its existing TRUE REMOTE infrastructure, verify readiness and reconcile native menus. Reuse the canonical initializer, preserve every saved destination/default/approval and keep OAuth successful even if initialization is blocked. Passive boot/status/refresh remain read-only. Agents still need existing provisioning/account authority; Login does not invent a grant. Missing/corrupt historical records are never fresh state. No profile backup is required for normal login/use, no reset or REDOWN changes. Installed/native/live proof classes remain separate. See `docs/evidence/login-ready-product/HANDOFF.md`.
+
 # AGENTS.md — Click2Cloud /scaffold-first engineering instructions
 
 ## TOP P0 OVERRIDE — CURRENT CONFIGURATION LOSS / FORENSIC RECOVERY (NOVEMBER 8, 2026)

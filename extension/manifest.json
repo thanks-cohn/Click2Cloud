@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Click2Cloud",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "Click2Cloud \u2014 cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",

@@ -51,7 +51,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!auth.accounts.some(a=>a.id===accountId))return {state:'blocked',code:'WRONG_ACCOUNT'};
   return withSetupLock(accountId,()=>initializeAccount(accountId,options));
  }
- async function initializeAccount(accountId,{resume=false}={}){
+ async function initializeAccount(accountId,{resume=false,authorizeSetup=false}={}){
   const auth=await account(accountId);const s=await current.read(),configured=savedTargets(s);
   if(s.product.defaultTarget&&(s.product.defaultTarget.provider!=='cloudflare'||s.product.defaultTarget.accountId!==accountId))return {state:'blocked',code:'DEFAULT_ACCOUNT_MISMATCH'};
   const targets=configured.filter(t=>t.accountId===accountId);
@@ -61,15 +61,20 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!target&&hasSaved(s))return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
   const readiness=await check(accountId,target);
   if(readiness.state==='READY')return {state:'completed',code:'CLOUDFLARE_READY',target:readiness.target};
-  if(!['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','REPAIR_REQUIRED','CHOOSE_DESTINATION'].includes(readiness.state))return {state:'blocked',code:readiness.code??readiness.state,accountId};
-  if(readiness.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED')return {state:'blocked',code:readiness.worker.code,accountId,target,worker:readiness.worker};
+  if(!['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','CHOOSE_DESTINATION'].includes(readiness.state))return {state:'blocked',code:readiness.code??readiness.state,stage:readiness.worker?'worker-readiness':'r2-readiness',accountId,...(readiness.diagnostic?{diagnostic:readiness.diagnostic}:{})};
+  if(readiness.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED'&&!authorizeSetup)return {state:'blocked',code:readiness.worker.code,accountId,target,worker:readiness.worker};
+  // Called only after the canonical Login's human consent and provisioning
+  // authorization. Passive status/boot/refresh can never establish approval.
+  if(authorizeSetup&&!await setupApproved(accountId)){
+   await current.writeSetupOperation('approval:'+accountId,{accountId,approved:true});
+  }
   if(!await setupApproved(accountId))return {state:'blocked',code:s.product.cloudflare.initialized.includes(accountId)?'SETUP_APPROVAL_RECORD_MISSING':'SETUP_APPROVAL_REQUIRED',accountId,target};
   const chosen=target??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''};
   const pointer=await current.readSetupOperation?.('initialization:'+accountId),pending=pointer&&await current.readSetupOperation?.(accountId+':'+pointer.idempotencyKey);
   const failure=safeWorkerDiagnostic(pending?.failure);resume=resume||!!(failure&&auth.scopeEvidence==='provider-returned'&&auth.scopes?.includes('workers-scripts.admin')&&failure.sessionScopes.length>0&&!failure.sessionScopes.includes('workers-scripts.admin'));if(failure&&!resume)return {state:'blocked',code:failure.code,accountId,diagnostic:failure};
   const idempotencyKey=pending&&!pending.result&&targetKey(pending.target)===targetKey(chosen)?pointer.idempotencyKey:'v1:'+crypto.randomUUID();
   await current.writeSetupOperation?.('initialization:'+accountId,{idempotencyKey});
-  return setupLocked({accountId,target,repair:!!target,automatic:true,resume,expectedRevision:(await current.read()).product.revision,idempotencyKey});
+  return setupLocked({accountId,target,repair:!!target,automatic:true,resume,upgrade:authorizeSetup&&readiness.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED',expectedRevision:(await current.read()).product.revision,idempotencyKey});
  }
  function setup(params){return withSetupLock(params.accountId,()=>setupLocked(params));}
  function withSetupLock(accountId,run){
@@ -77,7 +82,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(globalThis.navigator?.locks?.request)return navigator.locks.request(key,run);
   const preceding=setupLocks.get(current)??Promise.resolve(),task=preceding.then(run,run);setupLocks.set(current,task.catch(()=>{}));return task;
  }
- async function setupLocked({accountId,expectedRevision,idempotencyKey,repair=false,target:repairTarget,automatic=false,resume=false}){
+ async function setupLocked({accountId,expectedRevision,idempotencyKey,repair=false,target:repairTarget,automatic=false,resume=false,upgrade=false}){
   const started=performance.now(),auth=await account(accountId);let s=await current.read();
   const setupId=accountId+':'+idempotencyKey,prior=await current.readSetupOperation?.(setupId);
   if(prior?.result){if(prior.accountId!==accountId||repairTarget&&targetKey(prior.target)!==targetKey(repairTarget))fail('IDEMPOTENCY_CONFLICT');if(!savedTargets(s).some(t=>targetKey(t)===targetKey(prior.target)))return {state:'blocked',code:'SETUP_RESULT_STALE'};return prior.result;}
@@ -116,8 +121,19 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!exists){await progress('bucket-create-dispatched');try{const r=await oauth.request('/accounts/'+encodeURIComponent(accountId)+'/r2/buckets',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'redown'})});const creation=await r.json();if(!r.ok||creation.success!==true)throw Error('BUCKET_CREATE_UNCONFIRMED');}catch{const again=await r2(accountId);if(again.state!=='ACTIVE'||!again.buckets.some(b=>b.name==='redown'))return {state:'uncertain',code:'BUCKET_CREATE_UNCONFIRMED'};}}
   if(!recovered)await progress('bucket-confirmed');
   await stillSelected();const provisioningStarted=performance.now();
-  if(!recovered)try{await provisioner.prepare(target,{approved:true,rebuild:repair&&!automatic,retryDenied:resume||repair&&!automatic});}catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(!diagnostic)throw error;await progress('worker-preparation-blocked',{failure:diagnostic});return {state:'blocked',code:diagnostic.code,accountId,target,diagnostic};}const provisionMs=Math.round(performance.now()-provisioningStarted);
-  if(!recovered){delete progressRecord.failure;await progress('worker-prepared');}
+  if(!recovered)try{await provisioner.prepare(target,{approved:true,rebuild:upgrade||repair&&!automatic,retryDenied:resume||repair&&!automatic});}catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(!diagnostic)throw error;await progress('worker-preparation-blocked',{failure:diagnostic});return {state:'blocked',code:diagnostic.code,accountId,target,diagnostic};}const provisionMs=Math.round(performance.now()-provisioningStarted);
+  if(!recovered){
+   delete progressRecord.failure;await progress('worker-prepared');
+   // workers.dev route propagation can briefly return non-JSON after a successful
+   // upload. Retry only read-only capabilities, never a write/probe dispatch.
+   let capability;
+   for(let attempt=0;attempt<8;attempt++){
+    await stillSelected();capability=await transport.status(target);
+    if(['READY','PREPARED'].includes(capability.state))break;
+    if(!['RESPONSE_INVALID','TRANSPORT_UNAVAILABLE','WORKER_BUILD_MISMATCH'].includes(capability.code)||attempt===7)return {state:'blocked',code:capability.code??'WORKER_NOT_READY',stage:'worker-capability',accountId,target};
+    await new Promise(resolve=>setTimeout(resolve,Math.min(2000,250*2**attempt)));
+   }
+  }
   await stillSelected();
   const operationId=prior?.operationId??crypto.randomUUID();if(!recovered)await progress('probe-dispatched',{operationId});
   const probe=recovered??await transport.probe({target,operationId,authorize:async()=>{try{await stillSelected();return true;}catch{return false;}}});

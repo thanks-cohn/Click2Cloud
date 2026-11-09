@@ -207,6 +207,24 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(['loginBegin','loginCancel','disconnect'].includes(method)) {
           if(await confirm({actor,method,params})!==true)fail('HUMAN_INTERACTION_REQUIRED');
           if(method==='loginBegin'&&params.verifyOnly){await oauth.authority();data=await oauth.status();}else data=await oauth[{loginBegin:'connect',loginCancel:'cancel',disconnect:'disconnect'}[method]]();
+          // Explicit Login includes authorized save preparation. Authentication
+          // stays successful even if local state or provider setup is blocked.
+          if(method==='loginBegin'&&!params.verifyOnly&&data?.state==='CONNECTED'){
+            let stage='configuration';const initializationId=crypto.randomUUID();
+            try{
+              await loadCurrent({operationId:traceId});
+              stage='authorization';
+              if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:(data.accounts??[]).map(a=>({accountId:a.id}))})!==true)fail('PERMISSION_DENIED');
+              stage='cloudflare-initialization';
+              if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
+              const prepared=await cloudflare.initialize({authorizeSetup:true,resume:true});
+              stage='native-registration';
+              const initialization=prepared.state==='completed'?await finishInitialization(prepared):prepared;data={...data,initialization:{...initialization,operationId:initializationId,stage:initialization.stage??(initialization.native?.state&&initialization.native.state!=='completed'?'native-registration':prepared.state==='completed'?'ready':'cloudflare-initialization')}};
+            }catch(error){
+              const code=/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'INITIALIZATION_FAILED';
+              data={...data,initialization:{state:'blocked',code,stage,operationId:initializationId,...(safeWorkerDiagnostic(error.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:{})}};
+            }
+          }
 
         }
         else if(method==='fileAction'){

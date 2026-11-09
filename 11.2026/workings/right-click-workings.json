@@ -9198,15 +9198,15 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "See source-pinned docs/evidence/reliability-ratchet/verification.json",
+    "sourceCommit": "See docs/evidence/login-ready-product/verification.json",
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "72090d05ade904983e866523defc79b52a8f742102be43b86c19aca4c741fded",
+      "extension/app.mjs": "d12b48855ee3953ae5e271d9738116dac32ec58cc4d89df23749cc76f499f8fc",
       "extension/background.mjs": "91ef822b3e4c7bbf8d292bcd72763890c94f13843450d90a689361f64a8473ed",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "dbe8fd8f8d574dd03af4a455e7774372dff433e09b58564a44b92aee5ad51ade",
+      "extension/manifest.json": "a8e04332f43b46cbde657d82cf30ec9469279b743e9bf46f6975b47e9ee37d2e",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9223,10 +9223,10 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
-      "src/api/service.mjs": "f8c11f8a17aa346b2daeb49ab03efc1b9ce6d9bc2b89cebdb0f416fe70864ef2",
+      "src/api/service.mjs": "cc45da9d5661ca047bf69eb4a7e1ae0a94b153f52349c43a0e223abe8698cc0c",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
-      "src/build-info.mjs": "8f3202ba606c2251276f0a0aa54f9341d30e7038406ec0ae225903b7e8be155a",
+      "src/build-info.mjs": "cbf9960f6c58ff695fe03b2ba68185fdc19b14d95bd449442c2d749ed9e90598",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
@@ -9236,7 +9236,7 @@
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
       "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
-      "src/cloudflare/onboarding.mjs": "2622fff26b0706213ddc3e2bb15b238ba2386e96a1cb9c21a47581513d510ab4",
+      "src/cloudflare/onboarding.mjs": "293033e3f5851360d422bfe8b360718290847330b0e0085f7d7d6fedd18ba4d8",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
@@ -9271,7 +9271,7 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "b7d5f297b7915491251c0a4ad9551027ce9b4a15a70baf1c9e6b88728db573d3",
+      "src/glaciaring/catalog.mjs": "b3c595d6a834309dd21e0cdd0251c9a183b020657a04715db65f63ae62bbe306",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "8c40ddfcd20406773e6b4920878b07f9b718bc6f57d1c34980d7f6300a8ca2b0",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
@@ -9877,7 +9877,8 @@
           "integration": "tests/cloudflare-integration.test.mjs",
           "browser": "scripts/test-product-browser.mjs"
         },
-        "contractViolation": null
+        "contractViolation": null,
+        "currentOwnerOverride": "0.3.16 explicit Login runs canonical authorized save preparation AFTER successful OAuth; result.initialization separately reports failure, preserves saved destinations and established-loss fence; no passive provisioning."
       },
       {
         "id": "AUTH_CALLBACK",
@@ -10266,7 +10267,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async activation",
-            "line": 150
+            "line": 166
           }
         ],
         "verification": {
@@ -10402,7 +10403,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const exists=",
-            "line": 99
+            "line": 104
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
@@ -10441,7 +10442,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "bucket-create-dispatched",
-            "line": 116
+            "line": 121
           }
         ],
         "verification": {
@@ -10474,7 +10475,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function setupLocked",
-            "line": 80
+            "line": 85
           }
         ],
         "verification": {
@@ -10511,7 +10512,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "const recovered=",
-            "line": 112
+            "line": 117
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
@@ -10554,7 +10555,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "await provisioner.markVerified",
-            "line": 125
+            "line": 141
           }
         ],
         "verification": {
@@ -10718,7 +10719,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function invoke",
-            "line": 135
+            "line": 151
           }
         ],
         "verification": {
@@ -11000,7 +11001,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 424
+            "line": 425
           }
         ],
         "verification": {
@@ -11037,7 +11038,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 200
+            "line": 201
           },
           {
             "path": "src/api/service.mjs",
@@ -11087,7 +11088,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 238
+            "line": 239
           }
         ],
         "verification": {
@@ -11179,7 +11180,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 263
+            "line": 264
           }
         ],
         "verification": {
@@ -11588,7 +11589,7 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "worker-preparation-blocked",
-            "line": 119
+            "line": 124
           }
         ],
         "verification": {
@@ -11631,12 +11632,12 @@
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "failure.sessionScopes.length>0",
-            "line": 69
+            "line": 74
           },
           {
             "path": "extension/app.mjs",
             "symbol": "function renderRemotes",
-            "line": 128
+            "line": 129
           }
         ],
         "verification": {
@@ -11677,7 +11678,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 426
+            "line": 427
           }
         ],
         "verification": {
@@ -11719,7 +11720,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 212
+            "line": 230
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -12827,6 +12828,7 @@
         "HUMAN_INTERACTION_REQUIRED",
         "IDEMPOTENCY_CONFLICT",
         "IDEMPOTENT_REPLAY",
+        "INITIALIZATION_FAILED",
         "INVALID_REQUEST",
         "NATIVE_ACK_UNAVAILABLE",
         "NATIVE_APPLY_INCOMPLETE",
@@ -13091,6 +13093,7 @@
         "OAUTH_SCOPE_MISSING",
         "OPERATION_UNKNOWN",
         "POST",
+        "PREPARED",
         "PROVIDER_NOT_IMPLEMENTED",
         "PROVISIONING_BLOCKED",
         "R2_ALREADY_ACTIVE",
@@ -13102,6 +13105,7 @@
         "RECONNECT_REQUIRED",
         "REMOTE_SOURCE_REQUIRED",
         "REPAIR_REQUIRED",
+        "RESPONSE_INVALID",
         "REVISION_CONFLICT",
         "SELECTED_BUCKET_MISSING",
         "SETUP_APPROVAL_RECORD_MISSING",
@@ -13115,8 +13119,11 @@
         "TARGET_NOT_CONFIGURED",
         "TOKEN_EXPIRED",
         "TRANSIENT_API_FAILURE",
+        "TRANSPORT_UNAVAILABLE",
         "UNKNOWN",
+        "WORKER_BUILD_MISMATCH",
         "WORKER_CREATE_PERMISSION_REQUIRED",
+        "WORKER_NOT_READY",
         "WORKER_UPGRADE_APPROVAL_REQUIRED",
         "WRONG_ACCOUNT"
       ],
@@ -13778,6 +13785,7 @@
         "IDEMPOTENCY_CONFLICT",
         "IDEMPOTENT_REPLAY",
         "ID_COLLISION",
+        "INITIALIZATION_FAILED",
         "INTENT_INVALID",
         "INTENT_VALID",
         "INTENT_VALIDATE",
@@ -14365,7 +14373,7 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "e7b3b75252768d540fc6f319adfe7d92896f20d32da6dd7d15b6a8f472f2cfba"
+    "digest": "c0e3d314759cc0615108aa5f49897fd5358986432a2d40016f0f49d6e02c0ec7"
   },
   "changeLog": [
     {
