@@ -9274,7 +9274,7 @@
       "src/glaciaring/catalog.mjs": "b7d5f297b7915491251c0a4ad9551027ce9b4a15a70baf1c9e6b88728db573d3",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "03bf3f2ba1ccefd4e8eb339c38e442cf3a7e63e4c1a269f3f28142b3c4f64bb8",
-      "src/glaciaring/support-report.mjs": "2260aba24ee0586abc45116ba104980aff69751916f9f9de8deb10dfb90819c9",
+      "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
@@ -14116,6 +14116,7 @@
         "CURRENT_CONFLICT",
         "CURRENT_CORRUPT",
         "CURRENT_REQUIRED_RECORD_MISSING",
+        "EARLIEST_RETAINED_IN_LAST_64_EVENTS_NOT_ORIGINAL_DELETION",
         "ESTABLISHED_CORRUPT",
         "ESTABLISHED_MISSING",
         "ESTABLISHED_VALID",
@@ -14124,6 +14125,7 @@
         "INSTALLED_WINDOWS_NOT_VERIFIED",
         "LOCAL_REVIEW_ONLY_NO_TRANSMISSION",
         "NOT_ESTABLISHED",
+        "NOT_PROBED",
         "ORIGINAL_PHYSICAL_CAUSE_UNKNOWN",
         "ORIGINAL_PROFILE_NOT_EXAMINED",
         "OWNER_CONFIRMED_REBUILD",
@@ -14131,6 +14133,7 @@
         "PRESERVE_PRIVATE_PROFILE_THEN_REVIEW_RECOVERY_OR_CONFIRMED_REBUILD",
         "RECOVERY_CONFLICT",
         "REQUIRED_CURRENT_RECORDS_ABSENT",
+        "REQUIRES_TRIAGE",
         "REVIEW_LOCAL_EVIDENCE",
         "SOURCE_REQUIRES_VALIDATION",
         "UNKNOWN",
@@ -14354,7 +14357,7 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "858f364716cf47980a56e14b8dbcc538648c580e0ffbe0faf8a4d55ac8ff039b"
+    "digest": "d25836215a5a85d33ff163c44969d72166ef109662416a4c0c4f9ffa19dcf8af"
   },
   "changeLog": [
     {
