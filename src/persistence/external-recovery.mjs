@@ -70,7 +70,7 @@ export function createExternalRecovery({files,clock=Date.now}={}) {
 /** File System Access is explicitly user selected and independent of extension storage. */
 export function directoryFiles(root) {
   async function locate(path,create=false) {const parts=path.split('/');const name=parts.pop();let dir=root;for(const part of parts)dir=await dir.getDirectoryHandle(part,{create});return {dir,name};}
-  return Object.freeze({async read(path){const {dir,name}=await locate(path);return (await (await dir.getFileHandle(name)).getFile()).text();},
+  return Object.freeze({async size(path){const {dir,name}=await locate(path);return (await (await dir.getFileHandle(name)).getFile()).size;},async readChunk(path,offset,length){const {dir,name}=await locate(path);return (await (await dir.getFileHandle(name)).getFile()).slice(offset,offset+length).arrayBuffer();},async read(path){const {dir,name}=await locate(path);return (await (await dir.getFileHandle(name)).getFile()).text();},
     async replace(path,text){const {dir,name}=await locate(path,true),h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(text);await w.close();},
     async create(path,text){const {dir,name}=await locate(path,true);try{await dir.getFileHandle(name);return false;}catch(e){if(e.name!=='NotFoundError')throw e;}const w=await (await dir.getFileHandle(name,{create:true})).createWritable();await w.write(text);await w.close();return true;},
     async list(path){let dir=root;try{for(const part of path.split('/'))dir=await dir.getDirectoryHandle(part);}catch{return [];}const rows=[];for await(const [name,h] of dir.entries())if(h.kind==='file')rows.push(path+'/'+name);return rows;}

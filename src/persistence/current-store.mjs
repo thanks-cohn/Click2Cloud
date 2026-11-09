@@ -12,8 +12,8 @@ const done=tx=>new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onabort=t
 const error=code=>Object.assign(Error(code==='REVISION_CONFLICT'?'Local state changed; reload before saving.':'Local state operation was not confirmed.'),{code});
 export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click2cloud-current-v1',sink,clock=()=>Date.now(),fault=()=>{},readEstablishment=async()=>{if(typeof globalThis.chrome?.storage?.local?.get!=='function')return {};const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,nativeGeneration:p.nativeRegistration?.desired?.generation??0};},retainEstablishment=async proof=>{if(typeof globalThis.chrome?.storage?.local?.set==='function')await chrome.storage.local.set({currentProvenance:proof});}}={}) {
   let opening;
-  const signal=(stage,outcome,code,operationId,revision=0)=>{
-    try {const event={stage,outcome,code,operationId,revision};if(typeof sink==='function')sink(event);else sink?.emit?.(event);}catch{/* Observations never participate in a state transaction. */}
+  const signal=(stage,outcome,code,operationId,revision=0,context={})=>{
+    try {const event={stage,outcome,code,operationId,revision,parentOperation:context.parentOperation??0,requires:context.requires??[]};if(typeof sink==='function')return sink(event);else return sink?.emit?.(event);}catch{/* Observations never participate in a state transaction. */}
   };
   const open=()=>{if(opening)return opening;const pending=new Promise((resolve,reject)=>{
     if(!indexedDB){reject(error('STORAGE_UNAVAILABLE'));return;}
@@ -83,15 +83,15 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
   function boundary(stores,saved){
     for(const [id,value] of [['product',saved.product],...Object.entries(saved.configs).map(([m,c])=>['mode:'+m,c]),['generation',saved.generation]])
       if(!Object.hasOwn(saved.map,id))stores.state.put({id,value});
-    stores.state.put({id:'configurationProvenance',value:{version:1,established:true}});
+    stores.state.put({id:'configurationProvenance',value:{version:1,established:true,...(['OWNER_CONFIRMED_REBUILD','VERIFIED_RECOVERY'].includes(saved.map.configurationProvenance?.kind)?{kind:saved.map.configurationProvenance.kind}:{})}});
     rememberRows(stores,saved.map,['product','mode:simple','mode:nested','mode:depth']);
   }
   async function commitBoundary(fn,options){
-    const result=await transact('readwrite',fn,options);
-    fault('afterCommit'); // The write is durable; a lost response must be retried by idempotency key.
-    await read(); // Separate durable readback, never report an in-memory-only revision.
-    await retainEstablishment({version:1,established:true});
-    return result;
+    const operationId=operationIdentity(options?.context),started=signal('persistence.commit','started','PERSIST_STARTED',operationId,0,options?.context);
+    try{const result=await transact('readwrite',fn,options);
+      fault('afterCommit');await read({parentOperation:operationId,requires:started?[started]:[]});
+      await retainEstablishment({version:1,established:true});signal('persistence.commit','ok','PERSIST_COMMITTED',operationId,result?.after??0,{requires:started?[started]:[]});return result;
+    }catch(e){signal('persistence.commit','failed',['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CONFLICT','CONFIGURATION_CORRUPT','REVISION_CONFLICT'].includes(e.code)?e.code:'STORAGE_COMMIT_FAILED',operationId);throw e;}
   }
   function rememberRows(stores,map,ids){const required=[...new Set([...(map.configurationIntegrity?.required??[]),...Object.keys(map).filter(k=>k==='product'||k.startsWith('mode:')),...ids])];stores.state.put({id:'configurationIntegrity',value:{version:1,required}});}
   async function getModeConfig(mode) {
@@ -131,8 +131,10 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       signal('persistence.commit','ok','PERSIST_COMMITTED',operationId,result.desired);return result;
     } catch(e) {signal('persistence.commit','failed',e?.code==='REVISION_CONFLICT'?'REVISION_CONFLICT':'STORAGE_COMMIT_FAILED',operationId);throw e;}
   }
-  async function read() {
-    return transact('readonly',async stores=>{const {map,configs,product,generation}=await loadState(stores);return {schemaVersion:1,configurationState:Object.hasOwn(map,'product')||Object.keys(map).some(k=>k.startsWith('mode:'))?'ESTABLISHED_VALID':'FRESH_VERIFIED',configs,product,generation,requiresReconnect:true,journalEvicted:map.journalMeta?.evicted??0};});
+  async function read(context={}) {
+    const operationId=operationIdentity(context),started=context.observe===false?0:signal('persistence.read','started','CURRENT_READ_STARTED',operationId,0,context);
+    try{const result=await transact('readonly',async stores=>{const {map,configs,product,generation}=await loadState(stores);return {schemaVersion:1,configurationOrigin:['OWNER_CONFIRMED_REBUILD','VERIFIED_RECOVERY'].includes(map.configurationProvenance?.kind)?map.configurationProvenance.kind:'UNKNOWN_OR_LEGACY',configurationState:Object.hasOwn(map,'product')||Object.keys(map).some(k=>k.startsWith('mode:'))?'ESTABLISHED_VALID':'FRESH_VERIFIED',configs,product,generation,requiresReconnect:true,journalEvicted:map.journalMeta?.evicted??0};});if(context.observe!==false)signal('persistence.read','ok','CURRENT_READ_VALID',operationId,result.product.revision,{...context,requires:started?[started]:[]});return result;}
+    catch(e){if(context.observe!==false)signal('persistence.read','failed',['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CORRUPT','CONFIGURATION_CONFLICT'].includes(e.code)?e.code:'STORAGE_UNAVAILABLE',operationId);throw e;}
   }
   async function journal({after=0,limit=100}={}) {
     integer(after);if(!Number.isSafeInteger(limit)||limit<1||limit>500)throw error('BACKUP_INVALID');
@@ -181,7 +183,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     } catch(e) {signal('persistence.restore',e?.code==='BACKUP_AUTH_REQUIRED'?'blocked':'failed',e?.code==='BACKUP_AUTH_REQUIRED'?'BACKUP_AUTH_REQUIRED':'MIGRATION_QUARANTINED',operationId);throw e;}
   }
   // All modes, preferences and replay record share one CURRENT transaction.
-  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint}) {
+  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint,traceContext}) {
     const normalized=productState(product);
     const normalizedConfigs={};
     for(const mode of Object.keys(modeModules))normalizedConfigs[mode]=validateModeConfig(mode,configs[mode]);
@@ -210,7 +212,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       const retries=keys.filter(k=>String(k).startsWith('retry:'));
       if(retries.length>256)stores.state.delete(retries[0]);
       return receipt;
-    });
+    },{context:traceContext});
   }
   // Explicit inspection only. Values/paths/accounts never enter metadata diagnostics.
   async function inspect(){
@@ -222,7 +224,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       try{await loadState(stores);if(!rows.some(r=>['product','generation','configurationIntegrity','configurationProvenance'].includes(r.id)||r.id.startsWith('mode:')))state='FRESH_VERIFIED';}
       catch(e){code=e.code??'CONFIGURATION_CORRUPT';subreason=e.subreason;state=code==='CONFIGURATION_RECORD_MISSING'?'ESTABLISHED_MISSING':code==='CONFIGURATION_CONFLICT'?'RECOVERY_CONFLICT':'ESTABLISHED_CORRUPT';}
       const gen=map.generation;
-      return {state,...(code?{code}:{}),...(subreason?{subreason}:{}),database:{name:dbName,present:true,version:1,stores:['state','journal','checkpoints'],sameOriginDatabaseCount:databases?.length??null},records:Object.fromEntries(['product','mode:simple','mode:nested','mode:depth','generation','configurationIntegrity','configurationProvenance'].map(k=>[k,Object.hasOwn(map,k)])),remainingRecords:rows.length,generation:gen&&Number.isSafeInteger(gen.desired)?{desired:gen.desired,applied:Number.isSafeInteger(gen.applied)?gen.applied:null}:null,journal:{count:journal.length,firstSequence:Number.isSafeInteger(journal[0]?.sequence)?journal[0].sequence:null,lastSequence:Number.isSafeInteger(journal.at(-1)?.sequence)?journal.at(-1).sequence:null},checkpoints:{count:checkpoints.length},establishment:{external:stores.establishment.established===true,nativeGeneration:Number.isSafeInteger(stores.establishment.nativeGeneration)?stores.establishment.nativeGeneration:null},native:stores.establishment.native??null,nativeRelation:Number.isSafeInteger(gen?.desired)&&stores.establishment.nativeGeneration>0&&stores.establishment.nativeGeneration!==gen.desired?'NATIVE_REGISTRATION_STALE':null,internalRecovery:{journalPresent:journal.length>0,checkpointsPresent:checkpoints.length>0,completeness:'NOT_PROVEN'}};
+      return {state,configurationOrigin:['OWNER_CONFIRMED_REBUILD','VERIFIED_RECOVERY'].includes(map.configurationProvenance?.kind)?map.configurationProvenance.kind:'UNKNOWN_OR_LEGACY',...(code?{code}:{}),...(subreason?{subreason}:{}),database:{name:dbName,present:true,version:1,stores:['state','journal','checkpoints'],sameOriginDatabaseCount:databases?.length??null},records:Object.fromEntries(['product','mode:simple','mode:nested','mode:depth','generation','configurationIntegrity','configurationProvenance'].map(k=>[k,Object.hasOwn(map,k)])),remainingRecords:rows.length,generation:gen&&Number.isSafeInteger(gen.desired)?{desired:gen.desired,applied:Number.isSafeInteger(gen.applied)?gen.applied:null}:null,journal:{count:journal.length,firstSequence:Number.isSafeInteger(journal[0]?.sequence)?journal[0].sequence:null,lastSequence:Number.isSafeInteger(journal.at(-1)?.sequence)?journal.at(-1).sequence:null},checkpoints:{count:checkpoints.length},establishment:{external:stores.establishment.established===true,nativeGeneration:Number.isSafeInteger(stores.establishment.nativeGeneration)?stores.establishment.nativeGeneration:null},native:stores.establishment.native??null,nativeRelation:Number.isSafeInteger(gen?.desired)&&stores.establishment.nativeGeneration>0&&stores.establishment.nativeGeneration!==gen.desired?'NATIVE_REGISTRATION_STALE':null,internalRecovery:{journalPresent:journal.length>0,checkpointsPresent:checkpoints.length>0,completeness:'NOT_PROVEN'}};
     });
   }
   // Private owner evidence: never returned by diagnostics/API. Retained only in a
@@ -237,8 +239,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     validateBundle({format:BACKUP_FORMAT,schemaVersion:1,requiresReconnect:true,exportedAt:clock(),...normalized,generation,journal:e.journal,journalEvicted:e.state.find(r=>r.id==='journalMeta')?.value.evicted??0,checkpoints:e.checkpoints});
     return normalized;
   }
-  async function recoverProduct({candidate,expectedEvidence,idempotencyKey,fingerprint,generationFloor=0}){
-    const restored=validateProduct(candidate);integer(generationFloor);
+  async function recoverProduct({candidate,expectedEvidence,idempotencyKey,fingerprint,generationFloor=0,kind='VERIFIED_RECOVERY',traceContext}){
+    const restored=validateProduct(candidate);integer(generationFloor);if(!['VERIFIED_RECOVERY','OWNER_CONFIRMED_REBUILD'].includes(kind))throw error('BACKUP_INVALID');
     return commitBoundary(async stores=>{
       const retry=(await request(stores.state.get('retry:'+idempotencyKey)))?.value;
       if(retry){if(retry.fingerprint!==fingerprint)fail('IDEMPOTENCY_CONFLICT');return {...retry,replayed:true};}
@@ -254,11 +256,11 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       stores.state.put({id:'generation',value:generation});
       // Preserve journals/checkpoints verbatim. They are historical evidence, not
       // silently rewritten into a fictional replay of this restore.
-      stores.state.put({id:'configurationProvenance',value:{version:1,established:true}});
+      stores.state.put({id:'configurationProvenance',value:{version:1,established:true,kind}});
       rememberRows(stores,{},['product','mode:simple','mode:nested','mode:depth']);
-      const receipt={fingerprint,before:null,after:restored.product.revision,idempotencyKey,recovered:true};
+      const receipt={fingerprint,before:null,after:restored.product.revision,idempotencyKey,recoveryKind:kind};
       stores.state.put({id:'retry:'+idempotencyKey,value:receipt});return receipt;
-    },{recoverMissing:true});
+    },{recoverMissing:true,context:traceContext});
   }
   return Object.freeze({
     recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
@@ -274,6 +276,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     stageBackupRoot:handle=>transact('readwrite',async s=>{s.state.put({id:'backupRootCandidate',value:handle});return true;}),
     readBackupCandidate:()=>transact('readonly',async s=>(await request(s.state.get('backupRootCandidate')))?.value??null),
     readBackupRoot:async()=>{if(typeof indexedDB?.databases==='function'&&!(await indexedDB.databases()).some(d=>d.name===dbName))return null;return transact('readonly',async s=>(await request(s.state.get('backupRoot')))?.value??null);},
+    attachRecoveryRoot:handle=>transact('readwrite',async s=>{const old=(await request(s.state.get('backupRoot')))?.value;if(old)throw error('PREVIOUS_BACKUP_REQUIRES_REVIEW');s.state.put({id:'backupRoot',value:handle});return true;}),
     setBackupRoot:handle=>commitBoundary(async s=>{const saved=await loadState(s);boundary(s,saved);s.state.put({id:'backupRoot',value:handle});return true;}),
     setDesiredGeneration:(g,o)=>generationChange(g,o),acknowledgeGeneration:g=>generationChange(g,{acknowledge:true}),journal,exportEncrypted,restoreEncrypted,
     async close(){if(opening){const db=await opening;db.close();opening=null;}}

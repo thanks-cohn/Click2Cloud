@@ -2,7 +2,7 @@
 export function createAgentGateway({api,clock=Date.now}={}) {
   const grants=new Map();
   function grant({actor,methods,expiresAt,approve}) {
-    if(typeof actor!=='string'||!actor||!Array.isArray(methods)||methods.some(m=>!api.tools.some(t=>t.name===m))||!Number.isFinite(expiresAt)||expiresAt<=clock())throw TypeError('Invalid grant');
+    if(typeof actor!=='string'||!actor||actor==='gui'||!Array.isArray(methods)||methods.some(m=>!api.tools.some(t=>t.name===m))||!Number.isFinite(expiresAt)||expiresAt<=clock()||expiresAt>clock()+3600000)throw TypeError('Invalid grant');
     const handle=crypto.randomUUID();grants.set(handle,{actor,methods:new Set(methods),expiresAt,approve});return handle;
   }
   return Object.freeze({grant,revoke:handle=>grants.delete(handle),async request(handle,request,authenticatedActor) {

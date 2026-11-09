@@ -19,7 +19,7 @@ const validCode = s => typeof s==='string' && /^[A-Z][A-Z0-9_]{0,79}$/.test(s);
 const validPath = s => typeof s==='string' && /^(src|tests)\/[A-Za-z0-9_.\/-]{1,180}$/.test(s) && !s.includes('..');
 
 /** 63 bytes per preallocated event slot. No raw request/error strings are retained. */
-export function createDiagnostics({capacity=512,epoch=1,build='local-build',manifest=CRITICAL_BOUNDARIES,enabled=true,clock=()=>performance.now(),retentionMs=900000}={}) {
+export function createDiagnostics({capacity=512,epoch=1,build='local-build',manifest=CRITICAL_BOUNDARIES,enabled=true,clock=()=>performance.now(),retentionMs=900000,onCritical}={}) {
   if (!Number.isInteger(capacity)||capacity<1||capacity>16384) throw TypeError('Invalid diagnostic capacity');
   let currentEpoch=integer(epoch,1), sequence=0, size=0, evicted=0, dropped=0, expired=0, restarts=0, dependencyDrops=0, declarationDrops=0, metadataDrops=0;
   const columns={seq:new Uint32Array(capacity),time:new Float64Array(capacity),operation:new Uint32Array(capacity),generation:new Uint32Array(capacity),revision:new Uint32Array(capacity),epoch:new Uint32Array(capacity),stage:new Uint16Array(capacity),outcome:new Uint8Array(capacity),code:new Uint16Array(capacity),attempt:new Uint16Array(capacity),parent:new Uint32Array(capacity),retry:new Uint32Array(capacity),count:new Uint32Array(capacity),deps:new Uint32Array(capacity*4)};
@@ -54,6 +54,7 @@ export function createDiagnostics({capacity=512,epoch=1,build='local-build',mani
       const deps=Array.isArray(event.requires)?event.requires:[];
       for(let i=0;i<4;i++)columns.deps[slot*4+i]=integer(deps[i]);
       if(deps.length>4)dependencyDrops+=deps.length-4;
+      if(terminalFault.has(event.outcome))try{onCritical?.({stage:event.stage,code:codeList[columns.code[slot]],outcome:event.outcome,operationId:columns.operation[slot],generation:columns.generation[slot],revision:columns.revision[slot],epoch:columns.epoch[slot]});}catch{}
       return id;
     } catch {dropped++;return 0;}
   }

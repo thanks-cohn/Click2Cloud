@@ -1,3 +1,8 @@
+import {createAgentDebugApi} from '../glaciaring/agent-api.mjs';
+import {describeReliability} from '../glaciaring/reliability.mjs';
+import {supportReport} from '../glaciaring/support-report.mjs';
+import {operationIdentity,observe} from '../core/boundary-observation.mjs';
+import {REASON_CODES} from '../glaciaring/catalog.mjs';
 import {fileOperationTarget} from '../cloudflare/file-transport.mjs';
 import {digest,remoteDestination} from '../cloudflare/wire.mjs';
 import {safeWorkerDiagnostic} from '../cloudflare/deployment.mjs';
@@ -20,12 +25,13 @@ const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,targe
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
+const rebuild=obj({accountId:str,changes:arr(change),acknowledgeUnknown:{enum:[true]}},['accountId','changes','acknowledgeUnknown']);
 const definitions={
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
-  inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj()],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj()],getProviderConnections:['inspect',obj()],
+  inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj({section:{enum:['reliability']}})],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj({view:{enum:['health','trace','support']},operationId:num,cursor:str,limit:{type:'integer',minimum:1,maximum:128}})],getProviderConnections:['inspect',obj()],
   loginBegin:['auth',obj({verifyOnly:bool})],loginStatus:['inspect',obj()],loginCancel:['auth',obj()],disconnect:['auth',obj()],
   fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete']},source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
   listAccounts:['inspect',obj()],listAuthorizedBuckets:['inspect',obj({accountId:str,cursor:str},['accountId'])],
@@ -36,8 +42,8 @@ const definitions={
   previewConfigChange:['configure',obj({changes:arr(change),expectedRevision:num},['changes','expectedRevision'])],
   commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str},['changes','expectedRevision','idempotencyKey'])],
   reconcileNativeMenu:['configure',obj({expectedGeneration:num},['expectedGeneration'])],
-  chooseBackupLocation:['restore',obj()],inspectRecoveryCoverage:['inspect',obj({target},['target'])],runRecoveryPage:['restore',obj({target},['target'])],inspectBackupRoots:['inspect',obj()],listRecoveryPolicies:['inspect',obj()],writeRecovery:['restore',obj()],
-  requestRestorePreview:['restore',obj()],restoreRightClickMenu:['restore',obj({expectedRevision:num,previewToken:str,idempotencyKey:str},['previewToken','idempotencyKey'])],
+  chooseBackupLocation:['restore',obj({purpose:{enum:['rebuild']}})],inspectRecoveryCoverage:['inspect',obj({target},['target'])],runRecoveryPage:['restore',obj({target},['target'])],inspectBackupRoots:['inspect',obj()],listRecoveryPolicies:['inspect',obj()],writeRecovery:['restore',obj()],
+  requestRestorePreview:['restore',obj({rebuild})],restoreRightClickMenu:['restore',obj({expectedRevision:num,previewToken:str,idempotencyKey:str,rebuild},['previewToken','idempotencyKey'])],
   inspectWholeCloudJobs:['inspect',obj()],enableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId']),cadence:{enum:['weekly','daily']}},['identity'])],
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
   dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
@@ -66,15 +72,15 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,readState=()=>current.read()}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context)}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
-  let queue=Promise.resolve();
-  async function loadCurrent(){try{return await readState();}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
+  let queue=Promise.resolve(),traceInspector;
+  async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
   async function reconcile(){return engine.apply(await compile(await current.read()));}
   async function restorePreview(){
     const local=await current.inspect(),evidence=await current.evidence();
-    let present;if(local.database?.present!==false)try{present=await loadCurrent();}catch{};
+    let present;if(local.database?.present!==false)try{present=await loadCurrent({observe:false});}catch{};
     let candidate,internal;try{internal=await current.readRecoveryCandidate?.();}catch{fail('RECOVERY_CONFLICT');}
     try{candidate=validateProduct(await recovery.readVerified(present));if(internal&&JSON.stringify(internal)!==JSON.stringify(candidate))fail('RECOVERY_CONFLICT');}catch(e){if(e.code==='RECOVERY_CONFLICT')throw e;if(internal)candidate=internal;else return {available:false,current:local,reason:/^[A-Z][A-Z0-9_]+$/.test(e.code??e.message)?e.code??e.message:'NO_VALID_RECOVERY_POINT',nativeSalvage:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'};}
     const map=Object.fromEntries(evidence.state.map(r=>[r.id,r.value]));
@@ -90,6 +96,20 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     if(candidate.product.revision<retainedRevision)return {available:false,current:local,reason:'RECOVERY_STALE'};
     return {available:true,...candidate,current:local,previewToken:await digest({candidate,evidence}),provenance:internal?'VALIDATED_COMPLETE_LOCAL_JOURNAL':'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED',requiresPreservation:true};
   }
+  async function rebuildPreview(params){
+    const local=await current.inspect(),evidence=await current.evidence(),native=await readNative(),identity=await oauth.status();
+    if(local.state!=='ESTABLISHED_MISSING'||evidence.journal.length||evidence.checkpoints.length||evidence.state.some(r=>['product','generation','configurationIntegrity','configurationProvenance'].includes(r.id)||r.id.startsWith('mode:')))return {available:false,current:local,reason:'REBUILD_REQUIRES_ABSENT_CONFIGURATION'};
+    if(identity.state!=='CONNECTED'||!identity.accounts?.some(a=>a.id===params.accountId))fail('AUTH_REQUIRED');
+    const nativePartial=(native?.desired?.rows??[]).filter(r=>r.role==='save'&&r.target?.accountId===params.accountId&&r.target.provider==='cloudflare').flatMap(r=>{try{return [{target:normalizeTarget(r.target),label:typeof r.label==='string'?r.label.slice(0,256):''}];}catch{return [];}});
+    if(!params.changes.length)return {available:false,current:local,reason:'OWNER_CHOICES_REQUIRED',nativePartial,unknown:['modes','hidden','Quick','Default','unprojected destinations','setup approval'],reconstruction:'NEW_OWNER_CHOICES_REQUIRED'};
+    const allowed=new Set(['createDestination','updateDestination','setDepthDisplayBuckets','makeDefault','setShowInChrome','setProviderMenuVisibility','setProviderPlacement','setFavorite']);
+    if(params.changes.some(c=>!allowed.has(c.type)))fail('REBUILD_CHANGE_DENIED');
+    const candidate=applyConfigChanges({product:productState(),configs:Object.fromEntries(['simple','nested','depth'].map(m=>[m,validateModeConfig(m,{})]))},params.changes);
+    for(const t of [candidate.product.defaultTarget,...Object.values(candidate.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean))if(t.provider!=='cloudflare'||t.accountId!==params.accountId||t.connectionId!=='cloudflare:'+params.accountId)fail('SCOPE_UNAUTHORIZED');
+    if(!Object.values(candidate.configs).some(c=>(c.destinations??c.scopes??[]).length))fail('OWNER_CHOICES_REQUIRED');
+    const proof=await recovery.verifyProfileCopy();if(proof?.state!=='VERIFIED'||proof.proofClass!=='PRIVATE_PROFILE_COPY_FILE_READBACK')fail('RECOVERY_PRESERVATION_REQUIRED');
+    return {available:true,...candidate,current:local,nativePartial,provenance:'NEW_OWNER_CONFIRMED_CONFIGURATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',profileCopy:{state:proof.state,proofClass:proof.proofClass,checksum:proof.checksum},previewToken:await digest({rebuild:params,candidate,evidence,native,proof}),unknown:['Original settings and physical deletion cause remain unknown'],requiresPreservation:true};
+  }
   function nativeReadiness(readiness){
     const evidence=engine.getEvidence?.();
     if(readiness?.state!=='READY'||!evidence)return readiness;
@@ -103,15 +123,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
   async function invoke(request,actor) {
-    const operationId=crypto.randomUUID();
+    const operationId=crypto.randomUUID(),traceId=operationIdentity(),requestStarted=performance.now(),inspectOnly=['getEngineHealth','describeCapabilities','requestRestorePreview'].includes(request?.method);const traceMethodIndex=toolRegistry.findIndex(t=>t.name===request?.method)+1;const startSignal=inspectOnly?0:observe(diagnostics?.emit,'api.invoke','started','API_INVOKE_STARTED',{operationId:traceId},[],traceMethodIndex);
     try {
       if(request?.version!=='3+1.1'||Object.keys(request).some(k=>!['version','method','params'].includes(k))||!Object.hasOwn(definitions,request.method))fail('VERSION_OR_METHOD_UNSUPPORTED');
       const {method}=request,params=request.params??{},[scope,schema]=definitions[method];validate(schema,params);
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots'].includes(method);
-        let state=independent?null:await loadCurrent(),data,receipt;
+        const independent=['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation'].includes(method);
+        let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
         if(method==='initializeCloudflare')bindings.push(...((await oauth.status()).accounts??[]).map(a=>({accountId:a.id})));
@@ -163,14 +183,17 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
         }
         else if(method==='navigateExplorer'){const t=params.target,a=await oauth.status();if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===t.accountId))fail('SCOPE_UNAUTHORIZED');await current.writeExplorerLocation?.(t);await navigate(t,actor);data={state:'completed',target:t};}
+        else if(method==='describeCapabilities'&&params.section==='reliability')data=describeReliability(toolRegistry,diagnostics?.manifest?.()??[],BUILD_INFO);
         else if(method==='describeCapabilities')data={version:'3+1.1',build:BUILD_INFO,tools:toolRegistry,publicEndpoint:false,destructiveRemoteOperations:fileApi?.capabilities?.includes('delete')===true,remoteInfrastructureChanges:'explicit-provision-scope-and-confirmation',cloudflareTransfer:'true-remote-only',sourceCaptureMaxBytes:null,browserTransfer:'streaming-adapter-or-resident-bytes',explorer:{operations:fileApi?.capabilities??[],mutations:fileApi?.capabilities?.includes('mkdir')===true},providers:{cloudflare:{implemented:true,transfer:'true-remote-only',explorerSource:false,localFile:false},'google-drive':{implemented:false},dropbox:{implemented:false},onedrive:{implemented:false}},idempotencyRetention:256};
         else if(method==='getConfiguration')data=state;
         else if(method==='getEngineHealth'){
           let configuration;try{configuration=await current.inspect?.();}catch{configuration={state:'UNKNOWN',code:'STORAGE_UNAVAILABLE'};}
           let storage;if(configuration?.database?.present===false)storage={state:configuration.state==='FRESH_VERIFIED'?'available':'blocked',...(configuration.state==='FRESH_VERIFIED'?{}:{code:'CONFIGURATION_RECORD_MISSING'})};
-          else try{state=await loadCurrent();storage={state:'available'};}catch(error){storage={state:'blocked',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'CURRENT_READ_UNAVAILABLE'};}
+          else try{state=await loadCurrent({observe:false});storage={state:'available'};}catch(error){storage={state:'blocked',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'CURRENT_READ_UNAVAILABLE'};}
           let externalRecovery;try{externalRecovery=await recovery?.status();}catch{externalRecovery={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
-          const native=engine.getEvidence();data={revision:state?.product.revision??null,generation:state?.generation??null,storage,configuration,origin:{extensionId:globalThis.chrome?.runtime?.id??null,schemaVersion:1},native:{coverage:native.coverage,desiredGeneration:native.desired?.generation??null,acknowledgedGeneration:native.acknowledgedGeneration??null,pending:native.pending??null},externalRecovery};
+          let storagePolicy;try{storagePolicy=await readStorageHealth();}catch{storagePolicy={state:'UNOBSERVED'};}
+          const native=engine.getEvidence();data={revision:state?.product.revision??null,generation:state?.generation??null,storage,configuration,storagePolicy,origin:{extensionId:globalThis.chrome?.runtime?.id??null,schemaVersion:1},native:{coverage:native.coverage,desiredGeneration:native.desired?.generation??null,acknowledgedGeneration:native.acknowledgedGeneration??null,pending:native.pending??null},externalRecovery};
+          if(params.view==='trace'||params.view==='support'){const snapshot=diagnostics?.snapshot({...(params.operationId!==undefined?{operationId:params.operationId}:{} )}),durable=await breadcrumbs?.inspect();if(params.view==='support')data=await supportReport({health:data,snapshot,breadcrumbs:durable,build:BUILD_INFO});else{if(diagnostics&&!traceInspector)traceInspector=createAgentDebugApi({diagnostics,build:BUILD_INFO.revision,authorize:async(_request,context)=>await authorize({actor:context.actor,scope:'inspect',method:'getEngineHealth',params:{view:'trace'},phase:'diagnostic'})===true?{debug:true}:false});const page=await traceInspector?.getDiagnosticSnapshot({version:1,...(params.operationId!==undefined?{operationId:params.operationId}:{}),...(params.cursor?{cursor:params.cursor}:{}),limit:params.limit??64},{actor});data={snapshot:page??null,breadcrumbs:durable??null,coverage:'PARTIAL',gaps:['PHYSICAL_CAUSE_UNKNOWN','UNLINKED_BOUNDARIES_MAY_REMAIN',...(!page?['TRACE_UNOBSERVED']:[])]};}}
         }
         else if(method==='getProviderConnections'||method==='loginStatus')data=await oauth.status();
         else if(['loginBegin','loginCancel','disconnect'].includes(method)) {
@@ -235,7 +258,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
             if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-            receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params)});
+            receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
             const added=[...new Map(params.changes.flatMap(c=>c.type==='createDestination'||c.type==='makeDefault'?[c.target]:c.type==='setDepthDisplayBuckets'?c.scopes.map(s=>s.target):[]).map(t=>[targetKey(t),t])).values()];
             if(!receipt.replayed&&added.length)await getInventory({refreshTargets:added});
             // Display-only preferences persist through this same transaction without
@@ -248,28 +271,30 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
         }
         else if(method==='reconcileNativeMenu'){if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await reconcile();}
-        else if(method==='chooseBackupLocation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await recovery.choose();}
+        else if(method==='chooseBackupLocation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await recovery.choose(params);}
         else if(method==='inspectRecoveryCoverage')data=await recoveryCrawl.inspect(params.target);
         else if(method==='runRecoveryPage'){const policy=state.product.recovery.buckets.find(b=>scopeKey(b.target)===scopeKey(params.target));if(!policy?.enabled)fail('RECOVERY_NOT_ENABLED');data=await recoveryCrawl.tick(policy,{cadence:state.product.recovery.cadence});}
         else if(method==='inspectBackupRoots')data=await recovery.status();
         else if(method==='listRecoveryPolicies')data=state.product.recovery;
         else if(method==='writeRecovery')data=await recovery.writeVerified(state);
-        else if(method==='requestRestorePreview')data=await restorePreview();
+        else if(method==='requestRestorePreview')data=params.rebuild?await rebuildPreview(params.rebuild):await restorePreview();
         else if(method==='restoreRightClickMenu') {
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-          const retry=await current.findRetry(actor+':'+params.idempotencyKey);
-          if(retry){if(retry.fingerprint!==params.previewToken)fail('IDEMPOTENCY_CONFLICT');receipt={...retry,replayed:true};data={configuration:await current.read(),native:engine.getEvidence().lastOutcome??{state:'partial',code:'NATIVE_ACK_UNAVAILABLE'},requiresReconnect:true};}
+          const requestFingerprint=await digest({previewToken:params.previewToken,rebuild:params.rebuild??null}),retry=await current.findRetry(actor+':'+params.idempotencyKey);
+          if(retry){if(retry.fingerprint!==requestFingerprint&&!(retry.fingerprint===params.previewToken&&!params.rebuild))fail('IDEMPOTENCY_CONFLICT');receipt={...retry,replayed:true};data={configuration:await current.read(),native:engine.getEvidence().lastOutcome??{state:'partial',code:'NATIVE_ACK_UNAVAILABLE'},requiresReconnect:true,...(params.rebuild?{code:'REBUILT_WITH_OWNER_CONFIRMATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',originalStateRestored:false}: {})};}
           else{
-            const preview=await restorePreview();if(!preview.available)fail(preview.reason??'NO_VALID_RECOVERY_POINT');if(preview.previewToken!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');
+            const preview=params.rebuild?await rebuildPreview(params.rebuild):await restorePreview();if(!preview.available)fail(preview.reason??'NO_VALID_RECOVERY_POINT');if(preview.previewToken!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');
             const restored=validateProduct({product:preview.product,configs:preview.configs});
             if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
-            const evidence=await current.evidence();if(await digest({candidate:restored,evidence})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');const preservation=await recovery.preserveEvidence(evidence);
+            const evidence=await current.evidence();let preimage=evidence;if(params.rebuild){const native=await readNative(),proof=await recovery.verifyProfileCopy();if(await digest({rebuild:params.rebuild,candidate:restored,evidence,native,proof})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');preimage={current:evidence,native,profileCopy:proof};}else if(await digest({candidate:restored,evidence})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');const preservation=await recovery.preserveEvidence(preimage);
             if(preservation?.state!=='VERIFIED')fail('RECOVERY_PRESERVATION_REQUIRED');
             // Revalidate after external I/O; no CURRENT writes precede the verified preimage.
-            let readable;try{readable=await loadCurrent();}catch{};
-            if(readable){if(params.expectedRevision!==readable.product.revision)fail('REVISION_CONFLICT');receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:params.previewToken});}
-            else receipt=await current.recoverProduct({candidate:restored,expectedEvidence:evidence,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:params.previewToken,generationFloor:evidence.establishment.nativeGeneration??0});
-            const native=await reconcile();data={configuration:await current.read(),native,preservation,requiresReconnect:true};
+            if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
+            if(params.rebuild){const identity=await oauth.status();if(identity.state!=='CONNECTED'||!identity.accounts?.some(a=>a.id===params.rebuild.accountId))fail('AUTH_REQUIRED');}
+            let readable;try{readable=await loadCurrent({observe:false});}catch{};
+            if(readable){if(params.expectedRevision!==readable.product.revision)fail('REVISION_CONFLICT');receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:requestFingerprint,traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});}
+            else receipt=await current.recoverProduct({candidate:restored,expectedEvidence:evidence,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:requestFingerprint,generationFloor:evidence.establishment.nativeGeneration??0,kind:params.rebuild?'OWNER_CONFIRMED_REBUILD':'VERIFIED_RECOVERY',traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
+            let native;try{if(params.rebuild)await getInventory({refreshTargets:[...Object.values(restored.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))]});native=await reconcile();}catch{native={state:'blocked',code:'NATIVE_RECONCILE_UNAVAILABLE'};}data={configuration:await current.read(),native,preservation,requiresReconnect:true,...(params.rebuild?{code:'REBUILT_WITH_OWNER_CONFIRMATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',originalStateRestored:false,remoteSave:'NOT_VERIFIED'}:{})};
           }
         }
         else if(method==='inspectWholeCloudJobs'){const ids=await wholeCloud.list();data=await Promise.all(ids.map(x=>wholeCloud.inspect(x)));}
@@ -294,12 +319,13 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if(['listFolders','refreshExplorer','fileMetadata','readFile','readFileChunk'].includes(method)&&data?.state&&data.state!=='completed'&&(!data.code||data.code==='OK')){const reason=data.error;data={...data,code:/^[A-Z][A-Z0-9_]+$/.test(reason??'')&&reason!=='OK'?reason:'FILE_READ_FAILED'};}
         const inspection=method==='inspectRemoteReceipt';
         const status=inspection?'completed':data?.native&&typeof data.native.state==='string'&&data.native.state!=='completed'?'partial':data?.state;
-        return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,method,before:receipt?.before??state?.product.revision??null,after:receipt?.after??state?.product.revision??null,replayed:receipt?.replayed??false}};
+        if(!inspectOnly)observe(diagnostics?.emit,'api.invoke','ok','API_INVOKE_COMPLETED',{operationId:traceId},startSignal?[startSignal]:[],traceMethodIndex);
+        return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,traceId,durationMs:Math.round(performance.now()-requestStarted),method,before:receipt?.before??state?.product.revision??null,after:receipt?.after??state?.product.revision??null,replayed:receipt?.replayed??false}};
       };
       // Auth must remain cancellable while a provider sign-in window is pending.
       if(scope==='inspect'||['initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
       const task=queue.then(work,work);queue=task.catch(()=>{});return await task;
-    } catch(error){const code=/^[A-Z][A-Z0-9_]+$/.test(error?.code??error?.message)?error.code??error.message:'OPERATION_FAILED';return {version:'3+1.1',state:['PERMISSION_DENIED','AUTH_REQUIRED','HUMAN_INTERACTION_REQUIRED','EXTERNAL_RECOVERY_UNAVAILABLE'].includes(code)?'blocked':'failed',code,...(safeWorkerDiagnostic(error?.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:error?.diagnostic?.stage==='current-read'?{diagnostic:error.diagnostic}:{}),receipt:{operationId,method:request?.method??null}};}
+    } catch(error){if(!inspectOnly)observe(diagnostics?.emit,'api.invoke','failed',REASON_CODES.includes(error?.code)?error.code:'API_INVOKE_FAILED',{operationId:traceId},startSignal?[startSignal]:[],traceMethodIndex);const code=/^[A-Z][A-Z0-9_]+$/.test(error?.code??error?.message)?error.code??error.message:'OPERATION_FAILED';return {version:'3+1.1',state:['PERMISSION_DENIED','AUTH_REQUIRED','HUMAN_INTERACTION_REQUIRED','EXTERNAL_RECOVERY_UNAVAILABLE'].includes(code)?'blocked':'failed',code,...(safeWorkerDiagnostic(error?.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:error?.diagnostic?.stage==='current-read'?{diagnostic:error.diagnostic}:{}),receipt:{operationId,traceId,method:request?.method??null}};}
   }
   return Object.freeze({invoke,tools:toolRegistry,reconcile});
 }

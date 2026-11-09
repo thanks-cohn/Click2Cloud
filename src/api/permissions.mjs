@@ -1,12 +1,12 @@
 /** Host-owned expiring grants and one-operation approvals. Never client-asserted. */
 export function createPermissions({clock=Date.now}={}) {
   const grants=new Map(),approvals=new Map();
-  function accountsIn(value,result=[]) {
-    if(!value||typeof value!=='object')return result;
-    if(typeof value.accountId==='string')result.push(value.accountId);
-    if(Array.isArray(value.accounts))for(const a of value.accounts)if(typeof a?.id==='string')result.push(a.id);
-    for(const child of Object.values(value))if(child&&typeof child==='object')accountsIn(child,result);
-    return result;
+  function accountsIn(value){
+    const accounts=[],pending=[[value,false]],seen=new WeakSet(),active=new WeakSet();let nodes=0;
+    while(pending.length){const [v,exit]=pending.pop();if(!v||typeof v!=='object')continue;if(exit){active.delete(v);continue;}if(active.has(v)||++nodes>1000000)return null;if(seen.has(v))continue;seen.add(v);active.add(v);pending.push([v,true]);
+      if(typeof v.accountId==='string')accounts.push(v.accountId);if(Array.isArray(v.accounts))for(const a of v.accounts)if(typeof a?.id==='string')accounts.push(a.id);
+      for(const child of Object.values(v))if(child&&typeof child==='object')pending.push([child,false]);
+    }return accounts;
   }
   const fullConfig=new Set(['enterExplorer','initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview']);
   function authorize(r) {
@@ -14,7 +14,7 @@ export function createPermissions({clock=Date.now}={}) {
     if(!g||g.expiresAt<=clock()||!g.methods.includes(r.method))return false;
     if(fullConfig.has(r.method)&&!g.allConfiguration)return false;
     if(['loginBegin','loginCancel','disconnect'].includes(r.method)&&g.interactiveAuth!==true)return false;
-    return accountsIn([r.params,r.bindings,r.result]).every(a=>g.accounts.includes(a));
+    const accounts=accountsIn([r.params,r.bindings,r.result]);return accounts!==null&&accounts.every(a=>g.accounts.includes(a));
   }
   return Object.freeze({authorize,
     issue(g){
