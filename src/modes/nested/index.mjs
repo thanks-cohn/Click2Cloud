@@ -23,9 +23,9 @@ export function project({config,inventory}) {
       if(destination.levels?.[prefix]?.hidden)continue;
       // Include projected parent in identity: two paths may hide different shared
       // levels without moving an independent sibling or corrupting its ancestry.
-      const naturalParent=prefix?targetKey({...t,prefix:ancestors(prefix).at(-2)??''}):null;
-      const placement=parent===naturalParent?k:JSON.stringify([k,parent]);
-      if(!tree.has(placement))tree.set(placement,{placement,target:t,parentPlacement:parent,label:destination.levels?.[prefix]?.label});
+      const label=destination.levels?.[prefix]?.label??(prefix===target.prefix?destination.label:undefined)??targetLabel(t);
+      const placement=JSON.stringify([k,parent,label]);
+      if(!tree.has(placement))tree.set(placement,{placement,target:t,parentPlacement:parent,label,explicitLevel:destination.levels?.[prefix]?.label!==undefined});
       parent=placement;
     }
     const final=tree.get(parent);
@@ -43,7 +43,8 @@ export function project({config,inventory}) {
     rows.push({...row,label,role:destination&&!hasChildren?'save':'branch',enabled:hasChildren||!destination?.reason,reason:destination?.reason??(destination?'NESTED_CONFIGURED':'NATURAL_ANCESTOR')});
     if(destination&&hasChildren)rows.push({placement:row.placement+':save-here',parentPlacement:row.placement,label:'Save here',target:row.target,role:'save',enabled:!destination.reason,reason:destination.reason??'ACTIONABLE_BRANCH'});
   }
+  const represented=new Set([...tree.values()].map(row=>targetKey(row.target)));
   for(const scope of inventory.scopes)for(const folder of scope.folders)
-    if(!tree.has(targetKey(folder.target)))omissions.push({target:folder.target,reason:'NOT_CONFIGURED',kind:'excluded'});
+    if(!represented.has(targetKey(folder.target)))omissions.push({target:folder.target,reason:'NOT_CONFIGURED',kind:'excluded'});
   return {mode:'nested',revision:own.revision,rows,omissions};
 }

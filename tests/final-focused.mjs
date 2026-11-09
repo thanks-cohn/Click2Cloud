@@ -40,3 +40,5 @@ await import("./boot-login.test.mjs");
 await import("./current-recovery.test.mjs");
 
 await import("./reliability-ratchet.test.mjs");
+
+await import('./phased-narrow.test.mjs');

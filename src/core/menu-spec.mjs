@@ -124,7 +124,8 @@ export function compileMenuSpec(options={}) {
       const quickRows=[...new Map(projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick&&r.role==='save').map(r=>[targetKey(r.target),r])).values()].filter(r=>targetKey(r.target)!==defaultKey);
       const promoted=new Set(quickRows.filter(r=>r.target.provider==='cloudflare').map(r=>targetKey(r.target)));
       const active=(show.flat?[...candidates.values()].filter(r=>targetKey(r.target)===defaultKey):[...candidates.values()]).filter(r=>!promoted.has(targetKey(r.target)));
-      composition={policy:'quick-promoted',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
+      const narrowActive=active.filter(r=>r.sourceMode==='nested'),narrowHierarchy=narrowActive.length>0&&!show.flat;
+      composition={policy:'quick-promoted',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':narrowHierarchy?'submenu':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
         if(options.product?.providerVisibility?.[provider]===false)continue;
         const id=stableId('provider-entry',provider),origin={mode:null,provider};
@@ -133,9 +134,24 @@ export function compileMenuSpec(options={}) {
           if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
         }
         if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
-        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin,contexts:['image','link','video','audio','page']});
-        if(active.length===1)save(active[0],null,id);
-        else {const parent=add({id,label,origin,placement:'provider:cloudflare'});for(const row of active)save(row,parent,stableId('assigned-entry',targetKey(row.target)));}
+        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+targetKey(row.target),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
+        if(active.length===1&&!narrowHierarchy)save(active[0],null,id);
+        else {
+          const parent=add({id,label,origin,placement:'provider:cloudflare'});
+          for(const row of active.filter(r=>r.sourceMode!=='nested'))save(row,parent,stableId('assigned-entry',targetKey(row.target)));
+          // Keep the actual Narrow placements, not just their save endpoints.
+          const nestedRows=projection.rows.filter(r=>r.sourceMode==='nested'),index=new Map(nestedRows.map(r=>[r.placement,r])),needed=new Set(),selected=new Set(narrowActive.map(r=>r.placement)),placements=new Map();
+          for(const row of narrowActive){let r=row;while(r&&!needed.has(r.placement)){needed.add(r.placement);r=index.get(r.parentPlacement);}}
+          for(const row of nestedRows.filter(r=>needed.has(r.placement))){
+            // The provider already names Cloudflare. An unselected natural bucket
+            // wrapper is not a user-edited Narrow folder title.
+            if(row.role==='branch'&&!row.target.prefix&&!row.parentPlacement&&!row.explicitLevel){placements.set(row.placement,parent);continue;}
+            if(row.role==='save'&&!selected.has(row.placement))continue;
+            const parentId=row.parentPlacement===null?parent:placements.get(row.parentPlacement);
+            const nativeId=add({...row,...(row.role==='save'?{id:stableId('assigned-entry',targetKey(row.target))}:{}),parentId:parentId??'missing-parent:'+row.parentPlacement,placement:'nested:'+row.placement,origin:{mode:'nested',provider:'cloudflare'}});
+            if(nativeId)placements.set(row.placement,nativeId);
+          }
+        }
       }
       // Providers lead; independent Quick leaves follow in user-configured order.
       // Availability stays truthful (including setup actions), independently of placement.
