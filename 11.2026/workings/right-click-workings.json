@@ -9200,9 +9200,9 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "See docs/evidence/phased-upgrades/phase1/verification.json",
     "sourceFiles": {
-      "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
+      "extension/app.css": "af8e2632c54e549f5346005dc9db8fff0b9022a7af5cfc5225500c2720578d46",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "76add1c5438b8ca686172254e89c2b56c19a9d0a203ca49d2e0e52e4f501f4b1",
+      "extension/app.mjs": "97af9ef982b7ca65450b9f5241d2bd8ea728dc14c9b9bbcb5bea448e0e7a63f1",
       "extension/background.mjs": "91ef822b3e4c7bbf8d292bcd72763890c94f13843450d90a689361f64a8473ed",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -14413,9 +14413,14 @@
       "checkpoint": "3b24320138ff0ebbf50a0e6a912a5d2800038676",
       "phase1": "Composite preserves actual Narrow placements and parent IDs; natural unassigned bucket wrapper suppressed; shared physical/title ancestors merge. Ordinary Simple/default singleton remains flat. See docs/evidence/phased-upgrades/phase1/HANDOFF.md",
       "phase2": "visibilityMode all/hide-all/custom overrides presentation without erasing custom levels; deepest always visible; same configuration APIs and exact physical target. See phase2 evidence.",
-      "phase3": "Default/Quick exclusion in canonical config/read normalization; legacy Default wins until explicit Quick on clears global Default. Narrow Quick uses alternative direct placement. Eye hides/restores Simple/Narrow/Depth without deletion; hidden Default cannot reappear via Flat; Depth manager has no Default button."
+      "phase3": "Default/Quick exclusion in canonical config/read normalization; legacy Default wins until explicit Quick on clears global Default. Narrow Quick uses alternative direct placement. Eye hides/restores Simple/Narrow/Depth without deletion; hidden Default cannot reappear via Flat; Depth manager has no Default button.",
+      "phase4": {
+        "scope": "Gallery-only reserved responsive frame; existing image read/decode/download API unchanged. Dialog, controls, frame and download positions independent of intrinsic dimensions and loading/error content.",
+        "evidence": "docs/evidence/phased-upgrades/phase4/verification.json",
+        "installedAcceptance": "BLOCKED administrator policy; Chromium DOM/decoder measurements use HTTP/auth fixtures."
+      }
     },
-    "digest": "26ecbd97a1d321bc6294a837a2d764c3e3c3898d922f1b1c01f4c37e54f4ccdb"
+    "digest": "cae0ebd0b42ac2b01a3035fcfb77fdf4bad65187868ce812973c6f95a082aa03"
   },
   "changeLog": [
     {

@@ -267,7 +267,7 @@ async function openEntry(e){
  previewAbort?.abort();const controller=new AbortController();previewAbort=controller;const ticket=++previewEpoch,captured=structuredClone(source),started=performance.now(),image=isImage(e),text=/\.(txt|md|json|csv|log)$/i.test(e.key);
  if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
  if(image){galleryReturnKey??=e.key;gallery={key:e.key,target:captured};selected=new Set([e.key]);focusIndex=listingOrder.index(e.key)??0;updateSelection();}else{gallery=null;galleryReturnKey=null;}
- const body=image?`<section data-gallery>${galleryControls(e)}<p id="preview-state" role="status">Loading image…</p><img class="preview" alt="File preview" hidden><p id="preview-error" role="alert" hidden></p></section>`:'<p id="preview-state" role="status">Loading preview…</p>';
+ const body=image?`<section data-gallery>${galleryControls(e)}<div class="image-frame"><p id="preview-state" role="status">Loading image…</p><img class="preview" alt="File preview" hidden><p id="preview-error" role="alert" hidden></p></div></section>`:'<p id="preview-state" role="status">Loading preview…</p>';
  dialog(e.displayName??e.key,body+'<button id="download-stream">Download</button>');if(!image)previewAbort=controller;listen('#download-stream','click',()=>downloadEntry(e));listen('#gallery-previous','click',()=>moveGallery(-1));listen('#gallery-next','click',()=>moveGallery(1));paintTrace('preview-feedback',started);
  if(!image&&!text){$('#preview-state').textContent='Inline preview unavailable for this type.';return;}
  try{
