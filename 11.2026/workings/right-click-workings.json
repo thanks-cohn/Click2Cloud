@@ -9214,7 +9214,7 @@
       "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
       "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
       "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
-      "right2cloud-module/src/provenance.mjs": "647e02323aba2d60df531ddecc157ae1ed0c1bcfd195c6b735f6f8e700147081",
+      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
       "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
@@ -9251,8 +9251,8 @@
       "src/core/engine.mjs": "d816bf3c3dc57b29ef6d0a6ff61767e0496272458ef812ffcafa0832f6d9fb06",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
-      "src/core/menu-provenance.mjs": "84af7d5941b3124dffb654e523b6da2c62ac8b995c298388a438f2187bf51b8a",
-      "src/core/menu-spec.mjs": "c4b86edf94f8e21e516b97dc1a4986f88fe7e0d76caea717a3100fd78435910b",
+      "src/core/menu-provenance.mjs": "58467b1e4d2b22f71a159a6051a2e9ac0c9f7a8d5a50e73eecfba346026c6983",
+      "src/core/menu-spec.mjs": "35ca5b3102ff8bebc223702dda13e709ea165ea9fa3df045b4264ffa6ed06d75",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -14492,7 +14492,7 @@
         "compatibility": "Old objects and legacy lower-level no-snapshot clients remain readable/usable without fabricated provenance; canonical composite Cloudflare routes always supply snapshot."
       }
     },
-    "digest": "e2d823f9997a706bbb6287cd274b8f7aacf8df87991539ec16a5d4438a050654"
+    "digest": "9378abfdb4a9a93e01c95c17ac5d970c68f9fdeb7141c8244af6fdeb3fc337ee"
   },
   "changeLog": [
     {

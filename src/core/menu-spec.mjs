@@ -101,7 +101,7 @@ export function compileMenuSpec(options={}) {
       // actual blocker in the Shelf; never add a second native setup workflow.
       if(setupProvider)enabled=true;
       const row={...(presentationId?{presentationId}:{}),actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
-      if(composite&&role==='save'&&target?.provider==='cloudflare'&&['simple','nested','depth'].includes(origin.mode)){const menuPath=[label];let ancestor=byId.get(parentId);while(ancestor){menuPath.unshift(ancestor.label);ancestor=byId.get(ancestor.parentId);}row.provenance=menuProvenance({mode:origin.mode,entryId:id,target,title:label,presentationId,destinationConfig,menuPath});}
+      if(composite&&role==='save'&&target?.provider==='cloudflare'&&['simple','nested','depth'].includes(origin.mode)){const menuPath=[label];let ancestor=byId.get(parentId);while(ancestor){menuPath.unshift(ancestor.label);ancestor=byId.get(ancestor.parentId);}row.provenance=menuProvenance({mode:origin.mode,entryId:id,target,title:label,presentationId,destinationConfig,menuPath,quickPlacement:placement.startsWith('quick:')});}
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
     if(composite) {

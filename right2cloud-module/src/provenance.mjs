@@ -9,10 +9,10 @@ export function validateSelection(value,destination){
  closed(value.location,['provider','bucket','directories']);const l=value.location,dirs=destination.prefix.split('/').filter(Boolean);
  if(l.provider!=='cloudflare'||l.bucket!==destination.bucketName||!Array.isArray(l.directories)||JSON.stringify(l.directories)!==JSON.stringify(dirs))fail('PROVENANCE_TARGET_MISMATCH');
  for(const d of l.directories)text(d,1024);if(!Array.isArray(value.menuPath)||!value.menuPath.length)fail('PROVENANCE_INVALID');for(const title of value.menuPath)text(title);
- const p=value.presentation;
- if(value.mode==='simple'){closed(p,['id','title','configuredTitle','labelSource','visibility']);if(p.id!==undefined)text(p.id,128);text(p.title);text(p.configuredTitle);if(!['name','menu_title'].includes(p.labelSource)||p.visibility!=='hide-all')fail('PROVENANCE_INVALID');}
+ const p=value.presentation;if(p?.placement!==undefined&&p.placement!=='quick')fail('PROVENANCE_INVALID');if(p?.configuredVisibilityMode!==undefined&&(!['all','hide-all','custom'].includes(p.configuredVisibilityMode)||p.placement!=='quick'||p.visibilityMode!=='hide-all'))fail('PROVENANCE_INVALID');
+ if(value.mode==='simple'){closed(p,['id','title','configuredTitle','labelSource','visibility','placement']);if(p.id!==undefined)text(p.id,128);text(p.title);text(p.configuredTitle);if(!['name','menu_title'].includes(p.labelSource)||p.visibility!=='hide-all')fail('PROVENANCE_INVALID');}
  if(value.mode==='narrow'){
-  closed(p,['id','title','visibilityMode','levels','bucketTitle','bucketVisible']);text(p.id,128);text(p.title);if(!['all','hide-all','custom'].includes(p.visibilityMode)||!Array.isArray(p.levels)||p.levels.length!==dirs.length)fail('PROVENANCE_INVALID');
+  closed(p,['id','title','visibilityMode','levels','bucketTitle','bucketVisible','placement','configuredVisibilityMode']);text(p.id,128);text(p.title);if(!['all','hide-all','custom'].includes(p.visibilityMode)||!Array.isArray(p.levels)||p.levels.length!==dirs.length)fail('PROVENANCE_INVALID');
   for(let i=0;i<dirs.length;i++){const level=p.levels[i];closed(level,['actual','title','visible']);if(level.actual!==dirs[i]||typeof level.visible!=='boolean'||i===dirs.length-1&&!level.visible)fail('PROVENANCE_INVALID');text(level.title);if(p.visibilityMode==='all'&&!level.visible||p.visibilityMode==='hide-all'&&i<dirs.length-1&&level.visible)fail('PROVENANCE_INVALID');}
   if(p.bucketTitle!==undefined){text(p.bucketTitle);if(typeof p.bucketVisible!=='boolean')fail('PROVENANCE_INVALID');}
  }
