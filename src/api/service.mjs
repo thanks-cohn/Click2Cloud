@@ -27,6 +27,7 @@ const changeFields=CONFIG_CHANGE_FIELDS;
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const rebuild=obj({accountId:str,changes:arr(change),acknowledgeUnknown:{enum:[true]}},['accountId','changes','acknowledgeUnknown']);
 const definitions={
+  getGalleryLoadingVisual:['inspect',obj({includeMedia:bool})],setGalleryLoadingVisual:['configure',obj({expectedRevision:num,mode:{enum:['math','media','plain']},removeMedia:bool,media:obj({name:{type:'string',minLength:1,maxLength:256},type:{enum:['image/png','image/jpeg','image/webp','image/gif','video/mp4']},base64:{type:'string',minLength:1,maxLength:11184812}},['name','type','base64'])},['expectedRevision','mode'])],
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
@@ -138,7 +139,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation'].includes(method);
+        const independent=['getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation'].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -152,7 +153,9 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if((params.changes??[]).some(c=>c.type==='clearDefault')&&state.product.defaultTarget)bindings.push(state.product.defaultTarget);
         if(params.itemId){const row=engine.getMenu(params.generation)?.rows.find(r=>r.id===params.itemId);if(row?.target)bindings.push(row.target);}
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
-        if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
+        if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
+        else if(method==='setGalleryLoadingVisual')data=await current.setGalleryLoadingVisual(params);
+        else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
           if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
           if(['openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction'].includes(method)&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           if(method==='initializeCloudflare'){data=await finishInitialization(await cloudflare.initialize(params));}

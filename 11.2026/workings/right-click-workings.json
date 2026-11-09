@@ -9200,9 +9200,9 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "See docs/evidence/phased-upgrades/phase1/verification.json",
     "sourceFiles": {
-      "extension/app.css": "af8e2632c54e549f5346005dc9db8fff0b9022a7af5cfc5225500c2720578d46",
+      "extension/app.css": "c734ec91185cd60f088d0343c9f6d10a65333ee041815de71ca3578445729cdc",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "9c048a5de51f1fa535fbb9941144730130ac904b3bdb45a2fc34e479c3936af5",
+      "extension/app.mjs": "2571e377933e5a1a576cbad93bb7ba1d90ed587676b471b60e78b19623685720",
       "extension/background.mjs": "61ee9d3ad40138be6eda4a83cad5094ed3b3323d13427245aa43e490a3a22757",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -9223,7 +9223,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "f3a7e3b4dbac4767d24087e575cabef9bf81a1d074f5e50befc79849dfcf8e71",
       "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
-      "src/api/service.mjs": "a8d726c91e1756865bd4abd0ace8914532a1a9daf696368afc1816d96a6f8a44",
+      "src/api/service.mjs": "da4794f5ee4e4c1e2a1a1227689a806e75d0503f1a379e093576eee305cfa043",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "e1c1797539e0c49c8820480351e856d6ad323961836dbf99c300085e87636f57",
@@ -9264,6 +9264,10 @@
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
       "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
+      "src/explorer/loading-visual-config.mjs": "59461e49453227f2357e939351f0039b866872605dddbfdf8d4960058856d068",
+      "src/explorer/loading-visual.mjs": "ac5e4edfd4582af044dd17d53d990edf3471e1e4ed0971cc7a919ed47c24ca8b",
+      "src/explorer/loading-visuals/math.mjs": "1316a6ca8e537b0176ff93372fc073c19a42e0e6519abc64d929e989e3d66ae4",
+      "src/explorer/loading-visuals/media.mjs": "28fa9cae4ae6a3a57b535c72c3eda68d03687dec179015cacfc5f2ae651f2e23",
       "src/explorer/location-view.mjs": "33b0e2451d2af5f382413565a321f6f95f8a3586b52e831385644ef0e9f1855a",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
       "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
@@ -9272,9 +9276,9 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "7288e390a5db928057973996313b9ef0998e658b82bc023bdd8135d52bbcad9d",
+      "src/glaciaring/catalog.mjs": "44580cba202d3baae0c1225e4220be447c430912f86c59b36bf605333b39451b",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "8c40ddfcd20406773e6b4920878b07f9b718bc6f57d1c34980d7f6300a8ca2b0",
+      "src/glaciaring/reliability.mjs": "1ce4a29becb49f5490219251f60041a9fffc10997da7d092380934c10f6a7776",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -9282,7 +9286,7 @@
       "src/modes/nested/index.mjs": "c94578f239b38df4741f80f8cb7dcd849ce3fdf2ab10f363e747c29a9f965a03",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "11ebd8153d5d8910ae0ffee98b255d4a7bb4a2eeac2c95b2da776121027d8883",
+      "src/persistence/current-store.mjs": "7652567da52876d29ef05deabdb870bc496b9695e18748b2e68e05bbc87dfc81",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
@@ -9485,7 +9489,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function invoke",
-            "line": 133
+            "line": 134
           }
         ],
         "verification": {
@@ -9828,12 +9832,12 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function loadState",
-            "line": 53
+            "line": 54
           },
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function commitProduct",
-            "line": 186
+            "line": 187
           }
         ],
         "verification": {
@@ -9873,7 +9877,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "if(method==='loginBegin'&&!params.verifyOnly",
-            "line": 212
+            "line": 215
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
@@ -10979,7 +10983,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "recordRemoteResult:",
-            "line": 266
+            "line": 267
           }
         ],
         "verification": {
@@ -11012,7 +11016,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function remoteHistory",
-            "line": 426
+            "line": 441
           }
         ],
         "verification": {
@@ -11049,17 +11053,17 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function loadListing",
-            "line": 202
+            "line": 204
           },
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='enterExplorer'",
-            "line": 175
+            "line": 178
           },
           {
             "path": "extension/app.mjs",
             "symbol": "async function enterExplorer",
-            "line": 27
+            "line": 29
           },
           {
             "path": "src/explorer/image-preview.mjs",
@@ -11099,7 +11103,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function selectRow",
-            "line": 240
+            "line": 242
           }
         ],
         "verification": {
@@ -11191,7 +11195,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function openEntry",
-            "line": 265
+            "line": 275
           },
           {
             "path": "src/explorer/r2-adapter.mjs",
@@ -11206,7 +11210,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function downloadEntry",
-            "line": 439
+            "line": 454
           }
         ],
         "verification": {
@@ -11335,7 +11339,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "commitProduct",
-            "line": 186
+            "line": 187
           }
         ],
         "verification": {
@@ -11367,7 +11371,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "stageBackupRoot",
-            "line": 63
+            "line": 65
           }
         ],
         "verification": {
@@ -11485,7 +11489,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "async function api",
-            "line": 39
+            "line": 41
           }
         ],
         "verification": {
@@ -11662,7 +11666,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function renderRemotes",
-            "line": 130
+            "line": 132
           }
         ],
         "verification": {
@@ -11703,7 +11707,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "Original source",
-            "line": 428
+            "line": 443
           }
         ],
         "verification": {
@@ -11745,7 +11749,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 230
+            "line": 233
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -11772,7 +11776,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function loadState",
-            "line": 53
+            "line": 54
           }
         ],
         "verification": {
@@ -11790,7 +11794,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function commitBoundary",
-            "line": 89
+            "line": 90
           }
         ],
         "verification": {
@@ -11826,7 +11830,7 @@
           {
             "path": "src/persistence/current-store.mjs",
             "symbol": "async function transact",
-            "line": 29
+            "line": 30
           }
         ],
         "verification": {
@@ -11862,7 +11866,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function restorePreview",
-            "line": 81
+            "line": 82
           }
         ],
         "verification": {
@@ -11880,7 +11884,7 @@
           {
             "path": "extension/app.mjs",
             "symbol": "function recoveryCard",
-            "line": 48
+            "line": 50
           }
         ],
         "verification": {
@@ -11949,7 +11953,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function rebuildPreview",
-            "line": 106
+            "line": 107
           }
         ],
         "verification": {
@@ -12547,6 +12551,24 @@
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
         "coverage": "See zero-stutter evidence; installed Windows unverified"
+      },
+      {
+        "method": "getGalleryLoadingVisual",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
+        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
+      },
+      {
+        "method": "setGalleryLoadingVisual",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
+        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
       }
     ],
     "errorBranches": {
@@ -12670,6 +12692,7 @@
         "FILE_READ_FAILED",
         "IMAGE_DECODE_FAILED",
         "INSPECTION_FAILED",
+        "LOADING_MEDIA_TOO_LARGE",
         "NO_VALID_RECOVERY_POINT",
         "PREVIEW_SIZE_LIMIT",
         "PROVISIONING_BLOCKED",
@@ -13532,6 +13555,16 @@
       "src/explorer/index.mjs": [],
       "src/explorer/layout.mjs": [],
       "src/explorer/listing-view.mjs": [],
+      "src/explorer/loading-visual-config.mjs": [
+        "LOADING_MEDIA_INVALID",
+        "LOADING_MEDIA_TOO_LARGE",
+        "LOADING_MEDIA_TYPE_MISMATCH"
+      ],
+      "src/explorer/loading-visual.mjs": [],
+      "src/explorer/loading-visuals/math.mjs": [],
+      "src/explorer/loading-visuals/media.mjs": [
+        "VIDEO"
+      ],
       "src/explorer/location-view.mjs": [],
       "src/explorer/observed-api.mjs": [
         "BATCH_COMPLETED",
@@ -13870,6 +13903,10 @@
         "JOURNAL_EVICTED",
         "JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE",
         "LABEL_COLLISION",
+        "LOADING_MEDIA_INVALID",
+        "LOADING_MEDIA_REQUIRED",
+        "LOADING_MEDIA_TOO_LARGE",
+        "LOADING_MEDIA_TYPE_MISMATCH",
         "LOCATION_INVALID",
         "MENU_BUDGET_EXCEEDED",
         "MENU_INVALID",
@@ -14264,6 +14301,7 @@
         "IDEMPOTENCY_CONFLICT",
         "JOURNAL_EVICTED",
         "JSON_RECORDS_EXACT_OPAQUE_HANDLES_UNCHANGED_IN_ORIGINAL_DATABASE",
+        "LOADING_MEDIA_REQUIRED",
         "MIGRATION_QUARANTINED",
         "NATIVE_GENERATION_WITH_ZERO_CURRENT",
         "NATIVE_REGISTRATION_STALE",
@@ -14430,9 +14468,13 @@
         "status": "SOURCE_IMPLEMENTED_PENDING_FINAL_RECEIPTS",
         "behavior": "Independent additive mode routes; Flat never vetoes checked trees; repeated Narrow physical targets require unique persisted destination IDs; Depth preserves real parents and explicitly discovers requested scope folders read-only.",
         "evidence": "docs/evidence/composition-remaining/gate-a/verification.json"
+      },
+      "gateB": {
+        "behavior": "Two isolated visual modules mounted within existing reserved frame; trusted get/setGalleryLoadingVisual with local Blob and revision; no cloud upload or menu mutation.",
+        "evidence": "docs/evidence/composition-remaining/gate-b/verification.json"
       }
     },
-    "digest": "4511cdbb244f10ea69e203d871af254607a286bf73baafc99219fd006014ea9a"
+    "digest": "c2119e8829ab19e6acfe28d7ff6dfab7f57b9dc1bdd37cd1eecf714b8aa59b58"
   },
   "changeLog": [
     {

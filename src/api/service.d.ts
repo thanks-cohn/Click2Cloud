@@ -1,5 +1,6 @@
 /** V3+1.1 trusted in-process contract. Runtime JSON Schemas are toolRegistry in service.mjs. */
 export type Version = '3+1.1';
+export interface GalleryLoadingVisual {revision:number;mode:'math'|'media'|'plain';media:{name:string;type:string;size:number;base64?:string}|null}
 export interface Target {provider:string;connectionId:string;accountId:string;bucketName:string;prefix:string}
 export interface Level {hidden?:boolean;label?:string}
 export interface Destination {id:string;target:Target;label?:string;hidden?:boolean;quick?:boolean;order?:number;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
@@ -30,6 +31,7 @@ export interface Methods {
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
  invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
  inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'};describeCapabilities:{section?:'reliability'};getConfiguration:{};getEngineHealth:{view?:'health'|'trace'|'support';operationId?:number;cursor?:string;limit?:number};getProviderConnections:{};
+ getGalleryLoadingVisual:{includeMedia?:boolean};setGalleryLoadingVisual:{expectedRevision:number;mode:'math'|'media'|'plain';removeMedia?:boolean;media?:{name:string;type:'image/png'|'image/jpeg'|'image/webp'|'image/gif'|'video/mp4';base64:string}};
  loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};

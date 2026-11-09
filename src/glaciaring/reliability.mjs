@@ -24,7 +24,7 @@ export const failures=Object.freeze([
 ]);
 const families=[
  ['authentication','src/auth/cloudflare-oauth.mjs','tests/boot-login.test.mjs',['C2C-PERSIST-5'],['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections']],
- ['configuration','src/api/config.mjs','tests/final-v3p1.test.mjs',['C2C-PERSIST-1','C2C-PERSIST-2'],['getConfiguration','listDestinations','previewConfigChange','commitConfigChange','getOrganizationSuggestion','selectCloudflareAccount','openCloudflareDestinations','openCloudflareActivation']],
+ ['configuration','src/api/config.mjs','tests/final-v3p1.test.mjs',['C2C-PERSIST-1','C2C-PERSIST-2'],['getGalleryLoadingVisual','setGalleryLoadingVisual','getConfiguration','listDestinations','previewConfigChange','commitConfigChange','getOrganizationSuggestion','selectCloudflareAccount','openCloudflareDestinations','openCloudflareActivation']],
  ['native','src/core/engine.mjs','tests/nov06-native-menu.test.mjs',['C2C-PERSIST-3'],['previewContextMenu','inspectMenuTree','previewNativeMenu','inspectNativeACK','reconcileNativeMenu','inspectShelfAttention']],
  ['provisioning','src/cloudflare/onboarding.mjs','tests/cloudflare-onboarding.test.mjs',['C2C-PERSIST-5','C2C-PROOF-1'],['initializeCloudflare','inspectCloudflare','checkCloudflareR2','approveCloudflareSetup','repairCloudflareDestination','inspectCloudflareSetup']],
  ['remote','src/core/engine.mjs','tests/save-receipt-repair.test.mjs',['C2C-PROOF-1','C2C-PERSIST-3'],['invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt','cancelRemoteOperation','openRemoteResult','dispatchExplorerSave','dispatchSave']],

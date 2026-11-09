@@ -44,3 +44,5 @@ await import("./reliability-ratchet.test.mjs");
 await import('./phased-narrow.test.mjs');
 
 import './composition-remaining.test.mjs';
+
+import './gallery-loading.test.mjs';
