@@ -110,7 +110,7 @@ export function compileMenuSpec(options={}) {
       for(const row of projection.rows)if(row.role==='save'&&row.target.provider==='cloudflare'){
         const key=targetKey(row.target);if(!candidates.has(key))candidates.set(key,row);
       }
-      const hiddenDefault=!show.flat&&defaultTarget&&Object.entries(options.configs??{}).some(([m,c])=>show[m]&&(c.destinations??[]).some(d=>d.hidden&&targetKey(d.target)===targetKey(defaultTarget)))&&!candidates.has(targetKey(defaultTarget));
+      const hiddenDefault=defaultTarget&&!candidates.has(targetKey(defaultTarget))&&Object.entries(options.configs??{}).some(([m,c])=>(c.destinations??c.scopes??[]).some(d=>d.hidden&&(targetKey(d.target)===targetKey(defaultTarget)||m==='depth'&&scopeKey(d.target)===scopeKey(defaultTarget))));
       if(defaultTarget?.provider==='cloudflare'&&!hiddenDefault&&(show.flat||show.simple||show.nested||show.depth)){
         const key=targetKey(defaultTarget),c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
         if(!candidates.has(key)){const assigned=[...candidates];candidates.clear();candidates.set(key,{target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});for(const [k,row] of assigned)candidates.set(k,row);}
@@ -121,7 +121,7 @@ export function compileMenuSpec(options={}) {
       // an eligible Default under Cloudflare even when its stored Quick is ON;
       // suppress only that redundant shortcut, without mutating preferences.
       const defaultKey=defaultTarget&&candidates.has(targetKey(defaultTarget))?targetKey(defaultTarget):null;
-      const quickRows=[...new Map(projection.rows.filter(r=>r.sourceMode==='simple'&&r.quick&&r.role==='save').map(r=>[targetKey(r.target),r])).values()].filter(r=>targetKey(r.target)!==defaultKey);
+      const quickRows=[...new Map(projection.rows.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&r.role==='save').map(r=>[targetKey(r.target),{...r,label:r.quickLabel??r.label}])).values()].filter(r=>targetKey(r.target)!==defaultKey);
       const promoted=new Set(quickRows.filter(r=>r.target.provider==='cloudflare').map(r=>targetKey(r.target)));
       const active=(show.flat?[...candidates.values()].filter(r=>targetKey(r.target)===defaultKey):[...candidates.values()]).filter(r=>!promoted.has(targetKey(r.target)));
       const narrowActive=active.filter(r=>r.sourceMode==='nested'),narrowHierarchy=narrowActive.length>0&&!show.flat;
@@ -155,7 +155,7 @@ export function compileMenuSpec(options={}) {
       }
       // Providers lead; independent Quick leaves follow in user-configured order.
       // Availability stays truthful (including setup actions), independently of placement.
-      for(const row of quickRows)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:'simple',provider:row.target.provider}});
+      for(const row of quickRows)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});
       // Trusted future contributors remain independent flat actions. No second
       // Cloudflare owner or legacy REDOWN/provider parent is accepted here.
       for(const peer of options.flatProviders??[])if(!['cloudflare','google-drive','dropbox','onedrive'].includes(peer.target?.provider)&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});

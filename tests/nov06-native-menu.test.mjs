@@ -47,7 +47,7 @@ test('explicit Quick labels cannot rename or duplicate a canonical provider head
  const c=configs();c.simple.destinations=[{target:redown,label:'Cloudflare',quick:true},{target:photos}];const spec=compile([],{configs:c});assert.equal(root(spec).filter(r=>r.label==='Cloudflare').length,1);assert(root(spec).some(r=>r.label==='Quick: Cloudflare'));assert.equal(spec.rows.filter(r=>r.role==='save'&&r.parentId!==null).length,0);assert.equal(targetKey(cloud(spec)[0].target),targetKey(photos));
 });
 
-test('explicit Flat uses its selected default even when that destination is hidden in an inactive custom mode',()=>{const c=configs();c.simple.destinations=[{target:redown,hidden:true}];const spec=compile([],{configs:c,defaultTarget:redown,product:{show:{simple:true,nested:true,depth:false,flat:true}}});assert.equal(cloud(spec)[0].role,'save');assert.equal(targetKey(cloud(spec)[0].target),targetKey(redown));assert(c.simple.destinations[0].hidden);});
+test('hidden destination eye wins over Flat without deleting its saved default',()=>{const c=configs();c.simple.destinations=[{target:redown,hidden:true}];const spec=compile([],{configs:c,defaultTarget:redown,product:{show:{simple:true,nested:true,depth:false,flat:true}}});assert.equal(cloud(spec)[0].role,'provider-action');assert.equal(cloud(spec)[0].target,null);assert(c.simple.destinations[0].hidden);});
 
 test('programmatic provider action binds the sole canonical target before dispatch, even without a stored default',async()=>{
  const {createPermissions}=await import('../src/api/permissions.mjs');const permissions=createPermissions();permissions.issue({actor:'limited',methods:['invokeProviderAction'],accounts:['other'],expiresAt:Date.now()+10000});let writes=0;

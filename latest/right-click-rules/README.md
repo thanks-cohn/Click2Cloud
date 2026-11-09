@@ -1,3 +1,5 @@
+> November9 approved phased specification supersedes the historical dual-flag rule below: Default and Quick are mutually exclusive switches. Explicit Quick ON clears that physical destination's global Default; Default ON clears matching Quick flags. Legacy dual flags resolve in favor of the established Default. A hidden destination cannot resurface as a Default shortcut, including Flat. Existing destination rows/labels/keys remain stored. See `docs/requests/2026-11-09-phased-narrow-gallery-r2-provenance.md`.
+
 # Click2Cloud — Latest Right-Click Rules
 
 ## Engine implementation and API traceability

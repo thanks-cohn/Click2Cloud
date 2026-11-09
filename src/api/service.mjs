@@ -21,7 +21,7 @@ const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested'
 const level=obj({hidden:bool,label:str});
 const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
   visibilityMode:{enum:['all','hide-all','custom']},levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},explorerLayout:obj({split:{type:'number',minimum:0,maximum:100},toolbarRows:{type:'integer',minimum:1,maximum:7}},['split','toolbarRows']),connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
-  scopes:arr(obj({target,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
+  scopes:arr(obj({target,hidden:bool,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));

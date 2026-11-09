@@ -6,7 +6,8 @@ export function createConfig(input={}) {
     const target=normalizeTarget({...item.target,prefix:''}),key=scopeKey(target),maxDepth=item.maxDepth??10;
     if(seen.has(key))throw new MenuSpecError('DUPLICATE_SCOPE','Depth scope occurs twice.');
     if(!Number.isSafeInteger(maxDepth)||maxDepth<1)throw new MenuSpecError('INVALID_DEPTH','Depth must be a positive safe integer.');
-    seen.add(key);return {target,maxDepth};
+    if(item.hidden!==undefined&&typeof item.hidden!=='boolean')throw new MenuSpecError('INVALID_CONFIG','Invalid scope visibility.');
+    seen.add(key);return {target,maxDepth,...(item.hidden!==undefined?{hidden:item.hidden}:{})};
   });
   return freeze({schemaVersion:1,mode:'depth',revision:validateRevision(input.revision??0),scopes});
 }
@@ -27,7 +28,7 @@ export function project({config,inventory}) {
     const selection=selected.get(scopeKey(scope.target));
     const included=[];
     for(const folder of scope.folders) {
-      const reason=!selection?'UNSELECTED_SCOPE':folder.target.prefix.split('/').filter(Boolean).length>selection.maxDepth?'DEPTH_LIMIT':null;
+      const reason=selection?.hidden?'DESTINATION_HIDDEN':!selection?'UNSELECTED_SCOPE':folder.target.prefix.split('/').filter(Boolean).length>selection.maxDepth?'DEPTH_LIMIT':null;
       if(reason){omissions.push({target:folder.target,reason,kind:'excluded'});continue;}
       included.push(folder);
     }

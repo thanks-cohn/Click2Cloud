@@ -1,5 +1,5 @@
 import {validateModeConfig} from '../persistence/schema.mjs';
-import {normalizeTarget,targetKey,stableId} from '../core/menu-identity.mjs';
+import {normalizeTarget,targetKey,scopeKey,stableId} from '../core/menu-identity.mjs';
 export const fail=code=>{throw Object.assign(Error(code),{code});};
 export const DEFAULT_PROVIDER_VISIBILITY=Object.freeze({'google-drive':true,dropbox:true,onedrive:true,cloudflare:true});
 export function productState(raw={}) {
@@ -26,10 +26,17 @@ export function productState(raw={}) {
   return s;
 }
 
+// Legacy dual flags deterministically retain the established global Default.
+// The next normal atomic commit persists this same normalization; rows stay put.
+export function normalizeDefaultQuick(product,configs){
+ if(!product.defaultTarget)return {product,configs};const key=targetKey(product.defaultTarget);
+ if(!Object.values(configs).some(c=>(c.destinations??[]).some(d=>d.quick&&targetKey(d.target)===key)))return {product,configs};
+ const next=structuredClone(configs);for(const c of Object.values(next))for(const d of c.destinations??[])if(d.quick&&targetKey(d.target)===key)d.quick=false;return {product,configs:next};
+}
 export function validateProduct(value) {
   if(value?.configs&&!value.product)return migrateLegacyProduct(value);
   if(!value||Object.keys(value).sort().join()!=='configs,product'||Object.keys(value.configs??{}).sort().join()!=='depth,nested,simple')fail('INVALID_STATE');
-  return {product:productState(value.product),configs:Object.fromEntries(Object.entries(value.configs).map(([mode,c])=>[mode,validateModeConfig(mode,c)]))};
+  return normalizeDefaultQuick(productState(value.product),Object.fromEntries(Object.entries(value.configs).map(([mode,c])=>[mode,validateModeConfig(mode,c)])));
 }
 
 /** Read-only migration from the former main-branch product envelope. No identity
@@ -43,7 +50,7 @@ export function migrateLegacyProduct(raw) {
   const product=productState({revision:raw.revision,show:{simple:raw.show.simple,nested:raw.show.narrow,depth:raw.show.depth,flat:raw.show.flat},defaultTarget:raw.flatDefault??null,
     recovery:{cadence:r.cadence,simple:r.simple,nested:r.narrow,location:r.backupLocation,buckets:validateModeConfig('depth',{scopes:r.buckets}).scopes.map(b=>({target:b.target,enabled:true,depth:b.maxDepth}))}});
   if(Object.keys(raw.configs??{}).sort().join()!=='depth,nested,simple')fail('INVALID_STATE');
-  return {product,configs:Object.fromEntries(Object.entries(raw.configs).map(([m,c])=>[m,validateModeConfig(m,c)]))};
+  return normalizeDefaultQuick(product,Object.fromEntries(Object.entries(raw.configs).map(([m,c])=>[m,validateModeConfig(m,c)])));
 }
 
 export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
@@ -71,10 +78,10 @@ export function applyConfigChanges(state,changes) {
             p.defaultTarget=survivors.length===1?survivors[0]:null;p.cloudflare.removed=[...new Set([...p.cloudflare.removed,removed.target.accountId])];
           }
 if(removed.target.provider==='cloudflare'&&!next.product.defaultTarget&&!Object.values(next.configs).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'&&d.target.accountId===removed.target.accountId)))p.cloudflare.removed=[...new Set([...p.cloudflare.removed,removed.target.accountId])];}
-        else {for(const k of ['label','levels','hidden','quick','order','visibilityMode'])if(Object.hasOwn(c,k)){if(k==='label'&&!c[k])delete all[i].label;else all[i][k]=c[k];}}
+        else {for(const k of ['label','levels','hidden','quick','order','visibilityMode'])if(Object.hasOwn(c,k)){if(k==='label'&&!c[k])delete all[i].label;else all[i][k]=c[k];}if(c.quick===true&&p.defaultTarget&&targetKey(p.defaultTarget)===targetKey(all[i].target))p.defaultTarget=null;}
       }
     } else if(c.type==='setShowInChrome')p.show=c.show;
-    else if(c.type==='setDepthDisplayBuckets')next.configs.depth.scopes=c.scopes;
+    else if(c.type==='setDepthDisplayBuckets')next.configs.depth.scopes=c.scopes.map(s=>{const old=next.configs.depth.scopes.find(o=>scopeKey(o.target)===scopeKey(s.target));return {...(old?.hidden!==undefined?{hidden:old.hidden}:{}),...s};});
     else if(c.type==='makeDefault'){p.defaultTarget=normalizeTarget(c.target);p.cloudflare.removed=p.cloudflare.removed.filter(a=>a!==c.target.accountId);}
     else if(c.type==='clearDefault'){if(p.defaultTarget?.provider==='cloudflare')p.cloudflare.removed=[...new Set([...p.cloudflare.removed,p.defaultTarget.accountId])];p.defaultTarget=null;}
     else if(c.type==='setAutoOpenAttention')p.autoOpenAttention=c.visible;
@@ -89,5 +96,5 @@ if(removed.target.provider==='cloudflare'&&!next.product.defaultTarget&&!Object.
   }
   next.product=productState(p);
   for(const m of ['simple','nested','depth'])next.configs[m]=validateModeConfig(m,next.configs[m]);
-  return next;
+  return {...next,...normalizeDefaultQuick(next.product,next.configs)};
 }

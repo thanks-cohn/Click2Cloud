@@ -6,7 +6,7 @@ import {modeModules,validateModeConfig,validateBundle,validateGeneration,integer
 import {encodeBackup,decodeBackup} from './backup.mjs';
 import {normalizeTarget} from '../core/menu-identity.mjs';
 import {operationIdentity} from '../core/boundary-observation.mjs';
-import {productState,validateProduct,fail} from '../api/config.mjs';
+import {productState,validateProduct,normalizeDefaultQuick,fail} from '../api/config.mjs';
 const request=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
 const done=tx=>new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onabort=tx.onerror=()=>reject(tx.error??Error('CURRENT transaction aborted.'));});
 const error=code=>Object.assign(Error(code==='REVISION_CONFLICT'?'Local state changed; reload before saving.':'Local state operation was not confirmed.'),{code});
@@ -77,7 +77,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     }
     if(!Object.hasOwn(map,'generation')&&(map.configurationIntegrity|| (await request(stores.journal.getAll())).some(j=>j.kind==='generation')))missing('GENERATION_RECORD_MISSING');
     const generation=Object.hasOwn(map,'generation')?map.generation:defaultGeneration();try{validateGeneration(generation);}catch{throw error('CONFIGURATION_CORRUPT');}if(proof.nativeGeneration>0&&generation.desired===0)missing('NATIVE_GENERATION_WITH_ZERO_CURRENT');
-    let product;try{product=productState(map.product);}catch{throw error('CONFIGURATION_CORRUPT');}return {map,configs,product,generation};
+    let product;try{product=productState(map.product);}catch{throw error('CONFIGURATION_CORRUPT');}return {map,...normalizeDefaultQuick(product,configs),generation};
   }
   // C2C-PERSIST-2: one durable complete boundary, not a shadow configuration.
   function boundary(stores,saved){

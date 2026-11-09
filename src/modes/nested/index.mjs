@@ -46,8 +46,8 @@ export function project({config,inventory}) {
   for(const row of [...tree.values()].sort((a,b)=>(a.target.prefix.split('/').length-b.target.prefix.split('/').length)||compare(scopeKey(a.target),scopeKey(b.target))||compare(a.target.prefix,b.target.prefix))) {
     const destination=row.destination,hasChildren=branches.has(row.placement);
     const label=row.hiddenSave?'Save here — '+(destination.label??targetLabel(row.target)):row.label??destination?.label??targetLabel(row.target);
-    rows.push({...row,label,role:destination&&!hasChildren?'save':'branch',enabled:hasChildren||!destination?.reason,reason:destination?.reason??(destination?'NESTED_CONFIGURED':'NATURAL_ANCESTOR')});
-    if(destination&&hasChildren)rows.push({placement:row.placement+':save-here',parentPlacement:row.placement,label:'Save here',target:row.target,role:'save',enabled:!destination.reason,reason:destination.reason??'ACTIONABLE_BRANCH'});
+    rows.push({...row,label,quick:destination?.quick===true,quickLabel:destination?.label??destination?.levels?.[row.target.prefix]?.label??targetLabel(row.target),role:destination&&!hasChildren?'save':'branch',enabled:hasChildren||!destination?.reason,reason:destination?.reason??(destination?'NESTED_CONFIGURED':'NATURAL_ANCESTOR')});
+    if(destination&&hasChildren)rows.push({placement:row.placement+':save-here',parentPlacement:row.placement,label:'Save here',target:row.target,quick:destination.quick===true,quickLabel:destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target),role:'save',enabled:!destination.reason,reason:destination.reason??'ACTIONABLE_BRANCH'});
   }
   const represented=new Set([...tree.values()].map(row=>targetKey(row.target)));
   for(const scope of inventory.scopes)for(const folder of scope.folders)

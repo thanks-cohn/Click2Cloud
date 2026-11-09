@@ -11,7 +11,7 @@ export type Change =
  | {type:'updateDestination';mode:Mode;id:string;label?:string;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>;hidden?:boolean;quick?:boolean;order?:number}
  | {type:'deleteDestinationConfig';mode:Mode;id:string}
  | {type:'setShowInChrome';show:Show}
- | {type:'setDepthDisplayBuckets';scopes:{target:Target;maxDepth:number}[]}
+ | {type:'setDepthDisplayBuckets';scopes:{target:Target;maxDepth:number;hidden?:boolean}[]}
  | {type:'makeDefault';target:Target}
  | {type:'clearDefault'}
  | {type:'setTheme';theme:'dark'|'light'}
@@ -65,7 +65,7 @@ export interface Results {
  getEngineHealth:EngineTrace|SafeSupportReport|{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};configuration?:ConfigurationHealth;storagePolicy?:{state:'OBSERVED_READ_ONLY'|'UNOBSERVED';persistent?:boolean;usageBytes?:number|null;quotaBytes?:number|null;pastDeletionCause?:'UNKNOWN'};origin:{extensionId:string|null;schemaVersion:1};native:unknown;externalRecovery:unknown};
  commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
- listDestinations:{items:(Destination|{target:Target;maxDepth:number})[];total:number;nextCursor:string|null};
+ listDestinations:{items:(Destination|{target:Target;maxDepth:number;hidden?:boolean})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};
  fileAction:{state:string;code?:string;id:string;data?:{operationId:string;completed:number;skipped?:number;receipt?:RemoteReceipt;verification?:string;atomicDelete?:boolean}};
  enterExplorer:{state:string;code?:string;accounts:{id:string;name?:string}[];buckets:{name:string}[];target:Target|null;preferred:Target|null;accountId?:string};

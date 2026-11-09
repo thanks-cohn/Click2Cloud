@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "See docs/evidence/phased-upgrades/phase2/verification.json",
+  "productionSourceRevision": "See docs/evidence/phased-upgrades/phase3/verification.json",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -3116,6 +3116,9 @@
                           ],
                           "additionalProperties": false
                         },
+                        "hidden": {
+                          "type": "boolean"
+                        },
                         "maxDepth": {
                           "type": "integer",
                           "minimum": 1
@@ -3503,6 +3506,9 @@
                                 "prefix"
                               ],
                               "additionalProperties": false
+                            },
+                            "hidden": {
+                              "type": "boolean"
                             },
                             "maxDepth": {
                               "type": "integer",
@@ -4166,6 +4172,9 @@
                           ],
                           "additionalProperties": false
                         },
+                        "hidden": {
+                          "type": "boolean"
+                        },
                         "maxDepth": {
                           "type": "integer",
                           "minimum": 1
@@ -4553,6 +4562,9 @@
                                 "prefix"
                               ],
                               "additionalProperties": false
+                            },
+                            "hidden": {
+                              "type": "boolean"
                             },
                             "maxDepth": {
                               "type": "integer",
@@ -5666,6 +5678,9 @@
                               ],
                               "additionalProperties": false
                             },
+                            "hidden": {
+                              "type": "boolean"
+                            },
                             "maxDepth": {
                               "type": "integer",
                               "minimum": 1
@@ -6053,6 +6068,9 @@
                                     "prefix"
                                   ],
                                   "additionalProperties": false
+                                },
+                                "hidden": {
+                                  "type": "boolean"
                                 },
                                 "maxDepth": {
                                   "type": "integer",
@@ -6744,6 +6762,9 @@
                               ],
                               "additionalProperties": false
                             },
+                            "hidden": {
+                              "type": "boolean"
+                            },
                             "maxDepth": {
                               "type": "integer",
                               "minimum": 1
@@ -7131,6 +7152,9 @@
                                     "prefix"
                                   ],
                                   "additionalProperties": false
+                                },
+                                "hidden": {
+                                  "type": "boolean"
                                 },
                                 "maxDepth": {
                                   "type": "integer",

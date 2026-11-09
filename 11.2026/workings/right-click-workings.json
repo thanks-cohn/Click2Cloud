@@ -9202,7 +9202,7 @@
     "sourceFiles": {
       "extension/app.css": "85a546b531c74d7d0b9e6331e007c536bc86b2d9f3ca765bed7c45b2b271efa2",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "94c6a1c5d510943b93ff2c9ebd23ea8260a1ebac043e941ef9b6e1f3923b0eb5",
+      "extension/app.mjs": "76add1c5438b8ca686172254e89c2b56c19a9d0a203ca49d2e0e52e4f501f4b1",
       "extension/background.mjs": "91ef822b3e4c7bbf8d292bcd72763890c94f13843450d90a689361f64a8473ed",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -9218,12 +9218,12 @@
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
-      "src/api/config.mjs": "71b027add65ce8e110fbdc1ba149d893a25f18708e32741b29c6b770c46aa52f",
+      "src/api/config.mjs": "f7b9d3a18a1d9ff1aa2d413535aedc08184290227edadbb575ff706707eeaf65",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
       "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
-      "src/api/service.mjs": "34b68b3581a3f754e3fbc8bdde6a3364024c5a1bf26bb2055d031b9e4fc5d527",
+      "src/api/service.mjs": "ca79e9a5c1c2114ab7dfe811d398a3479c25033e981b4e0f2fc5cdecef7e159f",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "e1c1797539e0c49c8820480351e856d6ad323961836dbf99c300085e87636f57",
@@ -9250,7 +9250,7 @@
       "src/core/engine.mjs": "0ebdb7f6b90decc8719c8f66b479d2507dfd0acc76c7424235ae9a4700bdd7bd",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "2d4172a65ed3320868ee38de7013fda8210230c91e3bb2264d3e1c404027c73b",
-      "src/core/menu-spec.mjs": "f41fc3eca9f0bbce54fccd09636ff1f43b5b9f411233e5d5c824a583143c24d9",
+      "src/core/menu-spec.mjs": "8462fef8e87a4c23a3df797ece39aa6af981e5d0e96a9290e6d772a52eebdde8",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9277,16 +9277,16 @@
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
-      "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
-      "src/modes/nested/index.mjs": "a01f03a0d20db4b8a220bbb77d01feb5075f62259d78a44ea41d3bc8f6a4f460",
+      "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
+      "src/modes/nested/index.mjs": "85e8cc0a8991584fefc59a53a3d123988bc9fbf0479805bd9b7f26496c9ea21f",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "ee859a299e966da67409e1e051b22df0f5352f1c16c5901d92d5b1c1a41e973b",
+      "src/persistence/current-store.mjs": "11ebd8153d5d8910ae0ffee98b255d4a7bb4a2eeac2c95b2da776121027d8883",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
-      "src/persistence/schema.mjs": "5e9ef03a1b64648fd26130e8c8a29a0ec7989268a4215c6304292fbd17fe4985"
+      "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -9788,7 +9788,7 @@
           {
             "path": "src/api/config.mjs",
             "symbol": "const survivors=",
-            "line": 70
+            "line": 77
           }
         ],
         "verification": {
@@ -9822,7 +9822,7 @@
           {
             "path": "src/api/config.mjs",
             "symbol": "export function applyConfigChanges",
-            "line": 50
+            "line": 57
           },
           {
             "path": "src/persistence/current-store.mjs",
@@ -14211,6 +14211,7 @@
         "ACTIONABLE_BRANCH",
         "DEPTH_DISCOVERED",
         "DEPTH_LIMIT",
+        "DESTINATION_HIDDEN",
         "DUPLICATE_SCOPE",
         "INVALID_CONFIG",
         "INVALID_DEPTH",
@@ -14411,9 +14412,10 @@
     "phasedUpgradeEvidence": {
       "checkpoint": "3b24320138ff0ebbf50a0e6a912a5d2800038676",
       "phase1": "Composite preserves actual Narrow placements and parent IDs; natural unassigned bucket wrapper suppressed; shared physical/title ancestors merge. Ordinary Simple/default singleton remains flat. See docs/evidence/phased-upgrades/phase1/HANDOFF.md",
-      "phase2": "visibilityMode all/hide-all/custom overrides presentation without erasing custom levels; deepest always visible; same configuration APIs and exact physical target. See phase2 evidence."
+      "phase2": "visibilityMode all/hide-all/custom overrides presentation without erasing custom levels; deepest always visible; same configuration APIs and exact physical target. See phase2 evidence.",
+      "phase3": "Default/Quick exclusion in canonical config/read normalization; legacy Default wins until explicit Quick on clears global Default. Narrow Quick uses alternative direct placement. Eye hides/restores Simple/Narrow/Depth without deletion; hidden Default cannot reappear via Flat; Depth manager has no Default button."
     },
-    "digest": "77647415fbf88e3ce7f4cfe17acd44cfa9fc1b3fd67cce98e0513f3cb8789389"
+    "digest": "26ecbd97a1d321bc6294a837a2d764c3e3c3898d922f1b1c01f4c37e54f4ccdb"
   },
   "changeLog": [
     {

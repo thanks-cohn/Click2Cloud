@@ -392,3 +392,10 @@ The canonical composite compiler now retains the selected Narrow leaf's actual p
 ## Phase 2 — reversible Narrow ancestor visibility
 
 Existing create/updateDestination changes accept optional Narrow-only visibilityMode all/hide-all/custom. Legacy missing mode means custom and retains every stored level flag. All reveals original hierarchy; hide-all suppresses ancestors only; the deepest directory is always visible/actionable. Bulk switches never overwrite custom levels. Restore custom visibility selects the retained snapshot; editing specific levels explicitly selects custom mode. Checkbox/select-all excludes the final directory. Persisted state, GUI and projector use the same levelHidden rule, with no cloud-key changes. Existing recovery/export validation accepts this optional configuration property; no new recovery mechanism.
+
+
+## Phase 3 — destination switches and visibility
+
+Existing configuration API enforces Default/Quick exclusion: Quick ON clears matching global Default; Default ON clears matching Quick in all saved modes; OFF enables neither. Legacy dual-flag data retains Default and normalizes only its conflicting Quick flags; read is non-mutating and the next ordinary atomic commit persists normalized flags. No destinations/history are removed. Narrow Quick now uses the same alternative direct-placement semantics as Simple, with its own selected mode and final title.
+
+Every manager row has an eye titled exactly Change Visibility. Simple/Narrow use updateDestination.hidden; Depth uses the existing setDepthDisplayBuckets scopes with optional hidden, preserving other options. Hiding suppresses the relevant mode's choice/Quick and any hidden-Default fallback (including Flat), without clearing the saved Default or objects. Visible alternatives in another mode remain independent. Depth rows have no Make Default button. Stored visibility survives restart; the same spec/native reconciliation/resolver enforces hidden/stale dispatch blocking.
