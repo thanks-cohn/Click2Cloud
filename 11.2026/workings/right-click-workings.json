@@ -9278,7 +9278,7 @@
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/modes/depth/index.mjs": "d5265809faa99e1f69e4dc0af8e69609680eb63185e542705efd1058851eec55",
-      "src/modes/nested/index.mjs": "19c27f4d7551fdd6f55a14407f46d8ee44763a69cfa747a5b7ad83d069824ba1",
+      "src/modes/nested/index.mjs": "2554848efeda896633b97223459f1dfa4a83f438323256360d0e5852577f9154",
       "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
       "src/persistence/current-store.mjs": "ee859a299e966da67409e1e051b22df0f5352f1c16c5901d92d5b1c1a41e973b",
@@ -14219,6 +14219,7 @@
       "src/modes/nested/index.mjs": [
         "ACTIONABLE_BRANCH",
         "DESTINATION_HIDDEN",
+        "ID_COLLISION",
         "NATURAL_ANCESTOR",
         "NESTED_CONFIGURED",
         "NOT_CONFIGURED"
@@ -14410,7 +14411,7 @@
       "checkpoint": "3b24320138ff0ebbf50a0e6a912a5d2800038676",
       "phase1": "Composite preserves actual Narrow placements and parent IDs; natural unassigned bucket wrapper suppressed; shared physical/title ancestors merge. Ordinary Simple/default singleton remains flat. See docs/evidence/phased-upgrades/phase1/HANDOFF.md"
     },
-    "digest": "d77029e391d9aa92d98504097cb8f79e56d8cd5c54d79a483473a7d08c13b597"
+    "digest": "1f4e4d720ed21247b208690078c354640d0fba7552a74bfd553974e994be98fe"
   },
   "changeLog": [
     {
