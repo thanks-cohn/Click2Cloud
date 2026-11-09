@@ -36,5 +36,5 @@ export function resolveMenuAction(spec,selection={}) {
   if(!Array.isArray(authorizedTargets))return blocked('AUTHORIZATION_MISSING');
   if(!authorizedTargets.some(target=>target&&typeof target==='object'&&targetKey(target)===targetKey(row.target)))return blocked('SCOPE_UNAUTHORIZED');
   emit('ok','RESOLVE_OK');
-  return freeze({state:'completed',code:'RESOLVE_OK',generation:spec.generation,action:{actionId:row.actionId,itemId:row.id,target:row.target,intent:bound}});
+  return freeze({state:'completed',code:'RESOLVE_OK',generation:spec.generation,action:{actionId:row.actionId,itemId:row.id,target:row.target,intent:bound,...(row.provenance?{provenance:row.provenance}:{})}});
 }

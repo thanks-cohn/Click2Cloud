@@ -1,3 +1,4 @@
+import {menuProvenance} from './menu-provenance.mjs';
 import * as simple from '../modes/simple/index.mjs';
 import * as nested from '../modes/nested/index.mjs';
 import * as depth from '../modes/depth/index.mjs';
@@ -78,7 +79,7 @@ export function compileMenuSpec(options={}) {
     if(!Number.isSafeInteger(maxRows)||maxRows<1||!Number.isSafeInteger(maxOmissions)||maxOmissions<1)
       throw new MenuSpecError('INVALID_CONFIG','Logical inspection budgets must be positive safe integers.');
     let droppedRows=0;
-    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio','page'],visible=true,providerAction=null,presentationId=null}) {
+    function add({id,parentId=null,label='',role='branch',target=null,enabled=true,reason='STRUCTURE',origin={mode,provider:'cloudflare'},placement='',contexts=['image','link','video','audio','page'],visible=true,providerAction=null,presentationId=null,destinationConfig=null}) {
       if(composite&&role!=='separator') {
         const peers=siblings.get(parentId)??[];
         const base=label;let count=2;while(peers.some(p=>p.label===label))label=base+' ('+(count++)+')';
@@ -100,6 +101,7 @@ export function compileMenuSpec(options={}) {
       // actual blocker in the Shelf; never add a second native setup workflow.
       if(setupProvider)enabled=true;
       const row={...(presentationId?{presentationId}:{}),actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
+      if(composite&&role==='save'&&target?.provider==='cloudflare'&&['simple','nested','depth'].includes(origin.mode)){const menuPath=[label];let ancestor=byId.get(parentId);while(ancestor){menuPath.unshift(ancestor.label);ancestor=byId.get(ancestor.parentId);}row.provenance=menuProvenance({mode:origin.mode,entryId:id,target,title:label,presentationId,destinationConfig,menuPath});}
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;
     }
     if(composite) {

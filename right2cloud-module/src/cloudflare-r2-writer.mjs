@@ -38,8 +38,8 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
    stagingCleanup={removed,retained:staged.parts-removed};
   }
 
-  return {key:prepared.key,size:length,etag:result.etag,version:result.version,operationId,transfer:staged?'bounded-spool':'known-length-stream',...(stagingCleanup?{stagingCleanup}:{}),...(provenance?{provenance}:{})};
+  return {key:prepared.key,size:length,etag:result.etag,version:result.version,operationId,transfer:staged?'bounded-spool':'known-length-stream',...(stagingCleanup?{stagingCleanup}:{}),...(prepared.provenance?{provenance:prepared.provenance}:{})};
  },
- async verify({receipt,signal}){const h=await wait(storage.head(receipt.key),signal);return h?{key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId}:null;}
+ async verify({receipt,signal}){const h=await wait(storage.head(receipt.key),signal);let provenance;if(h?.customMetadata?.click2cloud)try{provenance=JSON.parse(h.customMetadata.click2cloud);}catch{fail('PROVENANCE_INVALID');}return h?{key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId,...(provenance?{provenance}:{})}:null;}
  };
 }

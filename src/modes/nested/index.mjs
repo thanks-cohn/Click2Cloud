@@ -48,7 +48,7 @@ export function project({config,inventory}) {
     if(hasChildren||!destinations.length)rows.push({...row,label:row.label,role:'branch',enabled:true,reason:'NATURAL_ANCESTOR'});
     for(const destination of destinations){
       const quickLabel=destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target);
-      rows.push({...row,placement:row.placement+':route:'+destination.id,parentPlacement:hasChildren?row.placement:row.parentPlacement,presentationId:destination.id,
+      rows.push({...row,placement:row.placement+':route:'+destination.id,parentPlacement:hasChildren?row.placement:row.parentPlacement,presentationId:destination.id,destinationConfig:destination,
         label:hasChildren?'Save here':row.label,quick:destination.quick===true,quickLabel,role:'save',enabled:!destination.reason,reason:destination.reason??(hasChildren?'ACTIONABLE_BRANCH':'NESTED_CONFIGURED')});
     }
   }

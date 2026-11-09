@@ -9202,37 +9202,38 @@
     "sourceFiles": {
       "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "d7c642e2d65d16fc854613c2bc7b3feefd18b8a1e7c43b0cd73a68f035077554",
+      "extension/app.mjs": "df068753e74c7046fe2dcb3cbf3ca96889d563a00b753a25ecdd4788df748c8d",
       "extension/background.mjs": "61ee9d3ad40138be6eda4a83cad5094ed3b3323d13427245aa43e490a3a22757",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "ded8ffe2942fe30964f5e082f2b2c0d12dc522bb9f9810d80bbbf387ba309901",
+      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "454657cd04ec8615fe1aad54db199f663e870fb93337764246251da112049f7b",
-      "right2cloud-module/src/cloudflare-worker.mjs": "4af4d3c04f34e080235399a65e2150a24899e1139a53fa5f59f40a275a8b42e6",
-      "right2cloud-module/src/common.mjs": "06c1a3531b9e302161415783f149c4aace53db299d4a3bf1ed9850624bfeee07",
-      "right2cloud-module/src/index.mjs": "75318a53cc31a0d8f9e57facaca8607cc57441fb5a05554a7efa49b78c12c04a",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
+      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
+      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
+      "right2cloud-module/src/provenance.mjs": "647e02323aba2d60df531ddecc157ae1ed0c1bcfd195c6b735f6f8e700147081",
       "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
-      "right2cloud-module/src/verification.mjs": "315ff66b461210bd41ce171241753e145dd78ce0b29dd8640c97693e38dc87b7",
+      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "1c53b1474dd8eb9187d7d787c0a5639f78989e2017f83ba122cd74ab4fbc90a9",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
-      "src/api/menu-view.mjs": "f3a7e3b4dbac4767d24087e575cabef9bf81a1d074f5e50befc79849dfcf8e71",
+      "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
       "src/api/service.mjs": "da4794f5ee4e4c1e2a1a1227689a806e75d0503f1a379e093576eee305cfa043",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
-      "src/build-info.mjs": "e1c1797539e0c49c8820480351e856d6ad323961836dbf99c300085e87636f57",
+      "src/build-info.mjs": "4ae1d0218ccee31c81b63b80c7bdc2229e23483317ee347154d0689e56c5001d",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
       "src/chrome/registrar.mjs": "d2f886cde4af5582b1c62657916a26d85b011b36a3804078b327c2e0f497938a",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/cloudflare/deployment.mjs": "78f64a764f1abda44cf5cba01f247ed392c8f0aa00b12cc70c89e9985d7d105b",
+      "src/cloudflare/deployment.mjs": "6a80a9589771637cbac4d71dc5a0ed1288cb48cfaeb61dddd6c8b6744f854518",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
       "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
@@ -9240,17 +9241,18 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "2df2784e1539d36451992e404aedf546b27e99d491c4ad48c122bf8ed65faf72",
+      "src/cloudflare/transport.mjs": "4bfc4fae4b9e2af119b71046a8e3eb081699930c9a84ae3dad1993084278ef9d",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
-      "src/cloudflare/worker.mjs": "b0a1537b9f47fbb9ab6c30cd5e49a04f6df583a8b29e3e26126194db06f03d9b",
+      "src/cloudflare/worker.mjs": "f74bfcf3d006e0f54a5c969b1c2bf1265f56af721c10d0604a6d792866d03304",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
-      "src/core/action-resolver.mjs": "5787c45503a6331d528da46991aa0b297a3720fc6a4290dcf240095d733fd3e6",
+      "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "0ebdb7f6b90decc8719c8f66b479d2507dfd0acc76c7424235ae9a4700bdd7bd",
+      "src/core/engine.mjs": "d816bf3c3dc57b29ef6d0a6ff61767e0496272458ef812ffcafa0832f6d9fb06",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
-      "src/core/menu-spec.mjs": "8599dad22dbfab955fb674e2ddbc249956fe83d26502182e3b78b5f6c044caa1",
+      "src/core/menu-provenance.mjs": "84af7d5941b3124dffb654e523b6da2c62ac8b995c298388a438f2187bf51b8a",
+      "src/core/menu-spec.mjs": "c4b86edf94f8e21e516b97dc1a4986f88fe7e0d76caea717a3100fd78435910b",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9264,7 +9266,7 @@
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
       "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
-      "src/explorer/loading-visual-config.mjs": "59461e49453227f2357e939351f0039b866872605dddbfdf8d4960058856d068",
+      "src/explorer/loading-visual-config.mjs": "30b9f9581233dbcee4d9514db4f0b1061167f026afac8f49550f0cbf5cb3e5e5",
       "src/explorer/loading-visual.mjs": "ac5e4edfd4582af044dd17d53d990edf3471e1e4ed0971cc7a919ed47c24ca8b",
       "src/explorer/loading-visuals/math.mjs": "1316a6ca8e537b0176ff93372fc073c19a42e0e6519abc64d929e989e3d66ae4",
       "src/explorer/loading-visuals/media.mjs": "28fa9cae4ae6a3a57b535c72c3eda68d03687dec179015cacfc5f2ae651f2e23",
@@ -9276,17 +9278,17 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "44580cba202d3baae0c1225e4220be447c430912f86c59b36bf605333b39451b",
+      "src/glaciaring/catalog.mjs": "5bcc377ffafd661dcb9939062dd79036d75af8ae3cf0531e162efced9192d956",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "1ce4a29becb49f5490219251f60041a9fffc10997da7d092380934c10f6a7776",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/nested/index.mjs": "c94578f239b38df4741f80f8cb7dcd849ce3fdf2ab10f363e747c29a9f965a03",
-      "src/modes/simple/index.mjs": "4ea9812afab132e0e9e55b82799b14ff2fecd185e1a0a76ae03791f1c4e47f20",
+      "src/modes/nested/index.mjs": "05d613e10a850e52689d9a7cb8f8d85c5c9c1f23046845deff0834c51db2aa2a",
+      "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "7652567da52876d29ef05deabdb870bc496b9695e18748b2e68e05bbc87dfc81",
+      "src/persistence/current-store.mjs": "b7b76589b1e01fd5e63d759d494020b1ecd09ffb8584afc45165a5a3f22881ef",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
@@ -9523,7 +9525,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const promoted=",
-            "line": 121
+            "line": 123
           }
         ],
         "verification": {
@@ -9557,7 +9559,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "if(active.length===1&&!hierarchy)",
-            "line": 133
+            "line": 135
           }
         ],
         "verification": {
@@ -9591,7 +9593,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const parent=add({id,label,origin,placement:'provider:cloudflare'})",
-            "line": 135
+            "line": 137
           }
         ],
         "verification": {
@@ -9625,7 +9627,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "providerVisibility",
-            "line": 75
+            "line": 76
           }
         ],
         "verification": {
@@ -9659,7 +9661,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const defaultAssigned=",
-            "line": 112
+            "line": 114
           }
         ],
         "verification": {
@@ -9693,7 +9695,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "export function compileMenuSpec",
-            "line": 51
+            "line": 52
           }
         ],
         "verification": {
@@ -9727,7 +9729,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const candidates=",
-            "line": 110
+            "line": 112
           }
         ],
         "verification": {
@@ -9761,7 +9763,7 @@
           {
             "path": "src/core/menu-spec.mjs",
             "symbol": "const root=",
-            "line": 158
+            "line": 160
           }
         ],
         "verification": {
@@ -10635,7 +10637,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/probe'",
-            "line": 94
+            "line": 95
           }
         ],
         "verification": {
@@ -10765,7 +10767,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/remote-save'",
-            "line": 43
+            "line": 44
           }
         ],
         "verification": {
@@ -10887,7 +10889,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "path==='/lease'",
-            "line": 83
+            "line": 84
           }
         ],
         "verification": {
@@ -10919,7 +10921,7 @@
           {
             "path": "src/cloudflare/worker.mjs",
             "symbol": "async operation",
-            "line": 21
+            "line": 22
           }
         ],
         "verification": {
@@ -12750,6 +12752,7 @@
       "extension/mirror.mjs": [],
       "right2cloud-module/src/cloudflare-r2-writer.mjs": [
         "FIXED_LENGTH_STREAM_REQUIRED",
+        "PROVENANCE_INVALID",
         "PUT_RECEIPT_INVALID",
         "R2_SINGLE_PUT_LIMIT",
         "STAGING_CONFLICT",
@@ -12800,6 +12803,11 @@
         "RECONCILE_READ_ONLY",
         "REMOTE_REJECTED",
         "VERIFICATION_MISMATCH"
+      ],
+      "right2cloud-module/src/provenance.mjs": [
+        "PROVENANCE_INVALID",
+        "PROVENANCE_TARGET_MISMATCH",
+        "PROVENANCE_TOO_LARGE"
       ],
       "right2cloud-module/src/public-address.mjs": [
         "SOURCE_DENIED",
@@ -13338,6 +13346,7 @@
         "STALE_REVISION",
         "WORKER_UNVERIFIED"
       ],
+      "src/core/menu-provenance.mjs": [],
       "src/core/menu-spec.mjs": [
         "COMPILE_FAILED",
         "COMPILE_OK",
@@ -13973,7 +13982,10 @@
         "PROJECTION_OK",
         "PROJECTION_PARTIAL",
         "PROJECTION_STARTED",
+        "PROVENANCE_INVALID",
         "PROVENANCE_SHARED_LEGACY",
+        "PROVENANCE_TARGET_MISMATCH",
+        "PROVENANCE_TOO_LARGE",
         "PROVIDER_ACTION",
         "PROVIDER_ACTION_FAILED",
         "PROVIDER_ACTION_INVALID",
@@ -14472,9 +14484,15 @@
       "gateB": {
         "behavior": "Two isolated visual modules mounted within existing reserved frame; trusted get/setGalleryLoadingVisual with local Blob and revision; no cloud upload or menu mutation.",
         "evidence": "docs/evidence/composition-remaining/gate-b/verification.json"
+      },
+      "gateD": {
+        "behavior": "Canonical frozen selection snapshot bound to HMAC operation/source/destination; original conditional Worker write includes bounded versioned metadata and filenames; independent HEAD metadata check; no source/page URLs in new custom metadata.",
+        "evidence": "docs/evidence/composition-remaining/gate-d/verification.json",
+        "production": "New Worker digest requires existing approved upgrade; only isolated test deployment authorized.",
+        "compatibility": "Old objects and legacy lower-level no-snapshot clients remain readable/usable without fabricated provenance; canonical composite Cloudflare routes always supply snapshot."
       }
     },
-    "digest": "fe871cd42f9d102371211045c21030faa1d67568c9991208f29561412810cbb8"
+    "digest": "6a3310c736da92f47ee555ffa4d3022e9ab7ab64a5a676ac45f971660f91e99b"
   },
   "changeLog": [
     {

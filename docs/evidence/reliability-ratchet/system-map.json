@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "See docs/evidence/composition-remaining/gate-b/verification.json",
+  "productionSourceRevision": "See docs/evidence/composition-remaining/gate-d/verification.json",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -8,7 +8,7 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.18",
+      "extensionVersion": "0.3.19",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {
@@ -8685,6 +8685,9 @@
           "UNKNOWN_REASON",
           "UNSUPPORTED_OPERATION",
           "CURSOR_REPEATED",
+          "PROVENANCE_INVALID",
+          "PROVENANCE_TARGET_MISMATCH",
+          "PROVENANCE_TOO_LARGE",
           "PROVIDER_UNAVAILABLE",
           "FILE_API_FAILED",
           "FILE_API_PARTIAL",
@@ -8797,6 +8800,9 @@
           "UNKNOWN",
           "UNKNOWN_REASON",
           "UNSUPPORTED_OPERATION",
+          "PROVENANCE_INVALID",
+          "PROVENANCE_TARGET_MISMATCH",
+          "PROVENANCE_TOO_LARGE",
           "PROVIDER_UNAVAILABLE",
           "FILE_API_FAILED",
           "FILE_API_PARTIAL",

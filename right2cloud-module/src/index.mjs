@@ -5,13 +5,13 @@ export {createWorker} from './cloudflare-worker.mjs';
 export {cloudflareR2Writer} from './cloudflare-r2-writer.mjs';
 export function createRemoteSaver(ports){const operations=new Map();return function saveRemote(input){
  // No persistence claim here: server-side durable claims own cross-restart deduplication.
- const id=input?.operationId;const fingerprint=JSON.stringify({source:input.source,destination:input.destination});if(operations.has(id)){const prior=operations.get(id);if(prior.fingerprint!==fingerprint)return Promise.resolve({state:'blocked',code:'OPERATION_ID_REUSED',operationId:id});return prior.task;}
+ const id=input?.operationId;const fingerprint=JSON.stringify({source:input.source,destination:input.destination,provenance:input.provenance});if(operations.has(id)){const prior=operations.get(id);if(prior.fingerprint!==fingerprint)return Promise.resolve({state:'blocked',code:'OPERATION_ID_REUSED',operationId:id});return prior.task;}
  const task=run(input,ports);operations.set(id,{task,fingerprint});return task;
 };}
 async function run(input,p){let dispatched=false;let intent;const result=(state,code,extra={})=>({state,code,operationId:input?.operationId,destination:intent?.destination,...extra});
  try{
   if(input.signal?.aborted)return result('cancelled','ABORTED_BEFORE_DISPATCH');
-  intent={operationId:input.operationId,source:canonicalSource(input.source),destination:destination(input.destination)};validateIntent(intent);
+  intent={operationId:input.operationId,source:canonicalSource(input.source),destination:destination(input.destination),...(input.provenance?{provenance:input.provenance}:{})};validateIntent(intent);
   const signal=input.signal;
   if(await wait(p.authorize(intent),signal)!==true)return result('blocked','AUTHORIZATION_DENIED');
   const cap=await wait(p.getPreparedWorkerCapability(intent),signal);

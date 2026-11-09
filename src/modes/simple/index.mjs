@@ -17,7 +17,7 @@ export function project({config,inventory}) {
     const {target}=destination,key=targetKey(target),{scope,folder}=findCandidate(inventory,target);
     const reasons=availabilityReasons(scope,folder),reason=reasons[0];
     selected.add(key);
-    rows.push({placement:key,parentPlacement:null,label:destination.label??targetLabel(target),target,role:'save',enabled:!reason,reason:reason??'SIMPLE_CONFIGURED',quick:destination.quick===true,order:destination.order??own.destinations.indexOf(destination)});
+    rows.push({presentationId:destination.id,destinationConfig:destination,placement:key,parentPlacement:null,label:destination.label??targetLabel(target),target,role:'save',enabled:!reason,reason:reason??'SIMPLE_CONFIGURED',quick:destination.quick===true,order:destination.order??own.destinations.indexOf(destination)});
     for(const reason of reasons)omissions.push({target,reason,placement:key,kind:'ineligible'});
   }
   rows.sort((a,b)=>a.order-b.order||compare(a.placement,b.placement));

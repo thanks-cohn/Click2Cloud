@@ -1,6 +1,6 @@
 {
   "name": "click2cloud",
-  "version": "0.3.18",
+  "version": "0.3.19",
   "private": true,
   "type": "module",
   "description": "One deterministic Click2Cloud menu specification for a real REDOWN Portal and Chrome",

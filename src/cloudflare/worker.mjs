@@ -1,3 +1,4 @@
+import {metadataJSON} from '../../right2cloud-module/src/provenance.mjs';
 import {validateFileIntent,runFileIntent} from './files.mjs';
 import {createWorker} from '../../right2cloud-module/src/cloudflare-worker.mjs';
 import {equal,destination,validateIntent,keyFor} from '../../right2cloud-module/src/common.mjs';
@@ -14,17 +15,17 @@ export class RemoteClaims {
   const e=this.env,p=await verifyGrant(e.SIGNING_KEY,request.headers.get('authorization')?.replace(/^Bearer /,'')),d=destination(p.destination);
   if(p.principal!==d.connectionId||d.accountId!==e.ACCOUNT_ID||d.bucketName!==e.BUCKET_NAME||d.connectionId!=='cloudflare:'+e.ACCOUNT_ID||((e.PREFIX_SCOPE??'')&&d.prefix!==e.PREFIX_SCOPE&&!d.prefix.startsWith(e.PREFIX_SCOPE+'/')))fail('BINDING_MISMATCH');
   if(await this.state.storage.get('revoked:'+p.principal+':'+p.sessionId))fail('AUTHORIZATION_REVOKED');
-  if(intent&&(p.use!=='save'||p.operationId!==intent.operationId||!equal(d,intent.destination)||p.sourceDigest!==await digest(intent.source)))fail('CAPABILITY_DENIED');
+  if(intent&&(p.use!=='save'||p.operationId!==intent.operationId||!equal(d,intent.destination)||p.sourceDigest!==await digest(intent.source)||p.provenanceDigest!==(intent.provenance?await digest(intent.provenance):undefined)))fail('CAPABILITY_DENIED');
   return {...p,destination:d,storage:e.STORAGE};
  }
  async live(cap,key){const job=await this.state.storage.get(key);return job?.leaseUntil>Date.now()&&!await this.state.storage.get('revoked:'+cap.principal+':'+cap.sessionId);}
  async operation(cap,id){
   const key=this.key(cap,id),job=await this.state.storage.get(key);
   if(!job||!equal(job.destination,cap.destination))return {state:'uncertain',code:'OPERATION_UNKNOWN',operationId:id};
-  const receipt=job.result?.receipt??(!this.running.has(key)&&job.stage==='writing'&&job.key&&Number.isSafeInteger(job.expectedSize)?{key:job.key,size:job.expectedSize,operationId:id,destination:cap.destination}:null);
+  const receipt=job.result?.receipt??(!this.running.has(key)&&job.stage==='writing'&&job.key&&Number.isSafeInteger(job.expectedSize)?{key:job.key,size:job.expectedSize,operationId:id,destination:cap.destination,...(job.provenance?{provenance:job.provenance}:{})}:null);
   if(receipt){
    const proof=await destinationWriter(cap).verify({receipt});
-   if(proof&&proof.operationId===id&&proof.size===receipt.size&&(!receipt.etag||proof.etag===receipt.etag)&&(!receipt.version||proof.version===receipt.version))return {state:'verified',code:'R2_HEAD_VERSION_SIZE',operationId:id,receipt:{...proof,destination:receipt.destination??cap.destination,...(receipt.provenance?{provenance:receipt.provenance}:{}),...(receipt.transfer?{transfer:receipt.transfer}:{}),...(receipt.stagingCleanup?{stagingCleanup:receipt.stagingCleanup}:{})},proofKind:'independent-head-version-size'};
+   if(proof&&proof.operationId===id&&proof.size===receipt.size&&(!receipt.etag||proof.etag===receipt.etag)&&(!receipt.version||proof.version===receipt.version)&&(!receipt.provenance||metadataJSON(proof.provenance)===metadataJSON(receipt.provenance)))return {state:'verified',code:'R2_HEAD_VERSION_SIZE',operationId:id,receipt:{...proof,destination:receipt.destination??cap.destination,...(receipt.provenance?{provenance:receipt.provenance}:{}),...(receipt.transfer?{transfer:receipt.transfer}:{}),...(receipt.stagingCleanup?{stagingCleanup:receipt.stagingCleanup}:{})},proofKind:'independent-head-version-size'};
    if(job.result?.state==='written')return {state:'uncertain',code:'VERIFICATION_MISMATCH',operationId:id};
   }
   if(job.result)return {...job.result,operationId:id};
@@ -45,7 +46,7 @@ export class RemoteClaims {
     const cap=await this.authenticate(request,intent),key=this.key(cap,operationId);
     if(this.admitted>=JOB_CAPACITY)return Response.json({state:'blocked',code:'RESOURCE_BUSY',operationId});
     this.admitted++;admissionHeld=true;
-    const claimed=await this.state.storage.transaction(async tx=>{if(await tx.get(key))return false;await tx.put(key,{destination:cap.destination,sessionId:cap.sessionId,sourceDigest:cap.sourceDigest,leaseUntil:cap.expiresAt,stage:'accepted',at:Date.now()});return true;});
+    const claimed=await this.state.storage.transaction(async tx=>{if(await tx.get(key))return false;await tx.put(key,{destination:cap.destination,sessionId:cap.sessionId,sourceDigest:cap.sourceDigest,provenanceDigest:cap.provenanceDigest,leaseUntil:cap.expiresAt,stage:'accepted',at:Date.now()});return true;});
     if(!claimed){this.admitted--;admissionHeld=false;return Response.json({state:'uncertain',code:'OPERATION_ALREADY_CLAIMED',operationId});}
     admissionHeld=false;
     this.running.add(key);
@@ -55,7 +56,7 @@ export class RemoteClaims {
       const stage=async value=>this.update(key,j=>({...j,...value,...(value.stage==='writing'?{expectedSize:value.bytes}:{})}));
       const result=await createWorker({
        authenticate:async()=>cap,claimOperation:async()=>true,recheckAuthorization:()=>this.live(cap,key),fetch:this.ports.fetch??publicFetch,
-       recordPrepared:async(_cap,prepared)=>stage({stage:'prepared',key:prepared.key}),
+       recordPrepared:async(_cap,prepared)=>stage({stage:'prepared',key:prepared.key,...(prepared.provenance?{provenance:prepared.provenance}:{})}),
        onProgress:bytes=>{this.progress.set(key,bytes);},
        writer:()=>destinationWriter(cap,{recordStage:stage,recordPart:(i,value)=>this.state.storage.put(key+':part:'+i,value),readPart:i=>this.state.storage.get(key+':part:'+i),...(this.ports.FixedLengthStream?{FixedLengthStream:this.ports.FixedLengthStream}:{})})
       }).fetch(new Request('https://internal/remote-save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(intent)}),this.env);
@@ -78,11 +79,11 @@ export class RemoteClaims {
    }
    if(path==='/capabilities'&&cap.use==='status'){
     const list=await this.env.STORAGE.list({prefix:cap.destination.prefix?cap.destination.prefix+'/':'',limit:1});
-    return Response.json({state:'completed',protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
+    return Response.json({state:'completed',protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,provenanceSchema:1,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
    }
    if(path==='/lease'&&['save','files'].includes(cap.use)){
     const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);
-    if(!job||job.sessionId!==cap.sessionId||(cap.use==='files'?job.fileDigest!==cap.fileDigest:job.sourceDigest!==cap.sourceDigest)||!equal(job.destination,cap.destination)||job.leaseUntil<=Date.now())fail('LEASE_DENIED');
+    if(!job||job.sessionId!==cap.sessionId||(cap.use==='files'?job.fileDigest!==cap.fileDigest:job.sourceDigest!==cap.sourceDigest||job.provenanceDigest!==cap.provenanceDigest)||!equal(job.destination,cap.destination)||job.leaseUntil<=Date.now())fail('LEASE_DENIED');
     await this.update(key,j=>({...j,leaseUntil:cap.expiresAt}));return Response.json({state:'completed',operationId:cap.operationId});
    }
    if(path==='/cancel'&&cap.use==='cancel'){const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);if(!job||!equal(job.destination,cap.destination))fail('OPERATION_UNKNOWN');await this.update(key,j=>({...j,leaseUntil:0,cancelRequested:true}));return Response.json({state:'uncertain',code:'CANCELLATION_REQUESTED_INSPECT',operationId:cap.operationId});}

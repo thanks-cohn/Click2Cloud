@@ -46,3 +46,5 @@ await import('./phased-narrow.test.mjs');
 import './composition-remaining.test.mjs';
 
 import './gallery-loading.test.mjs';
+
+import './object-provenance.test.mjs';
