@@ -9252,7 +9252,7 @@
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
       "src/core/menu-provenance.mjs": "58467b1e4d2b22f71a159a6051a2e9ac0c9f7a8d5a50e73eecfba346026c6983",
-      "src/core/menu-spec.mjs": "35ca5b3102ff8bebc223702dda13e709ea165ea9fa3df045b4264ffa6ed06d75",
+      "src/core/menu-spec.mjs": "bd055d2f1c21a43669d709ee8db49e93ecce159c343499ecd4d3f0d1b57a9df5",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -14492,7 +14492,7 @@
         "compatibility": "Old objects and legacy lower-level no-snapshot clients remain readable/usable without fabricated provenance; canonical composite Cloudflare routes always supply snapshot."
       }
     },
-    "digest": "9378abfdb4a9a93e01c95c17ac5d970c68f9fdeb7141c8244af6fdeb3fc337ee"
+    "digest": "6926a6a755b4c8c59c190451655def89a2aaabb047020979f94eb246e8134564"
   },
   "changeLog": [
     {

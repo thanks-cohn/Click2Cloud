@@ -116,7 +116,7 @@ export function compileMenuSpec(options={}) {
         const c=findCandidate(inventory,defaultTarget),reasons=availabilityReasons(c.scope,c.folder);
         candidates.unshift({target:defaultTarget,label:defaultTarget.prefix?defaultTarget.prefix.split('/').filter(Boolean).at(-1):defaultTarget.bucketName,sourceMode:'simple',placement:'legacy-default',enabled:!reasons.length,reason:reasons[0]??'DEFAULT_DIRECT_SAVE'});
       }
-      if(show.flat&&!defaultTarget)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
+      if(show.flat&&!defaultTarget&&!candidates.length)omissions.push({reason:'DEFAULT_LOCATION_REQUIRED',kind:'ineligible'});
       const defaultKey=defaultTarget&&candidates.some(r=>targetKey(r.target)===targetKey(defaultTarget))?targetKey(defaultTarget):null;
       const routeKey=r=>JSON.stringify([r.sourceMode,r.placement]);
       const quickRows=candidates.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&targetKey(r.target)!==defaultKey).map(r=>({...r,label:r.quickLabel??r.label}));

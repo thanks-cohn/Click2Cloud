@@ -34,7 +34,7 @@ test('composite modes preserve configs and checked trees even with Flat or missi
  const configs={simple:{destinations:[{target:{...base,prefix:'one/'}}]},nested:{destinations:[{target:{...base,prefix:'two/three/'}}]},depth:{scopes:[{target:base,maxDepth:50}]}};
  const before=JSON.stringify(configs),p=productState({show:{simple:true,nested:true,depth:true,flat:true},defaultTarget:{...base,prefix:'exact/'}});
  const spec=compile(configs,p);assert(!spec.rows.some(r=>r.role==='save'&&r.target.prefix==='exact/'));/* Selected Depth owns this bucket; Flat does not fabricate an undiscovered route. */assert(spec.rows.some(r=>r.origin.mode==='nested'));assert(spec.rows.some(r=>r.origin.mode==='depth'));assert.equal(JSON.stringify(configs),before);
- const missing=compile(configs,productState({show:p.show}));assert(missing.rows.filter(r=>r.role==='save').length>=3);assert.equal(missing.rows.filter(r=>r.role==='provider-action').length,3);assert(missing.omissions.some(r=>r.reason==='DEFAULT_LOCATION_REQUIRED'));
+ const missing=compile(configs,productState({show:p.show}));assert(missing.rows.filter(r=>r.role==='save').length>=3);assert.equal(missing.rows.filter(r=>r.role==='provider-action').length,3);assert(!missing.omissions.some(r=>r.reason==='DEFAULT_LOCATION_REQUIRED'));/* Checked mode routes need no fallback Default. */
 });
 test('Quick order is stable, promoted actions follow the four providers without duplicated children',()=>{
  const configs={simple:{destinations:[0,1,2,3].map(i=>({target:{...base,prefix:'p'+i+'/'},quick:i<3,order:i}))}};
