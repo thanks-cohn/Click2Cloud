@@ -96,10 +96,18 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     if(candidate.product.revision<retainedRevision)return {available:false,current:local,reason:'RECOVERY_STALE'};
     return {available:true,...candidate,current:local,previewToken:await digest({candidate,evidence}),provenance:internal?'VALIDATED_COMPLETE_LOCAL_JOURNAL':'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED',requiresPreservation:true};
   }
-  async function rebuildPreview(params){
+  async function affectedConfigurationAccounts(native){
+    const accounts=new Set();
+    let prior;try{prior=await readState({observe:false});}catch(e){if(!['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CORRUPT','CONFIGURATION_CONFLICT'].includes(e.code))throw e;}
+    if(!prior)for(const row of native?.desired?.rows??[])if(typeof row.target?.accountId==='string')accounts.add(row.target.accountId);
+    for(const t of [prior?.product?.defaultTarget,...Object.values(prior?.configs??{}).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean))accounts.add(t.accountId);
+    return [...accounts].map(accountId=>({accountId}));
+  }
+  async function rebuildPreview(params,actor,activeMethod){
     const local=await current.inspect(),evidence=await current.evidence(),native=await readNative(),identity=await oauth.status();
     if(local.state!=='ESTABLISHED_MISSING'||evidence.journal.length||evidence.checkpoints.length||evidence.state.some(r=>['product','generation','configurationIntegrity','configurationProvenance'].includes(r.id)||r.id.startsWith('mode:')))return {available:false,current:local,reason:'REBUILD_REQUIRES_ABSENT_CONFIGURATION'};
     if(identity.state!=='CONNECTED'||!identity.accounts?.some(a=>a.id===params.accountId))fail('AUTH_REQUIRED');
+    if(await authorize({actor,scope:'restore',method:activeMethod,params:{rebuild:params},bindings:await affectedConfigurationAccounts(native)})!==true)fail('PERMISSION_DENIED');
     const nativePartial=(native?.desired?.rows??[]).filter(r=>r.role==='save'&&r.target?.accountId===params.accountId&&r.target.provider==='cloudflare').flatMap(r=>{try{return [{target:normalizeTarget(r.target),label:typeof r.label==='string'?r.label.slice(0,256):''}];}catch{return [];}});
     if(!params.changes.length)return {available:false,current:local,reason:'OWNER_CHOICES_REQUIRED',nativePartial,unknown:['modes','hidden','Quick','Default','unprojected destinations','setup approval'],reconstruction:'NEW_OWNER_CHOICES_REQUIRED'};
     const allowed=new Set(['createDestination','updateDestination','setDepthDisplayBuckets','makeDefault','setShowInChrome','setProviderMenuVisibility','setProviderPlacement','setFavorite']);
@@ -254,7 +262,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
           const next=replay?state:applyConfigChanges(state,params.changes);
-          if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');
+          if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget,prior:{configs:state.configs,defaultTarget:state.product.defaultTarget}}})!==true)fail('PERMISSION_DENIED');
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
             if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
@@ -270,26 +278,26 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             data={configuration:await current.read(),native,backup,destinationReadiness};
           }
         }
-        else if(method==='reconcileNativeMenu'){if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await reconcile();}
+        else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await reconcile();}
         else if(method==='chooseBackupLocation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await recovery.choose(params);}
         else if(method==='inspectRecoveryCoverage')data=await recoveryCrawl.inspect(params.target);
         else if(method==='runRecoveryPage'){const policy=state.product.recovery.buckets.find(b=>scopeKey(b.target)===scopeKey(params.target));if(!policy?.enabled)fail('RECOVERY_NOT_ENABLED');data=await recoveryCrawl.tick(policy,{cadence:state.product.recovery.cadence});}
         else if(method==='inspectBackupRoots')data=await recovery.status();
         else if(method==='listRecoveryPolicies')data=state.product.recovery;
         else if(method==='writeRecovery')data=await recovery.writeVerified(state);
-        else if(method==='requestRestorePreview')data=params.rebuild?await rebuildPreview(params.rebuild):await restorePreview();
+        else if(method==='requestRestorePreview')data=params.rebuild?await rebuildPreview(params.rebuild,actor,method):await restorePreview();
         else if(method==='restoreRightClickMenu') {
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           const requestFingerprint=await digest({previewToken:params.previewToken,rebuild:params.rebuild??null}),retry=await current.findRetry(actor+':'+params.idempotencyKey);
           if(retry){if(retry.fingerprint!==requestFingerprint&&!(retry.fingerprint===params.previewToken&&!params.rebuild))fail('IDEMPOTENCY_CONFLICT');receipt={...retry,replayed:true};data={configuration:await current.read(),native:engine.getEvidence().lastOutcome??{state:'partial',code:'NATIVE_ACK_UNAVAILABLE'},requiresReconnect:true,...(params.rebuild?{code:'REBUILT_WITH_OWNER_CONFIRMATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',originalStateRestored:false}: {})};}
           else{
-            const preview=params.rebuild?await rebuildPreview(params.rebuild):await restorePreview();if(!preview.available)fail(preview.reason??'NO_VALID_RECOVERY_POINT');if(preview.previewToken!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');
+            const preview=params.rebuild?await rebuildPreview(params.rebuild,actor,method):await restorePreview();if(!preview.available)fail(preview.reason??'NO_VALID_RECOVERY_POINT');if(preview.previewToken!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');
             const restored=validateProduct({product:preview.product,configs:preview.configs});
-            if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
+            if(await authorize({actor,scope,method,params,bindings:{restored,priorAccounts:await affectedConfigurationAccounts(await readNative())}})!==true)fail('PERMISSION_DENIED');
             const evidence=await current.evidence();let preimage=evidence;if(params.rebuild){const native=await readNative(),proof=await recovery.verifyProfileCopy();if(await digest({rebuild:params.rebuild,candidate:restored,evidence,native,proof})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');preimage={current:evidence,native,profileCopy:proof};}else if(await digest({candidate:restored,evidence})!==params.previewToken)fail('RECOVERY_EVIDENCE_CHANGED');const preservation=await recovery.preserveEvidence(preimage);
             if(preservation?.state!=='VERIFIED')fail('RECOVERY_PRESERVATION_REQUIRED');
             // Revalidate after external I/O; no CURRENT writes precede the verified preimage.
-            if(await authorize({actor,scope,method,params,bindings:restored})!==true)fail('PERMISSION_DENIED');
+            if(await authorize({actor,scope,method,params,bindings:{restored,priorAccounts:await affectedConfigurationAccounts(await readNative())}})!==true)fail('PERMISSION_DENIED');
             if(params.rebuild){const identity=await oauth.status();if(identity.state!=='CONNECTED'||!identity.accounts?.some(a=>a.id===params.rebuild.accountId))fail('AUTH_REQUIRED');}
             let readable;try{readable=await loadCurrent({observe:false});}catch{};
             if(readable){if(params.expectedRevision!==readable.product.revision)fail('REVISION_CONFLICT');receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:requestFingerprint,traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});}

@@ -9222,8 +9222,8 @@
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "b7c74fcc3473c7fbd95842d23e9d46290db6bbb85d9324b2391c2214e6190583",
-      "src/api/permissions.mjs": "89977557de010289d32010a497d99b951bf59fc81d76750fb9dd7e75e3d9bf47",
-      "src/api/service.mjs": "213ab3a04dda09ead4cdf51f9443264214f161232b4969300dda1b81eed8599e",
+      "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
+      "src/api/service.mjs": "f8c11f8a17aa346b2daeb49ab03efc1b9ce6d9bc2b89cebdb0f416fe70864ef2",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "8f3202ba606c2251276f0a0aa54f9341d30e7038406ec0ae225903b7e8be155a",
@@ -9273,7 +9273,7 @@
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
       "src/glaciaring/catalog.mjs": "b7d5f297b7915491251c0a4ad9551027ce9b4a15a70baf1c9e6b88728db573d3",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "528aa1f526ff313995ef848fcc639a8ecf93201df1166ecd87f2f4fdb2dbc0ca",
+      "src/glaciaring/reliability.mjs": "8c40ddfcd20406773e6b4920878b07f9b718bc6f57d1c34980d7f6300a8ca2b0",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -9484,7 +9484,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function invoke",
-            "line": 125
+            "line": 133
           }
         ],
         "verification": {
@@ -11042,7 +11042,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='enterExplorer'",
-            "line": 167
+            "line": 175
           },
           {
             "path": "extension/app.mjs",
@@ -11719,7 +11719,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 204
+            "line": 212
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -11872,7 +11872,7 @@
           {
             "path": "src/glaciaring/reliability.mjs",
             "symbol": "export function describeReliability",
-            "line": 34
+            "line": 36
           }
         ],
         "verification": {
@@ -11923,7 +11923,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "async function rebuildPreview",
-            "line": 99
+            "line": 106
           }
         ],
         "verification": {
@@ -12786,6 +12786,8 @@
         "MENU_SPEC_REQUIRED"
       ],
       "src/api/permissions.mjs": [
+        "ALL_AFFECTED_PRIOR_AND_NEW_ACCOUNTS",
+        "HOST_OWNED_ONE_OPERATION_APPROVAL",
         "INVALID_GRANT",
         "PERMISSION_DENIED"
       ],
@@ -12801,6 +12803,7 @@
         "CHOOSE_BUCKET",
         "CLOUDFLARE_HOST_UNAVAILABLE",
         "CONFIGURATION_CONFLICT",
+        "CONFIGURATION_CORRUPT",
         "CONFIGURATION_RECORD_MISSING",
         "CONFIRMATION_REQUIRED",
         "CONNECTED",
@@ -14090,15 +14093,19 @@
         "POST_COMMIT_RECONCILE_EXCEPTION_HIDES_COMMITTED_RESULT",
         "PRESERVE_AND_BLOCK",
         "PRESERVE_CONFLICT",
+        "PRIOR_NATIVE_ACCOUNT_NOT_BOUND_BEFORE_GLOBAL_MENU_REPLACEMENT",
         "READ_CURRENT_THEN_EXPLICIT_NATIVE_RECONCILE",
         "READ_ONLY_OBSERVATION",
         "READ_ONLY_RESULT",
+        "REBUILD_PRIOR_ACCOUNT_SCOPE",
         "REJECTED_OPEN_POISONS_AUTH",
         "RELIABILITY_MAPPING_MISSING",
         "REPRODUCED_EQUIVALENT",
+        "REQUIRE_ALL_AFFECTED_ACCOUNT_GRANTS",
         "RETRY_FRESH_READ_NO_RESET",
         "REVISION_OR_GENERATION_CONFLICT",
         "SCHEMA",
+        "SIMULATED_CHROME_NO_PROVIDER_MUTATION",
         "SOURCE_PROVEN",
         "STATE_INTEGRITY",
         "STATIC_GUI_ANALYSIS_DOES_NOT_PROVE_DYNAMIC_CALL_COVERAGE",
@@ -14358,7 +14365,7 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "870deaaa743b759b31ce8a2e088aeae8e9b26bff063f5a7acf529087dfd2bce3"
+    "digest": "e7b3b75252768d540fc6f319adfe7d92896f20d32da6dd7d15b6a8f472f2cfba"
   },
   "changeLog": [
     {

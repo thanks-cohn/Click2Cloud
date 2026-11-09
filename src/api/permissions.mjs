@@ -1,3 +1,4 @@
+export const permissionPolicy=Object.freeze({maxGrantTtlMs:3600000,fullConfigurationMethods:Object.freeze(['enterExplorer','initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview','restoreRightClickMenu','chooseBackupLocation']),interactiveAuthMethods:Object.freeze(['loginBegin','loginCancel','disconnect']),confirmation:'HOST_OWNED_ONE_OPERATION_APPROVAL',accountScope:'ALL_AFFECTED_PRIOR_AND_NEW_ACCOUNTS'});
 /** Host-owned expiring grants and one-operation approvals. Never client-asserted. */
 export function createPermissions({clock=Date.now}={}) {
   const grants=new Map(),approvals=new Map();
@@ -8,7 +9,7 @@ export function createPermissions({clock=Date.now}={}) {
       for(const child of Object.values(v))if(child&&typeof child==='object')pending.push([child,false]);
     }return accounts;
   }
-  const fullConfig=new Set(['enterExplorer','initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview']);
+  const fullConfig=new Set(permissionPolicy.fullConfigurationMethods);
   function authorize(r) {
     const g=grants.get(r.actor);
     if(!g||g.expiresAt<=clock()||!g.methods.includes(r.method))return false;

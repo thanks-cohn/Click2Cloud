@@ -23,8 +23,12 @@ jobs:
           C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
           C2C_RECOVERY_EVIDENCE: ${{ runner.temp }}/click2cloud-current-recovery
         run: |
-          mkdir -p /tmp/c2c-current-baseline /tmp/c2c-boot-before /tmp/c2c-ratchet-baseline
+          mkdir -p /tmp/c2c-current-baseline /tmp/c2c-boot-before /tmp/c2c-ratchet-baseline /tmp/c2c-agent-scope-baseline
           git archive 3805acbe1bce14db88077acf5d688fa83bf76b2e | tar -x -C /tmp/c2c-current-baseline
           git archive 0222969 | tar -x -C /tmp/c2c-boot-before
-          git archive 08703cd | tar -x -C /tmp/c2c-ratchet-baseline
+          git archive 08703cd | tar -x -C /tmp/c2c-ratchet-baseline /tmp/c2c-agent-scope-baseline
+          git archive 204d400 | tar -x -C /tmp/c2c-agent-scope-baseline
           node scripts/test-current-recovery-browser.mjs
+          C2C_BOOT_EVIDENCE="${{ runner.temp }}/click2cloud-boot" node scripts/test-boot-login-browser.mjs
+          C2C_BOOT_BASELINE_LOSS=1 C2C_BOOT_BEFORE_ROOT=/tmp/c2c-current-baseline C2C_BOOT_EVIDENCE="${{ runner.temp }}/click2cloud-original-shelf" node scripts/test-boot-login-browser.mjs
+          node scripts/assert-reliability-receipts.mjs "${{ runner.temp }}/click2cloud-current-recovery/browser.json" "${{ runner.temp }}/click2cloud-boot/results.json" "${{ runner.temp }}/click2cloud-original-shelf/results.json"
