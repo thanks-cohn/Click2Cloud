@@ -53,7 +53,7 @@ export function migrateLegacyProduct(raw) {
   return normalizeDefaultQuick(product,Object.fromEntries(Object.entries(raw.configs).map(([m,c])=>[m,validateModeConfig(m,c)])));
 }
 
-export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode','hidden','quick'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
 export function applyConfigChanges(state,changes) {
   if(!changes.length)fail('INVALID_CHANGE');
   const next=structuredClone(state),p=next.product;
@@ -67,11 +67,12 @@ export function applyConfigChanges(state,changes) {
       if(c.visibilityMode!==undefined&&m!=='nested')fail('INVALID_CONFIG');
       const all=next.configs[m].destinations;
       if(c.type==='createDestination') {
-        const t=normalizeTarget(c.target);let id=stableId('destination',m+targetKey(t));
+        const t=normalizeTarget(c.target);let id=m==='nested'?stableId('destination',JSON.stringify(['presentation',p.revision,all.length,0])):stableId('destination',m+targetKey(t));
         if(m==='simple'&&all.some(d=>targetKey(d.target)===targetKey(t)))fail('DESTINATION_EXISTS');
         // Persist route identity once. Preview/retry is deterministic; edits never re-key it.
-        for(let sequence=1;all.some(d=>d.id===id);sequence++)id=stableId('destination',JSON.stringify([m,targetKey(t),p.revision,sequence]));
-        all.push({id,target:t,order:all.length,...(c.label?{label:c.label}:{}),...(c.levels?{levels:c.levels}:{}),...(c.visibilityMode?{visibilityMode:c.visibilityMode}:{})});
+        for(let sequence=1;all.some(d=>d.id===id);sequence++)id=stableId('destination',JSON.stringify(['presentation',p.revision,all.length,sequence]));
+        if(c.quick===true&&p.defaultTarget&&targetKey(p.defaultTarget)===targetKey(t))p.defaultTarget=null;
+        all.push({id,target:t,order:all.length,...(c.hidden!==undefined?{hidden:c.hidden}:{}),...(c.quick!==undefined?{quick:c.quick}:{}),...(c.label?{label:c.label}:{}),...(c.levels?{levels:c.levels}:{}),...(c.visibilityMode?{visibilityMode:c.visibilityMode}:{})});
       } else {
         const i=all.findIndex(d=>d.id===c.id);if(i<0)fail('DESTINATION_NOT_FOUND');
         if(c.type==='deleteDestinationConfig'){const removed=all.splice(i,1)[0];

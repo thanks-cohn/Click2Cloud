@@ -8,7 +8,7 @@ export type Mode = 'simple'|'nested'|'narrow';
 export interface Show {simple:boolean;nested:boolean;depth:boolean;flat:boolean}
 export interface RecoveryPolicy {cadence:'weekly'|'daily';simple:boolean;nested:boolean;location:'automatic'|'documents';buckets:{target:Target;enabled:boolean;depth:number}[]}
 export type Change =
- | {type:'createDestination';mode:Mode;target:Target;label?:string;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
+ | {type:'createDestination';mode:Mode;target:Target;label?:string;hidden?:boolean;quick?:boolean;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
  | {type:'updateDestination';mode:Mode;id:string;label?:string;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>;hidden?:boolean;quick?:boolean;order?:number}
  | {type:'deleteDestinationConfig';mode:Mode;id:string}
  | {type:'setShowInChrome';show:Show}

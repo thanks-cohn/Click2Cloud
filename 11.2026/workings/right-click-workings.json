@@ -9202,7 +9202,7 @@
     "sourceFiles": {
       "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
       "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "df068753e74c7046fe2dcb3cbf3ca96889d563a00b753a25ecdd4788df748c8d",
+      "extension/app.mjs": "b0f3e16b3a8c63d476265d866cbf302b8d7c3c7ec127284cf5d83dacba70db9c",
       "extension/background.mjs": "61ee9d3ad40138be6eda4a83cad5094ed3b3323d13427245aa43e490a3a22757",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -9219,7 +9219,7 @@
       "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
       "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
-      "src/api/config.mjs": "1c53b1474dd8eb9187d7d787c0a5639f78989e2017f83ba122cd74ab4fbc90a9",
+      "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
@@ -9795,7 +9795,7 @@
           {
             "path": "src/api/config.mjs",
             "symbol": "const survivors=",
-            "line": 79
+            "line": 80
           }
         ],
         "verification": {
@@ -14492,7 +14492,7 @@
         "compatibility": "Old objects and legacy lower-level no-snapshot clients remain readable/usable without fabricated provenance; canonical composite Cloudflare routes always supply snapshot."
       }
     },
-    "digest": "6926a6a755b4c8c59c190451655def89a2aaabb047020979f94eb246e8134564"
+    "digest": "90fc3142a5250895303dd86ad6367a89e1ae8b0b79c629f36f5daca07878c06d"
   },
   "changeLog": [
     {

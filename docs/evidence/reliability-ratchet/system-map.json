@@ -3463,6 +3463,12 @@
                           "hide-all",
                           "custom"
                         ]
+                      },
+                      "hidden": {
+                        "type": "boolean"
+                      },
+                      "quick": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -4519,6 +4525,12 @@
                           "hide-all",
                           "custom"
                         ]
+                      },
+                      "hidden": {
+                        "type": "boolean"
+                      },
+                      "quick": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -6025,6 +6037,12 @@
                               "hide-all",
                               "custom"
                             ]
+                          },
+                          "hidden": {
+                            "type": "boolean"
+                          },
+                          "quick": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
@@ -7109,6 +7127,12 @@
                               "hide-all",
                               "custom"
                             ]
+                          },
+                          "hidden": {
+                            "type": "boolean"
+                          },
+                          "quick": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
