@@ -9273,7 +9273,7 @@
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
       "src/glaciaring/catalog.mjs": "b7d5f297b7915491251c0a4ad9551027ce9b4a15a70baf1c9e6b88728db573d3",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "03bf3f2ba1ccefd4e8eb339c38e442cf3a7e63e4c1a269f3f28142b3c4f64bb8",
+      "src/glaciaring/reliability.mjs": "528aa1f526ff313995ef848fcc639a8ecf93201df1166ecd87f2f4fdb2dbc0ca",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -11872,7 +11872,7 @@
           {
             "path": "src/glaciaring/reliability.mjs",
             "symbol": "export function describeReliability",
-            "line": 33
+            "line": 34
           }
         ],
         "verification": {
@@ -14358,7 +14358,7 @@
       "originalOwnerRecovery": "NOT_VERIFIED",
       "reconstructionLabel": "REBUILT_WITH_OWNER_CONFIRMATION"
     },
-    "digest": "6374a6a0ea93a10085c90d6bc9353a04baa5441ca7d48c481fd245e7888329a0"
+    "digest": "870deaaa743b759b31ce8a2e088aeae8e9b26bff063f5a7acf529087dfd2bce3"
   },
   "changeLog": [
     {
