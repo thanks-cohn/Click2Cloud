@@ -1,0 +1,13 @@
+✔ ratchet-owner-invariant-failure-map-is-exhaustive-and-source-owned (14.169661ms)
+✔ ratchet-permission-and-report-adversaries (11.821969ms)
+✔ ratchet-durable-recorder-bounded-fault-contained-expiring-and-read-only (7.21806ms)
+✔ ratchet-private-copy-verifier-supports-existing-local-agent-filesystem-owner (33.096433ms)
+✔ ratchet-CI-rejects-unexecuted-failed-or-removed-known-failure-cases (2.517589ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 206.31926

@@ -1680,5 +1680,19 @@
       "source": "src/explorer/configuration.mjs:19",
       "messagePrefix": "Unsupported option: "
     }
-  ]
+  ],
+  "legacyInventoryStatus": "HISTORICAL_NOT_CURRENT_SOURCE_AUTHORITY",
+  "currentReliability": {
+    "manifest": "docs/evidence/reliability-ratchet/system-map.json",
+    "canonicalQuery": {
+      "version": "3+1.1",
+      "method": "describeCapabilities",
+      "params": {
+        "section": "reliability"
+      }
+    },
+    "coverage": "PARTIAL",
+    "originalLossCause": "UNKNOWN",
+    "ownerRestoration": "NOT_VERIFIED"
+  }
 }

@@ -1,0 +1,42 @@
+{
+  "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+  "results": [
+    {
+      "gate": "original-0.3.13-connected-six-row-loss-native-583-actual-Shelf-background",
+      "state": "REPRODUCED",
+      "productionSourceRevision": "3805acbe1bce14db88077acf5d688fa83bf76b2e",
+      "before": {
+        "directGeneration": {
+          "desired": 0,
+          "applied": null
+        },
+        "configurationCode": "CONFIGURATION_RECORD_MISSING"
+      },
+      "proof": {
+        "authentication": "CONNECTED",
+        "configuration": "CONFIGURATION_RECORD_MISSING",
+        "nativeGeneration": 583,
+        "counts": {
+          "opens": 1,
+          "native": 0,
+          "oauth": 1,
+          "token": 1,
+          "identity": 1,
+          "otherCloud": 0,
+          "resourceWrites": 0,
+          "access": 2
+        },
+        "forensic": {
+          "remainingRecords": 0,
+          "journalCount": 0,
+          "checkpointCount": 0
+        },
+        "rawPreserved": true
+      },
+      "evidenceClass": "original-production-app-background-real-IDB-fixture-Chrome-OAuth-network-not-owner-profile"
+    }
+  ],
+  "errors": []
+}

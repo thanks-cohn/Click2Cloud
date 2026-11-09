@@ -1,0 +1,46 @@
+{
+  "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+  "evidenceClass": "NODE_MICROBENCH_NOT_BROWSER_OR_WINDOWS_LATENCY",
+  "recipe": "8 samples x10000 emit(persistence.read,ok,OK); assert zero drops and80000 accepted except disabled; separate10000 failed events with unique generation; memory adapter; flush; sorted p50 index4,p95 index7",
+  "result": [
+    {
+      "mode": "disabled",
+      "eventsPerSample": 10000,
+      "samples": 8,
+      "p50Ms": 3.493352999999999,
+      "p95Ms": 4.8737020000000015,
+      "bufferBytes": 32256,
+      "acceptedHealthyEvents": 0,
+      "durableEvents": 0,
+      "writes": 0,
+      "telemetryBytes": 0,
+      "durableAdapter": "MEMORY_NOT_CHROME"
+    },
+    {
+      "mode": "ring",
+      "eventsPerSample": 10000,
+      "samples": 8,
+      "p50Ms": 4.159420999999995,
+      "p95Ms": 12.26403400000001,
+      "bufferBytes": 32256,
+      "acceptedHealthyEvents": 80000,
+      "durableEvents": 0,
+      "writes": 0,
+      "telemetryBytes": 0,
+      "durableAdapter": "MEMORY_NOT_CHROME"
+    },
+    {
+      "mode": "ring-with-critical-hook",
+      "eventsPerSample": 10000,
+      "samples": 8,
+      "p50Ms": 4.4581079999999815,
+      "p95Ms": 8.17326300000002,
+      "bufferBytes": 32256,
+      "acceptedHealthyEvents": 80000,
+      "durableEvents": 32,
+      "writes": 1,
+      "telemetryBytes": 6400,
+      "durableAdapter": "MEMORY_NOT_CHROME"
+    }
+  ]
+}

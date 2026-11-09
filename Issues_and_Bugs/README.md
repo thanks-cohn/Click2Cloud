@@ -25,3 +25,6 @@
 - Prioritize performance from the start: responsiveness is a core product criterion, not a final polish pass. Rendering a local UI context menu must not wait unnecessarily for remote network or service-worker readiness, but permission checks and cloud writes must remain authoritative.
 - Do not reset user storage, remove saved destinations, overwrite setup approval, mutate production Cloudflare resources, or change REDOWN as a quick fix.
 - Keep source ↔ API ↔ UI ↔ persisted behavior documentation and tests synchronized, including the immutable baseline and CURRENT behavior map; report PASS, FAIL, BLOCKED and NOT TESTED separately.
+
+
+CURRENT incident follow-up: 0.3.15 production repairs and evidence are on `dev/p0-agent-reliability-ratchet` ([handoff](../docs/evidence/reliability-ratchet/HANDOFF.md)). Original physical deletion and owner Windows recovery remain OPEN; assisted rebuild is new owner-confirmed intent, not recovered history. No production-ready claim or live-provider pass.

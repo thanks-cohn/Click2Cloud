@@ -1,0 +1,186 @@
+{
+  "assignment": "docs/requests/CODEX_P0_CURRENT_LOSS_AGENT_NATIVE_RELIABILITY_RATCHET_2026-11-08.md",
+  "branch": "dev/p0-agent-reliability-ratchet",
+  "startingMain": "08703cd",
+  "productionSourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+  "build": {
+    "workerCodeDigest": "IwTaIK4em1_mwIygmpbfULfJWUZln3ggKnG5suyu-NA",
+    "extensionVersion": "0.3.15",
+    "revision": "b105f526e2dec7ffbe1255520081435421008b1f",
+    "sourceDigest": "8ed7ff58b2087ecd807e6dcd6b3577d43b5c63a389a10f0d5f357dbbdfe68782",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "releaseGate": "BLOCKED",
+  "originalPhysicalLossCause": "UNKNOWN",
+  "originalOwnerStateRecovered": false,
+  "ownerProfileAccessed": false,
+  "REDOWNModified": false,
+  "cloudResourcesMutated": false,
+  "merged": false,
+  "pushed": false,
+  "runtimeReceipts": [
+    {
+      "path": "docs/evidence/reliability-ratchet/baseline/results.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+      "counts": {
+        "REPRODUCED": 1
+      }
+    },
+    {
+      "path": "docs/evidence/reliability-ratchet/persistence/browser.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "REAL_CHROMIUM_INDEXEDDB_PRODUCTION_MODULES_FIXTURE_CHROME_NOT_OWNER_WINDOWS",
+      "counts": {
+        "REPRODUCED": 3,
+        "PASS": 29
+      }
+    },
+    {
+      "path": "docs/evidence/reliability-ratchet/boot/results.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+      "counts": {
+        "REPRODUCED": 2,
+        "PASS": 16
+      }
+    },
+    {
+      "path": "docs/evidence/reliability-ratchet/product/browser-results.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "PER_GATE",
+      "counts": {
+        "BLOCKED": 3,
+        "PASS": 30,
+        "NOT_TESTED": 1
+      }
+    },
+    {
+      "path": "docs/evidence/reliability-ratchet/images/results.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "CHROMIUM_PRODUCTION_APP_FIXTURE_API_AUTH_NOT_INSTALLED_OR_LIVE_PROVIDER",
+      "counts": {
+        "PASS": 15
+      }
+    },
+    {
+      "path": "docs/evidence/reliability-ratchet/startup/results.json",
+      "sourceRevision": "b105f526e2dec7ffbe1255520081435421008b1f",
+      "runtimeSourceDirty": false,
+      "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+      "counts": {
+        "PASS": 2
+      }
+    }
+  ],
+  "nodeTests": {
+    "focused": {
+      "pass": 280,
+      "fail": 0,
+      "receipt": "docs/evidence/reliability-ratchet/focused.txt"
+    },
+    "remoteModule": {
+      "pass": 49,
+      "fail": 0,
+      "receipt": "docs/evidence/reliability-ratchet/remote-module.txt"
+    },
+    "finalRegistryAndDrift": {
+      "pass": 10,
+      "fail": 0,
+      "receipt": "docs/evidence/reliability-ratchet/registry-and-drift-tests.txt"
+    }
+  },
+  "executionRatchet": {
+    "state": "PASS",
+    "knownFailureCases": 6,
+    "browserInvariantCases": 8
+  },
+  "installedReceipt": "docs/evidence/reliability-ratchet/installed/real-shelf-receipt.json",
+  "installedGate": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR; response null; policy not bypassed",
+  "WindowsProfileCopyProducer": "NOT_TESTED; Linux rejection and shared verifier tested",
+  "hostedCI": "NOT_EXECUTED; existing job extended and baseline extraction checked locally",
+  "performance": {
+    "startup": "docs/evidence/reliability-ratchet/startup/results.json",
+    "overhead": "docs/evidence/reliability-ratchet/diagnostic-overhead.json",
+    "limitations": [
+      "Isolated Linux Chromium fixtures, not owner Windows latency",
+      "Node recorder timing and MEMORY breadcrumb adapter, not Chrome-local durability timing",
+      "Live save-dispatch and provider throughput NOT_TESTED"
+    ]
+  },
+  "sourceCommits": [
+    "6bceb02cbe436b1c43a07bf422ee8c654c4274b3 Add preserved owner rebuild and source-backed agent reliability ratchet",
+    "6e85b78c1eb3547568c5350283032855dc4de0e9 Keep trace coverage gaps and mechanism contracts in the closed catalog",
+    "aafd904c7ac7493eb50688b25054d23f6865a3ef Include safe loss evidence and retained-history limits in support reports",
+    "9fdb14615dfe57fd03f380a534f8fe694552eef1 Preserve unknown diagnostic storage instead of replacing unreadable evidence",
+    "204d400611e8aa89f636afc3ea907bebdf933517 Declare executable invariant surfaces for the reliability receipt gate",
+    "b105f526e2dec7ffbe1255520081435421008b1f Authorize all affected account intent before agent configuration repair"
+  ],
+  "sourceOnlyLaterChanges": "Documentation, receipts, CI baseline extraction and Windows copy CLI final shared-format readback guard; no src/extension runtime changes after pinned source",
+  "coverageGaps": [
+    "Original profile and exact physical deletion cause unavailable",
+    "Original-state recovery unsupported without complete independent evidence",
+    "Installed Windows Chrome, actual MV3 suspend and current live R2 NOT_TESTED",
+    "No complete dynamic graph or all historical bugs registry",
+    "No fleet/OS power-loss reliability proof"
+  ],
+  "artifactSha256": {
+    "docs/evidence/reliability-ratchet/baseline/results.json": "b91f527e5bbf8b48e6c7bd50479b1a24fa213dc3fc5b664430c619c5e360f06c",
+    "docs/evidence/reliability-ratchet/baseline-run.txt": "679465d739f5877e6db86accc18829f394653690ac46c70db366f54c49fb0d6b",
+    "docs/evidence/reliability-ratchet/boot/corrupt-configuration-login-still-works.png": "6daaa2006d507f435add6de8c1c2f0fb9a71899254483b601e4747a5f4461a65",
+    "docs/evidence/reliability-ratchet/boot/lost-configuration-login-still-works.png": "480a5b8958f578c195b6b59734bc1f3d89f5ff85688b4981ad7227712db60e41",
+    "docs/evidence/reliability-ratchet/boot/missing-configuration-login-still-works.png": "c5de42e06923a7d960cb6ad2e413b83cde38967c8c2cc0195a61e564b0fcb056",
+    "docs/evidence/reliability-ratchet/boot/remotes-login-only.png": "05af05b26be1dd19b9ad89cae53364db87d30408db2f16e01792f991e8e34cbc",
+    "docs/evidence/reliability-ratchet/boot/results.json": "c39b7b6b3c90f11978004399e8d35726b56eca186f17baa805229dc0e59afa6b",
+    "docs/evidence/reliability-ratchet/boot-run.txt": "d83ff006096b462012edea8b6406b5a3e788be1924a073f4a9337a5eb46a3d2c",
+    "docs/evidence/reliability-ratchet/build.txt": "2b9063428176addac0c7096c248f88cdf134fbf753038d252cf30065a663482f",
+    "docs/evidence/reliability-ratchet/diagnostic-overhead.json": "60a1b2f450c6115dbe7bd42217df639c83f9aadc00399bbf4531deeb9f13ad9c",
+    "docs/evidence/reliability-ratchet/execution-ledger.txt": "1fa349f3c9919a6ce1e8837f9679485eb4efab7b09aad10f51c9e5e2956449bc",
+    "docs/evidence/reliability-ratchet/focused.txt": "b40b64cfae9d99f7e6c015ba7d62d6cde54fdac0433398a394e9b50b837efad6",
+    "docs/evidence/reliability-ratchet/image-run.txt": "c65b46ad855d6ca9e017d5d660d395b8a35ac0edf1b8b7759210a11779a13307",
+    "docs/evidence/reliability-ratchet/images/grid-real-fixture-images.png": "e87d4d2d2433707bef44d386ea6f175e8c849649602c07c77f589edd571e06da",
+    "docs/evidence/reliability-ratchet/images/narrow-toolbar-expanded.png": "18a4bbe4c48e5a72a1ed3a05f9f67578cf2b2c7ffcb0e004472745dbfdcc2fc2",
+    "docs/evidence/reliability-ratchet/images/narrow-toolbar-more.png": "5db0f9228d4014f245554b1c6b0f12c6cb794fa8cf496008d57634435128d795",
+    "docs/evidence/reliability-ratchet/images/pane-0-percent.png": "eb9d4fec6f7dc03c68074c7278c326550a91169221efa8a98ab1708a0b3d3db8",
+    "docs/evidence/reliability-ratchet/images/pane-100-percent.png": "30b578dc17ca4265918013a8942db0bd64a37ee048fbfd15565339ae007acfd5",
+    "docs/evidence/reliability-ratchet/images/pane-50-percent.png": "f86c93690a4eba4ecf73d5711340cd54a20a669a6b230f73c4ceba61071f6736",
+    "docs/evidence/reliability-ratchet/images/results.json": "c9e1ff931238344edce61d18e6980e62eb776bfdbd8d676d9969ae41d8b4dc9c",
+    "docs/evidence/reliability-ratchet/images/webp-decoded-gallery.png": "27dc41cb814e35d6b22ab9d5118be8e7fd194b3a9a2f83fcd845d985cb15f260",
+    "docs/evidence/reliability-ratchet/installed/real-shelf-receipt.json": "3a32eeedc4c28efe66837244a5d92289902b8946469e346a7f6c0b3b50c9ad39",
+    "docs/evidence/reliability-ratchet/installed-run.txt": "7140e6e56c5868fc6fb689dbce6b96725aab1a936ab2b979d7d212af91286156",
+    "docs/evidence/reliability-ratchet/persistence/browser.json": "a64502c3b60fca8e59ec061797f4ddb7cc03b69d4ee03a831042c01652f55fd3",
+    "docs/evidence/reliability-ratchet/persistence-run.txt": "601f0f72ca747129a80148332a1b3a1b56c30eec0a3f3fbcbe0689c5a4abffef",
+    "docs/evidence/reliability-ratchet/product/browser-results.json": "f9b110d2c40e0b7ef99540bcb0e8c9d0d78cfba98a931847ab7829ede0f94e75",
+    "docs/evidence/reliability-ratchet/product/cloudflare-save-results-fixture.png": "c0f89a7ff526ecab1bee1fcce6c18131783d35481b506082c1371f0d163ef5a7",
+    "docs/evidence/reliability-ratchet/product/cloudflare-setup-fixture.png": "e8c58c0782ef825266d84800ab6505ce56b64d2480bf815ee692267a7de4f169",
+    "docs/evidence/reliability-ratchet/product/connected-native-hash-fixture.png": "8518d7b3c54db84f488e0c53c5e16762be619d2ad6c2a51718e453f06cd273d8",
+    "docs/evidence/reliability-ratchet/product/destinations-fixture.png": "cb70b23c14e6a7259c0968bd153fce0b97113b5adc8a4f9f2a7c5ed0d027438e",
+    "docs/evidence/reliability-ratchet/product/explorer-dark-fixture.png": "50458a6888aef6684a4f7f5b8bab8735f345f9e27ff2dc132a6b3b7d44056ea5",
+    "docs/evidence/reliability-ratchet/product/failed-receipt-visible-inspection-error.png": "4c1fb8fa7174ce655702ebbde83ca680cb9b2ff4e8a4520d8d591decd3a3cb0f",
+    "docs/evidence/reliability-ratchet/product/file-actions-cross-surface-fixture.png": "ea09861d358d0361913d2eb96462d5a4d56596c5a8283ef5fa12f3b3279c7dd6",
+    "docs/evidence/reliability-ratchet/product/grid-safe-offline-and-address.png": "68b2bdf0f384474b21da1299f9d159a30a039aa6733f41cc56ed906711289993",
+    "docs/evidence/reliability-ratchet/product/narrow-window-fixture.png": "89576008a827861287e9cc1b6a058f2870b789db05622e0afae7e23f80ecd9cb",
+    "docs/evidence/reliability-ratchet/product/nine-scope-reconsent-explorer-go-to-fixture.png": "e56d0f54e161a24db5de18bd3dcbc5292d55065464ea9d8da24687a98f7fa1a4",
+    "docs/evidence/reliability-ratchet/product/offline-preserved-destinations.png": "e81448035253957df6afc6d54baed0945b55a330dfa287f6a3dc7a6ee768637a",
+    "docs/evidence/reliability-ratchet/product/precise-worker-denial-fixture.png": "63c870b9db4fe55d08351963ad175de8c06e88ee27cdcfa501b6fa9929834310",
+    "docs/evidence/reliability-ratchet/product/settings-light-fixture.png": "13ae8c7a7d44ed8e6a1d3ed581b97a78563c10da68cafea3be1be6077516d664",
+    "docs/evidence/reliability-ratchet/product/v1-ordinary-redown-default-fixture.png": "b56e9eacf85bf4cc4343676409acd8125c4c0c8439ecc16751c4b92384ece044",
+    "docs/evidence/reliability-ratchet/product/v1-ready-inline-fixture.png": "ed56d7565317cb1668d4d7d352becb31c77609fd086859e3696d38d34f8291b0",
+    "docs/evidence/reliability-ratchet/product-run.txt": "a77b33a709c8db99f8c1f2f9f6ea01d65de2d668e846856ed7657b130752cb28",
+    "docs/evidence/reliability-ratchet/ratchet-unit.txt": "79b3a190dbc1599f389f098324cb37f5cea8099efbff443a8b6ab7458ac503f7",
+    "docs/evidence/reliability-ratchet/registry-and-drift-tests.txt": "c3867a5c4e278808fa97ed7d7220ba62a703e515647e5fb780805be8a8b4b83d",
+    "docs/evidence/reliability-ratchet/remote-module.txt": "d9984fdbe8945acc3cf76cdc08a7e00a1b04686694951a4d97485be1aa383de5",
+    "docs/evidence/reliability-ratchet/scope-baseline/browser.json": "c73bb82c6b600170cf493cef1742c98e77da949f8a92171ac7b9964bb6cbed18",
+    "docs/evidence/reliability-ratchet/startup/results.json": "5fa0aea67b2e5aa0df86b5695a6e8d4dd17bcd2e0209b9cd6ddfeea1a8d6439e",
+    "docs/evidence/reliability-ratchet/startup-run.txt": "916b585606134a1d1461a0aef8011e78e940d17cf6f2ced21798b483b2f8fdf1",
+    "docs/evidence/reliability-ratchet/system-map.json": "214f3c7d509240e555e2a0f110b4098abb6f5710fc56f6dfb8bf0c51720f535c"
+  },
+  "ownerBrowserStorageReset": false,
+  "disposableTestStorage": "Fault injection, synthetic clear and profile deletion confined to generated disposable fixtures"
+}
