@@ -1,0 +1,96 @@
+{
+  "sourceRevision": "5c66247a79c0f7ef1814676f786e3e6d75837787",
+  "runtimeSourceDirty": false,
+  "proofClass": "LIVE_CANONICAL_MENU_ENGINE_WORKER_R2_S3; FIXTURE_CHROME_ACK_ENV_TOKEN_NOT_EXTENSION_OAUTH",
+  "chain": [
+    "Cloudflare",
+    "human",
+    "money-maker",
+    "guns",
+    "swole"
+  ],
+  "native": {
+    "ack": "completed",
+    "leafParentId": "c2c:item:f0e29ae4895b37a5",
+    "generation": 1,
+    "proofClass": "FIXTURE_CALLBACKS_NOT_INSTALLED"
+  },
+  "dispatch": {
+    "state": "completed",
+    "code": "R2_HEAD_VERSION_SIZE",
+    "operationId": "97365ba5-4163-42e2-b62f-c49dde89a7a8"
+  },
+  "object": {
+    "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/fab0a01e-e2a2-4bd9-b7bd-ee2b1e1e59da.png",
+    "size": 290,
+    "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+    "independentHttp": 200,
+    "exactPrefix": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/",
+    "bytesMatch": true
+  },
+  "visibilityCases": [
+    {
+      "visibilityMode": "hide-all",
+      "chain": [
+        "Cloudflare",
+        "swole"
+      ],
+      "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/07a49ce9-0ab0-4dc9-9f9c-0061ccbc5487.png",
+      "targetPrefix": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/",
+      "bytesMatch": true,
+      "independentHttp": 200
+    },
+    {
+      "visibilityMode": "all",
+      "chain": [
+        "Cloudflare",
+        "__click2cloud_true_remote_test__",
+        "phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2",
+        "human",
+        "money-maker",
+        "guns",
+        "swole"
+      ],
+      "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/b562c705-dc09-4601-bbdb-7ce4741ae913.png",
+      "targetPrefix": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/",
+      "bytesMatch": true,
+      "independentHttp": 200
+    },
+    {
+      "visibilityMode": "custom",
+      "chain": [
+        "Cloudflare",
+        "money-maker",
+        "swole"
+      ],
+      "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/0ae49f8d-43c7-4b9c-8384-4bbfd7870a93.png",
+      "targetPrefix": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/",
+      "bytesMatch": true,
+      "independentHttp": 200
+    }
+  ],
+  "destinationControls": [
+    {
+      "phase": "quick-on",
+      "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/755667c9-9962-4bdf-be10-89735ef15566.png",
+      "bytesMatch": true,
+      "independentHttp": 200,
+      "quick": true,
+      "globalDefault": null
+    },
+    {
+      "phase": "eye-restored",
+      "key": "__click2cloud_true_remote_test__/phase1-2b3947f5-e1bd-4b4a-bff4-446bcf80d8a2/body/arm/bicep/muscle/9441e5f3-d5f8-46dc-80c8-9111c7d9a085.png",
+      "bytesMatch": true,
+      "independentHttp": 200,
+      "quick": true,
+      "globalDefault": null
+    }
+  ],
+  "hiddenClick": {
+    "state": "blocked",
+    "code": "STALE_GENERATION",
+    "retainedDestinations": 1
+  },
+  "state": "PASS"
+}

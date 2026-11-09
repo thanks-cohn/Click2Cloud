@@ -1,0 +1,22 @@
+{
+  "phase": 3,
+  "sourceRevision": "5c66247a79c0f7ef1814676f786e3e6d75837787",
+  "representativeGate": "PASS",
+  "installedAcceptance": "BLOCKED_INHERITED_ADMINISTRATOR_POLICY",
+  "focused": {
+    "pass": 302,
+    "fail": 0
+  },
+  "browser": {
+    "receipt": "browser/results.json",
+    "pass": 6
+  },
+  "images": {
+    "receipt": "images/results.json",
+    "pass": 25,
+    "classification": "real browser OPFS/decoder/production API, fixture auth/HTTP"
+  },
+  "live": "live.json",
+  "legacyMigration": "real disposable IDB dual flags normalize Default wins; next ordinary atomic commit persists Quick OFF without deleting rows",
+  "scope": "GUI/API/storage/native callback parity; actual canonical Quick/eye-restored saves independently verified in R2; genuine installed native click remains unverified"
+}
