@@ -1,63 +1,88 @@
-# P0 — Depth-selected bucket must expose its folder nesting, including when it is the only Depth location
+# P0 — Depth bucket nesting missing; composite right-click display must preserve all selected modes
 
 **Reported:** 2026-11-09
-**Status:** OPEN — specification correction; no implementation yet
-**Area:** Destinations Manager → Depth bucket selection → Chrome right-click native menu
+**Status:** OPEN — owner-confirmed reproduction and corrected requirement; implementation not verified
+**Area:** Right-click menu / Depth / selected Cloudflare R2 bucket / Chrome native menu
+**Companion architecture issue:** [Independent mode display and non-destructive visibility](../Issues/P0_RIGHT_CLICK_INDEPENDENT_MODE_DISPLAY_AND_ROW_VISIBILITY_2026-11-09.md)
 
-## Exact user requirement
+## Exact bug
 
-**Depth is not required to create a submenu just because Depth mode is selected.** The requirement applies to the **bucket selected for Depth** and its actual available directory structure.
+The user configured multiple Narrow destinations and potentially one Simple destination, selected a bucket for Depth, enabled Depth in the right-click **Show** display options, and the actual nested folders available in that Depth bucket **did not appear**.
 
-When a user selects a Cloudflare R2 bucket for Depth and that bucket **contains eligible nested directories**, Chrome's right-click menu **must show that real folder hierarchy** to the chosen depth. It must not flatten the bucket into a single Cloudflare save action, silently omit nested folders, or fall back to Simple/Narrow selections.
+This is a menu compilation/display bug, NOT authorization to discard Narrow or Simple entries, NOT a requirement to force a submenu for every Depth bucket, and NOT a request to make Depth exclusive.
 
-**Crucial exception to the old flat-single-location rule:** The rule “when there is only one destination, Cloudflare is a flat menu entry” **is superseded when the only Depth-selected location is a bucket with eligible nested directories**. The one bucket represents many potential nested destination choices, not one flat leaf. Cloudflare must branch to expose them.
+## Canonical product nomenclature
 
-Conversely, if that bucket contains no eligible subdirectories, there is **no artificial nesting requirement**. Don't fabricate folders or a submenu just to satisfy an always-branch rule. Present its valid bucket-level action or honest empty/unavailable state under existing behavior.
+- **Simple**: separately saved direct destinations (`configs.simple.destinations`).
+- **Narrow**: user-facing name of the internally named **Nested** mode (`configs.nested.destinations`).
+- **Depth**: selected bucket scopes plus numeric maximum folder depth (`configs.depth.scopes`).
+- **Show in Chrome / display checkmarks**: independent booleans `product.show.simple`, `product.show.nested`, `product.show.depth` (plus existing `flat` presentation setting).
+- **Individual Change Visibility eye**: independently hides/restores a specific saved destination or supported Depth bucket row without deleting it; separate requested UI/behavior.
+- **Default / Quick Select**: separately configured choices, not substitutes for the Show checkmarks.
 
-## User-observed bug
+Do not describe `product.show.depth = true` as “switching exclusively to Depth.” The intended behavior is additive.
 
-After configuring multiple Narrow destinations and perhaps one Simple destination, selecting Depth does **not display nested Depth options**. The selected bucket's actual eligible directories need to appear, independently of the existing Simple and Narrow selections.
+## Correct rule: real folder nesting determines branch versus leaf
 
-## Examples
+When a Depth-selected R2 bucket has discoverable, eligible child directories within the selected maximum depth, the **Depth portion** of the Cloudflare native right-click menu must expose the real bucket/directory hierarchy.
 
-**A — One selected Depth bucket WITH nested folders:**
+**Single-bucket exception to flat-single-destination policy:** One Depth-selected **bucket with eligible subdirectories** must not be treated as one flat save action. It contains multiple navigable folder choices, so Cloudflare must branch and expose them even if there is only one selected Depth bucket.
 
-Physical bucket `redown` contains `Images/Artwork/`. Show Chrome's genuine nested hierarchy, e.g.:
+If that bucket has **no** eligible subdirectories, no fabricated hierarchy is required; a flat bucket save action may be appropriate under existing menu rules.
+
+Example with one selected `redown` bucket, directory `Images/Artwork`, and sufficient depth:
 
 ```text
 Cloudflare R2 >
   redown >
     Images >
-      Artwork   [Save / Save here]
+      Artwork [save action]
 ```
 
-Depending on actual menu presentation policy, bucket-level saving may be available through a `Save here` leaf. The important guarantee is that the real nested folder choices remain accessible.
+The exact necessary parent placements and optional `Save here` actions must be determined by actual folder hierarchy and Chrome's native constraints. Clicking the leaf must save under `redown/Images/Artwork/`, not a flattened/incorrect root.
 
-**B — One selected Depth bucket WITHOUT subdirectories:**
+## Cross-mode behavior — the corrected requirement
 
-Physical bucket `redown` has no eligible directories. A single flat bucket-level action is acceptable. **Do not force a fake nested Cloudflare menu.**
+**Selecting or checking Depth must never invalidate, delete, replace or automatically uncheck existing Simple or Narrow destinations.** All mode-specific configs remain durable.
 
-**C — One Depth bucket plus configured Simple and Narrow entries:**
+- **Simple + Narrow + Depth checked:** all contribute their applicable saved/eligible menu entries.
+- **Only Depth checked:** only Depth's eligible entries are displayed, **without deleting or rewriting** Simple/Narrow configurations.
+- **Simple + Depth checked:** show both.
+- **Narrow + Depth checked:** show both.
+- **Depth unchecked:** do not display Depth entries; its selected buckets and depth settings remain stored and return when checked again.
+- An individually hidden destination stays configured and reversible through the row eye; the mode checkmark and eye are independent visibility gates.
+- The existing Flat presentation option must not silently override selected Depth hierarchy or suppress a requested mode; document its intended interaction before implementation rather than silently reinterpreting it.
 
-Set several Narrow destinations and one Simple; select one bucket for Depth, select Depth display. Expect the eligible bucket directory tree, not a flattened list of Simple/Narrow targets. Switching modes must not erase or corrupt other configurations.
+With overlapping destinations or shared ancestor folders, compose an intelligible native menu that does not drop actionable targets or erase mode-specific custom labels/hierarchy. Never turn an explicit Nested/Depth tree into flat actions merely by deduplicating identical destination targets. Honor native Chrome submenu/ID limits with truthful diagnostics, not false success.
 
-**D — Multiple Depth buckets:** Each selected bucket's own eligible hierarchy must be represented, respecting account/bucket identity and configured depth.
+**Important:** Display checkmarks are independent inclusion filters, **not a mutually exclusive `Simple | Narrow | Depth` radio selection**. They control menu visibility, not configuration persistence.
 
-## Implement / verify
+## Reproduction and expected results
 
-1. Diagnose saved Depth-selected bucket(s), applied visibility/show mode, folder inventory availability and completeness, `src/modes/depth/index.mjs`, `src/core/menu-spec.mjs` canonical composition, and Chrome native parent IDs. The cause is not yet proven.
-2. Determine branch-vs-leaf using the number and shape of **actual eligible displayed directory choices**, not merely “one selected Depth bucket.”
-3. Respect configured depth and folder discovery, with truthful behavior if inventory is stale/incomplete; no invented folders.
-4. Verify the same selected nested directory maps to the exact real R2 bucket/prefix and works with TRUE REMOTE verification. No changes to upload engine.
-5. Keep Simple and Narrow independent; keep normal flat-single-location behavior where appropriate outside the Depth nested-bucket exception.
-6. Follow separate issue `Issues_and_Bugs/Issues/P1_DEPTH_DESTINATIONS_MANAGER_NO_MAKE_DEFAULT_2026-11-09.md`: Depth destination-manager rows must NOT offer Make Default.
+1. Configure several Narrow paths; optionally one Simple location; select one Depth bucket with known nested folders and a sufficient numeric depth.
+2. Check **Show Depth** without unchecking Simple or Narrow. Expect all checked modes to contribute; the Depth-selected bucket shows actual directory nesting.
+3. Uncheck Simple and Narrow, leaving Depth checked. Expect only Depth entries, still nested; Simple/Narrow settings are untouched.
+4. Uncheck Depth and recheck Simple/Narrow. Their previous destinations and menu titles return. Recheck Depth; its bucket and depth are unchanged.
+5. Test only one Depth bucket **without** eligible child folders. A single flat bucket action is permissible; no artificial directory fabrication.
+6. Test multiple Depth buckets and multiple directory levels, respecting depth limits, identities and permission/inventory status.
+7. Toggle one row's **Change Visibility** eye where supported: only that entry disappears/returns, no deletion. An entire unchecked mode remains undisplayed regardless of individual eye state.
+8. Persist and repeat after Chrome restart and OAuth sign-out/sign-in.
+9. In actual Chrome select a deep Depth target and verify the object exists at the exact R2 bucket/key/prefix using TRUE REMOTE verification.
 
-## Acceptance
+## Investigation boundaries (hypotheses, not asserted root cause)
 
-- **One Depth-selected bucket, with 2+ eligible path levels:** real nested Chrome submenus, appropriate save actions, verified destination prefix, even though only one bucket was selected.
-- **One Depth-selected bucket, no eligible subdirectories:** valid flat/bucket action is permissible, no fabricated nesting.
-- **Depth chosen after Narrow/Simple configuration:** actual eligible Depth bucket folders appear; previous modes remain intact.
-- **Depth depth-limit change:** eligible presented hierarchy changes to match the configured limit.
-- Native parent/child IDs, apply acknowledgement, click dispatch and live R2 target where possible must be inspected. Do not claim real Windows Chrome acceptance from fixture-only tests.
+- `src/modes/depth/index.mjs` `project` and discovery completeness.
+- `src/modes/nested/index.mjs` independently maintained parent placements.
+- `src/core/menu-spec.mjs` composite projection, `product.show`, Default/Quick/flat placement, loss of `parentPlacement` when reconstructing provider rows, and branch/leaf counts.
+- `src/api/config.mjs` `setShowInChrome` and persistence.
+- Native Chrome item registration, real parent-child IDs, apply ACK and selected-click dispatch.
 
-No application code was changed by this record.
+## Acceptance evidence
+
+Test checked-mode combinations, non-destructive persistence, one Depth bucket with/without descendants, multiple buckets, native menu hierarchy, selected real physical R2 key, visibility gates, Chrome restart and relogin.
+
+Separate actual installed Chrome/R2 evidence from fixture receipts; do not claim production PASS without observed real behavior. Protect the prior working checkpoint and existing TRUE REMOTE save engine.
+
+Related separate UX issue: [Depth entries must not offer Make Default](../Issues/P1_DEPTH_DESTINATIONS_MANAGER_NO_MAKE_DEFAULT_2026-11-09.md).
+
+**No implementation or application-code changes are claimed by this issue record.**
