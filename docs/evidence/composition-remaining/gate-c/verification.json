@@ -1,0 +1,15 @@
+{
+  "gate": "C",
+  "phase": 6,
+  "sourceRevision": "80bc8d2b8e80cb3c28b0ef370f5dc0be72775e01",
+  "representative": "PASS",
+  "browser": {
+    "pass": 27,
+    "receipt": "browser/results.json",
+    "scope": "Production GUI/decoder/OPFS with fixture HTTP/auth/picker; pointer/keyboard/first-last/focus/rapid and zero-shift geometry"
+  },
+  "beforeScreenshot": "../gate-b/browser/webp-decoded-gallery.png",
+  "afterScreenshot": "browser/polished-gallery-navigation.png",
+  "localLogic": "Existing galleryStep/moveGallery and canonical image reads retained; fixed SVG affordances only. No new API.",
+  "installed": "BLOCKED_INHERITED_ADMINISTRATOR_POLICY"
+}
