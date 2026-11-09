@@ -9266,7 +9266,7 @@
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
       "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
-      "src/explorer/loading-visual-config.mjs": "30b9f9581233dbcee4d9514db4f0b1061167f026afac8f49550f0cbf5cb3e5e5",
+      "src/explorer/loading-visual-config.mjs": "d868079c819ae7ed3de94deb1cc3f86ad769d5777d39b7ce16aa521a13ccdaf5",
       "src/explorer/loading-visual.mjs": "ac5e4edfd4582af044dd17d53d990edf3471e1e4ed0971cc7a919ed47c24ca8b",
       "src/explorer/loading-visuals/math.mjs": "1316a6ca8e537b0176ff93372fc073c19a42e0e6519abc64d929e989e3d66ae4",
       "src/explorer/loading-visuals/media.mjs": "28fa9cae4ae6a3a57b535c72c3eda68d03687dec179015cacfc5f2ae651f2e23",
@@ -14492,7 +14492,7 @@
         "compatibility": "Old objects and legacy lower-level no-snapshot clients remain readable/usable without fabricated provenance; canonical composite Cloudflare routes always supply snapshot."
       }
     },
-    "digest": "6a3310c736da92f47ee555ffa4d3022e9ab7ab64a5a676ac45f971660f91e99b"
+    "digest": "e2d823f9997a706bbb6287cd274b8f7aacf8df87991539ec16a5d4438a050654"
   },
   "changeLog": [
     {
