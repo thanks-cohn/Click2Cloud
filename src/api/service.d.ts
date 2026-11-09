@@ -2,13 +2,13 @@
 export type Version = '3+1.1';
 export interface Target {provider:string;connectionId:string;accountId:string;bucketName:string;prefix:string}
 export interface Level {hidden?:boolean;label?:string}
-export interface Destination {id:string;target:Target;label?:string;hidden?:boolean;quick?:boolean;order?:number;levels?:Record<string,Level>}
+export interface Destination {id:string;target:Target;label?:string;hidden?:boolean;quick?:boolean;order?:number;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
 export type Mode = 'simple'|'nested'|'narrow';
 export interface Show {simple:boolean;nested:boolean;depth:boolean;flat:boolean}
 export interface RecoveryPolicy {cadence:'weekly'|'daily';simple:boolean;nested:boolean;location:'automatic'|'documents';buckets:{target:Target;enabled:boolean;depth:number}[]}
 export type Change =
- | {type:'createDestination';mode:Mode;target:Target;label?:string;levels?:Record<string,Level>}
- | {type:'updateDestination';mode:Mode;id:string;label?:string;levels?:Record<string,Level>;hidden?:boolean;quick?:boolean;order?:number}
+ | {type:'createDestination';mode:Mode;target:Target;label?:string;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
+ | {type:'updateDestination';mode:Mode;id:string;label?:string;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>;hidden?:boolean;quick?:boolean;order?:number}
  | {type:'deleteDestinationConfig';mode:Mode;id:string}
  | {type:'setShowInChrome';show:Show}
  | {type:'setDepthDisplayBuckets';scopes:{target:Target;maxDepth:number}[]}

@@ -72,6 +72,7 @@ export function normalizedDestinations(values=[]) {
     for(const field of ['hidden','quick'])if(item[field]!==undefined&&typeof item[field]!=='boolean')throw new MenuSpecError('INVALID_CONFIG','Invalid destination flag.');
     if(item.order!==undefined&&(!Number.isSafeInteger(item.order)||item.order<0))throw new MenuSpecError('INVALID_CONFIG','Invalid order.');
     if(item.aliases!==undefined&&(!Array.isArray(item.aliases)||item.aliases.some(x=>typeof x!=='string'||x.length>256||/[\x00-\x1f]/.test(x))))throw new MenuSpecError('INVALID_CONFIG','Invalid ancestor aliases.');
+    if(item.visibilityMode!==undefined&&!['all','hide-all','custom'].includes(item.visibilityMode))throw new MenuSpecError('INVALID_CONFIG','Invalid Narrow visibility mode.');
     const paths=['',...ancestors(target.prefix)];
     const legacyLevels=Object.fromEntries((item.aliases??[]).map((label,i)=>[paths[i],{label}]).filter(([p,v])=>p!==undefined&&v.label));
     const levels={...legacyLevels,...item.levels??{}};
@@ -80,7 +81,7 @@ export function normalizedDestinations(values=[]) {
       if(!['',...ancestors(target.prefix)].includes(p)||!v||Object.keys(v).some(k=>!['hidden','label'].includes(k))||v.hidden!==undefined&&typeof v.hidden!=='boolean'||v.label!==undefined&&(typeof v.label!=='string'||!v.label||/[\x00-\x1f]/.test(v.label)))throw new MenuSpecError('INVALID_CONFIG','Invalid level configuration.');
     }
     return {id:typeof item.id==='string'?item.id:stableId('destination',key),target,...(item.label===undefined?{}:{label:item.label}),
-      ...(item.hidden===undefined?{}:{hidden:item.hidden}),...(item.quick===undefined?{}:{quick:item.quick}),...(item.order===undefined?{}:{order:item.order}),...(!Object.keys(levels).length?{}:{levels:structuredClone(levels)})};
+      ...(item.visibilityMode===undefined?{}:{visibilityMode:item.visibilityMode}),...(item.hidden===undefined?{}:{hidden:item.hidden}),...(item.quick===undefined?{}:{quick:item.quick}),...(item.order===undefined?{}:{order:item.order}),...(!Object.keys(levels).length?{}:{levels:structuredClone(levels)})};
   });
 }
 export function availabilityReasons(scope,folder) {

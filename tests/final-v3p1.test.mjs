@@ -21,7 +21,7 @@ test('Narrow hidden final, shared children, overlapping paths and different acco
  const target={...base,prefix:'a/b/c/'};
  const spec=compile({nested:{destinations:[{target,levels:{'a/b/':{hidden:true},'a/b/c/':{hidden:true}}},{target:{...base,prefix:'a/b/d/'}},{target:{...base,accountId:'other',prefix:'a/b/c/'}}]}});
  generateChromePlan(spec);assert.equal(spec.rows.filter(r=>r.role==='save').length,3);
- assert(spec.rows.some(r=>r.label==='Save here — c'&&r.target.prefix==='a/b/c/'));
+ assert(spec.rows.some(r=>r.label==='c'&&r.target.prefix==='a/b/c/'));
 });
 test('hidden Quick persists but is omitted; shown Quick wins over duplicate exact default',()=>{
  const t={...base,prefix:'deep/folder/'},configs={simple:{destinations:[{id:'x',target:t,quick:true,hidden:true}]}};

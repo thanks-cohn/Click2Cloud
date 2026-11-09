@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "See docs/evidence/phased-upgrades/phase1/verification.json",
+  "productionSourceRevision": "See docs/evidence/phased-upgrades/phase2/verification.json",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -2970,6 +2970,13 @@
                     "type": "integer",
                     "minimum": 0
                   },
+                  "visibilityMode": {
+                    "enum": [
+                      "all",
+                      "hide-all",
+                      "custom"
+                    ]
+                  },
                   "levels": {
                     "type": "object",
                     "additionalProperties": {
@@ -3296,6 +3303,13 @@
                           "required": [],
                           "additionalProperties": false
                         }
+                      },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
                       }
                     },
                     "required": [
@@ -3356,6 +3370,13 @@
                       "order": {
                         "type": "integer",
                         "minimum": 0
+                      },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
                       }
                     },
                     "required": [
@@ -3999,6 +4020,13 @@
                     "type": "integer",
                     "minimum": 0
                   },
+                  "visibilityMode": {
+                    "enum": [
+                      "all",
+                      "hide-all",
+                      "custom"
+                    ]
+                  },
                   "levels": {
                     "type": "object",
                     "additionalProperties": {
@@ -4325,6 +4353,13 @@
                           "required": [],
                           "additionalProperties": false
                         }
+                      },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
                       }
                     },
                     "required": [
@@ -4385,6 +4420,13 @@
                       "order": {
                         "type": "integer",
                         "minimum": 0
+                      },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
                       }
                     },
                     "required": [
@@ -5478,6 +5520,13 @@
                         "type": "integer",
                         "minimum": 0
                       },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
+                      },
                       "levels": {
                         "type": "object",
                         "additionalProperties": {
@@ -5804,6 +5853,13 @@
                               "required": [],
                               "additionalProperties": false
                             }
+                          },
+                          "visibilityMode": {
+                            "enum": [
+                              "all",
+                              "hide-all",
+                              "custom"
+                            ]
                           }
                         },
                         "required": [
@@ -5864,6 +5920,13 @@
                           "order": {
                             "type": "integer",
                             "minimum": 0
+                          },
+                          "visibilityMode": {
+                            "enum": [
+                              "all",
+                              "hide-all",
+                              "custom"
+                            ]
                           }
                         },
                         "required": [
@@ -6535,6 +6598,13 @@
                         "type": "integer",
                         "minimum": 0
                       },
+                      "visibilityMode": {
+                        "enum": [
+                          "all",
+                          "hide-all",
+                          "custom"
+                        ]
+                      },
                       "levels": {
                         "type": "object",
                         "additionalProperties": {
@@ -6861,6 +6931,13 @@
                               "required": [],
                               "additionalProperties": false
                             }
+                          },
+                          "visibilityMode": {
+                            "enum": [
+                              "all",
+                              "hide-all",
+                              "custom"
+                            ]
                           }
                         },
                         "required": [
@@ -6921,6 +6998,13 @@
                           "order": {
                             "type": "integer",
                             "minimum": 0
+                          },
+                          "visibilityMode": {
+                            "enum": [
+                              "all",
+                              "hide-all",
+                              "custom"
+                            ]
                           }
                         },
                         "required": [

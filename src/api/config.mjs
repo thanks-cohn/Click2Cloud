@@ -46,7 +46,7 @@ export function migrateLegacyProduct(raw) {
   return {product,configs:Object.fromEntries(Object.entries(raw.configs).map(([m,c])=>[m,validateModeConfig(m,c)]))};
 }
 
-export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels'],updateDestination:['mode','id','label','levels','hidden','quick','order'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
 export function applyConfigChanges(state,changes) {
   if(!changes.length)fail('INVALID_CHANGE');
   const next=structuredClone(state),p=next.product;
@@ -57,11 +57,12 @@ export function applyConfigChanges(state,changes) {
     const m=c.mode==='narrow'?'nested':c.mode;
     if(c.type.endsWith('Destination')||c.type==='deleteDestinationConfig') {
       if(!['simple','nested'].includes(m))fail('INVALID_MODE');
+      if(c.visibilityMode!==undefined&&m!=='nested')fail('INVALID_CONFIG');
       const all=next.configs[m].destinations;
       if(c.type==='createDestination') {
         const t=normalizeTarget(c.target),id=stableId('destination',m+targetKey(t));
         if(all.some(d=>targetKey(d.target)===targetKey(t)))fail('DESTINATION_EXISTS');
-        all.push({id,target:t,order:all.length,...(c.label?{label:c.label}:{}),...(c.levels?{levels:c.levels}:{})});
+        all.push({id,target:t,order:all.length,...(c.label?{label:c.label}:{}),...(c.levels?{levels:c.levels}:{}),...(c.visibilityMode?{visibilityMode:c.visibilityMode}:{})});
       } else {
         const i=all.findIndex(d=>d.id===c.id);if(i<0)fail('DESTINATION_NOT_FOUND');
         if(c.type==='deleteDestinationConfig'){const removed=all.splice(i,1)[0];
@@ -70,7 +71,7 @@ export function applyConfigChanges(state,changes) {
             p.defaultTarget=survivors.length===1?survivors[0]:null;p.cloudflare.removed=[...new Set([...p.cloudflare.removed,removed.target.accountId])];
           }
 if(removed.target.provider==='cloudflare'&&!next.product.defaultTarget&&!Object.values(next.configs).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'&&d.target.accountId===removed.target.accountId)))p.cloudflare.removed=[...new Set([...p.cloudflare.removed,removed.target.accountId])];}
-        else {for(const k of ['label','levels','hidden','quick','order'])if(Object.hasOwn(c,k)){if(k==='label'&&!c[k])delete all[i].label;else all[i][k]=c[k];}}
+        else {for(const k of ['label','levels','hidden','quick','order','visibilityMode'])if(Object.hasOwn(c,k)){if(k==='label'&&!c[k])delete all[i].label;else all[i][k]=c[k];}}
       }
     } else if(c.type==='setShowInChrome')p.show=c.show;
     else if(c.type==='setDepthDisplayBuckets')next.configs.depth.scopes=c.scopes;

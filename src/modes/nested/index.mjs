@@ -10,6 +10,11 @@ export function migrateConfig(snapshot={}) {
   if(snapshot.schemaVersion!==undefined&&snapshot.schemaVersion!==1)throw new TypeError('Unsupported Nested schema version.');
   return createConfig(snapshot);
 }
+// Bulk presentation never erases the user's custom per-level flags.
+export function levelHidden(destination,prefix){
+  if(prefix===destination.target.prefix)return false;
+  return destination.visibilityMode==='hide-all'||destination.visibilityMode!=='all'&&destination.levels?.[prefix]?.hidden===true;
+}
 export function project({config,inventory}) {
   const own=createConfig(config),selected=new Map(),tree=new Map(),omissions=[];
   for(const destination of own.destinations) {
@@ -20,7 +25,7 @@ export function project({config,inventory}) {
     let parent=null;
     for(const prefix of ['',...ancestors(target.prefix)]) {
       const t={...target,prefix},k=targetKey(t);
-      if(destination.levels?.[prefix]?.hidden)continue;
+      if(levelHidden(destination,prefix))continue;
       // Include projected parent in identity: two paths may hide different shared
       // levels without moving an independent sibling or corrupting its ancestry.
       const label=destination.levels?.[prefix]?.label??(prefix===target.prefix?destination.label:undefined)??targetLabel(t);
