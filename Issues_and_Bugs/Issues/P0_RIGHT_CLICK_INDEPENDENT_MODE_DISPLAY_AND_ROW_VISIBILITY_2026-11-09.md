@@ -77,3 +77,10 @@ Inspect or repair `src/core/menu-spec.mjs`, `src/modes/{simple,nested,depth}/`, 
 9. Distinguish real installed-browser/live Cloudflare results from fixtures. An unperformed native installed test is BLOCKED/NOT TESTED, not PASS.
 
 **Implementation is scheduled AFTER current in-progress fixes. This issue records the corrected architecture; no runtime fix is claimed.**
+
+
+## Additional unimplemented architectural requirement — multiple Narrow presentations, one physical target
+
+The user also requires that **two distinct saved Narrow destination presentations may have the exact same physical R2 bucket/prefix**. One can have custom level titles (e.g. human > money-maker > guns > swole); the other can show natural titles (body > arm > bicep > muscle). Both are independently visible, editable and clickable; both save to the same physical body/arm/bicep/muscle location. Hiding, renaming or deleting one must not change the other. The selected menu presentation identity must later be faithfully recorded in Phase 7 object provenance.
+
+This is **NOT IMPLEMENTED at the assessed main revision 1123099ce**: normalizedDestinations and createDestination reject repeated physical target keys, and composite menu candidate selection deduplicates by targetKey. Allow distinct Narrow *presentation IDs* without globally permitting unintended duplicate entries or changing physical target authorization; maintain deterministic native menu IDs and correct click routing. See [queued comprehensive Codex request](../../codex/CODEX_NEXT_RIGHT_CLICK_COMPOSITION_AND_VISIBILITY_2026-11-09.md).
