@@ -1,3 +1,5 @@
+Implementation status update: Gates A–D are source implemented and representative/isolated live verified. See [the execution handoff](../docs/evidence/composition-remaining/HANDOFF.md) and exact proof boundaries; installed Windows acceptance and an approved production Worker upgrade remain pending. The original work order below is preserved as requirements, not current implementation status.
+
 # NEXT CODEX RUN — Finish right-click architecture + remaining phases 5–7
 
 **Status:** READY FOR NEXT RUN, after the currently active Codex work is finished and its changes are reconciled. This is a work order, NOT a statement that these fixes exist.
