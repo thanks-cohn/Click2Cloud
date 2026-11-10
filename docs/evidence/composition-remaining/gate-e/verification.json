@@ -1,0 +1,156 @@
+{
+  "gate": "E",
+  "runtimeRevision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "extensionVersion": "0.3.19",
+  "overall": "REPRESENTATIVE_AND_ISOLATED_LIVE_PASS_INSTALLED_ACCEPTANCE_BLOCKED",
+  "focused": {
+    "pass": 319,
+    "fail": 0,
+    "receipt": "focused.txt"
+  },
+  "gallery": {
+    "pass": 28,
+    "receipt": "gallery/results.json",
+    "layoutShiftPx": 0,
+    "localMediaTypes": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/gif",
+      "video/mp4"
+    ],
+    "lifecycle": {
+      "reducedStill": true,
+      "gifStill": true,
+      "created": 22,
+      "revoked": 22,
+      "active": 0,
+      "corruptFallback": true,
+      "missingFallback": true,
+      "plainEmpty": true
+    },
+    "corruptLocalPreferenceFallback": {
+      "revision": 6,
+      "mode": "math",
+      "media": null,
+      "warning": "LOADING_MEDIA_INVALID"
+    },
+    "realGalleryCancelCleanup": true
+  },
+  "liveImageReads": {
+    "receipt": "live-image-reads/results.json",
+    "classification": "Genuine existing Cloudflare R2 object reads through local proxy; actual GUI/API/decoder/OPFS; fixture OAuth, Chrome transport and file picker; not installed extension",
+    "downloads": [
+      {
+        "name": "picture.png",
+        "size": 290,
+        "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44"
+      },
+      {
+        "name": "picture.jpg",
+        "size": 1504,
+        "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f"
+      },
+      {
+        "name": "picture.webp",
+        "size": 334,
+        "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7"
+      },
+      {
+        "name": "picture.gif",
+        "size": 418,
+        "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33"
+      },
+      {
+        "name": "large.png",
+        "size": 3717007,
+        "sha256": "0ace601173165c6847bf414715f608f189d8132865eb0fcbc3080ae93b6ff45c"
+      }
+    ]
+  },
+  "composition": {
+    "pass": 7,
+    "receipt": "composition/results.json",
+    "showFlatCombinations": 16,
+    "GUI_additive_checkmarks": true
+  },
+  "workflow": {
+    "receipt": "login-workflow/results.json",
+    "operations": 19,
+    "classification": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS"
+  },
+  "persistence": {
+    "receipt": "persistence/browser.json",
+    "pass": 30,
+    "historicalReproductions": 3,
+    "scope": "Actual disposable Chromium SIGKILL/process restart; exact local MP4 bytes and duplicate Narrow configurations retained, not owner Windows profile/MV3."
+  },
+  "liveR2": "../gate-d/live.json",
+  "readOnlyWorkerBuildMatch": "cloudflare-worker-read-only.json",
+  "installed": {
+    "receipt": "installed/real-shelf-receipt.json",
+    "result": "BLOCKED",
+    "reason": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "policyBypassed": false
+  },
+  "performance": {
+    "measurements": [
+      {
+        "items": 0,
+        "renderedRows": 0,
+        "readCount": 0,
+        "frameGapMs": {
+          "p50": 16.6,
+          "p95": 17.1,
+          "max": 17.6
+        }
+      },
+      {
+        "items": 1,
+        "renderedRows": 1,
+        "readCount": 0,
+        "frameGapMs": {
+          "p50": 16.6,
+          "p95": 66.4,
+          "max": 77.3
+        }
+      },
+      {
+        "items": 100,
+        "renderedRows": 28,
+        "readCount": 8,
+        "frameGapMs": {
+          "p50": 16.7,
+          "p95": 17.4,
+          "max": 17.7
+        }
+      },
+      {
+        "items": 1000,
+        "renderedRows": 28,
+        "readCount": 6,
+        "frameGapMs": {
+          "p50": 16.6,
+          "p95": 19.5,
+          "max": 22.3
+        }
+      },
+      {
+        "items": 10000,
+        "renderedRows": 28,
+        "readCount": 8,
+        "frameGapMs": {
+          "p50": 16.6,
+          "p95": 17.3,
+          "max": 17.7
+        }
+      }
+    ],
+    "limits": "Real shared-cloud Chromium DOM/frame samples only; no Windows latency or zero-stutter certification. Earlier concurrent stress samples have large pauses and remain preserved. Explicit first-time Depth discovery is network-bound."
+  },
+  "pending": [
+    "Installed Windows native render/click/OAuth/restart acceptance",
+    "Explicitly approved production Worker upgrade to the tested digest",
+    "Google Drive/Dropbox/OneDrive remain existing intentional placeholders"
+  ]
+}

@@ -32,5 +32,8 @@ jobs:
           C2C_BOOT_EVIDENCE="${{ runner.temp }}/click2cloud-boot" node scripts/test-boot-login-browser.mjs
           C2C_BOOT_BASELINE_LOSS=1 C2C_BOOT_BEFORE_ROOT=/tmp/c2c-current-baseline C2C_BOOT_EVIDENCE="${{ runner.temp }}/click2cloud-original-shelf" node scripts/test-boot-login-browser.mjs
           C2C_BOOT_WORKFLOW=1 C2C_BOOT_EVIDENCE="${{ runner.temp }}/click2cloud-login-workflow" node scripts/test-boot-login-browser.mjs
-          C2C_IMAGE_EVIDENCE="${{ runner.temp }}/click2cloud-image-read" node scripts/test-image-gallery-browser.mjs
+          C2C_GALLERY_GEOMETRY=1 C2C_GALLERY_LOADING=1 C2C_GALLERY_NAVIGATION=1 C2C_IMAGE_EVIDENCE="${{ runner.temp }}/click2cloud-image-read" node scripts/test-image-gallery-browser.mjs
+          mkdir -p /tmp/c2c-working-checkpoint
+          git archive 3b24320138ff0ebbf50a0e6a912a5d2800038676 | tar -x -C /tmp/c2c-working-checkpoint
+          C2C_NARROW_PHASE=3 C2C_COMPOSITION_GATE=1 C2C_NARROW_EVIDENCE="${{ runner.temp }}/click2cloud-composition" node scripts/test-phased-narrow-browser.mjs
           node scripts/assert-reliability-receipts.mjs "${{ runner.temp }}/click2cloud-current-recovery/browser.json" "${{ runner.temp }}/click2cloud-boot/results.json" "${{ runner.temp }}/click2cloud-original-shelf/results.json"

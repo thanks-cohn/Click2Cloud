@@ -1,0 +1,50 @@
+{
+  "gate": "D",
+  "phase": 7,
+  "sourceRevision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "representative": "PASS",
+  "evidenceClass": "LIVE_ISOLATED_WORKER_R2_METADATA_AND_BYTES; CANONICAL_ENGINE; FIXTURE_CHROME_ACK_ENV_AUTH_NOT_INSTALLED_OAUTH",
+  "liveReceipt": "live.json",
+  "verifiedSaves": 10,
+  "cases": [
+    "simple-custom",
+    "simple-natural",
+    "narrow-all",
+    "narrow-hide-all",
+    "narrow-mixed",
+    "narrow-original",
+    "narrow-quick",
+    "depth-deep",
+    "keep-both-first",
+    "keep-both-second"
+  ],
+  "proof": "Original conditional Worker put; independent signed S3 GET bytes/SHA256 and custom metadata match actual selected entryId/presentation; collision filename proven; Quick effective and configured visibility distinct.",
+  "worker": {
+    "name": "click2cloud-r2-c743c2a5e5ef49aaa35c",
+    "codeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+    "isolated": true,
+    "prefixScope": "__click2cloud_true_remote_test__/provenance",
+    "newWorker": false
+  },
+  "productionUnchanged": true,
+  "initialDeploymentReceipt": "attempts/initial-five-verified-test-harness-freeze-error.json",
+  "initialAttempt": "Five saves verified; harness tried mutating a frozen normalized fixture. Source was not fixed for that harness error; corrected invocation passed. Partial receipt retained.",
+  "moduleRegression": {
+    "receipt": "module.txt",
+    "pass": 49,
+    "fail": 0
+  },
+  "workerd": "Final focused suite executes actual local workerd/R2/DO auth-binding/receipt regression; synthetic management/OAuth/source is labeled.",
+  "fixtureAdversaries": [
+    "HMAC snapshot tampering",
+    "oversize before dispatch",
+    "wrong physical hierarchy",
+    "missing old metadata",
+    "invalid metadata",
+    "unknown-length final snapshot",
+    "later label edits immutable",
+    "stale/generation/hidden route guards"
+  ],
+  "installed": "BLOCKED; no Windows native click or OAuth acceptance claimed",
+  "productionUpgrade": "New code digest requires existing approved Worker upgrade; no production deployment performed. All canonical composite Cloudflare routes emit snapshots; legacy low-level no-route clients stay compatible without fabricated snapshots."
+}

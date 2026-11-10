@@ -1,0 +1,166 @@
+{
+  "sourceRevision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_AND_BACKGROUND_REAL_IDB_FIXTURE_CHROME_OAUTH_NETWORK_NOT_INSTALLED_MV3_OR_WINDOWS",
+  "results": [
+    {
+      "gate": "login-ready-native-dispatch-local-workerd-R2-logout-relogin-restart",
+      "state": "PASS",
+      "bucketCreates": 1,
+      "workerUploads": 1,
+      "operations": [
+        {
+          "id": "07b3a5f1-2d3f-4171-a96b-b47def13e3b2",
+          "stage": "Shelf-opens",
+          "state": "PASS"
+        },
+        {
+          "id": "acd8b6a0-b2f6-4fbb-8a91-816715c138e8",
+          "stage": "login-1",
+          "state": "PASS",
+          "result": "CONNECTED",
+          "initialization": "CLOUDFLARE_READY"
+        },
+        {
+          "id": "a4dfaebd-5406-4ebd-8efe-4ed3b4adb75d",
+          "stage": "native-registration",
+          "state": "PASS",
+          "generation": 1,
+          "proofClass": "FIXTURE_CHROME_CALLBACK_ACK_NOT_INSTALLED_CHROME"
+        },
+        {
+          "id": "9e33cd56-3dac-4705-a558-df612b2adbc6",
+          "stage": "right-click-true-remote",
+          "state": "PASS",
+          "receipt": {
+            "key": "image.png",
+            "size": 68,
+            "etag": "51df190aed72e4ab4aea0ded83c504f5"
+          }
+        },
+        {
+          "id": "11807a5b-2bf6-45b9-aadf-42c67910c34a",
+          "parentOperationId": "9e33cd56-3dac-4705-a558-df612b2adbc6",
+          "stage": "independent-local-R2-readback",
+          "state": "PASS",
+          "exists": true,
+          "size": 68,
+          "sha256": "bc5ab44378898573623820dc8154f19d71482c49dbb56cfb134da6d077a01fb3",
+          "expected": true
+        },
+        {
+          "id": "bad67118-815e-4716-9642-c9a8cf8654a4",
+          "stage": "logout-1",
+          "state": "PASS"
+        },
+        {
+          "id": "0c9c428b-6e93-4ff6-a122-cb3099fb381f",
+          "stage": "login-2",
+          "state": "PASS",
+          "result": "CONNECTED",
+          "initialization": "CLOUDFLARE_READY"
+        },
+        {
+          "id": "4a8c78c1-554c-47ee-ac8f-b5da8670909a",
+          "stage": "native-registration",
+          "state": "PASS",
+          "generation": 2,
+          "proofClass": "FIXTURE_CHROME_CALLBACK_ACK_NOT_INSTALLED_CHROME"
+        },
+        {
+          "id": "748936ab-7a81-4455-9ecb-946726a33706",
+          "stage": "right-click-true-remote",
+          "state": "PASS",
+          "receipt": {
+            "key": "image-748936ab-7a81-4455-9ecb-946726a33706.png",
+            "size": 68,
+            "etag": "51df190aed72e4ab4aea0ded83c504f5"
+          }
+        },
+        {
+          "id": "4f0e34a0-e16d-4204-82f5-d29e995c8d9e",
+          "parentOperationId": "748936ab-7a81-4455-9ecb-946726a33706",
+          "stage": "independent-local-R2-readback",
+          "state": "PASS",
+          "exists": true,
+          "size": 68,
+          "sha256": "bc5ab44378898573623820dc8154f19d71482c49dbb56cfb134da6d077a01fb3",
+          "expected": true
+        },
+        {
+          "id": "ffd82504-ce06-45f2-978c-a7da47e5e38a",
+          "stage": "logout-2",
+          "state": "PASS"
+        },
+        {
+          "id": "4670b298-3b4b-4c8e-9420-cf67a807f98c",
+          "stage": "login-3",
+          "state": "PASS",
+          "result": "CONNECTED",
+          "initialization": "CLOUDFLARE_READY"
+        },
+        {
+          "id": "0f010300-bd8e-485d-a5b7-dfbaad23090f",
+          "stage": "native-registration",
+          "state": "PASS",
+          "generation": 3,
+          "proofClass": "FIXTURE_CHROME_CALLBACK_ACK_NOT_INSTALLED_CHROME"
+        },
+        {
+          "id": "aef7228c-0a48-4745-91fe-7f885d9bd72d",
+          "stage": "right-click-true-remote",
+          "state": "PASS",
+          "receipt": {
+            "key": "image-aef7228c-0a48-4745-91fe-7f885d9bd72d.png",
+            "size": 68,
+            "etag": "51df190aed72e4ab4aea0ded83c504f5"
+          }
+        },
+        {
+          "id": "1c6065b0-d7ef-489e-bcf6-3f714121efc6",
+          "parentOperationId": "aef7228c-0a48-4745-91fe-7f885d9bd72d",
+          "stage": "independent-local-R2-readback",
+          "state": "PASS",
+          "exists": true,
+          "size": 68,
+          "sha256": "bc5ab44378898573623820dc8154f19d71482c49dbb56cfb134da6d077a01fb3",
+          "expected": true
+        },
+        {
+          "id": "fbaebc82-9a61-4f74-8693-55e874f51834",
+          "stage": "native-registration",
+          "state": "PASS",
+          "generation": 4,
+          "proofClass": "FIXTURE_CHROME_CALLBACK_ACK_NOT_INSTALLED_CHROME"
+        },
+        {
+          "id": "b58fea72-b2c2-4e25-abb2-69baba8e1f5a",
+          "stage": "right-click-true-remote",
+          "state": "PASS",
+          "receipt": {
+            "key": "image-b58fea72-b2c2-4e25-abb2-69baba8e1f5a.png",
+            "size": 68,
+            "etag": "51df190aed72e4ab4aea0ded83c504f5"
+          }
+        },
+        {
+          "id": "c5ef8c77-1416-4f2f-b23e-9dce0204f95a",
+          "parentOperationId": "b58fea72-b2c2-4e25-abb2-69baba8e1f5a",
+          "stage": "independent-local-R2-readback",
+          "state": "PASS",
+          "exists": true,
+          "size": 68,
+          "sha256": "bc5ab44378898573623820dc8154f19d71482c49dbb56cfb134da6d077a01fb3",
+          "expected": true
+        },
+        {
+          "id": "f99e6e1f-ff8b-4fd4-968a-725347ca2e1e",
+          "stage": "full-browser-process-restart-and-save",
+          "state": "PASS"
+        }
+      ],
+      "evidenceClass": "REAL_APP_BACKGROUND_IDB_WORKERD_R2_DO; FIXTURE_CHROME_OAUTH_MANAGEMENT_SOURCE; NOT_LIVE_OR_INSTALLED"
+    }
+  ],
+  "errors": []
+}

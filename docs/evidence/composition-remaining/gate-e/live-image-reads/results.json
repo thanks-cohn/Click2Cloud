@@ -1,0 +1,399 @@
+{
+  "sourceRevision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "CHROMIUM_PRODUCTION_APP_REAL_R2_OBJECT_READS_VIA_LOCAL_PROXY_FIXTURE_AUTH_PICKER_NOT_INSTALLED",
+  "results": [
+    {
+      "gate": "fresh-50-50-remotes-no-tree-clean-footer",
+      "state": "PASS"
+    },
+    {
+      "gate": "four-formats-real-decoded-thumbnail-pixels-bounded-two-reads",
+      "state": "PASS",
+      "thumbnails": [
+        {
+          "key": "large.png",
+          "width": 128,
+          "height": 96,
+          "decoded": true
+        },
+        {
+          "key": "picture.gif",
+          "width": 128,
+          "height": 78,
+          "decoded": true
+        },
+        {
+          "key": "picture.jpg",
+          "width": 128,
+          "height": 82,
+          "decoded": true
+        },
+        {
+          "key": "picture.png",
+          "width": 120,
+          "height": 80,
+          "decoded": true
+        }
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-png",
+      "state": "PASS",
+      "width": 120,
+      "height": 80,
+      "pixel": [
+        230,
+        40,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-jpg",
+      "state": "PASS",
+      "width": 140,
+      "height": 90,
+      "pixel": [
+        231,
+        75,
+        26,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-webp",
+      "state": "PASS",
+      "width": 160,
+      "height": 100,
+      "pixel": [
+        230,
+        110,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "actual-image-pixels-gif",
+      "state": "PASS",
+      "width": 180,
+      "height": 110,
+      "pixel": [
+        230,
+        145,
+        25,
+        255
+      ]
+    },
+    {
+      "gate": "gateC-real-gallery-chevron-keyboard-pointer-first-last-focus-rapid-and-stable-controls",
+      "state": "PASS",
+      "geometry": {
+        "x": 161,
+        "y": 130,
+        "width": 958,
+        "height": 36
+      }
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.png",
+      "state": "PASS",
+      "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "width": 120,
+      "height": 80
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.jpg",
+      "state": "PASS",
+      "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.jpg",
+      "size": 1504,
+      "sha256": "0af299be18fa70a5e83a840524efa568760dc0bff0106af04ed33a818a4d456f",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.webp",
+      "state": "PASS",
+      "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.webp",
+      "size": 334,
+      "sha256": "8a2b885b09128a179b2a1a99110dafdd3a988382e2f5e48756da56ec4a6f35f7",
+      "width": 160,
+      "height": 100
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-picture.gif",
+      "state": "PASS",
+      "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "picture.gif",
+      "size": 418,
+      "sha256": "e62ad96d55dc6cacdba1cef405d4868088f7003e4600ea969d82efe7d8a82c33",
+      "width": 180,
+      "height": 110
+    },
+    {
+      "gate": "decoded-preview-and-byte-identical-OPFS-download-large.png",
+      "state": "PASS",
+      "evidenceClass": "LIVE_R2_OBJECT_READ_VIA_LOCAL_PROXY_REAL_APP_API_ADAPTER_OPFS_PICKER_AUTH_FIXTURE",
+      "name": "large.png",
+      "size": 3717007,
+      "sha256": "0ace601173165c6847bf414715f608f189d8132865eb0fcbc3080ae93b6ff45c",
+      "width": 1200,
+      "height": 900
+    },
+    {
+      "gate": "failed-read-does-not-truncate-existing-file-or-claim-download-complete",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-write-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-close-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "download-drop-failure-no-false-success-existing-file-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "literal-OK-and-corrupt-image-truthful-errors-gallery-stays-usable",
+      "state": "PASS"
+    },
+    {
+      "gate": "gallery-display-order-navigation-return-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "rapid-gallery-epochs-and-real-failed-inner-API-envelope-visible",
+      "state": "PASS"
+    },
+    {
+      "gate": "edge-to-edge-pointer-keyboard-resize-seven-positions-no-byte-refetch",
+      "state": "PASS"
+    },
+    {
+      "gate": "narrow-toolbar-overflow-shared-actions-expand-collapse-accessibility",
+      "state": "PASS"
+    },
+    {
+      "gate": "52-tab-transitions-no-list-refetch-settings-separation-reload-layout-persistence",
+      "state": "PASS"
+    },
+    {
+      "gate": "manager-default-A-clear-B-A-canonical-exact-target-no-destination-loss",
+      "state": "PASS"
+    },
+    {
+      "gate": "GUI-sign-out-login-preserves-destinations-and-image-read",
+      "state": "PASS",
+      "authorization": "FIXTURE_OAUTH_NOT_INSTALLED_PROVIDER_CONSENT"
+    },
+    {
+      "gate": "0-1-100-1000-10000-images-visible-window-bounded-scroll",
+      "state": "PASS",
+      "measurements": [
+        {
+          "count": 0,
+          "reads": 0,
+          "gaps": [
+            11.899999976158142,
+            16.5,
+            16.80000001192093,
+            16.69999998807907,
+            16.600000023841858,
+            16.69999998807907,
+            16.80000001192093,
+            16.69999998807907,
+            16.599999994039536,
+            16.5,
+            16.80000001192093,
+            16.400000005960464,
+            16.69999998807907,
+            16.80000001192093,
+            16.5,
+            16.799999982118607,
+            16.700000017881393,
+            16.5,
+            16.69999998807907,
+            16.5,
+            16.80000001192093,
+            16.69999998807907,
+            16.80000001192093,
+            16.69999998807907,
+            16.5,
+            16.599999994039536,
+            16.700000017881393,
+            16.799999982118607,
+            17.099999994039536,
+            16.30000001192093
+          ],
+          "rendered": 0,
+          "dom": 97
+        },
+        {
+          "count": 1,
+          "reads": 0,
+          "gaps": [
+            10.300000011920929,
+            16.299999982118607,
+            17.30000001192093,
+            16.099999994039536,
+            16.5,
+            16.69999998807907,
+            16.700000017881393,
+            16.799999982118607,
+            17.30000001192093,
+            16,
+            16.5,
+            16.69999998807907,
+            16.700000017881393,
+            16.599999994039536,
+            17.099999994039536,
+            16.30000001192093,
+            16.69999998807907,
+            16.599999994039536,
+            16.700000017881393,
+            16.900000005960464,
+            16.5,
+            17.19999998807907,
+            16,
+            16.69999998807907,
+            16.80000001192093,
+            16.69999998807907,
+            16.5,
+            17.600000023841858,
+            15.899999976158142,
+            17.100000023841858
+          ],
+          "rendered": 1,
+          "dom": 102
+        },
+        {
+          "count": 100,
+          "reads": 7,
+          "gaps": [
+            9.5,
+            17.80000001192093,
+            15.5,
+            22.5,
+            10.599999994039536,
+            16.30000001192093,
+            16.799999982118607,
+            16.599999994039536,
+            18.200000017881393,
+            15.199999988079071,
+            16.80000001192093,
+            16.5,
+            18.099999994039536,
+            15.400000005960464,
+            16.599999994039536,
+            16.599999994039536,
+            16.700000017881393,
+            16.599999994039536,
+            16.799999982118607,
+            16.600000023841858,
+            16.69999998807907,
+            16.80000001192093,
+            16.599999994039536,
+            16.5,
+            16.900000005960464,
+            16.399999976158142,
+            17,
+            16.400000005960464,
+            16.700000017881393,
+            16.5
+          ],
+          "rendered": 28,
+          "dom": 217
+        },
+        {
+          "count": 1000,
+          "reads": 6,
+          "gaps": [
+            13.400000005960464,
+            15.700000017881393,
+            16.599999994039536,
+            16.69999998807907,
+            16.700000017881393,
+            16.599999994039536,
+            16.900000005960464,
+            16.399999976158142,
+            16.80000001192093,
+            16.5,
+            16.69999998807907,
+            17.200000017881393,
+            16.19999998807907,
+            16.5,
+            16.900000005960464,
+            16.599999994039536,
+            16.599999994039536,
+            17,
+            16.5,
+            16.5,
+            16.900000005960464,
+            16.5,
+            16.599999994039536,
+            16.80000001192093,
+            16.599999994039536,
+            16.700000017881393,
+            16.69999998807907,
+            16.599999994039536,
+            17.099999994039536,
+            16.200000017881393
+          ],
+          "rendered": 28,
+          "dom": 217
+        },
+        {
+          "count": 10000,
+          "reads": 6,
+          "gaps": [
+            13.799999982118607,
+            15,
+            16.80000001192093,
+            17.099999994039536,
+            16.200000017881393,
+            16.69999998807907,
+            16.69999998807907,
+            16.80000001192093,
+            16.5,
+            17.599999994039536,
+            15.599999994039536,
+            16.80000001192093,
+            16.80000001192093,
+            16.799999982118607,
+            16.400000005960464,
+            16.69999998807907,
+            16.600000023841858,
+            16.69999998807907,
+            16.599999994039536,
+            17.900000005960464,
+            15.300000011920929,
+            16.69999998807907,
+            17.19999998807907,
+            16.30000001192093,
+            16.69999998807907,
+            17.80000001192093,
+            15.699999988079071,
+            16.600000023841858,
+            16.399999976158142,
+            16.700000017881393
+          ],
+          "rendered": 28,
+          "dom": 217
+        }
+      ]
+    },
+    {
+      "gate": "browser-runtime-errors",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}

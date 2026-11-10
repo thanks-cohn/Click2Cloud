@@ -1,7 +1,7 @@
 # P0 — Depth bucket nesting missing; composite right-click display must preserve all selected modes
 
 **Reported:** 2026-11-09
-**Status:** OPEN — owner-confirmed reproduction and corrected requirement; implementation not verified
+**Status:** SOURCE IMPLEMENTED; representative/browser and isolated live R2 PASS; installed Windows acceptance BLOCKED/unverified
 **Area:** Right-click menu / Depth / selected Cloudflare R2 bucket / Chrome native menu
 **Companion architecture issue:** [Independent mode display and non-destructive visibility](../Issues/P0_RIGHT_CLICK_INDEPENDENT_MODE_DISPLAY_AND_ROW_VISIBILITY_2026-11-09.md)
 
@@ -88,3 +88,5 @@ Related separate UX issue: [Depth entries must not offer Make Default](../Issues
 **No implementation or application-code changes are claimed by this issue record.**
 
 Implementation update: Gate A source58d017f; representative fixture and isolated live Worker/R2 gates PASS. Actual installed Windows native acceptance remains BLOCKED/unverified. Exact receipts: `docs/evidence/composition-remaining/gate-a/verification.json`. Original incident text retained above.
+
+Final consolidated acceptance: `docs/evidence/composition-remaining/HANDOFF.md`. Historical incident/requirement wording above is retained; current proof boundaries are in Gate E.

@@ -1,0 +1,899 @@
+{
+  "sourceRevision": "ba3327304c0058dce2a42c7a43898b1f18c5f3d1",
+  "runtimeSourceDirty": false,
+  "proofClass": "LIVE_ISOLATED_WORKER_R2_METADATA_AND_BYTES; CANONICAL_ENGINE; FIXTURE_CHROME_ACK_ENV_AUTH_NOT_INSTALLED_OAUTH",
+  "operations": [
+    {
+      "stage": "read-only-bucket",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets/redown",
+      "httpStatus": 200,
+      "providerCodes": []
+    },
+    {
+      "stage": "isolated-worker",
+      "method": "POST",
+      "endpoint": "/capabilities",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-custom",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "simple-custom",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-custom",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-custom",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-custom",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-natural",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "simple-natural",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-natural",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-natural",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "simple-natural",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "read-only-real-virtual-folders",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets/redown/objects?per_page=1000&prefix=__click2cloud_true_remote_test__%2Fprovenance%2F609ec68c-1579-43c9-bdd3-0b8588eb14ba%2F&delimiter=%2F",
+      "httpStatus": 200,
+      "providerCodes": []
+    },
+    {
+      "stage": "read-only-real-virtual-folders",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets/redown/objects?per_page=1000&prefix=__click2cloud_true_remote_test__%2Fprovenance%2F609ec68c-1579-43c9-bdd3-0b8588eb14ba%2Fbody%2F&delimiter=%2F",
+      "httpStatus": 200,
+      "providerCodes": []
+    },
+    {
+      "stage": "read-only-real-virtual-folders",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets/redown/objects?per_page=1000&prefix=__click2cloud_true_remote_test__%2Fprovenance%2F609ec68c-1579-43c9-bdd3-0b8588eb14ba%2Fbody%2Farm%2F&delimiter=%2F",
+      "httpStatus": 200,
+      "providerCodes": []
+    },
+    {
+      "stage": "read-only-real-virtual-folders",
+      "method": "GET",
+      "endpoint": "/accounts/{account_id}/r2/buckets/redown/objects?per_page=1000&prefix=__click2cloud_true_remote_test__%2Fprovenance%2F609ec68c-1579-43c9-bdd3-0b8588eb14ba%2Fbody%2Farm%2Fbicep%2F&delimiter=%2F",
+      "httpStatus": 200,
+      "providerCodes": []
+    },
+    {
+      "stage": "narrow-all",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "narrow-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-all",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-hide-all",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "narrow-hide-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-hide-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-hide-all",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-hide-all",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-mixed",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "narrow-mixed",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-mixed",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-mixed",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-original",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "narrow-original",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-original",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "narrow-original",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "depth-deep",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "depth-deep",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "depth-deep",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "depth-deep",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "depth-deep",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-first",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "keep-both-first",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-first",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-first",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-second",
+      "method": "POST",
+      "endpoint": "/remote-save",
+      "httpStatus": 202
+    },
+    {
+      "stage": "keep-both-second",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-second",
+      "method": "POST",
+      "endpoint": "/operation",
+      "httpStatus": 200
+    },
+    {
+      "stage": "keep-both-second",
+      "method": "POST",
+      "endpoint": "/verify",
+      "httpStatus": 200
+    }
+  ],
+  "saves": [
+    {
+      "name": "simple-custom",
+      "itemId": "c2c:assigned-entry:6c63ac8383722536",
+      "presentationId": "simple-selected",
+      "mode": "simple",
+      "nativeCallbackACK": true,
+      "operationId": "55f48703-ccef-4f5f-a45e-869132df5ff7",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/simple-custom.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "simple",
+        "entryId": "c2c:assigned-entry:6c63ac8383722536",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "Swole"
+        ],
+        "presentation": {
+          "id": "simple-selected",
+          "title": "Swole",
+          "configuredTitle": "Swole",
+          "labelSource": "menu_title",
+          "visibility": "hide-all"
+        },
+        "operationId": "55f48703-ccef-4f5f-a45e-869132df5ff7",
+        "originalFilename": "simple-custom.original.png",
+        "storedFilename": "simple-custom.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "simple-natural",
+      "itemId": "c2c:assigned-entry:6c63ac8383722536",
+      "presentationId": "simple-selected",
+      "mode": "simple",
+      "nativeCallbackACK": true,
+      "operationId": "ec0720b8-200a-483b-b53d-342f4f2fc8d7",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/simple-natural.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "simple",
+        "entryId": "c2c:assigned-entry:6c63ac8383722536",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "muscle"
+        ],
+        "presentation": {
+          "id": "simple-selected",
+          "title": "muscle",
+          "configuredTitle": "muscle",
+          "labelSource": "name",
+          "visibility": "hide-all"
+        },
+        "operationId": "ec0720b8-200a-483b-b53d-342f4f2fc8d7",
+        "originalFilename": "simple-natural.original.png",
+        "storedFilename": "simple-natural.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "narrow-all",
+      "itemId": "c2c:item:760e5e7cf1bf0353",
+      "presentationId": "narrow-custom",
+      "mode": "narrow",
+      "nativeCallbackACK": true,
+      "operationId": "f2d8835d-ea8f-4601-a1c4-3d016c337c50",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/narrow-all.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "narrow",
+        "entryId": "c2c:item:760e5e7cf1bf0353",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "__click2cloud_true_remote_test__",
+          "provenance",
+          "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+          "human",
+          "money-maker",
+          "guns",
+          "swole"
+        ],
+        "presentation": {
+          "id": "narrow-custom",
+          "title": "swole",
+          "visibilityMode": "all",
+          "levels": [
+            {
+              "actual": "__click2cloud_true_remote_test__",
+              "title": "__click2cloud_true_remote_test__",
+              "visible": true
+            },
+            {
+              "actual": "provenance",
+              "title": "provenance",
+              "visible": true
+            },
+            {
+              "actual": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "title": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "visible": true
+            },
+            {
+              "actual": "body",
+              "title": "human",
+              "visible": true
+            },
+            {
+              "actual": "arm",
+              "title": "money-maker",
+              "visible": true
+            },
+            {
+              "actual": "bicep",
+              "title": "guns",
+              "visible": true
+            },
+            {
+              "actual": "muscle",
+              "title": "swole",
+              "visible": true
+            }
+          ]
+        },
+        "operationId": "f2d8835d-ea8f-4601-a1c4-3d016c337c50",
+        "originalFilename": "narrow-all.original.png",
+        "storedFilename": "narrow-all.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "narrow-hide-all",
+      "itemId": "c2c:item:25746443dfd02dbc",
+      "presentationId": "narrow-custom",
+      "mode": "narrow",
+      "nativeCallbackACK": true,
+      "operationId": "06a6841f-7e73-45bd-8c64-919483dbaba4",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/narrow-hide-all.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "narrow",
+        "entryId": "c2c:item:25746443dfd02dbc",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "swole"
+        ],
+        "presentation": {
+          "id": "narrow-custom",
+          "title": "swole",
+          "visibilityMode": "hide-all",
+          "levels": [
+            {
+              "actual": "__click2cloud_true_remote_test__",
+              "title": "__click2cloud_true_remote_test__",
+              "visible": false
+            },
+            {
+              "actual": "provenance",
+              "title": "provenance",
+              "visible": false
+            },
+            {
+              "actual": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "title": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "visible": false
+            },
+            {
+              "actual": "body",
+              "title": "human",
+              "visible": false
+            },
+            {
+              "actual": "arm",
+              "title": "money-maker",
+              "visible": false
+            },
+            {
+              "actual": "bicep",
+              "title": "guns",
+              "visible": false
+            },
+            {
+              "actual": "muscle",
+              "title": "swole",
+              "visible": true
+            }
+          ]
+        },
+        "operationId": "06a6841f-7e73-45bd-8c64-919483dbaba4",
+        "originalFilename": "narrow-hide-all.original.png",
+        "storedFilename": "narrow-hide-all.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "narrow-mixed",
+      "itemId": "c2c:item:00f73bce6ae518ef",
+      "presentationId": "narrow-custom",
+      "mode": "narrow",
+      "nativeCallbackACK": true,
+      "operationId": "2c530c19-d423-4f20-9382-164669f6b6f8",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/narrow-mixed.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "narrow",
+        "entryId": "c2c:item:00f73bce6ae518ef",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "money-maker",
+          "swole"
+        ],
+        "presentation": {
+          "id": "narrow-custom",
+          "title": "swole",
+          "visibilityMode": "custom",
+          "levels": [
+            {
+              "actual": "__click2cloud_true_remote_test__",
+              "title": "__click2cloud_true_remote_test__",
+              "visible": false
+            },
+            {
+              "actual": "provenance",
+              "title": "provenance",
+              "visible": false
+            },
+            {
+              "actual": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "title": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "visible": false
+            },
+            {
+              "actual": "body",
+              "title": "human",
+              "visible": false
+            },
+            {
+              "actual": "arm",
+              "title": "money-maker",
+              "visible": true
+            },
+            {
+              "actual": "bicep",
+              "title": "guns",
+              "visible": false
+            },
+            {
+              "actual": "muscle",
+              "title": "swole",
+              "visible": true
+            }
+          ]
+        },
+        "operationId": "2c530c19-d423-4f20-9382-164669f6b6f8",
+        "originalFilename": "narrow-mixed.original.png",
+        "storedFilename": "narrow-mixed.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "narrow-original",
+      "itemId": "c2c:item:437b7dc7203331d8",
+      "presentationId": "narrow-original",
+      "mode": "narrow",
+      "nativeCallbackACK": true,
+      "operationId": "4c804708-c698-46ca-b124-db30f1117742",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/narrow-original.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "narrow",
+        "entryId": "c2c:item:437b7dc7203331d8",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "__click2cloud_true_remote_test__",
+          "provenance",
+          "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+          "body",
+          "arm",
+          "bicep",
+          "muscle"
+        ],
+        "presentation": {
+          "id": "narrow-original",
+          "title": "muscle",
+          "visibilityMode": "custom",
+          "levels": [
+            {
+              "actual": "__click2cloud_true_remote_test__",
+              "title": "__click2cloud_true_remote_test__",
+              "visible": true
+            },
+            {
+              "actual": "provenance",
+              "title": "provenance",
+              "visible": true
+            },
+            {
+              "actual": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "title": "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+              "visible": true
+            },
+            {
+              "actual": "body",
+              "title": "body",
+              "visible": true
+            },
+            {
+              "actual": "arm",
+              "title": "arm",
+              "visible": true
+            },
+            {
+              "actual": "bicep",
+              "title": "bicep",
+              "visible": true
+            },
+            {
+              "actual": "muscle",
+              "title": "muscle",
+              "visible": true
+            }
+          ]
+        },
+        "operationId": "4c804708-c698-46ca-b124-db30f1117742",
+        "originalFilename": "narrow-original.original.png",
+        "storedFilename": "narrow-original.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "depth-deep",
+      "itemId": "c2c:item:54eb8f0c26e5381f",
+      "mode": "depth",
+      "nativeCallbackACK": true,
+      "operationId": "55825f67-8f38-41b0-9ad1-4f81bc9aaafa",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/depth-deep.original.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "depth",
+        "entryId": "c2c:item:54eb8f0c26e5381f",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "redown",
+          "__click2cloud_true_remote_test__",
+          "provenance",
+          "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+          "body",
+          "arm",
+          "bicep",
+          "muscle",
+          "Save here"
+        ],
+        "operationId": "55825f67-8f38-41b0-9ad1-4f81bc9aaafa",
+        "originalFilename": "depth-deep.original.png",
+        "storedFilename": "depth-deep.original.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "keep-both-first",
+      "itemId": "c2c:assigned-entry:6c63ac8383722536",
+      "presentationId": "simple-selected",
+      "mode": "simple",
+      "nativeCallbackACK": true,
+      "operationId": "944bfff3-ba6e-4d0a-9593-d323f7285a3b",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/collision.full.name.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "simple",
+        "entryId": "c2c:assigned-entry:6c63ac8383722536",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "Swole"
+        ],
+        "presentation": {
+          "id": "simple-selected",
+          "title": "Swole",
+          "configuredTitle": "Swole",
+          "labelSource": "menu_title",
+          "visibility": "hide-all"
+        },
+        "operationId": "944bfff3-ba6e-4d0a-9593-d323f7285a3b",
+        "originalFilename": "collision.full.name.png",
+        "storedFilename": "collision.full.name.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    },
+    {
+      "name": "keep-both-second",
+      "itemId": "c2c:assigned-entry:6c63ac8383722536",
+      "presentationId": "simple-selected",
+      "mode": "simple",
+      "nativeCallbackACK": true,
+      "operationId": "7a4f1de4-8dcf-4ddc-9424-302a0b4668ba",
+      "key": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/collision.full.name-7a4f1de4-8dcf-4ddc-9424-302a0b4668ba.png",
+      "size": 290,
+      "sha256": "603a3661c3404e2468bf63039bc162cf0db8034a66e334375fda731333ba2c44",
+      "independentHttp": 200,
+      "metadata": {
+        "schema": 1,
+        "mode": "simple",
+        "entryId": "c2c:assigned-entry:6c63ac8383722536",
+        "location": {
+          "provider": "cloudflare",
+          "bucket": "redown",
+          "directories": [
+            "__click2cloud_true_remote_test__",
+            "provenance",
+            "609ec68c-1579-43c9-bdd3-0b8588eb14ba",
+            "body",
+            "arm",
+            "bicep",
+            "muscle"
+          ]
+        },
+        "menuPath": [
+          "Cloudflare",
+          "Swole"
+        ],
+        "presentation": {
+          "id": "simple-selected",
+          "title": "Swole",
+          "configuredTitle": "Swole",
+          "labelSource": "menu_title",
+          "visibility": "hide-all"
+        },
+        "operationId": "7a4f1de4-8dcf-4ddc-9424-302a0b4668ba",
+        "originalFilename": "collision.full.name.png",
+        "storedFilename": "collision.full.name-7a4f1de4-8dcf-4ddc-9424-302a0b4668ba.png"
+      },
+      "metadataMatchesClick": true,
+      "bytesMatch": true
+    }
+  ],
+  "worker": {
+    "name": "click2cloud-r2-c743c2a5e5ef49aaa35c",
+    "codeDigest": "d0IlnYuliadaIACn8Hi4yDB8TvIJD71xE4k9mRdkhBU",
+    "isolated": true,
+    "prefixScope": "__click2cloud_true_remote_test__/provenance",
+    "newWorker": false
+  },
+  "discovery": [
+    {
+      "prefix": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/",
+      "folders": [
+        "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/"
+      ]
+    },
+    {
+      "prefix": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/",
+      "folders": [
+        "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/"
+      ]
+    },
+    {
+      "prefix": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/",
+      "folders": [
+        "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/"
+      ]
+    },
+    {
+      "prefix": "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/",
+      "folders": [
+        "__click2cloud_true_remote_test__/provenance/609ec68c-1579-43c9-bdd3-0b8588eb14ba/body/arm/bicep/muscle/"
+      ]
+    }
+  ],
+  "state": "PASS",
+  "productionUnchanged": true,
+  "retained": "Isolated Worker/DO and only new unique test-prefix objects; no deletes, overwrites or production deployment."
+}

@@ -1,0 +1,17 @@
+{
+  "sourceRevision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "extensionVersion": "0.3.19",
+  "evidenceClass": "LIVE_CLOUDFLARE_READ_ONLY_SCRIPT_SETTINGS",
+  "request": {
+    "method": "GET",
+    "endpoint": "/accounts/{account_id}/workers/scripts/click2cloud-r2-c743c2a5e5ef49aaa35c/settings"
+  },
+  "httpStatus": 200,
+  "providerCodes": [],
+  "codeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+  "buildAndBindingDigestMatch": true,
+  "bucket": "redown",
+  "prefixScope": "__click2cloud_true_remote_test__/provenance",
+  "productionUnchanged": true,
+  "credentialValuesExported": false
+}

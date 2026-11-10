@@ -1,3 +1,5 @@
+Current implementation status: Phases5–7 and the consolidated Gate A are now implemented; see [remaining architecture handoff](../composition-remaining/HANDOFF.md). The report below is the preserved historical Phase1–4 snapshot, including its then-pending work.
+
 # Phased upgrade handoff — November 9, 2026
 
 Development branch: `dev/phased-narrow-gallery-provenance`, based on main `9e8916d`. The baseline tag remains `checkpoint/click2cloud-working-before-major-upgrades-2026-11-09` → `3b24320138ff0ebbf50a0e6a912a5d2800038676`. REDOWN is read-only and unchanged. No merge, push, production deployment, provisioning, object overwrite or reset was performed. Extension0.3.18 retains its identity/API and unchanged Worker digest.

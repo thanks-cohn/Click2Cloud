@@ -1,7 +1,7 @@
 # P0 — Right-click architecture: independent Simple/Narrow/Depth display and non-destructive visibility
 
 **Reported:** 2026-11-09
-**Status:** OPEN — requested architecture and UX behavior; NOT IMPLEMENTED
+**Status:** SOURCE IMPLEMENTED; representative/browser and isolated live R2 PASS; installed Windows acceptance BLOCKED/unverified
 **Area:** Destinations Manager, Show in Chrome, native Chrome right-click menu
 **Implementation work order:** [post-current Codex task](../../codex/CODEX_NEXT_RIGHT_CLICK_COMPOSITION_AND_VISIBILITY_2026-11-09.md)
 **Related bug:** [Depth nesting and single-bucket exception](../Bugs/P0_DEPTH_SINGLE_BUCKET_BRANCH_AND_NESTING_MISSING_2026-11-09.md)
@@ -86,3 +86,5 @@ The user also requires that **two distinct saved Narrow destination presentation
 This is **NOT IMPLEMENTED at the assessed main revision 1123099ce**: normalizedDestinations and createDestination reject repeated physical target keys, and composite menu candidate selection deduplicates by targetKey. Allow distinct Narrow *presentation IDs* without globally permitting unintended duplicate entries or changing physical target authorization; maintain deterministic native menu IDs and correct click routing. See [queued comprehensive Codex request](../../codex/CODEX_NEXT_RIGHT_CLICK_COMPOSITION_AND_VISIBILITY_2026-11-09.md).
 
 Implementation update: Gate A source58d017f; representative fixture and isolated live Worker/R2 gates PASS. Actual installed Windows native acceptance remains BLOCKED/unverified. Exact receipts: `docs/evidence/composition-remaining/gate-a/verification.json`. Original incident text retained above.
+
+Final consolidated acceptance: `docs/evidence/composition-remaining/HANDOFF.md`. Historical incident/requirement wording above is retained; current proof boundaries are in Gate E.

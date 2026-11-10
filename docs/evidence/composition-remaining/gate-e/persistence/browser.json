@@ -1,0 +1,226 @@
+{
+  "revision": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+  "runtimeSourceDirty": false,
+  "evidenceClass": "REAL_CHROMIUM_INDEXEDDB_PRODUCTION_MODULES_FIXTURE_CHROME_NOT_OWNER_WINDOWS",
+  "results": [
+    {
+      "gate": "baseline-six-config-rows-absent-native-583",
+      "state": "REPRODUCED",
+      "directRead": {
+        "desired": 0
+      },
+      "getConfigurationGuard": "CONFIGURATION_RECORD_MISSING",
+      "oauth": "NOT_EXERCISED_IN_THIS_GATE; see separate genuine production Shelf lost-state fixture",
+      "source": "3805acbe1bce14db88077acf5d688fa83bf76b2e"
+    },
+    {
+      "gate": "C2C-PERSIST-1-fresh-versus-established-absence-direct-read-and-write",
+      "state": "PASS",
+      "nativeGeneration": 583,
+      "zeroMutations": true
+    },
+    {
+      "gate": "C2C-PERSIST-1-six-rows-absent-native-583-remaining-approval-history-preserved",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-2-complete-atomic-boundary-and-restart-proof",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-3-missing-generation-intact-native-stale-and-corruption",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-4-journal-only-checkpoint-only-no-fake-defaults",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-4-every-put-and-precommit-aborts-leave-old-state",
+      "state": "PASS",
+      "faultStages": [
+        "state:put:configurationProvenance",
+        "state:put:configurationIntegrity",
+        "state:put:product",
+        "state:put:mode:simple",
+        "journal:add:config",
+        "state:put:journalMeta",
+        "state:put:mode:nested",
+        "state:put:mode:depth",
+        "journal:add:product",
+        "state:put:retry:fault",
+        "beforeCommit",
+        "afterCommit"
+      ],
+      "iterations": 11
+    },
+    {
+      "gate": "C2C-PERSIST-4-after-commit-response-loss-idempotent-retry-and-concurrency",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-4-open-faults-versionchange-no-silent-reinitialization",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-5-50-store-reopens-no-state-or-approval-change",
+      "state": "PASS",
+      "opens": 50
+    },
+    {
+      "gate": "C2C-PERSIST-6-preview-complete-external-backup-preserve-apply-ACK-idempotency",
+      "state": "PASS",
+      "request": {
+        "method": "restoreRightClickMenu",
+        "params": {
+          "previewToken": "SHA256_BOUND_PREVIEW",
+          "idempotencyKey": "fixture"
+        }
+      },
+      "response": {
+        "state": "completed",
+        "code": "OK",
+        "native": "NATIVE_ACKNOWLEDGED",
+        "generation": {
+          "desired": 584,
+          "applied": 584
+        }
+      },
+      "proof": "real IDB; fixture Chrome callbacks/filesystem; not owner recovery"
+    },
+    {
+      "gate": "C2C-PERSIST-6-native-partial-no-source-conflicts-stale-preview-preservation-failure",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-7-bounded-corruption-properties-no-mutation",
+      "state": "PASS",
+      "fixtures": 25
+    },
+    {
+      "gate": "C2C-PERSIST-4-real-browser-Worker-termination-during-and-after-transaction",
+      "state": "PASS",
+      "points": [
+        "after-product-put",
+        "before-commit",
+        "after-commit"
+      ],
+      "runtime": "real Web Worker, not MV3 service worker"
+    },
+    {
+      "gate": "C2C-PERSIST-4-first-commit-and-checkpoint-fault-coverage",
+      "state": "PASS",
+      "firstCommitFaults": 12
+    },
+    {
+      "gate": "C2C-PERSIST-6-complete-local-journal-recovery-and-surviving-conflicts",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-6-interrupted-external-boundary-rejects-mixed-Depth-policy",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-3-native-clear-and-save-block-after-authority-loss",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-performance-direct-read-before-after",
+      "state": "PASS",
+      "measurement": "100 warmed production CURRENT reads, real IndexedDB, synthetic small configuration; not Windows input latency",
+      "milliseconds": {
+        "baseline": {
+          "p50": 0.7000000178813934,
+          "p95": 3.800000011920929
+        },
+        "fixed": {
+          "p50": 0.7000000178813934,
+          "p95": 1.300000011920929
+        }
+      }
+    },
+    {
+      "gate": "C2C-PERSIST-4-0.3.12-to-0.3.13-to-fixed-same-origin-upgrade",
+      "state": "PASS",
+      "sources": [
+        "0222969 (0.3.12)",
+        "3805acb (0.3.13)",
+        "fixed 0.3.15"
+      ],
+      "origin": "same isolated Chromium origin; no other-profile access"
+    },
+    {
+      "gate": "C2C-PERSIST-3-concurrent-config-change-invalidates-compiled-menu-before-generation-advance",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-6-partial-journal-same-revision-disagreement-is-conflict",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-6-opaque-filesystem-handle-preserved-in-original-IDB",
+      "state": "PASS"
+    },
+    {
+      "gate": "C2C-PERSIST-5-health-backup-status-does-not-create-absent-database",
+      "state": "PASS"
+    },
+    {
+      "gate": "composition-and-local-MP4-survive-50-reopens-before-real-browser-crash",
+      "state": "PASS",
+      "opens": 50,
+      "mediaType": "video/mp4",
+      "bytes": 1942,
+      "narrowPresentations": 2,
+      "samePhysicalTarget": true
+    },
+    {
+      "gate": "ratchet-baseline-post-commit-reconcile-hides-durable-restoration",
+      "state": "REPRODUCED",
+      "productionSource": "08703cd / 0.3.14",
+      "response": "failed",
+      "code": "OPERATION_FAILED",
+      "durableCurrent": true,
+      "responseContainsConfiguration": false
+    },
+    {
+      "gate": "ratchet-owner-confirmed-rebuild",
+      "state": "PASS",
+      "proofClass": "REAL_CHROMIUM_IDB_OPFS_AND_NATIVE_CALLBACK_FIXTURE",
+      "profileProducer": "SYNTHETIC_MANIFEST_NOT_ACTUAL_WINDOWS_TASKLIST",
+      "outcome": "REBUILT_WITH_OWNER_CONFIRMATION",
+      "generation": {
+        "desired": 584,
+        "applied": 584
+      }
+    },
+    {
+      "gate": "ratchet-rebuild-blocks-missing-copy-revoked-authority-and-changed-native-proof",
+      "state": "PASS"
+    },
+    {
+      "gate": "ratchet-committed-rebuild-retains-visible-result-when-native-reconcile-unavailable",
+      "state": "PASS"
+    },
+    {
+      "gate": "ratchet-baseline-rebuild-replaces-out-of-grant-native-account",
+      "state": "REPRODUCED",
+      "productionSource": "204d400",
+      "effect": "native replacement accepted without prior-account grant",
+      "providerResourcesChanged": 0
+    },
+    {
+      "gate": "ratchet-rebuild-account-scope-includes-replaced-native-history",
+      "state": "PASS"
+    },
+    {
+      "gate": "ratchet-health-discovery-trace-support-zero-durable-mutation",
+      "state": "PASS"
+    },
+    {
+      "gate": "real-Chromium-SIGKILL-and-same-profile-process-restart",
+      "state": "PASS",
+      "scope": "disposable fixture profile; not Windows owner or MV3"
+    }
+  ]
+}
