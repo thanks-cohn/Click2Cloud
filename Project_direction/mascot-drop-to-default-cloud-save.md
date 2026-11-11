@@ -21,6 +21,18 @@ Much like Chutey, REDOWN and Click2Cloud can feature a small mascot, preferably 
 - Maintain privacy: send file bytes and needed filename/path metadata to the provider, not unrelated webpage/source URLs.
 - Explore Chutey-style personality/animation as an optional layer; core drop-to-default functionality should work independently of animation.
 
+## Mascot animation identity — dimensional pocket
+
+The mascot doesn't simply accept files or show a conventional upload spinner. **It flips up, opens its dimensional pocket, and absorbs the dropped files into it.** The pocket is an absurd little portal to the user's default cloud destination.
+
+- The physical performance should be **ludicrous, exaggerated, playful, and unpredictable**: outrageous flips, rubbery deformation, impossible pocket geometry, comic anticipation, and satisfying absorption.
+- Drag-hover can trigger an anticipatory pose; a valid drop triggers the flip/open/absorb sequence. Multiple files can tumble or cascade in without implying unsupported operations.
+- This theatrical absorption is distinct from verified completion: the mascot may swallow the files as the request is accepted, but must not show a final success celebration, increment success counters, or claim storage until provider verification succeeds.
+- If the upload fails, the character may react comically, but the interface must clearly communicate the failed or pending state and enable retry.
+- Favor cheap, responsive animation so the mascot never harms upload performance or UI responsiveness. Motion reduction/accessibility should be supported.
+
+**Creative rule:** The dimensional pocket is the mascot's defining gesture, not merely a generic drag-and-drop highlight.
+
 ## Design / engineering considerations for later
 - Decide whether the bottom-left target lives inside the app/extension UI or as an optional desktop overlay, respecting browser restrictions on drag-and-drop and desktop-wide overlays.
 - Support multiple files, clear accepted/rejected file feedback, cancellation, progress, collisions, and retry without unintended duplicate uploads.
