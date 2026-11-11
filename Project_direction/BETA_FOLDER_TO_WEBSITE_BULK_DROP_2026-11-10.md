@@ -1,7 +1,7 @@
-# Product direction — Explorer multi-select, clipboard, and folder-to-website bulk drop (BETA)
+# Product direction — REQUIRED Explorer multi-select, copy/paste, multi-file drag; future folder-drop BETA
 
 **Date:** November 10, 2026  
-**Status:** Future **BETA** proposal, not implemented, released, or guaranteed.  
+**Status:** **REQUIRED CORE FEATURES — ongoing implementation and continuous improvement:** Ctrl/Cmd/Shift multi-selection, select many, actual file copy/paste, multi-file drag and direct thumbnail drag. **FUTURE BETA ONLY:** folder-to-website bulk drop and optional ZIP packaging. This document does not claim that any unverified capability is implemented or universally supported.  
 **Scope:** Click2Cloud cloud file Explorer, using the existing drag-and-drop infrastructure.  
 **Related:** [Chutey browser file explorer vision](../directions/chutey-shelf-internet-file-explorer.md)
 
@@ -13,9 +13,9 @@ The Explorer should behave like a familiar local file explorer, but across the w
 
 **Owner-reported current milestone, not independently verified in this document:** an image can already be dragged from the Click2Cloud cloud Explorer into a website **after opening the image in Preview**. Dragging a closed thumbnail directly is not yet working. Protect and reuse the existing successful transfer path; don't create a competing drag engine.
 
-## Interaction specification — multi-selection FIRST
+## REQUIRED CORE — Explorer selection is NOT beta
 
-Treat native Explorer selection semantics as a fundamental building block of the future beta:
+**Owner-mandated product standard, to be developed, tested and improved continuously—not postponed behind a beta flag.** Treat ordinary Explorer selection semantics as a fundamental core capability:
 
 - **Click** one thumbnail/file row: select that file. **Drag** the selected file from its *closed* thumbnail or row without opening Preview.
 - **Ctrl+click** (Windows/Linux) or **Cmd+click** (macOS): toggle individual files in or out of a noncontiguous selection, preserving the other selected files.
@@ -29,9 +29,9 @@ Treat native Explorer selection semantics as a fundamental building block of the
 
 These selection behaviors should be consistent in grid, thumbnail, and list views; support keyboard focus and work without first loading full-resolution previews. Names, bytes, MIME types, order and per-file errors must be preserved where possible.
 
-## Two ways to send the SAME selection to a website
+## REQUIRED CORE — two ways to send the SAME selection to a website
 
-### A. Multi-file drag-and-drop — beta
+### A. Multi-file drag-and-drop — necessary core feature
 
 1. Select several cloud images/documents using Ctrl, Shift or Select All.
 2. Grab any selected thumbnail or file row, with no Preview requirement.
@@ -40,7 +40,7 @@ These selection behaviors should be consistent in grid, thumbnail, and list view
 5. Preflight incompatible types, count, aggregate size, permissions and other known constraints. Make partial rejection explicit and ask before silently omitting user-selected items.
 6. Clearly distinguish **files prepared**, **handoff attempted** and **website upload/acceptance verified** (the last cannot generally be determined by an extension).
 
-### B. Copy-to-clipboard and paste — beta, separate compatibility matrix
+### B. Copy-to-clipboard and paste — necessary core feature, separate compatibility matrix
 
 1. Select multiple files using exactly the same Explorer selection.
 2. Choose **Copy files** or press Ctrl+C / Cmd+C.
@@ -52,7 +52,16 @@ These selection behaviors should be consistent in grid, thumbnail, and list view
 
 **Key architectural rule:** Selection state is shared by the drag and copy paths; transfer transport may differ because web drag-and-drop and system clipboard capabilities are not interchangeable. Reuse the existing core file-read and staging API, without a second independent transfer engine.
 
-## Folder-to-website bulk drag — later BETA milestone
+## Continuous core engineering mandate (not beta)
+
+- This is a **necessary Click2Cloud File Explorer feature set** and should remain on the active implementation roadmap throughout future development, not a someday experiment. Prioritize production-grade selection, actual file Copy/Paste and reliable multi-file drag in ordinary Explorer workflows.
+- Use one consistent selection model for Ctrl/Cmd-click, Shift-click, Select All, keyboard Copy and drag. Make files draggable from closed thumbnails without Preview, but preserve existing working preview drag.
+- Build a clear compatibility matrix and progressively extend real-file clipboard paste to the websites/browsers where it is technically feasible; do not substitute URL text for actual bytes or claim unsupported universal file clipboard parity.
+- Measure and regress-test responsiveness, correctness and privacy each time the Explorer/drag engine changes. Core multi-file features must never silently corrupt selection, leak private filenames/URLs, or destabilize login, right-click saving, or browsing.
+- Distinguish **required and continually improved product capability** from **technically unsupported destination behavior**. A target website can refuse bulk drag or paste; Click2Cloud must report those limitations transparently and support practical alternatives without downgrading the feature to an optional beta.
+- **Only the folder-expansion-to-site and possible ZIP packaging remain beta/experimental.** They can be prototyped after foundational core operations are dependable.
+
+## FUTURE BETA ONLY — folder-to-website bulk drag
 
 - User drags an existing cloud folder into an accepting web page. Click2Cloud enumerates the user-authorized files **on demand**, not just because the user browsed the folder.
 - Default beta operation is **expand folder to individual accepted files** (particularly images), rather than assume the destination website understands folders or directory trees.
@@ -62,7 +71,7 @@ These selection behaviors should be consistent in grid, thumbnail, and list view
 - No assumed folder acceptance. If browser/site will not accept multiple files, report limits or offer a safe fallback. No claims of successful website upload without actual evidence.
 - Allow progress, cancellation and bounded-memory staging; do not freeze the Explorer, preload huge folders, or retain bytes indefinitely. Avoid duplicate handoffs and recursive symlink/path hazards where relevant.
 
-## Optional ZIP mode — later experimental possibility, NOT in first beta
+## FUTURE EXPERIMENT ONLY — optional ZIP mode, NOT part of initial beta
 
 - Consider user-selected **Package as ZIP** to preserve relative folder paths or upload one archive to a site that explicitly supports archives.
 - Never auto-zip without the user's consent. ZIP support does not mean the website will unpack or accept it.
@@ -70,25 +79,25 @@ These selection behaviors should be consistent in grid, thumbnail, and list view
 
 ## Product credibility and stability policy
 
-**Display the name: BETA — Bulk Drag, Copy & Folder Drop.** Keep the experimental capability **opt-in / OFF by default**.
+**Label ONLY the future folder expansion feature: BETA — Folder-to-Website Drop.** The later ZIP option remains experimental. **Do NOT label Ctrl/Shift selection, Select All, Copy, Paste, direct thumbnail drag, or multi-file drag as beta, and do NOT gate these core operations behind the folder beta flag.** Keep only the experimental folder/ZIP pathway opt-in and OFF by default.
 
-- Existing single-image preview drag must remain reliable and unchanged for people not in the beta.
-- Feature flag and independent failure boundaries must protect normal Click2Cloud login/OAuth, cloud navigation, right-click saves, History, and saved destinations.
+- Existing single-image preview drag must remain reliable for everyone; core direct-thumbnail drag, standard multi-selection, copy/paste and multi-file drag are required features to be developed and continuously improved for all users as browser/site capabilities permit.
+- The **folder beta's** feature flag and independent failure boundaries must protect the required core Explorer operations as well as normal Click2Cloud login/OAuth, cloud navigation, right-click saves, History, and saved destinations.
 - No assertion that any website, Chrome build, or clipboard implementation supports multi-file paste without direct testing.
 - No false completed-upload receipt: an extension may observe its own file handoff but often cannot inspect third-party upload acceptance.
 - No silent browser disk fallback for Cloudflare **TRUE REMOTE right-click saves**. Explicit user-directed drag/copy transport is a separate boundary and should be represented accurately.
 - Respect provider privacy: remote file listing/reads require appropriate authorization; send only the user-selected bytes/names and necessary transfer metadata to target websites, not cloud tokens.
 - API-first, one-to-one operation parity, no new parallel transport engine, no destructive state reset, no premature implementation promise.
-- This document records **direction only**. Do not start shipping beta code based solely on its existence; stability and current P0 work retain priority.
+- **Core feature mandate:** Treat desktop-like selection, real-file Copy/Paste and multi-file drag as ongoing, necessary Explorer work, with continuous testing and improvement; do not defer them indefinitely as experiments. Coordinate implementation with current P0 reliability priorities without sacrificing baseline stability. **Beta scope:** this document does not authorize an immediate rollout of experimental whole-folder drop or ZIP packaging.
 
-## Measurable acceptance criteria before broad availability
+## Core acceptance criteria (continuous) and additional beta gates
 
 1. Direct drag from a **closed thumbnail** to a compatible test drop zone works, while Preview drag remains functional.
 2. Ctrl/Cmd-click toggles individual files; Shift-click selects contiguous ranges; Ctrl/Cmd+A works within a visible, defined scope.
 3. Dragging one selected item with 2, 10, and 50 selected files carries the correct set. Verify real bytes, correct filenames, no phantom items, and per-file error reporting at a controlled receiving fixture.
 4. Ctrl/Cmd+C and Ctrl/Cmd+V paste actual file/image bytes **where supported**, including multiple items only when both browser clipboard and target website genuinely support it. Clearly surface limitations elsewhere; never fake success.
 5. Copy and Drag share the same selection snapshot: no stale selection, accidental extra files, or automatic background export.
-6. A folder with images, documents and unsupported files produces accurate preflight and only user-confirmed compatible file handoffs; test empty folders, nested folders, duplicate basenames, large groups, cancellations and unavailable cloud reads.
+6. **Future folder BETA only:** A folder with images, documents and unsupported files produces accurate preflight and only user-confirmed compatible file handoffs; test empty folders, nested folders, duplicate basenames, large groups, cancellations and unavailable cloud reads.
 7. No Explorer stutter/resource spikes, no auth/session breaks, no regressions to normal single-file drag and normal provider saving.
 8. Document a **browser × target-site × mode (drag or paste) × file-count** compatibility matrix, distinguishing real site acceptance from local synthetic test coverage.
 
