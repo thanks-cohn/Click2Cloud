@@ -80,3 +80,66 @@ Avoid promising every bug will be repaired immediately, each customer gets an in
 **Priority:** High architectural reliability direction, starting with independently functioning context-menu saves and fault isolation, then validated flight recorder, bot/test diagnostics API, self-service reporting and support copy.
 
 **Relationship to existing plans:** Complements Project_direction/REDOWN_TACTILE_MACHINE_CLICK2CLOUD_MINIMAL_REFERENCE_BASELINE_2026-11-12.md and the existing persistent queue and verified-save direction. Do not compromise the deliberately minimal Click2Cloud UI with REDOWN-specific styling.
+
+
+## 7. Headless Zombie Mode — three-tier graceful fallback
+
+**Internal team nickname:** **Headless Zombie Mode**. This is an affectionate engineering shorthand for Click2Cloud's refusal to lose its core job when optional UI components fail. It is not a promise of literal crash-proof software or a required customer-facing brand.
+
+**Design mantra:** *The Shelf may die; the popup should still work; the right-click menu must be our last dependable line of defense.*
+
+### Tier 1 — Full Shelf (preferred experience)
+
+The Shelf remains the primary, richer UI for cloud saves, destination selection, configuration and status. A Shelf crash or failed boot must be contained to its UI boundary. Offer a visible Reload Shelf action; restoration reads persisted state rather than resetting destinations, queue or receipts.
+
+### Tier 2 — Independent extension popup (graceful fallback)
+
+If the Shelf cannot render, open, initialize or recover, the normal browser toolbar extension popup is the user's fully usable fallback control panel. Build it as an **independent minimal entry point**; it must not import a Shelf-only boot path or depend on Shelf state in memory.
+
+The popup must support:
+- provider sign-in and reauthentication through sanctioned OAuth/login flows;
+- selection, creation where supported, and management of configured cloud destinations/accounts/folders/buckets;
+- default destination assignment and right-click menu configuration, including simple/narrow/depth choices when applicable;
+- current health, queued/saved/failed status and truthful recent history;
+- Reload Shelf and Advanced Diagnostics / Export / Send Bug Report;
+- clear guidance if extension permissions, browser services, or a provider are truly unavailable.
+
+A broken Shelf should **never force the user to repair the Shelf just to sign in, manage destinations, or keep saving**. The popup should degrade to simple reliable native controls if advanced presentation/configuration fails.
+
+### Tier 3 — Headless context-menu engine (last-resort core)
+
+The **right-click action and configured right-click destination menus** are core service capabilities, independent of both Shelf and popup rendering. Treat them as the most resilient path, with durable snapshot of last-known-good menu configuration and validated destinations. Persist a safe default destination and reconstruct registrations on worker startup or extension lifecycle events, with reconciliation and health checks.
+
+- Register/rebuild browser context menus without waiting for Shelf or popup boot.
+- Avoid coupling right-click handlers to open UI ports, in-memory Shelf-only configuration, or transient component state.
+- If a new menu configuration is corrupt, preserve or roll back to a validated last-known-good snapshot, retaining usable destinations rather than clearing every menu.
+- If configuration storage is temporarily unreadable, fall back only to verified known-safe choices; do not silently upload to an unintended account, folder or bucket.
+- Queue and persist eligible intents before volatile work where possible; ensure deduplication, bounded retries, explicit failure state and verified cloud receipts.
+- Recover after extension worker suspension and restart and restore menus where browser APIs permit; distinguish *click accepted*, *queued*, *uploading*, *verified saved* and *failed*.
+- If no authorized provider/valid destination exists, right-click can still explain the missing setup and route users to the popup; it must not fabricate success.
+
+### Failure isolation matrix
+
+| Failure | Full Shelf | Extension popup | Right-click/save engine |
+| --- | --- | --- | --- |
+| Shelf won't start | Unavailable; reload option | **Must remain usable** | **Must remain usable with valid configuration** |
+| Shelf crashes while saving | Recover/reopen | **Remains usable** | **Continue/reconcile independent jobs** |
+| Popup UI fails | May remain available | Unavailable | **Must remain usable with last-known-good destinations** |
+| Both UI surfaces fail | Unavailable | Unavailable | **Aim to preserve registered menus and eligible saves** |
+| Extension worker restarts | Reconnect after startup | Reconnect after startup | **Re-register menus, rehydrate durable queue** |
+| Provider auth expired | Can show reconnect | **Must support re-login** | Preserve truthful failure/pending status; other providers usable |
+
+**Engineering honesty:** Chrome extension runtime termination, browser shutdown, missing permissions, inaccessible storage, expired authentication and provider outages are external hard limits. "Crash-proof" means **maximum feasible fault tolerance demonstrated by adversarial testing**, not an absolute guarantee that every possible crash still permits uploads. A context-menu click itself must never be falsely reported as a completed cloud save.
+
+### Headless Zombie Mode acceptance tests
+
+1. Inject an exception before Shelf boot and verify popup login, destination management and right-click saving independently.
+2. Crash Shelf after setup; ensure last-known-good nested right-click menu continues functioning.
+3. Break popup rendering while Shelf is unavailable; verify right-click can save to a correctly configured, authorized destination.
+4. Corrupt a proposed menu change; verify rollback to validated menu snapshot instead of disappearing menus.
+5. Repeatedly suspend/restart extension workers and verify lifecycle re-registration, queue reconciliation and no duplicate verified saves.
+6. Expire one provider's tokens; verify the popup can reauthenticate and other providers' right-click paths remain usable.
+7. Reload Shelf after failure and verify it reconstructs from shared persisted truth, not a second divergent state.
+8. Record fault injection and recovery events in the flight recorder, including the active tier, reason for fallback, menu registration state and recovery outcome.
+
+**Development priority:** Right-click/menu independence first, popup-Shelf separation second, full fallback diagnostics and controlled fault-injection testing alongside implementation. Preserve Click2Cloud's simple design; resilience should not require REDOWN's richer interface.
