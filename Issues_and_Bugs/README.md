@@ -40,3 +40,9 @@ CURRENT incident follow-up: 0.3.15 production repairs and evidence are on `dev/p
 - **P1 UX ISSUE — Depth Destinations Manager does not offer Make Default:** [Depth row action rule](Issues/P1_DEPTH_DESTINATIONS_MANAGER_NO_MAKE_DEFAULT_2026-11-09.md).
 
 The original issue records retain the observed defects and requirements. Source repairs, representative browser tests and isolated live R2 evidence are now documented in [the consolidated handoff](../docs/evidence/composition-remaining/HANDOFF.md). Actual installed Windows acceptance remains unverified; newer queued issues remain open.
+
+## November 12 owner reports — OPEN
+
+- **P0 BUG: right-click Save does not work; generic error hides original code.** [Exact owner message and investigation/acceptance](Bugs/P0_RIGHT_CLICK_SAVE_ACTION_GENERIC_OPERATION_FAILED_2026-11-12.md): "The operation could not be completed. Inspect the relevant panel for details." This is a live owner observation, not an established underlying cause. Preserve actual provider, error code, native click and verified receipt evidence.
+- **P1 UX ISSUE: explicit Save button inside Manage Destinations.** [Configuration Save control and durable-commit acceptance](Issues/P1_MANAGE_DESTINATIONS_EXPLICIT_SAVE_BUTTON_2026-11-12.md). Do not confuse configuration Save with native context-menu file Save; preserve existing immediate controls and saved configuration.
+- **CRITICAL architecture reference:** [Depth bucket submenu/Save here rules](../architecture/depth.md) and [GO TO / LOGIN / REFRESH, red OAuth icon](../architecture/go-to-login-refresh.md).
