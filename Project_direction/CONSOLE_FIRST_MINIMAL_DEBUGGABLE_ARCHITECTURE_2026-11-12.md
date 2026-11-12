@@ -145,3 +145,7 @@ This code catalog is a contract shared by F12, GUI and support exports, not a gi
 - [Manage Destinations explicit Save request](../Issues_and_Bugs/Issues/P1_MANAGE_DESTINATIONS_EXPLICIT_SAVE_BUTTON_2026-11-12.md)
 
 **No runtime changes are authorized or claimed by creating this architectural paper.**
+
+## Companion visual architecture — opt-in Debug Mode and a minimal Queue
+
+The detailed display-layer specification lives in [`architecture/debug.md`](../architecture/debug.md). Click2Cloud Settings gets a **Debug** entry at its bottom, OFF by default. A dedicated Queue page stays simple in ordinary mode (time, filename, target and honest progress/outcome; a carefully scoped **Clear all** action). When Debug Mode is ON, the **same** rows expose on-demand non-secret operation details, phase timelines, typed errors and safe diagnostics rather than requiring a separate engine or heavy always-visible dashboard. Clear all must not delete cloud files, active/uncertain jobs, verified History or forensic evidence. Console-first inspection and optional rich visual diagnostics must share the same trusted canonical operation records.
