@@ -26,6 +26,32 @@ This complements **Console-First Observability, supported by a Diagnostic Intros
 - Persist the preference sensibly across normal Shelf reopen/reload; define profile-specific persistence and include an easy turn-off path. Do not make Debug Mode a prerequisite for collecting the basic operation ID, outcome, reason code and key timestamps used to investigate ordinary failures.
 - For unusually sensitive or high-volume RAW capture, use a **separate explicit advanced consent**, a privacy warning and bounded retention/quota controls. Turning on ordinary visual Debug Mode must not automatically collect or expose full sensitive URLs, tokens, cookies, file contents or private credentials.
 
+## 3. Shelf placement and navigation — Queue bottom-left, Manage Destinations bottom-right
+
+**Owner-approved Shelf location:** Add **one Queue button at the far bottom-left of the persistent Shelf footer**, on **the very same row** as the existing **single Manage Destinations button at the far bottom-right**. Keep a generous flexible gap between them and balanced, comfortable footer-edge and button padding. Do not move Manage Destinations or duplicate it elsewhere.
+
+\`\`\`text
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ ↗ Click2Cloud   Remotes   File Explorer   Settings   Help · Diagnose   ☀ / ◐ │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│                 Main content: Remotes / Explorer / Settings / Queue            │
+│                                                                               │
+├───────────────────────────────────────────────────────────────────────────────┤
+│   [ Queue ]                                       [ Manage Destinations ]     │
+└───────────────────────────────────────────────────────────────────────────────┘
+\`\`\`
+
+**Queue is an internal Shelf page, not a modal or a separate window.** Clicking the footer Queue button changes the central content, **not** the global header. The existing header options remain visible and fully usable, exactly as the owner specified: **↗ Click2Cloud; Remotes; File Explorer; Settings; Help · Diagnose; ☀ / ◐**. From the Queue page, users can click Remotes or File Explorer directly to navigate back, or use Settings, Help · Diagnose, and the theme control normally. Do not replace these controls with a Queue-only toolbar, disable them or force the user to close/reopen the Shelf.
+
+Keep the shared footer visible on Queue as well. A subtle selected state on Queue is allowed without inventing another top navigation tab. Return to File Explorer should restore the meaningful folder/selection/scroll state where feasible; unrelated Queue progress continues independently of the view. The Explorer-specific side tree may be omitted while Queue content is open if needed, but the global header/footer remain.
+
+**Current source/layout anchor (reference only; no code edits in this paper):** \`extension/app.html\` already contains the persistent global header and a footer with \`#manage\`; \`extension/app.css\` already gives that footer flex alignment and padding. The future implementation should reuse this shell and small shared styling, not create a second UI or queue engine.
+
+**Acceptance:** one row with Queue far-left and Manage Destinations far-right, ample padding and no overlap at responsive widths; Queue view shows the unchanged navigable top options; clicking any top navigation option actually exits Queue; returning does not lose authoritative Queue entries or duplicate saves.
+
+---
+
 ## 3. The Queue — a normal, dedicated page
 
 The Queue is a first-class, simple **page** reachable from normal navigation. Users can open it without enabling Debug Mode; it is **not** a developer-only page, modal that disappears, or a fake duplicate of History.
@@ -55,9 +81,102 @@ Time       File                       Saved to                  Outcome
 
 **Important distinction:** `attempted save` / `queued` / `sent` / `uploading` is never equivalent to `verified saved`. If a file may have arrived but no receipt was confirmed, show **Uncertain** and do not blindly retry. The Queue is a view of durable operation records, not a list of only successful files.
 
+### Expandable Queue cards and smart initial expansion
+
+**Every Queue item is a collapsible/expandable card.** Its compact header (time, filename, intended saved-to location, and truthful state/progress) is always visible. The disclosure arrow or card header expands/collapses the richer detail **in place**, not in a new browser page or modal. The owner wants these clear threshold rules:
+
+- **Debug Mode OFF:** use clean compact one-line rows; no expanded developer diagnostics are forced into the ordinary view.
+- **Debug Mode ON, 1–19 items:** **all cards initially expanded**. At 19, all 19 can be expanded without extra clicks.
+- **Debug Mode ON, 20 or more items:** **only the first five cards initially expanded**, in current visible order (normally newest attempts first); all others are collapsed by default. If there are 100 items, expand 1–5 and collapse 6–100.
+- **Manual user changes always win:** anyone may collapse the first five, expand item 50, or collapse everything. Progress updates, re-renders and scrolling must not unexpectedly reset those choices. On first entry or first enabling Debug Mode, apply defaults; afterward preserve manually selected expansion keyed by stable operation ID.
+- Render large lists using pagination/virtualization and **lazy-load expanded evidence only**. Expanding the first five must not secretly load all 100 diagnostics or generate heavy network/API traffic. Automatic rules should not expand 100 unbounded raw event timelines or cause a significant Shelf performance regression.
+- Use an actual disclosure button, \`aria-expanded\`, keyboard Enter/Space, visible focus, clear heading, and responsive readable card layout. Expanded content should appear beneath its own matching header; do not change the order of existing jobs.
+- Expanded state is only a presentation preference; it never pauses, retries, authorizes or deletes a save. Clearing a Queue entry discards its presentation state; paused jobs keep their cards.
+
+### Required Debug card anatomy — lessons from REDOWN incidents
+
+Make each expanded card a compact, self-explaining diagnostic report. Put **the answer first**, then evidence progressively:
+
+**A. What happened and what next?**
+- Honest state: queued, paused, source-fetching, uploading, verifying, verified completed, blocked, failed, cancelled or uncertain.
+- Concise human explanation, **exact original typed error/code and stage**, provider origin, how confident the classification is, and one actionable **Next safe action**.
+- Do not disguise \`OAuth2 not granted or revoked\`, \`ONEDRIVE_GRAPH_503\`, a source that returned HTML instead of a file, or an unknown source length as the same generic \`PROVIDER_FAILED\`.
+
+**B. URL provenance — required fields, with \`N/A\` when not observed**
+
+Every expanded card should have a small **URLs / Source provenance** section. These URLs are essential when diagnosing a source-file failure, redirect, hotlink blocking, cloud verification and native context-menu routing:
+
+| Field | Meaning | If not captured or unavailable |
+| --- | --- | --- |
+| **Host page URL** / **Webpage URL** | Original webpage where the user invoked the right-click or discovered the content (\`pageUrl\`) | **N/A** |
+| **Source URL** / **Asset URL** | Exact candidate image/file/link requested for saving, where legitimately available (\`sourceUrl\`) | **N/A** |
+| **Original image URL** | Original context-menu \`srcUrl\` if distinct from selected source | **N/A** |
+| **Original link URL** | Original anchor/link target \`linkUrl\` where applicable | **N/A** |
+| **Initial request URL** | Observed source-fetch URL, if distinct from source candidate | **N/A** |
+| **Final resolved URL** | Actual post-redirect request URL if the fetch/redirect was observed | **N/A** |
+| **Redirect chain** | Observed intermediary URL(s), paged/limited if long, no invented redirects | **N/A** |
+| **Provider result URL** | Verified provider-returned open/view link where actually provided and safe to show | **N/A** |
+| **Other related URL** | A relevant observed referer, canonical page, alternative source, or provider API endpoint for a specific failing stage, only if useful and safe | **N/A** |
+
+**Never guess or synthesize URLs solely from filenames, bucket labels or provider assumptions.** Distinguish the host page from the source asset: they may be different domains and both may be needed to reproduce an issue. If several related URLs are observed, label their individual roles instead of dumping an unlabeled array. A redacted/unsafe URL is not the same as missing evidence: show **Redacted** or the safely masked URL when its existence is known; reserve **N/A** for genuinely unavailable/not captured/not applicable. For a redirect chain with no observed redirects, show \`N/A\` or \`No redirect observed\` only if verified by actual capture.
+
+**Privacy requirement:** URL strings can contain signed access credentials, tokens, session IDs or personally sensitive paths/query parameters. Debug Mode must **never expose those secrets merely because the toggle was enabled**. Where safe, display the full URL with copy/open controls in trusted Click2Cloud UI; otherwise show a safe masked/redacted form, and require a **separate, explicitly authorized private RAW inspection/export flow** for any genuinely sensitive literal URL. Do not expose credentials to untrusted webpage JavaScript, public logs or default support bundles. Preserve original URL evidence according to explicit consent, retention and privacy policy; diagnostics must not initiate extra network fetches merely to populate absent URL fields.
+
+**C. Transfer progress and remote outcome**
+- Attempted time, start/update times, actual progress (bytes/known total, percent only when known), source response type, attempts/backoff, provider upload/write stage and remote receipt/verification state.
+- Distinguish **dispatch ACK**, **queued**, **bytes sent**, **provider accepted**, and **verified saved**. If receipt isn't confirmed, say **Not verified** or **Uncertain**—never fabricate a success.
+
+**D. Authorization and exact destination**
+- Provider and nonsecret account alias, selected destination identity (bucket/folder/prefix), configured Simple/Narrow/Depth menu presentation where relevant, access/scope and destination-readiness classifications, relevant HTTP status and bounded recovery recommendation.
+- **Google OAuth unavailable:** show **Reconnect required**, not a successful GO TO website session.
+- **OneDrive Graph HTTP 503:** show temporary provider unavailability, not a blanket LOGIN/consent revoked diagnosis.
+- **Source length unknown on a provider requiring exact bytes:** show that provider-specific source/protocol constraint, not an invented upload failure.
+
+**E. Short, verified event timeline**
+- Only stages actually observed: native click received, intent queued, menu route resolved, source requested, source response validated, provider authorization, provider write, verification, final History update or failure.
+- Include stage timestamps, operation/attempt ID, retry count, worker epoch, native menu ID/generation/ACK when applicable, and observed/inferred/unknown evidence gaps.
+- Distinguish unrelated **configuration** errors such as \`DESTINATION_EXISTS\` from actual native cloud save operations; they are not equivalent failures.
+
+**F. Advanced technical details (nested disclosure / lazy load)**
+- Sanitized exception name/message/stack where available, provider status/body classification (never private response bodies), file type/size, remote receipt ID and storage/flight-recorder linkage where available.
+- Offer **Copy safe diagnostics**, **Explain failure**, **View full timeline** and **F12 command guide** with trusted, read-only behavior. No tokens, cookies, private file bodies, signed URL secrets, or credentials in these ordinary actions.
+
+**Illustrative expanded card (not real data):**
+
+\`\`\`text
+▼ 14:25   scan.png   OneDrive / Documents        NEEDS ATTENTION
+
+  WHAT HAPPENED
+  Stage              Verify provider / drive
+  Code               ONEDRIVE_GRAPH_503
+  HTTP               503 · Service unavailable
+  Next step          Retry when provider recovers; login may be fine
+
+  URLS / SOURCE PROVENANCE
+  Host page URL      https://example.org/article                  [example]
+  Source URL         https://cdn.example.org/assets/scan.png      [example]
+  Original image URL N/A
+  Original link URL  N/A
+  Final resolved URL N/A
+  Redirect chain     N/A
+  Provider result    N/A
+
+  TRANSFER
+  Attempts           1
+  Bytes / total      Unknown / Unknown
+  Remote receipt     Not verified
+  Operation ID       op-...
+  Timeline           queued → verifying identity → blocked
+
+  [Copy safe diagnostics]  [Full timeline]  [Technical details ▸]
+\`\`\`
+
+The example URLs use placeholder domains and are **illustrative**, not claims about the owner's actual browsing. Real cards must fill each field from captured, appropriately authorized evidence and display \`N/A\` otherwise.
+
+---
 ### Queue with Debug Mode ON: reveal the underlying evidence
 
-The same queue rows stay in the same order and location; each may now expand or show additional diagnostic sections:
+The same queue rows stay in the same order and location; each may expand to show the **A–F sections above**, including URL provenance. The compact example below is only a short summary; full details remain available on expansion:
 
 ```text
 14:25   scan.png   OneDrive / Documents   ! Needs attention
@@ -69,6 +188,9 @@ The same queue rows stay in the same order and location; each may now expand or 
   ├─ Started / updated:     timestamps and duration
   ├─ Attempts / retries:    1 / bounded
   ├─ Bytes / total:         unknown / unknown
+  ├─ Host page URL:         N/A (if not captured)
+  ├─ Source URL:            N/A (if not captured)
+  ├─ Related URLs:          N/A (if not captured)
   ├─ Runtime:               worker epoch / request correlation
   ├─ Queue lifecycle:       accepted → auth checked → blocked
   ├─ Receipt:               not verified
@@ -76,6 +198,7 @@ The same queue rows stay in the same order and location; each may now expand or 
 ```
 
 Permitted **bounded, sanitized** extra fields, where actually observed:
+- host page URL, source URL, original src/link URLs, observed redirect/final URL and other relevant URLs when captured and safe; display **N/A** for unavailable fields;
 - unique attempt/operation ID, parent intent ID, provider adapter and intended account alias;
 - exact canonical mode and selected configured destination (Simple / Narrow / Depth, bucket/prefix), only to authorized users and redacted in exports as appropriate;
 - real state-machine phase, timestamps, elapsed times, worker epoch, source-kind, file-type, known bytes/total, retry count and backoff;
@@ -209,11 +332,11 @@ The same simple interface remains in place. We reveal relevant diagnostic afford
 1. Settings includes a bottom-positioned **Debug** entry; OFF is the initial default. Toggling ON immediately reveals contextual diagnostic affordances and OFF hides them without affecting active saves, connection state or recorded evidence.
 2. Queue page always exists without Debug Mode; rows show **time, filename, saved-to location, truthful status/progress** and **Pause all / Resume all**, **Clear successful**, **Clear all** controls.
 3. While uploading, only actual measured bytes/known total produce numeric progress; a successful verified receipt—not dispatch ACK—produces Saved. An ambiguous outcome appears as Uncertain.
-4. Enabling Debug Mode expands each row with accurate provider, exact known phase, sanitized reason code, attempt and runtime IDs, retries, timestamps, receipt state and safe next step; unobserved data is explicitly Unknown.
+4. Enabling Debug Mode supplies independently expandable cards with accurate provider, phase, error, attempts, IDs, receipt and next safe action. **1–19 items initially all expanded; 20+ initially first five expanded only**, with manual choices preserved. **Host page URL, source URL and other related URLs** are labeled and shown when observed/safe, otherwise **N/A** (or **Redacted** for known sensitive values).
 5. **Clear successful** removes only receipt-verified past successes; every other Queue item stays. **Pause all** persists across worker restarts and preserves all jobs while stopping further dispatch; **Resume all** safely continues without duplicate uploads. **Clear all** requires **Yes / No** confirmation, and **Yes** resets the complete operational Queue including pending, paused and scheduled retries, stopping active transfers where feasible; no old worker/alarms can recreate them. Existing remote files, saved settings and separate forensic/History evidence remain intact.
 6. Restart Chrome and suspend/restart the MV3 service worker; retained jobs and paused state survive normally without unintended resume. Following **Clear all**, the reset generation persists and no discarded pending job can resurrect or retry.
 7. A real `DESTINATION_EXISTS` configuration error is explained as such, not confused with a failed cloud upload. Temporary provider HTTP 503 remains separate from revoked OAuth.
-8. Default UI remains compact at narrow widths, in light/dark themes, keyboard/screen-reader accessible, and not slowed by heavyweight debug code when OFF.
+8. Default UI remains compact at narrow widths, in light/dark themes, keyboard/screen-reader accessible, and not slowed by heavyweight debug code when OFF. The **Queue** control occupies the far-left of the existing persistent footer, **Manage Destinations** stays far-right with generous padding, and the **↗ Click2Cloud / Remotes / File Explorer / Settings / Help · Diagnose / ☀ / ◐** header remains usable for navigating back while Queue is open.
 9. Default F12 introspection and Debug Mode show the same canonical operation IDs and status. No sensitive secret leakage or untrusted website access.
 10. Unit, installed Windows Chrome and real-provider results are reported separately. A prose specification or mock Queue is not proof of implementation.
 
