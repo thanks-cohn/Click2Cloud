@@ -6,6 +6,39 @@
 **Priority:** Foundational architecture, observability and interface simplicity  
 **Companion:** [Console-First Observability, supported by a Diagnostic Introspection API](../Project_direction/CONSOLE_FIRST_MINIMAL_DEBUGGABLE_ARCHITECTURE_2026-11-12.md)
 
+## Implementation mandate — API-first expansion of what Click2Cloud already has
+
+**Owner clarification (2026-11-12):** This architecture is principally **an expansion of Click2Cloud's existing canonical API and saved-operation data, expressed through a small new Queue view and conditional Debug Mode presentation**. It is **NOT** permission to develop a wholly separate Queue/diagnostics UX application, duplicate transfer engine, alternate job database or second independent status model.
+
+**Required order of operations:**
+
+1. **Inventory existing mechanisms first**, with source and API confirmation. The current trusted `3+1.1` API already exposes capabilities such as `dispatchSave`, `inspectRemoteHistory`, `inspectRemoteReceipt`, `getEngineHealth`, `inspectNativeACK`, and `cancelRemoteOperation`. `src/persistence/current-store.mjs` already records and pages remote results and reserves operations. The transfer engine already exposes observed stages and receipt verification. **Reuse or extend these** rather than inventing replacement persistence and independent UI-only queue state.
+2. **Identify what exists versus what is missing.** A collection of saved remote results, operation reservations, a transient JavaScript promise serialization named `queue`, and per-provider cancellation **do not automatically constitute a durable, cross-provider scheduler** with pause/resume/reset semantics. Audit actual capability and evidence before deciding whether to add a small canonical scheduler module or extend an existing one.
+3. **Expand the versioned trusted API minimally** with read-only Queue listing/details/health and whatever authorized lifecycle operations are genuinely missing: pause-all, resume-all, clear-successful, and full confirmed reset including pending jobs. These are **conceptual required capabilities, not claims that these specific method names or endpoints already exist**. Adapt current registry and typed contracts; do not create an unauthenticated DevTools backdoor or separate API host.
+4. **Expose previously observed data directly** wherever possible: filename, time, target, verified state/progress, receipt, operation ID, typed code, retries, source stage, origin host page, source URL and captured related URLs. Normalize and redact consistently. If an existing record never captured a field, report **N/A** rather than synthesizing it; capture additional permissible metadata at the original source boundary for future jobs only when necessary and authorized.
+5. **Build a thin Shelf projection** consuming the canonical Queue API: one bottom-left Queue navigation button, one Queue page under existing header/footer, minimal rows by default, expandable evidence in Debug Mode, and the specified pause/clear controls. The UI must not implement its own queue schedule, remote-save logic, truth classification or separate state transitions.
+6. **Make F12 Console-First Observability a second presentation of that same API.** The Queue and developer tools share operation IDs, safe explanation codes, underlying lifecycle state and authorization; no independent debug database or competing failure explanations.
+7. **Validate incremental, minimal change**: keep existing known-good save/readback paths, preserve prior configuration and History, and test native right-click dispatch, persistence, worker restart, pause/resume/reset generation fencing, provider cancellation limitations and real receipts separately.
+
+**Cost of implementation should primarily be API contracts, lifecycle correctness and small UI expressions, not wholesale visual redevelopment.** Prefer a compact, well-tested extension of the existing system—even if a missing scheduler primitive must be added—over a large new UI stack.
+
+### Source-grounded existing foundation versus proposed additions
+
+| Capability | Evidence in current Click2Cloud source | Required architecture direction |
+| --- | --- | --- |
+| Canonical right-click save dispatch | `src/api/service.mjs` `dispatchSave`; `src/core/engine.mjs` | Reuse directly, including authorization and verified receipt logic |
+| Remote-result storage and list | `src/persistence/current-store.mjs` `recordRemoteResult` / `readRemoteResults`; API `inspectRemoteHistory` | Reuse as source evidence; extend only where live Queue state is missing |
+| Remote receipt lookup | `inspectRemoteReceipt` and persistent remote results | Reuse; never treat mere progress/dispatch as successful save |
+| Diagnostic records | `getEngineHealth`, native ACK/inspection and engine observations | Surface safely in F12 and expanded cards |
+| Operation reservation | `current-store.mjs` `reserveOperation` | Reuse idempotency foundations; do not presume complete retry scheduling |
+| Provider operation cancellation | `cancelRemoteOperation` is present | Determine per-provider support; extend to safe Queue-wide control where possible |
+| Durable cross-provider Pause all / Resume all | **Not established by the inspected contracts** | Add to canonical lifecycle only if absent |
+| Total Queue reset and stale worker fencing | **Not established by the inspected contracts** | Add safe serialized reset/cancellation generation semantics, not UI-only deletion |
+| Full URL provenance on every historical operation | **Not established** | Display observed/safe fields; absent = N/A, sensitive = Redacted; gather future permitted evidence at source |
+| Queue page, Settings Debug toggle, expandable cards | **Proposed UX, not verified existing UI** | Thin read-only and action-bound presentation over the API |
+
+---
+
 ## 1. Core philosophy
 
 > **Normal Click2Cloud should look like a simple utility. Turning on Debug Mode should reveal the machinery, without building a second application or changing how saves work.**
