@@ -161,3 +161,11 @@ The **right-click action and configured right-click destination menus** are core
 **Acceptance tests:** (1) Shelf fails + provider OAuth expires -> right-click displays actionable reconnect, independent authentication completes and saving resumes; (2) Shelf and popup both fail -> a user-triggered authorized recovery path remains available to the extent browser APIs allow; (3) cancel/deny auth -> no silent upload or loss of pending status; (4) one provider expires -> all other valid destinations remain functional; (5) sign-in recovery and duplicate context-menu clicks do not duplicate uploads.
 
 **Non-negotiable limit:** If the extension runtime or browser authorization APIs themselves are unavailable, a new login window cannot be guaranteed. The goal is an unusually robust recovery lifeline, not an impossible promise that every infrastructure failure is survivable.
+
+## 9. CRITICAL / P0 — GO TO must never substitute for LOGIN / RECONNECT
+
+**Owner-confirmed REDOWN live regression (2026-11-12):** Google Drive's Shelf displayed **GO TO** from its stale saved `connected` state while native saves failed with `OAuth2 not granted or revoked`. The existing user-triggered Google OAuth authorization command launched a consent form, after which saves worked again. This proves a visible recovery action was missing; it does **not** prove why the OAuth grant became unavailable.
+
+**Click2Cloud release-blocking direction:** **GO TO (website navigation)** and **LOGIN / RECONNECT (extension authorization recovery)** must remain two independent controls for every provider. Never infer valid OAuth, write scopes, destination writability or upload readiness from a working provider website or past `connected` flag. Verify access noninteractively where possible, then distinguish revoked scopes from temporary network/provider failures (e.g. Microsoft Graph HTTP 503); preserve jobs, configured destinations and History. Keep recovery available in the Shelf, popup and authorized headless fallback. No false success or duplicate replay.
+
+**Full binding requirement, owner evidence and acceptance tests:** [CRITICAL OAuth readiness: separate GO TO and RECONNECT](CRITICAL_OAUTH_READINESS_SEPARATE_GO_TO_RECONNECT_2026-11-12.md). This is a **P0 product-direction requirement**, not a claim of implemented code.
