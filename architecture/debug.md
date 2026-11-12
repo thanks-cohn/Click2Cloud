@@ -118,23 +118,24 @@ Do not dump an unbounded event stream into every expanded row. Offer a compact f
 
 **This is explicitly destructive to pending work.** Clear all removes **every Queue item**, including pending jobs and retry schedules, and stops queue processing so they do not reappear or resume later.
 
-Clicking it must display a confirmation with **Yes | No**:
+**Naming decision:** Keep the short, conventional Queue action label **Clear all** alongside **Clear successful**. Internally, this is a **total operational Queue reset**, not merely clearing the visual list. The confirmation makes the destructive scope explicit. Do not rename the visible button to a vague **Reset** or **Delete history**, since neither tells users what Queue entries it affects.
+
+**Approved proposed confirmation dialog — wording and buttons exactly as supplied by the owner:**
 
 ```text
-Clear entire Queue?
+Clear entire queue?
 
-Are you sure you want to reset the entire Queue?
-All entries will be cleared, including pending saves and scheduled retries.
-Active transfers will be stopped where possible.
-This cannot be undone.
+This will remove all queue entries, including pending saves, and attempt to stop active transfers.
 
-Files already saved to a cloud will not be deleted.
+This cannot be undone. Files already uploaded to cloud storage will not be deleted.
 
-                      [ No ]  [ Yes ]
+[No]    [Yes, clear all]
 ```
 
-- **No:** dismiss the dialog and make no changes.
-- **Yes:** use one authoritative, serialized, auditable **reset queue** operation: atomically prevent new dispatch of old work, clear queued/pending/retry/paused operations, and request cancellation of active work across all providers. It resets the Queue to an **empty, unpaused, ready-for-new-work** state.
+Use the title **Clear entire queue?**, a secondary **No** button, and a visually distinct destructive **Yes, clear all** action. This is the confirmation copy; keep longer implementation details about cancellation limits in the architecture and diagnostics rather than cluttering the dialog.
+
+- **No:** dismiss the confirmation and make no changes.
+- **Yes, clear all:** use one authoritative, serialized, auditable **reset queue** operation: atomically prevent new dispatch of old work, clear queued/pending/retry/paused operations, and request cancellation of active work across all providers. It resets the Queue to an **empty, unpaused, ready-for-new-work** state.
 - Use a durable reset **generation/epoch and cancellation guards** so old service-worker callbacks, alarms, restarted Shelf instances and async completion handlers cannot reinsert deleted jobs, resume old retries or publish false verified receipts.
 - **Active transfer limitation:** a request already accepted by a remote cloud might complete despite cancellation, and some transfer protocols cannot be cancelled cleanly. The UI must not claim all remote effects were undone. Finish the best-effort abort/reconciliation safely; retain a minimal diagnostic/audit marker for in-flight remote uncertainty outside the reset Queue, without silently requeueing the abandoned operation.
 - **No cloud file deletion.** Resetting Queue items does not remove already uploaded objects, account connections, configuration, Default/Quick/Depth destinations, verified receipts/immutable History, or the forensic flight recorder. The **total reset applies to the operational Queue and unfinished work**, not an account or the entire application's persisted settings.
