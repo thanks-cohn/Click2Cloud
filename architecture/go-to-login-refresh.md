@@ -98,7 +98,7 @@ Do not silently change a saved account, destination, Quick Select, Default, fold
 
 ### REFRESH — *check first, request consent only when required*
 
-`` `text
+```text
 User clicks refresh icon
   -> deduplicate concurrent checks for that exact provider/account
   -> noninteractive provider-auth/status verification
