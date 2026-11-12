@@ -143,3 +143,21 @@ The **right-click action and configured right-click destination menus** are core
 8. Record fault injection and recovery events in the flight recorder, including the active tier, reason for fallback, menu registration state and recovery outcome.
 
 **Development priority:** Right-click/menu independence first, popup-Shelf separation second, full fallback diagnostics and controlled fault-injection testing alongside implementation. Preserve Click2Cloud's simple design; resilience should not require REDOWN's richer interface.
+
+
+## 8. Provider-specific emergency reauthentication — the login lifeline
+
+**Product idea:** When the Shelf will not open (and even when the normal extension popup is unavailable), a power user should still have a way to reauthorize an expired provider without repairing or relaunching the Shelf. This is a **fourth recovery capability within Headless Zombie Mode**, not a fourth main UI tier.
+
+- Right-click actions remain registered independently of the Shelf and popup; an expired token should disable only the affected provider's authenticated transfer, not the entire right-click menu or healthy providers.
+- If a user invokes an expired provider, retain a truthful pending/needs-authorization intent where safe and show an explicit **Reconnect [provider]** action via an independent, minimal recovery surface. If all primary UI surfaces are down, launch a small provider-specific recovery/sign-in window from a supported user gesture, subject to browser permission and popup restrictions.
+- Use the provider's **official, sanctioned OAuth authorization flow**, preferably through the browser extension identity API or an approved redirect and PKCE mechanism as appropriate. The recovery surface is branded as Click2Cloud only for explanation and control; the provider's credential entry remains on the provider's own trusted page. Never ask users to type provider passwords or copy tokens into an untrusted extension dialog.
+- Do **not** automatically spawn unsolicited windows when tokens expire in the background: avoid surprising interruptions and phishing-like behavior. Prompt only when the user explicitly attempts a save/reconnect or initiates recovery, and provide a cancel/later option.
+- The sign-in coordinator and callback handling must be independent of Shelf rendering and popup rendering. Preserve provider/account context across authorization and verify that returned credentials bind to the intended account and destination; do not silently switch accounts or save to an unexpected folder.
+- On successful reauthentication, refresh the provider's readiness, reconstruct destination menus where needed, and offer safe resumption of pending intents with deduplication and confirmation/receipt checks. On cancel, network failure or denied consent, leave honest actionable **Needs sign-in** state; other providers keep working.
+- Support each provider independently: R2 requires its own supported credential strategy; do not label API keys as OAuth or claim every provider uses the same sign-in flow.
+- Record expiry, recovery prompt, initiation, callback outcome, and resulting save state in the flight recorder **without recording tokens, passwords, auth codes or private account data**. Avoid exposing secrets in window URLs or diagnostic exports.
+
+**Acceptance tests:** (1) Shelf fails + provider OAuth expires -> right-click displays actionable reconnect, independent authentication completes and saving resumes; (2) Shelf and popup both fail -> a user-triggered authorized recovery path remains available to the extent browser APIs allow; (3) cancel/deny auth -> no silent upload or loss of pending status; (4) one provider expires -> all other valid destinations remain functional; (5) sign-in recovery and duplicate context-menu clicks do not duplicate uploads.
+
+**Non-negotiable limit:** If the extension runtime or browser authorization APIs themselves are unavailable, a new login window cannot be guaranteed. The goal is an unusually robust recovery lifeline, not an impossible promise that every infrastructure failure is survivable.
