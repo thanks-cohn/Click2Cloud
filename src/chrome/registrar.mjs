@@ -182,11 +182,11 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     return result;
   }
   async function handleClick(info = {}, tab) {
-    try{await beforeClick();}catch{const out=freeze({state:'blocked',code:'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
+    try{await beforeClick(info);}catch(error){const out=freeze({state:'blocked',code:error.code==='STALE_GENERATION'?'STALE_GENERATION':'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
     if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
       const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',authorizedTargets:[]});
       if(r.state!=='completed'||!dispatch)return r;
-      try{const out=await dispatch(r.action,{info,tab});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
+      try{const out=await dispatch(r.action,{info,tab,generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
     let authorization;
     try { authorization = await getAuthorization?.(info, tab); }
@@ -207,7 +207,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       emit('intent', 'blocked', blocked.code, nextId(), acknowledged?.generation);
       try { onOutcome?.(blocked); } catch {} return blocked;
     }
-    try { const outcome = await dispatch(result.action, { info, tab, authorization }); try { onOutcome?.(outcome); } catch {} return outcome; }
+    try { const outcome = await dispatch(result.action, { info, tab, authorization, generation:result.generation }); try { onOutcome?.(outcome); } catch {} return outcome; }
     catch { const failed = freeze({ state: 'failed', code: 'DISPATCH_FAILED' }); emit('intent', 'failed', failed.code, nextId(), acknowledged?.generation); try { onOutcome?.(failed); } catch {} return failed; }
   }
   const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab); };

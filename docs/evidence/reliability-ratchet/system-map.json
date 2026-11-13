@@ -9020,6 +9020,7 @@
         ],
         "owner": "src/modes/simple/index.mjs",
         "codes": [
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",
@@ -9094,6 +9095,7 @@
         ],
         "owner": "src/modes/nested/index.mjs",
         "codes": [
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",
@@ -9168,6 +9170,7 @@
         ],
         "owner": "src/modes/depth/index.mjs",
         "codes": [
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",

@@ -7,9 +7,10 @@ let fileClipboard=null;
 import {describeExplorerContextMenu} from '../src/api/explorer-context-menu.mjs';
 import {cloudPath,parseCloudPath,middlePath} from '../src/explorer/location-view.mjs';
 import {paintTrace} from '../src/explorer/performance.mjs';
+import {applyConfigChanges} from '../src/api/config.mjs';
 import {providerDefaults} from '../src/explorer/configuration.mjs';
 import {createListingOrder,createListingReader,rowWindow,gridWindow} from '../src/explorer/listing-view.mjs';
-import {ancestors,targetKey} from '../src/core/menu-identity.mjs';
+import {ancestors,scopeKey,targetKey} from '../src/core/menu-identity.mjs';
 const readinessNames={CLOUDFLARE_READY:'Ready to save',READY:'Ready to save',NOT_ACTIVATED:'R2 is unavailable. Correct it manually with Cloudflare, then Check again.',RECONNECT_REQUIRED:'Log in to reconnect Cloudflare.',INSUFFICIENT_PERMISSION:'Cloudflare did not grant the required access. Reconnect with the necessary permissions.',NETWORK_UNAVAILABLE:'Cloudflare could not be reached. Try again when the connection is available.',ACCOUNT_AMBIGUOUS:'Choose the Cloudflare account to use.',UNKNOWN:'R2 readiness is not confirmed. Retry Check R2 or review account permissions.',REPAIR_REQUIRED:'This destination needs its private save connection prepared or repaired.',SETUP_RESUME_REQUIRED:'Setup approval is saved. Resume the existing initialization when ready.',SETUP_APPROVAL_REQUIRED:'Approve initial setup to make Cloudflare saving ready.',CHOOSE_DESTINATION:'Choose a folder in Explorer and make it your default.',DESTINATION_UNAVAILABLE:'The selected destination is unavailable. Reconnect or choose another.'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const connectionElement=$('#connection');
@@ -83,11 +84,11 @@ listen('#help-diagnose','click',async()=>{dialog('Help · Diagnose · Review rep
 async function refreshState(options){const next=await api('getConfiguration',{},options);if(!state||next.product.revision>=state.product.revision)state=next;configurationIssue=null;document.documentElement.dataset.theme=state.product.theme;$('#theme').disabled=false;return state;}
 const transientBootCodes=new Set(['STORAGE_UNAVAILABLE','CURRENT_READ_UNAVAILABLE','STORAGE_ACCESS_UNAVAILABLE','ENGINE_RECEIVER_MISSING','ENGINE_RESPONSE_CHANNEL_CLOSED','ENGINE_MESSAGE_SEND_FAILED','ENGINE_READ_TIMEOUT']);
 async function readWithRetry(fn){try{return await fn();}catch(error){if(!transientBootCodes.has(error.code)&&!transientBootCodes.has(error.diagnostic?.causeCode))throw error;await new Promise(ok=>setTimeout(ok,100));return fn();}}
-async function change(changes,{confirmed=false}={}) {
+async function change(changes,{confirmed=false,expectedRevision=state.product.revision,idempotencyKey=crypto.randomUUID()}={}) {
   if(!Array.isArray(changes))changes=[changes];
   if(changes.some(c=>c.type==='deleteDestinationConfig')&&!confirmed)return;
-  const r=await api('commitConfigChange',{changes,expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()});
-  state=r.configuration;document.documentElement.dataset.theme=state.product.theme;
+  const r=await api('commitConfigChange',{changes,expectedRevision,idempotencyKey});
+  if(r.configuration.product.revision>=state.product.revision)state=r.configuration;document.documentElement.dataset.theme=state.product.theme;
   if(changes.some(c=>['createDestination','updateDestination','deleteDestinationConfig','setProviderPlacement','setProviderMenuVisibility','setShowInChrome'].includes(c.type))){suggestionDue=true;if(view==='explorer')void suggestion();}
   const blocked=r.destinationReadiness?.find(d=>d.state!=='READY');
   if(blocked){cloudflareState={state:'REPAIR_REQUIRED',...blocked,accountId:blocked.target.accountId};status('Destination saved · '+(names[blocked.code]??blocked.code)+' · Review Cloudflare status in this Shelf.');}
@@ -334,14 +335,61 @@ async function chooseRemoteSave(entry){const capabilities=await api('describeCap
   dialog('Save to cloud',`<p>${esc(entry.displayName??entry.key)}</p>${render(menu.roots)||'<p>No configured destinations.</p>'}<p class="muted">Saving requires current source-account authorization, a native menu ACK and a verified provider transport.</p>`);
   $$('[data-cloud-save]').forEach(b=>b.onclick=async()=>{try{const item=leaves[b.dataset.cloudSave];if(!confirm('Save this file to '+item.label+'?'))return;if(item.providerAction){await api('invokeProviderAction',{provider:item.providerAction,idempotencyKey:crypto.randomUUID()});return;}const r=await api('dispatchExplorerSave',{itemId:item.itemId,generation:menu.generation,context:'link',source:captured,entry:{key:entry.key,folder:false,...(entry.displayName?{displayName:entry.displayName}:{})},idempotencyKey:crypto.randomUUID()});status(r.confirmed?'Save verified by provider readback.':r.code);closeDialog();}catch(error){status(error.message);}});
 }
-function popupFooter(){return '<div id="level-action"></div><div class="show-controls" id="show-controls"></div><div class="dialog-foot"><button id="cancel">Cancel</button><button id="save" class="primary">Save</button></div>';}
-function openPopup(t,existing=null,fromManager=false){
-  if(!t)return;const captured=structuredClone(t),revision=state.product.revision;let mode=existing?.mode??'simple',drafts={},display=structuredClone(state.product.show),selectedLevels=new Set(),selectMode=false,lastLevel=0,depthScopes=structuredClone(state.configs.depth.scopes);
-  const original=existing?state.configs[mode].destinations.find(d=>d.id===existing.id):null;
+const saveButton='<button id="save" class="primary">Save</button>';
+const saveFeedback='<p id="destination-save-status" class="muted" role="status" aria-live="polite" hidden></p>';
+function popupFooter(){return '<div id="level-action"></div><div class="show-controls" id="show-controls"></div>'+saveFeedback+'<div class="dialog-foot"><button id="cancel">Cancel</button>'+saveButton+'</div>';}
+function destinationDraft(session){
+  return session.changes.length?applyConfigChanges(session.base,session.changes):session.base;
+}
+function bindDestinationSave(session,readChanges,afterSave){
+  listen('#save','click',async()=>{
+    const button=$('#save'),feedback=$('#destination-save-status');
+    const setFeedback=text=>{feedback.textContent=text;feedback.hidden=!text;};
+    const controls=$$('#dialog button:not(:disabled), #dialog input:not(:disabled), #dialog select:not(:disabled)').filter(control=>control.id!=='close-dialog');
+    let retryOnly=!!session.attempt?.persisted;
+    controls.forEach(control=>control.disabled=true);
+    try{
+      const changes=session.attempt?.persisted?session.attempt.changes:structuredClone(readChanges());
+      const serialized=JSON.stringify(changes);
+      if(!session.attempt||session.attempt.serialized!==serialized){
+        session.attempt={serialized,changes,expectedRevision:session.base.product.revision,idempotencyKey:crypto.randomUUID()};
+      }
+      const attempt=session.attempt;
+      setFeedback('Saving configuration and applying the Chrome menu…');
+      const result=attempt.changes.length
+        ?await change(attempt.changes,{...attempt,confirmed:true})
+        :{native:await api('reconcileNativeMenu',{expectedGeneration:session.base.generation.desired},{quiet:true}),configuration:await refreshState()};
+      if(!button.isConnected||!$('#dialog').open)return;
+      if(result.native.state!=='completed'){
+        attempt.persisted=attempt.changes.length>0;retryOnly=attempt.persisted;
+        button.textContent='Retry Save';
+        if(result.native.code==='CONFIGURATION_SUPERSEDED'){
+          setFeedback('A newer configuration was saved. Reopen Destinations to review it.');
+          return;
+        }
+        setFeedback('Configuration saved. Chrome menu application is incomplete ('+result.native.code+'). Use Retry Save.');
+        return;
+      }
+      session.base=result.configuration;session.changes=[];session.attempt=null;
+      await afterSave(result);
+    }catch(error){
+      button.textContent='Retry Save';
+      setFeedback(error.code==='REVISION_CONFLICT'||error.code==='GENERATION_CONFLICT'
+        ?'Configuration changed in another window. Reopen Destinations and review your edits.'
+        :error.method==='reconcileNativeMenu'
+          ?'Chrome menu application is incomplete ('+error.code+'). Use Retry Save.'
+          :'Save could not be confirmed. '+(names[error.code]??error.message)+' Use Retry Save.');
+    }finally{controls.forEach(control=>control.disabled=retryOnly&&control!==button&&!['back-manager','cancel'].includes(control.id));}
+  });
+}
+function openPopup(t,existing=null,managerDraft=null){
+  if(!t)return;const fromManager=!!managerDraft,configuration=fromManager?destinationDraft(managerDraft):state;
+  const buckets=structuredClone(bucketTargets),captured=structuredClone(t),session=managerDraft??{base:configuration,changes:[]};let mode=existing?.mode??'simple',drafts={},display=structuredClone(configuration.product.show),selectedLevels=new Set(),selectMode=false,lastLevel=0,depthScopes=structuredClone(configuration.configs.depth.scopes);
+  const original=existing?configuration.configs[mode].destinations.find(d=>d.id===existing.id):null;
   const draft=m=>drafts[m]??=(m===existing?.mode?structuredClone(original):{target:captured,label:'',levels:{}});
   function render(){
     const d=draft(mode),paths=ancestors(captured.prefix);
-    const body=`${fromManager?'<button id="back-manager">← Back to Destinations</button>':''}<div class="tabs">${['simple','nested','depth'].map(m=>`<button data-mode="${m}" class="${mode===m?'active':''}" ${existing&&m!==mode?'disabled':''}>${m==='nested'?'Narrow':m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div><div class="target">${esc(captured.bucketName+'/'+captured.prefix)}</div>${mode==='depth'?`<p class="muted">Display only discovered folders in explicitly enabled buckets.</p>${bucketTargets.length?bucketTargets.map((b,i)=>{const scope=depthScopes.find(s=>s.target.bucketName===b.bucketName&&s.target.accountId===b.accountId);return `<label><input data-bucket="${i}" type="checkbox" ${scope?'checked':''}> ${esc(b.bucketName)} <input data-depth="${i}" aria-label="Display depth for ${esc(b.bucketName)}" type="number" min="1" value="${scope?.maxDepth??10}"></label>`;}).join(''):'<p>Expand authorized accounts to load their buckets first.</p>'}`:`<label>Menu Title <input id="title" value="${esc(d.label??'')}" placeholder="${esc(captured.prefix.split('/').filter(Boolean).at(-1)??captured.bucketName)}"></label>${mode==='nested'?`<div class="between"><h2>Menu Titles</h2><button id="hierarchy-toggle">${d.visibilityMode==='hide-all'?'Show All':'Hide All'}</button>${d.visibilityMode&&d.visibilityMode!=='custom'?'<button id="custom-visibility">Restore custom visibility</button>':''}<button id="select-mode" aria-pressed="${selectMode}">Select Mode</button></div><div class="tabs"><button id="select-all">Select All</button><button id="clear-levels">Clear</button><span id="selection-count" class="muted">${selectedLevels.size} selected</span></div><div class="title-row muted"><span></span><span>Actual folder</span><span>Menu title</span></div>${paths.map((p,i)=>`<div class="title-row ${selectedLevels.has(p)?'selected':''} ${levelHidden(d,p)?'hidden-level':''}"><input data-level="${i}" aria-label="Select ${esc(p.split('/').at(-2))}" type="checkbox" ${selectedLevels.has(p)?'checked':''} ${!selectMode||p===captured.prefix?'disabled':''}><span title="${esc(p)}">${esc(p.split('/').at(-2))}</span><input data-alias="${i}" aria-label="Menu title for ${esc(p.split('/').at(-2))}" type="text" value="${esc(d.levels?.[p]?.label??'')}"></div>`).join('')}`:''}`}`;
+    const body=`${fromManager?'<button id="back-manager">← Back to Destinations</button>':''}<div class="tabs">${['simple','nested','depth'].map(m=>`<button data-mode="${m}" class="${mode===m?'active':''}" ${existing&&m!==mode?'disabled':''}>${m==='nested'?'Narrow':m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div><div class="target">${esc(captured.bucketName+'/'+captured.prefix)}</div>${mode==='depth'?`<p class="muted">Display only discovered folders in explicitly enabled buckets.</p>${buckets.length?buckets.map((b,i)=>{const scope=depthScopes.find(s=>scopeKey(s.target)===scopeKey(b));return `<label><input data-bucket="${i}" type="checkbox" ${scope?'checked':''}> ${esc(b.bucketName)} <input data-depth="${i}" aria-label="Display depth for ${esc(b.bucketName)}" type="number" min="1" value="${scope?.maxDepth??10}"></label>`;}).join(''):'<p>Expand authorized accounts to load their buckets first.</p>'}`:`<label>Menu Title <input id="title" value="${esc(d.label??'')}" placeholder="${esc(captured.prefix.split('/').filter(Boolean).at(-1)??captured.bucketName)}"></label>${mode==='nested'?`<div class="between"><h2>Menu Titles</h2><button id="hierarchy-toggle">${d.visibilityMode==='hide-all'?'Show All':'Hide All'}</button>${d.visibilityMode&&d.visibilityMode!=='custom'?'<button id="custom-visibility">Restore custom visibility</button>':''}<button id="select-mode" aria-pressed="${selectMode}">Select Mode</button></div><div class="tabs"><button id="select-all">Select All</button><button id="clear-levels">Clear</button><span id="selection-count" class="muted">${selectedLevels.size} selected</span></div><div class="title-row muted"><span></span><span>Actual folder</span><span>Menu title</span></div>${paths.map((p,i)=>`<div class="title-row ${selectedLevels.has(p)?'selected':''} ${levelHidden(d,p)?'hidden-level':''}"><input data-level="${i}" aria-label="Select ${esc(p.split('/').at(-2))}" type="checkbox" ${selectedLevels.has(p)?'checked':''} ${!selectMode||p===captured.prefix?'disabled':''}><span title="${esc(p)}">${esc(p.split('/').at(-2))}</span><input data-alias="${i}" aria-label="Menu title for ${esc(p.split('/').at(-2))}" type="text" value="${esc(d.levels?.[p]?.label??'')}"></div>`).join('')}`:''}`}`;
     dialog(existing?'Edit destination':'+ Right Click',body,popupFooter());
     $('#show-controls').innerHTML=`<span>Show in Chrome</span>${['simple','nested','depth'].map(m=>`<label><input data-show="${m}" type="checkbox" ${display[m]?'checked':''}> ${m==='nested'?'Narrow':m}</label>`).join('')}<button id="all">All</button><button id="flat" title="Keep checked mode trees; use an unassigned saved Default as a direct choice." aria-pressed="${display.flat}">Flat</button>`;
     $$('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;selectedLevels.clear();render();});
@@ -351,35 +399,147 @@ function openPopup(t,existing=null,fromManager=false){
     $$('[data-level]').forEach(input=>input.onclick=e=>{const i=Number(input.dataset.level);if(e.shiftKey){for(let j=Math.min(i,lastLevel);j<=Math.max(i,lastLevel);j++)selectedLevels.add(paths[j]);}else if(input.checked)selectedLevels.add(paths[i]);else selectedLevels.delete(paths[i]);lastLevel=i;render();});
     if(mode==='nested'&&selectedLevels.size){const hidden=[...selectedLevels].every(p=>levelHidden(d,p));$('#level-action').innerHTML=`<div class="show-controls"><button id="hide-levels" class="${hidden?'':'primary'}">${hidden?'Show':'Hide'} selected</button><span>${selectedLevels.size} selected</span></div>`;listen('#hide-levels','click',()=>{d.levels??={};d.visibilityMode='custom';for(const p of selectedLevels)if(p!==captured.prefix)d.levels[p]={...d.levels[p],hidden:!hidden};render();});}
     $$('[data-show]').forEach(input=>input.onchange=()=>{display[input.dataset.show]=input.checked;render();});listen('#all','click',()=>{display={simple:true,nested:true,depth:true,flat:false};render();});listen('#flat','click',()=>{display.flat=!display.flat;render();});
-    for(const input of $$('[data-bucket], [data-depth]'))input.onchange=()=>{depthScopes=[...depthScopes.filter(s=>!bucketTargets.some(b=>b.accountId===s.target.accountId&&b.bucketName===s.target.bucketName)),...$$('[data-bucket]:checked').map(input=>{const i=Number(input.dataset.bucket);return {target:bucketTargets[i],maxDepth:Number($(`[data-depth="${i}"]`).value)};})];};
-    listen('#cancel','click',closeDialog);listen('#back-manager','click',()=>manager(existing.mode));
-    listen('#save','click',async()=>{
-      if(state.product.revision!==revision)throw Error('Configuration changed. Reopen this editor.');
+    const readDepth=()=>{
+      depthScopes=[...depthScopes.filter(s=>!buckets.some(b=>scopeKey(b)===scopeKey(s.target))),...$$('[data-bucket]:checked').map(input=>{
+        const i=Number(input.dataset.bucket),target=buckets[i],previous=depthScopes.find(s=>scopeKey(s.target)===scopeKey(target));
+        return {...previous,target,maxDepth:$('[data-depth="'+i+'"]').valueAsNumber};
+      })];
+    };
+    for(const input of $$('[data-bucket], [data-depth]'))input.oninput=readDepth;
+    const back=()=>fromManager?manager(existing.mode,0,managerDraft.attempt?.persisted?null:managerDraft):closeDialog();
+    listen('#cancel','click',back);listen('#back-manager','click',back);
+    bindDestinationSave(session,()=>{
       const changes=[];
       for(const [m,rec] of Object.entries(drafts).filter(([m])=>m===mode))if(m!=='depth') {
         if(existing)changes.push({type:'updateDestination',mode:m,id:existing.id,label:rec.label??'',...(m==='nested'?{levels:rec.levels??{},...(rec.visibilityMode?{visibilityMode:rec.visibilityMode}:{})}:{})});
         else changes.push({type:'createDestination',mode:m,target:captured,...(rec.label?{label:rec.label}:{}),...(m==='nested'?{levels:rec.levels??{},...(rec.visibilityMode?{visibilityMode:rec.visibilityMode}:{})}:{})});
       }
+      if(mode==='depth'){readDepth();if(depthScopes.some(s=>!Number.isSafeInteger(s.maxDepth)||s.maxDepth<1))throw Error('Enter a positive whole number for each selected bucket.');}
       if(mode==='depth')changes.push({type:'setDepthDisplayBuckets',scopes:depthScopes});
-      changes.push({type:'setShowInChrome',show:display});await change(changes);if(fromManager)await manager(existing.mode);else closeDialog();
+      changes.push({type:'setShowInChrome',show:display});
+      return [...session.changes,...changes];
+    },async()=>{
+      if(fromManager)await manager(existing.mode,0,managerDraft,'Saved · Chrome menu acknowledged');
+      else closeDialog();
     });
   }render();
 }
-async function manager(filter='simple',page=0){
-  const ticket=viewEpoch;await refreshState();if(ticket!==viewEpoch)return;const rows=state.configs[filter].destinations??state.configs[filter].scopes,total=rows.length,items=rows.slice(page*20,page*20+20);
-  dialog('Destinations',`<div class="between"><div class="tabs"><button id="simple-filter" class="${filter==='simple'?'active':''}">Simple</button><button id="narrow-filter" class="${filter==='nested'?'active':''}">Narrow</button><button id="depth-filter" class="${filter==='depth'?'active':''}">Depth</button></div><button id="organize" class="circle" aria-label="Organize Right-Click" title="Organize Right-Click">☷</button></div><p class="muted">Saved locally: ${state.configs.simple.destinations.length} Simple · ${state.configs.nested.destinations.length} Narrow · ${state.configs.depth.scopes.length} Depth. ${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use; saved destinations remain here.'}</p>${state.product.defaultTarget?'<p>Saved Default: '+esc(state.product.defaultTarget.accountId+' · '+state.product.defaultTarget.bucketName+'/'+state.product.defaultTarget.prefix)+'</p>':'<p>No default selected</p>'}<div id="dest-list">${items.length?items.map((d,i)=>`<div class="dest-row ${d.hidden?'hidden':''}"><strong>${esc(d.label??d.target.prefix.split('/').filter(Boolean).at(-1)??d.target.bucketName)}</strong><div class="muted">Cloudflare R2 · ${esc(d.target.bucketName+'/'+d.target.prefix)}</div>${filter==='depth'?'':`<button data-default="${i}" aria-pressed="${!!state.product.defaultTarget&&targetKey(d.target)===targetKey(state.product.defaultTarget)}" ${state.product.defaultTarget&&targetKey(d.target)===targetKey(state.product.defaultTarget)?'class="badge" aria-label="Default destination: '+esc(d.label??d.target.bucketName+'/'+d.target.prefix)+'"':''}>${state.product.defaultTarget&&targetKey(d.target)===targetKey(state.product.defaultTarget)?'Default':'Make Default'}</button>`}<div class="controls"><button data-hide="${i}" title="Change Visibility" aria-label="Change Visibility" aria-pressed="${!d.hidden}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>${filter!=='depth'?`<button data-quick="${i}" aria-pressed="${!!d.quick}">${d.quick?'Quick ✓':'Quick Select'}</button>`:''}${filter==='depth'?'<span>Depth '+esc(d.maxDepth)+'</span>':'<button data-edit="'+i+'" aria-label="Edit Menu Title">✎</button>'}<button data-delete="${i}" aria-label="Remove destination configuration">🗑</button></div></div>`).join(''):'<p class="muted">No assigned destinations in this filter. Browse your Cloudflare buckets and choose a folder with Make Default or + Right Click. With no saved locations, the next login can initialize redown using your saved setup approval.</p><button id="browse-destinations" class="primary">Browse Cloudflare buckets</button>'}</div>`,`<div class="dialog-foot"><button id="previous" ${!page?'disabled':''}>Previous</button><span>${total?`${page*20+1}–${Math.min(total,page*20+20)} of ${total}`:'0 destinations'}</span><button id="next" ${(page+1)*20>=total?'disabled':''}>Next</button></div>`);
-  const toggle=async(i,key)=>{const d=items[i],scroll=$('.dialog-body').scrollTop;await change(filter==='depth'?{type:'setDepthDisplayBuckets',scopes:rows.map((s,n)=>({...s,...(n===page*20+i?{hidden:!s.hidden}:{})}))}:{type:'updateDestination',mode:filter,id:d.id,[key]:!d[key]});await manager(filter,page);$('.dialog-body').scrollTop=scroll;};
-  $$('[data-default]').forEach(b=>b.onclick=async()=>{const i=b.dataset.default,t=items[i].target,scroll=$('.dialog-body').scrollTop;$$('[data-default]').forEach(button=>button.disabled=true);try{await change(state.product.defaultTarget&&targetKey(t)===targetKey(state.product.defaultTarget)?{type:'clearDefault'}:{type:'makeDefault',target:t});await manager(filter,page);$('.dialog-body').scrollTop=scroll;$('[data-default=\"'+i+'\"]')?.focus({preventScroll:true});}catch(error){await manager(filter,page);status(error.message);}});
-  $$('[data-hide]').forEach(b=>b.onclick=()=>toggle(Number(b.dataset.hide),'hidden').catch(e=>status(e.message)));$$('[data-quick]').forEach(b=>b.onclick=()=>toggle(Number(b.dataset.quick),'quick').catch(e=>status(e.message)));
-  $$('[data-edit]').forEach(b=>b.onclick=()=>{const d=items[b.dataset.edit];openPopup(d.target,{id:d.id,mode:filter},true);});
-  $$('[data-delete]').forEach(b=>b.onclick=async()=>{const d=items[b.dataset.delete];if(confirm('Remove this saved destination? Cloud files and folders are kept.')){try{await change(filter==='depth'?{type:'setDepthDisplayBuckets',scopes:rows.filter((_,n)=>n!==page*20+Number(b.dataset.delete)).map(({target,maxDepth})=>({target,maxDepth}))}:{type:'deleteDestinationConfig',mode:filter,id:d.id},{confirmed:true});await manager(filter,Math.min(page,Math.max(0,Math.ceil((total-1)/20)-1)));}catch(error){status(error.message);}}});
-  listen('#simple-filter','click',()=>manager('simple'));listen('#narrow-filter','click',()=>manager('nested'));listen('#depth-filter','click',()=>manager('depth'));listen('#previous','click',()=>manager(filter,page-1));listen('#next','click',()=>manager(filter,page+1));listen('#organize','click',organize);listen('#browse-destinations','click',async()=>{closeDialog();await show('explorer');});
+async function manager(filter='simple',page=0,session=null,message=''){
+  const ticket=viewEpoch;
+  if(!session){await refreshState();if(ticket!==viewEpoch)return;session={base:state,changes:[]};}
+  const configuration=destinationDraft(session),product=configuration.product;
+  const rows=configuration.configs[filter].destinations??configuration.configs[filter].scopes;
+  const total=rows.length,items=rows.slice(page*20,page*20+20);
+  const isDepth=filter==='depth';
+  const rowLabel=d=>d.label??d.target.prefix.split('/').filter(Boolean).at(-1)??d.target.bucketName;
+  const isDefault=d=>!!product.defaultTarget&&targetKey(d.target)===targetKey(product.defaultTarget);
+  const rowHtml=(d,i)=>`<div class="dest-row ${d.hidden?'hidden':''}">
+    <strong>${esc(rowLabel(d))}</strong><div class="muted">Cloudflare R2 · ${esc(d.target.accountId+' · '+d.target.bucketName+'/'+d.target.prefix)}</div>
+    ${isDepth?'':`<button data-default="${i}" aria-pressed="${isDefault(d)}" ${isDefault(d)?'class="badge" aria-label="Default destination: '+esc(rowLabel(d))+'"':''}>${isDefault(d)?'Default':'Make Default'}</button>`}
+    <div class="controls">
+      <button data-hide="${i}" aria-label="Change Visibility" aria-pressed="${!d.hidden}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>
+      ${isDepth?`<label>Depth <input data-manager-depth="${i}" type="number" min="1" step="1" value="${d.maxDepth}" aria-label="Display depth for ${esc(d.target.bucketName)}"></label>`:
+      `<button data-quick="${i}" aria-pressed="${!!d.quick}">${d.quick?'Quick ✓':'Quick Select'}</button><button data-edit="${i}" aria-label="Edit Menu Title">✎</button>`}
+      <button data-delete="${i}" aria-label="Remove destination configuration">🗑</button>
+    </div></div>`;
+  dialog('Destinations',`<div class="between"><div class="tabs">${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
+    `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}">${label}</button>`).join('')}</div>
+    <button id="organize" class="circle" aria-label="Organize Right-Click" title="Organize Right-Click">☷</button></div>
+    <p class="muted">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
+    <p>${product.defaultTarget?'Default: '+esc(product.defaultTarget.accountId+' · '+product.defaultTarget.bucketName+'/'+product.defaultTarget.prefix):'No default selected'}</p>
+    <div id="dest-list">${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
+    ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
+    <div class="show-controls"><span>Show in Chrome</span>${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
+      `<label><input data-manager-show="${mode}" type="checkbox" ${product.show[mode]?'checked':''}> ${label}</label>`).join('')}</div>
+    ${saveFeedback}`,`<div class="dialog-foot"><button id="previous" ${!page?'disabled':''}>Previous</button><span>${total?`${page*20+1}–${Math.min(total,page*20+20)} of ${total}`:'0 destinations'}</span><button id="next" ${(page+1)*20>=total?'disabled':''}>Next</button>${saveButton}</div>`);
+  const feedback=$('#destination-save-status');
+  feedback.textContent=message||(session.changes.length?'Unsaved changes':'');feedback.hidden=!feedback.textContent;
+  const stage=edit=>{
+    session.attempt=null;
+    if(edit.type==='setShowInChrome')session.changes=session.changes.filter(c=>c.type!==edit.type);
+    session.changes.push(edit);feedback.textContent='Unsaved changes';feedback.hidden=false;};
+  const rerender=async(nextPage=page)=>{const scroll=$('.dialog-body').scrollTop;await manager(filter,nextPage,session);$('.dialog-body').scrollTop=scroll;};
+  const stageScopes=scopes=>{
+    session.changes=session.changes.filter(c=>c.type!=='setDepthDisplayBuckets');
+    stage({type:'setDepthDisplayBuckets',scopes});
+  };
+  const withDepthInputs=()=>{
+    const inputs=$$('[data-manager-depth]');
+    for(const input of inputs)if(!Number.isSafeInteger(input.valueAsNumber)||input.valueAsNumber<1){input.reportValidity();throw Error('Enter a positive whole number for each selected bucket.');}
+    return rows.map((scope,i)=>{const input=$('[data-manager-depth="'+(i-page*20)+'"]');return input?{...scope,maxDepth:input.valueAsNumber}:scope;});
+  };
+  const captureDepth=()=>{
+    if(!isDepth)return;
+    const scopes=withDepthInputs();
+    if(scopes.some((scope,i)=>scope.maxDepth!==rows[i].maxDepth))stageScopes(scopes);
+  };
+  const update=async(i,key)=>{
+    const d=items[i];
+    if(isDepth)stageScopes(withDepthInputs().map((s,n)=>n===page*20+i?{...s,hidden:!d.hidden}:s));
+    else stage({type:'updateDestination',mode:filter,id:d.id,[key]:!d[key]});
+    await rerender();
+  };
+  $$('[data-default]').forEach(b=>listen('[data-default="'+b.dataset.default+'"]','click',async()=>{
+    const d=items[b.dataset.default];stage(isDefault(d)?{type:'clearDefault'}:{type:'makeDefault',target:d.target});await rerender();
+  }));
+  $$('[data-hide]').forEach(b=>listen('[data-hide="'+b.dataset.hide+'"]','click',()=>update(Number(b.dataset.hide),'hidden')));
+  $$('[data-quick]').forEach(b=>listen('[data-quick="'+b.dataset.quick+'"]','click',()=>update(Number(b.dataset.quick),'quick')));
+  $$('[data-edit]').forEach(b=>b.onclick=()=>{const d=items[b.dataset.edit];openPopup(d.target,{id:d.id,mode:filter},session);});
+  $$('[data-delete]').forEach(b=>listen('[data-delete="'+b.dataset.delete+'"]','click',async()=>{
+    if(!confirm('Remove this destination from the configuration when you save? Cloud files and folders are kept.'))return;
+    const i=Number(b.dataset.delete);
+    if(isDepth)stageScopes(withDepthInputs().filter((_,n)=>n!==page*20+i));
+    else stage({type:'deleteDestinationConfig',mode:filter,id:items[i].id});
+    await rerender(Math.min(page,Math.max(0,Math.ceil((total-1)/20)-1)));
+  }));
+  $$('[data-manager-show]').forEach(input=>input.onchange=()=>{
+    stage({type:'setShowInChrome',show:{...product.show,...Object.fromEntries($$('[data-manager-show]').map(box=>[box.dataset.managerShow,box.checked]))}});
+  });
+  $$('[data-manager-mode]').forEach(b=>listen('[data-manager-mode="'+b.dataset.managerMode+'"]','click',()=>{captureDepth();return manager(b.dataset.managerMode,0,session);}));
+  listen('#previous','click',()=>{captureDepth();return rerender(page-1);});
+  listen('#next','click',()=>{captureDepth();return rerender(page+1);});
+  listen('#organize','click',()=>{captureDepth();return organize(session,()=>manager(filter,page,session));});
+  listen('#browse-destinations','click',async()=>{if((session.changes.length||isDepth&&$$('[data-manager-depth]').some((input,i)=>input.valueAsNumber!==items[i].maxDepth))&&!confirm('Discard unsaved destination edits and browse Cloudflare buckets?'))return;closeDialog();await show('explorer');});
+  bindDestinationSave(session,()=>{captureDepth();return session.changes;},()=>manager(filter,page,session,'Saved · Chrome menu acknowledged'));
+  if(isDepth)void loadManagerBuckets();
+  async function loadManagerBuckets(){
+    const region=$('#manager-buckets');
+    if(connection.state!=='CONNECTED')return;
+    region.textContent='Loading available buckets…';
+    const candidates=[];
+    try{
+      for(const account of connection.accounts){
+        let cursor='';const seen=new Set();
+        do{
+          const result=await api('listAuthorizedBuckets',{accountId:account.id,...(cursor?{cursor}:{})},{quiet:true});
+          if(result.state!=='completed')throw Error(result.code);
+          for(const bucket of result.data.buckets)candidates.push({provider:'cloudflare',connectionId:'cloudflare:'+account.id,accountId:account.id,bucketName:bucket.name,prefix:''});
+          cursor=result.data.cursor??'';
+          if(cursor&&seen.has(cursor))throw Error('PAGINATION_STALLED');
+          seen.add(cursor);
+        }while(cursor);
+      }
+      if(!region.isConnected)return;
+      const available=[...new Map(candidates.map(t=>[scopeKey(t),t])).values()].filter(t=>!rows.some(row=>scopeKey(row.target)===scopeKey(t)));
+      region.innerHTML=available.length?`<label>Add Depth bucket <select id="manager-bucket-choice">${available.map((t,i)=>`<option value="${i}">${esc(t.accountId+' · '+t.bucketName)}</option>`).join('')}</select></label> <button id="add-manager-bucket">Add</button>`:'';
+      if($('#save').disabled||session.attempt?.persisted){region.replaceChildren();return;}
+      listen('#add-manager-bucket','click',async()=>{
+        const target=available[Number($('#manager-bucket-choice').value)];
+        stageScopes([...withDepthInputs(),{target,maxDepth:10}]);
+        await rerender(Math.floor(total/20));
+      });
+    }catch{region.textContent='Available buckets could not be loaded. Switch back to Depth to retry.';}
+  }
 }
-async function organize(){
-  const spec=await api('previewNativeMenu'),providers=[...new Set(spec.rows.filter(r=>r.origin?.provider).map(r=>r.origin.provider))],placement={...state.product.placement};
-  dialog('Organize Right-Click',`<p class="muted">The four providers lead; Quick Select shortcuts follow and do not duplicate Cloudflare children.</p>${providers.map((p,i)=>`<div class="settings-row"><span>${esc(p==='cloudflare'?'Cloudflare':p)}</span><button data-placement="${i}">${placement[p]==='other'?'Under REDOWN':'Keep Direct'}</button></div>`).join('')||'<p>No configured providers yet.</p>'}<p id="layout-preview" class="muted"></p>`,`<div class="dialog-foot"><button id="cancel">Cancel</button><button id="save" class="primary">Save</button></div>`);
+async function organize(managerDraft,back=closeDialog){
+  const spec=await api('previewNativeMenu'),providers=[...new Set(spec.rows.filter(r=>r.origin?.provider).map(r=>r.origin.provider))],placement={...destinationDraft(managerDraft).product.placement};
+  dialog('Organize Right-Click',`<p class="muted">The four providers lead; Quick Select shortcuts follow and do not duplicate Cloudflare children.</p>${providers.map((p,i)=>`<div class="settings-row"><span>${esc(p==='cloudflare'?'Cloudflare':p)}</span><button data-placement="${i}">${placement[p]==='other'?'Under REDOWN':'Keep Direct'}</button></div>`).join('')||'<p>No configured providers yet.</p>'}<p id="layout-preview" class="muted"></p>`,`<div class="dialog-foot"><button id="cancel">Cancel</button><button id="save" class="primary">Done</button></div>`);
   const preview=()=>{$('#layout-preview').textContent='Providers → '+providers.filter(p=>placement[p]!=='other').join(', ')+(providers.some(p=>placement[p]==='other')?' → Other Clouds: '+providers.filter(p=>placement[p]==='other').join(', '):'');};preview();
-  $$('[data-placement]').forEach(b=>b.onclick=()=>{const p=providers[b.dataset.placement];placement[p]=placement[p]==='other'?'direct':'other';b.textContent=placement[p]==='other'?'Under REDOWN':'Keep Direct';preview();});listen('#cancel','click',closeDialog);listen('#save','click',async()=>{if(providers.length)await change(providers.map(p=>({type:'setProviderPlacement',provider:p,placement:placement[p]??'direct'})));closeDialog();await suggestion();});
+  $$('[data-placement]').forEach(b=>b.onclick=()=>{const p=providers[b.dataset.placement];placement[p]=placement[p]==='other'?'direct':'other';b.textContent=placement[p]==='other'?'Under REDOWN':'Keep Direct';preview();});listen('#cancel','click',back);listen('#save','click',async()=>{
+    managerDraft.attempt=null;
+    managerDraft.changes.push(...providers.map(p=>({type:'setProviderPlacement',provider:p,placement:placement[p]??'direct'})));
+    await back();
+  });
 }
 async function suggestion(){if(!$('#suggestion')||!suggestionDue)return;try{const s=await api('getOrganizationSuggestion');if(!s.eligible){$('#suggestion').replaceChildren();$('#suggestion').className='';return;}$('#suggestion').innerHTML='<span>Many direct entries. Organize your right-click menu?</span><button id="suggest-organize">Organize</button><button id="dismiss-suggestion" aria-label="Dismiss organization suggestion">×</button>';$('#suggestion').className='suggestion';listen('#suggest-organize','click',organize);listen('#dismiss-suggestion','click',async()=>{await change({type:'dismissOrganizationSuggestion',signature:s.signature});$('#suggestion').replaceChildren();$('#suggestion').className='';});}catch{}}
 async function renderSettings(){

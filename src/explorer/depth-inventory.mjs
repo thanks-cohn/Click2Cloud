@@ -10,12 +10,12 @@ export async function discoverDepthScope(fileApi,selection,{signal}={}){
    if(result.state!=='completed')throw Object.assign(Error('DEPTH_DISCOVERY_FAILED'),{code:result.code??'DEPTH_DISCOVERY_FAILED'});
    for(const entry of result.data.entries??[])if(entry.folder){
     const child=normalizeTarget({...target,prefix:entry.key}).prefix;
-    if(!child.startsWith(prefix)||child===prefix)throw Object.assign(Error(),{code:'INVENTORY_INVALID'});
+    if(!child.startsWith(prefix)||!child.slice(prefix.length,-1)||child.slice(prefix.length,-1).includes('/'))throw Object.assign(Error(),{code:'INVENTORY_INVALID'});
     if(folders.has(child))continue;folders.add(child);
     if(child.split('/').filter(Boolean).length<selection.maxDepth)queue.push(child);else complete=false;
    }
    cursor=result.data.cursor??'';if(cursor&&seen.has(cursor))throw Object.assign(Error(),{code:'PAGINATION_STALLED'});seen.add(cursor);
   }while(cursor);
  }
- return {target,folders:[...folders],complete,scopeKey:scopeKey(target)};
+ return {target,folders:[...folders],complete,listedDepth:selection.maxDepth,scopeKey:scopeKey(target)};
 }

@@ -59,16 +59,18 @@ export function compileMenuSpec(options={}) {
     const composite=mode==='composite',show=options.product?.show??{simple:true,nested:true,depth:false,flat:false};
     const module=composite?simple:(options.modules??modeModules)[mode];
     if(!module?.project||!module?.createConfig)throw new MenuSpecError('INVALID_MODE','Unsupported independent mode.');
-    const inventory=normalizeInventory(options.inventory),revision=validateRevision(options.revision??0);
+    const inventory=normalizeInventory(options.inventory);
+    const depthInventory=options.inventory?.depthScopes&&(mode==='depth'||composite&&show.depth)?normalizeInventory({revision:inventory.revision,scopes:options.inventory.depthScopes}):inventory;
+    const revision=validateRevision(options.revision??0);
     emit(options,'modes.'+mode,'started','PROJECTION_STARTED');
     let projection,composition;
     try {
       if(composite) {
-        const parts=Object.entries(modeModules).filter(([m])=>show[m]).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory})}));
+        const parts=Object.entries(modeModules).filter(([m])=>show[m]).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory:m==='depth'?depthInventory:inventory})}));
         projection={revision:options.product?.revision??0,rows:parts.flatMap(p=>p.rows.map(r=>({...r,sourceMode:p.m}))),omissions:parts.flatMap(p=>p.omissions)};
       } else {
         const config=module.createConfig(options.configs?.[mode]??{});
-        projection=module.project({config,inventory});
+        projection=module.project({config,inventory:mode==='depth'?depthInventory:inventory});
       }
       emit(options,'modes.'+mode,projection.omissions.some(x=>x.kind!=='excluded')?'partial':'ok',projection.omissions.some(x=>x.kind!=='excluded')?'PROJECTION_PARTIAL':'PROJECTION_OK');
     } catch(error) {emit(options,'modes.'+mode,'failed','PROJECTION_FAILED');throw error;}
@@ -121,6 +123,8 @@ export function compileMenuSpec(options={}) {
       const routeKey=r=>JSON.stringify([r.sourceMode,r.placement]);
       const quickRows=candidates.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&targetKey(r.target)!==defaultKey).map(r=>({...r,label:r.quickLabel??r.label}));
       const promoted=new Set(quickRows.map(routeKey)),active=candidates.filter(r=>!promoted.has(routeKey(r)));
+      const depthBuckets=new Set(active.filter(r=>r.sourceMode==='depth').map(r=>scopeKey(r.target)));
+      const inlineDepth=depthBuckets.size===1&&active.every(r=>r.sourceMode==='depth');
       const hierarchy=active.some(r=>r.sourceMode==='nested'||r.sourceMode==='depth'&&r.parentPlacement!==null);
       composition={policy:'independent-additive',flatPolicy:'unassigned-default-only; checked hierarchies retained',defaultKey,providerVisible:options.product?.providerVisibility?.cloudflare!==false,cloudflareChoiceCount:options.product?.providerVisibility?.cloudflare===false?0:active.length,quickTargets:quickRows.map(r=>r.target),defaultQuickSuppressed:projection.rows.some(r=>r.quick&&targetKey(r.target)===defaultKey),cloudflareShape:options.product?.providerVisibility?.cloudflare===false?'hidden':hierarchy?'submenu':active.length===1?'flat-save':active.length>1?'submenu':'attention'};
       for(const [provider,label] of [['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']]){
@@ -141,7 +145,10 @@ export function compileMenuSpec(options={}) {
             const selectedRows=active.filter(r=>r.sourceMode===treeMode),treeRows=projection.rows.filter(r=>r.sourceMode===treeMode),index=new Map(treeRows.map(r=>[r.placement,r])),needed=new Set(),selected=new Set(selectedRows.map(r=>r.placement)),placements=new Map();
             for(const row of selectedRows){let r=row;while(r&&!needed.has(r.placement)){needed.add(r.placement);r=index.get(r.parentPlacement);}}
             for(const row of treeRows.filter(r=>needed.has(r.placement))){
-              if(treeMode==='nested'&&row.role==='branch'&&!row.target.prefix&&!row.parentPlacement&&!row.explicitLevel){placements.set(row.placement,parent);continue;}
+              if(row.role==='branch'&&row.parentPlacement===null&&!row.target.prefix&&
+                (treeMode==='depth'?inlineDepth:!row.explicitLevel)){
+                placements.set(row.placement,parent);continue;
+              }
               if(row.role==='save'&&!selected.has(row.placement))continue;
               const parentId=row.parentPlacement===null?parent:placements.get(row.parentPlacement);
               const nativeId=add({...row,parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
@@ -202,9 +209,12 @@ export function compileMenuSpec(options={}) {
       for(let i=rows.length-1;i>=0;i--)if(rows[i].role==='branch'&&!needed.has(rows[i].id))rows.splice(i,1);
       const indices=new Map();for(const r of rows){const n=indices.get(r.parentId)??0;r.siblingIndex=r.index=n;indices.set(r.parentId,n+1);}
     }
+    const observedScopes=mode==='depth'?depthInventory.scopes:composite&&show.depth&&depthInventory!==inventory
+      ?[...inventory.scopes.filter(s=>!depthInventory.scopes.some(d=>scopeKey(d.target)===scopeKey(s.target))),...depthInventory.scopes]
+      :inventory.scopes;
     const retained=omissions.slice(0,maxOmissions),omissionDropped=omissions.length-retained.length;
     const unavailable=omissions.some(x=>['ineligible','unknown-descendants','budget'].includes(x.kind));
-    const coverage={rowsComplete:droppedRows===0,rowCount:rows.length,omissionsComplete:omissionDropped===0,omissionCount:omissions.length,omissionsRetained:retained.length,omissionsDropped:omissionDropped,rowsDropped:droppedRows,inventoryComplete:inventory.scopes.every(s=>s.complete&&!s.stale),unobservedDescendants:inventory.scopes.filter(s=>!s.complete).map(s=>({target:s.target,reason:'INVENTORY_INCOMPLETE'})),complete:droppedRows===0&&omissionDropped===0&&!unavailable&&inventory.scopes.every(s=>s.complete&&!s.stale)};
+    const coverage={rowsComplete:droppedRows===0,rowCount:rows.length,omissionsComplete:omissionDropped===0,omissionCount:omissions.length,omissionsRetained:retained.length,omissionsDropped:omissionDropped,rowsDropped:droppedRows,inventoryComplete:observedScopes.every(s=>s.complete&&!s.stale),unobservedDescendants:observedScopes.filter(s=>!s.complete).map(s=>({target:s.target,reason:'INVENTORY_INCOMPLETE'})),complete:droppedRows===0&&omissionDropped===0&&!unavailable&&observedScopes.every(s=>s.complete&&!s.stale)};
     const spec=freeze({schemaVersion:1,generation,revision,mode,modeRevision:projection.revision,inventoryRevision:inventory.revision,rows,nodes:rows,omissions:retained,coverage,...(composition?{composition}:{})});
     emit(options,'menu.compile',coverage.complete?'ok':'partial',coverage.complete?'COMPILE_OK':'COMPILE_PARTIAL');
     return spec;

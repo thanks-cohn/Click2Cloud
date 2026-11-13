@@ -154,6 +154,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     getMenu:generation=>menus.get(generation)??null,
     menuRetention:()=>({retained:menus.size,evictedGenerations,maxSnapshots}),
     getEvidence:()=>registrar.inspect(),
+    matchesCurrent:(spec,state)=>compiledIntent.get(spec)===menuIntent(state),
     getModeConfig:mode=>current.getModeConfig(mode),
     saveModeConfig:(mode,config,options)=>current.saveModeConfig(mode,config,options)
   });
