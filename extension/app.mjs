@@ -487,6 +487,7 @@ async function manager(filter='simple',page=0,session=null,message=''){
     <p class="muted">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
     <p>${product.defaultTarget?'Default: '+esc(product.defaultTarget.accountId+' · '+product.defaultTarget.bucketName+'/'+product.defaultTarget.prefix):'No default selected'}</p>
     <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
+    <div id="destination-delete-confirmation" class="card" role="group" aria-labelledby="destination-delete-title" hidden></div>
     ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
     <div class="show-controls"><span>Show in Chrome</span>${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
       `<label><input data-manager-show="${mode}" type="checkbox" ${product.show[mode]?'checked':''}> ${label}</label>`).join('')}</div>
@@ -524,13 +525,29 @@ async function manager(filter='simple',page=0,session=null,message=''){
   $$('[data-hide]').forEach(b=>listen('[data-hide="'+b.dataset.hide+'"]','click',()=>update(Number(b.dataset.hide),'hidden')));
   $$('[data-quick]').forEach(b=>listen('[data-quick="'+b.dataset.quick+'"]','click',()=>update(Number(b.dataset.quick),'quick')));
   $$('[data-edit]').forEach(b=>b.onclick=()=>{const d=items[b.dataset.edit];openPopup(d.target,{id:d.id,mode:filter},session);});
-  $$('[data-delete]').forEach(b=>listen('[data-delete="'+b.dataset.delete+'"]','click',async()=>{
-    if(!confirm('Remove this destination from the configuration when you save? Cloud files and folders are kept.'))return;
-    const i=Number(b.dataset.delete);
-    if(isDepth)stageScopes(withDepthInputs().filter((_,n)=>n!==page*20+i));
-    else stage({type:'deleteDestinationConfig',mode:filter,id:items[i].id});
-    await rerender(Math.min(page,Math.max(0,Math.ceil((total-1)/20)-1)));
-  }));
+  const deletion=$('#destination-delete-confirmation');let deleteReturnButton=null;
+  const cancelDeletion=()=>{deletion.hidden=true;$('#save').disabled=false;deleteReturnButton?.focus();};
+  deletion.onkeydown=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();cancelDeletion();}};
+  $$('[data-delete]').forEach(button=>{
+    const selected=items[Number(button.dataset.delete)],identity=isDepth?scopeKey(selected.target):selected.id;
+    button.onclick=()=>{
+      deleteReturnButton=button;deletion.innerHTML=`<h3 id="destination-delete-title">Remove ${esc(rowLabel(selected))}?</h3><p>Remove only this menu configuration when you Save. Cloud files and folders are kept.</p><p class="target">${esc(selected.target.accountId+' · '+selected.target.bucketName+'/'+selected.target.prefix)}</p><button id="cancel-destination-delete">Cancel</button> <button id="confirm-destination-delete">Remove from draft</button>`;
+      button.closest('.dest-row').append(deletion);deletion.hidden=false;$('#save').disabled=true;
+      $('#cancel-destination-delete').onclick=cancelDeletion;
+      $('#confirm-destination-delete').onclick=async event=>{
+        const confirmButton=event.currentTarget;if(confirmButton.disabled)return;confirmButton.disabled=true;
+        try{
+          const current=destinationDraft(session).configs[filter],present=(current.destinations??current.scopes).some(row=>(isDepth?scopeKey(row.target):row.id)===identity);
+          if(!present)throw Error('This destination is no longer in the draft. Reopen Destinations to review it.');
+          if(isDepth)stageScopes(withDepthInputs().filter(scope=>scopeKey(scope.target)!==identity));
+          else stage({type:'deleteDestinationConfig',mode:filter,id:identity});
+          await rerender(Math.min(page,Math.max(0,Math.ceil((total-1)/20)-1)));
+          $('#save').focus({preventScroll:true});
+        }catch(error){feedback.textContent='Removal could not be staged. '+error.message;feedback.hidden=false;confirmButton.disabled=false;}
+      };
+      $('#cancel-destination-delete').focus();
+    };
+  });
   $$('[data-manager-show]').forEach(input=>input.onchange=()=>{
     stage({type:'setShowInChrome',show:{...product.show,...Object.fromEntries($$('[data-manager-show]').map(box=>[box.dataset.managerShow,box.checked]))}});
   });

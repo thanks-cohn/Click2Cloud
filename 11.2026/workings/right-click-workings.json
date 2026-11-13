@@ -9279,7 +9279,7 @@
       "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
       "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
       "extension/app.html": "668602dae631aa7efbdda276d8644576434ab0c2b3e282798aa0e576652c1076",
-      "extension/app.mjs": "7e85c565ab9e473e22f216b9d7156ad9c065a092ca2d20fcadc6bf3c040b909c",
+      "extension/app.mjs": "38327ff35011737278317165f41e856d641d3f475044570db542cd1011ce2ca9",
       "extension/background.mjs": "a5e7852d206dbacf46712aebe3f4a564ad3de57dc707f6faa258928770305396",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
