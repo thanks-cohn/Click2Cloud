@@ -8,7 +8,9 @@
 >
 > **RULE #4 — MINIMAL COMPLEXITY.** Prefer the smallest sound correction that makes saving reliable. Do not add another upload engine, per-folder Workers, unnecessary log layers, speculative infrastructure, or unrelated security/auth redesign. Preserve existing checks; this task isn't about expanding them.
 >
-> **RULE #5 — THIS DOCUMENT REQUESTS A PROPOSAL, NOT AN IMPLEMENTATION.** Codex is encouraged to disagree with this architecture and suggest a simpler or better solution. **Do not edit application code, deploy Cloudflare resources, or implement a fix in this review.** Audit and produce a practical final plan. For every meaningful change you recommend to this proposal, explain **what changed, why, expected benefit, trade-off, and evidence**.
+> **RULE #5 — EXPLICITLY AUDIT THE INITIAL PROPOSAL'S DEFICITS AND ISSUES.** Before endorsing or replacing this plan, Codex must produce an exhaustive, evidence-labeled deficiency ledger covering **every material flaw, unsupported assumption, omission, unresolved defect, collision risk, redundancy, inefficiency, failure mode, and unnecessary complexity** in the proposal it receives. State what is wrong (or unproven), where, how it affects a real right-click save, severity, evidence, and exactly how to repair or defer it. **Do not quietly omit flaws or imply the proposal is sound merely because its intentions are good.** Distinguish demonstrated bugs from design risks and unknowns; do not invent defects for the sake of a longer list.
+>
+> **RULE #6 — THIS DOCUMENT REQUESTS A PROPOSAL, NOT AN IMPLEMENTATION.** Codex is encouraged to disagree with this architecture and suggest a simpler or better solution. **Do not edit application code, deploy Cloudflare resources, or implement a fix in this review.** Audit and produce a practical final plan. For every meaningful change you recommend to this proposal, explain **what changed, why, expected benefit, trade-off, and evidence**.
 
 Repository: `thanks-cohn/Click2Cloud`  
 Reference: latest remote `codex/depth-p0-click-save`; verify exact source HEAD and branch before auditing.  
@@ -137,21 +139,62 @@ It minimizes divergent logic. In particular, Depth should not independently deci
 9. Real Windows Chrome results count separately from simulated tests. If Codex cannot run an unpacked extension or use owner's Cloudflare R2, say **UNVERIFIED** and supply a short actionable local test, instead of declaring success.
 10. Keep changes focused and small. Explicitly justify any new abstraction, new persistence, new state, additional check, or shared-code change against the criterion **"does this help right-click actually save?"**
 
-## 6. What Codex should produce NOW — a FINAL PROPOSAL ONLY
+## 6. Mandatory initial-proposal deficiency audit — before a final recommendation
+
+**Codex must audit THIS ORIGINAL document, not only the current implementation.** Its first deliverable should be a separate `INITIAL_PROPOSAL_DEFICITS.md` which itemizes **all material shortcomings of this proposal** before recommending a solution. This must be a critical review, not an approval exercise. For each issue, include:
+
+| Field | Required answer |
+| --- | --- |
+| Proposal element | Quote or point to the exact section/claim/assumption being challenged |
+| Classification | Proven code defect, observed live defect, design flaw, missing requirement, unproven assumption, trade-off, future risk, or unnecessary complexity |
+| Evidence | File/function/test/operation reference; explicitly label inference and unverified hypotheses |
+| User impact | How it could prevent a right-click save, misroute a file, break Simple/Narrow, or create unnecessary complexity |
+| Severity | P0 actual-save blocker / P1 reliability / P2 later improvement / not a defect |
+| Resolution | Retain, change, reject, replace, test before decision, or explicitly defer |
+| Replacement & rationale | Precise proposed alternative, why simpler or more reliable, and its known downsides |
+| Verification | Minimal test or live observation that proves the risk is addressed |
+
+**At minimum, challenge these possible weaknesses rather than assuming them away:**
+
+1. **Unproven account/bucket equivalence.** The real Depth `PLAN_MISSING` and verified Narrow save are different operations; do they even address the same account/bucket/profile, and did the local Worker plan still exist at the failed-click time? A plan cannot be reconstructed by guessing a name or inventing its signing secret.
+2. **Extra Depth precheck versus common save authority.** Does the proposal keep an unnecessary second readiness decision, or could removing it cause a different fallback or a true scope bypass? Identify the correct single source of truth.
+3. **Conflated authorization and readiness.** Does `getAuthorization` wrongly equate `remoteReady` with account authority, resulting in misleading `SCOPE_UNAUTHORIZED` or setup-only actions? Is a shared-layer change truly required, and how would it avoid regressing Simple/Narrow?
+4. **Action kind and click dispatch.** Could `role=save` plus `actionKind=attention` be improperly rerouted by the registrar or engine? Account for the dispatcher taking a requested action while `extension/background.mjs` may reconstruct a save from `info.menuItemId`. Distinguish a genuine defect from a harmless intentional fallback.
+5. **Canonical target consistency.** Are prefixes normalized identically by discovery, Depth projection, menu compiler, authorization, Worker lookup and R2 object-key builder? Test root, trailing slash, multi-bucket same folder, same bucket with two different connections, and mixed modes.
+6. **Menu identity and collisions.** Preserve independent Depth/Narrow native entry IDs while sharing physical targets. Test stable-ID collision rejection, action-ID reuse by identical targets, sibling name duplication, parent placement, root Save here, stale click/generation, and mixed Quick/Default/composite placement. Don't claim hash collisions are mathematically impossible.
+7. **Worker scope and reuse.** The plan is account+bucket-wide but `prefixScope` can limit where saves are allowed. Could a proposed automatic readiness reuse incorrectly authorize a different prefix? Could a different bucket accidentally borrow a plan? Do not bypass existing checks.
+8. **Lost or inconsistent local Worker plan.** Does the proposal falsely assume an R2-listed bucket has a saved Worker plan, a live Worker can be rediscovered with its signing key, or a local plan can be auto-healed without consent? State precisely what is recoverable read-only versus what requires explicit setup.
+9. **Depth discovery quality.** What if folder pages repeat, a listing fails midway, paths differ from Cloudflare's delimiter representation, root/empty folders are virtual, or discovered children reach the depth boundary? Could incorrect `complete`/stale/pending flags poison future saves? Do not mistake partial discovery for an empty bucket.
+10. **Readiness amplification and scale.** Could each displayed folder trigger redundant network status checks and each menu rebuild re-register all entries? What is the measured impact of 5/20/100+ siblings and multiple buckets? Recommend a low-complexity remedy only if needed; no invented folder/depth caps.
+11. **Chrome registration and worker restart.** Are all native rows ACKed? A single create failure can nullify complete ACK; is the proposal prepared for stale generations, service-worker restarts and durable vs current ACK? These concerns must not be conflated with this live acknowledged click.
+12. **Successful-click verification.** Would a seemingly completed Depth click leave a file in the wrong bucket/prefix, show only a `depth-click` attempt instead of a transfer receipt, or treat a synthetic response as an R2 upload? Require exact key, independent HEAD/version/size proof, and no replay of uncertain transfers.
+13. **Operational hazards and protecting working modes.** Could any recommended shared-code edit change Simple/Narrow behavior, menu IDs, configuration or authorization? Could migration/reset/reinstall change the existing extension ID, credentials or local plan? Include noninterference and preserve-user-state gates.
+14. **Premature refactoring and scope creep.** Is an architecture rewrite, generic registry, new tracing subsystem, extra persistent format, dedicated worker-per-folder, or broader security redesign actually necessary for the P0 save? Reject anything that does not shorten the route to working Depth click saves.
+15. **Test validity and hidden regressions.** Which current tests use simulated Chrome callbacks or injected Worker responses rather than actual installed Chrome and R2? Identify the previously reported full-suite Simple golden mismatch and Quick browser assertion without "fixing" protected modes. Distinguish verified results, new regressions and untested conditions.
+16. **Any further deficits Codex discovers.** The above is a seed, **not a cap**. Examine the entire proposal and source for additional independent issues, conflicts between its own rules, vague success criteria, unjustified trade-offs, or stronger alternatives. Report them even if they challenge the proposed architecture.
+
+For every line item, say whether it is **already resolved in the present code, genuinely open, disproven, or unverified**. A code risk alone is not proof that it caused the owner's failed Depth click.
+
+**Do not hide bad news:** The document should clearly state if this proposal is overengineered, under-specified, wrong about the root cause, or imposes constraints that prevent the simplest successful repair.
+
+**Finish with an explicit coverage check:** list every original proposal section and record whether it was reviewed, with links to corresponding deficit entries or an evidence-backed "no material deficit found." No blanket praise and no superficial "minor concerns" section.
+
+## 7. What Codex should produce NOW — a FINAL PROPOSAL ONLY
 
 **Do not change implementation code during this review.** Read the actual repository, critically test the premise with existing source and evidence, then create a succinct but substantive engineering proposal.
 
 Deliver:
-- **A. Executive conclusion:** Is my candidate architecture the best fix? Yes / no / partly — why?
-- **B. Confirmed facts vs unknowns:** Distinguish the real `PLAN_MISSING` result and verified Narrow save from speculation; state which additional owner observation (if any) is decisive.
-- **C. Ranked solution choices:** (1) minimal surgical fix, (2) shared-boundary correction, (3) any alternative you judge better. Compare code touched, Simple/Narrow isolation, real-save probability, complexity, failure modes and migration risk.
-- **D. Recommended final plan:** Exact code ownership, boundaries to change and **leave alone**, ordered steps from reproducer to fix to R2 proof. Explain how Depth reaches the established engine rather than creating a second one.
-- **E. Identity/Worker collision proof plan:** Target/account/bucket/prefix and menu ID test matrix, account isolation, same-bucket Worker reuse, prefix restrictions, stale menu generations and changed configurations.
-- **F. Reliability notes without mission creep:** Only actionable risks that could stop an actual right-click save; prioritize fixes that matter now vs explicitly defer later optimizations.
-- **G. Working definition of done:** A real native Chrome Depth click that uploads, verifies the intended object, and does not regress Simple/Narrow.
-- **H. Changes to THIS proposal and WHY:** Explicit table with "proposal clause", "Codex retain/change/reject", "replacement", "reason/evidence", "complexity change", and "what it protects or improves". If Codex's final proposal diverges from mine, explain each material deviation. If no better solution is found, say so rather than inventing work.
-- **I. Short operator/Codex handoff:** One compact future implementation request, linked to the final plan, but **do not implement now**.
+- **A. Initial proposal deficit ledger FIRST:** Produce `INITIAL_PROPOSAL_DEFICITS.md` using the mandatory full-section audit above; include every material problem with evidence, severity, practical consequence, and disposition. Explicitly report which deficits were missing from this initial proposal and how the revised plan fixes them.
+- **B. Executive conclusion:** Is my candidate architecture the best fix? Yes / no / partly — why?
+- **C. Confirmed facts vs unknowns:** Distinguish the real `PLAN_MISSING` result and verified Narrow save from speculation; state which additional owner observation (if any) is decisive.
+- **D. Ranked solution choices:** (1) minimal surgical fix, (2) shared-boundary correction, (3) any alternative you judge better. Compare code touched, Simple/Narrow isolation, real-save probability, complexity, failure modes and migration risk.
+- **E. Recommended final plan:** Exact code ownership, boundaries to change and **leave alone**, ordered steps from reproducer to fix to R2 proof. Explain how Depth reaches the established engine rather than creating a second one.
+- **F. Identity/Worker collision proof plan:** Target/account/bucket/prefix and menu ID test matrix, account isolation, same-bucket Worker reuse, prefix restrictions, stale menu generations and changed configurations.
+- **G. Reliability notes without mission creep:** Only actionable risks that could stop an actual right-click save; prioritize fixes that matter now vs explicitly defer later optimizations.
+- **H. Working definition of done:** A real native Chrome Depth click that uploads, verifies the intended object, and does not regress Simple/Narrow.
+- **I. Changes to THIS proposal and WHY:** Explicit table with "proposal clause", "Codex retain/change/reject", "replacement", "reason/evidence", "complexity change", and "what it protects or improves". If Codex's final proposal diverges from mine, explain each material deviation. If no better solution is found, say so rather than inventing work.
+- **J. Short operator/Codex handoff:** One compact future implementation request, linked to the final plan, but **do not implement now**.
 
-Save the final review and plan under `codex/11.13.2026-0355/DEPTH_WORKING_FIRST_REVIEW/` on a **new isolated proposal branch**. If repository permissions permit, commit only those proposal documents. Do not merge into main. No source changes, no Worker setup, no OAuth reauthorization, no user configuration modifications.
+Save the explicit initial-proposal deficit ledger, followed by the final review and plan, under `codex/11.13.2026-0355/DEPTH_WORKING_FIRST_REVIEW/` on a **new isolated proposal branch**. If repository permissions permit, commit only those proposal documents. Do not merge into main. No source changes, no Worker setup, no OAuth reauthorization, no user configuration modifications.
 
 **Decision rule:** Favor the smallest demonstrated path to a working Depth native save. Architecturally elegant solutions that add complexity without improving actual saving should lose to simpler ones. Protect Simple and Narrow completely. Invite and defend better alternatives with evidence.
