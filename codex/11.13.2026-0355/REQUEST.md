@@ -289,3 +289,28 @@ The source has a candidate trigger in `src/cloudflare/transport.mjs`: readiness 
 Requirements: trace native menu → action ID → exact target → authorization → worker plan lookup → error provenance → save result. Compare Depth and Simple/Narrow targets and create controls for same-bucket/different-prefix and different-bucket cases. Add tests and reproducible live Chrome/R2 readback when authorized. Do not silently repair/provision/deploy workers, reset OAuth, move buckets, or alter functioning Simple/Narrow routing. Record P1 in the rule registry, traceability matrix, test matrix and Logic2Real scoring: confirmed real-world failure, action identity and cause not established, live outcome coverage partial. Fix narrowly only after evidence.
 
 **Release gate:** This P1 must either be proven fixed end-to-end or explicitly remain a blocking discrepancy in the report. UI styling and menu-label success alone cannot justify “merge ready”.
+
+
+# 10. NON-NEGOTIABLE CORRECTION — MODE FAULT CONTAINMENT; DO NOT REENGINEER SIMPLE OR NARROW
+
+**User directive (2026-11-13):** Simple and Narrow are currently working and must be **left unchanged for now**. The job is to prevent Depth failures from affecting them, now or in future. Do **NOT** interpret a Depth save fault as a mandate to merge the modes into one universal save engine, reconfigure all providers, change Simple/Narrow workflows, or rebuild their logic. The UI/menu arrangement is liked and should be preserved.
+
+## Invariants and scope
+
+- **C2C-ISOLATION-DEPTH-001:** A Depth-specific failure of inventory, worker readiness, action resolution, configuration, refresh, rendering, registration, or click/save must **not** block, invalidate, delete, degrade, or change independently valid Simple and Narrow destinations.
+- **C2C-ISOLATION-SIMPLE-002 / NARROW-003:** The same containment principle applies in reverse as a general architecture goal, but do not modify working Simple/Narrow implementations as part of this scoped Depth fix.
+- Preserve the exact existing Simple/Narrow menu behavior, stored configuration, authorization, target identities, save semantics, and end-to-end success.
+- Keep independently attributable mode health, diagnostic status, failure boundaries and recovery. An error in one mode should not be mislabeled as a global Cloudflare outage.
+- Shared interfaces and Chrome platform APIs may exist, but **do not create a shared failure domain**: one mode's failure cannot escalate to a full-menu outage. Prefer mode-scoped validation/compilation/application, preservation of last-known-good unaffected registrations, granular retry, and an explicit safe fallback.
+- Specifically audit `src/chrome/registrar.mjs`: its `removeAll()` plus recreate-all sequence can potentially propagate a single Depth row creation failure to the acknowledged menu generation and operation of otherwise healthy modes. This is an **architectural risk, NOT a proven explanation** of the observed `NATIVE_APPLY_INCOMPLETE`. Determine the actual failed row and callback code before attributing cause. Evaluate whether safe mode-local registration or transaction-like preservation of other modes is feasible within Chrome extension API limits. Do not fake atomicity or impossible Chrome guarantees.
+- Treat the observed `NATIVE_APPLY_INCOMPLETE` separately from the Depth `WORKER_SETUP_REQUIRED` failure unless operation-level evidence connects them.
+- The user explicitly **does not want** a universal merged Simple/Narrow/Depth save engine. Do not propose or implement that as a fix.
+
+## Tests/gates
+
+- Force failure at each Depth boundary (inventory, projection, native menu registration, worker setup, upload) while verifying Simple and Narrow still render and successfully save.
+- Repeat after restart, refresh, reconfiguration, failed Save/Retry, and with the shelf/manager closed.
+- Test intact Simple/Narrow target routing and actual R2 readback before and after each Depth fault-injection scenario.
+- Never claim fault isolation from simulated tests alone; report actual installed Chrome outcomes as verified or unverified.
+- Add isolation invariants to RULES, TRACEABILITY, TEST_MATRIX and Logic2Real scorecard with P0 significance.
+- **Release gate:** A Depth failure that can interrupt a working Simple or Narrow save is a critical cross-mode regression; cannot declare merge-ready.
