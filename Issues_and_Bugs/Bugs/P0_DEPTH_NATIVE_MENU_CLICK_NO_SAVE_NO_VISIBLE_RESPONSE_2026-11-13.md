@@ -45,3 +45,23 @@ Every enabled, clickable Depth destination must either:
 Callback fixtures reproduce stale negative readiness → fallback setupOnly → FRESH_CLICK_REQUIRED with zero uploads. A Depth-only native wrapper now checks current scoped readiness, refreshes the exact observation when READY, and delegates to the existing protected resolver/engine. Genuine missing/unready plans block without provisioning, with safe plan subreason and separate durable depth-click outcome; Save Results distinguishes attempts from receipts. Root/intermediate/leaf fixture dispatch, failed native ACK and early failure feedback tests pass. Hierarchy/scroll/projection/caps are untouched.
 
 This does **not** establish the original Windows cause or a real R2 fix. Native loading is administrator-blocked; actual clicks/readback remain UNVERIFIED and this issue remains OPEN. See [audit and remaining gaps](../../codex/11.13.2026-0355/DEPTH_P0_REPAIR/AUDIT.md). Separate WORKER_SETUP_REQUIRED and NATIVE_APPLY_INCOMPLETE observations are not merged into this incident.
+
+## Live Windows reproduction — 2026-11-13: exact plan lookup failure established
+
+On the owner's Windows Chrome installation after building the `codex/depth-p0-click-save` repair at commit `6beaccf`, a real Depth click now produces a definitive local diagnosis instead of appearing silent:
+
+- UI: `Depth: not saved (WORKER_SETUP_REQUIRED / PLAN_MISSING)`.
+- Durable Depth click ID: `depth-click:8437ba75-8344-4a57-9d3d-b50188942bd4`.
+- Click row ID: `c2c:item:fac90211f53a2d2a`; parent ID: `c2c:item:132c8a263c99277b`.
+- `role=save`, `actionKind=attention`, `mode=depth`.
+- Desired and acknowledged menu generations **both 26**; `nativeCode=NATIVE_ACKNOWLEDGED`.
+- First stopping stage: `worker`; plan reason: **`PLAN_MISSING`**.
+- This is a *click attempt*, not a verified transfer or receipt.
+
+The owner also provided a **distinct, successful Narrow R2 save**: operation `0a90880e-4efe-470e-a2bc-326eb975e68d`, verified by `R2_HEAD_VERSION_SIZE`, file `348s.jpg`, bucket `redown`, prefix `.click2cloud-readiness/.../`. Provenance confirms `mode=narrow`. This establishes that an R2 Worker/capability was functional for the Narrow destination at its operation time, **not** that Depth selected the identical account and bucket.
+
+**Crucial code fact:** `src/cloudflare/deployment.mjs` persists and looks up a Worker plan by digest of **[accountId,bucketName]**, not by folder prefix or presentation mode; `extension/background.mjs` reads that exact digest via `chrome.storage.local`. `src/modes/depth/native-click.mjs` maps a missing lookup to `PLAN_MISSING`. Therefore, if the two recorded destinations have the same account+bucket in the same extension profile and no intervening plan deletion, this points to an unexpected state/key/lookup inconsistency, not a required new per-folder Worker. If the buckets differ, a missing plan may instead be expected for the unprepared bucket.
+
+**Next decisive evidence (read-only):** Compare `(await click2cloud.current.readRemoteResult('depth-click:8437ba75-8344-4a57-9d3d-b50188942bd4')).destination` with `(await click2cloud.current.readRemoteResult('0a90880e-4efe-470e-a2bc-326eb975e68d')).destination`, locally in the service worker. Report only sameAccount/sameBucket flags and bucket names; do not export tokens, Worker secrets or full storage. Do not deploy/reset/provision a Worker or change any unrelated modes to diagnose this.
+
+**Status:** Depth P0 still **OPEN**, live saved-click failure localized to missing exact account+bucket plan. Native click dispatch and ACK are no longer the failing boundary for this specific attempt. Real Depth R2 save remains unverified.
