@@ -3,9 +3,25 @@
 **Date:** 2026-11-13 (America/Chicago)  
 **Repository:** `thanks-cohn/Click2Cloud`  
 **Start branch:** `codex/depth-working-first-implementation`; record actual starting SHA before working  
-**Priority:** P0 investigation + carefully bounded, evidence-driven repairs  
+**Priority:** **P0 FIRST: FIX ALL THREE TRASH BUTTONS**; only then app-wide responsiveness, silent Debug Mode, and logic2real investigation  
 **Status:** Owner-directed request; no implementation or live acceptance is implied  
 **Do not merge to main without owner approval.**
+
+## P0 FIRST / SHIP-BLOCKING GATE — Trash buttons before everything else
+
+**Highest-priority owner directive (2026-11-13): RIGHT-CLICK SAVING CURRENTLY WORKS; ALL THREE TRASH BUTTONS DO NOT. Preserve working right-click saving.**
+
+**Execution priority is mandatory, not optional:**
+
+1. **First, capture a minimally invasive baseline** of the existing working right-click save path and current stored configuration/menu; do not make changes or delay the repair with a comprehensive performance audit. This is a safety snapshot/acceptance baseline, not permission to reset, migrate or copy private secrets.
+2. **Immediately diagnose and FIX Trash in Simple, Narrow and Depth** using [P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md](P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md). Work from the shared click/confirmation handler outward; test whether `window.confirm` is swallowed by the extension modal, whether handlers are firing and whether the Save commit actually persists. Verify exactly one user-selected config row/scope is removed per explicit action; do not touch R2 files.
+3. **Gate all remaining work on Trash verification**. At minimum: all three modes show confirmation → Cancel preserves → Confirm stages exact entry → Save commits → reopen persists → native menu no longer includes selected entry; run working right-click save regression. If one tab still fails, continue fixing Trash before moving on. If a test is blocked by installed-Chrome access, report that explicitly, provide exact manual acceptance steps, and complete every verifiable source/fixture gate before proceeding; do not claim installed PASS.
+4. **Only after the Trash gate**, implement Debug OFF silence, Debug ON switch, and scoped performance improvements; then complete the larger logic2real audit and comparison. The full audit can record baseline evidence earlier but **may not displace the Trash repair as first development priority**.
+5. Document the repairs and measured outcomes so the user's working Chrome right-click save remains a **non-regression invariant**. No general refactor or UX redesign disguised as a Trash fix.
+
+**The core defect to communicate in the handoff and checkpoint name is: “RIGHT-CLICK SAVE WORKS, BUT TRASH DOES NOT — SIMPLE, NARROW, DEPTH.”** Do not mislabel this as broken right-click saving. The current save path should be preserved, not “repaired” as part of deletion.
+
+---
 
 ## 0. Read this first — owner's exact intent
 
@@ -13,7 +29,7 @@
 >
 > Independently, conduct a thorough **logic2real** comparison: what the rules/docs and configured intent say SHOULD happen, what the actual source and built extension DO, and what the installed Chrome experience REALLY shows. We need the discrepancies, with evidence, to cross-compare intent against implementation.
 >
-> Previous owner directive remains required: **Trash must work in Simple, Narrow and Depth**, deleting the selected configured entry only, via confirmation and Save. That repair is described in [the existing Trash request](P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md); it is a workstream of this larger request, **not the full extent of this assignment**.
+> **P0 first:** All three Trash buttons are broken while right-click saving works. Fix and test Trash in **Simple, Narrow and Depth** before pursuing other improvements. See the mandatory ship-blocking gate above and [the focused Trash repair request](P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md).
 
 **Strict boundaries:** Do not redesign the right-click menu, alter the owner's configured choices, auto-delete duplicate `2D` entries, conflate Narrow/Depth/Simple, reset storage, reauthorize accounts, recreate Workers, modify Cloudflare R2 objects, force uninstall/reinstall, rewrite the cloud transport or queue from scratch, disable security checks or declare a remote save successful without verification. **Audit menu logic2real gaps; don't silently change their intended menu behavior without owner instruction.** Small, proven changes that improve responsiveness and reduce unwanted UI noise are authorized. Preserve current crash-recovery and headless right-click reliability.
 
@@ -120,7 +136,7 @@ Deliver:
 
 **Important:** Investigation is authorized for all logic2real gaps. **Implementation of unrelated menu-layout/behavioral corrections is NOT authorized** by this request; document the mismatch and propose a separate scoped fix for owner review.
 
-## 6. P0 Trash repair still mandatory
+## 6. P0 Trash repair — FIRST IMPLEMENTATION AND VERIFICATION GATE
 
 Complete [P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md](P0_ALL_MODES_TRASH_BUTTON_REPAIR_REQUEST.md) as part of the work:
 - Simple, Narrow and Depth Trash must each **respond promptly**, present one deliberate reliable confirmation, stage exactly one selected stable entry/scope, and make the shared Save persist its removal.
