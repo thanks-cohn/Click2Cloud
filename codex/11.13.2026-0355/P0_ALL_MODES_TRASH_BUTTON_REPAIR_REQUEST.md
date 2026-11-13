@@ -1,5 +1,8 @@
 # CODEX REQUEST — P0 Fix Destinations Manager Trash Buttons (Simple + Narrow + Depth ONLY)
 
+> **NEW MASTER REQUEST — 2026-11-13:** This Trash-only request is now a required subtask of [App-wide Responsiveness, Silent Debug Mode and logic2real Audit](P0_APP_WIDE_RESPONSIVENESS_SILENT_DEBUG_LOGIC2REAL_AUDIT.md). The owner additionally requires no floating status box at all when Debug Mode is OFF, near-instant app-wide responsiveness where feasible, and an evidence-based intent → implementation → real Chrome comparison. **Execute the master request, not only this Trash subtask.**
+
+
 **Owner report:** 2026-11-13, America/Chicago  
 **Repository:** `thanks-cohn/Click2Cloud`  
 **Starting branch:** `codex/depth-working-first-implementation` (record exact HEAD before changes; owner reports bug in installed Windows Chrome)  
