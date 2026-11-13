@@ -45,6 +45,9 @@ body.resizing{user-select:none}
 #toolbar-overflow>*{display:block;width:100%;margin:4px 0}
 [hidden]{display:none!important}
 #status{position:fixed;z-index:7;right:14px;bottom:50px;max-width:min(520px,calc(100vw - 28px));max-height:25vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--text)}
+/* Default-off before JS or storage resolves: no one-frame floating diagnostics. */
+html:not([data-debug-mode="on"]) #status{display:none!important}
+#action-feedback{font-size:12px;overflow-wrap:anywhere}
 footer{justify-content:flex-end}footer>span{margin-right:auto}
 .thumbnail{display:block;width:100%;height:72px;object-fit:contain;pointer-events:none}
 .file-tile span{height:72px}.tile-label{margin-top:4px}

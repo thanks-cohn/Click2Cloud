@@ -52,3 +52,5 @@ await import('./depth-working-save.test.mjs');
 await import('./depth-plan-recovery.test.mjs');
 await import('./cloudflare-setup-ui.test.mjs');
 await import('./cloudflare-destination-recovery.test.mjs');
+
+await import('./debug-preference.test.mjs');

@@ -55,13 +55,12 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
  };
 }
 
-// Existing Depth feedback channels remain independent of optional observation writes.
+// Quiet presentation is independent of durable evidence and optional observation writes.
 export function createDepthFeedback(chrome){return async outcome=>{
  try{await chrome.storage.local.set({lastDepthClick:outcome});}catch{}
  const message=outcome.state==='completed'?'Depth save completed; inspect its verified remote receipt.':(['pending','partial','uncertain'].includes(outcome.state)?'Depth: save outcome not confirmed (':'Depth: not saved (')+outcome.code+(outcome.reason?' / '+outcome.reason:'')+'). Open Save results for details.';
  if(outcome.state!=='completed'){
-  try{await chrome.notifications.create('click2cloud-depth-'+outcome.operationId,{type:'basic',iconUrl:chrome.runtime.getURL('extension/icon.png'),title:'Click2Cloud Depth',message});}catch{}
   try{await chrome.action.setBadgeText({text:'!'});}catch{}
  }
- try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',message});}catch{}
+ try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
 };}

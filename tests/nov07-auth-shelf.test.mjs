@@ -13,7 +13,32 @@ test('diagnosis distinguishes grants, token challenge, wrong account, inactive R
 test('wrong account is rejected locally and does not send a request with another account token',async()=>{const f=fixture(async()=>{throw Error('must not fetch');});f.seed();await assert.rejects(f.auth.request('/accounts/foreign/r2/buckets'),{code:'WRONG_ACCOUNT'});assert.equal(f.calls.length,0);});
 test('token issuance followed by temporary identity failure remains pending and can recover read-only',async()=>{let down=true;const f=fixture(async(u)=>u.includes('/oauth2/token')?token():down?Response.json({errors:[]},{status:503}):Response.json({success:true,result:[{id:'a',name:'A'}]}));await assert.rejects(f.auth.connect(),{code:'TRANSIENT_API_FAILURE'});assert.equal((await f.auth.status()).state,'VERIFYING');assert(f.local.click2cloudOAuth.accessToken);down=false;assert.deepEqual((await f.auth.authority()).accounts,[{id:'a',name:'A'}]);assert.equal((await f.auth.status()).state,'CONNECTED');assert.equal(f.calls.filter(c=>c.u.includes('/oauth2/token')).length,1);});
 test('persisted callback can finish in restarted owner; duplicate callback exchanges one code only',async()=>{let release,flowURL,exchanges=0;const f=fixture(async(u)=>{if(u.includes('/oauth2/token')){exchanges++;return token();}return Response.json({success:true,result:[{id:'a'}]});});f.chrome.identity.launchWebAuthFlow=({url})=>{flowURL=url;return new Promise(ok=>release=ok);};const original=f.auth.connect();while(!release)await new Promise(ok=>setImmediate(ok));const restarted=createCloudflareOAuth({chrome:f.chrome,fetch:f.fetch}),url=f.chrome.identity.getRedirectURL()+'?code=one-use&state='+new URL(flowURL).searchParams.get('state');for(const fn of f.listeners)fn({frameId:0,url});for(let i=0;i<100&&(await restarted.status()).state!=='CONNECTED';i++)await new Promise(ok=>setImmediate(ok));assert.equal((await restarted.status()).state,'CONNECTED');release(url);await original;assert.equal(exchanges,1);assert(!JSON.stringify(await restarted.status()).includes('fixture-new-token'));});
-test('Shelf open is issued inside gesture; OFF and rejected open notify without popup/tab or OAuth',async()=>{for(const mode of ['on','off','rejected']){const calls=[],data={};const chrome={runtime:{getURL:p=>p,sendMessage:async()=>{}},storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},sidePanel:{open:()=>{calls.push('open');return mode==='rejected'?Promise.reject(Error('may only be called in response to a user gesture')):Promise.resolve();}},notifications:{create:async(_id,v)=>calls.push(v.message)},action:{setBadgeText:async()=>{}},windows:{getLastFocused:async()=>({id:1})}};const shelf=createShelfAttention({chrome,preference:()=>mode!=='off'}),info={};const context=shelf.gesture(info,{id:7,windowId:1},{provider:'cloudflare',enabled:true,needsAttention:true});assert.equal(calls.includes('open'),mode!=='off');await shelf.attend('cloudflare',undefined,{code:'CHOOSE_DESTINATION',context});assert.equal(calls.filter(x=>x==='open').length,mode==='off'?0:1);if(mode!=='on')assert(calls.some(x=>x==='Choose a Cloudflare destination.'));assert(!calls.some(x=>/log in/i.test(x)));if(mode==='rejected')assert.equal((await shelf.read()).opening.code,'SIDE_PANEL_GESTURE_REQUIRED');}});
+test('Shelf gesture keeps existing open policy while OFF and rejected-open fallback stay OS-silent',async()=>{
+ for(const mode of ['on','off','rejected']){
+  const calls=[],data={},badges=[];
+  const chrome={runtime:{getURL:p=>p,sendMessage:async m=>calls.push({message:m})},storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},sidePanel:{open:()=>{calls.push('open');return mode==='rejected'?Promise.reject(Error('may only be called in response to a user gesture')):Promise.resolve();}},notifications:{create:async(_id,v)=>calls.push({osNotification:v})},action:{setBadgeText:async v=>badges.push(v.text)},windows:{getLastFocused:async()=>({id:1})}};
+  const shelf=createShelfAttention({chrome,preference:()=>mode!=='off'}),info={};
+  const context=shelf.gesture(info,{id:7,windowId:1},{provider:'cloudflare',enabled:true,needsAttention:true});
+  assert.equal(calls.includes('open'),mode!=='off','user-gesture opening policy remains separate from OS notifications');
+  await shelf.attend('cloudflare',undefined,{code:'CHOOSE_DESTINATION',context});
+  assert.equal(calls.filter(x=>x==='open').length,mode==='off'?0:1);
+  assert.equal(calls.filter(x=>x?.osNotification).length,0,'ordinary fallback must never create a desktop notification');
+  assert.equal((await shelf.read()).code,'CHOOSE_DESTINATION');
+  if(mode!=='on')assert(badges.includes('!'),'silent fallback retains visible badge');
+  if(mode==='rejected')assert.equal((await shelf.read()).opening.code,'SIDE_PANEL_GESTURE_REQUIRED');
+ }
+});
+
+test('repeated concurrent attention failures stay OS-silent and retain the latest existing Shelf state',async()=>{
+ const data={},calls=[],badges=[];
+ const chrome={runtime:{getURL:p=>p,sendMessage:async m=>calls.push({message:m})},storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},notifications:{create:async(...args)=>calls.push({osNotification:args})},action:{setBadgeText:async v=>badges.push(v.text)},tabs:{create:()=>{throw Error('unexpected tab');}},identity:{launchWebAuthFlow:()=>{throw Error('unexpected OAuth');}}};
+ const shelf=createShelfAttention({chrome,preference:()=>false});
+ const codes=['WORKER_SETUP_REQUIRED','TRANSIENT_API_FAILURE','CHOOSE_DESTINATION'];
+ await Promise.all(codes.map(code=>shelf.attend('cloudflare',undefined,{code})));
+ assert.equal(calls.filter(c=>c.osNotification).length,0);assert(badges.includes('!'));
+ assert.equal((await shelf.read()).code,'CHOOSE_DESTINATION');assert.equal(data.shelfAttention.code,'CHOOSE_DESTINATION');
+ assert(calls.some(c=>c.message?.channel==='shelf-attention'),'existing in-app state notification remains available');
+});
 
 test('R2 unavailable, unknown403 and outage never provision or navigate an activation site',async()=>{
  const {createCloudflareOnboarding}=await import('../src/cloudflare/onboarding.mjs'),{productState}=await import('../src/api/config.mjs');
