@@ -446,3 +446,18 @@ Final loader regression hardening: a missing/corrupt local visual record reports
 Quick snapshot detail: an actual promoted Narrow Quick placement records `placement:quick`, effective `visibilityMode:hide-all` and only the final level visible, while `configuredVisibilityMode` retains its saved all/custom/hide-all choice. `menuPath` records the direct native shortcut. This avoids claiming configured ancestors were displayed on a promoted click. Ordinary Narrow snapshots are unchanged; no settings are mutated.
 
 Creation identity detail: NEW Narrow IDs are allocated deterministically from the configuration creation revision/slot/collision sequence, independently of physical targetKey. Deleting/recreating in a later revision creates a new ID; existing/legacy IDs never change. Preview/retry stays deterministic. `createDestination` accepts optional hidden/quick flags with the same validation/exclusion rules as update, so existing confirmed-rebuild GUI code can describe its initial choices atomically without guessing a target-derived ID. No recovery machinery or extra API was added; Simple duplicate-target semantics remain intact.
+
+### Depth native click lifecycle — November 13 P0 repair
+
+`src/modes/depth/native-click.mjs:createDepthNativeClick` owns Depth-only
+native preflight and click-attempt observation. `registrar.handleClick` delegates
+only `origin.mode=depth` rows; cold worker metadata may classify the row but never
+authorize a persisted ACK. Fresh account membership and scoped Worker READY are
+required; only that exact target's readiness observation refreshes. Original
+engine/resolver/transport still recheck current authority, generation and receipt.
+Unready status is blocked with a read-only plan subreason; no provisioning/retry.
+`inspectRemoteHistory` displays `kind=depth-click` attempts separately from actual
+remote receipts, using existing CURRENT storage. Native application semantics,
+configuration APIs and all menu projection stay unchanged. See
+[Depth P0 evidence](../../codex/11.13.2026-0355/DEPTH_P0_REPAIR/TEST_RESULTS.md).
+Native Chrome/R2 results remain unverified; fixture success is not release proof.

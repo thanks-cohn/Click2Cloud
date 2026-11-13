@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, depthClick, readDepthClickRow } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -181,7 +181,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     emit('resolver', result.state === 'completed' ? 'ok' : 'blocked', result.code, id, acknowledged.generation);
     return result;
   }
-  async function handleClick(info = {}, tab) {
+  async function handleClickBase(info = {}, tab) {
     try{await beforeClick(info);}catch(error){const out=freeze({state:'blocked',code:error.code==='STALE_GENERATION'?'STALE_GENERATION':'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
     if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
       const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',authorizedTargets:[]});
@@ -209,6 +209,13 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     }
     try { const outcome = await dispatch(result.action, { info, tab, authorization, generation:result.generation }); try { onOutcome?.(outcome); } catch {} return outcome; }
     catch { const failed = freeze({ state: 'failed', code: 'DISPATCH_FAILED' }); emit('intent', 'failed', failed.code, nextId(), acknowledged?.generation); try { onOutcome?.(failed); } catch {} return failed; }
+  }
+  async function handleClick(info = {}, tab) {
+    let row=(desired??acknowledged)?.rows.find(r=>r.id===String(info.menuItemId));
+    if(!desired&&!acknowledged&&readDepthClickRow){try{row=await readDepthClickRow(String(info.menuItemId));}catch{}}
+    if(row?.origin?.mode==='depth'&&typeof depthClick==='function')
+      return depthClick(row,info,tab,()=>handleClickBase(info,tab));
+    return handleClickBase(info,tab);
   }
   const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab); };
   chrome.contextMenus.onClicked?.addListener(listener);

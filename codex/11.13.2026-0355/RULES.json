@@ -1926,7 +1926,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-002",
@@ -2015,7 +2016,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-003",
@@ -2104,7 +2106,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-004",
@@ -2193,7 +2196,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-005",
@@ -2280,7 +2284,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-006",
@@ -2367,7 +2372,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-007",
@@ -2454,7 +2460,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-008",
@@ -2543,7 +2550,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-009",
@@ -2632,7 +2640,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-010",
@@ -2725,7 +2734,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-011",
@@ -2812,7 +2822,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-DEPTH-012",
@@ -2901,7 +2912,8 @@
         "R": "One reported failed incident scores 0; other applicable routing outcomes U. Synthetic workerd is not real R2.",
         "S": "U: durable/native/visible convergence not independently observed in this run.",
         "E": "0.5 for source/test logs with explicit limitations; 1 for paired reproducible measured repair evidence."
-      }
+      },
+      "p0_review": "DEPTH_P0_REPAIR/AUDIT.md; new source/test score snapshot in DEPTH_P0_REPAIR/SCORECARD.md. No upgraded live evidence."
     },
     {
       "id": "L2R-PRESENTATION-001",

@@ -39,3 +39,9 @@ Every enabled, clickable Depth destination must either:
 - Remains a release blocker until fixed and observed end-to-end. Document precise Intent → Implementation → Reality → Discrepancy and Logic2Real scoring update.
 
 **Related:** `Issues_and_Bugs/Bugs/P1_DEPTH_DESTINATION_WORKER_SETUP_REQUIRED_2026-11-13.md`; GitHub issue #11 concerns a distinct visual layout problem.
+
+## Depth P0 code repair — isolated branch, November 13
+
+Callback fixtures reproduce stale negative readiness → fallback setupOnly → FRESH_CLICK_REQUIRED with zero uploads. A Depth-only native wrapper now checks current scoped readiness, refreshes the exact observation when READY, and delegates to the existing protected resolver/engine. Genuine missing/unready plans block without provisioning, with safe plan subreason and separate durable depth-click outcome; Save Results distinguishes attempts from receipts. Root/intermediate/leaf fixture dispatch, failed native ACK and early failure feedback tests pass. Hierarchy/scroll/projection/caps are untouched.
+
+This does **not** establish the original Windows cause or a real R2 fix. Native loading is administrator-blocked; actual clicks/readback remain UNVERIFIED and this issue remains OPEN. See [audit and remaining gaps](../../codex/11.13.2026-0355/DEPTH_P0_REPAIR/AUDIT.md). Separate WORKER_SETUP_REQUIRED and NATIVE_APPLY_INCOMPLETE observations are not merged into this incident.

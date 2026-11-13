@@ -73,3 +73,5 @@ P0 native/save/state gates: **0/39 passed**. Unobserved P0 dimensions prevent a 
 - Regressions: zero new failures detected; one existing Simple golden failure remains. Final full offline 370/371; focused 319/319; module 49/49. Final registry/browser checks recorded separately in TEST_MATRIX.md.
 
 **Release: NOT READY.** The P1 reported Depth save has no end-to-end resolution and native verification is blocked. Low scores preserve missing evidence instead of treating fixtures as live success.
+
+Later P0 repair snapshot: [Depth-only callback repair scorecard](DEPTH_P0_REPAIR/SCORECARD.md), with its own baseline and three new Depth rules. Historical scores above are preserved; no new live evidence is implied.
