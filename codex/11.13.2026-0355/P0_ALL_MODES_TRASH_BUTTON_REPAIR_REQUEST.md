@@ -4,8 +4,8 @@
 **Repository:** `thanks-cohn/Click2Cloud`  
 **Starting branch:** `codex/depth-working-first-implementation` (record exact HEAD before changes; owner reports bug in installed Windows Chrome)  
 **Priority:** P0 functional UX — every destination Trash action is unusable, preventing owner-controlled removal of saved menu entries  
-**Scope:** Fix the Trash-button click → confirmation → staged deletion → explicit Save → durable configuration → native menu reconciliation workflow in **ALL THREE** Destinations Manager tabs. NOTHING ELSE.  
-**Deliverable:** Minimal source repair, focused regression tests, installed-browser observations, and before/after evidence. Do not merge into main.
+**Scope:** Fix the Trash-button click → confirmation → staged deletion → explicit Save → durable configuration → native menu reconciliation workflow in **ALL THREE** Destinations Manager tabs, and audit/repair latency **within that workflow**. NOTHING ELSE.  
+**Deliverable:** Minimal source repair, focused regression tests, before/after responsiveness metrics, installed-browser observations, and evidence. Do not merge into main.
 
 ## 0. Owner's directive — fix deletion, not the menu
 
@@ -98,8 +98,40 @@ Use isolated fixtures for destructive-looking repros. On the owner's profile, **
 - Include before/after row counts and exact removed *presentation IDs* or Depth scope identities (without credentials).
 - Do not merge to main. Commit the isolated repair and tests on the work branch and report the SHA, changed files, remaining gaps, and exact manual owner verification steps if live Chrome was inaccessible.
 
+## 5A. Focused responsiveness and latency investigation — near instant where possible
+
+**Additional owner directive, 2026-11-13:** Investigate why this workflow feels slow/unresponsive; prioritize **near-instant interaction feedback wherever feasible**, without damaging existing code, introducing risky architecture, sacrificing correctness, or overwhelming the user with debug messages or popups.
+
+This is **part of the Trash repair**, not permission for an app-wide latency overhaul. Investigate the shared Destinations Manager Trash → confirmation → draft → Save → native-menu refresh path across Simple/Narrow/Depth. If a broader source of latency is discovered, document it for separate review rather than extending code changes into unrelated Explorer, OAuth, provider transport, or right-click saving behavior.
+
+### Measure before optimizing
+
+- Instrument **pointer/click to visible response** (confirmation or inline acknowledgment), **confirm to staged-row update**, **Save click to immediate inline progress**, **durable commit receipt**, and **Chrome menu reconciliation completion** separately; report p50/p95 where practical and exact trial counts/environment.
+- Compare baseline and repaired results in a real Chrome extension context if accessible, including repeated rows, long lists (e.g. ten `2D` entries), small Shelf layouts, and fast consecutive interactions. Do not call simulated timings installed-Chrome measurements.
+- Inspect main-thread blocking, synchronous modal dialogs, excessive full-dialog reconstruction, stale event listener rebinding, unnecessary awaits, redundant configuration reads, background message round-trips, and menu re-registration. Treat these as hypotheses until profiled.
+
+### Desired feel and correctness
+
+- **Immediate, reliable reaction to Trash click**: display the confirmation promptly. Aim for next-frame/under ~100 ms visible reaction on an ordinary desktop as an aspirational UX target, not a fabricated guarantee or a reason to bypass safety.
+- **Immediate visible state after confirmation**: stage precisely the chosen deletion and update only the necessary interface, without waiting for network/cloud verification. Keep the existing explicit **Save** requirement for durable deletion.
+- **Save should acknowledge the click immediately** in one unobtrusive inline status. Durable storage commit and native Chrome menu registration may be asynchronous; show truthful completion separately. Do not show “Deleted” or “Saved” until durable evidence supports it.
+- **No million debug popups**: no repeated `alert()`, `confirm()` chains, progress modals, toasts for every internal step, noisy notifications, or debug overlays. One purposeful, accessible deletion confirmation is appropriate; otherwise prefer a stable, concise status line and, for developers, optional structured logs/diagnostics rather than user-visible noise.
+- No artificial delays, polling storms, busy loops, aggressive repeated registrations, or “optimistic” state that can silently diverge from persisted configuration. If retry is necessary, keep it idempotent and explicit.
+- Prefer the smallest proven code change. Never trade correct ID-based deletion, CURRENT atomicity, authorization checks, native menu convergence, or crash resilience for a benchmark.
+- Do **not** require a remote Cloudflare round trip merely to show the delete confirmation or stage a local config removal. Preserve any established security or existence check actually necessary before claiming remote actions succeed, but no cloud objects are being deleted in this workflow.
+- Preserve keyboard accessibility, cancel/undo-before-Save semantics, focus, disabled-button states during commit, and responsive behavior for narrow layouts.
+
+### Performance acceptance gates
+
+1. Trash click yields clear visible feedback on the same interaction cycle, not a dead button, in all three modes. State exact measured latency before and after, or mark unmeasured.
+2. Confirm/Cancel, staged draft UI, and retry remain responsive with many identical-label rows and no duplicate/incorrect event handling.
+3. Save feedback appears promptly even if commit/menu ACK takes longer; final statuses accurately reflect **pending / committed / native reconciliation incomplete / completed**.
+4. Avoid new user-visible debug popups/notification spam. A single in-app confirmation and quiet inline status are the expected normal path.
+5. Any meaningful measured regression in existing successful interactions should block shipping; compare baseline and after and explain tradeoffs.
+6. Strict scope lock: **no unrelated performance refactor**; document rather than implement broader optimization opportunities.
+
 ## 6. Scope lock
 
-**Success is exactly this:** In Destinations Manager, **Trash works in Simple, Narrow, and Depth**, deleting exactly the selected saved configuration after confirmation and Save, without breaking other destinations. No further features or redesigns. Nothing else.
+**Success is exactly this:** In Destinations Manager, **Trash works quickly and reliably in Simple, Narrow, and Depth**, immediately acknowledging the click, deleting exactly the selected saved configuration after confirmation and Save, and conveying asynchronous commit/menu status quietly and truthfully, without breaking other destinations. No further features or redesigns. Nothing else.
 
 **Related owner report (context only):** `Issues_and_Bugs/Bugs/P1_NARROW_2D_DUPLICATE_ACCUMULATION_TRASH_UNRESPONSIVE_2026-11-13.md`. The Narrow duplicate-creation issue and bucket-label presentation issue are NOT authorized for repair here.
