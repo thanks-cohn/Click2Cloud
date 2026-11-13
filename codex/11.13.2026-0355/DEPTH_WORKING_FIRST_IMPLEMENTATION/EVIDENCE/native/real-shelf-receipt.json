@@ -1,0 +1,27 @@
+{
+  "time": "2026-11-13T17:39:12.341Z",
+  "sourceRevision": "102ac7777d94b7507aa0b8bb7c37f2337869751f",
+  "build": {
+    "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+    "extensionVersion": "0.3.19",
+    "revision": "6beaccfafb797ae92671dd3c80b62faeb5f5ec65",
+    "sourceDigest": "9a318a69adc86d2f8e5e518f11894f17ada0b6c908cafaa6b9e7e608fd254c86",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "evidenceClass": "REAL_UNPACKED_EXTENSION_GENUINE_SIDE_PANEL_REQUIRED",
+  "request": {
+    "channel": "engine",
+    "version": "3+1.1",
+    "method": "describeCapabilities",
+    "params": {}
+  },
+  "response": null,
+  "result": "FAIL",
+  "checks": [],
+  "policyBypassed": false,
+  "error": {
+    "code": "REAL_SHELF_ACCEPTANCE_FAILED",
+    "message": "Build is stale: run npm run build:extension at this commit.\n+ actual - expected\n\n+ '6beaccfafb797ae92671dd3c80b62faeb5f5ec65'\n- '102ac7777d94b7507aa0b8bb7c37f2337869751f'\n"
+  }
+}

@@ -1,0 +1,11 @@
+✔ production Depth callbacks -> provisioner -> signed transport -> workerd -> independent R2 bytes, with observation failures and protected modes (1550.757136ms)
+✔ optional lastDepthClick failure does not suppress existing channels or claim uncertain save success (0.739704ms)
+✔ follow-up diagnostic read never purports to be rejecting plan snapshot (0.77179ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2207.299883

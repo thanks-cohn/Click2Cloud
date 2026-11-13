@@ -1,4 +1,4 @@
-import {createDepthNativeClick} from '../src/modes/depth/native-click.mjs';
+import {createDepthNativeClick,createDepthFeedback} from '../src/modes/depth/native-click.mjs';
 import {discoverDepthScope} from '../src/explorer/depth-inventory.mjs';
 import {createBreadcrumbs} from '../src/glaciaring/breadcrumbs.mjs';
 import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
@@ -140,15 +140,11 @@ const getAuthorization=async selection=>{
     return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>a.accounts.some(x=>x.id===t.accountId)&&await remoteReady(t)?t:null))).filter(Boolean)};
   }catch{return null;}
 };
-const depthClick=createDepthNativeClick({current,oauth,transport:remote,lookup:provisioner.lookup,inspect:()=>registrar.inspect(),refreshReady:target=>snapshots.set(targetKey(target),{at:Date.now(),ready:true}),feedback:async(outcome)=>{
-  await chrome.storage.local.set({lastDepthClick:outcome});
-  const message=outcome.state==='completed'?'Depth save completed; inspect its verified remote receipt.':(['pending','partial','uncertain'].includes(outcome.state)?'Depth: save outcome not confirmed (':'Depth: not saved (')+outcome.code+(outcome.reason?' / '+outcome.reason:'')+'). Open Save results for details.';
-  if(outcome.state!=='completed'){
-    try{await chrome.notifications.create('click2cloud-depth-'+outcome.operationId,{type:'basic',iconUrl:chrome.runtime.getURL('extension/icon.png'),title:'Click2Cloud Depth',message});}catch{}
-    try{await chrome.action.setBadgeText({text:'!'});}catch{}
-  }
-  try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',message});}catch{}
-}});
+const depthClick=createDepthNativeClick({current,oauth,transport:remote,lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:async target=>{
+ if(revoking)return null;
+ const auth=await oauth.authority();
+ return {sessionId:auth.sessionId,authorizedTargets:auth.accounts.some(a=>a.id===target.accountId)&&(await remote.status(target)).state==='READY'?[target]:[]};
+},feedback:createDepthFeedback(chrome)});
 const registrar=createChromeRegistrar({chrome,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.origin?.mode==='depth'&&row.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:async info=>{
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
     await nativeReady();
@@ -156,9 +152,9 @@ const registrar=createChromeRegistrar({chrome,depthClick,readDepthClickRow:async
     if(!prior||!next||prior.role!==next.role||prior.actionId!==next.actionId)
       throw Object.assign(Error(),{code:'STALE_GENERATION'});
   },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
-  dispatch:async(action,{info,generation})=>{
+  dispatch:async(action,{info,generation,depthAuthorization})=>{
     let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
-    return engine.save({itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
+    return engine.save({depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,

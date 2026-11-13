@@ -461,3 +461,22 @@ remote receipts, using existing CURRENT storage. Native application semantics,
 configuration APIs and all menu projection stay unchanged. See
 [Depth P0 evidence](../../codex/11.13.2026-0355/DEPTH_P0_REPAIR/TEST_RESULTS.md).
 Native Chrome/R2 results remain unverified; fixture success is not release proof.
+
+### Working-first Depth repairs — November 13
+
+`src/modes/depth/native-click.mjs` isolates optional click-record failures from
+safe dispatch and returns `depthRecordCode` without changing transfer truth.
+`createDepthFeedback` independently attempts existing notification/badge/message
+channels even if optional lastDepthClick persistence fails. A later diagnostic
+plan observation is prefixed FOLLOWUP; it is not the rejecting read's snapshot.
+
+Depth native callbacks now pass an internal invocation-local authorization
+function through `registrar.handleClickBase` → background dispatch → engine.save.
+The engine selects it only for a bound `origin.mode=depth` row. Fresh OAuth,
+exact scoped Worker status, current generation/configuration, capability and
+independent receipt verification remain required. Simple/Narrow retain the
+original getAuthorization path; no Depth click writes shared readiness snapshots.
+No public API schema, registry key, upload implementation or menu is changed.
+Owning APIs remain `dispatchSave` / `inspectRemoteHistory`; physical Chrome/R2
+verification is separate. Evidence: tests/depth-working-save.test.mjs and
+codex/11.13.2026-0355/DEPTH_WORKING_FIRST_IMPLEMENTATION/FIXES_AND_VERIFICATION.md.

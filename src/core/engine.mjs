@@ -41,7 +41,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     }
     return result;
   }
-  async function save({itemId,generation,context='image',source,signal,attentionContext}={}) {
+  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization}={}) {
     const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
     // These are actual sequential prerequisites in this owner, not inferred
@@ -62,6 +62,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     try {
       const durable=await current.read();if(durable.generation.desired!==generation||durable.generation.applied!==generation)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const spec=menus.get(generation);
+      const authorizeTarget=spec?.rows.find(r=>r.id===itemId)?.origin?.mode==='depth'&&typeof depthAuthorization==='function'?depthAuthorization:getAuthorization;
       if(spec&&compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(durable))return finish({state:'blocked',code:'STALE_CONFIGURATION',operationId});
       if(!spec)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const providerRow=spec?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
@@ -72,7 +73,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         return finish(await onProviderAction({provider:resolved.action.providerAction,attentionContext,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
       }
       let auth;
-      try{auth=await getAuthorization(spec?.rows.find(r=>r.id===itemId)?.target);}
+      try{auth=await authorizeTarget(spec?.rows.find(r=>r.id===itemId)?.target);}
       catch{observe(saveSink,'auth.check','failed','AUTH_CHECK_FAILED',scope);blockRemaining('auth.check');throw Object.assign(Error('Authorization could not be checked'),{code:'AUTH_CHECK_FAILED'});}
       if(!auth?.sessionId||!Array.isArray(auth.authorizedTargets)) {
         observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
@@ -94,7 +95,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
-        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await getAuthorization(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await authorizeTarget(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
         const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
@@ -108,7 +109,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         // Recheck current authority after source capture and before upload.
         authorize:async intent=>{
           const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;
-          const latest=await getAuthorization(resolved.action.target);
+          const latest=await authorizeTarget(resolved.action.target);
           if(latest?.sessionId!==auth.sessionId)return false;
           const registration=registrar.inspect();
           if(registration.pending||registration.desired?.generation!==generation)return false;

@@ -1,0 +1,25 @@
+✔ Depth emitted click uses fresh ready status to escape cached-negative attention and saves exact root/intermediate/leaf (51.792044ms)
+✔ baseline fallback reproduces FRESH_CLICK_REQUIRED with readiness-cache denial and zero uploads (16.03026ms)
+✔ Depth blocked status is recorded and visible: WORKER_SETUP_REQUIRED (12.253273ms)
+✔ Depth blocked status is recorded and visible: PREPARED (11.316237ms)
+✔ Depth blocked status is recorded and visible: TRANSPORT_UNAVAILABLE (12.786306ms)
+✔ Depth blocked status is recorded and visible: WORKER_DESTINATION_SCOPE_REQUIRED (14.86731ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Cloudflare (11.556411ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Images (8.35811ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Artwork (8.622575ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: remove (1.678467ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: timeout (82.679609ms)
+✔ Worker plan discriminators are mode-local and cannot borrow accounts/buckets (0.365522ms)
+✔ Depth keeps twenty siblings and depth beyond ten; no row cap or changed menu plan (68.21592ms)
+✔ non-Depth rows do not enter Depth preflight, history or feedback (6.628343ms)
+✔ Depth records authorization loss, hostile exceptions, uncertain/partial dispatch and persistence failures without retry (0.864739ms)
+✔ cold worker classifies persisted Depth row without trusting its historical ACK (11.56545ms)
+✔ five siblings preserve independent failed-child ACK evidence without claiming a full menu (13.580488ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 568.887285

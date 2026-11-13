@@ -1,0 +1,15 @@
+{
+  "phase": "after",
+  "sourceRoot": "/workspace/Click2Cloud",
+  "time": "2026-11-13T17:39:12.888Z",
+  "evidenceClass": "actual-Chromium-DOM-fixture-provider-not-native-menu",
+  "measurements": [],
+  "browser": "156.0.8078.79",
+  "result": "PASS",
+  "checks": [
+    "production IndexedDB retains depth-click kind",
+    "actual app renders blocked click and metadata",
+    "no fabricated receipt controls",
+    "reload retains click record"
+  ]
+}

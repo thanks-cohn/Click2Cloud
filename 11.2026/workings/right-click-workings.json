@@ -9213,7 +9213,7 @@
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
-      "src/chrome/registrar.mjs": "919077303446682a9e12c32e716f2fd7447ed45b890e354f7f567c7f0dd45fa7",
+      "src/chrome/registrar.mjs": "d3811a484289277cd033960b5cdffe4017e132d367065d4f88310161753245fd",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "6a80a9589771637cbac4d71dc5a0ed1288cb48cfaeb61dddd6c8b6744f854518",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
@@ -9230,7 +9230,7 @@
       "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "d762713e6fa0939a11a72c98c008f73f531ac8bcbc7045565935fa75eb3b8730",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "c1242149f09762541f65f30cf4111f4c8e38de9e1939bf885480b2d6306c686e",
+      "src/core/engine.mjs": "de18449bdb2b360c8f7afb30d076e3786aa57affd0e43667ddf4b68ba511bf44",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
       "src/core/menu-provenance.mjs": "58467b1e4d2b22f71a159a6051a2e9ac0c9f7a8d5a50e73eecfba346026c6983",
@@ -9267,7 +9267,7 @@
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/depth/native-click.mjs": "41498b127b0cdc2f7ec30e2ba869a30dc03b8a3dfb4c16126ded63e7a487b006",
+      "src/modes/depth/native-click.mjs": "889c5dbb42d3803ce3d7b17c09e297fe1a64f31e3327752627fd8d7b7089daf9",
       "src/modes/nested/index.mjs": "05d613e10a850e52689d9a7cb8f8d85c5c9c1f23046845deff0834c51db2aa2a",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
@@ -9280,7 +9280,7 @@
       "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
       "extension/app.html": "668602dae631aa7efbdda276d8644576434ab0c2b3e282798aa0e576652c1076",
       "extension/app.mjs": "4163d79783fcb2c338bab1e6ca858036264aa548dbc27e1c3ef8e6b9c5773c2c",
-      "extension/background.mjs": "379c741aa8bb5c9c6dd20607ad40db621c2b2b1d783aab801e1aacef3eb2d6f9",
+      "extension/background.mjs": "ac21b885e4b6a9eea724545363fc0ad997612c56f89da2c5fe678293ce02881f",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
@@ -14530,9 +14530,18 @@
         "dispatchSave"
       ],
       "owner": "src/modes/depth/native-click.mjs:createDepthNativeClick",
-      "behavior": "Only known Depth-origin native rows enter fresh status preflight, exact-target readiness cache refresh and correlated depth-click attempt records. Existing native ACK, target authorization, engine dispatch and transfer verification remain mandatory. Non-Depth handler is unchanged. No menu projection changes or caps.",
+      "behavior": "Depth-only native attempt lifecycle; superseded by depthWorkingFirstRepair for best-effort observations and invocation-local authorization. No shared snapshots mutation remains in Depth click handling.",
       "evidence": "codex/11.13.2026-0355/DEPTH_P0_REPAIR/TEST_RESULTS.md",
       "live": "UNVERIFIED"
+    },
+    "depthWorkingFirstRepair": {
+      "owner": "src/modes/depth/native-click.mjs",
+      "behavior": "Optional attempt and feedback storage failures do not abort safe save/feedback. Depth authorization is invocation-local through the original registrar/engine; no shared snapshot mutation. Later plan read explicitly FOLLOWUP; no provisioning, topology or limit changes.",
+      "api": [
+        "dispatchSave",
+        "inspectRemoteHistory"
+      ],
+      "evidence": "codex/11.13.2026-0355/DEPTH_WORKING_FIRST_IMPLEMENTATION/FIXES_AND_VERIFICATION.md"
     }
   },
   "changeLog": [
