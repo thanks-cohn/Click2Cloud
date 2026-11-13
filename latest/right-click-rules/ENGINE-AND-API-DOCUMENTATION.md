@@ -447,7 +447,7 @@ Quick snapshot detail: an actual promoted Narrow Quick placement records `placem
 
 Creation identity detail: NEW Narrow IDs are allocated deterministically from the configuration creation revision/slot/collision sequence, independently of physical targetKey. Deleting/recreating in a later revision creates a new ID; existing/legacy IDs never change. Preview/retry stays deterministic. `createDestination` accepts optional hidden/quick flags with the same validation/exclusion rules as update, so existing confirmed-rebuild GUI code can describe its initial choices atomically without guessing a target-derived ID. No recovery machinery or extra API was added; Simple duplicate-target semantics remain intact.
 
-### Depth native click lifecycle — November 13 P0 repair
+### Depth native click lifecycle — November 13 P0 repair (historical pre-recovery behavior)
 
 `src/modes/depth/native-click.mjs:createDepthNativeClick` owns Depth-only
 native preflight and click-attempt observation. `registrar.handleClick` delegates
@@ -480,3 +480,48 @@ No public API schema, registry key, upload implementation or menu is changed.
 Owning APIs remain `dispatchSave` / `inspectRemoteHistory`; physical Chrome/R2
 verification is separate. Evidence: tests/depth-working-save.test.mjs and
 codex/11.13.2026-0355/DEPTH_WORKING_FIRST_IMPLEMENTATION/FIXES_AND_VERIFICATION.md.
+
+### Exact-bucket missing-plan recovery — November 13 ship repair
+
+`recoverCloudflareDestination({target,expectedRevision?,idempotencyKey?,authorizeSetup?})`
+is the narrow trusted `3+1.1` provision action in `src/api/service.mjs`. Native
+Depth preflight calls it only after current CURRENT/configuration/generation and
+native ACK validation. Its immutable target is the clicked account, connection,
+bucket and prefix. Default and other configured buckets are never fallbacks.
+The API and Shelf use `onboarding.recoverDestination`; there is no second saver.
+
+Existing durable account or exact-bucket setup approval permits missing-plan
+creation/resume with live required grants. Without approval the original click
+is not saved and exact-target Shelf attention offers informed authorization.
+`authorizeSetup:true` requires host confirmation; code upgrades and signing-key
+renewal require that explicit action even when ordinary setup approval exists.
+The confirmation explains Worker/R2 usage and shared per-bucket key renewal.
+An unknown/mismatched remote identity is never overwritten. Existing prefix
+scope is retained; a scope mismatch stays blocked with scoped-change guidance.
+
+`deployment.prepare` persists a generated name/key before deployment, inspects
+retained account/bucket/R2/DO/signing bindings, and reuses pending deployment
+identity after interruption. `remoteTransport:digest([accountId,bucketName])`
+remains the one physical registry entry across modes/folders. The private
+`destination-recovery:` pointer selects the same-bucket setup ledger; legacy
+matching initialization records can resume. An uncertain probe is inspected by
+its original operation ID and never automatically replayed. Readiness requires
+fresh exact scoped capabilities, actual verified R2 probe, `markVerified`, and
+a final fresh status. Saved configurations, Default and Quick are not edited.
+
+After recovery the canonical compiler/registrar refreshes only the selected
+Depth bucket's discovery, preserves unrelated snapshots, and requires the exact
+actionable native row in the current ACK. The original click returns
+`FRESH_CLICK_REQUIRED`; its source URL/bytes are neither retained nor replayed.
+A new click uses the original common resolver/engine/signed transport with
+independent object verification. Shelf no longer interprets `completed` alone
+as readiness: `selectedSetupReady` requires fresh exact transport proof and
+current exact-target native ACK. Permission denial, stale code, restricted
+scope, uncertain probe, missing approval and incomplete menu remain distinct.
+
+Evidence: `tests/depth-plan-recovery.test.mjs` executes actual provisioning
+metadata/module construction, typed API, native callbacks, signed workerd
+requests and independent local R2 byte readback. Recovery/deployment/UI suites
+cover consent, restart, lost replies, scope/account isolation and no replay.
+Browser DOM tests use synthetic RPC. These are not owner Chrome or live
+Cloudflare R2 proof; administrator policy blocks unpacked loading in this runner.

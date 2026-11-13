@@ -30,6 +30,7 @@ const definitions={
   getGalleryLoadingVisual:['inspect',obj({includeMedia:bool})],setGalleryLoadingVisual:['configure',obj({expectedRevision:num,mode:{enum:['math','media','plain']},removeMedia:bool,media:obj({name:{type:'string',minLength:1,maxLength:256},type:{enum:['image/png','image/jpeg','image/webp','image/gif','video/mp4']},base64:{type:'string',minLength:1,maxLength:11184812}},['name','type','base64'])},['expectedRevision','mode'])],
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
+  recoverCloudflareDestination:['provision',obj({target,expectedRevision:num,idempotencyKey:str,authorizeSetup:bool},['target'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
   inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj({section:{enum:['reliability']}})],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj({view:{enum:['health','trace','support']},operationId:num,cursor:str,limit:{type:'integer',minimum:1,maximum:128}})],getProviderConnections:['inspect',obj()],
@@ -78,14 +79,17 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
-  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false}={}){
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget}={}){
     try{
       const state=await current.read();
       const inventory=await getInventory({refreshTargets,refreshDepthReadiness,
-        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare?state.configs.depth.scopes:[]});
+        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare?state.configs.depth.scopes.filter(s=>!depthTarget||scopeKey(s.target)===scopeKey(depthTarget)):[]});
       const spec=await engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory});
       const native=await engine.apply(spec);
-      return native.state==='completed'&&inventory.depthCoverageComplete===false
+      const selectedDepth=depthTarget&&inventory.depthScopes?.filter(s=>scopeKey(s.target)===scopeKey(depthTarget));
+      const configuredDepth=depthTarget&&state.configs.depth?.scopes.some(s=>scopeKey(s.target)===scopeKey(depthTarget));
+      const coverage=configuredDepth&&selectedDepth?selectedDepth.length>0&&selectedDepth.every(s=>!s.stale):inventory.depthCoverageComplete;
+      return native.state==='completed'&&coverage===false
         ?{...native,state:'partial',code:'DEPTH_DISCOVERY_REQUIRED'}:native;
     }catch(error){
       const code=error.code??error.message;
@@ -174,7 +178,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
         if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
         else if(method==='setGalleryLoadingVisual')data=await current.setGalleryLoadingVisual(params);
-        else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
+        else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','recoverCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
           if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
           if(['openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction'].includes(method)&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           if(method==='initializeCloudflare'){data=await finishInitialization(await cloudflare.initialize(params));}
@@ -183,6 +187,19 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='selectCloudflareAccount')data=await cloudflare.select(params.accountId);
           if(method==='openCloudflareActivation')data=await cloudflare.activation(params.accountId);
           if(method==='approveCloudflareSetup'||method==='repairCloudflareDestination'){data=await cloudflare.setup({...params,repair:method==='repairCloudflareDestination'});if(data.state==='completed')data=await finishInitialization(data);}
+          // Existing approval can resume this exact configured bucket. New
+          // approval is a separately confirmed, account-scoped provision action.
+          if(method==='recoverCloudflareDestination'){
+            if(params.authorizeSetup&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            data=await cloudflare.recoverDestination(params);
+            if(data.state==='completed'){
+              const native=await applyCurrent({refreshDepth:true,refreshDepthReadiness:true,refreshTargets:[params.target],depthTarget:params.target});
+              let readiness=nativeReadiness(await cloudflare.check(params.target.accountId,params.target));
+              const evidence=engine.getEvidence?.(),row=evidence?.desired?.rows?.find(r=>r.role==='save'&&r.target&&targetKey(r.target)===targetKey(params.target)&&r.enabled&&r.visible&&r.actionKind!=='attention');
+              if(readiness.state==='READY'&&!row)readiness={...readiness,state:'REPAIR_REQUIRED',code:'DESTINATION_NOT_REGISTERED'};
+              data={...data,native,readiness,...(native.state!=='completed'?{state:'partial',code:native.code??'NATIVE_APPLY_INCOMPLETE'}:readiness.state!=='READY'?{state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state}:{})};
+            }
+          }
           if(method==='invokeProviderAction'){if(!await current.reserveOperation(actor+':provider:'+params.idempotencyKey,Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(params)))),b=>b.toString(16).padStart(2,'0')).join('')))fail('SAVE_RETRY_REQUIRES_INSPECTION');if(params.source){if(!Number.isSafeInteger(params.generation))fail('GENERATION_REQUIRED');const spec=engine.getMenu(params.generation),row=spec?.rows.find(r=>r.providerAction===params.provider||r.role==='save'&&r.id===stableId('provider-entry',params.provider)||r.role==='save'&&r.target?.provider===params.provider&&state.product.defaultTarget&&targetKey(r.target)===targetKey(state.product.defaultTarget));if(!row)fail('CANONICAL_ACTION_UNAVAILABLE');data=await engine.save({itemId:row.id,generation:params.generation,context:'link',source:params.source});}else data=await cloudflare.invoke(params);}
           if(method==='inspectRemoteHistory')data=await cloudflare.history(params);
           if(method==='inspectRemoteReceipt')data=await cloudflare.receipt(params);

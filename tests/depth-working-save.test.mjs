@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {build} from 'esbuild';import {Miniflare,createFetchMock} from 'miniflare';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
@@ -5,7 +6,7 @@ import {PROTOCOL,digest} from '../src/cloudflare/wire.mjs';import {createDepthNa
 import {createEngine} from '../src/core/engine.mjs';import {createChromeRegistrar} from '../src/chrome/registrar.mjs';import {productState} from '../src/api/config.mjs';import {targetKey} from '../src/core/menu-identity.mjs';import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 const root={provider:'cloudflare',connectionId:'cloudflare:fixture',accountId:'fixture',bucketName:'bucket',prefix:''};
 test('production Depth callbacks -> provisioner -> signed transport -> workerd -> independent R2 bytes, with observation failures and protected modes',async()=>{
- const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',plugins:[{name:'source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:new URL('./fixtures/public-egress.mjs',import.meta.url).pathname}));}}]})).outputFiles[0].text;
+ const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',plugins:[{name:'source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:fileURLToPath(new URL('./fixtures/public-egress.mjs',import.meta.url))}));}}]})).outputFiles[0].text;
  const mock=createFetchMock();mock.disableNetConnect();mock.get('https://raw.githubusercontent.com').intercept({path:'/approved.bin'}).reply(200,'abc', {headers:{'content-length':'3','content-type':'application/octet-stream'}}).persist();
  const secret='synthetic-integration-secret-only',mf=new Miniflare({modules:true,script:code,compatibilityDate:'2026-01-01',r2Buckets:['STORAGE'],durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},bindings:{SIGNING_KEY:secret,ACCOUNT_ID:'fixture',BUCKET_NAME:'bucket',PREFIX_SCOPE:'',CODE_DIGEST:'fixture-code'},fetchMock:mock});
  let registrar;

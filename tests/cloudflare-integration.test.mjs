@@ -1,3 +1,4 @@
+import {fileURLToPath} from 'node:url';
 import {menuProvenance} from '../src/core/menu-provenance.mjs';
 import test from 'node:test';
 import {mkdtemp,rm,mkdir,writeFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
@@ -47,7 +48,7 @@ test('minimal trusted writer seam accepts a structural test writer without menu/
  await writer.write({prepared:await writer.prepare({}),body:new Blob(['abc']).stream(),operationId:'opaque'});assert(!('source' in input));assert.equal((await writer.verify({})).verified,true);assert.throws(()=>destinationWriter(cap));
 });
 test('real workerd runtime: R2 conditional writes, independent HEAD, durable claim replay and revocation',async()=>{
- const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',plugins:[{name:'explicit-source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:new URL('./fixtures/public-egress.mjs',import.meta.url).pathname}));}}]})).outputFiles[0].text;
+ const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',plugins:[{name:'explicit-source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:fileURLToPath(new URL('./fixtures/public-egress.mjs',import.meta.url))}));}}]})).outputFiles[0].text;
  const mock=createFetchMock();mock.disableNetConnect();
  mock.get('https://raw.githubusercontent.com').intercept({path:'/approved.bin'}).reply(200,'abc', {headers:{'content-length':'3','content-type':'application/octet-stream'}}).persist();
  const storage=await mkdtemp(join(tmpdir(),'c2c-claims-'));
@@ -62,7 +63,7 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
   const forgedScope=await signGrant(plan.secret,{protocol:PROTOCOL,use:'save',principal:'cloudflare:foreign',sessionId:'s',destination:foreignDestination,operationId:foreignOperation,sourceDigest:await digest(foreignSource),expiresAt:Date.now()+10000});
   const foreignResponse=await mf.dispatchFetch(url+'/remote-save',{method:'POST',headers:{authorization:'Bearer '+forgedScope,'content-type':'application/json'},body:JSON.stringify({operationId:foreignOperation,source:foreignSource,destination:foreignDestination})});assert.equal((await foreignResponse.json()).code,'BINDING_MISMATCH');
   const wrongScope=await transport.status({...target,prefix:'outside/'});assert.equal(wrongScope.state,'blocked');assert.equal((await (await mf.getR2Bucket('STORAGE')).list()).objects.length,0);
-  assert.equal((await transport.status(target)).state,'READY');
+  const initialReadiness=await transport.status(target);assert.equal(initialReadiness.state,'READY',JSON.stringify(initialReadiness));
   for(const prefix of ['exact/folder-one/','exact/folder-two/']){const added={...target,prefix};assert.equal((await transport.status(added)).state,'READY');const r=await transport.save({target:added,source:{url:'https://raw.githubusercontent.com/approved.bin',filename:'instant.bin'}});assert.equal(r.state,'verified',JSON.stringify(r));assert.equal(r.receipt.key,prefix+'instant.bin');assert.equal(await (await (await mf.getR2Bucket('STORAGE')).get(r.receipt.key)).text(),'abc');}
   const probeId=crypto.randomUUID(),probe=await transport.probe({target,operationId:probeId});assert.equal(probe.state,'verified',JSON.stringify(probe));const probeRecovered=await transport.probeStatus(target,probeId);assert.equal(probeRecovered.state,'verified',JSON.stringify(probeRecovered));
   const streamingEvidence=[];

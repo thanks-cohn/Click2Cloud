@@ -1,4 +1,5 @@
-// Depth-only native click lifecycle. No provisioning, menu mutation or retry.
+// Depth-only native click lifecycle. Recover only the exact configured target
+// through onboarding's retained approval; never retain or replay source bytes.
 import {remoteDestination,PROTOCOL} from '../../cloudflare/wire.mjs';
 const safeCode=value=>typeof value==='string'&&/^[A-Z][A-Z0-9_]{0,95}$/.test(value)?value:'DEPTH_CLICK_FAILED';
 export function workerPlanReason(plan,target){
@@ -9,7 +10,7 @@ export function workerPlanReason(plan,target){
  if(plan.protocol!==PROTOCOL)return 'PLAN_PROTOCOL_MISMATCH';
  return 'PLAN_MATCHES';
 }
-export function createDepthNativeClick({current,oauth,transport,lookup,inspect,authorize,feedback=async()=>{}}){
+export function createDepthNativeClick({current,oauth,transport,lookup,inspect,authorize,recover,attend=async()=>{},feedback=async()=>{}}){
  return async function depthClick(row,info,tab,run){
   const operationId='depth-click:'+crypto.randomUUID(),started=Date.now();let stage='native',reason=null,result,recordFailed=false;
   // Deliberate allowlist: never serialize a plan, token, source URL or Chrome error.
@@ -28,6 +29,15 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
      if(readiness.state!=='READY'){
       if(readiness.code==='WORKER_SETUP_REQUIRED'){const observed=workerPlanReason(await lookup(row.target),row.target);reason='FOLLOWUP_'+observed;}
       result={state:'blocked',code:safeCode(readiness.code??(readiness.state==='PREPARED'?'DEPTH_WORKER_UNVERIFIED':'DEPTH_WORKER_UNAVAILABLE'))};
+      if(recover){
+       stage='recovery';const prepared=await recover({target:row.target});
+       // Recovery has not saved the clicked source. A fresh native gesture
+       // must resolve the newly acknowledged menu and exact original prefix.
+       result=prepared.state==='completed'
+        ?{state:'blocked',code:'FRESH_CLICK_REQUIRED',requiredAction:'RIGHT_CLICK_AGAIN',target:row.target,recovery:prepared}
+        :{...prepared,state:prepared.state==='uncertain'?'uncertain':'blocked',target:row.target,requiredAction:prepared.requiredAction??'PREPARE_SELECTED_DESTINATION'};
+      }
+      await attend(row.target,{code:result.code,info,tab});
      }else{
       // Authorization stays invocation-local; never warm the shared mode cache.
       stage='dispatch';result=await run(authorize);
@@ -35,7 +45,7 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
     }
    }
    result??={state:'failed',code:'DEPTH_CLICK_FAILED'};
-  }catch(e){result={state:'blocked',code:safeCode(e?.code)};}
+  }catch(e){result={state:'blocked',code:safeCode(e?.code)};try{await attend(row.target,{code:result.code,info,tab});}catch{}}
   const code=safeCode(result.code??(result.state==='completed'?'DEPTH_CLICK_COMPLETED':'DEPTH_CLICK_FAILED'));
   const outcome={...result,depthClickId:operationId};
   try{await record(result.state,code,result.remoteOperationId??result.operationId);}catch{recordFailed=true;}

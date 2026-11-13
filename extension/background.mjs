@@ -144,7 +144,15 @@ const depthClick=createDepthNativeClick({current,oauth,transport:remote,lookup:p
  if(revoking)return null;
  const auth=await oauth.authority();
  return {sessionId:auth.sessionId,authorizedTargets:auth.accounts.some(a=>a.id===target.accountId)&&(await remote.status(target)).state==='READY'?[target]:[]};
-},feedback:createDepthFeedback(chrome)});
+},recover:async({target})=>{
+ if(revoking)return {state:'blocked',code:'DISCONNECTING'};
+ const state=await readCurrent(),native=registrar.inspect();
+ if(native.pending||native.acknowledgedGeneration!==state.generation.desired||!engine.matchesCurrent(native.desired,state))return {state:'blocked',code:'STALE_GENERATION'};
+ // Host-owned native gesture enters the same typed exact-target recovery as
+ // Shelf. authorizeSetup is absent: only durable prior approval permits writes.
+ const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params:{target}},'gui');
+ return out.data??{state:out.state,code:out.code};
+},attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome)});
 const registrar=createChromeRegistrar({chrome,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.origin?.mode==='depth'&&row.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:async info=>{
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
     await nativeReady();

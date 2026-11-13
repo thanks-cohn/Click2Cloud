@@ -7,6 +7,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
  async function cap(target,{use='status',operationId,source,provenance,fileIntent}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
   const plan=await lookup(target);if(plan?.state!=='ready'||plan.accountId!==target.accountId||plan.bucketName!==target.bucketName||plan.protocol!==PROTOCOL)fail('WORKER_SETUP_REQUIRED');
+  if(typeof plan.secret!=='string'||!plan.secret)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');
   if(expectedCodeDigest&&!['status','revoke'].includes(use)&&plan.codeDigest!==expectedCodeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
   if(use!=='revoke'&&await verifyAuthority(target,a)!==true)fail('AUTHORIZATION_REVOKED');
   const u=new URL(plan.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.workers.dev')||u.username||u.password||u.pathname!=='/'||u.search||u.hash)fail('WORKER_ADDRESS_INVALID');
