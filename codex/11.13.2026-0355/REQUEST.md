@@ -274,3 +274,18 @@ Prefer stable links to large preexisting documents rather than unnecessary dupli
 Report exact branch/commit and files changed, what was tested, before/after UI, the Logic2Real score and coverage by metric, live proof vs unverified, remaining discrepancies, and explicit **MERGE READY / CONDITIONALLY READY / NOT READY**. No merge into main, no blanket right-click rewrites, no unauthorized data/configuration modification.
 
 **Guiding principle:** If the project says a right-click should do X, identify the exact rule, prove the code attempts X, observe whether Chrome actually offers X, prove where the click writes, measure the discrepancy and evidence coverage, then close the gap without destabilizing unrelated behavior.
+
+
+# 9. NEW LIVE P1 REGRESSION — Depth destination WORKER_SETUP_REQUIRED (2026-11-13)
+
+**Mandatory addition to this request; this workstream takes precedence over cosmetic closure and must be incorporated into Logic2Real.** See `Issues_and_Bugs/Bugs/P1_DEPTH_DESTINATION_WORKER_SETUP_REQUIRED_2026-11-13.md`.
+
+User-verified real Chrome: Simple and Narrow destinations saved successfully and their files appeared in cloud storage. A Depth destination involving an `Images` directory failed and prompted **“Prepare Cloudflare in Remotes before saving.”** Advanced diagnostic: `{"state":"REPAIR_REQUIRED","worker":"WORKER_SETUP_REQUIRED"}`.
+
+**Crucial correction:** The user does **not** know whether the failed click was a nested “Save here” or a child directory/leaf. Treat the exact clicked action as UNKNOWN, not as proven “Save here”; test both classes and establish exact menu row ID, parent, canonical target and operation ID on reproduction.
+
+The source has a candidate trigger in `src/cloudflare/transport.mjs`: readiness capability demands a ready plan matching account, bucket and protocol. `src/cloudflare/deployment.mjs` keys plans by account/bucket. Determine whether the failing Depth path and successful control paths share a bucket/account, and which exact readiness comparison rejected it. This is a hypothesis; do not mark root cause established. A supplied separate diagnostic file has earliest retained `SCOPE_UNAUTHORIZED`, but lacks proof it is the same incident as this failure: correlate using operation IDs/timestamps or keep separate.
+
+Requirements: trace native menu → action ID → exact target → authorization → worker plan lookup → error provenance → save result. Compare Depth and Simple/Narrow targets and create controls for same-bucket/different-prefix and different-bucket cases. Add tests and reproducible live Chrome/R2 readback when authorized. Do not silently repair/provision/deploy workers, reset OAuth, move buckets, or alter functioning Simple/Narrow routing. Record P1 in the rule registry, traceability matrix, test matrix and Logic2Real scoring: confirmed real-world failure, action identity and cause not established, live outcome coverage partial. Fix narrowly only after evidence.
+
+**Release gate:** This P1 must either be proven fixed end-to-end or explicitly remain a blocking discrepancy in the report. UI styling and menu-label success alone cannot justify “merge ready”.
