@@ -1,0 +1,31 @@
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (184.859581ms)
+✔ non-Depth composition remains byte-identical to the request baseline (52.063067ms)
+✔ Depth root qualification does not rename a child folder with the same name as its bucket (1.002364ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (38.784516ms)
+✔ Depth fixture: one root (8.171118ms)
+✔ Depth fixture: two roots (1.967439ms)
+✔ Depth fixture: two roots at 10 (2.047355ms)
+✔ Depth fixture: two chains (4.059817ms)
+✔ Depth fixture: three chains (4.570216ms)
+✔ Depth fixture: four chains (3.896ms)
+✔ Depth fixture: ten siblings (2.152567ms)
+✔ Depth fixture: mixed branching (1.435456ms)
+✔ Depth fixture: single-child chain (1.314062ms)
+✔ Depth fixture: files-only folder (0.877267ms)
+✔ Depth fixture: deeper folder at limit (0.932314ms)
+✔ Depth fixture: identical names (1.320816ms)
+✔ Depth bounded discovery paginates, distinguishes file-only folders, and refuses partial listings (1.752348ms)
+✔ a fresh Depth tree replaces stale Explorer folders, including a successfully empty bucket (1.497642ms)
+✔ settings commit distinguishes storage, discovery and Chrome errors and converges through same-key retries (47.923509ms)
+✔ Logic2Real U earns zero credit but is not a measured failure (1.048285ms)
+✔ Logic2Real NA renormalizes, partial mismatch and missing evidence remain separate (0.587738ms)
+✔ Logic2Real all unknown has no known score; critical weights are retained (1.259656ms)
+✔ canonical registry has unique versioned rules and resolvable source/test traces; missing native proof stays open (79.196043ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 408.097153

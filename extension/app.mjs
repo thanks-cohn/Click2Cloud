@@ -437,17 +437,17 @@ async function manager(filter='simple',page=0,session=null,message=''){
     <strong>${esc(rowLabel(d))}</strong><div class="muted">Cloudflare R2 · ${esc(d.target.accountId+' · '+d.target.bucketName+'/'+d.target.prefix)}</div>
     ${isDepth?'':`<button data-default="${i}" aria-pressed="${isDefault(d)}" ${isDefault(d)?'class="badge" aria-label="Default destination: '+esc(rowLabel(d))+'"':''}>${isDefault(d)?'Default':'Make Default'}</button>`}
     <div class="controls">
-      <button data-hide="${i}" aria-label="Change Visibility" aria-pressed="${!d.hidden}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>
-      ${isDepth?`<label>Depth <input data-manager-depth="${i}" type="number" min="1" step="1" value="${d.maxDepth}" aria-label="Display depth for ${esc(d.target.bucketName)}"></label>`:
+      <button data-hide="${i}" aria-label="${isDepth?'Change visibility for '+esc(d.target.bucketName):'Change Visibility'}" aria-pressed="${!d.hidden}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>
+      ${isDepth?`<label>Maximum depth <input data-manager-depth="${i}" type="number" min="1" step="1" value="${d.maxDepth}" aria-label="Display depth for ${esc(d.target.bucketName)}"></label>`:
       `<button data-quick="${i}" aria-pressed="${!!d.quick}">${d.quick?'Quick ✓':'Quick Select'}</button><button data-edit="${i}" aria-label="Edit Menu Title">✎</button>`}
-      <button data-delete="${i}" aria-label="Remove destination configuration">🗑</button>
+      <button data-delete="${i}" aria-label="${isDepth?'Remove Depth bucket '+esc(d.target.bucketName):'Remove destination configuration'}">🗑</button>
     </div></div>`;
   dialog('Destinations',`<div class="between"><div class="tabs">${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
     `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}">${label}</button>`).join('')}</div>
     <button id="organize" class="circle" aria-label="Organize Right-Click" title="Organize Right-Click">☷</button></div>
     <p class="muted">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
     <p>${product.defaultTarget?'Default: '+esc(product.defaultTarget.accountId+' · '+product.defaultTarget.bucketName+'/'+product.defaultTarget.prefix):'No default selected'}</p>
-    <div id="dest-list">${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
+    <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
     ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
     <div class="show-controls"><span>Show in Chrome</span>${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
       `<label><input data-manager-show="${mode}" type="checkbox" ${product.show[mode]?'checked':''}> ${label}</label>`).join('')}</div>

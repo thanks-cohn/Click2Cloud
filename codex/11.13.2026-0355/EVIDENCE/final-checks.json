@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "npm",
+      "run",
+      "test:focused"
+    ],
+    "timestamp": "2026-11-13T11:46:05.258382+00:00",
+    "exitCode": 0,
+    "elapsedSeconds": 47.518,
+    "log": "focused-final.log"
+  },
+  {
+    "command": [
+      "npm",
+      "test"
+    ],
+    "timestamp": "2026-11-13T11:46:52.778382+00:00",
+    "exitCode": 1,
+    "elapsedSeconds": 48.873,
+    "log": "offline-final.log"
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "tests/logic2real-score.test.mjs",
+      "tests/depth-scope-regression.test.mjs",
+      "tests/logic2real-depth-save.test.mjs"
+    ],
+    "timestamp": "2026-11-13T11:47:41.652375+00:00",
+    "exitCode": 0,
+    "elapsedSeconds": 0.539,
+    "log": "targeted-final.log"
+  }
+]

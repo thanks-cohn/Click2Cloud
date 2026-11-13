@@ -151,7 +151,14 @@ export function compileMenuSpec(options={}) {
               }
               if(row.role==='save'&&!selected.has(row.placement))continue;
               const parentId=row.parentPlacement===null?parent:placements.get(row.parentPlacement);
-              const nativeId=add({...row,parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
+              // 3+1.1 previewNativeMenu/commitConfigChange: only a flattened
+              // Depth bucket root's own save action can become provider-immediate.
+              // Identify by structure + physical root, never by title alone.
+              // Keep this configured root reachable and preserve IDs/targets;
+              // named bucket/folder descendants retain their Save here labels.
+              const providerRootSave=treeMode==='depth'&&inlineDepth&&row.role==='save'&&
+                parentId===parent&&!row.target.prefix&&index.get(row.parentPlacement)?.parentPlacement===null;
+              const nativeId=add({...row,...(providerRootSave?{label:row.target.bucketName+'/'}:{}),parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
               if(nativeId)placements.set(row.placement,nativeId);
             }
           }

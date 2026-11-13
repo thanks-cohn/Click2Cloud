@@ -1,0 +1,945 @@
+{
+  "baseline": "a11dcf55b293a10cb8270084fee084db098221ec",
+  "scenarios": 384,
+  "identicalRows": 2876,
+  "rootLabelsClarified": 8,
+  "exactSaveTargetsCompared": 888,
+  "diffs": [
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":1,\"shape\":\"chain\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":1,\"shape\":\"siblings\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":4,\"shape\":\"chain\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":4,\"shape\":\"siblings\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":5,\"shape\":\"chain\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":5,\"shape\":\"siblings\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":10,\"shape\":\"chain\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "{\"depth\":true,\"count\":1,\"limit\":10,\"shape\":\"siblings\",\"hidden\":false,\"mixed\":false}",
+      "before": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "Save here",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "Save here"
+          ]
+        }
+      },
+      "after": {
+        "actionKind": "save",
+        "id": "c2c:item:58f2eed8ebbb94df",
+        "itemId": "c2c:item:58f2eed8ebbb94df",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "siblingIndex": 0,
+        "index": 0,
+        "type": "normal",
+        "label": "bucket-0/",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "role": "save",
+        "kind": "action",
+        "origin": {
+          "mode": "depth",
+          "provider": "cloudflare"
+        },
+        "reason": "ACTIONABLE_BRANCH",
+        "actionId": "c2c:action:f02afd323ed379b8",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": ""
+        },
+        "intent": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "bucket-0",
+          "prefix": "",
+          "bucket": "bucket-0",
+          "path": ""
+        },
+        "provenance": {
+          "schema": 1,
+          "mode": "depth",
+          "entryId": "c2c:item:58f2eed8ebbb94df",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "bucket-0",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "bucket-0/"
+          ]
+        }
+      }
+    }
+  ]
+}

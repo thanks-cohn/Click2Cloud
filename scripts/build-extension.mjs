@@ -8,6 +8,9 @@ import {writeFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url),output=new URL('../dist/click2cloud/',import.meta.url);
 await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});
 for(const dir of ['src','extension'])await cp(new URL(dir,root),new URL(dir,output),{recursive:true});
+// Fail packaging rather than ship a Depth manager with missing scoped styles.
+const depthCss=await readFile(new URL('extension/depth-destinations.css',output),'utf8');
+if(!depthCss.includes('.depth-destinations')||!(await readFile(new URL('extension/app.html',output),'utf8')).includes('href="depth-destinations.css"'))throw Error('DEPTH_STYLES_MISSING');
 await mkdir(new URL('right2cloud-module/',output),{recursive:true});await cp(new URL('right2cloud-module/src/',root),new URL('right2cloud-module/src/',output),{recursive:true});
 await copyFile(new URL('extension/manifest.json',root),new URL('manifest.json',output));
 const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();

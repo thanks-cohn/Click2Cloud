@@ -1,0 +1,13 @@
+/* Depth manager only. Controls stage drafts; commitConfigChange owns shared Save.
+ * Chromium measurements: inherited label margins/block input stretched icons
+ * to 81px. Explicit cross-axis alignment and fixed icon targets prevent that.
+ */
+.depth-destinations .dest-row { padding: 12px 0; min-width: 0; }
+.depth-destinations .dest-row > strong { display: block; line-height: 1.4; overflow-wrap: anywhere; }
+.depth-destinations .dest-row > .muted { margin-top: 3px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.depth-destinations .dest-row .controls { align-items: center; gap: 8px; margin-top: 10px; }
+.depth-destinations .controls label { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0; font-size: 12px; }
+.depth-destinations .controls label input[type=number] { display: inline-block; flex: 0 0 76px; width: 76px; min-width: 0; height: 32px; margin: 0; padding: 5px 8px; }
+.depth-destinations .controls button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 32px; width: 32px; height: 32px; min-height: 32px; padding: 0; }
+.depth-destinations .controls button svg { flex: none; }
+.depth-destinations .dest-row.hidden > strong { color: var(--muted); }

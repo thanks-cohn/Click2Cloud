@@ -1,0 +1,26 @@
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (225.68948ms)
+✔ non-Depth composition remains byte-identical to the request baseline (55.040417ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (42.576667ms)
+✔ Depth fixture: one root (13.508373ms)
+✔ Depth fixture: two roots (2.676136ms)
+✔ Depth fixture: two roots at 10 (2.348404ms)
+✔ Depth fixture: two chains (5.13413ms)
+✔ Depth fixture: three chains (9.217003ms)
+✔ Depth fixture: four chains (3.478531ms)
+✔ Depth fixture: ten siblings (2.043706ms)
+✔ Depth fixture: mixed branching (1.360601ms)
+✔ Depth fixture: single-child chain (1.250823ms)
+✔ Depth fixture: files-only folder (0.874318ms)
+✔ Depth fixture: deeper folder at limit (0.901423ms)
+✔ Depth fixture: identical names (1.22739ms)
+✔ Depth bounded discovery paginates, distinguishes file-only folders, and refuses partial listings (1.939434ms)
+✔ a fresh Depth tree replaces stale Explorer folders, including a successfully empty bucket (1.374661ms)
+✔ settings commit distinguishes storage, discovery and Chrome errors and converges through same-key retries (52.945352ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 495.536453

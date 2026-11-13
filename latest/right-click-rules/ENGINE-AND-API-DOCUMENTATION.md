@@ -1,5 +1,26 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
+## Depth-only provider root clarification — November 13, 2026
+
+`src/core/menu-spec.mjs:providerRootSave`, owned by `3+1.1`
+`previewNativeMenu` / `previewConfigChange` (pure) and
+`commitConfigChange` / `reconcileNativeMenu` (application), labels the root save
+of an inlined sole Depth bucket with its actual bucket name. The predicate
+requires Depth, a physical root prefix, the Cloudflare provider as parent, and
+a root placement ancestor. It does not match arbitrary `Save here` text.
+Otherwise projection is unchanged. Nested named bucket/folder `Save here`
+actions, all target/action/item IDs, availability checks, configuration and
+Worker authorization remain unchanged. No destination is deleted or provisioned.
+Inspect `previewNativeMenu` and `inspectNativeACK` separately; an ACK does not
+prove rendering or a save. The narrow exception avoids stranding the sole root.
+
+`extension/depth-destinations.css` scopes layout to the Depth manager list;
+its eye/delete/depth controls still stage drafts and use the existing explicit
+shared Save. Tests: `depth-scope-regression.test.mjs`,
+`logic2real-depth-save.test.mjs`, `scripts/test-depth-layout.mjs`.
+See [audit and remaining blocking P1](../../codex/11.13.2026-0355/IMPLEMENTATION_REPORT.md).
+Actual native rendering and R2 readback are unverified in this environment.
+
 **Documentation contract and current-source map | November 7, 2026**  
 **Applies to:** Click2Cloud's own Simple / Narrow / Depth engine, Quick Select, Default, the native Chrome context menu, destination configuration and right-click save dispatcher.  
 **Scope boundary:** The REDOWN repository is a **read-only functional reference** for useful right-click transfer and File Explorer capabilities; **Click2Cloud owns its menu system and configuration rules**. This does **not** authorize copying all of REDOWN.  

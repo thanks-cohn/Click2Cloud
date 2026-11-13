@@ -9200,24 +9200,6 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
     "sourceFiles": {
-      "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
-      "extension/app.html": "b377cc89af86de1c4170467b775cea0e50d5a950b84cdb08ffca1653e9082f6a",
-      "extension/app.mjs": "202390bdc73cb6259c36a7e61cd298dbd059654a1f6747fedd8565600f1d9990",
-      "extension/background.mjs": "61781c0a3cc7b0622d785decece5dbf4e5dc130de56077c789c69bf5dbb07956",
-      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
-      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
-      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
-      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
-      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
-      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
-      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
-      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
-      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
-      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
-      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
@@ -9252,7 +9234,7 @@
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
       "src/core/menu-provenance.mjs": "58467b1e4d2b22f71a159a6051a2e9ac0c9f7a8d5a50e73eecfba346026c6983",
-      "src/core/menu-spec.mjs": "606208abaaa67daf734d2b99d2f69c2608129c76b216dc35d390507941ddf638",
+      "src/core/menu-spec.mjs": "92b1fe42705a789ea0a64e750e52299d13294929b6a76609c38443571aa45f2a",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9293,7 +9275,26 @@
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
-      "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed"
+      "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
+      "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
+      "extension/app.html": "668602dae631aa7efbdda276d8644576434ab0c2b3e282798aa0e576652c1076",
+      "extension/app.mjs": "50cede3d267d40d5a788a9dce8e70dd8ea6df2fc23f264d31ac73d46c26ad002",
+      "extension/background.mjs": "61781c0a3cc7b0622d785decece5dbf4e5dc130de56077c789c69bf5dbb07956",
+      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
+      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
+      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
+      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
+      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -10814,10 +10815,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -11416,7 +11417,7 @@
       {
         "id": "ENTRY_MESSAGE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
         "apiMethods": [
@@ -11464,7 +11465,7 @@
       {
         "id": "ENTRY_CLIENT_RESPONSE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
         "apiMethods": [
@@ -14501,7 +14502,27 @@
         "handoff": "docs/evidence/composition-remaining/HANDOFF.md"
       }
     },
-    "digest": "9b4692b531be75fc2772ddeee4037485e9213b5e2538f8b26da61c1c9b92ee72"
+    "digest": "9b4692b531be75fc2772ddeee4037485e9213b5e2538f8b26da61c1c9b92ee72",
+    "depthProviderRootClarification": {
+      "sourceRefs": [
+        {
+          "path": "src/core/menu-spec.mjs",
+          "symbol": "providerRootSave"
+        },
+        {
+          "path": "extension/depth-destinations.css",
+          "symbol": ".depth-destinations"
+        }
+      ],
+      "api": [
+        "previewNativeMenu",
+        "commitConfigChange"
+      ],
+      "behavior": "Only a sole flattened Depth bucket root save immediately beneath Cloudflare is labeled with its exact bucket name with a root slash (avoids renaming same-named child folders). IDs, targets, nested Save here and every non-Depth path are retained. Dedicated Depth manager CSS prevents cross-axis icon stretching.",
+      "evidence": "codex/11.13.2026-0355/IMPLEMENTATION_REPORT.md",
+      "nativeRendering": "UNVERIFIED: unpacked extension disabled by administrator",
+      "liveSave": "UNVERIFIED; reported WORKER_SETUP_REQUIRED remains blocking"
+    }
   },
   "changeLog": [
     {

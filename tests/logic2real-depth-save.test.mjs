@@ -42,7 +42,7 @@ for(const [name,limits,folders] of fixtures)test('Depth fixture: '+name,()=>{
     const visible=['',...folders[i].filter(p=>p.split('/').length-1<=limits[i])];
     for(const prefix of visible){
       const children=visible.some(p=>p!==prefix&&p.startsWith(prefix));
-      const path=['Cloudflare',...(targets.length>1?[target.bucketName]:[]),...prefix.split('/').filter(Boolean),...(children?['Save here']:[])];
+      const path=['Cloudflare',...(targets.length>1?[target.bucketName]:[]),...prefix.split('/').filter(Boolean),...(children?[targets.length===1&&!prefix?target.bucketName+'/':'Save here']:[])];
       expected.push([path.join(' > '),targetKey({...target,prefix})]);
     }
   }

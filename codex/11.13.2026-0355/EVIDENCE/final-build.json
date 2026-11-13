@@ -1,0 +1,11 @@
+{
+  "time": "2026-11-13T11:46:35.399Z",
+  "branch": "codex/depth-repair-audit",
+  "sourceDirty": true,
+  "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+  "extensionVersion": "0.3.19",
+  "revision": "a11dcf55b293a10cb8270084fee084db098221ec",
+  "sourceDigest": "9a03310f5e33f71981a9c8b0f18742f844796936efea9d5de893a0cd69038ea0",
+  "apiVersion": "3+1.1",
+  "remoteProtocol": "click2cloud-remote-2"
+}
