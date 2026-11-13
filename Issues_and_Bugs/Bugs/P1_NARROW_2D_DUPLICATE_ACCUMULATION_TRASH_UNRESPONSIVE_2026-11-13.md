@@ -41,3 +41,22 @@
 
 **This file records the issue; no code repair or installed-Chrome success is claimed.**  
 **Related:** [bucket root visibility rule](../Issues/P1_CLOUDFLARE_NARROW_BUCKET_LABEL_VISIBILITY_REDOWN_EXCEPTION_2026-11-13.md); [independent mode contract](../Issues/P0_RIGHT_CLICK_INDEPENDENT_MODE_DISPLAY_AND_ROW_VISIBILITY_2026-11-09.md); [shared Save control](../Issues/P1_MANAGE_DESTINATIONS_EXPLICIT_SAVE_BUTTON_2026-11-12.md).
+
+## Additional owner observation — 2026-11-13 15:29:59 CST (America/Chicago)
+
+The owner clicked **Make Default** on one of the accumulated **`2D`** rows in Destinations Manager → Narrow. **Three `2D` rows simultaneously displayed Default**, while **at least one other `2D` row did not**. Edit still works; Trash remains reportedly unresponsive. This is a further identity/feedback diagnostic, not evidence that three separate global Default values were persisted.
+
+### Source-backed explanation
+
+- `extension/app.mjs` defines `isDefault(d) => !!product.defaultTarget && targetKey(d.target)===targetKey(product.defaultTarget)`. Its default control stages `makeDefault` with `target:d.target`, rather than with the row's stable Narrow presentation `id`.
+- `src/api/config.mjs` stores exactly one global `product.defaultTarget`; `makeDefault` writes that canonical target.
+- `src/core/menu-identity.mjs` defines `targetKey` by **provider, connectionId, accountId, bucketName, prefix**. Therefore three concurrently marked Default rows strongly suggest three presentations sharing one canonical target, whereas the unmarked row does not compare equal to that target (or was not from the same updated draft). Same visible `2D` label does **not** guarantee same prefix/account/bucket.
+- This shared target-based Default presentation may be semantically intentional (one physical Default), but the owner should not mistake several Default badges for several configured global defaults. It is also valuable evidence when distinguishing deliberate multiple Narrow presentations from unintended accidental duplicates.
+
+### Additional acceptance criteria
+
+1. On an intact, non-destructive snapshot, compare row `id`, `label`, `targetKey`, custom `levels`, flags and global `defaultTarget` for all `2D` entries. Record counts of distinct presentation IDs and distinct canonical target keys. Do not expose any secrets or alter configuration during diagnostics.
+2. After `makeDefault`, verify **one** global `product.defaultTarget`; explain or clearly render that multiple visible Narrow presentations can share it. The one different-target `2D` must remain unmarked.
+3. Verify `clearDefault` from any marked presentation only clears that one global target and appropriately updates all matching labels; cannot delete or modify any Narrow entries.
+4. Fix row-specific Trash independently: trashing one presentation ID must not remove all rows with matching `targetKey`; save/reopen/reconcile must not resurrect the deleted row.
+5. Distinguish proven source semantics from the still-unverified cause of the owner's ten accumulating entries and unresponsive Trash buttons.
