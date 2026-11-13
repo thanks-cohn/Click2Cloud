@@ -291,26 +291,19 @@ Requirements: trace native menu → action ID → exact target → authorization
 **Release gate:** This P1 must either be proven fixed end-to-end or explicitly remain a blocking discrepancy in the report. UI styling and menu-label success alone cannot justify “merge ready”.
 
 
-# 10. NON-NEGOTIABLE CORRECTION — MODE FAULT CONTAINMENT; DO NOT REENGINEER SIMPLE OR NARROW
+# 10. FINAL OVERRIDING SCOPE — FIX DEPTH ONLY; EVERYTHING ELSE IS OUT OF SCOPE
 
-**User directive (2026-11-13):** Simple and Narrow are currently working and must be **left unchanged for now**. The job is to prevent Depth failures from affecting them, now or in future. Do **NOT** interpret a Depth save fault as a mandate to merge the modes into one universal save engine, reconfigure all providers, change Simple/Narrow workflows, or rebuild their logic. The UI/menu arrangement is liked and should be preserved.
+**This section overrides any earlier instruction in this request that might imply work outside Depth.**
 
-## Invariants and scope
+**User's exact intent:** Fix the defects in **Depth**. Leave everything else alone. Do not expand the project into cross-mode architecture, shared engine redesign, mode-wide recovery work, or a general refactor.
 
-- **C2C-ISOLATION-DEPTH-001:** A Depth-specific failure of inventory, worker readiness, action resolution, configuration, refresh, rendering, registration, or click/save must **not** block, invalidate, delete, degrade, or change independently valid Simple and Narrow destinations.
-- **C2C-ISOLATION-SIMPLE-002 / NARROW-003:** The same containment principle applies in reverse as a general architecture goal, but do not modify working Simple/Narrow implementations as part of this scoped Depth fix.
-- Preserve the exact existing Simple/Narrow menu behavior, stored configuration, authorization, target identities, save semantics, and end-to-end success.
-- Keep independently attributable mode health, diagnostic status, failure boundaries and recovery. An error in one mode should not be mislabeled as a global Cloudflare outage.
-- Shared interfaces and Chrome platform APIs may exist, but **do not create a shared failure domain**: one mode's failure cannot escalate to a full-menu outage. Prefer mode-scoped validation/compilation/application, preservation of last-known-good unaffected registrations, granular retry, and an explicit safe fallback.
-- Specifically audit `src/chrome/registrar.mjs`: its `removeAll()` plus recreate-all sequence can potentially propagate a single Depth row creation failure to the acknowledged menu generation and operation of otherwise healthy modes. This is an **architectural risk, NOT a proven explanation** of the observed `NATIVE_APPLY_INCOMPLETE`. Determine the actual failed row and callback code before attributing cause. Evaluate whether safe mode-local registration or transaction-like preservation of other modes is feasible within Chrome extension API limits. Do not fake atomicity or impossible Chrome guarantees.
-- Treat the observed `NATIVE_APPLY_INCOMPLETE` separately from the Depth `WORKER_SETUP_REQUIRED` failure unless operation-level evidence connects them.
-- The user explicitly **does not want** a universal merged Simple/Narrow/Depth save engine. Do not propose or implement that as a fix.
+- Changes to application behavior are permitted **only for Depth-specific code and the one explicitly requested Cloudflare-immediate generic “Save here” menu exception**. Depth UI/CSS fixes are permitted. Do not alter any other existing menu behavior.
+- If shared code must be touched to fix Depth, keep the edit as narrow and guarded as possible so it executes only for the Depth case. Never change behavior for unrelated paths.
+- Other modes and subsystems: **no code changes, no redesigns, no configuration migrations, no broad fault-containment rewrite, no new dependencies**. The prior proposal to change how unaffected modes register or recover is **withdrawn**.
+- The comprehensive Logic2Real inventory is **read-only analysis and documentation** for non-Depth behavior. Its scope does not authorize changes to those implementations. Do not run disruptive live tests or change user configurations outside Depth.
+- Preserve all existing right-click options and their routing except the single exact provider-level “Save here” exception. Do not delete or rename other actions.
+- Investigate `WORKER_SETUP_REQUIRED` for the reported Depth save (clicked row unknown) and `NATIVE_APPLY_INCOMPLETE` as observations to correlate or distinguish. Do not use either symptom as an excuse for unrelated architectural work.
+- Test that the Depth fix has **no effects outside Depth** by checking diffs, preserving prior behavior and ensuring no regressions. This is a noninterference check, **not** a request to implement or refactor anything outside Depth.
+- If a proposed fix cannot be made without impacting other application logic, **stop that change and report it for review**; do not broaden scope on your own.
 
-## Tests/gates
-
-- Force failure at each Depth boundary (inventory, projection, native menu registration, worker setup, upload) while verifying Simple and Narrow still render and successfully save.
-- Repeat after restart, refresh, reconfiguration, failed Save/Retry, and with the shelf/manager closed.
-- Test intact Simple/Narrow target routing and actual R2 readback before and after each Depth fault-injection scenario.
-- Never claim fault isolation from simulated tests alone; report actual installed Chrome outcomes as verified or unverified.
-- Add isolation invariants to RULES, TRACEABILITY, TEST_MATRIX and Logic2Real scorecard with P0 significance.
-- **Release gate:** A Depth failure that can interrupt a working Simple or Narrow save is a critical cross-mode regression; cannot declare merge-ready.
+**Release gate:** A repaired Depth feature, verified with actual save destinations; the specified Cloudflare menu exception; scoped Depth aesthetics; full Logic2Real rule documentation and evidence-backed scorecard; **zero unintended behavioral changes anywhere else**. No merge to main.
