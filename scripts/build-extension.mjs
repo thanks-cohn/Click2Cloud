@@ -1,3 +1,4 @@
+import {assertWorkerImports} from './mv3-import-policy.mjs';
 import {mkdir,rm,cp,copyFile,readFile,readdir} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -6,6 +7,7 @@ import {WORKER_MODULES} from '../src/cloudflare/deployment.mjs';
 import {toolRegistry} from '../src/api/service.mjs';
 import {writeFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url),output=new URL('../dist/click2cloud/',import.meta.url);
+await assertWorkerImports({root:fileURLToPath(root)});
 await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});
 for(const dir of ['src','extension'])await cp(new URL(dir,root),new URL(dir,output),{recursive:true});
 // Fail packaging rather than ship a Depth manager with missing scoped styles.

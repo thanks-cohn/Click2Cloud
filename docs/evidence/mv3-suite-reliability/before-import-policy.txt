@@ -1,0 +1,63 @@
+✖ MV3 manifest worker graph has no dynamic imports, including re-exported dependencies (59.840576ms)
+✔ MV3 negative graph catches nested dynamic import; page-only import and comments are permitted (13.717841ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159.2891
+
+✖ failing tests:
+
+test at tests/mv3-import-policy.test.mjs:2:1
+✖ MV3 manifest worker graph has no dynamic imports, including re-exported dependencies (59.840576ms)
+  Error: MV3_DYNAMIC_IMPORT_FORBIDDEN
+      at assertWorkerImports (file:///workspace/Click2Cloud/scripts/mv3-import-policy.mjs:11:149)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///workspace/Click2Cloud/tests/mv3-import-policy.test.mjs:2:263)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    report: {
+      entry: 'extension/background.mjs',
+      modules: [
+        'extension/background.mjs',                     'right2cloud-module/src/cloudflare-r2-writer.mjs',
+        'right2cloud-module/src/cloudflare-worker.mjs', 'right2cloud-module/src/common.mjs',
+        'right2cloud-module/src/index.mjs',             'right2cloud-module/src/provenance.mjs',
+        'right2cloud-module/src/public-address.mjs',    'right2cloud-module/src/source-fetch.mjs',
+        'right2cloud-module/src/verification.mjs',      'src/api/config.mjs',
+        'src/api/explorer-context-menu.mjs',            'src/api/gateway.mjs',
+        'src/api/menu-view.mjs',                        'src/api/permissions.mjs',
+        'src/api/service.mjs',                          'src/api/whole-cloud.mjs',
+        'src/auth/cloudflare-oauth.mjs',                'src/build-info.mjs',
+        'src/chrome/debug-host.mjs',                    'src/chrome/provider-panel.mjs',
+        'src/chrome/registrar.mjs',                     'src/chrome/trusted-sender.mjs',
+        'src/cloudflare/deployment.mjs',                'src/cloudflare/file-transport.mjs',
+        'src/cloudflare/inventory.mjs',                 'src/cloudflare/onboarding.mjs',
+        'src/cloudflare/public-address.mjs',            'src/cloudflare/transport.mjs',
+        'src/cloudflare/wire.mjs',                      'src/core/action-resolver.mjs',
+        'src/core/boundary-observation.mjs',            'src/core/composite-menu.mjs',
+        'src/core/engine.mjs',                          'src/core/menu-identity.mjs',
+        'src/core/menu-provenance.mjs',                 'src/core/menu-spec.mjs',
+        'src/core/save-dispatcher.mjs',                 'src/core/source-capture.mjs',
+        'src/explorer/configuration.mjs',               'src/explorer/depth-inventory.mjs',
+        'src/explorer/failure-classification.mjs',      'src/explorer/file-api.mjs',
+        'src/explorer/image-preview.mjs',               'src/explorer/index.mjs',
+        'src/explorer/loading-visual-config.mjs',       'src/explorer/r2-adapter.mjs',
+        'src/explorer/read-coalescer.mjs',              'src/glaciaring/agent-api.mjs',
+        'src/glaciaring/breadcrumbs.mjs',               'src/glaciaring/catalog.mjs',
+        'src/glaciaring/index.mjs',                     'src/glaciaring/reliability.mjs',
+        'src/glaciaring/support-report.mjs',            'src/modes/depth/index.mjs',
+        'src/modes/depth/native-click.mjs',             'src/modes/nested/index.mjs',
+        'src/modes/simple/index.mjs',                   'src/persistence/backup.mjs',
+        'src/persistence/current-store.mjs',            'src/persistence/external-recovery.mjs',
+        'src/persistence/profile-preservation.mjs',     'src/persistence/recovery-crawl.mjs',
+        'src/persistence/schema.mjs',                   'src/recorder/host.mjs',
+        'src/recorder/provider-observation.mjs',        'src/recorder/recorder.mjs',
+        'src/recorder/schema.mjs',                      'src/recorder/storage.mjs',
+        'src/recorder/writer.mjs'
+      ],
+      violations: [ [Object], [Object], [Object] ]
+    }
+  }

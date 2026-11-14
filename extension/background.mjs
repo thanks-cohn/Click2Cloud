@@ -1,3 +1,4 @@
+import {createRecorderHost} from '../src/recorder/host.mjs';
 import {createDepthNativeClick,createDepthFeedback} from '../src/modes/depth/native-click.mjs';
 import {discoverDepthScope} from '../src/explorer/depth-inventory.mjs';
 import {createBreadcrumbs} from '../src/glaciaring/breadcrumbs.mjs';
@@ -153,8 +154,9 @@ const depthClick=createDepthNativeClick({current,oauth,transport:remote,lookup:p
  const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params:{target}},'gui');
  return out.data??{state:out.state,code:out.code};
 },attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome)});
-// Optional lazy recorder: import/open failure never becomes a bootstrap dependency.
-let recorder=null,recorderLoadError=false,bootstrapDropped=0;
+// MV3 supports static module loading only. The dependency graph is build-gated;
+// execution/readiness stays deferred and never gates the native listener.
+let recorder=null,recorderInitializationFailure=null,bootstrapDropped=0;
 const bootstrapObservations=[];
 function observeDeliveredClick(delivery){
   if(recorder)return recorder.click(delivery);
@@ -165,11 +167,11 @@ function observeDeliveredClick(delivery){
   const pending={early,events:[],forward:null};bootstrapObservations.push(pending);
   return event=>{if(pending.forward){pending.forward(event);return;}if(pending.events.length>=32){bootstrapDropped++;return;}const r=event.result;pending.events.push({monotonicMs:performance.now(),stage:event.stage,outcome:event.outcome,code:event.code,...(r?{result:{state:r.state,code:r.code,completion:r.completion,proofKind:r.proofKind,receipt:{size:r.receipt?.size}}}:{})});};
 }
-void import('../src/recorder/host.mjs').then(async({createRecorderHost})=>{
+void Promise.resolve().then(async()=>{
   recorder=await createRecorderHost({chrome,build:BUILD_INFO,startupGaps:()=>bootstrapDropped});
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
-}).catch(()=>{recorderLoadError=true;bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
+}).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
 const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.origin?.mode==='depth'&&row.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:async info=>{
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
     await nativeReady();
@@ -222,7 +224,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel==='recorder'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({version:2,state:'blocked',code:'UNTRUSTED_APP_SENDER'});return false;}
-    if(!recorder){respond({version:2,state:'failed',code:recorderLoadError?'RECORDER_IMPORT_FAILED':'RECORDER_NOT_READY'});return false;}
+    if(!recorder){respond({version:2,state:'failed',code:recorderInitializationFailure?'RECORDER_INITIALIZATION_FAILED':'RECORDER_NOT_READY',...(recorderInitializationFailure?{diagnostic:recorderInitializationFailure}:{})});return false;}
     recorder.request(message).then(respond,()=>respond({version:2,state:'failed',code:'RECORDER_UNAVAILABLE'}));return true;
   }
   if(message?.channel!=='engine')return false;

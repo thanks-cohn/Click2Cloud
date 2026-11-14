@@ -1,0 +1,32 @@
+{
+  "sourceRevision": "4878aa26d989b4344cccb92481db5273f6bcf6a1",
+  "browser": "156.0.8078.79",
+  "os": "linux",
+  "evidenceClass": "HTTP_MODULE_SERVICE_WORKER_REAL_IDB_FAKE_CHROME_PORTS_NOT_INSTALLED_EXTENSION",
+  "results": [
+    {
+      "gate": "before-dynamic-import-in-real-module-service-worker",
+      "state": "REPRODUCED",
+      "name": "TypeError",
+      "message": "import() is disallowed on ServiceWorkerGlobalScope by the HTML specification. See https://github.com/w3c/ServiceWorker/issues/1356.",
+      "stack": "TypeError: import() is disallowed on ServiceWorkerGlobalScope by the HTML specification. See https://github.com/w3c/ServiceWorker/issues/1356.\n    at http://127.0.0.1:38539/recorder-worker.mjs?before=1:7:71\n    at http://127.0.0.1:38539/recorder-worker.mjs?before=1:7:320"
+    },
+    {
+      "gate": "Basic-Debug-OFF-in-service-worker",
+      "state": "PASS"
+    },
+    {
+      "gate": "host-start-finite-cap-worker-message-export-download",
+      "state": "PASS",
+      "runId": "afc9e752-629c-4765-8af1-a600835bb475"
+    },
+    {
+      "gate": "stop-debug-off-browser-process-restart",
+      "state": "PASS"
+    },
+    {
+      "gate": "start-error-adjacent-control",
+      "state": "PASS"
+    }
+  ]
+}

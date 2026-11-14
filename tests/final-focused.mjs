@@ -57,3 +57,5 @@ await import('./debug-preference.test.mjs');
 
 // Isolated two-tier recorder gates; no provider credentials or user profile.
 await import('./recorder.test.mjs');
+
+await import('./mv3-import-policy.test.mjs');

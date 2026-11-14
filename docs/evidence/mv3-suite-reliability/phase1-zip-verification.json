@@ -1,0 +1,16 @@
+[
+  {
+    "mode": "RAW",
+    "CRC": "PASS",
+    "manifestHashes": "PASS",
+    "sentinel": "present",
+    "sha256": "163dea706b72ee32d387a7846607f683eff907feca75995eb56a8f5d4a3a9e66"
+  },
+  {
+    "mode": "SECURE",
+    "CRC": "PASS",
+    "manifestHashes": "PASS",
+    "sentinel": "absent",
+    "sha256": "9dc98ff950433465e3220c9e601a29071813203952532b10ab789f0c6c55a0b4"
+  }
+]
