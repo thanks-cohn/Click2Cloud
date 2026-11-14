@@ -18,7 +18,7 @@ Make a self-contained **Right-Click Recorder** for Click2Cloud, using the best r
 5. A user may **Export RAW ZIP** and **Export SECURE ZIP** **during recording, immediately after Stop, and after reopening Settings**. These are two views of the **same immutable event snapshot**, not two independent collectors. SECURE is the safer sharing format; RAW is private and intentionally may hold full observed source/page URLs and original errors when the user expressly opted into that level of collection.
 6. Implement as a **modular observer and separate versioned storage**, never a second save engine, a second Chrome context-menu listener, a new worker, a browser-wide monitoring service or a UI-rendering dependency for dispatch. If recording fails, stops, is full, exceeds quota, or crashes, saving must keep working correctly.
 7. Make exports useful for a defensible **ReDown versus Click2Cloud baseline**. Compare verified completion rates, failures, uncertain outcomes, latency and recovery under matched scenarios, with the same denominator and evidence class. Never claim success just because a recorder reports a green stage.
-8. This is NOT a request for ReDown gamification/counters, another diagnostic dashboard, new cloud providers, changing API semantics, fixing unrelated File API operations, publishing to a store or claiming launch certification.
+8. This is NOT a request for ReDown gamification/counters, another diagnostic dashboard, **implementing new cloud providers now** (only future-compatible observer adapters and synthetic fixtures), changing API semantics, fixing unrelated File API operations, publishing to a store or claiming launch certification.
 
 **Primary invariant: the recorder must never make the right-click engine less reliable than the frozen Base 0.1 build.**
 
@@ -137,6 +137,65 @@ The recorder can observe approved, typed and bounded fields, but cannot:
 - silently upload RAW/SECURE material to any server.
 
 If any of these permissions appear necessary, stop and seek a separate explicit design approval instead of expanding scope.
+
+## 5A. FUTURE-PROOF MULTICLOUD OBSERVABILITY — CLOUDFLARE NOW, ANY PROVIDER LATER
+
+**New owner requirement (2026-11-13):** The recorder must be fundamentally **provider-agnostic**. Build and validate the core against real Click2Cloud/Cloudflare now, while making later Google Drive, Microsoft OneDrive, Dropbox, and any future supported cloud provider trivial to instrument using **small observational adapters/submodules**. ReDown's existing multi-provider recorder is an architectural reference, not an excuse to copy its old caps/fragile storage behavior.
+
+**Scope boundary:** The future Codex implementation of THIS request adds diagnostics for **currently supported Click2Cloud Cloudflare flows only**, plus synthetic provider-adapter contract fixtures. **Do not implement, enable, authenticate, provision, advertise, or simulate production support for Google Drive, OneDrive or Dropbox now.** Their names in this section mean **forward-compatible design**, not provider release approval.
+
+### The invariant: a new provider never requires a recorder rewrite
+
+~~~text
+[Chrome's ONE existing contextMenus.onClicked owner]
+                       |
+          [existing canonical menu + SaveIntent]
+                       |
+           [provider-neutral observer seam]  <--- no transport authority
+             |     |       |      |
+       Cloudflare  Drive  OneDrive Dropbox ... future
+       observed    adapter adapter  adapter      adapter
+          |           provider-specific receipt → generic evidence envelope
+          +-----------+-------+------+----------+
+                      |
+           [ONE run controller / event schema]
+                      |
+        [ONE durable append-only local archive]
+                      |
+        [ONE RAW / ONE SECURE ZIP projection]
+                      |
+        [provider breakdown + comparable metrics]
+~~~
+
+- **Single recorder schema, run controller, persistence layer, start/stop controls, event-limit accounting, exporters and comparison engine** for *all* providers. Never spawn one per-provider recorder, one ZIP implementation per provider or multiple native Chrome listeners.
+- A tiny **provider observer adapter** (not a saving adapter) translates typed, **already-observed** data from an existing provider's save path into the **same standardized capture contract**. No provider-specific cloud request is issued by diagnostics. The core must recognize an unknown provider ID as a typed, incomplete/unsupported observation, not throw, drop the click, or fall back to “Cloudflare.”
+- Reuse existing Click2Cloud's trusted canonical native-click/save-attempt ID and join whatever real provider-specific request/receipt IDs become available; **do not guess joins from timestamp, filename, account name or URL**. Future provider retry/callback semantics may differ; each module indicates provenance and verified vs accepted vs uncertain.
+- Provider-specific **optional metadata** is namespaced and schema-versioned. Keep a **stable common event envelope**: runId, attemptId, eventId, sequence, timestamp, workerEpoch, menuGeneration, mode, context, providerId, providerAction, stage, outcome, source class, destination class, latencies, proof classification, error category, evidence class and completeness. A Google Drive file ID is not an R2 object key; OneDrive driveItem IDs, Dropbox paths and R2 key+ETag are not interchangeable. Preserve their original typed evidence in the RAW view only where observed and consented, while using privacy-safe opaque references in SECURE.
+- Adopt **generic semantic stages** for all providers (delivered click → route/auth → source capture → write admitted → provider response → verification → final disposition). Providers may add **namespaced provider stages** for upload sessions, resumable chunks, conflict handling, destination resolution, rate limits, async commits and remote readback. An unavailable stage must be \`not_observed\` or \`not_applicable\`, not fabricated merely to align graphs.
+- **Provider verification contract:** each provider module refers to the real, authoritative completion/proof from its own existing save pipeline. A successful Drive HTTP response is not necessarily equivalent to a verified R2 object readback; normalizer distinguishes \`provider_accepted\`, \`provider_confirmed\`, \`independently_verified\`, \`partial\`, \`uncertain\`, \`failed\`, and \`unknown\` with exact evidence scope. Report provider-specific verification strength separately rather than artificially equalizing success rates.
+- **Provider/connection isolation:** recorder failures for Google, OneDrive or Dropbox must not affect Cloudflare saves, and broken Cloudflare observability cannot disable other healthy providers. One disconnected provider must not stop the recorder or erase its other providers' event history.
+- **Provider additions as submodules:** document the minimal registration/interface (e.g. \`observeProviderEvent({providerId, attemptId, stage, result, receiptRef, ...})\`) with validation, versioning, capability flags, supported outcomes, privacy-filter projection, and a provider fixture. Do not export tokens or raw provider response bodies through arbitrary extension/plugin fields. Unknown fields are rejected/omitted from SECURE by default, and RAW only stores explicitly allowed legitimate observations.
+- **No recorder changes to add providers:** when Click2Cloud later supports an additional cloud, adding its provider-specific observation module and declarative capability mapping should be sufficient. The Debug UI, archive writer, 100,000-event limits, RAW/SECURE exporters, and generic success/failure metrics **must not require editing**.
+- Make metrics **per provider and aggregate**: observed native clicks, eligible save attempts, provider-confirmed receipts, independently verified saves, uncertain/failed/blocked attempts, dropped recorder events, p50/p95/p99 timings and recovery rates. Aggregate only commensurate denominators and report comparison exclusions. Cross-provider save operations count once per actual intended independent destination/operation, never once per emitted stage or duplicate callback.
+- **Security differences are real:** Google, OneDrive and Dropbox may return opaque file IDs, resumable-session URLs, signed preview/temporary links and provider-specific sensitive error messages; neither RAW nor SECURE may deliberately record OAuth tokens/cookies/headers/body content, and SECURE must remove such values even when nested or disguised.
+- No implicit dependency on Cloudflare Worker/R2 code, bucket names, R2 authorization scopes, Worker digests, URL-privacy assumptions, or Cloudflare-only menu structures inside the generic recorder. Cloudflare-specific details live in its tiny observer adapter.
+
+### Multicloud adapter proof **before** any additional real provider integration
+
+Add isolated, deterministic **mock observer adapters only** for Google Drive, OneDrive, Dropbox and one invented future provider. Feed each the exact same generic click→upload→provider proof→outcome sequence plus appropriate provider-specific optional events. Verify all events use the same persistent writer and same two exporters; no changes to the recorder core, UI or export module when swapping providers. No OAuth credentials, extra network permissions, cloud writes, simulated “live success” claims or new provider UI.
+
+Suggested future-proof tests:
+
+- **R51** Cloudflare's actual existing save path records through the generic observer contract, without injecting Cloudflare terms into the core archive/export code.
+- **R52** Synthetic Google Drive provider adapter plugs into the registry; captures a delivered right-click, account/file ID as optional scoped metadata and accurate completion/unknown semantics using no real provider access.
+- **R53** Synthetic OneDrive and Dropbox adapters do likewise, exercising resumable/delayed-ack/temporary-link/path identity differences without weakening privacy.
+- **R54** Synthetic unknown/fifth provider, unsupported capability and missing receipt do not crash the native listener, recorder, ZIP exporter or any actual save; unsupported/unverified fields remain explicit.
+- **R55** A multicloud mixed run interleaves four provider adapters and 100,000 total events in ONE run/DB: sequences unique; per-provider/aggregate counts correct; same RAW/SECURE ZIP format; secure redaction passes provider-specific sentinel tests.
+- **R56** Provider-specific storage/auth/rate-limit failures are attributed only to the relevant attempt/provider and do not break unrelated healthy provider recordings or cloud saves.
+- **R57** Adding a new mock provider requires ONLY a module/registry declaration and contract tests, **zero modifications** to archive writer, run controller, Debug UI and export processor. If not achieved, document the design shortfall rather than claiming plug-and-play extensibility.
+- **R58** Comparison report can group by provider and cross-provider verified evidence strength; incomparable proof standards are reported separately instead of inflating overall success percentage.
+
+**Future integration rule:** When the user later authorizes Google Drive/OneDrive/Dropbox implementation, add each through its already-working save provider pipeline. The recorder merely observes; the provider's save/authorization/retry code continues to own its operations. ReDoWN's multi-provider diagnostics may provide source patterns and test cases, but the Click2Cloud recorder remains independent of ReDown runtime/storage.
 
 ## 6. EVENT MODEL & EVIDENCE TRUTH CONTRACT
 
