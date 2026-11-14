@@ -1,5 +1,8 @@
 # CODEX REQUEST — Click2Cloud independent right-click flight/forensic recorder (user-controlled 100,000+ events, RAW + SECURE ZIP, ReDown regression lessons)
 
+> **SUPERSEDED FOR IMPLEMENTATION BY V2 (2026-11-14):** [Two-tier nonblocking diagnostics — authoritative Codex request](../11.14.2026/P1_V2_TWO_TIER_NONBLOCKING_RIGHT_CLICK_DIAGNOSTICS_CODEX_REQUEST.md). The newer request specifies BASIC always-on 4,000 **rolling attempt records** (editable), detailed opt-in Start/Stop fields (editable 4,000 event cap or Unlimited), explicit N/A values, continuous latency/speed metrics, safe concurrent clicks, and ReDown noninterference gates. Follow V2 wherever directions conflict. This older document remains a research and regression reference; do **not** implement its superseded single-tier UI, retention or capture semantics.
+
+
 **Recorded:** 2026-11-13, America/Chicago
 **Repository:** thanks-cohn/Click2Cloud
 **Priority:** P1 new diagnostic capability; **P0 regression gate** for right-click saving, native menu ownership, Chrome boot/Shelf availability, user configuration and credentials.
