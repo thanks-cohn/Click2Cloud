@@ -11,14 +11,18 @@ Creators should be able to work with whole collections of files rather than proc
 
 The UI should also make Cloudflare credential setup manageable. Users should be able to select permissions and scope, securely connect a configuration once, and let long-running authorized jobs finish or resume without repeatedly pasting tokens.
 
-## Feature 1: Multi-select, copy, and paste
+## Feature 1: Copy ACTUAL remote images to the system clipboard
 
-- In Click2Cloud File Explorer, support Ctrl+click to toggle individual files, Shift+click for range selection, and platform-conventional Cmd modifiers on macOS. Handle selection across pagination/virtualization without losing the selected set.
-- Offer distinct actions, never ambiguously label all of them 'Copy': **Copy URLs**, **Copy Paths/Keys**, **Export Selected URLs (CSV/JSON)**, **Download Selected**, and **Copy as Files to Clipboard** *only where technically supported*.
-- **Browser paste:** copying newline-delimited URLs / tabular text is feasible as text; a web application must be capable of consuming that text or an imported manifest. Do not promise pasted links magically upload the media bytes.
-- **Native desktop paste:** investigate OS clipboard file-list formats, security boundaries, browser extension permissions and whether a signed desktop helper is necessary. Provide an explicit fallback such as **Download/Export Selected** where native file clipboard integration cannot be guaranteed.
-- Make access explicit and avoid silently publishing private objects. The user must choose whether to copy private identifiers, authenticated links, or verified public URLs.
-- Market the workflow as **'Select multiple assets. Copy once. Paste where supported.'**, not universal 'Paste files anywhere' until real Windows/macOS/Linux/browser testing validates the claim.
+**Owner clarification:** The main promoted feature is real image data copied from Click2Cloud File Explorer to the user's OS clipboard. This is **not** the existing **Copy URLs** feature.
+
+- **Demonstration 1 (ChatGPT):** Ctrl/Shift-select five cloud images, click **Copy Images to Clipboard**, switch to ChatGPT, and press Ctrl+V. The ideal result is five **separate image attachments**. ChatGPT supports pasting images and uploading multiple images, but those facts do not establish that a single browser clipboard transaction can carry five independent images. **Test on the actual operating system, browser and ChatGPT composer before advertising this shot.**
+- **Demonstration 2 (visual search):** Select one image, **Copy Image**, and paste its actual bytes into a specifically verified Google Lens, Yandex Images or comparable visual-search input. Never assume every page accepts clipboard paste.
+- **Single-image initial scope:** read authorized remote image bytes, convert as needed (for example PNG), and write the image to the system clipboard after an explicit user action. Never require manually saving to the Downloads folder. Record success only when clipboard write succeeds.
+- **Multiple independent image items:** research OS-specific native clipboards, browser ClipboardItem limitations and target-app behavior. Multiple selected objects in the interface do not guarantee that all images survive one clipboard write or become separate pasted attachments. Investigate a trusted native companion only if appropriate. Offer clearly labeled fallback flows (one image at a time, multi-file export/ZIP, or a single contact sheet); do not substitute them secretly.
+- **Selection:** Ctrl+click toggle and Shift+click range, Cmd equivalents on macOS, selection persistence across virtualized pages, and precise count/order.
+- **Security:** honor private-object permissions, bound total clipboard memory, avoid revealing storage credentials or silently generating public links. Clipboard may be read by other local apps.
+- **UX:** separate actions **Copy Image**, **Copy Images** (only on proven platforms), **Copy URLs**, **Download Selected**, and **Export URL Manifest**.
+- **Marketing line:** **Your cloud. Your clipboard. Anywhere you create.** Qualify verified app/platform interoperability.
 
 ## Feature 2: Upload an entire local directory to Cloudflare R2
 
@@ -31,6 +35,9 @@ The UI should also make Cloudflare credential setup manageable. Users should be 
 - Market: **'Upload a whole project. Keep its structure.'**
 
 ## Feature 3: Guided Cloudflare credential creation, scope and configuration — INVESTIGATION
+
+**Related experimental direction:** [native credential broker](experimental/NATIVE_CREDENTIAL_BROKER_2026-11-14.md). For current OAuth, use real provider-issued expiry and refresh, not an artificial seven-day access-token value.
+
 
 ### Proposed user journey
 
@@ -72,6 +79,18 @@ The UI should also make Cloudflare credential setup manageable. Users should be 
 - Where short-lived job credentials expire before a job completes, a trusted scheduler can mint a new scoped session only while parent authorization and the customer's membership remain valid; do not ask the customer to paste a fresh temporary token for every retry.
 - If parent credentials have expired or been revoked, stop safely, preserve retriable state, and ask the user to reconnect. Never silently escalate scope.
 - Large folder uploads from a local computer cannot keep transferring after that machine goes offline unless the bytes have first been staged by an intentionally authorized service; do not use remote-job language to imply impossible offline local uploads.
+
+## Feature 5: Timed folder-upload benchmarks and session endurance
+
+**Owner's promotional concept:** show a genuine, visible timer during a Cloudflare R2 directory upload: for example, **100 images in 6 minutes**. Then demonstrate how much progress a creator can make over a sustained **55-minute working session**. Neither number is a guaranteed speed, actual benchmark, or fixed Cloudflare login lifetime.
+
+- Record **completed/total files, total and completed bytes, elapsed wall-clock time, effective throughput, skipped/failed files, retries, integrity checks and current ETA**. Count a file complete only when destination storage verifies it.
+- Provide a privacy-conscious, user-triggered **Copy Benchmark Report** with counts, byte size, time, test conditions and errors; no secret keys, private object names or personal paths by default.
+- Benchmark nested 100-image folders at documented aggregate sizes and network conditions, with varying file sizes and bounded concurrency. Advertise observed results only, such as **100 images · 640 MB · 6m 03s (measured test)** *if* those exact numbers are independently verified.
+- **55-minute scenario:** credential lifetimes and job duration are different concerns. Cloudflare R2 S3 credentials are not inherently limited to a 55-minute OAuth login session. Some temporary credentials can last up to seven days; account token expiry and revocation still apply.
+- Recover responsibly from an interrupted long run with checkpoint/resume, idempotent object writes, bounded retries, and clear handling for expiry/revocation. Local-folder bytes cannot continue uploading once the local computer is off unless intentionally staged elsewhere.
+- Add a **target: seven days without unnecessary interactive Cloudflare reconnects**, subject to the provider's authentic refresh grant/session policy. Never invent token expiry dates, suppress provider errors or grant additional permissions to meet that target; diagnose missing/invalid refresh credentials and app behavior.
+- **Acceptance:** compare timers to independent clocks, match counts against real R2 keys, validate restart/retry and revoked credential behavior, test a real browser and real R2 account separately from mocks.
 
 ## Acceptance criteria before promotion as a shipped feature
 
