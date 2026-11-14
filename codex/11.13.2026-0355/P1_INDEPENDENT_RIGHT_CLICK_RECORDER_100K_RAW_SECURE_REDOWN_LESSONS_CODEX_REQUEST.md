@@ -195,7 +195,7 @@ Suggested future-proof tests:
 - **R57** Adding a new mock provider requires ONLY a module/registry declaration and contract tests, **zero modifications** to archive writer, run controller, Debug UI and export processor. If not achieved, document the design shortfall rather than claiming plug-and-play extensibility.
 - **R58** Comparison report can group by provider and cross-provider verified evidence strength; incomparable proof standards are reported separately instead of inflating overall success percentage.
 
-**Future integration rule:** When the user later authorizes Google Drive/OneDrive/Dropbox implementation, add each through its already-working save provider pipeline. The recorder merely observes; the provider's save/authorization/retry code continues to own its operations. ReDoWN's multi-provider diagnostics may provide source patterns and test cases, but the Click2Cloud recorder remains independent of ReDown runtime/storage.
+**Future integration rule:** When the user later authorizes Google Drive/OneDrive/Dropbox implementation, add each through its already-working save provider pipeline. The recorder merely observes; the provider's save/authorization/retry code continues to own its operations. ReDown's multi-provider diagnostics may provide source patterns and test cases, but the Click2Cloud recorder remains independent of ReDown runtime/storage.
 
 ## 6. EVENT MODEL & EVIDENCE TRUTH CONTRACT
 
