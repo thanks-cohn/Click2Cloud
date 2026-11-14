@@ -1,4 +1,5 @@
 import {depthObservation} from './fixtures/depth-observation.mjs';
+import {dispatchDepthFixture} from './fixtures/depth-fetch-diagnostics.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -44,7 +45,9 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
    assert.deepEqual(metadata.migrations?.new_sqlite_classes,['RemoteClaims']);
    for(const [path,source] of sourceModules)assert.equal(await options.body.get(path).text(),source);
    const mf=new Miniflare({modules:true,script:code,compatibilityDate:metadata.compatibility_date,r2Buckets:['STORAGE'],durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},bindings,fetchMock:mock});
-   await mf.ready;workers.set(name,{mf,bindings:metadata.bindings,bucketName});deployments.push({name,bucketName});return Response.json({success:true,result:{}});
+   const worker={mf,bindings:metadata.bindings,bucketName,fixtureId:deployments.length+1,lifecycle:'starting',requestCount:0,inFlight:0};
+   trace('fixture.start',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle});
+   await mf.ready;worker.lifecycle='ready';trace('fixture.ready',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle});workers.set(name,worker);deployments.push({name,bucketName});return Response.json({success:true,result:{}});
   }
   if(suffix==='/settings')return workers.has(name)?Response.json({success:true,result:{bindings:workers.get(name).bindings}}):Response.json({success:false},{status:404});
   if(suffix==='/subdomain'&&options.method==='POST'){assert(workers.has(name));return Response.json({success:true,result:{enabled:true}});}
@@ -53,7 +56,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
  const provisionerOptions={request:management,authority,readModule:async path=>sourceModules.find(([name])=>name===path)[1],load:async key=>structuredClone(plans.get(key)),store:async(key,value)=>plans.set(key,structuredClone(value))};
  let provisioner=createProvisioner(provisionerOptions);
  const oauth={authority,status:async()=>({state:'CONNECTED',accounts:[{id:'fixture'}]}),request:async(path,options={})=>{assert.equal(options.method??'GET','GET','Recovery must never create a bucket');assert.match(path,/^\/accounts\/fixture\/r2\/buckets/);return Response.json({success:true,result:{buckets:[{name:a.bucketName},{name:b.bucketName}]}});}};
- const transportOptions={oauth,lookup:target=>provisioner.lookup(target),expectedCodeDigest,pollIntervalMs:1,record:async event=>{events.push(event);trace('transport.record',{state:event.state,code:event.code});},fetch:async(url,options)=>{const parsed=new URL(url),name=parsed.hostname.split('.')[0],worker=workers.get(name);assert(worker,'Unknown exact Worker '+name);if(process.env.C2C_DEPTH_TRACE_DIR){const c=JSON.parse(Buffer.from(options.headers.authorization.slice(7).split('.')[0],'base64url'));trace('request.begin',{endpoint:parsed.pathname,expiresInMs:c.expiresAt-Date.now(),sessionEqual:c.sessionId==='fixture-session'});}try{const response=await worker.mf.dispatchFetch((await worker.mf.ready).origin+parsed.pathname,options);if(process.env.C2C_DEPTH_TRACE_DIR){const data=await response.clone().json();trace('request.end',{endpoint:parsed.pathname,httpStatus:response.status,state:data.state,code:data.code});}return response;}catch(error){trace('request.error',{endpoint:parsed.pathname,errorName:error.name});throw error;}}};
+ const transportOptions={oauth,lookup:target=>provisioner.lookup(target),expectedCodeDigest,pollIntervalMs:1,record:async event=>{events.push(event);trace('transport.record',{state:event.state,code:event.code});},fetch:async(url,options)=>{const parsed=new URL(url),name=parsed.hostname.split('.')[0],worker=workers.get(name);assert(worker,'Unknown exact Worker '+name);if(process.env.C2C_DEPTH_TRACE_DIR){const c=JSON.parse(Buffer.from(options.headers.authorization.slice(7).split('.')[0],'base64url'));trace('request.begin',{endpoint:parsed.pathname,expiresInMs:c.expiresAt-Date.now(),sessionEqual:c.sessionId==='fixture-session'});}return dispatchDepthFixture(worker,parsed.pathname,options,trace,!!process.env.C2C_DEPTH_TRACE_DIR);}};
  let transport=createRemoteTransport(transportOptions),registrar,api;
  const deep=Array.from({length:12},(_,i)=>'level'+(i+1)).join('/')+'/';
  const state={product:productState({defaultTarget:a,show:{simple:true,nested:true,depth:true,flat:false},cloudflare:{selectedAccountId:'fixture',initialized:['fixture'],pending:[]}}),configs:{simple:{destinations:[{id:'simple-a',target:{...a,prefix:'simple/'},label:'Simple A'}]},nested:{destinations:[{id:'narrow-a',target:a,label:'Narrow A'}]},depth:{scopes:[{target:b,maxDepth:30}]}},generation:{desired:0,applied:null}};
@@ -90,7 +93,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
   const bObjects=(await bucketB.list()).objects.length,beforeDeployments=deployments.length;provisioner=createProvisioner(provisionerOptions);transport=createRemoteTransport(transportOptions);domain=createCloudflareOnboarding(domainOptions);
   const replay=await domain.recoverDestination({target:rowBefore.target,idempotencyKey:'exact-depth-b',expectedRevision:state.product.revision});assert.equal(replay.state,'completed',JSON.stringify(replay));assert.equal((await transport.status({...b,prefix:deep})).state,'READY');assert.equal(deployments.length,beforeDeployments);assert.equal((await bucketB.list()).objects.length,bObjects);assert.equal(JSON.stringify({product:state.product,configs:state.configs}),originalConfig);
   const outside={...b,accountId:'foreign',connectionId:'cloudflare:foreign'};await assert.rejects(domain.recoverDestination({target:outside,idempotencyKey:'foreign'}),{code:'WRONG_ACCOUNT'});assert.equal(deployments.length,beforeDeployments);
- }finally{trace('disposal.begin');registrar?.close();for(const worker of workers.values())await worker.mf.dispose();await mock.close();trace('disposal.end');await observation.finish();}
+ }finally{trace('disposal.begin');registrar?.close();for(const worker of workers.values()){worker.lifecycle='disposing';trace('fixture.dispose',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight,requestCount:worker.requestCount});await worker.mf.dispose();worker.lifecycle='disposed';trace('fixture.disposed',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight});}await mock.close();trace('disposal.end');await observation.finish();}
 });
 
 test('Depth recovery failures keep the exact contextual target and never dispatch or replay the clicked source',async()=>{

@@ -1,0 +1,18 @@
+{
+  "requestMain": "0c077fc88dd1402290b7ec54fd03928daa76278b",
+  "requestSHA256": "4821be2e99c2c068df895889109bbd3923885b07c12999217a36cc4b9e4dc904",
+  "implementationBase": "098ae67c76b00d664388c1e89b925ee00a1c0036",
+  "node": "v24.22.1 and v24.21.0",
+  "host": "Debian GNU/Linux 13 x64",
+  "miniflare": "4.20260730.0",
+  "undici": "7.28.0",
+  "workerd": "1.20260730.1",
+  "sourceFiles": {
+    "tests/depth-plan-recovery.test.mjs": "1e4909d09674333db0b2871b2ceb339e7ca7d717dc3d0a58f2bd9c216e51743c",
+    "tests/fixtures/depth-fetch-diagnostics.mjs": "0e96a49b263555e28017492fbc1dd5b85dc960109aaa17423c7f66d2ed459e2d",
+    "tests/depth-fetch-diagnostics.test.mjs": "3d05aac0e0216537e49f06f56af0d2b5ee501299be441be6dbb9e39f96029db4",
+    "tests/final-focused.mjs": "c5cd575ee3963765c97799cb16daa2aeb3f17dd73431921b45166897ad6bf446",
+    "scripts/diagnose-depth-fixture.mjs": "40ab2cf51c35f981fe5b0fbf47c3ac63216431256953a50b4f48087605961111"
+  },
+  "productionDiff": "git diff --exit-code 098ae67c76b00d664388c1e89b925ee00a1c0036 -- src extension right2cloud-module/src .gitattributes: exit 0"
+}
