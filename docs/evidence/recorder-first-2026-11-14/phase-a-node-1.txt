@@ -1,0 +1,19 @@
+✔ incremental archive digests match independent Node SHA-256 at block/padding boundaries (159.112082ms)
+✔ complete RAW ZIP contains 0/0 events across automatic pages (88.547718ms)
+✔ complete SECURE ZIP contains 0/0 events across automatic pages (76.147243ms)
+✔ complete RAW ZIP contains 102/102 events across automatic pages (93.005869ms)
+✔ complete SECURE ZIP contains 102/102 events across automatic pages (143.786333ms)
+✔ complete RAW ZIP contains 10000/10000 events across automatic pages (3726.715063ms)
+✔ complete SECURE ZIP contains 10000/10000 events across automatic pages (3969.39971ms)
+✔ sparse rich sequence and rolling Basic evictions retain counts and explicit PARTIAL coverage (201.446317ms)
+✔ corrupt segment, stalled page, interrupted read and cancellation never produce complete archive (14.378731ms)
+✔ missing segment tail, unavailable Basic and unconfirmed ranges are PARTIAL with named gaps (59.096496ms)
+✔ RAW export requires consent before reading any page (1.397131ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8734.414728

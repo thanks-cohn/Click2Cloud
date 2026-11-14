@@ -569,3 +569,22 @@ bounded causal names/stages are returned. Static module parse/evaluation failure
 still a whole-worker risk, so parse and browser-worker tests accompany this change.
 Installed/native acceptance is BLOCKED by policy here and is never inferred from
 Node or HTTP-worker fixtures. See [two-phase evidence](../../docs/evidence/mv3-suite-reliability/REPORT.md).
+
+### Recorder-first complete export (November 14 review)
+
+The Settings-only recorder v2 `snapshot` / `page` protocol remains local and sender/
+Debug gated; RAW still requires consent. It confers no cloud or agent authority.
+`exportComplete` now internally reads all Basic snapshot positions and rich segments,
+validates counts/sequences/source hash chain, streams page encodings into bounded
+native Blob chunks, computes incremental SHA-256/ZIP CRCs and starts one download.
+Snapshot ordinal cursors are explicit `basicNext`/`snapshotPosition`; durable Basic
+sequence numbers are preserved separately. Missing/evicted/gapped/unconfirmed data
+is named in PARTIAL coverage; corruption, cancellation and interrupted reads cannot
+report COMPLETE. 256 MiB is the explicit encoded payload budget; oversize fails
+without truncation or manual parts. The panel defaults to the available rich run,
+retains an explicit Basic-only choice and never equates a download request with a
+physical disk write. `exportPart` remains only for compatibility, not product UX.
+Source: recorder export/storage/host + Settings panel; tests:
+`recorder-complete-export.test.mjs`, `test-recorder-complete-export.mjs`, independent
+Python ZIP/CRC/hash/CSV verifier. Real Chromium page/IDB/download proof is separate
+from installed Chrome and live R2; neither is inferred from these fixtures.

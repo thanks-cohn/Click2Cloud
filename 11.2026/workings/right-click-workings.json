@@ -9200,6 +9200,28 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
     "sourceFiles": {
+      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
+      "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
+      "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
+      "extension/background.mjs": "d5a2fed63c96ea4cc6c5d72025e9fc71d63ec9f85389388880a1934c5d1c95b9",
+      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
+      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
+      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
+      "extension/recorder-panel.mjs": "0d17758a5bfdc57855d71d1cc0f5da9a14999bba8b00dbee2e748a5efa109254",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
+      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
+      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
+      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
@@ -9278,35 +9300,14 @@
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
       "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
-      "src/recorder/export.mjs": "4a2657e13d073d712c7f1aa82d16766716460d606360ecf8c6a8c5872d1add18",
-      "src/recorder/host.mjs": "f305fb1886cc31b4336db190b2daff1bdd7a6019a7506e0cbe3e445aa45d95a1",
+      "src/recorder/archive-stream.mjs": "dffc783f1bb30edd480b2ead5320909ba6a200a7b860c18ab98162246f25ec61",
+      "src/recorder/export.mjs": "59c7b6af57b93a070bbeaa70a3b8e2bbc128ff84498a5bbdb14ae3cddf4666c9",
+      "src/recorder/host.mjs": "8e2b82a22532305410356f420262dc6ad892fc960e75330884123b42edd9fac1",
       "src/recorder/provider-observation.mjs": "63acd6e40fcab227faa33bbe9913f856bfa68d5005e700adc9abbcd30d02e1a5",
-      "src/recorder/recorder.mjs": "47d5ea58694072086f32425b6ea3301b0db4ad4d32c3a6918fac78c05aff125c",
+      "src/recorder/recorder.mjs": "48ad3b7abe95c5827d496c92abed3da16e041703d2f1bdbb05a2c29dff6ba603",
       "src/recorder/schema.mjs": "1e11fa82b7591512c569d413fd08bcbd0209270d431aa094823c4f43866b4855",
-      "src/recorder/storage.mjs": "601b1559152f1634193e3d6ea777005a3ac1f38f4b338a96d8c13b6edd8d0af6",
-      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
-      "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
-      "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
-      "extension/background.mjs": "d5a2fed63c96ea4cc6c5d72025e9fc71d63ec9f85389388880a1934c5d1c95b9",
-      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
-      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
-      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
-      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
-      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
-      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
-      "extension/recorder-panel.mjs": "443f3a70f878b38814721aada96da366df6cc98c76e1211fbd7a15b1ee73cc11",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
-      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
-      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
-      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
-      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
-      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
-      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e"
+      "src/recorder/storage.mjs": "8228a931c92929fe416b4fad0a48d64f5c3856a15f47fa9c325453601f2ea7d4",
+      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -10827,10 +10828,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -11429,7 +11430,7 @@
       {
         "id": "ENTRY_MESSAGE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage → existing background listener",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
         "apiMethods": [
@@ -11477,7 +11478,7 @@
       {
         "id": "ENTRY_CLIENT_RESPONSE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage → existing background listener",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
         "apiMethods": [
@@ -12056,6 +12057,46 @@
           ],
           "installedWindows": "NOT_VERIFIED",
           "liveCloudflareR2": "NOT_VERIFIED"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "RECORDER_COMPLETE_EXPORT",
+        "preconditions": "Exact trusted Shelf sender; Debug enabled; RAW consent when selected",
+        "trigger": "One RAW ZIP or SECURE ZIP action",
+        "guard": "Fixed committed snapshot, sequence/count/hash validation, bounded native Blob payload",
+        "actual": "All internal pages included automatically in one archive; Basic ordinal and durable sequence are distinct; PARTIAL/FAILED/CANCELED stay explicit.",
+        "apiMethods": [],
+        "identity": "Local recorder v2 snapshot/page protocol only; no provider or configuration effect",
+        "nextState": "Complete retained snapshot archive or named partial/failure/cancellation",
+        "uiEffect": "Automatic one-file download request with counts/hash/progress; no manual next-part action",
+        "externalResourceEffect": "none; local browser download only",
+        "persistence": "Reads separate diagnostic archives only",
+        "errors": [
+          "SEGMENT_HASH_MISMATCH",
+          "SEGMENT_CHAIN_MISMATCH",
+          "EXPORT_READ_INTERRUPTED",
+          "EXPORT_SIZE_LIMIT_256_MIB"
+        ],
+        "retry": "No provider IO or write replay",
+        "sourceRefs": [
+          {
+            "path": "src/recorder/export.mjs",
+            "symbol": "exportComplete"
+          },
+          {
+            "path": "extension/recorder-panel.mjs",
+            "symbol": "async function begin(privacy)"
+          },
+          {
+            "path": "src/recorder/storage.mjs",
+            "symbol": "snapshotPosition"
+          }
+        ],
+        "verification": {
+          "level": "NODE_AND_HTTP_BROWSER_FIXTURE",
+          "status": "REAL_CHROMIUM_IDB_DOWNLOAD_NOT_INSTALLED_OR_LIVE",
+          "testFile": "tests/recorder-complete-export.test.mjs"
         },
         "contractViolation": null
       }

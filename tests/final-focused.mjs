@@ -65,3 +65,4 @@ await import('./checkout-integrity.test.mjs');
 await import('./depth-authority-race.test.mjs');
 
 await import('./depth-fetch-diagnostics.test.mjs');
+await import('./recorder-complete-export.test.mjs');

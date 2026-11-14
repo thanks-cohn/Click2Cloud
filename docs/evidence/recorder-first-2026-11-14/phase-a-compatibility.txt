@@ -1,0 +1,23 @@
+✔ MV3 manifest worker graph has no dynamic imports, including re-exported dependencies (200.25958ms)
+✔ MV3 negative graph catches nested dynamic import; page-only import and comments are permitted (27.805471ms)
+✔ R02 late write retains ownership through actual settlement (18.934828ms)
+✔ R03 late rejection preserves first batch and serial retry, bounded suffix (2.085565ms)
+✔ B05/B06/E04 canonical missing values and editable capacity (7.629296ms)
+✔ E03 SECURE allowlist removes origins, identifiers, arbitrary objects and free text (1.17623ms)
+✔ B09/F08 1000 overlaps, exact terminal updates and independent full failure (40.936412ms)
+✔ B07/P07 extracting a field throws; cross epoch never invents click-to-verified (1.213515ms)
+✔ R01 100 events coalesce into one archive commit and no health writes (0.533323ms)
+✔ F10 provider-neutral adapters include mock Drive, OneDrive, Dropbox and fifth provider (2.224634ms)
+✔ R07/R08/F08 single native listener dispatches 20/100/1000 times despite throwing/hung recorder (149.276518ms)
+✔ P01/P02/P05 measured timing, source/provider distinction, zero bytes and absent speeds (2.036832ms)
+✔ F05/F07 Stop fences a Start that has not settled; Basic remains on (11.677742ms)
+✔ R08 bounded byte pressure cannot allocate an unlimited rich queue (0.995633ms)
+✔ R04/B12 synchronous DB-open failure is isolated, and Basic retries after recovery (1.041902ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 739.164697
