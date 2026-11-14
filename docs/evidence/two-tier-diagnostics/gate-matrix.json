@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 2,
+  "installedChrome": "BLOCKED_ADMIN_POLICY",
+  "liveR2": "NOT_RUN",
+  "cases": [
+    {
+      "id": "B01",
+      "state": "BLOCKED",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Debug OFF + user never opens Shelf: genuine delivered click creates basic attempt and actual save still verifies.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "B02",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "4,000 unique attempts \u2192 4,000 rows; attempt 4,001 evicts exactly oldest eligible row, no capture stop.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B03",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Change 4,000 \u2192 10,000 without resetting archive; preserved historical rows remain and newest grow to 10,000. A previously overwritten row is NOT recreated.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B04",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Lower 10,000 \u2192 4,000 with explicit warning; no user destinations or expansive runs erased.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B05",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Editable arbitrary positive safe integer including 100,000, validation for empty/0/-1/float/NaN/huge unsafe/quota unavailable; no secret fallback to 4,000.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "B06",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "A click with NO pageUrl, sourceUrl, bytes, provider response, proof or duration still has a row with N/A canonical fields + explicit reason; next click is unaffected.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B07",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Missing source speed only: known source latency remains; bad provider proof only affects verified outcome, not timestamps or source URL category.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "B08",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Basic source/provider distinction on embedded CDN versus host, without copying signed/private URLs into default store or SECURE.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B09",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "BASIC 1-row-per-attempt with pending\u2192final update, duplicate callbacks exact-once, separate counts for verified/failed/blocked/uncertain/cancelled.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "B10",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Success percentages show numerator, denominator, time window, sample count, missing/gap coverage, and correct zero-sample N/A (never NaN or unjustified 100%).",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "B11",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "BASIC latest 4,000 rows remains efficient on low-end memory and disk; no unbounded list rendering.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "B12",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Basic captures while full recorder stops, fails, is disabled, has exceeded quota, or exports; disclose any storage loss.",
+      "evidence": "PASS: isolated rich failure and BASIC quota-open failure/recovery; full combined export/quota/stop fault matrix NOT RUN."
+    },
+    {
+      "id": "P01",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Known source acquisition bytes + timestamps yield correct ms, bytes/s, MiB/s, and click-to-verified.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "P02",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Source bytes N/A but source latency measured \u2192 source speed N/A; don't suppress rest of row.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "P03",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Provider response latency is labeled request-to-response, not network RTT; if only upload duration exists, RTT N/A.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "P04",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "R2 physical disk-writing throughput N/A unless measured by a genuine authorized provider signal; do not mislabel HTTP transfer speed.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "P05",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Zero-byte verified transfer does not divide by zero; N/A when elapsed = 0/unobserved; known zero bytes remain numeric zero.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "P06",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Cold vs warm, source-site/CDN, Simple/Narrow/Depth, provider, file-size buckets: per-group p50/p95/p99 show sample counts, units and proof levels.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "P07",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Worker epoch change mid-attempt doesn't subtract unrelated performance.now values; conservative N/A/uncertain.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "P08",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Comparing ReDown/Click2Cloud/future model retains app/build/provider/OS/browser/known hardware and network context where available, and marks incomparable conditions.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "P09",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Off/on paired benchmarks quantify recorder hook overhead, storage write frequency, JS heap and Chrome Task Manager RSS, with genuine native saves and simulated levels explicitly separated.",
+      "evidence": "Paired Linux fake-native fixture measured; genuine native counterpart BLOCKED."
+    },
+    {
+      "id": "P10",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Upload vs source-read vs end-to-end speed vs local archive write speed never mixed in labels or computations.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "F01",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Default full recording OFF; Basic ON. Debug switch ON reveals controls without beginning large capture.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "F02",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Start \u2192 Stop label/status; 4,000 rich events admitted; then stops at cap, preserves earliest events, reports LIMIT_REACHED (not rolling).",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "F03",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Rich cap changed to 10,000 and 100,000; full archive captures both old and new events, contiguous sequence and no hidden 4,000/4 MiB/7d prune.",
+      "evidence": "Real browser IDB 4k/10k/100k. Each run preserves beginning and sequence."
+    },
+    {
+      "id": "F04",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Unlimited mode runs until user Stop or safety limit; bounded queue, quota failure/incomplete truth; no false infinity promise.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "F05",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Stop instantly prevents new rich-event admission, already queued events settle when possible, and BASIC never stops.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "F06",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Browser reload while ACTIVE, after STOP and during export; run/archive/control restore without duplicated stages or re-upload.",
+      "evidence": "Active run full browser restart tested; restart during export NOT RUN."
+    },
+    {
+      "id": "F07",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Multiple Shelf windows Start/Stop races: one authoritative run, no silent RAW active after Debug OFF.",
+      "evidence": "PASS: Node Stop during pending Start fences admission. Multi-window installed Chrome test NOT RUN."
+    },
+    {
+      "id": "F08",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "20, 100 and 1,000 concurrent/rapid delivered clicks across tabs and providers: distinct IDs, no cross-talk, no missed *durably acceptable* records, out-of-order completion reconciled correctly.",
+      "evidence": "Node 20/100/1000 fake-native overlaps; no real native/provider claim."
+    },
+    {
+      "id": "F09",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "One field's extraction throws; observer records other fields and N/A, later clicks still captured, save unaffected.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "F10",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Synthetic provider adapter mock Google Drive/OneDrive/Dropbox/unknown uses same schema and archive/export and provider-neutral core.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "F11",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "Full-only request for exact RAW URL/error sees genuine observed values; if capture started after incident, old values N/A rather than fabricated.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "R01",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "100 healthy events do not produce 100 redundant health writes; prevent write amplification/logging-the-logger loop.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "R02",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "A timed-out IndexedDB/storage write later SUCCEEDS; prior serialization owns it until actual settlement; later batch cannot overwrite or race.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "R03",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Late REJECTED write and second queued write cause clear gap/unconfirmed, not a dropped promise or phantom success.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "R04",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Storage quota exceeded, denied, blocked database, versionchange, corrupt journal, partial batch: recorder degrades and continues best effort; saves still work.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "R05",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Worker idle\u2192wake, Chrome normal boot, browser restart, extension Reload/update, killed worker **in disposable test profile**: no erased CURRENT/menu, no forgotten cap/consent, no duplicate upload or listener.",
+      "evidence": "Full browser process restart tested; idle/wake/update/kill matrix NOT RUN."
+    },
+    {
+      "id": "R06",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Kill worker just after click, during local batch, during provider write, after response before receipt, during Stop and ZIP export: reflect actual observation/UNKNOWN, do not invent browser crash or re-upload.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "R07",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Broken recorder import or IDB open MUST NOT break context menu listener, right-click save, Shelf, credentials, or native menu repair; preferably fail open by lazy module isolation.",
+      "evidence": "Throwing/hung recorder tested via actual registrar; full broken-import installed test blocked."
+    },
+    {
+      "id": "R08",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Under overload, queued rich events may create explicit gaps but **never block provider saves**; basic priority attempt outcome retained where feasible, otherwise honest loss lower bound.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "R09",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "ReDown old forensic 4,000/35,417 event loss and 384 startup cap are not silently repeated in expansive archive; basic 4,000 rolling behavior remains intentionally bounded.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "R10",
+      "state": "BLOCKED",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Installed Chrome pre-/post-restart with recorder OFF, BASIC only, EXPANSIVE ON. Compare real latency and UI responsiveness; browser-level disappearance remains an independently investigated unknown if it recurs.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "E01",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "RAW/SECURE generated from identical basic snapshot and identical rich run snapshot; same ID/high-water, no mutations.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "E02",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "RAW contains actual approved observed fields; exact signed URLs are only allowed under informed RAW consent.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "E03",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "SECURE contains no planted token, private path, filename, email/account or original stack/error sentinel anywhere inside decompressed ZIP/manifest/README/comments; reject mislabelled ZIP.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "E04",
+      "state": "PASS",
+      "scope": "local synthetic / fixture only",
+      "requirement": "Missing canonical fields show N/A in UI, CSV and JSON availability metadata; fixed schema across rows/providers.",
+      "evidence": "See IMPLEMENTATION.md and reproducible tests; PASS applies only to stated local scope."
+    },
+    {
+      "id": "E05",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Export 4k, 10k and 100k committed detailed events with streaming/multipart; earliest retained entry present, hashes valid, bounded memory, no giant zipSync buffer.",
+      "evidence": "PASS: generated RAW/SECURE projections of all 100,000 committed events, 783 bounded ZIP parts each. Physical large-archive download/picker and every decompressed part are NOT RUN; sample ZIPs decompressed and hashed."
+    },
+    {
+      "id": "E06",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "RAW cancelled, picker revoked, low quota, export while recording and export during Stop are truthful and don't destroy source archive.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "E07",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "ZIP build/download performs zero provider HTTP requests, remote writes, token refreshes, CURRENT/native menu mutations or unrequested background repairs.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "A01",
+      "state": "BLOCKED",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "At least 2,000 real provider verified saves distributed across Simple/Narrow/Depth/mixed for release acceptance (where owner environment permits); distinguish Codex mocks vs installed Windows Chrome and actual Cloudflare R2 readback.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "A02",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "100,000 synthetic events through **real disk-backed browser IndexedDB**, plus measured bounded CPU/heap/RSS, plus separate owner Windows installed test when possible; test never claims the latter from Linux fixture.",
+      "evidence": "100k real disk-backed browser IDB and Linux CPU/RSS observed; Windows installed counterpart NOT RUN."
+    },
+    {
+      "id": "A03",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Record exact before/after source SHA, browser/OS, extension ID, CPU/memory, startup timings, click-to-verified timings, provider writes and all known failures; no cherry-picked denominator.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "A04",
+      "state": "NOT RUN",
+      "scope": "partial local coverage; full criterion outstanding",
+      "requirement": "No duplicate chrome.contextMenus.onClicked listener, cloud upload, History receipt or counter under instrumentation; single owner remains.",
+      "evidence": "Some subcases are exercised in recorder.test.mjs/browser tests; complete criterion has not executed."
+    },
+    {
+      "id": "A05",
+      "state": "BLOCKED",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Recorder OFF, BASIC only, and FULL on all preserve shelf-less save and crash fallback, including worker/Chrome restarts.",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    },
+    {
+      "id": "A06",
+      "state": "NOT RUN",
+      "scope": "full acceptance criterion outstanding",
+      "requirement": "Tests label PASS / FAIL / BLOCKED / NOT RUN, evidence class, precise commands and artifacts. Admin-blocked installed Chrome must remain BLOCKED, not \u201ctest passed.\u201d",
+      "evidence": "See remaining gates; no claim this complete criterion executed."
+    }
+  ]
+}

@@ -525,3 +525,36 @@ requests and independent local R2 byte readback. Recovery/deployment/UI suites
 cover consent, restart, lost replies, scope/account isolation and no replay.
 Browser DOM tests use synthetic RPC. These are not owner Chrome or live
 Cloudflare R2 proof; administrator policy blocks unpacked loading in this runner.
+
+## Two-tier observer (V2 review branch, November 14, 2026)
+
+`src/chrome/registrar.mjs:handleClick` remains the only native listener's owner.
+It gives each delivered action a random `attemptId`, invokes optional
+`observeClick` without awaiting IO, and reports the same terminal outcome in
+`finally`. `handleClickBase` and the existing Depth wrapper retain their
+route, generation and authorization decisions. Their existing `3+1.1`
+`dispatchSave`/`dispatchExplorerSave`/`invokeProviderAction` ownership is unchanged.
+An observer exception is caught and never authorizes, retries or changes a save.
+The optional callback travels with each invocation into `engine.save`; it sees
+`dispatch.enter` and already-existing source/authorization/transfer/verification
+boundaries. It is not the older Glaciaring reason-code channel. Transport adds
+only a first-request response-header latency observation, never an extra request.
+
+`extension/background.mjs` lazily loads `src/recorder/host.mjs` independently of
+startup. A bounded early BASIC-only checkpoint buffer does not retain RAW URLs.
+Failure leaves the original dispatcher available. This observer has no authority
+over CURRENT, OAuth, menu ACKs, provider writes, History or counters.
+
+Settings uses a separate local `{channel:'recorder',version:2,method,params}`
+protocol, accepted only by the existing `appSenderDecision` for the exact Shelf
+URL and extension identity. Methods: `status`, `debug`, `capacity`, `start`,
+`stop`, `runs`, `snapshot`, `page`. RAW Start and export each require consent;
+capacity shrink requires confirmation. These are not additional `3+1.1` cloud
+commands or agent grants. See the [implementation and field matrix](../../docs/evidence/two-tier-diagnostics/IMPLEMENTATION.md).
+
+Two independent IndexedDB archives own BASIC rolling attempts and opt-in rich
+segments. Stop fences rich admission synchronously; pending writes remain
+unconfirmed until actual settlement. Read/export never probes providers or
+re-uploads. Unknown times/bytes/proof remain explicit N/A. Linux fake-native,
+real-IDB and ZIP tests are separate from installed Chrome and R2 evidence.
+The latter remain BLOCKED/NOT RUN; no installed behavior claim follows from ACKs.

@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, depthClick, readDepthClickRow } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -181,12 +181,12 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     emit('resolver', result.state === 'completed' ? 'ok' : 'blocked', result.code, id, acknowledged.generation);
     return result;
   }
-  async function handleClickBase(info = {}, tab, depthAuthorization) {
+  async function handleClickBase(info = {}, tab, depthAuthorization, observation) {
     try{await beforeClick(info);}catch(error){const out=freeze({state:'blocked',code:error.code==='STALE_GENERATION'?'STALE_GENERATION':'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
     if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
       const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',authorizedTargets:[]});
       if(r.state!=='completed'||!dispatch)return r;
-      try{const out=await dispatch(r.action,{info,tab,...(depthAuthorization?{depthAuthorization}:{}),generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
+      try{const out=await dispatch(r.action,{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{}),generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
     const rowForDepth=()=>desired?.rows.find(r=>r.id===String(info.menuItemId));
     let authorization;
@@ -194,29 +194,36 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     catch { authorization = null; }
     if (!authorization || !Array.isArray(authorization.authorizedTargets)) {
       const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));
-      if(row&&dispatch&&!pending&&desired?.generation===acknowledged.generation){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab,...(depthAuthorization?{depthAuthorization}:{})});onOutcome?.(out);return out;}catch{return {state:'blocked',code:'PROVIDER_ACTION_FAILED'};}}
+      if(row&&dispatch&&!pending&&desired?.generation===acknowledged.generation){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{})});onOutcome?.(out);return out;}catch{return {state:'blocked',code:'PROVIDER_ACTION_FAILED'};}}
       const result = freeze({ state: 'blocked', code: 'CURRENT_AUTHORIZATION_REQUIRED' });
       emit('auth.check', 'blocked', result.code, nextId(), acknowledged?.generation);
       try { onOutcome?.(result); } catch {}
       return result;
     }
     const result = resolveClick({ itemId: String(info.menuItemId), generation: acknowledged?.generation, context: ['video','audio'].includes(info.mediaType)?info.mediaType:info.mediaType === 'image' || info.srcUrl ? 'image' : info.linkUrl ? 'link' : 'page', authorizedTargets: authorization.authorizedTargets });
-    if(result.state!=='completed'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(result.code)){const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));if(row&&dispatch){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab,...(depthAuthorization?{depthAuthorization}:{})});onOutcome?.(out);return out;}catch{}}}
+    if(result.state!=='completed'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(result.code)){const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));if(row&&dispatch){try{const out=await dispatch({providerAction:'cloudflare',reconnectOnly:true,target:row.target,itemId:row.id},{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{})});onOutcome?.(out);return out;}catch{}}}
     if (result.state !== 'completed') { try { onOutcome?.(result); } catch {} return result; }
     if (!dispatch) {
       const blocked = freeze({ state: 'blocked', code: 'AUTHORIZED_DISPATCHER_REQUIRED' });
       emit('intent', 'blocked', blocked.code, nextId(), acknowledged?.generation);
       try { onOutcome?.(blocked); } catch {} return blocked;
     }
-    try { const outcome = await dispatch(result.action, { info, tab, authorization, ...(depthAuthorization?{depthAuthorization}:{}), generation:result.generation }); try { onOutcome?.(outcome); } catch {} return outcome; }
+    try { const outcome = await dispatch(result.action, { info, tab, observation, authorization, ...(depthAuthorization?{depthAuthorization}:{}), generation:result.generation }); try { onOutcome?.(outcome); } catch {} return outcome; }
     catch { const failed = freeze({ state: 'failed', code: 'DISPATCH_FAILED' }); emit('intent', 'failed', failed.code, nextId(), acknowledged?.generation); try { onOutcome?.(failed); } catch {} return failed; }
   }
   async function handleClick(info = {}, tab) {
-    let row=(desired??acknowledged)?.rows.find(r=>r.id===String(info.menuItemId));
-    if(!desired&&!acknowledged&&readDepthClickRow){try{row=await readDepthClickRow(String(info.menuItemId));}catch{}}
-    if(row?.origin?.mode==='depth'&&typeof depthClick==='function')
-      return depthClick(row,info,tab,authorization=>handleClickBase(info,tab,authorization));
-    return handleClickBase(info,tab);
+    let observation;
+    try { observation=observeClick?.({attemptId:crypto.randomUUID(),timestampUtc:new Date().toISOString(),monotonicMs:performance.now(),menuGeneration:(desired??acknowledged)?.generation,info,tab,row:(desired??acknowledged)?.rows.find(r=>r.id===String(info.menuItemId))}); } catch {}
+    const observed=(stage,extra={})=>{try{observation?.({stage,...extra});}catch{}};
+    let outcome;
+    try {
+      let row=(desired??acknowledged)?.rows.find(r=>r.id===String(info.menuItemId));
+      if(!desired&&!acknowledged&&readDepthClickRow){try{row=await readDepthClickRow(String(info.menuItemId));}catch{}}
+      outcome=row?.origin?.mode==='depth'&&typeof depthClick==='function'
+        ?await depthClick(row,info,tab,authorization=>handleClickBase(info,tab,authorization,observation))
+        :await handleClickBase(info,tab,undefined,observation);
+      return outcome;
+    } finally { observed('native.terminal',{result:outcome??{state:'uncertain'}}); }
   }
   const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab); };
   chrome.contextMenus.onClicked?.addListener(listener);

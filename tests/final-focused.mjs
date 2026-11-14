@@ -54,3 +54,6 @@ await import('./cloudflare-setup-ui.test.mjs');
 await import('./cloudflare-destination-recovery.test.mjs');
 
 await import('./debug-preference.test.mjs');
+
+// Isolated two-tier recorder gates; no provider credentials or user profile.
+await import('./recorder.test.mjs');

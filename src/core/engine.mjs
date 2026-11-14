@@ -41,12 +41,14 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     }
     return result;
   }
-  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization}={}) {
+  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization,observation}={}) {
+    try{observation?.({stage:'dispatch.enter'});}catch{}
     const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
     // These are actual sequential prerequisites in this owner, not inferred
     // correlations between temporally adjacent independent operations.
     const saveSink=event=>{
+      try{observation?.({...event,remoteEnvelope:typeof remoteSave==='function'});}catch{}
       if(typeof sink!=='function')return 0;
       const requires=event.requires?.length?event.requires:priorBoundary?[priorBoundary]:[];
       let id=0;try{id=sink({...event,operationId,generation,requires})||0;}catch{}
@@ -96,7 +98,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
         const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await authorizeTarget(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
-        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
+        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onObservation:observation,onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
       }
