@@ -34,3 +34,17 @@
 - Real Chrome/native right-click and independent R2 readback remain **NOT VERIFIED** until owner-authorized physical acceptance. Do not close this item based solely on synthetic tests.
 
 **Documentation-only issue. No app code, tests, configuration, Cloudflare resources or existing milestone tags are modified by this log.**
+
+
+## 2026-11-14 — new Windows isolated regression evidence after MV3 repair
+
+**Status remains OPEN.** Owner-tested review branch fix/mv3-recorder-suite-reliability, Node v24.21.0 on win32, produced **3/3 isolated Depth failures** (OFF / BASIC / EXPANSIVE), **3/3 full focused suite PASS (392/392)**. All six original safe JSON traces were supplied. The Windows result remains a real local workerd fixture issue, NOT proven live Chrome/Cloudflare failure.
+
+**New primary evidence and targeted request:**
+
+- docs/evidence/windows-depth-2026-11-14/ISOLATED_CAPABILITIES_FAILURE.md
+- codex/11.14.2026/P1_WINDOWS_DEPTH_CAPABILITIES_TYPEERROR_MINIMAL_FIX.md
+
+The first observable fault is a **TypeError thrown by local Miniflare/workerd fetch on /capabilities** in the test fixture. The wrapper records only errorName, so the actual TypeError cause is still unknown. The fixture then reports TRANSPORT_UNAVAILABLE on the authorization status check. In OFF and EXPANSIVE modes the outcome becomes AUTHORIZATION_LOST/uncertain **after local /operation verified and /verify completed**; in BASIC it becomes SCOPE_UNAUTHORIZED/blocked **before upload**. Failed events still showed desired/applied/ACK generation 3, pending=0, same session and ~120 seconds of lease remaining. Safe fail-closed outcomes are not the defect; the unexpected transport TypeError is. Fix the culpable layer based on the actual exception cause, not by relaxing authorization or blindly retrying writes.
+
+Do **not** close this issue on a subsequent single Linux or full-suite green run. Require repeated actual Windows isolated passes and preservation of all negative revocation and generation tests. Keep unrelated recorder ZIP-export UX and classification bugs out of this one-defect repair.
