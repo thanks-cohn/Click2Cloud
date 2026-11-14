@@ -1,0 +1,282 @@
+{
+  "sourceRevision": "7e27e5dd168c6033f3f3d86ad5588d9a3cb139ba",
+  "sourceDirty": false,
+  "build": {
+    "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+    "extensionVersion": "0.3.19",
+    "revision": "7e27e5dd168c6033f3f3d86ad5588d9a3cb139ba",
+    "sourceDigest": "937d0c30b0572e72f5254a0e8603b921dad80dd45c2aadfe16e65bf7183ee1a6",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "results": [
+    {
+      "gate": "environment",
+      "state": "PASS",
+      "browser": "156.0.8078.79",
+      "os": "linux",
+      "arch": "x64"
+    },
+    {
+      "gate": "B02-B05-E01-real-IDB-rolling-growth-shrink-snapshot",
+      "state": "PASS",
+      "control": {
+        "capacity": 4000,
+        "sequence": 10002,
+        "count": 4000,
+        "evicted": 6002,
+        "gaps": 0,
+        "epoch": "epoch-1"
+      },
+      "first": "row-2",
+      "snapshot": "f59f3bb6-957e-4a61-92eb-f07824e6b34e"
+    },
+    {
+      "gate": "F02-F03-R09-A02-real-disk-IDB-4k-10k-100k",
+      "state": "PASS",
+      "runs": [
+        {
+          "count": 4000,
+          "seen": 4000,
+          "last": 4000,
+          "head": "492f703d00be4a0db3c6b3c4a09f9f5537c5f173d01d1548da42e2e9c790ac5f",
+          "elapsedMs": 1141.6000000000931,
+          "health": {
+            "admitted": 4000,
+            "committed": 4000,
+            "dropped": 0,
+            "failures": 0,
+            "batches": 33,
+            "peakQueue": 513,
+            "writeMs": 103.1999999997206,
+            "bytesCommitted": 4196168,
+            "pending": 0,
+            "queueBytes": 0,
+            "inFlight": false,
+            "retryAfterMs": 0,
+            "writeBytesPerSecond": 40660542.635768995
+          },
+          "exportEvidence": null
+        },
+        {
+          "count": 10000,
+          "seen": 10000,
+          "last": 10000,
+          "head": "3b19a1eb6d1befb8a6bafd9e8fca487e007ff4c561ec8a1a9f495077840c0296",
+          "elapsedMs": 1685.2000000001863,
+          "health": {
+            "admitted": 14000,
+            "committed": 14000,
+            "dropped": 0,
+            "failures": 0,
+            "batches": 113,
+            "peakQueue": 513,
+            "writeMs": 372.4000000008382,
+            "bytesCommitted": 14682923,
+            "pending": 0,
+            "queueBytes": 0,
+            "inFlight": false,
+            "retryAfterMs": 0,
+            "writeBytesPerSecond": 39427827.604637355
+          },
+          "exportEvidence": null
+        },
+        {
+          "count": 100000,
+          "seen": 100000,
+          "last": 100000,
+          "head": "1c7ff7678ad07c2c39f01a1e206155c31e5a8df702e572e222c7efbb3c34575a",
+          "elapsedMs": 17537.80000000028,
+          "health": {
+            "admitted": 114000,
+            "committed": 114000,
+            "dropped": 0,
+            "failures": 0,
+            "batches": 896,
+            "peakQueue": 513,
+            "writeMs": 2450.2999999970198,
+            "bytesCommitted": 119629378,
+            "pending": 0,
+            "queueBytes": 0,
+            "inFlight": false,
+            "retryAfterMs": 0,
+            "writeBytesPerSecond": 48822339.30545056
+          },
+          "exportEvidence": {
+            "parts": 783,
+            "rawCount": 100000,
+            "secureCount": 100000,
+            "peakPartBytes": 707932,
+            "rawHash": "e0cdb70130e09aeb0ac0ba3fcdc1dbed59f9164a555e65c49094fe3e14a4d934",
+            "secureHash": "19e21bdc369920368506d4c73e40f0e13f5aea803ff6fb0a49e590b7cedc55d9",
+            "method": "bounded sequential multipart ZIP generation; not physical Windows download"
+          }
+        }
+      ],
+      "activeRun": "14a365f4-5340-4f6a-be3c-b53460187cac",
+      "runState": "ACTIVE",
+      "heap": 33663692
+    },
+    {
+      "gate": "100k-resource-observations",
+      "state": "PASS",
+      "before": {
+        "cpuSeconds": 5.7299999999999995,
+        "rssKiB": 596080,
+        "unreadable": 0,
+        "scope": "Chromium processes reported by CDP; Linux proc RSS; not Windows Task Manager"
+      },
+      "after": {
+        "cpuSeconds": 29.32,
+        "rssKiB": 691800,
+        "unreadable": 0,
+        "scope": "Chromium processes reported by CDP; Linux proc RSS; not Windows Task Manager"
+      }
+    },
+    {
+      "gate": "F06-R05-browser-process-restart-active-run-capacity-unknown-epoch",
+      "state": "PASS",
+      "basic": {
+        "capacity": 4000,
+        "sequence": 10007,
+        "count": 4000,
+        "evicted": 6007,
+        "gaps": 0,
+        "epoch": "a59d1bb2-dd03-4df3-95fa-78b48356d9a1",
+        "unknownEpochs": 2
+      },
+      "rich": {
+        "id": "14a365f4-5340-4f6a-be3c-b53460187cac",
+        "limit": 10000,
+        "consent": true,
+        "state": "ACTIVE",
+        "admitted": 2,
+        "committed": 2,
+        "reserved": 2,
+        "head": "5052e8835d9d10ab1b9aa2bcdc9bf674b7eeea6f8e08280ad777672eb62c2ccc",
+        "epoch": "a59d1bb2-dd03-4df3-95fa-78b48356d9a1",
+        "startedAt": "2026-11-14T15:24:27.536Z",
+        "gaps": [],
+        "unknownEpochs": 1,
+        "highWater": 2,
+        "lastStart": 1,
+        "previousEpoch": "UNKNOWN",
+        "pending": [],
+        "createdAt": "2026-11-14T15:24:28.151Z"
+      }
+    },
+    {
+      "gate": "P09-paired-1000-sequential-registrar-dispatch",
+      "state": "PASS",
+      "measurements": [
+        {
+          "mode": "OFF",
+          "fixtureSaves": 1000,
+          "listenerCount": 1,
+          "unit": "ms per sequential fake-native-dispatch",
+          "p50": 0,
+          "p95": 0.10000000009313226,
+          "p99": 0.10000000009313226,
+          "heapBytes": 6300188,
+          "recorder": null,
+          "evidenceClass": "actual-registrar-fake-Chrome-and-provider-real-IDB-NOT-real-native-or-R2"
+        },
+        {
+          "mode": "BASIC",
+          "fixtureSaves": 1000,
+          "listenerCount": 1,
+          "unit": "ms per sequential fake-native-dispatch",
+          "p50": 0,
+          "p95": 0.10000000009313226,
+          "p99": 0.10000000009313226,
+          "heapBytes": 5360885,
+          "recorder": {
+            "basic": {
+              "admitted": 2000,
+              "committed": 2000,
+              "dropped": 0,
+              "failures": 0,
+              "batches": 16,
+              "peakQueue": 2000,
+              "writeMs": 503.39999999990687,
+              "bytesCommitted": 651349,
+              "pending": 0,
+              "queueBytes": 0,
+              "inFlight": false,
+              "retryAfterMs": 0,
+              "writeBytesPerSecond": 1293899.4835123569
+            },
+            "rich": {
+              "admitted": 0,
+              "committed": 0,
+              "dropped": 0,
+              "failures": 0,
+              "batches": 0,
+              "peakQueue": 0,
+              "writeMs": 0,
+              "bytesCommitted": 0,
+              "pending": 0,
+              "queueBytes": 0,
+              "inFlight": false,
+              "retryAfterMs": 0,
+              "writeBytesPerSecond": "N/A"
+            }
+          },
+          "evidenceClass": "actual-registrar-fake-Chrome-and-provider-real-IDB-NOT-real-native-or-R2"
+        },
+        {
+          "mode": "EXPANSIVE",
+          "fixtureSaves": 1000,
+          "listenerCount": 1,
+          "unit": "ms per sequential fake-native-dispatch",
+          "p50": 0,
+          "p95": 0.10000000009313226,
+          "p99": 0.10000000009313226,
+          "heapBytes": 27359045,
+          "recorder": {
+            "basic": {
+              "admitted": 2000,
+              "committed": 2000,
+              "dropped": 0,
+              "failures": 0,
+              "batches": 16,
+              "peakQueue": 2000,
+              "writeMs": 523.5,
+              "bytesCommitted": 654956,
+              "pending": 0,
+              "queueBytes": 0,
+              "inFlight": false,
+              "retryAfterMs": 0,
+              "writeBytesPerSecond": 1251109.8376313276
+            },
+            "rich": {
+              "admitted": 3000,
+              "committed": 3000,
+              "dropped": 0,
+              "failures": 0,
+              "batches": 24,
+              "peakQueue": 3000,
+              "writeMs": 67.80000000074506,
+              "bytesCommitted": 3184823,
+              "pending": 0,
+              "queueBytes": 0,
+              "inFlight": false,
+              "retryAfterMs": 0,
+              "writeBytesPerSecond": 46973790.559955776
+            }
+          },
+          "evidenceClass": "actual-registrar-fake-Chrome-and-provider-real-IDB-NOT-real-native-or-R2"
+        }
+      ]
+    },
+    {
+      "gate": "E01-E04-RAW-SECURE-same-snapshot",
+      "state": "PASS",
+      "snapshotId": "57cae2dc-f63d-42a4-8f56-dc0e6ef481ac"
+    },
+    {
+      "gate": "UI-disposable-browser-panel-start-stop",
+      "state": "PASS"
+    }
+  ]
+}

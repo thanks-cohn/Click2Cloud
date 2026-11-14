@@ -1,0 +1,26 @@
+{
+  "time": "2026-11-14T15:25:43.393Z",
+  "sourceRevision": "7e27e5dd168c6033f3f3d86ad5588d9a3cb139ba",
+  "build": {
+    "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+    "extensionVersion": "0.3.19",
+    "revision": "7e27e5dd168c6033f3f3d86ad5588d9a3cb139ba",
+    "sourceDigest": "937d0c30b0572e72f5254a0e8603b921dad80dd45c2aadfe16e65bf7183ee1a6",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "evidenceClass": "REAL_UNPACKED_EXTENSION_GENUINE_SIDE_PANEL_REQUIRED",
+  "request": {
+    "channel": "engine",
+    "version": "3+1.1",
+    "method": "describeCapabilities",
+    "params": {}
+  },
+  "response": null,
+  "result": "BLOCKED",
+  "checks": [],
+  "policyBypassed": false,
+  "browser": "156.0.8078.79",
+  "platform": "linux",
+  "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+}

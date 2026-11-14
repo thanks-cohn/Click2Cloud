@@ -1,0 +1,36 @@
+[
+  {
+    "mode": "RAW",
+    "entries": [
+      "README.md",
+      "basic-attempts.jsonl",
+      "basic-attempts.csv",
+      "full-events.jsonl",
+      "performance-summary.json",
+      "recorder-health.json",
+      "coverage.json",
+      "MANIFEST.json"
+    ],
+    "sha256": "f53cd1047a0755b850f34285c396079cc3e821ec0ae70d593288f244f8ba3f87",
+    "crc": "PASS",
+    "fileHashes": "PASS",
+    "seededPrivateMarker": "present in consented RAW"
+  },
+  {
+    "mode": "SECURE",
+    "entries": [
+      "README.md",
+      "basic-attempts.jsonl",
+      "basic-attempts.csv",
+      "full-events.jsonl",
+      "performance-summary.json",
+      "recorder-health.json",
+      "coverage.json",
+      "MANIFEST.json"
+    ],
+    "sha256": "b208247e96093f2bf9680d2985f127e47ae77a60e0e0b36a26c897dd5c8ae0b5",
+    "crc": "PASS",
+    "fileHashes": "PASS",
+    "seededPrivateMarker": "absent in all entries"
+  }
+]
