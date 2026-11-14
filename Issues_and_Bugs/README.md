@@ -54,3 +54,5 @@ The original issue records retain the observed defects and requirements. Source 
 ## November 14 owner report — CRITICAL / OPEN
 
 - **P0 CRITICAL — Narrow omits bucket-root save choice inside the bucket submenu:** [Narrow bucket root missing from nested Chrome right-click menu](Bugs/P0_CRITICAL_NARROW_BUCKET_ROOT_MISSING_FROM_NESTED_RIGHT_CLICK_MENU_2026-11-14.md). The bucket remains the submenu parent; its first actionable child must save to root (`prefix: ""`), followed by its configured child folders. Currently Simple is an unwanted workaround; investigate apparent first-child substitution. Installed-Chrome acceptance and live R2 key verification pending.
+
+- **P0 CRITICAL — Depth-only right-click collapses to one flat Cloudflare save action with an unknown destination:** [Reopened Depth native hierarchy bug; November 14 owner recurrence](Bugs/P0_DEPTH_SINGLE_BUCKET_BRANCH_AND_NESTING_MISSING_2026-11-09.md). With only Depth folders selected, the bucket's eligible nested folders must appear; no silent fallback to an ambiguous flat action. Prior source/test passes are not installed-Chrome acceptance. Actual save target requires independent R2 verification.
