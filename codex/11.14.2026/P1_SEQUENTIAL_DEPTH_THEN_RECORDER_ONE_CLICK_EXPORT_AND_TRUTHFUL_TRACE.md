@@ -1,3 +1,5 @@
+> **NEXT-RUN ENTRYPOINT SUPERSEDED (2026-11-14):** Use `codex/11.14.2026/P1_RECORDER_FIRST_BEST_EFFORT_SEQUENTIAL_REPAIRS.md`. The replacement starts with one-click export and truthful recording, moves past independent blockers, and leaves the Windows-only Depth issue for last. The older strict-gate instructions are retained solely as historical evidence; do not execute them as the new top-level job.
+
 # Click2Cloud — sequential, gated P1 repairs: Depth → complete one-click export → truthful recorder → Chrome acceptance
 
 **Directive:** This is **one Codex execution**, containing **small repairs in strict order**. Identify one root cause, make the smallest appropriate fix, prove it, then move to the next. **Results, not a planning document or another speculative audit.** Do not pause to ask the owner for a new Codex run between phases.
