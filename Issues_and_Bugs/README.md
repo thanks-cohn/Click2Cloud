@@ -50,3 +50,7 @@ The original issue records retain the observed defects and requirements. Source 
 - **P0 owner finding: + Right Click → Save configuration reports `DESTINATION_EXISTS`, but the UI hides the code.** [Console evidence, root-source branch and Edit existing UX](Bugs/P0_RIGHT_CLICK_SAVE_ACTION_GENERIC_OPERATION_FAILED_2026-11-12.md). The duplicate Simple destination guard explains this rejected configuration action; it is NOT proof that a native cloud upload failed.
 - **P1 UX ISSUE: explicit Save button inside Manage Destinations.** [Configuration Save control and durable-commit acceptance](Issues/P1_MANAGE_DESTINATIONS_EXPLICIT_SAVE_BUTTON_2026-11-12.md). Do not confuse configuration Save with native context-menu file Save; preserve existing immediate controls and saved configuration.
 - **CRITICAL architecture reference:** [Depth bucket submenu/Save here rules](../architecture/depth.md) and [GO TO / LOGIN / REFRESH, red OAuth icon](../architecture/go-to-login-refresh.md).
+
+## November 14 owner report — CRITICAL / OPEN
+
+- **P0 CRITICAL — Narrow omits bucket-root save choice inside the bucket submenu:** [Narrow bucket root missing from nested Chrome right-click menu](Bugs/P0_CRITICAL_NARROW_BUCKET_ROOT_MISSING_FROM_NESTED_RIGHT_CLICK_MENU_2026-11-14.md). The bucket remains the submenu parent; its first actionable child must save to root (`prefix: ""`), followed by its configured child folders. Currently Simple is an unwanted workaround; investigate apparent first-child substitution. Installed-Chrome acceptance and live R2 key verification pending.
