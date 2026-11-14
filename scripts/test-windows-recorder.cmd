@@ -16,12 +16,13 @@ if errorlevel 1 exit /b 1
 git ls-files --eol src extension right2cloud-module/src
 node --test tests/checkout-integrity.test.mjs tests/mv3-import-policy.test.mjs
 if errorlevel 1 exit /b 1
-node scripts/repeat-reliability.mjs root=. "out=%TEMP%\c2c-mv3-reliability" full=10 isolated=10 jobs=1 trace=1 modes=1
+set "C2C_REVIEW_OUT=%TEMP%\c2c-mv3-reliability-%RANDOM%-%RANDOM%"
+node scripts/repeat-reliability.mjs root=. "out=%C2C_REVIEW_OUT%" full=10 isolated=10 jobs=1 trace=1 modes=1
 if errorlevel 1 exit /b 1
 node --test right2cloud-module/tests/module.test.mjs
 if errorlevel 1 exit /b 1
 call npm run build:extension
 if errorlevel 1 exit /b 1
 echo Local suite and build completed. No extension was installed or deployed.
-echo Results: %TEMP%\c2c-mv3-reliability
+echo Results: %C2C_REVIEW_OUT%
 endlocal
