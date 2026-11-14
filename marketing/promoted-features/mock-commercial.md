@@ -141,53 +141,64 @@ Cluddy bounces into the corner and points at the finished webpage.
 
 ---
 
-## Commercial 3 — “Copy. Paste. Wait, ALL of Them?”
+## Commercial 3 — “The Clipboard Trick”
 
-**Approximate runtime:** 50–65 seconds  
-**Pitch:** Two promoted workflows: multi-select files and copy their URLs or transfer into supported destinations; upload an entire local directory to Cloudflare R2 while preserving its structure. Both are product concepts, not currently verified functionality.
+**Approximate runtime:** 65–75 seconds. **Mock commercial — not demonstration of shipped capabilities.**
 
-### Scene 1 — One-by-one misery (0:00–0:10)
+### Scene 1 — Five downloads? (0:00–0:10)
 
-**Visual:** Our familiar creator has dozens of cloud assets open. He laboriously copies them one by one into a web editor.
+**Visual:** The familiar creator needs five cloud images for a project. He starts downloading them individually. A tragic violin. He stares at the Downloads folder.
 
-**Creator:** “One... two... three... seriously?” A comically tragic violin.
+**Creator:** “One. Two. Three. Why am I doing this?”
 
-### Scene 2 — Ctrl. Shift. Select. (0:10–0:25)
+He looks up, eyes bulging. The familiar ridiculous lightbulb goes **DING!**
 
-**Visual:** From behind, we watch him hold **Ctrl** to select separate files and **Shift** to select a range. The files light up. He chooses **Copy → URLs**, then pastes a clean list into a compatible browser editor.
+### Scene 2 — ChatGPT (0:10–0:30)
 
-**Creator:** “Wait... I can select ALL of them?” His eyes widen. The ridiculous lightbulb reappears.
+**Visual:** From behind, see his Click2Cloud File Explorer. He Ctrl-selects five separate images (and Shift-selects a continuous range for a second demonstration). He right-clicks **Copy Images to Clipboard** — **actual image contents, not URLs**. He switches to ChatGPT and presses **Ctrl+V**.
 
-**Voiceover:** “One. Ten. A whole range. Select what you need and put the links to work.”
+**Ideal shot, pending actual verification:** Five independent image attachments appear in ChatGPT. His grin is absurdly triumphant.
 
-**On-screen:** **CTRL / SHIFT → SELECT → COPY LINKS → PASTE**
+**Creator:** “ALL FIVE?!”
 
-**Alternate future feature shot:** **Copy as Files** into a *supported* native desktop application using a validated OS integration or companion. If file clipboard paste isn't supported, show **Export Selected** instead. Never imply that arbitrary web pages or desktop apps already accept pasting remote file objects.
+**Voiceover:** “Your images live in your cloud. Put them on your clipboard, and use them in the tools you love.”
 
-### Scene 3 — The whole directory (0:25–0:43)
+**On-screen:** **CLICK2CLOUD → COPY IMAGES → CHATGPT → PASTE**
 
-**Visual:** The creator opens a huge local project folder with nested images, video, and thumbnails. He dreads recreating the tree in the cloud. Then he chooses **Click2Cloud → Upload Directory → Cloudflare R2**. An actual folder picker appears, followed by a bucket and destination-prefix selection. Progress advances honestly; the bucket now contains the same relative nested paths.
+**Production gate:** ChatGPT can receive pasted images and multiple uploads, but five separate images in **one** clipboard paste are not confirmed. If unsupported on tested platforms, film one image being pasted successfully, or an honestly labeled sequential-paste/multi-upload example. Never fake one five-image paste, substitute URLs, or imply OpenAI endorsement.
+
+### Scene 3 — Search by image (0:30–0:42)
+
+**Visual:** He selects **one** cloud image, clicks **Copy Image**, and pastes into a *verified compatible input* on Google Lens, Yandex Images or another image-search website. Results appear.
+
+**Creator:** “It works there TOO?!”
+
+**Voiceover:** “Copy the image itself. Paste where your tools support it.”
+
+### Scene 4 — Upload the whole folder (0:42–0:59)
+
+**Visual:** He finds a local folder with nested pictures, thumbnails and videos. Instead of reconstructing the folder in R2, he chooses **Upload Directory → Cloudflare R2**. A genuine timer and counter display the number of files transferred, bytes transferred, and elapsed time. The correct nested object prefixes appear in the bucket.
 
 **Creator:** “THE WHOLE FOLDER?!”
 
-**Voiceover:** “Upload an entire directory. Keep the structure. Keep creating.”
+**Voiceover:** “Bring an entire project into your cloud, with its structure intact.”
 
-**On-screen:** **YOUR FOLDERS. YOUR STRUCTURE. YOUR BUCKET.**
+**Benchmark cutaway:** One real measured upload could show **100 images in [actual time]**, with the verified total file size and test conditions. The proposed six-minute demonstration is a target, not an asserted result.
 
-### Scene 4 — More than files (0:43–0:55)
+### Scene 5 — URLs are a separate superpower (0:59–1:10)
 
-**Visual:** He right-clicks the uploaded directory in Click2Cloud, chooses **Export URLs**, then pastes an organized URL manifest into his site-building workflow. His gallery fills in.
+**Visual:** He right-clicks a directory and chooses **Export URLs**. A CSV of object URLs appears, ready to use in a site builder.
 
-**Creator:** “I could've been doing THIS?!”
+**Creator:** “Okay, now you're just showing off.”
 
-**Voiceover:** “Move whole projects to the cloud. Select what you need. Make it linkable.”
+**Voiceover:** “Copy images for everyday work. Export URLs for your projects.”
 
-### Scene 5 — End card (0:55–1:02)
+### Scene 6 — End card (1:10–1:15)
 
-Cluddy waves from the corner.
+Cluddy pops up and waves.
 
 **CLICK2CLOUD**  
-**Select more. Upload whole folders. Build with your links.**  
+**Your cloud. Your clipboard. Anywhere you create.**  
 *By Tinker & Co.*
 
 ---
@@ -198,13 +209,13 @@ Cluddy waves from the corner.
 
 **Commercial 2 sells the possibilities:** Having a media library is useful; being able to copy one URL or export a whole directory's URLs makes it readily reusable in website templates, content-management systems, developer tooling, and automated workflows.
 
-**Commercial 3 sells familiar workflow speed:** Multi-select, paste URL lists into supported apps, and upload an entire nested directory without manual folder recreation.
+**Commercial 3 sells image clipboard workflows:** Select images stored remotely, copy their **actual image data** onto the system clipboard and paste into compatible apps such as ChatGPT or a verified image-search input. Whole-directory uploads and URL manifest exports are distinct supporting features.
 
 **Shared visual joke:** Our hero repeatedly believes he's encountered a catastrophic technical problem. He looks up, a ridiculous lightbulb goes off, and he realizes the workflow can be much simpler.
 
 ## Product and truth-in-advertising notes
 
-- **Different paste meanings:** Copying a list of URLs as text is distinct from putting file bytes onto the native clipboard. Browsers and operating systems restrict clipboard file access. Native file paste requires specific verified support and possibly a desktop companion. Never promise it universally.
+- **Clipboard clarification:** The promoted feature is copying actual image data, **not URLs**. One image paste can be the initial tested feature. Five independently pasteable images in one Ctrl+V is conditional on OS, browser and receiving-app support, and may require a native helper. Do not advertise the five-image result without real verification.
 - **Local directory upload is not a true-remote source transfer:** Reading a folder from the user's local computer necessarily sends its bytes from that computer to R2. Preserve relative object-key prefixes, track progress, and verify nested-file counts and failures.
 - **Reusable Cloudflare configuration is a separate investigation:** Users should not have to re-enter valid keys every job. Offer scoped, revocable, securely persisted account-owned R2 credentials or time-limited delegated credentials; never suggest screenshots of secret keys as the preferred backup.
 
