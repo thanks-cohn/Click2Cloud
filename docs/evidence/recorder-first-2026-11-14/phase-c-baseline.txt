@@ -1,0 +1,48 @@
+✖ available transport timings and original rich timestamps survive canonical and secure projection (26.965094ms)
+✖ cross epoch duration availability is explicit and restart proof is never a verified save (3.185751ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 169.450613
+
+✖ failing tests:
+
+test at tests/recorder-measurements.test.mjs:3:1
+✖ available transport timings and original rich timestamps survive canonical and secure projection (26.965094ms)
+  AssertionError [ERR_ASSERTION]: dispatchPreparationMs
+
+  undefined !== 2
+
+      at TestContext.<anonymous> (file://<review-root>/tests/recorder-measurements.test.mjs:9:274)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/recorder-measurements.test.mjs:13:1
+✖ cross epoch duration availability is explicit and restart proof is never a verified save (3.185751ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'interrupted'
+  - 'cross_epoch'
+
+      at TestContext.<anonymous> (file://<review-root>/tests/recorder-measurements.test.mjs:13:576)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'interrupted',
+    expected: 'cross_epoch',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

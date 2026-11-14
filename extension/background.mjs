@@ -165,7 +165,7 @@ function observeDeliveredClick(delivery){
   if(bootstrapObservations.length>=256){bootstrapDropped++;return;}
   const row=delivery.row,early={...delivery,info:{menuItemId:delivery.info.menuItemId,mediaType:delivery.info.mediaType},tab:undefined,row:{target:{provider:row?.target?.provider},providerAction:row?.providerAction,origin:{mode:row?.origin?.mode}}};
   const pending={early,events:[],forward:null};bootstrapObservations.push(pending);
-  return event=>{if(pending.forward){pending.forward(event);return;}if(pending.events.length>=32){bootstrapDropped++;return;}const r=event.result;pending.events.push({monotonicMs:performance.now(),stage:event.stage,outcome:event.outcome,code:event.code,...(r?{result:{state:r.state,code:r.code,completion:r.completion,proofKind:r.proofKind,receipt:{size:r.receipt?.size}}}:{})});};
+  return event=>{if(pending.forward){pending.forward(event);return;}if(pending.events.length>=32){bootstrapDropped++;return;}const r=event.result;if(event.stage==='provider.verification')bootstrapDropped++;pending.events.push({monotonicMs:event.monotonicMs??performance.now(),timestampUtc:event.timestampUtc??new Date().toISOString(),stage:event.stage,outcome:event.outcome,code:event.code,...(event.stage==='native.identity'?{identity:{providerId:event.row?.target?.provider??event.row?.providerAction??event.row?.origin?.provider,mode:event.row?.origin?.mode,menuGeneration:event.menuGeneration}}:{}),...(r?{result:{state:r.state,code:r.code,completion:r.completion,proofKind:r.proofKind,receipt:{size:r.receipt?.size}}}:{})});};
 }
 void Promise.resolve().then(async()=>{
   recorder=await createRecorderHost({chrome,build:BUILD_INFO,startupGaps:()=>bootstrapDropped});

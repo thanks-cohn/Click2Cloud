@@ -1,0 +1,32 @@
+file://<review-root>/tests/recorder-measurements.test.mjs:28
+test('startup identity is retained without storing private bindings or inventing lost proof',async()=>{const m=recorderMemory(),r=createRecorder({basicFactory:async()=>m.basic,richFactory:async()=>m.rich});await r.ready;const chrome={storage:{local:{get:async()=>({uiDebugMode:true})},onChanged:{addListener(){}}},host=await createRecorderHost({chrome,recorder:r,startupGaps:()=>1});const forward=host.click({attemptId:crypto.randomUUID(),info:{menuItemId:'cold'}});forward({stage:'native.identity',identity:{providerId:'cloudflare',mode:'nested',menuGeneration:8}});forward({stage:'native.terminal',result:{state:'completed',completion:'verified',proofKind:'independent-head-version-size',code:'R2_HEAD_VERSION_SIZE',receipt:{size:3}}});await r.drain();const row=[...m.rows.values()][0];assert.equal(row.providerId,'cloudflare');assert.equal(row.mode,'narrow');assert.equal(row.menuGeneration,8);assert.equal(row.state,'uncertain');const snapshot=(await host.request({version:2,method:'snapshot',params:{}})).data;const archive=await exportComplete({snapshot,privacy:'SECURE',getPage:p=>r.page(snapshot,p)});assert.equal(archive.status,'PARTIAL');assert(archive.manifest.issues.some(i=>i.reason==='startup_observation_gaps'));r.close();});
+                                                                                                                                                                                                                                                                                                                                                                                              ^
+
+SyntaxError: Unexpected token ';'
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:370:14)
+
+Node.js v24.22.1
+✖ tests/recorder-measurements.test.mjs (51.755586ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.131701
+
+✖ failing tests:
+
+test at tests/recorder-measurements.test.mjs:1:1
+✖ tests/recorder-measurements.test.mjs (51.755586ms)
+  'test failed'

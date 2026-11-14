@@ -75,7 +75,7 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
  signal?.throwIfAborted();
  if(snapshot.rich&&richAfter<snapshot.rich.highWater)missingRanges.push({start:richAfter+1,end:snapshot.rich.highWater,reason:'missing_tail'});
  if(snapshot.rich&&richCount===snapshot.rich.committed&&priorHash!==snapshot.rich.head)throw Error('ARCHIVE_HEAD_MISMATCH');
- const issues=[];
+ const issues=[];if(snapshot.coverage?.startupGapsLowerBound)issues.push({reason:'startup_observation_gaps',count:snapshot.coverage.startupGapsLowerBound});
  if(basicCount!==snapshot.basic.count)issues.push({reason:'basic_count_mismatch',expected:snapshot.basic.count,exported:basicCount});
  if(snapshot.basic.available===false)issues.push({reason:'basic_unavailable'});
  if(snapshot.rich&&richCount!==snapshot.rich.committed)issues.push({reason:'rich_count_mismatch',expected:snapshot.rich.committed,exported:richCount});

@@ -1,0 +1,28 @@
+✔ available transport timings and original rich timestamps survive canonical and secure projection (22.003811ms)
+✔ cross epoch duration availability is explicit and restart proof is never a verified save (0.946483ms)
+✔ 1000 clicks retain saves with OFF/BASIC/EXPANSIVE, rejecting observer factories/callbacks and stalled observers (521.139076ms)
+✔ Stop fences Expansive events while Basic continues with truthful not-observed metrics (1.396473ms)
+✔ a completion/proofKind string without correlated independent readback cannot be recorded as verified (1.268286ms)
+✔ cold native callback reports actual resolved identity after beforeClick hydrates the ACK (4.37521ms)
+✔ real native listener -> cold/warm host -> actual workerd/R2 -> terminal -> Basic and rich export truth table (2574.726769ms)
+✔ R02 late write retains ownership through actual settlement (7.18653ms)
+✔ R03 late rejection preserves first batch and serial retry, bounded suffix (0.876527ms)
+✔ B05/B06/E04 canonical missing values and editable capacity (4.455269ms)
+✔ E03 SECURE allowlist removes origins, identifiers, arbitrary objects and free text (1.039412ms)
+✔ B09/F08 1000 overlaps, exact terminal updates and independent full failure (20.80779ms)
+✔ B07/P07 extracting a field throws; cross epoch never invents click-to-verified (1.224596ms)
+✔ R01 100 events coalesce into one archive commit and no health writes (0.299722ms)
+✔ F10 provider-neutral adapters include mock Drive, OneDrive, Dropbox and fifth provider (4.491203ms)
+✔ R07/R08/F08 single native listener dispatches 20/100/1000 times despite throwing/hung recorder (69.930082ms)
+✔ P01/P02/P05 measured timing, source/provider distinction, zero bytes and absent speeds (0.991057ms)
+✔ F05/F07 Stop fences a Start that has not settled; Basic remains on (10.59016ms)
+✔ R08 bounded byte pressure cannot allocate an unlimited rich queue (0.352821ms)
+✔ R04/B12 synchronous DB-open failure is isolated, and Basic retries after recovery (0.383997ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3941.214623

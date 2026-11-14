@@ -601,3 +601,15 @@ Missing/bad evidence, auth loss, stale generation or partial History remain
 unverified. Tests exercise actual native listener→host→engine→transport→local
 workerd/R2 readback→Basic/Rich/SECURE export with memory recorder ports; browser
 persistence, installed Chrome and live R2 are distinct gates.
+
+Recorder measurements preserve supplied UTC/monotonic timestamps and worker epochs,
+record cumulative transport timings with their actual denominators, and keep
+true-remote acquisition/upload duration and speed not_applicable. End-to-end and
+History completion spans are measured independently. Interrupted/cross-epoch,
+unobserved and redacted remain distinct. Basic diagnostic DB version 3 adds
+metric indices in place; pending restart rows become interrupted without reset.
+Rich restart keeps unconfirmed reservations, deduplicates identical gap records
+and resumes above reserved high-water. Startup buffers retain nonprivate identity
+and original timing only; dropped readback evidence is an explicit startup gap,
+never a fabricated verified save. Passive observer promises are not awaited and
+rejections are consumed. Native/configuration/auth/transfer ownership is unchanged.

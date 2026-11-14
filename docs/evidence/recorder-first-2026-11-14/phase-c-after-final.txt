@@ -1,0 +1,71 @@
+✔ save off/on/throwing diagnostics preserves exact provider bytes and verified business outcome (8.183978ms)
+✔ dispatcher exposes invalid intent, auth failure/revocation, capability and verifier blocks without upload (3.883075ms)
+✔ upload failures/cancel/uncertainty and false confirmation never verify or commit feedback (1.119339ms)
+✔ Boolean receipt, mismatched destination/bytes and unavailable final readback cannot count as saved (1.207963ms)
+✔ verified upload with failed History handoff stays verified and explicitly pending; no replay (0.94965ms)
+✔ independent provider faults retain distinct operation correlation and dependency chains (0.729082ms)
+✔ existing File API run wrapper preserves all terminal states and discloses partial inventory (1.113277ms)
+✔ API progress, unsupported operations, rejected calls, batch uncertainty and throwing sink preserve semantics (8.989589ms)
+✔ transport wrappers do not log credentials, request bodies, URLs or hostile returned errors (1.055835ms)
+✔ REDOWN upload adaptation independently verifies the FINAL destination bytes and rejects fabricated receipts (21.550216ms)
+✔ Dashboard instrumented failures do not leak auth and do not activate from Refresh (2.122874ms)
+✔ actual extracted R2 upload + staged readback + final byte verification runs through observed transports (80.531331ms)
+✔ provider adapter rejects cross-account resolution and wrong parent/leaf receipts before success (1.169845ms)
+✔ two account discovery failures are both observed even when the first rejects early (0.629074ms)
+✔ source-backed provider failure catalog retains each material rejection category without private strings (4.323575ms)
+✔ green connection-status gateway cannot conceal a blocked Worker child or legacy URL-forwarding privacy (0.511654ms)
+✔ actual protected R2 listing rejects malformed pages, auth denial and repeated metadata cursors distinctly (4.25321ms)
+✔ actual protected R2 Worker gates distinguish missing preparation, rejected auth and capability mismatch (1.446989ms)
+✔ actual extracted R2 adversarial staging corpus distinguishes extra, short, mismatched, stalled and unconfirmed bytes (20.097533ms)
+✔ a missing dispatch generation can yield STALE_GENERATION without a generation race (11.004355ms)
+✔ genuinely stale generation is rejected before any provider write (1.284498ms)
+✔ post-write session loss stays uncertain and is never retried or marked verified (6.432169ms)
+✔ post-write generation change stays uncertain; unchanged authority completes once (2.588543ms)
+file://<review-root>/tests/recorder-measurements.test.mjs:28
+test('startup identity is retained without storing private bindings or inventing lost proof',async()=>{const m=recorderMemory(),r=createRecorder({basicFactory:async()=>m.basic,richFactory:async()=>m.rich});await r.ready;const chrome={storage:{local:{get:async()=>({uiDebugMode:true})},onChanged:{addListener(){}}},host=await createRecorderHost({chrome,recorder:r,startupGaps:()=>1});const forward=host.click({attemptId:crypto.randomUUID(),info:{menuItemId:'cold'}});forward({stage:'native.identity',identity:{providerId:'cloudflare',mode:'nested',menuGeneration:8}});forward({stage:'native.terminal',result:{state:'completed',completion:'verified',proofKind:'independent-head-version-size',code:'R2_HEAD_VERSION_SIZE',receipt:{size:3}}});await r.drain();const row=[...m.rows.values()][0];assert.equal(row.providerId,'cloudflare');assert.equal(row.mode,'narrow');assert.equal(row.menuGeneration,8);assert.equal(row.state,'uncertain');const snapshot=(await host.request({version:2,method:'snapshot',params:{}})).data;const archive=await exportComplete({snapshot,privacy:'SECURE',getPage:p=>r.page(snapshot,p)});assert.equal(archive.status,'PARTIAL');assert(archive.manifest.issues.some(i=>i.reason==='startup_observation_gaps'));r.close();});
+                                                                                                                                                                                                                                                                                                                                                                                              ^
+
+SyntaxError: Unexpected token ';'
+    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)
+    at #translate (node:internal/modules/esm/loader:438:20)
+    at afterLoad (node:internal/modules/esm/loader:506:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)
+    at afterResolve (node:internal/modules/esm/loader:611:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)
+    at node:internal/modules/esm/loader:636:32
+    at TracingChannel.tracePromise (node:diagnostics_channel:370:14)
+
+Node.js v24.22.1
+✖ tests/recorder-measurements.test.mjs (49.173047ms)
+✔ a completion/proofKind string without correlated independent readback cannot be recorded as verified (1.210604ms)
+✔ cold native callback reports actual resolved identity after beforeClick hydrates the ACK (4.271401ms)
+✔ real native listener -> cold/warm host -> actual workerd/R2 -> terminal -> Basic and rich export truth table (2958.942522ms)
+✔ R02 late write retains ownership through actual settlement (7.160314ms)
+✔ R03 late rejection preserves first batch and serial retry, bounded suffix (0.924773ms)
+✔ B05/B06/E04 canonical missing values and editable capacity (5.189637ms)
+✔ E03 SECURE allowlist removes origins, identifiers, arbitrary objects and free text (0.879045ms)
+✔ B09/F08 1000 overlaps, exact terminal updates and independent full failure (19.175713ms)
+✔ B07/P07 extracting a field throws; cross epoch never invents click-to-verified (1.051764ms)
+✔ R01 100 events coalesce into one archive commit and no health writes (0.755591ms)
+✔ F10 provider-neutral adapters include mock Drive, OneDrive, Dropbox and fifth provider (4.595811ms)
+✔ R07/R08/F08 single native listener dispatches 20/100/1000 times despite throwing/hung recorder (78.936208ms)
+✔ P01/P02/P05 measured timing, source/provider distinction, zero bytes and absent speeds (1.315497ms)
+✔ F05/F07 Stop fences a Start that has not settled; Basic remains on (22.478217ms)
+✔ R08 bounded byte pressure cannot allocate an unlimited rich queue (2.472811ms)
+✔ R04/B12 synchronous DB-open failure is isolated, and Basic retries after recovery (0.947328ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 39
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4341.010838
+
+✖ failing tests:
+
+test at tests/recorder-measurements.test.mjs:1:1
+✖ tests/recorder-measurements.test.mjs (49.173047ms)
+  'test failed'

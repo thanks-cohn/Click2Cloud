@@ -11,7 +11,7 @@ export function createRecorder({epoch=crypto.randomUUID(),build={},storage={},ma
  const richWriter=createWriter({sizeOf:event=>1024+Object.values(event.raw??{}).reduce((n,v)=>n+(typeof v==='string'?v.length*2:0),0),commit:async events=>{if(!rich)throw Error('RICH_UNAVAILABLE');let bytes=0;for(const id of new Set(events.map(e=>e.runId)))bytes+=await rich.append(events.filter(e=>e.runId===id));return bytes;}});
  const ready=Promise.allSettled([ensureBasic().then(()=>{void basicWriter.flush();}),ensureRich()]);
  const safely=fn=>{try{return fn();}catch{extractionFailures++;return undefined;}};
- function richEvent(e,row,raw){if(!debug||run?.state!=='ACTIVE')return;const sequence=++run.admitted;const event={schemaVersion:2,runId:run.id,sequence,attemptId:e.attemptId,workerEpoch:epoch,timestampUtc:new Date().toISOString(),monotonicMs:clock(),menuGeneration:row?.menuGeneration??null,reasonCode:/^[A-Z][A-Z0-9_]{0,79}$/.test(e.code??'')?e.code:null,stage:STAGES.includes(e.stage)?e.stage:'N/A',outcome:e.outcome??'observed',providerId:row?.providerId??'other',mode:row?.mode??null,context:row?.context??null,proofLevel:row?.proofLevel??null,metrics:Object.fromEntries(METRICS.map(k=>[k,row?.[k]??null])),raw:rawFields(raw),availability:{unsupportedFields:'N/A / not_observed'},privacy:'RAW'};richWriter.push(event);if(run.limit!==null&&sequence>=run.limit){run.state='LIMIT_REACHED';void rich.stop(run.id,run.state,run.admitted,richWriter.inspect().dropped).catch(()=>{});}}
+ function richEvent(e,row,raw){if(!debug||run?.state!=='ACTIVE')return;const sequence=++run.admitted;const event={schemaVersion:2,runId:run.id,sequence,attemptId:e.attemptId,workerEpoch:e.workerEpoch??epoch,timestampUtc:e.timestampUtc??new Date().toISOString(),monotonicMs:number(e.monotonicMs)??clock(),menuGeneration:row?.menuGeneration??null,engineOperationId:row?.engineOperationId??null,remoteOperationId:row?.remoteOperationId??null,reasonCode:/^[A-Z][A-Z0-9_]{0,79}$/.test(e.code??'')?e.code:null,stage:STAGES.includes(e.stage)?e.stage:'N/A',outcome:e.stage==='native.terminal'?row.state:e.outcome??'observed',providerId:row?.providerId??'other',mode:row?.mode??null,context:row?.context??null,proofLevel:row?.proofLevel??null,metrics:Object.fromEntries(METRICS.map(k=>[k,row?.[k]??null])),raw:rawFields(raw),availability:Object.fromEntries([...METRICS.filter(k=>number(row?.[k])===null),...['providerId','mode','context'].filter(k=>!row?.[k]||row[k]==='other')].map(k=>[k,{value:'N/A',reason:row?.availability?.[k]?.reason??'not_observed'}])),privacy:'RAW'};richWriter.push(event);if(run.limit!==null&&sequence>=run.limit){run.state='LIMIT_REACHED';void rich.stop(run.id,run.state,run.admitted,richWriter.inspect().dropped).catch(()=>{});}}
  function observe(event){safely(()=>{
   const id=event.attemptId;if(typeof id!=='string')return;let entry=active.get(id);
   if(event.stage==='CLICK_RECEIVED'){
@@ -25,16 +25,26 @@ export function createRecorder({epoch=crypto.randomUUID(),build={},storage={},ma
   }
   if(!entry)return;
   const r=entry.row,t=number(event.monotonicMs)??clock();
-  if(event.workerEpoch&&event.workerEpoch!==epoch){r.dataLossFlag=true;r.state='uncertain';r.availability=Object.fromEntries(['clickToDispatchMs','clickToVerifiedMs'].map(k=>[k,{reason:'interrupted'}]));entry.crossEpoch=true;}
+  if(event.workerEpoch&&event.workerEpoch!==epoch){r.dataLossFlag=true;r.state='uncertain';r.availability={...r.availability,...Object.fromEntries(['clickToDispatchMs','clickToVerifiedMs','endToEndElapsedMs'].map(k=>[k,{reason:'cross_epoch'}]))};r.clickToDispatchMs=null;r.clickToVerifiedMs=null;r.endToEndElapsedMs=null;entry.crossEpoch=true;}
+  if(number(event.operationId)>0)r.engineOperationId=event.operationId;
+  if(/^[a-f0-9-]{36}$/i.test(event.providerOperationId??''))r.remoteOperationId=event.providerOperationId;
+  const unavailable=(keys,reason)=>{r.availability??={};for(const key of keys)r.availability[key]={reason};};
+  if(event.stage==='capture.acquire'&&event.code==='TRUE_REMOTE_ONLY')unavailable(['sourceAcquireMs','sourceReadThroughputBytesPerSecond'],'not_applicable');
+  if(event.stage==='transfer.upload'&&event.remoteEnvelope)unavailable(['uploadElapsedMs','uploadThroughputBytesPerSecond'],'not_applicable');
   if(event.stage==='native.identity'){if(['cloudflare','google-drive','onedrive','dropbox'].includes(event.providerId))r.providerId=event.providerId;const mode=({nested:'narrow',simple:'simple',narrow:'narrow',depth:'depth'})[event.mode];if(mode)r.mode=mode;if(number(event.menuGeneration)!==null)r.menuGeneration=event.menuGeneration;}
   if(event.stage==='dispatch.enter'&&!entry.crossEpoch)r.clickToDispatchMs=Math.max(0,t-entry.start);
-  const metric={'capture.acquire':'sourceAcquireMs','transfer.verify':'verificationElapsedMs',...(!event.remoteEnvelope?{'transfer.upload':'uploadElapsedMs'}:{})}[event.stage];
+  const metric={'capture.acquire':'sourceAcquireMs','transfer.verify':'verificationElapsedMs','completion.history':'completionElapsedMs',...(!event.remoteEnvelope?{'transfer.upload':'uploadElapsedMs'}:{})}[event.stage];
   if(event.outcome==='started')entry.stages.set(event.stage,t);
-  if(metric&&event.outcome==='ok'&&entry.stages.has(event.stage)&&!entry.crossEpoch)r[metric]=Math.max(0,t-entry.stages.get(event.stage));
+  if(metric&&['ok','failed','blocked','uncertain'].includes(event.outcome)&&entry.stages.has(event.stage)&&!entry.crossEpoch)r[metric]=Math.max(0,t-entry.stages.get(event.stage));
   // A transport envelope is request lifetime (may include polling), NOT upload or RTT.
   if(event.stage==='provider.request'&&number(event.durationMs)!==null)r.providerRequestLatencyMs=event.durationMs;
   if(event.stage==='native.terminal'){
    const out=event.result??{};const verified=event.proof?.independent===true;
+   if(!entry.crossEpoch)r.endToEndElapsedMs=Math.max(0,t-entry.start);
+   for(const key of ['dispatchPreparationMs','intentAuthorizationMs','capabilityMs','authorizationRecheckMs','workerRequestMs'])if(number(out.timings?.[key])!==null)r[key]=out.timings[key];
+   if(number(out.timings?.verificationMs)!==null)r.verificationElapsedMs=out.timings.verificationMs;
+   if(number(out.durationMs)!==null)r.transportElapsedMs=out.durationMs;
+   if(/^[a-f0-9-]{36}$/i.test(out.remoteOperationId??''))r.remoteOperationId=out.remoteOperationId;
    r.state=entry.crossEpoch?'uncertain':verified?'verified':['failed','blocked','cancelled','uncertain'].includes(out.state)?out.state:'uncertain';r.reasonCode=/^[A-Z][A-Z0-9_]{0,79}$/.test(out.code??'')?out.code:null;
    r.proofLevel=verified?'independently_verified':'unknown';r.evidenceClass=verified?(event.proof?.evidenceClass==='fixture-only'?'fixture-only':'authoritative-receipt'):'not_observed';
    r.bytesObserved=number(event.proof?.bytes);r.bytesVerified=verified?r.bytesObserved:null;
