@@ -90,3 +90,25 @@ Related separate UX issue: [Depth entries must not offer Make Default](../Issues
 Implementation update: Gate A source58d017f; representative fixture and isolated live Worker/R2 gates PASS. Actual installed Windows native acceptance remains BLOCKED/unverified. Exact receipts: `docs/evidence/composition-remaining/gate-a/verification.json`. Original incident text retained above.
 
 Final consolidated acceptance: `docs/evidence/composition-remaining/HANDOFF.md`. Historical incident/requirement wording above is retained; current proof boundaries are in Gate E.
+
+## November 14, 2026 — P0 CRITICAL owner recurrence: Depth-only collapses to ambiguous Cloudflare leaf
+
+**Status: REOPENED / OWNER-OBSERVED IN INSTALLED CHROME.** Earlier source and fixture passes do not supersede this observation. The exact installed version and root cause have not been verified.
+
+**Exact reported configuration:** No Simple or Narrow destinations shown; only Depth folder selection enabled/configured. The right-click menu renders **one flat `Cloudflare R2` action** instead of the selected bucket's nested folders. Clicking this flat action would apparently save somewhere, but the owner cannot identify where. **Do not infer the save destination or claim data loss without a verified actual key.**
+
+**Expected:** With Depth selected and at least one eligible directory under the configured bucket and numeric depth, `Cloudflare R2 > bucket > eligible folders` (including correct permitted Save here actions per existing architecture) must be navigable. The root action must not silently substitute for selected folders. Flat presentation is only permissible under the previously specified no-eligible-descendants rule; it must not discard a populated Depth tree.
+
+**Severity rationale:** silently losing explicit folder destinations and exposing an ambiguous generic save action risks wrong-destination saves and misrepresents active menu configuration.
+
+**Mandatory diagnosis and gates:**
+
+1. Capture saved `configs.depth.scopes`, per-scope bucket identity/maxDepth, discovered inventory/eligibility/completeness, `product.show` values and `flat` presentation, and native menu generation.
+2. Compare compiled menu specification (parent placement, bucket nodes, target prefixes, leaf/branch count) to actual `chrome.contextMenus` items, IDs, parent IDs, click targets and dispatch.
+3. Reproduce **Depth-only**, one bucket with several folders, with no saved Simple/Narrow destinations; test depth 1 and multiple levels, and both flat presentation settings without dropping eligible branches.
+4. Trace the flat Cloudflare item's exact bound target, and if clicked, validate final provider-confirmed bucket + object key; no unverified success.
+5. Regression-test no eligible descendants (where a flat bucket save may legitimately appear), multiple buckets, absent/stale inventory, account reconnect, extension restart, and toggling other modes back on.
+6. If selected Depth folders cannot be rendered, do **not** silently fall back to an ambiguous save target; retain saved config, report a precise recoverable diagnostic, and avoid changing user choices.
+7. Verify actual installed Windows Chrome menu and independent live R2 target (with owner-authorized safe test files), not just model fixtures. Preserve TRUE REMOTE, menu API parity and existing destination persistence.
+
+**This is an additional observed failure of the existing P0 issue, not a claim that previous implementation was never attempted. No code fix is claimed here.**
