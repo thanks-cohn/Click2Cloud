@@ -2,9 +2,9 @@
 
 **Campaign:** “More than a download”  
 **Parent brand:** Tinker & Co.  
-**Format:** Two text-only mock commercials (scripts and shot directions)  
+**Format:** Three text-only mock commercials (scripts and shot directions)  
 **Status:** Creative concepts for planned features, not a claim of currently shipped workflows.  
-**Character continuity:** The same slightly hapless creator stars in both commercials. Cluddy can appear in end cards.
+**Character continuity:** The same slightly hapless creator stars throughout the campaign. Cluddy can appear in end cards.
 
 ## Commercial 1 — “Only 500 MB Left”
 
@@ -141,15 +141,73 @@ Cluddy bounces into the corner and points at the finished webpage.
 
 ---
 
-## Why the two commercials work together
+## Commercial 3 — “Copy. Paste. Wait, ALL of Them?”
+
+**Approximate runtime:** 50–65 seconds  
+**Pitch:** Two promoted workflows: multi-select files and copy their URLs or transfer into supported destinations; upload an entire local directory to Cloudflare R2 while preserving its structure. Both are product concepts, not currently verified functionality.
+
+### Scene 1 — One-by-one misery (0:00–0:10)
+
+**Visual:** Our familiar creator has dozens of cloud assets open. He laboriously copies them one by one into a web editor.
+
+**Creator:** “One... two... three... seriously?” A comically tragic violin.
+
+### Scene 2 — Ctrl. Shift. Select. (0:10–0:25)
+
+**Visual:** From behind, we watch him hold **Ctrl** to select separate files and **Shift** to select a range. The files light up. He chooses **Copy → URLs**, then pastes a clean list into a compatible browser editor.
+
+**Creator:** “Wait... I can select ALL of them?” His eyes widen. The ridiculous lightbulb reappears.
+
+**Voiceover:** “One. Ten. A whole range. Select what you need and put the links to work.”
+
+**On-screen:** **CTRL / SHIFT → SELECT → COPY LINKS → PASTE**
+
+**Alternate future feature shot:** **Copy as Files** into a *supported* native desktop application using a validated OS integration or companion. If file clipboard paste isn't supported, show **Export Selected** instead. Never imply that arbitrary web pages or desktop apps already accept pasting remote file objects.
+
+### Scene 3 — The whole directory (0:25–0:43)
+
+**Visual:** The creator opens a huge local project folder with nested images, video, and thumbnails. He dreads recreating the tree in the cloud. Then he chooses **Click2Cloud → Upload Directory → Cloudflare R2**. An actual folder picker appears, followed by a bucket and destination-prefix selection. Progress advances honestly; the bucket now contains the same relative nested paths.
+
+**Creator:** “THE WHOLE FOLDER?!”
+
+**Voiceover:** “Upload an entire directory. Keep the structure. Keep creating.”
+
+**On-screen:** **YOUR FOLDERS. YOUR STRUCTURE. YOUR BUCKET.**
+
+### Scene 4 — More than files (0:43–0:55)
+
+**Visual:** He right-clicks the uploaded directory in Click2Cloud, chooses **Export URLs**, then pastes an organized URL manifest into his site-building workflow. His gallery fills in.
+
+**Creator:** “I could've been doing THIS?!”
+
+**Voiceover:** “Move whole projects to the cloud. Select what you need. Make it linkable.”
+
+### Scene 5 — End card (0:55–1:02)
+
+Cluddy waves from the corner.
+
+**CLICK2CLOUD**  
+**Select more. Upload whole folders. Build with your links.**  
+*By Tinker & Co.*
+
+---
+
+## Why the commercials work together
 
 **Commercial 1 sells the relief:** The source is much larger than the creator's remaining local disk space, yet a supported true-remote transfer saves it to authorized cloud storage without first downloading it to the laptop. The funny unchanged **500 MB free** notification lands the point.
 
 **Commercial 2 sells the possibilities:** Having a media library is useful; being able to copy one URL or export a whole directory's URLs makes it readily reusable in website templates, content-management systems, developer tooling, and automated workflows.
 
+**Commercial 3 sells familiar workflow speed:** Multi-select, paste URL lists into supported apps, and upload an entire nested directory without manual folder recreation.
+
 **Shared visual joke:** Our hero repeatedly believes he's encountered a catastrophic technical problem. He looks up, a ridiculous lightbulb goes off, and he realizes the workflow can be much simpler.
 
 ## Product and truth-in-advertising notes
+
+- **Different paste meanings:** Copying a list of URLs as text is distinct from putting file bytes onto the native clipboard. Browsers and operating systems restrict clipboard file access. Native file paste requires specific verified support and possibly a desktop companion. Never promise it universally.
+- **Local directory upload is not a true-remote source transfer:** Reading a folder from the user's local computer necessarily sends its bytes from that computer to R2. Preserve relative object-key prefixes, track progress, and verify nested-file counts and failures.
+- **Reusable Cloudflare configuration is a separate investigation:** Users should not have to re-enter valid keys every job. Offer scoped, revocable, securely persisted account-owned R2 credentials or time-limited delegated credentials; never suggest screenshots of secret keys as the preferred backup.
+
 
 - These are **mock ads for planned Click2Cloud features**, not footage or assertions of implemented or verified release behavior.
 - “20 GB remote save” is an *illustrative scenario*, contingent on supported sources, authorized provider accounts, remote-transfer infrastructure, file-size rules, and provider quotas/costs. The number is intentionally comic, not a currently published maximum or guarantee. The local disk number remains unchanged **by that transfer**; ordinary browser/cache/system activity can still use space.
