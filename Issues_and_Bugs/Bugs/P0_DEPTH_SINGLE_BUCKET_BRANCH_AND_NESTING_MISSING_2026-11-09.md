@@ -112,3 +112,17 @@ Final consolidated acceptance: `docs/evidence/composition-remaining/HANDOFF.md`.
 7. Verify actual installed Windows Chrome menu and independent live R2 target (with owner-authorized safe test files), not just model fixtures. Preserve TRUE REMOTE, menu API parity and existing destination persistence.
 
 **This is an additional observed failure of the existing P0 issue, not a claim that previous implementation was never attempted. No code fix is claimed here.**
+
+### November 14 owner correction — exact reproduction has TWO Depth-selected buckets
+
+**Corrected first-hand observation (supersedes the earlier assumption of one bucket):**
+
+- The owner has **two R2 buckets selected in Depth mode**.
+- Neither selected bucket is offered in the Chrome right-click menu; the only visible item is a flat **Cloudflare** entry.
+- A pop-out prompts the user to **"choose a Cloudflare entry"** (owner-reported wording), suggesting no usable destination entry is being recognized or registered.
+- The actual save destination is **not established**, and it is possible no save is dispatched at all. Do not describe the flat action as successfully saving until independently verified.
+- No Simple or Narrow entries are present/shown in this reproduction.
+
+**Critical acceptance addition:** Reproduce with two distinctly named, authorized Depth buckets, each with known eligible folders, and only Depth displayed. Verify both buckets survive configuration persistence, eligible-folder discovery, menu-spec compilation, Chrome native menu installation and click routing. The correct menu must expose both bucket submenus and their eligible folder choices, not a generic Cloudflare action or "choose a Cloudflare entry" prompt. Instrument each stage to distinguish (1) missing saved scopes, (2) show-filter/flat-mode dropping scopes, (3) missing inventory, (4) menu compilation/registration failure, and (5) clicked menu action without a registered destination. Preserve configuration and show a precise non-success diagnostic on failure. Test the popup's origin and do not assume it proves which layer failed.
+
+**Priority:** P0 CRITICAL, OPEN, installed-owner recurrence. Prior source/fixture implementation receipts do not count as resolution.
