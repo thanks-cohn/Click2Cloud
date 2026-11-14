@@ -220,7 +220,10 @@ fix, and pass the Phase 1 gate before implementing one-click ZIP and recorder
 attribution. **Passing this diagnosis command alone does not establish root cause
 or close the incident.** Actual Windows acceptance has not been run here.
 
-Remote base remained `098ae67`; main remained `0c077fc`. Protected Base 0.1 was
-read only (`5ec93a7` annotated tag, peeled commit `0d50ab82c10555ae49d617b90be588057a1fa6b6`).
+Final remote readback: implementation base remained `098ae67`. Main independently
+advanced from the initial request pin `0c077fc` to `998ad15ceb2bdcd856b6bae49492493c5e3f506d`
+(two Narrow bucket-root issue documentation commits). Fetch/diff confirmed the invoked
+sequential request and required Windows Depth evidence were unchanged. No main push
+was performed. Protected Base 0.1 was read only (`5ec93a7` annotated tag, peeled commit `0d50ab82c10555ae49d617b90be588057a1fa6b6`).
 No protected branch/tag, owner profile, saved state, production Worker or object
 was modified. Only this new review branch is delivered for review.
