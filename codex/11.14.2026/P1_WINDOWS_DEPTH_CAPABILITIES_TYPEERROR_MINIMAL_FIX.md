@@ -1,3 +1,5 @@
+> **SUPERSEDED AS THE NEXT EXECUTION ENTRYPOINT (2026-11-14):** Run `codex/11.14.2026/P1_SEQUENTIAL_DEPTH_THEN_RECORDER_ONE_CLICK_EXPORT_AND_TRUTHFUL_TRACE.md` instead. The sequential request retains this file's Depth acceptance/safety requirements, then gates one-click complete export and truthful recorder attribution. This file is preserved as a focused Phase 1 reference; do not run it as a separate new Codex job.
+
 # Codex request — Fix ONE Windows Depth capability-fetch failure at its root
 
 **Priority P1. Scope one defect only. Not a general pass.**
