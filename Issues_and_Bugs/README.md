@@ -23,6 +23,10 @@
 - [Remotes — full-width independent screen without Explorer left navigation](Issues/P1_REMOTES_TAB_MUST_NOT_SHOW_EXPLORER_LEFT_NAVIGATION_PANEL_2026-11-08.md). Hide the entire file tree outside File Explorer; retain login cards and restore Explorer state when returning.
 - [Explorer — one bottom-right Manage Destinations button, conventional full-path address entry, and Grid view](Issues/P1_EXPLORER_SINGLE_MANAGER_ADDRESS_FIELD_AND_GRID_VIEW_2026-11-07.md).
 
+## Full-suite
+
+- **P1 — OPEN: intermittent Depth save in Windows full-suite tests** ([failure log and investigation gates](Bugs/P1_FULL_SUITE_INTERMITTENT_DEPTH_GENERATION_AUTHORIZATION_2026-11-14.md)). The `feat/base01-two-tier-diagnostics` worktree passed 384/385 tests in the latest owner run, but `tests/depth-plan-recovery.test.mjs` intermittently returned `STALE_GENERATION` or `AUTHORIZATION_LOST` where the fixture expected `completed`; the same Depth file passed 4/4 in isolation. Root cause unverified; do not dilute authorization checks or claim live-provider regression. Windows LF/CRLF fingerprint mismatches are recorded as separate test-environment observations in the same report.
+
 ## Shared requirements
 
 - Click2Cloud's Simple, Narrow, Depth, Quick Select, Default, canonical API and Explorer data model remain authoritative.
