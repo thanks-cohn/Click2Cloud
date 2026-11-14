@@ -74,6 +74,24 @@ This is a founding product pillar and a prominent marketing feature; it is not h
 7. Premium entitlement is checked honestly for bulk workflows, with price and unlimited/free-remote semantics agreed before public marketing. No false paywall bypass and no false “unlimited” promises.
 8. Verify simulated contract tests separately from installed-browser end-to-end flow, live R2 credentials, real DNS/custom domains and copied-link accessibility. Do not claim tested implementation from this document.
 
+## Tinker & Co. paid membership — standalone ReDown product family (owner direction, 2026-11-14)
+
+The owner proposes that **paying Click2Cloud customers also receive access to separately maintained, independently installable ReDown-family tools** as part of their Tinker & Co. membership. This is an explicit **product-separation and packaging goal**, not a request to collapse products into one application. The proposed $5/month Click2Cloud creator offering should be considered in the context of these membership benefits, alongside premium bulk URL export and the intended remote-saving entitlement.
+
+| Product | Standalone scope | Product boundary |
+| --- | --- | --- |
+| **ReDown Basic** (`redown-basic`) | Minimal right-click save to **Google Drive, OneDrive, and Dropbox** only | Login/configure destination, right-click, save. No full flagship experience, broad provider catalog, or file explorer implied. |
+| **ReDown Remote** (`redown-remote`) | Minimal **true-remote** saving to **Cloudflare R2 only** | Remote transfer is the defining capability; do not accidentally expand it to all cloud providers or make it dependent on the flagship's UI. |
+| **ReDown** | The original **full-featured flagship**, retaining its own wider feature vision | Its name may **eventually** become **ReDown Classic** years later, but that is a possible later branding decision, **not** an immediate rename. |
+
+**Entitlement intent:** One active paid Tinker & Co./Click2Cloud customer membership should unlock the eligible standalone downloads when each product is released, using a coherent licensing/account mechanism rather than multiple independent charges for the same customer. Define activation, renewal, offline behavior, update eligibility and product availability before implementation. Do not state that unfinished products are already included and downloadable.
+
+**Modularity and maintainability:** Each tool should remain independently installable, independently updateable, and deliberately bounded in functionality; share reusable licensing and infrastructure only where it avoids duplication without turning the minimal tools into a monolith. ReDown Basic should not inherit premium creator URL workflows just because its subscription unlocks them elsewhere. ReDown Remote remains Cloudflare-only even if Click2Cloud later adds providers.
+
+**Marketing separation:** Present Click2Cloud's creator-focused URL library and bulk export as its own flagship *use case*, while describing ReDown Basic, ReDown Remote, and ReDown as membership-included standalone tools. Avoid asserting that the $5/month price, “unlimited free remote,” unrestricted transfer economics, every tool's availability, or a future ReDown Classic rename is finalized or live. Any “unlimited remote” headline must accurately name the included product/provider, operational limits and whether it is included in the paid plan.
+
+This is a strategic packaging specification; it **does not authorize code changes, product renames, billing changes, automatic public file access, or release announcements**.
+
 ## Explicit boundary
 
 This record **establishes long-term product intent and promotional priority only**. It does not authorize Cloudflare writes, domain transfer, bulk publication, new pricing/billing, extension source edits, customer notifications, deployment or changing the ReDown project.
