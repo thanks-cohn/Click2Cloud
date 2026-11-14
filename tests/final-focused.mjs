@@ -59,3 +59,7 @@ await import('./debug-preference.test.mjs');
 await import('./recorder.test.mjs');
 
 await import('./mv3-import-policy.test.mjs');
+
+await import('./checkout-integrity.test.mjs');
+
+await import('./depth-authority-race.test.mjs');
