@@ -49,3 +49,7 @@ Review Narrow tree construction, `ancestors(prefix)`, hidden-level and selected-
 8. Capture installed-Chrome reproduction, before/after menu structure, persisted target, API inputs, test results and independent R2 verification. Mark not-run scenarios NOT TESTED rather than PASS.
 
 **No fix is claimed by this report. Do not mutate production buckets or reset user destinations to investigate.**
+
+## Codex investigation-and-fix assignment
+
+[CODEX P0 CRITICAL — isolate, trace and fix the Narrow bucket-root submenu action without disturbing Simple/Depth or other unfinished work](../../docs/requests/CODEX_P0_CRITICAL_NARROW_BUCKET_ROOT_ISOLATE_TRACE_FIX_2026-11-14.md). Assignment committed, **not implemented**. Requires read-only source tracing, surgical helper extraction only where justified, exact Chrome menu parent/child routing, regression gates, and owner-installed Chrome acceptance before closure.
