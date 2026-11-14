@@ -540,8 +540,8 @@ The optional callback travels with each invocation into `engine.save`; it sees
 boundaries. It is not the older Glaciaring reason-code channel. Transport adds
 only a first-request response-header latency observation, never an extra request.
 
-`extension/background.mjs` lazily loads `src/recorder/host.mjs` independently of
-startup. A bounded early BASIC-only checkpoint buffer does not retain RAW URLs.
+`extension/background.mjs` statically imports the MV3-compatible host graph and
+defers guarded initialization independently of native startup. A bounded early BASIC-only checkpoint buffer does not retain RAW URLs.
 Failure leaves the original dispatcher available. This observer has no authority
 over CURRENT, OAuth, menu ACKs, provider writes, History or counters.
 
@@ -558,3 +558,14 @@ unconfirmed until actual settlement. Read/export never probes providers or
 re-uploads. Unknown times/bytes/proof remain explicit N/A. Linux fake-native,
 real-IDB and ZIP tests are separate from installed Chrome and R2 evidence.
 The latter remain BLOCKED/NOT RUN; no installed behavior claim follows from ACKs.
+
+
+### MV3 compatibility gate and current verification limit
+
+The build now rejects dynamic imports anywhere in the manifest worker import/re-export
+graph, including computed imports. HTML-page imports are outside this worker policy.
+Recorder initialization failure is distinct from not-ready/request-unavailable; only
+bounded causal names/stages are returned. Static module parse/evaluation failure is
+still a whole-worker risk, so parse and browser-worker tests accompany this change.
+Installed/native acceptance is BLOCKED by policy here and is never inferred from
+Node or HTTP-worker fixtures. See [two-phase evidence](../../docs/evidence/mv3-suite-reliability/REPORT.md).

@@ -1,0 +1,5235 @@
+{
+  "evidenceClass": "NODE_FIXTURE_REAL_LOCAL_WORKERD_R2_NOT_CLOUDFLARE_MEMORY_RECORDER_PORTS",
+  "mode": "OFF",
+  "loadWorkers": 4,
+  "maxLoadMs": 8000,
+  "events": [
+    {
+      "sequence": 1,
+      "monotonicMs": 3872.993687,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119976,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 2,
+      "monotonicMs": 3915.621012,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 3,
+      "monotonicMs": 3918.235952,
+      "stage": "request.begin",
+      "endpoint": "/probe",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 4,
+      "monotonicMs": 3935.262532,
+      "stage": "request.end",
+      "endpoint": "/probe",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_READBACK_BYTES"
+    },
+    {
+      "sequence": 5,
+      "monotonicMs": 3936.842939,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 6,
+      "monotonicMs": 3943.746814,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 7,
+      "monotonicMs": 3945.046107,
+      "stage": "current.read",
+      "desired": 0,
+      "applied": null
+    },
+    {
+      "sequence": 8,
+      "monotonicMs": 3946.084316,
+      "stage": "engine.menu.compile",
+      "outcome": "started",
+      "code": "COMPILE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 9,
+      "monotonicMs": 3947.430609,
+      "stage": "engine.modes.composite",
+      "outcome": "started",
+      "code": "PROJECTION_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 10,
+      "monotonicMs": 3949.970949,
+      "stage": "engine.modes.composite",
+      "outcome": "partial",
+      "code": "PROJECTION_PARTIAL",
+      "generation": 1
+    },
+    {
+      "sequence": 11,
+      "monotonicMs": 3976.092259,
+      "stage": "engine.menu.compile",
+      "outcome": "partial",
+      "code": "COMPILE_PARTIAL",
+      "generation": 1
+    },
+    {
+      "sequence": 12,
+      "monotonicMs": 3976.283541,
+      "stage": "current.read",
+      "desired": 0,
+      "applied": null
+    },
+    {
+      "sequence": 13,
+      "monotonicMs": 3976.419741,
+      "stage": "generation.desired",
+      "generation": 1
+    },
+    {
+      "sequence": 14,
+      "monotonicMs": 3977.328289,
+      "stage": "registrar.chrome.plan",
+      "outcome": "ok",
+      "code": "PLAN_GENERATED",
+      "generation": 1
+    },
+    {
+      "sequence": 15,
+      "monotonicMs": 3977.577586,
+      "stage": "registrar.chrome.apply",
+      "outcome": "started",
+      "code": "APPLY_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 16,
+      "monotonicMs": 3977.802557,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 17,
+      "monotonicMs": 3977.83822,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 18,
+      "monotonicMs": 3977.96027,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 19,
+      "monotonicMs": 3977.985567,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 20,
+      "monotonicMs": 3978.013788,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 21,
+      "monotonicMs": 3978.044374,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 22,
+      "monotonicMs": 3978.058514,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 23,
+      "monotonicMs": 3978.126995,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 24,
+      "monotonicMs": 3978.149348,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 25,
+      "monotonicMs": 3978.182206,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 26,
+      "monotonicMs": 3978.202556,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 27,
+      "monotonicMs": 3978.210608,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 28,
+      "monotonicMs": 3978.227463,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 29,
+      "monotonicMs": 3978.233692,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 30,
+      "monotonicMs": 3978.251809,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 31,
+      "monotonicMs": 3978.259981,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 32,
+      "monotonicMs": 3978.269775,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 33,
+      "monotonicMs": 3978.288333,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 34,
+      "monotonicMs": 3978.295333,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 35,
+      "monotonicMs": 3978.312128,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 36,
+      "monotonicMs": 3978.328292,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 37,
+      "monotonicMs": 3978.335272,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 38,
+      "monotonicMs": 3978.353789,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 39,
+      "monotonicMs": 3978.359347,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 40,
+      "monotonicMs": 3978.596927,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 41,
+      "monotonicMs": 3978.613622,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 42,
+      "monotonicMs": 3978.634482,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 43,
+      "monotonicMs": 3978.648663,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 44,
+      "monotonicMs": 3978.654512,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 45,
+      "monotonicMs": 3978.670656,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 46,
+      "monotonicMs": 3978.675293,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 47,
+      "monotonicMs": 3978.690475,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 48,
+      "monotonicMs": 3978.705517,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 49,
+      "monotonicMs": 3978.724375,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 50,
+      "monotonicMs": 3978.742441,
+      "stage": "registrar.chrome.apply",
+      "outcome": "ok",
+      "code": "NATIVE_ACKNOWLEDGED",
+      "generation": 1
+    },
+    {
+      "sequence": 51,
+      "monotonicMs": 3978.772986,
+      "stage": "generation.applied",
+      "generation": 1
+    },
+    {
+      "sequence": 52,
+      "monotonicMs": 3978.998018,
+      "stage": "click.begin",
+      "desired": 1,
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 53,
+      "monotonicMs": 3979.826978,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 54,
+      "monotonicMs": 3980.704841,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 55,
+      "monotonicMs": 3987.748603,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 56,
+      "monotonicMs": 3988.571885,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 57,
+      "monotonicMs": 3988.910624,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 1
+    },
+    {
+      "sequence": 58,
+      "monotonicMs": 3988.990411,
+      "stage": "dispatch.enter",
+      "generation": 1,
+      "desired": 1,
+      "applied": 1,
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 59,
+      "monotonicMs": 3989.789228,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 60,
+      "monotonicMs": 3989.962983,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 61,
+      "monotonicMs": 3991.035322,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 62,
+      "monotonicMs": 3998.539892,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 63,
+      "monotonicMs": 3998.855366,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 64,
+      "monotonicMs": 3999.016033,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 1
+    },
+    {
+      "sequence": 65,
+      "monotonicMs": 3999.042832,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 66,
+      "monotonicMs": 3999.170901,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 1
+    },
+    {
+      "sequence": 67,
+      "monotonicMs": 3999.241945,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 1
+    },
+    {
+      "sequence": 68,
+      "monotonicMs": 3999.792376,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 69,
+      "monotonicMs": 4000.578924,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 70,
+      "monotonicMs": 4000.672982,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 71,
+      "monotonicMs": 4000.857103,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 72,
+      "monotonicMs": 4001.667316,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 73,
+      "monotonicMs": 4007.012296,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 74,
+      "monotonicMs": 4007.295333,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 75,
+      "monotonicMs": 4007.411865,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 76,
+      "monotonicMs": 4007.478753,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 77,
+      "monotonicMs": 4008.327984,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 78,
+      "monotonicMs": 4008.374102,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 79,
+      "monotonicMs": 4008.438446,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 80,
+      "monotonicMs": 4008.539265,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 81,
+      "monotonicMs": 4009.128052,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 82,
+      "monotonicMs": 4016.205102,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 83,
+      "monotonicMs": 4016.628075,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 84,
+      "monotonicMs": 4016.724186,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 85,
+      "monotonicMs": 4016.838695,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 86,
+      "monotonicMs": 4017.205204,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119990,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 87,
+      "monotonicMs": 4034.458839,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 88,
+      "monotonicMs": 4034.681827,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 89,
+      "monotonicMs": 4034.977973,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 90,
+      "monotonicMs": 4036.471572,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 91,
+      "monotonicMs": 4048.68769,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 92,
+      "monotonicMs": 4049.122099,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 93,
+      "monotonicMs": 4073.041368,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 94,
+      "monotonicMs": 4080.374775,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 95,
+      "monotonicMs": 4080.468433,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 96,
+      "monotonicMs": 4080.563563,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 97,
+      "monotonicMs": 4080.729277,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119927,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 98,
+      "monotonicMs": 4086.665718,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 99,
+      "monotonicMs": 4086.725887,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 100,
+      "monotonicMs": 4086.75552,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 101,
+      "monotonicMs": 4086.790742,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 102,
+      "monotonicMs": 4086.943817,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 103,
+      "monotonicMs": 4087.698869,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 104,
+      "monotonicMs": 4106.746905,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 105,
+      "monotonicMs": 4118.282611,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 106,
+      "monotonicMs": 4118.35684,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 107,
+      "monotonicMs": 4118.684082,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 108,
+      "monotonicMs": 4118.69636,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 1
+    },
+    {
+      "sequence": 109,
+      "monotonicMs": 4118.754125,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 139.8223050000006
+    },
+    {
+      "sequence": 110,
+      "monotonicMs": 4421.349246,
+      "stage": "click.begin",
+      "desired": 1,
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 111,
+      "monotonicMs": 4421.427822,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 112,
+      "monotonicMs": 4422.132269,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 113,
+      "monotonicMs": 4429.831746,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 114,
+      "monotonicMs": 4430.029026,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 115,
+      "monotonicMs": 4430.123996,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 1
+    },
+    {
+      "sequence": 116,
+      "monotonicMs": 4430.141942,
+      "stage": "dispatch.enter",
+      "generation": 1,
+      "desired": 1,
+      "applied": 1,
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 117,
+      "monotonicMs": 4430.212536,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 118,
+      "monotonicMs": 4430.308838,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 119,
+      "monotonicMs": 4430.858498,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 120,
+      "monotonicMs": 4435.391122,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 121,
+      "monotonicMs": 4435.593339,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 122,
+      "monotonicMs": 4435.605057,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 1
+    },
+    {
+      "sequence": 123,
+      "monotonicMs": 4435.637434,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 124,
+      "monotonicMs": 4435.663643,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 1
+    },
+    {
+      "sequence": 125,
+      "monotonicMs": 4435.674859,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 1
+    },
+    {
+      "sequence": 126,
+      "monotonicMs": 4435.749489,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 127,
+      "monotonicMs": 4435.89962,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 128,
+      "monotonicMs": 4435.90614,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 129,
+      "monotonicMs": 4435.998596,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 130,
+      "monotonicMs": 4436.401419,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 131,
+      "monotonicMs": 4440.522987,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 132,
+      "monotonicMs": 4440.709652,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 133,
+      "monotonicMs": 4440.86447,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 134,
+      "monotonicMs": 4440.87762,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 135,
+      "monotonicMs": 4441.422532,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 136,
+      "monotonicMs": 4441.437264,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 137,
+      "monotonicMs": 4441.459246,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 138,
+      "monotonicMs": 4441.552133,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 139,
+      "monotonicMs": 4441.890431,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 140,
+      "monotonicMs": 4445.393229,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 141,
+      "monotonicMs": 4445.569398,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 142,
+      "monotonicMs": 4445.635385,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 143,
+      "monotonicMs": 4445.749223,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 144,
+      "monotonicMs": 4445.838905,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119995,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 145,
+      "monotonicMs": 4454.819528,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 146,
+      "monotonicMs": 4454.864294,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 147,
+      "monotonicMs": 4454.992392,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 148,
+      "monotonicMs": 4455.696579,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 149,
+      "monotonicMs": 4475.986123,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 150,
+      "monotonicMs": 4476.25543,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 151,
+      "monotonicMs": 4476.77885,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 152,
+      "monotonicMs": 4480.559567,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 153,
+      "monotonicMs": 4480.613897,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 154,
+      "monotonicMs": 4480.637061,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 155,
+      "monotonicMs": 4480.699714,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119961,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 156,
+      "monotonicMs": 4484.504937,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 157,
+      "monotonicMs": 4484.546568,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 158,
+      "monotonicMs": 4484.560078,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 1
+    },
+    {
+      "sequence": 159,
+      "monotonicMs": 4484.578125,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 160,
+      "monotonicMs": 4484.684421,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 161,
+      "monotonicMs": 4485.154623,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 162,
+      "monotonicMs": 4488.341025,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 163,
+      "monotonicMs": 4488.71098,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 164,
+      "monotonicMs": 4488.762055,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 1
+    },
+    {
+      "sequence": 165,
+      "monotonicMs": 4488.839389,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 166,
+      "monotonicMs": 4488.849914,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 1
+    },
+    {
+      "sequence": 167,
+      "monotonicMs": 4488.866338,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 67.53037200000017
+    },
+    {
+      "sequence": 168,
+      "monotonicMs": 4521.472343,
+      "stage": "click.begin",
+      "desired": 1,
+      "ack": 1,
+      "pending": 0
+    },
+    {
+      "sequence": 169,
+      "monotonicMs": 4522.012197,
+      "stage": "depth.record",
+      "state": "pending",
+      "code": "DEPTH_CLICK_STARTED"
+    },
+    {
+      "sequence": 170,
+      "monotonicMs": 4526.059396,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 171,
+      "monotonicMs": 4527.273975,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 172,
+      "monotonicMs": 4528.735366,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 173,
+      "monotonicMs": 7713.543301,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 174,
+      "monotonicMs": 7714.279107,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 175,
+      "monotonicMs": 7734.868587,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 176,
+      "monotonicMs": 7735.196932,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 177,
+      "monotonicMs": 7735.41237,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 178,
+      "monotonicMs": 7735.845609,
+      "stage": "request.begin",
+      "endpoint": "/probe",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 179,
+      "monotonicMs": 7749.318995,
+      "stage": "request.end",
+      "endpoint": "/probe",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_READBACK_BYTES"
+    },
+    {
+      "sequence": 180,
+      "monotonicMs": 7749.459733,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 181,
+      "monotonicMs": 7749.612959,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 182,
+      "monotonicMs": 7750.292632,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 183,
+      "monotonicMs": 7777.683951,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 184,
+      "monotonicMs": 7777.908433,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 185,
+      "monotonicMs": 7778.332278,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 186,
+      "monotonicMs": 7778.942709,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 187,
+      "monotonicMs": 7783.527216,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 188,
+      "monotonicMs": 7783.79409,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 189,
+      "monotonicMs": 7783.850483,
+      "stage": "engine.menu.compile",
+      "outcome": "started",
+      "code": "COMPILE_STARTED",
+      "generation": 2
+    },
+    {
+      "sequence": 190,
+      "monotonicMs": 7784.179048,
+      "stage": "engine.modes.composite",
+      "outcome": "started",
+      "code": "PROJECTION_STARTED",
+      "generation": 2
+    },
+    {
+      "sequence": 191,
+      "monotonicMs": 7784.709251,
+      "stage": "engine.modes.composite",
+      "outcome": "ok",
+      "code": "PROJECTION_OK",
+      "generation": 2
+    },
+    {
+      "sequence": 192,
+      "monotonicMs": 7785.575249,
+      "stage": "engine.menu.compile",
+      "outcome": "ok",
+      "code": "COMPILE_OK",
+      "generation": 2
+    },
+    {
+      "sequence": 193,
+      "monotonicMs": 7785.606205,
+      "stage": "current.read",
+      "desired": 1,
+      "applied": 1
+    },
+    {
+      "sequence": 194,
+      "monotonicMs": 7785.654456,
+      "stage": "generation.desired",
+      "generation": 2
+    },
+    {
+      "sequence": 195,
+      "monotonicMs": 7785.743026,
+      "stage": "registrar.chrome.plan",
+      "outcome": "ok",
+      "code": "PLAN_GENERATED",
+      "generation": 2
+    },
+    {
+      "sequence": 196,
+      "monotonicMs": 7785.761133,
+      "stage": "registrar.chrome.apply",
+      "outcome": "started",
+      "code": "APPLY_STARTED",
+      "generation": 2
+    },
+    {
+      "sequence": 197,
+      "monotonicMs": 7785.808773,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 198,
+      "monotonicMs": 7785.816835,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 199,
+      "monotonicMs": 7785.821903,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 200,
+      "monotonicMs": 7785.82678,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 201,
+      "monotonicMs": 7785.832559,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 202,
+      "monotonicMs": 7785.837486,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 203,
+      "monotonicMs": 7785.842503,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 204,
+      "monotonicMs": 7785.846499,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 205,
+      "monotonicMs": 7785.851246,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 206,
+      "monotonicMs": 7785.856594,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 207,
+      "monotonicMs": 7785.861652,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 208,
+      "monotonicMs": 7785.909422,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 209,
+      "monotonicMs": 7785.917133,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 210,
+      "monotonicMs": 7785.92138,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 211,
+      "monotonicMs": 7785.925235,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 212,
+      "monotonicMs": 7785.929462,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 213,
+      "monotonicMs": 7785.933808,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 214,
+      "monotonicMs": 7785.938395,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 215,
+      "monotonicMs": 7785.942911,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 216,
+      "monotonicMs": 7785.947248,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 217,
+      "monotonicMs": 7785.951674,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 218,
+      "monotonicMs": 7785.956071,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 219,
+      "monotonicMs": 7785.960027,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 220,
+      "monotonicMs": 7785.964624,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 221,
+      "monotonicMs": 7785.968489,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 222,
+      "monotonicMs": 7785.974728,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 223,
+      "monotonicMs": 7786.007667,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 224,
+      "monotonicMs": 7786.013145,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 225,
+      "monotonicMs": 7786.017742,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 226,
+      "monotonicMs": 7786.021928,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 227,
+      "monotonicMs": 7786.030471,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 228,
+      "monotonicMs": 7786.034777,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 229,
+      "monotonicMs": 7786.040445,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 230,
+      "monotonicMs": 7786.045863,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 231,
+      "monotonicMs": 7786.056629,
+      "stage": "registrar.chrome.apply",
+      "outcome": "ok",
+      "code": "NATIVE_ACKNOWLEDGED",
+      "generation": 2
+    },
+    {
+      "sequence": 232,
+      "monotonicMs": 7786.061166,
+      "stage": "generation.applied",
+      "generation": 2
+    },
+    {
+      "sequence": 233,
+      "monotonicMs": 7786.270695,
+      "stage": "current.read",
+      "desired": 2,
+      "applied": 2
+    },
+    {
+      "sequence": 234,
+      "monotonicMs": 7786.419575,
+      "stage": "current.read",
+      "desired": 2,
+      "applied": 2
+    },
+    {
+      "sequence": 235,
+      "monotonicMs": 7787.338251,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 236,
+      "monotonicMs": 7791.263835,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 237,
+      "monotonicMs": 7791.845022,
+      "stage": "depth.record",
+      "state": "blocked",
+      "code": "FRESH_CLICK_REQUIRED"
+    },
+    {
+      "sequence": 238,
+      "monotonicMs": 7791.874246,
+      "stage": "click.end",
+      "state": "blocked",
+      "code": "FRESH_CLICK_REQUIRED",
+      "elapsedMs": 3270.4132
+    },
+    {
+      "sequence": 239,
+      "monotonicMs": 7792.950634,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 240,
+      "monotonicMs": 7797.040261,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 241,
+      "monotonicMs": 8033.208901,
+      "stage": "current.read",
+      "desired": 2,
+      "applied": 2
+    },
+    {
+      "sequence": 242,
+      "monotonicMs": 8033.313245,
+      "stage": "engine.menu.compile",
+      "outcome": "started",
+      "code": "COMPILE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 243,
+      "monotonicMs": 8033.674208,
+      "stage": "engine.modes.composite",
+      "outcome": "started",
+      "code": "PROJECTION_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 244,
+      "monotonicMs": 8034.313762,
+      "stage": "engine.modes.composite",
+      "outcome": "ok",
+      "code": "PROJECTION_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 245,
+      "monotonicMs": 8035.205087,
+      "stage": "engine.menu.compile",
+      "outcome": "ok",
+      "code": "COMPILE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 246,
+      "monotonicMs": 8035.244045,
+      "stage": "current.read",
+      "desired": 2,
+      "applied": 2
+    },
+    {
+      "sequence": 247,
+      "monotonicMs": 8035.30828,
+      "stage": "generation.desired",
+      "generation": 3
+    },
+    {
+      "sequence": 248,
+      "monotonicMs": 8035.406735,
+      "stage": "registrar.chrome.plan",
+      "outcome": "ok",
+      "code": "PLAN_GENERATED",
+      "generation": 3
+    },
+    {
+      "sequence": 249,
+      "monotonicMs": 8035.426144,
+      "stage": "registrar.chrome.apply",
+      "outcome": "started",
+      "code": "APPLY_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 250,
+      "monotonicMs": 8035.478681,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 251,
+      "monotonicMs": 8035.488225,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 252,
+      "monotonicMs": 8035.496327,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 253,
+      "monotonicMs": 8035.503438,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 254,
+      "monotonicMs": 8035.510127,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 255,
+      "monotonicMs": 8035.5188,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 256,
+      "monotonicMs": 8035.52552,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 257,
+      "monotonicMs": 8035.53226,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 258,
+      "monotonicMs": 8035.539481,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 259,
+      "monotonicMs": 8035.546351,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 260,
+      "monotonicMs": 8035.553572,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 261,
+      "monotonicMs": 8035.559871,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 262,
+      "monotonicMs": 8035.56637,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 263,
+      "monotonicMs": 8035.574352,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 264,
+      "monotonicMs": 8035.582294,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 265,
+      "monotonicMs": 8035.589044,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 266,
+      "monotonicMs": 8035.596174,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 267,
+      "monotonicMs": 8035.602954,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 268,
+      "monotonicMs": 8035.609444,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 269,
+      "monotonicMs": 8035.616094,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 270,
+      "monotonicMs": 8035.622333,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 271,
+      "monotonicMs": 8035.629003,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 272,
+      "monotonicMs": 8035.635212,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 273,
+      "monotonicMs": 8035.645057,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 274,
+      "monotonicMs": 8035.653769,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 275,
+      "monotonicMs": 8035.660139,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 276,
+      "monotonicMs": 8035.666578,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 277,
+      "monotonicMs": 8035.673519,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 278,
+      "monotonicMs": 8035.68111,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 279,
+      "monotonicMs": 8035.687229,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 280,
+      "monotonicMs": 8035.693899,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 281,
+      "monotonicMs": 8035.70184,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 282,
+      "monotonicMs": 8035.70837,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 283,
+      "monotonicMs": 8035.716081,
+      "stage": "registrar.chrome.ack",
+      "outcome": "ok",
+      "code": "ITEM_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 284,
+      "monotonicMs": 8035.723182,
+      "stage": "registrar.chrome.apply",
+      "outcome": "ok",
+      "code": "NATIVE_ACKNOWLEDGED",
+      "generation": 3
+    },
+    {
+      "sequence": 285,
+      "monotonicMs": 8035.727428,
+      "stage": "generation.applied",
+      "generation": 3
+    },
+    {
+      "sequence": 286,
+      "monotonicMs": 8035.794898,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 287,
+      "monotonicMs": 8035.873624,
+      "stage": "depth.record",
+      "state": "pending",
+      "code": "DEPTH_CLICK_STARTED"
+    },
+    {
+      "sequence": 288,
+      "monotonicMs": 8036.949552,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 289,
+      "monotonicMs": 8044.311137,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 290,
+      "monotonicMs": 8044.64545,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 291,
+      "monotonicMs": 8045.117968,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 292,
+      "monotonicMs": 8049.303776,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 293,
+      "monotonicMs": 8049.487267,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 294,
+      "monotonicMs": 8049.556349,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 295,
+      "monotonicMs": 8049.583369,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 296,
+      "monotonicMs": 8049.644369,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 297,
+      "monotonicMs": 8049.742574,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 298,
+      "monotonicMs": 8072.466074,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119978,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 299,
+      "monotonicMs": 8077.346117,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 300,
+      "monotonicMs": 8077.556808,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 301,
+      "monotonicMs": 8077.570808,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 302,
+      "monotonicMs": 8077.596236,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 303,
+      "monotonicMs": 8077.618379,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 304,
+      "monotonicMs": 8077.624297,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 305,
+      "monotonicMs": 8077.80923,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 306,
+      "monotonicMs": 8077.900986,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 307,
+      "monotonicMs": 8077.904921,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 308,
+      "monotonicMs": 8077.988665,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 309,
+      "monotonicMs": 8078.408925,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 310,
+      "monotonicMs": 8082.018493,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 311,
+      "monotonicMs": 8082.215243,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 312,
+      "monotonicMs": 8082.275352,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 313,
+      "monotonicMs": 8082.284435,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 314,
+      "monotonicMs": 8082.764694,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 315,
+      "monotonicMs": 8082.77559,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 316,
+      "monotonicMs": 8082.790993,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 317,
+      "monotonicMs": 8082.865152,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 318,
+      "monotonicMs": 8083.25675,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 319,
+      "monotonicMs": 8086.85446,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 320,
+      "monotonicMs": 8087.00374,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 321,
+      "monotonicMs": 8087.039503,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 322,
+      "monotonicMs": 8087.049828,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 323,
+      "monotonicMs": 8087.129045,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119995,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 324,
+      "monotonicMs": 8098.809085,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 325,
+      "monotonicMs": 8098.846451,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 326,
+      "monotonicMs": 8098.956503,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 327,
+      "monotonicMs": 8099.992011,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 328,
+      "monotonicMs": 8115.751352,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 329,
+      "monotonicMs": 8116.050664,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 330,
+      "monotonicMs": 8117.285096,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 331,
+      "monotonicMs": 8122.127072,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 332,
+      "monotonicMs": 8122.187391,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 333,
+      "monotonicMs": 8122.206659,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 334,
+      "monotonicMs": 8122.316141,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119960,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 335,
+      "monotonicMs": 8127.236713,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 336,
+      "monotonicMs": 8127.311554,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 337,
+      "monotonicMs": 8127.325755,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 338,
+      "monotonicMs": 8127.345173,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 339,
+      "monotonicMs": 8127.461796,
+      "stage": "authorization.begin",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 340,
+      "monotonicMs": 8127.912811,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 341,
+      "monotonicMs": 8132.194401,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 342,
+      "monotonicMs": 8132.371693,
+      "stage": "authorization.end",
+      "targetRef": "d903ca127f9dcb02a4476396be5e2ee4cce711b66b416f768d28dc83d0866900",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 343,
+      "monotonicMs": 8132.415257,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 344,
+      "monotonicMs": 8132.484629,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 345,
+      "monotonicMs": 8132.494504,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 346,
+      "monotonicMs": 8132.604927,
+      "stage": "depth.record",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 347,
+      "monotonicMs": 8132.625748,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 96.8351160000002
+    },
+    {
+      "sequence": 348,
+      "monotonicMs": 8152.301639,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 349,
+      "monotonicMs": 8152.364792,
+      "stage": "depth.record",
+      "state": "pending",
+      "code": "DEPTH_CLICK_STARTED"
+    },
+    {
+      "sequence": 350,
+      "monotonicMs": 8173.175078,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 351,
+      "monotonicMs": 8178.922841,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 352,
+      "monotonicMs": 8179.428388,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 353,
+      "monotonicMs": 8180.159206,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 354,
+      "monotonicMs": 8185.88653,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 355,
+      "monotonicMs": 8186.172832,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 356,
+      "monotonicMs": 8186.241934,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 357,
+      "monotonicMs": 8186.258188,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 358,
+      "monotonicMs": 8186.319979,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 359,
+      "monotonicMs": 8186.403953,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 360,
+      "monotonicMs": 8186.8894,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 361,
+      "monotonicMs": 8189.721199,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 362,
+      "monotonicMs": 8189.861927,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 363,
+      "monotonicMs": 8189.869798,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 364,
+      "monotonicMs": 8189.883719,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 365,
+      "monotonicMs": 8189.89818,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 366,
+      "monotonicMs": 8189.903228,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 367,
+      "monotonicMs": 8189.961624,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 368,
+      "monotonicMs": 8190.028352,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 369,
+      "monotonicMs": 8190.032509,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 370,
+      "monotonicMs": 8190.156271,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 371,
+      "monotonicMs": 8190.488291,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 372,
+      "monotonicMs": 8193.555899,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 373,
+      "monotonicMs": 8193.699131,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 374,
+      "monotonicMs": 8193.727843,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 375,
+      "monotonicMs": 8193.734022,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 376,
+      "monotonicMs": 8194.38991,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 377,
+      "monotonicMs": 8194.401828,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 378,
+      "monotonicMs": 8194.413014,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 379,
+      "monotonicMs": 8194.473854,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 380,
+      "monotonicMs": 8194.781418,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 381,
+      "monotonicMs": 8197.837339,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 382,
+      "monotonicMs": 8198.025306,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 383,
+      "monotonicMs": 8198.054629,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 384,
+      "monotonicMs": 8198.065766,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 385,
+      "monotonicMs": 8198.307803,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119996,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 386,
+      "monotonicMs": 8206.761791,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 387,
+      "monotonicMs": 8206.79488,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 388,
+      "monotonicMs": 8206.88965,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 389,
+      "monotonicMs": 8208.188557,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 390,
+      "monotonicMs": 8221.836671,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 391,
+      "monotonicMs": 8222.099339,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 392,
+      "monotonicMs": 8222.505679,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 393,
+      "monotonicMs": 8226.321861,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 394,
+      "monotonicMs": 8226.361099,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 395,
+      "monotonicMs": 8226.37536,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 396,
+      "monotonicMs": 8226.44994,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119968,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 397,
+      "monotonicMs": 8230.464095,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 398,
+      "monotonicMs": 8230.496923,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 399,
+      "monotonicMs": 8230.5081,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 400,
+      "monotonicMs": 8230.559295,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 401,
+      "monotonicMs": 8230.659743,
+      "stage": "authorization.begin",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 402,
+      "monotonicMs": 8231.426555,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 403,
+      "monotonicMs": 8235.329496,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 404,
+      "monotonicMs": 8235.493588,
+      "stage": "authorization.end",
+      "targetRef": "4198ecd906f23fd7e85b9b92878daaae4f859ccbea52c0efa9e67b270e3e6005",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 405,
+      "monotonicMs": 8235.533297,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 406,
+      "monotonicMs": 8235.588518,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 407,
+      "monotonicMs": 8235.59626,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 408,
+      "monotonicMs": 8235.636069,
+      "stage": "depth.record",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 409,
+      "monotonicMs": 8235.652643,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 83.35972799999945
+    },
+    {
+      "sequence": 410,
+      "monotonicMs": 8247.163553,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 411,
+      "monotonicMs": 8247.241228,
+      "stage": "depth.record",
+      "state": "pending",
+      "code": "DEPTH_CLICK_STARTED"
+    },
+    {
+      "sequence": 412,
+      "monotonicMs": 8247.827413,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 413,
+      "monotonicMs": 8251.760718,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 414,
+      "monotonicMs": 8251.986151,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 415,
+      "monotonicMs": 8252.570193,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 416,
+      "monotonicMs": 8276.805664,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 417,
+      "monotonicMs": 8277.043215,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 418,
+      "monotonicMs": 8277.137574,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 419,
+      "monotonicMs": 8277.157143,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 420,
+      "monotonicMs": 8277.242749,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 421,
+      "monotonicMs": 8277.349617,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 422,
+      "monotonicMs": 8277.933238,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 423,
+      "monotonicMs": 8281.800867,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 424,
+      "monotonicMs": 8282.008163,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 425,
+      "monotonicMs": 8282.021112,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 426,
+      "monotonicMs": 8282.039499,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 427,
+      "monotonicMs": 8282.063375,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 428,
+      "monotonicMs": 8282.102983,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 429,
+      "monotonicMs": 8282.19553,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 430,
+      "monotonicMs": 8282.278011,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 431,
+      "monotonicMs": 8282.28395,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 432,
+      "monotonicMs": 8282.384909,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 433,
+      "monotonicMs": 8283.020327,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 434,
+      "monotonicMs": 8287.883475,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 435,
+      "monotonicMs": 8288.128236,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 436,
+      "monotonicMs": 8288.180283,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 437,
+      "monotonicMs": 8288.190909,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 438,
+      "monotonicMs": 8288.700952,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 439,
+      "monotonicMs": 8288.716194,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 440,
+      "monotonicMs": 8288.735292,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 441,
+      "monotonicMs": 8288.825976,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 442,
+      "monotonicMs": 8289.204915,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 443,
+      "monotonicMs": 8292.886008,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 444,
+      "monotonicMs": 8293.052304,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 445,
+      "monotonicMs": 8293.13816,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 446,
+      "monotonicMs": 8293.152431,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 447,
+      "monotonicMs": 8293.233581,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119995,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 448,
+      "monotonicMs": 8302.219755,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 449,
+      "monotonicMs": 8302.270049,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 450,
+      "monotonicMs": 8302.408844,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 451,
+      "monotonicMs": 8303.357715,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 452,
+      "monotonicMs": 8313.647351,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 453,
+      "monotonicMs": 8313.985891,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 454,
+      "monotonicMs": 8314.847122,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 455,
+      "monotonicMs": 8319.812581,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 456,
+      "monotonicMs": 8319.883005,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 457,
+      "monotonicMs": 8319.919599,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 458,
+      "monotonicMs": 8320.033698,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119968,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 459,
+      "monotonicMs": 8325.487388,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 460,
+      "monotonicMs": 8325.567956,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 461,
+      "monotonicMs": 8325.586704,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 462,
+      "monotonicMs": 8325.619853,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 463,
+      "monotonicMs": 8325.798697,
+      "stage": "authorization.begin",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 464,
+      "monotonicMs": 8327.213305,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 465,
+      "monotonicMs": 8333.346998,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 466,
+      "monotonicMs": 8333.643165,
+      "stage": "authorization.end",
+      "targetRef": "63703c9482169baaaf5b00c74690b2042b01f94e89f548d4e5b8b005c1ebf116",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 467,
+      "monotonicMs": 8333.727319,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 468,
+      "monotonicMs": 8333.824443,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 469,
+      "monotonicMs": 8333.838554,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 470,
+      "monotonicMs": 8333.906854,
+      "stage": "depth.record",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 471,
+      "monotonicMs": 8333.941976,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 86.79160200000115
+    },
+    {
+      "sequence": 472,
+      "monotonicMs": 8347.535801,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 473,
+      "monotonicMs": 8347.644331,
+      "stage": "depth.record",
+      "state": "pending",
+      "code": "DEPTH_CLICK_STARTED"
+    },
+    {
+      "sequence": 474,
+      "monotonicMs": 8348.730344,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 475,
+      "monotonicMs": 8374.783167,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 476,
+      "monotonicMs": 8375.245669,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 477,
+      "monotonicMs": 8377.374541,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 478,
+      "monotonicMs": 8383.278185,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 479,
+      "monotonicMs": 8384.663961,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 480,
+      "monotonicMs": 8384.770959,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 481,
+      "monotonicMs": 8384.802375,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 482,
+      "monotonicMs": 8385.107846,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 483,
+      "monotonicMs": 8385.275644,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 484,
+      "monotonicMs": 8386.995752,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119998,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 485,
+      "monotonicMs": 8392.038045,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 486,
+      "monotonicMs": 8392.330076,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 487,
+      "monotonicMs": 8392.354572,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 488,
+      "monotonicMs": 8392.373199,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 489,
+      "monotonicMs": 8392.415782,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 490,
+      "monotonicMs": 8392.422342,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 491,
+      "monotonicMs": 8392.513066,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 492,
+      "monotonicMs": 8392.646112,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 493,
+      "monotonicMs": 8392.650409,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 494,
+      "monotonicMs": 8392.770255,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 495,
+      "monotonicMs": 8393.573611,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 496,
+      "monotonicMs": 8398.250163,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 497,
+      "monotonicMs": 8398.580521,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 498,
+      "monotonicMs": 8398.670514,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 499,
+      "monotonicMs": 8398.696041,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 500,
+      "monotonicMs": 8400.332977,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 501,
+      "monotonicMs": 8400.351244,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 502,
+      "monotonicMs": 8400.383282,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 503,
+      "monotonicMs": 8400.517279,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 504,
+      "monotonicMs": 8401.173328,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 505,
+      "monotonicMs": 8406.654919,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 506,
+      "monotonicMs": 8406.936595,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 507,
+      "monotonicMs": 8407.026557,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 508,
+      "monotonicMs": 8407.043933,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 509,
+      "monotonicMs": 8407.186393,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119992,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 510,
+      "monotonicMs": 8415.927024,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 511,
+      "monotonicMs": 8416.006301,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 512,
+      "monotonicMs": 8416.222059,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 513,
+      "monotonicMs": 8417.033687,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 514,
+      "monotonicMs": 8428.186349,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 515,
+      "monotonicMs": 8428.64798,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 516,
+      "monotonicMs": 8429.829664,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 517,
+      "monotonicMs": 8435.268352,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 518,
+      "monotonicMs": 8435.342281,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 519,
+      "monotonicMs": 8435.376562,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 520,
+      "monotonicMs": 8435.487866,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119964,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 521,
+      "monotonicMs": 8445.641202,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 522,
+      "monotonicMs": 8445.722932,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 523,
+      "monotonicMs": 8445.740368,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 524,
+      "monotonicMs": 8445.77572,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 525,
+      "monotonicMs": 8445.942376,
+      "stage": "authorization.begin",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 526,
+      "monotonicMs": 8446.821424,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 527,
+      "monotonicMs": 8451.804539,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 528,
+      "monotonicMs": 8452.111212,
+      "stage": "authorization.end",
+      "targetRef": "68ceee49590b5c5c80d2558d9e1d578c03e7c8c29c40fa0194b1e79cfaddb8e7",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 529,
+      "monotonicMs": 8452.493265,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 530,
+      "monotonicMs": 8452.60498,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 531,
+      "monotonicMs": 8452.616698,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 532,
+      "monotonicMs": 8452.719269,
+      "stage": "depth.record",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 533,
+      "monotonicMs": 8452.747611,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 105.22353800000019
+    },
+    {
+      "sequence": 534,
+      "monotonicMs": 8485.357762,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 535,
+      "monotonicMs": 8485.446724,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 536,
+      "monotonicMs": 8486.366311,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 537,
+      "monotonicMs": 8498.123985,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 538,
+      "monotonicMs": 8498.46592,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 539,
+      "monotonicMs": 8498.600929,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 540,
+      "monotonicMs": 8498.619196,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 541,
+      "monotonicMs": 8498.73064,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 542,
+      "monotonicMs": 8498.888694,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 543,
+      "monotonicMs": 8499.674093,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 544,
+      "monotonicMs": 8504.630498,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 545,
+      "monotonicMs": 8504.904943,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 546,
+      "monotonicMs": 8504.920787,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 547,
+      "monotonicMs": 8504.940396,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 548,
+      "monotonicMs": 8504.979223,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 549,
+      "monotonicMs": 8504.998862,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 550,
+      "monotonicMs": 8505.098569,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 551,
+      "monotonicMs": 8505.243373,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 552,
+      "monotonicMs": 8505.24832,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 553,
+      "monotonicMs": 8505.385102,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 554,
+      "monotonicMs": 8506.110633,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 555,
+      "monotonicMs": 8516.093328,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 556,
+      "monotonicMs": 8516.417356,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 557,
+      "monotonicMs": 8516.493909,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 558,
+      "monotonicMs": 8516.505126,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 559,
+      "monotonicMs": 8520.061531,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 560,
+      "monotonicMs": 8520.110954,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 561,
+      "monotonicMs": 8520.139686,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 562,
+      "monotonicMs": 8520.248907,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 563,
+      "monotonicMs": 8520.808373,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 564,
+      "monotonicMs": 8526.108525,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 565,
+      "monotonicMs": 8528.27983,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 566,
+      "monotonicMs": 8528.344445,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 567,
+      "monotonicMs": 8528.384485,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 568,
+      "monotonicMs": 8528.531902,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119988,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 569,
+      "monotonicMs": 8539.01137,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 570,
+      "monotonicMs": 8539.203454,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 571,
+      "monotonicMs": 8539.723962,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 572,
+      "monotonicMs": 8540.573085,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 573,
+      "monotonicMs": 8549.706115,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 574,
+      "monotonicMs": 8550.025817,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 575,
+      "monotonicMs": 8550.892346,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 576,
+      "monotonicMs": 8556.880474,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 577,
+      "monotonicMs": 8556.951009,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 578,
+      "monotonicMs": 8556.965039,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 579,
+      "monotonicMs": 8557.064676,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119959,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 580,
+      "monotonicMs": 8576.540853,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 581,
+      "monotonicMs": 8576.615232,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 582,
+      "monotonicMs": 8576.631336,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 583,
+      "monotonicMs": 8576.663994,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 584,
+      "monotonicMs": 8576.824231,
+      "stage": "authorization.begin",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 585,
+      "monotonicMs": 8577.666394,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 586,
+      "monotonicMs": 8589.267256,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 587,
+      "monotonicMs": 8589.504276,
+      "stage": "authorization.end",
+      "targetRef": "8c5a0b663448e6c77440355604c2cb65d8556aa1e87dabe6f8155caf70319223",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 588,
+      "monotonicMs": 8589.54763,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 589,
+      "monotonicMs": 8589.607729,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 590,
+      "monotonicMs": 8589.616271,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 591,
+      "monotonicMs": 8589.631263,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 104.28605000000061
+    },
+    {
+      "sequence": 592,
+      "monotonicMs": 8599.723159,
+      "stage": "click.begin",
+      "desired": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 593,
+      "monotonicMs": 8599.767395,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 594,
+      "monotonicMs": 8600.328803,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 595,
+      "monotonicMs": 8603.018984,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 596,
+      "monotonicMs": 8603.187343,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 597,
+      "monotonicMs": 8603.228664,
+      "stage": "registrar.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 598,
+      "monotonicMs": 8603.23965,
+      "stage": "dispatch.enter",
+      "generation": 3,
+      "desired": 3,
+      "applied": 3,
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 599,
+      "monotonicMs": 8603.281942,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 600,
+      "monotonicMs": 8603.351154,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 601,
+      "monotonicMs": 8603.759777,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 602,
+      "monotonicMs": 8607.299161,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 603,
+      "monotonicMs": 8607.50162,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 604,
+      "monotonicMs": 8607.510363,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "AUTH_VERIFIED",
+      "generation": 3
+    },
+    {
+      "sequence": 605,
+      "monotonicMs": 8607.523112,
+      "stage": "engine.resolver",
+      "outcome": "started",
+      "code": "RESOLVE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 606,
+      "monotonicMs": 8607.538554,
+      "stage": "engine.resolver",
+      "outcome": "ok",
+      "code": "RESOLVE_OK",
+      "generation": 3
+    },
+    {
+      "sequence": 607,
+      "monotonicMs": 8607.543412,
+      "stage": "engine.capture.acquire",
+      "outcome": "skipped",
+      "code": "TRUE_REMOTE_ONLY",
+      "generation": 3
+    },
+    {
+      "sequence": 608,
+      "monotonicMs": 8607.588989,
+      "stage": "transport.record",
+      "state": "pending",
+      "code": "REMOTE_PREPARING"
+    },
+    {
+      "sequence": 609,
+      "monotonicMs": 8607.658491,
+      "stage": "engine.intent",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 610,
+      "monotonicMs": 8607.661826,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 611,
+      "monotonicMs": 8607.724078,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 612,
+      "monotonicMs": 8608.154053,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 613,
+      "monotonicMs": 8610.430322,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 614,
+      "monotonicMs": 8610.64566,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 615,
+      "monotonicMs": 8610.674583,
+      "stage": "engine.intent",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 616,
+      "monotonicMs": 8610.680411,
+      "stage": "engine.worker.capability",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 617,
+      "monotonicMs": 8611.109164,
+      "stage": "engine.worker.capability",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 618,
+      "monotonicMs": 8611.120771,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 619,
+      "monotonicMs": 8611.131648,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 620,
+      "monotonicMs": 8611.191115,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 621,
+      "monotonicMs": 8611.60111,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 622,
+      "monotonicMs": 8613.996857,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 623,
+      "monotonicMs": 8614.179226,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 624,
+      "monotonicMs": 8614.205795,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 625,
+      "monotonicMs": 8614.21596,
+      "stage": "engine.transfer.upload",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 626,
+      "monotonicMs": 8614.266805,
+      "stage": "request.begin",
+      "endpoint": "/remote-save",
+      "expiresInMs": 119996,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 627,
+      "monotonicMs": 8618.198018,
+      "stage": "request.end",
+      "endpoint": "/remote-save",
+      "httpStatus": 202,
+      "state": "pending",
+      "code": "REMOTE_ACCEPTED"
+    },
+    {
+      "sequence": 628,
+      "monotonicMs": 8618.220851,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 629,
+      "monotonicMs": 8618.291876,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 630,
+      "monotonicMs": 8618.812835,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 631,
+      "monotonicMs": 8625.560475,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 632,
+      "monotonicMs": 8625.761361,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 633,
+      "monotonicMs": 8626.148062,
+      "stage": "request.begin",
+      "endpoint": "/operation",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 634,
+      "monotonicMs": 8629.457997,
+      "stage": "request.end",
+      "endpoint": "/operation",
+      "httpStatus": 200,
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 635,
+      "monotonicMs": 8629.497755,
+      "stage": "engine.transfer.upload",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 636,
+      "monotonicMs": 8629.511726,
+      "stage": "engine.transfer.verify",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 637,
+      "monotonicMs": 8629.566056,
+      "stage": "request.begin",
+      "endpoint": "/verify",
+      "expiresInMs": 119981,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 638,
+      "monotonicMs": 8631.854173,
+      "stage": "request.end",
+      "endpoint": "/verify",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 639,
+      "monotonicMs": 8631.882225,
+      "stage": "engine.transfer.verify",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 640,
+      "monotonicMs": 8631.890157,
+      "stage": "engine.auth.check",
+      "outcome": "started",
+      "code": "REMOTE_STAGE_STARTED",
+      "generation": 3
+    },
+    {
+      "sequence": 641,
+      "monotonicMs": 8631.903757,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 642,
+      "monotonicMs": 8631.978317,
+      "stage": "authorization.begin",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "ack": 3,
+      "pending": 0
+    },
+    {
+      "sequence": 643,
+      "monotonicMs": 8632.450273,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 644,
+      "monotonicMs": 8634.961069,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 645,
+      "monotonicMs": 8635.167144,
+      "stage": "authorization.end",
+      "targetRef": "5fc791c5e28636e2aa388df746fcf8e1ea4e35c00964208a09b4fc1e5de0646a",
+      "state": "READY",
+      "sessionEqual": true
+    },
+    {
+      "sequence": 646,
+      "monotonicMs": 8635.199882,
+      "stage": "engine.auth.check",
+      "outcome": "ok",
+      "code": "REMOTE_STAGE_COMPLETE",
+      "generation": 3
+    },
+    {
+      "sequence": 647,
+      "monotonicMs": 8635.26603,
+      "stage": "transport.record",
+      "state": "verified",
+      "code": "R2_HEAD_VERSION_SIZE"
+    },
+    {
+      "sequence": 648,
+      "monotonicMs": 8635.274472,
+      "stage": "engine.completion.history",
+      "outcome": "ok",
+      "code": "REMOTE_COMPLETION_RECORDED",
+      "generation": 3
+    },
+    {
+      "sequence": 649,
+      "monotonicMs": 8635.426597,
+      "stage": "click.end",
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 35.710518000001684
+    },
+    {
+      "sequence": 650,
+      "monotonicMs": 8647.890823,
+      "stage": "current.read",
+      "desired": 3,
+      "applied": 3
+    },
+    {
+      "sequence": 651,
+      "monotonicMs": 8648.930047,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 119999,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 652,
+      "monotonicMs": 8651.978136,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 653,
+      "monotonicMs": 8652.620534,
+      "stage": "request.begin",
+      "endpoint": "/capabilities",
+      "expiresInMs": 120000,
+      "sessionEqual": true
+    },
+    {
+      "sequence": 654,
+      "monotonicMs": 8655.702393,
+      "stage": "request.end",
+      "endpoint": "/capabilities",
+      "httpStatus": 200,
+      "state": "completed"
+    },
+    {
+      "sequence": 655,
+      "monotonicMs": 8659.341895,
+      "stage": "disposal.begin"
+    },
+    {
+      "sequence": 656,
+      "monotonicMs": 8672.522609,
+      "stage": "disposal.end"
+    }
+  ],
+  "samples": [
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 139.8223050000006
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 67.53037200000017
+    },
+    {
+      "state": "blocked",
+      "code": "FRESH_CLICK_REQUIRED",
+      "elapsedMs": 3270.4132
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 96.8351160000002
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 83.35972799999945
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 86.79160200000115
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 105.22353800000019
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 104.28605000000061
+    },
+    {
+      "state": "completed",
+      "code": "R2_HEAD_VERSION_SIZE",
+      "elapsedMs": 35.710518000001684
+    }
+  ],
+  "recorder": null
+}

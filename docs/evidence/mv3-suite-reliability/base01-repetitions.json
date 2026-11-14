@@ -1,0 +1,70 @@
+{
+  "root": "/tmp/c2c-base01-control",
+  "revision": "0d50ab82c10555ae49d617b90be588057a1fa6b6",
+  "jobs": 1,
+  "node": "v24.22.1",
+  "os": "linux",
+  "results": [
+    {
+      "label": "isolated-1",
+      "mode": "OFF",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 9316.985078999998,
+      "depthFailure": false,
+      "outputMentionsStale": false,
+      "outputMentionsAuthorizationLost": false,
+      "staleFailure": false,
+      "authorizationLostFailure": false
+    },
+    {
+      "label": "isolated-2",
+      "mode": "OFF",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 8846.753434999999,
+      "depthFailure": false,
+      "outputMentionsStale": false,
+      "outputMentionsAuthorizationLost": false,
+      "staleFailure": false,
+      "authorizationLostFailure": false
+    },
+    {
+      "label": "isolated-3",
+      "mode": "OFF",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 8888.914343,
+      "depthFailure": false,
+      "outputMentionsStale": false,
+      "outputMentionsAuthorizationLost": false,
+      "staleFailure": false,
+      "authorizationLostFailure": false
+    },
+    {
+      "label": "full-1",
+      "mode": "OFF",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test --test-concurrency=1 tests/final-focused.mjs",
+      "exit": 0,
+      "tests": 372,
+      "pass": 372,
+      "fail": 0,
+      "durationMs": 52600.463074,
+      "depthFailure": false,
+      "outputMentionsStale": false,
+      "outputMentionsAuthorizationLost": false,
+      "staleFailure": false,
+      "authorizationLostFailure": false
+    }
+  ],
+  "scope": "Linux independent-process local workerd fixtures; no Windows or Cloudflare proof"
+}

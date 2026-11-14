@@ -28,5 +28,8 @@
       "gate": "start-error-adjacent-control",
       "state": "PASS"
     }
-  ]
+  ],
+  "productionDirtyAtExecution": true,
+  "committedProductionEquivalent": "79fb73f",
+  "provenanceNote": "Source revision is the checkout HEAD at execution; Phase 1 production edits were uncommitted then, subsequently committed unchanged in 79fb73f."
 }

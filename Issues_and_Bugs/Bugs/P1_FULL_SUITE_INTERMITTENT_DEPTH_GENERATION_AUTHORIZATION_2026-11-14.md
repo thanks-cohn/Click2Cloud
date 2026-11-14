@@ -34,3 +34,23 @@
 - Real Chrome/native right-click and independent R2 readback remain **NOT VERIFIED** until owner-authorized physical acceptance. Do not close this item based solely on synthetic tests.
 
 **Documentation-only issue. No app code, tests, configuration, Cloudflare resources or existing milestone tags are modified by this log.**
+
+## Review-branch investigation — November 14, 2026
+
+The issue remains **OPEN for the owner's Windows incident**. Linux independent
+process samples did not reproduce it: ten isolated + ten full runs before the
+Phase 2 investigation all passed; ten isolated + ten full runs after opt-in safe
+tracing and the LF checkout policy all passed, including OFF/BASIC/EXPANSIVE modes.
+Three bounded CPU-contention runs and protected Base 0.1 controls passed too.
+No production authorization, generation, expiry or replay behavior was changed.
+
+A deterministic control proves missing fixture-dispatch `generation` can produce
+STALE_GENERATION without a real generation change. Separate post-write session or
+generation loss correctly remains uncertain and is never replayed. These are
+causal controls, not proof of which path occurred in the owner report.
+
+The distinct LF/CRLF byte-hash cause is repaired by narrow `.gitattributes` rules,
+with actual Git autocrlf conversion and content-tamper controls. Real Windows CMD
+execution and installed Chrome remain NOT RUN/BLOCKED here. See
+[the complete report](../../docs/evidence/mv3-suite-reliability/REPORT.md) and
+[Windows procedure](../../docs/evidence/mv3-suite-reliability/WINDOWS_ACCEPTANCE.md).

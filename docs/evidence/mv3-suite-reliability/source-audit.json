@@ -1,0 +1,315 @@
+{
+  "revision": "4878aa26d989b4344cccb92481db5273f6bcf6a1",
+  "files": [
+    {
+      "path": "extension/background.mjs",
+      "sha256": "bd71e8c975e64efefab1584b968f328d1228464459225d12fcbe95a44512afcb",
+      "anchors": [
+        {
+          "text": "void import(",
+          "line": 168
+        },
+        {
+          "text": "message?.channel==='recorder'",
+          "line": 223
+        }
+      ]
+    },
+    {
+      "path": "extension/recorder-panel.mjs",
+      "sha256": "2ce96e87262d72d003558c5e0e162386dca31896e47fa719b3d362796dbc63d3",
+      "anchors": [
+        {
+          "text": "const report=",
+          "line": 9
+        },
+        {
+          "text": "rec-toggle",
+          "line": 7
+        }
+      ]
+    },
+    {
+      "path": "extension/app.mjs",
+      "sha256": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
+      "anchors": [
+        {
+          "text": "recorder-panel",
+          "line": 615
+        },
+        {
+          "text": "debug-mode",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "path": "src/recorder/host.mjs",
+      "sha256": "f39cb146397b2a5818d7ec4ff78cf00dbadbf17914878caf556f7c7e14ffdd06",
+      "anchors": [
+        {
+          "text": "createRecorderHost",
+          "line": 5
+        },
+        {
+          "text": "await import(",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "path": "src/recorder/recorder.mjs",
+      "sha256": "47d5ea58694072086f32425b6ea3301b0db4ad4d32c3a6918fac78c05aff125c",
+      "anchors": [
+        {
+          "text": "ensureBasic",
+          "line": 8
+        },
+        {
+          "text": "async function start",
+          "line": 48
+        },
+        {
+          "text": "function stop",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "path": "src/recorder/storage.mjs",
+      "sha256": "601b1559152f1634193e3d6ea777005a3ac1f38f4b338a96d8c13b6edd8d0af6",
+      "anchors": [
+        {
+          "text": "factory.open",
+          "line": 5
+        },
+        {
+          "text": "async append",
+          "line": 35
+        },
+        {
+          "text": "async snapshot",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "path": "src/recorder/writer.mjs",
+      "sha256": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
+      "anchors": [
+        {
+          "text": "async function flush",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "path": "src/recorder/export.mjs",
+      "sha256": "4a2657e13d073d712c7f1aa82d16766716460d606360ecf8c6a8c5872d1add18",
+      "anchors": [
+        {
+          "text": "export async function exportPart",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "path": "src/chrome/registrar.mjs",
+      "sha256": "164505890908b2c3894a588540bf5eac65622c94452e266b2b4501d9296b29bc",
+      "anchors": [
+        {
+          "text": "async function handleClick",
+          "line": 184
+        },
+        {
+          "text": "addListener(listener)",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "path": "src/chrome/trusted-sender.mjs",
+      "sha256": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
+      "anchors": [
+        {
+          "text": "appSenderDecision",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "path": "src/core/engine.mjs",
+      "sha256": "738941e567cd1817f6acca1111097b87e9303812c73cd4b776e79b772a3553ee",
+      "anchors": [
+        {
+          "text": "async function save",
+          "line": 44
+        },
+        {
+          "text": "const authorize=",
+          "line": 100
+        }
+      ]
+    },
+    {
+      "path": "src/cloudflare/transport.mjs",
+      "sha256": "72ee4afeb74c9c06ebaa60a619435199dbbb04e7351051c4e7b509447e9f398a",
+      "anchors": [
+        {
+          "text": "async function recheck",
+          "line": 25
+        },
+        {
+          "text": "async status",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "path": "src/cloudflare/onboarding.mjs",
+      "sha256": "7b54d45c4995889906b02af80431d639c24e73bda5fe0699639156173de0522c",
+      "anchors": [
+        {
+          "text": "recoverDestination",
+          "line": 167
+        }
+      ]
+    },
+    {
+      "path": "src/auth/cloudflare-oauth.mjs",
+      "sha256": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
+      "anchors": [
+        {
+          "text": "authority",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "path": "extension/manifest.json",
+      "sha256": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
+      "anchors": [
+        {
+          "text": "service_worker",
+          "line": 17
+        },
+        {
+          "text": "key",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "path": "scripts/build-extension.mjs",
+      "sha256": "0781fbad7765f4dc5f5f885b581ed5c3ed8bbff3b7a303feca5faec9230f0787",
+      "anchors": [
+        {
+          "text": "OAUTH_EXTENSION_ID_MISMATCH",
+          "line": 25
+        },
+        {
+          "text": "workerCodeDigest",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "path": "tests/depth-plan-recovery.test.mjs",
+      "sha256": "a85693d13c61a87e16c31bf9be7d9cca192814c3937d572778f4be6e30a236e5",
+      "anchors": [
+        {
+          "text": "const transportOptions",
+          "line": 54
+        },
+        {
+          "text": "dispatch:",
+          "line": 69
+        },
+        {
+          "text": "const selectedPrefixes",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "path": "tests/workings.test.mjs",
+      "sha256": "e92c5ce2c9a7dbd7e5525affa630936867f0287b9c73030419a4d6523dcf935d",
+      "anchors": [
+        {
+          "text": "const hash=",
+          "line": 2
+        },
+        {
+          "text": "Stale workings map",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "path": "tests/final-focused.mjs",
+      "sha256": "36473058f83673a4141aa4eeebe84dbcc06aaba7e242be8fe5f97ade8fda4cff",
+      "anchors": [
+        {
+          "text": "depth-plan-recovery",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "path": "scripts/test-shelf-extension.mjs",
+      "sha256": "58a559a70c40bdd6939be226b8716b3c9734d40df73691835ad1be0f1ddd6b5e",
+      "anchors": [
+        {
+          "text": "Extensions.loadUnpacked",
+          "line": 26
+        },
+        {
+          "text": "BLOCKED",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "path": "codex/11.14.2026/P1_V2_TWO_TIER_NONBLOCKING_RIGHT_CLICK_DIAGNOSTICS_CODEX_REQUEST.md",
+      "sha256": "1c58c2ad0e97ad437bc400fcdb6a119fb37f12fea38d6b09e0ea2f1570360cbb",
+      "anchors": [
+        {
+          "text": "Non-negotiable",
+          "line": 22
+        },
+        {
+          "text": "N/A rule",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "path": "docs/evidence/two-tier-diagnostics/IMPLEMENTATION.md",
+      "sha256": "dfc957fe798f33e345168b94b39ff540234862e514b04541aa8aee359a94c552",
+      "anchors": [
+        {
+          "text": "Architecture",
+          "line": 28
+        },
+        {
+          "text": "Source-to-field",
+          "line": 80
+        }
+      ]
+    },
+    {
+      "path": "docs/evidence/two-tier-diagnostics/VALIDATION.md",
+      "sha256": "91170a4afdf4f2e8d1fe468ac0c262632d87a3409bd497ff860219d2f1d0bd65",
+      "anchors": [
+        {
+          "text": "385/385",
+          "line": 10
+        },
+        {
+          "text": "BLOCKED_ADMIN_POLICY",
+          "line": 14
+        }
+      ]
+    }
+  ]
+}

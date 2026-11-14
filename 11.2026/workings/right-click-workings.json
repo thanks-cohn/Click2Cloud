@@ -14655,7 +14655,14 @@
       "expansive": "click2cloud-forensic-v2",
       "installedChrome": "BLOCKED_ADMIN_POLICY",
       "liveR2": "NOT_RUN",
-      "details": "docs/evidence/two-tier-diagnostics/IMPLEMENTATION.md"
+      "details": "docs/evidence/two-tier-diagnostics/IMPLEMENTATION.md",
+      "mv3WorkerCompatibility": {
+        "loading": "static-esm-with-deferred-guarded-initialization",
+        "policy": "scripts/mv3-import-policy.mjs",
+        "runtimeEvidence": "HTTP_MODULE_SERVICE_WORKER_WITH_FIXTURE_CHROME_PORTS",
+        "installedChrome": "BLOCKED_ADMIN_POLICY",
+        "report": "docs/evidence/mv3-suite-reliability/REPORT.md"
+      }
     }
   },
   "changeLog": [

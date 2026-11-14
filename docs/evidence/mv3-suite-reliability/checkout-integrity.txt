@@ -1,0 +1,9 @@
+✔ Windows autocrlf clean checkout preserves canonical fingerprint bytes; semantic tampering still fails (51.143995ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.014801
