@@ -9200,28 +9200,6 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
     "sourceFiles": {
-      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
-      "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
-      "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
-      "extension/background.mjs": "d5a2fed63c96ea4cc6c5d72025e9fc71d63ec9f85389388880a1934c5d1c95b9",
-      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
-      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
-      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
-      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
-      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
-      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
-      "extension/recorder-panel.mjs": "0d17758a5bfdc57855d71d1cc0f5da9a14999bba8b00dbee2e748a5efa109254",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
-      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
-      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
-      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
-      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
-      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
-      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
@@ -9236,7 +9214,7 @@
       "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "899d538d1d828c9097ff8d934a108af6edb3974b409bda3fed96a561770b82da",
-      "src/chrome/registrar.mjs": "164505890908b2c3894a588540bf5eac65622c94452e266b2b4501d9296b29bc",
+      "src/chrome/registrar.mjs": "0353ab69bcafe74e5c61666a0bd7945dd74705db3549a7798d28d2a4c24dc2cd",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "a31f77aa2bcae3f1050654c0afd221ec42478c2d97d0b78d7d3248fbaefc837d",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
@@ -9246,7 +9224,7 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "72ee4afeb74c9c06ebaa60a619435199dbbb04e7351051c4e7b509447e9f398a",
+      "src/cloudflare/transport.mjs": "74867aec05577b59f6c22d2df3ce0b5028030a2882b4c9c42b334113b8137866",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
       "src/cloudflare/worker.mjs": "f74bfcf3d006e0f54a5c969b1c2bf1265f56af721c10d0604a6d792866d03304",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -9302,12 +9280,34 @@
       "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
       "src/recorder/archive-stream.mjs": "dffc783f1bb30edd480b2ead5320909ba6a200a7b860c18ab98162246f25ec61",
       "src/recorder/export.mjs": "59c7b6af57b93a070bbeaa70a3b8e2bbc128ff84498a5bbdb14ae3cddf4666c9",
-      "src/recorder/host.mjs": "8e2b82a22532305410356f420262dc6ad892fc960e75330884123b42edd9fac1",
-      "src/recorder/provider-observation.mjs": "63acd6e40fcab227faa33bbe9913f856bfa68d5005e700adc9abbcd30d02e1a5",
-      "src/recorder/recorder.mjs": "48ad3b7abe95c5827d496c92abed3da16e041703d2f1bdbb05a2c29dff6ba603",
-      "src/recorder/schema.mjs": "1e11fa82b7591512c569d413fd08bcbd0209270d431aa094823c4f43866b4855",
+      "src/recorder/host.mjs": "9596eee5f2dfdbcb3bcc58eb4d8b5255c92e6b55604beb4ddff0a51cc0d2593e",
+      "src/recorder/provider-observation.mjs": "accd00a2102fe38bd5fca47673a6e9725919eb2c0b9820075c5122babbb0862f",
+      "src/recorder/recorder.mjs": "6bb436e59ff63e31d80ea0509ff5e2b7ddae6f0c5cdb1ec62fc0abdae57abb6e",
+      "src/recorder/schema.mjs": "ba485f4bd1e1b88e90a4c758dcd7c7d7114146f2cbc5a32049a3edfa58d1177e",
       "src/recorder/storage.mjs": "8228a931c92929fe416b4fad0a48d64f5c3856a15f47fa9c325453601f2ea7d4",
-      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303"
+      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
+      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
+      "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
+      "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
+      "extension/background.mjs": "d5a2fed63c96ea4cc6c5d72025e9fc71d63ec9f85389388880a1934c5d1c95b9",
+      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
+      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
+      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
+      "extension/recorder-panel.mjs": "0d17758a5bfdc57855d71d1cc0f5da9a14999bba8b00dbee2e748a5efa109254",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
+      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
+      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
+      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -12097,6 +12097,46 @@
           "level": "NODE_AND_HTTP_BROWSER_FIXTURE",
           "status": "REAL_CHROMIUM_IDB_DOWNLOAD_NOT_INSTALLED_OR_LIVE",
           "testFile": "tests/recorder-complete-export.test.mjs"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "RECORDER_NATIVE_TRUTH",
+        "preconditions": "Exact trusted Shelf sender; Debug enabled; RAW consent when selected",
+        "trigger": "Delivered native click and existing independent provider verification response",
+        "guard": "Fixed committed snapshot, sequence/count/hash validation, bounded native Blob payload",
+        "actual": "Cold identity joins after native hydration. Verified observer state requires final successful completion plus correlated exact receipt and independent HEAD proof; no proof from reason strings.",
+        "apiMethods": [],
+        "identity": "Local recorder v2 snapshot/page protocol only; no provider or configuration effect",
+        "nextState": "Complete retained snapshot archive or named partial/failure/cancellation",
+        "uiEffect": "Automatic one-file download request with counts/hash/progress; no manual next-part action",
+        "externalResourceEffect": "none; local browser download only",
+        "persistence": "Reads separate diagnostic archives only",
+        "errors": [
+          "SEGMENT_HASH_MISMATCH",
+          "SEGMENT_CHAIN_MISMATCH",
+          "EXPORT_READ_INTERRUPTED",
+          "EXPORT_SIZE_LIMIT_256_MIB"
+        ],
+        "retry": "No provider IO or write replay",
+        "sourceRefs": [
+          {
+            "path": "src/chrome/registrar.mjs",
+            "symbol": "stage:'native.identity'"
+          },
+          {
+            "path": "src/recorder/provider-observation.mjs",
+            "symbol": "acceptProof"
+          },
+          {
+            "path": "src/recorder/host.mjs",
+            "symbol": "let binding=row,verification=null"
+          }
+        ],
+        "verification": {
+          "level": "NODE_NATIVE_HOST_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER",
+          "status": "PASS_NOT_INSTALLED_OR_LIVE",
+          "testFile": "tests/recorder-native-truth.test.mjs"
         },
         "contractViolation": null
       }

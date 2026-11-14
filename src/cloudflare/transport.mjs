@@ -46,7 +46,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
       if(result.state==='pending'){await record({state:'pending',code:result.code,operationId,destination,stage:result.stage,bytes:result.bytes});await new Promise((ok,no)=>{const abort=()=>{clearTimeout(timer);o.signal?.removeEventListener('abort',abort);no(Error('CANCELLED'));},timer=setTimeout(()=>{o.signal?.removeEventListener('abort',abort);ok();},pollIntervalMs);if(o.signal?.aborted)abort();else o.signal?.addEventListener('abort',abort,{once:true});});}
      }return result;
     }),
-    verifyObject:(c,receipt,o)=>timed('verificationMs','transfer.verify',async()=>{const r=await post(c,'/verify',receipt,o.signal);return r.state==='completed'?r.proof:null;})});
+    verifyObject:(c,receipt,o)=>timed('verificationMs','transfer.verify',async()=>{const r=await post(c,'/verify',receipt,o.signal);if(r.state==='completed')try{onObservation?.({stage:'provider.verification',providerOperationId:operationId,receipt,proof:r.proof});}catch{}return r.state==='completed'?r.proof:null;})});
    const result=await saver({operationId,source,destination,provenance,signal});
    const final={...result,timings,durationMs:Math.round(performance.now()-start)};try{await record(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
   },

@@ -66,3 +66,4 @@ await import('./depth-authority-race.test.mjs');
 
 await import('./depth-fetch-diagnostics.test.mjs');
 await import('./recorder-complete-export.test.mjs');
+await import('./recorder-native-truth.test.mjs');

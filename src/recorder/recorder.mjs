@@ -26,6 +26,7 @@ export function createRecorder({epoch=crypto.randomUUID(),build={},storage={},ma
   if(!entry)return;
   const r=entry.row,t=number(event.monotonicMs)??clock();
   if(event.workerEpoch&&event.workerEpoch!==epoch){r.dataLossFlag=true;r.state='uncertain';r.availability=Object.fromEntries(['clickToDispatchMs','clickToVerifiedMs'].map(k=>[k,{reason:'interrupted'}]));entry.crossEpoch=true;}
+  if(event.stage==='native.identity'){if(['cloudflare','google-drive','onedrive','dropbox'].includes(event.providerId))r.providerId=event.providerId;const mode=({nested:'narrow',simple:'simple',narrow:'narrow',depth:'depth'})[event.mode];if(mode)r.mode=mode;if(number(event.menuGeneration)!==null)r.menuGeneration=event.menuGeneration;}
   if(event.stage==='dispatch.enter'&&!entry.crossEpoch)r.clickToDispatchMs=Math.max(0,t-entry.start);
   const metric={'capture.acquire':'sourceAcquireMs','transfer.verify':'verificationElapsedMs',...(!event.remoteEnvelope?{'transfer.upload':'uploadElapsedMs'}:{})}[event.stage];
   if(event.outcome==='started')entry.stages.set(event.stage,t);

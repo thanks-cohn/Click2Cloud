@@ -1,9 +1,9 @@
 // Provider-neutral v2 observation contract. No provider/network authority.
-export const FIELDS=Object.freeze(['attemptId','schemaVersion','clickTimestampUtc','appId','appVersion','build','workerEpoch','pageOrigin','websiteHost','sourceOrigin','sourceHost','sourceUrlSanitized','providerId','mode','context','state','reasonCode','proofLevel','evidenceClass','bytesObserved','bytesVerified','clickToDispatchMs','sourceAcquireMs','sourceReadThroughputBytesPerSecond','providerRequestLatencyMs','uploadElapsedMs','uploadThroughputBytesPerSecond','verificationElapsedMs','clickToVerifiedMs','endToEndEffectiveBytesPerSecond','outcomeCompleteness','missingFields','dataLossFlag']);
+export const FIELDS=Object.freeze(['attemptId','schemaVersion','clickTimestampUtc','appId','appVersion','build','workerEpoch','pageOrigin','websiteHost','sourceOrigin','sourceHost','sourceUrlSanitized','providerId','mode','context','state','reasonCode','proofLevel','evidenceClass','bytesObserved','bytesVerified','clickToDispatchMs','sourceAcquireMs','sourceReadThroughputBytesPerSecond','providerRequestLatencyMs','uploadElapsedMs','uploadThroughputBytesPerSecond','verificationElapsedMs','clickToVerifiedMs','endToEndEffectiveBytesPerSecond','outcomeCompleteness','missingFields','dataLossFlag','menuGeneration']);
 export const METRICS=FIELDS.slice(19,30);
 export const STATES=['pending','verified','failed','blocked','cancelled','uncertain','interrupted'];
 export const PROVIDERS=['cloudflare','google-drive','onedrive','dropbox','other'];
-export const STAGES=['CLICK_RECEIVED','dispatch.enter','auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history','native.terminal','provider.request'];
+export const STAGES=['CLICK_RECEIVED','dispatch.enter','auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history','native.terminal','provider.request','native.identity','provider.verification'];
 export const safeId=v=>typeof v==='string'&&/^[a-z0-9-]{1,64}$/i.test(v)?v:null;
 export const number=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0?v:null;
 export function capacity(value){if(!Number.isSafeInteger(value)||value<1)throw Error('POSITIVE_SAFE_INTEGER_REQUIRED');return value;}
@@ -19,7 +19,7 @@ export function secureBasic(row){
  out.providerId=PROVIDERS.includes(out.providerId)?out.providerId:'other';out.mode=['simple','narrow','depth','other'].includes(out.mode)?out.mode:'other';out.context=['image','link','page','audio','video','other'].includes(out.context)?out.context:'other';
  out.state=STATES.includes(out.state)?out.state:'uncertain';out.reasonCode=null;out.availability.reasonCode={value:'N/A',reason:'redacted'};
  out.clickTimestampUtc=instant(out.clickTimestampUtc);out.appId='click2cloud';out.appVersion=/^\d+\.\d+\.\d+$/.test(out.appVersion??'')?out.appVersion:null;out.build=/^[a-f0-9]{40}$/.test(out.build??'')?out.build:null;
- out.proofLevel=['independently_verified','provider_accepted','unknown'].includes(out.proofLevel)?out.proofLevel:'unknown';out.evidenceClass=['authoritative-receipt','fixture-only','not_observed'].includes(out.evidenceClass)?out.evidenceClass:'not_observed';out.outcomeCompleteness=['pending','terminal','interrupted'].includes(out.outcomeCompleteness)?out.outcomeCompleteness:'interrupted';out.dataLossFlag=out.dataLossFlag===true;
+ out.menuGeneration=number(out.menuGeneration);out.proofLevel=['independently_verified','provider_accepted','unknown'].includes(out.proofLevel)?out.proofLevel:'unknown';out.evidenceClass=['authoritative-receipt','fixture-only','not_observed'].includes(out.evidenceClass)?out.evidenceClass:'not_observed';out.outcomeCompleteness=['pending','terminal','interrupted'].includes(out.outcomeCompleteness)?out.outcomeCompleteness:'interrupted';out.dataLossFlag=out.dataLossFlag===true;
  for(const k of METRICS)out[k]=number(out[k]);out.missingFields=FIELDS.filter(k=>out[k]===null);for(const key of out.missingFields)out.availability[key]??={value:'N/A',reason:'invalid_measurement'};return out;
 }
 export function summary(rows){

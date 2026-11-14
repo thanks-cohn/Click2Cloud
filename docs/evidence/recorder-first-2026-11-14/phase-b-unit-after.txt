@@ -1,0 +1,10 @@
+✔ a completion/proofKind string without correlated independent readback cannot be recorded as verified (1.188016ms)
+✔ cold native callback reports actual resolved identity after beforeClick hydrates the ACK (15.653022ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 141.745031

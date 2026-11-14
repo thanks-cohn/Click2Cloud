@@ -588,3 +588,16 @@ Source: recorder export/storage/host + Settings panel; tests:
 `recorder-complete-export.test.mjs`, `test-recorder-complete-export.mjs`, independent
 Python ZIP/CRC/hash/CSV verifier. Real Chromium page/IDB/download proof is separate
 from installed Chrome and live R2; neither is inferred from these fixtures.
+
+Recorder classification now joins `native.identity` after `beforeClick` restores
+current native ACK state. That observation cannot authorize, alter or replay a
+route. The host updates its invocation-local binding, including nested→narrow,
+and Basic/Rich preserve the observed menu generation. `provider.verification`
+observes the already-existing independent /verify response. Verified recording
+requires terminal completed/verified, matching remote operation, selected exact
+destination, receipt and independently observed HEAD key/size/ETag/version through
+the existing acceptProof contract. A reason/proofKind string alone is insufficient.
+Missing/bad evidence, auth loss, stale generation or partial History remain
+unverified. Tests exercise actual native listener→host→engine→transport→local
+workerd/R2 readback→Basic/Rich/SECURE export with memory recorder ports; browser
+persistence, installed Chrome and live R2 are distinct gates.

@@ -1,0 +1,530 @@
+[
+  {
+    "mode": "simple",
+    "scenario": "success",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 106.1456599999999,
+    "elapsedMs": 212.751806,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "cold",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 43.7071890000002,
+    "elapsedMs": 106.61204599999996,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "auth_lost",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "uncertain",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 42.56213099999991,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "history_partial",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "partial",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 39.92358899999999,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "bad_proof",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 54.13302500000009,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "missing_receipt",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 54.08479699999998,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "wrong_target",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 40.19583999999986,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "stale_generation",
+    "provider": "cloudflare",
+    "recordedState": "blocked",
+    "saveState": "blocked",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 5.080032000000074,
+    "requests": [],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "observer_throw",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 46.071529000000055,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "observer_slow",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 66.7384790000001,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "success",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 32.57938799999965,
+    "elapsedMs": 76.33267999999998,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "cold",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 31.35440800000015,
+    "elapsedMs": 72.68752899999981,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "auth_lost",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "uncertain",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 38.83925799999997,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "history_partial",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "partial",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 32.14975400000003,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "bad_proof",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 40.34013899999991,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "missing_receipt",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 48.176368000000366,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "wrong_target",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 49.94411900000023,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "stale_generation",
+    "provider": "cloudflare",
+    "recordedState": "blocked",
+    "saveState": "blocked",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 4.524768999999651,
+    "requests": [],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "observer_throw",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 40.41980100000001,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "observer_slow",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 44.350836999999956,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "success",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 23.669716000000335,
+    "elapsedMs": 60.70742500000006,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "cold",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 25.093865999999707,
+    "elapsedMs": 51.14666099999977,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "auth_lost",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "uncertain",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 35.76676399999997,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "history_partial",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "partial",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 37.88000499999998,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "bad_proof",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 42.813726999999744,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "missing_receipt",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 39.11718599999995,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "wrong_target",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 53.26858099999981,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "stale_generation",
+    "provider": "cloudflare",
+    "recordedState": "blocked",
+    "saveState": "blocked",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 8.775368999999955,
+    "requests": [],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "observer_throw",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 56.60288199999968,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "observer_slow",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 42.239872000000105,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  }
+]

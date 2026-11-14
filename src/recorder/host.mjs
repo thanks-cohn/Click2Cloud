@@ -4,8 +4,8 @@ import {providerObservation} from './provider-observation.mjs';
 import {createRecorder} from './recorder.mjs';
 // Dedicated local versioned channel, accepted only after appSenderDecision in the
 // existing message owner. No agent/debug grant implies RAW collection authority.
-export async function createRecorderHost({chrome,build,startupGaps=()=>0}){
- const recorder=createRecorder({build});let debug=false;const snapshots=new Map();
+export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorder:providedRecorder}){
+ const recorder=providedRecorder??createRecorder({build});let debug=false;const snapshots=new Map();
  // No await of recorder DB readiness in bootstrap or on a delivered gesture.
  try{debug=(await chrome.storage.local.get('uiDebugMode')).uiDebugMode===true;}catch{}
  void recorder.setDebug(debug).catch(()=>{});
@@ -13,9 +13,10 @@ export async function createRecorderHost({chrome,build,startupGaps=()=>0}){
  chrome.storage.onChanged?.addListener((changes,area)=>{if(area==='local'&&changes.uiDebugMode){debug=changes.uiDebugMode.newValue===true;void recorder.setDebug(debug).catch(()=>{});}});
  return {
   click({attemptId,timestampUtc,monotonicMs,menuGeneration,info,tab,row}){
+   let binding=row,verification=null;
    const pageUrl=info.pageUrl??tab?.url,sourceUrl=info.srcUrl??info.linkUrl??info.pageUrl;
    recorder.observe({stage:'CLICK_RECEIVED',attemptId,timestampUtc,monotonicMs,menuGeneration,providerId:row?.target?.provider??row?.providerAction??row?.origin?.provider,mode:row?.origin?.mode,context:['audio','video'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',pageUrl,sourceUrl,raw:{pageUrl,sourceUrl,menuItemId:String(info.menuItemId)}});
-   return event=>{const result=event.result;recorder.observe({...event,attemptId,...(event.stage==='native.terminal'?{proof:providerObservation(row?.target?.provider??row?.providerAction,result),raw:{...result?.receipt,...result?.destination,providerOperationId:result?.remoteOperationId??result?.operationId,errorMessage:result?.errorMessage}}:{})});};
+   return event=>{const result=event.result;if(event.stage==='native.identity'&&event.row?.id===String(info.menuItemId))binding=event.row;if(event.stage==='provider.verification')verification=event;recorder.observe({...event,attemptId,...(event.stage==='native.identity'?{providerId:binding?.target?.provider??binding?.providerAction??binding?.origin?.provider,mode:binding?.origin?.mode}:{}),...(event.stage==='native.terminal'?{proof:providerObservation(binding?.target?.provider??binding?.providerAction,result,{target:binding?.target,verification}),raw:{...result?.receipt,...result?.destination,providerOperationId:result?.remoteOperationId??result?.operationId,errorMessage:result?.errorMessage}}:{})});};
   },
   async request(message){try{
    if(message.version!==2||!['status','debug','capacity','start','stop','snapshot','page','runs'].includes(message.method))throw Error('INVALID_RECORDER_REQUEST');

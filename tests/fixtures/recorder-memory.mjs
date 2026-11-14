@@ -1,0 +1,8 @@
+// Explicit memory ports for Node native/host integration. Not browser durability.
+import {sha256} from '../../src/recorder/storage.mjs';
+export function recorderMemory(){
+ const rows=new Map(),snapshots=new Map();let sequence=0,run=null;const segments=[];
+ const basic={commit:async batch=>{for(const row of batch){const prior=rows.get(row.attemptId);if(!prior||prior.state==='pending')rows.set(row.attemptId,{...row,sequence:prior?.sequence??++sequence});}return JSON.stringify(batch).length;},control:async()=>({sequence,count:rows.size,capacity:4000,evicted:0,gaps:0}),recent:async()=>[...rows.values()],snapshot:async health=>{const id=crypto.randomUUID();snapshots.set(id,structuredClone([...rows.values()]));return {id,available:true,count:rows.size,control:await basic.control(),health};},snapshotPage:async(id,after)=>snapshots.get(id).slice(after,after+128).map((r,i)=>({...r,snapshotPosition:after+i+1})),close(){}};
+ const rich={active:null,start:async p=>run={id:crypto.randomUUID(),state:'ACTIVE',limit:p.limit,admitted:0,reserved:0,committed:0,head:null,highWater:0,gaps:[],pending:[],unknownEpochs:0},append:async events=>{const jsonl=events.map(JSON.stringify).join('\n')+'\n',segment={runId:run.id,start:events[0].sequence,end:events.at(-1).sequence,jsonl,priorHash:run.head,hash:await sha256(run.head+'\n'+jsonl)};segments.push(segment);run.committed+=events.length;run.reserved=run.highWater=segment.end;run.head=segment.hash;return jsonl.length;},stop:async(_id,state)=>{run.state=state;return run;},runs:async()=>run?[structuredClone(run)]:[],snapshot:async id=>id?structuredClone(run):null,page:async(snap,after)=>segments.filter(s=>s.start>after&&s.end<=snap.highWater).slice(0,1),close(){}};
+ return {rows,basic,rich};
+}
