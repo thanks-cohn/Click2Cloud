@@ -1,0 +1,179 @@
+{
+  "node": "v24.22.1",
+  "os": "linux",
+  "windows": "NOT_RUN",
+  "incident": "UNRESOLVED_WINDOWS_OWNER_TEST_REQUIRED",
+  "results": [
+    {
+      "mode": "OFF",
+      "command": "C2C_DEPTH_RECORDER_MODE=OFF C2C_DEPTH_TRACE_DIR=work/recorder-first/depth-last/OFF node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "requests": 87,
+      "requestErrors": [],
+      "clickSamples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 163.83535299999994
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 76.47760500000004
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 318.67829400000005
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 87.08734500000037
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 79.76365699999997
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 67.70949400000018
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 80.179306
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 74.01524299999983
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 62.90415600000006
+        }
+      ]
+    },
+    {
+      "mode": "BASIC",
+      "command": "C2C_DEPTH_RECORDER_MODE=BASIC C2C_DEPTH_TRACE_DIR=work/recorder-first/depth-last/BASIC node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "requests": 87,
+      "requestErrors": [],
+      "clickSamples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 111.07778300000018
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 75.2054519999997
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 257.466324
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 81.47064000000046
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 74.49225500000011
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 69.33096800000021
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 71.12605199999962
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 98.13588100000015
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 69.02793500000007
+        }
+      ]
+    },
+    {
+      "mode": "EXPANSIVE",
+      "command": "C2C_DEPTH_RECORDER_MODE=EXPANSIVE C2C_DEPTH_TRACE_DIR=work/recorder-first/depth-last/EXPANSIVE node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "requests": 87,
+      "requestErrors": [],
+      "clickSamples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 110.52210399999967
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 75.86313799999971
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 241.25551899999937
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 92.48022700000001
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 65.91299799999979
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 82.96126800000002
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 77.14976899999965
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 75.90462899999966
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 64.64213899999959
+        }
+      ]
+    }
+  ]
+}

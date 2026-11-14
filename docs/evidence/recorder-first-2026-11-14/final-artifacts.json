@@ -89,5 +89,12 @@
     "zipSHA256": "91b5dd22431a8bf02be11fdcf6cf4de1b4ca4e9f7158acc5919b8a991a81eeeb",
     "data": "Generated synthetic fixture data only",
     "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/rolling-260-recovered.zip.gz",
+    "zipBytes": 1396491,
+    "zipSHA256": "d3de1003f3fdd5e7b2c889bfbf6012deb5d14cb341ba06d330367748aa6aa831",
+    "data": "Synthetic real-IDB rolling/recovery fixture; 260 retained rows, high-water 601",
+    "verifier": "scripts/verify-recorder-zip.py"
   }
 ]
