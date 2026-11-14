@@ -1,0 +1,98 @@
+[
+  {
+    "gate": "v2-to-v3-indices-pending-restart-gap-deduplication-resume-export",
+    "state": "PASS",
+    "control": {
+      "capacity": 123,
+      "sequence": 2,
+      "count": 2,
+      "evicted": 0,
+      "gaps": 0,
+      "epoch": "new",
+      "unknownEpochs": 1
+    },
+    "interruptedReason": "interrupted",
+    "richCommitted": 5,
+    "highWater": 7,
+    "gapCount": 1,
+    "unconfirmed": 1,
+    "status": "PARTIAL",
+    "issues": [
+      {
+        "reason": "rich_missing_ranges",
+        "ranges": [
+          {
+            "start": 4,
+            "end": 5,
+            "reason": "missing_or_dropped"
+          }
+        ]
+      },
+      {
+        "reason": "declared_rich_gaps",
+        "ranges": [
+          {
+            "start": 4,
+            "end": 5,
+            "reason": "interrupted_unconfirmed"
+          }
+        ]
+      },
+      {
+        "reason": "unconfirmed",
+        "ranges": [
+          {
+            "start": 4,
+            "end": 5
+          }
+        ]
+      },
+      {
+        "reason": "unknown_epochs",
+        "count": 3
+      }
+    ],
+    "verifier": {
+      "path": "<review-root>/work/recorder-first/recovery-browser/recovered.zip",
+      "privacy": "SECURE",
+      "status": "PARTIAL",
+      "basic": 3,
+      "rich": 5,
+      "bytes": 37717,
+      "hash": "35dfe711ea58deb443d7760e18a4cdec3bf63e9a3148919f9708e27c81ffd638",
+      "integrity": "PASS"
+    }
+  },
+  {
+    "gate": "later-commits-excluded-from-fixed-browser-snapshot",
+    "state": "PASS",
+    "path": "<review-root>/work/recorder-first/recovery-browser/fixed-snapshot.zip",
+    "privacy": "SECURE",
+    "status": "COMPLETE",
+    "basic": 1,
+    "rich": 102,
+    "bytes": 333381,
+    "hash": "643128a7de41db1ad87057f683280daa14d1f11ff4db0a8619ef3946c0ce9993",
+    "integrity": "PASS"
+  },
+  {
+    "gate": "cancel-is-visible-no-download-no-recording-deletion",
+    "state": "PASS"
+  },
+  {
+    "gate": "interrupted-worker-read-fails-without-false-complete",
+    "state": "PASS"
+  },
+  {
+    "gate": "new-selected-run-never-reuses-old-run-snapshot",
+    "state": "PASS",
+    "path": "<review-root>/work/recorder-first/recovery-browser/new-selected-run.zip",
+    "privacy": "SECURE",
+    "status": "COMPLETE",
+    "basic": 2,
+    "rich": 0,
+    "bytes": 15491,
+    "hash": "c883812cd8c2bdee07d71c61b95155b86c46dc869fecff189ca65b696b757651",
+    "integrity": "PASS"
+  }
+]

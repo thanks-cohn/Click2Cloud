@@ -1,0 +1,46 @@
+{
+  "sourceFiles": {
+    "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+    "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
+    "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
+    "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
+    "src/recorder/host.mjs": "ec2b05bd590f7014a8b503dd6b2c758563cd182c33978bcfe0fc47195bb2d473",
+    "src/recorder/provider-observation.mjs": "6742a3baa498377baa0c05723510970a0145c261371ad128223219a119162f4a",
+    "src/recorder/recorder.mjs": "912cc977a2065bd8823cd350c582d84f30ca2179549a50e0959f24d867b4c4bb",
+    "src/recorder/schema.mjs": "19693270df1a9ce0fdfd3d844d702b728cde209699f902968fd4226fd2b85e7b",
+    "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
+    "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
+    "extension/recorder-panel.mjs": "b45308a8bedeca6dcde29ddf5cf2fa28c8a5f9bb6acdfbea6c9ceae2c2c65a84",
+    "src/recorder/export.mjs": "04940be9cb5b69ff4c25e1580dcd286401d59e10607065a294bbcea594823ba4"
+  },
+  "productionDirty": true,
+  "sourceRevision": "d9f22f4de284044f6d313a1730c896d994dbc5b1",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "evidenceClass": "HTTP_MODULE_SERVICE_WORKER_REAL_IDB_FAKE_CHROME_PORTS_NOT_INSTALLED_EXTENSION",
+  "results": [
+    {
+      "gate": "before-dynamic-import-in-real-module-service-worker",
+      "state": "REPRODUCED",
+      "name": "TypeError",
+      "causeClass": "DYNAMIC_IMPORT_DISALLOWED_IN_MODULE_SERVICE_WORKER"
+    },
+    {
+      "gate": "Basic-Debug-OFF-in-service-worker",
+      "state": "PASS"
+    },
+    {
+      "gate": "host-start-finite-cap-worker-message-export-download",
+      "state": "PASS",
+      "runId": "ad00b7ce-98ff-47ca-b5cf-26a36fb2ee3f"
+    },
+    {
+      "gate": "stop-debug-off-browser-process-restart",
+      "state": "PASS"
+    },
+    {
+      "gate": "start-error-adjacent-control",
+      "state": "PASS"
+    }
+  ]
+}

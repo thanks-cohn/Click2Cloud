@@ -6,7 +6,7 @@ const server=createServer(async(req,res)=>{const url=new URL(req.url,'http://loc
 await new Promise(ok=>server.listen(0,'127.0.0.1',ok));const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-precise-memory-info']});const results=[];
 try{
- for(const count of baseline?[102]:[0,102,10000,...(process.env.C2C_EXPORT_STRESS==='1'?[100000]:[])])for(const privacy of baseline?['SECURE']:['SECURE','RAW']){
+ for(const count of baseline?[102]:process.env.C2C_EXPORT_ONLY_STRESS==='1'?[100000]:[0,102,10000,...(process.env.C2C_EXPORT_STRESS==='1'?[100000]:[])])for(const privacy of baseline?['SECURE']:['SECURE','RAW']){
   const context=await browser.newContext({acceptDownloads:true}),page=await context.newPage();page.on('dialog',d=>d.accept());await page.goto(origin);
   await page.evaluate(async count=>{
    const {createRecorderHost}=await import('/src/recorder/host.mjs'),{openBasic,openRich}=await import('/src/recorder/storage.mjs');
@@ -29,7 +29,7 @@ try{
   else assert.equal(await page.inputValue('#rec-run'),await page.evaluate(()=>window.selectedRun));
   const downloadPromise=page.waitForEvent('download',{timeout:baseline?3000:180000});
   await page.click(privacy==='RAW'?'#rec-raw':'#rec-secure');
-  let download;try{download=await Promise.race([downloadPromise,page.waitForFunction(()=>/^(FAILED|CANCELED)/.test(document.querySelector('#rec-export-status').textContent),{},{timeout:180000}).then(async()=>{throw Error(await page.locator('#rec-export-status').textContent());})]);}catch{const diagnostic=await page.evaluate(()=>({status:document.querySelector('#rec-export-status').textContent,pageCalls:window.exportCalls.filter(x=>x==='page').length,downloadAnchorReady:!!document.querySelector('#rec-download')?.href,manualNextVisible:!!document.querySelector('#rec-next')&&!document.querySelector('#rec-next').hidden}));results.push({count,privacy,state:'FAIL',reason:'ONE_CLICK_DID_NOT_START_DOWNLOAD',...diagnostic});await context.close();throw Error('ONE_CLICK_DID_NOT_START_DOWNLOAD');}
+  let download;try{download=await Promise.race([downloadPromise,page.waitForFunction(()=>/^(FAILED|CANCELED)/.test(document.querySelector('#rec-export-status').textContent),{},{timeout:180000}).then(async()=>{throw Error(await page.locator('#rec-export-status').textContent());})]);}catch{const diagnostic=await page.evaluate(()=>({status:document.querySelector('#rec-export-status').textContent,pageCalls:window.exportCalls.filter(x=>x==='page').length,downloadAnchorReady:!!document.querySelector('#rec-download')?.href,manualNextVisible:!!document.querySelector('#rec-next')&&!document.querySelector('#rec-next').hidden}));results.push({count,privacy,state:'FAIL',reason:diagnostic.status?.startsWith('FAILED')?diagnostic.status:'ONE_CLICK_DID_NOT_START_DOWNLOAD',...diagnostic});await context.close();throw Error('ONE_CLICK_DID_NOT_START_DOWNLOAD');}
   const path=output+'/'+privacy+'-'+count+'.zip';await download.saveAs(path);assert.equal(await download.failure(),null);
   const verified=JSON.parse(execFileSync('python',['scripts/verify-recorder-zip.py',path,String(count),privacy],{encoding:'utf8'}));
   const ui=await page.evaluate(()=>({status:document.querySelector('#rec-export-status').textContent,pageCalls:window.exportCalls.filter(x=>x==='page').length,heapBefore:window.heapBefore,heapAfter:performance.memory?.usedJSHeapSize??null,manualNext:!!document.querySelector('#rec-next')}));

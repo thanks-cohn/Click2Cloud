@@ -8,8 +8,8 @@
     "proofLevel": "independently_verified",
     "menuGeneration": 1,
     "bytesVerified": 3,
-    "clickToVerifiedMs": 82.11987799999997,
-    "elapsedMs": 201.17372600000022,
+    "clickToVerifiedMs": 52.558059000002686,
+    "elapsedMs": 148.34766200000013,
     "requests": [
       "/remote-save",
       "/operation",
@@ -18,23 +18,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": 3,
-      "clickToDispatchMs": 2.62462400000004,
+      "clickToDispatchMs": 1.1437759999971604,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 22.695645999999897,
+      "providerRequestLatencyMs": 20.44696699999622,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 7,
-      "clickToVerifiedMs": 82.11987799999997,
-      "endToEndEffectiveBytesPerSecond": 36.53195880295878,
-      "dispatchPreparationMs": 1,
-      "intentAuthorizationMs": 1,
-      "capabilityMs": 6,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": 52.558059000002686,
+      "endToEndEffectiveBytesPerSecond": 57.07973348102232,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 62,
-      "completionElapsedMs": 0.09639199999992343,
-      "transportElapsedMs": 78,
-      "endToEndElapsedMs": 82.11987799999997
+      "workerRequestMs": 45,
+      "completionElapsedMs": 0.08226599999761675,
+      "transportElapsedMs": 51,
+      "endToEndElapsedMs": 52.558059000002686
     },
     "availability": {
       "appVersion": {
@@ -77,8 +77,8 @@
     "proofLevel": "independently_verified",
     "menuGeneration": 1,
     "bytesVerified": 3,
-    "clickToVerifiedMs": 39.01021199999991,
-    "elapsedMs": 77.30171299999984,
+    "clickToVerifiedMs": 30.19458099998883,
+    "elapsedMs": 60.79166699999769,
     "requests": [
       "/remote-save",
       "/operation",
@@ -87,23 +87,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": 3,
-      "clickToDispatchMs": 0.7527669999999489,
+      "clickToDispatchMs": 0.4982039999886183,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 8.465806999999813,
+      "providerRequestLatencyMs": 5.508650999996462,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 5,
-      "clickToVerifiedMs": 39.01021199999991,
-      "endToEndEffectiveBytesPerSecond": 76.90294018397047,
-      "dispatchPreparationMs": 1,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": 30.19458099998883,
+      "endToEndEffectiveBytesPerSecond": 99.3555764195274,
+      "dispatchPreparationMs": 0,
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 29,
-      "completionElapsedMs": 0.027710999999953856,
-      "transportElapsedMs": 37,
-      "endToEndElapsedMs": 39.01021199999991
+      "workerRequestMs": 23,
+      "completionElapsedMs": 0.0422720000060508,
+      "transportElapsedMs": 29,
+      "endToEndElapsedMs": 30.19458099998883
     },
     "availability": {
       "appVersion": {
@@ -147,7 +147,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 38.306851999999935,
+    "elapsedMs": 29.957294000007096,
     "requests": [
       "/remote-save",
       "/operation",
@@ -156,98 +156,13 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.2400679999998374,
+      "clickToDispatchMs": 0.3918499999999767,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 8.625964000000067,
+      "providerRequestLatencyMs": 5.294433000002755,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 5,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 1,
-      "workerRequestMs": 26,
-      "completionElapsedMs": null,
-      "transportElapsedMs": 34,
-      "endToEndElapsedMs": 34.08689299999992
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "completionElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "history_partial",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "partial",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 43.56703500000003,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.25340699999992466,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.801419000000124,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 5,
+      "verificationElapsedMs": 6,
       "clickToVerifiedMs": null,
       "endToEndEffectiveBytesPerSecond": null,
       "dispatchPreparationMs": 0,
@@ -255,9 +170,9 @@
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
       "workerRequestMs": 18,
-      "completionElapsedMs": 0.06407999999987624,
-      "transportElapsedMs": 24,
-      "endToEndElapsedMs": 24.79441299999985
+      "completionElapsedMs": null,
+      "transportElapsedMs": 26,
+      "endToEndElapsedMs": 26.404762000005576
     },
     "availability": {
       "appVersion": {
@@ -267,6 +182,107 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "completionElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "history_partial",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "partial",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 43.15018299999065,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.27154000000155065,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 5.004581999994116,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 2,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 17,
+      "completionElapsedMs": 0.1307799999922281,
+      "transportElapsedMs": 24,
+      "endToEndElapsedMs": 24.193106999999145
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -313,7 +329,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 52.92661799999996,
+    "elapsedMs": 40.12344999999914,
     "requests": [
       "/remote-save",
       "/operation",
@@ -322,641 +338,10 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.43709100000000944,
+      "clickToDispatchMs": 0.2872150000039255,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.938472000000047,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 10,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 1,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 22,
-      "completionElapsedMs": 0.016519000000016604,
-      "transportElapsedMs": 35,
-      "endToEndElapsedMs": 35.459008999999924
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "missing_receipt",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "completed",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 47.47053699999992,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.2019359999999324,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.038136000000122,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 4,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 19,
-      "completionElapsedMs": 0.018573000000060347,
-      "transportElapsedMs": 24,
-      "endToEndElapsedMs": 24.91193199999998
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "wrong_target",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "completed",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 47.52579400000013,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.2226780000000872,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.955024000000094,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 6,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 22,
-      "completionElapsedMs": 0.019201999999950203,
-      "transportElapsedMs": 30,
-      "endToEndElapsedMs": 30.339448000000175
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "stale_generation",
-    "provider": "cloudflare",
-    "recordedState": "blocked",
-    "saveState": "blocked",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 4.250765999999885,
-    "requests": [],
-    "metrics": {
-      "bytesObserved": null,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.3309470000001511,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": null,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": null,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": null,
-      "intentAuthorizationMs": null,
-      "capabilityMs": null,
-      "authorizationRecheckMs": null,
-      "workerRequestMs": null,
-      "completionElapsedMs": null,
-      "transportElapsedMs": null,
-      "endToEndElapsedMs": 0.46763000000009924
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesObserved": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "providerRequestLatencyMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "verificationElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "engineOperationId": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "remoteOperationId": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "dispatchPreparationMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "intentAuthorizationMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "capabilityMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "authorizationRecheckMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "workerRequestMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "completionElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "transportElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "observer_throw",
-    "provider": null,
-    "recordedState": "not_observed",
-    "saveState": "completed",
-    "proofLevel": "not_observed",
-    "menuGeneration": null,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 47.21515999999997,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": null,
-    "availability": null,
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "simple",
-    "scenario": "observer_slow",
-    "provider": null,
-    "recordedState": "not_observed",
-    "saveState": "completed",
-    "proofLevel": "not_observed",
-    "menuGeneration": null,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 50.51092500000004,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": null,
-    "availability": null,
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "success",
-    "provider": "cloudflare",
-    "recordedState": "verified",
-    "saveState": "completed",
-    "proofLevel": "independently_verified",
-    "menuGeneration": 1,
-    "bytesVerified": 3,
-    "clickToVerifiedMs": 27.630864999999858,
-    "elapsedMs": 76.05990500000007,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": 3,
-      "clickToDispatchMs": 0.5514399999999569,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.400951999999961,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 6,
-      "clickToVerifiedMs": 27.630864999999858,
-      "endToEndEffectiveBytesPerSecond": 108.57423392282563,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 19,
-      "completionElapsedMs": 0.019808999999895605,
-      "transportElapsedMs": 27,
-      "endToEndElapsedMs": 27.630864999999858
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "cold",
-    "provider": "cloudflare",
-    "recordedState": "verified",
-    "saveState": "completed",
-    "proofLevel": "independently_verified",
-    "menuGeneration": 1,
-    "bytesVerified": 3,
-    "clickToVerifiedMs": 23.27185899999995,
-    "elapsedMs": 62.146900999999616,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": 3,
-      "clickToDispatchMs": 0.4288939999996728,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.194225999999617,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 4,
-      "clickToVerifiedMs": 23.27185899999995,
-      "endToEndEffectiveBytesPerSecond": 128.9110594903487,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 2,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 15,
-      "completionElapsedMs": 0.02187099999991915,
-      "transportElapsedMs": 22,
-      "endToEndElapsedMs": 23.27185899999995
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "auth_lost",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "uncertain",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 30.578729999999723,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.3968179999997119,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.307690999999977,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 4,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 17,
-      "completionElapsedMs": null,
-      "transportElapsedMs": 23,
-      "endToEndElapsedMs": 23.20827999999983
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "completionElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "history_partial",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "partial",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 40.708402000000206,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.25921500000004016,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 3.8166479999999865,
+      "providerRequestLatencyMs": 3.651569000008749,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
       "verificationElapsedMs": 5,
@@ -967,9 +352,9 @@
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
       "workerRequestMs": 16,
-      "completionElapsedMs": 0.142381000000114,
-      "transportElapsedMs": 22,
-      "endToEndElapsedMs": 22.649828999999954
+      "completionElapsedMs": 0.017912000010255724,
+      "transportElapsedMs": 24,
+      "endToEndElapsedMs": 24.309198999995715
     },
     "availability": {
       "appVersion": {
@@ -979,6 +364,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1016,88 +409,7 @@
     "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
   },
   {
-    "mode": "narrow",
-    "scenario": "bad_proof",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "completed",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 43.88298399999985,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.18167499999981374,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 3.798326999999972,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 4,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 1,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 17,
-      "completionElapsedMs": 0.01733299999978044,
-      "transportElapsedMs": 23,
-      "endToEndElapsedMs": 23.89117099999976
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
+    "mode": "simple",
     "scenario": "missing_receipt",
     "provider": "cloudflare",
     "recordedState": "uncertain",
@@ -1106,7 +418,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 41.78393600000027,
+    "elapsedMs": 33.21689199999673,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1115,91 +427,10 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.16576599999962127,
+      "clickToDispatchMs": 0.1985690000001341,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 3.431937999999718,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 10,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 14,
-      "completionElapsedMs": 0.016363999999612133,
-      "transportElapsedMs": 25,
-      "endToEndElapsedMs": 25.992314999999962
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "wrong_target",
-    "provider": "cloudflare",
-    "recordedState": "uncertain",
-    "saveState": "completed",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 43.732888999999886,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.16289300000016738,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 3.9232280000001083,
+      "providerRequestLatencyMs": 3.6882669999904465,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
       "verificationElapsedMs": 4,
@@ -1209,10 +440,10 @@
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 16,
-      "completionElapsedMs": 0.02428200000031211,
-      "transportElapsedMs": 22,
-      "endToEndElapsedMs": 22.685831000000235
+      "workerRequestMs": 15,
+      "completionElapsedMs": 0.018049999998765998,
+      "transportElapsedMs": 20,
+      "endToEndElapsedMs": 20.049654000002192
     },
     "availability": {
       "appVersion": {
@@ -1222,6 +453,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1259,319 +498,16 @@
     "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
   },
   {
-    "mode": "narrow",
-    "scenario": "stale_generation",
-    "provider": "cloudflare",
-    "recordedState": "blocked",
-    "saveState": "blocked",
-    "proofLevel": "unknown",
-    "menuGeneration": 1,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 4.626994000000195,
-    "requests": [],
-    "metrics": {
-      "bytesObserved": null,
-      "bytesVerified": null,
-      "clickToDispatchMs": 0.17771499999980733,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": null,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": null,
-      "clickToVerifiedMs": null,
-      "endToEndEffectiveBytesPerSecond": null,
-      "dispatchPreparationMs": null,
-      "intentAuthorizationMs": null,
-      "capabilityMs": null,
-      "authorizationRecheckMs": null,
-      "workerRequestMs": null,
-      "completionElapsedMs": null,
-      "transportElapsedMs": null,
-      "endToEndElapsedMs": 0.2640949999999975
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesObserved": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "bytesVerified": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "providerRequestLatencyMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "verificationElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "clickToVerifiedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "endToEndEffectiveBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "engineOperationId": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "remoteOperationId": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "dispatchPreparationMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "intentAuthorizationMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "capabilityMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "authorizationRecheckMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "workerRequestMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "completionElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "transportElapsedMs": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "observer_throw",
-    "provider": null,
-    "recordedState": "not_observed",
-    "saveState": "completed",
-    "proofLevel": "not_observed",
-    "menuGeneration": null,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 46.447777999999744,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": null,
-    "availability": null,
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "narrow",
-    "scenario": "observer_slow",
-    "provider": null,
-    "recordedState": "not_observed",
-    "saveState": "completed",
-    "proofLevel": "not_observed",
-    "menuGeneration": null,
-    "bytesVerified": null,
-    "clickToVerifiedMs": null,
-    "elapsedMs": 56.80376800000022,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": null,
-    "availability": null,
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "depth",
-    "scenario": "success",
-    "provider": "cloudflare",
-    "recordedState": "verified",
-    "saveState": "completed",
-    "proofLevel": "independently_verified",
-    "menuGeneration": 1,
-    "bytesVerified": 3,
-    "clickToVerifiedMs": 37.72355599999992,
-    "elapsedMs": 79.63884000000007,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": 3,
-      "clickToDispatchMs": 0.30165500000020984,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 7.924416999999721,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 7,
-      "clickToVerifiedMs": 37.72355599999992,
-      "endToEndEffectiveBytesPerSecond": 79.52590683656669,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 28,
-      "completionElapsedMs": 0.019778999999743974,
-      "transportElapsedMs": 37,
-      "endToEndElapsedMs": 37.72355599999992
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "depth",
-    "scenario": "cold",
-    "provider": "cloudflare",
-    "recordedState": "verified",
-    "saveState": "completed",
-    "proofLevel": "independently_verified",
-    "menuGeneration": 1,
-    "bytesVerified": 3,
-    "clickToVerifiedMs": 33.66882200000009,
-    "elapsedMs": 76.92734100000007,
-    "requests": [
-      "/remote-save",
-      "/operation",
-      "/verify"
-    ],
-    "metrics": {
-      "bytesObserved": 3,
-      "bytesVerified": 3,
-      "clickToDispatchMs": 0.37703300000021045,
-      "sourceAcquireMs": null,
-      "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.6235169999999925,
-      "uploadElapsedMs": null,
-      "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 8,
-      "clickToVerifiedMs": 33.66882200000009,
-      "endToEndEffectiveBytesPerSecond": 89.10320652145157,
-      "dispatchPreparationMs": 0,
-      "intentAuthorizationMs": 0,
-      "capabilityMs": 1,
-      "authorizationRecheckMs": 0,
-      "workerRequestMs": 23,
-      "completionElapsedMs": 0.017511999999896943,
-      "transportElapsedMs": 33,
-      "endToEndElapsedMs": 33.66882200000009
-    },
-    "availability": {
-      "appVersion": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "build": {
-        "value": "N/A",
-        "reason": "not_observed"
-      },
-      "sourceAcquireMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "sourceReadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadElapsedMs": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "uploadThroughputBytesPerSecond": {
-        "value": "N/A",
-        "reason": "not_applicable"
-      },
-      "missingFields": {
-        "value": "N/A",
-        "reason": "not_observed"
-      }
-    },
-    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
-  },
-  {
-    "mode": "depth",
-    "scenario": "auth_lost",
+    "mode": "simple",
+    "scenario": "wrong_target",
     "provider": "cloudflare",
     "recordedState": "uncertain",
-    "saveState": "uncertain",
+    "saveState": "completed",
     "proofLevel": "unknown",
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 37.50812799999994,
+    "elapsedMs": 35.60930900000676,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1580,10 +516,10 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.21440099999972517,
+      "clickToDispatchMs": 0.3363160000008065,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 6.433719999999994,
+      "providerRequestLatencyMs": 3.2631399999954738,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
       "verificationElapsedMs": 3,
@@ -1593,10 +529,10 @@
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 25,
-      "completionElapsedMs": null,
-      "transportElapsedMs": 29,
-      "endToEndElapsedMs": 29.96830399999999
+      "workerRequestMs": 15,
+      "completionElapsedMs": 0.018435000005410984,
+      "transportElapsedMs": 20,
+      "endToEndElapsedMs": 20.37460500000452
     },
     "availability": {
       "appVersion": {
@@ -1606,6 +542,1174 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "stale_generation",
+    "provider": "cloudflare",
+    "recordedState": "blocked",
+    "saveState": "blocked",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 5.6074010000011185,
+    "requests": [],
+    "metrics": {
+      "bytesObserved": null,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.20922499999869615,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": null,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": null,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": null,
+      "intentAuthorizationMs": null,
+      "capabilityMs": null,
+      "authorizationRecheckMs": null,
+      "workerRequestMs": null,
+      "completionElapsedMs": null,
+      "transportElapsedMs": null,
+      "endToEndElapsedMs": 0.38882699998794124
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "bytesObserved": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "providerRequestLatencyMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "verificationElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "engineOperationId": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "remoteOperationId": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "dispatchPreparationMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "intentAuthorizationMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "capabilityMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "authorizationRecheckMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "workerRequestMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "completionElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "transportElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "observer_throw",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 35.14913299999898,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": null,
+    "availability": null,
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "simple",
+    "scenario": "observer_slow",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 33.62773600000946,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": null,
+    "availability": null,
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "success",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 25.39470400000573,
+    "elapsedMs": 62.947088000000804,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": 3,
+      "clickToDispatchMs": 0.650539000009303,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 4.236548999993829,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": 25.39470400000573,
+      "endToEndEffectiveBytesPerSecond": 118.13486780548114,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 2,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 17,
+      "completionElapsedMs": 0.01900099999329541,
+      "transportElapsedMs": 24,
+      "endToEndElapsedMs": 25.39470400000573
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "cold",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 19.975577000004705,
+    "elapsedMs": 46.89716200000839,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": 3,
+      "clickToDispatchMs": 0.4833750000107102,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 3.8833250000025146,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 3,
+      "clickToVerifiedMs": 19.975577000004705,
+      "endToEndEffectiveBytesPerSecond": 150.18339645454515,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 15,
+      "completionElapsedMs": 0.02197899999737274,
+      "transportElapsedMs": 19,
+      "endToEndElapsedMs": 19.975577000004705
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "auth_lost",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "uncertain",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 26.922736999986228,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.4615349999949103,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 4.4532039999903645,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 3,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 18,
+      "completionElapsedMs": null,
+      "transportElapsedMs": 23,
+      "endToEndElapsedMs": 23.498775000000023
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "completionElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "history_partial",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "partial",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 35.08237000000372,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.22203400000580586,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 3.2600990000064485,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 0,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 16,
+      "completionElapsedMs": 0.07108399999560788,
+      "transportElapsedMs": 20,
+      "endToEndElapsedMs": 20.61452800000552
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "bad_proof",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 34.81757299999299,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.5455220000003465,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 4.277348000003258,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 3,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 14,
+      "completionElapsedMs": 0.019828000004054047,
+      "transportElapsedMs": 19,
+      "endToEndElapsedMs": 19.97597100000712
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "missing_receipt",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 36.37467400000605,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.17381900000327732,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 3.3735710000037216,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 5,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 0,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 16,
+      "completionElapsedMs": 0.019339999998919666,
+      "transportElapsedMs": 21,
+      "endToEndElapsedMs": 22.307674000010593
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "wrong_target",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "completed",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 35.45488400000613,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.3162210000009509,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 3.397257000004174,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 14,
+      "completionElapsedMs": 0.02070399999502115,
+      "transportElapsedMs": 20,
+      "endToEndElapsedMs": 20.80140599999868
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "stale_generation",
+    "provider": "cloudflare",
+    "recordedState": "blocked",
+    "saveState": "blocked",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 5.791505000001052,
+    "requests": [],
+    "metrics": {
+      "bytesObserved": null,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.18874500000674743,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": null,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": null,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": null,
+      "intentAuthorizationMs": null,
+      "capabilityMs": null,
+      "authorizationRecheckMs": null,
+      "workerRequestMs": null,
+      "completionElapsedMs": null,
+      "transportElapsedMs": null,
+      "endToEndElapsedMs": 0.2749810000095749
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "bytesObserved": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "bytesVerified": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "providerRequestLatencyMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "verificationElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "clickToVerifiedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "endToEndEffectiveBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "engineOperationId": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "remoteOperationId": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "dispatchPreparationMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "intentAuthorizationMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "capabilityMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "authorizationRecheckMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "workerRequestMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "completionElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "transportElapsedMs": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "observer_throw",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 42.2751350000035,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": null,
+    "availability": null,
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "narrow",
+    "scenario": "observer_slow",
+    "provider": null,
+    "recordedState": "not_observed",
+    "saveState": "completed",
+    "proofLevel": "not_observed",
+    "menuGeneration": null,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 34.78648900000553,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": null,
+    "availability": null,
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "success",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 34.07556700000714,
+    "elapsedMs": 62.88138500000059,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": 3,
+      "clickToDispatchMs": 0.2223740000044927,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 9.693399000010686,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": 34.07556700000714,
+      "endToEndEffectiveBytesPerSecond": 88.03962088141839,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 2,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 27,
+      "completionElapsedMs": 0.021888000002945773,
+      "transportElapsedMs": 33,
+      "endToEndElapsedMs": 34.07556700000714
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "cold",
+    "provider": "cloudflare",
+    "recordedState": "verified",
+    "saveState": "completed",
+    "proofLevel": "independently_verified",
+    "menuGeneration": 1,
+    "bytesVerified": 3,
+    "clickToVerifiedMs": 28.8132190000033,
+    "elapsedMs": 78.687751999998,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": 3,
+      "clickToDispatchMs": 0.4747110000025714,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 5.1250119999895105,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 4,
+      "clickToVerifiedMs": 28.8132190000033,
+      "endToEndEffectiveBytesPerSecond": 104.11887682523971,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 23,
+      "completionElapsedMs": 0.0185769999952754,
+      "transportElapsedMs": 28,
+      "endToEndElapsedMs": 28.8132190000033
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "sourceAcquireMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "sourceReadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadElapsedMs": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "uploadThroughputBytesPerSecond": {
+        "value": "N/A",
+        "reason": "not_applicable"
+      },
+      "missingFields": {
+        "value": "N/A",
+        "reason": "not_observed"
+      }
+    },
+    "caseEvidence": "NODE_NATIVE_LISTENER_REAL_LOCAL_WORKERD_R2_MEMORY_RECORDER_NOT_INSTALLED_OR_LIVE"
+  },
+  {
+    "mode": "depth",
+    "scenario": "auth_lost",
+    "provider": "cloudflare",
+    "recordedState": "uncertain",
+    "saveState": "uncertain",
+    "proofLevel": "unknown",
+    "menuGeneration": 1,
+    "bytesVerified": null,
+    "clickToVerifiedMs": null,
+    "elapsedMs": 26.72488599999633,
+    "requests": [
+      "/remote-save",
+      "/operation",
+      "/verify"
+    ],
+    "metrics": {
+      "bytesObserved": 3,
+      "bytesVerified": null,
+      "clickToDispatchMs": 0.19539300000178628,
+      "sourceAcquireMs": null,
+      "sourceReadThroughputBytesPerSecond": null,
+      "providerRequestLatencyMs": 5.373033999989275,
+      "uploadElapsedMs": null,
+      "uploadThroughputBytesPerSecond": null,
+      "verificationElapsedMs": 3,
+      "clickToVerifiedMs": null,
+      "endToEndEffectiveBytesPerSecond": null,
+      "dispatchPreparationMs": 0,
+      "intentAuthorizationMs": 0,
+      "capabilityMs": 1,
+      "authorizationRecheckMs": 0,
+      "workerRequestMs": 17,
+      "completionElapsedMs": null,
+      "transportElapsedMs": 22,
+      "endToEndElapsedMs": 22.537525000007008
+    },
+    "availability": {
+      "appVersion": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1656,7 +1760,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 50.66646600000013,
+    "elapsedMs": 37.99215200000617,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1665,23 +1769,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.38903499999969426,
+      "clickToDispatchMs": 0.24296200000389945,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 5.179610000000139,
+      "providerRequestLatencyMs": 3.566122999996878,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 5,
+      "verificationElapsedMs": 4,
       "clickToVerifiedMs": null,
       "endToEndEffectiveBytesPerSecond": null,
       "dispatchPreparationMs": 0,
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 24,
-      "completionElapsedMs": 0.07723900000019057,
-      "transportElapsedMs": 31,
-      "endToEndElapsedMs": 31.737319999999727
+      "workerRequestMs": 16,
+      "completionElapsedMs": 0.13743600000452716,
+      "transportElapsedMs": 21,
+      "endToEndElapsedMs": 22.315795000002254
     },
     "availability": {
       "appVersion": {
@@ -1691,6 +1795,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1737,7 +1849,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 40.66589399999975,
+    "elapsedMs": 35.533479999998235,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1746,23 +1858,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.3081529999999475,
+      "clickToDispatchMs": 0.3253439999971306,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 5.673796999999922,
+      "providerRequestLatencyMs": 3.700494999997318,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 4,
+      "verificationElapsedMs": 3,
       "clickToVerifiedMs": null,
       "endToEndEffectiveBytesPerSecond": null,
       "dispatchPreparationMs": 0,
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 20,
-      "completionElapsedMs": 0.016225999999733176,
-      "transportElapsedMs": 25,
-      "endToEndElapsedMs": 25.481262000000243
+      "workerRequestMs": 14,
+      "completionElapsedMs": 0.017191999999340624,
+      "transportElapsedMs": 20,
+      "endToEndElapsedMs": 20.47223600000143
     },
     "availability": {
       "appVersion": {
@@ -1772,6 +1884,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1818,7 +1938,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 47.45348400000012,
+    "elapsedMs": 33.47263499999826,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1827,23 +1947,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.17814299999963623,
+      "clickToDispatchMs": 0.18183000000135507,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 4.5360340000002,
+      "providerRequestLatencyMs": 3.4804200000071432,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 5,
+      "verificationElapsedMs": 3,
       "clickToVerifiedMs": null,
       "endToEndEffectiveBytesPerSecond": null,
       "dispatchPreparationMs": 0,
       "intentAuthorizationMs": 0,
       "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 22,
-      "completionElapsedMs": 0.01625500000000102,
-      "transportElapsedMs": 29,
-      "endToEndElapsedMs": 29.109324000000015
+      "workerRequestMs": 15,
+      "completionElapsedMs": 0.017384999999194406,
+      "transportElapsedMs": 19,
+      "endToEndElapsedMs": 19.221892999994452
     },
     "availability": {
       "appVersion": {
@@ -1853,6 +1973,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1899,7 +2027,7 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 59.933978000000025,
+    "elapsedMs": 38.43004199999268,
     "requests": [
       "/remote-save",
       "/operation",
@@ -1908,23 +2036,23 @@
     "metrics": {
       "bytesObserved": 3,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.3477939999997943,
+      "clickToDispatchMs": 0.2880920000025071,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
-      "providerRequestLatencyMs": 6.79850099999976,
+      "providerRequestLatencyMs": 3.2134550000046147,
       "uploadElapsedMs": null,
       "uploadThroughputBytesPerSecond": null,
-      "verificationElapsedMs": 6,
+      "verificationElapsedMs": 4,
       "clickToVerifiedMs": null,
       "endToEndEffectiveBytesPerSecond": null,
       "dispatchPreparationMs": 0,
       "intentAuthorizationMs": 0,
-      "capabilityMs": 2,
+      "capabilityMs": 1,
       "authorizationRecheckMs": 0,
-      "workerRequestMs": 32,
-      "completionElapsedMs": 0.02735000000029686,
-      "transportElapsedMs": 41,
-      "endToEndElapsedMs": 41.45043899999973
+      "workerRequestMs": 16,
+      "completionElapsedMs": 0.017521000001579523,
+      "transportElapsedMs": 21,
+      "endToEndElapsedMs": 21.542683000006946
     },
     "availability": {
       "appVersion": {
@@ -1934,6 +2062,14 @@
       "build": {
         "value": "N/A",
         "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
+      },
+      "evidenceClass": {
+        "value": "N/A",
+        "reason": "invalid_measurement"
       },
       "bytesVerified": {
         "value": "N/A",
@@ -1980,12 +2116,12 @@
     "menuGeneration": 1,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 5.648259000000053,
+    "elapsedMs": 5.026929999992717,
     "requests": [],
     "metrics": {
       "bytesObserved": null,
       "bytesVerified": null,
-      "clickToDispatchMs": 0.19098699999995006,
+      "clickToDispatchMs": 0.1917129999928875,
       "sourceAcquireMs": null,
       "sourceReadThroughputBytesPerSecond": null,
       "providerRequestLatencyMs": null,
@@ -2001,7 +2137,7 @@
       "workerRequestMs": null,
       "completionElapsedMs": null,
       "transportElapsedMs": null,
-      "endToEndElapsedMs": 0.2717360000001463
+      "endToEndElapsedMs": 0.311848999990616
     },
     "availability": {
       "appVersion": {
@@ -2009,6 +2145,14 @@
         "reason": "not_observed"
       },
       "build": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "proofLevel": {
+        "value": "N/A",
+        "reason": "not_observed"
+      },
+      "evidenceClass": {
         "value": "N/A",
         "reason": "not_observed"
       },
@@ -2105,7 +2249,7 @@
     "menuGeneration": null,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 51.61503599999969,
+    "elapsedMs": 34.37088899999799,
     "requests": [
       "/remote-save",
       "/operation",
@@ -2125,7 +2269,7 @@
     "menuGeneration": null,
     "bytesVerified": null,
     "clickToVerifiedMs": null,
-    "elapsedMs": 43.84608100000014,
+    "elapsedMs": 35.099855000007665,
     "requests": [
       "/remote-save",
       "/operation",

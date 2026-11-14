@@ -46,12 +46,14 @@ export function createRecorder({epoch=crypto.randomUUID(),build={},storage={},ma
    if(number(out.durationMs)!==null)r.transportElapsedMs=out.durationMs;
    if(/^[a-f0-9-]{36}$/i.test(out.remoteOperationId??''))r.remoteOperationId=out.remoteOperationId;
    r.state=entry.crossEpoch?'uncertain':verified?'verified':['failed','blocked','cancelled','uncertain'].includes(out.state)?out.state:'uncertain';r.reasonCode=/^[A-Z][A-Z0-9_]{0,79}$/.test(out.code??'')?out.code:null;
+   if(!verified)unavailable(['proofLevel','evidenceClass'],event.proof?.availability??'not_observed');
    r.proofLevel=verified?'independently_verified':'unknown';r.evidenceClass=verified?(event.proof?.evidenceClass==='fixture-only'?'fixture-only':'authoritative-receipt'):'not_observed';
    r.bytesObserved=number(event.proof?.bytes);r.bytesVerified=verified?r.bytesObserved:null;
    if(verified&&!entry.crossEpoch)r.clickToVerifiedMs=Math.max(0,t-entry.start);
    if(r.sourceAcquireMs>0&&r.bytesObserved!==null)r.sourceReadThroughputBytesPerSecond=r.bytesObserved*1000/r.sourceAcquireMs;
    if(r.uploadElapsedMs>0&&r.bytesObserved!==null)r.uploadThroughputBytesPerSecond=r.bytesObserved*1000/r.uploadElapsedMs;
    if(r.clickToVerifiedMs>0&&r.bytesVerified!==null)r.endToEndEffectiveBytesPerSecond=r.bytesVerified*1000/r.clickToVerifiedMs;
+   for(const [duration,speed] of [['sourceAcquireMs','sourceReadThroughputBytesPerSecond'],['uploadElapsedMs','uploadThroughputBytesPerSecond'],['clickToVerifiedMs','endToEndEffectiveBytesPerSecond']])if(r[duration]===0&&r.bytesObserved!==null)unavailable([speed],'invalid_measurement');
    r.outcomeCompleteness='terminal';r.dataLossFlag||=lost>0;basicWriter.push({...r});active.delete(id);completed.add(id);if(completed.size>4096)completed.delete(completed.values().next().value);
   }
   richEvent(event,r,event.raw);

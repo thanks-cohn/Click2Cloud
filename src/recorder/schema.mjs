@@ -1,5 +1,6 @@
 // Provider-neutral v2 observation contract. No provider/network authority.
 export const DETAIL_METRICS=Object.freeze(['dispatchPreparationMs','intentAuthorizationMs','capabilityMs','authorizationRecheckMs','workerRequestMs','completionElapsedMs','transportElapsedMs','endToEndElapsedMs']);
+const unavailableField=(key,value)=>value===null||['providerId','mode','context'].includes(key)&&value==='other'||key==='proofLevel'&&value==='unknown'||key==='evidenceClass'&&value==='not_observed';
 const availabilityReason=v=>['not_observed','not_applicable','unavailable','unsupported','interrupted','cross_epoch','redacted','invalid_measurement'].includes(v)?v:'not_observed';
 export const FIELDS=Object.freeze(['attemptId','schemaVersion','clickTimestampUtc','appId','appVersion','build','workerEpoch','pageOrigin','websiteHost','sourceOrigin','sourceHost','sourceUrlSanitized','providerId','mode','context','state','reasonCode','proofLevel','evidenceClass','bytesObserved','bytesVerified','clickToDispatchMs','sourceAcquireMs','sourceReadThroughputBytesPerSecond','providerRequestLatencyMs','uploadElapsedMs','uploadThroughputBytesPerSecond','verificationElapsedMs','clickToVerifiedMs','endToEndEffectiveBytesPerSecond','outcomeCompleteness','missingFields','dataLossFlag','menuGeneration','engineOperationId','remoteOperationId',...DETAIL_METRICS]);
 export const METRICS=Object.freeze([...FIELDS.slice(19,30),...DETAIL_METRICS]);
@@ -11,7 +12,7 @@ export const number=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0?v:null;
 export function capacity(value){if(!Number.isSafeInteger(value)||value<1)throw Error('POSITIVE_SAFE_INTEGER_REQUIRED');return value;}
 export function origin(value){try{if(typeof value!=='string'||value.length>16384)return null;const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.origin:null;}catch{return null;}}
 export function materialize(compact={}){
- const out={},availability={};for(const key of FIELDS){out[key]=compact[key]??null;if(out[key]===null||['providerId','mode','context'].includes(key)&&out[key]==='other')availability[key]={value:'N/A',reason:availabilityReason(compact.availability?.[key]?.reason)};}
+ const out={},availability={};for(const key of FIELDS){out[key]=compact[key]??null;if(unavailableField(key,out[key]))availability[key]={value:'N/A',reason:availabilityReason(compact.availability?.[key]?.reason)};}
  out.schemaVersion=2;out.missingFields=Object.keys(availability);out.availability=availability;return out;
 }
 export function secureBasic(row){
@@ -22,7 +23,7 @@ export function secureBasic(row){
  out.state=STATES.includes(out.state)?out.state:'uncertain';out.reasonCode=null;out.availability.reasonCode={value:'N/A',reason:'redacted'};
  out.clickTimestampUtc=instant(out.clickTimestampUtc);out.appId='click2cloud';out.appVersion=/^\d+\.\d+\.\d+$/.test(out.appVersion??'')?out.appVersion:null;out.build=/^[a-f0-9]{40}$/.test(out.build??'')?out.build:null;
  out.menuGeneration=number(out.menuGeneration);out.engineOperationId=number(out.engineOperationId);out.remoteOperationId=uuid(out.remoteOperationId);out.proofLevel=['independently_verified','provider_accepted','unknown'].includes(out.proofLevel)?out.proofLevel:'unknown';out.evidenceClass=['authoritative-receipt','fixture-only','not_observed'].includes(out.evidenceClass)?out.evidenceClass:'not_observed';out.outcomeCompleteness=['pending','terminal','interrupted'].includes(out.outcomeCompleteness)?out.outcomeCompleteness:'interrupted';out.dataLossFlag=out.dataLossFlag===true;
- for(const k of METRICS)out[k]=number(out[k]);out.missingFields=FIELDS.filter(k=>out[k]===null||['providerId','mode','context'].includes(k)&&out[k]==='other');for(const key of out.missingFields)out.availability[key]??={value:'N/A',reason:'invalid_measurement'};return out;
+ for(const k of METRICS)out[k]=number(out[k]);out.missingFields=FIELDS.filter(k=>unavailableField(k,out[k]));for(const key of out.missingFields)out.availability[key]??={value:'N/A',reason:'invalid_measurement'};return out;
 }
 export function summary(rows){
  const counts=Object.fromEntries(STATES.map(s=>[s,0]));for(const r of rows)counts[STATES.includes(r.state)?r.state:'uncertain']++;

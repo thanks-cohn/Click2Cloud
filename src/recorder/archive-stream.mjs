@@ -18,11 +18,11 @@ export function incrementalSHA256(){
 }
 const encoder=new TextEncoder(),crcTable=Uint32Array.from({length:256},(_,n)=>{for(let i=0;i<8;i++)n=n&1?0xedb88320^(n>>>1):n>>>1;return n>>>0;});
 const header=(n,fields)=>{const b=new Uint8Array(n),v=new DataView(b.buffer);for(const [at,size,value] of fields)v[size===2?'setUint16':'setUint32'](at,value,true);return b;};
-export const MAX_EXPORT_BYTES=256*1024*1024;
+export const MAX_EXPORT_BYTES=512*1024*1024;
 export function archiveEntries(maxBytes=MAX_EXPORT_BYTES){
  const files=new Map();let total=0;
  function entry(name){if(!/^[a-zA-Z0-9_.-]+$/.test(name))throw Error('UNSAFE_ZIP_NAME');if(!files.has(name))files.set(name,{name,parts:[],size:0,crc:0xffffffff,hash:incrementalSHA256()});return files.get(name);}
- return {write(name,text){const f=entry(name),bytes=encoder.encode(text);if(total+bytes.length>maxBytes)throw Error('EXPORT_SIZE_LIMIT_256_MIB');total+=bytes.length;f.size+=bytes.length;f.hash.update(bytes);for(const b of bytes)f.crc=crcTable[(f.crc^b)&255]^(f.crc>>>8);if(bytes.length)f.parts.push(new Blob([bytes]));},get bytes(){return total;},finish(){
+ return {write(name,text){const f=entry(name),bytes=encoder.encode(text);if(total+bytes.length>maxBytes)throw Error('EXPORT_SIZE_LIMIT_512_MIB');total+=bytes.length;f.size+=bytes.length;f.hash.update(bytes);for(const b of bytes)f.crc=crcTable[(f.crc^b)&255]^(f.crc>>>8);if(bytes.length)f.parts.push(new Blob([bytes]));},get bytes(){return total;},finish(){
   const hashes={},body=[],directory=[];let offset=0;
   for(const f of files.values()){
    hashes[f.name]=f.digest??=f.hash.digest();const name=encoder.encode(f.name),crc=(f.crc^0xffffffff)>>>0;

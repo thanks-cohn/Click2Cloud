@@ -1,0 +1,93 @@
+[
+  {
+    "file": "final-exports/final-browser-4-RAW-10000.zip.gz",
+    "zipBytes": 21142761,
+    "zipSHA256": "81b7c17494ee4be843679d86d2145b66a3e9b00c6e87b287cc94e0ac5cd7a1ae",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-browser-4-SECURE-10000.zip.gz",
+    "zipBytes": 40982776,
+    "zipSHA256": "63fbcf4ff0ef30935c924e951790bc51a27ff56680bd6f50173faae834b06b55",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-browser-4-RAW-0.zip.gz",
+    "zipBytes": 5819,
+    "zipSHA256": "23add0929b48039053d07e67071c13f691549cb2787fa4fd09befadd2101ad24",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-browser-4-SECURE-102.zip.gz",
+    "zipBytes": 427956,
+    "zipSHA256": "85b28fb5213bf72f7cbc8a37ff809b6369f7320eb53b854be97e92e9070b2503",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-browser-4-SECURE-0.zip.gz",
+    "zipBytes": 5834,
+    "zipSHA256": "6e138840aa4862888cab00eafb631154a0ec29d15b70ecc97efc03f28823b9dd",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-browser-4-RAW-102.zip.gz",
+    "zipBytes": 225696,
+    "zipSHA256": "02ad79d4443c4e7f416dda348a1bcd45581be7729a9fcef3d2615af34d883f76",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-stress-RAW-100000.zip.gz",
+    "zipBytes": 117968695,
+    "zipSHA256": "a9a40f1a467529932d1cfd80d1a49c636bfc6680375ce877d64786af55e7499f",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-stress-SECURE-100000.zip.gz",
+    "zipBytes": 320058710,
+    "zipSHA256": "ac533f1dbcc49ce2148d92a8fa8e8830e2cac116e8ba9b6e123680332f4b037c",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-worker-2-RAW-worker-synthetic.zip.gz",
+    "zipBytes": 24171,
+    "zipSHA256": "e86459134dd4dfd61211289d140273af554b4aae520b8161a15e824ce054f04e",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/final-worker-2-SECURE-worker-synthetic.zip.gz",
+    "zipBytes": 24570,
+    "zipSHA256": "9ce0d97817e2f7b8b2844b1dd056a41fff001112b968abbed8f9c91d4cd6577c",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/recovery-browser-recovered.zip.gz",
+    "zipBytes": 664750,
+    "zipSHA256": "bcc3210df04999df1dbbf7acec905124acdeb38faac8807518946150d82afe24",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/recovery-browser-new-selected-run.zip.gz",
+    "zipBytes": 15492,
+    "zipSHA256": "d640c741ab6366344cdab426442b306fdbb091e2ed571927eac311f6d411a01f",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  },
+  {
+    "file": "final-exports/recovery-browser-fixed-snapshot.zip.gz",
+    "zipBytes": 333455,
+    "zipSHA256": "91b5dd22431a8bf02be11fdcf6cf4de1b4ca4e9f7158acc5919b8a991a81eeeb",
+    "data": "Generated synthetic fixture data only",
+    "verifier": "scripts/verify-recorder-zip.py (ZIP CRC/file SHA-256/JSONL/CSV/coverage)"
+  }
+]

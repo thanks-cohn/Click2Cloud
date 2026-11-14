@@ -23,11 +23,11 @@ export async function exportPart({snapshot,page,privacy,part=1,previousPartHash=
 }
 
 // One fixed snapshot -> one complete ZIP. Internal pages are never UI parts.
-// Native Blob chunks are capped at 256 MiB; JS retains only one decoded page.
+// Native Blob chunks are capped at 512 MiB; JS retains only one decoded page.
 // Oversize, corruption, interruption and cancellation never masquerade as complete.
 export async function exportComplete({snapshot,getPage,privacy,consent=false,signal,onProgress=()=>{}}){
  if(!['RAW','SECURE'].includes(privacy))throw Error('PRIVACY_REQUIRED');if(privacy==='RAW'&&!consent)throw Error('RAW_EXPORT_CONSENT_REQUIRED');
- const {archiveEntries,hashBlob}=await import('./archive-stream.mjs');
+ const {archiveEntries,hashBlob,MAX_EXPORT_BYTES}=await import('./archive-stream.mjs');
  const archive=archiveEntries(),csv=v=>'"'+String(v==null?'N/A':typeof v==='object'?JSON.stringify(v):v).replaceAll('"','""')+'"';
  let basicAfter=0,richAfter=0,basicCount=0,richCount=0,pages=0,basicDone=snapshot.basic.count===0,richDone=!snapshot.rich||snapshot.rich.highWater===0,priorHash=null,maxPageEvents=0,lastBasicSequence=0;
  const missingRanges=[],segments=[];
@@ -90,7 +90,7 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
  archive.write('performance-summary.json',JSON.stringify({privacy,scope:'full_committed_basic_snapshot',...safeStatistics(snapshot.basic.statistics)}));
  archive.write('recorder-health.json',JSON.stringify({privacy,basic:safeHealth(snapshot.basic.health),rich:safeHealth(snapshot.richHealth)}));
  archive.write('coverage.json',JSON.stringify({privacy,...snapshot.coverage,status,...counts,issues,missingRanges,evicted:snapshot.basic.control.evicted??null,basicHighWater:snapshot.basic.control.sequence,richHighWater:snapshot.rich?.highWater??null,unknownEpochs:snapshot.rich?.unknownEpochs??0,unreceivedEvents:'UNKNOWN',lastCommitRisk:'UNKNOWN'}));
- const manifest={schemaVersion:2,privacy,snapshotId:snapshot.id,runId:snapshot.rich?.id??null,status,completeSnapshot:basicCount===snapshot.basic.count&&richCount===(snapshot.rich?.committed??0)&&!missingRanges.length,counts,basicHighWater:snapshot.basic.control.sequence,basicRetained:snapshot.basic.count,richHighWater:snapshot.rich?.highWater??null,richCommitted:snapshot.rich?.committed??null,missingRanges,issues,segments,files:archive.hashes(),processing:{pages,maxPageEvents,limitBytes:256*1024*1024},evidenceClass:'locally_recorded_committed_metadata_not_live_certification'};
+ const manifest={schemaVersion:2,privacy,snapshotId:snapshot.id,runId:snapshot.rich?.id??null,status,completeSnapshot:basicCount===snapshot.basic.count&&richCount===(snapshot.rich?.committed??0)&&!missingRanges.length,counts,basicHighWater:snapshot.basic.control.sequence,basicRetained:snapshot.basic.count,richHighWater:snapshot.rich?.highWater??null,richCommitted:snapshot.rich?.committed??null,missingRanges,issues,segments,files:archive.hashes(),processing:{pages,maxPageEvents,limitBytes:MAX_EXPORT_BYTES},evidenceClass:'locally_recorded_committed_metadata_not_live_certification'};
  archive.write('MANIFEST.json',JSON.stringify(manifest));progress('verifying');
  const {blob}=archive.finish(),hash=await hashBlob(blob,signal);signal?.throwIfAborted();progress('ready');return {blob,hash,status,manifest,counts};
 }

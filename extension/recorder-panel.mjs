@@ -23,7 +23,7 @@ export async function mountRecorderPanel(root){
   for(const id of ['#rec-secure','#rec-raw','#rec-run','#rec-snapshot'])$(id).disabled=true;
   $('#rec-cancel').hidden=false;$('#rec-export-status').textContent='Preparing committed snapshot…';
   try{
-   if(!snapshot)await chooseSnapshot();controller.signal.throwIfAborted();
+   if(!snapshot||(snapshot.rich?.id??'')!==$('#rec-run').value)await chooseSnapshot();controller.signal.throwIfAborted();
    const result=await exportComplete({snapshot,privacy,consent:privacy==='RAW',signal:controller.signal,getPage:params=>call('page',{snapshotId:snapshot.id,...params}),onProgress:p=>{$('#rec-export-status').textContent=p.phase+' · '+p.basicCount+'/'+p.basicExpected+' Basic attempts · '+p.richCount+'/'+p.richExpected+' rich events · '+p.pages+' pages · '+p.bytes+' bytes';}});
    controller.signal.throwIfAborted();if(!root.isConnected)throw Error('EXPORT_VIEW_CLOSED');
    if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(result.blob);

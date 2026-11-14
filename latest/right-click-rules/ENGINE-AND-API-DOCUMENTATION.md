@@ -580,7 +580,7 @@ native Blob chunks, computes incremental SHA-256/ZIP CRCs and starts one downloa
 Snapshot ordinal cursors are explicit `basicNext`/`snapshotPosition`; durable Basic
 sequence numbers are preserved separately. Missing/evicted/gapped/unconfirmed data
 is named in PARTIAL coverage; corruption, cancellation and interrupted reads cannot
-report COMPLETE. 256 MiB is the explicit encoded payload budget; oversize fails
+report COMPLETE. 512 MiB is the explicit encoded payload budget; oversize fails
 without truncation or manual parts. The panel defaults to the available rich run,
 retains an explicit Basic-only choice and never equates a download request with a
 physical disk write. `exportPart` remains only for compatibility, not product UX.
@@ -613,3 +613,9 @@ and resumes above reserved high-water. Startup buffers retain nonprivate identit
 and original timing only; dropped readback evidence is an explicit startup gap,
 never a fabricated verified save. Passive observer promises are not awaited and
 rejections are consumed. Native/configuration/auth/transfer ownership is unchanged.
+
+Final recorder integration registered the two new History timing reason codes in
+the existing closed diagnostic vocabulary. The expanded measurement/availability
+schema made the 100k SECURE stress archive exceed the original 256 MiB budget;
+the bounded native Blob payload budget is now 512 MiB, with the same explicit
+failure, cancellation and one-page JS processing policy.
