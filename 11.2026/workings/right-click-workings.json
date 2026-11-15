@@ -9200,6 +9200,33 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
+      "extension/aesthetic.css": "e6099e192936f19acd0f6d96be563fbf60003f493ac0b8cd072a52cb1a2d7c26",
+      "extension/app.css": "89aad628a49b47c26645fb51468d539995fa6bfa7f64df912519a4265e8d506c",
+      "extension/app.html": "02b86e0118980a0f5a14c83e90b1600f99d8791df7ec4f8c909dd83af2d36f6f",
+      "extension/app.mjs": "690244f52f35dbcf2a0afd4081b1bae755fc4e0f9bed128f06e2dee651be5e32",
+      "extension/background.mjs": "71f33f133dfd5dc6d484f4b951675c702f1ed7bee7054aba4300a392841dc5d9",
+      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
+      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
+      "extension/explorer-layout.mjs": "00c6ccd93a3af0c487b403bb42d6eb4ca8c27deb1e025a3ce89c7440dac03fcf",
+      "extension/history-page.mjs": "d35065df868cc86daa5ef233cdb8571d677c6605d343e759dddd3a885d7074d5",
+      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
+      "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
+      "extension/manifest.json": "455f2f65362a550c49977a7b645f7a925f23b3eaa581e608a550969564a82d40",
+      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
+      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
+      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
+      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
+      "extension/recorder-panel.mjs": "b45308a8bedeca6dcde29ddf5cf2fa28c8a5f9bb6acdfbea6c9ceae2c2c65a84",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "893a77fa02d0e0496a5ce821a5f54724cfcd2e7afa2f9df684b576438c6d204a",
+      "right2cloud-module/src/cloudflare-worker.mjs": "37911044110cad6b4249e525f608550d51b5c42e6c6acc08193e7c890d263566",
+      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
+      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
+      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
+      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
+      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
+      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e",
+      "src/aesthetic/host.mjs": "56b4da7567ae34b21e28f51273a8e978c854b4a6e12b03468f55c2ce2ffc9b2a",
+      "src/aesthetic/packages.mjs": "7793ae71fd77af9a9eaa4b28853fe6dd3fc202790078d014d74c2c13e9bc4227",
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
@@ -9292,31 +9319,7 @@
       "src/recorder/recorder.mjs": "912cc977a2065bd8823cd350c582d84f30ca2179549a50e0959f24d867b4c4bb",
       "src/recorder/schema.mjs": "19693270df1a9ce0fdfd3d844d702b728cde209699f902968fd4226fd2b85e7b",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
-      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "extension/app.css": "89aad628a49b47c26645fb51468d539995fa6bfa7f64df912519a4265e8d506c",
-      "extension/app.html": "5af292ecc6c76b0de03bc43ab71be60beb8872ab58f62ff0cc8f4f2a15bdf37b",
-      "extension/app.mjs": "06f13493100148f05db39ec3e46a823f6355a617ef38d5c58a6a925130d53d67",
-      "extension/background.mjs": "71f33f133dfd5dc6d484f4b951675c702f1ed7bee7054aba4300a392841dc5d9",
-      "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
-      "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "00c6ccd93a3af0c487b403bb42d6eb4ca8c27deb1e025a3ce89c7440dac03fcf",
-      "extension/history-page.mjs": "9f7b13ff48c5f1961cd24f7362a0935142566539ea9d226def70461e715febf1",
-      "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
-      "extension/manifest.json": "455f2f65362a550c49977a7b645f7a925f23b3eaa581e608a550969564a82d40",
-      "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
-      "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
-      "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
-      "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
-      "extension/recorder-panel.mjs": "b45308a8bedeca6dcde29ddf5cf2fa28c8a5f9bb6acdfbea6c9ceae2c2c65a84",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "893a77fa02d0e0496a5ce821a5f54724cfcd2e7afa2f9df684b576438c6d204a",
-      "right2cloud-module/src/cloudflare-worker.mjs": "37911044110cad6b4249e525f608550d51b5c42e6c6acc08193e7c890d263566",
-      "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
-      "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
-      "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
-      "right2cloud-module/src/public-address.mjs": "927b75ba63d0e555eeee045ac2ecb46e104e4a31ee8a47bab97fe620b5d34e51",
-      "right2cloud-module/src/source-fetch.mjs": "184a954c82c70a07fa7e082b72ea05a37b97489efe2d4ecdb9b6e242208c6330",
-      "right2cloud-module/src/verification.mjs": "14d70fa60497b44869d218e0b7eb5c5c7d6a0fcee4f62dcb5fe9e7ee1cf62f7e"
+      "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -15002,7 +15005,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "c09643fb7739e42c11c87ccc97f9f86ba95dc992d7edb7a06d6c43ab23d2252e",
+    "digest": "6745137b6de921f408f0816a30a19dbfe33c6fc7367d8f2db6351f4ae49f34c7",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
@@ -15027,12 +15030,25 @@
     },
     "explorerHistoryFoundation": {
       "source": "extension/explorer-layout.mjs, extension/history-page.mjs, extension/app.mjs",
-      "behavior": "Explorer More portals to body and native popover top layer with viewport anchoring, focus/Escape/outside close. History mounts the existing loader using the gallery preference reader independently of file reads; cancellation destroys visuals and aborts bounded queued reads. No native save/auth/permissions changes.",
+      "behavior": "Explorer More portals to body and native popover top layer with viewport anchoring, focus/Escape/outside close. History mounts the existing loader using the gallery preference reader independently of file reads; cancellation destroys visuals and aborts bounded queued reads. No native save/auth/permissions changes. Active read budget is shared across page epochs; rapidly reopened previews retry after cancelled work settles.",
       "tests": [
         "scripts/test-foundation-browser.mjs",
         "scripts/test-customer-history-browser.mjs"
       ],
       "evidenceClass": "Linux Chromium app with fixture provider; Windows and live Cloudflare not verified"
+    },
+    "aestheticApiV1": {
+      "apiVersion": "1.0",
+      "owner": "src/aesthetic/host.mjs",
+      "packages": "src/aesthetic/packages.mjs",
+      "adapter": "extension/aesthetic.css",
+      "behavior": "Declarative validated tokens; Standard removes host variables; High Polish is first package. Independent extension-local preference, exact compatibility/fallback, no engine calls or capabilities. Existing Light/Dark and loading selection unchanged.",
+      "documentation": "docs/api/AESTHETIC_API_V1.md",
+      "tests": [
+        "tests/aesthetic.test.mjs",
+        "scripts/test-aesthetic-browser.mjs"
+      ],
+      "verification": "Linux Chromium app/API/IDB fixture browser matrix; genuine unpacked extension blocked by administrator policy; Windows/live R2 not verified."
     }
   },
   "changeLog": [

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "high-polish",
+  "name": "High Polish",
+  "version": "1.0.0",
+  "compatibleApiVersion": "1.0",
+  "tokens": {
+    "color.background": {
+      "$type": "color",
+      "$value": {
+        "light": "#f4f5f7",
+        "dark": "#12151b"
+      }
+    },
+    "color.surface": {
+      "$type": "color",
+      "$value": {
+        "light": "#ffffff",
+        "dark": "#1b2028"
+      }
+    },
+    "color.raised": {
+      "$type": "color",
+      "$value": {
+        "light": "#eceff3",
+        "dark": "#252d38"
+      }
+    },
+    "color.text": {
+      "$type": "color",
+      "$value": {
+        "light": "#202734",
+        "dark": "#eef1f6"
+      }
+    },
+    "color.muted": {
+      "$type": "color",
+      "$value": {
+        "light": "#596576",
+        "dark": "#aab6c7"
+      }
+    },
+    "color.border": {
+      "$type": "color",
+      "$value": {
+        "light": "#d5dbe4",
+        "dark": "#364252"
+      }
+    },
+    "color.accent": {
+      "$type": "color",
+      "$value": {
+        "light": "#b7193e",
+        "dark": "#ff6687"
+      }
+    },
+    "color.selection": {
+      "$type": "color",
+      "$value": {
+        "light": "#fce8ed",
+        "dark": "#392936"
+      }
+    },
+    "color.focus": {
+      "$type": "color",
+      "$value": {
+        "light": "#a8173a",
+        "dark": "#ff8ca5"
+      }
+    },
+    "typography.family": {
+      "$type": "fontFamily",
+      "$value": "\"Segoe UI\", system-ui, sans-serif"
+    },
+    "typography.size": {
+      "$type": "dimension",
+      "$value": "14px"
+    },
+    "spacing.unit": {
+      "$type": "dimension",
+      "$value": "4px"
+    },
+    "spacing.page": {
+      "$type": "dimension",
+      "$value": "28px"
+    },
+    "spacing.card": {
+      "$type": "dimension",
+      "$value": "20px"
+    },
+    "geometry.control": {
+      "$type": "dimension",
+      "$value": "7px"
+    },
+    "geometry.surface": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "geometry.overlay": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "elevation.overlay": {
+      "$type": "shadow",
+      "$value": "0 12px 36px #00000030"
+    },
+    "motion.feedback": {
+      "$type": "duration",
+      "$value": "120ms"
+    },
+    "state.disabled": {
+      "$type": "number",
+      "$value": 0.5
+    }
+  }
+}
