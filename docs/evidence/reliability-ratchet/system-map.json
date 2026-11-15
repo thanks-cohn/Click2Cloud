@@ -14,6 +14,14 @@
     "permissionPolicy": {
       "maxGrantTtlMs": 3600000,
       "fullConfigurationMethods": [
+        "exportMenuManifest",
+        "getMenuManifestDraft",
+        "previewMenuManifest",
+        "inspectManifestBindings",
+        "commitMenuManifest",
+        "discardMenuManifest",
+        "provisionMenuManifest",
+        "undoMenuManifest",
         "enterExplorer",
         "initializeCloudflare",
         "inspectCloudflare",
@@ -39,8 +47,561 @@
     },
     "operations": [
       {
-        "method": "getGalleryLoadingVisual",
+        "method": "exportMenuManifest",
         "traceMethodIndex": 1,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getMenuManifestDraft",
+        "traceMethodIndex": 2,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "previewMenuManifest",
+        "traceMethodIndex": 3,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "json": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2097152,
+              "multiline": true
+            }
+          },
+          "required": [
+            "json"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "inspectManifestBindings",
+        "traceMethodIndex": 4,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "mapping": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "accountId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  },
+                  "connectionId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  }
+                },
+                "required": [
+                  "accountId",
+                  "connectionId"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "policy": {
+                  "enum": [
+                    "skip-identical",
+                    "add-alongside",
+                    "replace-selected"
+                  ]
+                },
+                "replaceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  },
+                  "maxItems": 4096
+                },
+                "applyPreferences": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "policy",
+                "replaceIds",
+                "applyPreferences"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "draftId"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "discardMenuManifest",
+        "traceMethodIndex": 5,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "draftId"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "commitMenuManifest",
+        "traceMethodIndex": 6,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "previewToken": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "partial": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "draftId",
+            "previewToken",
+            "expectedRevision",
+            "idempotencyKey",
+            "partial"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "provisionMenuManifest",
+        "traceMethodIndex": 7,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "previewToken": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "draftId",
+            "previewToken",
+            "expectedRevision",
+            "idempotencyKey"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "provision",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "undoMenuManifest",
+        "traceMethodIndex": 8,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "expectedRevision",
+            "idempotencyKey"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getGalleryLoadingVisual",
+        "traceMethodIndex": 9,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -93,7 +654,7 @@
       },
       {
         "method": "setGalleryLoadingVisual",
-        "traceMethodIndex": 2,
+        "traceMethodIndex": 10,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -190,7 +751,7 @@
       },
       {
         "method": "initializeCloudflare",
-        "traceMethodIndex": 3,
+        "traceMethodIndex": 11,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -243,7 +804,7 @@
       },
       {
         "method": "inspectShelfAttention",
-        "traceMethodIndex": 4,
+        "traceMethodIndex": 12,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -292,7 +853,7 @@
       },
       {
         "method": "openCloudflareDestinations",
-        "traceMethodIndex": 5,
+        "traceMethodIndex": 13,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -341,7 +902,7 @@
       },
       {
         "method": "inspectCloudflare",
-        "traceMethodIndex": 6,
+        "traceMethodIndex": 14,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -390,7 +951,7 @@
       },
       {
         "method": "checkCloudflareR2",
-        "traceMethodIndex": 7,
+        "traceMethodIndex": 15,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -482,7 +1043,7 @@
       },
       {
         "method": "selectCloudflareAccount",
-        "traceMethodIndex": 8,
+        "traceMethodIndex": 16,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -539,7 +1100,7 @@
       },
       {
         "method": "openCloudflareActivation",
-        "traceMethodIndex": 9,
+        "traceMethodIndex": 17,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -596,7 +1157,7 @@
       },
       {
         "method": "approveCloudflareSetup",
-        "traceMethodIndex": 10,
+        "traceMethodIndex": 18,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -664,7 +1225,7 @@
       },
       {
         "method": "repairCloudflareDestination",
-        "traceMethodIndex": 11,
+        "traceMethodIndex": 19,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -769,7 +1330,7 @@
       },
       {
         "method": "recoverCloudflareDestination",
-        "traceMethodIndex": 12,
+        "traceMethodIndex": 20,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -875,7 +1436,7 @@
       },
       {
         "method": "invokeProviderAction",
-        "traceMethodIndex": 13,
+        "traceMethodIndex": 21,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -969,7 +1530,7 @@
       },
       {
         "method": "inspectRemoteHistory",
-        "traceMethodIndex": 14,
+        "traceMethodIndex": 22,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1030,7 +1591,7 @@
       },
       {
         "method": "inspectRemoteReceipt",
-        "traceMethodIndex": 15,
+        "traceMethodIndex": 23,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1125,7 +1686,7 @@
       },
       {
         "method": "inspectCloudflareSetup",
-        "traceMethodIndex": 16,
+        "traceMethodIndex": 24,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1188,7 +1749,7 @@
       },
       {
         "method": "cancelRemoteOperation",
-        "traceMethodIndex": 17,
+        "traceMethodIndex": 25,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1284,7 +1845,7 @@
       },
       {
         "method": "openRemoteResult",
-        "traceMethodIndex": 18,
+        "traceMethodIndex": 26,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1342,7 +1903,7 @@
       },
       {
         "method": "refreshExplorer",
-        "traceMethodIndex": 19,
+        "traceMethodIndex": 27,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1436,7 +1997,7 @@
       },
       {
         "method": "enterExplorer",
-        "traceMethodIndex": 20,
+        "traceMethodIndex": 28,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1485,7 +2046,7 @@
       },
       {
         "method": "navigateExplorer",
-        "traceMethodIndex": 21,
+        "traceMethodIndex": 29,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1574,7 +2135,7 @@
       },
       {
         "method": "readFileChunk",
-        "traceMethodIndex": 22,
+        "traceMethodIndex": 30,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1684,7 +2245,7 @@
       },
       {
         "method": "inspectExplorerContextMenu",
-        "traceMethodIndex": 23,
+        "traceMethodIndex": 31,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1799,7 +2360,7 @@
       },
       {
         "method": "previewContextMenu",
-        "traceMethodIndex": 24,
+        "traceMethodIndex": 32,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1859,7 +2420,7 @@
       },
       {
         "method": "describeCapabilities",
-        "traceMethodIndex": 25,
+        "traceMethodIndex": 33,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1913,7 +2474,7 @@
       },
       {
         "method": "getConfiguration",
-        "traceMethodIndex": 26,
+        "traceMethodIndex": 34,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1962,7 +2523,7 @@
       },
       {
         "method": "getEngineHealth",
-        "traceMethodIndex": 27,
+        "traceMethodIndex": 35,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2032,7 +2593,7 @@
       },
       {
         "method": "getProviderConnections",
-        "traceMethodIndex": 28,
+        "traceMethodIndex": 36,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2079,7 +2640,7 @@
       },
       {
         "method": "loginBegin",
-        "traceMethodIndex": 29,
+        "traceMethodIndex": 37,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2130,7 +2691,7 @@
       },
       {
         "method": "loginStatus",
-        "traceMethodIndex": 30,
+        "traceMethodIndex": 38,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2177,7 +2738,7 @@
       },
       {
         "method": "loginCancel",
-        "traceMethodIndex": 31,
+        "traceMethodIndex": 39,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2224,7 +2785,7 @@
       },
       {
         "method": "disconnect",
-        "traceMethodIndex": 32,
+        "traceMethodIndex": 40,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2271,7 +2832,7 @@
       },
       {
         "method": "fileAction",
-        "traceMethodIndex": 33,
+        "traceMethodIndex": 41,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2448,7 +3009,7 @@
       },
       {
         "method": "listAccounts",
-        "traceMethodIndex": 34,
+        "traceMethodIndex": 42,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2497,7 +3058,7 @@
       },
       {
         "method": "listAuthorizedBuckets",
-        "traceMethodIndex": 35,
+        "traceMethodIndex": 43,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2559,7 +3120,7 @@
       },
       {
         "method": "listFolders",
-        "traceMethodIndex": 36,
+        "traceMethodIndex": 44,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2653,7 +3214,7 @@
       },
       {
         "method": "fileMetadata",
-        "traceMethodIndex": 37,
+        "traceMethodIndex": 45,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2748,7 +3309,7 @@
       },
       {
         "method": "readFile",
-        "traceMethodIndex": 38,
+        "traceMethodIndex": 46,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2856,7 +3417,7 @@
       },
       {
         "method": "listDestinations",
-        "traceMethodIndex": 39,
+        "traceMethodIndex": 47,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2924,7 +3485,7 @@
       },
       {
         "method": "inspectMenuTree",
-        "traceMethodIndex": 40,
+        "traceMethodIndex": 48,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3001,7 +3562,7 @@
       },
       {
         "method": "previewNativeMenu",
-        "traceMethodIndex": 41,
+        "traceMethodIndex": 49,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3050,7 +3611,7 @@
       },
       {
         "method": "inspectNativeACK",
-        "traceMethodIndex": 42,
+        "traceMethodIndex": 50,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3099,7 +3660,7 @@
       },
       {
         "method": "getOrganizationSuggestion",
-        "traceMethodIndex": 43,
+        "traceMethodIndex": 51,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3148,7 +3709,7 @@
       },
       {
         "method": "previewConfigChange",
-        "traceMethodIndex": 44,
+        "traceMethodIndex": 52,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -4210,7 +4771,7 @@
       },
       {
         "method": "commitConfigChange",
-        "traceMethodIndex": 45,
+        "traceMethodIndex": 53,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5278,7 +5839,7 @@
       },
       {
         "method": "reconcileNativeMenu",
-        "traceMethodIndex": 46,
+        "traceMethodIndex": 54,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5334,7 +5895,7 @@
       },
       {
         "method": "chooseBackupLocation",
-        "traceMethodIndex": 47,
+        "traceMethodIndex": 55,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5389,7 +5950,7 @@
       },
       {
         "method": "inspectRecoveryCoverage",
-        "traceMethodIndex": 48,
+        "traceMethodIndex": 56,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5478,7 +6039,7 @@
       },
       {
         "method": "runRecoveryPage",
-        "traceMethodIndex": 49,
+        "traceMethodIndex": 57,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5567,7 +6128,7 @@
       },
       {
         "method": "inspectBackupRoots",
-        "traceMethodIndex": 50,
+        "traceMethodIndex": 58,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5616,7 +6177,7 @@
       },
       {
         "method": "listRecoveryPolicies",
-        "traceMethodIndex": 51,
+        "traceMethodIndex": 59,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5665,7 +6226,7 @@
       },
       {
         "method": "writeRecovery",
-        "traceMethodIndex": 52,
+        "traceMethodIndex": 60,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5714,7 +6275,7 @@
       },
       {
         "method": "requestRestorePreview",
-        "traceMethodIndex": 53,
+        "traceMethodIndex": 61,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6790,7 +7351,7 @@
       },
       {
         "method": "restoreRightClickMenu",
-        "traceMethodIndex": 54,
+        "traceMethodIndex": 62,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7883,7 +8444,7 @@
       },
       {
         "method": "inspectWholeCloudJobs",
-        "traceMethodIndex": 55,
+        "traceMethodIndex": 63,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7931,7 +8492,7 @@
       },
       {
         "method": "enableWholeCloudJob",
-        "traceMethodIndex": 56,
+        "traceMethodIndex": 64,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8014,7 +8575,7 @@
       },
       {
         "method": "disableWholeCloudJob",
-        "traceMethodIndex": 57,
+        "traceMethodIndex": 65,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8091,7 +8652,7 @@
       },
       {
         "method": "dispatchExplorerSave",
-        "traceMethodIndex": 58,
+        "traceMethodIndex": 66,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8236,7 +8797,7 @@
       },
       {
         "method": "dispatchSave",
-        "traceMethodIndex": 59,
+        "traceMethodIndex": 67,
         "version": "3+1.1",
         "schema": {
           "type": "object",

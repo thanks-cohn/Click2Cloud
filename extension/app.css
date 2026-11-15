@@ -81,3 +81,10 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .gallery-controls .gallery-arrow:active:not(:disabled){background:var(--selected)}
 .gallery-controls .gallery-arrow:disabled{opacity:.35}
 .gallery-controls span{flex:1;text-align:center}
+/* Manifest review is a readable private diff, not an ellipsized Explorer row. */
+#portable-menu-manifests th,#portable-menu-manifests td{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;vertical-align:top;padding:8px}
+#portable-menu-manifests th:first-child{width:auto}
+#portable-menu-manifests th:nth-child(2),#portable-menu-manifests td:nth-child(2){display:table-cell}
+#portable-menu-manifests select{max-width:100%;white-space:normal}
+#portable-menu-manifests button{margin:4px 0;white-space:normal}
+#portable-menu-manifests details{margin:12px 0}

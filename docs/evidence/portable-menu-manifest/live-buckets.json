@@ -1,0 +1,27 @@
+{
+  "accountId": "40439992e793a00d8f33b19f898fa0c2",
+  "results": [
+    {
+      "name": "click2cloud-qa",
+      "state": "CREATED_VERIFIED",
+      "bucket": {
+        "name": "click2cloud-qa",
+        "creation_date": "2026-11-15T04:12:22.214Z",
+        "location": "WNAM",
+        "storage_class": "Standard",
+        "jurisdiction": "default"
+      }
+    },
+    {
+      "name": "click2cloud-qa-2",
+      "state": "CREATED_VERIFIED",
+      "bucket": {
+        "name": "click2cloud-qa-2",
+        "creation_date": "2026-11-15T04:12:23.666Z",
+        "location": "WNAM",
+        "storage_class": "Standard",
+        "jurisdiction": "default"
+      }
+    }
+  ]
+}

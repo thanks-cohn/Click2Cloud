@@ -672,3 +672,59 @@ in-memory projection, never persistent configuration or unrelated discovered pat
 Exact ancestor capability results remain independent: a prefix-restricted plan can
 permit C2C-QA/ while leaving bucket-root Save here disabled. Pure preview performs
 no new sweep, and no cloud resource is provisioned by this path.
+
+## Portable menu manifests — November 14 implementation branch
+
+Ordinary Settings mounts `extension/manifest-panel.mjs` outside Debug. It uses
+only trusted `3+1.1` engine messages, never the recorder protocol. Export performs
+no network calls and allowlists persisted user configuration; no generation,
+ACK, credentials, private setup ledger, diagnostics or discovered object listing
+is in its closed 2 MiB/version-1 personal format. A picker cancellation is not a
+saved file; the download fallback states request acceptance, not disk completion.
+
+`exportMenuManifest` and `getMenuManifestDraft` require full-configuration grants
+and all affected account bindings. `previewMenuManifest` parses locally and
+stages an inert private Chrome-local draft (`menuManifestState`), not CURRENT or
+a recovery source. `inspectManifestBindings` checks exact original or explicitly
+mapped account/connection + bucket + prefix through the canonical Cloudflare
+provider owner. Direct bucket GET and exact Worker capabilities separate absence,
+unknown, permission denial, login and Worker readiness. A bounded object page is
+only materialization evidence: empty prefixes are valid future keys. Narrow
+ancestor capabilities are checked separately, with no inherited child grant.
+
+`provisionMenuManifest` consumes the exact reviewed preview after one host-owned
+approval. In the GUI the disclosed Create Yes is that approval; there is no
+second/per-location confirmation. The provider owner rechecks bucket existence,
+issued scopes/session/account, CURRENT revision and approved plan before effects.
+It creates only named missing buckets and uses `deployment.prepare` for a named
+private Worker at the disclosed prefix scope, followed by the ordinary signed
+probe, independent readback, `markVerified` and fresh status. Existing scope,
+code-upgrade and signing-renewal blockers remain distinct; the import never
+widens or replaces them. Folder markers are not part of this product path.
+The exact logical prefixes become future save paths. Costs, retained probe object
+and Worker/Durable Object effects appear before Yes. A provider grant is not
+inferred from consent. Draft/plan progress and private setup ledgers make lost
+bucket replies read-only reconciled; uncertain probes resume by operation ID,
+never a new write. Remote resources are never automatically rolled back.
+
+`commitMenuManifest` rechecks CURRENT revision, one-use preview, account grants,
+conflict policy and fresh exact readiness. The isolated import writer does not
+relax `commitConfigChange` discovery checks. It commits all modes and preferences
+in one `commitProduct` transaction. Default and existing preferences are preserved
+unless the displayed preference change is explicitly chosen; empty menus restore
+the exported preferences. Safe presentation IDs are remapped deterministically;
+independent same-key Narrow routes retain multiplicity. Repeated imports/replies
+are idempotent. Partial Yes writes only verified routes and keeps the complete
+original intentions in a separate pending draft. Cancel/discard never activates.
+
+After the durable commit, the original compiler/registrar runs with fresh exact
+readiness and fresh Depth inventory (import budget: 256 listing requests / 4096
+folders per scope). Budget exhaustion is incomplete discovery, not empty cloud
+or successful native completion. Configuration saved, native acknowledged and
+remote save verified remain separate. A private preimage plus durable receipt
+and current revision fence `undoMenuManifest`; it cannot overwrite concurrent
+edits or delete cloud objects. Missing/corrupt CURRENT blocks commit/undo and
+routes to existing Recovery. Host-granted agents require all prior/new accounts;
+Debug confers no authority. See tests/portable-menu-manifest.test.mjs,
+menu-manifest-workerd.test.mjs and scripts/test-menu-manifest-browser.mjs. Real
+Chromium DOM/IndexedDB and local Workerd are not installed Windows/live R2 proof.

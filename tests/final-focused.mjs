@@ -71,3 +71,6 @@ await import('./recorder-measurements.test.mjs');
 
 await import('./narrow-bucket-boundary.test.mjs');
 await import('./depth-ready-authorization.test.mjs');
+
+await import('./portable-menu-manifest.test.mjs');
+await import('./menu-manifest-workerd.test.mjs');

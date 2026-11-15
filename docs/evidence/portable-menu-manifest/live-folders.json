@@ -1,0 +1,509 @@
+{
+  "accountId": "40439992e793a00d8f33b19f898fa0c2",
+  "results": [
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/A/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/A/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:50.143Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/B/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/B/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:51.616Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/C/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/C/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:52.837Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/A/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/A/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:54.037Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/B/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/B/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:55.312Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/C/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/C/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:56.478Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/L4/L5/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/L1/L2/L3/L4/L5/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:57.678Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling01/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling01/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:19:58.961Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling02/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling02/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:00.243Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling03/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling03/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:03.004Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling04/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling04/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:05.783Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling05/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling05/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:08.688Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling06/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling06/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:10.414Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling07/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling07/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:11.946Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling08/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling08/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:13.206Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling09/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling09/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:14.505Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling10/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling10/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:15.918Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling11/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling11/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:17.485Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling12/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling12/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:18.963Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling13/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling13/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:20.657Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling14/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/Sibling14/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:22.294Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/A/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/A/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:23.603Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/B/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/B/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:24.736Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/C/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Simple/C/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:25.653Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/A/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/A/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:26.553Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/B/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/B/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:27.521Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/C/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Narrow/C/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:28.442Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    },
+    {
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Depth/",
+      "state": "MARKER_VERIFIED",
+      "observed": [
+        {
+          "key": "C2C-QA/Depth/",
+          "etag": "d41d8cd98f00b204e9800998ecf8427e",
+          "last_modified": "2026-11-15T04:20:29.370Z",
+          "size": 0,
+          "http_metadata": {
+            "contentType": "application/octet-stream"
+          },
+          "custom_metadata": {},
+          "storage_class": "Standard"
+        }
+      ]
+    }
+  ]
+}

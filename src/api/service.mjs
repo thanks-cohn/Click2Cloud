@@ -1,3 +1,4 @@
+import {createManifestService,createManifestStore} from '../manifest/service.mjs';
 import {createAgentDebugApi} from '../glaciaring/agent-api.mjs';
 import {describeReliability} from '../glaciaring/reliability.mjs';
 import {supportReport} from '../glaciaring/support-report.mjs';
@@ -26,7 +27,19 @@ const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,targe
 const changeFields=CONFIG_CHANGE_FIELDS;
 change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const rebuild=obj({accountId:str,changes:arr(change),acknowledgeUnknown:{enum:[true]}},['accountId','changes','acknowledgeUnknown']);
+const manifestOptions=obj({policy:{enum:['skip-identical','add-alongside','replace-selected']},replaceIds:{type:'array',items:str,maxItems:4096},applyPreferences:bool},['policy','replaceIds','applyPreferences']);
+const draftParams={draftId:str,previewToken:str,expectedRevision:num,idempotencyKey:str};
+const manifestDefinitions={
+ exportMenuManifest:['inspect',obj()],getMenuManifestDraft:['inspect',obj()],
+ previewMenuManifest:['configure',obj({json:{type:'string',minLength:1,maxLength:2097152,multiline:true}},['json'])],
+ inspectManifestBindings:['configure',obj({draftId:str,mapping:{type:'object',additionalProperties:obj({accountId:str,connectionId:str},['accountId','connectionId'])},options:manifestOptions},['draftId'])],
+ discardMenuManifest:['configure',obj({draftId:str},['draftId'])],
+ commitMenuManifest:['configure',obj({...draftParams,partial:bool},['draftId','previewToken','expectedRevision','idempotencyKey','partial'])],
+ provisionMenuManifest:['provision',obj(draftParams,['draftId','previewToken','expectedRevision','idempotencyKey'])],
+ undoMenuManifest:['configure',obj({expectedRevision:num,idempotencyKey:str},['expectedRevision','idempotencyKey'])]
+};
 const definitions={
+ ...manifestDefinitions,
   getGalleryLoadingVisual:['inspect',obj({includeMedia:bool})],setGalleryLoadingVisual:['configure',obj({expectedRevision:num,mode:{enum:['math','media','plain']},removeMedia:bool,media:obj({name:{type:'string',minLength:1,maxLength:256},type:{enum:['image/png','image/jpeg','image/webp','image/gif','video/mp4']},base64:{type:'string',minLength:1,maxLength:11184812}},['name','type','base64'])},['expectedRevision','mode'])],
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
@@ -63,7 +76,7 @@ export function validate(schema,value) {
     for(const [k,v] of Object.entries(value)) {if(['__proto__','constructor','prototype'].includes(k))fail('INVALID_REQUEST');const sub=schema.properties?.[k]??schema.additionalProperties;if(!sub)fail('INVALID_REQUEST');if(sub!==true)validate(sub,v);}
   }
   if(schema.type==='array'){if(!Array.isArray(value)||value.length>(schema.maxItems??Number.MAX_SAFE_INTEGER))fail('INVALID_REQUEST');for(const v of value)validate(schema.items,v);}
-  if(schema.type==='string'&&(typeof value!=='string'||value.length<(schema.minLength??0)||value.length>(schema.maxLength??8192)||/[\x00-\x1f]/.test(value)))fail('INVALID_REQUEST');
+  if(schema.type==='string'&&(typeof value!=='string'||value.length<(schema.minLength??0)||value.length>(schema.maxLength??8192)||(!schema.multiline&&/[\x00-\x1f]/.test(value))))fail('INVALID_REQUEST');
   if(schema.type==='integer'&&(!Number.isSafeInteger(value)||value<(schema.minimum??0)||value>(schema.maximum??Number.MAX_SAFE_INTEGER)))fail('INVALID_REQUEST');
   if(schema.type==='boolean'&&typeof value!=='boolean')fail('INVALID_REQUEST');
 }
@@ -74,15 +87,15 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context)}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),manifestStore=createManifestStore(),manifestLocations}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
-  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget}={}){
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget}={}){
     try{
       const state=await current.read();
-      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,
+      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,
         refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare?state.configs.depth.scopes.filter(s=>!depthTarget||scopeKey(s.target)===scopeKey(depthTarget)):[]});
       const spec=await engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory});
       const native=await engine.apply(spec);
@@ -102,6 +115,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     return task;
   }
   const reconcile=()=>applyCurrent({refreshDepthReadiness:true});
+  const manifests=createManifestService({current,readCurrent:loadCurrent,store:manifestStore,locations:manifestLocations,oauth,authorize,confirm,applyCurrent,version:BUILD_INFO.extensionVersion});
   async function restorePreview(){
     const local=await current.inspect(),evidence=await current.evidence();
     let present;if(local.database?.present!==false)try{present=await loadCurrent({observe:false});}catch{};
@@ -162,7 +176,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation'].includes(method);
+        const independent=['getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -176,7 +190,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if((params.changes??[]).some(c=>c.type==='clearDefault')&&state.product.defaultTarget)bindings.push(state.product.defaultTarget);
         if(params.itemId){const row=engine.getMenu(params.generation)?.rows.find(r=>r.id===params.itemId);if(row?.target)bindings.push(row.target);}
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
-        if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
+        if(Object.hasOwn(manifestDefinitions,method))data=await manifests.invoke(method,params,actor);
+        else if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
         else if(method==='setGalleryLoadingVisual')data=await current.setGalleryLoadingVisual(params);
         else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','recoverCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
           if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');

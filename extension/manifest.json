@@ -11,7 +11,8 @@
     "activeTab",
     "sidePanel",
     "notifications",
-    "webNavigation"
+    "webNavigation",
+    "downloads"
   ],
   "background": {
     "service_worker": "extension/background.mjs",

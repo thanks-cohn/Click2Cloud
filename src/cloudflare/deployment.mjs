@@ -30,7 +30,7 @@ export function createProvisioner({request,readModule,load,store,authority=async
   }return body.result;
  }
 
- return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false}={}){
+ return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName}={}){
   if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]);
   const identity=await authority();let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
   let plan=await load(key);
@@ -54,7 +54,9 @@ export function createProvisioner({request,readModule,load,store,authority=async
   auth={...auth,workerIntent};
   if(workerIntent==='create'&&auth?.scopes&&!hasWorkerCreateScope(auth.scopes))throw workerError(safeWorkerDiagnostic({operation:'script-upload',workerIntent:'create',code:'WORKER_CREATE_PERMISSION_REQUIRED',classification:'OAUTH_SCOPE_MISSING',httpStatus:null,providerCodes:[],missingScopes:['workers-scripts.admin'],grantedScopes:auth.scopes,scopeEvidence:auth.scopeEvidence,selectedAccountVerified:auth.selectedAccountVerified}));
   const updating=!!plan&&!recoveredMissing;
-  const name=plan?.name??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=renewing&&!plan.signingRenewalPending||!plan?.secret?Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join(''):plan.secret;
+  if(workerName!==undefined&&!/^click2cloud-r2-[a-f0-9]{20}$/.test(workerName))fail('WORKER_ADDRESS_INVALID');
+  if(!plan&&workerName&&await json(base+'/scripts/'+workerName+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true))fail('PROVISION_RECONCILE_REQUIRED');
+  const name=plan?.name??workerName??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=renewing&&!plan.signingRenewalPending||!plan?.secret?Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join(''):plan.secret;
   plan={name,secret,codeDigest,state:'pending',accountId:d.accountId,bucketName:d.bucketName,prefixScope,protocol:PROTOCOL,...(renewing?{signingRenewalPending:true}:{})};await store(key,plan);
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify({main_module:'src/cloudflare/worker.mjs',compatibility_date:'2026-01-01',compatibility_flags:['nodejs_compat'],observability:{enabled:false},

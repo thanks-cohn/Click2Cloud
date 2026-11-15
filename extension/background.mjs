@@ -1,3 +1,4 @@
+import {createManifestLocations} from '../src/cloudflare/manifest-locations.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
 import {createDepthNativeClick,createDepthFeedback} from '../src/modes/depth/native-click.mjs';
 import {discoverDepthScope} from '../src/explorer/depth-inventory.mjs';
@@ -82,7 +83,7 @@ const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseF
 // Menu inspection/boot projects saved observations without a full-cloud network
 // sweep. Destination Save refreshes its exact new targets; every actual save
 // independently rechecks current authority and scoped Worker capability.
-async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false}={}) {
+async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false,depthBudget}={}) {
   const status=await oauth.status();
   const policy=(await current.read()).product.recovery;
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
@@ -98,7 +99,7 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
   const discovered=[];
   for(const selection of refreshSelections){
     if(status.state!=='CONNECTED'||!status.accounts.some(a=>a.id===selection.target.accountId))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
-    const result=await discoverDepthScope(baseFileApi,selection);
+    const result=await discoverDepthScope(baseFileApi,selection,depthBudget);
     depthSnapshots.set(result.scopeKey,result);
     pendingScopes.delete(result.scopeKey);
     discovered.push(result.target,...result.folders.map(prefix=>({...result.target,prefix})));
@@ -222,7 +223,8 @@ const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
-const api=createEngineApi({engine,current,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const manifestLocations=createManifestLocations({oauth,current,provisioner,transport:remote});
+const api=createEngineApi({engine,current,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});

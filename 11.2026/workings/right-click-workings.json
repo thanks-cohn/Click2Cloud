@@ -9205,8 +9205,8 @@
       "src/api/explorer-context-menu.mjs": "e87b66f2a6dcd6073a7b873dc258b7b9bb2d1b6472f32d29fab4ff449c22172f",
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
-      "src/api/permissions.mjs": "03cd3248a909c2d8709aeb01e01bc334ef11d1a7931218f0db5efd045e147bce",
-      "src/api/service.mjs": "90dd4571e3154bc91cdf9cd6c69878887a2e34f8eb9029420cbf348f8d60b852",
+      "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
+      "src/api/service.mjs": "8c2774ab380bab0ea8aab28ed82264bb7836765d36b67a7370d8182501a598bd",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "4ae1d0218ccee31c81b63b80c7bdc2229e23483317ee347154d0689e56c5001d",
@@ -9216,10 +9216,11 @@
       "src/chrome/provider-panel.mjs": "899d538d1d828c9097ff8d934a108af6edb3974b409bda3fed96a561770b82da",
       "src/chrome/registrar.mjs": "1b8fd1093f4846ba57d9012c8776e1d39f067bd5cf1af4432642e8faa7981455",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/cloudflare/deployment.mjs": "a31f77aa2bcae3f1050654c0afd221ec42478c2d97d0b78d7d3248fbaefc837d",
+      "src/cloudflare/deployment.mjs": "be4c8b3c6ce213c1705ef685970ba4331a628d3f8bdc49d3d4bbd975941d560f",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
       "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
+      "src/cloudflare/manifest-locations.mjs": "dcd7d3c0070149eb2ca6b3ca8d5560656e6a44fde8b54e797ce33bb9bc8482b4",
       "src/cloudflare/onboarding.mjs": "7b54d45c4995889906b02af80431d639c24e73bda5fe0699639156173de0522c",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
@@ -9242,7 +9243,7 @@
       "src/dashboard/redown-bridge.mjs": "8a0e74c4f53fd826c193870617610fca0ed2690864aa3a58d4a6dc18784a8e3f",
       "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
       "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
-      "src/explorer/depth-inventory.mjs": "b4778f391f0aab3e08e1942a61a39744e523cea36433bb7cdb872a7939c94417",
+      "src/explorer/depth-inventory.mjs": "6b0f897bf6be5fd23f533fe6a00cbca4c1c2151b63f1f243c968e640c1d8c563",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "4f213c2efcdb81ae37943a54b0de8a581e061b9a13d035e57c3630c58c30b3b7",
       "src/explorer/image-preview.mjs": "7421e2a8b03289b712b9a01255b24f18961c669b38d07aa7ee5f80289de6247c",
@@ -9263,10 +9264,14 @@
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
       "src/glaciaring/catalog.mjs": "69e9a54a2b39c0bb14c3f28be9002094319154f4512cc88ff7dfe25a1feca7b1",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "ee81be703083b8378ae913986f19612a476fe86704bf6e491b46a7c198573d68",
+      "src/glaciaring/reliability.mjs": "1821d676cbcaf293874909e3c1e223ab5207daec7040d084e9e36cf087e8aa61",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
+      "src/manifest/export.mjs": "2618aa0219cf67883e0e597dee27e2a35bb1d2676819d48729bdff9bc4420257",
+      "src/manifest/import-plan.mjs": "597044b5f35f77e13a497e82b9b6495cebd8f71e989a83c9acd169532f5eeabc",
+      "src/manifest/schema.mjs": "cba93d4eb18b8ea9a7e5cdf08b7e84b742f897ffd567e5338c2de6cb2ad173af",
+      "src/manifest/service.mjs": "794c990f587a9c1189dd439f19fd4ca63bf022fe7d93ad60f101fed5a9b36ece",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
       "src/modes/depth/native-click.mjs": "2fb8086dc1934f30405a69859ff795fb56b6b5f5c7eae8d5ed1e004d46230c30",
       "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
@@ -9286,15 +9291,16 @@
       "src/recorder/schema.mjs": "19693270df1a9ce0fdfd3d844d702b728cde209699f902968fd4226fd2b85e7b",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
+      "extension/app.css": "45a2b674bb5c22533f3289adcb98ffa99931a167af35b990c399927a270c7ae8",
       "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
-      "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
-      "extension/background.mjs": "4762e24dbabc9fe1c82eceb48ef0087211cbfd982b2bd25665d2681b46dc2dc6",
+      "extension/app.mjs": "37baf4d3ad14fcde82497b6b01f773415f7daeddeeda293a6a8c8a6ccc00df65",
+      "extension/background.mjs": "98cbb96754fc423468ec3855efcc80d4dbbad27d67572e7e9d8f1f8dd86c08bf",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
-      "extension/manifest.json": "630e44e29dd88d987541306ce2f9a50e18693cc6fa34e252c97907bd633d1dd5",
+      "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
+      "extension/manifest.json": "455f2f65362a550c49977a7b645f7a925f23b3eaa581e608a550969564a82d40",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -12229,6 +12235,59 @@
           "status": "LOCAL_PASS_HISTORICAL_RACE_UNEXPLAINED",
           "testFile": "tests/depth-ready-authorization.test.mjs"
         }
+      },
+      {
+        "id": "PORTABLE_MENU_MANIFEST",
+        "preconditions": "Explicit ordinary Settings action; Debug independent",
+        "trigger": "Export / Import / inspect / partial / Create Yes / Apply / Undo",
+        "guard": "Closed bounded schema, trusted actor/all accounts, exact binding/readiness, preview token, expected revision, idempotency and informed one-plan approval",
+        "actual": "Complete personal export, separate durable draft, explicit mapping, exact existing-location reuse, partial-only activation, disclosed feasible provisioning and atomic all-mode import; no fallback/reset or remote rollback",
+        "apiMethods": [
+          "exportMenuManifest",
+          "getMenuManifestDraft",
+          "previewMenuManifest",
+          "inspectManifestBindings",
+          "discardMenuManifest",
+          "commitMenuManifest",
+          "provisionMenuManifest",
+          "undoMenuManifest"
+        ],
+        "identity": "provider + account + connection + physical bucket + normalized prefix independently of portable presentation identity",
+        "nextState": "Draft or durable CURRENT with independent native ACK and remote proof",
+        "uiEffect": "Settings buttons outside Debug, readable private diff/status/creation plan, one approval, resumable pending draft",
+        "externalResourceEffect": "Only explicit Create Yes: missing exact bucket, canonical named private Worker and probe; zero marker objects; no deletions",
+        "persistence": "Private menuManifestState; CurrentStore atomic commit and setup progress ledger; original registrar",
+        "errors": [
+          "MANIFEST_INVALID",
+          "MANIFEST_PREVIEW_CHANGED",
+          "REVISION_CONFLICT",
+          "MANIFEST_LOCATIONS_NOT_READY",
+          "AUTHORIZATION_REVOKED",
+          "BUCKET_CREATE_REQUIRES_INSPECTION"
+        ],
+        "retry": "Read-only reconcile of uncertain bucket/probe; durable config receipt; changed plan requires review",
+        "sourceRefs": [
+          {
+            "path": "src/manifest/service.mjs",
+            "symbol": "createManifestService"
+          },
+          {
+            "path": "src/cloudflare/manifest-locations.mjs",
+            "symbol": "createManifestLocations"
+          },
+          {
+            "path": "extension/manifest-panel.mjs",
+            "symbol": "mountManifestPanel"
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_FIXTURE",
+          "status": "PASS",
+          "meaning": "Node/browser/workerd fixtures; live QA setup separately recorded",
+          "testFile": "tests/portable-menu-manifest.test.mjs",
+          "runtime": "INSTALLED_WINDOWS_NOT_VERIFIED"
+        },
+        "contractViolation": null
       }
     ],
     "stateTransitions": [
@@ -12828,6 +12887,78 @@
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Host provision grant for exact target account; retained scoped setup approval for resume; explicit one-operation confirmation for new approval, code upgrade or signing renewal",
         "coverage": "Local production API/native/workerd independent R2 readback; installed owner Chrome and live R2 unverified"
+      },
+      {
+        "method": "exportMenuManifest",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "getMenuManifestDraft",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "previewMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "inspectManifestBindings",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "discardMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "commitMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "provisionMenuManifest",
+        "scope": "provision",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "undoMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       }
     ],
     "errorBranches": {
@@ -12926,6 +13057,12 @@
         "genuineInstalledChrome": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
         "windowsAndLiveOAuth": "NOT_TESTED; no fixtures promoted to live proof",
         "handoff": "docs/evidence/remotes-boot/HANDOFF.md"
+      },
+      "portableManifest": {
+        "source": "Implemented",
+        "fixture": "See docs/evidence/portable-menu-manifest",
+        "liveQASetup": "Both specified buckets plus 28 empty marker objects independently read back under explicit owner authorization; not restored native save proof",
+        "installedWindows": "NOT_VERIFIED"
       }
     },
     "sourceState": "November 14 Narrow bucket/ancestor and Depth gesture-readiness repair, based on requested review HEAD; exact sourceFiles hashes identify this implementation. Local fixture and callback ACK validation only for these changes; historical live milestone is preserved but not recertified. Installed Windows and live R2 acceptance remain unverified.",
@@ -14844,7 +14981,8 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "34ebba9d672b5859ad7cd97d8a4adb3efca069c1c4abd6eeb046910af92f3543"
+    "digest": "34ebba9d672b5859ad7cd97d8a4adb3efca069c1c4abd6eeb046910af92f3543",
+    "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72"
   },
   "changeLog": [
     {
