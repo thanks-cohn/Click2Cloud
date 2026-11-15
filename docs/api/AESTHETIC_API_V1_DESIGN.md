@@ -9,6 +9,20 @@
 
 The **same versioned API** should eventually support third-party styles (classic Mac, Windows 98, retro, futuristic glass, etc.) without changes to the business logic or privileged application code. In v1, ship only Standard and High Polish; **document** public package extension points but do not build public installation, marketplace, or unrestricted styling/code loading.
 
+## High Polish quality standard — the finishing layer
+
+**Owner's bar: exceptional premium craftsmanship.** High Polish should make the finished Click2Cloud experience feel like a top-tier, confident, production-grade desktop application. This quality comes principally from thoughtful structure, immaculate spacing, visual hierarchy, carefully tuned typography, deliberate alignment, coherent proportions, fine surface details, responsive feedback and consistent components—not decorative blur or novelty gradients.
+
+**Sequence is required:** First repair/verify functional Explorer More overlay and shared History loading visuals. **Only after those functional changes are complete**, introduce the Aesthetic API with High Polish as the first overlay and visually refine the now-stable application. Finish Branch 1 with full functional AND visual regression tests. Then and only then create Branch 2 for URL code.
+
+Requirements:
+- Perfect consistent alignment, spacing scale, padding and visual rhythm across the header, navigation, settings, Remotes, File Explorer, History, dialogs, context menus, overlays, previews and error/empty states.
+- Harmonious typography and information hierarchy, including filenames, metadata, labels, buttons, dates and diagnostics. Respect practical density and small screens.
+- Precise borders, radii, elevation, material depth, hover/focus/disabled states and subtle motion. Focus on craftsmanship, not ornamental complexity.
+- The High Polish visual treatment is one **versioned Aesthetic API package/overlay**, loaded by the same interface as Standard; toggling it never modifies functional operations or user data.
+- Verify every screen in Standard and High Polish, light/dark, resized/narrow/wide, keyboard/reduced-motion; inspect screenshot evidence for awkward gaps, alignment issues, contrast, dropdown clipping and inconsistent density. Record defects and fix them before declaring Branch 1 complete.
+- Present subjective visual quality as a design review supported by screenshots and concrete consistency criteria; no assertion that code tests alone prove visual perfection.
+
 ## Reuse standards instead of inventing new ones
 
 - Use **CSS custom properties** for design-token application and **semantic component selectors/parts** for styling hooks. Use standard CSS layering/scoping where supported. Avoid a new CSS execution engine.
