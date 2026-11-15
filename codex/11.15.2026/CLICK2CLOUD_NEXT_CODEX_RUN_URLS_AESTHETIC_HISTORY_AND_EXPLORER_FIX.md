@@ -1,5 +1,5 @@
 # CLICK2CLOUD — NEXT CODEX RUN
-## Verified Get URL + TXT directory export · Aesthetic API + High Polish · shared History loading visual · Explorer More overlay fix
+## Get URL + resumable directory URL exports · Aesthetic API + High Polish · History loading visual · Explorer More overlay fix
 
 **Prepared:** 2026-11-15 (America/Chicago)  
 **Repository:** `thanks-cohn/Click2Cloud`  
@@ -14,10 +14,10 @@ Implement **four separately testable features/repairs** on a **new branch**, wit
 **The four workstreams:**
 1. Fix File Explorer toolbar **More** overlay appearing behind the left tree panel (**P1 UI bug, GitHub issue #14**).
 2. **Reuse the existing gallery/File Explorer image-loading animation module in History image previews** (no new animation engine).
-3. **Get URL** for individual R2 objects, verified Cloudflare custom-domain setup, and **Download URLs (.txt)** for files **immediately inside** an R2 directory.
+3. **Get URL** for individual R2 objects, authorized Cloudflare bucket public URL/custom-domain setup, and API-driven, resumable **multi-format URL export for the immediate files in a selected directory only**. No whole-bucket export.
 4. Build a **separate reusable Aesthetic API** and a premium **High Polish** appearance toggle in Settings. Architect the presentation interface for eventual safe **public/user-created aesthetics**; do not build a public marketplace or enable untrusted remote code in this run.
 
-**Explicitly out of scope:** “Send to another cloud,” any cross-cloud copy/transfer, changing ReDown or other products, launch/marketing announcements, billing/subscription changes, bulk recursive TXT exports (unless separately requested), and live Cloudflare public access changes without fresh explicit authorization. No production release, merge, deploy or tag without owner approval.
+**Explicitly out of scope:** **whole-bucket URL inventory/export**, recursive bucket exports, “Send to another cloud,” cross-cloud transfers, changing ReDown or other products, launch/marketing announcements, billing/subscription changes, and real Cloudflare public-access changes without fresh explicit authorization. No production release, merge, deploy or tag without owner approval.
 
 # 1. Read authoritative existing request documents FIRST
 
@@ -50,29 +50,28 @@ These requests may live on `main` while the actual implementation starts from `i
 - The actual image bytes/readers, concurrency, pagination, lazy loads, result status, metadata, and GO TO must remain untouched; no additional cloud requests should be caused by visuals.
 - Verify mathematical, local GIF/image/video, plain, invalid-media fallback, rapid navigation, cancel, hidden tab, no memory/RAF/object URL leaks.
 
-# 4. Workstream 3 — Get URL and immediate-directory TXT export
+# 4. Workstream 3 — API-first Get URL + resumable multi-format DIRECT-directory exports
 
-Implement the *full detailed specification* in the URL-only Codex request listed above. Customer requirements:
+**The authoritative implementation spec is** \`codex/11.15.2026/P1_EXPLORER_GET_URL_DOMAIN_AND_IMMEDIATE_DIRECTORY_TXT_EXPORT_CODEX_REQUEST.md\`, especially its updated sections **A1–A7**. Read it all and implement/test its scope. This short master overview must not override its more precise UX, API, serialization, auth, or resume requirements.
 
-**Right-click file inside Click2Cloud's own File Explorer → Get URL** (not the native Chrome page/image context menu).
-- Read the actual selected R2 account, bucket and exact object key and any legitimately configured public endpoints.
-- **Existing URL:** show **all available, correctly mapped link options for that particular file**, status, Copy and Open.
-- **No URL:** clearly show “No public URL available” and a fast, obvious **Make Public URL…** setup action. Do not fabricate `r2.dev`, a domain, or a URL for a private object. The right-click menu and initial Get URL UI must appear **instantly / without blocking on network**; any endpoint refresh happens asynchronously.
-- **Always show, UNDER the URL list**, the editable **Connect your website domain** field (placeholder `assets.example.com`) and italic help explaining that a Cloudflare-managed domain/subdomain can be connected to the R2 bucket to give its eligible objects URLs. **Do not hide this input after a link exists.** Allow **multiple domains/subdomains to be entered one after another** in the same setup view. Each approved **OK / Save** adds/configures one entry; users can then enter another without reopening setup. **Save & Exit / Done** finishes. Display active/pending/failed entries individually, dedupe repeated domains, persist actual authorized bucket-level configuration.
-- Provide **OK / Save** to initiate each eligible domain setup **with explicit consent**; show Cloudflare account/zone/DNS/API prerequisites, exact bucket scope, pending/active/errors, and **Refresh** to update the visible link list. A clicked Save does not mean DNS/TLS/public availability is immediately verified. On each future **Get URL** right-click, show **ALL verified active public addresses for the selected file across the linked domains**, with individual Copy/Open; never require setup again when already configured.
-- Cloudflare's standard public custom domain generally makes the bucket's objects publicly addressable: show a clear **ENTIRE BUCKET PUBLIC ACCESS** warning before authorizing any change. No accidental publicity; do not modify real buckets without fresh explicit owner approval. Arbitrary website strings cannot be treated as verified bucket endpoints.
-- Generate links from exact object keys with encoding and root/prefix handling, including all file types and Unicode/special characters.
+**Exact right-click file user flow in Click2Cloud File Explorer:**
 
-**Right-click directory inside Click2Cloud File Explorer → Get URLs… / Download URLs (.txt)**.
-- Operate on **IMMEDIATE/direct files** under the selected prefix, **not descendants in nested subdirectories**. Root folder is valid. Exclude virtual folder markers/internal housekeeping objects by default.
-- In Get URLs… show **all actual eligible links grouped per immediate file** across **all verified active linked domains**; optionally offer a single-domain filter without making it the default.
-- **Download URLs (.txt)** must produce a real UTF-8 plain-text download with **all valid URLs for each immediate file grouped together**, **one URL per nonblank line**, **exactly one blank line between file groups**, deterministic object order and endpoint order. Example: two https://domain1/fileA and https://domain2/fileA lines, blank line, then fileB's URL lines. **No filenames, headings, JSON, Markdown, or CSV**. Easy machine parsing: split on blank lines for an object-group, then process each URL line. Do not silently choose only one domain when multiple are active.
-- Enumerate **all** matching objects using true paginated/cursor-based read-only listing, not only currently visible Explorer items or History’s 25-per-page. Large directories may take some time: display truthful scanning/exporting progress and support cancel/error/partial-export reporting.
-- Stable ordering and dedupe. Zero eligible file case must be explicit; never silently fabricate or omit links or mislabel a partially failed download complete.
-- Completely separate read-only TXT exporting from any public-access mutation. No public URLs for unverified private endpoints.
-- Verify 0/1/25/26/100+/1000+ objects, exact immediate-prefix semantics, nested descendants excluded, non-image filenames, **multiple domains and grouped URL TXT round-trip parsing**, incomplete DNS, no domain, permission failures, rate limiting and abort. Verify each blank-line group maps to one source object and that every unique active-domain URL was included.
+1. **Get URL** opens immediately, without waiting on network calls.
+2. If the R2 bucket has no public endpoint, ask exactly **“Activate public URL for bucket?”** with Yes/No and a clear warning that enabling standard R2 public access may make **all bucket objects public**. No does nothing. Yes only performs the authorized, clearly scoped activation. A development \`r2.dev\` URL must be labeled development-only, and displayed as active only if Cloudflare confirms.
+3. Show the **actual public URL of this file at the top**, with Copy/Open. Pending/failure is not a working link.
+4. **Below the public URL**: **Add Cloudflare-linked websites** input, italic guidance; accepts either ONE domain/website URL or MULTIPLE values separated by commas, user's choice. Normalize/validate each and handle conflicts safely.
+5. **Add** performs actual authorized Cloudflare custom-domain setup for each; show resulting per-domain URL **below the input** only when genuinely configured/active, or visibly label pending. Clear successfully processed input entries; retain failed entries for correction. Repeat Add as desired.
+6. **Save**, then **Exit**, as separate controls. Subsequent Get URL displays **all active URLs for that exact file**, while retaining the domain input below for further additions.
 
-**Do not implement Send to Another Cloud** in this run. It remains a later marketing feature.
+**Right-click a selected directory → Export URLs… / Download URLs (.txt):**
+- Scope is **IMMEDIATE FILES IN THAT ONE SELECTED DIRECTORY** only, including direct root files if the user deliberately selects root. **NO WHOLE-BUCKET EXPORT, NO RECURSIVE FULL-BUCKET ENUMERATION, NO ALL-BUCKET JOB OPTION.** This reduces cost, scale and unintended exposure. Bucket PUBLIC-ENDPOINT activation remains distinct and in scope.
+- Export all active configured domain URLs per direct file, grouped by exact object identity. **TXT:** one URL per nonblank line, all URLs for one file contiguous, one blank line between file groups. No labels in TXT. Structured formats use explicit identity/associations.
+- Supported format menu/flag: **TXT, JSON, JSONL, CSV, Markdown, HTML, optional multi-format ZIP**; one canonical record listing/serializer pipeline, not separate cloud requests for each format.
+- **API-first:** one shared, documented, versioned authorized service behind both GUI and feasible programmatic adapter/CLI, with familiar methods/flags like get URL, public URL status, activate public URL, add domains, export chosen directory, job status/resume/cancel. CLI examples and detailed signature contracts are in A5. Do not invent a shell command that cannot run from the user's environment.
+- **Append-as-you-go and resume:** durable record checkpoints and deduplication, bounded pagination, low memory overhead; pause/resume from the last committed direct-file record after interruption, browser restart, rate limiting or Cloudflare OAuth token **expiration TIME**. Refresh only as legitimately supported; require reconnect when needed; no lost/duplicated URL groups, and no false completed status.
+- Test multi-domain input and per-domain partial success, public-access consent, TXT grouping, every structured serializer, nested path exclusion, deterministic counts, interruptions/resumption, invalid cursors, token expiry and live vs fixture/Chrome claims separately.
+
+**Explicitly excluded:** Send to Another Cloud; cross-provider file transfers; whole-bucket URL export or recursive bucket scans; unapproved public access or DNS changes; new billing/subscription code.
 
 # 5. Workstream 4 — independent Aesthetic API and High Polish mode
 
@@ -112,8 +111,8 @@ For this run:
 
 # 7. Owner-facing acceptance summary
 
-- **Get URL:** Instant File Explorer file right-click shows all URLs or Make Public URL; persistent domain input + italic explanation; **add multiple domains one at a time, Save each, Save & Exit** with explicit consent; next right-click shows all truly available verified links for the file.
-- **Directory TXT:** Folder right-click downloads .txt with **all verified URLs for every immediate file**, grouped together per file, **one URL per nonblank line** and **one blank line between object groups**; complete scan even when slow, and no nested descendants by default.
+- **Get URL:** Instant File Explorer right-click → if needed **“Activate public URL for bucket?”** Yes/No with scope warning → real public URL on top → **one OR comma-separated website domains** in field below → **Add** connects each with truthful status and new URLs listed under input → **Save → Exit**. Next Get URL shows all valid file links.
+- **Directory exports:** Selected folder right-click exports **only immediate files** (never whole bucket) to TXT, JSON, JSONL, CSV, Markdown, HTML or multi-format ZIP. TXT groups all verified URLs per object (one URL per nonblank line and blank line between groups); structured formats identify objects explicitly. One API powers GUI/CLI; jobs append durably and resume after interruptions or OAuth token expiration **time**.
 - **High Polish:** A single independent Settings toggle transforms the WHOLE app, while preserving Standard and all functionality; architecture is future-public and safely isolated.
 - **History visuals:** The EXISTING loading animation choice is shared by gallery and History, with no new engine or duplicated settings.
 - **Explorer overlay:** Toolbar More is always visibly **above** the tree/list panes and is interactable.
