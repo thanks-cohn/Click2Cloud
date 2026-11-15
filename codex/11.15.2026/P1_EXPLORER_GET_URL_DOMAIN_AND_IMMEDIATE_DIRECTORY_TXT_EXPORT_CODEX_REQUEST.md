@@ -11,25 +11,22 @@
 
 ## A. Precise customer experience
 
-### A1. Right-click a *file* inside Click2Cloud File Explorer
+### A1. Exact owner-corrected flow: right-click a *file* inside Click2Cloud File Explorer
 
-The context menu includes **Get URL**.
+**RIGHT-CLICK MUST BE INSTANT AND SIMPLE.** The menu includes **Get URL**, opens promptly without blocking on network, then refreshes the endpoint information asynchronously. This is the Explorer's own file menu, not Chrome's web-page right-click menu.
 
-- On click, inspect the selected actual provider/account/bucket/exact R2 object key and active, verified public endpoints for **that bucket**. URLs are derived from real configured endpoints and exact encoded keys, not from guesswork or filenames alone.
-- **If one or more available public URLs exist:** open a small modal/popover with a readable list of **all known URL options** for this file (e.g., custom domains and an enabled development endpoint if appropriate), each labeled by domain, verification/availability status, clickable Open and Copy controls. Prefer actually reachable public links; do not present pending/unknown as verified.
-- **If none exist:** show **No public URL available** and a prominent, **fast one-click entry into** **Make Public URL…** (guided setup). Do not silently publish anything. Do not invent a public R2 URL. **Responsiveness matters:** right-click menu and initial Get URL panel must appear immediately from the existing Explorer UI; asynchronously refresh verified endpoint state without blocking the menu's first paint.
-- **Below that list, ALWAYS show a persistent custom-domain region, even if a link already exists**:
-  - Label: **Connect your website domain**
-  - Input placeholder: `assets.example.com`
-  - Italic help: *Have a domain managed through Cloudflare? Connect a suitable domain or subdomain to this R2 bucket so its files can have URLs under your own domain.*
-  - **Add another website / domain** lets the user enter **multiple separate Cloudflare-managed domains or subdomains, one after another**, using a simple repeated entry field. Show a clear list of already linked, newly requested, pending and failed domains and preserve successfully configured entries if another fails.
-  - **OK / Save** saves/requests the current authorized domain and immediately leaves the same input ready for another domain. **Save & Exit** (or Done) closes setup after all desired entries; users can stop after one or add several. Do not require re-opening the entire Get URL workflow for each domain. Consent/confirmation still applies to real bucket-publication and DNS changes.
-  - Once configuration reaches confirmed active/reachable state, **refresh the URL list** in the same view; make pending DNS/TLS and permissions states visible, with manual Refresh and accurate errors. Never claim it is active merely because Save returned.
-- On a currently-private bucket, Make Public URL opens a scope/permission confirmation that explicitly says the normal public R2 custom-domain path affects **the entire bucket's public object access**, not just this file. A user merely opening Get URL, typing a domain, or using Copy does NOT authorize creating/changing any public access until they review and explicitly approve.
-- Input is for a domain/subdomain that the user controls and that satisfies Cloudflare R2 custom-domain prerequisites (account zone / DNS / privileges). **Do not accept an arbitrary website URL as if it were an active R2 endpoint;** do not replace the site's existing DNS route without warning. Prefer built-in, scoped provider APIs and display truthful status. If only one-file sharing is possible through a different safe mechanism, identify it as a separate sharing mode, not the equivalent of linking a standard public bucket domain.
-- Existing public domains should be reusable: connecting **one or multiple authorized domains/subdomains** for a bucket makes correctly authorized URLs available for multiple eligible objects in the bucket without per-file publication or creating one DNS record per file. Persist the domain list against the **actual bucket/account identity** (not each file), avoid duplicate entries, and accurately represent the live Cloudflare configuration. On the next ordinary Get URL right-click, promptly show **all active, valid URLs for that specific object** across the linked domains, with Copy/Open for each.
-- Support filenames of **all file types** (images, PDFs, ZIPs, videos, text, etc.) and nontrivial keys (Unicode, spaces, reserved characters, same filename under different prefixes).
+1. **If the R2 bucket has no enabled public endpoint**, the first dialog asks exactly: **“Activate public URL for bucket?”** with **Yes** / **No**. Explain plainly before Yes that ordinary R2 public URL activation makes bucket contents publicly addressable, **not just the selected file**. No means no change. Yes explicitly authorizes that specific bucket-public activation, performed through actual permitted Cloudflare APIs. Any newly enabled `r2.dev` link is for **development/testing only**, rate-limited, not recommended for production.
+2. **After Yes, show the generated public URL** for that selected exact file at the TOP of the next view, with Copy/Open. Do so only after Cloudflare reports a valid activated endpoint; otherwise show truthful pending/error state and Refresh, without claiming a URL already works.
+3. **Immediately BENEATH the public URL**, show the input labeled **Add Cloudflare-linked websites** (example `assets.example.com`) with short *italic help* explaining that supported domains/subdomains on Cloudflare can be linked to this R2 bucket.
+4. The user may enter **one domain/website URL at a time**, or **multiple domains/website URLs separated by commas** (their choice). Examples: `assets.example.com` or `https://assets.example.com, cdn.example.org`. Normalize safe URL input to the domain/hostname, trim whitespace, deduplicate, validate zone/account ownership and DNS conflicts; do not interpret arbitrary website paths, queries or unrelated URLs as valid bucket endpoints.
+5. An **Add** button performs the real authorized Cloudflare custom-domain operation for **each valid input**, separately showing success, pending or error. The UI must not treat mere local text entry as an actual public-domain connection. If one entry fails, do not lose successful others.
+6. **Immediately after each successful Add**, clear **only successfully processed** entries from the input and show **new URL(s) under the input** (with Copy/Open and actual active/pending state). For a comma-separated batch, process entries individually and leave failed/unprocessed names editable for retry. If DNS/TLS activation is still pending, show Pending rather than claiming a verified live URL. Repeatedly adding one or several websites should be easy without leaving this panel.
+7. Finally, the user clicks **Save**, then **Exit**. Save persists the reconciled, confirmed bucket/domain configuration in Click2Cloud; Exit closes the panel. The **Add** operations were already sent to Cloudflare and must not be deferred until this final Save. Reopening Get URL shows **ALL active URLs for that exact file** (bucket endpoint plus every active connected custom domain), with Copy/Open and the domain input beneath for further additions.
+8. **If the bucket already has a public URL**, skip the activation question. Show its existing public URL(s) immediately and retain the same field and Add, Save, Exit controls underneath.
 
+Cloudflare domains are **bucket-level configuration** shared by all objects, not separate DNS entries per file. All URL output must use verified endpoint/base and actual object key with correct encoding, including image and non-image types, spaces, Unicode, and reserved characters. Public links should never be fabricated from filenames. If a public endpoint is protected by Access, blocked, pending, or private, label it truthfully and don't expose it as confirmed usable. A private-object sharing mode would require separate design and is not silently provided by bucket activation.
+
+**Security:** Displaying the dialog, pressing No, requesting metadata, viewing History, listing/exporting URLs and entering text never changes bucket privacy. Yes is a deliberate scope-aware consent to public bucket activation; each Add must be an authorized, appropriately scoped Cloudflare domain/DNS operation with explicit conflict review. No real owner bucket should be modified in Codex tests without fresh, specific owner authorization.
 ### A2. Right-click a *directory / folder* in Click2Cloud File Explorer
 
 Offer:
@@ -40,33 +37,41 @@ Offer:
 - Even when there are hundreds/thousands of directly contained files, **do not truncate to the File Explorer's visible page or 25-item History pagination**. Fetch all relevant Cloudflare R2 list pages using scoped read-only APIs/cursors, stream/generate bounded-size chunks, show progress and allow cancellation, and initiate a real user-approved download. Because this may take time, progress must be truthful; declare completion only when the browser confirms that output was handed to the supported download/save flow. On disconnect/revoked auth/partial failures, show partial outcome and allow safe resume or an explicit partial export instead of mislabeling it as complete.
 - Keep file ordering deterministic (e.g. normalized key lexicographic), deduplicate cursor/page repeats and output URLs for the **exact** chosen bucket + folder across all authorized **active** domains. Group by exact object key; empty-line separators distinguish groups even when objects have different numbers of active URLs.
 
-### A3. Suggested layout (textual intent, not required pixels)
+### A3. Required interaction and visual order
 
 ```text
-[File Explorer context menu]           [Get URL popup]
-  Open                                 example-photo.jpg
-  Preview                              Available public URLs
-  Get URL...                              https://assets.example.com/photos/example-photo.jpg  [Copy] [Open]
-  Download                               https://... (other valid bucket domain)    [Copy] [Open]
-  ...                                  ------------------------------------------------
-                                       Connect your website domain
-                                       [ assets.example.com                      ]
-                                       Have a domain managed through Cloudflare? Connect
-                                       a suitable domain or subdomain to this bucket
-                                       so its files can have URLs under your own domain.
-                                       [OK / Save] [Refresh]
-```
+Right-click file > Get URL
 
-```text
-[Directory context menu]
-  Open
+IF bucket has no active public URL:
+  Activate public URL for bucket?
+  [Yes] [No / Cancel]
+  (Yes explicitly authorizes public BUCKET access after scope warning)
+
+AFTER Yes and confirmed Cloudflare activation:
+  Public URL:
+  https://<active-public-endpoint>/<encoded-file-key>   [Copy] [Open]
+
+  Add Cloudflare-linked websites:
+  [assets.example.com, cdn.example.org                ] [Add]
+  Have a domain on Cloudflare? Connect it to this bucket to give
+  its files additional public URLs.
+
+  Added URLs — SHOWN BELOW INPUT:
+  https://assets.example.com/<encoded-file-key>    [Copy] [Open]
+  https://cdn.example.org/<encoded-file-key>       [Copy] [Open]
+  Pending domain: waiting for DNS/TLS                [Refresh]
+
+  [Save]  [Exit]
+
+Subsequent Get URL right-click:
+  all genuinely active URLs for this specific object are shown.
+
+Right-click directory:
   Get URLs...
-  Download URLs (.txt) [all domains, grouped by file]
-  ...
+  Download URLs (.txt)  // immediate children only, grouped by object
 ```
 
-If no URL exists, show `No public URL available` and `Make Public URL…`, with explicit public-bucket scope before any authorized configuration. After the first domain is configured, the user may add another via the **same** input, **Save** each, and select **Save & Exit** when finished. A later file right-click displays all active-domain URLs immediately.
-
+**Input:** one website or comma-separated websites, selected by user; Add processes each. Clear successes; retain failures. New URLs are listed below the input. Save and then Exit are separate final actions.
 ### A4. Example TXT grouping — one URL per line, multiple lines per object
 
 ```text
@@ -94,7 +99,7 @@ https://cdn.example.org/photos/second.jpg
 
 1. Create a **separate implementation branch** from the latest reviewed customer-history branch; record precise base commit. Do not merge/tag/deploy without explicit owner approval. Write/run focused tests.
 2. Verify per-file Get URL with (a) no endpoint, (b) known existing domain, (c) multiple valid endpoints, (d) pending/failed domain, (e) inaccessible object and (f) private bucket. Confirm direct Copy/Open and domain region **always** below the result.
-3. Verify explicit public-bucket consent is mandatory; canceling setup leaves remote configuration unchanged. Validate domain ownership, account, API permission, status and url-encoding. Verify no unauthorized `r2.dev` enablement.
+3. Verify exact “Activate public URL for bucket?” Yes/No prompt; No makes no changes; Yes warns about entire bucket and performs only authorized activation. Test single domain and 2–4 comma-separated domains/website URLs with trimming, normalization, duplicates, malformed entries, DNS conflicts, partial success and errors, input-clearing for successful Adds only, new links displayed BELOW input, Save and Exit separately, and persistent all-URL display on future right-clicks.
 4. For folder TXT, test **0, 1, 25, 26, 100+, 1000+ immediate file objects**, multiple list pages, nested descendants (excluded), Unicode/special characters, exact prefix, deduplication, deterministic sorted lines, **one URL per nonblank line**, and **exactly one blank line between distinct object groups**. Include two or three authorized domains, objects with varying numbers of valid URLs, duplicate domain configurations, and a folder with no directly contained files but many nested files. Verify group count = number of exported direct objects and nonblank URL line count = sum of unique valid URLs exported for those objects. Test repeated Save/Add another/Save & Exit, no duplicate domain, instant UI open, and the next right-click showing every verified URL without reconfiguration.
 5. Test cancellation, revoked permissions, interrupted long listing, browser download confirmation, user-facing progress, bounded memory/concurrency and accurate partial errors.
 6. Test all file types, bucket root, nested folder, original existing context actions, native Chrome right-click save independence, History results and cloud verification regression. Keep real installed Windows Chrome vs local fixture claims separate.
@@ -104,4 +109,4 @@ https://cdn.example.org/photos/second.jpg
 
 **DO NOT implement Send to Another Cloud or any cross-cloud transfer in this run.** That feature is only a deferred promoted-feature vision. No unrelated marketing release claims or subscriptions.
 
-**User-facing goal:** **Instant right-click a file → Get URL → if needed Make Public URL with explicit consent → enter multiple Cloudflare-managed domains one by one → Save each → Save & Exit → Get URL lists all verified addresses for that file. Right-click the directory → Download URLs (.txt): all URLs for each immediate file kept together, one URL per nonblank line, one blank line between file groups, even for a long directory listing.**
+**User-facing goal:** **Right-click file → Get URL → if bucket private ask “Activate public URL for bucket?” → Yes → show actual public URL → input BELOW it → enter one or comma-separated Cloudflare websites → Add (Cloudflare creates connections) → successful fields clear, their new URLs appear BELOW input → repeat → Save → Exit. Later Get URL shows all active file URLs. Right-click folder → Download URLs (.txt), multiple URLs grouped per immediate file, one URL per nonblank line and one blank separator line between file groups.**
