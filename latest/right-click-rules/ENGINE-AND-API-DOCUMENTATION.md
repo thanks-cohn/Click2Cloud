@@ -619,3 +619,56 @@ the existing closed diagnostic vocabulary. The expanded measurement/availability
 schema made the 100k SECURE stress archive exceed the original 256 MiB budget;
 the bounded native Blob payload budget is now 512 MiB, with the same explicit
 failure, cancellation and one-page JS processing policy.
+
+## November 14 Narrow bucket boundary and Depth gesture readiness
+
+`3+1.1 previewNativeMenu`, `previewConfigChange`, `inspectMenuTree` and
+`commitConfigChange` continue to use `nested.project` and `compileMenuSpec`.
+Narrow always retains the physical bucket root with its actual bucketName;
+legacy root titles remain stored presentation data, not bucket identities.
+Identically named buckets in different scopes include connection/account labels.
+Visible configured paths alone contribute ancestors; hidden destinations contribute
+nothing. Hidden directory levels may collapse, but the bucket boundary cannot.
+Root-only configured rows become Save here inside the bucket. Explicit destinations
+at branch nodes retain their presentation IDs and their own Save here rows;
+otherwise a stable synthetic ancestor presentation represents the exact prefix.
+It does not write a destination, Default, approval, inventory or cloud resource.
+
+Each structural Save here uses the exact ancestor's inventory availability.
+Unverified/unwritable ancestors remain disabled with
+`NARROW_ANCESTOR_AUTHORIZATION_REQUIRED`; they cannot enter automatic setup.
+Fresh exact target authorization is still required by the resolver and transport
+before writing. A child grant never enables a root write. Hide All retains the
+real bucket and deepest action; Quick promotion retains its existing independent
+shortcut and does not leave structural saves behind when no ordinary configured
+presentation needs that branch. Current physical prefixes and custom level flags
+are unchanged. Native IDs legitimately change when their parents change; saved
+presentation IDs remain unchanged, and old-generation clicks remain rejected.
+
+`createRemoteTransport.authorizeReady` is an internal owner for a single native
+Depth gesture (`dispatchSave`/native engine.save), not a public capability API.
+A successful status observation is retained privately by object identity for at
+most ten seconds. Every reuse creates a fresh scoped capability, checks current
+OAuth session/account, plan identity (including signing material, prefix boundary,
+build and verified proof), and verifyAuthority. Changed bindings deny; expired or
+unrecognized observations require a full status check. No proof crosses gestures,
+serialization, buckets, accounts or prefixes. This removes redundant capabilities
+round trips while preserving pre-dispatch, pending and post-verification checks;
+uncertain writes remain uncertain and are never replayed. Missing setup and native
+ACK recovery still use the existing typed recovery/fresh-click contract.
+
+Evidence: `tests/narrow-bucket-boundary.test.mjs` checks native parent IDs, callback
+ACK and exact resolver targets; `tests/depth-ready-authorization.test.mjs` checks
+revocation, expiry and binding changes; existing local workerd/R2 tests exercise
+independent readback. `scripts/benchmark-narrow-depth.mjs` is explicitly a controlled
+network-latency model, not live R2/Chrome timing. See the implementation handoff for
+historical failures that remain unexplained. No new installed Windows or live R2
+pass is asserted.
+
+The background inventory owner additionally performs bounded-concurrency read-only
+checks for visible curated Narrow ancestors on an explicit matching target refresh
+or initial readiness reconciliation. It adds only these necessary ancestors to the
+in-memory projection, never persistent configuration or unrelated discovered paths.
+Exact ancestor capability results remain independent: a prefix-restricted plan can
+permit C2C-QA/ while leaving bucket-root Save here disabled. Pure preview performs
+no new sweep, and no cloud resource is provisioned by this path.

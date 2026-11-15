@@ -5,6 +5,10 @@ import {equal,canonicalSource} from '../../right2cloud-module/src/common.mjs';
 import {remoteDestination,PROTOCOL,signGrant,digest,boundedJSON,fail} from './wire.mjs';
 
 export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fetch,authorizeSource=async()=>true,verifyAuthority=async()=>true,clock=Date.now,record=async()=>{},pollIntervalMs=1000,expectedCodeDigest=null}){
+ // Per-gesture capability evidence, never persisted or shared across clicks.
+ // Fresh OAuth, plan, prefix and verifyAuthority checks still run before each use.
+ const readyProofs=new WeakMap();
+ const planIdentity=plan=>digest([plan.state,plan.accountId,plan.bucketName,plan.protocol,plan.url,plan.secret,plan.prefixScope??'',plan.codeDigest,plan.verifiedTargets]);
  async function cap(target,{use='status',operationId,source,provenance,fileIntent}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
   const plan=await lookup(target);if(plan?.state!=='ready'||plan.accountId!==target.accountId||plan.bucketName!==target.bucketName||plan.protocol!==PROTOCOL)fail('WORKER_SETUP_REQUIRED');
@@ -14,7 +18,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   const u=new URL(plan.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.workers.dev')||u.username||u.password||u.pathname!=='/'||u.search||u.hash)fail('WORKER_ADDRESS_INVALID');
   const destination=remoteDestination(target);if(plan.prefixScope&&destination.prefix!==plan.prefixScope&&!destination.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');const expiresAt=clock()+120000;
   const payload={protocol:PROTOCOL,use,principal:target.connectionId,sessionId:a.sessionId,destination,expiresAt,...(operationId?{operationId,...(source?{sourceDigest:await digest(canonicalSource(source))}:{}),...(provenance?{provenanceDigest:await digest(provenance)}:{}),...(fileIntent?{fileDigest:await digest(fileIntent)}:{})}:{})};
-  return {destination,expiresAt,sessionId:a.sessionId,url:u.origin,token:await signGrant(plan.secret,payload)};
+  return {destination,expiresAt,sessionId:a.sessionId,url:u.origin,token:await signGrant(plan.secret,payload),planIdentity:await planIdentity(plan)};
  }
  async function post(c,path,input,signal,onObservation){
   const requestStarted=performance.now();
@@ -25,10 +29,19 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
  }
  async function recheck(c,target){try{const a=await oauth.authority();return a.sessionId===c.sessionId&&a.accounts.some(x=>x.id===target.accountId)&&c.expiresAt>clock()&&await verifyAuthority(target,a)===true;}catch{return false;}}
  return Object.freeze({
+  // Internal native-click authorization. null means expired evidence: caller
+  // must perform a new status request. A changed binding fails closed instead.
+  async authorizeReady(target,readiness){
+   const proof=readyProofs.get(readiness);
+   if(!proof||clock()<proof.at||clock()-proof.at>=10000)return null;
+   try{const c=await cap(target);return {sessionId:c.sessionId,authorizedTargets:
+    equal(c.destination,proof.destination)&&c.sessionId===proof.sessionId&&c.planIdentity===proof.planIdentity?[target]:[]};}
+   catch{return {sessionId:null,authorizedTargets:[]};}
+  },
   async status(target){try{const selected=await lookup(target);if(selected&&expectedCodeDigest&&selected.codeDigest!==expectedCodeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');const c=await cap(target),r=await post(c,'/capabilities',{});if(!await recheck(c,target))fail('AUTHORIZATION_REVOKED');if(r.state!=='completed'||r.protocol!==PROTOCOL||!equal(r.destination,c.destination)||!r.storageBound||!r.durableClaims||!r.conditionalCreate)fail(r.code??'WORKER_NOT_READY');const plan=await lookup(target);if(plan.codeDigest&&r.codeDigest!==plan.codeDigest)fail('WORKER_BUILD_MISMATCH');// R2 binding/write authority is bucket-wide. A current exact scoped capability
   // plus a same-code verified write in THIS bucket is reusable for new folders.
   // The Worker still rejects prefix escape before returning capabilities.
-  const exact=plan.verifiedTargets?.[c.destination.prefix],proof=(exact?.codeDigest===plan.codeDigest?exact:null)??Object.values(plan.verifiedTargets??{}).find(p=>p.codeDigest===plan.codeDigest),ready=!!proof&&!!plan.codeDigest&&proof.codeDigest===plan.codeDigest;return {state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,destination:target,sourcePolicy:r.sourcePolicy,transfer:r.transfer,multipartConditionalCompletion:r.multipartConditionalCompletion,checkedAt:clock()};}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},
+  const exact=plan.verifiedTargets?.[c.destination.prefix],proof=(exact?.codeDigest===plan.codeDigest?exact:null)??Object.values(plan.verifiedTargets??{}).find(p=>p.codeDigest===plan.codeDigest),ready=!!proof&&!!plan.codeDigest&&proof.codeDigest===plan.codeDigest;const result={state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,destination:target,sourcePolicy:r.sourcePolicy,transfer:r.transfer,multipartConditionalCompletion:r.multipartConditionalCompletion,checkedAt:clock()};if(ready&&await planIdentity(plan)===c.planIdentity)readyProofs.set(result,{at:clock(),sessionId:c.sessionId,destination:c.destination,planIdentity:c.planIdentity});return result;}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},
   async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,dispatchPreparationMs,readinessMs}){
    const timings={...(Number.isFinite(dispatchPreparationMs)?{dispatchPreparationMs}:{}),...(Number.isFinite(readinessMs)?{readinessMs}:{})};const timed=async(name,stage,fn)=>{const started=performance.now();try{try{onBoundary?.(stage,'started','REMOTE_STAGE_STARTED');}catch{}const result=await fn();try{onBoundary?.(stage,result===false?'blocked':result==null?'uncertain':['blocked','failed','uncertain'].includes(result?.state)?result.state:'ok',result===false?'REMOTE_STAGE_DENIED':result==null?'REMOTE_STAGE_UNVERIFIED':'REMOTE_STAGE_COMPLETE');}catch{}return result;}catch(e){try{onBoundary?.(stage,'failed','REMOTE_STAGE_FAILED');}catch{}throw e;}finally{timings[name]=(timings[name]??0)+Math.round(performance.now()-started);}};
    try{source=canonicalSource({...source,url:sourceURL(source?.url).href});}catch(e){return {state:'blocked',code:e.code??'SOURCE_INVALID',operationId,destination:remoteDestination(target)};}

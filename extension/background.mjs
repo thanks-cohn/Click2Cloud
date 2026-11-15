@@ -27,7 +27,8 @@ import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
-import {scopeKey,targetKey,normalizeTarget} from '../src/core/menu-identity.mjs';
+import {levelHidden} from '../src/modes/nested/index.mjs';
+import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-identity.mjs';
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
 let storageReady;
 function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
@@ -120,14 +121,20 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
     status.accounts.some(a=>a.id===s.target.accountId)?[s.target,...s.folders
       .filter(p=>p.split('/').filter(Boolean).length<=depthSelections[i].maxDepth)
       .map(prefix=>({...s.target,prefix}))]:[]):[];
-  const readinessTargets=[...new Map([...refreshTargets,...discovered,...depthTargets]
+  // Preview remains read-only. On explicit target refresh or cold reconciliation,
+  // verify only visible curated Narrow ancestors, independently of child grants.
+  const narrowTargets=state.product.show.nested&&state.product.providerVisibility.cloudflare
+    ?state.configs.nested.destinations.filter(d=>!d.hidden&&(refreshDepthReadiness||refreshTargets.some(t=>scopeKey(t)===scopeKey(d.target))))
+      .flatMap(d=>['',...ancestors(d.target.prefix)].filter(prefix=>prefix!==d.target.prefix&&!levelHidden(d,prefix)).map(prefix=>({...d.target,prefix})))
+    :[];
+  const readinessTargets=[...new Map([...refreshTargets,...discovered,...depthTargets,...narrowTargets]
     .filter(t=>t.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];
   if(refreshTargets.length||discovered.length)for(const t of [...refreshTargets,...discovered])snapshots.delete(targetKey(t));
   let readinessIndex=0;
   await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{
     while(readinessIndex<readinessTargets.length)await remoteReady(readinessTargets[readinessIndex++]);
   }));
-  for(const saved of savedTargets){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
+  for(const saved of [...savedTargets,...narrowTargets]){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
   const projectScope=s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),
     workerReady:snapshots.get(targetKey(s.target))?.ready??false,
     folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})});

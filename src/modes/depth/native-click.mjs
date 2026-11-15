@@ -40,14 +40,17 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
       await attend(row.target,{code:result.code,info,tab});
      }else{
       // Authorization stays invocation-local; never warm the shared mode cache.
-      stage='dispatch';result=await run(authorize);
+      stage='dispatch';
+      const authorizeClick=typeof transport.authorizeReady==='function'?async target=>
+       (await transport.authorizeReady(target,readiness))??await authorize(target):authorize;
+      result=await run(authorizeClick);
      }
     }
    }
    result??={state:'failed',code:'DEPTH_CLICK_FAILED'};
   }catch(e){result={state:'blocked',code:safeCode(e?.code)};try{await attend(row.target,{code:result.code,info,tab});}catch{}}
   const code=safeCode(result.code??(result.state==='completed'?'DEPTH_CLICK_COMPLETED':'DEPTH_CLICK_FAILED'));
-  const outcome={...result,depthClickId:operationId};
+  const outcome={...result,target:row.target,depthClickId:operationId};
   try{await record(result.state,code,result.remoteOperationId??result.operationId);}catch{recordFailed=true;}
   if(recordFailed)outcome.depthRecordCode='DEPTH_CLICK_RECORD_FAILED';
   try{await feedback({state:result.state,code,reason,operationId,recordCode:outcome.depthRecordCode},tab);}catch{/* A failed notification never changes remote truth. */}

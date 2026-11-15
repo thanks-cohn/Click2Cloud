@@ -1,0 +1,773 @@
+{
+  "evidenceClass": "LOCAL_WORKERD_R2_NOT_LIVE_CLOUDFLARE",
+  "runs": [
+    {
+      "phase": "before",
+      "mode": "BASIC",
+      "run": "depth-BASIC",
+      "requests": {
+        "/capabilities": 61,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 93.677189
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 49.20537400000012
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3237.706644
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 70.57714299999952
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 45.721676000000116
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 47.061939000000166
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 43.17639899999995
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 40.84425800000008
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 45.77227200000016
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "before",
+      "mode": "EXPANSIVE",
+      "run": "depth-EXPANSIVE",
+      "requests": {
+        "/capabilities": 61,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 69.32232399999998
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 38.35290100000009
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3165.783521
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 67.4551419999998
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 49.40804200000002
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 52.182113999999274
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 48.548909000000094
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 44.26144700000077
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 42.04514499999914
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "before",
+      "mode": "OFF",
+      "run": "depth-OFF",
+      "requests": {
+        "/capabilities": 61,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 77.45271000000002
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 93.709159
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 239.7959289999999
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 65.98089299999992
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 57.26934100000017
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 51.43528399999923
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 61.23821300000054
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 58.00059400000009
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 46.829303999999865
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "BASIC",
+      "run": "depth-BASIC-1",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 67.48461399999997
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 42.042809000000034
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3201.951111
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 41.4958859999997
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 28.67533800000001
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 27.007313999999496
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 36.26403399999981
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 52.472021000000495
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 45.71138400000018
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "BASIC",
+      "run": "depth-BASIC-2",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 138.64951299999984
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 61.91102499999988
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 192.12875200000008
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 36.2290210000001
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 36.50220399999944
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 27.963643999999476
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 36.26137999999992
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 61.66277099999934
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 63.26719999999932
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "BASIC",
+      "run": "depth-BASIC-3",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 87.3029419999998
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 53.5147420000003
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3184.8245600000005
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 29.170396000000437
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 23.970714000000044
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 23.225531000000046
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 26.648879000000306
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 51.52035099999921
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 51.022345000000314
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "EXPANSIVE",
+      "run": "depth-EXPANSIVE-1",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 81.19709899999998
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 42.02260499999966
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 154.40554799999973
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 32.176262000000406
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 24.60831699999926
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 47.78609799999958
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 24.067543000000114
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 42.752181000000746
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 44.63958199999979
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "EXPANSIVE",
+      "run": "depth-EXPANSIVE-2",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 74.76650400000017
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 43.275924999999916
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 141.8085970000002
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 29.14513100000022
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 23.418141000000105
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 31.194749999999658
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 183.65469200000007
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 46.39481599999999
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 51.5551289999994
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "EXPANSIVE",
+      "run": "depth-EXPANSIVE-3",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 87.86703500000021
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 44.142961000000014
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 159.32359099999985
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 33.72777799999949
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 22.61948399999983
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 21.846047999999428
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 28.099119000000428
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 46.316523999999845
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 45.1703950000001
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "OFF",
+      "run": "depth-OFF-1",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 109.01265799999999
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 57.439989000000196
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3239.6769890000005
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 53.296675999999934
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 30.51782000000003
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 28.259743999999955
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 35.05527400000028
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 49.29340299999967
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 54.44943599999988
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "OFF",
+      "run": "depth-OFF-2",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 80.97768800000006
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 61.89451999999994
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3195.893076
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 66.12102400000003
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 48.84130600000026
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 25.4654129999999
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 26.863507000000027
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 78.63589400000001
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 56.13869799999975
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    {
+      "phase": "after",
+      "mode": "OFF",
+      "run": "depth-OFF-3",
+      "requests": {
+        "/capabilities": 37,
+        "/probe": 2,
+        "/remote-save": 8,
+        "/operation": 8,
+        "/verify": 8
+      },
+      "samples": [
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 79.59364300000016
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 105.65100500000017
+        },
+        {
+          "state": "blocked",
+          "code": "FRESH_CLICK_REQUIRED",
+          "elapsedMs": 3172.2886869999998
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 30.067831000000297
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 31.165415999999823
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 22.82289700000001
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 24.74337100000048
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 40.48781400000007
+        },
+        {
+          "state": "completed",
+          "code": "R2_HEAD_VERSION_SIZE",
+          "elapsedMs": 40.398489000000154
+        }
+      ],
+      "testTotals": {
+        "tests": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    }
+  ]
+}

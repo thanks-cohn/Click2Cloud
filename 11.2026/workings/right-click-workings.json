@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "0186b8bbf7f7bd1da3817a38183c709e25384ea4",
+    "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "src/api/client.mjs": "2bd30643c09bed5bb58d974106addd32ffcde6a9d15919dcb435be6f26788403",
       "src/api/config.mjs": "a71ae2fb11c779659ed2a608a8ef9487205f706ef19539c868a10acf6e02262a",
@@ -9224,7 +9224,7 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "fcc975fdfe6ef19d5377cd918db63e18013c02eab3162d259c1346dfc7c04c21",
+      "src/cloudflare/transport.mjs": "ee1f30c4b33b6ee22affec24c3b8f7068bb9402d4b7544629ca24a03c5eba337",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
       "src/cloudflare/worker.mjs": "f74bfcf3d006e0f54a5c969b1c2bf1265f56af721c10d0604a6d792866d03304",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -9234,8 +9234,8 @@
       "src/core/engine.mjs": "84777e98acee0c8496adbc009fa5ed24161647b724df2c689fd0b2fd07e5c600",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
-      "src/core/menu-provenance.mjs": "58467b1e4d2b22f71a159a6051a2e9ac0c9f7a8d5a50e73eecfba346026c6983",
-      "src/core/menu-spec.mjs": "92b1fe42705a789ea0a64e750e52299d13294929b6a76609c38443571aa45f2a",
+      "src/core/menu-provenance.mjs": "1b0044640d068729d5d260ac3be558dcedae5c5e4322c0039726ead80eb3c987",
+      "src/core/menu-spec.mjs": "3e90ea9544a4d96f66c8d250be686c886570e8c66a037accc7037e424037c489",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9261,15 +9261,15 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "7870f18a1138976321febce8d2d90a3280c80d232775e7c417393644a067125a",
+      "src/glaciaring/catalog.mjs": "69e9a54a2b39c0bb14c3f28be9002094319154f4512cc88ff7dfe25a1feca7b1",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "ee81be703083b8378ae913986f19612a476fe86704bf6e491b46a7c198573d68",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/depth/native-click.mjs": "5d8e8bd096859c3f4349115955d66b400eafa9ab33f16ca47b5e632176f26c25",
-      "src/modes/nested/index.mjs": "05d613e10a850e52689d9a7cb8f8d85c5c9c1f23046845deff0834c51db2aa2a",
+      "src/modes/depth/native-click.mjs": "2fb8086dc1934f30405a69859ff795fb56b6b5f5c7eae8d5ed1e004d46230c30",
+      "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
       "src/persistence/current-store.mjs": "8835882a2d7c480e7bd54debb75f02e5e5d81659eb91389555f967712bf5c8a9",
@@ -9289,7 +9289,7 @@
       "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
       "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
       "extension/app.mjs": "7e58fca3eca58d46bebeb96956090eedeb8e2e35ac4bd121f61a442b5463e0db",
-      "extension/background.mjs": "1dfca3d59cf553dd01c76845eceaf088317b5ad0238a1db25829496e43d0b3a0",
+      "extension/background.mjs": "4762e24dbabc9fe1c82eceb48ef0087211cbfd982b2bd25665d2681b46dc2dc6",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
@@ -10828,10 +10828,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -11430,7 +11430,7 @@
       {
         "id": "ENTRY_MESSAGE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
         "apiMethods": [
@@ -11478,7 +11478,7 @@
       {
         "id": "ENTRY_CLIENT_RESPONSE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
         "apiMethods": [
@@ -12183,6 +12183,52 @@
           "testFile": "tests/recorder-measurements.test.mjs"
         },
         "contractViolation": null
+      },
+      {
+        "id": "NARROW_REAL_BUCKET_ANCESTOR_SAVE",
+        "actual": "Narrow retains actual bucket boundary, exact ancestor Save here, disabled unverified structural targets, immutable saved presentations and physical prefixes; Quick-only trees do not leave synthetic routes.",
+        "sourceRefs": [
+          {
+            "path": "src/modes/nested/index.mjs",
+            "symbol": "structuralAncestor:true"
+          },
+          {
+            "path": "src/core/menu-spec.mjs",
+            "symbol": "retainedAncestors"
+          },
+          {
+            "path": "extension/background.mjs",
+            "symbol": "const narrowTargets="
+          },
+          {
+            "path": "src/core/menu-provenance.mjs",
+            "symbol": "bucketTitle:quickPlacement?"
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_LIVE_NOT_VERIFIED",
+          "testFile": "tests/narrow-bucket-boundary.test.mjs"
+        }
+      },
+      {
+        "id": "DEPTH_GESTURE_CAPABILITY_REUSE",
+        "actual": "One Depth gesture may reuse a privately held exact ready observation for at most 10s, with fresh session/account/plan/verified proof/prefix/revocation checks. Expiration requires status; changed bindings deny. No uncertain-write replay.",
+        "sourceRefs": [
+          {
+            "path": "src/cloudflare/transport.mjs",
+            "symbol": "async authorizeReady"
+          },
+          {
+            "path": "src/modes/depth/native-click.mjs",
+            "symbol": "const authorizeClick="
+          }
+        ],
+        "verification": {
+          "level": "SOURCE_AND_LOCAL_FIXTURE",
+          "status": "LOCAL_PASS_HISTORICAL_RACE_UNEXPLAINED",
+          "testFile": "tests/depth-ready-authorization.test.mjs"
+        }
       }
     ],
     "stateTransitions": [
@@ -12882,7 +12928,7 @@
         "handoff": "docs/evidence/remotes-boot/HANDOFF.md"
       }
     },
-    "sourceState": "Consolidated Gates A-D source implemented and representative/isolated live verified; installed Windows acceptance and production Worker upgrade pending. Historic owner CURRENT recovery remains unverified.",
+    "sourceState": "November 14 Narrow bucket/ancestor and Depth gesture-readiness repair, based on requested review HEAD; exact sourceFiles hashes identify this implementation. Local fixture and callback ACK validation only for these changes; historical live milestone is preserved but not recertified. Installed Windows and live R2 acceptance remain unverified.",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -14712,7 +14758,6 @@
         "handoff": "docs/evidence/composition-remaining/HANDOFF.md"
       }
     },
-    "digest": "2777b82b7dd130b3c19d17ff3a06df63aa3a47a61038b47e172f18850a4b7294",
     "depthProviderRootClarification": {
       "sourceRefs": [
         {
@@ -14788,7 +14833,18 @@
         "installedChrome": "BLOCKED_ADMIN_POLICY",
         "report": "docs/evidence/mv3-suite-reliability/REPORT.md"
       }
-    }
+    },
+    "narrowBucketSpeedDepth": {
+      "baseCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
+      "handoff": "codex/11.14.2026/implementation/HANDOFF.md",
+      "focusedTests": 425,
+      "fullTests": 494,
+      "liveVerification": "NOT_VERIFIED",
+      "historical37of37": "PRESERVED_NOT_REPLAYED",
+      "historicalReadinessFailures": "UNEXPLAINED",
+      "configurationMigration": "NONE"
+    },
+    "digest": "34ebba9d672b5859ad7cd97d8a4adb3efca069c1c4abd6eeb046910af92f3543"
   },
   "changeLog": [
     {

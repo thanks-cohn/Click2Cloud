@@ -122,7 +122,12 @@ export function compileMenuSpec(options={}) {
       const defaultKey=defaultTarget&&candidates.some(r=>targetKey(r.target)===targetKey(defaultTarget))?targetKey(defaultTarget):null;
       const routeKey=r=>JSON.stringify([r.sourceMode,r.placement]);
       const quickRows=candidates.filter(r=>['simple','nested'].includes(r.sourceMode)&&r.quick&&targetKey(r.target)!==defaultKey).map(r=>({...r,label:r.quickLabel??r.label}));
-      const promoted=new Set(quickRows.map(routeKey)),active=candidates.filter(r=>!promoted.has(routeKey(r)));
+      const promoted=new Set(quickRows.map(routeKey));
+      const nestedIndex=new Map(projection.rows.filter(r=>r.sourceMode==='nested').map(r=>[r.placement,r])),retainedAncestors=new Set();
+      for(const candidate of candidates.filter(r=>r.sourceMode==='nested'&&!r.structuralAncestor&&!promoted.has(routeKey(r)))){
+        let row=candidate;while(row){retainedAncestors.add(row.placement);row=nestedIndex.get(row.parentPlacement);}
+      }
+      const active=candidates.filter(r=>!promoted.has(routeKey(r))&&(!r.structuralAncestor||retainedAncestors.has(r.parentPlacement)));
       const depthBuckets=new Set(active.filter(r=>r.sourceMode==='depth').map(r=>scopeKey(r.target)));
       const inlineDepth=depthBuckets.size===1&&active.every(r=>r.sourceMode==='depth');
       const hierarchy=active.some(r=>r.sourceMode==='nested'||r.sourceMode==='depth'&&r.parentPlacement!==null);
@@ -146,7 +151,7 @@ export function compileMenuSpec(options={}) {
             for(const row of selectedRows){let r=row;while(r&&!needed.has(r.placement)){needed.add(r.placement);r=index.get(r.parentPlacement);}}
             for(const row of treeRows.filter(r=>needed.has(r.placement))){
               if(row.role==='branch'&&row.parentPlacement===null&&!row.target.prefix&&
-                (treeMode==='depth'?inlineDepth:!row.explicitLevel)){
+                treeMode==='depth'&&inlineDepth){
                 placements.set(row.placement,parent);continue;
               }
               if(row.role==='save'&&!selected.has(row.placement))continue;
@@ -158,7 +163,8 @@ export function compileMenuSpec(options={}) {
               // named bucket/folder descendants retain their Save here labels.
               const providerRootSave=treeMode==='depth'&&inlineDepth&&row.role==='save'&&
                 parentId===parent&&!row.target.prefix&&index.get(row.parentPlacement)?.parentPlacement===null;
-              const nativeId=add({...row,...(providerRootSave?{label:row.target.bucketName+'/'}:{}),parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
+              const duplicateBucket=treeMode==='nested'&&row.role==='branch'&&row.parentPlacement===null&&treeRows.some(other=>other!==row&&other.role==='branch'&&other.parentPlacement===null&&other.target.bucketName===row.target.bucketName&&scopeKey(other.target)!==scopeKey(row.target));
+              const nativeId=add({...row,...(duplicateBucket?{label:row.target.bucketName+' ['+row.target.connectionId+'/'+row.target.accountId+']'}:{}),...(providerRootSave?{label:row.target.bucketName+'/'}:{}),parentId:parentId??'missing-parent:'+row.parentPlacement,placement:treeMode+':'+row.placement,origin:{mode:treeMode,provider:'cloudflare'}});
               if(nativeId)placements.set(row.placement,nativeId);
             }
           }

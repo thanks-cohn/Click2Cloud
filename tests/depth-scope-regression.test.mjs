@@ -38,10 +38,19 @@ test('Depth exception matrix: exact target/action identity and nested actions ac
  }
  assert(checked>500);
 });
-test('non-Depth composition remains byte-identical to the request baseline',async()=>{
+test('non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary',async()=>{
  const expected=JSON.parse(await readFile(new URL('../codex/11.13.2026-0355/EVIDENCE/non-depth-baseline.json',import.meta.url)));
- const actual=scenarios().filter(s=>!s.product.show.depth).map(input=>({name:input.name,digest:digest(compileMenuSpec(input))}));
- assert.deepEqual(actual,expected);
+ const unchanged=scenarios().filter(s=>!s.product.show.depth&&!s.product.show.nested);
+ const names=new Set(unchanged.map(s=>s.name));
+ const actual=unchanged.map(input=>({name:input.name,digest:digest(compileMenuSpec(input))}));
+ assert.deepEqual(actual,expected.filter(s=>names.has(s.name)));
+ for(const input of scenarios().filter(s=>!s.product.show.depth&&s.product.show.nested)){
+  const spec=compileMenuSpec(input),leaf=spec.rows.find(r=>r.origin.mode==='nested'&&r.role==='save'&&r.target.prefix==='Images/same/');
+  assert(leaf);assert.equal(leaf.target.bucketName,'control');let row=leaf;const path=[];
+  while(row){path.unshift(row.label);row=spec.rows.find(r=>r.id===row.parentId);}
+  assert.deepEqual(path,['Cloudflare','control','Images','Named control']);
+  assert(spec.rows.some(r=>r.origin.mode==='nested'&&r.label==='Save here'&&r.target.prefix===''));
+ }
 });
 test('Depth root qualification does not rename a child folder with the same name as its bucket',()=>{
  const target=root('bucket'),spec=compileMenuSpec({mode:'composite',product:productState({show:{simple:false,nested:false,depth:true,flat:false}}),configs:{depth:{scopes:[{target,maxDepth:2}]}},inventory:{scopes:[{target,authorized:true,workerReady:true,complete:true,folders:['bucket/','bucket/nested/']}]}});

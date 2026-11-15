@@ -161,8 +161,8 @@ test('settings commit distinguishes storage, discovery and Chrome errors and con
       {type:'setShowInChrome',show:{simple:mode==='simple',nested:mode==='nested',depth:false,flat:false}}
     ]});
     assert.equal(applied.state,'completed');
-    const [{row,path}]=menuActions(registrar.inspect().desired);
-    assert.deepEqual(path,mode==='simple'?['Cloudflare']:['Cloudflare','a','Pick']);
+    const {row,path}=menuActions(registrar.inspect().desired).find(({row})=>row.target.prefix===target.prefix);
+    assert.deepEqual(path,mode==='simple'?['Cloudflare']:['Cloudflare','redown','a','Pick']);
     assert.equal((await registrar.handleClick({menuItemId:row.id,linkUrl:'https://example.org/sample.txt'})).receipt.key,'a/same/sample.txt');
   }
   registrar.close();

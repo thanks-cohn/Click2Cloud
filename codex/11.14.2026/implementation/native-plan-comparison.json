@@ -1,0 +1,1707 @@
+{
+  "evidenceClass": "GENERATED_NATIVE_PLAN_NOT_INSTALLED_CHROME",
+  "before": {
+    "rows": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:929c2be631b8eb9d",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "C2C-QA",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:e36e3f59ea66dae3",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "C2C-QA (2)",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:9076bc6c202bc46d",
+        "parentId": "c2c:item:929c2be631b8eb9d",
+        "label": "Narrow",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:8d2b52aa65621468",
+        "parentId": "c2c:item:e36e3f59ea66dae3",
+        "label": "Narrow",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:03cd54f9357c4755",
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "label": "A",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/A/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-A",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:03cd54f9357c4755",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "A"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA",
+            "Narrow",
+            "A"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-A",
+            "title": "A",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "A",
+                "title": "A",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:54ef0c551559833d",
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "label": "B",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/B/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-B",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:54ef0c551559833d",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "B"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA",
+            "Narrow",
+            "B"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-B",
+            "title": "B",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "B",
+                "title": "B",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:d25424c88e8f0e56",
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "label": "C",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/C/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-C",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:d25424c88e8f0e56",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "C"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA",
+            "Narrow",
+            "C"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-C",
+            "title": "C",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "C",
+                "title": "C",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:02e88c487998d5d0",
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "label": "C2C-QA2/Narrow/A",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/A/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-A",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:02e88c487998d5d0",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "A"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA (2)",
+            "Narrow",
+            "C2C-QA2/Narrow/A"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-A",
+            "title": "C2C-QA2/Narrow/A",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "A",
+                "title": "C2C-QA2/Narrow/A",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:d4278ad3662c509d",
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "label": "C2C-QA2/Narrow/B",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/B/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-B",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:d4278ad3662c509d",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "B"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA (2)",
+            "Narrow",
+            "C2C-QA2/Narrow/B"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-B",
+            "title": "C2C-QA2/Narrow/B",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "B",
+                "title": "C2C-QA2/Narrow/B",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:8aa0a169a99c02fe",
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "label": "C2C-QA2/Narrow/C",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/C/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-C",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:8aa0a169a99c02fe",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "C"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "C2C-QA (2)",
+            "Narrow",
+            "C2C-QA2/Narrow/C"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-C",
+            "title": "C2C-QA2/Narrow/C",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "C",
+                "title": "C2C-QA2/Narrow/C",
+                "visible": true
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "nativePlan": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Google Drive"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Dropbox"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "OneDrive"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Cloudflare"
+      },
+      {
+        "id": "c2c:item:929c2be631b8eb9d",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "title": "C2C-QA"
+      },
+      {
+        "id": "c2c:item:e36e3f59ea66dae3",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "title": "C2C-QA (2)"
+      },
+      {
+        "id": "c2c:item:9076bc6c202bc46d",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:929c2be631b8eb9d",
+        "title": "Narrow"
+      },
+      {
+        "id": "c2c:item:8d2b52aa65621468",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:e36e3f59ea66dae3",
+        "title": "Narrow"
+      },
+      {
+        "id": "c2c:item:03cd54f9357c4755",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "title": "A"
+      },
+      {
+        "id": "c2c:item:54ef0c551559833d",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "title": "B"
+      },
+      {
+        "id": "c2c:item:d25424c88e8f0e56",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:9076bc6c202bc46d",
+        "title": "C"
+      },
+      {
+        "id": "c2c:item:02e88c487998d5d0",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "title": "C2C-QA2/Narrow/A"
+      },
+      {
+        "id": "c2c:item:d4278ad3662c509d",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "title": "C2C-QA2/Narrow/B"
+      },
+      {
+        "id": "c2c:item:8aa0a169a99c02fe",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:8d2b52aa65621468",
+        "title": "C2C-QA2/Narrow/C"
+      }
+    ]
+  },
+  "after": {
+    "rows": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "branch",
+        "target": null,
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:9c7faa49c603f6de",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "click2cloud-qa",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": ""
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:67280f203a9c705c",
+        "parentId": "c2c:item:9c7faa49c603f6de",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": ""
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:4e42050ed5641eea",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:67280f203a9c705c",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:4e42050ed5641eea",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": []
+          }
+        }
+      },
+      {
+        "id": "c2c:item:10a3328fe7bf812d",
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "label": "click2cloud-qa-2",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": ""
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:e0e83ede2af14f99",
+        "parentId": "c2c:item:10a3328fe7bf812d",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": ""
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:1806444ea5e00181",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:e0e83ede2af14f99",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": []
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:1806444ea5e00181",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": []
+          }
+        }
+      },
+      {
+        "id": "c2c:item:2d7841044bb61313",
+        "parentId": "c2c:item:9c7faa49c603f6de",
+        "label": "C2C-QA",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:5d0418e4abf42e54",
+        "parentId": "c2c:item:2d7841044bb61313",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:e256858da013a5d1",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:5d0418e4abf42e54",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "C2C-QA",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:e256858da013a5d1",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:c9ef30f3924d7ccd",
+        "parentId": "c2c:item:10a3328fe7bf812d",
+        "label": "C2C-QA",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:3d49952e18b1a4fd",
+        "parentId": "c2c:item:c9ef30f3924d7ccd",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/"
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:4b4be48e42c8bf63",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:3d49952e18b1a4fd",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "C2C-QA",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:4b4be48e42c8bf63",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:5509da94008185cd",
+        "parentId": "c2c:item:2d7841044bb61313",
+        "label": "Narrow",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:76b55f7d4afefa23",
+        "parentId": "c2c:item:5509da94008185cd",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:bdb4ba756cccf6e8",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:76b55f7d4afefa23",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "C2C-QA",
+            "Narrow",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:bdb4ba756cccf6e8",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:5b4651e073216e5e",
+        "parentId": "c2c:item:c9ef30f3924d7ccd",
+        "label": "Narrow",
+        "role": "branch",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true
+      },
+      {
+        "id": "c2c:item:b609d229e02b1a75",
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "label": "Save here",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/"
+        },
+        "enabled": true,
+        "presentationId": "c2c:nested-ancestor:f450f640494110aa",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:b609d229e02b1a75",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "C2C-QA",
+            "Narrow",
+            "Save here"
+          ],
+          "presentation": {
+            "id": "c2c:nested-ancestor:f450f640494110aa",
+            "title": "Save here",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:b2b90c3fd665ffb8",
+        "parentId": "c2c:item:5509da94008185cd",
+        "label": "A",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/A/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-A",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:b2b90c3fd665ffb8",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "A"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "C2C-QA",
+            "Narrow",
+            "A"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-A",
+            "title": "A",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "A",
+                "title": "A",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:e0c4359c5c5984fc",
+        "parentId": "c2c:item:5509da94008185cd",
+        "label": "B",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/B/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-B",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:e0c4359c5c5984fc",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "B"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "C2C-QA",
+            "Narrow",
+            "B"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-B",
+            "title": "B",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "B",
+                "title": "B",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:5fa392123e37dabb",
+        "parentId": "c2c:item:5509da94008185cd",
+        "label": "C",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa",
+          "prefix": "C2C-QA/Narrow/C/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-C",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:5fa392123e37dabb",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "C"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa",
+            "C2C-QA",
+            "Narrow",
+            "C"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-C",
+            "title": "C",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "C",
+                "title": "C",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:5feadc7f21cd0fc7",
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "label": "C2C-QA2/Narrow/A",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/A/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-A",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:5feadc7f21cd0fc7",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "A"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "C2C-QA",
+            "Narrow",
+            "C2C-QA2/Narrow/A"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-A",
+            "title": "C2C-QA2/Narrow/A",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "A",
+                "title": "C2C-QA2/Narrow/A",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:21d04f5a02c937fa",
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "label": "C2C-QA2/Narrow/B",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/B/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-B",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:21d04f5a02c937fa",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "B"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "C2C-QA",
+            "Narrow",
+            "C2C-QA2/Narrow/B"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-B",
+            "title": "C2C-QA2/Narrow/B",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "B",
+                "title": "C2C-QA2/Narrow/B",
+                "visible": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "c2c:item:decc120cf0c79fcd",
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "label": "C2C-QA2/Narrow/C",
+        "role": "save",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "click2cloud-qa-2",
+          "prefix": "C2C-QA/Narrow/C/"
+        },
+        "enabled": true,
+        "presentationId": "click2cloud-qa-2-C",
+        "provenance": {
+          "schema": 1,
+          "mode": "narrow",
+          "entryId": "c2c:item:decc120cf0c79fcd",
+          "location": {
+            "provider": "cloudflare",
+            "bucket": "click2cloud-qa-2",
+            "directories": [
+              "C2C-QA",
+              "Narrow",
+              "C"
+            ]
+          },
+          "menuPath": [
+            "Cloudflare",
+            "click2cloud-qa-2",
+            "C2C-QA",
+            "Narrow",
+            "C2C-QA2/Narrow/C"
+          ],
+          "presentation": {
+            "id": "click2cloud-qa-2-C",
+            "title": "C2C-QA2/Narrow/C",
+            "visibilityMode": "custom",
+            "levels": [
+              {
+                "actual": "C2C-QA",
+                "title": "C2C-QA",
+                "visible": true
+              },
+              {
+                "actual": "Narrow",
+                "title": "Narrow",
+                "visible": true
+              },
+              {
+                "actual": "C",
+                "title": "C2C-QA2/Narrow/C",
+                "visible": true
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "nativePlan": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Google Drive"
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Dropbox"
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "OneDrive"
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "title": "Cloudflare"
+      },
+      {
+        "id": "c2c:item:9c7faa49c603f6de",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "title": "click2cloud-qa"
+      },
+      {
+        "id": "c2c:item:67280f203a9c705c",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:9c7faa49c603f6de",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:10a3328fe7bf812d",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:provider-entry:89a372375b51a98e",
+        "title": "click2cloud-qa-2"
+      },
+      {
+        "id": "c2c:item:e0e83ede2af14f99",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:10a3328fe7bf812d",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:2d7841044bb61313",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:9c7faa49c603f6de",
+        "title": "C2C-QA"
+      },
+      {
+        "id": "c2c:item:5d0418e4abf42e54",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:2d7841044bb61313",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:c9ef30f3924d7ccd",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:10a3328fe7bf812d",
+        "title": "C2C-QA"
+      },
+      {
+        "id": "c2c:item:3d49952e18b1a4fd",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:c9ef30f3924d7ccd",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:5509da94008185cd",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:2d7841044bb61313",
+        "title": "Narrow"
+      },
+      {
+        "id": "c2c:item:76b55f7d4afefa23",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5509da94008185cd",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:5b4651e073216e5e",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:c9ef30f3924d7ccd",
+        "title": "Narrow"
+      },
+      {
+        "id": "c2c:item:b609d229e02b1a75",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "title": "Save here"
+      },
+      {
+        "id": "c2c:item:b2b90c3fd665ffb8",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5509da94008185cd",
+        "title": "A"
+      },
+      {
+        "id": "c2c:item:e0c4359c5c5984fc",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5509da94008185cd",
+        "title": "B"
+      },
+      {
+        "id": "c2c:item:5fa392123e37dabb",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5509da94008185cd",
+        "title": "C"
+      },
+      {
+        "id": "c2c:item:5feadc7f21cd0fc7",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "title": "C2C-QA2/Narrow/A"
+      },
+      {
+        "id": "c2c:item:21d04f5a02c937fa",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "title": "C2C-QA2/Narrow/B"
+      },
+      {
+        "id": "c2c:item:decc120cf0c79fcd",
+        "type": "normal",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "enabled": true,
+        "visible": true,
+        "parentId": "c2c:item:5b4651e073216e5e",
+        "title": "C2C-QA2/Narrow/C"
+      }
+    ]
+  }
+}

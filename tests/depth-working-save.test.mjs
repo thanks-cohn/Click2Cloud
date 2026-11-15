@@ -31,10 +31,15 @@ test('production Depth callbacks -> provisioner -> signed transport -> workerd -
  const emit=async row=>{const done=new Promise(r=>finish=r);listener({menuItemId:row.id,linkUrl:'https://raw.githubusercontent.com/approved.bin'},{});await done;return feedback.at(-1);};
  const depthRows=spec.rows.filter(r=>r.role==='save'&&r.origin.mode==='depth');assert.equal(depthRows.length,3);
  // Real controls before/after Depth; compare same targets and registry without warming shared snapshots.
- const controls=spec.rows.filter(r=>r.role==='save'&&['simple','nested'].includes(r.origin.mode));assert.equal(controls.length,2);
+ const controls=spec.rows.filter(r=>r.role==='save'&&['simple','nested'].includes(r.origin.mode)&&r.reason!=='NARROW_ANCESTOR_READY');assert.equal(controls.length,2);
  for(const r of controls)shared.set(targetKey(r.target),true);
  const saveControl=async r=>{const out=await registrar.handleClick({menuItemId:r.id,linkUrl:'https://raw.githubusercontent.com/approved.bin'});assert.equal(out.state,'completed',JSON.stringify(out));assert.equal(await (await bucket.get(out.receipt.key)).text(),'abc');};
  for(const r of controls)await saveControl(r);
+ // New Narrow ancestors traverse the real engine and signed Worker protocol;
+ // independent local R2 readback confirms exact root/intermediate bytes.
+ const ancestors=spec.rows.filter(r=>r.origin.mode==='nested'&&r.reason==='NARROW_ANCESTOR_READY');
+ assert.deepEqual(ancestors.map(r=>r.target.prefix),['','Images/']);
+ for(const row of ancestors){shared.set(targetKey(row.target),true);await saveControl(row);}
  for(const row of depthRows){shared.set(targetKey(row.target),false);const before=JSON.stringify([...shared]);const control=controls.find(r=>targetKey(r.target)===targetKey(row.target));
  if(control){const denied=await engine.save({itemId:control.id,generation:spec.generation,depthAuthorization:depthAuth,context:'link'});assert.equal(denied.state,'blocked');}
  const out=await emit(row);assert.equal(out.state,'completed',JSON.stringify(out));assert.equal(out.recordCode,'DEPTH_CLICK_RECORD_FAILED');assert.equal(JSON.stringify([...shared]),before);if(control){const denied=await engine.save({itemId:control.id,generation:spec.generation,depthAuthorization:depthAuth,context:'link'});assert.equal(denied.state,'blocked');}const remote=records.filter(r=>r.state==='verified'&&r.destination?.prefix===row.target.prefix.replace(/\/$/,'')).at(-1);assert(remote?.receipt);assert.equal(remote.receipt.key.startsWith(row.target.prefix),true);assert.equal(await (await bucket.get(remote.receipt.key)).text(),'abc');}

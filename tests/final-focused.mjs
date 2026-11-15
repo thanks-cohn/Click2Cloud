@@ -68,3 +68,6 @@ await import('./depth-fetch-diagnostics.test.mjs');
 await import('./recorder-complete-export.test.mjs');
 await import('./recorder-native-truth.test.mjs');
 await import('./recorder-measurements.test.mjs');
+
+await import('./narrow-bucket-boundary.test.mjs');
+await import('./depth-ready-authorization.test.mjs');
