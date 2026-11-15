@@ -62,6 +62,28 @@ The user should not have to request a large one-shot crawl, keep the interface o
 8. Benchmark real installed Chrome responsiveness and R2 calls while a crawl is active; ordinary right-click saves must remain responsive, exact-target and separately verified.
 9. Prove the crawler never changed cloud data, inferred extra OAuth grants, wiped a destination/menu configuration or leaked sensitive object names off-device.
 
+## Future product experience: drop an image, find it across connected clouds
+
+**Owner's north-star interaction:** Drag a picture into Click2Cloud, have it search the **specifically opted-in, authorized directories across multiple connected cloud accounts/providers**, and show every confirmed exact or probable visual match. Select any result to **open the corresponding file or its actual parent directory in the correct cloud** (using a supported provider-native link or authenticated Click2Cloud Explorer navigation). No guessing links or pretending an offline/historical path is currently accessible.
+
+This is an eventual product direction, **not** a currently working feature. For example:
+
+1. User drops a locally owned/authorized picture into a search surface.
+2. A local image-fingerprint/query pipeline generates a cryptographic digest for exact-byte candidates and perceptual visual features (e.g. pHash) for near-identical/resized/compressed candidates.
+3. An opt-in, incrementally built, **sharded cross-cloud index** searches only elected locations and returns grouped results: **Exact bytes**, **Visually similar (estimated confidence)**, and **Historical location / needs revalidation**.
+4. Each result shows provider, account display name, bucket or drive, path, last observed date, current verification and useful preview where authorized.
+5. Click a result: open the exact file when supported, otherwise navigate to its containing directory and select the object. If disconnected, expired or removed, explain the obstacle and offer appropriate reconnect/recheck, not false success.
+
+**Crucial technical boundary:** A Whole Cloud metadata listing of filenames/keys is an excellent discovery and provenance foundation but **cannot yield pHash from keys alone**. The visual index needs authorized access to image pixels (full bytes, safe bounded preview or provider-provided thumbnail with understood limitations). A SHA-256 checksum proves byte equality only when calculated over trusted actual file content; an ETag isn't necessarily that checksum. Perceptual hashes are similarity candidates, not identity proof, and may have false positives. Shards are an indexing/scaling strategy, not a way around provider authorization.
+
+This experience should work alongside a historical **time-machine directory map**, so the same image can show where it was found in different clouds **and where it was observed previously**. Keep current live locations, historical sightings and verified byte-identical matches distinct.
+
+**Marketing direction after real validation:** The low-impact daily crawl is a genuine user-value accrual mechanism: "A little discovery each day; find more of what you've already saved." It may naturally encourage recurring use because the user's own index becomes more complete over time, but do not add artificial streak pressure or promise that using Chrome for 21 wall-clock hours means 21 hours of uninterrupted scanning. A future native desktop companion may optionally run faster account-authorized scans while sharing the same durable, versioned map and hash index. Avoid treating aggressive enumeration as a prerequisite.
+
+**History and changes:** Retain old verified observations and snapshots. Evolve `CURRENT.json` plus recovery journals toward timestamped inventory snapshots **and semantic, append-only change/delta records**, with checksums and versioned reconstruction. Current Click2Cloud recovery journal lines are full checksum-wrapped namespace state writes, **not yet** a complete semantic change history. Distinguish "not observed this pass" from "confirmed removed" under incomplete scans.
+
+**Experimental implementation proposal:** [Opt-in Visual Similarity Search, pHash and Sharded Index](../experimental/OPT_IN_VISUAL_SIMILARITY_SEARCH_PHASH_SHARDED_CLOUD_INDEX_2026-11-14.md). Explicit user directory selection; privacy-first local index; no silent bulk image reads or outside upload; all provider requests permission-scoped and throttled; metadata/history kept as distinct layers. No cloud object writes/deletions or provisioning permitted by this direction.
+
 ## Roadmap treatment
 
 **Strategic product pillar / P1 reliability work, not an implemented claim.** Build on the existing typed API, provider authorization, durable recovery and one-page-per-tick design rather than creating a competing crawler. First repair the observed stalled/rewound checkpoints and add inspectable, persisted progress/errors; then expose an offline hierarchy browser and incremental refresh. Preserve existing P0 login, CURRENT-data loss, save correctness and native right-click performance gates.
