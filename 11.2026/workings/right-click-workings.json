@@ -9293,14 +9293,14 @@
       "src/recorder/schema.mjs": "19693270df1a9ce0fdfd3d844d702b728cde209699f902968fd4226fd2b85e7b",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "extension/app.css": "2e3eaf12d0551d37fb75930a4b2d1edd852ffdce558c7ba0d0a3594f154fe506",
+      "extension/app.css": "89aad628a49b47c26645fb51468d539995fa6bfa7f64df912519a4265e8d506c",
       "extension/app.html": "5af292ecc6c76b0de03bc43ab71be60beb8872ab58f62ff0cc8f4f2a15bdf37b",
-      "extension/app.mjs": "0297c382cd29a7e638b81c807e7f01e8a673de6fde0b0c1cf7caeb02668d11c3",
+      "extension/app.mjs": "06f13493100148f05db39ec3e46a823f6355a617ef38d5c58a6a925130d53d67",
       "extension/background.mjs": "71f33f133dfd5dc6d484f4b951675c702f1ed7bee7054aba4300a392841dc5d9",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "1d136a57fce0d725f2c710cca1add5c3746c771a8c92b742f853a9436733bf49",
-      "extension/history-page.mjs": "c9b79ee03902ea2809a19ecf6662a5d695b045d78a3ad8ce7d487d3bef1f4b86",
+      "extension/explorer-layout.mjs": "00c6ccd93a3af0c487b403bb42d6eb4ca8c27deb1e025a3ce89c7440dac03fcf",
+      "extension/history-page.mjs": "9f7b13ff48c5f1961cd24f7362a0935142566539ea9d226def70461e715febf1",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
       "extension/manifest.json": "455f2f65362a550c49977a7b645f7a925f23b3eaa581e608a550969564a82d40",
@@ -10837,10 +10837,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -11439,7 +11439,7 @@
       {
         "id": "ENTRY_MESSAGE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
         "apiMethods": [
@@ -11487,7 +11487,7 @@
       {
         "id": "ENTRY_CLIENT_RESPONSE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage \u2192 existing background listener",
+        "trigger": "runtime.sendMessage → existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
         "apiMethods": [
@@ -12365,7 +12365,7 @@
         "scope": "inspect",
         "version": "3+1.1",
         "effectful": false,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12374,7 +12374,7 @@
         "scope": "inspect",
         "version": "3+1.1",
         "effectful": false,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12383,7 +12383,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12392,7 +12392,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12401,7 +12401,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12410,7 +12410,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12419,7 +12419,7 @@
         "scope": "provision",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12428,7 +12428,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -15024,6 +15024,15 @@
       "evidence": "docs/evidence/customer-history/IMPLEMENTATION.md",
       "liveWindows": "NOT_TESTED",
       "performance": "CURRENT reads fetch exact configuration and complete setup evidence, avoiding retained remote-result payloads. Customer cursors retain at most limit+1 records; no database schema/migration/pruning."
+    },
+    "explorerHistoryFoundation": {
+      "source": "extension/explorer-layout.mjs, extension/history-page.mjs, extension/app.mjs",
+      "behavior": "Explorer More portals to body and native popover top layer with viewport anchoring, focus/Escape/outside close. History mounts the existing loader using the gallery preference reader independently of file reads; cancellation destroys visuals and aborts bounded queued reads. No native save/auth/permissions changes.",
+      "tests": [
+        "scripts/test-foundation-browser.mjs",
+        "scripts/test-customer-history-browser.mjs"
+      ],
+      "evidenceClass": "Linux Chromium app with fixture provider; Windows and live Cloudflare not verified"
     }
   },
   "changeLog": [

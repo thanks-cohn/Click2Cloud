@@ -41,7 +41,7 @@ body.resizing{user-select:none}
 #command-items>button,#command-items>select{flex:none;height:36px;white-space:nowrap}
 #command-items>.address{flex:1;min-width:min(110px,100%)}
 #toolbar-more{height:36px;flex:none}
-#toolbar-overflow{position:absolute;z-index:6;right:8px;top:100%;width:min(280px,calc(100vw - 24px));max-height:65vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:8px;box-shadow:0 8px 24px #0005}
+#toolbar-overflow{position:fixed;z-index:80;inset:auto;margin:0;color:var(--text);width:min(280px,calc(100vw - 24px));max-height:65vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:8px;box-shadow:0 8px 24px #0005}
 #toolbar-overflow>*{display:block;width:100%;margin:4px 0}
 [hidden]{display:none!important}
 #status{position:fixed;z-index:7;right:14px;bottom:50px;max-width:min(520px,calc(100vw - 28px));max-height:25vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--text)}
@@ -92,3 +92,6 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 /* Three independent More controls: application navigation, History row, Explorer. */
 .header-more{position:relative;display:inline-block}.header-more [role=menu]{position:absolute;right:0;top:100%;z-index:60;background:var(--panel,#20232a);border:1px solid var(--border,#666);padding:6px;min-width:160px}.header-more [role=menu] button{display:block;width:100%;text-align:left}
 .history-row{border-bottom:1px solid var(--border,#68717d);padding:14px 0}.history-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.history-line strong{overflow-wrap:anywhere}.history-line time{margin-left:auto;font-size:.85em}.history-dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;background:#428bff}.history-dot.verified{background:#28ae5d}.history-dot.failed{background:#ee5050}.history-status{font-size:.85em}.history-page details{padding:8px 0 8px 12px}.history-page summary{cursor:pointer}.history-page pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:24em;overflow:auto}.history-page a{overflow-wrap:anywhere}.history-preview img{max-width:240px;max-height:180px}.history-page>nav{display:flex;gap:16px;align-items:center;margin-top:16px}
+
+/* Shared image-loading slot, bounded independently of History content. */
+.history-preview{position:relative;max-width:240px;min-height:48px}.history-preview[data-loading]{height:180px;overflow:hidden;background:var(--bg);border-radius:5px}.history-preview[data-loading]>p{position:absolute;inset:auto 8px 0;text-align:center;font-size:12px}

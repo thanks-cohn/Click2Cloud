@@ -225,7 +225,7 @@ function treeNode(parent,t,label){
  button.onclick=async()=>{const expand=button.getAttribute('aria-expanded')!=='true';children.hidden=!expand;button.setAttribute('aria-expanded',String(expand));if(!expand)return;try{await navigate(t);if(!button.isConnected||!source||targetKey(source)!==targetKey(t))return;const data=await listingReader.page(t);syncTreePage(t,data);}catch(e){status(e.message);}};
  button.oncontextmenu=e=>{e.preventDefault();contextFor(t,null,e.clientX,e.clientY);};return node;
 }
-const historyUI=createHistoryPage({api,goTo:async operationId=>{
+const historyUI=createHistoryPage({api,loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
  const result=await api('openRemoteResult',{operationId},{quiet:true});
  closeDialog();selected.clear();await navigate(result.target);const ticket=navigationEpoch,seen=new Set();
  while(!entries.some(e=>e.key===result.highlightKey)&&cursor){if(seen.has(cursor))throw Error('PAGINATION_STALLED');seen.add(cursor);await loadListing(true);if(ticket!==navigationEpoch)return;}
@@ -323,10 +323,14 @@ function syncThumbnails(){
 }
 let stopLoadingVisual=null,cachedGalleryVisual=null;
 function stopGalleryVisual(){stopLoadingVisual?.();stopLoadingVisual=null;const frame=$('.image-frame');if(frame)delete frame.dataset.loading;}
+// Shared preference reader; History and gallery use the identical local choice.
+async function getGalleryVisualSelection(){
+ const summary=await api('getGalleryLoadingVisual',{}, {quiet:true});if(!cachedGalleryVisual||cachedGalleryVisual.revision!==summary.revision){const value=summary.mode==='media'?await api('getGalleryLoadingVisual',{includeMedia:true},{quiet:true}):summary;cachedGalleryVisual={revision:value.revision,mode:value.mode,...(value.media?.base64?{blob:loadingMedia(value.media).blob}:{})};}return cachedGalleryVisual;
+}
 async function startGalleryVisual(frame,ticket,signal){
  frame.dataset.loading='true';stopLoadingVisual=mountLoadingVisual(frame,cachedGalleryVisual??{mode:'math'});
- try{const summary=await api('getGalleryLoadingVisual',{}, {quiet:true});if(!cachedGalleryVisual||cachedGalleryVisual.revision!==summary.revision){const value=summary.mode==='media'?await api('getGalleryLoadingVisual',{includeMedia:true},{quiet:true}):summary;cachedGalleryVisual={revision:value.revision,mode:value.mode,...(value.media?.base64?{blob:loadingMedia(value.media).blob}:{})};}
- if(ticket!==previewEpoch||signal.aborted||frame.dataset.loading!=='true')return;stopLoadingVisual?.();stopLoadingVisual=mountLoadingVisual(frame,cachedGalleryVisual);
+ try{const selection=await getGalleryVisualSelection();
+ if(ticket!==previewEpoch||signal.aborted||frame.dataset.loading!=='true')return;stopLoadingVisual?.();stopLoadingVisual=mountLoadingVisual(frame,selection);
  }catch{/* Loading artwork never prevents an authenticated object read. */}
 }
 function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" class="gallery-arrow" title="Previous image" aria-label="Previous image" aria-keyshortcuts="ArrowLeft" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>Images in this loaded folder${cursor?' · more files may be loaded in Explorer':''}</span><button id="gallery-next" class="gallery-arrow" title="Next image" aria-label="Next image" aria-keyshortcuts="ArrowRight" ${!galleryStep(ordered(),e.key,1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;}
