@@ -1,6 +1,6 @@
 # Click2Cloud — Next Codex Request: API-first File Get URL, Cloudflare Domains, Resumable Directory URL Exports
 
-**Status:** REQUEST ONLY. Not evidence of implementation or permission to make real Cloudflare resources public.
+**Status:** REQUEST ONLY. Not evidence of implementation or permission to make real Cloudflare resources public. **Implement this ONLY on Branch 2, created FROM the completed/tested HEAD of Branch 1 (Explorer More fix, History loading reuse, Aesthetic API + High Polish). Branch 2 = Branch 1 plus URL code; it must not be developed in parallel.**
 **Requested November 15, 2026.**
 **Repository:** `thanks-cohn/Click2Cloud`.
 **Code baseline to inspect:** `implement/customer-history-ux-2026-11-15`, latest implementation reviewed at `220e5f4e15baeb52fd600ad08f9078f8598a7a2f`; verify latest branch HEAD and owner working state before implementing. Preserve `checkpoint/click2cloud-working-right-click-pre-history-2026-11-15`.
@@ -86,7 +86,7 @@ https://cdn.example.org/photos/second.jpg
 
 ### A5. Standardized API-first implementation; intuitive CLI, GUI and export formats
 
-**Build the API below the GUI, not the reverse.** The Explorer context menu, domain form, progress view, format selectors and any programmatic adapter must call the **same canonical URL service**. Do not duplicate bucket activation, custom-domain validation, object-to-URL mapping, immediate-child enumeration, export serialization, authorization or resumable job state in UI code. Prefer stable, versioned object-shaped request/response contracts, documented status/error codes, and one source of truth.
+**Build the API below the GUI, not the reverse. Codex must document actual method signatures, request/response schemas, security and runnable examples under `docs/api/URL_API_V1.md` on Branch 2, not merely link to this proposal.** The Explorer context menu, domain form, progress view, format selectors and any programmatic adapter must call the **same canonical URL service**. Do not duplicate bucket activation, custom-domain validation, object-to-URL mapping, immediate-child enumeration, export serialization, authorization or resumable job state in UI code. Prefer stable, versioned object-shaped request/response contracts, documented status/error codes, and one source of truth.
 
 Use industry-familiar naming and semantics. Suggested **logical service operations** (Codex may adjust method names to existing conventions, but must document the actual ones):
 
@@ -104,11 +104,11 @@ click2cloud urls status --bucket my-bucket
 click2cloud urls activate --bucket my-bucket --confirm-public-bucket
 click2cloud urls domains add --bucket my-bucket --domains assets.example.com,cdn.example.org
 click2cloud urls get --bucket my-bucket --key photos/image.jpg
-click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format txt --output photos-urls.txt
+click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format txt --output photos-urls.txt --timeout 30m
 click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format json --output photos-urls.json
 click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format zip --output photos-urls.zip
 click2cloud urls jobs status --job-id <id>
-click2cloud urls jobs resume --job-id <id>
+click2cloud urls jobs resume --job-id <id> --no-timeout
 \`\`\`
 
 CLI flags are **illustrative standard nomenclature**, not automatic permission to publish. A protected local CLI must reuse the current user identity, authorization and public-bucket confirmation model. No unauthenticated internet-exposed control endpoints, secrets in output, embedding tokens in arguments/logs, or bypassing consent. Provide \`--help\`, a succinct README, useful exit codes and per-operation errors. Programmatic clients can supply a validated list of domains; GUI supports one or multiple comma-separated domains in the SAME Add field.
@@ -143,6 +143,18 @@ Canonical per-object record (illustrative, versioned):
 
 **Default GUI**: Folder right-click → **Export URLs…** → output format selector (TXT clearly first), current folder path and direct-children scope, optional endpoint filter → Export. A **single-click Download URLs (.txt)** shortcut is fine. Avoid needlessly presenting all options in the context menu. No export of a whole bucket or recursive subdirectories. Format choice belongs to the export dialog and/or CLI \`--format\` flag.
 
+### A6b. Standard timeout and resume conventions — GUI vs API
+
+**Do not impose a 30-minute timeout on the instant Explorer right-click menu or on file URL lookups.** This setting applies ONLY to long-running selected-directory URL export jobs. Right-click and Get URL popup must appear immediately, even if background status checking is slow.
+
+- **GUI export default:** \`timeoutMs: 1_800_000\` = 30 minutes of **active job processing time** per invocation. When reached, **PAUSE** safely (not fail or discard), preserving checkpoint, committed records and export progress, and offer Resume. A resumed GUI run gets its own fresh 30-minute active-time window. Time spent waiting for explicit reauthentication or sitting paused does not count as active processing.
+- **Programmatic API default:** \`timeoutMs: null\` = no **application-imposed overall job-duration limit**. This does not override the provider's token expiration TIME, request deadlines, rate limits, revocation, network errors or actual worker/container uptime. Continue from durable checkpoints when authorized; never promise the browser extension runs indefinitely after Chrome shuts down unless a real independent runner exists.
+- **CLI convention, if a supported authorized local CLI can actually run:** \`--timeout 30m\`, \`--timeout 2h\`, \`--no-timeout\`, and \`urls jobs resume --job-id ID\`. Accept familiar duration suffixes \`s\`, \`m\`, \`h\`; reject invalid/negative or mutually exclusive timeout flags. Avoid made-up \`--time:30min\` syntax. CLI and JS service call exactly the same underlying operations as the GUI.
+- Keep credentials/token handling behind a stable, replaceable authorization provider interface for future user-supplied scoped tokens or delegated sessions **without rewriting URL listing, export or serializers**. Adding a token later is an auth-adapter implementation, not a bypass of security consent or refresh policy.
+- Make the run deadline, remaining active duration, paused reason, last checkpoint and Resume button visible in the GUI; document flags and state/error types. Do not store tokens in plaintext jobs, logs or export files.
+- Test GUI expiration at 30m using an injected clock, API default unbounded job duration, changing/renewing deadline on resume, revoked/expired token, network 429 and restarts. Distinguish overall processing deadline from single-request timeout and OAuth token expiration timestamp.
+
+
 ### A7. Incremental, appendable, checkpointed export jobs; OAuth expiration **TIME**
 
 Exports for a specific directory should be **append-as-you-go and resumable**. “Appendable” means completed **per-object groups/records** are persisted **atomically** as the cursor progresses and are not discarded whenever another page arrives. Support adding more work to a **job queue** where requested while preserving each job's exact authorization and selection; never append results from a different directory into an existing file without an explicit distinct job/segment identity.
@@ -171,7 +183,7 @@ Exports for a specific directory should be **append-as-you-go and resumable**. �
 
 ## C. Test / delivery requirements for the next Codex run
 
-1. Create a **separate implementation branch** from the latest reviewed customer-history branch; record precise base commit. Do not merge/tag/deploy without explicit owner approval. Write/run focused tests.
+1. **Finish and verify Branch 1 first** using the master two-branch request. Then create **Branch 2 directly from Branch 1's final verified HEAD**, carrying its full history and implementation. This document applies exclusively to Branch 2. Record the parent SHA and verify ancestry; no URL work on Branch 1 and no parallel implementation. Do not merge/tag/deploy without explicit owner approval. Write/run focused tests.
 2. Verify per-file Get URL with (a) no endpoint, (b) known existing domain, (c) multiple valid endpoints, (d) pending/failed domain, (e) inaccessible object and (f) private bucket. Confirm direct Copy/Open and domain region **always** below the result.
 3. Verify exact “Activate public URL for bucket?” Yes/No prompt; No makes no changes; Yes warns about entire bucket and performs only authorized activation. Test single domain and 2–4 comma-separated domains/website URLs with trimming, normalization, duplicates, malformed entries, DNS conflicts, partial success and errors, input-clearing for successful Adds only, new links displayed BELOW input, Save and Exit separately, and persistent all-URL display on future right-clicks.
 4. For folder TXT, test **0, 1, 25, 26, 100+, 1000+ immediate file objects**, multiple list pages, nested descendants (excluded), Unicode/special characters, exact prefix, deduplication, deterministic sorted lines, **one URL per nonblank line**, and **exactly one blank line between distinct object groups**. Include two or three authorized domains, objects with varying numbers of valid URLs, duplicate domain configurations, and a folder with no directly contained files but many nested files. Verify group count = number of exported direct objects and nonblank URL line count = sum of unique valid URLs exported for those objects. Test repeated Save/Add another/Save & Exit, no duplicate domain, instant UI open, and the next right-click showing every verified URL without reconfiguration.
