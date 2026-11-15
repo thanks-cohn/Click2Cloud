@@ -6,6 +6,8 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P1 — Whole Cloud crawl stuck at zero object pages; UI `DUE` disagrees with external `RUNNING` checkpoint:** [owner's November 15 Windows evidence and read-only investigation](Bugs/P1_WHOLE_CLOUD_CRAWLER_STALLED_CHECKPOINT_DISAGREEMENT_2026-11-15.md). Seven buckets recorded but no object-page namespaces or completed export observed; root cause unknown. **Deferred behind current Simple/Narrow/Depth right-click acceptance testing.**
+
 - **P1 — Explorer condensed toolbar shows wrong controls:** [one-row slider must show only Back, Forward, Up, Refresh, More](Bugs/P1_EXPLORER_CONDENSED_TOOLBAR_NAVIGATION_ONLY_2026-11-09.md). Preserve every other command inside More and keep expanded toolbar behavior; no application code changed by this report.
 
 - **P0 HIGHEST PRIORITY — established user CURRENT records missing, but Chrome still retains menu generation 583:** [owner's installed-Chrome incident](Bugs/P0_CONNECTED_BUT_EXPLORER_SETTINGS_CONFIG_RECORD_MISSING_2026-11-08.md) · [extensive Codex forensic recovery, repair and prevention assignment](../docs/requests/CODEX_P0_CURRENT_STATE_LOSS_FORENSIC_RECOVERY_HARDENING_2026-11-08.md). Implementation on `dev/p0-current-recovery` (`84f0e19`, 0.3.14): [forensic repair/evidence](../docs/evidence/current-recovery/FORENSIC-HANDOFF.md). **OPEN:** original owner Windows profile/recovery and destructive trigger remain unverified. Protect data first; do not reset native metadata or claim recovery without independent proof.
