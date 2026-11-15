@@ -1,4 +1,4 @@
-# Click2Cloud — Next Codex Request: File Explorer Get URL, Cloudflare Domain Setup and Immediate Directory TXT URL Export
+# Click2Cloud — Next Codex Request: API-first File Get URL, Cloudflare Domains, Resumable Directory URL Exports
 
 **Status:** REQUEST ONLY. Not evidence of implementation or permission to make real Cloudflare resources public.
 **Requested November 15, 2026.**
@@ -6,7 +6,7 @@
 **Code baseline to inspect:** `implement/customer-history-ux-2026-11-15`, latest implementation reviewed at `220e5f4e15baeb52fd600ad08f9078f8598a7a2f`; verify latest branch HEAD and owner working state before implementing. Preserve `checkpoint/click2cloud-working-right-click-pre-history-2026-11-15`.
 **Previously documented goal:** `marketing/promoted-features/CREATOR_URL_LIBRARY_BULK_EXPORT_AND_REMOTE_2026-11-14.md`. Also see `marketing/promoted-features/FILE_EXPLORER_GET_URL_AND_SEND_TO_OTHER_CLOUDS_2026-11-15.md` **for URL vision only**.
 
-**IN SCOPE ONLY:** User-facing Get URL for saved objects; explicit opt-in setup of supported Cloudflare R2 public endpoint/custom domain; show all actually available public URLs for a file or the files immediately inside a selected directory; direct-child TXT download, one URL per line.
+**IN SCOPE ONLY:** Instant Explorer Get URL for one file; authorized public URL activation on that file's R2 bucket; custom domain setup one at a time or comma-separated; all verified URLs per file; **only specifically selected directory** URL inventories and exports of **immediate children** (not recursive); reusable versioned API used by the GUI and programmatic clients; TXT, JSON, JSONL, CSV, Markdown, HTML and multi-format ZIP as applicable; interruption-safe append/resume with OAuth access-token **expiration time** handling. **NO whole-bucket URL inventory/export**.
 **EXPLICITLY OUT OF SCOPE:** `Send to another cloud`, cross-cloud transfers/copies, remote provider adapters, Move, paid billing/gates, live public deployment or changing permissions on the owner's buckets without fresh explicit approval. Do not modify any unrelated project.
 
 ## A. Precise customer experience
@@ -31,7 +31,7 @@ Cloudflare domains are **bucket-level configuration** shared by all objects, not
 
 Offer:
 - **Get URLs…**: inspect **all files immediately inside that exact folder/prefix**. Show available URLs **grouped under each actual file**, including **all valid URLs across multiple authorized bucket domains** (not merely the first domain). Sorting must be stable: actual file key first, then configured/normalized domain order. Give Copy/Open where useful.
-- **Download URLs (.txt)**: create and download a UTF-8 **.txt** file with **one actual public URL per nonblank line**; include **ALL verified available domain URLs for each immediate file by default**. **Group all URLs for the same object contiguously, and put exactly one blank line between object groups** for straightforward subsequent parsing. No filenames, headings, CSV/JSON/Markdown or other metadata in this TXT. Every nonblank line is a URL; every blank-line-delimited group belongs to one object. Stable object-key order and stable configured-domain order, with deduplication per group. A single-domain filter can be an additional choice but must NOT silently replace the multi-domain grouping default. For programs requiring explicit object-key associations, a separately labeled structured manifest may be added later; do not alter the requested TXT format.
+- **Export URLs…**: offer TXT (default), JSON, JSONL, CSV, Markdown, HTML, and a ZIP containing selected formats, all using ONE canonical enumerator and semantic object records. **TXT** uses UTF-8 with **one real URL per nonblank line**, all active-domain URLs for each immediate file kept **contiguously**, **exactly one blank line between distinct file groups**, no labels/filenames/JSON/Markdown; within each group, URLs in stable endpoint order. Structured formats explicitly preserve object identity and group URLs per file (see section A5). Deduplicate per-object URLs and object keys. Never force the user to guess which links belong to an object in the structured formats.
 - **Immediate-directory semantics are mandatory:** include keys `prefix + immediateFilename` only; **do not include descendants** in `prefix/nestedFolder/file.ext`. The bucket root is a valid directory whose immediate objects can be exported. Folder placeholders/marker objects and internal `.click2cloud-*` housekeeping objects are not eligible as user files unless the user explicitly requests and has authority; do not confuse folder prefix with a real object URL.
 - If zero eligible files, explain `No directly contained files with available public URLs` instead of downloading a misleading success file. Files without valid public URLs should be counted as unavailable/skipped with reason; never fake URLs. Provide a bounded summary of `scanned / exported / skipped / errors` and optionally a separate explicit diagnostic report, but the **.txt remains URLs only**.
 - Even when there are hundreds/thousands of directly contained files, **do not truncate to the File Explorer's visible page or 25-item History pagination**. Fetch all relevant Cloudflare R2 list pages using scoped read-only APIs/cursors, stream/generate bounded-size chunks, show progress and allow cancellation, and initiate a real user-approved download. Because this may take time, progress must be truthful; declare completion only when the browser confirms that output was handed to the supported download/save flow. On disconnect/revoked auth/partial failures, show partial outcome and allow safe resume or an explicit partial export instead of mislabeling it as complete.
@@ -68,7 +68,7 @@ Subsequent Get URL right-click:
 
 Right-click directory:
   Get URLs...
-  Download URLs (.txt)  // immediate children only, grouped by object
+  Export URLs… [TXT / JSON / JSONL / CSV / Markdown / HTML / ZIP]  // immediate children only
 ```
 
 **Input:** one website or comma-separated websites, selected by user; Add processes each. Clear successes; retain failures. New URLs are listed below the input. Save and then Exit are separate final actions.
@@ -83,6 +83,80 @@ https://cdn.example.org/photos/second.jpg
 ```
 
 **Parsing rule:** Split the text into groups on blank lines; each group is one source object, with one actual public URL per nonblank line. If an object has only one confirmed URL, its group contains one line. Blank separators are structural, not URL lines. This keeps the file plain text, visually readable and unambiguous for a simple group parser; URLs encode the actual object keys.
+
+### A5. Standardized API-first implementation; intuitive CLI, GUI and export formats
+
+**Build the API below the GUI, not the reverse.** The Explorer context menu, domain form, progress view, format selectors and any programmatic adapter must call the **same canonical URL service**. Do not duplicate bucket activation, custom-domain validation, object-to-URL mapping, immediate-child enumeration, export serialization, authorization or resumable job state in UI code. Prefer stable, versioned object-shaped request/response contracts, documented status/error codes, and one source of truth.
+
+Use industry-familiar naming and semantics. Suggested **logical service operations** (Codex may adjust method names to existing conventions, but must document the actual ones):
+
+- \`getBucketPublicUrlStatus({ accountId, bucket })\`: inspect only; no publishing.
+- \`activateBucketPublicUrl({ accountId, bucket, confirmPublicBucket: true })\`: idempotent authorized operation; must **not** accept missing/false confirmation or silently enable public exposure. Return verified state and actual endpoint only if available.
+- \`addBucketDomains({ accountId, bucket, domains: ["assets.example.com", "cdn.example.org"] })\`: normalize and validate each independently; return per-domain \`active | pending | failed\` and reason; do not treat DNS/TLS pending as activated; don't silently replace existing DNS.
+- \`getObjectUrls({ accountId, bucket, key })\`: all actual eligible URLs for that object across available endpoints, with status.
+- \`startDirectoryUrlExport({ accountId, bucket, prefix, scope: "immediate", formats: ["txt"], output })\`: create a **durable appendable export job** for one explicitly selected directory (or the **selected bucket root's immediate files**, not the entire bucket). Return job ID, confirmed scope, counts and status.
+- \`getExportJob({ jobId })\`, \`resumeExportJob({ jobId })\`, \`cancelExportJob({ jobId })\`, \`downloadExport({ jobId, format })\`: status/progress/restart/download; authorization checked on every permitted operation. A resumed job continues from its checkpoint and does not repeat committed output.
+
+**Illustrative CLI** (only if a real secure, local, authorized CLI adapter is feasible with current architecture; otherwise provide a callable shared module and clearly report the CLI as not implemented, rather than inventing a shell that cannot talk to a Chrome extension):
+
+\`\`\`sh
+click2cloud urls status --bucket my-bucket
+click2cloud urls activate --bucket my-bucket --confirm-public-bucket
+click2cloud urls domains add --bucket my-bucket --domains assets.example.com,cdn.example.org
+click2cloud urls get --bucket my-bucket --key photos/image.jpg
+click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format txt --output photos-urls.txt
+click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format json --output photos-urls.json
+click2cloud urls export --bucket my-bucket --prefix photos/ --scope immediate --format zip --output photos-urls.zip
+click2cloud urls jobs status --job-id <id>
+click2cloud urls jobs resume --job-id <id>
+\`\`\`
+
+CLI flags are **illustrative standard nomenclature**, not automatic permission to publish. A protected local CLI must reuse the current user identity, authorization and public-bucket confirmation model. No unauthenticated internet-exposed control endpoints, secrets in output, embedding tokens in arguments/logs, or bypassing consent. Provide \`--help\`, a succinct README, useful exit codes and per-operation errors. Programmatic clients can supply a validated list of domains; GUI supports one or multiple comma-separated domains in the SAME Add field.
+
+**Deliberately prohibited scope:** there is **NO** \`--scope bucket\`, \`--all-buckets\`, \`--recursive\`, \`--whole-bucket\`, or equivalent for the export feature in this run. **A selected folder prefix lists only its immediately contained files, including root's direct objects when root explicitly selected.** Do not traverse all descendants or scan a whole bucket merely because the requested folder happens to be root. Bucket-public **activation/status** operations remain in scope, distinct from bucket-wide URL listing or exporting.
+
+### A6. Format design — grouped objects, canonical serialization
+
+Expose **TXT (default), JSON, JSONL, CSV, Markdown, HTML, ZIP of selected formats** through the same export-record pipeline. Use reasonable filenames with sanitized bucket/prefix and format extension; deterministic ordering and correct Unicode/UTF-8. Never output URLs that are not real/verified for an eligible endpoint.
+
+Canonical per-object record (illustrative, versioned):
+\`\`\`json
+{
+  "schemaVersion": 1,
+  "bucket": "example",
+  "key": "photos/image.jpg",
+  "filename": "image.jpg",
+  "urls": [
+    {"domain":"assets.example.com","url":"https://assets.example.com/photos/image.jpg"},
+    {"domain":"cdn.example.org","url":"https://cdn.example.org/photos/image.jpg"}
+  ]
+}
+\`\`\`
+
+- **TXT** — each direct child object is a group: 1 URL per nonblank line, ALL active domains grouped contiguously, **one blank line between groups**; no metadata or header. A basic parser splits groups on blank lines; direct URL keys are encoded safely.
+- **JSON** — envelope with \`schemaVersion\`, precise bucket/prefix/scope, counts/completion flag, and an \`items[]\` array of per-object records, each containing its own \`urls[]\`. No ambiguous association.
+- **JSONL/NDJSON** — one complete per-object JSON record per line, ideal for streaming and incremental processing; no partial JSON records.
+- **CSV** — \`bucket,object_key,filename,domain,url\`; one row per object/domain pair, repeat the exact object key for unambiguous grouping; proper RFC 4180 quoting and UTF-8.
+- **Markdown** — grouped by object-key heading with URL list under each heading; escaped content to prevent injection.
+- **HTML** — standalone safe static index, grouped per object, escaped filenames/URLs; no scripts/remote auto-fetch, unsafe \`javascript:\` URLs, or hidden credentials. Plain file links.
+- **ZIP** — package requested exported formats that correspond to the SAME completed checkpoint/snapshot; add a small machine-readable manifest with schema version, bucket/prefix, item counts and completion state. The contents must not silently differ due to a continuing scan. Don't build ZIP by repeating cloud listing seven times.
+
+**Default GUI**: Folder right-click → **Export URLs…** → output format selector (TXT clearly first), current folder path and direct-children scope, optional endpoint filter → Export. A **single-click Download URLs (.txt)** shortcut is fine. Avoid needlessly presenting all options in the context menu. No export of a whole bucket or recursive subdirectories. Format choice belongs to the export dialog and/or CLI \`--format\` flag.
+
+### A7. Incremental, appendable, checkpointed export jobs; OAuth expiration **TIME**
+
+Exports for a specific directory should be **append-as-you-go and resumable**. “Appendable” means completed **per-object groups/records** are persisted **atomically** as the cursor progresses and are not discarded whenever another page arrives. Support adding more work to a **job queue** where requested while preserving each job's exact authorization and selection; never append results from a different directory into an existing file without an explicit distinct job/segment identity.
+
+- Durable job fields: version, stable opaque job ID, authenticated account, exact bucket/prefix, explicit \`scope:"immediate"\`, selected domains/formats, request creation time, **provider-issued token expiration timestamp** when known, selected endpoint status, listing cursor/start-after checkpoint, last committed object key, counters, chunk/segment IDs/checksums, last error, and \`running | paused_auth | paused_retry | completed | cancelled\`. Store no reusable secrets in job state or exports.
+- Commit **one completed object record/group** at a time into a durable append-only staging log (e.g., versioned IndexedDB store or similarly robust append store). Record the checkpoint only after the corresponding record is durably stored. Use deterministic idempotency identity based on job + object key; resume must not duplicate existing objects/URLs. On crash between record write and cursor write, re-read safely and dedupe. Avoid appending incomplete TXT/CSV/JSON fragments; serialize complete groups/records.
+- Use Cloudflare's actual **token expiration TIME/timestamp** and any truthful refresh policy, not a guessed expiration date or fixed session lifetime. Refresh *before expiration* when refresh credentials and provider policy support it; otherwise safely pause job, request reauthorization, and resume at the last durable checkpoint. No bypass of revoked tokens. Distinguish provider timeout, network timeout, rate limit, and OAuth expiry. Retry boundedly with backoff where safe.
+- R2 listing cursors may become invalid or stale after long interruptions; retain last committed key and use safe \`start_after\` / equivalent resume strategy, with verified order and deduplication. New or changed objects during a long listing mean perfect point-in-time snapshot consistency may not be available; document semantics and report counts/partial state honestly.
+- Visible status: files scanned, objects committed, URLs emitted, pages processed, last durable checkpoint, elapsed time, retry/auth-wait state, and real completion. Provide Cancel, Resume, and Download **confirmed complete output**; explicitly label partial exports if offered.
+- Bound RAM, network concurrency, retry frequency, storage quota and exported-file sizes. For large jobs prefer a streaming save/download technique or chunk assembly, not \`array.join\` of every URL in memory.
+- One shared canonical record log serves all serializers; formats must remain consistent and deterministic on resume. Ensure ZIP and JSON are valid after interruptions by finalizing from committed records rather than appending raw incomplete syntax.
+
+**Tests mandatory:** interrupt after 0, 1, N object commits and during page transitions; simulate auth expiry a few seconds away, expiry during network request, refresh success/failure, reconnection, rate limit, cursor invalidation, browser restart, repeated Resume, duplicate keys and output staging failure. Cross-check **exact object groups, URL counts and byte-valid TXT/JSON/JSONL/CSV/MD/HTML/ZIP** against independently enumerated DIRECT children. Verify no nested descendants or unrequested bucket-wide enumeration. Tests must distinguish mocked fixtures from installed Chrome and live Cloudflare.
+
 
 ## B. Important technical and security boundaries
 
