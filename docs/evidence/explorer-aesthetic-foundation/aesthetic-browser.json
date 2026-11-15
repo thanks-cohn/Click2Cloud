@@ -1,0 +1,70 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+  "results": [
+    {
+      "gate": "actual-settings-switch-changes-zero-engine-calls-configuration-or-loader-preference",
+      "state": "PASS"
+    },
+    {
+      "gate": "appearance-restores-after-reload-separate-from-CURRENT",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-dark-1100-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-dark-600-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-dark-360-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-light-1100-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-light-600-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "standard-light-360-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-dark-1100-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-dark-600-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-dark-360-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-light-1100-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-light-600-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "high-polish-light-360-screens-layout-menu-focus",
+      "state": "PASS"
+    },
+    {
+      "gate": "30-mid-read-switches-preserve-exact-History-DOM-data-and-pending-file-read-with-zero-engine-calls",
+      "state": "PASS"
+    },
+    {
+      "gate": "reduced-motion-disables-overlay-transitions",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}

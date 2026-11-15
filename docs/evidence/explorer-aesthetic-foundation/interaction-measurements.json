@@ -1,0 +1,74 @@
+[
+  {
+    "mode": "standard",
+    "theme": "dark",
+    "width": 1100,
+    "openMs": 110.55869100000018
+  },
+  {
+    "mode": "standard",
+    "theme": "dark",
+    "width": 600,
+    "openMs": 102.75821299999916
+  },
+  {
+    "mode": "standard",
+    "theme": "dark",
+    "width": 360,
+    "openMs": 49.87856400000055
+  },
+  {
+    "mode": "standard",
+    "theme": "light",
+    "width": 1100,
+    "openMs": 81.95764899999995
+  },
+  {
+    "mode": "standard",
+    "theme": "light",
+    "width": 600,
+    "openMs": 50.66180700000041
+  },
+  {
+    "mode": "standard",
+    "theme": "light",
+    "width": 360,
+    "openMs": 58.479521000001114
+  },
+  {
+    "mode": "high-polish",
+    "theme": "dark",
+    "width": 1100,
+    "openMs": 110.76021300000139
+  },
+  {
+    "mode": "high-polish",
+    "theme": "dark",
+    "width": 600,
+    "openMs": 90.79167400000006
+  },
+  {
+    "mode": "high-polish",
+    "theme": "dark",
+    "width": 360,
+    "openMs": 45.15867099999741
+  },
+  {
+    "mode": "high-polish",
+    "theme": "light",
+    "width": 1100,
+    "openMs": 64.5315649999975
+  },
+  {
+    "mode": "high-polish",
+    "theme": "light",
+    "width": 600,
+    "openMs": 58.12555600000269
+  },
+  {
+    "mode": "high-polish",
+    "theme": "light",
+    "width": 360,
+    "openMs": 56.47257600000012
+  }
+]

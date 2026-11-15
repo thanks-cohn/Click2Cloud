@@ -35,22 +35,16 @@
 
 **Documentation-only issue. No app code, tests, configuration, Cloudflare resources or existing milestone tags are modified by this log.**
 
-## Review-branch investigation — November 14, 2026
 
-The issue remains **OPEN for the owner's Windows incident**. Linux independent
-process samples did not reproduce it: ten isolated + ten full runs before the
-Phase 2 investigation all passed; ten isolated + ten full runs after opt-in safe
-tracing and the LF checkout policy all passed, including OFF/BASIC/EXPANSIVE modes.
-Three bounded CPU-contention runs and protected Base 0.1 controls passed too.
-No production authorization, generation, expiry or replay behavior was changed.
+## 2026-11-14 — new Windows isolated regression evidence after MV3 repair
 
-A deterministic control proves missing fixture-dispatch `generation` can produce
-STALE_GENERATION without a real generation change. Separate post-write session or
-generation loss correctly remains uncertain and is never replayed. These are
-causal controls, not proof of which path occurred in the owner report.
+**Status remains OPEN.** Owner-tested review branch fix/mv3-recorder-suite-reliability, Node v24.21.0 on win32, produced **3/3 isolated Depth failures** (OFF / BASIC / EXPANSIVE), **3/3 full focused suite PASS (392/392)**. All six original safe JSON traces were supplied. The Windows result remains a real local workerd fixture issue, NOT proven live Chrome/Cloudflare failure.
 
-The distinct LF/CRLF byte-hash cause is repaired by narrow `.gitattributes` rules,
-with actual Git autocrlf conversion and content-tamper controls. Real Windows CMD
-execution and installed Chrome remain NOT RUN/BLOCKED here. See
-[the complete report](../../docs/evidence/mv3-suite-reliability/REPORT.md) and
-[Windows procedure](../../docs/evidence/mv3-suite-reliability/WINDOWS_ACCEPTANCE.md).
+**New primary evidence and targeted request:**
+
+- docs/evidence/windows-depth-2026-11-14/ISOLATED_CAPABILITIES_FAILURE.md
+- codex/11.14.2026/P1_WINDOWS_DEPTH_CAPABILITIES_TYPEERROR_MINIMAL_FIX.md
+
+The first observable fault is a **TypeError thrown by local Miniflare/workerd fetch on /capabilities** in the test fixture. The wrapper records only errorName, so the actual TypeError cause is still unknown. The fixture then reports TRANSPORT_UNAVAILABLE on the authorization status check. In OFF and EXPANSIVE modes the outcome becomes AUTHORIZATION_LOST/uncertain **after local /operation verified and /verify completed**; in BASIC it becomes SCOPE_UNAUTHORIZED/blocked **before upload**. Failed events still showed desired/applied/ACK generation 3, pending=0, same session and ~120 seconds of lease remaining. Safe fail-closed outcomes are not the defect; the unexpected transport TypeError is. Fix the culpable layer based on the actual exception cause, not by relaxing authorization or blindly retrying writes.
+
+Do **not** close this issue on a subsequent single Linux or full-suite green run. Require repeated actual Windows isolated passes and preservation of all negative revocation and generation tests. Keep unrelated recorder ZIP-export UX and classification bugs out of this one-defect repair.

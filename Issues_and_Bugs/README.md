@@ -6,6 +6,8 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P1 — Whole Cloud crawl stuck at zero object pages; UI `DUE` disagrees with external `RUNNING` checkpoint:** [owner's November 15 Windows evidence and read-only investigation](Bugs/P1_WHOLE_CLOUD_CRAWLER_STALLED_CHECKPOINT_DISAGREEMENT_2026-11-15.md). Seven buckets recorded but no object-page namespaces or completed export observed; root cause unknown. **Deferred behind current Simple/Narrow/Depth right-click acceptance testing.**
+
 - **P1 — Explorer condensed toolbar shows wrong controls:** [one-row slider must show only Back, Forward, Up, Refresh, More](Bugs/P1_EXPLORER_CONDENSED_TOOLBAR_NAVIGATION_ONLY_2026-11-09.md). Preserve every other command inside More and keep expanded toolbar behavior; no application code changed by this report.
 
 - **P0 HIGHEST PRIORITY — established user CURRENT records missing, but Chrome still retains menu generation 583:** [owner's installed-Chrome incident](Bugs/P0_CONNECTED_BUT_EXPLORER_SETTINGS_CONFIG_RECORD_MISSING_2026-11-08.md) · [extensive Codex forensic recovery, repair and prevention assignment](../docs/requests/CODEX_P0_CURRENT_STATE_LOSS_FORENSIC_RECOVERY_HARDENING_2026-11-08.md). Implementation on `dev/p0-current-recovery` (`84f0e19`, 0.3.14): [forensic repair/evidence](../docs/evidence/current-recovery/FORENSIC-HANDOFF.md). **OPEN:** original owner Windows profile/recovery and destructive trigger remain unverified. Protect data first; do not reset native metadata or claim recovery without independent proof.
@@ -22,6 +24,10 @@
 
 - [Remotes — full-width independent screen without Explorer left navigation](Issues/P1_REMOTES_TAB_MUST_NOT_SHOW_EXPLORER_LEFT_NAVIGATION_PANEL_2026-11-08.md). Hide the entire file tree outside File Explorer; retain login cards and restore Explorer state when returning.
 - [Explorer — one bottom-right Manage Destinations button, conventional full-path address entry, and Grid view](Issues/P1_EXPLORER_SINGLE_MANAGER_ADDRESS_FIELD_AND_GRID_VIEW_2026-11-07.md).
+
+## Full-suite
+
+- **P1 — OPEN: intermittent Depth save in Windows full-suite tests** ([failure log and investigation gates](Bugs/P1_FULL_SUITE_INTERMITTENT_DEPTH_GENERATION_AUTHORIZATION_2026-11-14.md)). The `feat/base01-two-tier-diagnostics` worktree passed 384/385 tests in the latest owner run, but `tests/depth-plan-recovery.test.mjs` intermittently returned `STALE_GENERATION` or `AUTHORIZATION_LOST` where the fixture expected `completed`; the same Depth file passed 4/4 in isolation. Root cause unverified; do not dilute authorization checks or claim live-provider regression. Windows LF/CRLF fingerprint mismatches are recorded as separate test-environment observations in the same report.
 
 ## Shared requirements
 
@@ -47,7 +53,8 @@ The original issue records retain the observed defects and requirements. Source 
 - **P1 UX ISSUE: explicit Save button inside Manage Destinations.** [Configuration Save control and durable-commit acceptance](Issues/P1_MANAGE_DESTINATIONS_EXPLICIT_SAVE_BUTTON_2026-11-12.md). Do not confuse configuration Save with native context-menu file Save; preserve existing immediate controls and saved configuration.
 - **CRITICAL architecture reference:** [Depth bucket submenu/Save here rules](../architecture/depth.md) and [GO TO / LOGIN / REFRESH, red OAuth icon](../architecture/go-to-login-refresh.md).
 
-## November 13, 2026, 15:24 CST — owner-reported Narrow bugs and bucket-label rule (OPEN)
+## November 14 owner report — CRITICAL / OPEN
 
-- **P1 BUG — `2D` Narrow destinations accumulate to ~10; Edit works but Trash does not reliably delete:** [investigation and non-destructive acceptance criteria](Bugs/P1_NARROW_2D_DUPLICATE_ACCUMULATION_TRASH_UNRESPONSIVE_2026-11-13.md). Unknown if stored duplicates, uncommitted deletions, or native menu artifacts; verify exact IDs and state before repair. No storage reset or bulk auto-cleanup.
-- **P1 ISSUE — Non-`redown` Cloudflare R2 bucket labels must be visible:** [`Cloudflare > valentiens > 2D` and Save here / redown exception](Issues/P1_CLOUDFLARE_NARROW_BUCKET_LABEL_VISIBILITY_REDOWN_EXCEPTION_2026-11-13.md). Existing source skips unlabeled Narrow bucket roots; preserve the actual bucket level, same-target independent Narrow presentations and Depth hierarchy.
+- **P0 CRITICAL — Narrow omits bucket-root save choice inside the bucket submenu:** [Narrow bucket root missing from nested Chrome right-click menu](Bugs/P0_CRITICAL_NARROW_BUCKET_ROOT_MISSING_FROM_NESTED_RIGHT_CLICK_MENU_2026-11-14.md). The bucket remains the submenu parent; its first actionable child must save to root (`prefix: ""`), followed by its configured child folders. Currently Simple is an unwanted workaround; investigate apparent first-child substitution. Installed-Chrome acceptance and live R2 key verification pending.
+
+- **November 14 Depth report withdrawn:** The owner confirmed Show Depth in Chrome was unchecked; its absence was expected. No new critical Depth bug is asserted. The separate Narrow bucket-root bug remains P0 CRITICAL.
