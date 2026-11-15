@@ -9,13 +9,17 @@
 
 # 0. Mission and boundaries
 
-Implement **four separately testable features/repairs** on a **new branch**, with strict preservation of the working Click2Cloud Chrome right-click saves, cloud authorization, File Explorer, History, diagnostics and recovery. Complete one phase at a time, record test results before proceeding, and report any unverified or blocked aspects transparently.
+Implement TWO SEQUENTIAL, STACKED branches: finish and verify **Branch 1 (foundation)** entirely, then create **Branch 2 directly from Branch 1's finished commit** and add only the URL work. **Branch 2 = Branch 1 + URLs.** Keep Branch 1 unchanged as a stable branch for independent tests, comparisons and later merging. Do not begin URL feature work or create Branch 2 until all Branch 1 gates are satisfied. Both must preserve working right-click saves, auth, File Explorer, History, diagnostics and recovery.
 
-**The four workstreams:**
-1. Fix File Explorer toolbar **More** overlay appearing behind the left tree panel (**P1 UI bug, GitHub issue #14**).
-2. **Reuse the existing gallery/File Explorer image-loading animation module in History image previews** (no new animation engine).
-3. **Get URL** for individual R2 objects, authorized Cloudflare bucket public URL/custom-domain setup, and API-driven, resumable **multi-format URL export for the immediate files in a selected directory only**. No whole-bucket export.
-4. Build a **separate reusable Aesthetic API** and a premium **High Polish** appearance toggle in Settings. Architect the presentation interface for eventual safe **public/user-created aesthetics**; do not build a public marketplace or enable untrusted remote code in this run.
+**Branch 1 — Foundation (finish first, test first):**
+1. Fix File Explorer toolbar **More** overlay behind the left tree panel (P1 issue #14).
+2. Reuse the existing gallery image-loading animation module in History; no duplicate loading engine.
+3. Implement the public-ready **Aesthetic API** with **High Polish as its first overlay/package**, not an independent styling system. The Standard visual is the baseline/fallback. Document real implemented Aesthetic API contract and usage in-repository.
+
+**Branch 2 — URLs (only after Branch 1 is complete):**
+4. **Create new Branch 2 FROM THE EXACT FINISHED HEAD OF BRANCH 1.** Add Get URL, explicit authorized bucket-public activation, individual/comma-separated domain addition, file URLs, and robust multi-format URL export for the immediate children of one selected directory (never the entire bucket). Document actual implemented URL API and CLI adapter in-repository.
+
+**Branch relationship:** Both branches are separately inspectable, but Branch 2 inherits every commit of Branch 1. Neither should contain unrelated divergent changes. Prepare to merge Branch 1 first and then Branch 2 after explicit owner approval and passing verification; merging must remain possible with ordinary Git ancestry.
 
 **Explicitly out of scope:** **whole-bucket URL inventory/export**, recursive bucket exports, “Send to another cloud,” cross-cloud transfers, changing ReDown or other products, launch/marketing announcements, billing/subscription changes, and real Cloudflare public-access changes without fresh explicit authorization. No production release, merge, deploy or tag without owner approval.
 
@@ -50,9 +54,9 @@ These requests may live on `main` while the actual implementation starts from `i
 - The actual image bytes/readers, concurrency, pagination, lazy loads, result status, metadata, and GO TO must remain untouched; no additional cloud requests should be caused by visuals.
 - Verify mathematical, local GIF/image/video, plain, invalid-media fallback, rapid navigation, cancel, hidden tab, no memory/RAF/object URL leaks.
 
-# 4. Workstream 3 — API-first Get URL + resumable multi-format DIRECT-directory exports
+# 4. Branch 2 only — API-first Get URL + resumable multi-format DIRECT-directory exports
 
-**The authoritative implementation spec is** \`codex/11.15.2026/P1_EXPLORER_GET_URL_DOMAIN_AND_IMMEDIATE_DIRECTORY_TXT_EXPORT_CODEX_REQUEST.md\`, especially its updated sections **A1–A7**. Read it all and implement/test its scope. This short master overview must not override its more precise UX, API, serialization, auth, or resume requirements.
+**ONLY ON BRANCH 2 AFTER BRANCH 1 IS COMPLETE:** The authoritative implementation spec is** \`codex/11.15.2026/P1_EXPLORER_GET_URL_DOMAIN_AND_IMMEDIATE_DIRECTORY_TXT_EXPORT_CODEX_REQUEST.md\`, especially its updated sections **A1–A7**. Read it all and implement/test its scope. This short master overview must not override its more precise UX, API, serialization, auth, or resume requirements.
 
 **Exact right-click file user flow in Click2Cloud File Explorer:**
 
@@ -73,7 +77,7 @@ These requests may live on `main` while the actual implementation starts from `i
 
 **Explicitly excluded:** Send to Another Cloud; cross-provider file transfers; whole-bucket URL export or recursive bucket scans; unapproved public access or DNS changes; new billing/subscription code.
 
-# 5. Workstream 4 — independent Aesthetic API and High Polish mode
+# 5. Branch 1 — Aesthetic API with High Polish as overlay #1
 
 ## Vision
 
@@ -82,13 +86,13 @@ Click2Cloud needs a **separate, future-public Aesthetic API**: a standardized an
 **Non-negotiable invariant: “An aesthetic can change how Click2Cloud looks, never how it works.”**
 
 For this run:
-1. Add **Settings → Appearance → High Polish Mode** with an easy ON/OFF switch. **OFF by default:** preserve current functional visual baseline. **ON:** professionally polished **whole-app** presentation. Dark/Light theme remains independently configurable.
-2. Build an explicit **versioned design contract / aesthetic interface**, small and isolated: design tokens for typography, spacing/rhythm, geometry, surface treatments, color, shadows, motion, component state; semantic hooks/adapters. Put presentation code into its own module/files, rather than entangling cloud/auth/save/History state or mutating core functional markup. Styling-only preferences stored separately and migrated safely.
+1. Implement **High Polish as the FIRST built-in Aesthetic API overlay/package**. It is NOT a parallel, independent styling system. **Settings → Appearance → High Polish Mode** toggles Standard (OFF, existing visual baseline) vs High Polish (ON, professional whole-app appearance) through exactly the same versioned aesthetic host contract future themes will use. Light/Dark remains independently configurable.
+2. Build and **document in the repository** an explicit **versioned design contract / aesthetic interface**, small and isolated: design tokens for typography, spacing/rhythm, geometry, surface treatments, color, shadows, motion, component state; semantic hooks/adapters. Put presentation code into its own module/files, rather than entangling cloud/auth/save/History state or mutating core functional markup. Styling-only preferences stored separately and migrated safely.
 3. Apply High Polish consistently to **ALL customer surfaces**, not just the landing view: header/nav, Remotes, Explorer list/tree/toolbar/context menus/overlays, previews/gallery, History/status/dots/metadata/expanded rows, Settings, help/diagnostics, forms, dialogs, empty/error/loading states, accessible focus.
 4. Aim for **visibly excellent, high-end production polish**: precise alignment, consistent spacing, careful type hierarchy, refined controls, restrained depth/shadows, excellent density balance, high-quality popovers/dialogs and carefully controlled motion. Avoid merely replacing colors or spraying generic gradients/blur effects.
 5. Preserve layout information density, responsive widths, mouse/keyboard/assistive accessibility, focus states, contrast, `prefers-reduced-motion`, touch targets where applicable, and **no extra pointer-blocking overlay or clipping**. Check the More popup fix in both modes.
 6. Changing aesthetics must **not** interrupt saves, downloads, image reads, History receipts, auth, account selection, folder traversal, cloud transactions, or keyboard controls; must not reload/delete existing preferences or credentials. A broken/incompatible aesthetic must safely fall back to standard without destroying data.
-7. Design with the **future PUBLIC Aesthetic API** in mind: a documented package manifest/compatibility version, semantic component names/tokens, validation, isolation and guaranteed fallback. **Do not grant visual packages unrestricted privileged JavaScript, raw remote CSS, extension APIs, network privileges, or access to user files, secrets, or browser storage.** Future public package installation/marketplace/import are **not requested for this run**; document extension points only.
+7. Follow `docs/api/AESTHETIC_API_V1_DESIGN.md` as the architecture guide and publish accurate, implementation-backed API documentation plus example manifest under `docs/api/` on Branch 1. Design with the **future PUBLIC Aesthetic API** in mind: a documented package manifest/compatibility version, semantic component names/tokens, validation, isolation and guaranteed fallback. **Do not grant visual packages unrestricted privileged JavaScript, raw remote CSS, extension APIs, network privileges, or access to user files, secrets, or browser storage.** Future public package installation/marketplace/import are **not requested for this run**; document extension points only.
 8. **Keep aesthetic styling separate from the pre-existing image-loading animation system.** This workstream must not rewrite `mountLoadingVisual` or introduce a new visual loader. History loading shared reuse is exclusively workstream 2. Future aesthetics may eventually express compatible visual defaults, but should not override a user's selected existing loading visual.
 
 ## Tests / professional standard
@@ -99,15 +103,16 @@ For this run:
 - A malformed/future-incompatible preset must safely fall back, and dynamic style/theme switching must not leak resources or cause layout dead zones.
 - Account for performance: avoid intrusive repaints, layout shift or continuously running heavy visual effects; measure relevant interactions and report regressions.
 
-# 6. Engineering workflow, verification, delivery
+# 6. Sequential engineering workflow — produce TWO mergeable branches
 
-1. **Audit and record base state first.** On a fresh branch from the existing customer-history implementation HEAD, run the current suite to establish a baseline. Preserve settings/profiles and working R2 save behavior. Do not implement directly on `main`.
-2. Phase order recommended: **More overlay fix → History loading reuse → URL + TXT features → Aesthetic API + High Polish**, with independent commits/tests and an explicit regression gate after each phase. If any phase is blocked, isolate and report instead of compromising prior successes.
-3. Maintain trusted authority boundaries: Explorer context-menu policy `src/api/explorer-context-menu.mjs` + `extension/app.mjs` `contextFor()` must be updated consistently for Get URL/actions; do not bolt privileged actions onto UI-only checks.
-4. Real installed Chrome, network/domain readiness, and live R2 GET/HEAD checks may not be available in the Codex sandbox. Label results as **UNIT / FIXTURE / HEADLESS CHROMIUM / INSTALLED CHROME / LIVE CLOUDFLARE**. Never describe mock or headless results as proof of live deployments or actual public URL accessibility.
-5. Run focused tests, full existing suite, build, browser UI scenarios, snapshot/regression and stress tests (pagination, rapid image loads, context-menu overlays, theme toggle). Ensure failure/cancel states and no collateral changes to Simple/Narrow/Depth.
-6. Write final `docs/evidence/...` with changed files, exact commits, test commands/counts and concise tables for each feature: **BEFORE / AFTER / PASS / FAIL / BLOCKED / NOT VERIFIED**. Note independently verified R2 paths/links only when actually checked.
-7. **Deliver a ready-to-test implementation branch and report**, but **NO merge to main, deployment, release, tag movement, production public-domain changes, or cross-cloud development** until owner authorizes those separately.
+1. Record the exact HEAD of `implement/customer-history-ux-2026-11-15` (observed `220e5f4e15baeb52fd600ad08f9078f8598a7a2f`), check for unfinished local changes, and run the baseline tests. Preserve the existing working checkpoint tag.
+2. **CREATE BRANCH 1**: Suggested `implement/explorer-aesthetic-foundation-2026-11-15`, from that history HEAD. Complete all of: **Explorer More layering repair → History existing loading-visual reuse → Aesthetic API with High Polish as its first overlay**. No Get URL, public bucket setup, directory exports or URL-specific implementation work may land on Branch 1.
+3. Fully test and commit Branch 1. Perform focused, full build/test, UI/Chrome checks, accessibility, Light/Dark, Standard/High Polish, and Simple/Narrow/Depth save no-regression verification. Write Branch 1 results and API documentation at `docs/api/`. Preserve the passing final SHA. **Do not create Branch 2 early**. If Branch 1 has blockers, report them and stop or resolve them on Branch 1 before proceeding.
+4. **ONLY AFTER Branch 1 has passed**, **CREATE BRANCH 2 FROM THE FINAL VERIFIED BRANCH 1 HEAD** (NOT from the old history branch and not from parallel `main`). Suggested `implement/explorer-aesthetic-plus-urls-2026-11-15`. Branch 2 starts with ALL completed Branch 1 functionality and commits. Implement only URL work on top of that base, as described in the detailed URL request.
+5. Use one shared, documented/versioned API behind the URL GUI and a feasible programmatic/CLI adapter. Standardize duration semantics: GUI export jobs default to `30m` of active processing time, resuming from durable checkpoints when the run window ends; programmatic jobs default to **no overall deadline** (`timeoutMs: null`), with conventional `--timeout 30m`, `--no-timeout`, `jobs resume --job-id ID` syntax. All paths respect OAuth token **expiration TIME**, request timeouts, permissions and rate limits; no false guarantee of unattended browser operation. No whole-bucket export.
+6. On Branch 2, run **the complete Branch 1 regression suite again**, plus Get URL, consent, Cloudflare domain setup, individual/comma-separated domains, grouping and multi-format directory export, interrupted/resumable/reconnected jobs, auth timeout, Unicode, disabled/blocked URLs, pointer/keyboard checks. Document actual methods and CLI semantics in `docs/api/URL_API_V1.md`; do not claim a CLI exists if it cannot run with current auth architecture.
+7. Deliver TWO branch names, exact parent/child SHA ancestry, comparison commands, the commits exclusive to Branch 2, tests run and PASS/FAIL/BLOCKED/NOT VERIFIED reports for each. Label fixture/headless Chrome/live Cloudflare evidence precisely. Show a `git merge-base --is-ancestor <branch1-head> <branch2-head>` ancestry check and that Branch 2 can merge cleanly after Branch 1, unless later unreviewed changes intervene.
+8. **Do not merge either branch, deploy, release, change live bucket publicity, or move tags without explicit owner authorization.** If later authorized, merge Branch 1 into the target branch first, then Branch 2; Branch 2 should contribute just its URL-specific commits.
 
 # 7. Owner-facing acceptance summary
 
@@ -118,4 +123,4 @@ For this run:
 - **Explorer overlay:** Toolbar More is always visibly **above** the tree/list panes and is interactable.
 - **Non-goals respected:** No cross-cloud transfer, no unauthorized Cloudflare exposure, no corruption of working save pipeline, no premature deployment.
 
-**This document is the single master entry point for the NEXT CODEX RUN.**
+**This document is the single master entry point for the NEXT CODEX RUN: finish Branch 1 first, then branch FROM it and add URLs on Branch 2. Both branches must be mergeable.**
