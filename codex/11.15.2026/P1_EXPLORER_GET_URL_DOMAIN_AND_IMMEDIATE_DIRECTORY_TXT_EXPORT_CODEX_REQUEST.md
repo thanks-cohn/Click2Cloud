@@ -17,27 +17,28 @@ The context menu includes **Get URL**.
 
 - On click, inspect the selected actual provider/account/bucket/exact R2 object key and active, verified public endpoints for **that bucket**. URLs are derived from real configured endpoints and exact encoded keys, not from guesswork or filenames alone.
 - **If one or more available public URLs exist:** open a small modal/popover with a readable list of **all known URL options** for this file (e.g., custom domains and an enabled development endpoint if appropriate), each labeled by domain, verification/availability status, clickable Open and Copy controls. Prefer actually reachable public links; do not present pending/unknown as verified.
-- **If none exist:** show **No public URL available** and a clear action **Make Public URL…**. Do not silently publish anything. Do not invent a public R2 URL.
+- **If none exist:** show **No public URL available** and a prominent, **fast one-click entry into** **Make Public URL…** (guided setup). Do not silently publish anything. Do not invent a public R2 URL. **Responsiveness matters:** right-click menu and initial Get URL panel must appear immediately from the existing Explorer UI; asynchronously refresh verified endpoint state without blocking the menu's first paint.
 - **Below that list, ALWAYS show a persistent custom-domain region, even if a link already exists**:
   - Label: **Connect your website domain**
   - Input placeholder: `assets.example.com`
   - Italic help: *Have a domain managed through Cloudflare? Connect a suitable domain or subdomain to this R2 bucket so its files can have URLs under your own domain.*
-  - **OK / Save** control to submit a user-approved eligible domain setup, or save/select an already-configured eligible domain, as appropriate.
+  - **Add another website / domain** lets the user enter **multiple separate Cloudflare-managed domains or subdomains, one after another**, using a simple repeated entry field. Show a clear list of already linked, newly requested, pending and failed domains and preserve successfully configured entries if another fails.
+  - **OK / Save** saves/requests the current authorized domain and immediately leaves the same input ready for another domain. **Save & Exit** (or Done) closes setup after all desired entries; users can stop after one or add several. Do not require re-opening the entire Get URL workflow for each domain. Consent/confirmation still applies to real bucket-publication and DNS changes.
   - Once configuration reaches confirmed active/reachable state, **refresh the URL list** in the same view; make pending DNS/TLS and permissions states visible, with manual Refresh and accurate errors. Never claim it is active merely because Save returned.
 - On a currently-private bucket, Make Public URL opens a scope/permission confirmation that explicitly says the normal public R2 custom-domain path affects **the entire bucket's public object access**, not just this file. A user merely opening Get URL, typing a domain, or using Copy does NOT authorize creating/changing any public access until they review and explicitly approve.
 - Input is for a domain/subdomain that the user controls and that satisfies Cloudflare R2 custom-domain prerequisites (account zone / DNS / privileges). **Do not accept an arbitrary website URL as if it were an active R2 endpoint;** do not replace the site's existing DNS route without warning. Prefer built-in, scoped provider APIs and display truthful status. If only one-file sharing is possible through a different safe mechanism, identify it as a separate sharing mode, not the equivalent of linking a standard public bucket domain.
-- Existing public domains should be reusable: connecting one domain for a bucket makes correctly authorized URLs available for multiple eligible objects in the bucket without per-file publication or creating one DNS record per file.
+- Existing public domains should be reusable: connecting **one or multiple authorized domains/subdomains** for a bucket makes correctly authorized URLs available for multiple eligible objects in the bucket without per-file publication or creating one DNS record per file. Persist the domain list against the **actual bucket/account identity** (not each file), avoid duplicate entries, and accurately represent the live Cloudflare configuration. On the next ordinary Get URL right-click, promptly show **all active, valid URLs for that specific object** across the linked domains, with Copy/Open for each.
 - Support filenames of **all file types** (images, PDFs, ZIPs, videos, text, etc.) and nontrivial keys (Unicode, spaces, reserved characters, same filename under different prefixes).
 
 ### A2. Right-click a *directory / folder* in Click2Cloud File Explorer
 
 Offer:
-- **Get URLs…**: inspect **all files immediately inside that exact folder/prefix**. Show available URLs per actual file, including multiple legitimate public endpoints where configured; show which domain is selected for copying/export.
-- **Download URLs (.txt)**: create and download a UTF-8 **.txt** file with **one actual public URL per line**, no CSV headers, JSON wrappers, Markdown, labels, or other text. Default to **one URL per direct file** using a user-selected active public domain/endpoint; if supporting all endpoints, make that an explicit mode and clearly explain that it may produce multiple lines for one file.
+- **Get URLs…**: inspect **all files immediately inside that exact folder/prefix**. Show available URLs **grouped under each actual file**, including **all valid URLs across multiple authorized bucket domains** (not merely the first domain). Sorting must be stable: actual file key first, then configured/normalized domain order. Give Copy/Open where useful.
+- **Download URLs (.txt)**: create and download a UTF-8 **.txt** file with **one actual public URL per nonblank line**; include **ALL verified available domain URLs for each immediate file by default**. **Group all URLs for the same object contiguously, and put exactly one blank line between object groups** for straightforward subsequent parsing. No filenames, headings, CSV/JSON/Markdown or other metadata in this TXT. Every nonblank line is a URL; every blank-line-delimited group belongs to one object. Stable object-key order and stable configured-domain order, with deduplication per group. A single-domain filter can be an additional choice but must NOT silently replace the multi-domain grouping default. For programs requiring explicit object-key associations, a separately labeled structured manifest may be added later; do not alter the requested TXT format.
 - **Immediate-directory semantics are mandatory:** include keys `prefix + immediateFilename` only; **do not include descendants** in `prefix/nestedFolder/file.ext`. The bucket root is a valid directory whose immediate objects can be exported. Folder placeholders/marker objects and internal `.click2cloud-*` housekeeping objects are not eligible as user files unless the user explicitly requests and has authority; do not confuse folder prefix with a real object URL.
 - If zero eligible files, explain `No directly contained files with available public URLs` instead of downloading a misleading success file. Files without valid public URLs should be counted as unavailable/skipped with reason; never fake URLs. Provide a bounded summary of `scanned / exported / skipped / errors` and optionally a separate explicit diagnostic report, but the **.txt remains URLs only**.
 - Even when there are hundreds/thousands of directly contained files, **do not truncate to the File Explorer's visible page or 25-item History pagination**. Fetch all relevant Cloudflare R2 list pages using scoped read-only APIs/cursors, stream/generate bounded-size chunks, show progress and allow cancellation, and initiate a real user-approved download. Because this may take time, progress must be truthful; declare completion only when the browser confirms that output was handed to the supported download/save flow. On disconnect/revoked auth/partial failures, show partial outcome and allow safe resume or an explicit partial export instead of mislabeling it as complete.
-- Keep file ordering deterministic (e.g. normalized key lexicographic), deduplicate cursor/page repeats and output URLs for the **exact** chosen bucket + folder + domain.
+- Keep file ordering deterministic (e.g. normalized key lexicographic), deduplicate cursor/page repeats and output URLs for the **exact** chosen bucket + folder across all authorized **active** domains. Group by exact object key; empty-line separators distinguish groups even when objects have different numbers of active URLs.
 
 ### A3. Suggested layout (textual intent, not required pixels)
 
@@ -60,11 +61,23 @@ Offer:
 [Directory context menu]
   Open
   Get URLs...
-  Download URLs (.txt)
+  Download URLs (.txt) [all domains, grouped by file]
   ...
 ```
 
-If no URL exists, show `No public URL available` and `Make Public URL…`, with explicit public-bucket scope before any authorized configuration.
+If no URL exists, show `No public URL available` and `Make Public URL…`, with explicit public-bucket scope before any authorized configuration. After the first domain is configured, the user may add another via the **same** input, **Save** each, and select **Save & Exit** when finished. A later file right-click displays all active-domain URLs immediately.
+
+### A4. Example TXT grouping — one URL per line, multiple lines per object
+
+```text
+https://assets.example.com/photos/first.jpg
+https://cdn.example.org/photos/first.jpg
+
+https://assets.example.com/photos/second.jpg
+https://cdn.example.org/photos/second.jpg
+```
+
+**Parsing rule:** Split the text into groups on blank lines; each group is one source object, with one actual public URL per nonblank line. If an object has only one confirmed URL, its group contains one line. Blank separators are structural, not URL lines. This keeps the file plain text, visually readable and unambiguous for a simple group parser; URLs encode the actual object keys.
 
 ## B. Important technical and security boundaries
 
@@ -82,7 +95,7 @@ If no URL exists, show `No public URL available` and `Make Public URL…`, with 
 1. Create a **separate implementation branch** from the latest reviewed customer-history branch; record precise base commit. Do not merge/tag/deploy without explicit owner approval. Write/run focused tests.
 2. Verify per-file Get URL with (a) no endpoint, (b) known existing domain, (c) multiple valid endpoints, (d) pending/failed domain, (e) inaccessible object and (f) private bucket. Confirm direct Copy/Open and domain region **always** below the result.
 3. Verify explicit public-bucket consent is mandatory; canceling setup leaves remote configuration unchanged. Validate domain ownership, account, API permission, status and url-encoding. Verify no unauthorized `r2.dev` enablement.
-4. For folder TXT, test **0, 1, 25, 26, 100+, 1000+ immediate file objects**, multiple list pages, nested descendants (excluded), Unicode/special characters, exact prefix, deduplication, deterministic sorted lines, and 1 URL/line. Test a folder with **no directly contained files** but many nested files yields zero. Verify total lines against independently listed direct children, and ensure one chosen domain gives one link per direct file.
+4. For folder TXT, test **0, 1, 25, 26, 100+, 1000+ immediate file objects**, multiple list pages, nested descendants (excluded), Unicode/special characters, exact prefix, deduplication, deterministic sorted lines, **one URL per nonblank line**, and **exactly one blank line between distinct object groups**. Include two or three authorized domains, objects with varying numbers of valid URLs, duplicate domain configurations, and a folder with no directly contained files but many nested files. Verify group count = number of exported direct objects and nonblank URL line count = sum of unique valid URLs exported for those objects. Test repeated Save/Add another/Save & Exit, no duplicate domain, instant UI open, and the next right-click showing every verified URL without reconfiguration.
 5. Test cancellation, revoked permissions, interrupted long listing, browser download confirmation, user-facing progress, bounded memory/concurrency and accurate partial errors.
 6. Test all file types, bucket root, nested folder, original existing context actions, native Chrome right-click save independence, History results and cloud verification regression. Keep real installed Windows Chrome vs local fixture claims separate.
 7. Deliver a concise before/after report with PASS / FAIL / BLOCKED / NOT TESTED, exact changed files, test command output and honest limitations; note no actual live public-domain activation unless explicitly authorized.
@@ -91,4 +104,4 @@ If no URL exists, show `No public URL available` and `Make Public URL…`, with 
 
 **DO NOT implement Send to Another Cloud or any cross-cloud transfer in this run.** That feature is only a deferred promoted-feature vision. No unrelated marketing release claims or subscriptions.
 
-**User-facing goal:** **Right-click a file → Get URL → set up a verified Cloudflare domain if needed → Save → refreshed links. Right-click its directory → Download URLs (.txt), one link per immediate file, even for a long directory listing.**
+**User-facing goal:** **Instant right-click a file → Get URL → if needed Make Public URL with explicit consent → enter multiple Cloudflare-managed domains one by one → Save each → Save & Exit → Get URL lists all verified addresses for that file. Right-click the directory → Download URLs (.txt): all URLs for each immediate file kept together, one URL per nonblank line, one blank line between file groups, even for a long directory listing.**
