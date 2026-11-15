@@ -728,3 +728,14 @@ routes to existing Recovery. Host-granted agents require all prior/new accounts;
 Debug confers no authority. See tests/portable-menu-manifest.test.mjs,
 menu-manifest-workerd.test.mjs and scripts/test-menu-manifest-browser.mjs. Real
 Chromium DOM/IndexedDB and local Workerd are not installed Windows/live R2 proof.
+
+### Customer feedback — November 15, 2026
+
+`createDepthFeedback` is internal presentation owned by `3+1.1 dispatchSave`.
+Every outcome still writes `lastDepthClick`; the canonical operation journal
+remains available via `inspectRemoteHistory`. If persisted `uiDebugMode` is OFF,
+completed/pending outcomes send no routine message or badge; failed/uncertain
+outcomes retain a badge and short actionable customer text. If ON, detailed
+Depth messages remain. A failed preference read defaults to quiet. No routing,
+CURRENT configuration, cloud write, native ACK or verification changes.
+Tests: `tests/debug-preference.test.mjs`. Installed Windows/live R2: NOT TESTED.

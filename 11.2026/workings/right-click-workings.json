@@ -9273,7 +9273,7 @@
       "src/manifest/schema.mjs": "cba93d4eb18b8ea9a7e5cdf08b7e84b742f897ffd567e5338c2de6cb2ad173af",
       "src/manifest/service.mjs": "794c990f587a9c1189dd439f19fd4ca63bf022fe7d93ad60f101fed5a9b36ece",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/depth/native-click.mjs": "2fb8086dc1934f30405a69859ff795fb56b6b5f5c7eae8d5ed1e004d46230c30",
+      "src/modes/depth/native-click.mjs": "9433884052d20d9cbc1e3a65ca3a28328ee6b6dd79a4b73ec48933fccef7ed49",
       "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
@@ -10834,10 +10834,10 @@
         "preconditions": "Known or unknown length body",
         "trigger": "save",
         "guard": "Strict counts, FixedLengthStream, conditional create",
-        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "actual": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation’s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
+        "nextState": "Known-length FixedLengthStream and bounded 4MiB unknown-length spool, final atomic conditional PUT under actual 5GiB single-PUT service limit. Fresh final R2 HEAD precedes cleanup of only this operation\u2019s identity-matching staging parts. Retain changed/unconfirmed parts explicitly.",
         "uiEffect": "Reported through existing GUI/API outcome",
         "externalResourceEffect": "Retained spool objects and final conditional object",
         "persistence": "none",
@@ -11436,7 +11436,7 @@
       {
         "id": "ENTRY_MESSAGE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage → existing background listener",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Engine-channel requests validate Chrome-supplied extension ID and exact app URL, plus matching origin and valid document UUID when those optional fields exist. Rejection returns UNTRUSTED_APP_SENDER with a fixed reason. Accepted requests hold the real response channel with literal true across ready and api.invoke; startup/invoke/invalid-result failures return versioned structured envelopes.",
         "apiMethods": [
@@ -11484,7 +11484,7 @@
       {
         "id": "ENTRY_CLIENT_RESPONSE",
         "preconditions": "Shelf engine-channel message",
-        "trigger": "runtime.sendMessage → existing background listener",
+        "trigger": "runtime.sendMessage \u2192 existing background listener",
         "guard": "Chrome-authenticated same extension and exact extension/app.html; optional document metadata is not a required credential",
         "actual": "Shelf distinguishes missing receiver, prematurely closed channel, no response, invalid envelope, explicit sender denial, startup failure and API failure. Startup shows method, stage and safe cause; Retry calls the existing bootstrap without clearing user data.",
         "apiMethods": [
@@ -12893,7 +12893,7 @@
         "scope": "inspect",
         "version": "3+1.1",
         "effectful": false,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12902,7 +12902,7 @@
         "scope": "inspect",
         "version": "3+1.1",
         "effectful": false,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12911,7 +12911,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12920,7 +12920,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12929,7 +12929,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12938,7 +12938,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12947,7 +12947,7 @@
         "scope": "provision",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       },
@@ -12956,7 +12956,7 @@
         "scope": "configure",
         "version": "3+1.1",
         "effectful": true,
-        "owner": "src/api/service.mjs:invoke → src/manifest/service.mjs:invoke",
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
         "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
         "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       }
@@ -14981,8 +14981,16 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "34ebba9d672b5859ad7cd97d8a4adb3efca069c1c4abd6eeb046910af92f3543",
-    "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72"
+    "digest": "5af2a512458463b2b4e1110cbae97c4bb01aa8ca2eb3d01ed7d5d1205f370f99",
+    "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
+    "customerHistoryQuietFeedback": {
+      "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
+      "behavior": "Depth last-outcome and operation journal remain durable. uiDebugMode OFF suppresses completed/pending notifications; actionable failures use short customer text. ON retains detailed messages. No change to routing, authorization or verification.",
+      "tests": [
+        "tests/debug-preference.test.mjs"
+      ],
+      "installedWindows": "NOT_TESTED"
+    }
   },
   "changeLog": [
     {
