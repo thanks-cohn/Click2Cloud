@@ -1,0 +1,356 @@
+{
+  "evidenceClass": "LOCAL_WORKERD_R2_NOT_LIVE_CLOUDFLARE",
+  "conditions": {
+    "payload": "3-byte abc from mocked approved public HTTPS source",
+    "targets": "same root/Images/Images/Artwork prefixes, Simple/Narrow/Depth engine routes",
+    "runtime": "local workerd, readiness probe before save workload, fake OAuth/Chrome callbacks",
+    "coldWarmMV3": "NOT_MEASURED",
+    "REDOWN": "NOT_MEASURED",
+    "timingCaveat": "Nine tiny local samples per build; noisy test-process scheduling, not representative of Windows or remote source/region latency"
+  },
+  "traces": {
+    "before": [
+      {
+        "mode": "simple",
+        "durationMs": 33,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 26,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 33,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 4,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 23,
+          "verificationMs": 6
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 41,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 6,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 29,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 46,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 10,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 23,
+          "verificationMs": 12
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 36,
+        "timings": {
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 1,
+          "workerRequestMs": 24,
+          "verificationMs": 10
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 38,
+        "timings": {
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 1,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 2,
+          "workerRequestMs": 28,
+          "verificationMs": 7
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 42,
+        "timings": {
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 1,
+          "capabilityMs": 3,
+          "authorizationRecheckMs": 8,
+          "workerRequestMs": 26,
+          "verificationMs": 5
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "simple",
+        "durationMs": 38,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 30,
+          "verificationMs": 6
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 28,
+        "timings": {
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "workerRequestMs": 21,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      }
+    ],
+    "after": [
+      {
+        "mode": "simple",
+        "durationMs": 35,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 8,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 26,
+          "verificationMs": 5
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 29,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 4,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 4,
+          "worker.destinationPrepareMs": 0,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 20,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 28,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 2,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 3,
+          "worker.destinationPrepareMs": 0,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 17,
+          "verificationMs": 8
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 28,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 2,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 20,
+          "verificationMs": 5
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 26,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 0,
+          "authorizationRecheckMs": 2,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 3,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 19,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 25,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 1,
+          "intentAuthorizationMs": 1,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 1,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 2,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 17,
+          "verificationMs": 5
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "depth",
+        "durationMs": 32,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 3,
+          "intentAuthorizationMs": 1,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 3,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 5,
+          "worker.destinationPrepareMs": 0,
+          "worker.sourceBodyAndWriteMs": 5,
+          "workerRequestMs": 21,
+          "verificationMs": 5
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "simple",
+        "durationMs": 21,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 2,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 15,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      },
+      {
+        "mode": "narrow",
+        "durationMs": 23,
+        "timings": {
+          "pollCount": 1,
+          "dispatchPreparationMs": 0,
+          "intentAuthorizationMs": 0,
+          "capabilityMs": 1,
+          "authorizationRecheckMs": 0,
+          "worker.authenticationMs": 0,
+          "worker.sourceHeadersMs": 4,
+          "worker.destinationPrepareMs": 1,
+          "worker.sourceBodyAndWriteMs": 4,
+          "workerRequestMs": 18,
+          "verificationMs": 4
+        },
+        "bytes": 3
+      }
+    ]
+  },
+  "summary": {
+    "before": {
+      "depth": {
+        "count": 3,
+        "transportDurationMs": {
+          "p50": 38,
+          "p95": 42,
+          "p99": 42,
+          "max": 42
+        }
+      },
+      "simple": {
+        "count": 2,
+        "transportDurationMs": {
+          "p50": 33,
+          "p95": 38,
+          "p99": 38,
+          "max": 38
+        }
+      },
+      "narrow": {
+        "count": 4,
+        "transportDurationMs": {
+          "p50": 33,
+          "p95": 46,
+          "p99": 46,
+          "max": 46
+        }
+      }
+    },
+    "after": {
+      "depth": {
+        "count": 3,
+        "transportDurationMs": {
+          "p50": 26,
+          "p95": 32,
+          "p99": 32,
+          "max": 32
+        }
+      },
+      "simple": {
+        "count": 2,
+        "transportDurationMs": {
+          "p50": 21,
+          "p95": 35,
+          "p99": 35,
+          "max": 35
+        }
+      },
+      "narrow": {
+        "count": 4,
+        "transportDurationMs": {
+          "p50": 28,
+          "p95": 29,
+          "p99": 29,
+          "max": 29
+        }
+      }
+    }
+  }
+}

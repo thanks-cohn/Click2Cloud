@@ -779,3 +779,29 @@ Worker numeric stage timings distinguish source headers, destination preparation
 and streaming source-body/write time (overlapping stages are not misreported as
 separable network durations). Transport retains poll count and stage timings in
 the durable diagnostic record, outside customer History Metadata and exports.
+
+### Bounded CURRENT reads and History cursors
+
+`CurrentStore.loadState` still backs `getConfiguration`, `commitConfigChange`
+and invocation-time `dispatchSave` authorization. It now reads exact product,
+mode, generation, integrity, provenance and backup-root keys plus the complete
+setup prefix. Missing/corrupt/conflicting historical evidence takes the same
+blocking branches; configuration journals/checkpoints and native establishment
+proof remain independent guards. Remote-result payloads are no longer decoded
+for each authorization. No schema upgrade, data rewrite or history migration.
+
+`inspectRemoteHistory(customer:true)` scans only canonical remote-result keys,
+keeps at most limit+1 records in memory, preserves legacy operation records, and
+uses timestamp/ID continuation cursors. It omits linked click wrappers only
+when their actual transfer record exists. Export streams these pages; display
+projects them with yields between pages. Legacy unindexed history still needs
+one cursor scan per export page; no background index migration was introduced.
+CSV has an explicit `recordType=export` metadata row, including on empty exports;
+operation rows have `recordType=operation`. Formula-leading spreadsheet strings
+are apostrophe-prefixed; JSON/JSONL retain original text. Sensitive metadata
+fields/URLs are redacted for customer output with an explicit indicator; raw
+upload snapshots remain internal. Privacy export also omits nested browsing URLs.
+
+Evidence: paired 5,000-record actual Chromium IDB measurements and the full
+existing recovery/crash guards in docs/evidence/customer-history. These are not
+Windows gesture latency or live cloud transfer measurements.

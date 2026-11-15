@@ -183,7 +183,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
         if(method==='initializeCloudflare')bindings.push(...((await oauth.status()).accounts??[]).map(a=>({accountId:a.id})));
-        if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);}
+        if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);if(saved?.receipt?.destination)bindings.push(saved.receipt.destination);}
         for(const c of params.changes??[])if(c.id){const d=Object.values(state.configs).flatMap(c=>c.destinations??[]).find(d=>d.id===c.id);if(d)bindings.push(d.target);}
         if(method==='invokeProviderAction'){
           const spec=params.generation===undefined?null:engine.getMenu(params.generation),row=spec?.rows.find(r=>r.id===stableId('provider-entry',params.provider)&&r.role==='save');

@@ -93,7 +93,7 @@ async function rebuildConfiguration(){
   const idempotencyKey=crypto.randomUUID();listen('#apply-rebuild','click',async()=>{const b=$('#apply-rebuild');b.disabled=true;try{const result=await api('restoreRightClickMenu',{rebuild,previewToken:preview.previewToken,idempotencyKey});await refreshState();closeDialog();await show('settings');status('New configuration rebuilt with your confirmation. Original state is not restored; remote saving is not verified. '+(result.native?.state==='completed'?'Chrome acknowledged.':'Chrome acknowledgement pending.'));}catch(e){b.disabled=false;throw e;}});
  });
 }
-listen('#help-diagnose','click',async()=>{dialog('Help · Diagnose · Review report','<p role="status">Preparing a private-content-free local report…</p>');const report=await api('getEngineHealth',{view:'support'});dialog('Review support report',`<p>No private locations, account IDs, source URLs or files are included. Nothing has been transmitted. Copy only if you choose to share it.</p><pre>${esc(JSON.stringify(report,null,2))}</pre>`,`<div class="dialog-foot"><button id="copy-reviewed-report">Copy reviewed report</button></div>`);listen('#copy-reviewed-report','click',()=>navigator.clipboard.writeText(JSON.stringify(report,null,2)));});
+listen('#help-diagnose','click',async()=>{dialog('Help · Diagnose · Review report','<p role="status">Preparing a private-content-free local report…</p>');const report=await api('getEngineHealth',{view:'support'});dialog('Review support report',`<p>No private locations, account IDs, source URLs or files are included. Nothing has been transmitted. Copy only if you choose to share it.</p><pre>${esc(JSON.stringify(report,null,2))}</pre>`,`<div class="dialog-foot"><button id="copy-reviewed-report">Copy reviewed report</button><button id="save-diagnostics">Inspect save diagnostics</button></div>`);listen('#save-diagnostics','click',()=>remoteHistory());listen('#copy-reviewed-report','click',()=>navigator.clipboard.writeText(JSON.stringify(report,null,2)));});
 async function refreshState(options){const next=await api('getConfiguration',{},options);if(!state||next.product.revision>=state.product.revision)state=next;configurationIssue=null;document.documentElement.dataset.theme=state.product.theme;$('#theme').disabled=false;return state;}
 const transientBootCodes=new Set(['STORAGE_UNAVAILABLE','CURRENT_READ_UNAVAILABLE','STORAGE_ACCESS_UNAVAILABLE','ENGINE_RECEIVER_MISSING','ENGINE_RESPONSE_CHANNEL_CLOSED','ENGINE_MESSAGE_SEND_FAILED','ENGINE_READ_TIMEOUT']);
 async function readWithRetry(fn){try{return await fn();}catch(error){if(!transientBootCodes.has(error.code)&&!transientBootCodes.has(error.diagnostic?.causeCode))throw error;await new Promise(ok=>setTimeout(ok,100));return fn();}}
@@ -227,9 +227,9 @@ function treeNode(parent,t,label){
 }
 const historyUI=createHistoryPage({api,goTo:async operationId=>{
  const result=await api('openRemoteResult',{operationId},{quiet:true});
- closeDialog();await navigate(result.target);const ticket=navigationEpoch,seen=new Set();
+ closeDialog();selected.clear();await navigate(result.target);const ticket=navigationEpoch,seen=new Set();
  while(!entries.some(e=>e.key===result.highlightKey)&&cursor){if(seen.has(cursor))throw Error('PAGINATION_STALLED');seen.add(cursor);await loadListing(true);if(ticket!==navigationEpoch)return;}
- if(ticket!==navigationEpoch)return;if(!entries.some(e=>e.key===result.highlightKey))throw Error('RESULT_NOT_FOUND');
+ if(ticket!==navigationEpoch)return;if(!entries.some(e=>e.key===result.highlightKey)){selected.clear();updateSelection();status('The recorded file is unavailable in this listing. Refresh or reconnect before trying again.',{attention:true});throw Error('RESULT_NOT_FOUND');}
  selected=new Set([result.highlightKey]);ordered();focusIndex=listingOrder.index(result.highlightKey);updateSelection();focusRow(focusIndex);
 }});
 let viewEpoch=0;
