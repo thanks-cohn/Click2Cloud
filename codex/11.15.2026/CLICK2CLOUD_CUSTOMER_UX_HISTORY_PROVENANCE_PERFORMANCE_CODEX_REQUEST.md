@@ -54,7 +54,7 @@ Each history operation occupies **one visually separated row** with a thin divid
 - Actual saved **filename** (or attempted source name if no saved object exists).
 - **GO TO** button for a real recorded saved object.
 - **Right-aligned timestamp**; local readable presentation, preserve UTC machine timestamp.
-- A row **More** expander containing an image preview first (where the entry is an image), then independently expandable **Source & links**, **Technical details**, and, **last**, **Metadata**. Do not invent a preview if bytes are absent.
+- A row **More** expander containing an image preview first (where the entry is an image), then independently expandable **Source & links**, and, **last**, **Metadata**. **Do not show a Technical Details section anywhere in the History page**, including expanded rows. Do not invent a preview if bytes are absent.
 
 **GO TO semantics (ALL FILE TYPES):** Every History entry representing an existing saved object may provide GO TO regardless of file type or extension: image, PDF, document, archive, video, audio, text, binary, or any other supported file. Open **Click2Cloud's own File Explorer**, navigate to the **actual provider/bucket/folder directory** for that record, and visibly **highlight/select that exact saved file** in the listing. GO TO is not an external-browser open, a file download, or a preview action, and must never be gated on being an image. Use recorded provider/account/bucket/exact object key, including collision-renamed keys. Revalidate current authority and object presence; if deleted/inaccessible or a failed attempt has no saved object, show a truthful explanation and optionally offer navigation to the intended directory; never highlight an unrelated same-named object. Image preview rules apply only to image-capable entries and must not restrict History or GO TO for other file types.
 
@@ -77,9 +77,9 @@ Each history operation occupies **one visually separated row** with a thin divid
 - **Cloudflare public object URL(s)**: show all **known and verified/appropriately classified** publicly addressable URLs if they exist (authorized custom domain, enabled public `r2.dev`, etc.). Do not assume private R2 keys are public; do not invent domains, publish objects or activate public access. Clarify historical vs current link availability.
 - Show destination bucket, exact stored prefix/key in suitable row details; keep URLs safe, no token-bearing query URLs exposed. When not captured historically, label fields unavailable instead of guessing from referrers.
 
-### Technical details
+### No Technical Details in History
 
-Separate from the saved file's metadata: operation ID, intent/destination, status and reason, duration/stages when observed, retry/uncertainty state, authentic receipt/proof, actual key, source-to-destination mapping. Do not treat mere successful UI appearance as independently verified.
+Do **not** render a Technical Details section, diagnostic-code dump, operation trace, worker stage list, ETag/version report, or receipt/proof detail panel anywhere on the customer-facing History page. Keep required backend operation/verification evidence intact and available through the existing Debug Mode, Help · Diagnose, and support/recorder facilities. The visible History row may still show a concise human-readable success/failure/uncertainty status, filename, date, GO TO and ordinary source/destination information. Do not treat mere successful UI appearance as independently verified.
 
 ## Phase 5 — Metadata = the metadata *the saved file actually gets*
 
@@ -87,7 +87,7 @@ Separate from the saved file's metadata: operation ID, intent/destination, statu
 
 - Under each History entry's row **More**, the **last expandable subsection is “Metadata.”**
 - Ground it in the saved file's **actual persisted upload metadata payload**. Inspect `right2cloud-module/src/cloudflare-r2-writer.mjs` and `right2cloud-module/src/provenance.mjs` to preserve what is truly written, not arbitrary imagined fields. In the inspected baseline `storage.put` provides `httpMetadata: {contentType}` and `customMetadata: {operationId, click2cloud: <serialized save provenance>}` when provenance exists; some fields may be absent. Display the as-written metadata field names/values and parsed `click2cloud` provenance faithfully, without inventing values or calling other event attributes “file metadata.”
-- Keep independent R2 ETags, object version, remote verification timing, and recorder-internal fields under **Technical details**, unless a field actually belongs to the saved-file metadata payload; no redundant dump.
+- **Do not expose independent R2 ETags, object versions, remote verification timing, recorder events or other technical diagnostics as a separate History section.** Retain them internally for truthful verification and under existing debug/diagnostic tools, without injecting them into History's Metadata section. A field that really belongs to the file's persisted upload-metadata payload can remain in Metadata.
 - For historical accuracy, prefer a saved-object metadata snapshot captured/verified at write time; if reading current object metadata later, identify it as **current remote metadata** and do not silently rewrite historical metadata. For missing/unreachable objects, show only safely retained historical metadata and label gaps.
 - This **same per-file saved metadata** must be included in the structured History export, preserving field names, types and nested structure (JSON/JSONL; CSV JSON-encoded metadata column). A failure with no uploaded file must have no fabricated saved-file metadata.
 - Privacy: prevent credential, secret or sensitive query leakage in rendered links/export. Do not change what current verified saves write merely to populate History; first inspect/carry existing provenance accurately.
@@ -108,7 +108,7 @@ Export formats: **JSON** (preferred full-fidelity structured export), **CSV** (f
 - Save timestamp, host page URL, original source URL, and any known Cloudflare public object URL(s) with availability/type;
 - Provider, account reference as safely appropriate, bucket, prefix, exact object key; status, save mode (Simple/Narrow/Depth/Quick/Default when known), operation ID, proof kind, error when applicable;
 - **Exactly the metadata attached to the saved file** per Phase 5—not a guessed R2/EXIF/debug mashup;
-- Other appropriate diagnostics under explicit `technicalDetails`, separate from `savedFileMetadata`.
+- **No `technicalDetails` section or diagnostic dump in ordinary customer-facing History exports.** Retain internal receipts, operation traces and debugging data through existing diagnostic/recorder facilities. The requested saved-file metadata is exported separately as `savedFileMetadata`.
 
 Use a versioned export schema with null and availability explanations for unknown historical values, safe URL handling, and optional review/privacy mode when exporting potentially sensitive browsing provenance. Do not delete history or change remote objects. Bound memory and avoid a slow whole-list UI freeze.
 
@@ -129,7 +129,7 @@ Reuse already-open requirement `Issues_and_Bugs/Bugs/P1_EXPLORER_CONDENSED_TOOLB
 - Verify 25-item History boundaries, grouping across page boundaries, all three image auto-expansion preferences on **every page**, and lazy preview behavior under high history volume, deleted objects and offline/auth transitions.
 - Test real GO TO opening Click2Cloud File Explorer at the proper directory and **selecting/highlighting the exact saved file of ANY type**, including image, PDF, document, text, archive and generic binary; verify same-named keys across buckets, collision-renamed keys, deleted/inaccessible objects and failed operations with no saved object. GO TO must not require an image preview.
 - Test clickable host page and source URL separation, title/hostname fallback, never invented public R2 URL; safe and accessible external links.
-- Compare the **file's as-written R2 metadata** with the exact History Metadata subsection and JSON/JSONL/CSV export on verified objects, including absent/legacy metadata cases.
+- Compare the **file's as-written R2 metadata** with the exact History Metadata subsection and JSON/JSONL/CSV export on verified objects, including absent/legacy metadata cases. Assert that **no Technical Details section appears anywhere on the History page**, with Debug Mode ON or OFF; detailed debugging belongs in existing diagnostic facilities.
 - Export 0/1/25/26/100+ and larger historical records across All Time, Weekly, Daily, Custom range; verify no pagination truncation, inclusive date boundaries, timezone correctness, CSV quoting and JSONL streaming; no destructive retention.
 - Benchmark latency before and after using identical conditions, with p50/p95/p99 and honest missed gates.
 - Build and run focused/full suites as available, test in a disposable Chrome profile if possible. Real installed Chrome and live R2 tests must be labeled independently from fixtures. No external publishing, packaging, tag creation or deployment.
