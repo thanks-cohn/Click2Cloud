@@ -9206,7 +9206,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "8c2774ab380bab0ea8aab28ed82264bb7836765d36b67a7370d8182501a598bd",
+      "src/api/service.mjs": "f3a3093bfebeda5d80307324c9fea9b6bf4459869a2258ed7666260c095a5941",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "4ae1d0218ccee31c81b63b80c7bdc2229e23483317ee347154d0689e56c5001d",
@@ -9225,9 +9225,9 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "ee1f30c4b33b6ee22affec24c3b8f7068bb9402d4b7544629ca24a03c5eba337",
+      "src/cloudflare/transport.mjs": "02b43900aa997bbc6cad765707b3a31baf39b3391d90fa1bee297167c46423ce",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
-      "src/cloudflare/worker.mjs": "f74bfcf3d006e0f54a5c969b1c2bf1265f56af721c10d0604a6d792866d03304",
+      "src/cloudflare/worker.mjs": "76f068c5dc9ae5d35a6d643e014549ec79ea0bc0cb735d5c678c66a68ad0cc01",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
       "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "9d064e09b515f687c3d8bddeea1e919b7b17973c324516859e8ec495df075c0d",
@@ -9264,8 +9264,10 @@
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
       "src/glaciaring/catalog.mjs": "69e9a54a2b39c0bb14c3f28be9002094319154f4512cc88ff7dfe25a1feca7b1",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "1821d676cbcaf293874909e3c1e223ab5207daec7040d084e9e36cf087e8aa61",
+      "src/glaciaring/reliability.mjs": "b81859a56f03039fbca8087a23e27c3828517c5aa8598e99974c98b20b5b8fc0",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
+      "src/history/model.mjs": "dd4642b39bb632da3834988ce451274b812aa5a008eeb81dede68a531112aa31",
+      "src/history/navigation.mjs": "a92bb168dbdb4e9c933f95a98a79f9565c79f701d57db55f4353b029e298ca10",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
       "src/manifest/export.mjs": "2618aa0219cf67883e0e597dee27e2a35bb1d2676819d48729bdff9bc4420257",
@@ -9277,7 +9279,7 @@
       "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "8835882a2d7c480e7bd54debb75f02e5e5d81659eb91389555f967712bf5c8a9",
+      "src/persistence/current-store.mjs": "766a4c251e0fc8373250b9a6d297f07dca45224d24e95d4d321a7348926432ab",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
@@ -9291,13 +9293,14 @@
       "src/recorder/schema.mjs": "19693270df1a9ce0fdfd3d844d702b728cde209699f902968fd4226fd2b85e7b",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "extension/app.css": "45a2b674bb5c22533f3289adcb98ffa99931a167af35b990c399927a270c7ae8",
-      "extension/app.html": "d3d99567f477f6de17d09a36cdf4290967a7f47d901e294e865f66c22e57d23f",
-      "extension/app.mjs": "37baf4d3ad14fcde82497b6b01f773415f7daeddeeda293a6a8c8a6ccc00df65",
-      "extension/background.mjs": "98cbb96754fc423468ec3855efcc80d4dbbad27d67572e7e9d8f1f8dd86c08bf",
+      "extension/app.css": "2e3eaf12d0551d37fb75930a4b2d1edd852ffdce558c7ba0d0a3594f154fe506",
+      "extension/app.html": "5af292ecc6c76b0de03bc43ab71be60beb8872ab58f62ff0cc8f4f2a15bdf37b",
+      "extension/app.mjs": "dabbcd10f83e1ff4787d5a48d823cbc81a110bfb38fb82ce5d89bf2651a12e5c",
+      "extension/background.mjs": "71f33f133dfd5dc6d484f4b951675c702f1ed7bee7054aba4300a392841dc5d9",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "304eb2bab1d5d670186d561efab0ba10d41e5ca9f2c137c90e3260c9782dd89e",
+      "extension/explorer-layout.mjs": "5d940e4133cd80368e56a81c69043ec96e41413e3d1714f8d79be5a32adb0c31",
+      "extension/history-page.mjs": "e891c29f67e7d9220902084e59b657ee9a20279484cf7e2a6a15dfc6eb9f2b00",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
       "extension/manifest.json": "455f2f65362a550c49977a7b645f7a925f23b3eaa581e608a550969564a82d40",
@@ -9306,8 +9309,8 @@
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
       "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
       "extension/recorder-panel.mjs": "b45308a8bedeca6dcde29ddf5cf2fa28c8a5f9bb6acdfbea6c9ceae2c2c65a84",
-      "right2cloud-module/src/cloudflare-r2-writer.mjs": "dc2b19e666e8e59710cc441d43303a5a9348f9f93c8aeab11d7518e2e8db4140",
-      "right2cloud-module/src/cloudflare-worker.mjs": "3fc5a671067db8ed9c61abb125b40425d6a0732aef2397f2add6e83f06d4b5d8",
+      "right2cloud-module/src/cloudflare-r2-writer.mjs": "893a77fa02d0e0496a5ce821a5f54724cfcd2e7afa2f9df684b576438c6d204a",
+      "right2cloud-module/src/cloudflare-worker.mjs": "37911044110cad6b4249e525f608550d51b5c42e6c6acc08193e7c890d263566",
       "right2cloud-module/src/common.mjs": "36c438bf7ad78d3f93d98f86cd65f143d5f285817ba1ed1b38cf863d5028e4e9",
       "right2cloud-module/src/index.mjs": "ee762ad1323b06ad0a91ed766804381578a7c3d254afe75d3a1c72e9e7fc6e82",
       "right2cloud-module/src/provenance.mjs": "ad605964b193fdb5ceb18938200a8a500ab7d54628302151b6e64063d1bf5500",
@@ -12358,6 +12361,96 @@
     ],
     "apiParity": [
       {
+        "method": "exportMenuManifest",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "getMenuManifestDraft",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "previewMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "inspectManifestBindings",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "discardMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "commitMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "provisionMenuManifest",
+        "scope": "provision",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "undoMenuManifest",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
+        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
+        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
+      },
+      {
+        "method": "getGalleryLoadingVisual",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
+        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
+      },
+      {
+        "method": "setGalleryLoadingVisual",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
+        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
+      },
+      {
         "method": "initializeCloudflare",
         "scope": "provision",
         "version": "3+1.1",
@@ -12439,6 +12532,15 @@
         "coverage": "See zero-stutter evidence; installed Windows unverified"
       },
       {
+        "method": "recoverCloudflareDestination",
+        "scope": "provision",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Host provision grant for exact target account; retained scoped setup approval for resume; explicit one-operation confirmation for new approval, code upgrade or signing renewal",
+        "coverage": "Local production API/native/workerd independent R2 readback; installed owner Chrome and live R2 unverified"
+      },
+      {
         "method": "invokeProviderAction",
         "scope": "execute",
         "version": "3+1.1",
@@ -12446,6 +12548,24 @@
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
         "coverage": "See zero-stutter evidence; installed Windows unverified"
+      },
+      {
+        "method": "getHistoryPreferences",
+        "scope": "inspect",
+        "version": "3+1.1",
+        "effectful": false,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Existing trusted local scope checks; History preferences do not mutate configuration or cloud objects",
+        "coverage": "tests/history.test.mjs; scripts/test-customer-history-browser.mjs"
+      },
+      {
+        "method": "setHistoryPreferences",
+        "scope": "configure",
+        "version": "3+1.1",
+        "effectful": true,
+        "owner": "src/api/service.mjs:invoke",
+        "authorization": "Existing trusted local scope checks; History preferences do not mutate configuration or cloud objects",
+        "coverage": "tests/history.test.mjs; scripts/test-customer-history-browser.mjs"
       },
       {
         "method": "inspectRemoteHistory",
@@ -12860,105 +12980,6 @@
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
         "coverage": "See zero-stutter evidence; installed Windows unverified"
-      },
-      {
-        "method": "getGalleryLoadingVisual",
-        "scope": "inspect",
-        "version": "3+1.1",
-        "effectful": false,
-        "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
-        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
-      },
-      {
-        "method": "setGalleryLoadingVisual",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke",
-        "authorization": "Trusted host method grant; independent local GalleryLoadingVisual record with expectedRevision, no cloud authority or configuration mutation",
-        "coverage": "Gate B Chromium API/IDB/media lifecycle receipts; installed Windows unverified"
-      },
-      {
-        "method": "recoverCloudflareDestination",
-        "scope": "provision",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke",
-        "authorization": "Host provision grant for exact target account; retained scoped setup approval for resume; explicit one-operation confirmation for new approval, code upgrade or signing renewal",
-        "coverage": "Local production API/native/workerd independent R2 readback; installed owner Chrome and live R2 unverified"
-      },
-      {
-        "method": "exportMenuManifest",
-        "scope": "inspect",
-        "version": "3+1.1",
-        "effectful": false,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "getMenuManifestDraft",
-        "scope": "inspect",
-        "version": "3+1.1",
-        "effectful": false,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "previewMenuManifest",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "inspectManifestBindings",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "discardMenuManifest",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "commitMenuManifest",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "provisionMenuManifest",
-        "scope": "provision",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
-      },
-      {
-        "method": "undoMenuManifest",
-        "scope": "configure",
-        "version": "3+1.1",
-        "effectful": true,
-        "owner": "src/api/service.mjs:invoke \u2192 src/manifest/service.mjs:invoke",
-        "authorization": "Full configuration and all prior/new affected account grants; exact reviewed preview and one host approval for disclosed cloud writes",
-        "coverage": "Node API, browser CURRENT/native fixture and local Workerd; installed Windows/live restored saves unverified"
       }
     ],
     "errorBranches": {
@@ -14981,7 +15002,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "5af2a512458463b2b4e1110cbae97c4bb01aa8ca2eb3d01ed7d5d1205f370f99",
+    "digest": "428642081124a6a6ce5e67bfd6722093b7b1f39e6c2908cc8ba6d5c95136594f",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
@@ -14990,6 +15011,18 @@
         "tests/debug-preference.test.mjs"
       ],
       "installedWindows": "NOT_TESTED"
+    },
+    "customerHistory": {
+      "sourceBase": "a3a672754156f88bb572bfb4275d1471f0ccb4a6",
+      "apiOwners": [
+        "inspectRemoteHistory",
+        "openRemoteResult",
+        "getHistoryPreferences",
+        "setHistoryPreferences"
+      ],
+      "rules": "25 operation rows, forever retention, local date grouping, all-file exact-object navigation, as-written metadata, safe captured source/page links, structured streaming exports; no customer technical details",
+      "evidence": "docs/evidence/customer-history/IMPLEMENTATION.md",
+      "liveWindows": "NOT_TESTED"
     }
   },
   "changeLog": [

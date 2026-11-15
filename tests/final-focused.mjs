@@ -74,3 +74,5 @@ await import('./depth-ready-authorization.test.mjs');
 
 await import('./portable-menu-manifest.test.mjs');
 await import('./menu-manifest-workerd.test.mjs');
+
+await import('./history.test.mjs');

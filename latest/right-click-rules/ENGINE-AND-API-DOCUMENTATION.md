@@ -739,3 +739,43 @@ outcomes retain a badge and short actionable customer text. If ON, detailed
 Depth messages remain. A failed preference read defaults to quiet. No routing,
 CURRENT configuration, cloud write, native ACK or verification changes.
 Tests: `tests/debug-preference.test.mjs`. Installed Windows/live R2: NOT TESTED.
+
+### History, exact-object navigation and metadata — November 15, 2026
+
+`3+1.1 inspectRemoteHistory` retains its diagnostic form; `customer:true`
+filters readiness probes and transfer-linked Depth wrappers before pagination.
+No operation is deleted. `getHistoryPreferences` (inspect, no arguments) and
+`setHistoryPreferences` (configure, range all/daily/weekly, previews
+all/first/closed, IANA timezone) use the same trusted sender/scope boundary.
+They read/write only `state.historyPreferences`; no destination revisions,
+menu generations, setup or native projection change. History remains readable
+independently of configuration errors. These settings never prune operations.
+
+`openRemoteResult` (inspect, operationId) binds the saved account through the
+existing API authorization, stats the exact recorded key in its actual folder,
+and rejects absent/changed identities. It is file-type independent. The GUI
+loads subsequent directory pages as needed and focuses/selects only the exact
+key; a missing file does not select another object. New saves retain sanitized
+host/source context locally; nothing adds page context to Worker capabilities
+or upload metadata. Unknown legacy fields stay unavailable.
+
+The R2 writer keeps its conditional PUT payload unchanged, returning a snapshot
+of the exact `httpMetadata` and `customMetadata` it supplied. HEAD still verifies
+key/size/ETag/version/operation and provenance. History displays this snapshot
+and parsed click2cloud provenance, never diagnostic receipt fields. Worker
+readback retains the upload snapshot rather than silently replacing it with
+current metadata. No cloud resource is provisioned by History or exports.
+
+The GUI projects 25 operations per page, local ISO Year/Week/Day groups, bounded
+visible image previews, and streaming JSON/JSONL/CSV exports of matching records.
+History has no Technical Details section in either Debug setting. Full receipt
+inspection remains in the existing diagnostic facility. Header, History-row
+and Explorer More controls have separate owners. A one-row Explorer toolbar
+moves address/View/+ Right Click into overflow and keeps Back/Forward/Up/Refresh.
+Tests: history.test.mjs, test-customer-history-browser.mjs and existing focused
+save suites. Browser/provider fixtures are not installed Windows/live evidence.
+
+Worker numeric stage timings distinguish source headers, destination preparation,
+and streaming source-body/write time (overlapping stages are not misreported as
+separable network durations). Transport retains poll count and stage timings in
+the durable diagnostic record, outside customer History Metadata and exports.

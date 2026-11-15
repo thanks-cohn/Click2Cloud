@@ -1529,12 +1529,137 @@
         ]
       },
       {
-        "method": "inspectRemoteHistory",
+        "method": "getHistoryPreferences",
         "traceMethodIndex": 22,
         "version": "3+1.1",
         "schema": {
           "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/persistence/current-store.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PERSIST-2"
+        ],
+        "tests": [
+          "tests/history.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "setHistoryPreferences",
+        "traceMethodIndex": 23,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
           "properties": {
+            "range": {
+              "enum": [
+                "all",
+                "daily",
+                "weekly"
+              ]
+            },
+            "previews": {
+              "enum": [
+                "all",
+                "first",
+                "closed"
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "range",
+            "previews",
+            "timezone"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/persistence/current-store.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PERSIST-2"
+        ],
+        "tests": [
+          "tests/history.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "inspectRemoteHistory",
+        "traceMethodIndex": 24,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "customer": {
+              "type": "boolean"
+            },
             "cursor": {
               "type": "string",
               "minLength": 1,
@@ -1591,7 +1716,7 @@
       },
       {
         "method": "inspectRemoteReceipt",
-        "traceMethodIndex": 23,
+        "traceMethodIndex": 25,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1686,7 +1811,7 @@
       },
       {
         "method": "inspectCloudflareSetup",
-        "traceMethodIndex": 24,
+        "traceMethodIndex": 26,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1749,7 +1874,7 @@
       },
       {
         "method": "cancelRemoteOperation",
-        "traceMethodIndex": 25,
+        "traceMethodIndex": 27,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1845,7 +1970,7 @@
       },
       {
         "method": "openRemoteResult",
-        "traceMethodIndex": 26,
+        "traceMethodIndex": 28,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1903,7 +2028,7 @@
       },
       {
         "method": "refreshExplorer",
-        "traceMethodIndex": 27,
+        "traceMethodIndex": 29,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1997,7 +2122,7 @@
       },
       {
         "method": "enterExplorer",
-        "traceMethodIndex": 28,
+        "traceMethodIndex": 30,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2046,7 +2171,7 @@
       },
       {
         "method": "navigateExplorer",
-        "traceMethodIndex": 29,
+        "traceMethodIndex": 31,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2135,7 +2260,7 @@
       },
       {
         "method": "readFileChunk",
-        "traceMethodIndex": 30,
+        "traceMethodIndex": 32,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2245,7 +2370,7 @@
       },
       {
         "method": "inspectExplorerContextMenu",
-        "traceMethodIndex": 31,
+        "traceMethodIndex": 33,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2360,7 +2485,7 @@
       },
       {
         "method": "previewContextMenu",
-        "traceMethodIndex": 32,
+        "traceMethodIndex": 34,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2420,7 +2545,7 @@
       },
       {
         "method": "describeCapabilities",
-        "traceMethodIndex": 33,
+        "traceMethodIndex": 35,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2474,7 +2599,7 @@
       },
       {
         "method": "getConfiguration",
-        "traceMethodIndex": 34,
+        "traceMethodIndex": 36,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2523,7 +2648,7 @@
       },
       {
         "method": "getEngineHealth",
-        "traceMethodIndex": 35,
+        "traceMethodIndex": 37,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2593,7 +2718,7 @@
       },
       {
         "method": "getProviderConnections",
-        "traceMethodIndex": 36,
+        "traceMethodIndex": 38,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2640,7 +2765,7 @@
       },
       {
         "method": "loginBegin",
-        "traceMethodIndex": 37,
+        "traceMethodIndex": 39,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2691,7 +2816,7 @@
       },
       {
         "method": "loginStatus",
-        "traceMethodIndex": 38,
+        "traceMethodIndex": 40,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2738,7 +2863,7 @@
       },
       {
         "method": "loginCancel",
-        "traceMethodIndex": 39,
+        "traceMethodIndex": 41,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2785,7 +2910,7 @@
       },
       {
         "method": "disconnect",
-        "traceMethodIndex": 40,
+        "traceMethodIndex": 42,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2832,7 +2957,7 @@
       },
       {
         "method": "fileAction",
-        "traceMethodIndex": 41,
+        "traceMethodIndex": 43,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3009,7 +3134,7 @@
       },
       {
         "method": "listAccounts",
-        "traceMethodIndex": 42,
+        "traceMethodIndex": 44,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3058,7 +3183,7 @@
       },
       {
         "method": "listAuthorizedBuckets",
-        "traceMethodIndex": 43,
+        "traceMethodIndex": 45,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3120,7 +3245,7 @@
       },
       {
         "method": "listFolders",
-        "traceMethodIndex": 44,
+        "traceMethodIndex": 46,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3214,7 +3339,7 @@
       },
       {
         "method": "fileMetadata",
-        "traceMethodIndex": 45,
+        "traceMethodIndex": 47,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3309,7 +3434,7 @@
       },
       {
         "method": "readFile",
-        "traceMethodIndex": 46,
+        "traceMethodIndex": 48,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3417,7 +3542,7 @@
       },
       {
         "method": "listDestinations",
-        "traceMethodIndex": 47,
+        "traceMethodIndex": 49,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3485,7 +3610,7 @@
       },
       {
         "method": "inspectMenuTree",
-        "traceMethodIndex": 48,
+        "traceMethodIndex": 50,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3562,7 +3687,7 @@
       },
       {
         "method": "previewNativeMenu",
-        "traceMethodIndex": 49,
+        "traceMethodIndex": 51,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3611,7 +3736,7 @@
       },
       {
         "method": "inspectNativeACK",
-        "traceMethodIndex": 50,
+        "traceMethodIndex": 52,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3660,7 +3785,7 @@
       },
       {
         "method": "getOrganizationSuggestion",
-        "traceMethodIndex": 51,
+        "traceMethodIndex": 53,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3709,7 +3834,7 @@
       },
       {
         "method": "previewConfigChange",
-        "traceMethodIndex": 52,
+        "traceMethodIndex": 54,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -4771,7 +4896,7 @@
       },
       {
         "method": "commitConfigChange",
-        "traceMethodIndex": 53,
+        "traceMethodIndex": 55,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5839,7 +5964,7 @@
       },
       {
         "method": "reconcileNativeMenu",
-        "traceMethodIndex": 54,
+        "traceMethodIndex": 56,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5895,7 +6020,7 @@
       },
       {
         "method": "chooseBackupLocation",
-        "traceMethodIndex": 55,
+        "traceMethodIndex": 57,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5950,7 +6075,7 @@
       },
       {
         "method": "inspectRecoveryCoverage",
-        "traceMethodIndex": 56,
+        "traceMethodIndex": 58,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6039,7 +6164,7 @@
       },
       {
         "method": "runRecoveryPage",
-        "traceMethodIndex": 57,
+        "traceMethodIndex": 59,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6128,7 +6253,7 @@
       },
       {
         "method": "inspectBackupRoots",
-        "traceMethodIndex": 58,
+        "traceMethodIndex": 60,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6177,7 +6302,7 @@
       },
       {
         "method": "listRecoveryPolicies",
-        "traceMethodIndex": 59,
+        "traceMethodIndex": 61,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6226,7 +6351,7 @@
       },
       {
         "method": "writeRecovery",
-        "traceMethodIndex": 60,
+        "traceMethodIndex": 62,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6275,7 +6400,7 @@
       },
       {
         "method": "requestRestorePreview",
-        "traceMethodIndex": 61,
+        "traceMethodIndex": 63,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7351,7 +7476,7 @@
       },
       {
         "method": "restoreRightClickMenu",
-        "traceMethodIndex": 62,
+        "traceMethodIndex": 64,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8444,7 +8569,7 @@
       },
       {
         "method": "inspectWholeCloudJobs",
-        "traceMethodIndex": 63,
+        "traceMethodIndex": 65,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8492,7 +8617,7 @@
       },
       {
         "method": "enableWholeCloudJob",
-        "traceMethodIndex": 64,
+        "traceMethodIndex": 66,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8575,7 +8700,7 @@
       },
       {
         "method": "disableWholeCloudJob",
-        "traceMethodIndex": 65,
+        "traceMethodIndex": 67,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8652,7 +8777,7 @@
       },
       {
         "method": "dispatchExplorerSave",
-        "traceMethodIndex": 66,
+        "traceMethodIndex": 68,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8797,7 +8922,7 @@
       },
       {
         "method": "dispatchSave",
-        "traceMethodIndex": 67,
+        "traceMethodIndex": 69,
         "version": "3+1.1",
         "schema": {
           "type": "object",

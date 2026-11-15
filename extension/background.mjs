@@ -1,3 +1,4 @@
+import {captureHistoryContext} from '../src/history/model.mjs';
 import {createManifestLocations} from '../src/cloudflare/manifest-locations.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
 import {createDepthNativeClick,createDepthFeedback} from '../src/modes/depth/native-click.mjs';
@@ -187,8 +188,8 @@ const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick
     if(!prior||!next||prior.role!==next.role||prior.actionId!==next.actionId)
       throw Object.assign(Error(),{code:'STALE_GENERATION'});
   },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
-  dispatch:async(action,{info,generation,depthAuthorization,observation})=>{
-    let source;try{source=sourceFromClick(info);}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
+  dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
+    let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
 });
