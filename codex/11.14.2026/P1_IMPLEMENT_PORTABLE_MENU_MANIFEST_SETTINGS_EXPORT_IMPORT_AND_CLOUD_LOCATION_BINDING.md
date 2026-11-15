@@ -131,7 +131,7 @@ Once preview is staged, the import wizard should try **read-only** to bind each 
 
 # Gate D — Exact owner-confirmed missing-location decision flow
 
-**This conditional sequence is required UI behavior and required tested business logic, not documentation filler.**
+**This conditional sequence is required UI behavior and required tested business logic, not documentation filler. The owner's single informed “YES, create missing cloud locations and fulfill the original manifest” is itself explicit consent for the exact listed cloud creations. Do NOT add a redundant second confirmation screen. Provider OAuth/API privileges are distinct from the user's consent; ask for a provider grant only where the account genuinely lacks the technical authorization.**
 
 After binding existing locations, **if not all required manifest destinations can be verified as present/ready**, display a comprehensible summary and these user choices:
 
@@ -139,6 +139,10 @@ After binding existing locations, **if not all required manifest destinations ca
 Some manifest locations could not be matched or verified.
   Ready existing matches: 23
   Missing / unmaterialized / unresolved: 14
+
+Before the decision, show a readable exact creation plan, selected account,
+resource names, costs/side effects, and distinctly blocked unknown/unauthorized
+items. The YES choice below authorizes the listed feasible writes.
 
 Maintain a partial implementation?             [Yes] [No]
 
@@ -153,14 +157,16 @@ Maintain a partial implementation?             [Yes] [No]
                                                   [Yes] [No]
 
       YES:
-        First inspect an exact, provider/account-scoped creation plan:
+        This explicit YES approves the exact cloud creation plan already shown:
           - actual missing R2 buckets and chosen account
           - virtual prefixes to be used and whether marker objects are needed
           - permission/Worker readiness requirements and scope
           - potential charges/irreversible cloud effects
-        Require a further EXPLICIT, separate authorization/confirmation
-        for the listed cloud creation operations.
-        Execute only the owner-approved items and independently verify them.
+        Begin the authorized, feasible creations immediately; do NOT ask
+        a redundant second YES/NO confirmation or one prompt per location.
+        Verify each created location independently. If current Cloudflare
+        OAuth/API authority is insufficient, request the required provider
+        authorization rather than misrepresenting consent as API access.
         Bind all completed targets and apply the complete imported menu ONLY
         if every required target has verified authority/readiness.
         On partial creation failure, keep imported draft pending and report
@@ -173,12 +179,12 @@ Maintain a partial implementation?             [Yes] [No]
 
 **Nuances required for correctness:**
 - A location with **permission denied**, disconnected provider, Worker unready or unresolved account identity cannot be "created" to circumvent authorization. Show appropriate blocking remedy/reconnect. Missing unknown != confirmed nonexistent. Do not misclassify them simply to get through the YES/NO wizard.
-- **Creating missing R2 buckets** is a separate, authorized cloud provisioning operation, never authorized by the manifest itself. Show scope/billing/correct-account impact and require explicit account-scoped confirmation. Recheck existence immediately before create and reconcile provider timeout/uncertain outcomes read-only instead of blind retry. Do not create `redown` or a default as a fallback for imported targets.
-- **Creating R2 directory locations:** directories are virtual prefixes. If a prefix does not yet have objects, use the normalized desired prefix for future saves; only materialize a visible **empty-folder marker object** if the owner explicitly approves that specific cloud write and its effect and the existing canonical provider API supports it. Do not claim a real physical directory was created just because a logical prefix string exists. Preserve exact prefixes and trailing-slash semantics.
-- If a Cloudflare Worker/signing scope needs authorized preparation, route it through existing approved setup/repair owners with a separate consent when required; don't bypass or broaden authorization, and don't auto-deploy arbitrary code as an import side effect.
+- **Creating missing R2 buckets** is a cloud provisioning operation authorized by the owner's informed YES to the specific reviewed creation plan; the manifest file alone is never authorization. Show scope/billing/correct-account impact BEFORE that YES; no repeat consent prompt for the same unchanged plan. Recheck existence immediately before create and reconcile provider timeout/uncertain outcomes read-only instead of blind retry. Do not create `redown` or a default as a fallback for imported targets.
+- **Creating R2 directory locations:** directories are virtual prefixes. If a prefix does not yet have objects, use the normalized desired prefix for future saves; only materialize a visible **empty-folder marker object** when that specific write and effect are disclosed in the creation plan accepted by the owner's YES and the existing canonical provider API supports it. Do not claim a real physical directory was created just because a logical prefix string exists. Preserve exact prefixes and trailing-slash semantics.
+- If a Cloudflare Worker/signing scope needs authorized preparation, route it through existing approved setup/repair owners; the creation-plan YES is not itself a Cloudflare OAuth grant or an authorization to deploy arbitrary Worker code. Respect existing durable approvals and request any genuinely distinct provider grant or security-sensitive setup consent only where required, rather than showing duplicate confirmations for the approved resource list.
 - Support **idempotent resume** of interrupted create-plan operations. Never duplicate billable buckets or marker objects; uncertain writes remain uncertain until verified. Persist only safe approval/progress metadata (no token/secret in manifest). Remote provisioning is not transactionally reversible; never delete remotely created resources automatically on local rollback.
 - This request *does* demand a real implementation path for the user's **Create missing locations? YES** choice when provider capabilities and explicit account authorization permit it. If the existing API lacks a permissioned R2 bucket-create or marker-create method, implement a minimal bounded, typed, consent-gated capability in its canonical owner. Do **not** replace this path with a stub while claiming the feature is complete. If a provider truly cannot support creation under current grants, show honest BLOCKED with reason, not fabricated success.
-- User chooses behavior once per plan, then approves concrete cloud creations; do not pester for 37 repetitive identical questions if a single exact provider/account-scoped review and confirmation can safely authorize the requested set.
+- Show the exact provider/account-scoped plan BEFORE the creation choice. One informed YES to 'Create missing cloud locations and fulfill the original manifest?' approves the entire feasible listed plan: no second approval dialog and no per-folder repetition. If the plan materially changes, show the changed plan and ask again; unrelated OAuth/API grants may still be necessary.
 
 # Gate E — Safe, atomic, idempotent local activation (do not lose the original menu)
 
@@ -215,7 +221,7 @@ Create a realistic SAFE fixture mirroring the owner's already-known test hierarc
 4. Some missing; partial NO, create YES: **actual provider-owner cloud creation** under exact user approval, independent readback, complete activation if verified.
 5. Creation partially fails or times out: created resources reported, no blind retry; local menu/draft recoverable.
 6. Missing root with child-like labels, two accounts same-named bucket, incorrect Worker prefix scope, unknown inventory, provider disconnected: no guessed binding/provisioning.
-7. R2 virtual prefix absent with no objects: properly distinguish valid unmaterialized prefix from truly missing bucket; optional markers only on separate consent.
+7. R2 virtual prefix absent with no objects: properly distinguish valid unmaterialized prefix from truly missing bucket; optional marker writes must be expressly listed in the creation plan approved with the single YES.
 8. Signed/authorized exact-target save via one restored Simple, Narrow leaf, Narrow permitted `Save here`, Depth folder action. Verify physical key and operation/provenance metadata in realistic integration; **LIVE R2** only when genuinely exercised with owner approval.
 9. Imported malicious/oversized JSON, traversal, duplicate IDs, stale schema, injected script labels, secrets, denied permissions, stale generation/revision, simultaneous imported sessions and canceled picker: reject safely and preserve original user settings.
 10. **With Debug OFF**, regular Settings exposes both actual buttons and performs export/import independently of recorder. Accessibility: keyboard focus, read-only diff, progress, cancellation and clear status.
@@ -231,4 +237,4 @@ Run `npm run build:extension`, `npm run test:focused`, `npm test` and targeted m
 - Do not turn this into a general backup rewrite, public template marketplace, mandatory cloud sync, GitHub integration, automatic Worker deployment, another menu compiler or a new cloud provider.
 - Maintain exact local privacy and security boundaries, update the source↔API documentation and CURRENT workings map in the implementation changeset, preserve immutable history, and report remaining installed/live gaps honestly.
 
-**Bottom-line instruction to Codex:** **Deliver both Settings buttons as real production UI with Debug OFF; make Personal Restore export/import reconstruct all actual right-click destinations; link what already exists; implement the owner's partial YES/NO → explicit create-missing YES/NO flow with safe permission-gated cloud creation; preserve the working IT WORKS/pre-manifest baselines. This next run should remove the need to reconstruct every location by hand.**
+**Bottom-line instruction to Codex:** **Deliver both Settings buttons as real production UI with Debug OFF; make Personal Restore export/import reconstruct all actual right-click destinations; link what already exists; implement the owner's partial YES/NO → informed single-YES create-missing flow (no redundant confirmation) with safe permission-gated cloud creation; preserve the working IT WORKS/pre-manifest baselines. This next run should remove the need to reconstruct every location by hand.**
