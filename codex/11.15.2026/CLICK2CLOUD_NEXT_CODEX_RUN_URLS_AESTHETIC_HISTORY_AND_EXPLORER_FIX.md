@@ -57,20 +57,20 @@ Implement the *full detailed specification* in the URL-only Codex request listed
 **Right-click file inside Click2Cloud's own File Explorer → Get URL** (not the native Chrome page/image context menu).
 - Read the actual selected R2 account, bucket and exact object key and any legitimately configured public endpoints.
 - **Existing URL:** show **all available, correctly mapped link options for that particular file**, status, Copy and Open.
-- **No URL:** clearly show “No public URL available” and **Make Public URL…**. Do not fabricate `r2.dev`, a domain, or a URL for a private object.
-- **Always show, UNDER the URL list**, the editable **Connect your website domain** field (placeholder `assets.example.com`) and italic help explaining that a Cloudflare-managed domain/subdomain can be connected to the R2 bucket to give its eligible objects URLs. **Do not hide this input after a link exists.**
-- Provide **OK / Save** to initiate or select an eligible domain setup **with explicit consent**; show Cloudflare account/zone/DNS/API prerequisites, exact bucket scope, pending/active/errors, and **Refresh** to update the visible link list. A clicked Save does not mean DNS/TLS/public availability is immediately verified.
+- **No URL:** clearly show “No public URL available” and a fast, obvious **Make Public URL…** setup action. Do not fabricate `r2.dev`, a domain, or a URL for a private object. The right-click menu and initial Get URL UI must appear **instantly / without blocking on network**; any endpoint refresh happens asynchronously.
+- **Always show, UNDER the URL list**, the editable **Connect your website domain** field (placeholder `assets.example.com`) and italic help explaining that a Cloudflare-managed domain/subdomain can be connected to the R2 bucket to give its eligible objects URLs. **Do not hide this input after a link exists.** Allow **multiple domains/subdomains to be entered one after another** in the same setup view. Each approved **OK / Save** adds/configures one entry; users can then enter another without reopening setup. **Save & Exit / Done** finishes. Display active/pending/failed entries individually, dedupe repeated domains, persist actual authorized bucket-level configuration.
+- Provide **OK / Save** to initiate each eligible domain setup **with explicit consent**; show Cloudflare account/zone/DNS/API prerequisites, exact bucket scope, pending/active/errors, and **Refresh** to update the visible link list. A clicked Save does not mean DNS/TLS/public availability is immediately verified. On each future **Get URL** right-click, show **ALL verified active public addresses for the selected file across the linked domains**, with individual Copy/Open; never require setup again when already configured.
 - Cloudflare's standard public custom domain generally makes the bucket's objects publicly addressable: show a clear **ENTIRE BUCKET PUBLIC ACCESS** warning before authorizing any change. No accidental publicity; do not modify real buckets without fresh explicit owner approval. Arbitrary website strings cannot be treated as verified bucket endpoints.
 - Generate links from exact object keys with encoding and root/prefix handling, including all file types and Unicode/special characters.
 
 **Right-click directory inside Click2Cloud File Explorer → Get URLs… / Download URLs (.txt)**.
 - Operate on **IMMEDIATE/direct files** under the selected prefix, **not descendants in nested subdirectories**. Root folder is valid. Exclude virtual folder markers/internal housekeeping objects by default.
-- In Get URLs… show actual eligible links and optionally choose the verified domain/endpoint.
-- **Download URLs (.txt)** must produce a real UTF-8 plain-text download with **one real URL per line**; by default **one URL per direct file** on the selected endpoint. **No filenames, headings, JSON, Markdown, or CSV.**
+- In Get URLs… show **all actual eligible links grouped per immediate file** across **all verified active linked domains**; optionally offer a single-domain filter without making it the default.
+- **Download URLs (.txt)** must produce a real UTF-8 plain-text download with **all valid URLs for each immediate file grouped together**, **one URL per nonblank line**, **exactly one blank line between file groups**, deterministic object order and endpoint order. Example: two https://domain1/fileA and https://domain2/fileA lines, blank line, then fileB's URL lines. **No filenames, headings, JSON, Markdown, or CSV**. Easy machine parsing: split on blank lines for an object-group, then process each URL line. Do not silently choose only one domain when multiple are active.
 - Enumerate **all** matching objects using true paginated/cursor-based read-only listing, not only currently visible Explorer items or History’s 25-per-page. Large directories may take some time: display truthful scanning/exporting progress and support cancel/error/partial-export reporting.
 - Stable ordering and dedupe. Zero eligible file case must be explicit; never silently fabricate or omit links or mislabel a partially failed download complete.
 - Completely separate read-only TXT exporting from any public-access mutation. No public URLs for unverified private endpoints.
-- Verify 0/1/25/26/100+/1000+ objects, exact immediate-prefix semantics, nested descendants excluded, non-image filenames, multiple configured domains, incomplete DNS, no domain, permission failures, rate limiting and abort.
+- Verify 0/1/25/26/100+/1000+ objects, exact immediate-prefix semantics, nested descendants excluded, non-image filenames, **multiple domains and grouped URL TXT round-trip parsing**, incomplete DNS, no domain, permission failures, rate limiting and abort. Verify each blank-line group maps to one source object and that every unique active-domain URL was included.
 
 **Do not implement Send to Another Cloud** in this run. It remains a later marketing feature.
 
@@ -112,8 +112,8 @@ For this run:
 
 # 7. Owner-facing acceptance summary
 
-- **Get URL:** File Explorer file right-click shows links or Make Public URL; persistent domain input + italic explanation underneath; Save/OK with explicit consent; refresh shows only truly available verified links.
-- **Directory TXT:** Folder right-click downloads a .txt containing **one URL per immediate file**, ALL matching direct children, even if scanning takes time; never includes nested descendants by default.
+- **Get URL:** Instant File Explorer file right-click shows all URLs or Make Public URL; persistent domain input + italic explanation; **add multiple domains one at a time, Save each, Save & Exit** with explicit consent; next right-click shows all truly available verified links for the file.
+- **Directory TXT:** Folder right-click downloads .txt with **all verified URLs for every immediate file**, grouped together per file, **one URL per nonblank line** and **one blank line between object groups**; complete scan even when slow, and no nested descendants by default.
 - **High Polish:** A single independent Settings toggle transforms the WHOLE app, while preserving Standard and all functionality; architecture is future-public and safely isolated.
 - **History visuals:** The EXISTING loading animation choice is shared by gallery and History, with no new engine or duplicated settings.
 - **Explorer overlay:** Toolbar More is always visibly **above** the tree/list panes and is interactable.
