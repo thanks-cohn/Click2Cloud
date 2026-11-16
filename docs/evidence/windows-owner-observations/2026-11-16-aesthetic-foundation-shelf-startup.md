@@ -16,6 +16,12 @@
 3. Owner intends to retest Aesthetic Foundation on a **separate, disposable Chrome user-data directory** to remove existing-profile effects. No such fresh-profile result has been supplied yet.
 4. Opening the Shelf does not establish OAuth readiness, persistence durability, native right-click behavior or live Cloudflare R2 save verification.
 
+## Updated owner observation — daily-use and throwaway Chrome profiles
+- On 2026-11-16 the owner explicitly reports that commit `e188dc7f86b5` **opens its Shelf successfully in both a disposable Chrome profile and the daily-use Chrome profile**.
+- **No Shelf crashes were observed in either profile** during those checks. This is owner-observed startup stability, not a claim about long-duration stability or successful provider saves.
+- The earlier, unidentified version whose Shelf failed to open still needs its exact SHA identified. Do not assume which change repaired it.
+- Owner requested a protected annotated checkpoint tag named `click2cloud-aesthetic-shelf-working-2026-11-16` pointed at `e188dc7f86b5`. Creating/pushing that tag is an owner-local Git CLI step until separately verified; do **not** mark the tag as remotely created based merely on this note.
+
 ## Independent automated test-run failure
 - The Windows Node/Python automated test run failed on the 10,000-event **SECURE** recorder ZIP verifier: `MemoryError` during `zipfile.ZipFile.read()` in `scripts/verify-recorder-zip.py`.
 - The corresponding 10,000-event **RAW** recorder ZIP test passed.
