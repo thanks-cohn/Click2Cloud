@@ -1,0 +1,50 @@
+# P1 — Click2Cloud Portable History Manifest: faithful export, merge, and restore
+
+Date: 2026-11-16
+Status: **proposed Codex implementation request — not implemented**.
+Source of owner requirement: History is a personal chronological record of online activity, used to orient oneself over time. Losing the visible History after uninstall/reinstall is unacceptable. Preserve this intent as a first-class product requirement.
+
+## Context and hard distinction
+- Aesthetic Foundation baseline for analysis: `implement/explorer-aesthetic-foundation-2026-11-15`, `e188dc7f86b522207226bf30f8f6c25fec2a0a1e`.
+- Existing customer History supports **JSON, JSONL, CSV export** (`src/history/model.mjs`), which are customer-facing projections, not a proven canonical import/restore format.
+- Durable operation records are local to the installed browser/extension environment; 'forever retention' means no local retention pruning, **not resilience to extension uninstallation/profile deletion**.
+- The existing encrypted CURRENT/configuration backup, portable menu manifests and whole-cloud inventory are **not equivalent to a portable restorable History database**.
+- This request must not conflate recoverable metadata in remote cloud objects with the original record of all browsing/source URLs, failures, timestamps, receipts, and diagnostic context.
+
+## Required UX
+1. Alongside the existing **Export History**, offer **Export History Manifest (restorable)**. Ideally allow **Export Both** to produce one bundle with independently named human-readable and machine-restorable files.
+2. Add **Import History Manifest** under History/Settings. Default to **preview/dry run**: total entries, old/new dates, duplicates, valid/invalid, account remapping needed, privacy details, resulting counts and storage estimate.
+3. Import modes **Merge (default)** and **Replace only with explicit warnings/backup and authorization**. No silent overwrite or deletion of user history.
+4. A fresh extension on the same or a different computer can show the restored history immediately **without requiring cloud sign-in first**. Auth/rebind is required later for GO TO, stat, preview, remote actions; missing authorization never erases historical entries.
+5. Preserve original save/failure/blocked/uncertain outcomes, original chronological timestamps, source host/page URL/title where recorded, filename/original filename, displayed mode, provider, account reference, bucket/prefix/object key, saved metadata, receipt and evidence source, linked parent/source URL, and grouping. Preserve missing fields explicitly as unavailable; never fabricate them.
+6. Import and export should be **API-first**: GUI calls public versioned typed service methods; CLI/headless/tests use same handlers.
+
+## Archive and restore contract
+- Define a closed, versioned manifest schema (`click2cloud.history-manifest/v1`) with portable, stable per-operation IDs and schema migration rules.
+- Prefer streaming JSONL payload plus manifest index/header; SHA-256 checksum per payload and whole-bundle integrity; include creation time, exporting version, per-field availability, privacy mode, import compatibility and count.
+- A bundle may optionally contain a reader-friendly JSON/JSONL/CSV History export, but the **restore payload must preserve more canonical data** than the current read-only customer projection.
+- Do not export OAuth tokens, API keys, cookies, worker secrets, device-private keys, raw secret-bearing signed URL parameters, unconsented private diagnostic payloads or file bytes. Private source/page URLs and browsing history may be sensitive: explicit user choice; offer encrypted passphrase-protected portable archive (independent from browser-profile keys) with authenticated encryption, plus privacy-reduced export.
+- Integrity validation, schema validation, size/entry limits, streaming processing and atomic import are mandatory. Avoid loading a whole archive into RAM, especially on the owner's roughly 4 GiB machine.
+- Preserve exact timestamps and original order, and duplicate-identify using durable original operation ID + source-install identity/version; support legacy records lacking IDs via conservative stable keys and review, not arbitrary auto-dedupe.
+- Preserve provenance separately from current availability. Imported past verified saves may display **historically verified / imported evidence** only with the recorded independent receipt; do not claim new independent live verification or increment a new confirmed-save counter merely by import. For legacy projections missing proof, display **imported historical record / live status unverified**. GO TO/preview only after current account binding and exact-object revalidation.
+- Avoid co-mingling archived records with active pending queues or replaying operations. Import **never resends** source URLs nor initiates cloud uploads or infrastructure creation.
+- Use a transaction or staged/idempotent chunk journal and crash-safe commit; report partial/invalid archives clearly; failures leave current History intact. Merge should survive repeated import/restart.
+- If the old export has fewer details, provide **legacy import of existing JSON/JSONL/CSV History exports** when feasible with explicit fidelity downgrade and field availability, rather than rejecting the user's only surviving export.
+
+## Resilience beyond manual export
+- Design opt-in **durable external History backups** with incremental append/delta and periodic snapshot, retained through uninstall/reinstall. Offer user-selectable local location, supported native-host integration or authorized cloud destination and read-back verification. Chrome's internal IndexedDB and `chrome.storage` alone do **not** count as an external backup.
+- Do not promise silent arbitrary filesystem writing from an MV3 extension without the necessary granted file handle/native host/OS facility. If automatic backup cannot be supported, offer explicit export + backup reminders with truthful state.
+- Independent backup recovery catalog with last successful proof, retention policy and disk-space budget; failure to back up never suppresses a save or falsely reports success.
+- For already lost History, audit whether legacy exported JSON/JSONL/CSV, existing Chrome profile/extension origin, previous local backup, diagnostic ZIP or remote R2 object custom metadata can reconstruct anything. Distinguish trustworthy recovered entries and incomplete reconstructed records. Never claim cloud metadata can recover arbitrary browsing activity that wasn't written there.
+- No cross-provider sharing of source/page URLs in cloud object upload metadata without independent opt-in. Prefer encrypted archives under user control.
+
+## Acceptance tests and safety
+- Full roundtrip preserving 0, 1, 10K and very large mixed successes/failures; verify byte-exact field fidelity where allowed, chronological grouping, duplicate-free repeated merges, and restart after import.
+- Fresh separate Chrome profile and extension ID, as well as same-ID reinstall simulation; prove history is visible before provider auth and no local identity migration/credential transfer occurs.
+- Corrupt/truncated/reordered/untrusted/oversized/zip-bomb archive; wrong password; interrupted import; interrupted/export disk full; ensure no data loss and bounded RAM.
+- Legacy export compatibility (JSON/JSONL/CSV); no invented proof; verify no counter increments, no attempted cloud writes, no source URL leaks.
+- CI/local tests, installed Chrome owner acceptance, visible results. Keep original branch/tag, native menu registration, OAuth, Worker, destinations and saves untouched.
+- Implement in a new focused branch cut from the latest separately verified stable runtime base; do not alter classic REDOWN or REDOWN Basic in this task.
+
+## User acceptance statement
+After a new install, the owner chooses **Import History Manifest**, previews the archive, presses **Restore History**, and sees the same personal timeline—original dates, hosts, filenames, destinations, outcomes and groups—without reuploading anything, without demanding OAuth immediately, and without replacing unrelated configuration. Entries with missing current cloud access remain visible with honest availability notes.
