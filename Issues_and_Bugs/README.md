@@ -6,6 +6,8 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P1 CRITICAL — newly created Simple destinations fail right-click saves even after becoming Default and the only choice:** [owner's November 16 reproduction + RAW diagnostic analysis](Bugs/P1_SIMPLE_DESTINATION_WORKER_SETUP_REQUIRED_AFTER_DEFAULT_2026-11-16.md) · [Codex cross-repo REDOWN/Click2Cloud starting point](../codex/11.16.2026/START_HERE_SIMPLE_DESTINATION_REDOWN_REFERENCE.md). Four verified saves and seven `WORKER_SETUP_REQUIRED` blocks interleave; exact destination mapping remains unproven. Compare REDOWN as a read-only, user-proven functional reference before any selective port; no code change or live repair claimed.
+
 - **P1 — Whole Cloud crawl stuck at zero object pages; UI `DUE` disagrees with external `RUNNING` checkpoint:** [owner's November 15 Windows evidence and read-only investigation](Bugs/P1_WHOLE_CLOUD_CRAWLER_STALLED_CHECKPOINT_DISAGREEMENT_2026-11-15.md). Seven buckets recorded but no object-page namespaces or completed export observed; root cause unknown. **Deferred behind current Simple/Narrow/Depth right-click acceptance testing.**
 
 - **P1 — Explorer condensed toolbar shows wrong controls:** [one-row slider must show only Back, Forward, Up, Refresh, More](Bugs/P1_EXPLORER_CONDENSED_TOOLBAR_NAVIGATION_ONLY_2026-11-09.md). Preserve every other command inside More and keep expanded toolbar behavior; no application code changed by this report.
