@@ -1,5 +1,7 @@
 # START HERE — Click2Cloud Simple destinations vs REDOWN (Codex, 2026-11-16)
 
+> **NEW NOVEMBER 17 FIELD EVIDENCE — READ FIRST:** [Owner live test: login did not leave custom destination ready; Inspect/prepare succeeds; subsequent REPAIR_REQUIRED appears before verified save; source-read failure after rich recording](../11.17.2026/OWNER_LIVE_TEST_LOGIN_PREPARE_REPAIR_SOURCE_FAILURE.md). The owner **has not run this Codex request yet**. Investigate the existing auto-initialization path, per-click status correlation, and recorder/source-fetch independence. Do not mistake this additional baseline test for a regression from an attempted fix.
+
 **Priority:** P1 / critical core right-click save.  
 **Code implementation target:** `thanks-cohn/Click2Cloud`.  
 **Proven behavioral reference:** `thanks-cohn/REDOWN`, **read-only**.  
