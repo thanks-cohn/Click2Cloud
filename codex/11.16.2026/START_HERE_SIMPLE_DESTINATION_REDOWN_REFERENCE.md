@@ -2,6 +2,8 @@
 
 > **NEW NOVEMBER 17 FIELD EVIDENCE — READ FIRST:** [Owner live test: login did not leave custom destination ready; Inspect/prepare succeeds; subsequent REPAIR_REQUIRED appears before verified save; source-read failure after rich recording](../11.17.2026/OWNER_LIVE_TEST_LOGIN_PREPARE_REPAIR_SOURCE_FAILURE.md). The owner **has not run this Codex request yet**. Investigate the existing auto-initialization path, per-click status correlation, and recorder/source-fetch independence. Do not mistake this additional baseline test for a regression from an attempted fix.
 
+> **SECOND NOVEMBER 17 FIELD FINDING — NATIVE CHROME ACK:** [Delayed `NATIVE_APPLY_INCOMPLETE` after Cloudflare was prepared](../11.17.2026/OWNER_DELAYED_NATIVE_APPLY_INCOMPLETE_AFTER_PREPARE.md). Read alongside the initial Nov 17 report. Diagnose the **native registrar, acknowledgment and desired-generation lifecycle** separately from Cloudflare readiness. Do not mistake a delayed menu-maintenance status for a new failed upload, and do not routinely require extension reload and OAuth login for native-only reconciliation.
+
 **Priority:** P1 / critical core right-click save.  
 **Code implementation target:** `thanks-cohn/Click2Cloud`.  
 **Proven behavioral reference:** `thanks-cohn/REDOWN`, **read-only**.  
