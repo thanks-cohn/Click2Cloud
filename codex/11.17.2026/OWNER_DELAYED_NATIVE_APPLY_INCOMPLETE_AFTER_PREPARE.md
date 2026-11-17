@@ -51,3 +51,35 @@ F. **REDOWN parity:** Inspect REDOWN's menu refresh/application and authenticati
 - No repeated manual login for native-only repair, and no unapproved Cloudflare resource creation.
 
 **No code fix, verified new test, or installed Chrome inspection was performed by this documentation update. Phase 1 still requires owner review before any selected repair/porting Phase 2.**
+
+
+## November 17 follow-up: explicit login again still returns contradictory "· ready"
+
+After receiving the earlier `NATIVE_APPLY_INCOMPLETE` warning, the owner **logged back in** to Click2Cloud and observed this **exact** new message:
+
+> Cloudflare connected · Cloudflare is prepared, but Chrome did not acknowledge the menu. Reload the existing extension and log in again; saved destinations remain. · ready
+
+**Important:** This is a separate observation from the earlier idle/return banner, and occurred **after a deliberate re-login**, directly challenging the UI's instruction to log in again. Do not claim the owner also reloaded the extension or that a new right-click was attempted; those actions were not reported.
+
+### Exact source-level explanation for the trailing "ready"
+
+In current GitHub `main`, `extension/app.mjs` login handler displays:
+
+```js
+status(result.state==='CONNECTED'
+  ? (cloudflareState?.state==='completed'
+      ? 'Ready to save · Cloudflare and Chrome verified.'
+      : cloudflareState
+        ? 'Cloudflare connected · '+(names[cloudflareState.code]??cloudflareState.code)+' · '+(cloudflareState.stage??'cloudflare-initialization')
+        : 'Cloudflare connected.')
+  : ...);
+```
+
+Thus **the final "ready" is a `cloudflareState.stage` string, not an independent assertion that the full native menu is acknowledged**. It can appear after an incomplete result if stage is populated as `ready`. In `src/api/service.mjs` the login route sets `initialization.stage` based on a `prepared.state==='completed'` branch and `finishInitialization` outcome, but can retain a stage like `ready` even when the resulting state is blocked/partial due to `NATIVE_APPLY_INCOMPLETE`. Codex must trace the exact intermediate object and verify this branch with a deterministic regression test; do not assume the installed build hash matches the current repo.
+
+### Additional acceptance requirements
+
+- A normal successful **re-login** with an already prepared Cloudflare destination must either automatically reconcile the native Chrome menu through the canonical API (and report real independent acknowledgement) or display an explicit **Cloudflare connected / Chrome menu NOT READY** status with the precise failed generation/ACK cause.
+- Never append **"ready"** to a blocked or partial initialization status just because an earlier setup stage was called `ready`. Display **Ready to save** only when BOTH exact target Worker capability/readiness AND the expected native menu generation/selected row are actually acknowledged.
+- Do not prescribe "log in again" for a native-only menu failure when the user has just done so; provide a bounded, safe local menu retry/reconcile action that preserves configuration, doesn't invoke new provider consent/resources, and reports persistent native errors with evidence.
+- Preserve the previous separately reported **potential false verified save / missing object** as P0 [Issue #17](https://github.com/thanks-cohn/Click2Cloud/issues/17). Merely fixing the status text does not resolve either the native ACK failure or receipt-to-intended-target integrity.
