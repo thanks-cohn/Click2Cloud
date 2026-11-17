@@ -4,6 +4,8 @@
 
 > **SECOND NOVEMBER 17 FIELD FINDING — NATIVE CHROME ACK:** [Delayed `NATIVE_APPLY_INCOMPLETE` after Cloudflare was prepared](../11.17.2026/OWNER_DELAYED_NATIVE_APPLY_INCOMPLETE_AFTER_PREPARE.md). Read alongside the initial Nov 17 report. Diagnose the **native registrar, acknowledgment and desired-generation lifecycle** separately from Cloudflare readiness. Do not mistake a delayed menu-maintenance status for a new failed upload, and do not routinely require extension reload and OAuth login for native-only reconciliation.
 
+> **NEW RELEASE-BLOCKING P0 — READ BEFORE PHASE 1:** [Nov 17 reported success while file absent from intended saved location, contradictory session/native/source statuses](../11.17.2026/CODEX_P0_MISSING_FILE_FALSE_SUCCESS_TARGET_RECEIPT_CORRELATION.md) and [Issue #17](https://github.com/thanks-cohn/Click2Cloud/issues/17). Investigate receipt-to-intended-target/operation binding and possible stale/cross-operation success notifications **first**. Keep earlier P1 readiness investigation, but no verified-save claim is trustworthy for the disputed attempt until exact destination and receipt are independently correlated. Preserve all local data and REDOWN read-only.
+
 **Priority:** P1 / critical core right-click save.  
 **Code implementation target:** `thanks-cohn/Click2Cloud`.  
 **Proven behavioral reference:** `thanks-cohn/REDOWN`, **read-only**.  
