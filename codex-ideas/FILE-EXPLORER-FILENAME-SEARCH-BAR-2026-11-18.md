@@ -218,6 +218,16 @@ The textual expression `bucket/directory/child:nested report` is a **convenient 
 
 **V1 remains deliberately simple:** one supplied directory, direct child filenames/folders only, and a GUI search bar calling that API. Recursive `:nested`, explicit inline directory targeting, and `bucket/directory/child:nested` are **future extensions** and must not delay V1.
 
+## Header refinement — day/night switch in the **upper right**
+
+**User correction (2026-11-18):** The day/night Light/Dark switch belongs at the **far upper-right corner** of the application header, **not** the upper-left. Keep it visibly separated from the application tabs and header More menu. The current DOM in `extension/app.html` already places `button#theme` after the `<nav>`; inspect the actual rendered result and its responsive CSS before changing DOM order.
+
+- Ensure `#theme` is visibly **pinned/aligned to the right edge** of the header, with comfortable right padding and consistent alignment in Bit o' Polish, Remote V1, and Minimal.
+- The Remotes, File Explorer, History and header More tabs may shift **slightly left** or tighten their gaps to accommodate the switch, but preserve readable labels, working menus, focus/keyboard navigation, brand placement, and narrow-width behavior.
+- No overlap, clipping, awkward huge gap, extra row or header height increase merely to fit the switch. Do not mistake the Explorer toolbar's own **More** for the global header More.
+- **Small isolated UI implementation is allowed only when separately requested**; the Codex IndexedDB research and final cross-repo enterprise architecture audit remain **strictly read-only**. This idea file itself is documentation, not permission to change code.
+- Verify narrow and wide windows across dark/light modes and all three aesthetics, with no changes to theme logic, saves, File API, receipts, sessions, Worker deployment or ReDown.
+
 ## Delivery boundaries
 
 **V1 is only the direct-children search API with a GUI overlay.** Recursive search and `:nested` are roadmap extensions, not prerequisites to ship V1.
