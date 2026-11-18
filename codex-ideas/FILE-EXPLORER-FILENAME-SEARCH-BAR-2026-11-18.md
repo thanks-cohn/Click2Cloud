@@ -5,6 +5,8 @@
 **Area:** Click2Cloud File API + File Explorer  
 **Design:** A reusable API function is the feature; the search bar is a small GUI overlay calling it.
 
+**Research-only Codex task:** [Read-only Codex IndexedDB inventory/cache architecture request](../docs/requests/CODEX_READ_ONLY_INDEXEDDB_FILENAME_CACHE_ARCHITECTURE_2026-11-18.md). Codex must inspect and produce a design/decision in its response; it is NOT authorized to edit either repository or run live cloud changes.
+
 ## V1 — simple, current-directory-only search
 
 The **first implementation (V1)** is intentionally narrow: search for **file and immediate child directory names inside exactly the directory supplied to the API**. No recursive search, no other directories, no bucket-wide walk, no cross-account aggregation.
