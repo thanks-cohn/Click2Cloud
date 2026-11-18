@@ -46,6 +46,19 @@ Use the above proposal as ground truth for this area, without conflating the Exp
 - Add one shortcut to toggle Explorer toolbar between one/two rows (reusing existing `#toolbar-splitter` state) and another independent shortcut to reset left-tree/right-gallery `#pane-splitter` to 50/50. Validate key chords do not collide with OS/Chrome and aren't caught during text composition.
 - Preserve responsive search even in single-row mode when width allows. Do not create a second layout engine.
 
+## Minimal mode: remove the redundant "Login and usage" disclosure block
+
+**User-requested UI change:** In **Minimal** appearance, remove the standalone collapsible section that currently reads:
+
+> **Login and usage**  
+> Login may prepare a private Worker and verify a small R2 file. Cloudflare usage may incur charges.
+
+**Exact inspected source:** `extension/app.mjs` renders this as a `<details class="minimal-only"><summary>Login and usage</summary>...</details>` in the **Remotes** view. `extension/aesthetic.css` currently reveals every `.minimal-only` wrapper in Minimal mode. Remove **this particular redundant, space-consuming Remotes details block** from Minimal mode; do not indiscriminately hide unrelated `.minimal-only` warnings, diagnostics, or actionable recovery notices.
+
+**Important disclosure requirement:** The text concerns potentially chargeable Cloudflare Worker/R2 actions and consent. Removing this *redundant UI block* must **not** conceal those facts before users authorize setup or operations. Make sure an accessible, concise explanation of any Worker preparation, verification writes and possible Cloudflare charges remains visible at the relevant login/setup/consent decision. Preserve existing mandatory confirmation and permission disclosures in all three themes and the Destinations Manager. Do not assume a login is free or silently authorize paid actions.
+
+Regression check: Minimal Remotes no longer shows the literal `Login and usage` accordion; ordinary Remotes functionality and meaningful consent/cost notice remain correct; Bit o' Polish and Remote V1 unaffected; no change to Worker, R2, OAuth or save logic.
+
 ## Required validation & stop condition
 
 - Inspect existing implementation before changing anything. Work only in a **dedicated isolated feature branch**, not `main`. Do not touch REDOWN.
