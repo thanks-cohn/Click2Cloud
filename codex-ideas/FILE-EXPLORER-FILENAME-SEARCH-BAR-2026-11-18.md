@@ -9,7 +9,7 @@
 
 The **first implementation (V1)** is intentionally narrow: search for **file and immediate child directory names inside exactly the directory supplied to the API**. No recursive search, no other directories, no bucket-wide walk, no cross-account aggregation.
 
-The GUI supplies the **currently open Explorer directory** as the API scope and displays matching entries in the existing File Explorer list. It is a presentation layer **over the API function**, not a separate search engine in the UI.
+The GUI supplies the **currently open Explorer directory** as the API scope and displays matching entries in the existing File Explorer list. It is a presentation layer **over the API function**, not a separate search engine in the UI. **The API always receives an explicit named directory/bucket target**; only the GUI can omit that from what the user types because Explorer already knows the location.
 
 - At bucket root (`bucket/`), search only files and folder names immediately inside that root.
 - At `bucket/photos/`, search only files and immediate child folders in `photos/`, **not** `photos/2025/`.
@@ -56,18 +56,37 @@ searchDirectoryNames({
 4. Changing the currently viewed directory changes the API's directory context; old results never leak into the new view.
 5. The same File API operation can be called without the Explorer UI; the GUI does no independent searching.
 
-## Later version — optional `:nested` query mode (future, **not V1**)
+## Later version — `:nested` shorthand for a directory-aware API (future, **not V1**)
 
-Preserve an API-first design that can eventually support **opt-in recursive searching**. The GUI may later recognize a `:nested` modifier and translate it into a richer search API request. **Do not implement or automatically enable recursive search in V1.**
+**Why the syntax is short:** In File Explorer, the user is **already inside a specific bucket/directory**. Therefore typing `:nested` should mean **“use my current directory as the root, but include everything nested under it.”** The GUI knows the location and supplies it automatically. The user should **not** need to repeat the directory name in the GUI.
 
-Two desired future patterns:
+The *underlying File API*, unlike the GUI, cannot assume where the caller is browsing. Its equivalent call must explicitly name the **target directory or bucket** and select a **nested/recursive scope**. Conceptually this is the combination of **`directory: <named target>` + `scope: nested`** (or a compatible `directory:nested` operation exposed by the File API). The exact API naming should follow existing File API conventions, but **an explicit directory target is mandatory for direct programmatic callers**.
 
-- **`:nested`**, followed by an ordinary search term: search the **currently open directory and all descendants**, including matching filenames/folder names nested below. Example: `:nested photo` from `bucket/` can find `bucket/photo.jpg` and `bucket/archive/photo.jpg`.
-- **`:nested <directory-name>`** while browsing the bucket root: resolve the **named directory below the current context** and produce/search results from **that directory's nested contents**, rather than globally searching unrelated directories. The future command grammar should distinguish a directory selection from a search term unambiguously (e.g. explicit directory argument or autocomplete); ambiguous duplicate directory names must not silently select one.
+### Illustrative future API call (not implemented)
 
-The longer-term **API capability** should conceptually support a caller-specified directory/bucket target, plus an explicit `recursive` option or equivalent. The search bar translates `:nested` syntax into API parameters; the recursion belongs in the underlying API/provider implementation, **never in an ad hoc UI-only traversal**.
+```ts
+searchNames({
+  connectionId,
+  accountId,
+  bucketName: 'bucket',
+  directory: 'photos/', // explicit named target; '' means bucket root
+  scope: 'nested',      // traverse this directory and every descendant
+  query: 'cat'
+})
+```
 
-Future nested search must handle scope-specific permissions, pagination, cancellation, bounded resource usage, and exact result paths. An explicit bucket target must remain within connected authorized resources, with no silent account switch.
+**Equivalent GUI experience:** When Explorer is already displaying `bucket/photos/`, typing `:nested` activates nested search **rooted at `bucket/photos/`**; then typing `cat` searches filenames/folder names there and below. For example `:nested cat` can match both `bucket/photos/cat.jpg` and `bucket/photos/2025/cat.jpg`, but **not** `bucket/elsewhere/cat.jpg`.
+
+The GUI may parse the single modifier `:nested` first and keep the input in nested mode, so subsequent ordinary text is the name query. The API call receives the fully resolved current directory and explicit nested scope; **the API performs recursion, not the GUI**.
+
+An additional future form may support **choosing a different named directory**, such as `:nested <directory-name>` from the bucket root, and showing/searching its descendants. Because a bare name can look like a filename query, define an unambiguous target-selection mechanism (autocomplete, a distinct directory argument, or another clearly specified syntax) **before implementation**. Never silently guess between “search for this name” and “change the target directory,” or between duplicate directory names.
+
+### Important separation from V1
+
+- **V1 default:** `searchNames({directory: currentDirectory, scope: 'children', query})` — direct child names only; no recursion.
+- **Future GUI `:nested`:** `searchNames({directory: currentDirectory, scope: 'nested', query})` — current directory **plus all descendants**.
+- **Future direct API caller:** must **name the target directory/bucket explicitly**, irrespective of whether `scope` is `children` or `nested`.
+- Recursive search must honor authorization, pagination, cancellation, exact result paths, bounded resource usage, and account/bucket boundaries. Changing Explorer directories invalidates the previous root and pending results.
 
 ## Delivery boundaries
 
