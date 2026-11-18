@@ -68,6 +68,28 @@ searchDirectoryNames({
 - On search submission the UI should call **the underlying File API** (not an in-browser ad hoc recursive listing); V1 searches immediate children of the current directory only. A future typed `:nested ...` or explicit `bucket/directory/child:nested ...` command uses this **same input and Enter-to-submit behavior**, routed through the future API parser and search capability.
 - Preserve the compact toolbar's two-row usability at narrow panel widths and across all three aesthetics. Do not add a permanent third row or force the user to expand the toolbar merely to search.
 
+### One-keyboard-shortcut toggle for the compact toolbar (GUI requirement)
+
+The current Explorer already has a horizontally draggable **toolbar-height splitter** (`#toolbar-splitter`), with keyboard **Up/Down** on the focused separator and a persisted `toolbarRows` preference. The existing `installExplorerLayout` in `extension/explorer-layout.mjs` calculates and renders toolbar rows. **Reuse this mechanism rather than building a second collapsing toolbar engine.**
+
+**New behavior requested:** A single, discoverable keyboard shortcut **toggles between exactly one and two toolbar rows** each time it is pressed, without requiring the user to first focus the splitter:
+
+```text
+Shortcut press #1: 1 row -> 2 rows (show filename search input next to More)
+Shortcut press #2: 2 rows -> 1 row (only Back / Forward / Up / Refresh, per existing one-row mode)
+Shortcut press #3: 1 row -> 2 rows, and so on
+```
+
+- **Two-row state:** the filename search input is visible on row one directly **left of More**; **+ Right Click** remains on row two and works exactly as before.
+- **One-row state:** preserve the existing ultra-compact navigation actions (Back, Forward, Up, Refresh); search may be hidden/collapsed but its API and stored results remain unaffected.
+- This shortcut should reuse the existing toolbar-row layout state and persistence; **it must not change the folder-tree/file-pane splitter**, whose width is a separate preference.
+- Manual mouse dragging and arrow-key adjustments to the existing separator must continue to work. A shortcut from any toolbar-row state should have deterministic behavior (for example, 2+ rows collapse to 1, next press expands to 2).
+- Choose a shortcut that does not collide with existing Chrome/OS shortcuts or text input; expose its keyboard hint in a tooltip/help and consider user-configurable remapping. **Do not hard-code an unverified shortcut combination in the specification.**
+- Scope keyboard handling to an active File Explorer view. Do not fire during IME composition or steal ordinary text entry. If collapsing hides the focused search input, move focus to a visible appropriate control.
+- Unit/browser tests should verify repeated 1↔2 toggles, persisted preference across reopen, manual resize compatibility, responsive widths, correct keyboard focus, unchanged More behavior and unchanged + Right Click behavior.
+
+**Why:** the user can instantly reveal the two-row toolbar to search, then return to the minimal navigation-only row with the **same shortcut**. This is a presentation behavior; it must not modify the save engine, directory selection or File API search logic.
+
 ### V1 acceptance examples
 
 1. From `bucket/`, query `photo` finds `bucket/photo.jpg` and `bucket/photographs/`, but **not** `bucket/archive/photo.jpg`.
