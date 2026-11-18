@@ -26,7 +26,7 @@ import {createAgentDebugApi} from '../src/glaciaring/agent-api.mjs';
 import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
-import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
+import {createRemoteTransport,preparedDestination} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
@@ -41,15 +41,35 @@ let connectionObservation=null,attentionPreference=null;
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
-const provisioner=createProvisioner({request:oauth.request,authority:oauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:async(t,a)=>{if(revoking)return false;if(!a.scopes?.includes('workers-r2.write')||!a.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});const r=await oauth.request('/accounts/'+encodeURIComponent(t.accountId)+'/r2/buckets/'+encodeURIComponent(t.bucketName));const b=await r.json();if(!r.ok||b.success!==true){const diagnostic=diagnoseCloudflare(r,b,{context:'r2'});throw Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});}return true;},record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
+function assertConnected(){if(revoking)throw Object.assign(Error(),{code:'AUTHORIZATION_REVOKED'});}
+const setupOauth={...oauth,
+ authority:()=>{assertConnected();return oauth.authority();},
+ request:(...args)=>{assertConnected();return oauth.request(...args);}
+};
+const provisioner=createProvisioner({request:setupOauth.request,authority:setupOauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
+async function checkSelectedBucket(target,auth){
+ assertConnected();
+ if(!auth.scopes?.includes('workers-r2.write')||!auth.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});
+ const response=await oauth.request('/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName));
+ const body=await response.json();
+ assertConnected();
+ if(!response.ok||body.success!==true){
+  const diagnostic=diagnoseCloudflare(response,body,{context:'r2'}),code=response.status===404?'SELECTED_BUCKET_MISSING':diagnostic.code;
+  throw Object.assign(Error(code),{code,diagnostic});
+ }
+ return true;
+}
+const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
-const cloudflare=createCloudflareOnboarding({current,oauth,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
+async function prepared(target){
+ return preparedDestination(await provisioner.lookup(target),target,BUILD_INFO.workerCodeDigest);
+}
+const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
  const saved=await current.recordRemoteResult(value);
- try{await chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}});}catch{/* No open app is normal; durable results remain inspectable. */}
+ try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
  return saved;
 }
 const executeFileMessage=createFileTransport({remote});
@@ -84,11 +104,11 @@ const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseF
 // Menu inspection/boot projects saved observations without a full-cloud network
 // sweep. Destination Save refreshes its exact new targets; every actual save
 // independently rechecks current authority and scoped Worker capability.
-async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false,depthBudget}={}) {
+async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false,depthBudget,preparedTargets=[],saveSelection}={}) {
   const status=await oauth.status();
-  const policy=(await current.read()).product.recovery;
+  const state=await current.read(),policy=state.product.recovery;
   for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
-  const state=await current.read();attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
+  attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   // Keep the bounded Depth snapshot separate from Explorer and recovery observations.
   // A failed crawl leaves the previous snapshot intact.
   const {depthInventory=[],depthRefreshPending=[]}=await chrome.storage.local.get(['depthInventory','depthRefreshPending']);
@@ -97,13 +117,19 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
   const refreshSelections=refreshDepthScopes.filter(s=>!s.hidden);
   for(const selection of refreshSelections)pendingScopes.add(scopeKey(selection.target));
   if(refreshSelections.length)await chrome.storage.local.set({depthRefreshPending:[...pendingScopes]});
-  const discovered=[];
+  const discovered=[],depthFailures=[];
   for(const selection of refreshSelections){
-    if(status.state!=='CONNECTED'||!status.accounts.some(a=>a.id===selection.target.accountId))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
-    const result=await discoverDepthScope(baseFileApi,selection,depthBudget);
-    depthSnapshots.set(result.scopeKey,result);
-    pendingScopes.delete(result.scopeKey);
-    discovered.push(result.target,...result.folders.map(prefix=>({...result.target,prefix})));
+    try{
+      if(status.state!=='CONNECTED'||!status.accounts.some(a=>a.id===selection.target.accountId))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
+      const result=await discoverDepthScope(baseFileApi,selection,depthBudget);
+      depthSnapshots.set(result.scopeKey,result);
+      pendingScopes.delete(result.scopeKey);
+      discovered.push(result.target,...result.folders.map(prefix=>({...result.target,prefix})));
+    }catch(error){
+      if(!saveSelection)throw error;
+      const code=error?.code;
+      depthFailures.push({target:selection.target,code:/^[A-Z0-9_]+$/.test(code??'')?code:'DEPTH_DISCOVERY_REQUIRED'});
+    }
   }
   if(discovered.length){
     await chrome.storage.local.set({depthInventory:[...depthSnapshots.values()],depthRefreshPending:[...pendingScopes]});
@@ -117,8 +143,8 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
     const observed=snapshot??{target:selection.target,folders:previous?.folders??[],complete:false,listedDepth:0};
     return {...observed,stale:!observed.complete&&observed.listedDepth<selection.maxDepth||pendingScopes.has(scopeKey(selection.target))};
   });
-  // A restarted worker can reuse the observed tree but must check destination
-  // readiness again before offering actionable saves.
+  // Explicit diagnostics can refresh live readiness. Cold dispatch uses the
+  // retained tree and keeps live authorization at the transfer boundary.
   const depthTargets=refreshDepthReadiness&&status.state==='CONNECTED'?depthScopes.flatMap((s,i)=>
     status.accounts.some(a=>a.id===s.target.accountId)?[s.target,...s.folders
       .filter(p=>p.split('/').filter(Boolean).length<=depthSelections[i].maxDepth)
@@ -126,43 +152,80 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
   // Preview remains read-only. On explicit target refresh or cold reconciliation,
   // verify only visible curated Narrow ancestors, independently of child grants.
   const narrowTargets=state.product.show.nested&&state.product.providerVisibility.cloudflare
-    ?state.configs.nested.destinations.filter(d=>!d.hidden&&(refreshDepthReadiness||refreshTargets.some(t=>scopeKey(t)===scopeKey(d.target))))
+    ?state.configs.nested.destinations.filter(d=>!d.hidden)
       .flatMap(d=>['',...ancestors(d.target.prefix)].filter(prefix=>prefix!==d.target.prefix&&!levelHidden(d,prefix)).map(prefix=>({...d.target,prefix})))
     :[];
-  const readinessTargets=[...new Map([...refreshTargets,...discovered,...depthTargets,...narrowTargets]
-    .filter(t=>t.provider==='cloudflare').map(t=>[targetKey(t),t])).values()];
+  const checkedTargets=new Set((saveSelection??[]).map(s=>targetKey(s.target)));
+  const preparedBuckets=new Set(preparedTargets.map(scopeKey)),checkedBuckets=new Set((saveSelection??[]).map(s=>scopeKey(s.target)));
+  const readinessTargets=[...new Map([...refreshTargets,...discovered,...depthTargets,...narrowTargets.filter(t=>refreshDepthReadiness||refreshTargets.some(r=>scopeKey(r)===scopeKey(t)))]
+    .filter(t=>t.provider==='cloudflare'&&!checkedBuckets.has(scopeKey(t))).map(t=>[targetKey(t),t])).values()];
   if(refreshTargets.length||discovered.length)for(const t of [...refreshTargets,...discovered])snapshots.delete(targetKey(t));
   let readinessIndex=0;
   await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{
     while(readinessIndex<readinessTargets.length)await remoteReady(readinessTargets[readinessIndex++]);
   }));
   for(const saved of [...savedTargets,...narrowTargets]){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
+  const plans=new Map();
+  for(const {target} of [...inventory.scopes,...depthScopes]){
+    if(target.provider!=='cloudflare'||!status.accounts.some(a=>a.id===target.accountId)||plans.has(scopeKey(target)))continue;
+    plans.set(scopeKey(target),Promise.resolve().then(()=>provisioner.lookup(target)).catch(()=>null));
+  }
+  for(const [key,plan] of plans)plans.set(key,await plan);
+  const projectReady=t=>{
+    const bucket=scopeKey(t);
+    if(checkedBuckets.has(bucket)&&!preparedBuckets.has(bucket)&&checkedTargets.has(targetKey(t)))return false;
+    const snapshot=snapshots.get(targetKey(t));
+    if(!checkedBuckets.has(bucket)&&snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;
+    try{return preparedDestination(plans.get(scopeKey(t)),t,BUILD_INFO.workerCodeDigest).state==='READY';}catch{return false;}
+  };
   const projectScope=s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),
-    workerReady:snapshots.get(targetKey(s.target))?.ready??false,
-    folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:snapshots.get(targetKey({...s.target,prefix}))?.ready??false};})});
+    workerReady:projectReady(s.target),
+    folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:projectReady({...s.target,prefix})};})});
   return {...inventory,scopes:inventory.scopes.map(projectScope),depthScopes:depthScopes.map(projectScope),
-    depthCoverageComplete:depthScopes.every(s=>!s.stale)};
+    depthCoverageComplete:depthScopes.every(s=>!s.stale),depthFailures};
 }
 const getAuthorization=async selection=>{
-  if(revoking)return null;
-  try{const a=await oauth.authority(),selected=selection?.provider?selection:registrar.inspect().desired?.rows.find(r=>r.id===String(selection?.menuItemId))?.target;
-    const targets=selected?[selected]:(registrar.inspect().desired?.rows??[]).filter(r=>r.role==='save').map(r=>r.target);
-    return {sessionId:a.sessionId,authorizedTargets:(await Promise.all(targets.map(async t=>a.accounts.some(x=>x.id===t.accountId)&&await remoteReady(t)?t:null))).filter(Boolean)};
-  }catch{return null;}
-};
-const depthClick=createDepthNativeClick({current,oauth,transport:remote,lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:async target=>{
  if(revoking)return null;
- const auth=await oauth.authority();
- return {sessionId:auth.sessionId,authorizedTargets:auth.accounts.some(a=>a.id===target.accountId)&&(await remote.status(target)).state==='READY'?[target]:[]};
-},recover:async({target})=>{
+ try{
+  const auth=await oauth.authority();
+  const target=selection?.provider?selection:registrar.inspect().desired?.rows.find(r=>r.id===String(selection?.menuItemId))?.target;
+  const authorized=target?.provider==='cloudflare'&&auth.accounts.some(a=>a.id===target.accountId)&&(await prepared(target)).state==='READY';
+  return {sessionId:auth.sessionId,authorizedTargets:authorized?[target]:[]};
+ }catch{return null;}
+};
+async function recoverConfiguredTarget({target,generation}){
  if(revoking)return {state:'blocked',code:'DISCONNECTING'};
  const state=await readCurrent(),native=registrar.inspect();
- if(native.pending||native.acknowledgedGeneration!==state.generation.desired||!engine.matchesCurrent(native.desired,state))return {state:'blocked',code:'STALE_GENERATION'};
- // Host-owned native gesture enters the same typed exact-target recovery as
- // Shelf. authorizeSetup is absent: only durable prior approval permits writes.
+ if(native.pending||native.acknowledgedGeneration!==state.generation.desired||
+   (generation!==undefined&&generation!==native.acknowledgedGeneration)||!engine.matchesCurrent(native.desired,state))
+  return {state:'blocked',code:'STALE_GENERATION'};
+ // The typed owner can use existing approval, but cannot grant new consent
+ // from a context-menu gesture or repeat a source write.
  const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params:{target}},'gui');
  return out.data??{state:out.state,code:out.code};
-},attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome)});
+}
+const depthClick=createDepthNativeClick({current,oauth,transport:{async status(target){
+ const evidence=await prepared(target);
+ return evidence.state==='READY'?evidence:remote.status(target);
+}},lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:getAuthorization,recover:recoverConfiguredTarget,
+attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome)});
+async function invokeProviderAction(input){
+ if(revoking)return {state:'blocked',code:'DISCONNECTING'};
+ if(input.setupOnly&&input.attentionContext&&input.requestedTarget){
+  const target=input.requestedTarget,auth=await oauth.authority().catch(()=>null);
+  if(auth?.accounts.some(a=>a.id===target.accountId)){
+   const evidence=await prepared(target);
+   if(['WORKER_SETUP_REQUIRED','WRITE_PROOF_REQUIRED'].includes(evidence.code)){
+    const prepared=await recoverConfiguredTarget({target,generation:input.generation});
+    const code=prepared.state==='completed'?'FRESH_CLICK_REQUIRED':prepared.code;
+    try{await attention.attend('cloudflare',target,{code,context:input.attentionContext});}catch{}
+    return {state:prepared.state==='uncertain'?'uncertain':'blocked',code,target,
+     requiredAction:prepared.state==='completed'?'RIGHT_CLICK_AGAIN':prepared.requiredAction};
+   }
+  }
+ }
+ return cloudflare.invoke(input);
+}
 // MV3 supports static module loading only. The dependency graph is build-gated;
 // execution/readiness stays deferred and never gates the native listener.
 let recorder=null,recorderInitializationFailure=null,bootstrapDropped=0;
@@ -181,20 +244,23 @@ void Promise.resolve().then(async()=>{
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
-const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.origin?.mode==='depth'&&row.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});},beforeClick:async info=>{
+const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
+    if(row?.role==='save'&&row.actionKind==='save'&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation)
+      void chrome.action.setBadgeText({text:'…'}).catch(()=>{});},beforeClick:async info=>{
+    if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
     await nativeReady();
     const itemId=String(info.menuItemId),prior=previous?.rows.find(r=>r.id===itemId),next=registrar.inspect().desired?.rows.find(r=>r.id===itemId);
     if(!prior||!next||prior.role!==next.role||prior.actionId!==next.actionId)
       throw Object.assign(Error(),{code:'STALE_GENERATION'});
-  },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,
+  },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,dispatchOwnsAuthorization:true,
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
-    let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction)return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
+    let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction&&action.actionKind!=='attention')return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
-  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'});}
+  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'}).catch(()=>{});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
-  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:input=>revoking?{state:'blocked',code:'DISCONNECTING'}:cloudflare.invoke(input),
+  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:invokeProviderAction,
   authorizeSource:async s=>{if(s.bytes instanceof Uint8Array)return true;try{const u=new URL(s.url);return ['https:','http:'].includes(u.protocol)&&await chrome.permissions.contains({origins:[u.origin+'/*']});}catch{return false;}},fetchSource:fetch});
 async function external(){const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('EXTERNAL_RECOVERY_UNAVAILABLE');return createExternalRecovery({files:directoryFiles(h)});}
 const recovery={verifyProfileCopy:async()=>{const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('RECOVERY_PRESERVATION_REQUIRED');return verifyProfileCopy(directoryFiles(h),chrome.runtime.id);},choose:async options=>{
@@ -257,7 +323,7 @@ chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{
 // or future read attempts. Never reinterpret an established missing CURRENT as empty.
 async function readCurrent(context){await trustedStorage();const saved=await current.read(context),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING',origin:'BACKGROUND_NATIVE_FENCE',subreason:'NATIVE_GENERATION_WITH_ZERO_CURRENT'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return saved;}
 let nativeAttempt;
-async function nativeReady(){const state=await readCurrent(),e=registrar.inspect();if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null&&engine.matchesCurrent(e.desired,state))return e.lastOutcome;if(!nativeAttempt){const attempt=api.reconcile();nativeAttempt=attempt;attempt.finally(()=>{if(nativeAttempt===attempt)nativeAttempt=null;}).catch(()=>{});}return nativeAttempt;}
+async function nativeReady(){const state=await readCurrent(),e=registrar.inspect();if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null&&engine.matchesCurrent(e.desired,state))return e.lastOutcome;if(!nativeAttempt){const attempt=api.reconcile({refreshDepthReadiness:false});nativeAttempt=attempt;attempt.finally(()=>{if(nativeAttempt===attempt)nativeAttempt=null;}).catch(()=>{});}return nativeAttempt;}
 // Menu maintenance has explicit lifecycle/save owners, never Shelf open or OAuth.
 for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(()=>{void nativeReady().catch(()=>{});});
 // Developer/native-companion integration only: no externally_connectable manifest,

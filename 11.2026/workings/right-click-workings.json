@@ -9203,8 +9203,8 @@
       "extension/aesthetic.css": "e6099e192936f19acd0f6d96be563fbf60003f493ac0b8cd072a52cb1a2d7c26",
       "extension/app.css": "89aad628a49b47c26645fb51468d539995fa6bfa7f64df912519a4265e8d506c",
       "extension/app.html": "02b86e0118980a0f5a14c83e90b1600f99d8791df7ec4f8c909dd83af2d36f6f",
-      "extension/app.mjs": "690244f52f35dbcf2a0afd4081b1bae755fc4e0f9bed128f06e2dee651be5e32",
-      "extension/background.mjs": "71f33f133dfd5dc6d484f4b951675c702f1ed7bee7054aba4300a392841dc5d9",
+      "extension/app.mjs": "bc8b2126c00e8f0bfd9d8d615d691ef601e7d7f3830cba4e57a3d6c151fd71fd",
+      "extension/background.mjs": "12451867251364e7012834e765c2abb23fb86ab2b388a170c26d9309fb1ddfec",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-layout.mjs": "00c6ccd93a3af0c487b403bb42d6eb4ca8c27deb1e025a3ce89c7440dac03fcf",
@@ -9233,7 +9233,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "c80a3c805efa3a5d3dac0ec9375b21e1f47b23033c530aa76e93bef1f64100bf",
+      "src/api/service.mjs": "35784fe3c58190fea1c8e5475844f306af870bbef9d523a29d29fa77119a6a6e",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "4ae1d0218ccee31c81b63b80c7bdc2229e23483317ee347154d0689e56c5001d",
@@ -9241,25 +9241,25 @@
       "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "899d538d1d828c9097ff8d934a108af6edb3974b409bda3fed96a561770b82da",
-      "src/chrome/registrar.mjs": "1b8fd1093f4846ba57d9012c8776e1d39f067bd5cf1af4432642e8faa7981455",
+      "src/chrome/registrar.mjs": "4c878c3d1e095085b5b38a9b94041cf1cb43d114f7012f2e0b808c14c7d4821e",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/cloudflare/deployment.mjs": "be4c8b3c6ce213c1705ef685970ba4331a628d3f8bdc49d3d4bbd975941d560f",
       "src/cloudflare/file-transport.mjs": "2a6d37ed8d9881d130a570494c9a2d2b68b396d208a275427bcabef40020d029",
       "src/cloudflare/files.mjs": "89e706cbc1c6b578f418ad53e110c9080d0ac7231ef296e62d75dd332bc4d867",
       "src/cloudflare/inventory.mjs": "999886570e54bb1a4bd4c933ca95e9d5a262517ab5957861cc07e6e77516a619",
       "src/cloudflare/manifest-locations.mjs": "dcd7d3c0070149eb2ca6b3ca8d5560656e6a44fde8b54e797ce33bb9bc8482b4",
-      "src/cloudflare/onboarding.mjs": "7b54d45c4995889906b02af80431d639c24e73bda5fe0699639156173de0522c",
+      "src/cloudflare/onboarding.mjs": "df24339a91312373e311d65136adc9a4fe4c30adeb6a2af3fa90db20de6585db",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
-      "src/cloudflare/transport.mjs": "02b43900aa997bbc6cad765707b3a31baf39b3391d90fa1bee297167c46423ce",
+      "src/cloudflare/transport.mjs": "bb3a78b1a7672b0e63b7e0c3c7bb788db02ab45851c11c500b9ff8cca940feb6",
       "src/cloudflare/wire.mjs": "add1071cce7837d64cea4567c9d7b9993786315d852c0a1705c3a7ae3fec5ba5",
       "src/cloudflare/worker.mjs": "76f068c5dc9ae5d35a6d643e014549ec79ea0bc0cb735d5c678c66a68ad0cc01",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
       "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "9d064e09b515f687c3d8bddeea1e919b7b17973c324516859e8ec495df075c0d",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "84777e98acee0c8496adbc009fa5ed24161647b724df2c689fd0b2fd07e5c600",
+      "src/core/engine.mjs": "f9788aa4bacdb39c095d636ee74a1db31de568113331b4770c7b9bb4ed31f6f6",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
       "src/core/menu-provenance.mjs": "1b0044640d068729d5d260ac3be558dcedae5c5e4322c0039726ead80eb3c987",
@@ -9289,7 +9289,7 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "14a27604ed500ccb5ab4651df66d5eaab522e1c1ace343dc58190ca13b7700bc",
+      "src/glaciaring/catalog.mjs": "ae670299d51755c52aee8525308f9a771bd5fab2a32fbcfb735961b847e3f1fe",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "b81859a56f03039fbca8087a23e27c3828517c5aa8598e99974c98b20b5b8fc0",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
@@ -9302,11 +9302,11 @@
       "src/manifest/schema.mjs": "cba93d4eb18b8ea9a7e5cdf08b7e84b742f897ffd567e5338c2de6cb2ad173af",
       "src/manifest/service.mjs": "794c990f587a9c1189dd439f19fd4ca63bf022fe7d93ad60f101fed5a9b36ece",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/depth/native-click.mjs": "9433884052d20d9cbc1e3a65ca3a28328ee6b6dd79a4b73ec48933fccef7ed49",
+      "src/modes/depth/native-click.mjs": "f4b96f223b36b79f1961785ab0a49f80db93d4ede126f9b9be679fc83e47b0bd",
       "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "97ee8d5a7d3c4f2f5fb8e0ff23fdde90490556c2cca06f912d2b7da9c1f7b2cf",
+      "src/persistence/current-store.mjs": "ff1c0fe4960e69b79147ff84e07e792c7cdc077e7c09769fdde7b6fc930cd19d",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
@@ -10680,14 +10680,14 @@
         "preconditions": "Ready exact-target native/API save",
         "trigger": "save",
         "guard": "Current session, actor account, ACK generation and target binding",
-        "actual": "Cloudflare remote path before browser capture; no UI on success",
+        "actual": "Engine owns ready native resolution. Scoped Worker preparation is read locally; live bucket authority is rechecked before dispatch and after independent R2 HEAD proof. Read-only polls are operation-local, and History progress does not gate the remote write.",
         "apiMethods": [
           "dispatchSave",
           "invokeProviderAction"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
         "nextState": "Cloudflare remote path before browser capture; no UI on success",
-        "uiEffect": "Reported through existing GUI/API outcome",
+        "uiEffect": "Pending badge on an acknowledged warm gesture. Verified completion or an actionable/uncertain result follows.",
         "externalResourceEffect": "Authorized Worker receives source transiently",
         "persistence": "none",
         "errors": [],
@@ -10696,7 +10696,17 @@
           {
             "path": "src/core/engine.mjs",
             "symbol": "const selectedRemote=",
-            "line": 93
+            "line": 96
+          },
+          {
+            "path": "src/cloudflare/transport.mjs",
+            "symbol": "async save({target",
+            "line": 64
+          },
+          {
+            "path": "src/chrome/registrar.mjs",
+            "symbol": "if(dispatchOwnsAuthorization)",
+            "line": 197
           }
         ],
         "verification": {
@@ -12292,6 +12302,60 @@
           "meaning": "Node/browser/workerd fixtures; live QA setup separately recorded",
           "testFile": "tests/portable-menu-manifest.test.mjs",
           "runtime": "INSTALLED_WINDOWS_NOT_VERIFIED"
+        },
+        "contractViolation": null
+      },
+      {
+        "id": "DESTINATION_READY_SAVE",
+        "preconditions": "Explicit Destinations Manager Save or confirmed configure and provision grants",
+        "trigger": "commitConfigChange with prepareModes",
+        "guard": "Durable CURRENT and expected revision, exact previously authorized Cloudflare account and bucket, confirmation, scoped Worker and acknowledged native generation",
+        "actual": "Prepare each affected visible target through recoverCloudflareDestination, using the existing setup ledger. Scoped same-bucket proof is projected to approved descendants. Save remains incomplete if required discovery, readiness or native ACK is missing.",
+        "apiMethods": [
+          "commitConfigChange",
+          "recoverCloudflareDestination",
+          "dispatchSave"
+        ],
+        "identity": "Exact selected account, bucket, prefix and mode; Depth descendants in the bounded selected inventory",
+        "nextState": "Configuration persisted; destination ready only after verified capability and Chrome callbacks",
+        "uiEffect": "Readiness progress and actionable cause; user saves directly after ready",
+        "externalResourceEffect": "Existing or explicitly approved Worker setup and verified readiness probe if needed",
+        "persistence": "Existing CURRENT transaction, retry receipt scope and destination recovery ledger",
+        "errors": [
+          "SETUP_PROBE_REQUIRES_INSPECTION",
+          "WORKER_DESTINATION_SCOPE_REQUIRED",
+          "DEPTH_DISCOVERY_REQUIRED",
+          "NATIVE_APPLY_INCOMPLETE",
+          "CONFIGURATION_SUPERSEDED"
+        ],
+        "retry": "Same revision/idempotency key and selected scope; uncertain writes inspected by original operation ID",
+        "sourceRefs": [
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "function saveTargets",
+            "line": 127
+          },
+          {
+            "path": "src/api/service.mjs",
+            "symbol": "async function prepareSelected",
+            "line": 163
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function recoverDestinationLocked",
+            "line": 168
+          },
+          {
+            "path": "extension/app.mjs",
+            "symbol": "function bindDestinationSave",
+            "line": 411
+          }
+        ],
+        "verification": {
+          "level": "LOCAL_WORKERD_AND_BROWSER_FIXTURES",
+          "testFile": "tests/depth-plan-recovery.test.mjs",
+          "evidence": "codex/11.18.2026/CLICK_AND_DONE_EVIDENCE.md",
+          "runtime": "BLOCKED_UNVERIFIED_INSTALLED_CHROME_AND_LIVE_R2"
         },
         "contractViolation": null
       }
@@ -15005,7 +15069,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "6745137b6de921f408f0816a30a19dbfe33c6fc7367d8f2db6351f4ae49f34c7",
+    "digest": "a38de086bd69c0e4c45cb12cd90ed11bdcbd3dbdb51d3e2985fb8d09295bbd7b",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
@@ -15049,6 +15113,13 @@
         "scripts/test-aesthetic-browser.mjs"
       ],
       "verification": "Linux Chromium app/API/IDB fixture browser matrix; genuine unpacked extension blocked by administrator policy; Windows/live R2 not verified."
+    },
+    "clickAndDone": {
+      "referenceTag": "95-percent-plus-success",
+      "referenceCommit": "653ad9b5fdd59532df571514fc60053d8a7b13bb",
+      "baseline": "2a3799c2661057c3a95fc4b37b3a70e9f9b7782c",
+      "evidence": "codex/11.18.2026/CLICK_AND_DONE_EVIDENCE.md",
+      "installedAndLive": "BLOCKED_UNVERIFIED"
     }
   },
   "changeLog": [

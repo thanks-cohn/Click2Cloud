@@ -57,7 +57,7 @@ const definitions={
   listDestinations:['inspect',obj({mode:{enum:['simple','nested','narrow','depth']},cursor:str,limit:{type:'integer',minimum:1,maximum:20}})],
   inspectMenuTree:['inspect',obj({generation:num,cursor:str,limit:{type:'integer',minimum:1,maximum:1000},parentId:str,recursive:bool,includeOmissions:bool},['generation'])],previewNativeMenu:['inspect',obj()],inspectNativeACK:['inspect',obj()],getOrganizationSuggestion:['inspect',obj()],
   previewConfigChange:['configure',obj({changes:arr(change),expectedRevision:num},['changes','expectedRevision'])],
-  commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str},['changes','expectedRevision','idempotencyKey'])],
+  commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str,prepareModes:{type:'array',items:{enum:['simple','nested','depth']},maxItems:3}},['changes','expectedRevision','idempotencyKey'])],
   reconcileNativeMenu:['configure',obj({expectedGeneration:num},['expectedGeneration'])],
   chooseBackupLocation:['restore',obj({purpose:{enum:['rebuild']}})],inspectRecoveryCoverage:['inspect',obj({target},['target'])],runRecoveryPage:['restore',obj({target},['target'])],inspectBackupRoots:['inspect',obj()],listRecoveryPolicies:['inspect',obj()],writeRecovery:['restore',obj()],
   requestRestorePreview:['restore',obj({rebuild})],restoreRightClickMenu:['restore',obj({expectedRevision:num,previewToken:str,idempotencyKey:str,rebuild},['previewToken','idempotencyKey'])],
@@ -94,18 +94,22 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
-  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget}={}){
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection}={}){
     try{
       const state=await current.read();
-      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,
-        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare?state.configs.depth.scopes.filter(s=>!depthTarget||scopeKey(s.target)===scopeKey(depthTarget)):[]});
+      const selectedDepthKeys=saveSelection&&new Set(saveSelection.filter(s=>s.mode==='depth').map(s=>scopeKey(s.target)));
+      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,preparedTargets,saveSelection,
+        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare
+          ?state.configs.depth.scopes.filter(s=>(!depthTarget||scopeKey(s.target)===scopeKey(depthTarget))&&(!selectedDepthKeys||selectedDepthKeys.has(scopeKey(s.target)))):[]});
       const spec=await engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory});
       const native=await engine.apply(spec);
       const selectedDepth=depthTarget&&inventory.depthScopes?.filter(s=>scopeKey(s.target)===scopeKey(depthTarget));
       const configuredDepth=depthTarget&&state.configs.depth?.scopes.some(s=>scopeKey(s.target)===scopeKey(depthTarget));
-      const coverage=configuredDepth&&selectedDepth?selectedDepth.length>0&&selectedDepth.every(s=>!s.stale):inventory.depthCoverageComplete;
+      const coverage=selectedDepthKeys
+        ?[...selectedDepthKeys].every(key=>inventory.depthScopes?.some(s=>scopeKey(s.target)===key&&!s.stale))
+        :configuredDepth&&selectedDepth?selectedDepth.length>0&&selectedDepth.every(s=>!s.stale):inventory.depthCoverageComplete;
       return native.state==='completed'&&coverage===false
-        ?{...native,state:'partial',code:'DEPTH_DISCOVERY_REQUIRED'}:native;
+        ?{...native,state:'partial',code:'DEPTH_DISCOVERY_REQUIRED',depthFailures:inventory.depthFailures??[]}:native;
     }catch(error){
       const code=error.code??error.message;
       return {state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(code??'')?code:'NATIVE_RECONCILE_UNAVAILABLE'};
@@ -116,8 +120,56 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     nativeQueue=task.catch(()=>{});
     return task;
   }
-  const reconcile=()=>applyCurrent({refreshDepthReadiness:true});
+  const reconcile=({refreshDepthReadiness=true}={})=>applyCurrent({refreshDepthReadiness});
   const manifests=createManifestService({current,readCurrent:loadCurrent,store:manifestStore,locations:manifestLocations,oauth,authorize,confirm,applyCurrent,version:BUILD_INFO.extensionVersion});
+  // Save selects current visible routes. No cloud action is derived from rows
+  // merely observed in Explorer, hidden entries or a previous menu generation.
+  function saveTargets(state,params,prior){
+    const priorScopes=new Map(prior.configs.depth.scopes.map(row=>[scopeKey(row.target),row]));
+    const selected=new Map();
+    const include=(mode,row)=>{
+      if(!row||row.hidden||row.target.provider!=='cloudflare'||!state.product.providerVisibility.cloudflare||!state.product.show[mode])return;
+      const target=normalizeTarget(row.target);
+      selected.set(mode+':'+targetKey(target),{mode,target});
+    };
+    for(const mode of params.prepareModes){
+      const config=state.configs[mode];
+      for(const row of config.destinations??config.scopes)include(mode,row);
+    }
+    for(const change of params.changes){
+      const mode=change.mode==='narrow'?'nested':change.mode;
+      if(change.type==='setDepthDisplayBuckets')for(const row of state.configs.depth.scopes){
+        const previous=priorScopes.get(scopeKey(row.target));
+        if(!previous||previous.maxDepth!==row.maxDepth||previous.hidden!==row.hidden)include('depth',row);
+      }
+      if(change.type==='createDestination'||change.type==='updateDestination'){
+        for(const row of state.configs[mode].destinations){
+          if(change.id?row.id===change.id:targetKey(row.target)===targetKey(normalizeTarget(change.target)))include(mode,row);
+        }
+      }
+      if(change.type==='makeDefault'&&state.product.defaultTarget){
+        const target=state.product.defaultTarget;
+        for(const m of ['simple','nested','depth']){
+          for(const row of state.configs[m].destinations??state.configs[m].scopes)
+            if(targetKey(row.target)===targetKey(target))include(m,row);
+        }
+        const assigned=Object.values(state.configs).some(c=>(c.destinations??c.scopes).some(row=>targetKey(row.target)===targetKey(target)));
+        if(!assigned&&state.product.show.flat&&state.product.providerVisibility.cloudflare&&target.provider==='cloudflare')
+          selected.set('simple:'+targetKey(target),{mode:'simple',target});
+      }
+    }
+    return [...selected.values()].sort((a,b)=>a.target.prefix.length-b.target.prefix.length);
+  }
+  async function prepareSelected(selected,revision){
+    const results=new Map();
+    for(const {target} of selected){
+      const key=targetKey(target);
+      if(results.has(key))continue;
+      try{results.set(key,await cloudflare.recoverDestination({target,expectedRevision:revision,authorizeSetup:true}));}
+      catch(error){const code=error?.code??error?.message;results.set(key,{state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(code??'')?code:'WORKER_RECOVERY_FAILED'});}
+    }
+    return results;
+  }
   async function restorePreview(){
     const local=await current.inspect(),evidence=await current.evidence();
     let present;if(local.database?.present!==false)try{present=await loadCurrent({observe:false});}catch{};
@@ -165,8 +217,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     const row=evidence.desired?.rows?.find(r=>r.role==='save'&&readiness.target&&r.target&&targetKey(r.target)===targetKey(readiness.target));
     return row&&!row.enabled?{...readiness,state:'REPAIR_REQUIRED',code:row.reason??'DESTINATION_NOT_READY'}:readiness;
   }
-  async function finishInitialization(data){
-    const native=await reconcile();if(data.state!=='completed')return {...data,native};
+  async function finishInitialization(data,{refreshDepthReadiness=true}={}){
+    const native=await reconcile({refreshDepthReadiness});if(data.state!=='completed')return {...data,native};
     if(native.state!=='completed')return {...data,native,state:'partial',code:'NATIVE_APPLY_INCOMPLETE'};
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
@@ -270,14 +322,25 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='loginBegin'&&!params.verifyOnly&&data?.state==='CONNECTED'){
             let stage='configuration';const initializationId=crypto.randomUUID();
             try{
-              await loadCurrent({operationId:traceId});
+              const saved=await loadCurrent({operationId:traceId});
+              const hasSaved=!!saved.product.defaultTarget||Object.values(saved.configs).some(config=>(config.destinations??config.scopes).length);
               stage='authorization';
               if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:(data.accounts??[]).map(a=>({accountId:a.id}))})!==true)fail('PERMISSION_DENIED');
               stage='cloudflare-initialization';
               if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
               const prepared=await cloudflare.initialize({authorizeSetup:true,resume:true});
               stage='native-registration';
-              const initialization=prepared.state==='completed'?await finishInitialization(prepared):prepared;data={...data,initialization:{...initialization,operationId:initializationId,stage:initialization.stage??(initialization.native?.state&&initialization.native.state!=='completed'?'native-registration':prepared.state==='completed'?'ready':'cloudflare-initialization')}};
+              let initialization=prepared;
+              if(prepared.state==='completed')initialization=await finishInitialization(prepared,{refreshDepthReadiness:false});
+              else if(hasSaved){
+                // A setup issue for one target or the absence of a preferred
+                // target must not keep other saved routes in signed-out mode.
+                const native=await applyCurrent({saveSelection:[]});
+                initialization=prepared.code==='CHOOSE_DESTINATION'&&native.state==='completed'
+                  ?{state:'completed',code:'SAVED_DESTINATIONS_RESTORED',stage:'native-registration',native}
+                  :{...prepared,native};
+              }
+              data={...data,initialization:{...initialization,operationId:initializationId,stage:initialization.stage??(initialization.native?.state&&initialization.native.state!=='completed'?'native-registration':prepared.state==='completed'?'ready':'cloudflare-initialization')}};
             }catch(error){
               const code=/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'INITIALIZATION_FAILED';
               data={...data,initialization:{state:'blocked',code,stage,operationId:initializationId,...(safeWorkerDiagnostic(error.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:{})}};
@@ -337,24 +400,56 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix))fail('TARGET_NOT_DISCOVERED');
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
-          const next=replay?state:applyConfigChanges(state,params.changes);
+          const readySave=params.prepareModes!==undefined;
+          const unchanged=readySave&&!params.changes.length;
+          if(unchanged&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
+          const next=replay||unchanged?state:applyConfigChanges(state,params.changes);
+          const selected=readySave?(replay?.destinationSelection??saveTargets(next,params,state)):[];
+          if(selected.length){
+            if(!cloudflare?.recoverDestination)fail('CLOUDFLARE_HOST_UNAVAILABLE');
+            if(await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:selected})!==true)fail('PERMISSION_DENIED');
+          }
           if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget,prior:{configs:state.configs,defaultTarget:state.product.defaultTarget}}})!==true)fail('PERMISSION_DENIED');
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
-            if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-            receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
+            if((selected.length||params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target)))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            receipt=unchanged?{after:state.product.revision,replayed:false}:await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),...(readySave?{destinationSelection:selected}:{}),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
             const added=[...new Map(params.changes.flatMap(c=>['createDestination','makeDefault'].includes(c.type)?[c.target]:[]).map(t=>[targetKey(t),t])).values()];
-            const refreshDepth=params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);
+            const refreshDepth=readySave?selected.some(s=>s.mode==='depth'):params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);
             const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();
             const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
-            const native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:displayOnly&&evidence
+            const prepared=superseded?new Map():await prepareSelected(selected,receipt.after);
+            const preparedTargets=selected.filter(s=>prepared.get(targetKey(s.target))?.state==='completed').map(s=>s.target);
+            let native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
               ?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true})
-              :receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
-                ?evidence.lastOutcome:await applyCurrent({refreshTargets:added,refreshDepth,refreshDepthReadiness:!evidence?.desired});
+              :!readySave&&receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
+                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave?[]:added,refreshDepth,refreshDepthReadiness:!readySave&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:undefined});
             let backup;
-            if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
+            if(unchanged)backup={state:'NOT_REPEATED'};else if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
+            const configuration=await current.read();
+            if(readySave&&configuration.product.revision!==receipt.after)native={state:'blocked',code:'CONFIGURATION_SUPERSEDED'};
             const destinationReadiness=[];
-            for(const target of added){
+            if(readySave){
+              const evidence=engine.getEvidence?.(),rows=evidence?.desired?.rows??[];
+              const acknowledged=!!evidence&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation
+                &&configuration.generation.applied===evidence.acknowledgedGeneration;
+              for(const {mode,target} of selected){
+                const checked=prepared.get(targetKey(target));
+                const belongs=row=>row.role==='save'&&row.origin?.mode===mode&&row.target&&
+                  (mode==='depth'?scopeKey(row.target)===scopeKey(target):targetKey(row.target)===targetKey(target));
+                const candidates=rows.filter(belongs);
+                const actionable=row=>row.enabled&&row.visible&&row.actionKind!=='attention';
+                const nativeAck=acknowledged&&(native.state==='completed'||native.code==='DEPTH_DISCOVERY_REQUIRED'&&native.failedItems===0);
+                const depthFailure=mode==='depth'&&native.depthFailures?.find(f=>scopeKey(f.target)===scopeKey(target));
+                const ready=nativeAck&&!depthFailure&&checked?.state==='completed'&&candidates.length&&candidates.every(actionable);
+                destinationReadiness.push({mode,target,state:ready?'READY':'blocked',code:ready?'DESTINATION_NATIVE_ACKNOWLEDGED':
+                  checked?.state!=='completed'&&checked?.code?checked.code:depthFailure?depthFailure.code:!nativeAck?(native.state==='completed'?'NATIVE_APPLY_INCOMPLETE':native.code):
+                  candidates.find(row=>!actionable(row))?.reason??'DESTINATION_NOT_REGISTERED'});
+              }
+              const blocked=destinationReadiness.find(r=>r.state!=='READY');
+              if(blocked&&native.state==='completed')native={...native,state:'partial',code:blocked.code};
+            }
+            for(const target of readySave?[]:added){
               const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));
               if(row?.enabled&&row.actionKind!=='attention'&&native.state==='completed')destinationReadiness.push({target,state:'READY',code:'DESTINATION_NATIVE_ACKNOWLEDGED'});
               else {
@@ -362,7 +457,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
                 destinationReadiness.push({target,state:'blocked',code:checked?.worker?.code??checked?.code??row?.reason??native.code??'NATIVE_APPLY_INCOMPLETE'});
               }
             }
-            data={configuration:await current.read(),native,backup,destinationReadiness};
+            data={configuration,native,backup,destinationReadiness};
           }
         }
         else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await applyCurrent({refreshDepth:true,refreshDepthReadiness:true});}

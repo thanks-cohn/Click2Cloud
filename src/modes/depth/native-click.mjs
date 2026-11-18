@@ -17,7 +17,7 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
   const trace=()=>{const failed=inspect().acknowledgements?.find(a=>a.state!=='acknowledged');return JSON.stringify({itemId:row.id,parentId:row.parentId,role:row.role,actionKind:row.actionKind,mode:'depth',generation:inspect().desired?.generation,acknowledgedGeneration:inspect().acknowledgedGeneration,nativeCode:inspect().lastOutcome?.code,...(failed?{firstNativeFailure:{itemId:failed.itemId,code:safeCode(failed.code),state:failed.state}}:{}),stage,reason});};
   const record=async(state,code,cause)=>current.recordRemoteResult({kind:'depth-click',operationId,state,code,cause,destination:remoteDestination(row.target),stage:trace(),durationMs:Date.now()-started});
   try{
-   try{await record('pending','DEPTH_CLICK_STARTED');}catch{recordFailed=true;}
+   void record('pending','DEPTH_CLICK_STARTED').catch(()=>{recordFailed=true;});
    // Retain original ACK/recovery semantics; never authorize a partial menu.
    const native=inspect();
    if(native.pending||native.acknowledgedGeneration!==native.desired?.generation){result=await run(authorize);}

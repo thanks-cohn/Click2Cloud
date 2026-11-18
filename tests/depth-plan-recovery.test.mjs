@@ -8,7 +8,7 @@ import {isAbsolute} from 'node:path';
 import {build} from 'esbuild';
 import {Miniflare,createFetchMock} from 'miniflare';
 import {createProvisioner,WORKER_MODULES} from '../src/cloudflare/deployment.mjs';
-import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
+import {createRemoteTransport,preparedDestination} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {createDepthNativeClick} from '../src/modes/depth/native-click.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
@@ -26,7 +26,7 @@ const a={provider:'cloudflare',connectionId:'cloudflare:fixture',accountId:'fixt
 const b={...a,bucketName:'depth-b',prefix:''};
 const sourceUrl='https://raw.githubusercontent.com/approved.bin';
 
-test('absent Depth B plan is created for B, verified, persisted and reused; Narrow A and exact native destinations survive',async()=>{
+test('absent Depth B plan is created for B, verified, persisted and reused; Narrow A and exact native destinations survive',async t=>{
  const observation=await depthObservation(),{trace,ref}=observation;
  const fixturePath=fileURLToPath(new URL('./fixtures/public-egress.mjs',import.meta.url));
  assert(isAbsolute(fixturePath));assert.doesNotMatch(fixturePath,/^\/[A-Za-z]:\//,'esbuild requires a native Windows path, never URL /C:/ form');
@@ -55,7 +55,8 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
  };
  const provisionerOptions={request:management,authority,readModule:async path=>sourceModules.find(([name])=>name===path)[1],load:async key=>structuredClone(plans.get(key)),store:async(key,value)=>plans.set(key,structuredClone(value))};
  let provisioner=createProvisioner(provisionerOptions);
- const oauth={authority,status:async()=>({state:'CONNECTED',accounts:[{id:'fixture'}]}),request:async(path,options={})=>{assert.equal(options.method??'GET','GET','Recovery must never create a bucket');assert.match(path,/^\/accounts\/fixture\/r2\/buckets/);return Response.json({success:true,result:{buckets:[{name:a.bucketName},{name:b.bucketName}]}});}};
+ const fresh=['simple','nested','depth'].map(mode=>({...b,bucketName:'save-'+mode}));
+ const oauth={authority,status:async()=>({state:'CONNECTED',accounts:[{id:'fixture'}]}),request:async(path,options={})=>{assert.equal(options.method??'GET','GET','Recovery must never create a bucket');assert.match(path,/^\/accounts\/fixture\/r2\/buckets/);return Response.json({success:true,result:{buckets:[a,b,...fresh].map(t=>({name:t.bucketName}))}});}};
  const transportOptions={oauth,lookup:target=>provisioner.lookup(target),expectedCodeDigest,pollIntervalMs:1,record:async event=>{events.push(event);trace('transport.record',{state:event.state,code:event.code});},fetch:async(url,options)=>{const parsed=new URL(url),name=parsed.hostname.split('.')[0],worker=workers.get(name);assert(worker,'Unknown exact Worker '+name);if(process.env.C2C_DEPTH_TRACE_DIR){const c=JSON.parse(Buffer.from(options.headers.authorization.slice(7).split('.')[0],'base64url'));trace('request.begin',{endpoint:parsed.pathname,expiresInMs:c.expiresAt-Date.now(),sessionEqual:c.sessionId==='fixture-session'});}return dispatchDepthFixture(worker,parsed.pathname,options,trace,!!process.env.C2C_DEPTH_TRACE_DIR);}};
  let transport=createRemoteTransport(transportOptions),registrar,api;
  const deep=Array.from({length:12},(_,i)=>'level'+(i+1)).join('/')+'/';
@@ -93,6 +94,130 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
   const bObjects=(await bucketB.list()).objects.length,beforeDeployments=deployments.length;provisioner=createProvisioner(provisionerOptions);transport=createRemoteTransport(transportOptions);domain=createCloudflareOnboarding(domainOptions);
   const replay=await domain.recoverDestination({target:rowBefore.target,idempotencyKey:'exact-depth-b',expectedRevision:state.product.revision});assert.equal(replay.state,'completed',JSON.stringify(replay));assert.equal((await transport.status({...b,prefix:deep})).state,'READY');assert.equal(deployments.length,beforeDeployments);assert.equal((await bucketB.list()).objects.length,bObjects);assert.equal(JSON.stringify({product:state.product,configs:state.configs}),originalConfig);
   const outside={...b,accountId:'foreign',connectionId:'cloudflare:foreign'};await assert.rejects(domain.recoverDestination({target:outside,idempotencyKey:'foreign'}),{code:'WRONG_ACCOUNT'});assert.equal(deployments.length,beforeDeployments);
+
+  await t.test('Destinations Save prepares and acknowledges Simple, Narrow and nested Depth before the first click',async()=>{
+   const retries=new Map(),folders=['Parent/','Parent/Leaf/'];
+   current.findRetry=async key=>retries.get(key);
+   current.commitProduct=async ({product,configs,expectedRevision,idempotencyKey,fingerprint,destinationSelection})=>{
+    if(retries.has(idempotencyKey))return {...retries.get(idempotencyKey),replayed:true};
+    assert.equal(expectedRevision,state.product.revision);
+    const receipt={after:expectedRevision+1,fingerprint,destinationSelection};
+    state.product={...structuredClone(product),revision:receipt.after};
+    state.configs=structuredClone(configs);
+    retries.set(idempotencyKey,receipt);
+    return receipt;
+   };
+   let signedIn=true,sessionId='manager-first-login',nativeFailure=false,historyOutage=false;
+   const localOauth={...oauth,connect:async()=>{
+    signedIn=true;sessionId='manager-returning-login';
+    return oauth.status();
+   },authority:async()=>{
+    if(!signedIn)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
+    return {...await authority(),sessionId};
+   }};
+   const count={authority:0,capabilities:0,upload:0,verify:0};
+   const createTransport=()=>createRemoteTransport({...transportOptions,oauth:localOauth,verifyAuthority:async()=>{count.authority++;return signedIn;},
+    record:async event=>{if(historyOutage)throw Error('History unavailable');events.push(event);},
+    fetch:async(url,options)=>{
+     const path=new URL(url).pathname;
+     if(path==='/capabilities')count.capabilities++;
+     if(path==='/remote-save')count.upload++;
+     if(path==='/verify')count.verify++;
+     return transportOptions.fetch(url,options);
+    }});
+   const getInventory=async()=>{
+    const scopes=inventory(true).scopes;
+    for(const target of fresh){
+     const plan=await provisioner.lookup(target);
+     const ready=prefix=>preparedDestination(plan,{...target,prefix},expectedCodeDigest).state==='READY';
+     scopes.push({target,authorized:signedIn,complete:true,workerReady:ready(''),folders:folders.map(prefix=>({prefix,workerReady:ready(prefix)}))});
+    }
+    return {scopes,depthScopes:scopes.map(scope=>({...scope,stale:false}))};
+   };
+   function startHost(){
+    registrar?.close();
+    transport=createTransport();
+    const cloudflare=createCloudflareOnboarding({...domainOptions,oauth:localOauth,transport});
+    const authorize=async target=>{
+     const auth=await localOauth.authority().catch(()=>null);
+     const ready=auth&&preparedDestination(await provisioner.lookup(target),target,expectedCodeDigest).state==='READY';
+     return ready?{sessionId:auth.sessionId,authorizedTargets:[target]}:null;
+    };
+    const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},removeAll:callback=>callback(),
+     create:(properties,callback)=>{
+      if(nativeFailure&&properties.title==='Narrow test')chrome.runtime.lastError={message:'fixture ACK failure'};
+      callback();delete chrome.runtime.lastError;
+     }}};
+    registrar=createChromeRegistrar({chrome,dispatchOwnsAuthorization:true,
+     dispatch:(_row,{info,generation})=>engine.save({itemId:info.menuItemId,generation,context:'link',source:sourceFromClick(info)})});
+    engine=createEngine({current,registrar,getAuthorization:authorize,providerSetupActions:true,remoteSave:input=>transport.save(input)});
+    api=createEngineApi({engine,current,oauth:localOauth,cloudflare,getInventory,authorize:async()=>true,confirm:async()=>true});
+   }
+   function commit(changes,id,prepareModes=[]){
+    return {version:'3+1.1',method:'commitConfigChange',params:{changes,prepareModes,expectedRevision:state.product.revision,idempotencyKey:id}};
+   }
+   startHost();
+   const click=async(mode,target,expected='completed')=>{
+    const row=registrar.inspect().desired.rows.find(r=>r.role==='save'&&r.origin.mode===mode&&r.target.bucketName===target.bucketName&&r.target.prefix===target.prefix);
+    assert(row,'Missing native route for '+mode+' '+target.prefix);
+    assert.equal(row.actionKind,'save');
+    const from={...count};
+    const out=await registrar.handleClick({menuItemId:row.id,linkUrl:sourceUrl});
+    assert.equal(out.state,expected,JSON.stringify(out));
+    if(expected==='completed'||expected==='partial'){
+     assert.equal(count.capabilities,from.capabilities);
+     assert.equal(count.authority-from.authority,2);
+     assert.equal(count.upload-from.upload,1);
+     assert.equal(count.verify-from.verify,1);
+     assert.equal(out.receipt.key.split('/').slice(0,-1).join('/')+(target.prefix?'/':''),target.prefix);
+     const worker=workers.get((await provisioner.lookup(target)).name);
+     assert.equal(await (await (await worker.mf.getR2Bucket('STORAGE')).get(out.receipt.key)).text(),'abc');
+    }else assert.equal(count.upload,from.upload);
+   };
+   const before=deployments.length;
+   for(const [i,mode] of ['simple','nested','depth'].entries()){
+    const root=fresh[i],target={...root,prefix:'Parent/Leaf/'};
+    const changes=mode==='depth'?[{type:'setDepthDisplayBuckets',scopes:[...state.configs.depth.scopes,{target:root,maxDepth:2}]}]
+     :[{type:'createDestination',mode,target,label:mode==='simple'?'Simple test':'Narrow test'}];
+    const request=commit(changes,'manager-'+mode);
+    assert.equal(await provisioner.lookup(target),undefined);
+    nativeFailure=mode==='nested';
+    const first=await api.invoke(request,'gui');
+    if(nativeFailure){
+     assert.equal(first.state,'partial');
+     assert.equal(first.code,'NATIVE_APPLY_INCOMPLETE');
+     assert.equal(first.data.destinationReadiness.at(-1).state,'blocked');
+     nativeFailure=false;
+    }else assert.equal(first.state,'completed',JSON.stringify(first));
+    const ready=mode==='nested'?await api.invoke(request,'gui'):first;
+    assert.equal(ready.state,'completed',JSON.stringify(ready));
+    assert(ready.data.destinationReadiness.every(row=>row.state==='READY'));
+    await click(mode,target);
+    if(mode==='depth')for(const prefix of ['','Parent/'])await click(mode,{...root,prefix});
+   }
+   assert.equal(deployments.length-before,3);
+   for(const target of fresh){
+    const worker=workers.get((await provisioner.lookup(target)).name);
+    assert.equal((await (await worker.mf.getR2Bucket('STORAGE')).list()).objects.filter(o=>o.key.includes('.click2cloud-readiness/')).length,1);
+   }
+   const noDepth={...state.product.show,depth:false};
+   assert.equal((await api.invoke(commit([{type:'setShowInChrome',show:noDepth}],'hide-depth'),'gui')).state,'completed');
+   assert(!registrar.inspect().desired.rows.some(r=>r.origin.mode==='depth'));
+   signedIn=false;
+   await click('simple',{...fresh[0],prefix:'Parent/Leaf/'},'blocked');
+   startHost();
+   const cleared=await api.invoke(commit([{type:'clearDefault'}],'clear-default-for-returning-login'),'gui');
+   assert.equal(cleared.state,'completed');
+   const relogin=await api.invoke({version:'3+1.1',method:'loginBegin',params:{}},'gui');
+   assert.equal(relogin.data.initialization.code,'SAVED_DESTINATIONS_RESTORED');
+   assert.equal(relogin.data.initialization.native.state,'completed');
+   assert.equal((await api.invoke(commit([{type:'setShowInChrome',show:{...noDepth,depth:true}}],'show-depth',['depth']),'gui')).state,'completed');
+   historyOutage=true;
+   await click('depth',{...fresh[2],prefix:'Parent/Leaf/'},'partial');
+   historyOutage=false;
+   for(const [i,mode] of ['simple','nested','depth'].entries())await click(mode,{...fresh[i],prefix:'Parent/Leaf/'});
+   assert.equal(deployments.length-before,3,'Reopen, mode switch and relogin must reuse the Workers');
+  });
  }finally{trace('disposal.begin');registrar?.close();for(const worker of workers.values()){worker.lifecycle='disposing';trace('fixture.dispose',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight,requestCount:worker.requestCount});await worker.mf.dispose();worker.lifecycle='disposed';trace('fixture.disposed',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight});}await mock.close();trace('disposal.end');await observation.finish();}
 });
 

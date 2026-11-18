@@ -37,7 +37,7 @@ export interface Methods {
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
  listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
  previewConfigChange:{changes:Change[];expectedRevision:number};
- commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string};
+ commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string;prepareModes?:('simple'|'nested'|'depth')[]};
  reconcileNativeMenu:{expectedGeneration:number};inspectRecoveryCoverage:{target:Target};runRecoveryPage:{target:Target};inspectBackupRoots:{};chooseBackupLocation:{purpose?:'rebuild'};listRecoveryPolicies:{};writeRecovery:{};
  requestRestorePreview:{rebuild?:RebuildIntent};restoreRightClickMenu:{expectedRevision?:number;previewToken:string;idempotencyKey:string;rebuild?:RebuildIntent};
  inspectWholeCloudJobs:{};enableWholeCloudJob:{identity:Identity;cadence?:'weekly'|'daily'};disableWholeCloudJob:{identity:Identity};
@@ -66,7 +66,7 @@ export interface Results {
  requestRestorePreview:RestorePreview;restoreRightClickMenu:{configuration:unknown;native:{state:string;code?:string};preservation?:{state:'VERIFIED';checksum:string;filename:string;evidenceClass:'external-filesystem-readback'};requiresReconnect:true;outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';originalStateRestored?:false;remoteSave?:'NOT_VERIFIED'};
  describeCapabilities:ReliabilityDescription|{version:Version;build:unknown;tools:Tool[];publicEndpoint:false};
  getEngineHealth:EngineTrace|SafeSupportReport|{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};configuration?:ConfigurationHealth;storagePolicy?:{state:'OBSERVED_READ_ONLY'|'UNOBSERVED';persistent?:boolean;usageBytes?:number|null;quotaBytes?:number|null;pastDeletionCause?:'UNKNOWN'};origin:{extensionId:string|null;schemaVersion:1};native:unknown;externalRecovery:unknown};
- commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
+ commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{mode?:'simple'|'nested'|'depth';target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
  listDestinations:{items:(Destination|{target:Target;maxDepth:number;hidden?:boolean})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};

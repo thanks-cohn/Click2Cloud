@@ -805,3 +805,41 @@ upload snapshots remain internal. Privacy export also omits nested browsing URLs
 Evidence: paired 5,000-record actual Chromium IDB measurements and the full
 existing recovery/crash guards in docs/evidence/customer-history. These are not
 Windows gesture latency or live cloud transfer measurements.
+
+## CLICK AND DONE — destination Save and native dispatch
+
+The Destinations Manager and its add/edit dialog call `3+1.1 commitConfigChange`
+with `prepareModes`. Save discloses scoped Worker maintenance and the small R2
+readback probe. The selected cloud targets come from the resulting visible
+configuration and the changed rows, including new or changed Depth scopes.
+A tool caller must hold both configure and exact-account
+`recoverCloudflareDestination` authority and confirm the combined operation.
+A caller that omits `prepareModes` retains the legacy configuration-only
+contract. The saved revision and exact readiness selection are bound to the
+CURRENT retry receipt.
+
+The commit calls existing `recoverCloudflareDestination` onboarding logic
+before asking the canonical compiler and registrar to apply the menu. An
+existing scoped Worker with matching build and verified bucket write is reused.
+A newly prepared Worker must pass the independent R2 byte readback probe.
+The same bucket binding supports discovered Depth descendants within the
+Worker's prefix. Required Depth discovery failures, narrower existing Worker
+scopes, changed CURRENT and missing Chrome acknowledgments report incomplete
+Save while preserving configuration. An unrelated stale Depth snapshot does
+not block a Simple or Narrow Save. An uncertain probe is inspected by its
+original operation ID on retry. No bucket is created by this method.
+
+The production registrar calls the existing `dispatchSave` engine once for
+native save rows. The engine validates CURRENT, native ACK, immutable route,
+context and current account authorization. Prepared Worker evidence comes
+from the retained scoped plan. The transport performs live bucket authority
+checks before dispatch and after independent R2 verification. Signed, read-only
+operation polls reuse an invocation-local grant and check the OAuth session.
+Long-running writes still require authorized lease renewal. Cold boot
+reprojects retained configuration and Depth inventory and obtains new Chrome
+callbacks without a provider sweep. Native pre-dispatch recovery can use
+retained approval for the exact configured target and requires a fresh click
+if the menu changes. It never replays a source write. Shelf, recorder and
+pending History updates cannot gate a valid remote write.
+
+Evidence and live acceptance steps are in [CLICK AND DONE evidence](../../codex/11.18.2026/CLICK_AND_DONE_EVIDENCE.md).

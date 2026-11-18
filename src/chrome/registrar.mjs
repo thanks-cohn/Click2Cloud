@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, dispatchOwnsAuthorization=false } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -191,6 +191,19 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       try{const out=await dispatch(r.action,{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{}),generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
     const rowForDepth=()=>desired?.rows.find(r=>r.id===String(info.menuItemId));
+    // The product engine already validates durable CURRENT, ACK, context,
+    // exact action binding and fresh authority. Do not do a second resolution
+    // with a different authority observation before sending it the gesture.
+    if(dispatchOwnsAuthorization){
+      const row=rowForDepth(),generation=acknowledged?.generation;
+      if(!pending&&generation!=null&&desired?.generation===generation&&row?.role==='save'&&dispatch){
+        let result;
+        try{result=await dispatch(row,{info,tab,generation,observation,depthAuthorization});}
+        catch{result={state:'failed',code:'DISPATCH_FAILED'};}
+        try{onOutcome?.(result);}catch{}
+        return result;
+      }
+    }
     let authorization;
     try { authorization = await (depthAuthorization??getAuthorization)?.(depthAuthorization?rowForDepth().target:info, tab); }
     catch { authorization = null; }
@@ -227,7 +240,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       return outcome;
     } finally { observed('native.terminal',{result:outcome??{state:'uncertain'}}); }
   }
-  const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab); };
+  const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab).catch(()=>{}); };
   chrome.contextMenus.onClicked?.addListener(listener);
   const owner = freeze({ apply, inspect, resolveClick, handleClick,
     async recover(spec) {

@@ -194,7 +194,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     } catch(e) {signal('persistence.restore',e?.code==='BACKUP_AUTH_REQUIRED'?'blocked':'failed',e?.code==='BACKUP_AUTH_REQUIRED'?'BACKUP_AUTH_REQUIRED':'MIGRATION_QUARANTINED',operationId);throw e;}
   }
   // All modes, preferences and replay record share one CURRENT transaction.
-  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint,traceContext}) {
+  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint,traceContext,destinationSelection}) {
     const normalized=productState(product);
     const normalizedConfigs={};
     for(const mode of Object.keys(modeModules))normalizedConfigs[mode]=validateModeConfig(mode,configs[mode]);
@@ -217,7 +217,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         }
       }
       await append(stores,{kind:'product',mode:null,at:clock(),previous,current});
-      const receipt={fingerprint,before:previous.revision,after:current.revision,idempotencyKey};
+      const receipt={fingerprint,before:previous.revision,after:current.revision,idempotencyKey,
+        ...(destinationSelection?{destinationSelection}:{})};
       stores.state.put({id:'retry:'+idempotencyKey,value:receipt});
       const keys=await request(stores.state.getAllKeys());
       const retries=keys.filter(k=>String(k).startsWith('retry:'));
@@ -295,7 +296,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
   }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;const safe={...previous,kind:value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResults:({cursor,limit,customer=false}={})=>transact('readonly',async s=>{if(customer&&typeof s.state.openCursor==='function'&&typeof IDBKeyRange==='function')return customerHistoryPage(s,{cursor,limit});const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const visible=customer?all.filter(r=>r.kind!=='readiness'&&(r.kind!=='depth-click'||!r.cause||!all.some(s=>s.operationId===r.cause))):all;const start=cursor?visible.findIndex(x=>x.operationId===cursor)+1:0,items=visible.slice(start,start+limit);return {items,nextCursor:start+limit<visible.length?items.at(-1)?.operationId:null};}),
     readHistoryPreferences:()=>transact('readonly',async s=>(await request(s.state.get('historyPreferences')))?.value??{...historyDefaults}),
