@@ -71,6 +71,23 @@ Replace the existing two-way Appearance/theme **switch** with a normal **dropdow
 
 A theme switch is no longer appropriate with three or more options. Persist selection, restore it on reload, and use the existing extensible, isolated presentation system so future themes add one dropdown item rather than more switches. Avoid changing unrelated appearance settings or modifying how the other two themes look.
 
+### Mandatory implementation foundation: existing Aesthetic API v1.0
+
+**Verified present at base commit `c337e41`:**
+- `docs/api/AESTHETIC_API_V1.md` documents the implemented contract, explicitly stating aesthetic packages change appearance and never engine behavior.
+- `src/aesthetic/host.mjs` exposes `createAestheticHost()`, `register()`, `apply()`, `restore()`, and storage key `aestheticPreferenceV1`, with supported `data-aesthetic` root selection.
+- `src/aesthetic/packages.mjs` registers `standard` and `high-polish` as **declarative tokens only**.
+- `extension/aesthetic.css` is the **trusted semantic adapter** for visual effects and styling.
+- `tests/aesthetic.test.mjs` and `scripts/test-aesthetic-browser.mjs` are relevant tests.
+
+**Implementation directive:** Build **Minimal on top of THIS EXISTING Aesthetic API**, not a second theme engine or disconnected CSS/JS mechanism. Register a new `minimal` declarative theme package through the existing host, expose it via the Appearance dropdown, and apply tokens for typography, colors, spacing, elevation, etc. Respect the current API's versioning, validation, persistence, and Standard fallback behavior. Keep Light/Dark independent.
+
+**Important v1 API limit:** The existing token schema does **not** include arbitrary selectors, `display`, or content suppression. Do **not** grant aesthetic packages scripting, DOM access, arbitrary CSS, executable plugins, credentials, storage APIs, or privileges. To hide explanatory/debug copy in Minimal, extend only the **trusted application-owned presentation adapter and explicitly annotated nonfunctional text nodes**, with tightly scoped selectors/hooks under `:root[data-aesthetic="minimal"]`. If essential, add a strictly presentation-only rendering decision to the trusted UI view layer; it must never alter business state or control flow. Avoid brittle global selectors that could hide buttons, live errors, accessible labels, or file names.
+
+**Hard boundary:** All saves, queues, uploads, Worker setup, OAuth, R2 operations, menus, history, receipts, authorization, routing, diagnostics data, functional buttons, data model, and background services operate **identically** across Standard/High Polish/Minimal. Minimal may hide *only redundant visible prose and debug decoration*, never disable a button, block an event, swallow an exception, prevent a legitimate alert, or delete event/data. Preserve diagnostics access on demand. Switching themes mid-operation must leave jobs and current selection uninterrupted.
+
+**Proof required:** Add tests for Aesthetic API validation, switching, persistence, malformed-package fallback, DOM presentation hooks that hide only the specified copy, button interaction parity, accessibility, and active-job/Worker/save behavior unchanged. Inspect the actual DOM for text visibility rather than only asserting a token exists. No edits to privileged engine modules solely for the sake of Minimal.
+
 ### Minimal means content and commands, not explanatory prose
 
 **Product intent:** Primarily just the File Explorer with **bucket names, directory names, filenames, icons, essential navigation, top tabs, toolbar buttons and their working commands**. Elegant typography, deliberate alignment, compact but comfortable spacing, little ornament, clean neutral colors and legible focus/hover states. Avoid large instructional panels, decorative cards, verbose status blocks or repeated explanatory microcopy.
