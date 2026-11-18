@@ -9,6 +9,8 @@
 
 > **Product directive:** Build a cloud operations engine that can grow from one user's right-click save to large enterprises handling many accounts, buckets, objects, simultaneous transfers, and long-running jobs—without sacrificing security, independently inspectable receipts, speed, recovery, or predictable operating cost. We are aiming for a winning general-purpose foundation, not merely making the current per-pair implementation pass a few tests.
 
+**Research-only Codex task:** [Final read-only Codex architecture decision request](../docs/requests/CODEX_FINAL_READ_ONLY_CLOUD_ENGINE_ARCHITECTURE_DECISION_2026-11-18.md). Codex must inspect and produce a design/decision in its response; it is NOT authorized to edit either repository or run live cloud changes.
+
 ## 1. Evidence that motivated this proposal
 
 **Primary decision source — full comparative audit:** [Click2Cloud vs. full ReDown, 2026-11-18](../docs/evidence/r2-operations-overhaul/Click2Cloud-vs-ReDown-audit.md). This is the direct source for the architectural comparison and recommendations. The audit assessed Click2Cloud `6c401f5` and ReDown `c78babc`; it explicitly found that:
