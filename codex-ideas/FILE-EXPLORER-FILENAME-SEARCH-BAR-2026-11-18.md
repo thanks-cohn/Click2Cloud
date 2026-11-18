@@ -48,47 +48,43 @@ searchDirectoryNames({
 
 **V1 implementation rule:** Only enumerate and match **one directory level** (e.g., delimiter-aware listing). Do **not** download file contents or scan all descendants to answer a V1 search. The GUI is just a small input/results overlay on that underlying API.
 
-### Exact GUI placement in the compressed two-row File Explorer
+### Responsive toolbar: search fills available space before More
 
-**Observed in the user's screenshot (2026-11-18):** the compressed File Explorer shows the current `#location` **Address** input on the top row immediately to the **left of `More`**, and **`+ Right Click`** on the second row. The user finds the address field intrusive and wants that visible slot to be the **filename search input instead**.
+**Latest user clarification (2026-11-18):** The current File Explorer toolbar already has the right navigation controls (Back, Forward, Up and Refresh). **Keep those controls intact.** The unused horizontal space **between the navigation controls and the `More` button** should become a flexible **filename search input whenever sufficient width is available**. The goal is to gain search without wasting space or forcing an additional row.
 
-**Requested compact layout:**
-
-```text
-+---------------------------------+
-| [ Search filenames... ] [ More ] |  row 1
-| [ + Right Click ]                |  row 2 — unchanged
-+---------------------------------+
-```
-
-- **Replace the visible address field in this compact slot** with a genuine text input for search, not a path/address bar with relabeled placeholder text. A directory address must **not** occupy the main visible input in the compact two-row view.
-- **Press Enter to submit the query.** Typing alone must **not** send API search calls; the explicit Enter keypress invokes the File API using the current directory context. Display loading and results or a concise error afterward. Repeated Enter with a changed query runs a new search. Empty Enter should leave or restore the ordinary current-directory listing.
-- **`More` stays directly to the right** of the search input. Preserve its overflow action and behavior. Keep the **`+ Right Click`** button on row two in the same position, with the same wording and exact existing behavior; **do not turn it into a search action, relocate it to More, or remove it**.
-- The existing `#location` control in `extension/app.mjs` currently performs address navigation. If retaining that capability, expose it separately via an expanded layout or the existing overflow menu as needed; **do not keep it as the primary compact text field**. Preserve functional navigation via tree and breadcrumbs and avoid changing the Explorer save engine while implementing the GUI.
-- On search submission the UI should call **the underlying File API** (not an in-browser ad hoc recursive listing); V1 searches immediate children of the current directory only. A future typed `:nested ...` or explicit `bucket/directory/child:nested ...` command uses this **same input and Enter-to-submit behavior**, routed through the future API parser and search capability.
-- Preserve the compact toolbar's two-row usability at narrow panel widths and across all three aesthetics. Do not add a permanent third row or force the user to expand the toolbar merely to search.
-
-### One-keyboard-shortcut toggle for the compact toolbar (GUI requirement)
-
-The current Explorer already has a horizontally draggable **toolbar-height splitter** (`#toolbar-splitter`), with keyboard **Up/Down** on the focused separator and a persisted `toolbarRows` preference. The existing `installExplorerLayout` in `extension/explorer-layout.mjs` calculates and renders toolbar rows. **Reuse this mechanism rather than building a second collapsing toolbar engine.**
-
-**New behavior requested:** A single, discoverable keyboard shortcut **toggles between exactly one and two toolbar rows** each time it is pressed, without requiring the user to first focus the splitter:
+**Examples, schematic only:**
 
 ```text
-Shortcut press #1: 1 row -> 2 rows (show filename search input next to More)
-Shortcut press #2: 2 rows -> 1 row (only Back / Forward / Up / Refresh, per existing one-row mode)
-Shortcut press #3: 1 row -> 2 rows, and so on
+Wide enough (single visible row):
+[ ← ][ → ][ ↑ ][ ⟳ ] [ Search filenames................. ] [ More ]
+
+Too narrow for a usable search input:
+[ ← ][ → ][ ↑ ][ ⟳ ][ More ]
+                     (Search collapses; navigation remains)
 ```
 
-- **Two-row state:** the filename search input is visible on row one directly **left of More**; **+ Right Click** remains on row two and works exactly as before.
-- **One-row state:** preserve the existing ultra-compact navigation actions (Back, Forward, Up, Refresh); search may be hidden/collapsed but its API and stored results remain unaffected.
-- This shortcut should reuse the existing toolbar-row layout state and persistence; **it must not change the folder-tree/file-pane splitter**, whose width is a separate preference.
-- Manual mouse dragging and arrow-key adjustments to the existing separator must continue to work. A shortcut from any toolbar-row state should have deterministic behavior (for example, 2+ rows collapse to 1, next press expands to 2).
-- Choose a shortcut that does not collide with existing Chrome/OS shortcuts or text input; expose its keyboard hint in a tooltip/help and consider user-configurable remapping. **Do not hard-code an unverified shortcut combination in the specification.**
-- Scope keyboard handling to an active File Explorer view. Do not fire during IME composition or steal ordinary text entry. If collapsing hides the focused search input, move focus to a visible appropriate control.
-- Unit/browser tests should verify repeated 1↔2 toggles, persisted preference across reopen, manual resize compatibility, responsive widths, correct keyboard focus, unchanged More behavior and unchanged + Right Click behavior.
+If the panel is *extremely* narrow, adapt button spacing and overflow gracefully; preserve **Back, Forward, Up and More** as the minimum navigation/overflow controls and retain Refresh wherever possible. Do not compress the search field into an unusable sliver or overlap buttons.
 
-**Why:** the user can instantly reveal the two-row toolbar to search, then return to the minimal navigation-only row with the **same shortcut**. This is a presentation behavior; it must not modify the save engine, directory selection or File API search logic.
+- The **search input is an elastic/flexibly sized element** that occupies leftover horizontal room **after essential navigation buttons** and **before More**. Set a minimum usable input width, test actual text legibility, and hide/collapse the search input first when that minimum is unavailable. When the panel widens, automatically restore the search field without requiring a separate click.
+- **`More` remains accessible in the compact state**, including when there is no search bar. Search may be reachable through More when collapsed, but that must not introduce a new permanent row. Keep the existing More action and overflow behavior.
+- The current `#location` **Address** input is **not** the desired primary field. Replace its visible toolbar role with a filename search field, and retain any useful Go-to-path/address navigation through a secondary accessible route rather than removing it outright.
+- **Enter submits the query** to the reusable File API; typing alone doesn't call Cloudflare or launch a search. V1 searches only the current directory's immediate files and child folders. A future `:nested` or `bucket/directory/child:nested` expression uses this same field and Enter behavior.
+- The search must fit without displacing the existing navigation or `More` button and without stealing gallery space through unnecessary toolbar rows. Respect keyboard navigation, focus if the search collapses during resize, theme styling and input accessibility.
+
+**When the user deliberately expands the toolbar to two rows**, retain the existing two-row experience, including **`+ Right Click`** on its established second-row position with **exactly the same action**. Give the search field as much useful width as the expanded layout permits; do not duplicate it in two places. If there is adequate horizontal space even in one-row mode, **show search there as well**—search is responsive, **not exclusively a two-row feature**.
+
+### One-shortcut toggle for toolbar height, independent of responsive search
+
+The Explorer already uses `#toolbar-splitter` with keyboard Up/Down and persisted `toolbarRows` in `extension/explorer-layout.mjs`. Add a **single keyboard shortcut** that toggles its row-height preference between **1 row and 2 rows**, reusing the current layout controller (not a second toolbar engine).
+
+- **Press #1:** 1 → 2 rows. Expanded commands such as **+ Right Click** appear in their established positions; search fills available space near More.
+- **Press #2:** 2 → 1 row. Return to compact navigation plus More; **show search automatically if the available width can still accommodate it**, otherwise hide search. Do not force search hidden at all widths.
+- Further presses alternate 1 ↔ 2 rows. From a manually configured 3+-row state, first shortcut press may collapse to 1, then next expands to 2. Manual drag and separator arrow keys continue working.
+- Keep this shortcut distinct from the **50/50 left/right pane reset** shortcut. Do not change the pane split when toggling toolbar height.
+- Avoid Chrome/OS/input conflicts, IME composition, and inadvertent key capture; publish an accessible shortcut hint after verifying the chosen chord. Persist toolbar row preference and restore focus safely after a collapse.
+- Browser tests: wide and narrow widths for both row states; auto-appear/disappear of search on resize; stable order Back/Forward/Up/Refresh → Search (when fitting) → More; no overflow/overlap; no duplicate search; unchanged More, + Right Click, manual splitter and right-click save behavior.
+
+**Priority rule if earlier text conflicts:** The latest requirement is **responsive search occupying spare space in a one-row or two-row toolbar**. The one-row layout does **not** automatically ban search. When space is too narrow, it falls back to navigation plus More. This supersedes the earlier fixed rule that search is only revealed at two rows.
 
 ### Remove the persistent bottom footer; float Manage Destinations on the left
 
