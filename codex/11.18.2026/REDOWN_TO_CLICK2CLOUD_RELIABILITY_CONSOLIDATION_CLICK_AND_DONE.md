@@ -68,6 +68,18 @@ The owner has a significant success baseline in their **Guti Chrome profile**. T
 
 Known concerns for investigation include repeated `WORKER_SETUP_REQUIRED`/`REPAIR_REQUIRED` intervention, intermittent Shelf/Explorer behavior, and prior recorder/storage test failures, but **do not assume all have a common cause or originate from this exact Guti-profile build**.
 
+## HIGH PRIORITY — Explain and eliminate Click2Cloud's speed deficit
+
+**The owner's direct experience is that full REDOWN feels near-instant.** They recall typical REDOWN media saves taking under one second to about one second, with a maximum around two seconds. **These are owner estimates, not verified statistics.** Do not dismiss the perceived difference; investigate it rigorously, and do not manufacture precise comparative metrics from incomplete data.
+
+By contrast, the owner's November 17 Click2Cloud RAW exports from the working Guti Chrome profile / runtime `e188dc7` were previously analyzed as recording **161 verified attempts among 178 recorded attempts**, with **37 additional verified attempts in the newer snapshot**. The reported click-to-verified latency among verified saves had **median ~4.25 seconds, p95 ~12.11 seconds, slowest ~23.93 seconds**. The available stage measurements suggest that Worker requests, authorization rechecks, capability checks and sometimes dispatch could contribute, but this is not a proven root-cause finding.
+
+**Find out why full REDOWN feels near-instant while Click2Cloud is comparatively slow.** Investigate the actual implementations and timings without assuming a solution. Consider end-to-end architecture, unnecessary serial work, duplicate calls, state ownership, provider/Worker boundaries, network and source-host variation, background-service-worker lifecycle, and the difference between responsiveness and completed cloud verification.
+
+Compare **like with like**: click-to-immediate UI acknowledgement, click-to-dispatch, click-to-provider request and click-to-independently-verified cloud object. REDOWN may use different providers and mechanisms; compare equivalently sized files and controlled circumstances where possible. Measure warm/cold cases and **Simple, Narrow and Depth**. Report sample counts, median, p95, slowest, errors and stalls; do not infer a typical speed from only the fastest saves. Distinguish recorder-derived evidence from live Chrome measurements.
+
+**Optimize for genuinely faster verified saves and near-instant user feedback while preserving every security and correctness boundary.** No fake success, unsafe caching of permissions, duplicate uncertain writes, or bypassing checks just to improve reported numbers. Consolidate unnecessary repeated work and calls where evidence supports it. Benchmark before and after, protect the current working engine, and report what can and cannot realistically reach REDOWN-like responsiveness.
+
 ## Required method and evidence
 
 1. **Investigate first.** Produce a grounded explanation of what makes REDOWN successful, how Click2Cloud differs, and the concrete failure opportunities or redundant ownership discovered. Clearly distinguish facts, hypotheses, and unknowns.
