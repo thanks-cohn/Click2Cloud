@@ -121,6 +121,20 @@ Shortcut press #3: 1 row -> 2 rows, and so on
 
 **Implementation boundary:** Presentation/layout changes only for this request. Do not modify backend save semantics, receipts, History persistence, cloud authorization, or transfer operations.
 
+### Independent shortcut: restore a 50/50 left/right panel split (mouse-free recovery)
+
+**User request (2026-11-18):** Add **another keyboard shortcut**, separate from the one-row/two-row toolbar shortcut, that immediately restores the File Explorer's **left folder tree and right files/gallery panel to exactly 50% / 50%**. This is especially important if mouse dragging is unavailable, unreliable, or the divider has been pushed so far that a pane is hard to access.
+
+- This shortcut is a **reset command**, not a toggle. Every press sets the horizontal pane split to **50/50**, regardless of its current value (including fully collapsed left/right pane). It must **not alter the toolbar height or row count**.
+- Use the **existing `#pane-splitter` and `installExplorerLayout` split preference** in `extension/explorer-layout.mjs`. The current code already supports keyboard Left/Right adjustment and double-click to reset to 50%. The new shortcut should invoke the equivalent `split = 50` operation without requiring mouse interaction, divider focus or manual dragging.
+- Persist the reset using the same existing preferences/storage pathway, and refresh the layout immediately without unnecessarily changing cloud state, save destinations, current folder, selections, or files.
+- Scope the command to **File Explorer**, and avoid conflicting with Chrome/system shortcuts, normal typing, editable inputs, IME composition, or the separate toolbar-row toggle. Choose and document the actual key chord during implementation after checking existing shortcuts; ideally provide a configurable binding or a visible keyboard-hint in Help/More.
+- Keep the existing drag, keyboard arrows, and divider double-click behavior. The shortcut is an extra *accessibility and recovery* path, not a replacement.
+- Provide a brief accessible confirmation such as `Panels reset to 50/50` if useful, without introducing a persistent bottom/footer bar or covering the gallery.
+- Test from left-pane-collapsed (0%), right-pane-collapsed (100%), off-center (e.g. 20/80), and already-balanced (50/50) states. Test repeat press, reload persistence, narrow widths, keyboard-only interaction, focus safety, and no interaction with the toolbar-row shortcut.
+
+**Purpose:** one immediate, predictable way to recover a balanced folder-tree/gallery layout when the mouse or separator is difficult to use.
+
 ### V1 acceptance examples
 
 1. From `bucket/`, query `photo` finds `bucket/photo.jpg` and `bucket/photographs/`, but **not** `bucket/archive/photo.jpg`.
