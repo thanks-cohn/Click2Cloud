@@ -1,4 +1,4 @@
-# Aesthetic API 1.0 — implemented contract
+# Aesthetic API 1.1 — implemented contract
 
 An aesthetic changes how Click2Cloud looks, never how it works. This module is independent of the privileged engine API `3+1.1`. Standard and High Polish use the same host. Standard removes all aesthetic variables and restores the pre-existing stylesheet. High Polish is the first declarative package, not a second theme engine. Light/Dark remains the existing independent product preference.
 
@@ -26,7 +26,7 @@ Only trusted application code instantiates the host with a DOM root and storage 
 
 ## Package manifest and validation
 
-See `aesthetic-high-polish.example.json` (the actual built-in manifest) and `AESTHETIC_PACKAGE_V1.schema.json`. Fields: `schemaVersion:1`, lowercase safe `id` (≤48 characters), `name` (1–80 characters), semver `version`, exact `compatibleApiVersion:"1.0"`, `tokens`. Unknown fields and token names are rejected. The runtime validator is authoritative, including numeric bounds. Package versions identify content; API compatibility is deliberately exact in v1.
+See `aesthetic-high-polish.example.json` (the actual built-in manifest) and `AESTHETIC_PACKAGE_V1.schema.json`. Fields: `schemaVersion:1`, lowercase safe `id` (≤48 characters), `name` (1–80 characters), semver `version`, `compatibleApiVersion:"1.0"` or `"1.1"`, `tokens`. Unknown fields and token names are rejected. The runtime validator is authoritative, including numeric bounds. Package versions identify content; Version 1.0 packages remain compatible. The visibility field requires API 1.1.
 
 DTCG-style flat semantic token names use `{$type,$value}`. These are a bounded interoperable subset, not a claim to implement the whole DTCG standard. `tokenTypes` exports the complete inventory:
 
@@ -53,3 +53,19 @@ All aesthetic selectors are scoped under the active non-Standard root. The sheet
 Packages are JSON data: no executable JS, raw CSS, URLs, assets, arbitrary selectors/properties, storage, extension APIs, file handles or network. Registering data does not grant capabilities. This run ships only built-ins: no public install/import/marketplace or plugin execution. A future product can compile a vetted semantic adapter against a new compatible API; it cannot pass arbitrary CSS to this host. Expanding token types or semantic hooks requires compatibility review and tests. The bounded v1 token adapter intentionally cannot express every future aesthetic by itself.
 
 Tests: `node --test tests/aesthetic.test.mjs`, `node scripts/test-aesthetic-browser.mjs`, plus the complete existing test suite and shared History/Explorer browser checks. Visual quality is a design review with screenshots, not something unit tests can certify. See `docs/evidence/explorer-aesthetic-foundation/` for evidence and explicit environment blockers.
+
+## Semantic text visibility
+
+The optional `visibility` map accepts only `show` and `hide` for roles in
+`src/aesthetic/host.mjs`. Unspecified roles stay visible. The host applies the
+validated list to the presentation root and clears it on every package change.
+The trusted stylesheet matches just the approved text wrappers, including
+wrappers rendered after the theme was selected. Their contents are hidden both
+visually and in the accessibility tree. File and folder names, form labels,
+actions, notices and confirmations use separate elements outside those wrappers.
+
+The dropdown gets its choices from the registered package manifests. The first
+use defaults to Bit o' Polish. Existing persisted IDs remain compatible, and an
+unrecognized saved ID still falls back to Remote V1. Light/Dark remains an
+independent preference. Minimal leaves essential statuses and consent visible
+or available in their existing control, including the cost disclosure.

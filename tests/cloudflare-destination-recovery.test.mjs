@@ -21,7 +21,7 @@ function fixture({approved=true,scope=b}={}){
 test('approved recovery binds missing Depth B child to configured B scope and preserves Narrow A/default',async()=>{
  const f=fixture(),before=structuredClone(f.s),out=await f.c.recoverDestination({target:child});
  assert.equal(out.code,'CLOUDFLARE_READY');assert.deepEqual(out.target,child);assert.equal(out.readiness.state,'READY');assert.deepEqual(f.s,before);
- assert.equal(f.calls.filter(x=>x.kind==='prepare').length,1);assert.equal(f.calls.find(x=>x.kind==='prepare').options.prefixScope,'scope');
+ assert.equal(f.calls.filter(x=>x.kind==='prepare').length,1);assert.equal(f.calls.find(x=>x.kind==='prepare').options.prefixScope,'');
  assert.deepEqual(f.calls.find(x=>x.kind==='probe').target,child);assert(f.records.has('destination-recovery:'+await digest(['a','depth-b'])));
  const beforeCount=f.calls.length;assert.equal((await f.c.recoverDestination({target:child})).reused,true);assert(f.calls.slice(beforeCount).every(x=>x.kind==='status'));
 });

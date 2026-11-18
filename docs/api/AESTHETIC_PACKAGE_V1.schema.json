@@ -29,7 +29,10 @@
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "compatibleApiVersion": {
-      "const": "1.0"
+      "enum": [
+        "1.0",
+        "1.1"
+      ]
     },
     "tokens": {
       "type": "object",
@@ -502,9 +505,125 @@
               "maximum": 1
             }
           }
+        },
+        "spacing.navGap": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "spacing.navInline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        }
+      }
+    },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "explorer.debug-caption": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.intro-copy": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.connection-explanation": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.provider-description": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.connected-caption": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.previous-result-detail": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "destinations.worker-explanation": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "destinations.availability-hint": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "status.verbose-technical-detail": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "settings.help-copy": {
+          "enum": [
+            "show",
+            "hide"
+          ]
         }
       }
     }
   },
-  "$comment": "Runtime additionally bounds dimensions to 48px (typography >=12px), duration to 200ms, rejects whitespace-only names and requires plain data objects."
+  "$comment": "Runtime additionally bounds dimensions to 48px (typography >=12px), duration to 200ms, rejects whitespace-only names and requires plain data objects.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compatibleApiVersion": {
+            "const": "1.1"
+          }
+        }
+      }
+    }
+  ]
 }

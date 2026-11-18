@@ -1,0 +1,1328 @@
+{
+  "evidence": "Local workerd/R2, controlled HTTPS and OAuth fixture. No Chrome delivery or live Cloudflare.",
+  "before": {
+    "build": "c337e415596be01f061e161f167d9f5aed13825c",
+    "cells": [
+      {
+        "mode": "simple",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 86,
+          "p95": 159,
+          "p99": 159
+        },
+        "dispatchMs": {
+          "p50": 27,
+          "p95": 38,
+          "p99": 38
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 6,
+            "p99": 6
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 53,
+            "p99": 53
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 4,
+            "p95": 21,
+            "p99": 21
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 13,
+            "p99": 13
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 7,
+            "p95": 10,
+            "p99": 10
+          },
+          "workerRequestMs": {
+            "p50": 26,
+            "p95": 88,
+            "p99": 88
+          },
+          "verificationMs": {
+            "p50": 6,
+            "p95": 11,
+            "p99": 11
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 159
+      },
+      {
+        "mode": "simple",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 140,
+          "p95": 183,
+          "p99": 183
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 27,
+          "p99": 27
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 50,
+            "p99": 50
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 4,
+            "p95": 15,
+            "p99": 15
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 69,
+            "p95": 105,
+            "p99": 105
+          },
+          "workerRequestMs": {
+            "p50": 84,
+            "p95": 124,
+            "p99": 124
+          },
+          "verificationMs": {
+            "p50": 4,
+            "p95": 8,
+            "p99": 8
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 140
+      },
+      {
+        "mode": "simple",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 1081,
+          "p95": 1085,
+          "p99": 1085
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 27,
+          "p99": 27
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 2,
+            "p95": 2,
+            "p99": 2
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 51,
+            "p99": 51
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 265,
+            "p95": 276,
+            "p99": 276
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 43,
+            "p95": 95,
+            "p99": 95
+          },
+          "workerRequestMs": {
+            "p50": 1023,
+            "p95": 1027,
+            "p99": 1027
+          },
+          "verificationMs": {
+            "p50": 6,
+            "p95": 12,
+            "p99": 12
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /operation → /verify"
+        ],
+        "firstSampleMs": 1083
+      },
+      {
+        "mode": "narrow",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 74,
+          "p95": 110,
+          "p99": 110
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 31,
+          "p99": 31
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 53,
+            "p99": 53
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 3,
+            "p95": 5,
+            "p99": 5
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 5,
+            "p95": 7,
+            "p99": 7
+          },
+          "workerRequestMs": {
+            "p50": 19,
+            "p95": 51,
+            "p99": 51
+          },
+          "verificationMs": {
+            "p50": 4,
+            "p95": 5,
+            "p99": 5
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 76
+      },
+      {
+        "mode": "narrow",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 108,
+          "p95": 1098,
+          "p99": 1098
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 27,
+          "p99": 27
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 51,
+            "p99": 51
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 5,
+            "p95": 7,
+            "p99": 7
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 6,
+            "p99": 6
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 36,
+            "p95": 155,
+            "p99": 155
+          },
+          "workerRequestMs": {
+            "p50": 54,
+            "p95": 1039,
+            "p99": 1039
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 7,
+            "p99": 7
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify",
+          "/remote-save → /operation → /operation → /verify"
+        ],
+        "firstSampleMs": 108
+      },
+      {
+        "mode": "narrow",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 1109,
+          "p95": 1180,
+          "p99": 1180
+        },
+        "dispatchMs": {
+          "p50": 28,
+          "p95": 36,
+          "p99": 36
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 2,
+            "p95": 2,
+            "p99": 2
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 7,
+            "p99": 7
+          },
+          "authorizationRecheckMs": {
+            "p50": 51,
+            "p95": 57,
+            "p99": 57
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 267,
+            "p95": 287,
+            "p99": 287
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 4,
+            "p95": 12,
+            "p99": 12
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 70,
+            "p95": 588,
+            "p99": 588
+          },
+          "workerRequestMs": {
+            "p50": 1037,
+            "p95": 1088,
+            "p99": 1088
+          },
+          "verificationMs": {
+            "p50": 14,
+            "p95": 34,
+            "p99": 34
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /operation → /verify"
+        ],
+        "firstSampleMs": 1109
+      },
+      {
+        "mode": "depth",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 79,
+          "p95": 132,
+          "p99": 132
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 28,
+          "p99": 28
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 0,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 55,
+            "p99": 55
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 2,
+            "p95": 6,
+            "p99": 6
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 6,
+            "p95": 10,
+            "p99": 10
+          },
+          "workerRequestMs": {
+            "p50": 23,
+            "p95": 68,
+            "p99": 68
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 26,
+            "p99": 26
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 97
+      },
+      {
+        "mode": "depth",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 117,
+          "p95": 331,
+          "p99": 331
+        },
+        "dispatchMs": {
+          "p50": 27,
+          "p95": 39,
+          "p99": 39
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 6,
+            "p99": 6
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 58,
+            "p99": 58
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 3,
+            "p95": 22,
+            "p99": 22
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 44,
+            "p95": 202,
+            "p99": 202
+          },
+          "workerRequestMs": {
+            "p50": 61,
+            "p95": 253,
+            "p99": 253
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 15,
+            "p99": 15
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 107
+      },
+      {
+        "mode": "depth",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 1089,
+          "p95": 1132,
+          "p99": 1132
+        },
+        "dispatchMs": {
+          "p50": 28,
+          "p95": 31,
+          "p99": 31
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 2,
+            "p95": 2,
+            "p99": 2
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 5,
+            "p99": 5
+          },
+          "authorizationRecheckMs": {
+            "p50": 51,
+            "p95": 54,
+            "p99": 54
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 267,
+            "p95": 360,
+            "p99": 360
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 3,
+            "p99": 3
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 41,
+            "p95": 63,
+            "p99": 63
+          },
+          "workerRequestMs": {
+            "p50": 1028,
+            "p95": 1065,
+            "p99": 1065
+          },
+          "verificationMs": {
+            "p50": 8,
+            "p95": 16,
+            "p99": 16
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /operation → /verify"
+        ],
+        "firstSampleMs": 1089
+      }
+    ]
+  },
+  "after": {
+    "build": "overhaul working tree",
+    "cells": [
+      {
+        "mode": "simple",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 73,
+          "p95": 143,
+          "p99": 143
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 29,
+          "p99": 29
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 51,
+            "p99": 51
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 2,
+            "p95": 4,
+            "p99": 4
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 0,
+            "p95": 12,
+            "p99": 12
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 5,
+            "p95": 10,
+            "p99": 10
+          },
+          "workerRequestMs": {
+            "p50": 18,
+            "p95": 53,
+            "p99": 53
+          },
+          "verificationMs": {
+            "p50": 4,
+            "p95": 39,
+            "p99": 39
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 107
+      },
+      {
+        "mode": "simple",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 117,
+          "p95": 138,
+          "p99": 138
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 34,
+          "p99": 34
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 6,
+            "p99": 6
+          },
+          "authorizationRecheckMs": {
+            "p50": 51,
+            "p95": 53,
+            "p99": 53
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 2,
+            "p95": 7,
+            "p99": 7
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 49,
+            "p95": 68,
+            "p99": 68
+          },
+          "workerRequestMs": {
+            "p50": 61,
+            "p95": 80,
+            "p99": 80
+          },
+          "verificationMs": {
+            "p50": 4,
+            "p95": 6,
+            "p99": 6
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 112
+      },
+      {
+        "mode": "simple",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 408,
+          "p95": 596,
+          "p99": 596
+        },
+        "dispatchMs": {
+          "p50": 27,
+          "p95": 87,
+          "p99": 87
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 5,
+            "p99": 5
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 111,
+            "p99": 111
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 264,
+            "p95": 268,
+            "p99": 268
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 6,
+            "p99": 6
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 56,
+            "p95": 180,
+            "p99": 180
+          },
+          "workerRequestMs": {
+            "p50": 351,
+            "p95": 480,
+            "p99": 480
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 11,
+            "p99": 11
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 408
+      },
+      {
+        "mode": "narrow",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 78,
+          "p95": 154,
+          "p99": 154
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 27,
+          "p99": 27
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 51,
+            "p99": 51
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 2,
+            "p95": 5,
+            "p99": 5
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 4,
+            "p99": 4
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 7,
+            "p95": 47,
+            "p99": 47
+          },
+          "workerRequestMs": {
+            "p50": 19,
+            "p95": 93,
+            "p99": 93
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 10,
+            "p99": 10
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 90
+      },
+      {
+        "mode": "narrow",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 159,
+          "p95": 258,
+          "p99": 258
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 27,
+          "p99": 27
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 54,
+            "p99": 54
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 3,
+            "p95": 40,
+            "p99": 40
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 36,
+            "p99": 36
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 76,
+            "p95": 171,
+            "p99": 171
+          },
+          "workerRequestMs": {
+            "p50": 100,
+            "p95": 198,
+            "p99": 198
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 13,
+            "p99": 13
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 149
+      },
+      {
+        "mode": "narrow",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 418,
+          "p95": 463,
+          "p99": 463
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 28,
+          "p99": 28
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 3,
+            "p99": 3
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 53,
+            "p99": 53
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 264,
+            "p95": 313,
+            "p99": 313
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 3,
+            "p99": 3
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 56,
+            "p95": 97,
+            "p99": 97
+          },
+          "workerRequestMs": {
+            "p50": 356,
+            "p95": 397,
+            "p99": 397
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 27,
+            "p99": 27
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 414
+      },
+      {
+        "mode": "depth",
+        "size": 1024,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 81,
+          "p95": 109,
+          "p99": 109
+        },
+        "dispatchMs": {
+          "p50": 27,
+          "p95": 28,
+          "p99": 28
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 2,
+            "p99": 2
+          },
+          "authorizationRecheckMs": {
+            "p50": 51,
+            "p95": 58,
+            "p99": 58
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 3,
+            "p95": 11,
+            "p99": 11
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 8,
+            "p99": 8
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 7,
+            "p95": 11,
+            "p99": 11
+          },
+          "workerRequestMs": {
+            "p50": 25,
+            "p95": 51,
+            "p99": 51
+          },
+          "verificationMs": {
+            "p50": 6,
+            "p95": 8,
+            "p99": 8
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 80
+      },
+      {
+        "mode": "depth",
+        "size": 1048576,
+        "sourceDelayMs": 0,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 133,
+          "p95": 191,
+          "p99": 191
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 30,
+          "p99": 30
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 1,
+            "p95": 3,
+            "p99": 3
+          },
+          "authorizationRecheckMs": {
+            "p50": 51,
+            "p95": 52,
+            "p99": 52
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 4,
+            "p95": 6,
+            "p99": 6
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 3,
+            "p99": 3
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 54,
+            "p95": 106,
+            "p99": 106
+          },
+          "workerRequestMs": {
+            "p50": 73,
+            "p95": 133,
+            "p99": 133
+          },
+          "verificationMs": {
+            "p50": 5,
+            "p95": 25,
+            "p99": 25
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /verify"
+        ],
+        "firstSampleMs": 159
+      },
+      {
+        "mode": "depth",
+        "size": 1048576,
+        "sourceDelayMs": 260,
+        "samples": 10,
+        "failures": [],
+        "totalMs": {
+          "p50": 395,
+          "p95": 423,
+          "p99": 423
+        },
+        "dispatchMs": {
+          "p50": 26,
+          "p95": 38,
+          "p99": 38
+        },
+        "stageMs": {
+          "pollCount": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1
+          },
+          "intentAuthorizationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "capabilityMs": {
+            "p50": 0,
+            "p95": 12,
+            "p99": 12
+          },
+          "authorizationRecheckMs": {
+            "p50": 50,
+            "p95": 52,
+            "p99": 52
+          },
+          "worker.authenticationMs": {
+            "p50": 0,
+            "p95": 0,
+            "p99": 0
+          },
+          "worker.sourceHeadersMs": {
+            "p50": 263,
+            "p95": 264,
+            "p99": 264
+          },
+          "worker.destinationPrepareMs": {
+            "p50": 1,
+            "p95": 4,
+            "p99": 4
+          },
+          "worker.sourceBodyAndWriteMs": {
+            "p50": 38,
+            "p95": 59,
+            "p99": 59
+          },
+          "workerRequestMs": {
+            "p50": 338,
+            "p95": 354,
+            "p99": 354
+          },
+          "verificationMs": {
+            "p50": 4,
+            "p95": 20,
+            "p99": 20
+          }
+        },
+        "requestSequences": [
+          "/remote-save → /operation → /verify"
+        ],
+        "firstSampleMs": 406
+      }
+    ]
+  }
+}

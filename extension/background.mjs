@@ -25,8 +25,9 @@ import {createDiagnostics} from '../src/glaciaring/index.mjs';
 import {createAgentDebugApi} from '../src/glaciaring/agent-api.mjs';
 import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
+import {createVerifiedBucket} from '../src/cloudflare/inventory.mjs';
 import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
-import {createRemoteTransport,preparedDestination} from '../src/cloudflare/transport.mjs';
+import {createRemoteTransport,preparedDestination,previousWorkerDigests} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
@@ -59,11 +60,11 @@ async function checkSelectedBucket(target,auth){
  }
  return true;
 }
-const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
+const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,compatibleCodeDigests:previousWorkerDigests,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
 async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
 async function prepared(target){
- return preparedDestination(await provisioner.lookup(target),target,BUILD_INFO.workerCodeDigest);
+ return preparedDestination(await provisioner.lookup(target),target,BUILD_INFO.workerCodeDigest,previousWorkerDigests);
 }
 const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
@@ -76,6 +77,7 @@ const executeFileMessage=createFileTransport({remote});
 
 async function send(message) {
   let path,field;
+  if(message.type==='cfCreateBucket')return createVerifiedBucket(setupOauth,message);
   if(['cfCreateFolder','cfTransferObjects','cfRenameEntry','cfDeleteObjects'].includes(message.type))return executeFileMessage(message);
   if(message.type==='cfAccounts'){const status=await oauth.status();return {ok:true,accounts:status.accounts??[],cursor:''};}
   else if(message.type==='cfBuckets'){
@@ -88,9 +90,9 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete'].includes(op)),async run(operation,input={},options={}) {
+const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(op)),async run(operation,input={},options={}) {
   // Unconfigured Worker transport is blocked before staging any object bytes.
-  if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
+  if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
   if(operation==='list'&&result.state==='completed') {
     const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+input.source.accountId,...input.source,prefix:''});
@@ -176,7 +178,7 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
     if(checkedBuckets.has(bucket)&&!preparedBuckets.has(bucket)&&checkedTargets.has(targetKey(t)))return false;
     const snapshot=snapshots.get(targetKey(t));
     if(!checkedBuckets.has(bucket)&&snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;
-    try{return preparedDestination(plans.get(scopeKey(t)),t,BUILD_INFO.workerCodeDigest).state==='READY';}catch{return false;}
+    try{return preparedDestination(plans.get(scopeKey(t)),t,BUILD_INFO.workerCodeDigest,previousWorkerDigests).state==='READY';}catch{return false;}
   };
   const projectScope=s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),
     workerReady:projectReady(s.target),
@@ -278,9 +280,16 @@ const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
   const status=await oauth.status();revoking=true;snapshots.clear();
   try{
     try{
-      const selected=await current.read(),targets=[selected.product.defaultTarget,...Object.values(selected.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(t=>t?.provider==='cloudflare');
-      const pending=[...new Map(targets.map(t=>[scopeKey(t),t])).values()];let next=0;
-      await Promise.all(Array.from({length:Math.min(4,pending.length)},async()=>{while(next<pending.length){const target=pending[next++];try{await remote.revoke(target);}catch{/* Offline revocation remains bounded by capability expiry. */}}}));
+      const keys=(await chrome.storage.local.getKeys()).filter(key=>key.startsWith('remoteTransport:'));
+      const plans=Object.values(await chrome.storage.local.get(keys)).filter(plan=>plan?.state==='ready'&&status.accounts.some(a=>a.id===plan.accountId));
+      let next=0;
+      await Promise.all(Array.from({length:Math.min(4,plans.length)},async()=>{
+        while(next<plans.length){
+          const plan=plans[next++],target={provider:'cloudflare',connectionId:'cloudflare:'+plan.accountId,accountId:plan.accountId,
+            bucketName:plan.bucketName,prefix:plan.prefixScope?plan.prefixScope+'/':''};
+          try{await remote.revoke(target,plan.sourceBucket);}catch{/* A failed revocation remains bounded by capability expiry. */}
+        }
+      }));
       const stopped=(await chrome.storage.local.get('outlineStoppedAccounts')).outlineStoppedAccounts??[];
       await chrome.storage.local.set({outlineStoppedAccounts:[...new Set([...stopped,...status.accounts.map(a=>a.id)])]});
       for(const identity of await wholeCloud.list())if(status.accounts.some(a=>a.id===identity.accountId))try{await wholeCloud.disable(identity);}catch{}
@@ -291,7 +300,7 @@ const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
 const manifestLocations=createManifestLocations({oauth,current,provisioner,transport:remote});
-const api=createEngineApi({engine,current,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const api=createEngineApi({engine,current,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,prepareFileWorker:cloudflare.ensureFileWorker,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});

@@ -16,12 +16,18 @@ export class RemoteClaims {
   if(p.principal!==d.connectionId||d.accountId!==e.ACCOUNT_ID||d.bucketName!==e.BUCKET_NAME||d.connectionId!=='cloudflare:'+e.ACCOUNT_ID||((e.PREFIX_SCOPE??'')&&d.prefix!==e.PREFIX_SCOPE&&!d.prefix.startsWith(e.PREFIX_SCOPE+'/')))fail('BINDING_MISMATCH');
   if(await this.state.storage.get('revoked:'+p.principal+':'+p.sessionId))fail('AUTHORIZATION_REVOKED');
   if(intent&&(p.use!=='save'||p.operationId!==intent.operationId||!equal(d,intent.destination)||p.sourceDigest!==await digest(intent.source)||p.provenanceDigest!==(intent.provenance?await digest(intent.provenance):undefined)))fail('CAPABILITY_DENIED');
-  return {...p,destination:d,storage:e.STORAGE};
+  return {...p,destination:d,storage:e.STORAGE,
+   ...(e.SOURCE_BUCKET_NAME?{sourceBucket:e.SOURCE_BUCKET_NAME,sourceStorage:e.SOURCE_STORAGE}:{})};
  }
  async live(cap,key){const job=await this.state.storage.get(key);return job?.leaseUntil>Date.now()&&!await this.state.storage.get('revoked:'+cap.principal+':'+cap.sessionId);}
- async operation(cap,id){
+ async operation(cap,id,{receiptOnly=false}={}){
   const key=this.key(cap,id),job=await this.state.storage.get(key);
   if(!job||!equal(job.destination,cap.destination))return {state:'uncertain',code:'OPERATION_UNKNOWN',operationId:id};
+  if(job.fileDigest&&job.result)return {...job.result,operationId:id};
+  // The attached save client independently verifies the persisted receipt
+  // through /verify. Standalone or crash-recovery inspections still use HEAD.
+  if(receiptOnly&&cap.operationId===id&&job.sessionId===cap.sessionId&&job.result?.state==='written')
+   return {...job.result,operationId:id};
   const receipt=job.result?.receipt??(!this.running.has(key)&&job.stage==='writing'&&job.key&&Number.isSafeInteger(job.expectedSize)?{key:job.key,size:job.expectedSize,operationId:id,destination:cap.destination,...(job.provenance?{provenance:job.provenance}:{})}:null);
   if(receipt){
    const proof=await destinationWriter(cap).verify({receipt});
@@ -65,7 +71,19 @@ export class RemoteClaims {
      finally{this.running.delete(key);this.progress.delete(key);this.admitted--;}
     };
     const task=work();this.state.waitUntil(task);
-    return Response.json({state:'pending',code:'REMOTE_ACCEPTED',operationId},{status:202});
+    // Give small transfers a chance to finish without a second Worker request.
+    // The same durable claim continues if the bounded wait expires.
+    let timer;
+    try{
+     const done=await Promise.race([task.then(()=>true),new Promise(resolve=>{timer=setTimeout(()=>resolve(false),200);})]);
+     if(done){
+      const persisted=(await this.state.storage.get(key))?.result;
+      if(persisted?.state==='written')return Response.json({...persisted,operationId});
+      // Reconciliation of ambiguous storage/receipt outcomes stays on the
+      // read-only /operation path, including recovery of a completed PUT.
+     }
+    }finally{clearTimeout(timer);}
+    return Response.json({state:'pending',code:'REMOTE_ACCEPTED',operationId,retryAfterMs:125},{status:202});
    }
    const cap=await this.authenticate(request);
    if(path==='/files'&&cap.use==='files'){
@@ -79,7 +97,8 @@ export class RemoteClaims {
    }
    if(path==='/capabilities'&&cap.use==='status'){
     const list=await this.env.STORAGE.list({prefix:cap.destination.prefix?cap.destination.prefix+'/':'',limit:1});
-    return Response.json({state:'completed',protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,provenanceSchema:1,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
+    const sourceBound=cap.sourceBucket?!!await cap.sourceStorage?.list({limit:1}):false;
+    return Response.json({state:'completed',...(cap.sourceBucket?{sourceBucket:cap.sourceBucket,sourceBound}:{}),protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,provenanceSchema:1,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
    }
    if(path==='/lease'&&['save','files'].includes(cap.use)){
     const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);
@@ -88,7 +107,7 @@ export class RemoteClaims {
    }
    if(path==='/cancel'&&cap.use==='cancel'){const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);if(!job||!equal(job.destination,cap.destination))fail('OPERATION_UNKNOWN');await this.update(key,j=>({...j,leaseUntil:0,cancelRequested:true}));return Response.json({state:'uncertain',code:'CANCELLATION_REQUESTED_INSPECT',operationId:cap.operationId});}
    if(path==='/operation'&&cap.use==='status'){
-    const {operationId:id}=await boundedJSON(request,1024);if(!/^[a-zA-Z0-9_-]{16,128}$/.test(id??''))fail('OPERATION_INVALID');return Response.json(await this.operation(cap,id));
+    const {operationId:id,receiptOnly}=await boundedJSON(request,1024);if(!/^[a-zA-Z0-9_-]{16,128}$/.test(id??''))fail('OPERATION_INVALID');return Response.json(await this.operation(cap,id,{receiptOnly:receiptOnly===true}));
    }
    if(path==='/revoke'&&cap.use==='revoke'){await this.state.storage.put('revoked:'+cap.principal+':'+cap.sessionId,true);return Response.json({state:'completed'});}
    if(path==='/probe-status'&&cap.use==='status'){const query=await boundedJSON(request,1024);if(!/^[a-zA-Z0-9_-]{16,128}$/.test(query.operationId??''))fail('OPERATION_INVALID');return Response.json(await this.probeProof(cap,query.operationId));}

@@ -20,7 +20,10 @@ const httpReads=createFileApi(createR2Adapter({http:{request:async(path,options)
  const bytes=window.fixtureImageData?.[key]?new Uint8Array(window.fixtureImageData[key]):window.fixtureGeneratedImageBytes&&key.startsWith('image-')?new Uint8Array(window.fixtureGeneratedImageBytes):new TextEncoder().encode('fixture preview');
  return new Response(bytes,{headers:{etag:'"fixture-preview"','content-length':String(bytes.length)}});
 }}}));
-const fileApi={capabilities:['mkdir','copy','move','rename','delete','stat','list'],async run(operation,input,options={}){calls.push({operation,input});if(['mkdir','copy','move','rename','delete'].includes(operation)){
+const fileApi={capabilities:['mkdir','copy','move','rename','delete','stat','list','createBucket'],async run(operation,input,options={}){calls.push({operation,input});
+ if(operation==='createBucket'){fixtureBuckets.push(input.name);return {state:'completed',data:{code:'BUCKET_VERIFIED',name:input.name}};}
+ if(window.fixtureFileActionError&&operation==='mkdir')return {state:'failed',code:window.fixtureFileActionError};
+ if(['mkdir','copy','move','rename','delete'].includes(operation)){
  const b=input.source.bucketName,op=options.operationId??crypto.randomUUID();let receipt;
  if(operation==='mkdir'){const key=input.source.prefix+input.name+'/';r2Objects.set(b+':'+key,{bucketName:b,key,displayName:input.name,folder:true,size:0});}
  else{const e=input.entry??input.entries[0],original=r2Objects.get(b+':'+e.key)??entries.find(x=>x.key===e.key),leaf=e.key.split('/').filter(Boolean).pop();if(!original)return {state:'failed',code:'FILE_NOT_FOUND'};

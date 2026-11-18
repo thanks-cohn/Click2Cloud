@@ -843,3 +843,39 @@ if the menu changes. It never replays a source write. Shelf, recorder and
 pending History updates cannot gate a valid remote write.
 
 Evidence and live acceptance steps are in [CLICK AND DONE evidence](../../codex/11.18.2026/CLICK_AND_DONE_EVIDENCE.md).
+
+## P0 R2 operations and Narrow ancestors
+
+`3+1.1 fileAction` uses the selected Explorer account, source and destination.
+It checks authorization and human confirmation before execution and does not
+read native menu acknowledgment. A current authorized private Worker is
+reused. If setup is needed the Shelf discloses the selected bucket bindings
+and possible charges before calling with `authorizeSetup`. Trusted tool
+callers also need the provision grant. `Create Bucket` is in Explorer More and
+reads back the exact authorized name following the single create attempt.
+
+Each ordinary Worker binds one R2 bucket. Narrow saved leaves and visible
+ancestors, including bucket root, use its bucket-wide readiness. The signed
+capability still binds the exact account, bucket, prefix, operation and
+intent. Explicitly authorized migration inspects the owned old script,
+preserves its signing material and claims namespace, and verifies expanded
+binding access and a readback before claiming readiness. Existing narrow
+bindings continue to enforce their original scope until migration succeeds.
+The c337e41 Worker remains compatible for operations its existing binding
+already supports.
+
+Same-account transfers between buckets prepare an ordered dual-bound Worker
+through the same provisioner, with no effect on the primary Workers.
+Copy streams through the Worker between its two bindings. Move and rename
+check every non-skipped target before deleting source objects. R2 does not
+offer conditional delete, so the final source identity check and delete
+remain a verified, non-atomic sequence. `Make Default` verifies readiness
+before replacing the prior target and requires an actionable acknowledged
+route. An unavailable target leaves or restores the prior Default.
+
+The Worker may return a durable written receipt within its first bounded
+response. If it continues in the background, the client uses the bounded
+retry hint rather than waiting a whole polling interval after a near miss.
+Both paths still require an independent R2 HEAD before verified completion.
+The standalone reconciliation path still checks ambiguous writes by
+operation ID. See [implementation evidence](../../docs/evidence/r2-operations-overhaul/HANDOFF.md).

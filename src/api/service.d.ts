@@ -26,7 +26,7 @@ export type Change =
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
 export interface Methods {
- fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete';source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
+ fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
  invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};

@@ -193,7 +193,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     assert.equal(ready.state,'completed',JSON.stringify(ready));
     assert(ready.data.destinationReadiness.every(row=>row.state==='READY'));
     await click(mode,target);
-    if(mode==='depth')for(const prefix of ['','Parent/'])await click(mode,{...root,prefix});
+    if(mode==='depth'||mode==='nested')for(const prefix of ['','Parent/'])await click(mode,{...root,prefix});
    }
    assert.equal(deployments.length-before,3);
    for(const target of fresh){

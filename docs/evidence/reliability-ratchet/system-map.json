@@ -2968,8 +2968,12 @@
                 "copy",
                 "move",
                 "rename",
-                "delete"
+                "delete",
+                "createBucket"
               ]
+            },
+            "authorizeSetup": {
+              "type": "boolean"
             },
             "source": {
               "type": "object",
@@ -10128,7 +10132,8 @@
           "INVALID_SIBLING_INDEX",
           "INVALID_NATIVE_STATE",
           "INVALID_OBSERVED_EVIDENCE",
-          "DEPENDENCY_BLOCKED"
+          "DEPENDENCY_BLOCKED",
+          "DEFAULT_DESTINATION_UNAVAILABLE"
         ],
         "coverage": "partial",
         "boundaryLimit": "Gateway evidence does not certify hidden service internals.",

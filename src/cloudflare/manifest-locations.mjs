@@ -42,11 +42,10 @@ export function createManifestLocations({oauth,provisioner,transport,current}){
    if(observations.some(r=>r.state==='NEEDS_WORKER'&&!['WORKER_SETUP_REQUIRED','WRITE_PROOF_REQUIRED'].includes(r.code)))continue;
    const canWrite=a.scopes?.includes('workers-r2.write')&&a.scopes?.includes('workers-r2.read'),workerNeeded=!lookup||lookup.state!=='ready';
    if(!canWrite||workerNeeded&&(!hasWorkerWriteScope(a.scopes)||!lookup&&!hasWorkerCreateScope(a.scopes)))continue;
-   const common=group.map(t=>remoteDestination(t).prefix.split('/').filter(Boolean));let parts=common[0];for(const p of common.slice(1)){let n=0;while(n<parts.length&&parts[n]===p[n])n++;parts=parts.slice(0,n);}
-   const prefixScope=lookup?.prefixScope??parts.join('/');
+   const prefixScope=lookup?.prefixScope??'';
    const previous=prior.find(p=>scopeKey(p.target)===key);
    const workerName=lookup?.name??previous?.workerName??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20);
-   actions.push({target:{...target,prefix:prefixScope?prefixScope+'/':''},bucket:missing?'create-if-absent':'reuse',worker:workerNeeded?'prepare':'reuse',workerName,prefixScope,probe:true,markerObjects:false,prefixes:group.map(t=>t.prefix),effects:'May create the named R2 bucket and private Worker/Durable Object; retain a small readiness probe object. Cloudflare storage/operations/Workers may incur charges. No folder markers or deletions. Provider grants remain required.'});
+   actions.push({target:{...target,prefix:prefixScope?prefixScope+'/':''},bucket:missing?'create-if-absent':'reuse',worker:workerNeeded?'prepare':'reuse',workerName,prefixScope,probe:true,markerObjects:false,prefixes:group.map(t=>t.prefix),effects:'May create the named R2 bucket and private bucket-wide Worker/Durable Object; retain a small readiness probe object. Cloudflare storage/operations/Workers may incur charges. No folder markers or deletions. Provider grants remain required.'});
   }
   return actions;
  }

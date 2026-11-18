@@ -38,3 +38,29 @@ test('interrupted signing renewal retains pending secret and script identity acr
  await assert.rejects(f.p.prepare(target,{approved:true,renewSigning:true}),{code:'TRANSIENT_API_FAILURE'});const pending=structuredClone(f.plans.get(key));assert.equal(pending.signingRenewalPending,true);assert.notEqual(pending.secret,original.secret);
  const resumed=await f.p.prepare(target,{approved:true,inspect:true,retryDenied:true});assert.equal(resumed.secret,pending.secret);assert.equal(resumed.name,pending.name);assert.equal(resumed.signingRenewalPending,undefined);assert.equal(new Set(f.calls.filter(x=>x.method==='PUT').map(x=>x.path)).size,1);
 });
+
+test('approved migration expands the owned Worker and resumes after a lost upload reply',async()=>{
+ const f=fixture(),original=await f.p.prepare(target,{approved:true,prefixScope:'folder'});
+ await assert.rejects(f.p.prepare(target,{expandScope:true}),{code:'SETUP_APPROVAL_REQUIRED'});
+ f.failUploadOnce=true;
+ await assert.rejects(f.p.prepare(target,{approved:true,expandScope:true}),{code:'TRANSIENT_API_FAILURE'});
+ const pending=await f.p.lookup(target);assert.equal(pending.previousBinding.prefixScope,'folder');
+ const puts=f.calls.filter(c=>c.method==='PUT').length;
+ const resumed=await f.p.prepare(target,{approved:true,expandScope:true,retryDenied:true});
+ assert.equal(resumed.state,'ready');assert.equal(resumed.name,original.name);assert.equal(resumed.secret,original.secret);
+ assert.equal(resumed.prefixScope,'');assert.equal(resumed.previousBinding,undefined);
+ assert.equal(f.metadata.bindings.find(b=>b.name==='PREFIX_SCOPE').text,'');
+ assert.equal(f.calls.filter(c=>c.method==='PUT').length,puts);
+ assert.equal(f.metadata.migrations,undefined);
+});
+test('a cross-bucket route has two independently named bindings and leaves the existing primary Worker alone',async()=>{
+ const f=fixture(),primary=await f.p.prepare(target,{approved:true});
+ const pair=await f.p.prepare(target,{approved:true,sourceBucket:'source-one'});
+ assert.notEqual(pair.name,primary.name);
+ assert.equal(f.metadata.bindings.find(b=>b.name==='SOURCE_STORAGE').bucket_name,'source-one');
+ assert.equal(f.metadata.bindings.find(b=>b.name==='SOURCE_BUCKET_NAME').text,'source-one');
+ assert.equal(f.metadata.bindings.find(b=>b.name==='STORAGE').bucket_name,target.bucketName);
+ assert.deepEqual(await f.p.lookup(target),primary);
+ assert.deepEqual(await f.p.lookup(target,'source-one'),pair);
+ assert.equal(await f.p.lookup(target,'source-two'),undefined);
+});
