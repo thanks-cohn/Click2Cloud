@@ -56,37 +56,82 @@ searchDirectoryNames({
 4. Changing the currently viewed directory changes the API's directory context; old results never leak into the new view.
 5. The same File API operation can be called without the Explorer UI; the GUI does no independent searching.
 
-## Later version — `:nested` shorthand for a directory-aware API (future, **not V1**)
+## Future — `:nested`, explicit directory paths, and the same syntax in the API and search bar (not V1)
 
-**Why the syntax is short:** In File Explorer, the user is **already inside a specific bucket/directory**. Therefore typing `:nested` should mean **“use my current directory as the root, but include everything nested under it.”** The GUI knows the location and supplies it automatically. The user should **not** need to repeat the directory name in the GUI.
+**Ordinary searches are local to the directory currently displayed.** Searching for `report` matches file and immediate child-folder names there only. **`:nested ` is an opt-in recursion modifier**, not a directory name or a command that moves the user somewhere else.
 
-The *underlying File API*, unlike the GUI, cannot assume where the caller is browsing. Its equivalent call must explicitly name the **target directory or bucket** and select a **nested/recursive scope**. Conceptually this is the combination of **`directory: <named target>` + `scope: nested`** (or a compatible `directory:nested` operation exposed by the File API). The exact API naming should follow existing File API conventions, but **an explicit directory target is mandatory for direct programmatic callers**.
+When File Explorer is at `bucket/projects/`:
 
-### Illustrative future API call (not implemented)
+```text
+bucket/
+  outside/report.txt                    <- excluded; outside projects/
+  projects/                             <- CURRENT LOCATION
+    report.txt                          <- matches "report" and ":nested report"
+    client-A/
+      report.txt                        <- matches ":nested report"
+      drafts/report-final.txt           <- matches ":nested report"
+    client-B/                           <- sibling of client-A, still inside projects/
+      report.txt                        <- matches ":nested report"
+```
+
+- **`report`** → direct children of `bucket/projects/` only.
+- **`:nested report`** → the **entire subtree** rooted at `bucket/projects/`: files and directories immediately inside it and every descendant, **including sibling child branches** such as `client-A/` and `client-B/`.
+- **`:nested`** on its own activates nested scope for the current location; a term may then be typed. Empty-query behavior (e.g., paginated subtree browse versus waiting for a term) should be decided explicitly.
+- At the **bucket root**, `:nested report` recursively covers the entire bucket. At a nested folder, it **never goes above that folder or into sibling folders of the current folder**.
+
+### Explicit location syntax — a goal for the future File API **and the GUI search bar**
+
+The File API must accept a caller-supplied, **fully resolved location**—unlike the Explorer GUI, it has no implicit current directory. An intended path expression is:
+
+```text
+bucket/directory/child:nested
+```
+
+That means: **search recursively within `bucket/directory/child/`**, including that folder's direct contents and all descendants. A search term can follow the scope expression:
+
+```text
+bucket/directory/child:nested report
+```
+
+This path expression is **not API-only**. The **File Explorer search bar should eventually accept it as well**, so users can target a different authorized directory **without first navigating there**. The GUI can either infer the current directory when omitted or accept a user-specified directory path.
+
+| Search-bar input | Resolved target | Scope |
+| --- | --- | --- |
+| `report` | Current Explorer directory | Immediate children only |
+| `:nested report` | Current Explorer directory | Entire nested subtree |
+| `bucket/directory/child:nested report` | Explicit named `bucket/directory/child/` | Entire nested subtree |
+| `bucket/directory/child:nested` | Explicit named `bucket/directory/child/` | Nested scope, awaiting/showing results according to empty-query policy |
+
+Later, an explicit target without the `:nested` modifier may use the default **immediate-children-only** scope. That syntax should be specified and tested before implementation.
+
+### File API semantics versus GUI shorthand
+
+Conceptually, the API receives a normalized operation such as:
 
 ```ts
 searchNames({
   connectionId,
   accountId,
-  bucketName: 'bucket',
-  directory: 'photos/', // explicit named target; '' means bucket root
-  scope: 'nested',      // traverse this directory and every descendant
-  query: 'cat'
+  bucketName: "bucket",
+  directory: "directory/child/",
+  scope: "nested",
+  query: "report"
 })
 ```
 
-**Equivalent GUI experience:** When Explorer is already displaying `bucket/photos/`, typing `:nested` activates nested search **rooted at `bucket/photos/`**; then typing `cat` searches filenames/folder names there and below. For example `:nested cat` can match both `bucket/photos/cat.jpg` and `bucket/photos/2025/cat.jpg`, but **not** `bucket/elsewhere/cat.jpg`.
+The textual expression `bucket/directory/child:nested report` is a **convenient command-language representation** of the same structured API request. The engine resolves and validates the target, scope and query independently. Do not interpret the entire command as a literal filename.
 
-The GUI may parse the single modifier `:nested` first and keep the input in nested mode, so subsequent ordinary text is the name query. The API call receives the fully resolved current directory and explicit nested scope; **the API performs recursion, not the GUI**.
+**Implementation design requirements for future syntax:**
 
-An additional future form may support **choosing a different named directory**, such as `:nested <directory-name>` from the bucket root, and showing/searching its descendants. Because a bare name can look like a filename query, define an unambiguous target-selection mechanism (autocomplete, a distinct directory argument, or another clearly specified syntax) **before implementation**. Never silently guess between “search for this name” and “change the target directory,” or between duplicate directory names.
+- Resolve `bucket/directory/child:nested` against the authorized connection; do not allow the path expression to switch accounts or access unapproved buckets.
+- Support unambiguous relative paths where appropriate, but avoid guessing between a partial filename and a path. Establish escaping/quoting rules for filenames that contain spaces or colons.
+- Apply `:nested` to **all descendants** of the selected root, not to an arbitrary one-branch walk; return exact paths to distinguish duplicate filenames.
+- Route both GUI shorthand and explicit GUI paths through the **same File API**, which owns pagination, recursion, cancellation, completeness, session validation and result identity. No parallel GUI-only search engine.
+- Keep result loading bounded, report incomplete pages accurately, and invalidate stale results if the search root, query or authorization changes.
 
-### Important separation from V1
+### Separation from V1
 
-- **V1 default:** `searchNames({directory: currentDirectory, scope: 'children', query})` — direct child names only; no recursion.
-- **Future GUI `:nested`:** `searchNames({directory: currentDirectory, scope: 'nested', query})` — current directory **plus all descendants**.
-- **Future direct API caller:** must **name the target directory/bucket explicitly**, irrespective of whether `scope` is `children` or `nested`.
-- Recursive search must honor authorization, pagination, cancellation, exact result paths, bounded resource usage, and account/bucket boundaries. Changing Explorer directories invalidates the previous root and pending results.
+**V1 remains deliberately simple:** one supplied directory, direct child filenames/folders only, and a GUI search bar calling that API. Recursive `:nested`, explicit inline directory targeting, and `bucket/directory/child:nested` are **future extensions** and must not delay V1.
 
 ## Delivery boundaries
 
