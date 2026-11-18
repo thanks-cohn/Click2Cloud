@@ -90,6 +90,25 @@ Compare **like with like**: click-to-immediate UI acknowledgement, click-to-disp
 6. **Distinguish test environments honestly.** Simulated fixtures and local test success are not live installed-Chrome or Cloudflare proof. If real testing is inaccessible, document the exact unverified acceptance gate; never claim completion beyond the evidence.
 7. **Do not deploy, publish, merge to main, change cloud infrastructure, or touch private Chrome profiles without applicable authorization.** Preserve original state and evidence.
 
+## NON-NEGOTIABLE — This must actually WORK (implementation and evidence gate)
+
+**This is an implementation-and-verification mission, not just an audit, architectural essay, new test scaffolding or recommendations.** The investigation is the means to the end. After diagnosing with evidence, carry the work through to meaningful, production-code improvements on the Codex working branch, and prove the outcomes available in the environment. Do not stop with a plan while the real user journey remains broken. If a genuine external permission, live Chrome setup, provider outage or missing access prevents the final acceptance run, explicitly mark that gate **BLOCKED / UNVERIFIED**, preserve the working code and evidence, and supply the exact short reproduction/verification procedure; never falsely claim it works.
+
+**User-facing meaning of WORKS:**
+
+1. **First-time destination:** A person logs in to Cloudflare, creates **Simple**, **Narrow** or **Depth** configuration in Destinations Manager, presses **Save**, and—after truthful success—can **immediately right-click a supported source and save it into the precise intended R2 destination**. This requires more than a visually present menu, a configuration write or a queued operation; a real cloud write and evidence of the correct object must succeed. No second manual Worker preparation or separate Remotes repair ceremony.
+2. **Every mode:** Repeat independently for all three modes; test Depth's authorized nested locations and Narrow's correct bucket/folder identity. A passing Simple save must not conceal broken Narrow/Depth paths. Right-click must be ready promptly after destination configuration rather than requiring a second setup trigger.
+3. **Returning user:** Close/reopen the Shelf, let MV3 workers suspend/restart, restart Chrome, toggle configured modes and reconnect after a legitimate sign-out. Existing authorized, properly configured destinations should become usable without needless repeated approvals or rebuilding. Respect logout/revocation and never claim usable remote operations without real authorization.
+4. **Fault tolerance:** A Shelf/Explorer/History/recorder failure does not destroy or stall an independently valid right-click save. Recoverable readiness/Worker problems self-reconcile where permitted; in-flight uncertain operations are reconciled without blindly duplicating uploads. Surface real failure causes when recovery is impossible.
+5. **Speed:** Deliver a near-instant **responsive click acknowledgement** without pretending the cloud upload is finished; substantially reduce genuinely measured click-to-verified latency where justified. Prove before/after time distributions on comparable workloads, including stalled and failed operations. Do **not** redefine save success or replace verified completion with dispatch/queue acknowledgement.
+6. **Regression resistance:** Preserve existing proven saves, source/destination accuracy, scoped authorization, durability, and the Guti Chrome baseline; verify that consolidation reduces duplicated work/conflicting ownership without collapsing independent failure domains.
+
+**Mandatory completion gate:** Supply reproducible observations and artifacts for the full **Destinations Manager Save → native Chrome menu appears/updates → actual right-click → correct R2 object exists → authoritative verification** chain, for each mode. Include cold and warm runs, representative repeats, restoration after normal restarts, and actual latency measurements. Automated simulations are useful, but do not substitute them for installed-Chrome + live Cloudflare evidence. If those live facilities are unavailable to Codex, clearly distinguish **code implemented**, **tests passed**, **live verification blocked**, and **owner test still needed**.
+
+**A change that merely makes a broken flow less visible does not pass. A change that passes isolated unit tests but still requires repeated manual Worker setup does not pass. A change that feels instantaneous but does not finish the R2 save does not pass.**
+
+**Make it WORK, then make it demonstrably stay working; do not trade away resilient engineering for superficial simplicity.**
+
 ## Acceptance definition
 
 A user can configure **Simple**, **Narrow**, or **Depth**, press **Save**, and—once successful completion is truthfully reported—make a working native Chrome right-click save **without a second Worker ceremony**. Working configurations remain durable through ordinary lifecycle changes, with safe, intelligent recovery when needed.
