@@ -2,7 +2,7 @@
 
 **Owner directive:** November 18, 2026  
 **Target repository:** `thanks-cohn/Click2Cloud`  
-**Reference repository:** **full, original `thanks-cohn/REDOWN`, including its Cloudflare implementation**  
+**Primary REDOWN reference — owner-selected historical diagnostic checkpoint:** full, Cloudflare-capable `thanks-cohn/REDOWN` at annotated tag [`95-percent-plus-success`](https://github.com/thanks-cohn/REDOWN/tree/95-percent-plus-success), commit `653ad9b5fdd59532df571514fc60053d8a7b13bb` (November 12, 2026). Use this source-pinned reference for the core reliability comparison; inspect later full-REDOWN changes separately and distinguish them from the tagged behavior. The tag is a diagnostic checkpoint **not** proof of 95% success across all ~900–1,000 saves, nor a crash-free release.  
 **Explicit exclusion:** **DO NOT use `thanks-cohn/redown-basic` or any three-provider-only REDOWN Basic variant as the REDOWN reference.** Google Drive/OneDrive/Dropbox-only Basic lacks Cloudflare and would distort the investigation.  
 **Working Click2Cloud baseline:** `implement/explorer-aesthetic-foundation-2026-11-15`, runtime commit `e188dc7f86b522207226bf30f8f6c25fec2a0a1e`, extension `0.3.19`; its subsequently added documentation-only Guti-profile note is `IMPORTANT/GUTI_CHROME_PROFILE_SAVING_BASELINE_2026-11-17.md`.  
 **Purpose:** investigate, implement evidence-justified improvements, and demonstrate results; not a predetermined rewrite.
@@ -57,6 +57,8 @@ For **Simple, Narrow and Depth**, creating an authorized destination and pressin
 - Never manufacture success, silently weaken verification, route to the wrong destination, or replay uncertain remote writes as fresh uploads. Preserve the distinction between a confirmed failure, incomplete readiness and a verified save.
 
 **Aim for the system to work whenever the required authorization and provider capability are actually present.** When unavailable, fail truthfully, preserve state, and recover safely at the earliest legitimate opportunity.
+
+**Additional Click2Cloud comparison checkpoint:** `checkpoint/click2cloud-working-right-click-pre-history-2026-11-15`, commit `a3a672754156f88bb572bfb4275d1471f0ccb4a6`, documents 107/107 traceable R2 objects and 141 successful saves, with a Depth conflict and a blocked operation still noted. Distinguish this earlier tagged checkpoint from the later `e188dc7` Guti-profile export; do not infer a 95% aggregate Click2Cloud result from either tag label or success-only subsets.
 
 ## Baseline, provenance and regression protection
 
