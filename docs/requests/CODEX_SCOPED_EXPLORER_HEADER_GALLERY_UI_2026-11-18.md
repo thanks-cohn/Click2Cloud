@@ -28,6 +28,19 @@ Current `extension/app.html` has a global footer containing `#action-feedback`, 
 - Move `#action-feedback` to a compact, accessible nonpersistent status/toast or contextual notification that doesn't reserve gallery height. Do not suppress critical failed/uncertain-save warnings, loading state or accessibility announcements.
 - Do NOT accidentally remove Explorer pagination (Load more), directory listing progress, item counts, selection state or existing safety/consent dialogs.
 
+## Remotes page: Cloudflare status and Save results are Debug-Mode-only buttons
+
+**New explicit user request (2026-11-18):** The two adjacent Remotes-page buttons **Cloudflare status** and **Save results** are unwanted in normal use. They must **both disappear when Debug Mode is OFF**, and appear **only when Debug Mode is ON**. They are **not** the same control as the already specified footer `Review save results` button.
+
+**Exact source in `extension/app.mjs`:** `<button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button>` in the Remotes view markup. These currently bind to `cloudflarePanel` and `show('history')`. Preserve those handlers when the buttons are visible in Debug Mode.
+
+- Make the **single authoritative Debug Mode state** (`debugPreference` / `applyDebugMode`) control **both** `#cloudflare-setup` and `#remote-history`, alongside `#show-save-results` and `#help-diagnose`. Synchronize on boot, preference restoration, re-render, view switch and live toggling; hidden elements must not leave empty gaps or remain keyboard-focusable.
+- With Debug Mode **OFF**, do **not** show the two Remotes buttons in **Minimal, Bit o' Polish or Remote V1**. With Debug Mode **ON**, they may appear together in a compact diagnostic area, retaining exactly their existing actions.
+- Preserve the header's normal **History** navigation, so ordinary users can still inspect saves without the diagnostic shortcut; never delete history, receipts or the underlying diagnostic API.
+- Critical **Cloudflare setup approvals, permissions, live status, explicit failure messages and safe recovery** must still be visible/actionable through the ordinary setup/remotes workflow. Do not hide the essential `authorize-setup`, `prepare-selected`, `review-selected` or relevant recovery controls simply because `#cloudflare-setup` is debug-only. If that particular panel is the sole remaining route to a necessary recovery action, expose that action in a suitable ordinary place independently.
+- An error or uncertain save must still produce a concise accessible warning/recovery route but **must not unhide either button when Debug Mode is OFF**.
+- Regression tests must assert both buttons hidden (including from keyboard) when Debug Mode OFF on initial load, after save failure and after navigation, and visible/clickable with Debug Mode ON, across all aesthetics and viewport sizes; verify no stale dialogs or focus traps on a mode switch.
+
 ## Header More: Help · Diagnose ONLY in Debug Mode
 
 - `Settings` is always available through the global header More menu, including when Debug Mode is OFF.
