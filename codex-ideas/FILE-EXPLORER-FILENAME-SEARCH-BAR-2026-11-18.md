@@ -48,6 +48,26 @@ searchDirectoryNames({
 
 **V1 implementation rule:** Only enumerate and match **one directory level** (e.g., delimiter-aware listing). Do **not** download file contents or scan all descendants to answer a V1 search. The GUI is just a small input/results overlay on that underlying API.
 
+### Exact GUI placement in the compressed two-row File Explorer
+
+**Observed in the user's screenshot (2026-11-18):** the compressed File Explorer shows the current `#location` **Address** input on the top row immediately to the **left of `More`**, and **`+ Right Click`** on the second row. The user finds the address field intrusive and wants that visible slot to be the **filename search input instead**.
+
+**Requested compact layout:**
+
+```text
++---------------------------------+
+| [ Search filenames... ] [ More ] |  row 1
+| [ + Right Click ]                |  row 2 — unchanged
++---------------------------------+
+```
+
+- **Replace the visible address field in this compact slot** with a genuine text input for search, not a path/address bar with relabeled placeholder text. A directory address must **not** occupy the main visible input in the compact two-row view.
+- **Press Enter to submit the query.** Typing alone must **not** send API search calls; the explicit Enter keypress invokes the File API using the current directory context. Display loading and results or a concise error afterward. Repeated Enter with a changed query runs a new search. Empty Enter should leave or restore the ordinary current-directory listing.
+- **`More` stays directly to the right** of the search input. Preserve its overflow action and behavior. Keep the **`+ Right Click`** button on row two in the same position, with the same wording and exact existing behavior; **do not turn it into a search action, relocate it to More, or remove it**.
+- The existing `#location` control in `extension/app.mjs` currently performs address navigation. If retaining that capability, expose it separately via an expanded layout or the existing overflow menu as needed; **do not keep it as the primary compact text field**. Preserve functional navigation via tree and breadcrumbs and avoid changing the Explorer save engine while implementing the GUI.
+- On search submission the UI should call **the underlying File API** (not an in-browser ad hoc recursive listing); V1 searches immediate children of the current directory only. A future typed `:nested ...` or explicit `bucket/directory/child:nested ...` command uses this **same input and Enter-to-submit behavior**, routed through the future API parser and search capability.
+- Preserve the compact toolbar's two-row usability at narrow panel widths and across all three aesthetics. Do not add a permanent third row or force the user to expand the toolbar merely to search.
+
 ### V1 acceptance examples
 
 1. From `bucket/`, query `photo` finds `bucket/photo.jpg` and `bucket/photographs/`, but **not** `bucket/archive/photo.jpg`.
