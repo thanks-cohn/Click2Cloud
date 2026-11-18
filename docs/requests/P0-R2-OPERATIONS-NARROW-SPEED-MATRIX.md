@@ -80,3 +80,17 @@ Acceptance cases: root/nested New Folder; new bucket; copy/paste within/across b
 **No new recorder, diagnostics pages, logging features, or unrelated UI redesign.** Fix underlying causes, not just messages; preserve existing user data/config. Record any Cloudflare limits that make a requested operation impossible rather than masking them. Work on an implementation branch, do not modify `main`, run builds/tests, commit and push. Report branch, SHA, tests, real-world verification, latency data, known limitations and precise changes. Do not rely on ephemeral ZIP URLs.
 
 **Acceptance phrase:** "Create Folder creates a folder; Narrow saves from bucket root through the selected directory; all authorized R2 locations work without artificial folder scopes; theme selection stays isolated; faster save is proven by measurement."
+
+
+## 7. Final phase ONLY — read-only Click2Cloud versus ReDown comparative audit
+
+**Run this AFTER completing and committing the implementation, tests and save-speed benchmarks above. This phase is strictly read-only for BOTH repositories.**
+
+- Identify the authoritative ReDown repository and the most relevant current branch/commit. Record exactly which ReDown revision was examined; if repository access or identification is uncertain, report that limitation rather than guessing.
+- Compare the freshly implemented Click2Cloud revision with the actual ReDown revision using repository evidence. Contrast Worker authority/R2 architecture, provisioning and destination scoping, OAuth/session recovery, bucket/root and folder CRUD, copy/paste, Simple/Narrow/Depth right-click behavior (where comparable), resilience/error handling, verified save receipts, and observed end-to-end save performance.
+- Identify capabilities or hardening techniques that ReDown has and Click2Cloud lacks, and vice versa, without assuming all differences are regressions. Explain why any remaining differences matter.
+- Compare measured speed only when test conditions are reasonably comparable. If not, report separate figures and the reasons a direct speed claim would be unreliable.
+- Prepare a **read-only audit report** covering a side-by-side matrix, source paths and commit SHAs, evidence, verified strengths, weaknesses, regressions, and prioritized **recommendations only**.
+- **Do not modify, reformat, commit, push, configure, or deploy anything in either repository during this comparative-audit phase.** Do not apply recommendations, open remediation PRs, or change running infrastructure. Report findings for separate approval.
+
+This final audit must not delay or replace the implementation and verification phases. Its output is an assessment, not code changes.
