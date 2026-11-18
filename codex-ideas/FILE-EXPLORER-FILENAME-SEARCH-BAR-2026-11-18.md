@@ -218,6 +218,8 @@ The textual expression `bucket/directory/child:nested report` is a **convenient 
 
 **V1 remains deliberately simple:** one supplied directory, direct child filenames/folders only, and a GUI search bar calling that API. Recursive `:nested`, explicit inline directory targeting, and `bucket/directory/child:nested` are **future extensions** and must not delay V1.
 
+**Related scoped Codex UI request:** [Implement the upper-right first-row sun/moon fix, gallery/footer changes, debug-only controls and Explorer toolbar polish](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md). The filename/IndexedDB research request remains first; the enterprise audit remains last.
+
 ## Header, debug-only support controls and gallery-space changes — final clarified UI directives
 
 **Latest final placement instruction (2026-11-18): The Light/Dark (sun/moon) switch must ALWAYS remain at the FAR UPPER-RIGHT, on the FIRST ROW of the application header, including at the shelf's DEFAULT window size. It must NEVER be pushed to a second line.** This supersedes earlier conflicting upper-left language. The current `button#theme` appears after the nav in `extension/app.html`; retain its far-right position conceptually and correct the flex/responsive layout so the control has **reserved non-wrapping space**.
