@@ -242,6 +242,12 @@ The textual expression `bucket/directory/child:nested report` is a **convenient 
 
 **Scope:** A separately authorized Codex UI implementation may change header/footer/layout and debug entry visibility with focused tests. The filename-cache architecture research and the final cross-repo operations-engine audit remain read-only and must not edit repositories, production storage or Cloudflare resources.
 
+## Minimal appearance: remove redundant Login and usage accordion
+
+The Minimal Remotes view currently displays a collapsible block labeled **Login and usage**, with the explanatory text: “Login may prepare a private Worker and verify a small R2 file. Cloudflare usage may incur charges.” **Do not display this redundant expandable block in Minimal mode**; it adds clutter to the compact layout.
+
+This is a **presentation-only removal**: retain a concise, visible cost/Worker-setup explanation at the actual login/consent decision, and keep all permission disclosures, confirmation gates, warnings and errors intact. Do not remove other Minimal-only critical statuses. This requirement is also in the [scoped Codex UI request](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md).
+
 ## Delivery boundaries
 
 **V1 is only the direct-children search API with a GUI overlay.** Recursive search and `:nested` are roadmap extensions, not prerequisites to ship V1.
