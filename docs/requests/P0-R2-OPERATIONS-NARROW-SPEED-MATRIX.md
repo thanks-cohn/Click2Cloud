@@ -84,6 +84,38 @@ When **Minimal** is selected:
 - **Visual design:** elegant modern UI/font hierarchy; filenames easy to scan; whitespace measured rather than sparse; unobtrusive borders, restrained neutral palette, coherent icon and text alignment; compact layout with comfortably accessible hit targets; keyboard and screen-reader access preserved.
 - **Isolation:** Minimal is a presentation-only skin/copy-density mode. Do not change Worker provisioning, OAuth, permissions, save routing, receipts, File Explorer state/operations, or actual diagnostics collection. Existing themes keep their original text and styling.
 
+### Explicit text removal and Remotes replacement — Minimal theme ONLY
+
+The following are literal examples of **visible UI text that must not render in Minimal**. Remove the redundant *text blocks*, not the associated buttons, tabs, account controls, navigation, or their behavior. This includes repeated copies of the same technical error. Do not merely fade the text or leave empty whitespace.
+
+**Remove from routine Minimal presentation:**
+
+> The existing Worker is scoped to a different folder. Review the required destination capability in Cloudflare status; no resources were changed.
+
+> The existing Worker is scoped to a different folder. Review the required destination capability in Cloudflare status; no resources were changed. This action cannot expand the Worker’s scope. Select a permitted configured folder, or obtain an explicitly approved scoped repair.
+
+> Save uncertain. Inspect before retrying.
+
+> Google Drive, Dropbox and OneDrive are not available yet.
+
+> Connect an account, browse its folders, and choose where to save.
+
+> Signed in to Cloudflare.
+
+> Login authorizes preparing or reusing redown and the save Worker when needed, plus a small verification file. Cloudflare may charge for usage. Existing destinations are preserved.
+
+Also hide routine redundant **“Cloudflare — Connected”** informational text block in Minimal. Keep the actual Cloudflare remote row, connection indicator as needed, account selector, functional login/reconnect actions, **Cloudflare status** button, **Save results** button, and all other existing operational buttons. The buttons must remain clickable and retain the same behavior. Do not turn the status/reconnect area into a new screen.
+
+**Replace the removed descriptive/connected-status copy in Remotes with exactly this succinct tagline:**
+
+> **The Future is Now. True Remote is Here.**
+
+Style as one elegant, restrained typographic line or a natural two-line wrap in constrained width. Do not add long explanatory text under it.
+
+**Error-handling nuance:** The listed verbose debug strings must not occupy the Minimal UI, even during a scope error. However, never misrepresent a failed operation as success or erase an active problem: replace technical prose with a short relevant inline status such as “Save unavailable” / “Couldn’t create folder” and keep existing **Cloudflare status**, **Save results**, or **Advanced diagnostics** affordances to inspect detail. In particular, an uncertain save must never be automatically retried without checking its outcome. Error detail remains available in on-demand diagnostic views; no new diagnostic components. Cost/authorization disclosures required before a new paid setup action remain accessible at that point, not as persistent Remotes prose.
+
+**Verification:** Screenshot-test the actual Minimal Shelf, Remotes and Destinations states, including an error state; assert the phrases above are absent from visible Minimal UI; confirm tabs/buttons remain and work; confirm tagline exact spelling/case/punctuation; ensure Bit o' Polish and Remote V1 stay unchanged.
+
 **Acceptance checks:** dropdown offers precisely Bit o' Polish / Remote V1 / Minimal and remembers selection; switch is removed; Minimal Explorer displays filenames, directories, buckets and functional toolbar/tabs without bottom-left debug text; Destinations popup lacks the cited Worker preparation/charges paragraph and the availability sentence in normal view; no essential commands are hidden; user-facing actionable errors and required cost disclosures remain accessible; switching to older themes restores existing presentation without regression. Do not introduce Matrix.
 
 ## 6. Verification and delivery
