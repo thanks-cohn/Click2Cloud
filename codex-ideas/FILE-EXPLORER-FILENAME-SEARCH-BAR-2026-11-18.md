@@ -90,6 +90,37 @@ Shortcut press #3: 1 row -> 2 rows, and so on
 
 **Why:** the user can instantly reveal the two-row toolbar to search, then return to the minimal navigation-only row with the **same shortcut**. This is a presentation behavior; it must not modify the save engine, directory selection or File API search logic.
 
+### Remove the persistent bottom footer; float Manage Destinations on the left
+
+**Additional user-requested gallery-space refinement (2026-11-18):** The current global app footer in `extension/app.html` is:
+
+```html
+<footer>
+  <span id="action-feedback" role="status" aria-live="polite" hidden></span>
+  <button id="show-save-results" hidden>Review save results</button>
+  <button disabled id="manage">Manage Destinations</button>
+</footer>
+```
+
+**Desired outcome:** **Remove this persistent full-width footer row entirely, releasing its occupied height for the File Explorer gallery and file list.** Avoid replacing it with another always-visible, full-width row or reserving unused footer space.
+
+- **Manage Destinations** remains an ordinary, always-available action when it is functionally permitted, but is rendered as a **small floating/sticky control on the far left**, preferably anchored near the lower-left of the cloud-navigation/sidebar region. It must **not consume a full horizontal row**, obscure image tiles, impede the sidebar/tree or splitter, or block scrolling. Keep the existing `#manage` click behavior, permission gating and keyboard accessibility. When the left pane is collapsed or narrow, give it a responsive unobtrusive placement rather than letting it disappear or cover gallery items.
+- **Review save results** (existing `#show-save-results`) is **visible only while Debug Mode is ON**. When Debug Mode is OFF, it must **not be displayed**, including when a routine error or uncertain save would previously reveal the button. It may be placed with debug tools/in the debugging controls instead of in a footer. When Debug Mode is ON, retain its existing action of opening Save results / History. Keep the general History view and its data available by their existing normal navigation; **the button's visibility is what changes, not operation history or receipts**.
+- The existing `applyDebugMode` and `quietFeedback` in `extension/app.mjs` currently manage debug state and conditionally reveal `#show-save-results`. Make the **Debug Mode gate authoritative** across initialization, errors, state changes and re-renders. Turning Debug Mode OFF immediately hides the button; turning it ON reveals the debug-only affordance according to the chosen debug layout.
+- The footer also currently owns `#action-feedback`, an accessible live status/error region. **Do not discard real errors, warnings, accessibility announcements or safety-critical save uncertainty when removing the footer.** Move required transient feedback to a compact non-layout-consuming toast/status region or another relevant panel with `role="status"`/appropriate live announcement. Keep actionable guidance if a save is blocked/uncertain and retain a non-debug path to inspect History; do not misrepresent failure as success.
+- This specifically targets the **persistent app footer** containing Manage Destinations and Review save results. Do **not** accidentally remove File Explorer's own conditional **Load more** pagination button, loading/errors, item count semantics, file selection, or permission/consent notices. Where these can consume gallery height, redesign carefully without making large directory listings inaccessible.
+- The freed vertical space should be granted to the **actual gallery/file viewport** (`#files`) in all three appearance themes. Honor safe-area padding, keyboard focus, scroll visibility and popup sizes. No giant overlay or opaque sticky strip along the bottom.
+
+**Acceptance criteria:**
+
+1. With Debug Mode OFF, the File Explorer has **no full-width bottom footer** and **no Review save results button**, regardless of ordinary saves and failures; necessary save warnings still appear accessibly and History still works.
+2. **Manage Destinations** is visible near the left edge as a compact floating/sticky button and opens exactly the same Destinations Manager as before.
+3. With Debug Mode ON, **Review save results** is available in the debug UI and opens the same results/History destination, without restoring the permanent full-width footer.
+4. Narrow/split/one-row/two-row layouts preserve keyboard accessibility, avoid covering file thumbnails, and display **more vertical gallery space** than before.
+5. Existing file pagination, feedback/error notices, destructive confirmations, right-click saves and all Explorer actions still function.
+
+**Implementation boundary:** Presentation/layout changes only for this request. Do not modify backend save semantics, receipts, History persistence, cloud authorization, or transfer operations.
+
 ### V1 acceptance examples
 
 1. From `bucket/`, query `photo` finds `bucket/photo.jpg` and `bucket/photographs/`, but **not** `bucket/archive/photo.jpg`.
