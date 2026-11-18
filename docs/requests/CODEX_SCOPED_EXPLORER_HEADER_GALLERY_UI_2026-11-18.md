@@ -72,6 +72,41 @@ Use the above proposal as ground truth for this area, without conflating the Exp
 
 Regression check: Minimal Remotes no longer shows the literal `Login and usage` accordion; ordinary Remotes functionality and meaningful consent/cost notice remain correct; Bit o' Polish and Remote V1 unaffected; no change to Worker, R2, OAuth or save logic.
 
+## Settings: Debug-only advanced sections and readable text wrapping
+
+**User request (2026-11-18):** Declutter the Settings page. The following full Settings cards must be **hidden when Debug Mode is OFF**, and remain available and functional when Debug Mode is ON:
+
+1. **Recovery Mode** — the ENTIRE card: external storage status/blocked note, Cadence weekly/daily selector, Simple Recovery, Narrow Recovery, Bucket recovery crawl and depth controls, Windows Backup Location (Automatic · Local AppData / Documents), external-folder explanation, Choose external backup folder, Back up now, and Restore My Right-Click Menu.
+2. **Save Whole Cloud** — the ENTIRE card: account selections, Enable/Stop selected accounts, Inspect jobs, associated job status/output.
+3. **Connection** — the ENTIRE Settings card: OAuth redirect URI such as `https://<extension-id>.chromiumapp.org/cloudflare` and the `Disconnect Cloudflare` button.
+
+**Exact code:** `extension/app.mjs` builds three consecutive `<div class="card">` blocks, headed `Recovery Mode`, `Save Whole Cloud`, and `Connection`. Assign clear stable card IDs or a `data-debug-only` role for these containers, rather than hiding only selected inner text. Do not confuse the **Settings Connection card** with the Remotes sign-in/status UI or the sidebar `#connection`.
+
+**Debug OFF:** cards and all their children are fully absent from visible layout, tab/focus order and accessibility navigation, with NO blank gaps. **Debug ON:** show all three with saved selections/statuses, existing working actions, no duplicated controls and no destructive changes just from toggling visibility.
+
+**Essential access:** The existing `Sign out` button (`#sign-out`) in Remotes must remain available so normal users can disconnect; keep required login permissions, setup consent, notifications, reconnection, ordinary History, and any essential recovery path available outside Debug Mode. Ensure the `Debug Mode` control itself is always visible under Settings so the extra panels can be enabled when needed.
+
+**Fix narrow-width text overflow:** The long OAuth redirect URI in the Settings Connection card, including `https://<extension-id>.chromiumapp.org/cloudflare`, must **wrap within its card instead of overflowing**. Apply suitable CSS to its own text element such as `overflow-wrap:anywhere`, `word-break:break-word` and `min-width:0`, with no forced page-wide horizontal scrolling and no broken keyboard interactions. In the Remotes diagnostic button group, `Cloudflare status` and `Save results` must also have readable spacing or wrap/stack at narrow widths rather than appearing as `Cloudflare statusSave results`. The ordinary user should not see these debug-only buttons at all when Debug OFF.
+
+Use one authoritative `debugPreference`/`applyDebugMode` gate on load, Settings re-render, navigation and mode toggle, returning focus to a visible control if hiding a card with focused content. Test Debug OFF/ON/OFF, persistence/reload, 320px-ish/narrow/default/wide panels and all three aesthetics, ensuring zero overflow and appropriate retained settings.
+
+## New Folder: no unnecessary generic Worker/R2 warning popup
+
+**User request:** Clicking **New Folder** should not be interrupted by this generic modal during routine folder creation:
+
+> This action may prepare a private Worker for all paths in the selected bucket or bind both selected buckets for a transfer. Cloudflare may charge for Worker and R2 usage.
+
+**Inspected source:** `extension/app.mjs` defines this exact string as `workerCost`; `offerFilePreparation` wraps `fileActionGUI('mkdir')` and calls `setupDisclosure` only when `fileAction` fails with `FILE_SETUP_APPROVAL_REQUIRED`. The warning is generic and inaccurately mentions binding *both buckets for a transfer* during a single-bucket folder creation.
+
+**Desired behavior:**
+- On an already authorized/prepared bucket, **New Folder** opens the normal lightweight name form and creates/validates the directory with no additional setup/Worker/cost popup. Verify no spurious `FILE_SETUP_APPROVAL_REQUIRED` and no repeated prompt due to stale readiness, routing or state. Do not force implicit Worker reprovisioning to create folders.
+- Where first-time Worker preparation, expanded bucket binding or genuinely chargeable setup **actually requires new user approval**, do **not** silently bypass the authorization/consent gate. Instead present a **single, accurate, contextual approval prompt** specifically describing the required *folder setup* and possible Cloudflare costs, with clear Continue/Cancel. Never show an unrelated cross-bucket transfer disclosure for mkdir. After consent, resume the same validated intent without duplicate folder creation.
+- Do not conflate the **normal New Folder name form** with the unwanted extra disclosure. Keep name validation, permission checks, cancellation, verified creation, progress/error reporting, and exact target prefix identity.
+- If this is currently shown on every creation, investigate the exact `FILE_SETUP_APPROVAL_REQUIRED` cause/authority readiness path **before modifying behavior**. Do not hard-code `authorizeSetup:true`, suppress real approval requirements, or weaken session/account isolation.
+- Test prepared single-bucket mkdir, first-time unprepared bucket, authorization denial, lost/repeated reply, reauth, multiple consecutive mkdirs, root and nested directories, and no regressions to copy/move approval and save receipts. Nothing is deployed or written to real R2 as part of tests without explicit separately granted authorization.
+
+**Implementation boundary:** This is a small correctness/UX fix; if addressing the duplicate approval requires changing security or provisioning semantics, stop and report the evidence instead of silently broadening this UI task. The separate IndexedDB cache and final cross-repo architecture requests are still research-only.
+
 ## Required validation & stop condition
 
 - Inspect existing implementation before changing anything. Work only in a **dedicated isolated feature branch**, not `main`. Do not touch REDOWN.
