@@ -60,27 +60,37 @@ Profile click-to-dispatch → authorization/readiness → Worker invocation → 
 
 Benchmark same file sizes, source sites, destinations, network conditions and build setup before/after. Report p50/p95/p99, failures, and per-stage duration. Clearly distinguish simulated tests from independently observed live R2 writes. No false speed claims.
 
-## 5. Add a selectable **Minimal** theme (replaces the Matrix theme request)
+## 5. Appearance: dropdown selector and genuinely stripped-down **Minimal** theme
 
-Under **existing Settings → Theme options**, add **Minimal** as a new selectable theme. Keep existing themes, particularly **Bit o' Polish** (default) and **Remote V1**, unchanged. Do not create a Matrix theme as part of this request.
+### Appearance selector (applies to theme choice across the app)
 
-**Design intent:** Beautiful, elegant, restrained, information-dense File Explorer and Shelf. Files and folders are the visual focus. Clear basic commands stay visible. Anything unnecessary to the user’s current task should recede or disappear.
+Replace the existing two-way Appearance/theme **switch** with a normal **dropdown/select** in the same Appearance settings location. Its options must be:
+1. **Bit o' Polish** — remain default and preserve existing visuals.
+2. **Remote V1** — preserve existing legacy visuals.
+3. **Minimal** — new option described below.
 
-- **Typography:** refined, highly readable UI font, concise labels, calm visual hierarchy; file and folder names must remain visible and legible. Choose compatible bundled/system fonts; no external runtime font loading.
-- **Layout:** balanced whitespace, consistent compact spacing and alignment, minimal borders/shadows/ornament, thoughtful icon sizing, unobtrusive menus and controls. Do not shrink click targets below accessible sizes.
-- **Copy reduction:** hide or greatly condense redundant descriptive text, instructional paragraphs, status chatter, technical metadata, secondary labels and repetitive hints *in the Minimal theme only*. Preserve file/folder names, basic commands (New Folder, Copy, Paste, Move, Rename, Delete, Create Bucket, Save here, Make Default), account/destination identification when necessary to prevent mistakes, and navigational context.
-- **No debug popups:** routine internal diagnostics, raw JSON, Worker codes and developer-style popups must not interrupt Minimal-theme users. Keep technical details accessible through the existing Advanced diagnostics/on-demand troubleshooting interface. **Do not suppress real errors:** authentication failures, operation failures, permissions that truly require attention, confirmation of destructive actions (unless user disabled it), and meaningful progress/success feedback still need concise, actionable UI.
-- **Colors:** subtle, restrained neutral palette with high contrast and selective accent color; elegant light/dark adaptation if supported. No Matrix green-terminal styling.
-- **Scope:** apply consistently across the Shelf, Remotes, File Explorer, Settings, menus, dialogs and toast/status surfaces. The app’s functional capabilities, data, access control and operational feedback must be identical whichever theme is selected. Theme selection and persistence use the existing isolated extensible presentation layer.
-- **Performance and accessibility:** avoid heavy animations, extra render work, or layout thrashing; keyboard accessibility, visible focus and screen-reader text remain intact. No change to Worker, OAuth, R2, save engine, receipts or diagnostics collection.
+A theme switch is no longer appropriate with three or more options. Persist selection, restore it on reload, and use the existing extensible, isolated presentation system so future themes add one dropdown item rather than more switches. Avoid changing unrelated appearance settings or modifying how the other two themes look.
 
-Test that Minimal theme reduces *visible clutter*, but no command disappears and no failure is silently hidden. Verify switching back to Bit o' Polish/Remote V1 restores their existing UI intact.
+### Minimal means content and commands, not explanatory prose
+
+**Product intent:** Primarily just the File Explorer with **bucket names, directory names, filenames, icons, essential navigation, top tabs, toolbar buttons and their working commands**. Elegant typography, deliberate alignment, compact but comfortable spacing, little ornament, clean neutral colors and legible focus/hover states. Avoid large instructional panels, decorative cards, verbose status blocks or repeated explanatory microcopy.
+
+When **Minimal** is selected:
+
+- **File Explorer:** show bucket/folder/file names, breadcrumb/path when needed, selection indications, top tab options, basic toolbar buttons/menus, and operational commands. Hide nonessential debug/status copy at the bottom-left (and elsewhere), technical Worker details, repeated instruction text, redundant captions, decorative descriptions and raw JSON. The bottom-left debug text must be **absent from the visible Minimal interface**, not merely less prominent.
+- **Destinations popup/manager:** retain selected destinations, edit controls, Save/Make Default where applicable, and meaningful success/error states. **Remove this explanatory paragraph from the visible Minimal popup:** “Save prepares or maintains the private Cloudflare Worker for the selected destinations and checks a small R2 verification file when needed. Worker and R2 usage may incur charges.” Also remove extraneous explanatory sentences like **“Availability depends on the connected account.”** Do not replace them with similarly verbose phrasing. Necessary disclosure about possible charges should still be accessible at the action where charges may first be authorized (e.g. setup confirmation or an on-demand info affordance); do not silently consent to billed operations.
+- **Shelf/Remotes/Settings:** keep functional navigation and critical status/action labels but strip unnecessary help paragraphs, debug blocks, repetitive explanatory text, tool-internal nomenclature, verbose success descriptions and decorative labels. Don't remove user-requested functional controls.
+- **Dialogs/popups:** no unsolicited diagnostic popups, raw debug JSON, Worker error codes or long developer explanations. Use terse user-facing errors only when an operation actually fails and requires attention, with optional existing diagnostics access for technical details. Don't suppress authentication recovery, destructive confirmations, actionable failures, or meaningful pending/success feedback.
+- **Visual design:** elegant modern UI/font hierarchy; filenames easy to scan; whitespace measured rather than sparse; unobtrusive borders, restrained neutral palette, coherent icon and text alignment; compact layout with comfortably accessible hit targets; keyboard and screen-reader access preserved.
+- **Isolation:** Minimal is a presentation-only skin/copy-density mode. Do not change Worker provisioning, OAuth, permissions, save routing, receipts, File Explorer state/operations, or actual diagnostics collection. Existing themes keep their original text and styling.
+
+**Acceptance checks:** dropdown offers precisely Bit o' Polish / Remote V1 / Minimal and remembers selection; switch is removed; Minimal Explorer displays filenames, directories, buckets and functional toolbar/tabs without bottom-left debug text; Destinations popup lacks the cited Worker preparation/charges paragraph and the availability sentence in normal view; no essential commands are hidden; user-facing actionable errors and required cost disclosures remain accessible; switching to older themes restores existing presentation without regression. Do not introduce Matrix.
 
 ## 6. Verification and delivery
 
 Create/fix deterministic tests plus live account tests when legitimately authorized, using disposable test buckets/object keys rather than destructive tests on user data.
 
-Acceptance cases: root/nested New Folder; new bucket; copy/paste within/across buckets; move/rename/delete; Make Default; unrelated bucket isolation; Narrow saves at every ancestor including bucket root and multiple branches; old-Worker migration; reconnect; latency comparison; Minimal theme selection/persistence, core-command visibility, actionable error presentation, and other theme regressions; Simple/Depth/right-click regression.
+Acceptance cases: root/nested New Folder; new bucket; copy/paste within/across buckets; move/rename/delete; Make Default; unrelated bucket isolation; Narrow saves at every ancestor including bucket root and multiple branches; old-Worker migration; reconnect; latency comparison; Appearance dropdown/selection persistence; Minimal Explorer removing bottom-left debug text; Destinations popup explanatory copy removal; core-command visibility, actionable error presentation, and existing-theme regressions; Simple/Depth/right-click regression.
 
 **No new recorder, diagnostics pages, logging features, or unrelated UI redesign.** Fix underlying causes, not just messages; preserve existing user data/config. Record any Cloudflare limits that make a requested operation impossible rather than masking them. Work on an implementation branch, do not modify `main`, run builds/tests, commit and push. Report branch, SHA, tests, real-world verification, latency data, known limitations and precise changes. Do not rely on ephemeral ZIP URLs.
 
