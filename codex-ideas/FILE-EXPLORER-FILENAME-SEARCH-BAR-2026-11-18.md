@@ -248,6 +248,14 @@ The Minimal Remotes view currently displays a collapsible block labeled **Login 
 
 This is a **presentation-only removal**: retain a concise, visible cost/Worker-setup explanation at the actual login/consent decision, and keep all permission disclosures, confirmation gates, warnings and errors intact. Do not remove other Minimal-only critical statuses. This requirement is also in the [scoped Codex UI request](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md).
 
+## Remotes: hide Cloudflare status and Save results unless Debug Mode is ON
+
+The Remotes panel currently places two buttons together in `extension/app.mjs`: `#cloudflare-setup` (**Cloudflare status**) and `#remote-history` (**Save results**). **Both should be absent from ordinary UI when Debug Mode is OFF**, in all appearance themes, and available only when Debug Mode is ON. Keep their existing click actions while debug is enabled.
+
+This requirement is **in addition to** making the footer `#show-save-results` (Review save results) and header More `#help-diagnose` debug-only; it does not refer to the same Save Results button. Use one authoritative `debugPreference` state for all four controls; no leftover layout gap, no hidden focusable buttons, and no error-triggered accidental reappearance.
+
+Do not hide normal **History** navigation, Cloudflare authorization/setup approval, essential recovery actions, consent details, or live failure feedback. The aim is to **declutter**, not conceal actionable errors or remove the receipt evidence. [Codex scoped UI request](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md) has implementation requirements and tests.
+
 ## Delivery boundaries
 
 **V1 is only the direct-children search API with a GUI overlay.** Recursive search and `:nested` are roadmap extensions, not prerequisites to ship V1.
