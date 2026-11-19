@@ -10,10 +10,9 @@
 :where([data-aesthetic]:not([data-aesthetic=standard])) :is(button,input,select,summary,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 :where([data-aesthetic]:not([data-aesthetic=standard])) .primary{background:var(--accent);color:var(--panel)}
 :where([data-aesthetic]:not([data-aesthetic=standard])) .primary:hover{background:var(--accent);filter:brightness(.93)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header{gap:24px;padding:12px 20px;min-height:64px;box-shadow:0 1px 0 #00000008}
+:where([data-aesthetic]:not([data-aesthetic=standard])) .app-header{box-shadow:0 1px 0 #00000008}
 :where([data-aesthetic]:not([data-aesthetic=standard])) header strong{letter-spacing:-.3px;white-space:nowrap;font-weight:650}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header nav{gap:4px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button{font-weight:550;color:var(--muted);padding:8px 12px}
+:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button{color:var(--muted)}
 :where([data-aesthetic]:not([data-aesthetic=standard])) header nav button.active{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
 :where([data-aesthetic]:not([data-aesthetic=standard])) :is(h1,h2,h3){letter-spacing:-.025em;color:var(--text)}
 :where([data-aesthetic]:not([data-aesthetic=standard])) h1{font-size:26px;line-height:1.25;font-weight:650;margin-bottom:12px}
@@ -51,9 +50,8 @@
 :where([data-aesthetic]:not([data-aesthetic=standard])) .history-preview{border-radius:var(--a-geometry-control)}
 :where([data-aesthetic]:not([data-aesthetic=standard])) :is(.history-page a,.dialog-body a){color:var(--accent);text-underline-offset:3px}
 :where([data-aesthetic]:not([data-aesthetic=standard])) .history-page>nav{padding-top:16px;border-top:1px solid var(--line)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) footer{min-height:44px;font-size:12px}
-@media(max-width:700px){:where([data-aesthetic]:not([data-aesthetic=standard])) header{padding:8px;gap:6px}:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button{padding:8px 6px}:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:20px}:where([data-aesthetic]:not([data-aesthetic=standard])) .card{padding:16px}}
-@media(max-width:480px){:where([data-aesthetic]:not([data-aesthetic=standard])) header strong{font-size:0}:where([data-aesthetic]:not([data-aesthetic=standard])) header strong .brand{font-size:22px}:where([data-aesthetic]:not([data-aesthetic=standard])) header nav{gap:0}:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button{padding:7px 5px;font-size:12px}:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:16px}:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line time{width:100%}}
+@media(max-width:700px){:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:20px}:where([data-aesthetic]:not([data-aesthetic=standard])) .card{padding:16px}}
+@media(max-width:480px){:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:16px}:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line time{width:100%}}
 /* Keep theme switches instantaneous: interpolating surface colors can briefly
    put light text on the old light surface. Hover feedback uses borders only. */
 :where([data-aesthetic]:not([data-aesthetic=standard])) :is(button,input,select,textarea){transition:border-color var(--a-motion-feedback)}
@@ -81,17 +79,9 @@
 .minimal-only{display:none}
 [data-aesthetic=minimal] .minimal-only{display:revert}
 [data-aesthetic=minimal] .remotes-tagline{font-size:clamp(15px,3.25vw,21px);font-weight:590;letter-spacing:-.02em;color:var(--text);margin-block:8px 18px}
-[data-aesthetic=minimal] header{gap:12px;flex-wrap:wrap}
-[data-aesthetic=minimal] header nav{display:flex;flex:1 1 auto;min-width:0;justify-content:center;align-items:center;flex-wrap:wrap;gap:var(--a-spacing-navGap)}
-[data-aesthetic=minimal] header nav button{white-space:nowrap;padding:8px var(--a-spacing-navInline);min-height:36px}
 [data-aesthetic=minimal] header nav button.active{background:var(--selected)}
 [data-aesthetic=minimal] .card{box-shadow:none;margin-block:10px}
 [data-aesthetic=minimal] .card>h2{padding-bottom:6px;margin-bottom:8px}
-@media(max-width:480px){
- [data-aesthetic=minimal] header{gap:6px}
- [data-aesthetic=minimal] header nav{column-gap:clamp(5px,2vw,var(--a-spacing-navGap));row-gap:4px}
- [data-aesthetic=minimal] header nav button{padding-inline:clamp(7px,2vw,var(--a-spacing-navInline))}
-}
 .reconnect-needed{border-color:#589577;animation:reconnect-edge 2s ease-in-out infinite}
 @keyframes reconnect-edge{50%{box-shadow:0 0 0 2px #58957785}}
 @media(prefers-reduced-motion:reduce){.reconnect-needed{animation:none}}

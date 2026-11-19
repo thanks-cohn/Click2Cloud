@@ -1,6 +1,22 @@
 <!doctype html>
 <html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Click2Cloud</title><link rel="stylesheet" href="app.css"><link rel="stylesheet" href="depth-destinations.css"><link rel="stylesheet" href="aesthetic.css"></head>
-<body><header><strong><span class="brand">↗</span> Click2Cloud</strong><nav aria-label="Application"><button disabled data-view="remotes">Remotes</button><button disabled data-view="explorer">File Explorer</button><button disabled data-view="history">History</button><div class="header-more"><button id="header-more" aria-haspopup="menu" aria-expanded="false" aria-controls="header-menu">More ▾</button><div id="header-menu" role="menu" hidden><button role="menuitem" disabled data-view="settings">Settings</button><button role="menuitem" id="help-diagnose">Help · Diagnose</button></div></div></nav><button disabled id="theme" aria-label="Switch Light or Dark theme">☀ / ◐</button></header>
-<div id="shell" data-view="remotes"><aside aria-label="Cloud navigation"><h2>Cloud connections</h2><div id="connection"></div><div id="tree" role="tree" aria-label="Cloud folders"></div></aside><div id="pane-splitter" role="separator" aria-label="Folder tree and files width" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"></div><main id="main" tabindex="-1"><section class="page"><h1>Your clouds, one place.</h1><div class="card"><h2>Cloudflare</h2><p role="status">Checking connection…</p></div></section></main></div>
-<footer><span id="action-feedback" role="status" aria-live="polite" hidden></span><button id="show-save-results" hidden>Review save results</button><button disabled id="manage">Manage Destinations</button></footer>
-<div id="status" data-aesthetic-text="status.verbose-technical-detail" role="status" aria-live="polite" hidden></div><dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog><div id="context" role="menu" aria-label="File actions" hidden></div><script type="module" src="app.mjs"></script></body></html>
+<body><header class="app-header">
+  <strong><span class="brand" aria-hidden="true">↗</span> <span class="brand-name">Click2Cloud</span></strong>
+  <nav aria-label="Application">
+    <button disabled data-view="remotes">Remotes</button>
+    <button disabled data-view="explorer" aria-label="File Explorer"><span class="explorer-label">File Explorer</span><span class="explorer-compact-label" aria-hidden="true">Files</span></button>
+    <button disabled data-view="history">History</button>
+    <div class="header-more"><button id="header-more" aria-haspopup="menu" aria-expanded="false" aria-controls="header-menu" aria-label="More ▾"><span class="header-more-label" aria-hidden="true">More ▾</span><span class="header-more-icon" aria-hidden="true">⋯</span></button>
+      <div id="header-menu" role="menu" hidden><button role="menuitem" disabled data-view="settings">Settings</button><button role="menuitem" disabled data-view="history" id="header-compact-history">History</button><button role="menuitem" id="help-diagnose" data-debug-only hidden>Help · Diagnose</button></div>
+    </div>
+  </nav>
+  <button disabled id="theme" aria-label="Switch Light or Dark theme"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">◐</span></button>
+</header>
+<div id="shell" data-view="remotes"><aside aria-label="Cloud navigation"><h2>Cloud connections</h2><div id="connection"></div><div id="tree" role="tree" aria-label="Cloud folders"></div></aside><div id="pane-splitter" role="separator" aria-label="Folder tree and files width" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"></div><main id="main" tabindex="-1"><section class="page"><h1>Your clouds, one place.</h1><div class="card"><h2>Cloudflare</h2><p role="status">Checking connection…</p></div></section></main>
+  <div id="manage-slot"><button disabled id="manage" aria-label="Manage Destinations" title="Manage Destinations"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 6h7l2 2h9v12H3z"/><path d="M12 11v6m-3-3h6"/></svg><span>Manage Destinations</span></button></div>
+</div>
+<div id="feedback-stack">
+  <div id="status" data-aesthetic-text="status.verbose-technical-detail" role="status" aria-live="polite" hidden></div>
+  <div id="action-feedback" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+</div>
+<dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog><div id="context" role="menu" aria-label="File actions" hidden></div><script type="module" src="app.mjs"></script></body></html>

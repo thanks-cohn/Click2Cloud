@@ -9200,14 +9200,14 @@
     "auditStatus": "SOURCE_VERIFIED",
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
-      "extension/aesthetic.css": "b2181ef39c7c3ad79c6a1b78f0ce5f9b2b09f52bd8cb365d17ddc00e003381d8",
-      "extension/app.css": "89aad628a49b47c26645fb51468d539995fa6bfa7f64df912519a4265e8d506c",
-      "extension/app.html": "d9ecf906abc46df96df7db02df14800542a95df8395cc96d9d4229492891f03e",
-      "extension/app.mjs": "32a327298a06f86633ddbad960267c8ce57d45d94aadc286ef473f352d38f46e",
+      "extension/aesthetic.css": "424f8d29cbc72d84c1082b9785977354f5dec33ceeb98a176eb029e915c4959b",
+      "extension/app.css": "24909e9744681b075b733dc3e3784d985e53f54012ad6dd1b20798285ee4e0b5",
+      "extension/app.html": "ded66a391cfca6e4d908c2e0e73dd76dbcfafc057330ddfcddc037d1e772056b",
+      "extension/app.mjs": "bc734be53a1e0ddf4a17cd799e7a1d720420e116120c8b60d64351a1136f9d19",
       "extension/background.mjs": "d0c0f8c3af259ba87a775113f0ba44db31ef9a468fe6a77b3d1232fc02aeca44",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "17db0f713bf0286222a9bd44635c97409d89de9ecac52834cd075402fdcb1438",
+      "extension/explorer-layout.mjs": "e30adebc3b9740046e000dbef9174b0712acbb311dc136c0195c835151870b00",
       "extension/history-page.mjs": "d35065df868cc86daa5ef233cdb8571d677c6605d343e759dddd3a885d7074d5",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
@@ -11131,7 +11131,7 @@
         "actual": "Explicit tab intent survives late boot reads/attention; file navigation and exact targets remain in the canonical Explorer/API.",
         "apiMethods": [],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Visible selection/keyboard updates only; stable keyed identity and focus. Single footer manager; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
+        "nextState": "Visible selection/keyboard updates only; stable keyed identity and focus. Single left-side manager, reachable with the tree collapsed; full canonical cloud address remains copyable with visual middle ellipsis. Preview feedback precedes bounded readFileChunk acquisition and stale/closed previews never reopen.",
         "uiEffect": "Ctrl/Shift selection and context focus; no repeated full sorts or network on selection",
         "externalResourceEffect": "none",
         "persistence": "none",
@@ -15069,11 +15069,11 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "7aca655dc258ccaa774d8350026f6499556e924591a174d3badf70bc59fedb63",
+    "digest": "eb70059fdae4ee56cc8fd4fb5c8d326ca4f8a7d2ec6ea85e9431a40b13af16c4",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
-      "behavior": "Depth last-outcome and operation journal remain durable. uiDebugMode OFF suppresses completed/pending notifications; actionable failures use short customer text. ON retains detailed messages. No change to routing, authorization or verification.",
+      "behavior": "Depth last-outcome and operation journal remain durable. Remote saves show compact progress and actionable warnings with normal History access. uiDebugMode controls detailed status, diagnostic shortcuts and advanced Settings cards. It does not grant authority. No change to routing, authorization or verification.",
       "tests": [
         "tests/debug-preference.test.mjs"
       ],
@@ -15100,6 +15100,16 @@
         "scripts/test-customer-history-browser.mjs"
       ],
       "evidenceClass": "Linux Chromium app with fixture provider; Windows and live Cloudflare not verified"
+    },
+    "scopedExplorerUX": {
+      "sourceBase": "4b79b652465b3dc7861f716e8802c189fc08795f",
+      "source": "extension/app.html, extension/app.css, extension/app.mjs, extension/explorer-layout.mjs",
+      "behavior": "Single-row header with fixed right theme control, no global footer, left Manage Destinations and compact save feedback. Existing layout settings own independent toolbar and 50/50 shortcuts. Debug visibility and live focus are local presentation.",
+      "folderConsent": "fileAction checks the exact bucket-wide Worker plan first. A new approval prompts for the exact folder action, resuming the same name and target. The intent keeps its operation key within the form so repeat submission can be rejected for inspection after a lost reply.",
+      "tests": [
+        "scripts/test-scoped-explorer-ux-browser.mjs"
+      ],
+      "evidenceClass": "Chromium with fixture provider and Chrome message transport"
     },
     "aestheticApiV1": {
       "apiVersion": "1.0",

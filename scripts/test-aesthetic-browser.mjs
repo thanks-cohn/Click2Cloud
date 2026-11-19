@@ -29,14 +29,14 @@ const measurements=[];
 for(const mode of ['standard','high-polish','minimal'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
  await page.setViewportSize({width,height:850});await settings();await page.locator('#appearance').selectOption(mode);await page.locator('#setting-theme').selectOption(theme);
  await page.waitForFunction(({mode,theme})=>document.documentElement.dataset.aesthetic===mode&&document.documentElement.dataset.theme===theme,{mode,theme});
- const tag=`${mode}-${theme}-${width}`;await page.waitForTimeout(160);await shot(tag+'-settings');if(mode==='high-polish'&&theme==='dark'&&width===360){const cards=page.locator('#main .card');for(let i=1;i<await cards.count();i++){await cards.nth(i).scrollIntoViewIfNeeded();await shot(tag+'-settings-card-'+i);}await page.locator('#main').evaluate(el=>el.scrollTop=0);}
+ const tag=`${mode}-${theme}-${width}`;await page.waitForTimeout(160);await shot(tag+'-settings');if(mode==='high-polish'&&theme==='dark'&&width===360){const cards=page.locator('#main .card:visible');for(let i=1;i<await cards.count();i++){await cards.nth(i).scrollIntoViewIfNeeded();await shot(tag+'-settings-card-'+i);}await page.locator('#main').evaluate(el=>el.scrollTop=0);}
  for(const view of ['Remotes','History','File Explorer']){
   await page.getByRole('button',{name:view,exact:true}).click();await page.waitForTimeout(80);await shot(tag+'-'+view.replaceAll(' ','-'));
   if(mode==='minimal'&&view==='Remotes'){
    await page.getByText('The Future is Now. True Remote is Here.',{exact:true}).waitFor();
    assert.equal(await page.getByText('Signed in to Cloudflare.',{exact:true}).isVisible(),false);
-   assert(await page.getByRole('button',{name:'Cloudflare status'}).isVisible());
-   assert(await page.getByRole('button',{name:'Save results',exact:true}).isVisible());
+   assert.equal(await page.getByRole('button',{name:'Cloudflare status'}).isVisible(),false);
+   assert.equal(await page.getByRole('button',{name:'Save results',exact:true}).isVisible(),false);
   }
   if(mode==='minimal'&&view==='File Explorer'){
    assert.equal(await page.locator('#item-count').isVisible(),false);
@@ -54,6 +54,8 @@ for(const mode of ['standard','high-polish','minimal'])for(const theme of ['dark
  results.push({gate:tag+'-screens-layout-menu-focus',state:'PASS'});
 }
 await page.setViewportSize({width:1100,height:850});
+await settings();await page.locator('#debug-mode').check();
+await page.waitForFunction(()=>document.documentElement.dataset.debugMode==='on');
 for(const mode of ['standard','high-polish','minimal']){
  await settings();await page.locator('#appearance').selectOption(mode);
  await page.getByRole('button',{name:'Manage Destinations',exact:true}).click();await shot(mode+'-destinations');
