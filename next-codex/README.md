@@ -1,5 +1,8 @@
 # Next Codex — Click2Cloud execution queue (2026-11-18)
 
+> **LATEST POST-0.3.20 FOLLOW-UP:** [`/codex-timestamp-latets.md`](../codex-timestamp-latets.md) is the owner's next-run priority: pressing **Enter** must never dismiss the Explorer filename-search field (only Escape or the far-right X may close it); **Get URL** must show the actual verified public-object URL **directly beneath the domain input** for any already-active bucket endpoint, and fill that same area after successful setup. These are requested fixes on top of the 0.3.20 branch, **not claims that 0.3.20 already implements them**. Implement on a separate follow-up branch and test carefully.
+
+
 **Master implementation request:** [Explorer UX → existing API shortcuts and daily count → experimental URLs/tags/downloads → complete API reference](CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md).
 
 ## Already changed on this feature branch
