@@ -27,7 +27,7 @@
 - **P1 — Pop-out Search shortcut:** [dedicated Ctrl+Shift+F7 proposal to show/focus Search, without replacing existing F8/F9 shortcuts](Issues/P1_EXPLORER_FILENAME_SEARCH_POPOUT_SHORTCUT_2026-11-18.md).
 - **P1 — Keyboard shortcuts editor:** [show shortcut references ONLY at bottom of Settings; allow user-defined F8/F9/F7 chords, conflict checks, persistence and Restore defaults](Issues/P1_USER_EDITABLE_KEYBOARD_SHORTCUTS_IN_SETTINGS_2026-11-19.md).
 - **P1 — Always-visible daily Shelf download badge:** [small top-right icon showing today's completed downloads/transfers, reset at midnight without deleting History](Issues/P1_ALWAYS_VISIBLE_DAILY_SHELF_DOWNLOAD_COUNTER_2026-11-19.md). **REQUESTED**, not yet implemented.
-- **Next Codex:** [scoped Search/gallery/Manager UI fixes + audited Worker implementation + experimental URL/tag features](../next-codex/CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md). Worker migration has NOT been implemented by this index/request.
+- **Next Codex:** [scoped Search/gallery/Manager UI fixes + canonical API shortcuts + daily count + experimental URL/tag/download features](../next-codex/CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md). The previously proposed Worker overhaul is EXCLUDED from this next-Codex request.
 
 - **P1 — Destinations Manager visual clarity and debug/UI separation:** [compact rows with dividers; remove Saved locally/Saved Default diagnostic banners from dialog](Issues/P1_DESTINATIONS_MANAGER_COMPACT_DIVIDED_ROWS_NO_DIAGNOSTIC_BANNER_2026-11-09.md). Keep mode counts, Default identity and connection status accessible through trusted programmatic diagnostics, not dumped above saved destinations.
 
