@@ -17,6 +17,10 @@
 5. [Editable F8/F9/F7 keyboard shortcuts in bottom Settings card](../Issues_and_Bugs/Issues/P1_USER_EDITABLE_KEYBOARD_SHORTCUTS_IN_SETTINGS_2026-11-19.md)
 **Out of scope for the next run:** the previously proposed Cloudflare Worker architecture overhaul (route migration, destination-owned executor redesign, pair-Worker changes and cross-account move redesign). The audit remains historical reference only; existing save behavior must be preserved. Do not add extra authorization/confirmation prompts as part of this removed phase.
 
+## Cross-cutting rule — API-first when it actually helps
+
+**The entire project should stay scriptable:** implement tags, URL mappings, directory URL exports, bulk download modes, metadata and machine-readable receipts through the **existing V3+1.1 API / File API where practical**, with useful stable commands and schemas. But **do not add complexity** or fake API wrappers for simple local UI; fulfill the requested behavior exactly. **History remains unchanged**, reserved for existing right-click saves. No blanket six-width/theme/aesthetic/keyboard test matrix; use focused tests that prove the specific requested functionality.
+
 ## Existing API Command and Shortcut Extension + complete developer documentation
 
 **Single ordered workstream:** canonical command metadata first → shortcut resolver/bindings second → Settings editor third. Do not build these as competing systems or duplicate the feature under two names.
@@ -41,6 +45,8 @@
 
 **Directory download + presentation:** Both individual files and directories support the two gated optional modes. In ordinary Settings, Show Download with Tags and Show Download with Metadata govern whether the two extra right-click actions appear (OFF until validated); Nest under Download governs direct siblings versus submenu (DEFAULT OFF). Recursive directory ZIP includes file bytes and readable tags/metadata manifest. See experimental specification, section 2D.
 
-**WE GOT THE RECEIPTS — mandatory by default:** Every bulk directory download, including plain, with Tags, or with All Metadata, automatically includes a source-R2-inventory-to-exported-files reconciliation receipt (machine-readable versioned JSON inside completed ZIP; same canonical operation in ordinary History). Show expected vs packaged files and sizes, missing/changed/failed objects, hashes where genuinely verified, and honest local-delivery evidence. **No extra prompt, no opt-in, no separate API and no Worker overhaul.** See experimental section 2E.
+**WE GOT THE RECEIPTS — mandatory by default:** Every bulk directory ZIP download, whether plain, with Tags or with All Metadata, automatically contains exactly one comprehensive source-to-archive reconciliation receipt named **`RRReceipt-<time-stamp>-<job-number>.json`**. Each job gets a distinct UTC millisecond timestamp plus stable unique job number/ID. **Receipt exists ONLY INSIDE the downloaded ZIP; never in History, Save Results, Downloads cards, a separate download or a second receipt store. History stays exactly as it is for right-click saving.** No extra receipt prompts, no extra public API and no Worker overhaul. See experimental section 2E.
+
+**More → Downloads (Debug ON only):** a separate diagnostic view with **one expandable card per major download**, prominently showing the directory name, timestamp, mode and status, and additional safe progress/error details when expanded. It may display the receipt **filename only**, never its content. It is not ordinary History, and turning Debug OFF hides it. See [the Debug Downloads issue](../Issues_and_Bugs/Issues/P1_DEBUG_DOWNLOADS_MORE_SECTION_2026-11-19.md).
 
 **Rule:** Don't conflate documentation with implemented code; report the tested status and commit of every milestone. Protect existing verified saving and avoid unauthorized production Cloudflare changes.
