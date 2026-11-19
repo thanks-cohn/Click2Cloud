@@ -77,6 +77,16 @@ Public URLs
 
 Focused tests: one/multiple existing domains, Submit=Enter, new domain verified in same dialog, invalid/mismatched domain, scrolling, click-one copies, Copy All including offscreen, clipboard errors, exact Unicode/prefix key, private/no public domain, directory URLs.
 
+### New directory Get URL export — SIMPLE one-line-per-file TXT
+
+**Required new delta:** [GET_URL_DIRECTORY_SIMPLE_TEXT_PRODUCTION_DOMAIN_PREFERENCE_2026-11-19.md](GET_URL_DIRECTORY_SIMPLE_TEXT_PRODUCTION_DOMAIN_PREFERENCE_2026-11-19.md).
+
+- In **right-click directory → Get URL → Export**, offer a separate **"Simple Text File, One of Each Per Line?"** option alongside the existing grouped TXT/CSV/JSON.
+- Offer checkmark **"Use non-developmental URLs where possible"**, prioritizing a verified active custom domain for each real file over an independently verified public development URL (e.g. `r2.dev`). One chosen full URL per actual object, **no** JSON header, `FILE` markers or other metadata in the simple TXT.
+- Full authorized directory inventory including safely encodable file types (not arbitrarily limited by current fixed extension allowlist), preserve directory-relative scope and nested files; report missing URLs, developmental fallback count, and incomplete enumeration **outside** the simple TXT. Never silently call a partial list complete.
+- Reuse the already implemented `directoryUrls()`, `formatUrlExport()`, `getPublicUrls` and inventory code; this is a small additional export format with optional verified endpoint preference, **not a new export engine**.
+- Keep the original structured/grouped TXT, JSON and CSV contracts intact. Do not guess `r2.dev` availability or anonymously accessible URLs.
+
 ## 4. REMAINING P1 C — Minimal only: remove unwanted generic/technical warnings
 
 - `extension/app.mjs` `quietFeedback()` still emits **`This action needs attention. Review the current panel or History.`** for unknown error states.
@@ -153,7 +163,7 @@ Cloud persistent tag-writing is still **disabled** pending safe conditional meta
 
 1. **Read-only audit / P0 triage**: report what is already present, what is incomplete, and what is not testable on the current machine; preserve evidence.
 2. **Search lifecycle repair**: focused Chrome fixture and regression tests; commit+push.
-3. **Get URL UX delta**: reuse existing API, test public/private and multi-domain cases; commit+push.
+3. **Get URL UX delta + simple directory TXT export**: reuse existing API, test public/private and multi-domain cases; implement one-URL-per-file plain TXT and custom-domain preference without modifying structured exports; commit+push.
 4. **Minimal presentation cleanup**: focused theme/error tests; commit+push.
 5. **Rules menu + validated persistent editor + page size 25**: separate isolated implementation; commit+push. Real download routing only after proven feasible, opt-in and correctly tested.
 6. **Screenshot rule UI + right-click destination capture + per-rule shortcuts and shared diagnostics**: verify Chrome capture authority, implement additive multi-destination fan-out without rewriting existing save/shortcut/recorder engines; test exact targets and shared Raw/Secure export scopes; commit+push.
