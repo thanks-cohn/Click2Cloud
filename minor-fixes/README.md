@@ -11,6 +11,10 @@ Small, isolated UX improvements. Preserve the existing right-click save engine, 
 3. [Rename image immediately inline, without a new popup](IMAGE_RENAME_INLINE_NO_POPUP.md)
 4. [Right-click any eligible folder → Make Default, automatically creating its Simple destination](RIGHT_CLICK_ANY_FOLDER_MAKE_DEFAULT_SIMPLE.md)
 
+## Major future capabilities — separate proposal
+
+[**major-fixes.md**](major-fixes.md) captures the proposed **Auto-Reroute Downloads to Cloud** (enabled in Settings; type/site → selected cloud folder; byte-streaming where truly possible), **Screenshot to Cloud** via the existing API-backed shortcut system, and **per-job timestamps, filenames, file sizes and cloud-side comparison evidence**. Diagnostics must remain **separate, bounded, expandable and non-blocking** so they never interfere with existing transfers, History, ZIP receipts or the save engine. **Do not include these major features in the current 0.3.20 run without separate authorization.**
+
 ## Future only — do NOT implement as part of 0.3.20
 
 5. [Cloud provider tabs](FUTURE_CLOUD_PROVIDER_TABS.md): eventually turn the Cloudflare provider indicator into a tab next to other authorized connected providers, so users can switch clouds without a separate navigation page. Do not invent functioning providers or build this during the present run.
