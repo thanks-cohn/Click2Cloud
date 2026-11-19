@@ -29,6 +29,12 @@ All five issues below are source-reviewed requests, not proof of repair:
 
 For each, add visual/keyboard browser gates at default Windows Shelf width, 280/320/360/480/600/1100px, all three aesthetics and light/dark themes. Explicitly test the browser screenshot symptom and absence of redundant More buttons, not just code inspection.
 
+## STEP 1 ADDITIONS — API-first shortcuts, final Settings card, and Remotes hero
+
+- **New Remotes headline hierarchy:** Replace the current large "Your clouds, one place." with a large primary **"The Future is Now. True Remote is Here."** hero headline and subtitle **"Nothing ever gets downloaded to your computer."** Correct spelling and preserve responsive typography, all themes, and legitimate remote-save vs. optional user-initiated local download distinctions. It currently appears as `minimal-only remotes-tagline` under the smaller original hero in `extension/app.mjs`; make the intended hierarchy consistent rather than merely changing one font size.
+- **Shortcut design decision — EXTEND THE EXISTING API, NO SECOND API:** Implement [the Command and Shortcut Extension, including the mandatory API Command Reference](CODEX_EXISTING_API_COMMAND_SHORTCUT_METADATA_2026-11-19.md). Expose shortcut eligibility as metadata of the existing versioned V3+1.1 `toolRegistry` and host-sanctioned local UI commands; one shared binding resolver and Settings GUI. The last card in ordinary Settings is the user-editable Keyboard Shortcuts section. Future Screenshot-to-Cloud is only an extensibility example, NOT part of this implementation.
+- **Deliver a finished documentation artifact** at **`docs/api/API-COMMAND-REFERENCE.md`** listing EVERY callable API command/method, each with a few substantive plain-English sentences, input/return/permissions/effect/limitations and correct examples. Verify exact complete coverage with a script/test compared to the final `toolRegistry`. The audited baseline declares 70 methods (62 core + 8 manifest), but recount on the final HEAD after implementation. Keep UI-only commands in a separate appendix and don't imply they are API methods. Generate the definitive doc **after** subsequent Worker/experimental stages so it reflects the final implementation.
+
 ## STEP 2 — IMPLEMENT the Worker architecture improvements from the completed audit
 
 **Reference decision:** [Final Click2Cloud vs ReDown architecture audit](../docs/evidence/ux-filename-search-audit/ARCHITECTURE-AUDIT.md) at `1f366aa`, based on Click2Cloud `c1ea866` and ReDown tagged/full source. **This audit is complete; the next run is authorized to implement scoped, gated improvements in Click2Cloud, not to start another read-only comparison.**
@@ -54,6 +60,10 @@ E. **Rollback and measurements.** Feature-flag the new route, maintain old route
 Follow [experimental Get/Add URL mappings and image tags task](experimental/CODEX_EXPERIMENTAL_GET_URLS_AND_IMAGE_TAG_METADATA_2026-11-18.md). User wants real right-click image **Get URL/Add URLs** capabilities with multiple Cloudflare-linked website URLs per object and per-directory exports (one URL per line grouped by file), plus **right-click image → add/edit tags** saved as persistent cloud metadata, not just browser-local notes. This is a Click2Cloud product pillar, but initial implementation lives under `next-codex/experimental` and **must be feature-flagged OFF by default** until validated.
 
 No auto-enabling public access. Respect R2 custom-domain authorization, multi-site URL identity, metadata overwrite/sidecar constraints, object version/ETag concurrency, verified receipts and record persistence across restarts/renames. Do not assume metadata editing is an in-place cheap operation. Prototype the canonical API and UI only if safe; otherwise preserve as gated proof with explicit blocker.
+
+## STEP 4 — MANDATORY developer API documentation deliverable (do not omit)
+
+Read and implement [the authoritative API Command Reference and shortcut metadata request](CODEX_EXISTING_API_COMMAND_SHORTCUT_METADATA_2026-11-19.md). **Complete and commit `docs/api/API-COMMAND-REFERENCE.md` after all code and experimental work**, covering the entire actual final `toolRegistry`, with several explanatory sentences for every method, current auth/effects/parameters/returns, and a source-derived completeness check. Explicitly distinguish actual methods, trusted UI shortcuts, experimental/flagged commands and future-only screenshot-to-cloud. Stop and report missing coverage instead of declaring success. The Settings editor must use the existing API's shared metadata/bindings, not introduce a competing API.
 
 ## Final quality gate
 
