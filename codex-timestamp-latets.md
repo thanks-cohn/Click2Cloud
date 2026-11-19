@@ -103,27 +103,32 @@ Connected Cloudflare domain
 Domain: [add or select a domain                    ] [Add / Verify]
 
 Public URL
-https://existing-domain.example/photos/image.png        [Copy]
-https://second-domain.example/photos/image.png          [Copy]
+┌─────────────────────────────────────────────────────┐
+│ https://existing-domain.example/photos/image.png    │ ← click card to copy
+├─────────────────────────────────────────────────────┤
+│ https://second-domain.example/photos/image.png      │ ← click card to copy
+└─────────────────────────────────────────────────────┘
+  (scroll vertically inside this list if there are many)
 
 [Copy All URLs]
 ```
 
 1. **Existing URLs first, automatically:** As soon as Get URL opens on a file, render **every currently verified public endpoint for the exact account/bucket/object** directly beneath the domain input. No need to type, re-add, select, Save, or click a preliminary "Copy selected URLs" button to reveal them.
 2. **Domain configuration stays live:** Keep the input and existing domain-verification/setup controls visible and functional in the SAME window. When the user adds/selects another domain, verify that the endpoint is actually active for the exact bucket; then **append that file's real URL to the visible list immediately**, without closing/reopening the popup. Do not treat unverified typed text as an active link; explain missing setup and offer Recheck.
-3. **Copy one:** Every displayed URL is individually selectable and copyable. A user can **click a URL row (clearly indicated as a Copy action) or its explicit Copy button** to copy that exact URL to the clipboard. A separate **Open URL** affordance may be supplied, but must not replace Copy or cause accidental navigation. Announce success or a meaningful clipboard error.
-4. **Copy All:** Provide a visible **Copy All URLs** button directly beneath the list that copies **all currently displayed verified-mapping URLs for that object** to the clipboard, one complete URL per line, in displayed order. Dedupe repeated mappings; never include unverified text, placeholder URLs, other objects, or other buckets. Disable if none are available; announce the copied count or failure. No preliminary per-domain checkbox selection required for the default Copy All action.
+3. **Copy one by clicking the URL card itself:** Display **each verified public URL as its own small, clean, minimalist card immediately beneath the domain input**. The **entire card is the Copy control**: clicking anywhere on the card copies that card's full URL to the clipboard. **Do not require a separate Copy button within each URL card.** Make the cards keyboard-accessible (focusable button semantics, Enter/Space copies), readable with long URLs, and give subtle visible/accessible "Copied" or error feedback. Clicking a card **copies; it must not navigate to the website**. An optional distinct Open affordance must not interfere with card-to-copy behavior.
+4. **Scrollable list + Copy All:** Place all minimalist URL cards in one bounded-height list **directly beneath the domain input**. For one/few URLs show the cards normally; **when many URLs exceed the available height, display an internal vertical scrollbar** and scroll *the cards only*, not the entire Get URL window. Maintain visible, readable URL text with sensible wrapping and accessible keyboard scrolling. Keep the domain field and a persistent **Copy All URLs** button outside the scrollable card list, so both stay available even with many domains. Copy All copies **all currently displayed verified-mapping URLs for that object** (including those scrolled out of view), one full URL per line, in displayed order. Dedupe repeated mappings; never include unverified text, placeholders, other objects, or other buckets. Disable if none are available and announce the copied count or failure. No preliminary checkbox selection.
 5. **Keep both modes together:** A newly verified site/domain adds a new URL row while all previous URL rows stay visible. Copy one, Copy All, input and Recheck remain available in the same flow. If there is no public endpoint, render the persistent empty-state Public URL section and Recheck instead of any invented URL. Do not silently enable public access.
 6. **Mapping versus reachability:** Clearly distinguish a verified Cloudflare endpoint mapping from a successful unauthenticated request to the object. Present truthful status on each row and never label untested anonymous delivery as tested. Rendering a derived URL for a verified mapping is acceptable when reachability status is accurately labeled.
 7. **Directories:** A directory/prefix has no fabricated standalone URL; retain grouped per-object directory export and only offer Copy All when the concrete URLs being copied and their scope are unambiguous.
 
 ### Required acceptance tests for this clarification
 
-- Already-public bucket with two domains: immediately see two full URLs beneath the domain input; click either row / its Copy button to copy only that URL; Copy All copies exactly those two URLs on separate lines.
+- Already-public bucket with two domains: immediately see two minimalist URL cards beneath the domain input; clicking anywhere on either card copies **only** that URL, without a separate per-card Copy button; Copy All copies exactly those two URLs on separate lines.
 - Start with one verified domain and add a second verified domain: second URL appears immediately in the same window without losing the first. Copy All now copies both.
 - Enter an inactive or mismatched domain: no fake URL row, truthful explanation and Recheck; previously verified URLs remain visible.
 - Spaces, Unicode, prefixes and duplicate filenames across buckets: every copy operation yields only the fully encoded exact-object URL(s).
 - Copy errors display feedback rather than silently failing; controls are keyboard accessible; the list remains visible through copying, verification, and ordinary focus changes.
+- With many verified domains, the cards appear in a **bounded scrolling list** with a vertical scrollbar; scrolling the list does not hide the domain input or Copy All; Copy All includes even the off-screen cards.
 
 **This clarifies and supersedes any earlier instructions implying Get URL is only a setup form, only a copy dialog, or that new domains must be selected again after verification.**
 
