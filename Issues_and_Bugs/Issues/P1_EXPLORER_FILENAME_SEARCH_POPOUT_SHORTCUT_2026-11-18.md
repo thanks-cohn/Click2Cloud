@@ -13,7 +13,7 @@ Users must be able to make the filename Search field **pop out and receive keybo
 - Enter runs the existing current-directory `searchDirectoryNames` File API with persistent IndexedDB. Typing does not trigger cloud queries. Escape closes the popover and restores focus without silently clearing the typed query or search results. Clear explicitly resets the search.
 - Preserve one authoritative search input and handler, existing query and selected folder scope, accessibility label, IME focus, and source/session fencing. No duplicate search engine or duplicate form.
 - Do not intercept the shortcut in text controls, dialogs, open menus, or outside Explorer; retain the existing F8/F9 shortcuts and the top-right first-row theme switch.
-- Add Chrome Shelf browser tests for inline, hidden, pop-out, repeated open, Enter, Escape, switching folders, account changes, narrow and wide, 1/2 toolbar rows, all themes, and no provider calls before Enter.
+- Add focused Chrome Shelf tests for Search hidden vs visible, pop-out, repeated open, Enter/Escape, and no provider calls before Enter. Avoid an unrelated width/theme/aesthetic test matrix.
 
 ## Implementation guidance
 
