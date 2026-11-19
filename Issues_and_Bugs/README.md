@@ -6,6 +6,8 @@
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
+- **P1 — Filename Search missing from expanded Explorer toolbar despite usable layout space:** [owner's real installed-Chrome screenshot, source-identified row-packing defect and Ctrl+Shift+F7 pop-out request](Bugs/P1_EXPLORER_FILENAME_SEARCH_HIDDEN_DESPITE_EXPANDED_TOOLBAR_SPACE_2026-11-18.md). **OPEN**; fix Search priority and visibility in normal narrow 2-row Shelf. Existing direct-child search API works, but `:nested` recursion is not implemented.
+
 - **P1 — Whole Cloud crawl stuck at zero object pages; UI `DUE` disagrees with external `RUNNING` checkpoint:** [owner's November 15 Windows evidence and read-only investigation](Bugs/P1_WHOLE_CLOUD_CRAWLER_STALLED_CHECKPOINT_DISAGREEMENT_2026-11-15.md). Seven buckets recorded but no object-page namespaces or completed export observed; root cause unknown. **Deferred behind current Simple/Narrow/Depth right-click acceptance testing.**
 
 - **P1 — Explorer condensed toolbar shows wrong controls:** [one-row slider must show only Back, Forward, Up, Refresh, More](Bugs/P1_EXPLORER_CONDENSED_TOOLBAR_NAVIGATION_ONLY_2026-11-09.md). Preserve every other command inside More and keep expanded toolbar behavior; no application code changed by this report.
@@ -19,6 +21,11 @@
 - [Existing P0 — Destinations lost after login; recurring approval; Explorer opens blank](../bugs/CRITICAL/P0_DESTINATION_PERSISTENCE_REAUTH_EXPLORER_STARTUP_2026-11-07.md). Maintain the current owner priority: saved configurations and approvals survive OAuth cycles.
 
 ## Issues (desired UX, controls, presentation, and missing capabilities)
+
+- **P1 — Destinations Show in Chrome alignment:** [heading on its own line; Simple, Narrow, Depth checkboxes together beneath, plus separate All/Flat controls](Issues/P1_DESTINATIONS_SHOW_IN_CHROME_CHECKBOX_ROW_2026-11-18.md).
+- **P1 — Image preview cleanup:** [remove “Images in this loaded folder”; double-click preview filename to safely rename through File API](Issues/P1_GALLERY_PREVIEW_REMOVE_CAPTION_AND_DOUBLE_CLICK_RENAME_2026-11-18.md).
+- **P1 — Pop-out Search shortcut:** [dedicated Ctrl+Shift+F7 proposal to show/focus Search, without replacing existing F8/F9 shortcuts](Issues/P1_EXPLORER_FILENAME_SEARCH_POPOUT_SHORTCUT_2026-11-18.md).
+- **Next Codex:** [scoped Search/gallery/Manager UI fixes + audited Worker implementation + experimental URL/tag features](../next-codex/CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md). Worker migration has NOT been implemented by this index/request.
 
 - **P1 — Destinations Manager visual clarity and debug/UI separation:** [compact rows with dividers; remove Saved locally/Saved Default diagnostic banners from dialog](Issues/P1_DESTINATIONS_MANAGER_COMPACT_DIVIDED_ROWS_NO_DIAGNOSTIC_BANNER_2026-11-09.md). Keep mode counts, Default identity and connection status accessible through trusted programmatic diagnostics, not dumped above saved destinations.
 
