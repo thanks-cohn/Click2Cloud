@@ -48,7 +48,7 @@ See [full API extension + mandatory all-method API documentation task](../../nex
 2. Change F8 to an alternate allowed chord; it activates toolbar toggle, old F8 no longer triggers; F9 stays unchanged. Repeat for F9 and Search; verify Escape cancels edits and saved custom chords survive extension reload.
 3. Restore defaults atomically, and verify originals work again; test disabling/re-enabling if implemented.
 4. Reject conflicts with existing bindings and unsafe/bare/reserved keys with accessible error; capture prevents running actions; shortcut presses in other text controls/dialogs are ignored.
-5. Regression: exactly zero "Toggle one or two toolbar rows" and "Reset panels to 50/50" command buttons in Explorer More at all viewports/themes, including after settings edit; actual splitter drag/double-click and keyboard shortcuts still work; no duplicate event listeners on Settings rerender.
+5. Regression: exactly zero "Toggle one or two toolbar rows" and "Reset panels to 50/50" buttons in Explorer More, including after a Settings edit; existing splitter behavior and bindings still work, with no duplicate listeners. No all-viewports/themes matrix.
 6. When the browser has reserved a chosen chord or a chord isn't dispatched, don't claim it functions; provide alternative and document verification limits. Test installed Chrome on Windows separately from browser fixtures.
 
 **Parent task:** [next-Codex implementation queue](../../next-codex/CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md).
