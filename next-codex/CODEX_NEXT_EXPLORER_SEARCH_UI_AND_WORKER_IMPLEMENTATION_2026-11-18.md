@@ -1,9 +1,9 @@
-# NEXT CODEX — Explorer polish, canonical API shortcuts, daily Shelf badge, and experimental URLs/tags
+# NEXT CODEX — Explorer polish, canonical API shortcuts, daily Chrome extension icon badge, and experimental URLs/tags
 
 **Date:** November 18, 2026  
 **Baseline:** `codex/ux-filename-search-audit-2026-11-18`; fetch its latest HEAD at execution.  
 **Status:** **NEXT IMPLEMENTATION RUN** — not another research-only audit.  
-**Sequence:** UI correctness and branding first → existing-API command/shortcut bindings and daily Shelf badge → experimental Get URLs, tags and download exports behind independent feature flags → final complete API reference and regression report. Report each gate separately. **No Worker architecture redesign or migration in this run.**  
+**Sequence:** UI correctness and branding first → existing-API command/shortcut bindings and daily Chrome extension icon badge → experimental Get URLs, tags and download exports behind independent feature flags → final complete API reference and regression report. Report each gate separately. **No Worker architecture redesign or migration in this run.**  
 **Boundaries:** Only Click2Cloud, isolated feature branch; do not modify `main`, ReDown's code, actual user saved destinations, production Cloudflare Workers or R2. ReDown is read-only reference. Don't weaken existing save authorization or verified receipts. Local tests with fixtures only unless separately authorized.
 
 ## STEP 0 — Existing small fix already committed: clean Explorer More
@@ -36,9 +36,9 @@ For each, add visual/keyboard browser gates at default Windows Shelf width, 280/
 - **Shortcut design decision — EXTEND THE EXISTING API, NO SECOND API:** Implement [the Command and Shortcut Extension, including the mandatory API Command Reference](CODEX_EXISTING_API_COMMAND_SHORTCUT_METADATA_2026-11-19.md). Expose shortcut eligibility as metadata of the existing versioned V3+1.1 `toolRegistry` and host-sanctioned local UI commands; one shared binding resolver and Settings GUI. The last card in ordinary Settings is the user-editable Keyboard Shortcuts section. Future Screenshot-to-Cloud is only an extensibility example, NOT part of this implementation.
 - **Deliver a finished documentation artifact** at **`docs/api/API-COMMAND-REFERENCE.md`** listing EVERY callable API command/method, each with a few substantive plain-English sentences, input/return/permissions/effect/limitations and correct examples. Verify exact complete coverage with a script/test compared to the final `toolRegistry`. The audited baseline declares 70 methods (62 core + 8 manifest), but recount on the final HEAD after implementation. Keep UI-only commands in a separate appendix and don't imply they are API methods. Generate the definitive doc **after** the approved API/experimental changes so it reflects the final implementation.
 
-## STEP 1 ADDITION — Always-visible top-right daily download count
+## STEP 1 ADDITION — Daily number on the Chrome EXTENSION TOOLBAR ICON (not Shelf)
 
-Implement the [daily Shelf download-count icon](../Issues_and_Bugs/Issues/P1_ALWAYS_VISIBLE_DAILY_SHELF_DOWNLOAD_COUNTER_2026-11-19.md): always visible at the top-right of the Shelf beside existing header controls on every view, displaying today's **verified completed Click2Cloud downloads/transfers** and automatically rolling over to zero at local midnight without deleting History. Derive from authoritative saved receipts and confirmed local-download completion; avoid double-counting retries, ZIP metadata sidecars, or failed/unknown jobs. Show remote saves vs local download breakdown, timezone, and unavailable state honestly. No replacement of the Sun/Moon theme toggle or additional top-right toolbar button in Explorer.
+Implement the [daily Chrome extension ICON BADGE](../Issues_and_Bugs/Issues/P1_DAILY_CHROME_EXTENSION_ICON_BADGE_2026-11-19.md): display today's **verified completed Click2Cloud downloads/transfers as a numeric badge ON THE EXISTING BROWSER EXTENSION TOOLBAR ICON** next to Chrome's address bar (when the user pins the extension). Use native MV3 `chrome.action.setBadgeText` / `setBadgeBackgroundColor`, global action badge, and the existing receipt/History authority. Reset at midnight even when the Shelf is closed; survive browser/worker restarts. **DO NOT add an icon, counter, badge or number ANYWHERE inside the Shelf**, including the top-right header, theme toggle, Explorer, Remotes and Settings. Chrome controls whether the extension action is pinned; do not claim control of the browser's puzzle-piece icon. No added user confirmation or popup. Avoid duplicate counts and preserve the existing Shelf UI.
 
 ## STEP 2 — EXPERIMENTAL: right-click multiple URLs and image tags metadata
 
