@@ -2,11 +2,17 @@
 
 **Repository issue register; owner-reported November 7, 2026.** These Markdown files are scoped Codex work items, not evidence that any change has been implemented. Keep defects separate from feature/UX requirements and record actual Chrome test results before closing.
 
+**Status note (merged November 19, 2026):** This issue register preserves historical descriptions, including items marked *requested* that now have code in 0.3.20. Use [the code-audited, delta-only next-Codex handoff](../next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md) to distinguish implemented source from remaining gaps. Existing P0 wrong-destination reports remain open pending real proof.
+
 **Current Explorer performance P0 (after CURRENT data-integrity blocker):** [Whole-Shelf Explorer stutter/latency, REDOWN-informed improvements](Bugs/P0_WHOLE_SHELF_EXPLORER_LATENCY_STUTTER_REDOWN_PARITY_PLUS_2026-11-08.md), with an [implementation-ready Codex assignment](../docs/requests/CODEX_P0_ZERO_STUTTER_EXPLORER_PERFORMANCE_REDOWN_REFERENCE_2026-11-08.md). This is a broader owner-reported latency defect than the earlier right-click-only P0; measure input-to-paint in installed Chrome, then repair code.
+
+- **P0 RELEASE-BLOCKING — owner received success reporting but could not find the file in the selected Cloudflare destination:** [reported possible false verified save / wrong-target or stale notification](Bugs/P0_POTENTIAL_FALSE_VERIFIED_SAVE_WRONG_DESTINATION_STATUS_CONFLICT_2026-11-17.md) · [P0 Codex investigation](../codex/11.17.2026/CODEX_P0_MISSING_FILE_FALSE_SUCCESS_TARGET_RECEIPT_CORRELATION.md) · [GitHub #17](https://github.com/thanks-cohn/Click2Cloud/issues/17). Connected/Sign out UI conflicted with reconnect instruction; a later source error and earlier native ACK warning need per-operation correlation. **Cause not proved; do not claim verified success in the intended target without matched receipt + provider stat.**
 
 ## Bugs (existing functionality fails or is unacceptably slow)
 
 - **P1 — Filename Search missing from expanded Explorer toolbar despite usable layout space:** [owner's real installed-Chrome screenshot, source-identified row-packing defect and Ctrl+Shift+F7 pop-out request](Bugs/P1_EXPLORER_FILENAME_SEARCH_HIDDEN_DESPITE_EXPANDED_TOOLBAR_SPACE_2026-11-18.md). **OPEN**; fix Search priority and visibility in normal narrow 2-row Shelf. Existing direct-child search API works, but `:nested` recursion is not implemented.
+
+- **P1 CRITICAL — newly created Simple destinations fail right-click saves even after becoming Default and the only choice:** [owner's November 16 reproduction + RAW diagnostic analysis](Bugs/P1_SIMPLE_DESTINATION_WORKER_SETUP_REQUIRED_AFTER_DEFAULT_2026-11-16.md) · [Codex cross-repo REDOWN/Click2Cloud starting point](../codex/11.16.2026/START_HERE_SIMPLE_DESTINATION_REDOWN_REFERENCE.md). Four verified saves and seven `WORKER_SETUP_REQUIRED` blocks interleave; exact destination mapping remains unproven. Compare REDOWN as a read-only, user-proven functional reference before any selective port; no code change or live repair claimed.
 
 - **P1 — Whole Cloud crawl stuck at zero object pages; UI `DUE` disagrees with external `RUNNING` checkpoint:** [owner's November 15 Windows evidence and read-only investigation](Bugs/P1_WHOLE_CLOUD_CRAWLER_STALLED_CHECKPOINT_DISAGREEMENT_2026-11-15.md). Seven buckets recorded but no object-page namespaces or completed export observed; root cause unknown. **Deferred behind current Simple/Narrow/Depth right-click acceptance testing.**
 
