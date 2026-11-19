@@ -1,7 +1,7 @@
 # CODEX REQUEST — Final read-only decision: safest, simplest, most scalable cloud operations engine
 
 **Date:** 2026-11-18  
-**Status:** Research/architecture decision ONLY. This is the FINAL evaluation step before a separately authorized implementation.  
+**Status:** Research/architecture decision ONLY. **Execution order: STEP 3 — THE FINAL TASK, after (1) scoped UX fixes and (2) the read-only filename/IndexedDB architecture design.** This is the final evaluation before any separately authorized cloud-engine implementation.  
 **Repositories:** `thanks-cohn/Click2Cloud` and the **full** `thanks-cohn/REDOWN` repository.  
 **Priority:** P0 design review. Reliability, correctness and fewer failure/miscommunication surfaces take precedence over novelty.
 
