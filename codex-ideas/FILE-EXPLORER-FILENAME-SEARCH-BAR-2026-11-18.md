@@ -218,7 +218,7 @@ The textual expression `bucket/directory/child:nested report` is a **convenient 
 
 **V1 remains deliberately simple:** one supplied directory, direct child filenames/folders only, and a GUI search bar calling that API. Recursive `:nested`, explicit inline directory targeting, and `bucket/directory/child:nested` are **future extensions** and must not delay V1.
 
-**Related scoped Codex UI request:** [Implement the upper-right first-row sun/moon fix, gallery/footer changes, debug-only controls and Explorer toolbar polish](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md). The filename/IndexedDB research request remains first; the enterprise audit remains last.
+**Related scoped Codex UI request:** [Implement the upper-right first-row sun/moon fix, gallery/footer changes, debug-only controls and Explorer toolbar polish](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md). The scoped UX fixes run FIRST; the read-only filename/IndexedDB design runs SECOND; the read-only enterprise architecture audit remains LAST.
 
 ## Header, debug-only support controls and gallery-space changes — final clarified UI directives
 
