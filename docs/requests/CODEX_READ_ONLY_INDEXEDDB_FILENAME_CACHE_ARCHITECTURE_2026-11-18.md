@@ -1,7 +1,7 @@
-# CODEX REQUEST — Design the best practical IndexedDB filename inventory & search cache (READ ONLY)
+# ARCHIVED / SUPERSEDED RESEARCH NOTES — IndexedDB filename inventory and search cache
 
 **Date:** 2026-11-18  
-**Status:** Research/design only, not implementation. **Execution order: STEP 2 — AFTER scoped UX fixes and BEFORE the final cross-repo cloud-engine audit.** Do not edit or reimplement the completed UX work; treat it as the observed current UI and design search to integrate cleanly.  
+**Status:** **SUPERSEDED as an executable Codex task.** The user has now expressly requested IMPLEMENTATION of the filename system, not design only. **Active STEP 2 request:** [CODEX_IMPLEMENT_FILENAME_SEARCH_INDEXEDDB_2026-11-18.md](CODEX_IMPLEMENT_FILENAME_SEARCH_INDEXEDDB_2026-11-18.md). The old read-only/no-repo-edits instructions below are archived research constraints only; **do not execute this older file as a standalone task or use its read-only language to override the active implementation request.**  
 **Product:** Click2Cloud, Cloudflare R2 first; reusable File API/provider adapters later.  
 **User objective:** Repeated filename searches should be answered from a **durable local IndexedDB inventory** rather than repeatedly asking Cloudflare R2 for names already fetched. No downloading file contents to match filenames.
 
