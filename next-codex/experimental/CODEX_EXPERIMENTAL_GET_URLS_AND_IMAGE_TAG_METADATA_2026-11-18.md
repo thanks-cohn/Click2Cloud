@@ -3,7 +3,7 @@
 **Date:** November 18, 2026  
 **Status:** NEW EXPERIMENTAL IMPLEMENTATION FEATURE, **not currently shipped**.  
 **Repository:** Click2Cloud only; isolated feature branch.  
-**Priority:** After the immediate Search/gallery/Manager UX fixes and the audited Worker reliability changes have their own validation gates. Experiment behind a user-visible feature flag, off by default, with no surprise public exposure or mutation of private buckets.
+**Priority:** After the immediate Search/gallery/Manager UX and existing API/shortcut fixes have their own validation gates. Experiment behind a user-visible feature flag, off by default, with no surprise public exposure or mutation of private buckets. **No general Worker architecture redesign, pair-Worker migration, or cross-account copy/move redesign is in scope.** Use only the existing trusted provider/file paths and changes strictly necessary for these specific features.
 
 ## 1. Preserve the previously agreed Get URL workflow
 
