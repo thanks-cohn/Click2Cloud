@@ -25,6 +25,16 @@
 - **0.3.20 is a FINAL BUILT VERSION REQUIREMENT**, not a tag or finished artifact now. Codex must update `extension/manifest.json`, `package.json`, `package-lock.json`, build outputs and actual `chrome://extensions` version on the next implementation branch; keep the current 0.3.19 rollback source untouched.
 - **End deliverables:** complete and accurate `docs/api/API-COMMAND-REFERENCE.md` documenting ALL actual methods, quick-start for programmers, invocation/parameter/return/permissions/effects examples, an automated exact registry-vs-doc coverage test, and instructions to run repeatable API function tests.
 
+## New minor fixes (November 19)
+
+[**Four current minor fixes and one future-only multi-cloud UI concept**](../minor-fixes/README.md):
+
+- In the **single-row Explorer toolbar**, use genuine spare width to show the existing Refresh control when it fits, without moving Search unnecessarily.
+- Remove the redundant visible **Cloud connections** heading in Explorer; leave the cloud tree and accessibility intact.
+- **Image filename rename must be immediate and INLINE** on double-click at the top of preview. **No separate Rename popup.** Enter to commit, Escape to cancel, existing File API.
+- **Explorer folder → right-click Make Default must work for ANY authorized folder.** Automatically create/reuse its exact **Simple destination** and make it the default, with no manual mode, path entry or Destinations Manager setup; reuse existing trusted API and confirm actual native menu readiness without claiming success prematurely. No extra user steps when existing authorization suffices.
+- **Future only (do not implement now):** connected-provider tabs alongside Cloudflare for eventual multi-cloud navigation.
+
 ## Cross-cutting rule — API-first when it actually helps
 
 **The entire project should stay scriptable:** implement tags, URL mappings, directory URL exports, bulk download modes, metadata and machine-readable receipts through the **existing V3+1.1 API / File API where practical**, with useful stable commands and schemas. But **do not add complexity** or fake API wrappers for simple local UI; fulfill the requested behavior exactly. **History remains unchanged**, reserved for existing right-click saves. No blanket six-width/theme/aesthetic/keyboard test matrix; use focused tests that prove the specific requested functionality.
