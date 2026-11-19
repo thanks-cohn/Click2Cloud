@@ -1,10 +1,10 @@
 # CODEX REQUEST — Click2Cloud scoped header, gallery and search-toolbar polish
 
 **Date:** 2026-11-18  
-**Status:** Focused UI implementation request, separate from the two research-only architecture tasks.  
+**Status:** STEP 1 — focused UI IMPLEMENTATION. STEP 2 filename/IndexedDB is now also IMPLEMENTATION; only STEP 3 final cloud-engine audit is read-only.  
 **Repository:** thanks-cohn/Click2Cloud  
 **Primary source:** [Current File Explorer search and UI proposal](../../codex-ideas/FILE-EXPLORER-FILENAME-SEARCH-BAR-2026-11-18.md)  
-**Schedule — revised by user (2026-11-18): STEP 1, UX FIRST.** Implement and test the independent, authorized Shelf / header / footer / Settings / Debug Mode / New Folder UX fixes **before** the filename-search/IndexedDB architecture design. **STEP 2** is the read-only IndexedDB filename-search design. **STEP 3 (LAST)** is the read-only Click2Cloud vs ReDown cloud-engine architecture audit. Work on an isolated feature branch, never main; do not modify ReDown or deploy cloud resources. The user's instruction to do the UX fixes first authorizes this scoped UI work, not security or infrastructure changes.
+**Execution order (updated user instruction): STEP 1 = UX FIXES FIRST; STEP 2 = IMPLEMENT [working File API filename search + persistent IndexedDB cache](CODEX_IMPLEMENT_FILENAME_SEARCH_INDEXEDDB_2026-11-18.md); STEP 3 = final READ-ONLY Click2Cloud vs ReDown cloud-engine architecture audit.** Finish focused header/footer/Settings/Debug/New Folder UI corrections first; then ship actual filename search with tests; only then research the enterprise architecture. Work on an isolated feature branch, never main; do not modify ReDown or deploy cloud resources. No cloud-engine/provisioning/security redesign is authorized by this UI task.
 
 ## Mandatory top-header layout: SUN/MOON UPPER-RIGHT, FIRST ROW, NEVER WRAP
 
@@ -55,7 +55,7 @@ Use the above proposal as ground truth for this area, without conflating the Exp
 - Keep Back / Forward / Up / Refresh navigation; place a **flexible filename search field in leftover space just BEFORE Explorer More** whenever it has enough width. When narrow, hide the search field first, leaving navigation and More intact, with search discoverable through More if appropriate.
 - Replace the visible primary directory-address field role with Search. Keep a secondary accessible Go-to-path route.
 - Search submission uses **Enter**, not every keystroke. The **File API owns the search**, not a GUI-only filtering engine. V1 is immediate children of the current directory; future `:nested` and `bucket/folder:nested` remain future API/search-bar commands rather than mandatory V1 recursion.
-- **UX-first dependency rule:** Since the IndexedDB/File API search design now comes second, implement independently safe visual/layout improvements first. Do **not** introduce a broken, fake, or GUI-only search box before the real File API operation is ready. The search slot can be prepared behind a feature flag or deferred, with existing address navigation working until search is implemented in a later separately authorized task. This must not block footer/header/debug/shortcut/New Folder UX fixes.
+- **UX-first dependency rule:** Implement independent UI fixes in STEP 1 first. The complete File API/IndexedDB **implementation is explicitly authorized in STEP 2**, so defer enabling the Search input until it is functionally connected to the real API and verified persistent inventory. Preserve normal address navigation meanwhile. Do not ship fake or GUI-only search; do not let this dependency block sun/moon, footer, debug, shortcut, Settings or New Folder fixes.
 - Keep **+ Right Click** fully functional and in its established second-row position if the toolbar expands.
 - Add one shortcut to toggle Explorer toolbar between one/two rows (reusing existing `#toolbar-splitter` state) and another independent shortcut to reset left-tree/right-gallery `#pane-splitter` to 50/50. Validate key chords do not collide with OS/Chrome and aren't caught during text composition.
 - Preserve responsive search even in single-row mode when width allows. Do not create a second layout engine.
@@ -114,4 +114,4 @@ Use one authoritative `debugPreference`/`applyDebugMode` gate on load, Settings 
 - Make scoped UI updates only if implementation has been expressly authorized. Never change the cloud save engine, Worker deployment, authorization, receipts, destination configuration semantics, File API transport or IndexedDB production data as part of header/footer polish.
 - Test default Shelf width, narrow/wide sizes, all themes, dark/light, mouse and keyboard, Debug Mode ON/OFF, header More focus, one/two rows, collapsed left pane, 50/50 reset, gallery height before/after and normal save error visibility. Assert sun/moon **never appears on second header row**.
 - Report exact changes, before/after screenshots, tests, failures, unverified behavior and rollback. Do not claim real installed-Chrome success if unavailable.
-- **Order must be UX fixes FIRST, filename/IndexedDB design SECOND, final cross-repo architecture evaluation LAST.** Neither research-only request authorizes code changes. Stop before security/provisioning redesign and do not start the final audit early.
+- **Order must be UX fixes FIRST, real filename-search/IndexedDB IMPLEMENTATION SECOND, final READ-ONLY cross-repo architecture evaluation LAST.** This scope does not authorize security/provisioning redesign; the final architecture audit must not edit either repository.
