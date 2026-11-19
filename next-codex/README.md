@@ -19,6 +19,8 @@
 
 ## Existing API Command and Shortcut Extension + complete developer documentation
 
+**Single ordered workstream:** canonical command metadata first → shortcut resolver/bindings second → Settings editor third. Do not build these as competing systems or duplicate the feature under two names.
+
 - [Command and Shortcut Extension of the existing V3+1.1 API](CODEX_EXISTING_API_COMMAND_SHORTCUT_METADATA_2026-11-19.md): programmers should be able to bind shortcuts to eligible current/future API operations without a second execution API. Settings is only the GUI editor.
 - **Mandatory at the end of next-Codex:** a finished `docs/api/API-COMMAND-REFERENCE.md` with a few explanatory sentences **for every API method** (baseline inspected: 70, recount at final HEAD), its schema/effects/permissions/examples, plus automated exact registry-vs-doc coverage validation. UI-only commands and future screenshot-to-cloud must be distinguished.
 - Remotes hero: make **"The Future is Now. True Remote is Here."** the prominent headline, with **"Nothing ever gets downloaded to your computer."** as the subtitle; demote/remove the existing larger "Your clouds, one place." text without changing cloud authority.
