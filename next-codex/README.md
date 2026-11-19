@@ -33,6 +33,8 @@
 
 [Right-click multiple Get/Add URLs with Cloudflare custom domains, directory URL export, and persistent image metadata tags](experimental/CODEX_EXPERIMENTAL_GET_URLS_AND_IMAGE_TAG_METADATA_2026-11-18.md) — new feature, not yet shipped. Experiment flag OFF by default.
 
+**Get URL first-time question for BOTH files and directories:** If no valid public URL mapping exists, ask exactly **`Allow Public URL?` Yes / No**. Yes opens the domain association setup; No leaves everything private. Both object types use the same first-time UI before their normal URL editor/export flow. This is documented in experimental section 2B.
+
 **Also requested:** Three distinct image right-click options: **Download**, **Download with Tags**, **Download with All Metadata**, with the original unchanged and a full safe JSON manifest in the all-metadata ZIP. The new variants remain experimental. See section 2C of the experimental URL/tag specification.
 
 **Directory download + presentation:** Both individual files and directories support the two gated optional modes. In ordinary Settings, Show Download with Tags and Show Download with Metadata govern whether the two extra right-click actions appear (OFF until validated); Nest under Download governs direct siblings versus submenu (DEFAULT OFF). Recursive directory ZIP includes file bytes and readable tags/metadata manifest. See experimental specification, section 2D.
