@@ -17,6 +17,17 @@
 - **Required agent-ready/scriptable design and final Chrome version:** Read [Agent-ready Scriptable API + Version 0.3.20](CODEX_AGENT_READY_SCRIPTABLE_API_AND_VERSION_0_3_20_2026-11-19.md) in full. Today's new cloud/file operations must be API-driven **where sensible without complexity**, repeatably testable via stable typed existing V3+1.1 API commands and deterministic fixture-based scripting. Future optional agent control of computers/clouds is a **design possibility**, not functionality or unrestricted access to implement now. Final build must actually identify as **0.3.20** in `chrome://extensions` (source `extension/manifest.json`, root package/lock, generated manifest/build info consistent) and include full programmer-facing documentation for every callable API method, coverage validator and API test harness. Do **not** bump the version in the instructions-only branch or publish/deploy without approval.
 - **Required Minimal Remotes cleanup:** Follow [Minimal Remotes cleanup + one Cloudflare heading](../Issues_and_Bugs/Issues/P1_MINIMAL_REMOTES_HIDE_SETUP_AND_DUPLICATE_CLOUDFLARE_TITLE_2026-11-19.md): in **Minimal**, never show the entire `Selected save destination` technical preparation card, `Inspect / prepare selected destination` or `Save unavailable. Review the setup options below or check History.`. Keep authentication/basic Remotes intact. In the Remotes Cloudflare card, use **only the outer `☁ Cloudflare R2` title**; remove the redundant inner `☁ Cloudflare` title from `renderConnection()` without losing its connection-status and login/reconnect controls. This is UI-only; never disable necessary underlying setup APIs.
 
+## NEW minor fixes folder — required small UX fixes and future-only cloud tabs
+
+Before closing the next-Codex run, review [`minor-fixes/README.md`](../minor-fixes/README.md) and implement its **four current fixes** as small isolated improvements, preserving the API-first/unchanged-History boundaries:
+
+- **One-row Explorer Refresh**: display the existing Refresh button in spare single-row toolbar space **only when measured room exists**; otherwise preserve More fallback, existing Search priority and single-row selection.
+- **Remove visible `Cloud connections` label** in Explorer's navigation pane without removing the tree or account controls.
+- **Instant inline image filename rename**: double-click the name at the top of the image preview to edit in place; **NO separate rename dialog/popup**; Enter submits, Escape cancels, existing File API does the real rename. This overrides older wording that permitted a second modal.
+- **ONE-CLICK `Make Default` on ANY authorized folder**: right-clicking a folder automatically creates/reuses its exact **Simple-mode** destination if missing and sets that path as default, with native menu verification. **No Destinations Manager visit, manual Simple configuration, additional wizard, or redundant confirmations** for an already-authorized operation. Do not bypass genuine missing provider permissions; on failure be explicit and preserve the prior default. Reuse canonical configuration/File API and native menu operations.
+
+The **future cloud-provider tabs concept** in `minor-fixes/FUTURE_CLOUD_PROVIDER_TABS.md` is a **design note only, not to implement in 0.3.20**. It would someday let the user switch between connected cloud providers from tabs alongside Cloudflare.
+
 ## STEP 0 — Existing small fix already committed: clean Explorer More
 
 **These two redundant More-menu buttons must stay REMOVED:**
