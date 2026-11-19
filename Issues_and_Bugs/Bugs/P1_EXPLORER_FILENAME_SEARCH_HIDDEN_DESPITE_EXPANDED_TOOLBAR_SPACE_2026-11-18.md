@@ -34,7 +34,7 @@ The first command row shows Back, Forward, Up, Refresh and Explorer More (`…`)
 2. Preserve a readable usable search input, without truncation, overlap, blank reserved rows, unintentional third row, or hiding the far-upper-right sun/moon in the **separate global header**.
 3. Search remains one real `#filename-search-form` instance, using `searchDirectoryNames` File API and IndexedDB—no GUI-only filtering and no second source of truth. Reparent safely between toolbar and More without losing query text, keyboard focus, screen-reader labelling or submitted results.
 4. If the panel becomes genuinely too narrow even after moving secondary controls, collapse Search into More with an accessible entry point; as soon as usable space becomes available, it should return, including when the user expands from one to two toolbar rows. Do not hardcode the width from one screenshot.
-5. Test actual Shelf default width, 280/320/360/480/600/1100px, 1 and 2 toolbar rows, all three aesthetics, both light/dark themes, collapsed/50-50/custom left-tree split, focus and typing/Enter/Escape, details/list/grid changes, and display resize.
+5. Test the **actual reported missing-Search configuration** in the ordinary Shelf (including the two-row mode), verify that the Search input becomes visible when there is room, and preserve the one-row compact contract. Do not run a broad viewport/aesthetic/theme matrix just for this task.
 6. Verify keyboard shortcuts `Ctrl+Shift+F8` (toolbar rows) and `Ctrl+Shift+F9` (50/50 pane reset), and preservation of `+ Right Click` and existing File API action routing.
 7. Add a browser regression test that specifically asserts the search input **is visible at the user-reported normal narrow two-row shelf state** when computed layout has sufficient space, and that the existing one-row compact contract remains intact.
 
@@ -50,7 +50,7 @@ Behavior and acceptance:
 4. **Enter** submits to the existing `searchDirectoryNames` File API; typing alone does not issue remote requests. **Escape** closes the pop-out when appropriate, restores focus to its prior/trigger location and does not inadvertently discard results. Clearing the query explicitly resets to browsing. Reopening retains the query until the normal search-reset rules apply.
 5. Avoid two competing Search form instances or duplicate event listeners. Preserve current source scope, IndexedDB inventory, visible results, session/authorization fencing, query text, keyboard focus and screen-reader naming when moving the existing form between toolbar/overflow/popover.
 6. Suppress the shortcut while typing in other controls, interacting with a modal/menu, or using an IME; prevent collisions with the existing browser Find and accessibility commands. Expose the shortcut as `aria-keyshortcuts` on the Search control and in Explorer More/help text.
-7. Add browser/installed-Chrome tests for **Ctrl+Shift+F7** at the owner-reported 360px shelf width, wide/compact toolbars, all themes and debug modes, consecutive activations, Escape, focus restoration and no extra provider reads until Enter. Test standard shortcuts F8/F9 continue working.
+7. Verify **Ctrl+Shift+F7** at the owner-reported Shelf state, including repeated activation, Escape, focus restoration and no provider reads before Enter. Verify existing F8/F9 behavior. Do not expand into all themes/debug/width combinations without a concrete regression need.
 
 This shortcut is a **new implementation request**, not a claim it already exists in commit `1f366aa`.
 
