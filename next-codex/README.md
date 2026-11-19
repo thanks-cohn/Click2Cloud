@@ -1,5 +1,8 @@
 # Next Codex — Click2Cloud execution queue (2026-11-18)
 
+> **CURRENT AUTHORITATIVE HANDOFF (POST-0.3.20 CODE AUDIT):** [NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Much of the older work below **already exists in 0.3.20 source** (shortcuts, API reference, version, badge, inline rename, folder Make Default, optional exports). **Do not reimplement it.** Read the new code-audited, delta-only handoff first. The newly requested **Rules** top-dropdown page is listed there as its own feature, with 25 rules per page and a feasibility gate for genuine browser download rerouting. The older steps below are HISTORICAL acceptance references, not an instruction to start over.
+
+
 > **LATEST POST-0.3.20 FOLLOW-UP:** [`/codex-timestamp-latets.md`](../codex-timestamp-latets.md) is the owner's next-run priority: pressing **Enter** must never dismiss the Explorer filename-search field (only Escape or the far-right X may close it); **Get URL** must show the actual verified public-object URL **directly beneath the domain input** for any already-active bucket endpoint, and fill that same area after successful setup. These are requested fixes on top of the 0.3.20 branch, **not claims that 0.3.20 already implements them**. Implement on a separate follow-up branch and test carefully.
 
 
