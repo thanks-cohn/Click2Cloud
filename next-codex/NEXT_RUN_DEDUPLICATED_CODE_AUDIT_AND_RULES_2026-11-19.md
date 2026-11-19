@@ -131,6 +131,14 @@ A) User opens More → Rules **above Settings**, adds extension `png` to a selec
 
 ---
 
+## 5C. NEW — one shared diagnostics system, scoped Raw/Secure ZIPs
+
+**Binding contract:** [LIGHTWEIGHT_DIAGNOSTICS_AND_RAW_SECURE_ZIPS_FOR_RULE_TRANSFERS_2026-11-19.md](LIGHTWEIGHT_DIAGNOSTICS_AND_RAW_SECURE_ZIPS_FOR_RULE_TRANSFERS_2026-11-19.md).
+
+Screenshot-to-Cloud and browser-download-reroute workflows must extend the **existing diagnostics/recorder/export framework**, not add parallel recorders, competing event writers, separate History, or colliding event IDs. Record cheap known quantities (filename, source/upload/cloud byte counts, UTC timestamps, rule, exact cloud target, operation/stage/status and truthful verification method). Keep the additive screenshot capture-to-many-destinations correlation explicit. Existing **Raw/Secure exporter** gets a workflow scope filter: `right-click saves` or `rule-based transfers`, yielding two compatible forensic ZIPs when desired; do not create two exporters. Advanced trace level reuses the existing gated diagnostics behavior. Logging/export failures never affect a transfer. Never expose secrets in Secure.
+
+---
+
 ## 6. P0 — wrong destination must be independently triaged
 
 `Issues_and_Bugs/Bugs/P0_FLAT_CLOUDFLARE_WRONG_BUCKET_IMAGES_2026-11-19.md` documents an owner-reported flat Cloudflare right-click save landing in `images` after another destination was configured. Root cause is **NOT proven**. This is higher consequence than UX polish.
@@ -148,7 +156,7 @@ Cloud persistent tag-writing is still **disabled** pending safe conditional meta
 3. **Get URL UX delta**: reuse existing API, test public/private and multi-domain cases; commit+push.
 4. **Minimal presentation cleanup**: focused theme/error tests; commit+push.
 5. **Rules menu + validated persistent editor + page size 25**: separate isolated implementation; commit+push. Real download routing only after proven feasible, opt-in and correctly tested.
-6. **Screenshot rule UI + right-click destination capture + per-rule shortcuts**: verify Chrome capture authority, implement additive multi-destination fan-out without rewriting existing save/shortcut engines; test each exact target, commit+push.
+6. **Screenshot rule UI + right-click destination capture + per-rule shortcuts and shared diagnostics**: verify Chrome capture authority, implement additive multi-destination fan-out without rewriting existing save/shortcut/recorder engines; test exact targets and shared Raw/Secure export scopes; commit+push.
 7. **Destinations Manager popup visual polish**: isolate structure/CSS, test Simple/Narrow/Depth draft/Save flows and native ACK; commit+push.
 8. Full regression suites, build manifest validation, API registry-vs-doc coverage check, real Chrome/R2 verification only if actually possible. Do not unreasonably rewrite old tests to pass by removing assertions.
 9. Return **a table of DONE/REPAIRED/NOT TESTED/BLOCKED**, exact file paths and commit SHAs, passing/failing tests, known warnings, and a working pushed branch. Preserve unchanged systems.
