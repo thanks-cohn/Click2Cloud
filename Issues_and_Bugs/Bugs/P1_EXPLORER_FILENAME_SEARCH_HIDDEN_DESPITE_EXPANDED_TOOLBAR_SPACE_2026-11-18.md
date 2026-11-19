@@ -38,6 +38,22 @@ The first command row shows Back, Forward, Up, Refresh and Explorer More (`…`)
 6. Verify keyboard shortcuts `Ctrl+Shift+F8` (toolbar rows) and `Ctrl+Shift+F9` (50/50 pane reset), and preservation of `+ Right Click` and existing File API action routing.
 7. Add a browser regression test that specifically asserts the search input **is visible at the user-reported normal narrow two-row shelf state** when computed layout has sufficient space, and that the existing one-row compact contract remains intact.
 
+## New user-requested keyboard shortcut: pop out/focus Search immediately
+
+**Added requirement:** Search must be reachable **without using the mouse or opening Explorer More manually**, even when responsive layout has hidden the inline search form. Introduce a third **dedicated shortcut** for "Search filenames / Pop out search". Proposed consistent chord: **Ctrl+Shift+F7**, alongside existing **Ctrl+Shift+F8** (toggle toolbar rows) and **Ctrl+Shift+F9** (reset pane split). Confirm Ctrl+Shift+F7 does not conflict with Chrome, Windows, extension shortcuts or accessibility features before finalizing; if it does, select and document a safe alternative, preserving the established F8/F9 shortcuts.
+
+Behavior and acceptance:
+
+1. In File Explorer with Search **inline and visible**, the shortcut focuses the existing search input and selects its text (or preserves caret/query when appropriate). Do not spawn a redundant text field.
+2. When inline Search is **hidden in More** because the toolbar is narrow or condensed, the shortcut **pops out a compact anchored Search overlay/popover** with the **same underlying search input/form**, automatically focuses it and makes it usable immediately. Do not require another click. Prefer an accessible popover rather than permanently adding toolbar rows or forcing the splitter height.
+3. The shortcut works at the normal Windows Chrome Shelf/side-panel size, in both one-row and two-row toolbar states, and with collapsed or custom tree/gallery widths. Preserve the global top-right Sun/Moon switch and the existing **+ Right Click** control.
+4. **Enter** submits to the existing `searchDirectoryNames` File API; typing alone does not issue remote requests. **Escape** closes the pop-out when appropriate, restores focus to its prior/trigger location and does not inadvertently discard results. Clearing the query explicitly resets to browsing. Reopening retains the query until the normal search-reset rules apply.
+5. Avoid two competing Search form instances or duplicate event listeners. Preserve current source scope, IndexedDB inventory, visible results, session/authorization fencing, query text, keyboard focus and screen-reader naming when moving the existing form between toolbar/overflow/popover.
+6. Suppress the shortcut while typing in other controls, interacting with a modal/menu, or using an IME; prevent collisions with the existing browser Find and accessibility commands. Expose the shortcut as `aria-keyshortcuts` on the Search control and in Explorer More/help text.
+7. Add browser/installed-Chrome tests for **Ctrl+Shift+F7** at the owner-reported 360px shelf width, wide/compact toolbars, all themes and debug modes, consecutive activations, Escape, focus restoration and no extra provider reads until Enter. Test standard shortcuts F8/F9 continue working.
+
+This shortcut is a **new implementation request**, not a claim it already exists in commit `1f366aa`.
+
 ## Separate question: `:nested` filename-search syntax
 
 **NOT IMPLEMENTED in V1.** `docs/evidence/filename-search.md` says V1 searches only immediate children of the current directory and has **no recursive or inline path command**. The V3+1.1 `searchDirectoryNames({source,query,pageToken?,pageSize?,refresh?})` operation treats its `query` as a basename substring, not a `:nested` modifier; don't advertise recursion as working. The app's distinct `nested`/Narrow *context-menu mode* is unrelated to recursive filename search. Consider `:nested` a future separately scoped feature, not part of fixing search field visibility.
