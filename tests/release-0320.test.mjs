@@ -187,3 +187,45 @@ test('download action descriptors preserve the plain action and nest only select
     assert(download.every(item=>item.group===(nested?'Download':undefined)));
   }
 });
+
+test('paged inventory and grouped URL export handle 10,000 files with bounded source pages',async()=>{
+  let pages=0;
+  const inventory=await listExportInventory(async(_source,cursor)=>{
+    const start=Number(cursor??0);
+    pages++;
+    return {entries:Array.from({length:1000},(_,index)=>({key:'images/'+(start+index)+'/photo.png'})),
+      nextCursor:start<9000?String(start+1000):null};
+  },source);
+  const domains=['cdn.example','images.example','files.example'];
+  const files=inventory.files.map(file=>objectUrls(source,file.key,domains));
+  assert.equal(pages,10);assert.equal(inventory.complete,true);
+  assert.equal(new Set(files.map(file=>file.objectId)).size,10000);
+  const result=JSON.parse(formatUrlExport(source,files,true,'json'));
+  assert.deepEqual(result.counts,{files:10000,urls:30000,multiUrlFiles:10000});
+});
+
+test('failed native ACK compensates Explorer Make Default and retains the previous configuration',async()=>{
+  const prior={...source,prefix:'previous/'};
+  let state={product:productState({defaultTarget:prior}),configs:{simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:0}};
+  let applyCount=0;
+  const api=createEngineApi({
+    current:{read:async()=>structuredClone(state),findRetry:async()=>null,commitProduct:async next=>{
+      assert.equal(next.expectedRevision,state.product.revision);
+      const revision=state.product.revision+1;
+      state={...state,product:{...next.product,revision},configs:next.configs};
+      return {after:revision,replayed:false};
+    }},
+    engine:{getEvidence:()=>({}),compile:async()=>({}),apply:async()=>++applyCount===1?{state:'partial',code:'NATIVE_APPLY_INCOMPLETE'}:{state:'completed'}},
+    getInventory:async()=>({scopes:[{target:{...source,prefix:''},authorized:true,folders:[source.prefix]}]}),
+    authorize:async()=>true,
+    prepareFileWorker:async(target,options)=>{
+      assert.deepEqual(target,source);
+      assert.deepEqual(options,{authorizeSetup:false,requireWriteProof:true,useSavedApproval:true});
+    }
+  });
+  const result=await api.invoke({version:'3+1.1',method:'commitConfigChange',params:{
+    changes:[{type:'makeDefault',ensureSimple:true,target:source}],expectedRevision:0,idempotencyKey:'fixture-native-fail'
+  }},'gui');
+  assert.equal(result.code,'NATIVE_APPLY_INCOMPLETE');assert.equal(applyCount,2);
+  assert.deepEqual(state.product.defaultTarget,prior);assert.deepEqual(state.configs.simple.destinations,[]);
+});

@@ -185,7 +185,7 @@ export async function streamDownloadArchive({source, inventory, mode, recursive,
   for(const row of dispositions)if(row.metadataWarning)errors.push({key:row.key,code:row.metadataWarning});
   const complete=inventory.complete&&!errors.length;
   const stats={expectedItems:inventory.files.length,expectedBytes,written,sourceBytes,archivedBytes,tagged,errors:errors.length};
-  const scope={provider:source.provider,bucketName:source.bucketName,prefix:source.prefix};
+  const scope={provider:source.provider,accountId:source.accountId,bucketName:source.bucketName,prefix:source.prefix};
   const summary={schema:'click2cloud.directory-download/1',...job,source:scope,mode,outputName,complete,
     inventory:{complete:inventory.complete,pages:inventory.pages,code:inventory.code??null,consistency:'paginated-list-with-strong-etag-and-size-checked-reads'},
     stats,errors,objects:dispositions,evidence:{source:'SOURCE_LISTED',entries:'ZIP_ENTRY_WRITTEN',delivery:'UNCONFIRMED_AT_RECEIPT_CREATION',unexpectedEntries:[]}

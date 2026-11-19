@@ -26,6 +26,14 @@ try{
   await page.addInitScript(({png})=>{
     const host=import('/tests/product-browser-host.mjs'), events=new Set(), messages=new Set();
     window.fixtureImageData={'test.png':png};
+    window.showSaveFilePicker=async({suggestedName})=>{
+      const chunks=[];
+      return {name:suggestedName,createWritable:async()=>({
+        write:async bytes=>chunks.push(bytes),
+        close:async()=>{window.fixtureDownload=new Blob(chunks);},
+        abort:async()=>{chunks.length=0;}
+      }),getFile:async()=>window.fixtureDownload};
+    };
     const storage={
       async get(key){const data=JSON.parse(localStorage.getItem('release-prefs')??'{}');return key===null?data:{[key]:data[key]};},
       async set(update){const data=JSON.parse(localStorage.getItem('release-prefs')??'{}');
@@ -111,7 +119,7 @@ try{
   await page.getByRole('row').filter({hasText:'renamed.png'}).waitFor();
   gates.push('Preview rename uses the inline filename and retains the displayed image');
 
-  const folder=page.getByRole('row').filter({hasText:'projects'});
+  const folder=page.getByRole('row',{name:/^projects .*File folder/});
   await folder.click({button:'right'});
   await page.getByRole('menuitem',{name:'Make Default',exact:true}).click();
   await page.getByText('Default set · Chrome menu acknowledged.',{exact:true}).waitFor();
@@ -132,11 +140,44 @@ try{
   await page.locator('#header-more').click();
   assert.equal(await page.getByRole('menuitem',{name:'Downloads',exact:true}).count(),0);
   await page.getByRole('menuitem',{name:'Settings',exact:true}).click();
+  await page.getByText('Show Get URL in right-click menu').click();
+  await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+  for(const item of [page.getByRole('row').filter({hasText:'renamed.png'}),folder]){
+    await item.click({button:'right'});
+    await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
+    await page.getByRole('heading',{name:'Allow Public URL?',exact:true}).waitFor();
+    await page.getByRole('button',{name:'No',exact:true}).click();
+  }
+  gates.push('Files and folders use the same first-time public URL gate');
+  await page.evaluate(png=>{
+    window.fixtureImageData['projects/2026.png']=png;
+    const fixture=window.productFixture;
+    fixture.r2Objects.set('fixture-bucket:projects/2026.png',{bucketName:'fixture-bucket',key:'projects/2026.png',folder:false,displayName:'2026.png',size:png.length,etag:'fixture-preview'});
+  },png);
+  await folder.click({button:'right'});
+  await page.getByRole('menuitem',{name:'Download',exact:true}).click();
+  await page.getByText(/Complete · file size verified · 1 file/).waitFor().catch(async error=>{
+    console.error(await page.locator('#dialog').innerText(),pageErrors);
+    console.error(await page.evaluate(()=>({last:window.productFixture.lastResponse,calls:window.productFixture.calls.slice(-4)})));
+    throw error;
+  });
+  const evidence=await page.evaluate(async()=>{
+    const bytes=new Uint8Array(await window.fixtureDownload.arrayBuffer());
+    return {size:bytes.byteLength,zipSignature:new DataView(bytes.buffer).getUint32(0,true),body:new TextDecoder().decode(bytes)};
+  });
+  assert.equal(evidence.zipSignature,0x04034b50);assert(evidence.size>png.length);
+  assert.match(evidence.body,/_click2cloud\/RRReceipt-/);
+  await page.getByRole('button',{name:'Close',exact:true}).last().click();
+  await openSettings();
   await page.locator('#debug-mode').check();
   await page.locator('#header-more').click();
   await page.getByRole('menuitem',{name:'Downloads',exact:true}).click();
   await page.getByRole('heading',{name:'Downloads',exact:true}).waitFor();
-  gates.push('Downloads is available only through Debug More');
+  await page.getByText(/projects · Download · Complete/).waitFor();
+  await page.locator('.download-job summary').click();
+  await page.getByText(/^RRReceipt-.*\.json$/).waitFor();
+  assert.equal(await page.getByText('UNCONFIRMED_AT_RECEIPT_CREATION').count(),0);
+  gates.push('Folder download delivers a ZIP, and Debug Downloads shows only its receipt filename');
   assert.deepEqual(pageErrors,[]);
   console.log(JSON.stringify({passed:gates.length,gates},null,2));
 }finally{

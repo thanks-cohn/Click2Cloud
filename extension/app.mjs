@@ -558,7 +558,7 @@ async function openEntry(e){
  if(image){galleryReturnKey??=e.key;gallery={key:e.key,target:captured};selected=new Set([e.key]);focusIndex=listingOrder.index(e.key)??0;updateSelection();}else{gallery=null;galleryReturnKey=null;}
  const body=image?`<section data-gallery>${galleryControls(e)}<div class="image-frame"><p id="preview-state" role="status">Loading image…</p><img class="preview" alt="File preview" hidden><p id="preview-error" role="alert" hidden></p></div></section>`:'<p id="preview-state" role="status">Loading preview…</p>';
  dialog(e.displayName??e.key,body+'<button id="download-stream">Download</button>'+(image&&explorerExports.options.tags?'<button id="preview-tags">Add Tags</button>':''));
- listen('#preview-tags','click',()=>explorerExports.tags(captured,e));if(!image)previewAbort=controller;$('#download-stream').onclick=()=>{void downloadEntry(e).catch(error=>status(error.message));};listen('#gallery-previous','click',()=>moveGallery(-1));listen('#gallery-next','click',()=>moveGallery(1));paintTrace('preview-feedback',started);if(image){bindInlineRename(e,captured,ticket);void startGalleryVisual($('.image-frame'),ticket,controller.signal);}
+ if($('#preview-tags'))$('#preview-tags').onclick=()=>{void explorerExports.tags(captured,e);};if(!image)previewAbort=controller;$('#download-stream').onclick=()=>{void downloadEntry(e).catch(error=>status(error.message));};listen('#gallery-previous','click',()=>moveGallery(-1));listen('#gallery-next','click',()=>moveGallery(1));paintTrace('preview-feedback',started);if(image){bindInlineRename(e,captured,ticket);void startGalleryVisual($('.image-frame'),ticket,controller.signal);}
  if(!image&&!text){$('#preview-state').textContent='Inline preview unavailable for this type.';return;}
  try{
   const result=image?await imageReader.load(captured,e,{limit:providerDefaults.previewMaxBytes,signal:controller.signal}):await readPreviewBytes(p=>api('readFileChunk',p,{quiet:true}),{source:captured,key:e.key},{limit:providerDefaults.textPreviewMaxBytes,signal:controller.signal,truncate:true});
@@ -594,8 +594,8 @@ function bindInlineRename(entry,target,ticket){
     if(ticket!==previewEpoch||view!=='explorer'||targetKey(target)!==targetKey(source))return;
     galleryReturnKey=key;gallery.key=key;selected=new Set([key]);
     title.textContent=newName;title.focus();
-    bindInlineRename({...entry,key,displayName:newName},target,ticket);
-    const renamed={...entry,key,displayName:newName};
+    const renamed={...entry,key,displayName:newName,etag:data.receipt.etag??entry.etag,size:data.receipt.size??entry.size};
+    bindInlineRename(renamed,target,ticket);
     $('#download-stream').onclick=()=>{void downloadEntry(renamed).catch(error=>status(error.message));};
     if($('#preview-tags'))$('#preview-tags').onclick=()=>{void explorerExports.tags(target,renamed);};
     await reloadCurrentDirectory();

@@ -3,27 +3,30 @@ import {dayKey} from '../history/model.mjs';
 const localTotalsKey = 'verifiedLocalDownloadTotals';
 const rolloverAlarm = 'click2cloud-daily-badge';
 
-export function nextLocalMidnight(now, timezone) {
-  const today = dayKey(now, timezone);
-  let low = now, high = now + 27 * 3600000;
+function midnightEdge(now, timezone, forward) {
+  const today = dayKey(now, timezone), horizon = 27 * 3600000;
+  let low = forward ? now : now - horizon, high = forward ? now + horizon : now;
   while (high - low > 1) {
-    const middle = Math.floor((low + high) / 2);
-    if (dayKey(middle, timezone) === today) low = middle;
+    const middle = Math.floor((low + high) / 2), sameDay = dayKey(middle, timezone) === today;
+    if (sameDay === forward) low = middle;
     else high = middle;
   }
   return high;
 }
+export const nextLocalMidnight = (now, timezone) => midnightEdge(now, timezone, true);
 
-export function countVerifiedSaves(rows, now, timezone) {
-  const today = dayKey(now, timezone);
+function countRows(rows, start, end) {
   const seen = new Set();
   for (const row of rows) {
     const at = row.updatedAt ?? row.at;
     if ((row.kind && row.kind !== 'save') || row.state !== 'verified' || !row.proofKind ||
-        !row.receipt?.key || !row.operationId || !Number.isFinite(at) || dayKey(at, timezone) !== today) continue;
+        !row.receipt?.key || !row.operationId || !Number.isFinite(at) || at < start || at >= end) continue;
     seen.add(row.operationId);
   }
   return seen.size;
+}
+export function countVerifiedSaves(rows, now, timezone) {
+  return countRows(rows,midnightEdge(now,timezone,false),nextLocalMidnight(now,timezone));
 }
 
 export function createDailyBadge({chrome, readHistory, readPreferences, clock = Date.now}) {
@@ -36,10 +39,13 @@ export function createDailyBadge({chrome, readHistory, readPreferences, clock = 
       try {
         const {timezone} = await readPreferences();
         const rows = await readHistory();
-        const local = await readLocal();
-        const count = countVerifiedSaves(rows, now, timezone) + (local.timezone===timezone&&local.day===dayKey(now,timezone)&&Number.isSafeInteger(local.total)?local.total:0);
+        const local = await readLocal(), start=midnightEdge(now,timezone,false);
+        const midnight = nextLocalMidnight(now,timezone);
+        const downloads=Object.entries(local.minutes??{}).reduce((total,[minute,files])=>
+          minute*60000>=start&&minute*60000<midnight&&Number.isSafeInteger(files)?total+files:total,0);
+        const count = countRows(rows,start,midnight)+downloads;
         text = count >= 1000 ? '1k+' : String(count);
-        when = nextLocalMidnight(now, timezone);
+        when = midnight;
       } catch { /* A timed retry will reconcile temporarily unavailable History. */ }
       await Promise.allSettled([
         Promise.resolve().then(() => chrome.action.setBadgeText({text})),
@@ -53,12 +59,12 @@ export function createDailyBadge({chrome, readHistory, readPreferences, clock = 
   function recordLocal(jobId, files) {
     if (!/^[a-f0-9-]{36}$/.test(jobId??'') || !Number.isSafeInteger(files) || files<1 || files>20000) return Promise.reject(Error('DOWNLOAD_COMPLETION_INVALID'));
     const mutation = tail.then(async () => {
-      const {timezone} = await readPreferences();
-      const now = clock(), day = dayKey(now,timezone), stored = await readLocal();
+      const now = clock(), minute=Math.floor(now/60000), stored = await readLocal();
       const jobs = Array.isArray(stored.jobs) ? stored.jobs.filter(entry => Array.isArray(entry)&&entry[1]>=now-48*3600000) : [];
       if (jobs.some(([id])=>id===jobId) || jobs.length>=20000) return;
-      const total = stored.day===day&&stored.timezone===timezone&&Number.isSafeInteger(stored.total) ? stored.total : 0;
-      await chrome.storage.local.set({[localTotalsKey]:{day,timezone,total:total+files,jobs:[...jobs,[jobId,now]]}});
+      const minutes=Object.fromEntries(Object.entries(stored.minutes??{}).filter(([at,total])=>Number(at)>=minute-2880&&Number.isSafeInteger(total)));
+      minutes[minute]=(minutes[minute]??0)+files;
+      await chrome.storage.local.set({[localTotalsKey]:{minutes,jobs:[...jobs,[jobId,now]]}});
     });
     tail=mutation.catch(()=>{});
     return mutation.then(refresh);

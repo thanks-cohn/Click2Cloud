@@ -31,13 +31,22 @@ export type Change =
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
 export interface ShortcutCommand {commandId:string;label:string;category:string;context:string;defaultChord:string|null;shortcutEligible:boolean;requires?:string;effects:string;parameterBindings?:Record<string,string>;kind?:'api'|'ui';method?:keyof Methods;permission?:Tool['scope']}
+export interface ManifestDraftAction {draftId:string;previewToken:string;expectedRevision:number;idempotencyKey:string}
+export interface HistoryPreferences {range:'all'|'daily'|'weekly';previews:'all'|'first'|'closed';timezone:string}
+export interface ExportObject {key:string;bucket:string;provider:string;size:number|null;contentType:string|null;etag:string|null;version:string|null;lastModified:string|null;missing:string[];redacted:string[]}
+export interface ExportUrl {url:string;domain:string;status:'verified-domain';provenance:'cloudflare-r2-active-custom-domain'}
 export interface Methods {
+ exportMenuManifest:{};getMenuManifestDraft:{};previewMenuManifest:{json:string};discardMenuManifest:{draftId:string};
+ inspectManifestBindings:{draftId:string;mapping?:Record<string,{accountId:string;connectionId:string}>;options?:{policy:'skip-identical'|'add-alongside'|'replace-selected';replaceIds?:string[];applyPreferences?:boolean}};
+ commitMenuManifest:ManifestDraftAction&{partial:boolean};provisionMenuManifest:ManifestDraftAction;undoMenuManifest:{expectedRevision:number;idempotencyKey:string};
+ getHistoryPreferences:{};setHistoryPreferences:HistoryPreferences;
+ recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean};
  listDirectoryObjects:{source:Target;cursor?:string};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
  listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};
  fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
- invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
+ invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{customer?:boolean;cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
  inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'};describeCapabilities:{section?:'reliability'};getConfiguration:{};getEngineHealth:{view?:'health'|'trace'|'support';operationId?:number;cursor?:string;limit?:number};getProviderConnections:{};
  getGalleryLoadingVisual:{includeMedia?:boolean};setGalleryLoadingVisual:{expectedRevision:number;mode:'math'|'media'|'plain';removeMedia?:boolean;media?:{name:string;type:'image/png'|'image/jpeg'|'image/webp'|'image/gif'|'video/mp4';base64:string}};
  loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
@@ -71,6 +80,10 @@ export interface MenuRow {presentationId?:string;provenance?:SelectionProvenance
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface RestorePreview {available:boolean;reason?:string;current:ConfigurationHealth;previewToken?:string;product?:unknown;configs?:unknown;provenance?:'VALIDATED_COMPLETE_LOCAL_JOURNAL'|'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED'|'NEW_OWNER_CONFIRMED_CONFIGURATION';nativePartial?:{target:Target;label:string}[];outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';unknown?:string[];requiresPreservation?:boolean;nativeSalvage?:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'}
 export interface Results {
+ getHistoryPreferences:HistoryPreferences;setHistoryPreferences:HistoryPreferences;recoverCloudflareDestination:CloudflareSetupResult;
+ listDirectoryObjects:{entries:ExportObject[];nextCursor:string|null};
+ getPublicUrls:{domains:string[];checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
+ getExportObjectMetadata:ExportObject&{customMetadata:Record<string,string>|null;httpMetadata:Record<string,string>|null;tags:string[];availability:'observed'|'unobserved';tagBudget?:{used:number;limit:number;remaining:number;reserved:number;fits:boolean}};
  listCommands:{commands:ShortcutCommand[]};getShortcutBindings:{bindings:Record<string,string|null>};setShortcutBinding:Results['getShortcutBindings'];resetShortcutBindings:Results['getShortcutBindings'];
  getGalleryLoadingVisual:GalleryLoadingVisual;setGalleryLoadingVisual:GalleryLoadingVisual;
  requestRestorePreview:RestorePreview;restoreRightClickMenu:{configuration:unknown;native:{state:string;code?:string};preservation?:{state:'VERIFIED';checksum:string;filename:string;evidenceClass:'external-filesystem-readback'};requiresReconnect:true;outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';originalStateRestored?:false;remoteSave?:'NOT_VERIFIED'};

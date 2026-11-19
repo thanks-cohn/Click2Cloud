@@ -34,12 +34,13 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       const input=event.target, flag=input.dataset.exportOption;
       if(!Object.hasOwn(exportDefaults,flag))return;
       const checked=input.checked;
-      update=update.catch(()=>{}).then(async()=>{
+      const save=async()=>{
         const stored=exportOptions((await chrome.storage.local.get(exportPreferenceKey))[exportPreferenceKey]);
         const next={...stored,[flag]:checked};
         await chrome.storage.local.set({[exportPreferenceKey]:next});
         refreshOptions(next);card.querySelector('[role=status]').textContent='';
-      }).catch(()=>{input.checked=options[flag];card.querySelector('[role=status]').textContent='Could not save this setting.';});
+      };
+      update=update.catch(()=>{}).then(()=>navigator.locks?navigator.locks.request(exportPreferenceKey,save):save()).catch(()=>{input.checked=options[flag];card.querySelector('[role=status]').textContent='Could not save this setting.';});
     };
   }
   function metadata(source,key,signal){return api('getExportObjectMetadata',{source,key},{quiet:true,signal});}
@@ -67,7 +68,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     const render=()=>{
       if(!section.isConnected){subscribers.delete(render);return;}
       const holder=section.querySelector('#download-jobs'),expanded=new Set([...holder.querySelectorAll('details[open]')].map(card=>card.dataset.job));
-      const cards=[...jobs.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+      const cards=[...jobs.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,40);
       holder.innerHTML=cards.map(job=>`<details class="card download-job" data-job="${esc(job.jobId)}" ${expanded.has(job.jobId)?'open':''}><summary><strong>${esc(job.name)}</strong> · ${esc(labels[job.mode])} · ${esc(job.status)}<br><time datetime="${esc(job.createdAt)}">${esc(new Date(job.createdAt).toLocaleString())}</time> · ${format(job.files??0)} files · ${format(job.bytes??0)} bytes</summary><p>Scanned ${format(job.scanned??0)} · errors ${format(job.errors??0)}</p>${job.error?'<p>Code: '+esc(job.error)+'</p>':''}${job.receiptName?'<p>'+esc(job.receiptName)+'</p>':''}</details>`).join('')||'<p>No download jobs in this browser session.</p>';
     };
     subscribers.add(render);render();void refreshJobs();
@@ -94,7 +95,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       Object.assign(record,values);
       if(force||Date.now()-last>300){
         last=Date.now();saveJob(record);
-        if(display.isConnected)display.textContent=record.status+' · '+format(record.files??0)+' files · '+format(record.bytes??0)+' bytes';
+        if(display.isConnected)display.textContent=record.status+' · '+format(record.files??0)+(record.files===1?' file · ':' files · ')+format(record.bytes??0)+' bytes';
       }
     }
     const read=(file,onChunk)=>readPreviewBytes(p=>api('readFileChunk',p,{quiet:true,signal}),
@@ -176,6 +177,9 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       catch{feedback.textContent='This domain is not an active custom domain on the selected R2 bucket.';}
     };
     button.textContent=entry?'Copy selected URLs':'Continue';
+    if(entry){
+      const note=document.createElement('p');note.textContent='Domain selections are used for this copy. Per-file URL edits cannot be saved in this build.';button.after(note);
+    }
     button.onclick=()=>{if(!entry)return next?.(info,[...chosen]);const links=objectUrls(source,entry.key,[...chosen]).urls.map(item=>item.url);void navigator.clipboard.writeText(links.join('\n')).then(()=>{feedback.textContent='URLs copied.';});};
     render();
   }
