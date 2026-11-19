@@ -30,6 +30,12 @@ The new F7 action is not implemented yet; coordinate with [the dedicated Search 
 - No extra controls for toolbar toggle/panel reset are to appear in the Explorer More popover, and no extra persistent toolbar rows are allowed. The Settings section is the sole **visible shortcut reference/editor**. Accessibility labels on the real splitter controls may still expose their current shortcuts for assistive technology.
 - Save only presentation preferences; do not modify cloud destinations, OAuth, R2, worker routing, receipts, or the engine.
 
+## Architectural decision: use the existing API, not a shortcut-specific API
+
+**Updated user requirement (Nov 19):** Developers should be able to make any **eligible existing or future Click2Cloud API operation** shortcut-capable using optional metadata in the existing V3+1.1 `toolRegistry`. The Settings page is a **GUI for the canonical binding registry**, not another source of truth. No separate public Shortcut API, no arbitrary script execution, no duplicated permissions, dispatchers or persistence.
+
+See [full API extension + mandatory all-method API documentation task](../../next-codex/CODEX_EXISTING_API_COMMAND_SHORTCUT_METADATA_2026-11-19.md). Future Screenshot-to-Cloud is the intended extensibility example, **not currently implemented or authorized by this issue**. UI-local commands may use a trusted adapter in the same logical command catalog without pretending to be cloud API methods.
+
 ## Exact current source / prior work
 
 - `extension/explorer-layout.mjs` declares the F8/F9 `shortcuts` array and listens to document keydown, rejecting key events inside inputs, menus and dialogs.
