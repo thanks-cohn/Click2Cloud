@@ -16,6 +16,8 @@
 - `renderRemotes()` creates `<h2>☁ Cloudflare R2</h2>` and `renderConnection()` inserts `<strong>☁ Cloudflare</strong>` in `#remotes-connection`. **Keep the outer h2, remove the nested duplicate strong**, maintaining the underlying connection controls and status.
 - Keep required ordinary Cloudflare authentication, reconnect and permissions-related flows accessible through their appropriate existing supported UI, without introducing extra login or confirmation prompts. Preserve existing right-click save engine, account state and working preparation API, and do not alter History, receipts or the Worker architecture.
 
+Additional UI-boundary reminder: `renderRemotes()` may also call `workerUpdateMarkup(cloudflareState)`, `workerFailureMarkup(cloudflareState?.diagnostic)` and `ordinarySetupReview()`. Inspect their output when Minimal is selected; if they inject the same technical preparation/repair disclosures into Minimal, **omit those from its normal Remotes rendering too** rather than reintroducing the material through a different component. Keep concise basic connection controls visible. Underlying required authorization behavior must remain functional through the proper non-Minimal/authorized flow.
+
 ## Focused acceptance
 
 1. In Minimal Remotes: **no** `Selected save destination` card, selected bucket/account, `Inspect / prepare selected destination` button or technical `NATIVE_APPLY_INCOMPLETE` paragraph, regardless of save readiness or reconnect.
