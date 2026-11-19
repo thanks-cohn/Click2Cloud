@@ -18,6 +18,20 @@
 
 Additional UI-boundary reminder: `renderRemotes()` may also call `workerUpdateMarkup(cloudflareState)`, `workerFailureMarkup(cloudflareState?.diagnostic)` and `ordinarySetupReview()`. Inspect their output when Minimal is selected; if they inject the same technical preparation/repair disclosures into Minimal, **omit those from its normal Remotes rendering too** rather than reintroducing the material through a different component. Keep concise basic connection controls visible. Underlying required authorization behavior must remain functional through the proper non-Minimal/authorized flow.
 
+## Additional owner clarification — remove generic action-attention fallback in Minimal
+
+**Exact text to remove from Minimal presentation:**
+
+`This action needs attention. Review the current panel or History.`
+
+This generic warning **must not appear anywhere in the ordinary Minimal theme UI**, including Remotes, after failed operations, on reconnect, on a panel re-render, or after a status/feedback update. Do not simply rewrite it to an equivalent vague "review panel or History" warning. Preserve necessary concise Cloudflare login/reconnect indicators where they genuinely help; keep the actual error state, receipts, history and diagnostics available through their existing authorized views.
+
+**Grounded code cause:** `extension/app.mjs` function `quietFeedback(value,attention)` (around line 47–52 on the inspected 0.3.20 branch) assigns this exact fallback phrase to global `#action-feedback` for unclassified attention states. `status(...)` invokes `quietFeedback`; therefore, cleaning up `renderRemotes()` alone will not remove it. Guard the generic feedback presentation for the active Minimal theme (without disabling the underlying error handling), and avoid reintroducing it elsewhere in Minimal. The technical/non-Minimal presentation may retain its useful feedback.
+
+**Focused checks:** Cause an unclassified attention status with Minimal selected: the exact string and equivalent generic warning must never display; repeat after navigating between Remotes and another ordinary panel, restoring focus, toggling Debug, and reconnecting. Verify genuine connection state remains accessible and non-Minimal technical feedback continues to function. Do not change cloud mutations, save verification, History or receipts.
+
+---
+
 ## Focused acceptance
 
 1. In Minimal Remotes: **no** `Selected save destination` card, selected bucket/account, `Inspect / prepare selected destination` button or technical `NATIVE_APPLY_INCOMPLETE` paragraph, regardless of save readiness or reconnect.
