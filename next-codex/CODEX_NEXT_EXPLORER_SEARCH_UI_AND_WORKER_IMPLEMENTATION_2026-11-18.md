@@ -1,5 +1,8 @@
 # NEXT CODEX — Explorer polish, canonical API shortcuts, daily Chrome extension icon badge, and experimental URLs/tags
 
+> **CURRENT AUTHORITATIVE HANDOFF (POST-0.3.20 CODE AUDIT):** [NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Much of the older work below **already exists in 0.3.20 source** (shortcuts, API reference, version, badge, inline rename, folder Make Default, optional exports). **Do not reimplement it.** Read the new code-audited, delta-only handoff first. The newly requested **Rules** top-dropdown page is listed there as its own feature, with 25 rules per page and a feasibility gate for genuine browser download rerouting. The older steps below are HISTORICAL acceptance references, not an instruction to start over.
+
+
 **Date:** November 18, 2026  
 **Baseline:** `codex/ux-filename-search-audit-2026-11-18`; fetch its latest HEAD at execution.  
 **Status:** **NEXT IMPLEMENTATION RUN** — not another research-only audit.  
