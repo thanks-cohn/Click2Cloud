@@ -1,6 +1,6 @@
 # Next Codex — Click2Cloud execution queue (2026-11-18)
 
-**Master implementation request:** [Search/gallery/Manager UX → audited Worker changes → experimental URLs + tags](CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md).
+**Master implementation request:** [Explorer UX → existing API shortcuts and daily count → experimental URLs/tags/downloads → complete API reference](CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md).
 
 ## Already changed on this feature branch
 
@@ -15,7 +15,7 @@
 3. [Preview caption removal and double-click file rename](../Issues_and_Bugs/Issues/P1_GALLERY_PREVIEW_REMOVE_CAPTION_AND_DOUBLE_CLICK_RENAME_2026-11-18.md)
 4. [Destinations Show in Chrome 3-checkbox row](../Issues_and_Bugs/Issues/P1_DESTINATIONS_SHOW_IN_CHROME_CHECKBOX_ROW_2026-11-18.md)
 5. [Editable F8/F9/F7 keyboard shortcuts in bottom Settings card](../Issues_and_Bugs/Issues/P1_USER_EDITABLE_KEYBOARD_SHORTCUTS_IN_SETTINGS_2026-11-19.md)
-5. **Implement**, behind separately testable feature flags and strong rollback, the [completed Worker architecture audit](../docs/evidence/ux-filename-search-audit/ARCHITECTURE-AUDIT.md)'s immediate receipt/route fixes and compatible destination-owned adapter architecture. No live deployment merely because of this document.
+**Out of scope for the next run:** the previously proposed Cloudflare Worker architecture overhaul (route migration, destination-owned executor redesign, pair-Worker changes and cross-account move redesign). The audit remains historical reference only; existing save behavior must be preserved. Do not add extra authorization/confirmation prompts as part of this removed phase.
 
 ## Existing API Command and Shortcut Extension + complete developer documentation
 
