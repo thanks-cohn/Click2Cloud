@@ -13,9 +13,8 @@ export function installExplorerLayout({read,save,onResize}){
  for(const {key,separator,property,label,next} of shortcuts){
   separator.setAttribute('aria-keyshortcuts',`Control+Shift+${key}`);
   separator.title=`${label} (Ctrl+Shift+${key})`;
-  const button=document.createElement('button');button.type='button';button.textContent=separator.title;
-  button.onclick=()=>{changeLayout(property,next());closeMore();more.focus({preventScroll:true});};
-  moreActions.push(button);
+  // Shortcut details belong to the splitters' accessible title only.
+  // No duplicate "Toggle rows" or "Reset 50/50" action buttons in Explorer More.
  }
  // Escape both clipping ancestors and their stacking contexts. The native
  // popover top layer also stays above splitters; body portal is the fallback.
