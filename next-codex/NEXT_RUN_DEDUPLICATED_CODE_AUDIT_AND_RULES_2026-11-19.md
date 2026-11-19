@@ -110,6 +110,27 @@ Focused tests: one/multiple existing domains, Submit=Enter, new domain verified 
 
 A) User opens More → Rules **above Settings**, adds extension `png` to a selected authorized Cloudflare directory, leaves name empty, presses Save → persisted **Rule 1** appears below. B) Create another with a custom name; edit and disable it; restart/reopen, data remains. C) Create 26 → page 1 shows exactly 25, page 2 shows remaining 1, Previous/Next retains state. D) Invalid extension / missing authorization / duplicate/conflicting active rule produce clear feedback, not success. E) If execution is supported, run only controlled opt-in fixture/disposable-object tests for exact target, precedence, source access, byte verification and safe failure; if not supported, visibly disabled with an accurate blocker, never misleading "download redirected" confirmation.
 
+## 5A. NEW — Screenshot-to-Cloud destinations, additive website rules and per-rule shortcuts
+
+**Binding detailed handoff:** [SCREENSHOT_TO_CLOUD_CONTEXT_MENU_AND_ADDITIVE_RULES_2026-11-19.md](SCREENSHOT_TO_CLOUD_CONTEXT_MENU_AND_ADDITIVE_RULES_2026-11-19.md).
+
+- **Browser right-click → Screenshot → choose exact authorized cloud bucket/folder**; alternatively explicitly apply matching screenshot rules. Clicking **Screenshot** in the Shelf's More dropdown opens a dedicated Screenshot Rules editor, not a capture.
+- **More menu order:** Rules → Screenshot → Settings. Screenshot and download routing use separate rule collections.
+- Screenshot Rules have optional name (Rule 1, Rule 2, ...), exact website/subdomain/wildcard matching, exact authorized destination, Save, list beneath the form, Edit, Activate/Disable, X Delete on the far right, and **25 rules per page**. General download Rules also get the X, switch, and 25-per-page structure.
+- **Additive matching is essential:** one user-triggered screenshot can match multiple enabled rules and upload to **all distinct matching destinations** (e.g., three buckets/folders). Do not reject site overlap or force a single winner. Deduplicate only identical target identities and report independent upload outcomes for each.
+- **One optional shortcut per Screenshot Rule:** pressing it explicitly captures and uploads to *that one rule's destination*, not every matching rule. Reuse the existing canonical shortcut registry, collision detection, persistence and Settings conventions; handle disabled rules and shortcut scope truthfully.
+- Only user-triggered, Chrome-authorized captures. No hidden/background surveillance, invented permissions or claimed successful cloud delivery without evidence. This is new work, not an excuse to rebuild existing saves.
+
+## 5B. P1 — Destinations Manager visual organization
+
+**Binding detailed handoff:** [DESTINATIONS_MANAGER_POLISHED_STRUCTURED_DIALOG_2026-11-19.md](DESTINATIONS_MANAGER_POLISHED_STRUCTURED_DIALOG_2026-11-19.md).
+
+- Restyle the *existing* `extension/app.mjs` `manager()` popup with a visually coherent header, mode tabs, current/default destination summary, well-aligned destination cards and action groups, separated Show in Chrome controls, readable status and a consistently placed Save/pagination footer.
+- **Minimal must still be attractive and structured**: typography hierarchy, whitespace, restrained separators, consistent control sizes, long-name handling, responsive/modal scrolling and accessibility. No giant eye/trash controls or haphazard stacking.
+- **UI-only:** preserve draft staging and single Save, Simple/Narrow/Depth modes, current 20-per-page Manager pagination, Quick/Default/visibility, delete confirmations, exact provider targets, native menu ACK, engine logic and other aesthetics. Do **not** mistakenly impose Rules' 25-per-page on Destinations Manager.
+
+---
+
 ## 6. P0 — wrong destination must be independently triaged
 
 `Issues_and_Bugs/Bugs/P0_FLAT_CLOUDFLARE_WRONG_BUCKET_IMAGES_2026-11-19.md` documents an owner-reported flat Cloudflare right-click save landing in `images` after another destination was configured. Root cause is **NOT proven**. This is higher consequence than UX polish.
@@ -118,7 +139,7 @@ Before any real save test, preserve read-only SECURE diagnostics, exact `menuIte
 
 ## 7. Deferred, not part of this delta
 
-Cloud persistent tag-writing is still **disabled** pending safe conditional metadata replacement; current `r2.dev` and new custom-domain administration are not proven; screenshot-to-cloud, future multi-cloud tabs, full download auto-reroute architecture, desktop/native agents and wholesale Worker redesign are NOT automatically completed by this request. The **Rules UI** is newly requested, but real rerouting proceeds only through the explicit feasibility + safely verified gate above. No second API, second screenshot engine, second History store or parallel receipts ledger.
+Cloud persistent tag-writing is still **disabled** pending safe conditional metadata replacement; current `r2.dev` and new custom-domain administration are not proven; the **new screenshot feature remains pending implementation and Chrome permission verification** (see §5A), future multi-cloud tabs, full download auto-reroute architecture, desktop/native agents and wholesale Worker redesign are NOT automatically completed by this request. The **Rules UI** is newly requested, but real rerouting proceeds only through the explicit feasibility + safely verified gate above. No second API, second screenshot engine, second History store or parallel receipts ledger.
 
 ## 8. Milestones and truthful end report
 
@@ -126,8 +147,10 @@ Cloud persistent tag-writing is still **disabled** pending safe conditional meta
 2. **Search lifecycle repair**: focused Chrome fixture and regression tests; commit+push.
 3. **Get URL UX delta**: reuse existing API, test public/private and multi-domain cases; commit+push.
 4. **Minimal presentation cleanup**: focused theme/error tests; commit+push.
-5. **Rules menu + validated persistent editor + page size 25**: separate isolated implementation; commit+push. Real routing only after proven feasible, opt-in and correctly tested; clearly separate UI-ready from transfer-ready.
-6. Full regression suites, build manifest validation, API registry-vs-doc coverage check, real Chrome/R2 verification only if actually possible. Do not unreasonably rewrite old tests to pass by removing assertions.
-7. Return **a table of DONE/REPAIRED/NOT TESTED/BLOCKED**, exact file paths and commit SHAs, passing/failing tests, known warnings, and a working pushed branch. Preserve unchanged systems.
+5. **Rules menu + validated persistent editor + page size 25**: separate isolated implementation; commit+push. Real download routing only after proven feasible, opt-in and correctly tested.
+6. **Screenshot rule UI + right-click destination capture + per-rule shortcuts**: verify Chrome capture authority, implement additive multi-destination fan-out without rewriting existing save/shortcut engines; test each exact target, commit+push.
+7. **Destinations Manager popup visual polish**: isolate structure/CSS, test Simple/Narrow/Depth draft/Save flows and native ACK; commit+push.
+8. Full regression suites, build manifest validation, API registry-vs-doc coverage check, real Chrome/R2 verification only if actually possible. Do not unreasonably rewrite old tests to pass by removing assertions.
+9. Return **a table of DONE/REPAIRED/NOT TESTED/BLOCKED**, exact file paths and commit SHAs, passing/failing tests, known warnings, and a working pushed branch. Preserve unchanged systems.
 
 **Latest detailed Search/Get URL/Minimal user UX acceptance reference:** `/codex-timestamp-latets.md` (most recent instructions override any older conflicting mockups).
