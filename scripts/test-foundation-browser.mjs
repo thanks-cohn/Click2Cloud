@@ -9,7 +9,7 @@ await page.goto('http://127.0.0.1:'+server.address().port+'/extension/app.html?f
 await page.waitForFunction(()=>!document.querySelector('[data-view=history]').disabled);
 
 await page.evaluate(()=>window.productFixture.setReady('fixture-bucket'));
-await page.getByRole('button',{name:'File Explorer',exact:true}).click();await page.locator('#toolbar-splitter').press('Home');await page.waitForFunction(()=>document.querySelector('#command-items').children.length===4);
+await page.getByRole('button',{name:'File Explorer',exact:true}).click();await page.locator('#toolbar-splitter').press('Home');await page.waitForFunction(()=>document.querySelector('#toolbar-splitter').getAttribute('aria-valuenow')==='1');
 for(const width of [1100,600,360]){
  await page.setViewportSize({width,height:850});await page.locator('#toolbar-more').click();await page.waitForTimeout(80);
  const check=await page.locator('#toolbar-overflow').evaluate(el=>{const r=el.getBoundingClientRect();return {bounds:r.toJSON(),hits:[...el.querySelectorAll('button,input,select')].map(n=>{const b=n.getBoundingClientRect(),top=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return {id:n.id,hit:[2,b.width/2,b.width-2].every(x=>{const hit=document.elementFromPoint(b.x+x,b.y+b.height/2);return hit===n||n.contains(hit);})};})};});

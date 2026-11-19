@@ -7,6 +7,7 @@ import {createBreadcrumbs} from '../src/glaciaring/breadcrumbs.mjs';
 import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
 import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
+import {attachFilenameSearch} from '../src/explorer/search-file-api.mjs';
 import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
@@ -69,7 +70,9 @@ async function prepared(target){
 const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
+ const inventoryUpdate=fileApi.noteRemoteWrite(value);
  const saved=await current.recordRemoteResult(value);
+ await inventoryUpdate;
  try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
  return saved;
 }
@@ -90,19 +93,28 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const fileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(op)),async run(operation,input={},options={}) {
+const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(op)),async run(operation,input={},options={}) {
   // Unconfigured Worker transport is blocked before staging any object bytes.
   if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
-  if(operation==='list'&&result.state==='completed') {
-    const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+input.source.accountId,...input.source,prefix:''});
-    let s=inventory.scopes.find(x=>scopeKey(x.target)===scopeKey(t));
-    if(!s){s={target:t,authorized:true,workerReady:false,folders:[],complete:false};inventory.scopes.push(s);}
-    for(const p of [input.source.prefix,...result.data.entries.filter(e=>e.folder).map(e=>e.key)])if(!s.folders.includes(p))s.folders.push(p);
-    inventory.revision++;await chrome.storage.local.set({discoveredInventory:inventory});
-  }
+  if(operation==='list'&&result.state==='completed')await observeListing(input.source,result.data);
   return result;
 }}),{authority:oauth.authority});
+async function observeListing(source,result){
+ const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+source.accountId,...source,prefix:''});
+ let s=inventory.scopes.find(x=>scopeKey(x.target)===scopeKey(t)),changed=false;
+ if(!s){s={target:t,authorized:true,workerReady:false,folders:[],complete:false};inventory.scopes.push(s);changed=true;}
+ for(const p of [source.prefix??'',...result.entries.filter(e=>e.folder).map(e=>e.key)])if(!s.folders.includes(p)){s.folders.push(p);changed=true;}
+ if(changed){inventory.revision++;await chrome.storage.local.set({discoveredInventory:inventory}).catch(()=>{});}
+}
+const filenameApi=attachFilenameSearch(providerFileApi,{oauth,assertConnected,readFilePage:baseFileApi.run,onWrite(scopes){
+ void chrome.runtime.sendMessage({channel:'filename-inventory-changed',scopes}).catch(()=>{});
+}});
+const fileApi=Object.freeze({...filenameApi,async listDirectory(input,options){
+ const result=await filenameApi.listDirectory(input,options);
+ if(result.state==='completed')await observeListing(input.source,result.data);
+ return result;
+}});
 // Menu inspection/boot projects saved observations without a full-cloud network
 // sweep. Destination Save refreshes its exact new targets; every actual save
 // independently rechecks current authority and scoped Worker capability.
@@ -295,7 +307,11 @@ const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
       for(const identity of await wholeCloud.list())if(status.accounts.some(a=>a.id===identity.accountId))try{await wholeCloud.disable(identity);}catch{}
     }catch{/* Local credential removal still proceeds when ancillary state is unavailable. */}
     return await oauth.disconnect();
-  }finally{revoking=false;try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}
+  }finally{
+    const accounts=status.accounts??[];
+    await Promise.all((accounts.length?accounts.map(a=>({provider:'cloudflare',accountId:a.id})):[{provider:'cloudflare'}]).map(scope=>fileApi.invalidateDirectorySearch(scope,{purge:true})));
+    revoking=false;try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}
+  }
 }};
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();

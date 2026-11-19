@@ -9201,13 +9201,13 @@
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "extension/aesthetic.css": "424f8d29cbc72d84c1082b9785977354f5dec33ceeb98a176eb029e915c4959b",
-      "extension/app.css": "24909e9744681b075b733dc3e3784d985e53f54012ad6dd1b20798285ee4e0b5",
+      "extension/app.css": "81aafd178dbdfff4d52be1185d38c7e87c9cbe691a477f438ee044693a13ff16",
       "extension/app.html": "ded66a391cfca6e4d908c2e0e73dd76dbcfafc057330ddfcddc037d1e772056b",
-      "extension/app.mjs": "bc734be53a1e0ddf4a17cd799e7a1d720420e116120c8b60d64351a1136f9d19",
-      "extension/background.mjs": "d0c0f8c3af259ba87a775113f0ba44db31ef9a468fe6a77b3d1232fc02aeca44",
+      "extension/app.mjs": "b83f822766f441da1c0f8331b655aeaf0c9c056ea32b7a1789d408b4186506bf",
+      "extension/background.mjs": "7293f97e43e8c5639a4f62d19de748983d219772804e5beace94b9294158d0a3",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
-      "extension/explorer-layout.mjs": "e30adebc3b9740046e000dbef9174b0712acbb311dc136c0195c835151870b00",
+      "extension/explorer-layout.mjs": "e8b325c7f7e70b7a176f5f36ccdfb47680b27cd713994df62afc26509a17ec90",
       "extension/history-page.mjs": "d35065df868cc86daa5ef233cdb8571d677c6605d343e759dddd3a885d7074d5",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
@@ -9233,7 +9233,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "73e58716773a2c6897d35ce0ba129fea968b42bd0da3759a2135b9aab935e8d9",
+      "src/api/service.mjs": "a9a9111857c7cdb8c753d4efaf774dd90f5b7a839aa1b79e582ddbdd43b38039",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
       "src/build-info.mjs": "4ae1d0218ccee31c81b63b80c7bdc2229e23483317ee347154d0689e56c5001d",
@@ -9271,12 +9271,14 @@
       "src/explorer/cloudflare-api.js": "b5e210b3fd97a4972bea583f801229dace6068730289bb2379f98280895a3e64",
       "src/explorer/configuration.mjs": "e67cd105d8432bce8f312ccbe2d04120e1755e7544d2cb600d0fe6628ab745be",
       "src/explorer/depth-inventory.mjs": "6b0f897bf6be5fd23f533fe6a00cbca4c1c2151b63f1f243c968e640c1d8c563",
+      "src/explorer/directory-inventory-store.mjs": "e42cac6d8a43a2f922f8ac257b257aa5b0cae3c2ceff27f1a7277b3956c52893",
+      "src/explorer/directory-search.mjs": "7130d5060dc7d98f71146258222c6bf22b351544ae3bec17589692a3e05c29b5",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "4f213c2efcdb81ae37943a54b0de8a581e061b9a13d035e57c3630c58c30b3b7",
       "src/explorer/image-preview.mjs": "7421e2a8b03289b712b9a01255b24f18961c669b38d07aa7ee5f80289de6247c",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "367d5f5bc5291d5fa04dbe6c9f6d509494490da45546a50c87e3e4b24deb5aa7",
-      "src/explorer/listing-view.mjs": "610d87e22b2b6a8015f6588b7ed7fc86ecef1dcef815baa061026387bfcd4e7f",
+      "src/explorer/listing-view.mjs": "8fe138877c7e4064b273c22376b83931f1943ddeabd47ce660291a9a53815e37",
       "src/explorer/loading-visual-config.mjs": "d868079c819ae7ed3de94deb1cc3f86ad769d5777d39b7ce16aa521a13ccdaf5",
       "src/explorer/loading-visual.mjs": "ac5e4edfd4582af044dd17d53d990edf3471e1e4ed0971cc7a919ed47c24ca8b",
       "src/explorer/loading-visuals/math.mjs": "1316a6ca8e537b0176ff93372fc073c19a42e0e6519abc64d929e989e3d66ae4",
@@ -9287,11 +9289,12 @@
       "src/explorer/r2-adapter.mjs": "5c49dc50a6ecf24204d23076bc808a41dede591f26b4e807b59a1d5f3b425948",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
+      "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "b4352ae4c4873b7f2090051bf977ba3fe1f59c4dc8b75071ef78ea281a9e6217",
-      "src/glaciaring/catalog.mjs": "8bc2b21762848d5f4771bb154bbd1d2e5443775e49abb45d68fea68c72193830",
+      "src/glaciaring/catalog.mjs": "cb7751010a22f8ed293e6139696c26da4f2aa949ccf21022c5e134922dc1b18f",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
-      "src/glaciaring/reliability.mjs": "b81859a56f03039fbca8087a23e27c3828517c5aa8598e99974c98b20b5b8fc0",
+      "src/glaciaring/reliability.mjs": "0a2cbd4e85cc881df133b77e6493c833f64c4e56f2665316eb38d9235017f726",
       "src/glaciaring/support-report.mjs": "57e9f1d02577aecb78b57c2b31c8656bb01029de51108d534bbc5c93d30ee5b8",
       "src/history/model.mjs": "e27a4b1369000a90fec30e016e641cb189f855e9752da5a6b194ef526d8eb6bd",
       "src/history/navigation.mjs": "26012ae774c3c0c53c5899822b2f4dd1472b82e3aa32b67ca2a0fc7d50c76104",
@@ -13047,6 +13050,12 @@
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
         "coverage": "See zero-stutter evidence; installed Windows unverified"
+      },
+      {
+        "method": "searchDirectoryNames",
+        "scope": "inspect",
+        "implementation": "src/api/service.mjs",
+        "evidence": "Shared File API searches cached, scoped immediate-child names, with provider pagination and explicit completeness."
       }
     ],
     "errorBranches": {
@@ -15069,7 +15078,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "eb70059fdae4ee56cc8fd4fb5c8d326ca4f8a7d2ec6ea85e9431a40b13af16c4",
+    "digest": "69a72c8e41807efd05e7461103e1b7229912d0986d96a180d1e71892ae308cfd",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
@@ -15100,6 +15109,20 @@
         "scripts/test-customer-history-browser.mjs"
       ],
       "evidenceClass": "Linux Chromium app with fixture provider; Windows and live Cloudflare not verified"
+    },
+    "filenameDirectoryInventory": {
+      "sourceBase": "ccf9223f2cb627a33d0c9bab6bd55196a9483aea",
+      "apiOwner": "3+1.1 searchDirectoryNames through the shared File API",
+      "storageOwner": "src/explorer/directory-inventory-store.mjs",
+      "listingOwner": "src/explorer/directory-search.mjs",
+      "behavior": "Search one authorized directory for immediate-child names. Scoped metadata publishes only after provider pagination ends. Warm complete queries search the browser's persisted compound keys without listing R2.",
+      "mutationFence": "Explorer writes and remote saves invalidate affected directory scopes, including both move parents. Auth changes separate inventory by authority stamp.",
+      "tests": [
+        "tests/filename-search.test.mjs",
+        "tests/filename-inventory-store-browser.mjs",
+        "scripts/test-filename-search-browser.mjs"
+      ],
+      "evidence": "docs/evidence/filename-search.md"
     },
     "scopedExplorerUX": {
       "sourceBase": "4b79b652465b3dc7861f716e8802c189fc08795f",

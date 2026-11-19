@@ -45,7 +45,7 @@ for(const mode of ['standard','high-polish','minimal'])for(const theme of ['dark
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Page horizontal overflow '+tag+' '+view);
  }
- await page.locator('#toolbar-splitter').press('Home');await page.waitForFunction(()=>document.querySelector('#command-items').children.length===4);
+ await page.locator('#toolbar-splitter').press('Home');await page.waitForFunction(()=>document.querySelector('#toolbar-splitter').getAttribute('aria-valuenow')==='1');
  const start=performance.now();await page.locator('#toolbar-more').click();await page.locator('#location').waitFor();measurements.push({mode,theme,width,openMs:performance.now()-start});await shot(tag+'-more');
  const edges=await page.locator('#location').evaluate(el=>{const b=el.getBoundingClientRect();return [2,b.width/2,b.width-2].every(x=>document.elementFromPoint(b.x+x,b.y+b.height/2)===el);});assert(edges,'More edge hit test '+tag);
  await page.locator('#location').press('Escape');assert(await page.locator('#toolbar-more').evaluate(el=>el===document.activeElement));

@@ -64,7 +64,8 @@ const definitions={
   inspectWholeCloudJobs:['inspect',obj()],enableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId']),cadence:{enum:['weekly','daily']}},['identity'])],
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
   dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
-  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])]
+  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])],
+  searchDirectoryNames:['inspect',obj({source:target,query:{type:'string',maxLength:1024},pageToken:{type:'string',minLength:1,maxLength:8192},pageSize:{type:'integer',minimum:1,maximum:200},refresh:bool},['source','query'])]
 };
 export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
 export function validate(schema,value) {
@@ -370,6 +371,14 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);
+        else if(method==='searchDirectoryNames'){
+          const s=normalizeTarget(params.source);
+          if(s.provider!=='cloudflare'||s.connectionId!=='cloudflare:'+s.accountId)fail('SCOPE_UNAUTHORIZED');
+          const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===s.accountId))fail('AUTH_REQUIRED');
+          if(!fileApi?.capabilities?.includes(method))fail('FILE_SEARCH_UNAVAILABLE');
+          const result=await fileApi.run(method,{...params,source:s});
+          data=result.state==='completed'?result.data:result;
+        }
         else if(['listFolders','refreshExplorer','fileMetadata','readFile','readFileChunk'].includes(method)) {
           const s=params.source;
           if(s.provider!=='cloudflare'||s.connectionId!=='cloudflare:'+s.accountId)fail('SCOPE_UNAUTHORIZED');
@@ -381,7 +390,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             const result=await fileApi.run('readStream',{source:s,key:params.entry.key},{onChunk:chunk=>{size+=chunk.length;if(size>8*1024*1024)fail('PREVIEW_SIZE_LIMIT');chunks.push(chunk);}});
             const bytes=new Uint8Array(size);let offset=0;for(const c of chunks){bytes.set(c,offset);offset+=c.length;}
             data=result.state==='completed'?{state:'completed',data:{bytes:Array.from(bytes),key:params.entry.key}}:result;
-          } else data=await fileApi.run({listFolders:'list',refreshExplorer:'list',fileMetadata:'stat'}[method],params);
+          } else if(method!=='fileMetadata'&&fileApi.listDirectory)data=await fileApi.listDirectory(params,{fresh:method==='refreshExplorer'});
+          else data=await fileApi.run({listFolders:'list',refreshExplorer:'list',fileMetadata:'stat'}[method],params);
         }
         else if(method==='listDestinations') {
           const m=params.mode==='narrow'?'nested':params.mode??'simple',limit=params.limit??20;let offset=0;

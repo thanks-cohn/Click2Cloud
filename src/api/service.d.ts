@@ -2,6 +2,11 @@
 export type Version = '3+1.1';
 export interface GalleryLoadingVisual {warning?:'LOADING_MEDIA_INVALID';revision:number;mode:'math'|'media'|'plain';media:{name:string;type:string;size:number;base64?:string}|null}
 export interface Target {provider:string;connectionId:string;accountId:string;bucketName:string;prefix:string}
+export interface DirectoryNameEntry {key:string;parentPrefix:string;displayName:string;folder:boolean;size?:number;etag?:string;uploaded?:string;last_modified?:string;contentType?:string}
+export interface DirectoryNameResult {
+ entries:DirectoryNameEntry[];nextPageToken:string|null;complete:boolean;
+ source:'cache'|'cloud'|'offline';asOf:number|null;stale:boolean;refreshing:boolean;code?:string;
+}
 export interface Level {hidden?:boolean;label?:string}
 export interface Destination {id:string;target:Target;label?:string;hidden?:boolean;quick?:boolean;order?:number;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
 export type Mode = 'simple'|'nested'|'narrow';
@@ -34,6 +39,7 @@ export interface Methods {
  getGalleryLoadingVisual:{includeMedia?:boolean};setGalleryLoadingVisual:{expectedRevision:number;mode:'math'|'media'|'plain';removeMedia?:boolean;media?:{name:string;type:'image/png'|'image/jpeg'|'image/webp'|'image/gif'|'video/mp4';base64:string}};
  loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
+ searchDirectoryNames:{source:Target;query:string;pageToken?:string;pageSize?:number;refresh?:boolean};
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
  listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
  previewConfigChange:{changes:Change[];expectedRevision:number};
@@ -71,6 +77,7 @@ export interface Results {
  listDestinations:{items:(Destination|{target:Target;maxDepth:number;hidden?:boolean})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};
  fileAction:{state:string;code?:string;id:string;data?:{operationId:string;completed:number;skipped?:number;receipt?:RemoteReceipt;verification?:string;atomicDelete?:boolean}};
+ searchDirectoryNames:DirectoryNameResult;
  enterExplorer:{state:string;code?:string;accounts:{id:string;name?:string}[];buckets:{name:string}[];target:Target|null;preferred:Target|null;accountId?:string};
  initializeCloudflare:CloudflareSetupResult;
  loginBegin:Results['loginStatus']&{initialization?:CloudflareSetupResult&{stage?:string;operationId?:string}};

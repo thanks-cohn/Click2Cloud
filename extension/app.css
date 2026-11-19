@@ -49,9 +49,14 @@
 #toolbar-splitter{height:6px;flex:none;cursor:row-resize;background:var(--line);touch-action:none}
 body.resizing{user-select:none}
 #explorer-commands{position:relative;flex:none;display:flex;flex-wrap:nowrap;align-items:flex-start;padding:8px;gap:6px;min-height:52px;container-type:inline-size}
-#command-items{display:flex;align-content:start;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;max-height:calc(var(--command-rows,1)*42px);overflow:hidden}
+#command-items{--filename-search-min:154px;display:flex;align-content:start;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;max-height:calc(var(--command-rows,1)*42px);overflow:hidden}
 #command-items>button,#command-items>select{flex:none;height:36px;white-space:nowrap}
-#command-items>.address{flex:1;min-width:min(110px,100%)}
+#command-items>#filename-search-form{flex:1;min-width:var(--filename-search-min);padding:2px}
+#filename-search{width:100%;min-width:0;height:32px;padding:5px 8px}
+#filename-search:focus-visible{outline-offset:0}
+#go-to-path .address{margin-block-start:4px}
+#go-to-path .address input{margin:0}
+#listing-state{overflow-wrap:anywhere}
 #command-items>.toolbar-row-break{flex:0 0 100%;height:0;margin-block-start:-6px}
 #toolbar-more{height:36px;min-width:32px;flex:none}
 @container(max-width:240px){

@@ -46,7 +46,17 @@ for(const mode of ['all','first','closed']){
 results.push({gate:'preview-all-first-closed-on-first-and-second-page-bounded-reads',state:'PASS'});
 await page.locator('.history-year > summary').first().click();const count=await page.evaluate(()=>window.productFixture.calls.filter(c=>c.operation==='readChunk').length);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>window.productFixture.calls.filter(c=>c.operation==='readChunk').length),count);results.push({gate:'collapsed-date-group-no-new-preview-reads',state:'PASS'});
 await page.screenshot({path:join(out,'history.png'),fullPage:true});
-await page.getByRole('button',{name:'File Explorer',exact:true}).click();await page.locator('#toolbar-splitter').waitFor();await page.locator('#toolbar-splitter').press('Home');await page.waitForFunction(()=>document.querySelector('#command-items').children.length===4);assert.deepEqual(await page.locator('#command-items > *').evaluateAll(els=>els.map(e=>e.id)),['back','forward','up','refresh']);assert(await page.locator('#toolbar-more').isVisible());await page.locator('#toolbar-more').click();assert(await page.locator('#location').isVisible());assert(await page.locator('#view-switch').isVisible());assert(await page.locator('#add-location').isVisible());results.push({gate:'condensed-explorer-five-controls-and-overflow',state:'PASS'});
-await page.locator('#toolbar-splitter').press('End');await page.waitForFunction(()=>document.querySelector('#command-items .address'));results.push({gate:'expanded-toolbar-restores-address-controls',state:'PASS'});
+await page.getByRole('button',{name:'File Explorer',exact:true}).click();await page.locator('#toolbar-splitter').press('Home');
+await page.waitForFunction(()=>document.querySelector('#command-items #filename-search'));
+assert.deepEqual(await page.locator('#command-items > button').evaluateAll(els=>els.map(e=>e.id)),['back','forward','up','refresh']);
+await page.locator('#toolbar-more').click();
+assert(await page.locator('#toolbar-overflow #location').isVisible());
+assert(await page.locator('#view-switch').isVisible());assert(await page.locator('#add-location').isVisible());
+results.push({gate:'condensed-explorer-navigation-search-and-go-to-path-overflow',state:'PASS'});
+await page.locator('#toolbar-splitter').press('ArrowDown');
+await page.locator('#command-items #add-location').waitFor();
+assert(await page.locator('#command-items #filename-search').isVisible());
+assert(await page.locator('#toolbar-overflow #location').isHidden());
+results.push({gate:'expanded-toolbar-retains-search-and-second-row-right-click',state:'PASS'});
 await page.screenshot({path:join(out,'explorer-condensed.png'),fullPage:true});assert.deepEqual(errors,[]);
 }catch(e){try{const p=context.pages().at(-1);await writeFile(join(out,'failure-dom.html'),await p.content());await writeFile(join(out,'failure-debug.json'),JSON.stringify(await p.evaluate(()=>({previews:[...document.querySelectorAll('[data-preview]')].map(el=>({text:el.textContent,rect:el.getBoundingClientRect().toJSON()})),calls:window.productFixture?.calls,settings:document.querySelector('.history-page')?.innerText})),null,2));}catch{}results.push({gate:'browser-acceptance',state:'FAIL',message:e.message,stack:e.stack});process.exitCode=1;}finally{await context?.close();if(server)await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});await writeFile(join(out,'results.json'),JSON.stringify({evidenceClass:'REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE',results,errors},null,2));console.log(JSON.stringify(results,null,2));}
