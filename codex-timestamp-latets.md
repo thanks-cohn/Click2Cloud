@@ -57,6 +57,28 @@ This is a small **next-run Explorer UX fix**. Do not rewrite the search engine, 
 6. If the user right-clicks a **directory/prefix** rather than an actual file, don't fabricate a standalone folder object URL. Instead, after a valid public mapping exists, present the existing directory URL export flow showing correct grouped object URLs.
 7. Retain feature-flag scope, existing Cloudflare authentication, private-by-default policy and API-first design. This is a missing/unfinished Get URL workflow, not permission for blanket bucket exposure, arbitrary Cloudflare mutations, new Worker topology or additional unrelated features.
 
+## Required Get URL layout — URL directly UNDER the domain input, always visible
+
+**The result area must be directly below the domain entry field, not somewhere else in the popup and not hidden until a separate Copy/Save action.** When `Get URL` opens for a file, the panel should look and behave like:
+
+```text
+Get URL
+Connected Domain with Cloudflare?
+Domain: [your-domain.example             ]
+Public URL:
+https://your-domain.example/exact/path/to/image.png     [Copy]
+[Other verified public URL(s), if any]
+```
+
+- **Always render a dedicated Public URL row beneath the input** when the Get URL panel is shown. If the selected bucket already has an active, verified public endpoint, **immediately fill it with the selected file's actual complete object URL**. Never require typing into the domain box again for an already-authorized mapping.
+- As the user selects or enters a domain, update the field **only once that domain is verified as actively linked to this exact bucket**. Show the URL and Copy control as soon as verification succeeds, without requiring `Copy selected URLs`, a Save click, another right-click or a popup restart. Render multiple URLs as distinct rows directly beneath the input when several verified endpoints exist.
+- The **X / close** control must not erase any cloud mapping; closing the popup is not a revoke. Preserve the selected object identity and its exact key throughout.
+- If **no public endpoint exists**, the Public URL row remains visibly present with **`No public URL available yet — connect or activate a public endpoint for this bucket.`** and an actionable **Recheck** control. Do **not** display a guessed URL or a clickable dead link.
+- A verified endpoint mapping is distinct from verified anonymous object reachability. If live accessibility has not been confirmed, show the real derived URL with an honest `Reachability not checked` or blocked status, never claim successful public delivery without evidence.
+- Validate UI order and accessibility: input immediately followed by `Public URL`, a selectable/copyable full URL for an active mapping, keyboard-accessible Copy button and status/error region; correct long-name wrapping without clipping.
+
+**Additional acceptance check:** Start with an already-public bucket, right-click a nested image, choose Get URL: without typing anything, the actual URL is visible **directly under the domain input**. If a domain is newly activated during the current flow, that same row populates immediately after the verification refresh.
+
 ## Current 0.3.20 implementation evidence and likely cause
 
 - `extension/explorer-exports.mjs`: `urls()` calls `getPublicUrls`, shows **`Allow Public URL?`** when `info.domains.length === 0`, and **Yes** merely opens `urlEditor(...)`. The editor asks “Connected Domain with Cloudflare? Add it...” and verifies a manually entered domain. It does not activate public access or complete a one-click public URL outcome.
