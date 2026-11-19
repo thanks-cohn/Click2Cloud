@@ -276,6 +276,9 @@ async function shortcuts() {
   await value('#toolbar-splitter', '1');
   assert.equal(await pane.getAttribute('aria-valuenow'), '50', 'toolbar toggle changed the pane');
   await page.locator('#toolbar-more').press('ArrowDown');
+  const moreLabels=await page.locator('#toolbar-overflow button').allTextContents();
+  assert(!moreLabels.some(label=>/Toggle one or two toolbar rows|Reset panels to 50\/50/.test(label)),
+    'More must not contain redundant layout shortcut buttons');
   await page.getByLabel('Address').waitFor();
   await page.keyboard.press('Escape');
   assert(await page.locator('#toolbar-more').evaluate(el => el === document.activeElement));
