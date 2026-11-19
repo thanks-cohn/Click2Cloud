@@ -5,7 +5,7 @@
 **Area:** Click2Cloud File API + File Explorer  
 **Design:** A reusable API function is the feature; the search bar is a small GUI overlay calling it.
 
-**Research-only Codex task:** [Read-only Codex IndexedDB inventory/cache architecture request](../docs/requests/CODEX_READ_ONLY_INDEXEDDB_FILENAME_CACHE_ARCHITECTURE_2026-11-18.md). Codex must inspect and produce a design/decision in its response; it is NOT authorized to edit either repository or run live cloud changes.
+**ACTIVE CODEX TASK — IMPLEMENT, NOT JUST DESIGN:** [STEP 2: Build a working File API filename search and persistent IndexedDB inventory](../docs/requests/CODEX_IMPLEMENT_FILENAME_SEARCH_INDEXEDDB_2026-11-18.md). This follows STEP 1 scoped UX fixes and precedes STEP 3 final read-only cross-repo architecture audit. Prior [read-only research notes](../docs/requests/CODEX_READ_ONLY_INDEXEDDB_FILENAME_CACHE_ARCHITECTURE_2026-11-18.md) are background, superseded as an execution task. Scope is V1 only; future `:nested` is not required for the first shipment.
 
 ## V1 — simple, current-directory-only search
 
@@ -218,7 +218,7 @@ The textual expression `bucket/directory/child:nested report` is a **convenient 
 
 **V1 remains deliberately simple:** one supplied directory, direct child filenames/folders only, and a GUI search bar calling that API. Recursive `:nested`, explicit inline directory targeting, and `bucket/directory/child:nested` are **future extensions** and must not delay V1.
 
-**Related scoped Codex UI request:** [Implement the upper-right first-row sun/moon fix, gallery/footer changes, debug-only controls and Explorer toolbar polish](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md). The scoped UX fixes run FIRST; the read-only filename/IndexedDB design runs SECOND; the read-only enterprise architecture audit remains LAST.
+**Related scoped Codex UI request:** [Implement the upper-right first-row sun/moon fix, gallery/footer changes, debug-only controls and Explorer toolbar polish](../docs/requests/CODEX_SCOPED_EXPLORER_HEADER_GALLERY_UI_2026-11-18.md). The scoped UX fixes run FIRST; actual filename/File API + IndexedDB IMPLEMENTATION runs SECOND; the strictly read-only enterprise architecture audit remains LAST.
 
 ## Header, debug-only support controls and gallery-space changes — final clarified UI directives
 
@@ -260,4 +260,4 @@ Do not hide normal **History** navigation, Cloudflare authorization/setup approv
 
 **V1 is only the direct-children search API with a GUI overlay.** Recursive search and `:nested` are roadmap extensions, not prerequisites to ship V1.
 
-This is documentation only. Do not modify Click2Cloud implementation code, cloud deployments, right-click Simple/Narrow/Depth behavior, Explorer CRUD, current saves, or the Aesthetic API for this note.
+This file is the feature specification; **the separately linked STEP 2 Codex request explicitly authorizes implementing V1 filename search, GUI wiring and persistent IndexedDB** on an isolated branch. Do not change unrelated Cloudflare deployments, right-click Simple/Narrow/Depth behavior, Explorer CRUD, current saves or the Aesthetic API. Future `:nested` syntax remains a nonblocking roadmap extension.
