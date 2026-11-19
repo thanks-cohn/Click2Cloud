@@ -10,7 +10,7 @@
 2. **Double-click the file name at the top of the preview dialog to rename it.** It should enter an unobtrusive editable filename state, prefilled with the object's actual current basename (preserve extension/whole key appropriately). Let Enter submit; Escape cancel; show pending and verified/uncertain outcomes and name conflicts. The rename must call the **existing trusted File API `fileActionGUI('rename',entry,origin)` / canonical rename path**, not an unverified client-only label edit. It must not silently rename merely from a click.
 3. The preview title may be implemented as a focusable button that also supports keyboard-triggered rename (Enter/F2 as appropriate), with explanatory accessible label. Preserve dialog close/back, downloaded preview blob, image navigation, gallery position and source identity. If a rename opens a separate name dialog, return gracefully to preview/Explorer after verified completion; prevent stale image selection and wrong-object actions if the user switches gallery items during the request.
 4. Changes to file name must invalidate/reconcile affected parent IndexedDB directory inventory and refresh the displayed object after verified rename. Keep original if failed/uncertain; do not claim success when a remote effect has not been independently verified.
-5. Verify source identity, collision behavior, Unicode and extension semantics, image navigation while editing, no accidental arrow navigation while an input has focus, and keyboard/screen-reader access in all themes.
+5. Verify source identity, collisions, Unicode filenames, navigation while editing and focused rename keyboard behavior. Do not require repeating the same tests across every theme.
 
 ## Current code evidence
 
