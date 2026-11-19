@@ -23,7 +23,17 @@ https://assets.example.com/photos/logo.svg
 https://assets.example.com/photos/background.webp
 ```
 
-**Important:** This mode means **one selected URL for each real eligible object**, NOT one URL for each of several domains attached to the same object. Avoid duplicate lines and duplicated objects. This is a distinct plain-text format: **no JSON header, `FILE` / `END FILE` wrappers, quotes, filename labels, comments, receipt paths, statuses, HTML or other metadata** in the downloaded TXT. Plain UTF-8 text with one complete URL per line and conventional newline separators.
+**Important:** This mode means **one selected URL for each real eligible object**, NOT one URL for each of several domains attached to the same object. Unlike **Get all URLs for directory**, which deliberately retains ALL distinct domain/endpoint URLs per asset and groups them by object identity. Avoid duplicate lines and duplicated objects. This is a distinct plain-text format: **no JSON header, `FILE` / `END FILE` wrappers, quotes, filename labels, comments, receipt paths, statuses, HTML or other metadata** in the downloaded TXT. Plain UTF-8 text with one complete URL per line and conventional newline separators.
+
+## Two intentionally distinct directory Get URL export modes
+
+**The user is choosing between two different outputs, not two names for the same file.**
+
+**A. "Export one link per asset — Simple Text File"** — clean, site-ready TXT. For each eligible asset/object in the chosen directory, select **exactly ONE** actual URL. A file with five linked/custom/developmental endpoints generates **ONE line**, not five. If linked active websites exist, prefer one valid linked custom-domain URL per file when "Use non-developmental URLs where possible" is checked. The selection for this simple output can be **Only image files**, **Only media files (images/video/audio)**, or **All files**, as specified below. No redundant per-domain copies, no metadata/header/JSON.
+
+**B. "Get all URLs for directory"** — preserve/rename the already-implemented **grouped** directory export (structured TXT/CSV/JSON) so it exports **ALL actual URLs associated with EACH asset**, including multiple URLs pointing to the **same asset via different websites/endpoints**. Group every file's URL list **under that file's stable object identity** and keep each file's variants together, rather than flattening, choosing only the preferred domain, or merging variants across objects. An asset with 5 linked URLs contributes 5 grouped URLs; 3 assets with 2 valid linked endpoints each contribute 6 URLs grouped into 3 distinct asset sections. Do **not** drop a URL just because that same asset is already represented by another domain; remove only true duplicate identical records caused by duplicate provider enumeration if necessary, never domain variants. Report separate **unique file count** and **total URL count**. Keep stable source bucket/path identity, exact key encoding, truthful completeness, and existing structured file outputs. Do not replace the current grouped TXT format with plain TXT.
+
+The two modes must be clearly labeled and visibly selectable from the **same right-click directory → Get URL** workflow. They should not automatically download both when a user selects only one; retain optional multi-format export within "Get all URLs for directory". **Implement the small simple-TXT addition and clarify existing grouped-export UI, not a second cloud listing/export engine.**
 
 ## When only developmental public URLs exist — inline Add Domain flow
 
@@ -77,6 +87,7 @@ The image and media scope must be determined using grounded object metadata (MIM
 ## Required tests
 
 - 3 files, 2 verified linked custom domains each: **exactly 3 lines** with one stable custom-domain URL per file, no JSON/headers.
+- The **same** 3 files × 2 actual domains using **Get all URLs for directory** produces **6 grouped URL entries, 3 asset groups**, with each asset's two links together (not 3 flattened one-per-file URLs); preserve original grouped TXT/CSV/JSON behavior and correctly report files=3, urls=6.
 - 3 objects including an uncommon extension, nested folder and Unicode filename: **All files** exports each actual authorized file once in stable order. No folder marker included.
 - Mixed directory containing PNG, SVG, MP4, WebM, MP3, WAV, HTML, CSS, PDF, ZIP and extensionless objects: **Only image files** emits only PNG/SVG; **Only media files** emits PNG/SVG/MP4/WebM/MP3/WAV; **All files** emits every file with a verified URL. No three-way checkbox ambiguity; switching options preserves the chosen domain/directory.
 - Verified custom + verified `r2.dev`: preference ON selects custom; custom absent selects eligible verified developmental fallback with a truthful UI fallback count; no endpoint never produces an invented line.
