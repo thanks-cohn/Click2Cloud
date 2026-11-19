@@ -59,14 +59,14 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
 }
 
 // Quiet presentation is independent of durable evidence and optional observation writes.
-export function createDepthFeedback(chrome){return async outcome=>{
+export function createDepthFeedback(chrome,refreshBadge=async()=>{}){return async outcome=>{
  try{await chrome.storage.local.set({lastDepthClick:outcome});}catch{}
  let debug=false;try{debug=(await chrome.storage.local.get('uiDebugMode')).uiDebugMode===true;}catch{}
  const routine=['completed','pending'].includes(outcome.state);
  if(routine&&!debug)return;
  const message=debug?(outcome.state==='completed'?'Depth save completed; inspect its verified remote receipt.':(['pending','partial','uncertain'].includes(outcome.state)?'Depth: save outcome not confirmed (':'Depth: not saved (')+outcome.code+(outcome.reason?' / '+outcome.reason:'')+'). Open Save results for details.'):(outcome.state==='uncertain'||outcome.state==='partial'?'Save not confirmed. Review History before retrying.':'Not saved. Review History or reconnect in Remotes.');
  if(!routine){
-  try{await chrome.action.setBadgeText({text:'!'});}catch{}
+  try{await refreshBadge();}catch{}
  }
  try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
 };}

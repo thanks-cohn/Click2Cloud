@@ -63,19 +63,19 @@ test('closing removes native listener, ignores delayed initialization and reject
 });
 test('Depth outcomes remain durable and OS-silent for repeated blocked, uncertain and completed operations',async()=>{
  const writes=[],messages=[],badges=[],notifications=[];const chrome={storage:{local:{get:async()=>({uiDebugMode:true}),set:async v=>writes.push(structuredClone(v))}},runtime:{sendMessage:async m=>messages.push(m)},action:{setBadgeText:async b=>badges.push(b.text)},notifications:{create:async(...args)=>notifications.push(args)}};
- const feedback=createDepthFeedback(chrome),outcomes=[{state:'blocked',code:'WORKER_SETUP_REQUIRED',operationId:'depth-click:one'},{state:'uncertain',code:'VERIFY_UNCERTAIN',operationId:'depth-click:two'},{state:'completed',code:'DEPTH_CLICK_COMPLETED',operationId:'depth-click:three'}];
+ const feedback=createDepthFeedback(chrome,async()=>badges.push("refresh")),outcomes=[{state:'blocked',code:'WORKER_SETUP_REQUIRED',operationId:'depth-click:one'},{state:'uncertain',code:'VERIFY_UNCERTAIN',operationId:'depth-click:two'},{state:'completed',code:'DEPTH_CLICK_COMPLETED',operationId:'depth-click:three'}];
  for(const outcome of outcomes)await feedback(outcome);
- assert.deepEqual(writes,outcomes.map(lastDepthClick=>({lastDepthClick})));assert.equal(notifications.length,0);assert.deepEqual(messages.map(m=>m.state),outcomes.map(o=>o.state));assert.deepEqual(badges,['!','!']);
+ assert.deepEqual(writes,outcomes.map(lastDepthClick=>({lastDepthClick})));assert.equal(notifications.length,0);assert.deepEqual(messages.map(m=>m.state),outcomes.map(o=>o.state));assert.deepEqual(badges,['refresh','refresh']);
  assert.match(messages[0].message,/not saved/);assert.match(messages[1].message,/outcome not confirmed/);assert.match(messages[2].message,/completed/);
 });
 test('Depth failure feedback still reaches badge and existing in-app channel when the optional last-outcome write fails',async()=>{
  const notifications=[],messages=[],badges=[];const chrome={storage:{local:{set:async()=>{throw Error('quota');}}},runtime:{sendMessage:async m=>messages.push(m)},action:{setBadgeText:async b=>badges.push(b.text)},notifications:{create:async(...args)=>notifications.push(args)}};
- const feedback=createDepthFeedback(chrome);for(let i=0;i<3;i++)await feedback({state:'blocked',code:'WORKER_SETUP_REQUIRED',operationId:'depth-click:failure-'+i});
- assert.equal(notifications.length,0);assert.equal(messages.length,3);assert.deepEqual(badges,['!','!','!']);assert(messages.every(m=>m.channel==='depth-click-outcome'&&m.state==='blocked'));
+ const feedback=createDepthFeedback(chrome,async()=>badges.push("refresh"));for(let i=0;i<3;i++)await feedback({state:'blocked',code:'WORKER_SETUP_REQUIRED',operationId:'depth-click:failure-'+i});
+ assert.equal(notifications.length,0);assert.equal(messages.length,3);assert.deepEqual(badges,['refresh','refresh','refresh']);assert(messages.every(m=>m.channel==='depth-click-outcome'&&m.state==='blocked'));
 });
 
 test('customer Depth feedback suppresses completed/pending chatter and retains actionable uncertainty without codes',async()=>{
- const messages=[],writes=[],badges=[];let debug=false;const feedback=createDepthFeedback({storage:{local:{get:async()=>({uiDebugMode:debug}),set:async v=>writes.push(v)}},runtime:{sendMessage:async m=>messages.push(m)},action:{setBadgeText:async v=>badges.push(v)}});
+ const messages=[],writes=[],badges=[];let debug=false;const feedback=createDepthFeedback({storage:{local:{get:async()=>({uiDebugMode:debug}),set:async v=>writes.push(v)}},runtime:{sendMessage:async m=>messages.push(m)},action:{setBadgeText:async v=>badges.push(v)}},async()=>badges.push('refresh'));
  for(const state of ['pending','completed'])await feedback({state,code:'DEPTH_INTERNAL'});assert.equal(messages.length,0);assert.equal(writes.length,2);
  await feedback({state:'uncertain',code:'PRIVATE_INTERNAL'});assert.match(messages[0].message,/not confirmed/);assert(!messages[0].message.includes('PRIVATE_INTERNAL'));assert.equal(badges.length,1);
  debug=true;await feedback({state:'completed',code:'DEPTH_CLICK_COMPLETED'});assert.match(messages.at(-1).message,/completed/);

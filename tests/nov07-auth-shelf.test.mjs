@@ -17,14 +17,14 @@ test('Shelf gesture keeps existing open policy while OFF and rejected-open fallb
  for(const mode of ['on','off','rejected']){
   const calls=[],data={},badges=[];
   const chrome={runtime:{getURL:p=>p,sendMessage:async m=>calls.push({message:m})},storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},sidePanel:{open:()=>{calls.push('open');return mode==='rejected'?Promise.reject(Error('may only be called in response to a user gesture')):Promise.resolve();}},notifications:{create:async(_id,v)=>calls.push({osNotification:v})},action:{setBadgeText:async v=>badges.push(v.text)},windows:{getLastFocused:async()=>({id:1})}};
-  const shelf=createShelfAttention({chrome,preference:()=>mode!=='off'}),info={};
+  const shelf=createShelfAttention({chrome,preference:()=>mode!=='off',notify:async()=>calls.push('refresh-daily-badge')}),info={};
   const context=shelf.gesture(info,{id:7,windowId:1},{provider:'cloudflare',enabled:true,needsAttention:true});
   assert.equal(calls.includes('open'),mode!=='off','user-gesture opening policy remains separate from OS notifications');
   await shelf.attend('cloudflare',undefined,{code:'CHOOSE_DESTINATION',context});
   assert.equal(calls.filter(x=>x==='open').length,mode==='off'?0:1);
   assert.equal(calls.filter(x=>x?.osNotification).length,0,'ordinary fallback must never create a desktop notification');
   assert.equal((await shelf.read()).code,'CHOOSE_DESTINATION');
-  if(mode!=='on')assert(badges.includes('!'),'silent fallback retains visible badge');
+  assert.equal(calls.includes('refresh-daily-badge'),mode!=='on');assert.deepEqual(badges,[]);
   if(mode==='rejected')assert.equal((await shelf.read()).opening.code,'SIDE_PANEL_GESTURE_REQUIRED');
  }
 });
@@ -32,10 +32,10 @@ test('Shelf gesture keeps existing open policy while OFF and rejected-open fallb
 test('repeated concurrent attention failures stay OS-silent and retain the latest existing Shelf state',async()=>{
  const data={},calls=[],badges=[];
  const chrome={runtime:{getURL:p=>p,sendMessage:async m=>calls.push({message:m})},storage:{session:{get:async k=>({[k]:data[k]}),set:async v=>Object.assign(data,v)}},notifications:{create:async(...args)=>calls.push({osNotification:args})},action:{setBadgeText:async v=>badges.push(v.text)},tabs:{create:()=>{throw Error('unexpected tab');}},identity:{launchWebAuthFlow:()=>{throw Error('unexpected OAuth');}}};
- const shelf=createShelfAttention({chrome,preference:()=>false});
+ const shelf=createShelfAttention({chrome,preference:()=>false,notify:async()=>calls.push('refresh-daily-badge')});
  const codes=['WORKER_SETUP_REQUIRED','TRANSIENT_API_FAILURE','CHOOSE_DESTINATION'];
  await Promise.all(codes.map(code=>shelf.attend('cloudflare',undefined,{code})));
- assert.equal(calls.filter(c=>c.osNotification).length,0);assert(badges.includes('!'));
+ assert.equal(calls.filter(c=>c.osNotification).length,0);assert(calls.includes('refresh-daily-badge'));assert.deepEqual(badges,[]);
  assert.equal((await shelf.read()).code,'CHOOSE_DESTINATION');assert.equal(data.shelfAttention.code,'CHOOSE_DESTINATION');
  assert(calls.some(c=>c.message?.channel==='shelf-attention'),'existing in-app state notification remains available');
 });

@@ -879,3 +879,9 @@ retry hint rather than waiting a whole polling interval after a near miss.
 Both paths still require an independent R2 HEAD before verified completion.
 The standalone reconciliation path still checks ambiguous writes by
 operation ID. See [implementation evidence](../../docs/evidence/r2-operations-overhaul/HANDOFF.md).
+
+## Explorer Make Default in 0.3.20
+
+Explorer’s **Make Default** sends one `commitConfigChange` operation with `type: 'makeDefault'`, the exact `target`, and `ensureSimple: true`. The normal revision and idempotency checks apply. The service verifies that the folder is in authorized inventory or confirms the exact prefix through the File API. `applyConfigChanges` reuses an existing Simple row or creates one with a deterministic ID, then applies Default and Quick precedence.
+
+The existing Worker readiness check runs before the local commit. An exact durable setup approval can be reused where the host grants provisioning authority. Insufficient provider access stops the operation. After commit, the existing registrar must acknowledge an enabled save row for the target. A failed native application compensates the focused change if it still owns the current revision. The browser fixture exercises the Simple row and ACK. The installed menu and live R2 path require independent verification. [API command reference](../../docs/api/API-COMMAND-REFERENCE.md)

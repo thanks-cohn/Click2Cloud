@@ -306,7 +306,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  // Explorer owns explicit file gestures. It neither reads the configured
  // Default nor needs a native menu. The source bucket is an additional binding
  // only for a transfer between buckets in the same OAuth account.
- async function ensureFileWorker(target,{sourceBucket,authorizeSetup=false,requireWriteProof=false}={}){
+ async function ensureFileWorker(target,{sourceBucket,authorizeSetup=false,requireWriteProof=false,useSavedApproval=false}={}){
   return withSetupLock(target.accountId,async()=>{
    const auth=await account(target.accountId),plan=await provisioner.lookup(target,sourceBucket);
    const broad=plan?.state==='ready'&&!plan.prefixScope;
@@ -314,7 +314,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     if(!requireWriteProof&&transport.filePlanCurrent(plan))return;
     if(requireWriteProof&&(await transport.status(target)).state==='READY')return;
    }
-   if(!authorizeSetup)fail('FILE_SETUP_APPROVAL_REQUIRED');
+   if(!authorizeSetup&&!(useSavedApproval&&await destinationApproved(target)))fail('FILE_SETUP_APPROVAL_REQUIRED');
    if(inspectBucket&&await inspectBucket(target,auth)!==true)fail('AUTHORIZATION_DENIED');
    if(sourceBucket&&inspectBucket&&await inspectBucket({...target,bucketName:sourceBucket},auth)!==true)fail('AUTHORIZATION_DENIED');
    if(!hasWorkerWriteScope(auth.scopes))fail('INSUFFICIENT_SCOPE');

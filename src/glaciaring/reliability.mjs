@@ -23,6 +23,8 @@ export const failures=Object.freeze([
  {signature:'PARTIAL_HISTORY_CONFLICT',invariants:['C2C-PERSIST-6'],classification:'SOURCE_PROVEN',physicalCause:'EQUAL_REVISION_CONTRADICTION_NOT_CHECKED',baseline:'84f0e19',repair:'122cc45',fixture:'tests/current-recovery-browser.mjs',testId:'C2C-PERSIST-6-partial-journal-same-revision-disagreement-is-conflict',evidence:'docs/evidence/current-recovery/browser.json',recovery:'PRESERVE_CONFLICT',acceptance:'REPRODUCED_EQUIVALENT'}
 ]);
 const families=[
+ ['file-exports','src/explorer/object-exports.mjs','tests/release-0320.test.mjs',['C2C-AGENT-1'],['listDirectoryObjects','getPublicUrls','getExportObjectMetadata']],
+ ['shortcuts','src/api/shortcuts.mjs','tests/release-0320.test.mjs',['C2C-AGENT-1'],['listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings']],
  ['history-preferences','src/persistence/current-store.mjs','tests/history.test.mjs',['C2C-AGENT-1','C2C-PERSIST-2'],['getHistoryPreferences','setHistoryPreferences']],
  ['manifest','src/manifest/service.mjs','tests/portable-menu-manifest.test.mjs',['C2C-PERSIST-1','C2C-PERSIST-2','C2C-AGENT-1','C2C-PROOF-1'],['exportMenuManifest','getMenuManifestDraft','previewMenuManifest','inspectManifestBindings','discardMenuManifest','commitMenuManifest','provisionMenuManifest','undoMenuManifest']],
  ['authentication','src/auth/cloudflare-oauth.mjs','tests/boot-login.test.mjs',['C2C-PERSIST-5'],['loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections']],

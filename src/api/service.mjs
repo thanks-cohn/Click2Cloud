@@ -1,3 +1,5 @@
+import {objectUrls,objectTags,safeObjectMetadata,verifiedDomains,metadataBudget,TAG_KEY} from '../explorer/object-exports.mjs';
+import {apiShortcutMetadata,listCommands} from './shortcuts.mjs';
 import {locateSavedResult} from '../history/navigation.mjs';
 import {createManifestService,createManifestStore} from '../manifest/service.mjs';
 import {createAgentDebugApi} from '../glaciaring/agent-api.mjs';
@@ -21,12 +23,12 @@ const target=obj({provider:str,connectionId:str,accountId:str,bucketName:str,pre
 const arr=items=>({type:'array',items,maxItems:Number.MAX_SAFE_INTEGER});
 const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested','depth','flat']);
 const level=obj({hidden:bool,label:str});
-const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
+const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,ensureSimple:bool,
   visibilityMode:{enum:['all','hide-all','custom']},levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},explorerLayout:obj({split:{type:'number',minimum:0,maximum:100},toolbarRows:{type:'integer',minimum:1,maximum:7}},['split','toolbarRows']),connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,hidden:bool,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
-change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
+change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:type==='makeDefault'?['target']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const rebuild=obj({accountId:str,changes:arr(change),acknowledgeUnknown:{enum:[true]}},['accountId','changes','acknowledgeUnknown']);
 const manifestOptions=obj({policy:{enum:['skip-identical','add-alongside','replace-selected']},replaceIds:{type:'array',items:str,maxItems:4096},applyPreferences:bool},['policy','replaceIds','applyPreferences']);
 const draftParams={draftId:str,previewToken:str,expectedRevision:num,idempotencyKey:str};
@@ -65,9 +67,15 @@ const definitions={
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
   dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
   dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])],
-  searchDirectoryNames:['inspect',obj({source:target,query:{type:'string',maxLength:1024},pageToken:{type:'string',minLength:1,maxLength:8192},pageSize:{type:'integer',minimum:1,maximum:200},refresh:bool},['source','query'])]
+  searchDirectoryNames:['inspect',obj({source:target,query:{type:'string',maxLength:1024},pageToken:{type:'string',minLength:1,maxLength:8192},pageSize:{type:'integer',minimum:1,maximum:200},refresh:bool},['source','query'])],
+  listCommands:['inspect',obj()],getShortcutBindings:['inspect',obj()],
+  setShortcutBinding:['configure',obj({commandId:str,chord:{oneOf:[str,{enum:[null]}]}},['commandId','chord'])],
+  resetShortcutBindings:['configure',obj()],
+  listDirectoryObjects:['inspect',obj({source:target,cursor:str},['source'])],
+  getPublicUrls:['inspect',obj({source:target,key:str,domains:{type:'array',items:str,maxItems:100}},['source'])],
+  getExportObjectMetadata:['inspect',obj({source:target,key:str},['source','key'])]
 };
-export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
+export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,...(apiShortcutMetadata[name]?{command:apiShortcutMetadata[name]}:{}),effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
 export function validate(schema,value) {
   if(schema.oneOf){let matches=0;for(const variant of schema.oneOf)try{validate(variant,value);matches++;}catch{}if(matches!==1)fail('INVALID_REQUEST');}
 
@@ -90,7 +98,7 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readExportOptions}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
@@ -232,7 +240,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
+        const independent=['listDirectoryObjects','getPublicUrls','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -247,6 +255,11 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if(params.itemId){const row=engine.getMenu(params.generation)?.rows.find(r=>r.id===params.itemId);if(row?.target)bindings.push(row.target);}
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
         if(Object.hasOwn(manifestDefinitions,method))data=await manifests.invoke(method,params,actor);
+        else if(method==='listCommands')data={commands:listCommands(toolRegistry)};
+        else if(['getShortcutBindings','setShortcutBinding','resetShortcutBindings'].includes(method)){
+          if(!shortcutStore)fail('SHORTCUT_STORAGE_UNAVAILABLE');
+          data={bindings:await (method==='getShortcutBindings'?shortcutStore.read():method==='setShortcutBinding'?shortcutStore.set(params.commandId,params.chord):shortcutStore.reset())};
+        }
         else if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
         else if(method==='setGalleryLoadingVisual')data=await current.setGalleryLoadingVisual(params);
         else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','recoverCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
@@ -280,7 +293,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='inspectCloudflareSetup')data=await cloudflare.setupStatus(params);
         else if(method==='cancelRemoteOperation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await cloudflare.cancel(params);}
         else if(method==='getHistoryPreferences')data=await current.readHistoryPreferences();
-        else if(method==='setHistoryPreferences')data=await current.setHistoryPreferences(params);
+        else if(method==='setHistoryPreferences'){data=await current.setHistoryPreferences(params);onHistoryPreferenceChange?.();}
         else if(method==='openRemoteResult')data=await locateSavedResult(await current.readRemoteResult(params.operationId),fileApi);
         // One canonical startup decision for Shelf and trusted API. Never rewrites
         // Default or destinations. Only explicit navigateExplorer remembers user intent.
@@ -367,10 +380,45 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const destination=remoteDestination(operationTarget);
           await current.recordRemoteResult?.({kind:'file-action',operationId,state:'pending',code:'FILE_ACTION_PENDING',destination});
           data=await fileApi.run(params.action,createBucket?{accountId:s.accountId,name:params.name}:input,{operationId});
+          if(params.action==='rename'&&data.state!=='completed'&&!data.code&&data.data?.code)data={...data,code:data.data.code};
           const r=data.data;await current.recordRemoteResult?.({kind:'file-action',operationId,state:data.state==='completed'&&r?.receipt?'verified':data.state,code:r?.code??data.code??'FILE_ACTION_RESULT',destination,receipt:r?.receipt});
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);
+        else if(['listDirectoryObjects','getPublicUrls','getExportObjectMetadata'].includes(method)){
+          const source=normalizeTarget(params.source);
+          if(source.provider!=='cloudflare'||source.connectionId!=='cloudflare:'+source.accountId)fail('SCOPE_UNAUTHORIZED');
+          const status=await oauth.status();
+          if(status.state!=='CONNECTED'||!status.accounts?.some(account=>account.id===source.accountId))fail('AUTH_REQUIRED');
+          if(params.key&&(!params.key.startsWith(source.prefix)||params.key.endsWith('/')))fail('SOURCE_SCOPE_MISMATCH');
+          if(method==='listDirectoryObjects'){
+            const result=await fileApi.run('listRaw',{source,cursor:params.cursor});
+            if(result.state!=='completed')fail(result.code??'EXPORT_LIST_FAILED');
+            if(result.data.entries.some(entry=>typeof entry.key!=='string'||!entry.key.startsWith(source.prefix)))fail('SOURCE_SCOPE_MISMATCH');
+            data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};
+          }else if(method==='getPublicUrls'){
+            if(!(await readExportOptions?.())?.urls||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
+            const domains=verifiedDomains(await readCustomDomains(source));
+            if(params.domains?.some(domain=>!domains.includes(domain)))fail('DOMAIN_NOT_VERIFIED');
+            if(params.key){
+              const result=await fileApi.run('stat',{source,key:params.key});
+              if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
+            }
+            data={domains,checkedAt:new Date().toISOString(),...(params.key?{file:objectUrls(source,params.key,params.domains??domains)}:{})};
+          }else{
+            const options=await readExportOptions?.();
+            if(!options?.tags&&!options?.metadata)fail('EXPORT_METADATA_EXPERIMENT_DISABLED');
+            const result=await fileApi.run('stat',{source,key:params.key});
+            if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
+            const object=result.data.object;
+            const tags=objectTags(object);
+            const custom=object.customMetadata??object.custom_metadata;
+            const withoutTags=custom?{...custom}:null;
+            if(withoutTags)delete withoutTags[TAG_KEY];
+            data={...safeObjectMetadata(object,source),...tags,
+              ...(withoutTags?{tagBudget:metadataBudget(withoutTags,[])}:{})};
+          }
+        }
         else if(method==='searchDirectoryNames'){
           const s=normalizeTarget(params.source);
           if(s.provider!=='cloudflare'||s.connectionId!=='cloudflare:'+s.accountId)fail('SCOPE_UNAUTHORIZED');
@@ -399,7 +447,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const rows=state.configs[m].destinations??state.configs[m].scopes;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
         }
         else if(method==='inspectMenuTree'){const spec=engine.getMenu(params.generation);if(!spec)fail('STALE_GENERATION');data=inspectMenuTree(spec,params);}
-        else if(method==='inspectExplorerContextMenu'){const a=await oauth?.status(),available=a?.state==='CONNECTED'&&a.accounts?.some(x=>x.id===params.target.accountId)&&params.target.connectionId==='cloudflare:'+params.target.accountId,scopes=a?.scopes??a?.permissions?.issuedScopes;data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,available:!!available,defaultAvailable:!!available&&(!Array.isArray(scopes)||['workers-r2.read','workers-r2.write'].every(scope=>scopes.includes(scope))),mutations:!!available&&(!Array.isArray(scopes)||scopes.includes('workers-r2.write'))&&fileApi?.capabilities?.includes('mkdir')===true});}
+        else if(method==='inspectExplorerContextMenu'){const a=await oauth?.status(),available=a?.state==='CONNECTED'&&a.accounts?.some(x=>x.id===params.target.accountId)&&params.target.connectionId==='cloudflare:'+params.target.accountId,scopes=a?.scopes??a?.permissions?.issuedScopes;data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,exports:await readExportOptions?.(),available:!!available,defaultAvailable:!!available&&(!Array.isArray(scopes)||['workers-r2.read','workers-r2.write'].every(scope=>scopes.includes(scope))),mutations:!!available&&(!Array.isArray(scopes)||scopes.includes('workers-r2.write'))&&fileApi?.capabilities?.includes('mkdir')===true});}
         else if(method==='previewContextMenu') {
           const evidence=engine.getEvidence(),generation=evidence.acknowledgedGeneration;
           const installed=generation!==null&&!evidence.pending&&evidence.desired?.generation===generation?engine.getMenu(generation):null;
@@ -415,7 +463,13 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(!replay&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
           for(const c of replay?[]:params.changes)if(['createDestination','makeDefault'].includes(c.type)) {
             const t=normalizeTarget(c.target),inv=await getInventory(),scope=inv.scopes.find(s=>scopeKey(s.target??s)===scopeKey(t));
-            if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix))fail('TARGET_NOT_DISCOVERED');
+            if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix)){
+              if(c.type!=='makeDefault'||!c.ensureSimple)fail('TARGET_NOT_DISCOVERED');
+              const authority=await oauth.status();
+              if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||authority.state!=='CONNECTED'||!authority.accounts?.some(a=>a.id===t.accountId))fail('AUTH_REQUIRED');
+              const listed=await fileApi.run('listRaw',{source:t});
+              if(listed.state!=='completed'||t.prefix&&!listed.data?.entries?.some(e=>e.key.startsWith(t.prefix)))fail('TARGET_NOT_DISCOVERED');
+            }
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
           const readySave=params.prepareModes!==undefined;
@@ -435,7 +489,9 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(newDefault){
               const allowSetup=readySave&&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[newDefault]})===true;
               if(readySave&&!selected.length&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-              await prepareFileWorker(newDefault,{authorizeSetup:allowSetup,requireWriteProof:true});
+              const useSavedApproval=params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple)
+                &&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[newDefault]})===true;
+              await prepareFileWorker(newDefault,{authorizeSetup:allowSetup,requireWriteProof:true,...(useSavedApproval?{useSavedApproval:true}:{})});
             }
             receipt=unchanged?{after:state.product.revision,replayed:false}:await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),...(readySave?{destinationSelection:selected}:{}),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
             const added=[...new Map(params.changes.flatMap(c=>['createDestination','makeDefault'].includes(c.type)?[c.target]:[]).map(t=>[targetKey(t),t])).values()];
@@ -444,10 +500,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
             const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
             const preparedTargets=selected.filter(s=>prepared.get(targetKey(s.target))?.state==='completed').map(s=>s.target);
-            let native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
+            let native;
+            try{native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
               ?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true})
               :!readySave&&receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
-                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined});
+                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined});}
+            catch(error){
+              if(!newDefault||!params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple))throw error;
+              native={state:'partial',code:error.code??'NATIVE_RECONCILE_UNAVAILABLE'};
+            }
             // Default selection is conditional on usable native application.
             // Restore only the previous default when this exact revision still owns the commit.
             if(newDefault&&native.state==='completed'){
@@ -458,7 +519,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(newDefault&&native.state!=='completed'){
               const saved=await current.read();
               if(saved.product.revision===receipt.after){
-                await current.commitProduct({...saved,product:{...saved.product,defaultTarget:state.product.defaultTarget},expectedRevision:receipt.after,
+                await current.commitProduct({...saved,product:{...saved.product,defaultTarget:state.product.defaultTarget},
+                  ...(params.changes.length===1&&params.changes[0].ensureSimple?{product:state.product,configs:state.configs}:{}),expectedRevision:receipt.after,
                   idempotencyKey:actor+':default-rollback:'+params.idempotencyKey,fingerprint:'default-rollback'});
                 await applyCurrent({saveSelection:[]});
                 fail(native.code??'NATIVE_APPLY_INCOMPLETE');

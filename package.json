@@ -1,6 +1,6 @@
 {
   "name": "click2cloud",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "private": true,
   "type": "module",
   "description": "One deterministic Click2Cloud menu specification for a real REDOWN Portal and Chrome",
@@ -11,7 +11,10 @@
     "test:focused": "node tests/final-focused.mjs",
     "test:browser": "node scripts/test-product-browser.mjs",
     "test:engine-api": "node tests/final-v3p1.test.mjs",
-    "test:shelf:extension": "node scripts/test-shelf-extension.mjs"
+    "test:shelf:extension": "node scripts/test-shelf-extension.mjs",
+    "test:api": "node --test tests/release-0320.test.mjs",
+    "check:api-docs": "node scripts/check-api-command-docs.mjs",
+    "test:release-browser": "node scripts/test-release-0320-browser.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -1,13 +1,11 @@
 // One Chrome Shelf attention adapter. It never starts OAuth or changes cloud state.
-export function createShelfAttention({chrome,preference=()=>true}={}){
+export function createShelfAttention({chrome,preference=()=>true,notify=async()=>{}}={}){
  let serial=0,last=null;const gestures=new WeakMap();
  // Chrome 141+ reports actual panel opening, unlike ordinary focus/OAuth returns.
  chrome.sidePanel?.onOpened?.addListener(info=>{if(!Number.isInteger(info.windowId)||info.path?.split('#')[0]!=='extension/app.html')return;try{void chrome.runtime.sendMessage({channel:'shelf-opened',windowId:info.windowId}).catch(()=>{});}catch{}});
  const providers=['cloudflare','google-drive','dropbox','onedrive'];
  const safeError=e=>/user gesture/i.test(e?.message??'')?'SIDE_PANEL_GESTURE_REQUIRED':/not.*available|undefined|not supported/i.test(e?.message??'')?'SIDE_PANEL_UNAVAILABLE':'SIDE_PANEL_OPEN_FAILED';
  function open(tabId,windowId){try{if(!chrome.sidePanel?.open)return Promise.resolve({state:'blocked',code:'SIDE_PANEL_UNAVAILABLE',operation:'sidePanel.open'});return Promise.resolve(chrome.sidePanel.open(Number.isInteger(tabId)?{tabId}:{windowId})).then(()=>({state:'opened',operation:'sidePanel.open'}),e=>({state:'blocked',code:safeError(e),operation:'sidePanel.open'}));}catch(e){return Promise.resolve({state:'blocked',code:safeError(e),operation:'sidePanel.open'});}}
- // The badge opens the existing Shelf/results; technical OS notifications add no proof.
- async function notify(){try{await chrome.action.setBadgeText({text:'!'});}catch{}}
  function gesture(info,tab,{provider,needsAttention=false,enabled=false}={}){
   const context={id:++serial,provider,tabId:tab?.id,windowId:tab?.windowId,opening:null};gestures.set(info,context);
   // Called in the native listener before its first await. Unknown READY state

@@ -23,7 +23,7 @@ export async function createWorkflowFixture(){
   }catch(e){json(res,{success:false,code:'FIXTURE_BOUNDARY_FAILED'},500);}return true;
  }
  async function run({launch,install,origin,results,evidence}){
-  const profile=await mkdtemp(join(tmpdir(),'c2c-login-workflow-'));let context=await launch(profile);await install(context);let page=await context.newPage();await page.goto(origin+'/extension/app.html?case=workflow');await page.getByRole('heading',{name:'Your clouds, one place.'}).waitFor();receipts.push({id:crypto.randomUUID(),stage:'Shelf-opens',state:'PASS'});
+  const profile=await mkdtemp(join(tmpdir(),'c2c-login-workflow-'));let context=await launch(profile);await install(context);let page=await context.newPage();await page.goto(origin+'/extension/app.html?case=workflow');await page.getByRole('heading',{name:'The Future is Now. True Remote is Here.'}).waitFor();receipts.push({id:crypto.randomUUID(),stage:'Shelf-opens',state:'PASS'});
   async function saveAndVerify(n){
    const native=await page.evaluate(()=>click2cloud.registrar.inspect());assert(!native.pending);assert.equal(native.acknowledgedGeneration,native.desired.generation);assert.equal(native.desired.rows.filter(r=>r.parentId===null).length,4);const row=native.desired.rows.find(r=>r.role==='save'&&r.target?.bucketName==='redown');assert(row);assert(!row.label.includes('Set up'));
    receipts.push({id:crypto.randomUUID(),stage:'native-registration',state:'PASS',generation:native.acknowledgedGeneration,proofClass:'FIXTURE_CHROME_CALLBACK_ACK_NOT_INSTALLED_CHROME'});

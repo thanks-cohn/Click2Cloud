@@ -1,3 +1,4 @@
+import {exportOptions,exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
 import {captureHistoryContext} from '../src/history/model.mjs';
 import {createManifestLocations} from '../src/cloudflare/manifest-locations.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
@@ -9,12 +10,14 @@ import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {attachFilenameSearch} from '../src/explorer/search-file-api.mjs';
 import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
+import {createDailyBadge} from '../src/chrome/daily-badge.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createCurrentStore} from '../src/persistence/current-store.mjs';
 import {createEngine} from '../src/core/engine.mjs';
-import {createEngineApi} from '../src/api/service.mjs';
+import {createEngineApi,toolRegistry} from '../src/api/service.mjs';
+import {createShortcutStore,listCommands} from '../src/api/shortcuts.mjs';
 import {createPermissions} from '../src/api/permissions.mjs';
 import {createAgentGateway} from '../src/api/gateway.mjs';
 import {createCloudflareOAuth,diagnoseCloudflare} from '../src/auth/cloudflare-oauth.mjs';
@@ -40,7 +43,9 @@ const workerEpoch=crypto.getRandomValues(new Uint32Array(1))[0]||1;
 const breadcrumbs=createBreadcrumbs({epoch:workerEpoch,build:BUILD_INFO.revision,read:async()=>(await chrome.storage.local.get('criticalBreadcrumbs')).criticalBreadcrumbs,write:value=>chrome.storage.local.set({criticalBreadcrumbs:value})});
 const diagnostics=createDiagnostics({epoch:workerEpoch,build:BUILD_INFO.revision,onCritical:breadcrumbs.enqueue}),current=createCurrentStore({sink:diagnostics,readEstablishment:async()=>{await trustedStorage();const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,uncertain:!!p.currentProvenance&&(p.currentProvenance.version!==1||p.currentProvenance.established!==true),nativeGeneration:p.nativeRegistration?.desired?.generation??0,native:{present:!!p.nativeRegistration,desiredGeneration:p.nativeRegistration?.desired?.generation??null,appliedGeneration:p.nativeRegistration?.appliedGeneration??null,state:['applying','acknowledged','applied','failed','partial'].includes(p.nativeRegistration?.state)?p.nativeRegistration.state:'unknown',rowCount:p.nativeRegistration?.desired?.rows?.length??0,roles:Object.fromEntries(['save','branch','provider-action','separator','navigation'].map(role=>[role,(p.nativeRegistration?.desired?.rows??[]).filter(r=>r.role===role).length]))}};},retainEstablishment:async proof=>{await chrome.storage.local.set({currentProvenance:proof});}});
 let connectionObservation=null,attentionPreference=null;
-const attention=createShelfAttention({chrome,preference:()=>attentionPreference});
+const dailyBadge=createDailyBadge({chrome,
+ readHistory:()=>current.readRemoteResults(),readPreferences:()=>current.readHistoryPreferences()});
+const attention=createShelfAttention({chrome,preference:()=>attentionPreference,notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 function assertConnected(){if(revoking)throw Object.assign(Error(),{code:'AUTHORIZATION_REVOKED'});}
@@ -72,6 +77,7 @@ const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBuc
 async function recordRemote(value){
  const inventoryUpdate=fileApi.noteRemoteWrite(value);
  const saved=await current.recordRemoteResult(value);
+ if(saved.kind==='save'&&saved.state==='verified')void dailyBadge.refresh();
  await inventoryUpdate;
  try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
  return saved;
@@ -222,7 +228,7 @@ const depthClick=createDepthNativeClick({current,oauth,transport:{async status(t
  const evidence=await prepared(target);
  return evidence.state==='READY'?evidence:remote.status(target);
 }},lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:getAuthorization,recover:recoverConfiguredTarget,
-attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome)});
+attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome,()=>{void dailyBadge.refresh();})});
 async function invokeProviderAction(input){
  if(revoking)return {state:'blocked',code:'DISCONNECTING'};
  if(input.setupOnly&&input.attentionContext&&input.requestedTarget){
@@ -259,8 +265,7 @@ void Promise.resolve().then(async()=>{
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
 const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
-    if(row?.role==='save'&&row.actionKind==='save'&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation)
-      void chrome.action.setBadgeText({text:'…'}).catch(()=>{});},beforeClick:async info=>{
+},beforeClick:async info=>{
     if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
     await nativeReady();
@@ -271,7 +276,7 @@ const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
     let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction&&action.actionKind!=='attention')return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
-  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});void chrome.action.setBadgeText({text:result.state==='completed'?'':'!'}).catch(()=>{});}
+  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});}
 });
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
   remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:invokeProviderAction,
@@ -316,13 +321,29 @@ const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
 const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>{const s=await oauth.status();return s.state==='CONNECTED'&&s.accounts.some(a=>a.id===t.accountId)&&t.connectionId==='cloudflare:'+t.accountId;}});
 const permissions=createPermissions();
 const manifestLocations=createManifestLocations({oauth,current,provisioner,transport:remote});
-const api=createEngineApi({engine,current,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,prepareFileWorker:cloudflare.ensureFileWorker,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const readExportOptions=async()=>exportOptions((await chrome.storage.local.get(exportPreferenceKey).catch(()=>({})))[exportPreferenceKey]);
+async function readCustomDomains(target){
+ assertConnected();
+ const path='/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName)+'/domains/custom';
+ const response=await oauth.request(path), body=await response.json().catch(()=>null);
+ if(!response.ok||body?.success!==true||!Array.isArray(body.result?.domains))
+  throw Object.assign(Error(),{code:response.status===403?'CUSTOM_DOMAIN_ACCESS_DENIED':'DOMAIN_LIST_UNAVAILABLE'});
+ assertConnected();
+ return body.result.domains;
+}
+const shortcutStore=createShortcutStore(chrome.storage.local,listCommands(toolRegistry));
+const api=createEngineApi({engine,current,shortcutStore,onHistoryPreferenceChange:dailyBadge.refresh,readExportOptions,readCustomDomains,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,prepareFileWorker:cloudflare.ensureFileWorker,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
+  if(message?.channel==='verified-local-download'){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond({accepted:false});return false;}
+    dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));
+    return true;
+  }
   if(message?.channel==='recorder'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({version:2,state:'blocked',code:'UNTRUSTED_APP_SENDER'});return false;}
     if(!recorder){respond({version:2,state:'failed',code:recorderInitializationFailure?'RECORDER_INITIALIZATION_FAILED':'RECORDER_NOT_READY',...(recorderInitializationFailure?{diagnostic:recorderInitializationFailure}:{})});return false;}
@@ -350,7 +371,7 @@ async function readCurrent(context){await trustedStorage();const saved=await cur
 let nativeAttempt;
 async function nativeReady(){const state=await readCurrent(),e=registrar.inspect();if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null&&engine.matchesCurrent(e.desired,state))return e.lastOutcome;if(!nativeAttempt){const attempt=api.reconcile({refreshDepthReadiness:false});nativeAttempt=attempt;attempt.finally(()=>{if(nativeAttempt===attempt)nativeAttempt=null;}).catch(()=>{});}return nativeAttempt;}
 // Menu maintenance has explicit lifecycle/save owners, never Shelf open or OAuth.
-for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(()=>{void nativeReady().catch(()=>{});});
+for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(()=>{void nativeReady().catch(()=>{});void dailyBadge.refresh();});
 // Developer/native-companion integration only: no externally_connectable manifest,
 // external messages, content scripts, localhost server, or client-issued grants.
 Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,get ready(){return readCurrent().then(()=>({state:'completed',code:'LOCAL_STATE_READY'}));},
@@ -359,3 +380,4 @@ Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway
   approveAgent:(actor,method,params)=>permissions.approve(actor,method,params)
 })});
 void chrome.alarms.create('whole-cloud',{periodInMinutes:1});
+void dailyBadge.refresh();

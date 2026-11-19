@@ -8,6 +8,9 @@ import {loadingMedia,LOADING_MEDIA_MAX_BYTES} from '../src/explorer/loading-visu
 import {levelHidden} from '../src/modes/nested/index.mjs';
 import {isImage,galleryStep,createImageReader,readPreviewBytes} from '../src/explorer/image-preview.mjs';
 import {installExplorerLayout} from './explorer-layout.mjs';
+import {installShortcuts} from './shortcut-settings.mjs';
+import {createExplorerExports,noteDownload} from './explorer-exports.mjs';
+import {downloadJob} from '../src/explorer/download-archive.mjs';
 import {selectedSetupReady,selectedSetupLabel,selectedSetupCode} from './cloudflare-setup-view.mjs';
 let fileClipboard=null;
 import {describeExplorerContextMenu} from '../src/api/explorer-context-menu.mjs';
@@ -32,6 +35,7 @@ function applyDebugMode(enabled){
  if(debugControl)debugControl.checked=debugMode;
  $('#status').hidden=!debugMode||!$('#status').textContent;
  if(debugMode)return;
+ if($('#shell').dataset.view==='downloads')void show('settings').catch(error=>status(error.message));
  const diagnosticDialog=$('#dialog').open&&$('#dialog').hasAttribute('data-debug-only-dialog');
  if(diagnosticDialog)closeDialog();
  if(focusedPanel||document.activeElement?.closest('[data-debug-only]')){
@@ -105,6 +109,17 @@ async function api(method,params={}, {quiet=false,readTimeout=0,signal}={}) {
   if(result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const code=result.code??'ENGINE_REQUEST_FAILED';reconnectAfter(code);const err=Object.assign(Error(names[code]??code),{code,method,stage:result.diagnostic?.stage??'api',diagnostic:result.diagnostic});if(!quiet)status(err.message,{attention:true});throw err;}
   return result.data;
 }
+const explorerExports=createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange:hideContext});
+const shortcuts=installShortcuts({
+ invoke:(method,params)=>api(method,params,{quiet:true}),
+ context:()=>({view,activeDirectory:!!source&&connection?.state==='CONNECTED'}),
+ runUI:id=>explorerLayoutUI?.commands[id]?.(),
+ runAPI:command=>{
+  if(command.parameterBindings?.source!=='currentAuthorizedFolder'||command.method!=='refreshExplorer')return false;
+  void refreshExplorerFolder()?.catch(error=>status(error.message));return true;
+ },
+ updateReferences:bindings=>explorerLayoutUI?.setShortcuts(bindings)
+});
 function recoveryCard(){return '<div class="card" role="status"><h2>Local configuration needs recovery</h2><p>'+esc(names[configurationIssue?.code]??configurationIssue?.code??'Saved configuration is unavailable.')+'</p><details><summary>Local service diagnostics</summary><pre id="local-diagnostics">'+esc(JSON.stringify(configurationIssue,null,2))+'</pre></details><p>Saved configuration cannot be trusted. Existing records and native menus are preserved. Login remains independent. Do not clear extension storage or uninstall.</p><button id="inspect-recovery">Inspect recovery</button><button id="attach-private-copy">Verify private profile copy</button><button id="rebuild-config">Rebuild with my choices</button><button id="read-local-state">Read saved configuration again</button><pre id="recovery-summary"></pre></div>';}
 function bindRecovery(){listen('#attach-private-copy','click',attachPrivateCopy);listen('#rebuild-config','click',rebuildConfiguration);listen('#inspect-recovery','click',inspectRecovery);listen('#read-local-state','click',async()=>{await refreshState();await show(view);});}
 async function inspectRecovery(){
@@ -176,7 +191,7 @@ async function connections() {
   renderConnection();if(view==='explorer'&&state&&connection.state==='CONNECTED'&&before!==JSON.stringify([connection.state,connection.accounts]))await enterExplorer();
 }
 function renderConnection(){
-  connectionElement.innerHTML=`<strong>☁ Cloudflare</strong><p class="muted" ${connection.state==='CONNECTED'?'data-aesthetic-text="remotes.connected-caption"':''}>${esc(connection.state==='CONNECTED'?'Connected':connection.state==='CONNECTING'?'Signing in…':connection.state==='VERIFYING'?'Authorization received; account verification pending':connection.state==='DISCONNECTED'?'Not connected':connection.state==='UNKNOWN'?'Checking connection…':'Connection status unavailable')}</p>${connection.diagnostic?.code?'<p class="muted">Connection unavailable · '+esc(connection.diagnostic.code)+'</p>':''}${connection.state==='CONNECTED'?'<button id="browse">Open File Explorer</button><button id="sign-out">Sign out</button>'+(connection.permissions?.needsReconsent?'<button id="reauthorize">Update Cloudflare permissions</button>':''):connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':reconnectNeeded?'<button id="login" class="reconnect-needed">Reconnect</button>':'<button id="login">Log in</button>'}`;
+  connectionElement.innerHTML=`${view==='remotes'?'':'<strong>☁ Cloudflare</strong>'}<p class="muted" ${connection.state==='CONNECTED'?'data-aesthetic-text="remotes.connected-caption"':''}>${esc(connection.state==='CONNECTED'?'Connected':connection.state==='CONNECTING'?'Signing in…':connection.state==='VERIFYING'?'Authorization received; account verification pending':connection.state==='DISCONNECTED'?'Not connected':connection.state==='UNKNOWN'?'Checking connection…':'Connection status unavailable')}</p>${connection.diagnostic?.code?'<p class="muted">Connection unavailable · '+esc(connection.diagnostic.code)+'</p>':''}${connection.state==='CONNECTED'?'<button id="browse">Open File Explorer</button><button id="sign-out">Sign out</button>'+(connection.permissions?.needsReconsent?'<button id="reauthorize">Update Cloudflare permissions</button>':''):connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':reconnectNeeded?'<button id="login" class="reconnect-needed">Reconnect</button>':'<button id="login">Log in</button>'}`;
   listen('#sign-out','click',async()=>{await api('disconnect');cloudflareState=null;await connections();if(view==='remotes')renderRemotes();status('Signed out. Saved destinations remain.');});listen('#reauthorize','click',()=>login('#reauthorize'));listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());listen('#cancel-login','click',async()=>{await api('loginCancel');await connections();});listen('#browse','click',async()=>{await show('explorer');});
 }
 async function login(selector='#login',params={}) {
@@ -239,7 +254,7 @@ function ordinarySetupReview(){
 function renderRemotes(){
   if(view!=='remotes')return;
   connectionElement.remove();
-  $('#main').innerHTML=`<section class="page"><h1>Your clouds, one place.</h1>${configurationIssue?recoveryCard():''}<p class="muted" data-aesthetic-text="remotes.intro-copy">Connect an account, browse its folders, and choose where to save.</p><p class="minimal-only remotes-tagline">The Future is Now. True Remote is Here.</p><div class="card"><h2>☁ Cloudflare R2</h2><p data-aesthetic-text="remotes.intro-copy">${connection?.state==='CONNECTED'?'Signed in to Cloudflare.':'Log in below to connect your account.'}</p>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status" data-aesthetic-text="status.verbose-technical-detail">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${cloudflareState&&cloudflareState.state!=='completed'?'<p class="minimal-only" role="status">Save unavailable. Review the setup options below or check History.</p>':''}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><p id="remote-summary" role="status" data-aesthetic-text="remotes.previous-result-detail"></p><p id="remote-summary-attention" role="status" hidden></p><p class="muted" data-aesthetic-text="remotes.provider-description">Google Drive, Dropbox and OneDrive are not available yet.</p><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
+  $('#main').innerHTML=`<section class="page"><h1 class="remotes-headline">The Future is Now. True Remote is Here.</h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p>${configurationIssue?recoveryCard():''}<p class="muted" data-aesthetic-text="remotes.intro-copy">Connect an account, browse its folders, and choose where to save.</p><div class="card"><h2>☁ Cloudflare R2</h2><p data-aesthetic-text="remotes.intro-copy">${connection?.state==='CONNECTED'?'Signed in to Cloudflare.':'Log in below to connect your account.'}</p>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status" data-aesthetic-text="status.verbose-technical-detail">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><p id="remote-summary" role="status" data-aesthetic-text="remotes.previous-result-detail"></p><p id="remote-summary-attention" role="status" hidden></p><p class="muted" data-aesthetic-text="remotes.provider-description">Google Drive, Dropbox and OneDrive are not available yet.</p><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);$$('[data-placeholder]').forEach(b=>b.onclick=()=>api('invokeProviderAction',{provider:b.dataset.placeholder,idempotencyKey:crypto.randomUUID()}).catch(e=>status(e.message)));
   listen('#open-explorer','click',async()=>{await show('explorer');});
@@ -369,10 +384,10 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
-async function show(next){if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;explorerScroll=0;}
  else explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh)await loadListing();}else await renderSettings();}
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function renderExplorer(){
@@ -380,13 +395,13 @@ function renderExplorer(){
  if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="search" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"></form><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted" data-aesthetic-text="explorer.debug-caption"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
   $('#main').replaceChildren(explorerShell);
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
-  listen('#up','click',()=>source&&navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',()=>{imageReader.clear();clearThumbnails();listingReader.invalidate();if(filenameSearch)return searchDirectoryNames(filenameSearch.query,{refresh:true});return source?loadListing(false,true):enterExplorer();});
+  listen('#up','click',()=>source&&navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',refreshExplorerFolder);
   listen('#view-switch','change',e=>{const value=e.target.value,start=performance.now(),el=$('#files'),oldGrid=displayView()==='grid',anchor=Math.floor(Math.max(0,el.scrollTop-(oldGrid?0:40))/(oldGrid?136:40))*(oldGrid?gridWindow(displayedEntries().length,0,viewportHeight,viewportWidth).columns:1);presentationView=value;renderExplorer();el.scrollTop=Math.floor(anchor/(value==='grid'?gridWindow(displayedEntries().length,0,viewportHeight,viewportWidth).columns:1))*(value==='grid'?136:40);renderWindow();paintTrace('view',start);viewCommit=viewCommit.catch(()=>{}).then(async()=>{if(presentationView!==value)return;try{await change({type:'setView',view:value});}catch(error){status(error.message);}finally{if(presentationView===value)presentationView=null;if(view==='explorer')renderExplorer();}});});
   listen('#create-bucket','click',createBucketGUI);
   listen('#add-location','click',()=>openPopup(selectedFolder()));
   listen('#more','click',()=>filenameSearch?searchDirectoryNames(filenameSearch.query,{more:true}):loadListing(true));
   listen('#filename-search-form','submit',event=>{
-   event.preventDefault();const input=$('#filename-search'),inOverflow=input.closest('#toolbar-overflow');
+   event.preventDefault();const input=$('#filename-search'),inOverflow=input.closest('#toolbar-overflow,#filename-search-popout');
    if(inOverflow){explorerLayoutUI.hide();$('#files').focus({preventScroll:true});}
    return searchDirectoryNames(input.value);
   });
@@ -421,10 +436,15 @@ function renderExplorer(){
    if(key){await revealListedFile(key,target);}
    else if(view==='explorer')$('#files').focus({preventScroll:true});
   });
-  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:async value=>{layoutIntent=value;viewCommit=viewCommit.catch(()=>{}).then(async()=>{try{await change({type:'setExplorerLayout',explorerLayout:value});}finally{if(layoutIntent===value)layoutIntent=null;}});return viewCommit;},onResize:scheduleWindow});
+  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:async value=>{layoutIntent=value;viewCommit=viewCommit.catch(()=>{}).then(async()=>{try{await change({type:'setExplorerLayout',explorerLayout:value});}finally{if(layoutIntent===value)layoutIntent=null;}});return viewCommit;},onResize:scheduleWindow});shortcuts.attachReferences();
  }else if(!explorerShell.isConnected){$('#main').replaceChildren(explorerShell);$('#files').scrollTop=explorerScroll;}
  $('#back').disabled=historyAt<=0;$('#forward').disabled=historyAt>=history.length-1;$('#up').disabled=!source?.prefix;$('#add-location').disabled=!source;$('#filename-search').disabled=!source||connection.state!=='CONNECTED';$('#view-switch').value=displayView();
  $('#shell').dataset.view='explorer';explorerLayoutUI?.refresh();renderAddress();renderFiles();void suggestion();
+}
+function refreshExplorerFolder(){
+ imageReader.clear();clearThumbnails();listingReader.invalidate();
+ if(filenameSearch)return searchDirectoryNames(filenameSearch.query,{refresh:true});
+ return source?loadListing(false,true):enterExplorer();
 }
 function selectedFolder(){const row=displayedEntries().find(e=>selected.has(e.key));return row?.folder?{...source,prefix:row.key}:source;}
 const pathMeasure=(()=>{let ctx;return text=>{ctx??=document.createElement('canvas').getContext('2d');ctx.font='14px Segoe UI';return ctx.measureText(text).width;};})();
@@ -529,7 +549,7 @@ async function startGalleryVisual(frame,ticket,signal){
  if(ticket!==previewEpoch||signal.aborted||frame.dataset.loading!=='true')return;stopLoadingVisual?.();stopLoadingVisual=mountLoadingVisual(frame,selection);
  }catch{/* Loading artwork never prevents an authenticated object read. */}
 }
-function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" class="gallery-arrow" title="Previous image" aria-label="Previous image" aria-keyshortcuts="ArrowLeft" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>Images in this loaded folder${cursor?' · more files may be loaded in Explorer':''}</span><button id="gallery-next" class="gallery-arrow" title="Next image" aria-label="Next image" aria-keyshortcuts="ArrowRight" ${!galleryStep(ordered(),e.key,1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;}
+function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" class="gallery-arrow" title="Previous image" aria-label="Previous image" aria-keyshortcuts="ArrowLeft" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span class="sr-only" role="status">${cursor?'More files may be loaded in Explorer.':''}</span><button id="gallery-next" class="gallery-arrow" title="Next image" aria-label="Next image" aria-keyshortcuts="ArrowRight" ${!galleryStep(ordered(),e.key,1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;}
 function moveGallery(direction){if(!gallery)return;const next=galleryStep(ordered(),gallery.key,direction);if(next)void openEntry(next).catch(e=>status(imageMessage(e.code)));}
 async function openEntry(e){
  if(e.folder)return navigate({...source,prefix:e.key});
@@ -537,7 +557,8 @@ async function openEntry(e){
  if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
  if(image){galleryReturnKey??=e.key;gallery={key:e.key,target:captured};selected=new Set([e.key]);focusIndex=listingOrder.index(e.key)??0;updateSelection();}else{gallery=null;galleryReturnKey=null;}
  const body=image?`<section data-gallery>${galleryControls(e)}<div class="image-frame"><p id="preview-state" role="status">Loading image…</p><img class="preview" alt="File preview" hidden><p id="preview-error" role="alert" hidden></p></div></section>`:'<p id="preview-state" role="status">Loading preview…</p>';
- dialog(e.displayName??e.key,body+'<button id="download-stream">Download</button>');if(!image)previewAbort=controller;listen('#download-stream','click',()=>downloadEntry(e));listen('#gallery-previous','click',()=>moveGallery(-1));listen('#gallery-next','click',()=>moveGallery(1));paintTrace('preview-feedback',started);if(image)void startGalleryVisual($('.image-frame'),ticket,controller.signal);
+ dialog(e.displayName??e.key,body+'<button id="download-stream">Download</button>'+(image&&explorerExports.options.tags?'<button id="preview-tags">Add Tags</button>':''));
+ listen('#preview-tags','click',()=>explorerExports.tags(captured,e));if(!image)previewAbort=controller;$('#download-stream').onclick=()=>{void downloadEntry(e).catch(error=>status(error.message));};listen('#gallery-previous','click',()=>moveGallery(-1));listen('#gallery-next','click',()=>moveGallery(1));paintTrace('preview-feedback',started);if(image){bindInlineRename(e,captured,ticket);void startGalleryVisual($('.image-frame'),ticket,controller.signal);}
  if(!image&&!text){$('#preview-state').textContent='Inline preview unavailable for this type.';return;}
  try{
   const result=image?await imageReader.load(captured,e,{limit:providerDefaults.previewMaxBytes,signal:controller.signal}):await readPreviewBytes(p=>api('readFileChunk',p,{quiet:true}),{source:captured,key:e.key},{limit:providerDefaults.textPreviewMaxBytes,signal:controller.signal,truncate:true});
@@ -546,6 +567,51 @@ async function openEntry(e){
   else{$('#preview-state').outerHTML='<pre id="preview-text">'+esc(await result.blob.text())+'</pre>'+(!result.done?'<p>Showing the first 512 KiB. Download the full file for all contents.</p>':'');}
   paintTrace('preview-ready',started);
  }catch(error){if(ticket!==previewEpoch||controller.signal.aborted)return;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}stopGalleryVisual();const message=imageMessage(error.code);if(image){$('#preview-state').hidden=true;const alert=$('#preview-error');alert.hidden=false;alert.textContent=message;alert.dataset.code=error.code??'FILE_READ_FAILED';$('img.preview').hidden=true;}else{$('#preview-state').textContent=message;$('#preview-state').setAttribute('role','alert');}}
+}
+function bindInlineRename(entry,target,ticket){
+ const title=$('#dialog-title'),name=entry.displayName??entry.key.split('/').at(-1);
+ title.tabIndex=0;title.title='Double-click or press F2 to rename';
+ const edit=()=>{
+  if(title.querySelector('input'))return;
+  const input=document.createElement('input'),feedback=document.createElement('span');
+  input.value=name;input.maxLength=1024;input.setAttribute('aria-label','Image filename');
+  feedback.setAttribute('role','status');feedback.className='preview-rename-status';
+  title.replaceChildren(input,feedback);input.focus();input.select();
+  const cancel=()=>{title.textContent=name;title.focus();};
+  input.addEventListener('keydown',async event=>{
+   if(event.isComposing||!['Enter','Escape'].includes(event.key))return;
+   event.preventDefault();event.stopPropagation();
+   if(event.key==='Escape'||input.value===name){cancel();return;}
+   const newName=input.value;
+   if(!newName.trim()||newName==='.'||newName==='..'||newName.includes('/')||newName.includes('\\')){feedback.textContent='Enter a filename without path separators.';return;}
+   input.readOnly=true;feedback.textContent='Renaming…';
+   try{
+    const result=await runFileAction('rename',{source:target,entry:{key:entry.key,folder:false},name:newName,conflict:'skip'});
+    const data=result.data??result;
+    const key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+newName;
+    if(!data.code?.endsWith('_VERIFIED')||data.receipt?.key!==key)throw Object.assign(Error(),{code:data.code??'FILE_RENAME_UNCONFIRMED'});
+    listingReader.invalidate();
+    if(ticket!==previewEpoch||view!=='explorer'||targetKey(target)!==targetKey(source))return;
+    galleryReturnKey=key;gallery.key=key;selected=new Set([key]);
+    title.textContent=newName;title.focus();
+    bindInlineRename({...entry,key,displayName:newName},target,ticket);
+    const renamed={...entry,key,displayName:newName};
+    $('#download-stream').onclick=()=>{void downloadEntry(renamed).catch(error=>status(error.message));};
+    if($('#preview-tags'))$('#preview-tags').onclick=()=>{void explorerExports.tags(target,renamed);};
+    await reloadCurrentDirectory();
+    if(ticket===previewEpoch&&gallery?.key===key){
+     $('#gallery-previous').disabled=!galleryStep(ordered(),key,-1);
+     $('#gallery-next').disabled=!galleryStep(ordered(),key,1);
+    }
+   }catch(error){
+    if(!input.isConnected)return;
+    feedback.textContent=/EXIST|CONFLICT|SKIP/.test(error.code??'')?'That name is already in use.':fileError('Rename',error);
+    input.readOnly=/UNCERTAIN|UNCONFIRMED|INSPECTION/.test(error.code??'');
+   }
+  });
+ };
+ title.ondblclick=edit;
+ title.onkeydown=event=>{if(event.target===title&&(event.key==='F2'||event.key==='Enter')){event.preventDefault();edit();}};
 }
 $('#dialog').addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
 $('#dialog').addEventListener('keydown',e=>{if(!gallery||e.target.closest('input,textarea,select,[contenteditable=true]'))return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();e.stopPropagation();moveGallery(e.key==='ArrowRight'?1:-1);}});
@@ -557,18 +623,33 @@ async function contextFor(t,entry,x,y){
   const params={target:t,...(entry?{entry:{key:entry.key,folder:entry.folder,...(entry.displayName?{displayName:entry.displayName}:{})}}:{}),hasClipboard:!!fileClipboard};
   // Same pure descriptor as inspectExplorerContextMenu; no second menu policy.
   // Shell has no enabled authority until the trusted response arrives.
-  const descriptors=describeExplorerContextMenu(t,{entry:params.entry,hasClipboard:!!fileClipboard,mutations:false}),el=$('#context');el.replaceChildren();let verified=false;
-  const action=(label,fn)=>{const descriptor=descriptors.items.find(d=>d.label===label);if(!descriptor)return null;const button=document.createElement('button');button.textContent=label;button.setAttribute('role','menuitem');button.disabled=true;button.dataset.action=descriptor.id;button.onclick=()=>{if(!verified||ticket!==contextTicket||contextEpoch!==navigationEpoch||view!=='explorer')return;hideContext();Promise.resolve(fn()).catch(e=>status(e.message));};el.append(button);return button;};
+  const descriptors=describeExplorerContextMenu(t,{entry:params.entry,hasClipboard:!!fileClipboard,mutations:false,exports:explorerExports.options}),el=$('#context');el.replaceChildren();let verified=false;
+  let downloadGroup;
+  const action=(label,fn)=>{const descriptor=descriptors.items.find(d=>d.label===label);if(!descriptor)return null;const button=document.createElement('button');button.textContent=label;button.setAttribute('role','menuitem');button.disabled=true;button.dataset.action=descriptor.id;button.onclick=()=>{if(!verified||ticket!==contextTicket||contextEpoch!==navigationEpoch||view!=='explorer')return;hideContext();Promise.resolve(fn()).catch(e=>status(e.message));};if(descriptor.group){
+   if(!downloadGroup){
+    downloadGroup=document.createElement('details');const summary=document.createElement('summary');
+    summary.textContent=descriptor.group;summary.setAttribute('role','menuitem');downloadGroup.append(summary);el.append(downloadGroup);
+   }
+   downloadGroup.append(button);
+  }else el.append(button);return button;};
   action('Open',()=>entry?openEntry(entry):navigate(t));
-  if(entry&&!entry.folder){action('Preview',()=>openEntry(entry));action('Download',()=>downloadEntry(entry));}
-  if(!entry||entry.folder){action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',offerFilePreparation('Make Default',allow=>change({type:'makeDefault',target:structuredClone(t)},allow?{prepareModes:[]}:{})));}
+  const file=entry&&!entry.folder?entry:null,scope=file?origin:t;
+  if(file)action('Preview',()=>openEntry(file));
+  action('Download',()=>file?downloadEntry(file):explorerExports.download(scope,null,'original'));
+  action('Download original',()=>file?downloadEntry(file):explorerExports.download(scope,null,'original'));
+  action('Download with Tags',()=>explorerExports.download(scope,file,'tags'));
+  action('Download with All Metadata',()=>explorerExports.download(scope,file,'metadata'));
+  action('Get URL',()=>explorerExports.urls(scope,file));
+  action('Add Tags',()=>explorerExports.tags(scope,file));
+  if(!entry||entry.folder){action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>makeExplorerDefault(t));}
   else {const save=action('Save to cloud…',()=>chooseRemoteSave(entry));if(capabilities?.providers?.cloudflare?.explorerSource===false){save.disabled=true;save.title='No authorized remote source is available for this private Explorer file.';}}
   const mutation=action;
   if(entry){
    mutation('Copy',()=>{fileClipboard={source:origin,entries:capturedSelection,action:'copy'};status(fileClipboard.entries.length+' items ready to paste.');});
    mutation('Cut',()=>{fileClipboard={source:origin,entries:capturedSelection,action:'move'};status(fileClipboard.entries.length+' items ready to move. Sources remain until paste.');});
    mutation('Move',()=>fileActionGUI('move',entry,origin));mutation('Rename',()=>fileActionGUI('rename',entry,origin));mutation('Delete',()=>fileActionGUI('delete',entry,origin));
-   action('Properties',async()=>{const r=await api(entry.folder?'listFolders':'fileMetadata',entry.folder?{source:{...origin,prefix:entry.key}}:{source:origin,key:entry.key});dialog('Properties','<pre>'+esc(JSON.stringify(r,null,2))+'</pre>');});
+   action('Properties',async()=>{const r=await api(entry.folder?'listFolders':'fileMetadata',entry.folder?{source:{...origin,prefix:entry.key}}:{source:origin,key:entry.key});const metadata=!entry.folder&&isImage(entry)&&explorerExports.options.tags?await api('getExportObjectMetadata',{source:origin,key:entry.key},{quiet:true}).catch(()=>null):null;
+    dialog('Properties',(metadata?'<p>Tags · '+esc(metadata.availability==='observed'?metadata.tags.join(', ')||'None':'Unavailable')+'</p>':'')+'<pre>'+esc(JSON.stringify(r,null,2))+'</pre>');});
   }
   if(!entry||entry.folder){mutation('New Folder',()=>fileActionGUI('mkdir',null,t));mutation('Paste',()=>pasteFiles(structuredClone(t)));}
 
@@ -580,6 +661,16 @@ async function contextFor(t,entry,x,y){
    if(item?.id==='explorer.setFlatDefault'&&button.disabled)feedback.textContent='Make Default unavailable. Check Cloudflare access.';
   }
   if(feedback.textContent==='Checking actions…')feedback.remove();if(document.activeElement===el)el.querySelector('button:not(:disabled)')?.focus({preventScroll:true});paintTrace('menu-authorized',started);}catch(error){if(ticket===contextTicket&&!el.hidden)feedback.textContent='Actions unavailable · '+(error.code??'INSPECTION_FAILED');}
+}
+async function makeExplorerDefault(target){
+ try{
+  await refreshState({quiet:true});
+  const result=await change({type:'makeDefault',target,ensureSimple:true});
+  if(result.native?.state!=='completed')throw Object.assign(Error(),{code:result.native?.code});
+  $('#listing-state').textContent='Default set · Chrome menu acknowledged.';
+ }catch(error){
+  if($('#listing-state'))$('#listing-state').textContent=fileError('Make Default',error);
+ }
 }
 const workerCost='This action may prepare a private Worker for all paths in the selected bucket or bind both selected buckets for a transfer. Cloudflare may charge for Worker and R2 usage.';
 function setupDisclosure(title,run,detail=workerCost){
@@ -709,6 +800,10 @@ const completedDestinationMessage=result=>result.destinationReadiness?.length?'S
 const saveButton='<button id="save" class="primary">Save</button>';
 const saveFeedback='<p id="destination-save-status" class="muted" role="status" aria-live="polite" hidden></p>';
 const destinationSetupDisclosure='<p class="muted" data-aesthetic-text="destinations.worker-explanation">Save prepares or maintains the private Cloudflare Worker for the selected destinations and checks a small R2 verification file when needed. Worker and R2 usage may incur charges. Setup covers the selected bucket.</p><details class="minimal-only"><summary>Setup and usage</summary><p>Save can authorize a private Worker for the selected bucket and a small R2 verification file. Cloudflare usage may incur charges.</p></details>';
+function showInChrome(display,attribute){
+ return '<h3>Show in Chrome</h3><div class="show-mode-checkboxes">'+[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
+  `<label><input ${attribute}="${mode}" type="checkbox" ${display[mode]?'checked':''}> ${label}</label>`).join('')+'</div>';
+}
 function popupFooter(){return '<div id="level-action"></div><div class="show-controls" id="show-controls"></div>'+destinationSetupDisclosure+saveFeedback+'<div class="dialog-foot"><button id="cancel">Cancel</button>'+saveButton+'</div>';}
 function destinationDraft(session){
   return session.changes.length?applyConfigChanges(session.base,session.changes):session.base;
@@ -767,7 +862,7 @@ function openPopup(t,existing=null,managerDraft=null){
     const d=draft(mode),paths=ancestors(captured.prefix);
     const body=`${fromManager?'<button id="back-manager">← Back to Destinations</button>':''}<div class="tabs">${['simple','nested','depth'].map(m=>`<button data-mode="${m}" class="${mode===m?'active':''}" ${existing&&m!==mode?'disabled':''}>${m==='nested'?'Narrow':m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div><div class="target">${esc(captured.bucketName+'/'+captured.prefix)}</div>${mode==='depth'?`<p class="muted">Display only discovered folders in explicitly enabled buckets.</p>${buckets.length?buckets.map((b,i)=>{const scope=depthScopes.find(s=>scopeKey(s.target)===scopeKey(b));return `<label><input data-bucket="${i}" type="checkbox" ${scope?'checked':''}> ${esc(b.bucketName)} <input data-depth="${i}" aria-label="Display depth for ${esc(b.bucketName)}" type="number" min="1" value="${scope?.maxDepth??10}"></label>`;}).join(''):'<p>Expand authorized accounts to load their buckets first.</p>'}`:`<label>Menu Title <input id="title" value="${esc(d.label??'')}" placeholder="${esc(captured.prefix.split('/').filter(Boolean).at(-1)??captured.bucketName)}"></label>${mode==='nested'?`<div class="between"><h2>Menu Titles</h2><button id="hierarchy-toggle">${d.visibilityMode==='hide-all'?'Show All':'Hide All'}</button>${d.visibilityMode&&d.visibilityMode!=='custom'?'<button id="custom-visibility">Restore custom visibility</button>':''}<button id="select-mode" aria-pressed="${selectMode}">Select Mode</button></div><div class="tabs"><button id="select-all">Select All</button><button id="clear-levels">Clear</button><span id="selection-count" class="muted">${selectedLevels.size} selected</span></div><div class="title-row muted"><span></span><span>Actual folder</span><span>Menu title</span></div>${paths.map((p,i)=>`<div class="title-row ${selectedLevels.has(p)?'selected':''} ${levelHidden(d,p)?'hidden-level':''}"><input data-level="${i}" aria-label="Select ${esc(p.split('/').at(-2))}" type="checkbox" ${selectedLevels.has(p)?'checked':''} ${!selectMode||p===captured.prefix?'disabled':''}><span title="${esc(p)}">${esc(p.split('/').at(-2))}</span><input data-alias="${i}" aria-label="Menu title for ${esc(p.split('/').at(-2))}" type="text" value="${esc(d.levels?.[p]?.label??'')}"></div>`).join('')}`:''}`}`;
     dialog(existing?'Edit destination':'+ Right Click',body,popupFooter());
-    $('#show-controls').innerHTML=`<span>Show in Chrome</span>${['simple','nested','depth'].map(m=>`<label><input data-show="${m}" type="checkbox" ${display[m]?'checked':''}> ${m==='nested'?'Narrow':m}</label>`).join('')}<button id="all">All</button><button id="flat" title="Keep checked mode trees; use an unassigned saved Default as a direct choice." aria-pressed="${display.flat}">Flat</button>`;
+    $('#show-controls').innerHTML=showInChrome(display,'data-show')+`<div class="show-mode-actions"><button id="all">All</button><button id="flat" title="Keep checked mode trees; use an unassigned saved Default as a direct choice." aria-pressed="${display.flat}">Flat</button></div>`;
     $$('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;selectedLevels.clear();render();});
     listen('#title','input',e=>{d.label=e.target.value;if(mode==='nested'&&paths.length){const last=paths.at(-1);d.levels??={};d.levels[last]={...d.levels[last]};if(d.label)d.levels[last].label=d.label;else delete d.levels[last].label;const input=$(`[data-alias="${paths.length-1}"]`);if(input)input.value=d.label;}});
     $$('[data-alias]').forEach(input=>input.oninput=()=>{const p=paths[Number(input.dataset.alias)];d.levels??={};d.levels[p]={...d.levels[p]};if(input.value)d.levels[p].label=input.value;else delete d.levels[p].label;if(p===paths.at(-1)){d.label=input.value;$('#title').value=input.value;}});
@@ -832,8 +927,7 @@ async function manager(filter='simple',page=0,session=null,message=''){
     <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
     <div id="destination-delete-confirmation" class="card" role="group" aria-labelledby="destination-delete-title" hidden></div>
     ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
-    <div class="show-controls"><span>Show in Chrome</span>${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
-      `<label><input data-manager-show="${mode}" type="checkbox" ${product.show[mode]?'checked':''}> ${label}</label>`).join('')}</div>
+    <div class="show-controls">${showInChrome(product.show,'data-manager-show')}</div>
     ${destinationSetupDisclosure}${saveFeedback}`,`<div class="dialog-foot"><button id="previous" ${!page?'disabled':''}>Previous</button><span>${total?`${page*20+1}–${Math.min(total,page*20+20)} of ${total}`:'0 destinations'}</span><button id="next" ${(page+1)*20>=total?'disabled':''}>Next</button>${saveButton}</div>`);
   const feedback=$('#destination-save-status');
   feedback.textContent=message||(session.changes.length?'Unsaved changes':'');feedback.hidden=!feedback.textContent;
@@ -989,6 +1083,10 @@ async function renderSettings(){
   listen('#whole-status','click',async()=>{$('#jobs').textContent=JSON.stringify(await api('inspectWholeCloudJobs'),null,2);});listen('#disconnect','click',async()=>{await api('disconnect');await connections();await renderSettings();status('Cloudflare disconnected. Saved destinations remain.');});
   listen('#capabilities','click',async()=>{const c=await api('describeCapabilities');$('#api-info').textContent=JSON.stringify({version:c.version,tools:c.tools.map(t=>({name:t.name,scope:t.scope})),publicEndpoint:c.publicEndpoint},null,2);});
   await historyUI.settings(historySettings);
+  if(historySettings.isConnected){
+    explorerExports.mountSettings(historySettings.parentElement);
+    shortcuts.mount(historySettings.parentElement);
+  }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
@@ -999,7 +1097,7 @@ headerMenu.addEventListener('click',()=>closeHeaderMore());
 headerMenu.addEventListener('keydown',e=>{const items=headerItems();if(e.key==='Escape'){e.preventDefault();closeHeaderMore(true);}else if(items.length&&['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();let i=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}else if(e.key==='Tab')closeHeaderMore(true);});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 $$('header nav [data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view).catch(e=>status(e.message)));listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
-document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled)')],i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
+document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
 $('#dialog').addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
@@ -1059,6 +1157,7 @@ async function downloadEntry(entry){
   if(offset!==result.total)throw Error('RANGE_RESPONSE_INVALID');writer??=await handle.createWritable();await writer.close();
   if((await handle.getFile()).size!==result.total)throw Error('DOWNLOAD_WRITE_UNCONFIRMED');
   status('Download complete · '+offset.toLocaleString()+' bytes.');
+  void noteDownload(downloadJob().jobId,1);
  }catch(error){try{await writer?.abort();}catch{}throw error;}
 }
 

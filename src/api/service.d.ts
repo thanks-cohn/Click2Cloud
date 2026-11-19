@@ -18,7 +18,7 @@ export type Change =
  | {type:'deleteDestinationConfig';mode:Mode;id:string}
  | {type:'setShowInChrome';show:Show}
  | {type:'setDepthDisplayBuckets';scopes:{target:Target;maxDepth:number;hidden?:boolean}[]}
- | {type:'makeDefault';target:Target}
+ | {type:'makeDefault';target:Target;ensureSimple?:boolean}
  | {type:'clearDefault'}
  | {type:'setTheme';theme:'dark'|'light'}
  | {type:'setExplorerLayout';explorerLayout:{split:number;toolbarRows:number}}
@@ -30,7 +30,10 @@ export type Change =
  | {type:'dismissOrganizationSuggestion';signature:string}
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
+export interface ShortcutCommand {commandId:string;label:string;category:string;context:string;defaultChord:string|null;shortcutEligible:boolean;requires?:string;effects:string;parameterBindings?:Record<string,string>;kind?:'api'|'ui';method?:keyof Methods;permission?:Tool['scope']}
 export interface Methods {
+ listDirectoryObjects:{source:Target;cursor?:string};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
+ listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};
  fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
@@ -68,6 +71,7 @@ export interface MenuRow {presentationId?:string;provenance?:SelectionProvenance
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface RestorePreview {available:boolean;reason?:string;current:ConfigurationHealth;previewToken?:string;product?:unknown;configs?:unknown;provenance?:'VALIDATED_COMPLETE_LOCAL_JOURNAL'|'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED'|'NEW_OWNER_CONFIRMED_CONFIGURATION';nativePartial?:{target:Target;label:string}[];outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';unknown?:string[];requiresPreservation?:boolean;nativeSalvage?:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'}
 export interface Results {
+ listCommands:{commands:ShortcutCommand[]};getShortcutBindings:{bindings:Record<string,string|null>};setShortcutBinding:Results['getShortcutBindings'];resetShortcutBindings:Results['getShortcutBindings'];
  getGalleryLoadingVisual:GalleryLoadingVisual;setGalleryLoadingVisual:GalleryLoadingVisual;
  requestRestorePreview:RestorePreview;restoreRightClickMenu:{configuration:unknown;native:{state:string;code?:string};preservation?:{state:'VERIFIED';checksum:string;filename:string;evidenceClass:'external-filesystem-readback'};requiresReconnect:true;outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';originalStateRestored?:false;remoteSave?:'NOT_VERIFIED'};
  describeCapabilities:ReliabilityDescription|{version:Version;build:unknown;tools:Tool[];publicEndpoint:false};
@@ -91,7 +95,7 @@ export interface Results {
  inspectCloudflareSetup:{accountId:string;target:Target;stage:string;operationId?:string;result?:CloudflareSetupResult}|null;cancelRemoteOperation:RemoteOperation;openRemoteResult:{target:Target;highlightKey:string};navigateExplorer:{state:'completed';target:Target};refreshExplorer:{state:string;code?:string;data?:{entries:unknown[];cursor:string}};readFileChunk:{state:string;code?:string;data?:{bytes:number[];offset:number;etag?:string|null;total:number;done:boolean}};
 }
 export interface EngineApi {invoke<K extends keyof Methods>(request:Request<K>,authenticatedActor:string):Promise<Response<K extends keyof Results?Results[K]:unknown>>;readonly tools:readonly Tool[]}
-export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local'}
+export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local';command?:ShortcutCommand}
 export interface Grant {actor:string;methods:(keyof Methods)[];accounts:string[];expiresAt:number;allConfiguration?:boolean;interactiveAuth?:boolean}
 export interface AgentGateway {request(handle:string,request:Request,authenticatedActor:string):Promise<Response>;grant(grant:Grant):string;revoke(handle:string):boolean}
 

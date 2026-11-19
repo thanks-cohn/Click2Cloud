@@ -56,8 +56,8 @@ test('production Depth callbacks -> provisioner -> signed transport -> workerd -
  }catch(e){console.error('DEPTH_INTEGRATION_FAILURE',e.stack);throw e;}finally{registrar?.close();await mf.dispose();}
 });
 test('optional lastDepthClick failure does not suppress existing channels or claim uncertain save success',async()=>{
- const calls=[];const feedback=createDepthFeedback({storage:{local:{set:async()=>{calls.push('set');throw Error('quota');}}},runtime:{getURL:p=>p,sendMessage:async m=>calls.push(m)},notifications:{create:async(_id,m)=>calls.push(m)},action:{setBadgeText:async()=>calls.push('badge')}});
- await feedback({state:'uncertain',code:'VERIFY_UNCERTAIN',operationId:'fixture'});assert(calls.some(c=>c.channel==='depth-click-outcome'));assert(calls.includes('badge'));assert(calls.some(c=>c.message?.includes('not confirmed')));assert(!calls.some(c=>c.message?.includes('save completed')));
+ const calls=[];const feedback=createDepthFeedback({storage:{local:{set:async()=>{calls.push('set');throw Error('quota');}}},runtime:{getURL:p=>p,sendMessage:async m=>calls.push(m)},notifications:{create:async(_id,m)=>calls.push(m)},action:{setBadgeText:async()=>calls.push('direct-badge')}},async()=>calls.push('badge-refresh'));
+ await feedback({state:'uncertain',code:'VERIFY_UNCERTAIN',operationId:'fixture'});assert(calls.some(c=>c.channel==='depth-click-outcome'));assert(calls.includes('badge-refresh'));assert(!calls.includes('direct-badge'));assert(calls.some(c=>c.message?.includes('not confirmed')));assert(!calls.some(c=>c.message?.includes('save completed')));
 });
 test('follow-up diagnostic read never purports to be rejecting plan snapshot',async()=>{
  let n=0;const plan={state:'ready',accountId:'fixture',bucketName:'bucket',protocol:PROTOCOL},lookup=async()=>++n===1?plan:n===2?{...plan,state:'pending'}:null;

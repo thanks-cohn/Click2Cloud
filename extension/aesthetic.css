@@ -78,7 +78,7 @@
 [data-aesthetic-hide~="settings.help-copy"] [data-aesthetic-text="settings.help-copy"]{display:none}
 .minimal-only{display:none}
 [data-aesthetic=minimal] .minimal-only{display:revert}
-[data-aesthetic=minimal] .remotes-tagline{font-size:clamp(15px,3.25vw,21px);font-weight:590;letter-spacing:-.02em;color:var(--text);margin-block:8px 18px}
+[data-aesthetic=minimal] #selected-save-setup{display:none}
 [data-aesthetic=minimal] header nav button.active{background:var(--selected)}
 [data-aesthetic=minimal] .card{box-shadow:none;margin-block:10px}
 [data-aesthetic=minimal] .card>h2{padding-bottom:6px;margin-bottom:8px}

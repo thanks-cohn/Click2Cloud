@@ -65,8 +65,8 @@ body.resizing{user-select:none}
  #toolbar-more{width:32px;padding-inline:0;font-size:0}
  #toolbar-more::after{content:'⋯';font-size:16px}
 }
-#toolbar-overflow{position:fixed;z-index:80;inset:auto;margin:0;color:var(--text);width:min(280px,calc(100vw - 24px));max-height:65vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:8px;box-shadow:0 8px 24px #0005}
-#toolbar-overflow>*{display:block;width:100%;margin:4px 0}
+#toolbar-overflow,#filename-search-popout{position:fixed;z-index:80;inset:auto;margin:0;color:var(--text);width:min(280px,calc(100vw - 24px));max-height:65vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:8px;box-shadow:0 8px 24px #0005}
+#toolbar-overflow>*,#filename-search-popout>*{display:block;width:100%;margin:4px 0}
 [hidden]{display:none!important}
 #feedback-stack{position:fixed;z-index:6;inset-inline-end:8px;inset-block-end:54px;max-inline-size:min(360px,calc(100% - 16px));display:grid;justify-items:end;gap:6px;pointer-events:none}
 #status,#action-feedback{padding:8px 12px;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:6px;background:var(--panel);box-shadow:0 3px 12px #0003}
@@ -148,3 +148,23 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 
 /* Shared image-loading slot, bounded independently of History content. */
 .history-preview{position:relative;max-width:240px;min-height:48px}.history-preview[data-loading]{height:180px;overflow:hidden;background:var(--bg);border-radius:5px}.history-preview[data-loading]>p{position:absolute;inset:auto 8px 0;text-align:center;font-size:12px}
+
+.remotes-headline{font-size:clamp(25px,5vw,42px);line-height:1.12}
+.remotes-subtitle{font-size:clamp(15px,2.4vw,20px)}
+.show-controls>h3{flex:0 0 100%;font-size:14px;margin:0}
+.show-mode-checkboxes,.show-mode-actions{flex:0 0 100%;display:flex;gap:clamp(5px,2vw,16px);align-items:center}
+.show-mode-checkboxes label{white-space:nowrap;margin:0}
+#dialog-title{min-width:0;overflow-wrap:anywhere}
+#dialog-title input{max-width:100%}
+.preview-rename-status{display:block;font-size:12px;color:var(--muted)}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.shortcut-row>span{flex:1}
+.shortcut-row kbd{white-space:nowrap}
+.shortcut-row input{flex:1;min-width:0}
+
+#context details summary{cursor:pointer;padding:7px 10px}
+#context details button{padding-inline-start:20px}
+.tag-pills{display:flex;flex-wrap:wrap;gap:6px;max-height:30vh;overflow-y:auto}
+.tag-pills button{overflow-wrap:anywhere;max-width:100%}
+.download-job summary{cursor:pointer;line-height:1.6;overflow-wrap:anywhere}
