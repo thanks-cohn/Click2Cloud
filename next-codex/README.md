@@ -37,4 +37,6 @@
 
 **Directory download + presentation:** Both individual files and directories support the two gated optional modes. In ordinary Settings, Show Download with Tags and Show Download with Metadata govern whether the two extra right-click actions appear (OFF until validated); Nest under Download governs direct siblings versus submenu (DEFAULT OFF). Recursive directory ZIP includes file bytes and readable tags/metadata manifest. See experimental specification, section 2D.
 
+**WE GOT THE RECEIPTS — mandatory by default:** Every bulk directory download, including plain, with Tags, or with All Metadata, automatically includes a source-R2-inventory-to-exported-files reconciliation receipt (machine-readable versioned JSON inside completed ZIP; same canonical operation in ordinary History). Show expected vs packaged files and sizes, missing/changed/failed objects, hashes where genuinely verified, and honest local-delivery evidence. **No extra prompt, no opt-in, no separate API and no Worker overhaul.** See experimental section 2E.
+
 **Rule:** Don't conflate documentation with implemented code; report the tested status and commit of every milestone. Protect existing verified saving and avoid unauthorized production Cloudflare changes.
