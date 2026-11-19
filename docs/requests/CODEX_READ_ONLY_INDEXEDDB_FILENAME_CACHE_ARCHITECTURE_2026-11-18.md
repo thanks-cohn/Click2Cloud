@@ -1,7 +1,7 @@
 # CODEX REQUEST — Design the best practical IndexedDB filename inventory & search cache (READ ONLY)
 
 **Date:** 2026-11-18  
-**Status:** Final architecture DESIGN, not implementation.  
+**Status:** Research/design only, not implementation. **Execution order: STEP 2 — AFTER scoped UX fixes and BEFORE the final cross-repo cloud-engine audit.** Do not edit or reimplement the completed UX work; treat it as the observed current UI and design search to integrate cleanly.  
 **Product:** Click2Cloud, Cloudflare R2 first; reusable File API/provider adapters later.  
 **User objective:** Repeated filename searches should be answered from a **durable local IndexedDB inventory** rather than repeatedly asking Cloudflare R2 for names already fetched. No downloading file contents to match filenames.
 
