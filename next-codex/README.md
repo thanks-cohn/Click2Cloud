@@ -35,4 +35,6 @@
 
 **Also requested:** Three distinct image right-click options: **Download**, **Download with Tags**, **Download with All Metadata**, with the original unchanged and a full safe JSON manifest in the all-metadata ZIP. The new variants remain experimental. See section 2C of the experimental URL/tag specification.
 
+**Directory download + presentation:** Both individual files and directories support the two gated optional modes. In ordinary Settings, Show Download with Tags and Show Download with Metadata govern whether the two extra right-click actions appear (OFF until validated); Nest under Download governs direct siblings versus submenu (DEFAULT OFF). Recursive directory ZIP includes file bytes and readable tags/metadata manifest. See experimental specification, section 2D.
+
 **Rule:** Don't conflate documentation with implemented code; report the tested status and commit of every milestone. Protect existing verified saving and avoid unauthorized production Cloudflare changes.
