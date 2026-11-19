@@ -1,0 +1,15 @@
+# Logic2real BEFORE audit
+
+Baseline: requested review HEAD fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09; clean tracked checkout. Protected annotated tag resolves to 156ed15c0de5afe3c6d59f4a635db23962ab8600. The only HEAD/tag difference is the owner's task document. Implementation branch: fix/narrow-bucket-speed-depth-2026-11-14. No existing user profile or live credentials are present in this machine.
+
+| Required logic | Source / generated native plan BEFORE | Owner observation / R2 evidence | Class and diagnosis |
+| --- | --- | --- | --- |
+| Actual bucket directly under Cloudflare | nested.project emits a root; menu-spec composite aliases unlabelled Narrow root placement to Cloudflare | C2C-QA and C2C-QA (2), without real buckets; exact R2 buckets nonetheless correct | Confirmed source cause of missing bucket boundary; owner evidence remains historical |
+| Bucket and intermediate Save here | nested.project emits save rows only for explicit destinations | A/B/C saves worked; ancestor/root saves not established | Confirmed missing projection; never infer ancestor permission from child |
+| Physical location independent of labels | scopeKey includes provider/connection/account/bucket; targetKey adds prefix; resolver binds action ID and exact current authorizedTargets | Both buckets use physical C2C-QA/Narrow/A etc.; 7/7 diagnostic matches reported | Source matches owner report; no fresh live inspection |
+| Native parents, ACK and generation | generateChromePlan forwards parentId; registrar serializes callback ACKs; engine rechecks durable/current native generation | Historical NATIVE_APPLY_INCOMPLETE | ACK fixture available; installed Chromium loading blocked by administrator. Historical failure cause unestablished |
+| Fast save dispatch | Depth wrapper status, registrar authorization, engine authorization, remote preflight and final authorization each can issue /capabilities through Depth's uncached authorize | Historical 111 attempts / 88 verified / 172 events; median 9.56s, p95 40.77s | Repeated requests confirmed in source; duration and causal contribution require benchmark. Historical exports unavailable locally |
+| Depth readiness | transport.status validates exact capability against current plan, session and verified bucket proof; native wrapper retains recovery/fresh-click rule | WORKER_SETUP_REQUIRED; later success; isolated AUTHORIZATION_LOST | Neither historical root cause established. Local workerd recovery fixture can exercise real protocol, not real Cloudflare |
+| Recorder does not control business path | observeDeliveredClick/recorder uses passive observers; transport pending/final history and Depth history are awaited separately | BASIC/detail count mismatch reported | Need distinguish History persistence from recorder; count alone cannot prove loss |
+
+The owner-reported IT WORKS 37/37 is preserved historical live evidence, not a new-run claim. No live QA writes, setup, profile reset, deploy, push, merge or tag changes are authorized/performed here. Runtime checks use disposable local fixtures only.

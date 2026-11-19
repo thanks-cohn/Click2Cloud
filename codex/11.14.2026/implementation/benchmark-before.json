@@ -1,0 +1,722 @@
+{
+  "evidenceClass": "CONTROLLED_NODE_FIXTURE_NOT_CHROME_NOT_R2",
+  "conditions": "20ms per request; modeled 15ms cold boot; modeled source/write 5ms small,25ms large; timings overlap; no real bytes transferred",
+  "clock": "performance.now monotonic, one Node process",
+  "authorizationMetric": "uncachedStatusAuthorizationMs counts only fallback status authorizer; reused authorization is included in transport intent/authorizationRecheckMs, not a fabricated zero cost",
+  "unavailable": [
+    "real source DNS/TLS/bytes",
+    "R2 put/head",
+    "Chrome onClicked/MV3 boot",
+    "real provider latency"
+  ],
+  "rows": [
+    {
+      "mode": "simple",
+      "condition": "cold",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 165.79020800000012,
+        "p95": 241.2650839999999,
+        "max": 241.2650839999999
+      },
+      "requestMs": {
+        "p50": 146.42580099999964,
+        "p95": 172.32476299999985,
+        "max": 172.32476299999985
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.76198199999999,
+        "p95": 174.69081100000017,
+        "max": 174.69081100000017
+      },
+      "preRemoteDispatchMs": {
+        "p50": 98.42764499999998,
+        "p95": 174.19828799999982,
+        "max": 174.19828799999982
+      },
+      "postVerificationMs": {
+        "p50": 20.998509000000013,
+        "p95": 21.984750000000076,
+        "max": 21.984750000000076
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 28,
+          "max": 28
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 42,
+          "p95": 43,
+          "max": 43
+        },
+        "workerRequestMs": {
+          "p50": 26,
+          "p95": 26,
+          "max": 26
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 20,
+          "max": 20
+        }
+      }
+    },
+    {
+      "mode": "simple",
+      "condition": "cold",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 184.9575930000001,
+        "p95": 211.14663399999972,
+        "max": 211.14663399999972
+      },
+      "requestMs": {
+        "p50": 166.33413699999937,
+        "p95": 187.427318,
+        "max": 187.427318
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.41682000000083,
+        "p95": 104.81600900000058,
+        "max": 104.81600900000058
+      },
+      "preRemoteDispatchMs": {
+        "p50": 98.24443999999994,
+        "p95": 99.96256100000028,
+        "max": 99.96256100000028
+      },
+      "postVerificationMs": {
+        "p50": 20.82773300000008,
+        "p95": 21.748454000000038,
+        "max": 21.748454000000038
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 21,
+          "max": 21
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 42,
+          "max": 42
+        },
+        "workerRequestMs": {
+          "p50": 46,
+          "p95": 71,
+          "max": 71
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "simple",
+      "condition": "warm",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 151.67864399999962,
+        "p95": 191.7814240000007,
+        "max": 191.7814240000007
+      },
+      "requestMs": {
+        "p50": 147.1997910000009,
+        "p95": 158.76830700000028,
+        "max": 158.76830700000028
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 104.63440599999922,
+        "p95": 138.7835439999999,
+        "max": 138.7835439999999
+      },
+      "preRemoteDispatchMs": {
+        "p50": 84.35243300000002,
+        "p95": 110.99411800000053,
+        "max": 110.99411800000053
+      },
+      "postVerificationMs": {
+        "p50": 20.932224000000133,
+        "p95": 58.484105000000454,
+        "max": 58.484105000000454
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 23,
+          "max": 23
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 4,
+          "max": 4
+        },
+        "authorizationRecheckMs": {
+          "p50": 42,
+          "p95": 77,
+          "max": 77
+        },
+        "workerRequestMs": {
+          "p50": 26,
+          "p95": 29,
+          "max": 29
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 23,
+          "max": 23
+        }
+      }
+    },
+    {
+      "mode": "simple",
+      "condition": "warm",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 169.25963500000034,
+        "p95": 220.41875999999957,
+        "max": 220.41875999999957
+      },
+      "requestMs": {
+        "p50": 166.21399700000075,
+        "p95": 191.77184899999884,
+        "max": 191.77184899999884
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 102.94038999999884,
+        "p95": 134.88228900000013,
+        "max": 134.88228900000013
+      },
+      "preRemoteDispatchMs": {
+        "p50": 82.78053200000068,
+        "p95": 119.92324699999972,
+        "max": 119.92324699999972
+      },
+      "postVerificationMs": {
+        "p50": 20.766673000000083,
+        "p95": 22.32595499999843,
+        "max": 22.32595499999843
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 36,
+          "max": 36
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 5,
+          "max": 5
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 56,
+          "max": 56
+        },
+        "workerRequestMs": {
+          "p50": 46,
+          "p95": 58,
+          "max": 58
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "nested",
+      "condition": "cold",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 165.6156979999996,
+        "p95": 181.85816999999952,
+        "max": 181.85816999999952
+      },
+      "requestMs": {
+        "p50": 146.24440800000048,
+        "p95": 154.6801370000012,
+        "max": 154.6801370000012
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.94991499999924,
+        "p95": 116.11169200000222,
+        "max": 116.11169200000222
+      },
+      "preRemoteDispatchMs": {
+        "p50": 98.84191900000042,
+        "p95": 103.25956299999962,
+        "max": 103.25956299999962
+      },
+      "postVerificationMs": {
+        "p50": 20.914027000000715,
+        "p95": 30.16150099999868,
+        "max": 30.16150099999868
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 22,
+          "max": 22
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 42,
+          "p95": 50,
+          "max": 50
+        },
+        "workerRequestMs": {
+          "p50": 25,
+          "p95": 26,
+          "max": 26
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 23,
+          "max": 23
+        }
+      }
+    },
+    {
+      "mode": "nested",
+      "condition": "cold",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 184.29731700000048,
+        "p95": 240.57840599999872,
+        "max": 240.57840599999872
+      },
+      "requestMs": {
+        "p50": 166.17013600000064,
+        "p95": 183.0391469999995,
+        "max": 183.0391469999995
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.48975400000018,
+        "p95": 141.56236399999761,
+        "max": 141.56236399999761
+      },
+      "preRemoteDispatchMs": {
+        "p50": 98.42462300000079,
+        "p95": 152.96172899999874,
+        "max": 152.96172899999874
+      },
+      "postVerificationMs": {
+        "p50": 20.785718999999517,
+        "p95": 23.393882000000303,
+        "max": 23.393882000000303
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 34,
+          "max": 34
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 4,
+          "max": 4
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 56,
+          "max": 56
+        },
+        "workerRequestMs": {
+          "p50": 46,
+          "p95": 47,
+          "max": 47
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "nested",
+      "condition": "warm",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 149.06085200000052,
+        "p95": 152.35699300000124,
+        "max": 152.35699300000124
+      },
+      "requestMs": {
+        "p50": 146.18922900000325,
+        "p95": 146.67640899999788,
+        "max": 146.67640899999788
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 102.68583100000069,
+        "p95": 106.00245200000063,
+        "max": 106.00245200000063
+      },
+      "preRemoteDispatchMs": {
+        "p50": 82.61618199999975,
+        "p95": 83.49526800000058,
+        "max": 83.49526800000058
+      },
+      "postVerificationMs": {
+        "p50": 20.740670000001046,
+        "p95": 24.040187000000515,
+        "max": 24.040187000000515
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 21,
+          "max": 21
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 45,
+          "max": 45
+        },
+        "workerRequestMs": {
+          "p50": 25,
+          "p95": 26,
+          "max": 26
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "nested",
+      "condition": "warm",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 170.1938850000006,
+        "p95": 209.0547639999986,
+        "max": 209.0547639999986
+      },
+      "requestMs": {
+        "p50": 166.53443399999924,
+        "p95": 173.66779300000235,
+        "max": 173.66779300000235
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.91103300000213,
+        "p95": 140.22764000000097,
+        "max": 140.22764000000097
+      },
+      "preRemoteDispatchMs": {
+        "p50": 83.31051800000023,
+        "p95": 121.73940599999878,
+        "max": 121.73940599999878
+      },
+      "postVerificationMs": {
+        "p50": 20.91489299999921,
+        "p95": 30.334458999999697,
+        "max": 30.334458999999697
+      },
+      "capabilities": 5,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 23,
+          "max": 23
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 49,
+          "max": 49
+        },
+        "workerRequestMs": {
+          "p50": 46,
+          "p95": 46,
+          "max": 46
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 22,
+          "max": 22
+        }
+      }
+    },
+    {
+      "mode": "depth",
+      "condition": "cold",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 184.4964050000017,
+        "p95": 198.44891300000018,
+        "max": 198.44891300000018
+      },
+      "requestMs": {
+        "p50": 166.27792899999986,
+        "p95": 170.55997499999648,
+        "max": 170.55997499999648
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 102.37491099999534,
+        "p95": 110.19725999999719,
+        "max": 110.19725999999719
+      },
+      "preRemoteDispatchMs": {
+        "p50": 118.26277100000152,
+        "p95": 132.07395700000052,
+        "max": 132.07395700000052
+      },
+      "postVerificationMs": {
+        "p50": 20.715273000001616,
+        "p95": 30.013796999999613,
+        "max": 30.013796999999613
+      },
+      "capabilities": 6,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 49,
+          "max": 49
+        },
+        "workerRequestMs": {
+          "p50": 25,
+          "p95": 26,
+          "max": 26
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "depth",
+      "condition": "cold",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 204.58411799999885,
+        "p95": 250.52958600000056,
+        "max": 250.52958600000056
+      },
+      "requestMs": {
+        "p50": 186.29133699999875,
+        "p95": 200.9845529999984,
+        "max": 200.9845529999984
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 102.55114299999696,
+        "p95": 137.78392399999575,
+        "max": 137.78392399999575
+      },
+      "preRemoteDispatchMs": {
+        "p50": 118.2362979999998,
+        "p95": 163.71695100000215,
+        "max": 163.71695100000215
+      },
+      "postVerificationMs": {
+        "p50": 20.739097999998194,
+        "p95": 22.346181000000797,
+        "max": 22.346181000000797
+      },
+      "capabilities": 6,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 35,
+          "max": 35
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 4,
+          "max": 4
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 55,
+          "max": 55
+        },
+        "workerRequestMs": {
+          "p50": 45,
+          "p95": 52,
+          "max": 52
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "depth",
+      "condition": "warm",
+      "bytes": 1024,
+      "n": 12,
+      "totalMs": {
+        "p50": 170.35020500000246,
+        "p95": 239.42632299999968,
+        "max": 239.42632299999968
+      },
+      "requestMs": {
+        "p50": 166.42532800000117,
+        "p95": 182.62237100000493,
+        "max": 182.62237100000493
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 103.09717800000362,
+        "p95": 164.68604799999957,
+        "max": 164.68604799999957
+      },
+      "preRemoteDispatchMs": {
+        "p50": 103.65719000000172,
+        "p95": 171.4589049999995,
+        "max": 171.4589049999995
+      },
+      "postVerificationMs": {
+        "p50": 20.990528000002087,
+        "p95": 22.009368000002723,
+        "max": 22.009368000002723
+      },
+      "capabilities": 6,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 40,
+          "max": 40
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 3,
+          "max": 3
+        },
+        "authorizationRecheckMs": {
+          "p50": 41,
+          "p95": 42,
+          "max": 42
+        },
+        "workerRequestMs": {
+          "p50": 25,
+          "p95": 26,
+          "max": 26
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 21,
+          "max": 21
+        }
+      }
+    },
+    {
+      "mode": "depth",
+      "condition": "warm",
+      "bytes": 1048576,
+      "n": 12,
+      "totalMs": {
+        "p50": 190.14921400000094,
+        "p95": 242.03434299999935,
+        "max": 242.03434299999935
+      },
+      "requestMs": {
+        "p50": 186.37047700000767,
+        "p95": 226.37774600000193,
+        "max": 226.37774600000193
+      },
+      "uncachedStatusAuthorizationMs": {
+        "p50": 102.84110900000087,
+        "p95": 153.18544200000542,
+        "max": 153.18544200000542
+      },
+      "preRemoteDispatchMs": {
+        "p50": 103.6266829999986,
+        "p95": 154.6794230000014,
+        "max": 154.6794230000014
+      },
+      "postVerificationMs": {
+        "p50": 20.809754999998404,
+        "p95": 21.671517000002495,
+        "max": 21.671517000002495
+      },
+      "capabilities": 6,
+      "stages": {
+        "intentAuthorizationMs": {
+          "p50": 21,
+          "p95": 21,
+          "max": 21
+        },
+        "capabilityMs": {
+          "p50": 0,
+          "p95": 1,
+          "max": 1
+        },
+        "authorizationRecheckMs": {
+          "p50": 42,
+          "p95": 42,
+          "max": 42
+        },
+        "workerRequestMs": {
+          "p50": 45,
+          "p95": 49,
+          "max": 49
+        },
+        "verificationMs": {
+          "p50": 20,
+          "p95": 20,
+          "max": 20
+        }
+      }
+    }
+  ]
+}

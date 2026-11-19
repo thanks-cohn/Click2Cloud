@@ -1,0 +1,279 @@
+{
+  "kind": "click2cloud.menu-manifest",
+  "schemaVersion": 1,
+  "purpose": "personal-restore",
+  "exportedProductVersion": "0.3.19",
+  "bindings": [
+    {
+      "slot": "bucket-1",
+      "provider": "cloudflare",
+      "accountHint": "qa-account",
+      "connectionHint": "cloudflare:qa-account",
+      "bucketName": "click2cloud-qa"
+    },
+    {
+      "slot": "bucket-2",
+      "provider": "cloudflare",
+      "accountHint": "qa-account",
+      "connectionHint": "cloudflare:qa-account",
+      "bucketName": "click2cloud-qa-2"
+    }
+  ],
+  "simple": [
+    {
+      "label": "Simple 1 A",
+      "hidden": false,
+      "quick": false,
+      "order": 0,
+      "id": "c2c:portable-route:63c332567adae4aa",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Simple/A/"
+      }
+    },
+    {
+      "label": "Simple 1 B",
+      "hidden": false,
+      "quick": true,
+      "order": 1,
+      "id": "c2c:portable-route:63c331567adae2f7",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Simple/B/"
+      }
+    },
+    {
+      "label": "Simple 1 C",
+      "hidden": false,
+      "quick": false,
+      "order": 2,
+      "id": "c2c:portable-route:63c330567adae144",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Simple/C/"
+      }
+    },
+    {
+      "label": "Simple 2 A",
+      "hidden": false,
+      "quick": false,
+      "order": 3,
+      "id": "c2c:portable-route:6c6663567fbdf9e9",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Simple/A/"
+      }
+    },
+    {
+      "label": "Simple 2 B",
+      "hidden": false,
+      "quick": true,
+      "order": 4,
+      "id": "c2c:portable-route:6c6660567fbdf4d0",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Simple/B/"
+      }
+    },
+    {
+      "label": "Simple 2 C",
+      "hidden": false,
+      "quick": false,
+      "order": 5,
+      "id": "c2c:portable-route:6c6661567fbdf683",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Simple/C/"
+      }
+    }
+  ],
+  "narrow": [
+    {
+      "label": "Narrow 1 A",
+      "hidden": false,
+      "quick": false,
+      "order": 0,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/A/": {
+          "label": "A"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:da9f64880e8e11cc",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Narrow/A/"
+      }
+    },
+    {
+      "label": "Narrow 1 B",
+      "hidden": false,
+      "quick": true,
+      "order": 1,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/B/": {
+          "label": "B"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:da9f67880e8e16e5",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Narrow/B/"
+      }
+    },
+    {
+      "label": "Narrow 1 C",
+      "hidden": false,
+      "quick": false,
+      "order": 2,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/C/": {
+          "label": "C"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:da9f66880e8e1532",
+      "target": {
+        "slot": "bucket-1",
+        "prefix": "C2C-QA/Narrow/C/"
+      }
+    },
+    {
+      "label": "Narrow 2 A",
+      "hidden": false,
+      "quick": false,
+      "order": 3,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA2",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/A/": {
+          "label": "A"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:e24de58812a14383",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Narrow/A/"
+      }
+    },
+    {
+      "label": "Narrow 2 B",
+      "hidden": false,
+      "quick": true,
+      "order": 4,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA2",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/B/": {
+          "label": "B"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:e24de68812a14536",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Narrow/B/"
+      }
+    },
+    {
+      "label": "Narrow 2 C",
+      "hidden": false,
+      "quick": false,
+      "order": 5,
+      "levels": {
+        "C2C-QA/": {
+          "label": "C2C-QA2",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/": {
+          "label": "Narrow",
+          "hidden": false
+        },
+        "C2C-QA/Narrow/C/": {
+          "label": "C"
+        }
+      },
+      "visibilityMode": "custom",
+      "id": "c2c:portable-route:e24de78812a146e9",
+      "target": {
+        "slot": "bucket-2",
+        "prefix": "C2C-QA/Narrow/C/"
+      }
+    }
+  ],
+  "depth": [
+    {
+      "target": {
+        "slot": "bucket-1",
+        "prefix": ""
+      },
+      "maxDepth": 7
+    },
+    {
+      "target": {
+        "slot": "bucket-2",
+        "prefix": ""
+      },
+      "maxDepth": 7
+    }
+  ],
+  "preferences": {
+    "show": {
+      "simple": true,
+      "nested": true,
+      "depth": true,
+      "flat": false
+    },
+    "providerVisibility": {
+      "google-drive": true,
+      "dropbox": true,
+      "onedrive": true,
+      "cloudflare": true
+    },
+    "placement": {
+      "cloudflare": "direct"
+    },
+    "defaultTarget": {
+      "slot": "bucket-1",
+      "prefix": "C2C-QA/Simple/A/"
+    }
+  }
+}

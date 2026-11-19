@@ -1,0 +1,26 @@
+✔ personal manifest round trip restores all 37 fixture destinations across two physical buckets and native parent tree (24.199795ms)
+✔ hidden, Quick, Default, Flat, provider flags, level labels and same-key independent Narrow presentations survive (8.058307ms)
+✔ identical-looking independent presentations retain multiplicity; legal Unicode prefixes preserve exact bytes (1.458937ms)
+✔ closed bounded schema rejects secrets, malicious keys, traversal, oversized, stale schema and duplicate IDs (14.5381ms)
+✔ API stages a restart-safe draft, previews without writes, atomically applies and retries without duplication or second confirmation (20.014217ms)
+✔ partial Yes activates only ready matches and retains exact unbound intentions; cancel/discard leaves current unchanged (9.709797ms)
+✔ stale preview/revision, missing CURRENT, account loss and wrong token fail closed with original menu intact (15.778025ms)
+✔ Add preserves existing Default/preferences and distinct Narrow presentations; replacement selects only matching local IDs (2.270742ms)
+✔ provider binding distinguishes empty virtual prefix, missing bucket, permission denial and wrong connection; no writes (24.106062ms)
+✔ real provider-owner create path rechecks bucket, makes one exact POST, prepares scoped Worker and independently verifies readiness; lost POST reply never duplicates (7.242938ms)
+✔ single informed creation approval invokes no redundant confirmation, and never activates incomplete creation (4.362379ms)
+✔ manifest methods stay typed, local and distinct from diagnostic protocol (0.266462ms)
+✔ Undo requires the committed checkpoint receipt and current revision; later edits and inert failed-Apply checkpoint cannot overwrite live state (14.946364ms)
+✔ draft storage failure, missing configuration and changed native ACK remain distinct from successful configuration activation (8.755844ms)
+✔ host account grant checks include export, uninspected draft, old mapping and all replaced CURRENT accounts (3.582772ms)
+✔ bounded Depth import discovery returns explicit incomplete coverage without forging absence (0.676546ms)
+✔ lost local commit reply resumes from durable receipt without duplicate routes; plan token reuse with another request is rejected (3.480562ms)
+✔ restart/resume reuses informed consent for the identical creation plan without requesting another confirmation (5.9321ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 176.047416

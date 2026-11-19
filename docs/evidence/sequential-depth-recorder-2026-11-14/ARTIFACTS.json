@@ -1,0 +1,27 @@
+{
+  "transforms": [
+    "Absolute node executable paths replaced with node version in node-24.21.0 summary.",
+    "Safety module test title synthetic URLs replaced by numbered synthetic URL case labels; outcomes/counts unchanged.",
+    "Complete synthetic fixture traces are losslessly gzip-compressed with mtime=0 to keep the review diff small. Each compressed trace contains the exact original bytes."
+  ],
+  "uncompressedTraceSHA256": {
+    "baseline-original-off-trace.json": "19b3d1c34798465635f39ee0d74a7cc900e59dd89cec4a4914ff64972e55ad25",
+    "node-24.22.1/full-2-trace.json": "39d07337ac9b1e3e5b1be19d4a5eb522f4805730c218a44f41d25c0b40a5c097",
+    "node-24.22.1/full-1-trace.json": "33989e2fe2a9ffa08070b05e4e28dfc38c802e8932fd41ae26ccbe4dcc3e785e",
+    "node-24.22.1/isolated-6-trace.json": "4339768855b08828a46c62c3210d4fbf49ae57b74c843a899475ecf3c51e53e3",
+    "node-24.22.1/isolated-5-trace.json": "fcebe74c894194117282ab697548b8341e2121fdf404c4550f600f47933a2cef",
+    "node-24.22.1/isolated-4-trace.json": "00e3ab84c1414c54e6a2c548d60b2e7ea881fed9eacd38e7851e5817c4d0b1ae",
+    "node-24.22.1/isolated-3-trace.json": "1b84af292fa381a97bc042d32a5b45e8862df6b741c055c3cdd738b99dc00616",
+    "node-24.22.1/isolated-1-trace.json": "5ddc8b9edcdbbeddb48e7ab146c58ce9504d933668bcaf448aeb3359ed6fbea5",
+    "node-24.22.1/isolated-2-trace.json": "bd45e178287682f44ea65424e7852698dfe27fd092a873a32889aaef354b98bd",
+    "node-24.21.0/full-2-trace.json": "26122b72249c3b375ea5c24ef13b6139874c68e9fbdeabc32b1b6921d394acfa",
+    "node-24.21.0/full-1-trace.json": "e09aca0e2597f554d53ded8394a73ef517ee0da686d221311bb88b69fa655dd3",
+    "node-24.21.0/isolated-6-trace.json": "94c11ba7b97c151a5e0ff409a235a1ed4e1ac04f49b50da63b22e3d893409e4e",
+    "node-24.21.0/isolated-5-trace.json": "89b4275744eb510040bd52d041a0fb11869ec83772bb9891a6c6f2941051691a",
+    "node-24.21.0/isolated-4-trace.json": "c218886e62204ee103d24321ca7d84c8161b364cccb17c6ca5d4bf72cbe39a98",
+    "node-24.21.0/isolated-3-trace.json": "608e6749b63a7288750a32e6c551e88bb79a01fa37f837b33549db43a916c743",
+    "node-24.21.0/isolated-1-trace.json": "a5a0ceff8ac68d7bd59daf06ae4b41ac14efb81b888ef9f1964998589e6be71f",
+    "node-24.21.0/isolated-2-trace.json": "30f2868d5aef5243c345a4e5a4ab0520ef9e9610c1968a7cd9455fe1f6c65a81"
+  },
+  "evidenceClass": "NODE_FIXTURE, not installed Chrome or live Cloudflare R2"
+}

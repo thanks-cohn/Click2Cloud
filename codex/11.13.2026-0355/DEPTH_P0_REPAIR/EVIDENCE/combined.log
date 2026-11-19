@@ -1,0 +1,48 @@
+✔ Depth emitted click uses fresh ready status to escape cached-negative attention and saves exact root/intermediate/leaf (50.156182ms)
+✔ baseline fallback reproduces FRESH_CLICK_REQUIRED with readiness-cache denial and zero uploads (15.627442ms)
+✔ Depth blocked status is recorded and visible: WORKER_SETUP_REQUIRED (14.968105ms)
+✔ Depth blocked status is recorded and visible: PREPARED (12.809766ms)
+✔ Depth blocked status is recorded and visible: TRANSPORT_UNAVAILABLE (10.956006ms)
+✔ Depth blocked status is recorded and visible: WORKER_DESTINATION_SCOPE_REQUIRED (14.952094ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Cloudflare (7.166ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Images (7.814897ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Artwork (11.674725ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: remove (1.598175ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: timeout (84.255898ms)
+✔ Worker plan discriminators are mode-local and cannot borrow accounts/buckets (0.288433ms)
+✔ Depth keeps twenty siblings and depth beyond ten; no row cap or changed menu plan (67.373067ms)
+✔ non-Depth rows do not enter Depth preflight, history or feedback (7.796635ms)
+✔ Depth records authorization loss, hostile exceptions, uncertain/partial dispatch and persistence failures without retry (1.269919ms)
+✔ cold worker classifies persisted Depth row without trusting its historical ACK (10.245615ms)
+✔ five siblings preserve independent failed-child ACK evidence without claiming a full menu (13.065098ms)
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (202.969905ms)
+✔ non-Depth composition remains byte-identical to the request baseline (89.217771ms)
+✔ Depth root qualification does not rename a child folder with the same name as its bucket (1.090128ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (50.458135ms)
+✔ Depth fixture: one root (12.819708ms)
+✔ Depth fixture: two roots (3.037539ms)
+✔ Depth fixture: two roots at 10 (2.211718ms)
+✔ Depth fixture: two chains (3.166659ms)
+✔ Depth fixture: three chains (5.156653ms)
+✔ Depth fixture: four chains (6.2135ms)
+✔ Depth fixture: ten siblings (1.727354ms)
+✔ Depth fixture: mixed branching (0.954044ms)
+✔ Depth fixture: single-child chain (0.862428ms)
+✔ Depth fixture: files-only folder (0.851596ms)
+✔ Depth fixture: deeper folder at limit (0.973102ms)
+✔ Depth fixture: identical names (1.006339ms)
+✔ Depth bounded discovery paginates, distinguishes file-only folders, and refuses partial listings (3.003594ms)
+✔ a fresh Depth tree replaces stale Explorer folders, including a successfully empty bucket (1.563654ms)
+✔ settings commit distinguishes storage, discovery and Chrome errors and converges through same-key retries (42.911004ms)
+✔ Logic2Real U earns zero credit but is not a measured failure (1.915545ms)
+✔ Logic2Real NA renormalizes, partial mismatch and missing evidence remain separate (1.055469ms)
+✔ Logic2Real all unknown has no known score; critical weights are retained (1.434934ms)
+✔ canonical registry has unique versioned rules and resolvable source/test traces; missing native proof stays open (95.014281ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 456.498587

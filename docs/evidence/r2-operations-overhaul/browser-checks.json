@@ -1,0 +1,98 @@
+[
+  {
+    "gate": "actual-settings-switch-changes-zero-engine-calls-configuration-or-loader-preference",
+    "state": "PASS"
+  },
+  {
+    "gate": "appearance-restores-after-reload-separate-from-CURRENT",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-dark-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-dark-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-dark-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-light-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-light-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "standard-light-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-dark-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-dark-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-dark-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-light-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-light-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "high-polish-light-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-dark-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-dark-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-dark-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-light-1100-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-light-600-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-light-360-screens-layout-menu-focus",
+    "state": "PASS"
+  },
+  {
+    "gate": "30-mid-read-switches-preserve-exact-History-DOM-data-and-pending-file-read-with-zero-engine-calls",
+    "state": "PASS"
+  },
+  {
+    "gate": "minimal-root-and-nested-mkdir-error-and-explorer-only-create-bucket",
+    "state": "PASS"
+  },
+  {
+    "gate": "appearance-switches-during-active-save-preserve-worker-call-and-receipt",
+    "state": "PASS"
+  },
+  {
+    "gate": "reduced-motion-disables-overlay-transitions",
+    "state": "PASS"
+  }
+]

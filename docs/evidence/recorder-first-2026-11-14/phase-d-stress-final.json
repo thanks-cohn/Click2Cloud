@@ -1,0 +1,44 @@
+{
+  "evidenceClass": "HTTP_BROWSER_UI_REAL_IDB_DOWNLOAD_FAKE_CHROME_PORT_NOT_INSTALLED_EXTENSION",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "baseline": false,
+  "results": [
+    {
+      "count": 100000,
+      "privacy": "SECURE",
+      "state": "PASS",
+      "oneExportAction": true,
+      "oneDownload": true,
+      "path": "work/recorder-first/final-stress/SECURE-100000.zip",
+      "status": "COMPLETE \u00b7 2000 Basic attempts \u00b7 100000 rich events \u00b7 one ZIP \u00b7 SHA-256 ac533f1dbcc49ce2148d92a8fa8e8830e2cac116e8ba9b6e123680332f4b037c. Download requested; physical disk completion is not observable here.",
+      "basic": 2000,
+      "rich": 100000,
+      "bytes": 320058710,
+      "hash": "ac533f1dbcc49ce2148d92a8fa8e8830e2cac116e8ba9b6e123680332f4b037c",
+      "integrity": "PASS",
+      "pageCalls": 782,
+      "heapBefore": 93177732,
+      "heapAfter": 33795953,
+      "manualNext": false
+    },
+    {
+      "count": 100000,
+      "privacy": "RAW",
+      "state": "PASS",
+      "oneExportAction": true,
+      "oneDownload": true,
+      "path": "work/recorder-first/final-stress/RAW-100000.zip",
+      "status": "COMPLETE \u00b7 2000 Basic attempts \u00b7 100000 rich events \u00b7 one ZIP \u00b7 SHA-256 a9a40f1a467529932d1cfd80d1a49c636bfc6680375ce877d64786af55e7499f. Download requested; physical disk completion is not observable here.",
+      "basic": 2000,
+      "rich": 100000,
+      "bytes": 117968695,
+      "hash": "a9a40f1a467529932d1cfd80d1a49c636bfc6680375ce877d64786af55e7499f",
+      "integrity": "PASS",
+      "pageCalls": 782,
+      "heapBefore": 91730160,
+      "heapAfter": 47674192,
+      "manualNext": false
+    }
+  ]
+}

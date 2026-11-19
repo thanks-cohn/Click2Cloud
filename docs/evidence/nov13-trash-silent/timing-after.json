@@ -1,0 +1,948 @@
+{
+  "root": "/tmp/c2c-silent-after",
+  "time": "2026-11-13T22:09:53.744Z",
+  "evidenceClass": "production-app-headless-Chromium-real-IDB-fixture-IPC-not-native-not-R2",
+  "rpc": [
+    {
+      "method": "describeCapabilities",
+      "durationMs": 550.6999999955297
+    },
+    {
+      "method": "loginStatus",
+      "durationMs": 550.6999999955297
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 558.1000000014901
+    },
+    {
+      "method": "inspectShelfAttention",
+      "durationMs": 0.10000000149011612
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 574.5999999940395
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 22.600000001490116
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 16.200000002980232
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 15.699999995529652
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 3.2999999970197678
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 21.900000005960464
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.29999999701976776
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 2.2000000029802322
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7.600000001490116
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 6.399999998509884
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 24.30000000447035
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.20000000298023224
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 4.200000002980232
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 12.300000004470348
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 4.899999998509884
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 3.399999998509884
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.30000000447034836
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 6.800000004470348
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 8.800000004470348
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 3.899999998509884
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 7.800000004470348
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.30000000447034836
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 0.8000000044703484
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 4.4000000059604645
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 18.5
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 5.399999998509884
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 4.5
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 8.400000005960464
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 39.600000001490116
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 13.200000002980232
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 21.80000000447035
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.19999999552965164
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 2.399999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 11.5
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 2.899999998509884
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 1.2999999970197678
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 1.7000000029802322
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 4.399999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 3.1999999955296516
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 1.6999999955296516
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 12.800000004470348
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.20000000298023224
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 7.5
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 6.399999998509884
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 5.700000002980232
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 1.8999999985098839
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.30000000447034836
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 2.2000000029802322
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 8.699999995529652
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 1.6000000014901161
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 3.0999999940395355
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.20000000298023224
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 1.8000000044703484
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 3
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 1.2999999970197678
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 4.799999997019768
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.7000000029802322
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 2.7999999970197678
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7.700000002980232
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 9.600000001490116
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 7.700000002980232
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.20000000298023224
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 5.700000002980232
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 4.200000002980232
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 1
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 4
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 1.6000000014901161
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 3
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 5.299999997019768
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 5.199999995529652
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 3.5
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.3999999985098839
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 2.899999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 5
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 1.5
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 6.300000004470348
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.19999999552965164
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 9.699999995529652
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7.600000001490116
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 4.5
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 4.4000000059604645
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.30000000447034836
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 0.7000000029802322
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 19.600000001490116
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 5.399999998509884
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 3.2000000029802322
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.19999999552965164
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 7.299999997019768
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 19.200000002980232
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 3.7999999970197678
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 6.0999999940395355
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.4000000059604645
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 1
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7.800000004470348
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 15.100000001490116
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 2.1999999955296516
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.5
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 7.299999997019768
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 9.299999997019768
+    },
+    {
+      "method": "getConfiguration",
+      "durationMs": 14.299999997019768
+    },
+    {
+      "method": "listAuthorizedBuckets",
+      "durationMs": 4.100000001490116
+    },
+    {
+      "method": "inspectBackupRoots",
+      "durationMs": 0.19999999552965164
+    },
+    {
+      "method": "getGalleryLoadingVisual",
+      "durationMs": 0.7999999970197678
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 3.399999998509884
+    },
+    {
+      "method": "enterExplorer",
+      "durationMs": 16.399999998509884
+    },
+    {
+      "method": "listFolders",
+      "durationMs": 5.4000000059604645
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 14.299999997019768
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 3.899999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 5.100000001490116
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 12.899999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 9.700000002980232
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 5.200000002980232
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 13.299999997019768
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 10.399999998509884
+    },
+    {
+      "method": "inspectRemoteHistory",
+      "durationMs": 7.100000001490116
+    },
+    {
+      "method": "inspectRemoteReceipt",
+      "durationMs": 7.100000001490116
+    },
+    {
+      "method": "listFolders",
+      "durationMs": 7.100000001490116
+    }
+  ],
+  "samples": {
+    "manager-open": {
+      "n": 20,
+      "p50": 30.5,
+      "p95": 50.899999998509884,
+      "min": 24.19999999552965,
+      "max": 51.30000000447035,
+      "values": [
+        47.600000001490116,
+        34.399999998509884,
+        39.5,
+        26.69999999552965,
+        27.80000000447035,
+        51.30000000447035,
+        25.099999994039536,
+        28.69999999552965,
+        32.20000000298023,
+        36.5,
+        30.299999997019768,
+        30.5,
+        28.69999999552965,
+        30.5,
+        24.19999999552965,
+        28.599999994039536,
+        35.899999998509884,
+        26.799999997019768,
+        50.899999998509884,
+        44.30000000447035
+      ]
+    },
+    "manager-narrow": {
+      "n": 20,
+      "p50": 14.300000004470348,
+      "p95": 17.299999997019768,
+      "min": 4.399999998509884,
+      "max": 39.099999994039536,
+      "values": [
+        4.399999998509884,
+        16.700000002980232,
+        5.899999998509884,
+        14.399999998509884,
+        16.600000001490116,
+        39.099999994039536,
+        12.600000001490116,
+        15.700000002980232,
+        13.700000002980232,
+        4.899999998509884,
+        13.600000001490116,
+        15.100000001490116,
+        17.100000001490116,
+        14.300000004470348,
+        17.299999997019768,
+        15.100000001490116,
+        14.799999997019768,
+        9.200000002980232,
+        6.799999997019768,
+        12.5
+      ]
+    },
+    "manager-depth": {
+      "n": 20,
+      "p50": 12.299999997019768,
+      "p95": 16.5,
+      "min": 7.199999995529652,
+      "max": 24.200000002980232,
+      "values": [
+        24.200000002980232,
+        15.5,
+        11.600000001490116,
+        12.299999997019768,
+        10.299999997019768,
+        12.099999994039536,
+        11.399999998509884,
+        11.900000005960464,
+        13.399999998509884,
+        12.899999998509884,
+        14,
+        16.5,
+        11.700000002980232,
+        7.199999995529652,
+        8.699999995529652,
+        11.399999998509884,
+        15.299999997019768,
+        12.400000005960464,
+        15.100000001490116,
+        12.299999997019768
+      ]
+    },
+    "manager-simple": {
+      "n": 20,
+      "p50": 11,
+      "p95": 17.399999998509884,
+      "min": 6.200000002980232,
+      "max": 18.100000001490116,
+      "values": [
+        6.200000002980232,
+        10.200000002980232,
+        8.800000004470348,
+        15.800000004470348,
+        11,
+        16.600000001490116,
+        12.299999997019768,
+        9.100000001490116,
+        11.700000002980232,
+        13.099999994039536,
+        13.5,
+        9.899999998509884,
+        11,
+        12.599999994039536,
+        10.600000001490116,
+        7,
+        6.399999998509884,
+        15.799999997019768,
+        18.100000001490116,
+        17.399999998509884
+      ]
+    },
+    "settings-tab": {
+      "n": 20,
+      "p50": 31.899999998509884,
+      "p95": 38,
+      "min": 19.69999999552965,
+      "max": 39.19999999552965,
+      "values": [
+        34.29999999701977,
+        34,
+        31.5,
+        31.899999998509884,
+        35.600000001490116,
+        35,
+        29.100000001490116,
+        35,
+        29.69999999552965,
+        27.399999998509884,
+        38,
+        34.5,
+        22.799999997019768,
+        22.100000001490116,
+        39.19999999552965,
+        32.30000000447035,
+        30.600000001490116,
+        19.69999999552965,
+        37.899999998509884,
+        25
+      ]
+    },
+    "remotes-tab": {
+      "n": 20,
+      "p50": 11.700000002980232,
+      "p95": 17.5,
+      "min": 4.600000001490116,
+      "max": 31.799999997019768,
+      "values": [
+        10.199999995529652,
+        12.099999994039536,
+        17.5,
+        4.600000001490116,
+        31.799999997019768,
+        8.700000002980232,
+        11.400000005960464,
+        14.199999995529652,
+        12.900000005960464,
+        12.5,
+        7.899999998509884,
+        15.200000002980232,
+        11.700000002980232,
+        10.899999998509884,
+        10.300000004470348,
+        8.100000001490116,
+        10.5,
+        14.800000004470348,
+        12.699999995529652,
+        14.5
+      ]
+    },
+    "explorer-first": {
+      "n": 1,
+      "p50": 16.80000000447035,
+      "p95": 16.80000000447035,
+      "min": 16.80000000447035,
+      "max": 16.80000000447035,
+      "values": [
+        16.80000000447035
+      ]
+    },
+    "remotes-from-explorer": {
+      "n": 10,
+      "p50": 8.300000004470348,
+      "p95": 16.69999999552965,
+      "min": 2,
+      "max": 16.69999999552965,
+      "values": [
+        2,
+        10.399999998509884,
+        14.5,
+        16.69999999552965,
+        8.300000004470348,
+        8.300000004470348,
+        8.300000004470348,
+        8,
+        8.599999994039536,
+        10.200000002980232
+      ]
+    },
+    "explorer-warm": {
+      "n": 10,
+      "p50": 11,
+      "p95": 16.299999997019768,
+      "min": 6.300000004470348,
+      "max": 16.299999997019768,
+      "values": [
+        6.300000004470348,
+        9.799999997019768,
+        13.299999997019768,
+        11.199999995529652,
+        11,
+        11.600000001490116,
+        16.299999997019768,
+        10.099999994039536,
+        9.200000002980232,
+        13.100000001490116
+      ]
+    }
+  },
+  "status": [
+    {
+      "at": 1685.7000000029802,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 1986.5,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 2205.8000000044703,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 2419,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 2690.2000000029802,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3034.3000000044703,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3226.5,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3402.9000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3587.10000000149,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3772,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 3969.60000000149,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 4151.60000000149,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 4362.80000000447,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 4561.9000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 4734.9000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 4918.4000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 5126.9000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 5312.9000000059605,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 5535.30000000447,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 5741,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 5839.60000000149,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 6151.10000000149,
+      "text": "Saving remotely · accepted",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 6191.5,
+      "text": "Saving remotely · transfer.upload",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 6252.10000000149,
+      "text": "",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 6252.30000000447,
+      "text": "Saved and independently verified.",
+      "hidden": true,
+      "display": "none"
+    },
+    {
+      "at": 6436.30000000447,
+      "text": "Depth save completed; inspect its verified remote receipt.",
+      "hidden": true,
+      "display": "none"
+    }
+  ],
+  "errors": [],
+  "browser": "156.0.8078.79",
+  "bootFixtureReadyMs": 1456.2166099999995,
+  "paintEntries": [
+    {
+      "name": "first-paint",
+      "startTime": 612
+    },
+    {
+      "name": "first-contentful-paint",
+      "startTime": 612
+    }
+  ],
+  "rpcSummary": {
+    "describeCapabilities": {
+      "n": 1,
+      "p50": 550.6999999955297,
+      "p95": 550.6999999955297
+    },
+    "loginStatus": {
+      "n": 1,
+      "p50": 550.6999999955297,
+      "p95": 550.6999999955297
+    },
+    "getConfiguration": {
+      "n": 21,
+      "p50": 4.5,
+      "p95": 15.100000001490116
+    },
+    "inspectShelfAttention": {
+      "n": 1,
+      "p50": 0.10000000149011612,
+      "p95": 0.10000000149011612
+    },
+    "inspectRemoteHistory": {
+      "n": 34,
+      "p50": 8.699999995529652,
+      "p95": 39.600000001490116
+    },
+    "listAuthorizedBuckets": {
+      "n": 20,
+      "p50": 4.4000000059604645,
+      "p95": 21.900000005960464
+    },
+    "inspectBackupRoots": {
+      "n": 20,
+      "p50": 0.30000000447034836,
+      "p95": 1.7000000029802322
+    },
+    "getGalleryLoadingVisual": {
+      "n": 20,
+      "p50": 2.899999998509884,
+      "p95": 8.400000005960464
+    },
+    "enterExplorer": {
+      "n": 1,
+      "p50": 16.399999998509884,
+      "p95": 16.399999998509884
+    },
+    "listFolders": {
+      "n": 2,
+      "p50": 5.4000000059604645,
+      "p95": 7.100000001490116
+    },
+    "inspectRemoteReceipt": {
+      "n": 1,
+      "p50": 7.100000001490116,
+      "p95": 7.100000001490116
+    }
+  },
+  "result": "PASS"
+}

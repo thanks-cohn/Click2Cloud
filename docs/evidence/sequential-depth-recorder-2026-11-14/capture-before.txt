@@ -1,0 +1,2 @@
+{"purpose":"DIAGNOSTIC_CAPTURE_ONLY_NOT_INCIDENT_ROOT_REGRESSION","kind":"before","captured":{"stage":"request.error","endpoint":"/capabilities","errorName":"TypeError"}}
+{"diagnosticCaptureGate":"FAIL","incidentRootGate":"NOT_PROVEN"}

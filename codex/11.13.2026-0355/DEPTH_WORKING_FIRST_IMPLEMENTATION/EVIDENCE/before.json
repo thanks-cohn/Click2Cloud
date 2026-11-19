@@ -1,0 +1,12 @@
+{
+  "baseline": "102ac7777d94b7507aa0b8bb7c37f2337869751f",
+  "A": {
+    "optionalHistoryThrows": "STORAGE_UNAVAILABLE",
+    "dispatch": 0
+  },
+  "B": {
+    "optionalLastDepthClickThrows": true,
+    "feedbackChannelsAttempted": 0
+  },
+  "method": "imported baseline native click plus evaluated exact baseline feedback callback with synthetic storage rejection; no remote operations"
+}

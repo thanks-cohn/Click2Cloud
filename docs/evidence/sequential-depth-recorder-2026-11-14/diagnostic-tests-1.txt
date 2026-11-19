@@ -1,0 +1,12 @@
+✔ fixture exception capture retains bounded cause/modules, never private exception text (2.890899ms)
+✔ dispatch diagnostics preserve request identity, lifecycle, original error and single attempt (5.319389ms)
+✔ ready failure and response-trace failure are distinct from dispatchFetch failure (2.05928ms)
+✔ trace disabled retains original response and never clones/consumes it (0.690594ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139.672172

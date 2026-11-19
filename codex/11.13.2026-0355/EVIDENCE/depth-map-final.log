@@ -1,0 +1,36 @@
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (202.246159ms)
+✔ non-Depth composition remains byte-identical to the request baseline (60.739225ms)
+✔ Depth root qualification does not rename a child folder with the same name as its bucket (1.428112ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (41.050403ms)
+✔ Depth fixture: one root (13.043957ms)
+✔ Depth fixture: two roots (4.101173ms)
+✔ Depth fixture: two roots at 10 (3.216744ms)
+✔ Depth fixture: two chains (4.492473ms)
+✔ Depth fixture: three chains (4.48574ms)
+✔ Depth fixture: four chains (3.138924ms)
+✔ Depth fixture: ten siblings (2.066269ms)
+✔ Depth fixture: mixed branching (1.038205ms)
+✔ Depth fixture: single-child chain (1.587477ms)
+✔ Depth fixture: files-only folder (0.82833ms)
+✔ Depth fixture: deeper folder at limit (0.89047ms)
+✔ Depth fixture: identical names (1.285981ms)
+✔ Depth bounded discovery paginates, distinguishes file-only folders, and refuses partial listings (1.899036ms)
+✔ a fresh Depth tree replaces stale Explorer folders, including a successfully empty bucket (2.071175ms)
+✔ settings commit distinguishes storage, discovery and Chrome errors and converges through same-key retries (49.356017ms)
+✔ Logic2Real U earns zero credit but is not a measured failure (1.057248ms)
+✔ Logic2Real NA renormalizes, partial mismatch and missing evidence remain separate (0.54876ms)
+✔ Logic2Real all unknown has no known score; critical weights are retained (1.393291ms)
+✔ canonical registry has unique versioned rules and resolvable source/test traces; missing native proof stays open (101.791595ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (18.503827ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (5.179692ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (1.13815ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.285585ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.477836ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 411.774443

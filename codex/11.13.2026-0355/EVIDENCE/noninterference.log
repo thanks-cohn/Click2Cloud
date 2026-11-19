@@ -1,0 +1,12 @@
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (109.924919ms)
+✔ non-Depth composition remains byte-identical to the request baseline (49.230076ms)
+✔ Depth root qualification does not rename a child folder with the same name as its bucket (0.866047ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (46.866466ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 549.110213

@@ -1,0 +1,136 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_SHELF_PREFERENCE_API_IDB_WITH_FIXTURE_STORAGE_PROVIDER_AND_LIFECYCLE_MESSAGES_NOT_NATIVE_OR_R2",
+  "checks": [
+    "Default OFF including delayed preference boot and three simulated pending/uncertain/completed lifecycle sequences: floating status never visible; uncertainty remains quietly actionable",
+    "Debug OFF required action has concise non-floating feedback and working Save results entry",
+    "Settings ON shows retained diagnostic status and existing safe report API; protected debug-host grant remains denied",
+    "Preference persists into another Shelf; OFF hides floating box immediately and propagates across documents",
+    "OFF persists across reload without a visible status flash",
+    "Failed enable and failed disable both fail closed for this window and explain unsaved preference inline",
+    "Known API failures remain visible and actionable OFF even when their mapped prose is not a raw diagnostic code",
+    "Preference read failure starts OFF even when persisted fixture value was ON",
+    "Pending durable History projects Saving… instead of a false Not saved label",
+    "320px blocked and uncertain feedback: both footer controls fit without body overflow and are reachable in keyboard order",
+    "No off-mode visible frames/mutations; no CURRENT/config/credentials/provisioning change from Debug preference"
+  ],
+  "browser": "156.0.8078.79",
+  "narrowLayout": {
+    "baseline": {
+      "viewport": 320,
+      "documentWidth": 320,
+      "bodyWidth": 320,
+      "footer": {
+        "left": 0,
+        "right": 320,
+        "top": 758,
+        "bottom": 800,
+        "width": 320,
+        "height": 42
+      },
+      "feedback": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "results": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "manage": {
+        "left": 168.25,
+        "right": 306,
+        "top": 766,
+        "bottom": 793,
+        "width": 137.75,
+        "height": 27
+      }
+    },
+    "scenarios": [
+      {
+        "state": "blocked",
+        "viewport": 320,
+        "documentWidth": 320,
+        "bodyWidth": 320,
+        "footer": {
+          "left": 0,
+          "right": 320,
+          "top": 721,
+          "bottom": 800,
+          "width": 320,
+          "height": 79
+        },
+        "feedback": {
+          "left": 14,
+          "right": 130.6875,
+          "top": 727,
+          "bottom": 795,
+          "width": 116.6875,
+          "height": 68
+        },
+        "results": {
+          "left": 142.6875,
+          "right": 205.296875,
+          "top": 730.5,
+          "bottom": 791.5,
+          "width": 62.609375,
+          "height": 61
+        },
+        "manage": {
+          "left": 217.296875,
+          "right": 306,
+          "top": 739,
+          "bottom": 783,
+          "width": 88.703125,
+          "height": 44
+        }
+      },
+      {
+        "state": "uncertain",
+        "viewport": 320,
+        "documentWidth": 320,
+        "bodyWidth": 320,
+        "footer": {
+          "left": 0,
+          "right": 320,
+          "top": 728,
+          "bottom": 800,
+          "width": 320,
+          "height": 72
+        },
+        "feedback": {
+          "left": 14,
+          "right": 134.3125,
+          "top": 739,
+          "bottom": 790,
+          "width": 120.3125,
+          "height": 51
+        },
+        "results": {
+          "left": 146.3125,
+          "right": 205.296875,
+          "top": 734,
+          "bottom": 795,
+          "width": 58.984375,
+          "height": 61
+        },
+        "manage": {
+          "left": 217.296875,
+          "right": 306,
+          "top": 742.5,
+          "bottom": 786.5,
+          "width": 88.703125,
+          "height": 44
+        }
+      }
+    ]
+  },
+  "visibilitySamples": 1524,
+  "result": "PASS"
+}

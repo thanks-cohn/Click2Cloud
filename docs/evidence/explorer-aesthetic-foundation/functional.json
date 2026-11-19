@@ -1,0 +1,114 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+  "results": [
+    {
+      "gate": "more-visible-clickable-1100",
+      "state": "PASS",
+      "bounds": {
+        "x": 812,
+        "y": 108,
+        "width": 280,
+        "height": 142,
+        "top": 108,
+        "right": 1092,
+        "bottom": 250,
+        "left": 812
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": true
+        },
+        {
+          "id": "view-switch",
+          "hit": true
+        },
+        {
+          "id": "add-location",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "gate": "more-visible-clickable-600",
+      "state": "PASS",
+      "bounds": {
+        "x": 312,
+        "y": 108,
+        "width": 280,
+        "height": 142,
+        "top": 108,
+        "right": 592,
+        "bottom": 250,
+        "left": 312
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": true
+        },
+        {
+          "id": "view-switch",
+          "hit": true
+        },
+        {
+          "id": "add-location",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "gate": "more-visible-clickable-360",
+      "state": "PASS",
+      "bounds": {
+        "x": 72,
+        "y": 108,
+        "width": 280,
+        "height": 142,
+        "top": 108,
+        "right": 352,
+        "bottom": 250,
+        "left": 72
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": true
+        },
+        {
+          "id": "view-switch",
+          "hit": true
+        },
+        {
+          "id": "add-location",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "gate": "history-shared-math-collapse-abort-reopen-success",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-shared-plain-collapse-abort-reopen-success",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-shared-png-collapse-abort-reopen-success",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-shared-gif-collapse-abort-reopen-success",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-shared-mp4-collapse-abort-reopen-success",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-shared-invalid-collapse-abort-reopen-success",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}

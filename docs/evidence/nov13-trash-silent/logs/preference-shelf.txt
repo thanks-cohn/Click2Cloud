@@ -1,0 +1,44 @@
+✔ Debug preference defaults OFF and rejects non-boolean stored undefined (3.44844ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored null (0.327163ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored false (0.219673ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored 0 (0.245244ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored 1 (0.25879ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored "true" (0.304658ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored {} (0.226903ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored [] (0.257962ms)
+✔ Debug reads only the stored true boolean and restores it without writing credentials/configuration (0.59649ms)
+✔ Debug setters persist exactly one presentation preference and notify subscribers without granting authority (1.348907ms)
+✔ invalid Debug setter never writes an implicit truthy preference (7.538095ms)
+✔ Debug follows only local storage changes; removal and invalid values disable presentation (0.639202ms)
+✔ a local preference event wins over a delayed stale initial read (0.248914ms)
+✔ an explicit set wins over a delayed stale initial read (0.141758ms)
+✔ read failure or missing storage keeps Debug OFF instead of weakening execution gates (0.808501ms)
+✔ failed enable write stays OFF and does not publish enabled presentation (0.722401ms)
+✔ failed disable write immediately turns Debug OFF even when previously enabled (2.302888ms)
+✔ an older failed setter does not overwrite a newer external local preference event (0.254111ms)
+✔ failed explicit setter remains OFF when an older delayed startup read later returns true (0.204328ms)
+✔ bad presentation subscribers cannot disrupt state propagation or other listeners (0.503706ms)
+✔ closing removes native listener, ignores delayed initialization and rejects subsequent setters (0.310001ms)
+✔ Depth outcomes remain durable and OS-silent for repeated blocked, uncertain and completed operations (0.915976ms)
+✔ Depth failure feedback still reaches badge and existing in-app channel when the optional last-outcome write fails (0.579074ms)
+✔ single refresh on expired token rotates credentials; simultaneous reads share refresh (76.97021ms)
+✔ temporary refresh outage retains the session; invalid_grant alone requires reconnect (5.073941ms)
+✔ read retries once only for actual auth rejection; generic403 never refreshes (8.013543ms)
+✔ rejected write is never replayed, while a valid refresh is preserved (1.196992ms)
+✔ diagnosis distinguishes grants, token challenge, wrong account, inactive R2, policy and unknown403 without raw text (0.699659ms)
+✔ wrong account is rejected locally and does not send a request with another account token (0.468325ms)
+✔ token issuance followed by temporary identity failure remains pending and can recover read-only (18.63488ms)
+✔ persisted callback can finish in restarted owner; duplicate callback exchanges one code only (6.597292ms)
+✔ Shelf gesture keeps existing open policy while OFF and rejected-open fallback stay OS-silent (1.8211ms)
+✔ repeated concurrent attention failures stay OS-silent and retain the latest existing Shelf state (0.875457ms)
+✔ R2 unavailable, unknown403 and outage never provision or navigate an activation site (11.407878ms)
+✔ native listener calls the Shelf gesture hook before awaiting cold boot (3.616452ms)
+✔ notification preference uses canonical config API independently of provider visibility and has no arbitrary batch ceiling (38.588202ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 305.336469

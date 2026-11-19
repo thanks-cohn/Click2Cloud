@@ -1,0 +1,170 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_PRODUCTION_APP_API_IDB_PROJECTOR_REGISTRAR_WITH_FIXTURE_PROVIDER_AND_CHROME_CALLBACKS_NOT_INSTALLED_OR_R2",
+  "baselineRef": "b0d11f1b:extension/app.mjs",
+  "baselineSha256": "7e85c565ab9e473e22f216b9d7156ad9c065a092ca2d20fcadc6bf3c040b909c",
+  "checks": [
+    "Baseline: all three callbacks reach suppressed/false native confirm and silently leave draft/persistence unchanged (15 activations); installed root cause remains unverified",
+    "All three modes: native confirm suppressed yet inline accessible confirmation appears; Cancel preserves full persisted config/product/generation",
+    "simple: exact selected ID/scope staged only, explicit Save persisted, other rows/Default/show untouched, fixture native ACK completed",
+    "nested: exact selected ID/scope staged only, explicit Save persisted, other rows/Default/show untouched, fixture native ACK completed",
+    "depth: exact selected ID/scope staged only, explicit Save persisted, other rows/Default/show untouched, fixture native ACK completed",
+    "Narrow pagination, repeated Trash activation, rerender, two staged exact IDs and tab switching preserve independent same-target presentations",
+    "Simple and Depth pagination remove exact selected identities; repeated Depth deletions retain maxDepth/hidden fields and return from an empty final page",
+    "Closing manager discards unsaved deletion without durable removal",
+    "Save failure keeps durable config; Retry Save uses same idempotency key and removes only selected ID",
+    "Actual CURRENT revision conflict reports inline failure and does not remove a different record",
+    "Missing fixture Chrome ACK keeps committed deletion durable; Retry Save reconciles without resurrecting it",
+    "Reload reopens retained CURRENT without deleted IDs/scopes; actual generated plan and fixture ACK converge; zero remote mutation/Cloudflare setup calls",
+    "Only Depth scope can be explicitly removed, survives reload as empty, has no phantom generated Depth rows and preserves both other modes"
+  ],
+  "timings": {
+    "before": {
+      "simple": {
+        "n": 5,
+        "visibleResponseMs": null,
+        "outcome": "No confirmation, no stage when native confirm returns false"
+      },
+      "nested": {
+        "n": 5,
+        "visibleResponseMs": null,
+        "outcome": "No confirmation, no stage when native confirm returns false"
+      },
+      "depth": {
+        "n": 5,
+        "visibleResponseMs": null,
+        "outcome": "No confirmation, no stage when native confirm returns false"
+      }
+    },
+    "after": {
+      "simple": {
+        "clickToConfirmation": {
+          "n": 5,
+          "p50Ms": 10.200000002980232,
+          "p95Ms": 12.400000005960464,
+          "samplesMs": [
+            9.299999997019768,
+            8.400000005960464,
+            10.200000002980232,
+            12.399999998509884,
+            12.400000005960464
+          ]
+        },
+        "confirmToDraft": {
+          "n": 1,
+          "p50Ms": 11.899999998509884,
+          "p95Ms": 11.899999998509884,
+          "samplesMs": [
+            11.899999998509884
+          ]
+        },
+        "saveToProgress": {
+          "n": 1,
+          "p50Ms": 12.699999995529652,
+          "p95Ms": 12.699999995529652,
+          "samplesMs": [
+            12.699999995529652
+          ]
+        },
+        "saveToCommitAndFixtureAckMs": 145
+      },
+      "nested": {
+        "clickToConfirmation": {
+          "n": 5,
+          "p50Ms": 7.9000000059604645,
+          "p95Ms": 9,
+          "samplesMs": [
+            8.899999998509884,
+            9,
+            7.9000000059604645,
+            4.5999999940395355,
+            5.100000001490116
+          ]
+        },
+        "confirmToDraft": {
+          "n": 1,
+          "p50Ms": 33.20000000298023,
+          "p95Ms": 33.20000000298023,
+          "samplesMs": [
+            33.20000000298023
+          ]
+        },
+        "saveToProgress": {
+          "n": 1,
+          "p50Ms": 12.799999997019768,
+          "p95Ms": 12.799999997019768,
+          "samplesMs": [
+            12.799999997019768
+          ]
+        },
+        "saveToCommitAndFixtureAckMs": 132.10000000149012
+      },
+      "depth": {
+        "clickToConfirmation": {
+          "n": 5,
+          "p50Ms": 10.5,
+          "p95Ms": 12.700000002980232,
+          "samplesMs": [
+            10.5,
+            10.5,
+            12.100000001490116,
+            12.700000002980232,
+            8.399999998509884
+          ]
+        },
+        "confirmToDraft": {
+          "n": 1,
+          "p50Ms": 20.100000001490116,
+          "p95Ms": 20.100000001490116,
+          "samplesMs": [
+            20.100000001490116
+          ]
+        },
+        "saveToProgress": {
+          "n": 1,
+          "p50Ms": 11.899999998509884,
+          "p95Ms": 11.899999998509884,
+          "samplesMs": [
+            11.899999998509884
+          ]
+        },
+        "saveToCommitAndFixtureAckMs": 133.39999999850988
+      }
+    }
+  },
+  "browser": "156.0.8078.79",
+  "beforeCounts": {
+    "simple": 27,
+    "nested": 24,
+    "depth": 23
+  },
+  "nativeProof": {
+    "rowCount": 159,
+    "generation": 12,
+    "state": "completed",
+    "evidenceClass": "fixture Chrome callbacks, not installed native visibility"
+  },
+  "afterCounts": {
+    "simple": 23,
+    "nested": 21,
+    "depth": 20
+  },
+  "removed": {
+    "simple": [
+      "simple-1",
+      "simple-22",
+      "simple-3",
+      "simple-0"
+    ],
+    "nested": [
+      "narrow-1",
+      "narrow-22",
+      "narrow-3"
+    ],
+    "depth": [
+      "depth-1",
+      "depth-22",
+      "depth-21"
+    ]
+  },
+  "result": "PASS"
+}

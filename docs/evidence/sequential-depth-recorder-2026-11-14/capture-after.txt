@@ -1,0 +1,2 @@
+{"purpose":"DIAGNOSTIC_CAPTURE_ONLY_NOT_INCIDENT_ROOT_REGRESSION","kind":"after","captured":{"stage":"request.error","endpoint":"/capabilities","requestId":1,"fixtureId":1,"lifecycle":"ready","inFlight":1,"signalAborted":false,"boundary":"dispatchFetch","errorName":"TypeError","error":{"name":"TypeError","code":null,"messageClass":"FETCH_FAILED","frames":[{"module":"miniflare","line":104599,"column":22}],"cause":{"name":"Error","code":"UND_ERR_SOCKET","messageClass":"UNCLASSIFIED","frames":[],"cause":null}}}}
+{"diagnosticCaptureGate":"PASS","incidentRootGate":"NOT_PROVEN"}

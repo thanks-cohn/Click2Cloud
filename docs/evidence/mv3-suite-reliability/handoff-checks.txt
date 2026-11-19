@@ -1,0 +1,20 @@
+✔ Windows autocrlf clean checkout preserves canonical fingerprint bytes; semantic tampering still fails (104.709645ms)
+✔ a missing dispatch generation can yield STALE_GENERATION without a generation race (10.539964ms)
+✔ genuinely stale generation is rejected before any provider write (0.953191ms)
+✔ post-write session loss stays uncertain and is never retried or marked verified (5.283678ms)
+✔ post-write generation change stays uncertain; unchanged authority completes once (3.069581ms)
+✔ MV3 manifest worker graph has no dynamic imports, including re-exported dependencies (92.496906ms)
+✔ MV3 negative graph catches nested dynamic import; page-only import and comments are permitted (17.18128ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (12.037229ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.948702ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (0.623252ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.186196ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.196811ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 265.855949

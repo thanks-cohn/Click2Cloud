@@ -1,0 +1,50 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+  "results": [
+    {
+      "gate": "101-operation-history-first-page-25",
+      "state": "PASS"
+    },
+    {
+      "gate": "separate-safe-links-exact-upload-metadata-no-technical-panel",
+      "state": "PASS"
+    },
+    {
+      "gate": "history-25-page-boundaries-last-page-one",
+      "state": "PASS"
+    },
+    {
+      "gate": "persistent-history-settings",
+      "state": "PASS"
+    },
+    {
+      "gate": "settings-export-101-operations-independent-of-visible-page-all-three-formats",
+      "state": "PASS"
+    },
+    {
+      "gate": "production-GO-TO-selects-png-pdf-docx-txt-zip-bin-video-audio",
+      "state": "PASS"
+    },
+    {
+      "gate": "missing-object-does-not-highlight-unrelated-file",
+      "state": "PASS"
+    },
+    {
+      "gate": "preview-all-first-closed-on-first-and-second-page-bounded-reads",
+      "state": "PASS"
+    },
+    {
+      "gate": "collapsed-date-group-no-new-preview-reads",
+      "state": "PASS"
+    },
+    {
+      "gate": "condensed-explorer-five-controls-and-overflow",
+      "state": "PASS"
+    },
+    {
+      "gate": "expanded-toolbar-restores-address-controls",
+      "state": "PASS"
+    }
+  ],
+  "errors": []
+}

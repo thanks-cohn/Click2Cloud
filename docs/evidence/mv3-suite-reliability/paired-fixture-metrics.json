@@ -1,0 +1,113 @@
+{
+  "scope": "Sequential explicit fixture calls, local workerd/R2, fake native callbacks and memory recorder ports; traced processes under shared load. No causal overhead or real provider claim.",
+  "measurements": [
+    {
+      "cohort": "isolated",
+      "mode": "OFF",
+      "runs": 4,
+      "clickToDispatchMs": {
+        "samples": 32,
+        "p50": 8.194212999999763,
+        "p95": 19.36285500000031,
+        "p99": 28.654171999999562
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 32,
+        "p50": 46.96489400000064,
+        "p95": 78.38493800000003,
+        "p99": 83.39714000000004
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    },
+    {
+      "cohort": "isolated",
+      "mode": "BASIC",
+      "runs": 3,
+      "clickToDispatchMs": {
+        "samples": 24,
+        "p50": 7.838945999999851,
+        "p95": 15.477482000000236,
+        "p99": 17.88592000000017
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 24,
+        "p50": 44.6623840000002,
+        "p95": 80.94335499999988,
+        "p99": 91.2713560000002
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    },
+    {
+      "cohort": "isolated",
+      "mode": "EXPANSIVE",
+      "runs": 3,
+      "clickToDispatchMs": {
+        "samples": 24,
+        "p50": 8.76253799999995,
+        "p95": 17.7889439999999,
+        "p99": 22.004698000000644
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 24,
+        "p50": 49.564736000000266,
+        "p95": 81.56176499999992,
+        "p99": 95.80856900000026
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    },
+    {
+      "cohort": "full",
+      "mode": "OFF",
+      "runs": 4,
+      "clickToDispatchMs": {
+        "samples": 32,
+        "p50": 6.334812000000966,
+        "p95": 13.309881000001042,
+        "p99": 20.817930000004708
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 32,
+        "p50": 39.164786000001186,
+        "p95": 124.17546500000026,
+        "p99": 180.29575699999987
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    },
+    {
+      "cohort": "full",
+      "mode": "BASIC",
+      "runs": 3,
+      "clickToDispatchMs": {
+        "samples": 24,
+        "p50": 5.6448400000008405,
+        "p95": 15.263255000005302,
+        "p99": 17.7288750000007
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 24,
+        "p50": 39.97317800000019,
+        "p95": 70.52642500000366,
+        "p99": 75.33739200000127
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    },
+    {
+      "cohort": "full",
+      "mode": "EXPANSIVE",
+      "runs": 3,
+      "clickToDispatchMs": {
+        "samples": 24,
+        "p50": 6.1145160000014585,
+        "p95": 32.0634990000035,
+        "p99": 79.1478150000039
+      },
+      "clickToTerminalVerifiedFixtureResultMs": {
+        "samples": 24,
+        "p50": 41.07613200000196,
+        "p95": 78.19342399999732,
+        "p99": 132.34446199999365
+      },
+      "installedNativeClickToVerifiedMs": "N/A"
+    }
+  ]
+}

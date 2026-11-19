@@ -1,0 +1,38 @@
+[
+  {
+    "file": "RAW-10000.zip.gz",
+    "zipBytes": 18167858,
+    "zipSHA256": "1c148afb947a1031b10be567cd69f2434a080e7a998e6a7014cf340e9582f280",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  },
+  {
+    "file": "SECURE-10000.zip.gz",
+    "zipBytes": 22841873,
+    "zipSHA256": "c38ebc1e90d141a6bb5667a2e690cde4c0bc68812bad7a927fe2782ba94d160d",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  },
+  {
+    "file": "RAW-0.zip.gz",
+    "zipBytes": 4916,
+    "zipSHA256": "1e97a289970de96bd002631ef207da92580b02e643799fb3bb7566b58b5e82fa",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  },
+  {
+    "file": "SECURE-102.zip.gz",
+    "zipBytes": 240987,
+    "zipSHA256": "f96267a828cf087fa08725f650f6b2344b83b1af975cd34ad838a46301204a32",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  },
+  {
+    "file": "SECURE-0.zip.gz",
+    "zipBytes": 4931,
+    "zipSHA256": "0c1c10208b33d8335d49fbd02f3d7c7dba72d5db0f2c98f4e63e4e9230296b28",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  },
+  {
+    "file": "RAW-102.zip.gz",
+    "zipBytes": 193566,
+    "zipSHA256": "2702b1d3404e3ba883e0a40db0c9d7d536ebf3d25e8b22b0481a95828d58f614",
+    "purpose": "Generated synthetic HTTP Chromium UI download; not installed Chrome/live R2 or user RAW data"
+  }
+]

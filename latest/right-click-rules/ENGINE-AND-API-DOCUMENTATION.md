@@ -1,5 +1,26 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
+## Depth-only provider root clarification — November 13, 2026
+
+`src/core/menu-spec.mjs:providerRootSave`, owned by `3+1.1`
+`previewNativeMenu` / `previewConfigChange` (pure) and
+`commitConfigChange` / `reconcileNativeMenu` (application), labels the root save
+of an inlined sole Depth bucket with its actual bucket name. The predicate
+requires Depth, a physical root prefix, the Cloudflare provider as parent, and
+a root placement ancestor. It does not match arbitrary `Save here` text.
+Otherwise projection is unchanged. Nested named bucket/folder `Save here`
+actions, all target/action/item IDs, availability checks, configuration and
+Worker authorization remain unchanged. No destination is deleted or provisioned.
+Inspect `previewNativeMenu` and `inspectNativeACK` separately; an ACK does not
+prove rendering or a save. The narrow exception avoids stranding the sole root.
+
+`extension/depth-destinations.css` scopes layout to the Depth manager list;
+its eye/delete/depth controls still stage drafts and use the existing explicit
+shared Save. Tests: `depth-scope-regression.test.mjs`,
+`logic2real-depth-save.test.mjs`, `scripts/test-depth-layout.mjs`.
+See [audit and remaining blocking P1](../../codex/11.13.2026-0355/IMPLEMENTATION_REPORT.md).
+Actual native rendering and R2 readback are unverified in this environment.
+
 **Documentation contract and current-source map | November 7, 2026**  
 **Applies to:** Click2Cloud's own Simple / Narrow / Depth engine, Quick Select, Default, the native Chrome context menu, destination configuration and right-click save dispatcher.  
 **Scope boundary:** The REDOWN repository is a **read-only functional reference** for useful right-click transfer and File Explorer capabilities; **Click2Cloud owns its menu system and configuration rules**. This does **not** authorize copying all of REDOWN.  
@@ -321,7 +342,7 @@ The owner follow-up makes `+ Right Click → Save` the complete assignment workf
 | View | Existing `setView` now accepts details/list/grid. GUI feedback uses pending intent immediately, then the same serialized commitConfigChange transaction persists it or rolls presentation back on failure. Grid virtualizes fixed-size icon tiles, not whole-directory thumbnails. |
 | Address | Pure cloud URI format/parse and visual middle ellipsis. Focus/copy retains the exact full URI. Enter validates current authorized account/bucket pages through listAuthorizedBuckets, then navigateExplorer; a file is checked with fileMetadata and selected. Escape restores actual location. No key mutation or new navigation API. |
 | Preview | `readFileChunk` supplies bounded, identity-checked ranges (up to three concurrent reads after the first identity-bearing range), immediate loading feedback and epoch cancellation. Text is visibly truncated at the existing preview budget; images use the existing provider memory budget. No full arbitrary file body is serialized in one message. |
-| Manager | Exactly one visible Explorer entrypoint, the persistent footer Manage Destinations button. Its existing saved configuration/API functionality remains available offline; duplicate toolbar/context entries removed. |
+| Manager | One visible Manage Destinations control at the lower left of the Explorer tree. As the tree collapses, the same control moves to the leading edge of the toolbar. It uses the existing configuration API and works offline. |
 | Timing | Opt-in local Performance Timeline (`localStorage.click2cloudPerformance='1'`, reload). Fixed event names and numeric durations only, bounded retention; no paths/URLs/tokens. Two RAF paint opportunities are not physical display latency or a Windows/native-input proof. |
 
 Detailed before/after evidence, source hashes, real-workerd destination byte checks, installed-Chrome blockers and portable Windows measurement commands are in `docs/evidence/zero-stutter/`. No genuine live provider or Windows result is inferred from fixtures or Chrome callback ACKs.
@@ -425,3 +446,442 @@ Final loader regression hardening: a missing/corrupt local visual record reports
 Quick snapshot detail: an actual promoted Narrow Quick placement records `placement:quick`, effective `visibilityMode:hide-all` and only the final level visible, while `configuredVisibilityMode` retains its saved all/custom/hide-all choice. `menuPath` records the direct native shortcut. This avoids claiming configured ancestors were displayed on a promoted click. Ordinary Narrow snapshots are unchanged; no settings are mutated.
 
 Creation identity detail: NEW Narrow IDs are allocated deterministically from the configuration creation revision/slot/collision sequence, independently of physical targetKey. Deleting/recreating in a later revision creates a new ID; existing/legacy IDs never change. Preview/retry stays deterministic. `createDestination` accepts optional hidden/quick flags with the same validation/exclusion rules as update, so existing confirmed-rebuild GUI code can describe its initial choices atomically without guessing a target-derived ID. No recovery machinery or extra API was added; Simple duplicate-target semantics remain intact.
+
+### Depth native click lifecycle — November 13 P0 repair (historical pre-recovery behavior)
+
+`src/modes/depth/native-click.mjs:createDepthNativeClick` owns Depth-only
+native preflight and click-attempt observation. `registrar.handleClick` delegates
+only `origin.mode=depth` rows; cold worker metadata may classify the row but never
+authorize a persisted ACK. Fresh account membership and scoped Worker READY are
+required; only that exact target's readiness observation refreshes. Original
+engine/resolver/transport still recheck current authority, generation and receipt.
+Unready status is blocked with a read-only plan subreason; no provisioning/retry.
+`inspectRemoteHistory` displays `kind=depth-click` attempts separately from actual
+remote receipts, using existing CURRENT storage. Native application semantics,
+configuration APIs and all menu projection stay unchanged. See
+[Depth P0 evidence](../../codex/11.13.2026-0355/DEPTH_P0_REPAIR/TEST_RESULTS.md).
+Native Chrome/R2 results remain unverified; fixture success is not release proof.
+
+### Working-first Depth repairs — November 13
+
+`src/modes/depth/native-click.mjs` isolates optional click-record failures from
+safe dispatch and returns `depthRecordCode` without changing transfer truth.
+`createDepthFeedback` independently attempts existing notification/badge/message
+channels even if optional lastDepthClick persistence fails. A later diagnostic
+plan observation is prefixed FOLLOWUP; it is not the rejecting read's snapshot.
+
+Depth native callbacks now pass an internal invocation-local authorization
+function through `registrar.handleClickBase` → background dispatch → engine.save.
+The engine selects it only for a bound `origin.mode=depth` row. Fresh OAuth,
+exact scoped Worker status, current generation/configuration, capability and
+independent receipt verification remain required. Simple/Narrow retain the
+original getAuthorization path; no Depth click writes shared readiness snapshots.
+No public API schema, registry key, upload implementation or menu is changed.
+Owning APIs remain `dispatchSave` / `inspectRemoteHistory`; physical Chrome/R2
+verification is separate. Evidence: tests/depth-working-save.test.mjs and
+codex/11.13.2026-0355/DEPTH_WORKING_FIRST_IMPLEMENTATION/FIXES_AND_VERIFICATION.md.
+
+### Exact-bucket missing-plan recovery — November 13 ship repair
+
+`recoverCloudflareDestination({target,expectedRevision?,idempotencyKey?,authorizeSetup?})`
+is the narrow trusted `3+1.1` provision action in `src/api/service.mjs`. Native
+Depth preflight calls it only after current CURRENT/configuration/generation and
+native ACK validation. Its immutable target is the clicked account, connection,
+bucket and prefix. Default and other configured buckets are never fallbacks.
+The API and Shelf use `onboarding.recoverDestination`; there is no second saver.
+
+Existing durable account or exact-bucket setup approval permits missing-plan
+creation/resume with live required grants. Without approval the original click
+is not saved and exact-target Shelf attention offers informed authorization.
+`authorizeSetup:true` requires host confirmation; code upgrades and signing-key
+renewal require that explicit action even when ordinary setup approval exists.
+The confirmation explains Worker/R2 usage and shared per-bucket key renewal.
+An unknown/mismatched remote identity is never overwritten. Existing prefix
+scope is retained; a scope mismatch stays blocked with scoped-change guidance.
+
+`deployment.prepare` persists a generated name/key before deployment, inspects
+retained account/bucket/R2/DO/signing bindings, and reuses pending deployment
+identity after interruption. `remoteTransport:digest([accountId,bucketName])`
+remains the one physical registry entry across modes/folders. The private
+`destination-recovery:` pointer selects the same-bucket setup ledger; legacy
+matching initialization records can resume. An uncertain probe is inspected by
+its original operation ID and never automatically replayed. Readiness requires
+fresh exact scoped capabilities, actual verified R2 probe, `markVerified`, and
+a final fresh status. Saved configurations, Default and Quick are not edited.
+
+After recovery the canonical compiler/registrar refreshes only the selected
+Depth bucket's discovery, preserves unrelated snapshots, and requires the exact
+actionable native row in the current ACK. The original click returns
+`FRESH_CLICK_REQUIRED`; its source URL/bytes are neither retained nor replayed.
+A new click uses the original common resolver/engine/signed transport with
+independent object verification. Shelf no longer interprets `completed` alone
+as readiness: `selectedSetupReady` requires fresh exact transport proof and
+current exact-target native ACK. Permission denial, stale code, restricted
+scope, uncertain probe, missing approval and incomplete menu remain distinct.
+
+Evidence: `tests/depth-plan-recovery.test.mjs` executes actual provisioning
+metadata/module construction, typed API, native callbacks, signed workerd
+requests and independent local R2 byte readback. Recovery/deployment/UI suites
+cover consent, restart, lost replies, scope/account isolation and no replay.
+Browser DOM tests use synthetic RPC. These are not owner Chrome or live
+Cloudflare R2 proof; administrator policy blocks unpacked loading in this runner.
+
+## Two-tier observer (V2 review branch, November 14, 2026)
+
+`src/chrome/registrar.mjs:handleClick` remains the only native listener's owner.
+It gives each delivered action a random `attemptId`, invokes optional
+`observeClick` without awaiting IO, and reports the same terminal outcome in
+`finally`. `handleClickBase` and the existing Depth wrapper retain their
+route, generation and authorization decisions. Their existing `3+1.1`
+`dispatchSave`/`dispatchExplorerSave`/`invokeProviderAction` ownership is unchanged.
+An observer exception is caught and never authorizes, retries or changes a save.
+The optional callback travels with each invocation into `engine.save`; it sees
+`dispatch.enter` and already-existing source/authorization/transfer/verification
+boundaries. It is not the older Glaciaring reason-code channel. Transport adds
+only a first-request response-header latency observation, never an extra request.
+
+`extension/background.mjs` statically imports the MV3-compatible host graph and
+defers guarded initialization independently of native startup. A bounded early BASIC-only checkpoint buffer does not retain RAW URLs.
+Failure leaves the original dispatcher available. This observer has no authority
+over CURRENT, OAuth, menu ACKs, provider writes, History or counters.
+
+Settings uses a separate local `{channel:'recorder',version:2,method,params}`
+protocol, accepted only by the existing `appSenderDecision` for the exact Shelf
+URL and extension identity. Methods: `status`, `debug`, `capacity`, `start`,
+`stop`, `runs`, `snapshot`, `page`. RAW Start and export each require consent;
+capacity shrink requires confirmation. These are not additional `3+1.1` cloud
+commands or agent grants. See the [implementation and field matrix](../../docs/evidence/two-tier-diagnostics/IMPLEMENTATION.md).
+
+Two independent IndexedDB archives own BASIC rolling attempts and opt-in rich
+segments. Stop fences rich admission synchronously; pending writes remain
+unconfirmed until actual settlement. Read/export never probes providers or
+re-uploads. Unknown times/bytes/proof remain explicit N/A. Linux fake-native,
+real-IDB and ZIP tests are separate from installed Chrome and R2 evidence.
+The latter remain BLOCKED/NOT RUN; no installed behavior claim follows from ACKs.
+
+
+### MV3 compatibility gate and current verification limit
+
+The build now rejects dynamic imports anywhere in the manifest worker import/re-export
+graph, including computed imports. HTML-page imports are outside this worker policy.
+Recorder initialization failure is distinct from not-ready/request-unavailable; only
+bounded causal names/stages are returned. Static module parse/evaluation failure is
+still a whole-worker risk, so parse and browser-worker tests accompany this change.
+Installed/native acceptance is BLOCKED by policy here and is never inferred from
+Node or HTTP-worker fixtures. See [two-phase evidence](../../docs/evidence/mv3-suite-reliability/REPORT.md).
+
+### Recorder-first complete export (November 14 review)
+
+The Settings-only recorder v2 `snapshot` / `page` protocol remains local and sender/
+Debug gated; RAW still requires consent. It confers no cloud or agent authority.
+`exportComplete` now internally reads all Basic snapshot positions and rich segments,
+validates counts/sequences/source hash chain, streams page encodings into bounded
+native Blob chunks, computes incremental SHA-256/ZIP CRCs and starts one download.
+Snapshot ordinal cursors are explicit `basicNext`/`snapshotPosition`; durable Basic
+sequence numbers are preserved separately. Missing/evicted/gapped/unconfirmed data
+is named in PARTIAL coverage; corruption, cancellation and interrupted reads cannot
+report COMPLETE. 512 MiB is the explicit encoded payload budget; oversize fails
+without truncation or manual parts. The panel defaults to the available rich run,
+retains an explicit Basic-only choice and never equates a download request with a
+physical disk write. `exportPart` remains only for compatibility, not product UX.
+Source: recorder export/storage/host + Settings panel; tests:
+`recorder-complete-export.test.mjs`, `test-recorder-complete-export.mjs`, independent
+Python ZIP/CRC/hash/CSV verifier. Real Chromium page/IDB/download proof is separate
+from installed Chrome and live R2; neither is inferred from these fixtures.
+
+Recorder classification now joins `native.identity` after `beforeClick` restores
+current native ACK state. That observation cannot authorize, alter or replay a
+route. The host updates its invocation-local binding, including nested→narrow,
+and Basic/Rich preserve the observed menu generation. `provider.verification`
+observes the already-existing independent /verify response. Verified recording
+requires terminal completed/verified, matching remote operation, selected exact
+destination, receipt and independently observed HEAD key/size/ETag/version through
+the existing acceptProof contract. A reason/proofKind string alone is insufficient.
+Missing/bad evidence, auth loss, stale generation or partial History remain
+unverified. Tests exercise actual native listener→host→engine→transport→local
+workerd/R2 readback→Basic/Rich/SECURE export with memory recorder ports; browser
+persistence, installed Chrome and live R2 are distinct gates.
+
+Recorder measurements preserve supplied UTC/monotonic timestamps and worker epochs,
+record cumulative transport timings with their actual denominators, and keep
+true-remote acquisition/upload duration and speed not_applicable. End-to-end and
+History completion spans are measured independently. Interrupted/cross-epoch,
+unobserved and redacted remain distinct. Basic diagnostic DB version 3 adds
+metric indices in place; pending restart rows become interrupted without reset.
+Rich restart keeps unconfirmed reservations, deduplicates identical gap records
+and resumes above reserved high-water. Startup buffers retain nonprivate identity
+and original timing only; dropped readback evidence is an explicit startup gap,
+never a fabricated verified save. Passive observer promises are not awaited and
+rejections are consumed. Native/configuration/auth/transfer ownership is unchanged.
+
+Final recorder integration registered the two new History timing reason codes in
+the existing closed diagnostic vocabulary. The expanded measurement/availability
+schema made the 100k SECURE stress archive exceed the original 256 MiB budget;
+the bounded native Blob payload budget is now 512 MiB, with the same explicit
+failure, cancellation and one-page JS processing policy.
+
+## November 14 Narrow bucket boundary and Depth gesture readiness
+
+`3+1.1 previewNativeMenu`, `previewConfigChange`, `inspectMenuTree` and
+`commitConfigChange` continue to use `nested.project` and `compileMenuSpec`.
+Narrow always retains the physical bucket root with its actual bucketName;
+legacy root titles remain stored presentation data, not bucket identities.
+Identically named buckets in different scopes include connection/account labels.
+Visible configured paths alone contribute ancestors; hidden destinations contribute
+nothing. Hidden directory levels may collapse, but the bucket boundary cannot.
+Root-only configured rows become Save here inside the bucket. Explicit destinations
+at branch nodes retain their presentation IDs and their own Save here rows;
+otherwise a stable synthetic ancestor presentation represents the exact prefix.
+It does not write a destination, Default, approval, inventory or cloud resource.
+
+Each structural Save here uses the exact ancestor's inventory availability.
+Unverified/unwritable ancestors remain disabled with
+`NARROW_ANCESTOR_AUTHORIZATION_REQUIRED`; they cannot enter automatic setup.
+Fresh exact target authorization is still required by the resolver and transport
+before writing. A child grant never enables a root write. Hide All retains the
+real bucket and deepest action; Quick promotion retains its existing independent
+shortcut and does not leave structural saves behind when no ordinary configured
+presentation needs that branch. Current physical prefixes and custom level flags
+are unchanged. Native IDs legitimately change when their parents change; saved
+presentation IDs remain unchanged, and old-generation clicks remain rejected.
+
+`createRemoteTransport.authorizeReady` is an internal owner for a single native
+Depth gesture (`dispatchSave`/native engine.save), not a public capability API.
+A successful status observation is retained privately by object identity for at
+most ten seconds. Every reuse creates a fresh scoped capability, checks current
+OAuth session/account, plan identity (including signing material, prefix boundary,
+build and verified proof), and verifyAuthority. Changed bindings deny; expired or
+unrecognized observations require a full status check. No proof crosses gestures,
+serialization, buckets, accounts or prefixes. This removes redundant capabilities
+round trips while preserving pre-dispatch, pending and post-verification checks;
+uncertain writes remain uncertain and are never replayed. Missing setup and native
+ACK recovery still use the existing typed recovery/fresh-click contract.
+
+Evidence: `tests/narrow-bucket-boundary.test.mjs` checks native parent IDs, callback
+ACK and exact resolver targets; `tests/depth-ready-authorization.test.mjs` checks
+revocation, expiry and binding changes; existing local workerd/R2 tests exercise
+independent readback. `scripts/benchmark-narrow-depth.mjs` is explicitly a controlled
+network-latency model, not live R2/Chrome timing. See the implementation handoff for
+historical failures that remain unexplained. No new installed Windows or live R2
+pass is asserted.
+
+The background inventory owner additionally performs bounded-concurrency read-only
+checks for visible curated Narrow ancestors on an explicit matching target refresh
+or initial readiness reconciliation. It adds only these necessary ancestors to the
+in-memory projection, never persistent configuration or unrelated discovered paths.
+Exact ancestor capability results remain independent: a prefix-restricted plan can
+permit C2C-QA/ while leaving bucket-root Save here disabled. Pure preview performs
+no new sweep, and no cloud resource is provisioned by this path.
+
+## Portable menu manifests — November 14 implementation branch
+
+Ordinary Settings mounts `extension/manifest-panel.mjs` outside Debug. It uses
+only trusted `3+1.1` engine messages, never the recorder protocol. Export performs
+no network calls and allowlists persisted user configuration; no generation,
+ACK, credentials, private setup ledger, diagnostics or discovered object listing
+is in its closed 2 MiB/version-1 personal format. A picker cancellation is not a
+saved file; the download fallback states request acceptance, not disk completion.
+
+`exportMenuManifest` and `getMenuManifestDraft` require full-configuration grants
+and all affected account bindings. `previewMenuManifest` parses locally and
+stages an inert private Chrome-local draft (`menuManifestState`), not CURRENT or
+a recovery source. `inspectManifestBindings` checks exact original or explicitly
+mapped account/connection + bucket + prefix through the canonical Cloudflare
+provider owner. Direct bucket GET and exact Worker capabilities separate absence,
+unknown, permission denial, login and Worker readiness. A bounded object page is
+only materialization evidence: empty prefixes are valid future keys. Narrow
+ancestor capabilities are checked separately, with no inherited child grant.
+
+`provisionMenuManifest` consumes the exact reviewed preview after one host-owned
+approval. In the GUI the disclosed Create Yes is that approval; there is no
+second/per-location confirmation. The provider owner rechecks bucket existence,
+issued scopes/session/account, CURRENT revision and approved plan before effects.
+It creates only named missing buckets and uses `deployment.prepare` for a named
+private Worker at the disclosed prefix scope, followed by the ordinary signed
+probe, independent readback, `markVerified` and fresh status. Existing scope,
+code-upgrade and signing-renewal blockers remain distinct; the import never
+widens or replaces them. Folder markers are not part of this product path.
+The exact logical prefixes become future save paths. Costs, retained probe object
+and Worker/Durable Object effects appear before Yes. A provider grant is not
+inferred from consent. Draft/plan progress and private setup ledgers make lost
+bucket replies read-only reconciled; uncertain probes resume by operation ID,
+never a new write. Remote resources are never automatically rolled back.
+
+`commitMenuManifest` rechecks CURRENT revision, one-use preview, account grants,
+conflict policy and fresh exact readiness. The isolated import writer does not
+relax `commitConfigChange` discovery checks. It commits all modes and preferences
+in one `commitProduct` transaction. Default and existing preferences are preserved
+unless the displayed preference change is explicitly chosen; empty menus restore
+the exported preferences. Safe presentation IDs are remapped deterministically;
+independent same-key Narrow routes retain multiplicity. Repeated imports/replies
+are idempotent. Partial Yes writes only verified routes and keeps the complete
+original intentions in a separate pending draft. Cancel/discard never activates.
+
+After the durable commit, the original compiler/registrar runs with fresh exact
+readiness and fresh Depth inventory (import budget: 256 listing requests / 4096
+folders per scope). Budget exhaustion is incomplete discovery, not empty cloud
+or successful native completion. Configuration saved, native acknowledged and
+remote save verified remain separate. A private preimage plus durable receipt
+and current revision fence `undoMenuManifest`; it cannot overwrite concurrent
+edits or delete cloud objects. Missing/corrupt CURRENT blocks commit/undo and
+routes to existing Recovery. Host-granted agents require all prior/new accounts;
+Debug confers no authority. See tests/portable-menu-manifest.test.mjs,
+menu-manifest-workerd.test.mjs and scripts/test-menu-manifest-browser.mjs. Real
+Chromium DOM/IndexedDB and local Workerd are not installed Windows/live R2 proof.
+
+### Customer feedback — November 15, 2026
+
+`createDepthFeedback` is internal presentation owned by `3+1.1 dispatchSave`.
+Every outcome still writes `lastDepthClick`; the canonical operation journal
+remains available via `inspectRemoteHistory`. If persisted `uiDebugMode` is OFF,
+completed/pending outcomes send no routine message or badge; failed/uncertain
+outcomes retain a badge and short actionable customer text. If ON, detailed
+Depth messages remain. A failed preference read defaults to quiet. No routing,
+CURRENT configuration, cloud write, native ACK or verification changes.
+Tests: `tests/debug-preference.test.mjs`. Installed Windows/live R2: NOT TESTED.
+
+### History, exact-object navigation and metadata — November 15, 2026
+
+`3+1.1 inspectRemoteHistory` retains its diagnostic form; `customer:true`
+filters readiness probes and transfer-linked Depth wrappers before pagination.
+No operation is deleted. `getHistoryPreferences` (inspect, no arguments) and
+`setHistoryPreferences` (configure, range all/daily/weekly, previews
+all/first/closed, IANA timezone) use the same trusted sender/scope boundary.
+They read/write only `state.historyPreferences`; no destination revisions,
+menu generations, setup or native projection change. History remains readable
+independently of configuration errors. These settings never prune operations.
+
+`openRemoteResult` (inspect, operationId) binds the saved account through the
+existing API authorization, stats the exact recorded key in its actual folder,
+and rejects absent/changed identities. It is file-type independent. The GUI
+loads subsequent directory pages as needed and focuses/selects only the exact
+key; a missing file does not select another object. New saves retain sanitized
+host/source context locally; nothing adds page context to Worker capabilities
+or upload metadata. Unknown legacy fields stay unavailable.
+
+The R2 writer keeps its conditional PUT payload unchanged, returning a snapshot
+of the exact `httpMetadata` and `customMetadata` it supplied. HEAD still verifies
+key/size/ETag/version/operation and provenance. History displays this snapshot
+and parsed click2cloud provenance, never diagnostic receipt fields. Worker
+readback retains the upload snapshot rather than silently replacing it with
+current metadata. No cloud resource is provisioned by History or exports.
+
+The GUI projects 25 operations per page, local ISO Year/Week/Day groups, bounded
+visible image previews, and streaming JSON/JSONL/CSV exports of matching records.
+History has no Technical Details section in either Debug setting. Full receipt
+inspection remains in the existing diagnostic facility. Header, History-row
+and Explorer More controls have separate owners. A one-row Explorer toolbar
+moves address/View/+ Right Click into overflow and keeps Back/Forward/Up/Refresh.
+Tests: history.test.mjs, test-customer-history-browser.mjs and existing focused
+save suites. Browser/provider fixtures are not installed Windows/live evidence.
+
+Worker numeric stage timings distinguish source headers, destination preparation,
+and streaming source-body/write time (overlapping stages are not misreported as
+separable network durations). Transport retains poll count and stage timings in
+the durable diagnostic record, outside customer History Metadata and exports.
+
+### Bounded CURRENT reads and History cursors
+
+`CurrentStore.loadState` still backs `getConfiguration`, `commitConfigChange`
+and invocation-time `dispatchSave` authorization. It now reads exact product,
+mode, generation, integrity, provenance and backup-root keys plus the complete
+setup prefix. Missing/corrupt/conflicting historical evidence takes the same
+blocking branches; configuration journals/checkpoints and native establishment
+proof remain independent guards. Remote-result payloads are no longer decoded
+for each authorization. No schema upgrade, data rewrite or history migration.
+
+`inspectRemoteHistory(customer:true)` scans only canonical remote-result keys,
+keeps at most limit+1 records in memory, preserves legacy operation records, and
+uses timestamp/ID continuation cursors. It omits linked click wrappers only
+when their actual transfer record exists. Export streams these pages; display
+projects them with yields between pages. Legacy unindexed history still needs
+one cursor scan per export page; no background index migration was introduced.
+CSV has an explicit `recordType=export` metadata row, including on empty exports;
+operation rows have `recordType=operation`. Formula-leading spreadsheet strings
+are apostrophe-prefixed; JSON/JSONL retain original text. Sensitive metadata
+fields/URLs are redacted for customer output with an explicit indicator; raw
+upload snapshots remain internal. Privacy export also omits nested browsing URLs.
+
+Evidence: paired 5,000-record actual Chromium IDB measurements and the full
+existing recovery/crash guards in docs/evidence/customer-history. These are not
+Windows gesture latency or live cloud transfer measurements.
+
+## CLICK AND DONE — destination Save and native dispatch
+
+The Destinations Manager and its add/edit dialog call `3+1.1 commitConfigChange`
+with `prepareModes`. Save discloses scoped Worker maintenance and the small R2
+readback probe. The selected cloud targets come from the resulting visible
+configuration and the changed rows, including new or changed Depth scopes.
+A tool caller must hold both configure and exact-account
+`recoverCloudflareDestination` authority and confirm the combined operation.
+A caller that omits `prepareModes` retains the legacy configuration-only
+contract. The saved revision and exact readiness selection are bound to the
+CURRENT retry receipt.
+
+The commit calls existing `recoverCloudflareDestination` onboarding logic
+before asking the canonical compiler and registrar to apply the menu. An
+existing scoped Worker with matching build and verified bucket write is reused.
+A newly prepared Worker must pass the independent R2 byte readback probe.
+The same bucket binding supports discovered Depth descendants within the
+Worker's prefix. Required Depth discovery failures, narrower existing Worker
+scopes, changed CURRENT and missing Chrome acknowledgments report incomplete
+Save while preserving configuration. An unrelated stale Depth snapshot does
+not block a Simple or Narrow Save. An uncertain probe is inspected by its
+original operation ID on retry. No bucket is created by this method.
+
+The production registrar calls the existing `dispatchSave` engine once for
+native save rows. The engine validates CURRENT, native ACK, immutable route,
+context and current account authorization. Prepared Worker evidence comes
+from the retained scoped plan. The transport performs live bucket authority
+checks before dispatch and after independent R2 verification. Signed, read-only
+operation polls reuse an invocation-local grant and check the OAuth session.
+Long-running writes still require authorized lease renewal. Cold boot
+reprojects retained configuration and Depth inventory and obtains new Chrome
+callbacks without a provider sweep. Native pre-dispatch recovery can use
+retained approval for the exact configured target and requires a fresh click
+if the menu changes. It never replays a source write. Shelf, recorder and
+pending History updates cannot gate a valid remote write.
+
+Evidence and live acceptance steps are in [CLICK AND DONE evidence](../../codex/11.18.2026/CLICK_AND_DONE_EVIDENCE.md).
+
+## P0 R2 operations and Narrow ancestors
+
+`3+1.1 fileAction` uses the selected Explorer account, source and destination.
+It checks authorization and human confirmation before execution and does not
+read native menu acknowledgment. A current authorized private Worker is
+reused. If setup is needed the Shelf discloses the selected bucket bindings
+and possible charges before calling with `authorizeSetup`. Trusted tool
+callers also need the provision grant. `Create Bucket` is in Explorer More and
+reads back the exact authorized name following the single create attempt.
+
+Each ordinary Worker binds one R2 bucket. Narrow saved leaves and visible
+ancestors, including bucket root, use its bucket-wide readiness. The signed
+capability still binds the exact account, bucket, prefix, operation and
+intent. Explicitly authorized migration inspects the owned old script,
+preserves its signing material and claims namespace, and verifies expanded
+binding access and a readback before claiming readiness. Existing narrow
+bindings continue to enforce their original scope until migration succeeds.
+The c337e41 Worker remains compatible for operations its existing binding
+already supports.
+
+Same-account transfers between buckets prepare an ordered dual-bound Worker
+through the same provisioner, with no effect on the primary Workers.
+Copy streams through the Worker between its two bindings. Move and rename
+check every non-skipped target before deleting source objects. R2 does not
+offer conditional delete, so the final source identity check and delete
+remain a verified, non-atomic sequence. `Make Default` verifies readiness
+before replacing the prior target and requires an actionable acknowledged
+route. An unavailable target leaves or restores the prior Default.
+
+The Worker may return a durable written receipt within its first bounded
+response. If it continues in the background, the client uses the bounded
+retry hint rather than waiting a whole polling interval after a near miss.
+Both paths still require an independent R2 HEAD before verified completion.
+The standalone reconciliation path still checks ambiguous writes by
+operation ID. See [implementation evidence](../../docs/evidence/r2-operations-overhaul/HANDOFF.md).
+
+## Explorer Make Default in 0.3.20
+
+Explorer’s **Make Default** sends one `commitConfigChange` operation with `type: 'makeDefault'`, the exact `target`, and `ensureSimple: true`. The normal revision and idempotency checks apply. The service verifies that the folder is in authorized inventory or confirms the exact prefix through the File API. `applyConfigChanges` reuses an existing Simple row or creates one with a deterministic ID, then applies Default and Quick precedence.
+
+The existing Worker readiness check runs before the local commit. An exact durable setup approval can be reused where the host grants provisioning authority. Insufficient provider access stops the operation. After commit, the existing registrar must acknowledge an enabled save row for the target. A failed native application compensates the focused change if it still owns the current revision. The browser fixture exercises the Simple row and ACK. The installed menu and live R2 path require independent verification. [API command reference](../../docs/api/API-COMMAND-REFERENCE.md)

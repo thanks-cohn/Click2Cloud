@@ -1,0 +1,14 @@
+[
+  {
+    "privacy": "SECURE",
+    "sha256": "fc223ee199c832c024aaf4474c06b1e35388686cfb36233f6eb9e3ae19061274",
+    "checks": "all entries CRC, manifest mode/hash and seeded privacy PASS",
+    "rawArtifactPublished": false
+  },
+  {
+    "privacy": "RAW",
+    "sha256": "a617eb09d1df01d6f663006c1f910199615cc22713e0a5d8bda61afc398de40f",
+    "checks": "all entries CRC, manifest mode/hash and seeded privacy PASS",
+    "rawArtifactPublished": false
+  }
+]

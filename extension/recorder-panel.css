@@ -1,0 +1,9 @@
+/* Settings-only; no global Shelf/layout/engine selectors. */
+.recorder-panel {min-width:0;max-width:100%;font-size:13px;line-height:1.5}
+.recorder-panel h3 {font-size:15px;margin:20px 0 8px}
+.recorder-panel label {display:block;margin:10px 0}
+.recorder-panel input[type=number] {width:10em;max-width:100%}
+.recorder-panel button,.recorder-panel select {max-width:100%;white-space:normal;margin:4px 4px 4px 0}
+.recorder-panel pre {max-height:20rem;overflow:auto;border:1px solid var(--line);padding:8px}
+.recorder-panel [role=status] {overflow-wrap:anywhere}
+.recorder-panel a {display:block;margin:10px 0}

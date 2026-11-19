@@ -19,6 +19,8 @@ export function safeWorkerDiagnostic(value){
  return {kind:'cloudflare-worker-access',observedAt:/^\d{4}-\d\d-\d\dT[0-9:.]+Z$/.test(value.observedAt??'')?value.observedAt:null,requestId:/^[a-f0-9]{12,24}(?:-[A-Z]{3})?$/.test(value.requestId??'')?value.requestId:null,challenge:['invalid_token','insufficient_scope'].includes(value.challenge)?value.challenge:null,operation:value.operation,workerIntent,requiredCreationRole:workerIntent==='create'?'Workers Admin at Workers product scope':null,creationPermissionEvidence:workerIntent==='create'?'Official Workers roles guidance; current account role not observed':null,method:op.method,endpoint:op.endpoint,code:['WORKER_PERMISSION_DENIED','INSUFFICIENT_SCOPE','REAUTH_REQUIRED','TOKEN_EXPIRED','WORKER_REQUEST_REJECTED','CLOUDFLARE_RESPONSE_INVALID','TRANSIENT_API_FAILURE','WORKERS_SUBDOMAIN_UNAVAILABLE','WORKER_CREATE_PERMISSION_REQUIRED'].includes(value.code)?value.code:'WORKER_PERMISSION_DENIED',httpStatus:Number.isInteger(value.httpStatus)&&value.httpStatus>=100&&value.httpStatus<=599?value.httpStatus:null,providerCodes:(Array.isArray(value.providerCodes)?value.providerCodes:[]).filter(c=>typeof c==='number'&&Number.isSafeInteger(c)||typeof c==='string'&&/^\d{1,16}$/.test(c)).slice(0,16),omittedScopeCount,scopeListComplete:omittedScopeCount===0,missingScopes:(Array.isArray(value.missingScopes)?value.missingScopes:[]).filter(s=>PUBLIC_SCOPES.includes(s)),grantedScopes:value.scopeEvidence==='provider-returned'?sessionScopes:null,sessionScopes,scopeEvidence:['provider-returned','oauth-default-requested','legacy','unavailable'].includes(value.scopeEvidence)?value.scopeEvidence:'unavailable',selectedAccountVerified:value.selectedAccountVerified===true,requestedWorkerScopes:CLOUDFLARE_SCOPES.filter(s=>s.startsWith('workers-scripts.')),referenceWorkerScopes:['workers-scripts.read','workers-scripts.write'],requiredPermissionAnyOf:[...op.permissions],classification,correctiveAction};
 }
 const workerError=diagnostic=>Object.assign(Error(diagnostic.code),{code:diagnostic.code,diagnostic});
+const planKey=(target,sourceBucket)=>digest(sourceBucket&&sourceBucket!==target.bucketName
+ ?[target.accountId,target.bucketName,sourceBucket]:[target.accountId,target.bucketName]);
 export function createProvisioner({request,readModule,load,store,authority=async()=>null}){
  async function json(path,options={},operation,auth,allowMissing=false){
   let r,body;try{r=await request(path,options);body=await r.json();}catch(error){
@@ -30,41 +32,59 @@ export function createProvisioner({request,readModule,load,store,authority=async
   }return body.result;
  }
 
- return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false}={}){
-  if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]);
+ return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName,expandScope=false,sourceBucket}={}){
+  if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await planKey(d,sourceBucket);
+  if(sourceBucket===d.bucketName)sourceBucket=undefined;
   const identity=await authority();let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
   let plan=await load(key);
-  try{if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')||!/^[a-f0-9]{64}$/.test(plan.secret??'')))fail('TRANSPORT_PLAN_INVALID');if(plan?.failure&&!retryDenied)throw workerError(safeWorkerDiagnostic(plan.failure));
+  try{if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.sourceBucket!==sourceBucket||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')))fail('TRANSPORT_PLAN_INVALID');if(plan&&!/^[a-f0-9]{64}$/.test(plan.secret??'')&&!renewSigning)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');const renewing=!!plan&&(renewSigning||plan.signingRenewalPending===true);if(renewing)rebuild=true;if(plan?.failure&&!retryDenied)throw workerError(safeWorkerDiagnostic(plan.failure));
   if(identity&&!auth.selectedAccountVerified)fail('WRONG_ACCOUNT');
-  prefixScope??=plan?.prefixScope??'';const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);if(plan?.state==='ready'&&!rebuild){if(plan.codeDigest!==codeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');return plan;}
+  const expanding=expandScope&&!!plan?.prefixScope;
+  if(expanding){prefixScope='';rebuild=true;}
+  prefixScope??=plan?.prefixScope??'';
+  if(plan&&prefixScope!==(plan.prefixScope??'')&&!expanding)fail('WORKER_DESTINATION_SCOPE_REQUIRED');const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);if(plan?.state==='ready'&&!rebuild){if(plan.codeDigest!==codeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');if(!inspect)return plan;}
   const base='/accounts/'+encodeURIComponent(d.accountId)+'/workers';
   const sub=await json(base+'/subdomain',{},'account-subdomain-read',{...auth,workerIntent:'account-settings'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
   let recoveredMissing=false,workerIntent=plan?'update':'create';
-  if(plan?.state==='pending'||plan&&rebuild){
+  if(plan?.state==='pending'||plan&&(rebuild||inspect)){
    const settings=await json(base+'/scripts/'+plan.name+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true);
    if(settings){const bindings=settings.bindings??[];
-    if(!bindings.some(x=>x.name==='STORAGE'&&x.bucket_name===d.bucketName)||!bindings.some(x=>x.name==='ACCOUNT_ID'&&x.text===d.accountId))fail('PROVISION_RECONCILE_REQUIRED');
-    if(!bindings.some(x=>x.name==='PREFIX_SCOPE'&&x.text===(plan.prefixScope??'')))fail('PROVISION_RECONCILE_REQUIRED');
-    if(plan.state==='pending'&&plan.codeDigest===codeDigest&&bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest)){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');delete plan.failure;plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
-    if(plan.state==='pending'&&!rebuild)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
+    if(!bindings.some(x=>x.name==='STORAGE'&&x.type==='r2_bucket'&&x.bucket_name===d.bucketName)||!bindings.some(x=>x.name==='ACCOUNT_ID'&&x.text===d.accountId)||!bindings.some(x=>x.name==='BUCKET_NAME'&&x.text===d.bucketName)||!bindings.some(x=>x.name==='CLAIMS'&&x.type==='durable_object_namespace'&&x.class_name==='RemoteClaims'&&!x.script_name)||!bindings.some(x=>x.name==='SIGNING_KEY'&&x.type==='secret_text'))fail('PROVISION_RECONCILE_REQUIRED');
+    const sourceBinding=bindings.find(x=>x.name==='SOURCE_STORAGE'),sourceName=bindings.find(x=>x.name==='SOURCE_BUCKET_NAME');
+    if(sourceBucket
+      ?sourceBinding?.type!=='r2_bucket'||sourceBinding.bucket_name!==sourceBucket||sourceName?.text!==sourceBucket
+      :sourceBinding||sourceName)fail('PROVISION_RECONCILE_REQUIRED');
+    const deployedScope=bindings.find(x=>x.name==='PREFIX_SCOPE')?.text;
+    const deployedDigest=bindings.find(x=>x.name==='CODE_DIGEST')?.text;
+    const desiredBinding=deployedScope===(plan.prefixScope??'');
+    const previousBinding=plan.previousBinding&&deployedScope===plan.previousBinding.prefixScope&&deployedDigest===plan.previousBinding.codeDigest;
+    if(!desiredBinding&&!previousBinding)fail('PROVISION_RECONCILE_REQUIRED');
+    if(plan.state==='ready'&&!rebuild){if(!bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest))fail('WORKER_BUILD_MISMATCH');return plan;}
+    if(plan.state==='pending'&&!renewing&&!expanding&&desiredBinding&&plan.codeDigest===codeDigest&&deployedDigest===codeDigest){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');delete plan.failure;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
+    if(plan.state==='pending'&&!rebuild&&!previousBinding)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
    }else{recoveredMissing=true;workerIntent='create';}
   }
   if(plan&&!['ready','pending'].includes(plan.state))fail('PROVISION_RECONCILE_REQUIRED');
   auth={...auth,workerIntent};
   if(workerIntent==='create'&&auth?.scopes&&!hasWorkerCreateScope(auth.scopes))throw workerError(safeWorkerDiagnostic({operation:'script-upload',workerIntent:'create',code:'WORKER_CREATE_PERMISSION_REQUIRED',classification:'OAUTH_SCOPE_MISSING',httpStatus:null,providerCodes:[],missingScopes:['workers-scripts.admin'],grantedScopes:auth.scopes,scopeEvidence:auth.scopeEvidence,selectedAccountVerified:auth.selectedAccountVerified}));
   const updating=!!plan&&!recoveredMissing;
-  const name=plan?.name??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=plan?.secret??Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
-  plan={name,secret,codeDigest,state:'pending',accountId:d.accountId,bucketName:d.bucketName,prefixScope,protocol:PROTOCOL};await store(key,plan);
+  if(workerName!==undefined&&!/^click2cloud-r2-[a-f0-9]{20}$/.test(workerName))fail('WORKER_ADDRESS_INVALID');
+  if(!plan&&workerName&&await json(base+'/scripts/'+workerName+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true))fail('PROVISION_RECONCILE_REQUIRED');
+  const name=plan?.name??workerName??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=renewing&&!plan.signingRenewalPending||!plan?.secret?Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join(''):plan.secret;
+  const previousBinding=plan?.previousBinding??(expanding?{prefixScope:plan.prefixScope,codeDigest:plan.codeDigest}:null);
+  plan={name,secret,codeDigest,state:'pending',accountId:d.accountId,bucketName:d.bucketName,prefixScope,protocol:PROTOCOL,
+   ...(sourceBucket?{sourceBucket}:{}),...(previousBinding?{previousBinding}:{}),...(renewing?{signingRenewalPending:true}:{})};await store(key,plan);
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify({main_module:'src/cloudflare/worker.mjs',compatibility_date:'2026-01-01',compatibility_flags:['nodejs_compat'],observability:{enabled:false},
-   bindings:[{name:'STORAGE',type:'r2_bucket',bucket_name:d.bucketName},{name:'CLAIMS',type:'durable_object_namespace',class_name:'RemoteClaims'},
+   bindings:[{name:'STORAGE',type:'r2_bucket',bucket_name:d.bucketName},
+    ...(sourceBucket?[{name:'SOURCE_STORAGE',type:'r2_bucket',bucket_name:sourceBucket},{name:'SOURCE_BUCKET_NAME',type:'plain_text',text:sourceBucket}]:[]),{name:'CLAIMS',type:'durable_object_namespace',class_name:'RemoteClaims'},
     {name:'CODE_DIGEST',type:'plain_text',text:codeDigest},{name:'ACCOUNT_ID',type:'plain_text',text:d.accountId},{name:'BUCKET_NAME',type:'plain_text',text:d.bucketName},{name:'PREFIX_SCOPE',type:'plain_text',text:prefixScope},
     {name:'SIGNING_KEY',type:'secret_text',text:secret}],...(!updating?{migrations:{new_tag:'v1',new_sqlite_classes:['RemoteClaims']}}:{})})],{type:'application/json'}));
   for(const [path,source] of sources)form.append(path,new Blob([source],{type:'application/javascript+module'}),path);
   await json(base+'/scripts/'+name,{method:'PUT',body:form},'script-upload',auth);
   await json(base+'/scripts/'+name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});
  if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
-  delete plan.failure;plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;
+  delete plan.failure;delete plan.signingRenewalPending;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;
   }catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(diagnostic){if(plan)await store(key,{...plan,failure:diagnostic});throw workerError(diagnostic);}throw error;}
- },async markVerified(target,sessionId){const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]),plan=await load(key);if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');await store(key,{...plan,verifiedAt:Date.now(),verifiedTargets:{...plan.verifiedTargets,[d.prefix]:{at:Date.now(),sessionId,codeDigest:plan.codeDigest}}});},async lookup(target){const d=remoteDestination(target);return load(await digest([d.accountId,d.bucketName]));}});
+ },async markVerified(target,sessionId){const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]),plan=await load(key);if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');if(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.protocol!==PROTOCOL)fail('TRANSPORT_PLAN_INVALID');if(plan.prefixScope&&d.prefix!==plan.prefixScope&&!d.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');await store(key,{...plan,verifiedAt:Date.now(),verifiedTargets:{...plan.verifiedTargets,[d.prefix]:{at:Date.now(),sessionId,codeDigest:plan.codeDigest}}});},async lookup(target,sourceBucket){return load(await planKey(remoteDestination(target),sourceBucket));}});
 }

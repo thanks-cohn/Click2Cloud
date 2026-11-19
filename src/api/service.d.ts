@@ -2,6 +2,11 @@
 export type Version = '3+1.1';
 export interface GalleryLoadingVisual {warning?:'LOADING_MEDIA_INVALID';revision:number;mode:'math'|'media'|'plain';media:{name:string;type:string;size:number;base64?:string}|null}
 export interface Target {provider:string;connectionId:string;accountId:string;bucketName:string;prefix:string}
+export interface DirectoryNameEntry {key:string;parentPrefix:string;displayName:string;folder:boolean;size?:number;etag?:string;uploaded?:string;last_modified?:string;contentType?:string}
+export interface DirectoryNameResult {
+ entries:DirectoryNameEntry[];nextPageToken:string|null;complete:boolean;
+ source:'cache'|'cloud'|'offline';asOf:number|null;stale:boolean;refreshing:boolean;code?:string;
+}
 export interface Level {hidden?:boolean;label?:string}
 export interface Destination {id:string;target:Target;label?:string;hidden?:boolean;quick?:boolean;order?:number;visibilityMode?:'all'|'hide-all'|'custom';levels?:Record<string,Level>}
 export type Mode = 'simple'|'nested'|'narrow';
@@ -13,7 +18,7 @@ export type Change =
  | {type:'deleteDestinationConfig';mode:Mode;id:string}
  | {type:'setShowInChrome';show:Show}
  | {type:'setDepthDisplayBuckets';scopes:{target:Target;maxDepth:number;hidden?:boolean}[]}
- | {type:'makeDefault';target:Target}
+ | {type:'makeDefault';target:Target;ensureSimple?:boolean}
  | {type:'clearDefault'}
  | {type:'setTheme';theme:'dark'|'light'}
  | {type:'setExplorerLayout';explorerLayout:{split:number;toolbarRows:number}}
@@ -25,19 +30,32 @@ export type Change =
  | {type:'dismissOrganizationSuggestion';signature:string}
  | {type:'updateRecoveryPolicy';policy:RecoveryPolicy};
 export interface Identity {provider:string;connectionId:string;accountId:string}
+export interface ShortcutCommand {commandId:string;label:string;category:string;context:string;defaultChord:string|null;shortcutEligible:boolean;requires?:string;effects:string;parameterBindings?:Record<string,string>;kind?:'api'|'ui';method?:keyof Methods;permission?:Tool['scope']}
+export interface ManifestDraftAction {draftId:string;previewToken:string;expectedRevision:number;idempotencyKey:string}
+export interface HistoryPreferences {range:'all'|'daily'|'weekly';previews:'all'|'first'|'closed';timezone:string}
+export interface ExportObject {key:string;bucket:string;provider:string;size:number|null;contentType:string|null;etag:string|null;version:string|null;lastModified:string|null;missing:string[];redacted:string[]}
+export interface ExportUrl {url:string;domain:string;status:'verified-domain';provenance:'cloudflare-r2-active-custom-domain'}
 export interface Methods {
- fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete';source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
+ exportMenuManifest:{};getMenuManifestDraft:{};previewMenuManifest:{json:string};discardMenuManifest:{draftId:string};
+ inspectManifestBindings:{draftId:string;mapping?:Record<string,{accountId:string;connectionId:string}>;options?:{policy:'skip-identical'|'add-alongside'|'replace-selected';replaceIds?:string[];applyPreferences?:boolean}};
+ commitMenuManifest:ManifestDraftAction&{partial:boolean};provisionMenuManifest:ManifestDraftAction;undoMenuManifest:{expectedRevision:number;idempotencyKey:string};
+ getHistoryPreferences:{};setHistoryPreferences:HistoryPreferences;
+ recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean};
+ listDirectoryObjects:{source:Target;cursor?:string};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
+ listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};
+ fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
  approveCloudflareSetup:{accountId:string;expectedRevision:number;idempotencyKey:string};repairCloudflareDestination:{accountId:string;target?:Target;expectedRevision:number;idempotencyKey:string};
- invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
+ invokeProviderAction:{provider:'cloudflare'|'google-drive'|'dropbox'|'onedrive';generation?:number;source?:{url:string;filename:string;responseFilename?:boolean};idempotencyKey:string};inspectRemoteHistory:{customer?:boolean;cursor?:string;limit?:number};inspectRemoteReceipt:{operationId:string;target?:Target};inspectCloudflareSetup:{accountId:string;idempotencyKey:string};cancelRemoteOperation:{target:Target;operationId:string};openRemoteResult:{operationId:string};refreshExplorer:{source:Target;cursor?:string};enterExplorer:{};navigateExplorer:{target:Target};readFileChunk:{source:Target;key:string;offset:number;etag?:string;length?:number};
  inspectExplorerContextMenu:{target:Target;entry?:{key:string;folder:boolean;displayName?:string};hasClipboard?:boolean};previewContextMenu:{context?:'image'|'link'|'video'|'audio'|'page'|'selection'};describeCapabilities:{section?:'reliability'};getConfiguration:{};getEngineHealth:{view?:'health'|'trace'|'support';operationId?:number;cursor?:string;limit?:number};getProviderConnections:{};
  getGalleryLoadingVisual:{includeMedia?:boolean};setGalleryLoadingVisual:{expectedRevision:number;mode:'math'|'media'|'plain';removeMedia?:boolean;media?:{name:string;type:'image/png'|'image/jpeg'|'image/webp'|'image/gif'|'video/mp4';base64:string}};
  loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
+ searchDirectoryNames:{source:Target;query:string;pageToken?:string;pageSize?:number;refresh?:boolean};
  fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
  listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
  previewConfigChange:{changes:Change[];expectedRevision:number};
- commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string};
+ commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string;prepareModes?:('simple'|'nested'|'depth')[]};
  reconcileNativeMenu:{expectedGeneration:number};inspectRecoveryCoverage:{target:Target};runRecoveryPage:{target:Target};inspectBackupRoots:{};chooseBackupLocation:{purpose?:'rebuild'};listRecoveryPolicies:{};writeRecovery:{};
  requestRestorePreview:{rebuild?:RebuildIntent};restoreRightClickMenu:{expectedRevision?:number;previewToken:string;idempotencyKey:string;rebuild?:RebuildIntent};
  inspectWholeCloudJobs:{};enableWholeCloudJob:{identity:Identity;cadence?:'weekly'|'daily'};disableWholeCloudJob:{identity:Identity};
@@ -62,15 +80,21 @@ export interface MenuRow {presentationId?:string;provenance?:SelectionProvenance
 export interface MenuSpec {schemaVersion:1;generation:number;revision:number;rows:MenuRow[];omissions:unknown[];composition?:MenuComposition}
 export interface RestorePreview {available:boolean;reason?:string;current:ConfigurationHealth;previewToken?:string;product?:unknown;configs?:unknown;provenance?:'VALIDATED_COMPLETE_LOCAL_JOURNAL'|'USER_AUTHORIZED_EXTERNAL_CHECKSUM_VERIFIED'|'NEW_OWNER_CONFIRMED_CONFIGURATION';nativePartial?:{target:Target;label:string}[];outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';unknown?:string[];requiresPreservation?:boolean;nativeSalvage?:'PARTIAL_PROJECTION_ONLY_NOT_RESTORABLE'}
 export interface Results {
+ getHistoryPreferences:HistoryPreferences;setHistoryPreferences:HistoryPreferences;recoverCloudflareDestination:CloudflareSetupResult;
+ listDirectoryObjects:{entries:ExportObject[];nextCursor:string|null};
+ getPublicUrls:{domains:string[];checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
+ getExportObjectMetadata:ExportObject&{customMetadata:Record<string,string>|null;httpMetadata:Record<string,string>|null;tags:string[];availability:'observed'|'unobserved';tagBudget?:{used:number;limit:number;remaining:number;reserved:number;fits:boolean}};
+ listCommands:{commands:ShortcutCommand[]};getShortcutBindings:{bindings:Record<string,string|null>};setShortcutBinding:Results['getShortcutBindings'];resetShortcutBindings:Results['getShortcutBindings'];
  getGalleryLoadingVisual:GalleryLoadingVisual;setGalleryLoadingVisual:GalleryLoadingVisual;
  requestRestorePreview:RestorePreview;restoreRightClickMenu:{configuration:unknown;native:{state:string;code?:string};preservation?:{state:'VERIFIED';checksum:string;filename:string;evidenceClass:'external-filesystem-readback'};requiresReconnect:true;outcome?:'REBUILT_WITH_OWNER_CONFIRMATION';originalStateRestored?:false;remoteSave?:'NOT_VERIFIED'};
  describeCapabilities:ReliabilityDescription|{version:Version;build:unknown;tools:Tool[];publicEndpoint:false};
  getEngineHealth:EngineTrace|SafeSupportReport|{revision:number|null;generation:{desired:number;applied:number|null}|null;storage:{state:'available'|'blocked';code?:string};configuration?:ConfigurationHealth;storagePolicy?:{state:'OBSERVED_READ_ONLY'|'UNOBSERVED';persistent?:boolean;usageBytes?:number|null;quotaBytes?:number|null;pastDeletionCause?:'UNKNOWN'};origin:{extensionId:string|null;schemaVersion:1};native:unknown;externalRecovery:unknown};
- commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{target:Target;state:'READY'|'blocked';code:string}[]};
+ commitConfigChange:{configuration:unknown;native:{state:string;code?:string};backup:unknown;destinationReadiness?:{mode?:'simple'|'nested'|'depth';target:Target;state:'READY'|'blocked';code:string}[]};
  previewNativeMenu:MenuSpec;
  listDestinations:{items:(Destination|{target:Target;maxDepth:number;hidden?:boolean})[];total:number;nextCursor:string|null};
  inspectNativeACK:{schemaVersion:1;epoch:number;pending:number;desired:MenuSpec|null;acknowledgedGeneration:number|null;coverage:{nativeApi:string;nativeBehavior:string;nativeRendering:string;gaps:string[]};lastOutcome:unknown};
  fileAction:{state:string;code?:string;id:string;data?:{operationId:string;completed:number;skipped?:number;receipt?:RemoteReceipt;verification?:string;atomicDelete?:boolean}};
+ searchDirectoryNames:DirectoryNameResult;
  enterExplorer:{state:string;code?:string;accounts:{id:string;name?:string}[];buckets:{name:string}[];target:Target|null;preferred:Target|null;accountId?:string};
  initializeCloudflare:CloudflareSetupResult;
  loginBegin:Results['loginStatus']&{initialization?:CloudflareSetupResult&{stage?:string;operationId?:string}};
@@ -84,7 +108,7 @@ export interface Results {
  inspectCloudflareSetup:{accountId:string;target:Target;stage:string;operationId?:string;result?:CloudflareSetupResult}|null;cancelRemoteOperation:RemoteOperation;openRemoteResult:{target:Target;highlightKey:string};navigateExplorer:{state:'completed';target:Target};refreshExplorer:{state:string;code?:string;data?:{entries:unknown[];cursor:string}};readFileChunk:{state:string;code?:string;data?:{bytes:number[];offset:number;etag?:string|null;total:number;done:boolean}};
 }
 export interface EngineApi {invoke<K extends keyof Methods>(request:Request<K>,authenticatedActor:string):Promise<Response<K extends keyof Results?Results[K]:unknown>>;readonly tools:readonly Tool[]}
-export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local'}
+export interface Tool {name:keyof Methods;scope:'inspect'|'configure'|'auth'|'execute'|'restore'|'provision';version:Version;inputSchema:object;outputSchema:object;effectful:boolean;transport:'trusted-local';command?:ShortcutCommand}
 export interface Grant {actor:string;methods:(keyof Methods)[];accounts:string[];expiresAt:number;allConfiguration?:boolean;interactiveAuth?:boolean}
 export interface AgentGateway {request(handle:string,request:Request,authenticatedActor:string):Promise<Response>;grant(grant:Grant):string;revoke(handle:string):boolean}
 

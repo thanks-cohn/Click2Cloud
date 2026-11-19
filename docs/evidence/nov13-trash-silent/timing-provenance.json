@@ -1,0 +1,22 @@
+{
+  "beforeRef": "b0d11f1b",
+  "after": "frozen working-tree snapshot after Trash gate and Debug UI; runtime source dirty at capture",
+  "evidenceClass": "production-app-headless-Chromium-real-IDB-fixture-IPC-not-native-not-R2",
+  "files": {
+    "before": {
+      "extension/app.mjs": "7e85c565ab9e473e22f216b9d7156ad9c065a092ca2d20fcadc6bf3c040b909c",
+      "extension/app.css": "13bb172da97739e3402381b181429e9bbc88660ff92e6038fc3ccd743175d306",
+      "extension/app.html": "668602dae631aa7efbdda276d8644576434ab0c2b3e282798aa0e576652c1076",
+      "src/chrome/provider-panel.mjs": "ff033df6700670167bf3a5c5b1fa5e3f11da0ca377e7f12e2baf961130a51061",
+      "src/modes/depth/native-click.mjs": "1c9762b46b4f6c7b2f90b7c5cd309bdcca6a238b25936e898a97295da8ed7c48"
+    },
+    "after": {
+      "extension/app.mjs": "4b6973dc5aa8db125390b63333504b8fcd67635957cfde6308bc8ce029b01656",
+      "extension/app.css": "1d8120eb84409b2ce2d0656087e9661d6423fb552116dcd9a4944e9a72965eea",
+      "extension/app.html": "eae6460b8e64cce549606eecbeafb107efe42a2a6d50e00bec11149b98d5e252",
+      "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
+      "src/chrome/provider-panel.mjs": "899d538d1d828c9097ff8d934a108af6edb3974b409bda3fed96a561770b82da",
+      "src/modes/depth/native-click.mjs": "5d8e8bd096859c3f4349115955d66b400eafa9ab33f16ca47b5e632176f26c25"
+    }
+  }
+}

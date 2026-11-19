@@ -1,3 +1,7 @@
+import {objectUrls,objectTags,safeObjectMetadata,verifiedDomains,metadataBudget,TAG_KEY} from '../explorer/object-exports.mjs';
+import {apiShortcutMetadata,listCommands} from './shortcuts.mjs';
+import {locateSavedResult} from '../history/navigation.mjs';
+import {createManifestService,createManifestStore} from '../manifest/service.mjs';
 import {createAgentDebugApi} from '../glaciaring/agent-api.mjs';
 import {describeReliability} from '../glaciaring/reliability.mjs';
 import {supportReport} from '../glaciaring/support-report.mjs';
@@ -19,38 +23,59 @@ const target=obj({provider:str,connectionId:str,accountId:str,bucketName:str,pre
 const arr=items=>({type:'array',items,maxItems:Number.MAX_SAFE_INTEGER});
 const show=obj({simple:bool,nested:bool,depth:bool,flat:bool},['simple','nested','depth','flat']);
 const level=obj({hidden:bool,label:str});
-const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,
+const change=obj({type:str,mode:{enum:['simple','nested','narrow']},id:str,target,label:{type:'string',maxLength:256},hidden:bool,quick:bool,order:num,ensureSimple:bool,
   visibilityMode:{enum:['all','hide-all','custom']},levels:{type:'object',additionalProperties:level},show,theme:{enum:['dark','light']},view:{enum:['details','list','grid']},explorerLayout:obj({split:{type:'number',minimum:0,maximum:100},toolbarRows:{type:'integer',minimum:1,maximum:7}},['split','toolbarRows']),connectionId:str,favorite:bool,provider:str,visible:bool,placement:{enum:['direct','other']},
   scopes:arr(obj({target,hidden:bool,maxDepth:{type:'integer',minimum:1}},['target','maxDepth'])),signature:str,
   policy:obj({cadence:{enum:['weekly','daily']},simple:bool,nested:bool,location:{enum:['automatic','documents']},buckets:arr(obj({target,enabled:bool,depth:{type:'integer',minimum:1}},['target','enabled','depth']))},['cadence','simple','nested','location','buckets'])},['type']);
 const changeFields=CONFIG_CHANGE_FIELDS;
-change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
+change.oneOf=Object.entries(changeFields).map(([type,fields])=>({...obj({type:{enum:[type]},...Object.fromEntries(fields.map(k=>[k,change.properties[k]]))},['type',...(type==='createDestination'?['mode','target']:type==='updateDestination'?['mode','id']:type==='makeDefault'?['target']:fields)]),...(type==='updateDestination'?{minProperties:4}:{})}));
 const rebuild=obj({accountId:str,changes:arr(change),acknowledgeUnknown:{enum:[true]}},['accountId','changes','acknowledgeUnknown']);
+const manifestOptions=obj({policy:{enum:['skip-identical','add-alongside','replace-selected']},replaceIds:{type:'array',items:str,maxItems:4096},applyPreferences:bool},['policy','replaceIds','applyPreferences']);
+const draftParams={draftId:str,previewToken:str,expectedRevision:num,idempotencyKey:str};
+const manifestDefinitions={
+ exportMenuManifest:['inspect',obj()],getMenuManifestDraft:['inspect',obj()],
+ previewMenuManifest:['configure',obj({json:{type:'string',minLength:1,maxLength:2097152,multiline:true}},['json'])],
+ inspectManifestBindings:['configure',obj({draftId:str,mapping:{type:'object',additionalProperties:obj({accountId:str,connectionId:str},['accountId','connectionId'])},options:manifestOptions},['draftId'])],
+ discardMenuManifest:['configure',obj({draftId:str},['draftId'])],
+ commitMenuManifest:['configure',obj({...draftParams,partial:bool},['draftId','previewToken','expectedRevision','idempotencyKey','partial'])],
+ provisionMenuManifest:['provision',obj(draftParams,['draftId','previewToken','expectedRevision','idempotencyKey'])],
+ undoMenuManifest:['configure',obj({expectedRevision:num,idempotencyKey:str},['expectedRevision','idempotencyKey'])]
+};
 const definitions={
+ ...manifestDefinitions,
   getGalleryLoadingVisual:['inspect',obj({includeMedia:bool})],setGalleryLoadingVisual:['configure',obj({expectedRevision:num,mode:{enum:['math','media','plain']},removeMedia:bool,media:obj({name:{type:'string',minLength:1,maxLength:256},type:{enum:['image/png','image/jpeg','image/webp','image/gif','video/mp4']},base64:{type:'string',minLength:1,maxLength:11184812}},['name','type','base64'])},['expectedRevision','mode'])],
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
+  recoverCloudflareDestination:['provision',obj({target,expectedRevision:num,idempotencyKey:str,authorizeSetup:bool},['target'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
-  inspectRemoteHistory:['inspect',obj({cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
+  getHistoryPreferences:['inspect',obj()],setHistoryPreferences:['configure',obj({range:{enum:['all','daily','weekly']},previews:{enum:['all','first','closed']},timezone:str},['range','previews','timezone'])],
+  inspectRemoteHistory:['inspect',obj({customer:bool,cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
   inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj({section:{enum:['reliability']}})],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj({view:{enum:['health','trace','support']},operationId:num,cursor:str,limit:{type:'integer',minimum:1,maximum:128}})],getProviderConnections:['inspect',obj()],
   loginBegin:['auth',obj({verifyOnly:bool})],loginStatus:['inspect',obj()],loginCancel:['auth',obj()],disconnect:['auth',obj()],
-  fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete']},source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
+  fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete','createBucket']},authorizeSetup:bool,source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
   listAccounts:['inspect',obj()],listAuthorizedBuckets:['inspect',obj({accountId:str,cursor:str},['accountId'])],
   listFolders:['inspect',obj({source:target,cursor:str},['source'])],fileMetadata:['inspect',obj({source:target,key:str},['source','key'])],
   readFile:['inspect',obj({source:target,entry:obj({key:str,folder:bool},['key','folder'])},['source','entry'])],
   listDestinations:['inspect',obj({mode:{enum:['simple','nested','narrow','depth']},cursor:str,limit:{type:'integer',minimum:1,maximum:20}})],
   inspectMenuTree:['inspect',obj({generation:num,cursor:str,limit:{type:'integer',minimum:1,maximum:1000},parentId:str,recursive:bool,includeOmissions:bool},['generation'])],previewNativeMenu:['inspect',obj()],inspectNativeACK:['inspect',obj()],getOrganizationSuggestion:['inspect',obj()],
   previewConfigChange:['configure',obj({changes:arr(change),expectedRevision:num},['changes','expectedRevision'])],
-  commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str},['changes','expectedRevision','idempotencyKey'])],
+  commitConfigChange:['configure',obj({changes:arr(change),expectedRevision:num,idempotencyKey:str,prepareModes:{type:'array',items:{enum:['simple','nested','depth']},maxItems:3}},['changes','expectedRevision','idempotencyKey'])],
   reconcileNativeMenu:['configure',obj({expectedGeneration:num},['expectedGeneration'])],
   chooseBackupLocation:['restore',obj({purpose:{enum:['rebuild']}})],inspectRecoveryCoverage:['inspect',obj({target},['target'])],runRecoveryPage:['restore',obj({target},['target'])],inspectBackupRoots:['inspect',obj()],listRecoveryPolicies:['inspect',obj()],writeRecovery:['restore',obj()],
   requestRestorePreview:['restore',obj({rebuild})],restoreRightClickMenu:['restore',obj({expectedRevision:num,previewToken:str,idempotencyKey:str,rebuild},['previewToken','idempotencyKey'])],
   inspectWholeCloudJobs:['inspect',obj()],enableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId']),cadence:{enum:['weekly','daily']}},['identity'])],
   disableWholeCloudJob:['configure',obj({identity:obj({provider:str,connectionId:str,accountId:str},['provider','connectionId','accountId'])},['identity'])],
   dispatchExplorerSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:target,entry:obj({key:str,folder:bool,displayName:str,contentType:str},['key','folder']),idempotencyKey:str},['itemId','generation','source','entry','idempotencyKey'])],
-  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])]
+  dispatchSave:['execute',obj({itemId:str,generation:num,context:{enum:['image','link','video','audio','page']},source:obj({url:str,filename:str,bytes:{type:'array',items:{type:'integer',minimum:0,maximum:255},maxItems:Number.MAX_SAFE_INTEGER},contentType:str,responseFilename:bool},['filename']),idempotencyKey:str},['itemId','generation','source','idempotencyKey'])],
+  searchDirectoryNames:['inspect',obj({source:target,query:{type:'string',maxLength:1024},pageToken:{type:'string',minLength:1,maxLength:8192},pageSize:{type:'integer',minimum:1,maximum:200},refresh:bool},['source','query'])],
+  listCommands:['inspect',obj()],getShortcutBindings:['inspect',obj()],
+  setShortcutBinding:['configure',obj({commandId:str,chord:{oneOf:[str,{enum:[null]}]}},['commandId','chord'])],
+  resetShortcutBindings:['configure',obj()],
+  listDirectoryObjects:['inspect',obj({source:target,cursor:str},['source'])],
+  getPublicUrls:['inspect',obj({source:target,key:str,domains:{type:'array',items:str,maxItems:100}},['source'])],
+  getExportObjectMetadata:['inspect',obj({source:target,key:str},['source','key'])]
 };
-export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
+export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,...(apiShortcutMetadata[name]?{command:apiShortcutMetadata[name]}:{}),effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
 export function validate(schema,value) {
   if(schema.oneOf){let matches=0;for(const variant of schema.oneOf)try{validate(variant,value);matches++;}catch{}if(matches!==1)fail('INVALID_REQUEST');}
 
@@ -62,7 +87,7 @@ export function validate(schema,value) {
     for(const [k,v] of Object.entries(value)) {if(['__proto__','constructor','prototype'].includes(k))fail('INVALID_REQUEST');const sub=schema.properties?.[k]??schema.additionalProperties;if(!sub)fail('INVALID_REQUEST');if(sub!==true)validate(sub,v);}
   }
   if(schema.type==='array'){if(!Array.isArray(value)||value.length>(schema.maxItems??Number.MAX_SAFE_INTEGER))fail('INVALID_REQUEST');for(const v of value)validate(schema.items,v);}
-  if(schema.type==='string'&&(typeof value!=='string'||value.length<(schema.minLength??0)||value.length>(schema.maxLength??8192)||/[\x00-\x1f]/.test(value)))fail('INVALID_REQUEST');
+  if(schema.type==='string'&&(typeof value!=='string'||value.length<(schema.minLength??0)||value.length>(schema.maxLength??8192)||(!schema.multiline&&/[\x00-\x1f]/.test(value))))fail('INVALID_REQUEST');
   if(schema.type==='integer'&&(!Number.isSafeInteger(value)||value<(schema.minimum??0)||value>(schema.maximum??Number.MAX_SAFE_INTEGER)))fail('INVALID_REQUEST');
   if(schema.type==='boolean'&&typeof value!=='boolean')fail('INVALID_REQUEST');
 }
@@ -73,12 +98,88 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context)}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readExportOptions}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
-  let queue=Promise.resolve(),traceInspector;
+  let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
-  async function reconcile(){return engine.apply(await compile(await current.read()));}
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection}={}){
+    try{
+      const state=await current.read();
+      const selectedDepthKeys=saveSelection&&new Set(saveSelection.filter(s=>s.mode==='depth').map(s=>scopeKey(s.target)));
+      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,preparedTargets,saveSelection,
+        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare
+          ?state.configs.depth.scopes.filter(s=>(!depthTarget||scopeKey(s.target)===scopeKey(depthTarget))&&(!selectedDepthKeys||selectedDepthKeys.has(scopeKey(s.target)))):[]});
+      const spec=await engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory});
+      const native=await engine.apply(spec);
+      const selectedDepth=depthTarget&&inventory.depthScopes?.filter(s=>scopeKey(s.target)===scopeKey(depthTarget));
+      const configuredDepth=depthTarget&&state.configs.depth?.scopes.some(s=>scopeKey(s.target)===scopeKey(depthTarget));
+      const coverage=selectedDepthKeys
+        ?[...selectedDepthKeys].every(key=>inventory.depthScopes?.some(s=>scopeKey(s.target)===key&&!s.stale))
+        :configuredDepth&&selectedDepth?selectedDepth.length>0&&selectedDepth.every(s=>!s.stale):inventory.depthCoverageComplete;
+      return native.state==='completed'&&coverage===false
+        ?{...native,state:'partial',code:'DEPTH_DISCOVERY_REQUIRED',depthFailures:inventory.depthFailures??[]}:native;
+    }catch(error){
+      const code=error.code??error.message;
+      return {state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(code??'')?code:'NATIVE_RECONCILE_UNAVAILABLE'};
+    }
+  }
+  function applyCurrent(options){
+    const task=nativeQueue.then(()=>buildAndApply(options));
+    nativeQueue=task.catch(()=>{});
+    return task;
+  }
+  const reconcile=({refreshDepthReadiness=true}={})=>applyCurrent({refreshDepthReadiness});
+  const manifests=createManifestService({current,readCurrent:loadCurrent,store:manifestStore,locations:manifestLocations,oauth,authorize,confirm,applyCurrent,version:BUILD_INFO.extensionVersion});
+  // Save selects current visible routes. No cloud action is derived from rows
+  // merely observed in Explorer, hidden entries or a previous menu generation.
+  function saveTargets(state,params,prior){
+    const priorScopes=new Map(prior.configs.depth.scopes.map(row=>[scopeKey(row.target),row]));
+    const selected=new Map();
+    const include=(mode,row)=>{
+      if(!row||row.hidden||row.target.provider!=='cloudflare'||!state.product.providerVisibility.cloudflare||!state.product.show[mode])return;
+      const target=normalizeTarget(row.target);
+      selected.set(mode+':'+targetKey(target),{mode,target});
+    };
+    for(const mode of params.prepareModes){
+      const config=state.configs[mode];
+      for(const row of config.destinations??config.scopes)include(mode,row);
+    }
+    for(const change of params.changes){
+      const mode=change.mode==='narrow'?'nested':change.mode;
+      if(change.type==='setDepthDisplayBuckets')for(const row of state.configs.depth.scopes){
+        const previous=priorScopes.get(scopeKey(row.target));
+        if(!previous||previous.maxDepth!==row.maxDepth||previous.hidden!==row.hidden)include('depth',row);
+      }
+      if(change.type==='createDestination'||change.type==='updateDestination'){
+        for(const row of state.configs[mode].destinations){
+          if(change.id?row.id===change.id:targetKey(row.target)===targetKey(normalizeTarget(change.target)))include(mode,row);
+        }
+      }
+      if(change.type==='makeDefault'&&state.product.defaultTarget){
+        const target=state.product.defaultTarget;
+        for(const m of ['simple','nested','depth']){
+          for(const row of state.configs[m].destinations??state.configs[m].scopes)
+            if(targetKey(row.target)===targetKey(target))include(m,row);
+        }
+        const assigned=Object.values(state.configs).some(c=>(c.destinations??c.scopes).some(row=>targetKey(row.target)===targetKey(target)));
+        if(!assigned&&Object.values(state.product.show).some(Boolean)&&state.product.providerVisibility.cloudflare&&target.provider==='cloudflare')
+          selected.set('simple:'+targetKey(target),{mode:'simple',target});
+      }
+    }
+    return [...selected.values()].sort((a,b)=>a.target.prefix.length-b.target.prefix.length);
+  }
+  async function prepareSelected(selected,revision,verifiedDefault){
+    const results=new Map();
+    if(verifiedDefault)results.set(targetKey(verifiedDefault),{state:'completed'});
+    for(const {target} of selected){
+      const key=targetKey(target);
+      if(results.has(key))continue;
+      try{results.set(key,await cloudflare.recoverDestination({target,expectedRevision:revision,authorizeSetup:true}));}
+      catch(error){const code=error?.code??error?.message;results.set(key,{state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(code??'')?code:'WORKER_RECOVERY_FAILED'});}
+    }
+    return results;
+  }
   async function restorePreview(){
     const local=await current.inspect(),evidence=await current.evidence();
     let present;if(local.database?.present!==false)try{present=await loadCurrent({observe:false});}catch{};
@@ -126,8 +227,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     const row=evidence.desired?.rows?.find(r=>r.role==='save'&&readiness.target&&r.target&&targetKey(r.target)===targetKey(readiness.target));
     return row&&!row.enabled?{...readiness,state:'REPAIR_REQUIRED',code:row.reason??'DESTINATION_NOT_READY'}:readiness;
   }
-  async function finishInitialization(data){
-    const native=await reconcile();if(data.state!=='completed')return {...data,native};
+  async function finishInitialization(data,{refreshDepthReadiness=true}={}){
+    const native=await reconcile({refreshDepthReadiness});if(data.state!=='completed')return {...data,native};
     if(native.state!=='completed')return {...data,native,state:'partial',code:'NATIVE_APPLY_INCOMPLETE'};
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
@@ -139,12 +240,12 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation'].includes(method);
+        const independent=['listDirectoryObjects','getPublicUrls','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
         if(method==='initializeCloudflare')bindings.push(...((await oauth.status()).accounts??[]).map(a=>({accountId:a.id})));
-        if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);}
+        if(['inspectRemoteReceipt','openRemoteResult'].includes(method)&&!params.target){const saved=await current.readRemoteResult?.(params.operationId);if(saved?.destination)bindings.push(saved.destination);if(saved?.receipt?.destination)bindings.push(saved.receipt.destination);}
         for(const c of params.changes??[])if(c.id){const d=Object.values(state.configs).flatMap(c=>c.destinations??[]).find(d=>d.id===c.id);if(d)bindings.push(d.target);}
         if(method==='invokeProviderAction'){
           const spec=params.generation===undefined?null:engine.getMenu(params.generation),row=spec?.rows.find(r=>r.id===stableId('provider-entry',params.provider)&&r.role==='save');
@@ -153,9 +254,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         if((params.changes??[]).some(c=>c.type==='clearDefault')&&state.product.defaultTarget)bindings.push(state.product.defaultTarget);
         if(params.itemId){const row=engine.getMenu(params.generation)?.rows.find(r=>r.id===params.itemId);if(row?.target)bindings.push(row.target);}
         if(await authorize({actor,scope,method,params,bindings})!==true)fail('PERMISSION_DENIED');
-        if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
+        if(Object.hasOwn(manifestDefinitions,method))data=await manifests.invoke(method,params,actor);
+        else if(method==='listCommands')data={commands:listCommands(toolRegistry)};
+        else if(['getShortcutBindings','setShortcutBinding','resetShortcutBindings'].includes(method)){
+          if(!shortcutStore)fail('SHORTCUT_STORAGE_UNAVAILABLE');
+          data={bindings:await (method==='getShortcutBindings'?shortcutStore.read():method==='setShortcutBinding'?shortcutStore.set(params.commandId,params.chord):shortcutStore.reset())};
+        }
+        else if(method==='getGalleryLoadingVisual')data=await current.readGalleryLoadingVisual(params.includeMedia);
         else if(method==='setGalleryLoadingVisual')data=await current.setGalleryLoadingVisual(params);
-        else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
+        else if(['initializeCloudflare','inspectCloudflare','checkCloudflareR2','selectCloudflareAccount','openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','recoverCloudflareDestination','invokeProviderAction','inspectRemoteHistory','inspectRemoteReceipt'].includes(method)){
           if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
           if(['openCloudflareActivation','approveCloudflareSetup','repairCloudflareDestination','invokeProviderAction'].includes(method)&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           if(method==='initializeCloudflare'){data=await finishInitialization(await cloudflare.initialize(params));}
@@ -164,6 +271,19 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='selectCloudflareAccount')data=await cloudflare.select(params.accountId);
           if(method==='openCloudflareActivation')data=await cloudflare.activation(params.accountId);
           if(method==='approveCloudflareSetup'||method==='repairCloudflareDestination'){data=await cloudflare.setup({...params,repair:method==='repairCloudflareDestination'});if(data.state==='completed')data=await finishInitialization(data);}
+          // Existing approval can resume this exact configured bucket. New
+          // approval is a separately confirmed, account-scoped provision action.
+          if(method==='recoverCloudflareDestination'){
+            if(params.authorizeSetup&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            data=await cloudflare.recoverDestination(params);
+            if(data.state==='completed'){
+              const native=await applyCurrent({refreshDepth:true,refreshTargets:[params.target],depthTarget:params.target});
+              let readiness=nativeReadiness(await cloudflare.check(params.target.accountId,params.target));
+              const evidence=engine.getEvidence?.(),row=evidence?.desired?.rows?.find(r=>r.role==='save'&&r.target&&targetKey(r.target)===targetKey(params.target)&&r.enabled&&r.visible&&r.actionKind!=='attention');
+              if(readiness.state==='READY'&&!row)readiness={...readiness,state:'REPAIR_REQUIRED',code:'DESTINATION_NOT_REGISTERED'};
+              data={...data,native,readiness,...(native.state!=='completed'?{state:'partial',code:native.code??'NATIVE_APPLY_INCOMPLETE'}:readiness.state!=='READY'?{state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state}:{})};
+            }
+          }
           if(method==='invokeProviderAction'){if(!await current.reserveOperation(actor+':provider:'+params.idempotencyKey,Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(params)))),b=>b.toString(16).padStart(2,'0')).join('')))fail('SAVE_RETRY_REQUIRES_INSPECTION');if(params.source){if(!Number.isSafeInteger(params.generation))fail('GENERATION_REQUIRED');const spec=engine.getMenu(params.generation),row=spec?.rows.find(r=>r.providerAction===params.provider||r.role==='save'&&r.id===stableId('provider-entry',params.provider)||r.role==='save'&&r.target?.provider===params.provider&&state.product.defaultTarget&&targetKey(r.target)===targetKey(state.product.defaultTarget));if(!row)fail('CANONICAL_ACTION_UNAVAILABLE');data=await engine.save({itemId:row.id,generation:params.generation,context:'link',source:params.source});}else data=await cloudflare.invoke(params);}
           if(method==='inspectRemoteHistory')data=await cloudflare.history(params);
           if(method==='inspectRemoteReceipt')data=await cloudflare.receipt(params);
@@ -172,7 +292,9 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(method==='openCloudflareDestinations'){if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');data=await cloudflare.manage();}
         else if(method==='inspectCloudflareSetup')data=await cloudflare.setupStatus(params);
         else if(method==='cancelRemoteOperation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await cloudflare.cancel(params);}
-        else if(method==='openRemoteResult'){const saved=await current.readRemoteResult(params.operationId);if(!saved?.receipt||saved.state!=='verified')fail('VERIFIED_RESULT_REQUIRED');const d=saved.receipt.destination??saved.destination;const checked=await fileApi.run('stat',{source:{accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},key:saved.receipt.key});if(checked.state!=='completed')fail('RESULT_LOOKUP_FAILED');const object=checked.data?.object;if(!object)fail('RESULT_NOT_FOUND');if(Number(object.size)!==saved.receipt.size||object.etag&&object.etag!==saved.receipt.etag)fail('RESULT_CHANGED');data={target:{provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''},highlightKey:saved.receipt.key};}
+        else if(method==='getHistoryPreferences')data=await current.readHistoryPreferences();
+        else if(method==='setHistoryPreferences'){data=await current.setHistoryPreferences(params);onHistoryPreferenceChange?.();}
+        else if(method==='openRemoteResult')data=await locateSavedResult(await current.readRemoteResult(params.operationId),fileApi);
         // One canonical startup decision for Shelf and trusted API. Never rewrites
         // Default or destinations. Only explicit navigateExplorer remembers user intent.
         else if(method==='enterExplorer'){
@@ -215,14 +337,25 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='loginBegin'&&!params.verifyOnly&&data?.state==='CONNECTED'){
             let stage='configuration';const initializationId=crypto.randomUUID();
             try{
-              await loadCurrent({operationId:traceId});
+              const saved=await loadCurrent({operationId:traceId});
+              const hasSaved=!!saved.product.defaultTarget||Object.values(saved.configs).some(config=>(config.destinations??config.scopes).length);
               stage='authorization';
               if(await authorize({actor,scope:'provision',method:'initializeCloudflare',params:{},bindings:(data.accounts??[]).map(a=>({accountId:a.id}))})!==true)fail('PERMISSION_DENIED');
               stage='cloudflare-initialization';
               if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
               const prepared=await cloudflare.initialize({authorizeSetup:true,resume:true});
               stage='native-registration';
-              const initialization=prepared.state==='completed'?await finishInitialization(prepared):prepared;data={...data,initialization:{...initialization,operationId:initializationId,stage:initialization.stage??(initialization.native?.state&&initialization.native.state!=='completed'?'native-registration':prepared.state==='completed'?'ready':'cloudflare-initialization')}};
+              let initialization=prepared;
+              if(prepared.state==='completed')initialization=await finishInitialization(prepared,{refreshDepthReadiness:false});
+              else if(hasSaved){
+                // A setup issue for one target or the absence of a preferred
+                // target must not keep other saved routes in signed-out mode.
+                const native=await applyCurrent({saveSelection:[]});
+                initialization=prepared.code==='CHOOSE_DESTINATION'&&native.state==='completed'
+                  ?{state:'completed',code:'SAVED_DESTINATIONS_RESTORED',stage:'native-registration',native}
+                  :{...prepared,native};
+              }
+              data={...data,initialization:{...initialization,operationId:initializationId,stage:initialization.stage??(initialization.native?.state&&initialization.native.state!=='completed'?'native-registration':prepared.state==='completed'?'ready':'cloudflare-initialization')}};
             }catch(error){
               const code=/^[A-Z][A-Z0-9_]{1,79}$/.test(error.code??'')?error.code:'INITIALIZATION_FAILED';
               data={...data,initialization:{state:'blocked',code,stage,operationId:initializationId,...(safeWorkerDiagnostic(error.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:{})}};
@@ -232,19 +365,68 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         }
         else if(method==='fileAction'){
           const s=normalizeTarget(params.source),d=normalizeTarget(params.destination??s),a=await oauth.status();
-          if([s,d].some(t=>t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||!a.accounts?.some(x=>x.id===t.accountId))||a.state!=='CONNECTED')fail('SCOPE_UNAUTHORIZED');
-          if(params.action==='mkdir'?!params.name:!params.entry||!params.entry.key.startsWith(s.prefix))fail('SOURCE_SCOPE_MISMATCH');
+          if(a.state!=='CONNECTED')fail('AUTH_REQUIRED');
+          if([s,d].some(t=>t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||!a.accounts?.some(x=>x.id===t.accountId)))fail('SCOPE_UNAUTHORIZED');
+          const createBucket=params.action==='createBucket',needsName=params.action==='mkdir'||createBucket;
+          if(needsName?!params.name:!params.entry||!params.entry.key.startsWith(s.prefix))fail('SOURCE_SCOPE_MISMATCH');
+          if(createBucket&&(s.prefix||s.bucketName!==params.name||!/^[a-z0-9](?:[a-z0-9-]{1,61})[a-z0-9]$/.test(params.name)))fail('BUCKET_NAME_INVALID');
+          const operationTarget=fileOperationTarget(s,d),sourceBucket=s.bucketName===d.bucketName?undefined:s.bucketName;
           if(['rename'].includes(params.action)&&!params.name||['copy','move'].includes(params.action)&&!params.destination)fail('INVALID_REQUEST');
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+          if(params.authorizeSetup&&prepareFileWorker&&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[s,d]})!==true)fail('PERMISSION_DENIED');
+          if(!createBucket&&prepareFileWorker)await prepareFileWorker(operationTarget,{sourceBucket,authorizeSetup:params.authorizeSetup});
           if(!await current.reserveOperation(actor+':files:'+params.idempotencyKey,await digest(params)))fail('FILE_RETRY_REQUIRES_INSPECTION');
           const input={source:s,...(params.destination?{destination:d}:{}),...(params.entry?{entry:params.entry,entries:[params.entry]}:{}),...(params.name?{name:params.name,newName:params.name}:{}),conflict:params.conflict??'keep'};
-          const operationTarget=fileOperationTarget(s,d),destination=remoteDestination(operationTarget);
+          const destination=remoteDestination(operationTarget);
           await current.recordRemoteResult?.({kind:'file-action',operationId,state:'pending',code:'FILE_ACTION_PENDING',destination});
-          data=await fileApi.run(params.action,input,{operationId});
+          data=await fileApi.run(params.action,createBucket?{accountId:s.accountId,name:params.name}:input,{operationId});
+          if(params.action==='rename'&&data.state!=='completed'&&!data.code&&data.data?.code)data={...data,code:data.data.code};
           const r=data.data;await current.recordRemoteResult?.({kind:'file-action',operationId,state:data.state==='completed'&&r?.receipt?'verified':data.state,code:r?.code??data.code??'FILE_ACTION_RESULT',destination,receipt:r?.receipt});
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);
+        else if(['listDirectoryObjects','getPublicUrls','getExportObjectMetadata'].includes(method)){
+          const source=normalizeTarget(params.source);
+          if(source.provider!=='cloudflare'||source.connectionId!=='cloudflare:'+source.accountId)fail('SCOPE_UNAUTHORIZED');
+          const status=await oauth.status();
+          if(status.state!=='CONNECTED'||!status.accounts?.some(account=>account.id===source.accountId))fail('AUTH_REQUIRED');
+          if(params.key&&(!params.key.startsWith(source.prefix)||params.key.endsWith('/')))fail('SOURCE_SCOPE_MISMATCH');
+          if(method==='listDirectoryObjects'){
+            const result=await fileApi.run('listRaw',{source,cursor:params.cursor});
+            if(result.state!=='completed')fail(result.code??'EXPORT_LIST_FAILED');
+            if(result.data.entries.some(entry=>typeof entry.key!=='string'||!entry.key.startsWith(source.prefix)))fail('SOURCE_SCOPE_MISMATCH');
+            data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};
+          }else if(method==='getPublicUrls'){
+            if(!(await readExportOptions?.())?.urls||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
+            const domains=verifiedDomains(await readCustomDomains(source));
+            if(params.domains?.some(domain=>!domains.includes(domain)))fail('DOMAIN_NOT_VERIFIED');
+            if(params.key){
+              const result=await fileApi.run('stat',{source,key:params.key});
+              if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
+            }
+            data={domains,checkedAt:new Date().toISOString(),...(params.key?{file:objectUrls(source,params.key,params.domains??domains)}:{})};
+          }else{
+            const options=await readExportOptions?.();
+            if(!options?.tags&&!options?.metadata)fail('EXPORT_METADATA_EXPERIMENT_DISABLED');
+            const result=await fileApi.run('stat',{source,key:params.key});
+            if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
+            const object=result.data.object;
+            const tags=objectTags(object);
+            const custom=object.customMetadata??object.custom_metadata;
+            const withoutTags=custom?{...custom}:null;
+            if(withoutTags)delete withoutTags[TAG_KEY];
+            data={...safeObjectMetadata(object,source),...tags,
+              ...(withoutTags?{tagBudget:metadataBudget(withoutTags,[])}:{})};
+          }
+        }
+        else if(method==='searchDirectoryNames'){
+          const s=normalizeTarget(params.source);
+          if(s.provider!=='cloudflare'||s.connectionId!=='cloudflare:'+s.accountId)fail('SCOPE_UNAUTHORIZED');
+          const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===s.accountId))fail('AUTH_REQUIRED');
+          if(!fileApi?.capabilities?.includes(method))fail('FILE_SEARCH_UNAVAILABLE');
+          const result=await fileApi.run(method,{...params,source:s});
+          data=result.state==='completed'?result.data:result;
+        }
         else if(['listFolders','refreshExplorer','fileMetadata','readFile','readFileChunk'].includes(method)) {
           const s=params.source;
           if(s.provider!=='cloudflare'||s.connectionId!=='cloudflare:'+s.accountId)fail('SCOPE_UNAUTHORIZED');
@@ -256,7 +438,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             const result=await fileApi.run('readStream',{source:s,key:params.entry.key},{onChunk:chunk=>{size+=chunk.length;if(size>8*1024*1024)fail('PREVIEW_SIZE_LIMIT');chunks.push(chunk);}});
             const bytes=new Uint8Array(size);let offset=0;for(const c of chunks){bytes.set(c,offset);offset+=c.length;}
             data=result.state==='completed'?{state:'completed',data:{bytes:Array.from(bytes),key:params.entry.key}}:result;
-          } else data=await fileApi.run({listFolders:'list',refreshExplorer:'list',fileMetadata:'stat'}[method],params);
+          } else if(method!=='fileMetadata'&&fileApi.listDirectory)data=await fileApi.listDirectory(params,{fresh:method==='refreshExplorer'});
+          else data=await fileApi.run({listFolders:'list',refreshExplorer:'list',fileMetadata:'stat'}[method],params);
         }
         else if(method==='listDestinations') {
           const m=params.mode==='narrow'?'nested':params.mode??'simple',limit=params.limit??20;let offset=0;
@@ -264,7 +447,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const rows=state.configs[m].destinations??state.configs[m].scopes;data={items:rows.slice(offset,offset+limit),total:rows.length,nextCursor:offset+limit<rows.length?JSON.stringify({revision:state.product.revision,mode:m,offset:offset+limit}):null};
         }
         else if(method==='inspectMenuTree'){const spec=engine.getMenu(params.generation);if(!spec)fail('STALE_GENERATION');data=inspectMenuTree(spec,params);}
-        else if(method==='inspectExplorerContextMenu'){const a=await oauth?.status(),available=a?.state==='CONNECTED'&&a.accounts?.some(x=>x.id===params.target.accountId)&&params.target.connectionId==='cloudflare:'+params.target.accountId,scopes=a?.scopes??a?.permissions?.issuedScopes;data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,available:!!available,mutations:!!available&&(!Array.isArray(scopes)||scopes.includes('workers-r2.write'))&&fileApi?.capabilities?.includes('mkdir')===true});}
+        else if(method==='inspectExplorerContextMenu'){const a=await oauth?.status(),available=a?.state==='CONNECTED'&&a.accounts?.some(x=>x.id===params.target.accountId)&&params.target.connectionId==='cloudflare:'+params.target.accountId,scopes=a?.scopes??a?.permissions?.issuedScopes;data=describeExplorerContextMenu(params.target,{entry:params.entry,hasClipboard:params.hasClipboard,exports:await readExportOptions?.(),available:!!available,defaultAvailable:!!available&&(!Array.isArray(scopes)||['workers-r2.read','workers-r2.write'].every(scope=>scopes.includes(scope))),mutations:!!available&&(!Array.isArray(scopes)||scopes.includes('workers-r2.write'))&&fileApi?.capabilities?.includes('mkdir')===true});}
         else if(method==='previewContextMenu') {
           const evidence=engine.getEvidence(),generation=evidence.acknowledgedGeneration;
           const installed=generation!==null&&!evidence.pending&&evidence.desired?.generation===generation?engine.getMenu(generation):null;
@@ -277,29 +460,109 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='previewConfigChange'&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
           const fingerprint=JSON.stringify(params),replay=method==='commitConfigChange'?await current.findRetry(actor+':'+params.idempotencyKey):null;
           if(replay&&replay.fingerprint!==fingerprint)fail('IDEMPOTENCY_CONFLICT');
+          if(!replay&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
           for(const c of replay?[]:params.changes)if(['createDestination','makeDefault'].includes(c.type)) {
             const t=normalizeTarget(c.target),inv=await getInventory(),scope=inv.scopes.find(s=>scopeKey(s.target??s)===scopeKey(t));
-            if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix))fail('TARGET_NOT_DISCOVERED');
+            if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix)){
+              if(c.type!=='makeDefault'||!c.ensureSimple)fail('TARGET_NOT_DISCOVERED');
+              const authority=await oauth.status();
+              if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||authority.state!=='CONNECTED'||!authority.accounts?.some(a=>a.id===t.accountId))fail('AUTH_REQUIRED');
+              const listed=await fileApi.run('listRaw',{source:t});
+              if(listed.state!=='completed'||t.prefix&&!listed.data?.entries?.some(e=>e.key.startsWith(t.prefix)))fail('TARGET_NOT_DISCOVERED');
+            }
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
-          const next=replay?state:applyConfigChanges(state,params.changes);
+          const readySave=params.prepareModes!==undefined;
+          const unchanged=readySave&&!params.changes.length;
+          if(unchanged&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
+          const next=replay||unchanged?state:applyConfigChanges(state,params.changes);
+          const selected=readySave?(replay?.destinationSelection??saveTargets(next,params,state)):[];
+          if(selected.length){
+            if(!cloudflare?.recoverDestination)fail('CLOUDFLARE_HOST_UNAVAILABLE');
+            if(await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:selected})!==true)fail('PERMISSION_DENIED');
+          }
           if(await authorize({actor,scope,method,params,bindings:{configs:next.configs,defaultTarget:next.product.defaultTarget,prior:{configs:state.configs,defaultTarget:state.product.defaultTarget}}})!==true)fail('PERMISSION_DENIED');
           if(method==='previewConfigChange')data={configuration:next,diff:diffMenuSpecs(await compile(state),await compile(next))};
           else {
-            if(params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
-            receipt=await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
-            const added=[...new Map(params.changes.flatMap(c=>c.type==='createDestination'||c.type==='makeDefault'?[c.target]:c.type==='setDepthDisplayBuckets'?c.scopes.map(s=>s.target):[]).map(t=>[targetKey(t),t])).values()];
-            if(!receipt.replayed){const depthRequested=params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);if(added.length||depthRequested)await getInventory({refreshTargets:added,...(depthRequested?{refreshDepthScopes:next.configs.depth.scopes}: {})});}
-            // Display-only preferences persist through this same transaction without
-            // rebuilding unrelated native menus on every View/Theme click.
+            if((selected.length||params.changes.some(c=>c.type==='deleteDestinationConfig'||c.type==='setDepthDisplayBuckets'&&state.configs.depth.scopes.some(old=>!c.scopes.some(n=>targetKey(n.target)===targetKey(old.target)))))&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            const newDefault=prepareFileWorker&&!replay&&params.changes.some(c=>c.type==='makeDefault')?next.product.defaultTarget:null;
+            if(newDefault){
+              const allowSetup=readySave&&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[newDefault]})===true;
+              if(readySave&&!selected.length&&await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+              const useSavedApproval=params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple)
+                &&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[newDefault]})===true;
+              await prepareFileWorker(newDefault,{authorizeSetup:allowSetup,requireWriteProof:true,...(useSavedApproval?{useSavedApproval:true}:{})});
+            }
+            receipt=unchanged?{after:state.product.revision,replayed:false}:await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),...(readySave?{destinationSelection:selected}:{}),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
+            const added=[...new Map(params.changes.flatMap(c=>['createDestination','makeDefault'].includes(c.type)?[c.target]:[]).map(t=>[targetKey(t),t])).values()];
+            const refreshDepth=readySave?selected.some(s=>s.mode==='depth'):params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);
             const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();
-            const native=receipt.replayed?evidence?.lastOutcome??{state:'blocked',code:'NATIVE_ACK_UNAVAILABLE'}:displayOnly&&evidence?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true}):await reconcile();let backup;
-            if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
-            const destinationReadiness=[];for(const target of added){const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));if(row?.enabled&&row.actionKind!=='attention'&&native.state==='completed')destinationReadiness.push({target,state:'READY',code:'DESTINATION_NATIVE_ACKNOWLEDGED'});else{const checked=cloudflare?.check?await cloudflare.check(target.accountId,target):null;destinationReadiness.push({target,state:'blocked',code:checked?.worker?.code??checked?.code??row?.reason??'NATIVE_APPLY_INCOMPLETE'});}}
-            data={configuration:await current.read(),native,backup,destinationReadiness};
+            const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
+            const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
+            const preparedTargets=selected.filter(s=>prepared.get(targetKey(s.target))?.state==='completed').map(s=>s.target);
+            let native;
+            try{native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
+              ?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true})
+              :!readySave&&receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
+                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined});}
+            catch(error){
+              if(!newDefault||!params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple))throw error;
+              native={state:'partial',code:error.code??'NATIVE_RECONCILE_UNAVAILABLE'};
+            }
+            // Default selection is conditional on usable native application.
+            // Restore only the previous default when this exact revision still owns the commit.
+            if(newDefault&&native.state==='completed'){
+              const rows=engine.getEvidence?.().desired?.rows??[];
+              if(!rows.some(row=>row.role==='save'&&row.visible&&row.enabled&&row.actionKind!=='attention'&&row.target&&targetKey(row.target)===targetKey(newDefault)))
+                native={...native,state:'partial',code:'DEFAULT_DESTINATION_UNAVAILABLE'};
+            }
+            if(newDefault&&native.state!=='completed'){
+              const saved=await current.read();
+              if(saved.product.revision===receipt.after){
+                await current.commitProduct({...saved,product:{...saved.product,defaultTarget:state.product.defaultTarget},
+                  ...(params.changes.length===1&&params.changes[0].ensureSimple?{product:state.product,configs:state.configs}:{}),expectedRevision:receipt.after,
+                  idempotencyKey:actor+':default-rollback:'+params.idempotencyKey,fingerprint:'default-rollback'});
+                await applyCurrent({saveSelection:[]});
+                fail(native.code??'NATIVE_APPLY_INCOMPLETE');
+              }
+            }
+            let backup;
+            if(unchanged)backup={state:'NOT_REPEATED'};else if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
+            const configuration=await current.read();
+            if(readySave&&configuration.product.revision!==receipt.after)native={state:'blocked',code:'CONFIGURATION_SUPERSEDED'};
+            const destinationReadiness=[];
+            if(readySave){
+              const evidence=engine.getEvidence?.(),rows=evidence?.desired?.rows??[];
+              const acknowledged=!!evidence&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation
+                &&configuration.generation.applied===evidence.acknowledgedGeneration;
+              for(const {mode,target} of selected){
+                const checked=prepared.get(targetKey(target));
+                const belongs=row=>row.role==='save'&&row.origin?.mode===mode&&row.target&&
+                  (mode==='depth'?scopeKey(row.target)===scopeKey(target):targetKey(row.target)===targetKey(target));
+                const candidates=rows.filter(belongs);
+                const actionable=row=>row.enabled&&row.visible&&row.actionKind!=='attention';
+                const nativeAck=acknowledged&&(native.state==='completed'||native.code==='DEPTH_DISCOVERY_REQUIRED'&&native.failedItems===0);
+                const depthFailure=mode==='depth'&&native.depthFailures?.find(f=>scopeKey(f.target)===scopeKey(target));
+                const ready=nativeAck&&!depthFailure&&checked?.state==='completed'&&candidates.length&&candidates.every(actionable);
+                destinationReadiness.push({mode,target,state:ready?'READY':'blocked',code:ready?'DESTINATION_NATIVE_ACKNOWLEDGED':
+                  checked?.state!=='completed'&&checked?.code?checked.code:depthFailure?depthFailure.code:!nativeAck?(native.state==='completed'?'NATIVE_APPLY_INCOMPLETE':native.code):
+                  candidates.find(row=>!actionable(row))?.reason??'DESTINATION_NOT_REGISTERED'});
+              }
+              const blocked=destinationReadiness.find(r=>r.state!=='READY');
+              if(blocked&&native.state==='completed')native={...native,state:'partial',code:blocked.code};
+            }
+            for(const target of readySave?[]:added){
+              const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));
+              if(row?.enabled&&row.actionKind!=='attention'&&native.state==='completed')destinationReadiness.push({target,state:'READY',code:'DESTINATION_NATIVE_ACKNOWLEDGED'});
+              else {
+                let checked;try{if(native.state==='completed')checked=await cloudflare?.check?.(target.accountId,target);}catch{/* The configuration commit is already durable. */}
+                destinationReadiness.push({target,state:'blocked',code:checked?.worker?.code??checked?.code??row?.reason??native.code??'NATIVE_APPLY_INCOMPLETE'});
+              }
+            }
+            data={configuration,native,backup,destinationReadiness};
           }
         }
-        else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await reconcile();}
+        else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await applyCurrent({refreshDepth:true,refreshDepthReadiness:true});}
         else if(method==='chooseBackupLocation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await recovery.choose(params);}
         else if(method==='inspectRecoveryCoverage')data=await recoveryCrawl.inspect(params.target);
         else if(method==='runRecoveryPage'){const policy=state.product.recovery.buckets.find(b=>scopeKey(b.target)===scopeKey(params.target));if(!policy?.enabled)fail('RECOVERY_NOT_ENABLED');data=await recoveryCrawl.tick(policy,{cadence:state.product.recovery.cadence});}
@@ -323,7 +586,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             let readable;try{readable=await loadCurrent({observe:false});}catch{};
             if(readable){if(params.expectedRevision!==readable.product.revision)fail('REVISION_CONFLICT');receipt=await current.commitProduct({...restored,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:requestFingerprint,traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});}
             else receipt=await current.recoverProduct({candidate:restored,expectedEvidence:evidence,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:requestFingerprint,generationFloor:evidence.establishment.nativeGeneration??0,kind:params.rebuild?'OWNER_CONFIRMED_REBUILD':'VERIFIED_RECOVERY',traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
-            let native;try{if(params.rebuild)await getInventory({refreshTargets:[...Object.values(restored.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))]});native=await reconcile();}catch{native={state:'blocked',code:'NATIVE_RECONCILE_UNAVAILABLE'};}data={configuration:await current.read(),native,preservation,requiresReconnect:true,...(params.rebuild?{code:'REBUILT_WITH_OWNER_CONFIRMATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',originalStateRestored:false,remoteSave:'NOT_VERIFIED'}:{})};
+            let native;try{if(params.rebuild)await getInventory({refreshTargets:[...Object.values(restored.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))]});native=await applyCurrent();}catch{native={state:'blocked',code:'NATIVE_RECONCILE_UNAVAILABLE'};}data={configuration:await current.read(),native,preservation,requiresReconnect:true,...(params.rebuild?{code:'REBUILT_WITH_OWNER_CONFIRMATION',outcome:'REBUILT_WITH_OWNER_CONFIRMATION',originalStateRestored:false,remoteSave:'NOT_VERIFIED'}:{})};
           }
         }
         else if(method==='inspectWholeCloudJobs'){const ids=await wholeCloud.list();data=await Promise.all(ids.map(x=>wholeCloud.inspect(x)));}
@@ -352,7 +615,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,traceId,durationMs:Math.round(performance.now()-requestStarted),method,before:receipt?.before??state?.product.revision??null,after:receipt?.after??state?.product.revision??null,replayed:receipt?.replayed??false}};
       };
       // Auth must remain cancellable while a provider sign-in window is pending.
-      if(scope==='inspect'||['initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
+      if(scope==='inspect'||['initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','fileAction','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
       const task=queue.then(work,work);queue=task.catch(()=>{});return await task;
     } catch(error){if(!inspectOnly)observe(diagnostics?.emit,'api.invoke','failed',REASON_CODES.includes(error?.code)?error.code:'API_INVOKE_FAILED',{operationId:traceId},startSignal?[startSignal]:[],traceMethodIndex);const code=/^[A-Z][A-Z0-9_]+$/.test(error?.code??error?.message)?error.code??error.message:'OPERATION_FAILED';return {version:'3+1.1',state:['PERMISSION_DENIED','AUTH_REQUIRED','HUMAN_INTERACTION_REQUIRED','EXTERNAL_RECOVERY_UNAVAILABLE'].includes(code)?'blocked':'failed',code,...(safeWorkerDiagnostic(error?.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:error?.diagnostic?.stage==='current-read'?{diagnostic:error.diagnostic}:{}),receipt:{operationId,traceId,method:request?.method??null}};}
   }

@@ -11,3 +11,6 @@ export function observe(sink, stage, outcome, code, context = {}, requires = [],
   } catch { return 0; }
 }
 export const errorOutcome = error => error?.uncertain === true ? 'uncertain' : error?.name === 'AbortError' ? 'cancelled' : 'failed';
+
+// Optional observer promises never gate business work or leak rejected IO.
+export function passiveObservation(callback,event){try{const result=callback?.(event);if(result&&typeof result.then==='function')void Promise.resolve(result).catch(()=>{});}catch{}}

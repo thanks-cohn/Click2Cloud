@@ -1,0 +1,629 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Click2Cloud Aesthetic package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "version",
+    "compatibleApiVersion",
+    "tokens"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "compatibleApiVersion": {
+      "enum": [
+        "1.0",
+        "1.1"
+      ]
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color.background": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.surface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.raised": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.text": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.muted": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.border": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.accent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.selection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "color.focus": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "color"
+            },
+            "$value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "light",
+                "dark"
+              ],
+              "properties": {
+                "light": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                },
+                "dark": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+                }
+              }
+            }
+          }
+        },
+        "typography.family": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "fontFamily"
+            },
+            "$value": {
+              "type": "string",
+              "maxLength": 159,
+              "pattern": "^[a-zA-Z ,\"'-]+$"
+            }
+          }
+        },
+        "typography.size": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "spacing.unit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "spacing.page": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "spacing.card": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "geometry.control": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "geometry.surface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "geometry.overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "elevation.overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "shadow"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^0 \\d{1,2}px \\d{1,2}px #[0-9a-fA-F]{8}$"
+            }
+          }
+        },
+        "motion.feedback": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "duration"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+ms$"
+            }
+          }
+        },
+        "state.disabled": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "number"
+            },
+            "$value": {
+              "type": "number",
+              "minimum": 0.4,
+              "maximum": 1
+            }
+          }
+        },
+        "spacing.navGap": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        },
+        "spacing.navInline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "$type",
+            "$value"
+          ],
+          "properties": {
+            "$type": {
+              "const": "dimension"
+            },
+            "$value": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+)?px$"
+            }
+          }
+        }
+      }
+    },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "explorer.debug-caption": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.intro-copy": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.connection-explanation": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.provider-description": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.connected-caption": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "remotes.previous-result-detail": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "destinations.worker-explanation": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "destinations.availability-hint": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "status.verbose-technical-detail": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        },
+        "settings.help-copy": {
+          "enum": [
+            "show",
+            "hide"
+          ]
+        }
+      }
+    }
+  },
+  "$comment": "Runtime additionally bounds dimensions to 48px (typography >=12px), duration to 200ms, rejects whitespace-only names and requires plain data objects.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compatibleApiVersion": {
+            "const": "1.1"
+          }
+        }
+      }
+    }
+  ]
+}

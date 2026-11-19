@@ -1,0 +1,26 @@
+✔ available transport timings and original rich timestamps survive canonical and secure projection (32.035425ms)
+✔ cross epoch duration availability is explicit and restart proof is never a verified save (1.190357ms)
+✔ a completion/proofKind string without correlated independent readback cannot be recorded as verified (1.430294ms)
+✔ cold native callback reports actual resolved identity after beforeClick hydrates the ACK (4.605384ms)
+✔ real native listener -> cold/warm host -> actual workerd/R2 -> terminal -> Basic and rich export truth table (2515.272981ms)
+✔ R02 late write retains ownership through actual settlement (12.806834ms)
+✔ R03 late rejection preserves first batch and serial retry, bounded suffix (1.15884ms)
+✔ B05/B06/E04 canonical missing values and editable capacity (5.600511ms)
+✔ E03 SECURE allowlist removes origins, identifiers, arbitrary objects and free text (0.972391ms)
+✔ B09/F08 1000 overlaps, exact terminal updates and independent full failure (23.746398ms)
+✔ B07/P07 extracting a field throws; cross epoch never invents click-to-verified (1.184541ms)
+✔ R01 100 events coalesce into one archive commit and no health writes (0.505315ms)
+✔ F10 provider-neutral adapters include mock Drive, OneDrive, Dropbox and fifth provider (4.542858ms)
+✔ R07/R08/F08 single native listener dispatches 20/100/1000 times despite throwing/hung recorder (107.498498ms)
+✔ P01/P02/P05 measured timing, source/provider distinction, zero bytes and absent speeds (1.841891ms)
+✔ F05/F07 Stop fences a Start that has not settled; Basic remains on (19.444158ms)
+✔ R08 bounded byte pressure cannot allocate an unlimited rich queue (0.368845ms)
+✔ R04/B12 synchronous DB-open failure is isolated, and Basic retries after recovery (0.439273ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3507.147562

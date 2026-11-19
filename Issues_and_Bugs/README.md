@@ -2,11 +2,15 @@
 
 **Repository issue register; owner-reported November 7, 2026.** These Markdown files are scoped Codex work items, not evidence that any change has been implemented. Keep defects separate from feature/UX requirements and record actual Chrome test results before closing.
 
+**Status note (merged November 19, 2026):** This issue register preserves historical descriptions, including items marked *requested* that now have code in 0.3.20. Use [the code-audited, delta-only next-Codex handoff](../next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md) to distinguish implemented source from remaining gaps. Existing P0 wrong-destination reports remain open pending real proof.
+
 **Current Explorer performance P0 (after CURRENT data-integrity blocker):** [Whole-Shelf Explorer stutter/latency, REDOWN-informed improvements](Bugs/P0_WHOLE_SHELF_EXPLORER_LATENCY_STUTTER_REDOWN_PARITY_PLUS_2026-11-08.md), with an [implementation-ready Codex assignment](../docs/requests/CODEX_P0_ZERO_STUTTER_EXPLORER_PERFORMANCE_REDOWN_REFERENCE_2026-11-08.md). This is a broader owner-reported latency defect than the earlier right-click-only P0; measure input-to-paint in installed Chrome, then repair code.
 
-
 - **P0 RELEASE-BLOCKING — owner received success reporting but could not find the file in the selected Cloudflare destination:** [reported possible false verified save / wrong-target or stale notification](Bugs/P0_POTENTIAL_FALSE_VERIFIED_SAVE_WRONG_DESTINATION_STATUS_CONFLICT_2026-11-17.md) · [P0 Codex investigation](../codex/11.17.2026/CODEX_P0_MISSING_FILE_FALSE_SUCCESS_TARGET_RECEIPT_CORRELATION.md) · [GitHub #17](https://github.com/thanks-cohn/Click2Cloud/issues/17). Connected/Sign out UI conflicted with reconnect instruction; a later source error and earlier native ACK warning need per-operation correlation. **Cause not proved; do not claim verified success in the intended target without matched receipt + provider stat.**
+
 ## Bugs (existing functionality fails or is unacceptably slow)
+
+- **P1 — Filename Search missing from expanded Explorer toolbar despite usable layout space:** [owner's real installed-Chrome screenshot, source-identified row-packing defect and Ctrl+Shift+F7 pop-out request](Bugs/P1_EXPLORER_FILENAME_SEARCH_HIDDEN_DESPITE_EXPANDED_TOOLBAR_SPACE_2026-11-18.md). **OPEN**; fix Search priority and visibility in normal narrow 2-row Shelf. Existing direct-child search API works, but `:nested` recursion is not implemented.
 
 - **P1 CRITICAL — newly created Simple destinations fail right-click saves even after becoming Default and the only choice:** [owner's November 16 reproduction + RAW diagnostic analysis](Bugs/P1_SIMPLE_DESTINATION_WORKER_SETUP_REQUIRED_AFTER_DEFAULT_2026-11-16.md) · [Codex cross-repo REDOWN/Click2Cloud starting point](../codex/11.16.2026/START_HERE_SIMPLE_DESTINATION_REDOWN_REFERENCE.md). Four verified saves and seven `WORKER_SETUP_REQUIRED` blocks interleave; exact destination mapping remains unproven. Compare REDOWN as a read-only, user-proven functional reference before any selective port; no code change or live repair claimed.
 
@@ -23,6 +27,15 @@
 - [Existing P0 — Destinations lost after login; recurring approval; Explorer opens blank](../bugs/CRITICAL/P0_DESTINATION_PERSISTENCE_REAUTH_EXPLORER_STARTUP_2026-11-07.md). Maintain the current owner priority: saved configurations and approvals survive OAuth cycles.
 
 ## Issues (desired UX, controls, presentation, and missing capabilities)
+
+- **P1 — Destinations Show in Chrome alignment:** [heading on its own line; Simple, Narrow, Depth checkboxes together beneath, plus separate All/Flat controls](Issues/P1_DESTINATIONS_SHOW_IN_CHROME_CHECKBOX_ROW_2026-11-18.md).
+- **P1 — Image preview cleanup:** [remove “Images in this loaded folder”; double-click preview filename to safely rename through File API](Issues/P1_GALLERY_PREVIEW_REMOVE_CAPTION_AND_DOUBLE_CLICK_RENAME_2026-11-18.md).
+- **P1 — Pop-out Search shortcut:** [dedicated Ctrl+Shift+F7 proposal to show/focus Search, without replacing existing F8/F9 shortcuts](Issues/P1_EXPLORER_FILENAME_SEARCH_POPOUT_SHORTCUT_2026-11-18.md).
+- **P1 — Keyboard shortcuts editor:** [show shortcut references ONLY at bottom of Settings; allow user-defined F8/F9/F7 chords, conflict checks, persistence and Restore defaults](Issues/P1_USER_EDITABLE_KEYBOARD_SHORTCUTS_IN_SETTINGS_2026-11-19.md).
+- **P1 — Daily count on the existing CHROME EXTENSION ICON (not in the Shelf):** [native browser-toolbar action badge displaying today's verified completed downloads; resets at midnight without deleting History](Issues/P1_DAILY_CHROME_EXTENSION_ICON_BADGE_2026-11-19.md). **REQUESTED**, not yet implemented.
+- **P1 — Debug-only More → Downloads:** [one expandable card per major download, with directory name, timestamp, progress and status; full timestamped `RRReceipt-...json` exists only in ZIP, never History](Issues/P1_DEBUG_DOWNLOADS_MORE_SECTION_2026-11-19.md). **REQUESTED**, not implemented.
+- **P1 — Minimal Remotes cleanup:** [never show selected save destination, technical preparation diagnostics or the exact Save-unavailable warning; keep only the top `☁ Cloudflare R2` card heading and preserve login controls](Issues/P1_MINIMAL_REMOTES_HIDE_SETUP_AND_DUPLICATE_CLOUDFLARE_TITLE_2026-11-19.md). **REQUESTED**, not yet implemented.
+- **Next Codex:** [scoped Search/gallery/Manager UI fixes + canonical API shortcuts + daily count + experimental URL/tag/download features](../next-codex/CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md). The previously proposed Worker overhaul is EXCLUDED from this next-Codex request.
 
 - **P1 — Destinations Manager visual clarity and debug/UI separation:** [compact rows with dividers; remove Saved locally/Saved Default diagnostic banners from dialog](Issues/P1_DESTINATIONS_MANAGER_COMPACT_DIVIDED_ROWS_NO_DIAGNOSTIC_BANNER_2026-11-09.md). Keep mode counts, Default identity and connection status accessible through trusted programmatic diagnostics, not dumped above saved destinations.
 

@@ -1,0 +1,90 @@
+{
+  "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+  "results": [
+    {
+      "gate": "more-visible-clickable-1100",
+      "state": "PASS",
+      "bounds": {
+        "x": 812,
+        "y": 112,
+        "width": 280,
+        "height": 142,
+        "top": 112,
+        "right": 1092,
+        "bottom": 254,
+        "left": 812
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": true
+        },
+        {
+          "id": "view-switch",
+          "hit": true
+        },
+        {
+          "id": "add-location",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "gate": "more-visible-clickable-600",
+      "state": "PASS",
+      "bounds": {
+        "x": 312,
+        "y": 112,
+        "width": 280,
+        "height": 142,
+        "top": 112,
+        "right": 592,
+        "bottom": 254,
+        "left": 312
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": true
+        },
+        {
+          "id": "view-switch",
+          "hit": true
+        },
+        {
+          "id": "add-location",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "gate": "more-visible-clickable-360",
+      "state": "FAIL",
+      "bounds": {
+        "x": 72,
+        "y": 118,
+        "width": 280,
+        "height": 142,
+        "top": 118,
+        "right": 352,
+        "bottom": 260,
+        "left": 72
+      },
+      "hits": [
+        {
+          "id": "location",
+          "hit": false
+        },
+        {
+          "id": "view-switch",
+          "hit": false
+        },
+        {
+          "id": "add-location",
+          "hit": false
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

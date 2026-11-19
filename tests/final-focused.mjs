@@ -48,3 +48,31 @@ import './composition-remaining.test.mjs';
 import './gallery-loading.test.mjs';
 
 import './object-provenance.test.mjs';
+await import('./depth-working-save.test.mjs');
+await import('./depth-plan-recovery.test.mjs');
+await import('./cloudflare-setup-ui.test.mjs');
+await import('./cloudflare-destination-recovery.test.mjs');
+
+await import('./debug-preference.test.mjs');
+
+// Isolated two-tier recorder gates; no provider credentials or user profile.
+await import('./recorder.test.mjs');
+
+await import('./mv3-import-policy.test.mjs');
+
+await import('./checkout-integrity.test.mjs');
+
+await import('./depth-authority-race.test.mjs');
+
+await import('./depth-fetch-diagnostics.test.mjs');
+await import('./recorder-complete-export.test.mjs');
+await import('./recorder-native-truth.test.mjs');
+await import('./recorder-measurements.test.mjs');
+
+await import('./narrow-bucket-boundary.test.mjs');
+await import('./depth-ready-authorization.test.mjs');
+
+await import('./portable-menu-manifest.test.mjs');
+await import('./menu-manifest-workerd.test.mjs');
+
+await import('./history.test.mjs');

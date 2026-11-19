@@ -1,0 +1,48 @@
+[
+  {
+    "command": "C2C_PHASE=before C2C_SOURCE_ROOT=/tmp/c2c-depth-baseline node scripts/test-depth-layout.mjs",
+    "result": "PASS",
+    "evidenceClass": "actual-Chromium-DOM-fixture-provider-not-native-menu",
+    "time": "2026-11-13T11:45:45.582Z",
+    "measurements": 6,
+    "receipt": "layout-before/results.json"
+  },
+  {
+    "command": "node scripts/test-depth-layout.mjs",
+    "result": "PASS",
+    "evidenceClass": "actual-Chromium-DOM-fixture-provider-not-native-menu",
+    "time": "2026-11-13T11:45:48.916Z",
+    "measurements": 6,
+    "receipt": "layout-after/results.json"
+  },
+  {
+    "command": "C2C_HEADLESS=1 npm run test:shelf:extension",
+    "result": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "build": {
+      "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+      "extensionVersion": "0.3.19",
+      "revision": "a11dcf55b293a10cb8270084fee084db098221ec",
+      "sourceDigest": "85a28d4ea01a298c17fa4ebd8957819903d591b5496630473b3b85cd12805d7e",
+      "apiVersion": "3+1.1",
+      "remoteProtocol": "click2cloud-remote-2"
+    },
+    "time": "2026-11-13T11:28:19.423Z",
+    "receipt": "shelf-before/real-shelf-receipt.json"
+  },
+  {
+    "command": "C2C_HEADLESS=1 npm run test:shelf:extension",
+    "result": "BLOCKED",
+    "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "build": {
+      "workerCodeDigest": "UnCTefIZnYXQSDQvjehsP3DXfEm3AXcBVo6iBqVgwto",
+      "extensionVersion": "0.3.19",
+      "revision": "a11dcf55b293a10cb8270084fee084db098221ec",
+      "sourceDigest": "9a03310f5e33f71981a9c8b0f18742f844796936efea9d5de893a0cd69038ea0",
+      "apiVersion": "3+1.1",
+      "remoteProtocol": "click2cloud-remote-2"
+    },
+    "time": "2026-11-13T11:46:36.270Z",
+    "receipt": "shelf-after/real-shelf-receipt.json"
+  }
+]

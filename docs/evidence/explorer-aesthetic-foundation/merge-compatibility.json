@@ -1,0 +1,11 @@
+{
+  "check": "git merge-tree --write-tree origin/main HEAD",
+  "kind": "read-only merge preview; no branch merge or ref move",
+  "target": "9bdec3b7093fca740dc0af7b76ace27940d8ec79",
+  "sourceRuntimeCommit": "967f7238e20a1ebc25362c46b7471ed3c6848f5f",
+  "result": "PASS",
+  "conflicts": [],
+  "historyBaseIsAncestor": true,
+  "runtimeSourcesUnchangedAfterTestedCommit": true,
+  "branch2": "NOT_CREATED_BLOCKED_BY_BRANCH1_NATIVE_GATE"
+}

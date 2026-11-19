@@ -1,3 +1,4 @@
+import {historyDefaults,validateHistoryPreferences} from '../history/model.mjs';
 import {loadingMedia,loadingVisualSummary,loadingVisualWire} from '../explorer/loading-visual-config.mjs';
 import {safeRemoteDiagnostic} from '../../right2cloud-module/src/common.mjs';
 // Adapted transaction/journal/desired-applied fences from REDOWN right-click-current.js
@@ -52,7 +53,16 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
    * Integrity stores record presence only, not a competing copy of destinations.
    */
   async function loadState(stores) {
-    const rows=await request(stores.state.getAll()),map=Object.fromEntries(rows.map(r=>[r.id,r.value]));
+    // Authorization reads must not deserialize the unbounded remote History.
+    // Preserve every existing integrity/establishment guard: exact configuration
+    // keys plus all setup evidence, including completed setup and backupRoot.
+    // No schema upgrade or migration; historical data remains untouched.
+    const ids=['product','mode:simple','mode:nested','mode:depth','generation','configurationIntegrity','configurationProvenance','backupRoot'];
+    const exact=await Promise.all(ids.map(id=>request(stores.state.get(id))));
+    const setup=typeof IDBKeyRange==='function'
+      ?await request(stores.state.getAll(IDBKeyRange.bound('setup:','setup:\uffff')))
+      :(await request(stores.state.getAll())).filter(r=>r.id.startsWith('setup:'));
+    const rows=[...exact.filter(Boolean),...setup],map=Object.fromEntries(rows.map(r=>[r.id,r.value]));
     const proof=stores.establishment??{},configIds=['product','mode:simple','mode:nested','mode:depth','generation'];
     if(proof.uncertain)throw error('CONFIGURATION_CORRUPT');
     const established=proof.established===true||proof.nativeGeneration>0||map.configurationProvenance!==undefined;
@@ -184,7 +194,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     } catch(e) {signal('persistence.restore',e?.code==='BACKUP_AUTH_REQUIRED'?'blocked':'failed',e?.code==='BACKUP_AUTH_REQUIRED'?'BACKUP_AUTH_REQUIRED':'MIGRATION_QUARANTINED',operationId);throw e;}
   }
   // All modes, preferences and replay record share one CURRENT transaction.
-  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint,traceContext}) {
+  async function commitProduct({product,configs,expectedRevision,idempotencyKey,fingerprint,traceContext,destinationSelection}) {
     const normalized=productState(product);
     const normalizedConfigs={};
     for(const mode of Object.keys(modeModules))normalizedConfigs[mode]=validateModeConfig(mode,configs[mode]);
@@ -207,7 +217,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         }
       }
       await append(stores,{kind:'product',mode:null,at:clock(),previous,current});
-      const receipt={fingerprint,before:previous.revision,after:current.revision,idempotencyKey};
+      const receipt={fingerprint,before:previous.revision,after:current.revision,idempotencyKey,
+        ...(destinationSelection?{destinationSelection}:{})};
       stores.state.put({id:'retry:'+idempotencyKey,value:receipt});
       const keys=await request(stores.state.getAllKeys());
       const retries=keys.filter(k=>String(k).startsWith('retry:'));
@@ -263,10 +274,33 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       stores.state.put({id:'retry:'+idempotencyKey,value:receipt});return receipt;
     },{recoverMissing:true,context:traceContext});
   }
+  // Cursor projection over the existing canonical records: bounded page memory,
+  // no new History database/index or destructive migration. Diagnostic reads keep
+  // their original operation-ID cursor; customer cursors bind timestamp + ID.
+  async function customerHistoryPage(stores,{cursor,limit=100}) {
+    const order=(a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId);
+    let after=null;if(cursor){try{after=JSON.parse(decodeURIComponent(cursor.slice(8)));if(!cursor.startsWith('history:')||!Array.isArray(after)||!Number.isFinite(after[0])||typeof after[1]!=='string')throw Error();}catch{throw error('HISTORY_CURSOR_INVALID');}}
+    const boundary=after&&{at:after[0],operationId:after[1]},best=[];
+    const legacy=(await request(stores.state.get('remoteResults')))?.value??[];
+    const consider=async row=>{
+      if(row.kind==='readiness'||boundary&&order(row,boundary)<=0)return;
+      if(row.kind==='depth-click'&&row.cause&&((await request(stores.state.get('remote-result:'+row.cause)))||legacy.some(r=>r.operationId===row.cause)))return;
+      const existing=best.findIndex(r=>r.operationId===row.operationId);if(existing>=0)best.splice(existing,1);
+      best.push(row);best.sort(order);if(best.length>limit+1)best.pop();
+    };
+    for(const row of legacy)if(!await request(stores.state.get('remote-result:'+row.operationId)))await consider(row);
+    await new Promise((resolve,reject)=>{
+      const r=stores.state.openCursor(IDBKeyRange.bound('remote-result:','remote-result:\uffff'));
+      r.onerror=()=>reject(r.error);r.onsuccess=()=>{const c=r.result;if(!c){resolve();return;}consider(c.value.value).then(()=>c.continue(),reject);};
+    });
+    const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
+  }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const safe={kind:value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,at:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
-    readRemoteResults:({cursor,limit}={})=>transact('readonly',async s=>{const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const start=cursor?all.findIndex(x=>x.operationId===cursor)+1:0,items=all.slice(start,start+limit);return {items,nextCursor:start+limit<all.length?items.at(-1)?.operationId:null};}),
+    readRemoteResults:({cursor,limit,customer=false}={})=>transact('readonly',async s=>{if(customer&&typeof s.state.openCursor==='function'&&typeof IDBKeyRange==='function')return customerHistoryPage(s,{cursor,limit});const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const visible=customer?all.filter(r=>r.kind!=='readiness'&&(r.kind!=='depth-click'||!r.cause||!all.some(s=>s.operationId===r.cause))):all;const start=cursor?visible.findIndex(x=>x.operationId===cursor)+1:0,items=visible.slice(start,start+limit);return {items,nextCursor:start+limit<visible.length?items.at(-1)?.operationId:null};}),
+    readHistoryPreferences:()=>transact('readonly',async s=>(await request(s.state.get('historyPreferences')))?.value??{...historyDefaults}),
+    setHistoryPreferences:value=>transact('readwrite',async s=>{const validated=validateHistoryPreferences(value);s.state.put({id:'historyPreferences',value:validated});return validated;}),
     readGalleryLoadingVisual:async(includeMedia=false)=>{const value=await transact('readonly',async s=>(await request(s.state.get('galleryLoadingVisual')))?.value??{revision:0,mode:'math'});return loadingVisualWire(value,includeMedia);},
     setGalleryLoadingVisual:async input=>{const media=input.media?loadingMedia(input.media):null;return transact('readwrite',async s=>{const old=(await request(s.state.get('galleryLoadingVisual')))?.value??{revision:0,mode:'math'};const summary=loadingVisualSummary(old);if(input.expectedRevision!==summary.revision)throw error('REVISION_CONFLICT');const value={revision:summary.revision+1,mode:input.mode,...(!input.removeMedia&&old.media?{media:old.media}:{}),...(media?{media}:{})};if(value.mode==='media'&&!loadingVisualSummary(value).media)throw error('LOADING_MEDIA_REQUIRED');s.state.put({id:'galleryLoadingVisual',value});return loadingVisualSummary((await request(s.state.get('galleryLoadingVisual'))).value);});},
     readExplorerLocation:()=>transact('readonly',async s=>(await request(s.state.get('explorerLocation')))?.value??null),

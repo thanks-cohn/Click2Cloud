@@ -1,0 +1,21 @@
+import {execFileSync} from 'node:child_process';import assert from 'node:assert/strict';
+import {dispatchDepthFixture} from '../../../tests/fixtures/depth-fetch-diagnostics.mjs';
+const kind=process.argv[2],events=[],cause=Object.assign(Error('SYNTHETIC_PRIVATE_SENTINEL'),{code:'UND_ERR_SOCKET'}),error=new TypeError('fetch failed',{cause});
+error.stack='TypeError: fetch failed\n at fn (C:\\private\\node_modules\\miniflare\\dist\\src\\index.js:104599:22)';
+const worker={mf:{ready:Promise.resolve(new URL('http://127.0.0.1:12345')),dispatchFetch:async()=>{throw error;}},fixtureId:1,lifecycle:'ready',requestCount:0,inFlight:0};
+const trace=(stage,fields)=>events.push({stage,...fields});
+const options={method:'POST',headers:{authorization:'Bearer '+Buffer.from(JSON.stringify({expiresAt:Date.now()+120000,sessionId:'fixture-session'})).toString('base64url')+'.synthetic'},body:'{}'};
+let fetcher;
+if(kind==='before'){
+ const source=execFileSync('git',['show','098ae67c76b00d664388c1e89b925ee00a1c0036:tests/depth-plan-recovery.test.mjs'],{encoding:'utf8'});
+ const start=source.indexOf('fetch:async(url,options)=>{')+'fetch:'.length,end=source.indexOf('\n let transport=',start);
+ const literal=source.slice(start,end).replace(/};\s*$/,'');
+ fetcher=new Function('workers','trace','assert','return '+literal)(new Map([['fixture',worker]]),trace,assert);
+}else fetcher=(_url,options)=>dispatchDepthFixture(worker,'/capabilities',options,trace,true);
+process.env.C2C_DEPTH_TRACE_DIR='capture-only';
+await assert.rejects(fetcher('https://fixture.example/capabilities',options),e=>e===error);
+const captured=events.find(e=>e.stage==='request.error');
+console.log(JSON.stringify({purpose:'DIAGNOSTIC_CAPTURE_ONLY_NOT_INCIDENT_ROOT_REGRESSION',kind,captured}));
+const retained=captured?.error?.cause?.code==='UND_ERR_SOCKET'&&captured?.boundary==='dispatchFetch'&&!JSON.stringify(captured).includes('SYNTHETIC_PRIVATE_SENTINEL');
+console.log(JSON.stringify({diagnosticCaptureGate:retained?'PASS':'FAIL',incidentRootGate:'NOT_PROVEN'}));
+if(!retained)process.exitCode=1;

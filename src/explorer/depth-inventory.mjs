@@ -1,21 +1,24 @@
 import {normalizeTarget,scopeKey} from '../core/menu-identity.mjs';
 // Explicit Depth selection: read-only, paginated discovery to the requested depth.
 // Passive menu inspection never starts a crawl. Partial/failing discovery is not empty.
-export async function discoverDepthScope(fileApi,selection,{signal}={}){
- const target=normalizeTarget({...selection.target,prefix:''}),folders=new Set(),queue=[''];let complete=true;
+export async function discoverDepthScope(fileApi,selection,{signal,maxRequests=Infinity,maxFolders=Infinity}={}){
+ const target=normalizeTarget({...selection.target,prefix:''}),folders=new Set(),queue=[''];let complete=true,requests=0,budgetExceeded=false;
  for(let at=0;at<queue.length;at++){
   signal?.throwIfAborted();const prefix=queue[at],seen=new Set();let cursor='';
   do{
+   if(requests++>=maxRequests){budgetExceeded=true;complete=false;break;}
    const result=await fileApi.run('list',{source:{...target,prefix},...(cursor?{cursor}:{})},{signal});
    if(result.state!=='completed')throw Object.assign(Error('DEPTH_DISCOVERY_FAILED'),{code:result.code??'DEPTH_DISCOVERY_FAILED'});
    for(const entry of result.data.entries??[])if(entry.folder){
     const child=normalizeTarget({...target,prefix:entry.key}).prefix;
-    if(!child.startsWith(prefix)||child===prefix)throw Object.assign(Error(),{code:'INVENTORY_INVALID'});
-    if(folders.has(child))continue;folders.add(child);
+    if(!child.startsWith(prefix)||!child.slice(prefix.length,-1)||child.slice(prefix.length,-1).includes('/'))throw Object.assign(Error(),{code:'INVENTORY_INVALID'});
+    if(folders.has(child))continue;if(folders.size>=maxFolders){budgetExceeded=true;complete=false;break;}folders.add(child);
     if(child.split('/').filter(Boolean).length<selection.maxDepth)queue.push(child);else complete=false;
    }
+   if(budgetExceeded)break;
    cursor=result.data.cursor??'';if(cursor&&seen.has(cursor))throw Object.assign(Error(),{code:'PAGINATION_STALLED'});seen.add(cursor);
   }while(cursor);
+  if(budgetExceeded)break;
  }
- return {target,folders:[...folders],complete,scopeKey:scopeKey(target)};
+ return {target,folders:[...folders],complete,listedDepth:budgetExceeded?0:selection.maxDepth,...(budgetExceeded?{budgetExceeded:true}:{}),scopeKey:scopeKey(target)};
 }

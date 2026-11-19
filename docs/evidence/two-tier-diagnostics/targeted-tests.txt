@@ -1,0 +1,26 @@
+✔ R02 late write retains ownership through actual settlement (8.31305ms)
+✔ R03 late rejection preserves first batch and serial retry, bounded suffix (0.732845ms)
+✔ B05/B06/E04 canonical missing values and editable capacity (3.783392ms)
+✔ E03 SECURE allowlist removes origins, identifiers, arbitrary objects and free text (0.670973ms)
+✔ B09/F08 1000 overlaps, exact terminal updates and independent full failure (19.047936ms)
+✔ B07/P07 extracting a field throws; cross epoch never invents click-to-verified (0.615621ms)
+✔ R01 100 events coalesce into one archive commit and no health writes (0.224432ms)
+✔ F10 provider-neutral adapters include mock Drive, OneDrive, Dropbox and fifth provider (1.389929ms)
+✔ R07/R08/F08 single native listener dispatches 20/100/1000 times despite throwing/hung recorder (57.654514ms)
+✔ P01/P02/P05 measured timing, source/provider distinction, zero bytes and absent speeds (0.996355ms)
+✔ F05/F07 Stop fences a Start that has not settled; Basic remains on (5.162915ms)
+✔ R08 bounded byte pressure cannot allocate an unlimited rich queue (0.25664ms)
+✔ R04/B12 synchronous DB-open failure is isolated, and Basic retries after recovery (0.380443ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (14.489165ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.479723ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (1.43835ms)
+✔ pre-permanence behavior/source snapshot is immutable (0.203311ms)
+✔ zero-stutter pre-change source snapshot stays immutable (0.178695ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 196.837982

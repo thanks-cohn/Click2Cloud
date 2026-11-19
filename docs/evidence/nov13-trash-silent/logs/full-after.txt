@@ -1,0 +1,1352 @@
+
+> click2cloud@0.3.19 test
+> node tests/run.mjs
+
+✔ agent handoff includes full paged menu, both faults, cascade and explicit absent checkpoint with zero writes (1547.95956ms)
+✔ auth/capabilities remain canonical and independent of unreadable CURRENT, setup and native work (36.308746ms)
+✔ verify-only extends loginBegin auth owner without another OAuth flow or R2 setup (2.307551ms)
+✔ a failed read reports a safe actual storage stage and a new request can recover without fake empty data (9.763315ms)
+✔ save off/on/throwing diagnostics preserves exact provider bytes and verified business outcome (5.506165ms)
+✔ dispatcher exposes invalid intent, auth failure/revocation, capability and verifier blocks without upload (3.744884ms)
+✔ upload failures/cancel/uncertainty and false confirmation never verify or commit feedback (15.410151ms)
+✔ Boolean receipt, mismatched destination/bytes and unavailable final readback cannot count as saved (5.91402ms)
+✔ verified upload with failed History handoff stays verified and explicitly pending; no replay (2.250302ms)
+✔ independent provider faults retain distinct operation correlation and dependency chains (1.16812ms)
+✔ existing File API run wrapper preserves all terminal states and discloses partial inventory (6.036175ms)
+✔ API progress, unsupported operations, rejected calls, batch uncertainty and throwing sink preserve semantics (5.437355ms)
+✔ transport wrappers do not log credentials, request bodies, URLs or hostile returned errors (1.81098ms)
+✔ REDOWN upload adaptation independently verifies the FINAL destination bytes and rejects fabricated receipts (12.717254ms)
+✔ Dashboard instrumented failures do not leak auth and do not activate from Refresh (2.082817ms)
+✔ actual extracted R2 upload + staged readback + final byte verification runs through observed transports (31.04483ms)
+✔ provider adapter rejects cross-account resolution and wrong parent/leaf receipts before success (1.106697ms)
+✔ two account discovery failures are both observed even when the first rejects early (4.98234ms)
+✔ source-backed provider failure catalog retains each material rejection category without private strings (2.076099ms)
+✔ green connection-status gateway cannot conceal a blocked Worker child or legacy URL-forwarding privacy (0.270184ms)
+✔ actual protected R2 listing rejects malformed pages, auth denial and repeated metadata cursors distinctly (7.475861ms)
+✔ actual protected R2 Worker gates distinguish missing preparation, rejected auth and capability mismatch (4.967923ms)
+✔ actual extracted R2 adversarial staging corpus distinguishes extra, short, mismatched, stalled and unconfirmed bytes (26.361701ms)
+✔ canonical MenuSpec preserves full arbitrary supported depth, row order, role and immutable exact identity (9.959449ms)
+✔ input permutations compile byte-identical canonical output without mutation (8.957931ms)
+✔ single default is a direct Cloudflare save; extra destination expands with native separator and Home last (4.221702ms)
+✔ same named bucket and path in different accounts retain separate canonical actions (8.871435ms)
+✔ provider-neutral S3 modes are siblings of Cloudflare and unchanged flat provider native IDs survive all modes (28.585213ms)
+✔ independent mode configurations own migrations, revisions and pure projections; replacement leaves peers exact (12.168856ms)
+✔ Nested natural ancestors never accidentally save; selected parents receive explicit Save here (3.866603ms)
+✔ unwritable actionable ancestor stays a navigable branch without concealing a writable descendant (9.489977ms)
+✔ read-only paging retrieves every nested row and omission, and rejects stale cursors or scope changes (7.665362ms)
+✔ partial Depth scans, bounded omissions, invalid targets and budget omissions stay explicitly incomplete (16.05403ms)
+✔ ineligible scope/default remains visible and blocked; unknown inventory is never healthy (12.754405ms)
+✔ all simultaneous scope faults remain inspectable and contradictory observations fail explicitly (2.041991ms)
+✔ native, mirror and agent simulation resolve identical action without reads writes or feedback (2.479265ms)
+✔ resolver rejects all stale unknown unacknowledged disabled context and revoked selections without rerouting (2.686437ms)
+✔ forged stored action binding cannot resolve an authorized target to a different intent (2.664156ms)
+✔ structured generation diff detects lost flat peers, misrouting, stale baselines and mode output changes (8.029847ms)
+✔ duplicate logical labels, duplicate targets and identities fail visibly instead of silently rerouting (8.931235ms)
+✔ diagnostics disabled or throwing cannot alter compile or resolution, and decision evidence is source-owned (14.094897ms)
+✔ native plan and human mirror preserve every ordered canonical row without invented semantics (0.858934ms)
+✔ single registrar tracks desired generated ACK and independent observation separately; unchanged no-op (1.921592ms)
+✔ failed child ACK does not conceal independently failed sibling; blocked descendants visible (1.165904ms)
+✔ lost callback is uncertainty even when create returned correct-looking ID (158.938674ms)
+✔ removeAll missing ACK invalidates old generation and never claims installed state (5.889386ms)
+✔ serial generations reject stale/conflicting plans; restart does not trust historical ACK; sink throws harmlessly (1.768441ms)
+✔ failed prepare persistence blocks native clearing and cannot claim an ACK (0.507118ms)
+✔ native user failure feedback survives missing auth/dispatcher and disabled diagnostics (5.468733ms)
+✔ privileged debug host refuses external senders, unknown routes, absent consent, writes and export (3.473845ms)
+✔ duplicate owners rejected, immutable acknowledged models and retry repair preserve identity (1.777274ms)
+✔ failed persistence cannot turn into success merely by reapplying same generation (0.403678ms)
+✔ debug and one-page export grants are expiring, document-bound and distinct (2.49431ms)
+✔ every row outcome has canonical ordinal and explicit prerequisite links, including blocked descendants (0.497975ms)
+✔ provisioning requires explicit approval and records exact immutable R2/DO/secret bindings (17.454581ms)
+✔ interrupted owned deployment is inspected and resumed without reupload or rebinding (9.374175ms)
+✔ explicit repair updates only an owned matching Worker and preserves its existing prefix scope (12.434588ms)
+✔ ready-plan inspection reuses an owned deployment and recreates only its confirmed missing script (7.117983ms)
+✔ owned inspection rejects foreign bucket/claims bindings and preserves restricted prefix (18.140218ms)
+✔ missing signing secret needs explicit renewal and only an inspected owned Worker is updated (7.791946ms)
+✔ interrupted signing renewal retains pending secret and script identity across retry (14.224139ms)
+✔ approved recovery binds missing Depth B child to configured B scope and preserves Narrow A/default (12.633452ms)
+✔ no approval requests one exact bucket approval; explicit authorization preserves unrelated account approval (8.616102ms)
+✔ exact configured second account recovers independently of the Default account (1.889119ms)
+✔ unconfigured roots, sibling prefixes, stale revisions and missing live grants never provision (3.392627ms)
+✔ post-probe READY is mandatory and lost completion resumes by probe identity without writes (6.073927ms)
+✔ an uncertain readiness write is inspected on retry and never automatically replayed (3.289316ms)
+✔ legacy exact-bucket initialization probe is resumed read-only without borrowing Narrow A setup (6.404385ms)
+✔ per-bucket pending probe at another prefix reconciles original proof and rechecks clicked target without writes (4.510416ms)
+✔ explicit approval resumes the stable pending operation despite a fresh caller idempotency key (2.334262ms)
+✔ same-bucket pre-probe sibling setup resumes its original bound target and then checks clicked capability (9.90964ms)
+✔ configuration removal during preparation stops before readiness write (2.199368ms)
+✔ removing broader Depth authority cannot fall through to a narrower same-target other mode during setup (2.659638ms)
+✔ restricted Worker scope and stale code require the appropriate explicit next action (3.467356ms)
+✔ explicit approved signing repair and broader saved Depth scope use correct shared Worker options (2.635058ms)
+✔ attention inspection preserves exact Depth descendant and invalid target never falls back to Default (6.158514ms)
+✔ fresh canonical menu has four actionable siblings; custom configurations and Flat retain their meaning (8.440856ms)
+✔ Cloudflare remote path precedes browser capture and Explorer refuses byte staging (7.897372ms)
+✔ setup actions remain actionable without authorization and cannot impersonate saved routes (0.73159ms)
+✔ minimal trusted writer seam accepts a structural test writer without menu/source changes (3.159268ms)
+✔ real workerd runtime: R2 conditional writes, independent HEAD, durable claim replay and revocation (35709.335227ms)
+✔ native onboarding fragments retain the exact trusted app sender boundary (0.710603ms)
+✔ production TLS egress module loads in actual workerd with node compatibility (no network proof) (165.892016ms)
+✔ approved first setup creates redown only when missing; default is established only after verified probe (6.62807ms)
+✔ returning custom default always wins, and no missing selected bucket is recreated (3.769424ms)
+✔ intentional removal, missing permission, outage and positive inactive status stay distinct (4.55278ms)
+✔ passive click does not initialize an empty account outside the next explicit login (0.927525ms)
+✔ login and unavailable providers never replay pending sources or claim success (0.290543ms)
+✔ readiness never silently falls back after setup and custom selection is preserved during reconnect (0.513205ms)
+✔ new API operations have closed schemas, account grants and separate provisioning confirmation (1.677187ms)
+✔ OAuth API remains human-interactive: trusted host must issue an auth grant and approve the exact operation (0.306347ms)
+✔ repair of a configured non-default destination never changes the global default (2.225379ms)
+✔ one verified account needs no extra account-selection step; multiple accounts remain explicit (0.803892ms)
+✔ setup completion loss resumes by read-only probe identity without redeploy or duplicate readiness write (1.85828ms)
+✔ zero active native assignments open manager even when a hidden default remains ready (0.484914ms)
+✔ explicit Login automatically authorizes and initializes redown; repeated login preserves exact targets and approval (6.421963ms)
+✔ Login cannot silently acquire an agent provisioning grant; authentication remains connected (0.89737ms)
+✔ Login preserves a custom default; blocked native acknowledgement never claims saving ready (2.299946ms)
+✔ Login reports real R2 activation or permission failures while preserving auth and avoiding writes (1.568526ms)
+✔ new Worker route propagation retries read-only capability before exactly one readiness write (1758.089808ms)
+✔ denied capability stops before readiness write rather than retrying or claiming a usable destination (3.420618ms)
+✔ selected setup readiness needs fresh exact capability/write proof and current actionable native ACK (1.367933ms)
+✔ working Narrow bucket or another Depth prefix cannot paint the clicked target ready (0.903335ms)
+✔ exact attention preserves actionable approval and uncertainty over a generic missing-plan read (0.236043ms)
+✔ phase1-composite-Narrow-retains-real-parent-IDs-and-exact-physical-save (1.94652ms)
+✔ phase1-shared-ancestors-merge-only-when-both-physical-path-and-titles-agree (2.857122ms)
+✔ gateA-ordinary-Simple-alone-stays-flat-and-Flat-does-not-veto-checked-Narrow (1.350984ms)
+✔ phase1-native-ACK-and-engine-click-dispatch-resolve-exact-Narrow-target (2.223503ms)
+✔ phase1-deep-placement-identities-stay-bounded-without-escaped-parent-growth (5.64435ms)
+✔ phase2-all-hide-all-custom-are-reversible-and-retain-exact-physical-target (5.172064ms)
+✔ phase2-config-API-shape-persists-only-Narrow-presentation-and-preserves-custom-flags (1.292885ms)
+✔ phase3A-mutual-exclusion-default-wins-legacy-and-explicit-Quick-clears-global-Default (1.114334ms)
+✔ phase3B-hidden-Default-Quick-do-not-resurrect-and-Depth-scope-visibility-is-not-removal (1.597913ms)
+✔ gateA-before-regression-all8-additive-modes-preserve-Depth-and-Narrow-real-parents-even-with-Flat (8.599705ms)
+✔ gateA-two-Narrow-presentations-same-target-independently-edit-hide-delete-and-route (3.162987ms)
+✔ gateA-identical-Narrow-titles-remain-distinct-IDs-with-readable-collision-labels (1.250654ms)
+✔ gateA-single-Depth-empty-no-fabricated-branch-real-children-depth-bound-and-eye (0.898036ms)
+✔ gateA-read-only-Depth-discovery-paginates-real-children-and-rejects-partial-as-empty (1.010207ms)
+✔ gateA-multiple-Depth-buckets-keep-distinct-real-trees-and-per-scope-eye (1.895979ms)
+✔ gateA-new-Narrow-IDs-are-creation-identities-legacy-IDs-unchanged-and-initial-flags-need-no-ID-guess (0.956527ms)
+✔ C2C-PERSIST-3 queued native clear revalidates CURRENT after asynchronous prepare (0.420228ms)
+✔ C2C-PERSIST-6 canonical restore requires an immutable preview, schema rejects fabricated revision-only repairs (0.229455ms)
+✔ C2C-PERSIST CI guard links permanent invariants to production sources and real-IDB regression gates (6.647298ms)
+✔ Refresh with no selected location lists real accounts and buckets via REDOWN file API only (1.315373ms)
+✔ Refresh with selected folder uses REDOWN list, not activation or provisioning (0.418797ms)
+✔ Activate uses REDOWN background exact message and observed registered menu state (0.461874ms)
+✔ Failed/partial activation retries failed buckets, never resets already ready targets (0.321649ms)
+✔ A missing menu registration receipt cannot be reported as activated (0.206896ms)
+✔ Unauthenticated refresh/activate do not send any cloud operations (0.248203ms)
+✔ Refresh failure reports error and leaves activation untouched (0.211677ms)
+✔ Original sender restrictions are preserved; separate Click2Cloud page cannot invoke provisioning (0.46791ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored undefined (0.838583ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored null (0.142539ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored false (0.068279ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored 0 (0.066066ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored 1 (0.103443ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored "true" (0.055035ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored {} (0.044345ms)
+✔ Debug preference defaults OFF and rejects non-boolean stored [] (0.044582ms)
+✔ Debug reads only the stored true boolean and restores it without writing credentials/configuration (0.148849ms)
+✔ Debug setters persist exactly one presentation preference and notify subscribers without granting authority (0.350395ms)
+✔ invalid Debug setter never writes an implicit truthy preference (0.345685ms)
+✔ Debug follows only local storage changes; removal and invalid values disable presentation (0.433485ms)
+✔ a local preference event wins over a delayed stale initial read (0.353408ms)
+✔ an explicit set wins over a delayed stale initial read (0.182507ms)
+✔ read failure or missing storage keeps Debug OFF instead of weakening execution gates (0.165618ms)
+✔ failed enable write stays OFF and does not publish enabled presentation (0.141245ms)
+✔ failed disable write immediately turns Debug OFF even when previously enabled (0.112514ms)
+✔ an older failed setter does not overwrite a newer external local preference event (0.316574ms)
+✔ failed explicit setter remains OFF when an older delayed startup read later returns true (0.382625ms)
+✔ bad presentation subscribers cannot disrupt state propagation or other listeners (0.391026ms)
+✔ closing removes native listener, ignores delayed initialization and rejects subsequent setters (0.21648ms)
+✔ Depth outcomes remain durable and OS-silent for repeated blocked, uncertain and completed operations (0.619809ms)
+✔ Depth failure feedback still reaches badge and existing in-app channel when the optional last-outcome write fails (0.311888ms)
+✔ Depth emitted click uses fresh ready status to escape cached-negative attention and saves exact root/intermediate/leaf (14.520104ms)
+✔ baseline fallback reproduces FRESH_CLICK_REQUIRED with readiness-cache denial and zero uploads (10.981159ms)
+✔ Depth blocked status is recorded and visible: WORKER_SETUP_REQUIRED (11.868481ms)
+✔ Depth blocked status is recorded and visible: PREPARED (10.068856ms)
+✔ Depth blocked status is recorded and visible: TRANSPORT_UNAVAILABLE (9.749512ms)
+✔ Depth blocked status is recorded and visible: WORKER_DESTINATION_SCOPE_REQUIRED (10.189767ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Cloudflare (5.853092ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Images (7.547769ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: Artwork (10.338195ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: remove (1.196044ms)
+✔ Depth native ACK failure retains fail-closed authority and durable feedback: timeout (81.476458ms)
+✔ Worker plan discriminators are mode-local and cannot borrow accounts/buckets (0.365307ms)
+✔ Depth keeps twenty siblings and depth beyond ten; no row cap or changed menu plan (62.910794ms)
+✔ non-Depth rows do not enter Depth preflight, history or feedback (5.817829ms)
+✔ Depth records authorization loss, hostile exceptions, uncertain/partial dispatch and persistence failures without retry (1.623524ms)
+✔ cold worker classifies persisted Depth row without trusting its historical ACK (11.486193ms)
+✔ five siblings preserve independent failed-child ACK evidence without claiming a full menu (13.046422ms)
+✔ absent Depth B plan is created for B, verified, persisted and reused; Narrow A and exact native destinations survive (4654.406104ms)
+✔ Depth recovery failures keep the exact contextual target and never dispatch or replay the clicked source (0.920881ms)
+✔ exact recovery reconciles only selected Depth B when another same-account or foreign-account scope is unprepared (10.613816ms)
+✔ exact recovery API enforces closed input, account grants and one-use confirmation before establishing setup approval (2.607739ms)
+✔ Depth exception matrix: exact target/action identity and nested actions across 384 scenarios (141.524266ms)
+✔ non-Depth composition remains byte-identical to the request baseline (90.652939ms)
+✔ Depth root qualification does not rename a child folder with the same name as its bucket (0.577744ms)
+✔ Depth same-bucket root, intermediate Save here and leaf reuse the identical worker plan; different buckets do not (6.786571ms)
+{"evidenceClass":"LOCAL_WORKERD_R2_NOT_LIVE_CLOUDFLARE","verifiedKeys":["Images/approved.bin","Images/Artwork/approved.bin","approved.bin","Images/approved-5aa4e833-782d-4234-a21e-d6f5ee61ece9.bin","Images/Artwork/approved-ef50601c-c437-4934-8ffd-4345b02db41c.bin","Images/approved-9f022c91-a48c-47c7-8ac7-bc07952514f0.bin","Images/Artwork/approved-f172b2d9-14e9-49fc-a948-1e84b26fd6de.bin"],"uncertainState":"uncertain","bodyReadback":"abc","sharedSnapshotsUnchanged":true}
+✔ production Depth callbacks -> provisioner -> signed transport -> workerd -> independent R2 bytes, with observation failures and protected modes (1181.8558ms)
+✔ optional lastDepthClick failure does not suppress existing channels or claim uncertain save success (0.435863ms)
+✔ follow-up diagnostic read never purports to be rejecting plan snapshot (0.551605ms)
+✔ new exact folders reuse a current same-bucket write proof and scoped capabilities; no mutation/provision (3.724494ms)
+✔ native destinations never acquire a second Set up label; unready rows retain truthful attention kind (1.72198ms)
+✔ a genuinely missing Worker is setup-required, not an invented existing-Worker upgrade (0.275911ms)
+✔ shared engine composes native ACK, exact canonical route, local capture and independently verified completion (13.713779ms)
+✔ stale/revoked selections never capture or upload; source errors still notify with debug off (1.534726ms)
+✔ uncertain write and failed verified completion do not replay or falsely count (4.582129ms)
+✔ actual temporary disk CURRENT and monthly journal preserve preferences and recover corrupted CURRENT (157.400474ms)
+✔ whole-cloud external job pauses without auth UI and resumes only the same opted-in account (74.306026ms)
+✔ per-bucket recovery crawl uses independent explicit depth and an actual disk checkpoint (47.837518ms)
+✔ Simple/Narrow history toggles omit disabled records from dated checkpoints while CURRENT retains both (72.072592ms)
+✔ Narrow hides eight intermediate levels without altering full target; cancel source stays immutable (4.955377ms)
+✔ Narrow hidden final, shared children, overlapping paths and different accounts stay actionable (0.686796ms)
+✔ hidden Quick persists but is omitted; shown Quick wins over duplicate exact default (0.679065ms)
+✔ composite modes preserve configs and checked trees even with Flat or missing default (0.94369ms)
+✔ Quick order is stable, promoted actions follow the four providers without duplicated children (2.839605ms)
+✔ organization trigger is exactly >=7 direct entries; dismiss signature changes only on relevant projection (0.501042ms)
+✔ closed schemas reject malformed params and credentials; typed registry has all meaningful GUI families (1.208903ms)
+✔ trusted scoped grants bind hidden record identities, response accounts, expiry, revocation and approval (0.848553ms)
+✔ previous main product shape migrates exact targets, revisions, visibility, recovery and ancestor aliases (1.800032ms)
+✔ gateB-local-loading-media-validates-content-types-names-and-bounded-storage (3.177418ms)
+✔ gateB-canonical-loading-API-is-trusted-closed-and-independent-of-cloud (0.644938ms)
+✔ gateB-corrupt-local-media-falls-back-without-discarding-plain-choice-or-configuration (0.28508ms)
+✔ all catalog stages retain every critical fault outcome; no first-fault early stop (3.602896ms)
+✔ misleading green parent does not hide child, cascade or independent sibling (2.169263ms)
+✔ missing, in-flight, stale generation, epoch, evictions, dependencies, drops and restart stay visible (3.434944ms)
+✔ disabled/throwing instrumentation is fail-open without inventing health (0.583621ms)
+✔ future provider boundary registration requires safe source manifest, preserves vocabulary (0.528748ms)
+✔ API denies unknown/expired grants, sender spoofing and write methods (2.436706ms)
+✔ API paginates immutable complete available traces and scoped menu aliases; no private strings exported (5.014188ms)
+✔ export grant distinct from debug read grant; bounded errors and cursor scopes are safe (3.140868ms)
+✔ source manifest anchors exist and all source-defined typed codes remain in the vocabulary (21.327442ms)
+✔ desired/generated/ACK/observed states and omissions differ independently, without invented proof (1.328307ms)
+✔ external skipped checks and unobservable mandatory boundaries cannot be healthy (2.578169ms)
+✔ fixture authorized simulation resolves selected aliases without disclosing routes or granting live authority (5.829935ms)
+✔ one green native ACK cannot conceal an entirely absent child checkpoint (0.627038ms)
+✔ failure storms paginate every available gap and keep each authorized export inside its actual byte cap (98.986914ms)
+✔ unrepresentable revision metadata is a visible diagnostic gap instead of silent correlation (0.700492ms)
+✔ a green checkpoint on another operation cannot conceal a declared absent checkpoint (0.515514ms)
+✔ aggregate current ACK cannot conceal missing failed uncertain or stale per-item proof; extra generated rows stay visible (2.830086ms)
+✖ committed known-good complete mode/provider generations do not silently drift (20.64634ms)
+✔ known-good baseline detects independent flat-provider and deep route regressions (0.74833ms)
+✔ optimized FNV1a64 retains published vectors and exact namespace/leading-zero semantics (70.940581ms)
+✔ split-word FNV equals original BigInt formula across deterministic arbitrary UTF16 and surrogate boundaries (162.078527ms)
+✔ image signature detection is byte-derived; literal OK, corrupt formats and wrong ranges never succeed (9.895756ms)
+✔ byte assembly verifies etag, offsets and integrity; cancellation stops subsequent ranges (37.459536ms)
+✔ one image cache isolates account/key/version, bounds memory, and enforces thumbnail budget on reuse (3.885528ms)
+✔ gallery follows display order, skips folders/nonimages and stops at loaded boundaries (0.46365ms)
+✔ layout defaults migrate without data loss and canonical config validates persisted geometry (3.346869ms)
+✔ failed File API read propagates actual bounded code, never outer OK; schema rejects invalid layout (4.469507ms)
+✔ header dimensions preserve four image aspect ratios and reject decoded-pixel bombs before decode (11.393052ms)
+✔ R2 range HTTP failures retain status through File API and typed RPC without raw response bodies (3.444514ms)
+✔ valid JPEG with metadata beyond first 64 KiB retains its actual dimensions without another network owner (6.773705ms)
+✔ Cloudflare quoted HTTP ETags and ignored Range full 200 responses retain bounded complete preview bytes (168.771499ms)
+✔ duplicate first windows and concurrent following chunks share a strong snapshot without cancelling other readers (33.717211ms)
+✔ real changes, weak/missing identities, ignored conditionals and malformed full bodies never become successful reads (6.179838ms)
+✔ 206 keeps strong conditional checks and exact byte/content-range validation (4.166821ms)
+✔ download sink uses the preview byte validator without retaining whole-file blobs and propagates interrupted writes (96.346402ms)
+✔ a genuine object replacement between 206 chunks is detected before a mixed download is committed (15.153768ms)
+✔ an actually empty R2 object is a verified empty read, never confused with truncated nonempty data (1.797718ms)
+✔ inventory resumes pagination fairly across same-named buckets without writes or implicit authorization (55.76484ms)
+✔ repeated cursors, malformed paths and budget limits retain known inventory as incomplete (3.346601ms)
+✔ read cancellation and concurrent scan are explicit; diagnostic sink cannot break discovery (3.15919ms)
+✔ source bytes remain exact; no provenance in capture output; source permission always checked (19.510477ms)
+✔ capture source failures, redirects, size limits and aborts are distinguishable and safe (15.815972ms)
+✔ V1 authorized login reuses redown, ordinary entry/default and verified next save (7.564562ms)
+✔ V1 authorized login creates redown, ordinary entry/default and verified next save (10.866501ms)
+✔ saved assignments without default preserve labels, visibility, order and mode; never add redown (11.430716ms)
+✔ default-only migration links exact custom target to an editable canonical row without implicit remote approval (4.936213ms)
+✔ existing default plus assignments is unchanged and multiple assignments without a default stay ambiguous (6.76767ms)
+✔ configuration-only deletion of last row reinitializes on next login, but never on passive status or restart (4.700822ms)
+✔ deleting redown with a surviving assignment preserves that survivor at next login (3.135828ms)
+✔ missing consent, unknown R2, missing scopes and wrong account never mutate remote resources (3.145798ms)
+✔ partial probe completion resumes after worker restart without a duplicate write or manager entry (3.285662ms)
+✔ a concurrent user destination edit stops setup instead of overwriting choices (15.760526ms)
+✔ login automatically initializes only with provisioning authority and requires native ACK (7.454501ms)
+✔ verified provider setup with a failed native ACK is partial, never READY (5.581863ms)
+✔ a bucket create whose reply is lost is discovered after restart without a duplicate POST (4.030046ms)
+✔ two live owners serialize initialization and recover an interrupted bucket-confirmed stage (2.842189ms)
+✔ an approval for another account or forged transferable config cannot grant provisioning (0.974152ms)
+✔ explicit setup completion loss is resumed by next login using the same probe (2.609185ms)
+✔ initializeCloudflare binds verified account IDs before any domain mutation (0.962271ms)
+✔ latest Quick decision matrix: promotion, Default, order, Flat, hidden and no forced fallback (7.247583ms)
+✔ API preview/commit/ACK, native routing, stored flags and restart use the same Quick projection (29.820499ms)
+✔ Depth fixture: one root (1.089737ms)
+✔ Depth fixture: two roots (0.673335ms)
+✔ Depth fixture: two roots at 10 (5.055564ms)
+✔ Depth fixture: two chains (5.462211ms)
+✔ Depth fixture: three chains (25.019286ms)
+✔ Depth fixture: four chains (2.698814ms)
+✔ Depth fixture: ten siblings (1.357376ms)
+✔ Depth fixture: mixed branching (2.331939ms)
+✔ Depth fixture: single-child chain (3.480635ms)
+✔ Depth fixture: files-only folder (0.467619ms)
+✔ Depth fixture: deeper folder at limit (0.733163ms)
+✔ Depth fixture: identical names (0.934486ms)
+✔ Depth bounded discovery paginates, distinguishes file-only folders, and refuses partial listings (5.457533ms)
+✔ a fresh Depth tree replaces stale Explorer folders, including a successfully empty bucket (1.078392ms)
+✔ settings commit distinguishes storage, discovery and Chrome errors and converges through same-key retries (45.232398ms)
+✔ Logic2Real U earns zero credit but is not a measured failure (0.556059ms)
+✔ Logic2Real NA renormalizes, partial mismatch and missing evidence remain separate (0.278084ms)
+✔ Logic2Real all unknown has no known score; critical weights are retained (13.149197ms)
+✔ canonical registry has unique versioned rules and resolvable source/test traces; missing native proof stays open (379.664018ms)
+✔ Cloudflare Explorer file-save path refuses unsupported remote sources without staging bytes (5.400611ms)
+✔ old composite entrypoint delegates to the single canonical compiler (1.690406ms)
+✔ same normalized input generates an identical result independent of folder order (5.688445ms)
+✔ Simple destinations are flat Cloudflare leaf entries (0.499331ms)
+✔ Other cloud providers are single native leaf siblings, not submenus (0.701062ms)
+✔ Narrow includes only configured paths and ancestors (5.301115ms)
+✔ Depth 10 includes unconfigured folders but hides levels beyond 10 (7.293194ms)
+✔ Depth 16 reaches the deepest marker path and has an actionable leaf (1.442326ms)
+✔ Each mode changes only its own projection (8.954245ms)
+✔ No sibling label collision is silently accepted (1.254597ms)
+✔ Unavailable destination and path traversal are rejected (0.5103ms)
+✔ Native submenu parents expose explicit Save here leaf (7.952121ms)
+✔ Upload is not acknowledged until provider confirms it (0.830135ms)
+✔ exact owner-registered nine-scope authorization with Admin/item/routes, same identity and no offline_access (13.83815ms)
+✔ requested scopes are not mislabeled as provider-issued grants when scope is absent (3.507681ms)
+✔ partial grant remains authenticated but explicitly requires reconsent instead of pretending Admin was issued (1.592438ms)
+✔ cancelled or invalid-scope reconsent preserves existing access/refresh tokens, account and session (3.794608ms)
+✔ refresh and rotation work without requesting offline_access and retain the nine-grant provenance (5.380563ms)
+✔ known edit-only token cannot create a Worker, but already owned existing Workers can still be updated (12.479355ms)
+✔ a newly provider-issued Admin grant resumes a preserved create denial once without renewed setup approval (32.902802ms)
+✔ known missing Admin prevents even initial bucket creation and retains the approved setup intent (3.038021ms)
+✔ ordering is cached by immutable listing and sort revision, with numeric size and natural names (7.813261ms)
+✔ viewport bounds DOM work without limiting logical directory capacity (0.322362ms)
+✔ listing reader coalesces pending requests, expires pages and invalidates stale cache fills (10.024909ms)
+✔ a failed page does not poison retries and request coalescing never drops the next cursor (1.37329ms)
+✔ canonical metadata reads coalesce only within a session and never reuse mutation or stale-session results (4.445954ms)
+✔ slow listing never holds the configuration/inspection queue or blocks unrelated folder navigation (0.998688ms)
+✔ viewport stays valid after a shrinking listing with a stale scroll offset (0.179235ms)
+✔ Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity (3.520757ms)
+✔ gateA discovered buckets do not inflate count; checked overlapping mode routes remain independent (1.48846ms)
+✔ Nov6 each Settings toggle removes whole native branch and restores exact target without mutation (5.151844ms)
+✔ Nov6 two accounts with identical display names keep distinct exact targets and disambiguated labels (0.564354ms)
+✔ Nov6 deliberate default assignment deletion persists sole survivor and does not recreate deleted target (3.94458ms)
+✔ Nov6 real registrar ACK click uses engine exact target without provider/dashboard detour, including restart (4.928224ms)
+✔ Shelf attention replaces legacy popup and retains the exact trusted app boundary (4.157839ms)
+✔ future trusted flat provider ports replace their one canonical entry, never add a second provider row (4.76278ms)
+✔ explicit Quick labels cannot rename or duplicate a canonical provider heading (0.722455ms)
+✔ hidden destination eye wins over Flat without deleting its saved default (0.494162ms)
+✔ programmatic provider action binds the sole canonical target before dispatch, even without a stored default (4.523814ms)
+✔ single refresh on expired token rotates credentials; simultaneous reads share refresh (6.232507ms)
+✔ temporary refresh outage retains the session; invalid_grant alone requires reconnect (25.977723ms)
+✔ read retries once only for actual auth rejection; generic403 never refreshes (7.253461ms)
+✔ rejected write is never replayed, while a valid refresh is preserved (7.742518ms)
+✔ diagnosis distinguishes grants, token challenge, wrong account, inactive R2, policy and unknown403 without raw text (0.551125ms)
+✔ wrong account is rejected locally and does not send a request with another account token (0.995593ms)
+✔ token issuance followed by temporary identity failure remains pending and can recover read-only (11.98485ms)
+✔ persisted callback can finish in restarted owner; duplicate callback exchanges one code only (2.744561ms)
+✔ Shelf gesture keeps existing open policy while OFF and rejected-open fallback stay OS-silent (10.053823ms)
+✔ repeated concurrent attention failures stay OS-silent and retain the latest existing Shelf state (0.4446ms)
+✔ R2 unavailable, unknown403 and outage never provision or navigate an activation site (2.048411ms)
+✔ native listener calls the Shelf gesture hook before awaiting cold boot (1.635487ms)
+✔ notification preference uses canonical config API independently of provider visibility and has no arbitrary batch ceiling (23.286615ms)
+✔ PKCE login uses verified scopes and exact redirect; verifies identity before safe connected status (3.95603ms)
+✔ OAuth state mismatch never exchanges code; denied identity remains authenticated pending verification (24.070149ms)
+✔ cancel pending login prevents late callback from reauthorizing; duplicate login is rejected (12.242968ms)
+✔ a legacy main token without verified account identity returns disconnected and requires normal login (2.590872ms)
+✔ gateD-compiled-snapshots-truthfully-distinguish-all-modes-and-visibility-without-source-URLs (7.697688ms)
+✔ gateD-original-put-includes-byte-verified-immutable-route-metadata-and-honest-keep-both-filenames (19.244139ms)
+✔ gateD-missing-old-metadata-remains-readable-and-oversize-forbidden-route-metadata-blocks (3.520772ms)
+✔ gateD-HMAC-grant-binds-snapshot-to-operation-source-and-exact-destination (13.556868ms)
+✔ gateD-unknown-length-spool-final-put-keeps-snapshot-and-invalid-readback-never-verifies (7.484851ms)
+✔ gateD-oversize-snapshot-blocks-before-network-and-later-label-edits-cannot-change-earlier-generation (3.190009ms)
+✔ gateD-promoted-Narrow-Quick-records-actual-collapsed-visibility-without-losing-configured-mode (1.060373ms)
+✔ public address classification blocks special-use IPv4/IPv6 including encoded URL literals (1.77342ms)
+✔ three unrelated HTTPS hosts use native fetch with no credentials and manual redirects (3.191239ms)
+✔ known private/mixed DNS answers fail closed; native TLS/network failure remains visible (0.924823ms)
+✔ native chunked response remains streaming and unknown length (0.787065ms)
+✔ more than five safe redirects work; cycles and private redirects fail closed (1.947123ms)
+✔ actual API create/delete, migrated revision and restart retain permanent four providers (15.580449ms)
+✔ customized never-initialized menu offers initial setup; explicit removal and chosen account win (2.461211ms)
+✔ prepared-key recovery after a missing receipt independently checks operation ID and size (7.247967ms)
+✔ actual outer Worker receipt persistence failure cannot claim blocked/no-write after PUT (16.791994ms)
+✔ ranged download keeps canonical File API scope and exact authenticated range bytes (5.08271ms)
+✔ clearing default preserves provider access and an explicit removal tombstone (4.375712ms)
+✔ source signature canonicalization permits API contentType without allowing changed source intent (4.006493ms)
+✔ exact folder proof is required for READY, not merely an old bucket-wide timestamp (13.702421ms)
+✔ memory-derived admission backpressure rejects before claim or source fetch, not by file size (6.209706ms)
+✔ browser streaming port handles more than 32MiB with backpressure and no provenance in provider payload (102.46179ms)
+✔ streaming upload cannot report verified without consuming the complete source (1.062095ms)
+✔ bucket discovery traverses numeric and opaque pages without a 1000 bucket ceiling (2.878569ms)
+✔ native click waits for cold-boot reconciliation before resolving current ACK (2.309935ms)
+✔ download continuation binds the original ETag and refuses changed range objects (0.769259ms)
+✔ reported p95/p99 use all samples, including tail latency (0.581303ms)
+✔ benchmark gates fail on tail regression even with a fast median (0.288088ms)
+✔ alternating benchmark exercises every variant equally and excludes warmup (1.098116ms)
+✔ paired overhead retains negative improvements and actual matched outliers (0.836981ms)
+✔ global saved precedence includes hidden/inactive/other-account simple (1.194777ms)
+✔ global saved precedence includes hidden/inactive/other-account nested (0.62664ms)
+✔ global saved precedence includes hidden/inactive/other-account depth (0.551381ms)
+✔ retained approval is visible in empty-state read-only status and next login reuses it (12.422509ms)
+✔ existing Worker upgrade preserves setup approval and exact saved config without provisioning (5.947181ms)
+✔ newly saved other-account target during empty initialization aborts before provider preparation (2.598518ms)
+✔ canonical Explorer entry restores durable preference, then Default, actual redown; ambiguous accounts never guessed (3.257426ms)
+✔ storage read failure blocks state-dependent initialization and writes; auth-only login remains independent (2.069021ms)
+✔ missing retained approval is recovery, never a new consent prompt or fabricated approval (9.708862ms)
+✔ non-Cloudflare saved assignments and explicit Default in another account block fallback (1.926681ms)
+✔ missing last bucket in account A falls through to verified saved Default in account B (7.062339ms)
+✔ local encrypted backup retains schema, authenticates payload and requires a distinct explicit authorization (216.347127ms)
+✔ closed persistence schema rejects credentials hidden behind unknown fields at every accepted level (7.26849ms)
+✔ backup rejects namespace mismatch, revision mismatch, duplicate journal and unsupported schemas (0.88557ms)
+✔ unavailable CURRENT reports a setup failure while throwing diagnostic sinks cannot mask the outcome (4.912957ms)
+✔ all four provider visibility preferences default ON and migrate absent historical field (0.59035ms)
+✔ per-provider configuration changes have a typed, permission-scoped API schema (1.206035ms)
+✔ hiding Cloudflare removes all of its menu entries without mutating saved targets (2.001891ms)
+✔ hiding all providers yields no native provider or descendant rows; preferences can be restored (0.66364ms)
+✔ paired actual REDOWN native-fetch behavior: direct text, image and validated relative redirects (10.424458ms)
+✔ paired reference guard defect is not inherited: private literals and credential-bearing redirects never reach C2C fetch (1.894632ms)
+✔ native response length, filename and useful provenance preserve content without leaking query credentials (2.082477ms)
+✔ extension-required Worker digest blocks old READY projection without deployment or source fetch (0.325448ms)
+✔ ordinary page context preserves media/link precedence and shares safe remote acquisition (0.448469ms)
+✔ ratchet-owner-invariant-failure-map-is-exhaustive-and-source-owned (32.662527ms)
+✔ ratchet-permission-and-report-adversaries (2.649818ms)
+✔ ratchet-durable-recorder-bounded-fault-contained-expiring-and-read-only (11.146627ms)
+✔ ratchet-private-copy-verifier-supports-existing-local-agent-filesystem-owner (44.447276ms)
+✔ ratchet-CI-rejects-unexecuted-failed-or-removed-known-failure-cases (1.874304ms)
+✔ actual workerd/R2 through canonical File API: folder, copy, keep-both, rename, folder move, delete, idempotence and scope (4566.588488ms)
+✔ review: generation changes during asynchronous auth block source acquisition as well as upload (3.816547ms)
+✔ review: generation changes during capture block dispatch under the old ACK (2.215805ms)
+✔ review: thrown auth and cancelled capture report exact outcomes with explicit downstream dependency signals (3.456524ms)
+✔ review: capture deadline and abort settle even if host fetch, reader or cancel never settles (12.219699ms)
+✔ review: a completed subtree scan never claims complete bucket inventory (0.308772ms)
+✔ review: descendant-first inventory scans natural ancestors and preserves sibling coverage (0.861965ms)
+✔ review: a partially ingested failed inventory page advances immutable revision and discloses retained nodes (0.427327ms)
+✔ successful read-only inspection completes independently of blocked stored transfer; errors remain errors (0.894297ms)
+✔ unexpected pre-write exceptions identify bounded stage; saver retains safe diagnostics (3.028717ms)
+✔ actual workerd production egress handles DNS redirects without unsupported redirect:error; no TLS or R2 write (3170.993068ms)
+✔ Chrome-authenticated Shelf identity does not depend on optional documentId (1.138064ms)
+✔ optional metadata never overrides extension/page provenance; malformed or conflicting metadata is denied (0.413845ms)
+✔ REDOWN core path and destination normalization preserved (0.427711ms)
+✔ no privileged transport defaults are silently allowed into Click2Cloud host (0.179717ms)
+✔ Click2Cloud calls the extracted real R2 listing adapter via the universal operation API (0.922608ms)
+✔ Unimplemented operation does not fabricate a successful result (0.162185ms)
+✔ Ambiguous writes stay uncertain and never auto-replay during a batch (0.596285ms)
+✔ Provider preferences stay configurable but pagination is not exposed as a preference (0.280362ms)
+✔ The API exposes partial responses and dispatch-time progress, not false completion (0.240064ms)
+✔ Worker denial retains exact safe account-subdomain-read evidence without assuming scope versus account role (2.541548ms)
+✔ Worker denial retains exact safe script-upload evidence without assuming scope versus account role (2.542965ms)
+✔ Worker denial retains exact safe script-subdomain-enable evidence without assuming scope versus account role (1.673453ms)
+✔ Worker denial retains exact safe script-settings-read evidence without assuming scope versus account role (3.263815ms)
+✔ denied enable step is not automatically retried; explicit resume preserves Worker, key, scope and upload (3.520353ms)
+✔ scope, authentication, invalid request and account subdomain configuration have different remedies (5.990215ms)
+✔ diagnostic serializer rejects injected endpoints, scopes, headers, messages and secret values (0.677548ms)
+✔ onboarding keeps approval, bucket, ledger identity and diagnostic; only explicit resume retries preparation (5.320564ms)
+✔ canonical API returns safe operation/status/provider-code diagnostics with a blocked response (3.505058ms)
+✔ REDOWN canonical Workers read/write grants are accepted without replacing OAuth client or saved authority (2.214079ms)
+✔ new Worker creation and existing Worker edit have different documented role diagnostics (5.872902ms)
+✔ resolved permission denial does not mask a later local completion failure or force new approval (2.463388ms)
+✔ workings baseline remains immutable and current map covers source paths, rules and API operations (13.207121ms)
+✔ routing, OAuth, onboarding or Explorer source changes require a current workings update (3.694502ms)
+✔ restoration baseline remains immutable and distinct from repaired CURRENT (0.659441ms)
+✔ pre-permanence behavior/source snapshot is immutable (1.454457ms)
+✔ zero-stutter pre-change source snapshot stays immutable (1.068021ms)
+✔ cloud paths preserve exact Unicode, punctuation, percent and selected file; visual truncation never changes target (1.249303ms)
+✔ Grid stays bounded and aligned through empty/shrinking/large folders and narrow widths (0.697856ms)
+✔ canonical Grid preference survives validation and roundtrip; context descriptors have one manager owner (0.9201ms)
+✔ bounded reads cancel obsolete queued work, coalesce consumers and isolate authority invalidation (0.727766ms)
+✔ descriptor authority reflects disconnection/read-only grants, independently of static mutation capabilities (1.037632ms)
+ℹ tests 441
+ℹ suites 0
+ℹ pass 440
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59041.214161
+
+✖ failing tests:
+
+test at tests/golden-menu.test.mjs:7:1
+✖ committed known-good complete mode/provider generations do not silently drift (20.64634ms)
+  AssertionError [ERR_ASSERTION]: simple differs from reviewed public fixture generation
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      coverage: {
+        complete: true,
+        inventoryComplete: true,
+        omissionCount: 4,
+  ...
+          actionId: null,
+  +       actionKind: 'branch',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:root',
+          index: 0,
+          intent: null,
+  ...
+          actionId: null,
+  +       actionKind: 'branch',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:cloudflare',
+          index: 0,
+          intent: null,
+  ...
+          actionId: 'c2c:action:d84c0b94ef37f404',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:229159f7b306a982',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:54e887f94ec23d4a',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:5d29d91609ff0746',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:ff628e211bf99fa7',
+          index: 0,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-0',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 0,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:18c0fbf793e49ef8',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:3700ef78ce71cd7d',
+          index: 1,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-1',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 1,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:db358a84e91223a7',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:e432530503a6ccc7',
+          index: 2,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-2',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 2,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:6e08a4b7b33e9ced',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:d1f288e1094857bb',
+          index: 3,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-3',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 3,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:1312494e3bdf35da',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:825a94498af4a948',
+          index: 4,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-4',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 4,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:040724b0a3901e68',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:7a04eb4bd7f4e2d1',
+          index: 5,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-5',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 5,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:49308a16df1286fb',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:2dc325878b394c1f',
+          index: 6,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-6',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 6,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:c014ff12c53baf0d',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:7435810c685cdb09',
+          index: 7,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-7',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 7,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:beb5d894829966b6',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:05531222a8d9ad12',
+          index: 8,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-8',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 8,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:da33c1e725dcf3b9',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:56151b1ab58f6cc1',
+          index: 9,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-9',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 9,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:d29b6534c0c090a5',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:77f106a53e68f472',
+          index: 10,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-10',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 10,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:c5685443af379476',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:8ee600892cfd2d68',
+          index: 11,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-11',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 11,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:a4b8e1abdfa3bd4e',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:6b0625bf4e03e04a',
+          index: 12,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-12',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 12,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:0827f87223e8193d',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:eda23c596b0359f1',
+          index: 13,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-13',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 13,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:6d96ff885b61f6a5',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:2a749771f5586587',
+          index: 14,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-14',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 14,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:47fca0fbe32044d2',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:1ec18731b95555c4',
+          index: 15,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-15',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 15,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: null,
+  +       actionKind: 'separator',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:835d6d5561200148',
+          index: 16,
+          intent: null,
+  ...
+          actionId: 'c2c:action:73a45b7da052f285',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:73c744bac490e62b',
+          index: 17,
+          intent: {
+  ...
+          actionId: null,
+  +       actionKind: 'branch',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:root',
+          index: 0,
+          intent: null,
+  ...
+          actionId: null,
+  +       actionKind: 'branch',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:cloudflare',
+          index: 0,
+          intent: null,
+  ...
+          actionId: 'c2c:action:d84c0b94ef37f404',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:229159f7b306a982',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:54e887f94ec23d4a',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link'
+          ],
+          enabled: true,
+  ...
+          actionId: 'c2c:action:5d29d91609ff0746',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:ff628e211bf99fa7',
+          index: 0,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-0',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 0,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:18c0fbf793e49ef8',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:3700ef78ce71cd7d',
+          index: 1,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-1',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 1,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:db358a84e91223a7',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:e432530503a6ccc7',
+          index: 2,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-2',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 2,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:6e08a4b7b33e9ced',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:d1f288e1094857bb',
+          index: 3,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-3',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 3,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:1312494e3bdf35da',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:825a94498af4a948',
+          index: 4,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-4',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 4,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:040724b0a3901e68',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:7a04eb4bd7f4e2d1',
+          index: 5,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-5',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 5,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:49308a16df1286fb',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:2dc325878b394c1f',
+          index: 6,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-6',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 6,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:c014ff12c53baf0d',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:7435810c685cdb09',
+          index: 7,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-7',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 7,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:beb5d894829966b6',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:05531222a8d9ad12',
+          index: 8,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-8',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 8,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:da33c1e725dcf3b9',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:56151b1ab58f6cc1',
+          index: 9,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-9',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 9,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:d29b6534c0c090a5',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:77f106a53e68f472',
+          index: 10,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-10',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 10,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:c5685443af379476',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:8ee600892cfd2d68',
+          index: 11,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-11',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 11,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:a4b8e1abdfa3bd4e',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:6b0625bf4e03e04a',
+          index: 12,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-12',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 12,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:0827f87223e8193d',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:eda23c596b0359f1',
+          index: 13,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-13',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 13,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:6d96ff885b61f6a5',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:2a749771f5586587',
+          index: 14,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-14',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 14,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: 'c2c:action:47fca0fbe32044d2',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:1ec18731b95555c4',
+          index: 15,
+          intent: {
+  ...
+          parentId: 'c2c:cloudflare',
+  +       presentationId: 'fixture-placement-15',
+          reason: 'SIMPLE_CONFIGURED',
+          role: 'save',
+          siblingIndex: 15,
+          target: {
+            accountId: 'fixture-account-a',
+  ...
+          actionId: null,
+  +       actionKind: 'separator',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:835d6d5561200148',
+          index: 16,
+          intent: null,
+  ...
+          actionId: 'c2c:action:73a45b7da052f285',
+  +       actionKind: 'save',
+          contexts: [
+            'image',
+            'link',
+  +         'video',
+  +         'audio',
+  +         'page'
+          ],
+          enabled: true,
+          id: 'c2c:item:73c744bac490e62b',
+          index: 17,
+          intent: {
+  
+      at TestContext.<anonymous> (file:///workspace/Click2Cloud-current/tests/golden-menu.test.mjs:11:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [Object],
+    expected: [Object],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

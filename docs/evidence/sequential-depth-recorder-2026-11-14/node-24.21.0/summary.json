@@ -1,0 +1,208 @@
+{
+  "sourceRevision": "098ae67c76b00d664388c1e89b925ee00a1c0036",
+  "sourceFiles": {
+    "tests/depth-plan-recovery.test.mjs": "1e4909d09674333db0b2871b2ceb339e7ca7d717dc3d0a58f2bd9c216e51743c",
+    "tests/fixtures/depth-fetch-diagnostics.mjs": "0e96a49b263555e28017492fbc1dd5b85dc960109aaa17423c7f66d2ed459e2d",
+    "tests/fixtures/depth-observation.mjs": "252bf6c33427a402b66d82fc6e116ce091be0f330a6935b44f36aa109c07ce2d",
+    "tests/final-focused.mjs": "c5cd575ee3963765c97799cb16daa2aeb3f17dd73431921b45166897ad6bf446"
+  },
+  "node": "v24.21.0",
+  "os": "linux",
+  "arch": "x64",
+  "jobs": 1,
+  "results": [
+    {
+      "label": "isolated-1",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-1-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6644.470253,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-2",
+      "mode": "BASIC",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-2-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6275.414626,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-3",
+      "mode": "EXPANSIVE",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-3-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6430.944215000001,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-4",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-4-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6415.62196,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-5",
+      "mode": "BASIC",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-5-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6296.801963999998,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-6",
+      "mode": "EXPANSIVE",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/isolated-6-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6446.885889000001,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "full-1",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "tests/final-focused.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/full-1-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 396,
+      "pass": 396,
+      "fail": 0,
+      "durationMs": 52560.78567899999,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "full-2",
+      "mode": "EXPANSIVE",
+      "args": [
+        "tests/final-focused.mjs"
+      ],
+      "executable": "node v24.21.0",
+      "trace": "work/depth-fixture-1794686377108-1636/full-2-trace",
+      "exit": 0,
+      "spawnFailed": false,
+      "tests": 396,
+      "pass": 396,
+      "fail": 0,
+      "durationMs": 53589.19274299999,
+      "observation": {
+        "traceEvents": 751,
+        "requestErrors": 0,
+        "requests": 87,
+        "clicks": 9,
+        "completedClicks": 8
+      },
+      "evidenceClass": "NODE_FIXTURE"
+    }
+  ],
+  "artifactNote": "Only absolute executable paths replaced with node version; traces and test logs unchanged. Commands use repository-relative paths."
+}

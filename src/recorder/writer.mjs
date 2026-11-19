@@ -1,0 +1,11 @@
+// Deadlines do not cancel writes: one owner holds each batch until real settlement.
+// No caller in the business path awaits this writer. Memory pressure loses evidence,
+// never transfer work. No keepalive or recursive logging of logger health.
+export function createWriter({commit,maxQueue=4096,batchSize=128,delayMs=25,maxQueueBytes=4*1024*1024,sizeOf=()=>1024,clock=()=>performance.now()}={}){
+ let queue=[],queueBytes=0,running=null,timer=null,backoff=0,nextRetry=0,closed=false;const health={admitted:0,committed:0,dropped:0,failures:0,batches:0,peakQueue:0,writeMs:0,bytesCommitted:0};
+ function schedule(){if(!closed&&!timer&&!running&&queue.length&&clock()>=nextRetry)timer=setTimeout(()=>{timer=null;void flush();},delayMs);}
+ function push(value){if(closed||queue.length>=maxQueue||queueBytes+sizeOf(value)>maxQueueBytes){health.dropped++;return false;}queue.push(value);queueBytes+=sizeOf(value);health.admitted++;health.peakQueue=Math.max(health.peakQueue,queue.length);schedule();return true;}
+ async function flush(){if(running)return running;if(timer){clearTimeout(timer);timer=null;}if(!queue.length)return;const batch=queue.splice(0,batchSize),start=clock();queueBytes-=batch.reduce((n,v)=>n+sizeOf(v),0);running=(async()=>{try{const bytes=await commit(batch);health.batches++;health.committed+=batch.length;health.bytesCommitted+=number(bytes);backoff=0;nextRetry=0;}catch{health.failures++;queue.unshift(...batch);queueBytes+=batch.reduce((n,v)=>n+sizeOf(v),0);while(queue.length>maxQueue||queueBytes>maxQueueBytes){queueBytes-=sizeOf(queue.pop());health.dropped++;}backoff=Math.min(60000,backoff?backoff*2:1000);nextRetry=clock()+backoff;}finally{health.writeMs+=clock()-start;running=null;schedule();}})();return running;}
+ function number(v){return Number.isFinite(v)?v:0;}
+ return {push,flush,async drain(){while(queue.length||running){const failures=health.failures;await flush();if(health.failures!==failures)break;}return this.inspect();},inspect:()=>({...health,pending:queue.length,queueBytes,inFlight:!!running,retryAfterMs:Math.max(0,nextRetry-clock()),writeBytesPerSecond:health.writeMs>0?health.bytesCommitted*1000/health.writeMs:'N/A'}),close(){closed=true;clearTimeout(timer);}};
+}

@@ -1,0 +1,309 @@
+right2cloud-module/src/source-fetch.mjs:3:export const publicUrl=raw=>sourceURL(raw);
+right2cloud-module/src/source-fetch.mjs:4:export async function sourceFetch(raw,{fetch:fetcher,signal,maxBytes=Number.MAX_SAFE_INTEGER,onProgress=()=>{},idleTimeoutMs=30000}){
+right2cloud-module/src/source-fetch.mjs:25:export function sourceFromClick(info){
+right2cloud-module/src/source-fetch.mjs:32:export function sourceMetadata(raw){
+right2cloud-module/src/source-fetch.mjs:38:export function responseFilename(name,contentType){
+extension/mirror.mjs:7:async function request(method, args) { return chrome.runtime.sendMessage({ version: 1, method, args }); }
+right2cloud-module/src/provenance.mjs:2:export const R2_METADATA_BYTES=2048;
+right2cloud-module/src/provenance.mjs:6:export const metadataJSON=value=>JSON.stringify(value??null).replace(/[\u007f-\uffff]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
+right2cloud-module/src/provenance.mjs:7:export function validateSelection(value,destination){
+right2cloud-module/src/provenance.mjs:22:export function objectProvenance(selection,{destination,originalFilename,storedFilename,operationId}){
+right2cloud-module/src/provenance.mjs:27:export function selectionMatches(selection,object){if(!object)return false;const {operationId,originalFilename,storedFilename,...actual}=object;return metadataJSON(actual)===metadataJSON(selection);}
+right2cloud-module/src/verification.mjs:3:export function acceptProof(intent,receipt,proof){
+right2cloud-module/src/public-address.mjs:2:export function publicAddress(raw){
+right2cloud-module/src/public-address.mjs:17:export function sourceURL(raw){
+right2cloud-module/src/index.mjs:6:export function createRemoteSaver(ports){const operations=new Map();return function saveRemote(input){
+right2cloud-module/src/index.mjs:11:async function run(input,p){let dispatched=false;let intent;const result=(state,code,extra={})=>({state,code,operationId:input?.operationId,destination:intent?.destination,...extra});
+right2cloud-module/src/cloudflare-worker.mjs:6:export function createWorker(ports){return {async fetch(request,env){
+right2cloud-module/src/cloudflare-r2-writer.mjs:3:export const SPOOL_PART_BYTES=4*1024*1024;
+right2cloud-module/src/cloudflare-r2-writer.mjs:5:export const R2_SINGLE_PUT_BYTES=5*1024**3;
+right2cloud-module/src/cloudflare-r2-writer.mjs:6:export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLengthStream,recordStage=async()=>{},recordPart,readPart}={}){
+right2cloud-module/src/common.mjs:2:export const fields=['provider','connectionId','accountId','bucketName','prefix','conflictPolicy'];
+right2cloud-module/src/common.mjs:3:export const equal=(a,b)=>fields.every(k=>a?.[k]===b?.[k]);
+right2cloud-module/src/common.mjs:4:export function fail(code){throw Object.assign(new Error(code),{code});}
+right2cloud-module/src/common.mjs:5:export function destination(d){
+right2cloud-module/src/common.mjs:10:export function filename(name){if(typeof name!=='string'||!name||/[\\/\x00-\x1f\x7f]/.test(name)||name==='.'||name==='..')fail('FILENAME_INVALID');return name;}
+right2cloud-module/src/common.mjs:11:export function validateIntent(i){destination(i.destination);if(i.provenance!==undefined)validateSelection(i.provenance,i.destination);if(!/^[a-zA-Z0-9_-]{16,128}$/.test(i.operationId||''))fail('OPERATION_INVALID');filename(i.source?.filename);keyFor(i.destination,i.source.filename);if(i.source.responseFilename!==undefined&&typeof i.source.responseFilename!=='boolean')fail('SOURCE_INVALID');}
+right2cloud-module/src/common.mjs:12:export function keyFor(d,name){const key=(d.prefix?d.prefix+'/':'')+filename(name);if(new TextEncoder().encode(key).length>1024)fail('KEY_TOO_LONG');return key;}
+right2cloud-module/src/common.mjs:13:export function wait(p,signal){return new Promise((resolve,reject)=>{const abort=()=>{cleanup();reject(Object.assign(Error('INTERRUPTED'),{code:'INTERRUPTED'}));};const cleanup=()=>signal?.removeEventListener('abort',abort);Promise.resolve(p).then(v=>{cleanup();resolve(v);},e=>{cleanup();reject(e);});if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});});}
+right2cloud-module/src/common.mjs:15:export function canonicalSource(s){return {url:s?.url,filename:s?.filename,...(s?.responseFilename===true?{responseFilename:true}:{})};}
+right2cloud-module/src/common.mjs:18:export const remoteStages=['request','authenticate','claim','writer','source.fetch','destination.prepare','authorization.recheck','destination.record','destination.write'];
+right2cloud-module/src/common.mjs:19:export function safeRemoteDiagnostic(value){
+src/modes/simple/index.mjs:2:export function createConfig(input={}) {
+src/modes/simple/index.mjs:5:export const validateConfig=createConfig;
+src/modes/simple/index.mjs:6:export function updateConfig(current,patch,{expectedRevision}={}) {
+src/modes/simple/index.mjs:9:export function migrateConfig(snapshot={}) {
+src/modes/simple/index.mjs:13:export function project({config,inventory}) {
+extension/background.mjs:31:function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
+extension/background.mjs:42:async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
+extension/background.mjs:45:async function recordRemote(value){
+extension/background.mjs:52:async function send(message) {
+extension/background.mjs:82:async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false}={}) {
+extension/background.mjs:157:async function external(){const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('EXTERNAL_RECOVERY_UNAVAILABLE');return createExternalRecovery({files:directoryFiles(h)});}
+extension/background.mjs:210:async function readCurrent(context){await trustedStorage();const saved=await current.read(context),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING',origin:'BACKGROUND_NATIVE_FENCE',subreason:'NATIVE_GENERATION_WITH_ZERO_CURRENT'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return saved;}
+extension/background.mjs:212:async function nativeReady(){const state=await readCurrent(),e=registrar.inspect();if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null&&engine.matchesCurrent(e.desired,state))return e.lastOutcome;if(!nativeAttempt){const attempt=api.reconcile();nativeAttempt=attempt;attempt.finally(()=>{if(nativeAttempt===attempt)nativeAttempt=null;}).catch(()=>{});}return nativeAttempt;}
+src/modes/nested/index.mjs:2:export function createConfig(input={}) {
+src/modes/nested/index.mjs:5:export const validateConfig=createConfig;
+src/modes/nested/index.mjs:6:export function updateConfig(current,patch,{expectedRevision}={}) {
+src/modes/nested/index.mjs:9:export function migrateConfig(snapshot={}) {
+src/modes/nested/index.mjs:14:export function levelHidden(destination,prefix){
+src/modes/nested/index.mjs:18:export function project({config,inventory}) {
+src/modes/depth/index.mjs:2:export function createConfig(input={}) {
+src/modes/depth/index.mjs:14:export const validateConfig=createConfig;
+src/modes/depth/index.mjs:15:export function updateConfig(current,patch,{expectedRevision}={}) {
+src/modes/depth/index.mjs:18:export function migrateConfig(snapshot={}) {
+src/modes/depth/index.mjs:22:export function project({config,inventory}) {
+extension/app.mjs:30:async function enterExplorer(){
+extension/app.mjs:42:async function api(method,params={}, {quiet=false,readTimeout=0}={}) {
+extension/app.mjs:51:function recoveryCard(){return '<div class="card" role="status"><h2>Local configuration needs recovery</h2><p>'+esc(names[configurationIssue?.code]??configurationIssue?.code??'Saved configuration is unavailable.')+'</p><details><summary>Local service diagnostics</summary><pre id="local-diagnostics">'+esc(JSON.stringify(configurationIssue,null,2))+'</pre></details><p>Saved configuration cannot be trusted. Existing records and native menus are preserved. Login remains independent. Do not clear extension storage or uninstall.</p><button id="inspect-recovery">Inspect recovery</button><button id="attach-private-copy">Verify private profile copy</button><button id="rebuild-config">Rebuild with my choices</button><button id="read-local-state">Read saved configuration again</button><pre id="recovery-summary"></pre></div>';}
+extension/app.mjs:52:function bindRecovery(){listen('#attach-private-copy','click',attachPrivateCopy);listen('#rebuild-config','click',rebuildConfiguration);listen('#inspect-recovery','click',inspectRecovery);listen('#read-local-state','click',async()=>{await refreshState();await show(view);});}
+extension/app.mjs:53:async function inspectRecovery(){
+extension/app.mjs:61:async function attachPrivateCopy(){
+extension/app.mjs:69:async function rebuildConfiguration(){
+extension/app.mjs:84:async function refreshState(options){const next=await api('getConfiguration',{},options);if(!state||next.product.revision>=state.product.revision)state=next;configurationIssue=null;document.documentElement.dataset.theme=state.product.theme;$('#theme').disabled=false;return state;}
+extension/app.mjs:86:async function readWithRetry(fn){try{return await fn();}catch(error){if(!transientBootCodes.has(error.code)&&!transientBootCodes.has(error.diagnostic?.causeCode))throw error;await new Promise(ok=>setTimeout(ok,100));return fn();}}
+extension/app.mjs:87:async function change(changes,{confirmed=false,expectedRevision=state.product.revision,idempotencyKey=crypto.randomUUID()}={}) {
+extension/app.mjs:98:function listen(selector,event,fn){$(selector)?.addEventListener(event,e=>{try{Promise.resolve(fn(e)).catch(error=>status(error.message));}catch(error){status(error.message);}});}
+extension/app.mjs:99:function closeDialog(){stopGalleryVisual();const returnKey=galleryReturnKey;gallery=null;galleryReturnKey=null;previewAbort?.abort();previewEpoch++;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}$('#dialog').close();if(returnKey&&view==='explorer'){const i=listingOrder.index(returnKey);if(i!==undefined){focusIndex=i;focusRow(i);}}}
+extension/app.mjs:100:function dialog(title,body,footer='') {
+extension/app.mjs:105:async function connections() {
+extension/app.mjs:109:function renderConnection(){
+extension/app.mjs:113:async function login(selector='#login',params={}) {
+extension/app.mjs:121:function workerFailureMarkup(d){
+extension/app.mjs:127:async function resumeWorkerSetup(){
+extension/app.mjs:132:function workerUpdateMarkup(readiness){if((readiness?.worker?.code??readiness?.code)==='WORKER_DESTINATION_SCOPE_REQUIRED')return '<p role="alert">'+esc(names.WORKER_DESTINATION_SCOPE_REQUIRED)+'</p>';return readiness?.target&&readiness?.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED'?'<p>Update code in the existing Worker and verify readback. Keep this bucket, destination and saved setup approval. Cloudflare usage may be billed.</p><button id="update-worker">Update existing Worker</button>':'';}
+extension/app.mjs:133:function renderRemotes(){
+extension/app.mjs:143:async function focusShelf(){const request=await api('inspectShelfAttention',{}, {quiet:true});shelfRequest=request;if(view==='remotes'&&$('#remotes-connection')){renderRemotes();if(request)status(names[request.code]??readinessNames[request.code]??'This provider needs attention. Open Cloudflare status for details.');}return false;}
+extension/app.mjs:144:async function loadTree(initial=null){
+extension/app.mjs:158:function treeKeyboard(button,children){
+extension/app.mjs:165:function syncTreePage(t,data){
+extension/app.mjs:171:function treeNode(parent,t,label){
+extension/app.mjs:178:async function show(next){const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer')explorerScroll=$('#files')?.scrollTop??0;if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();}else await renderSettings();}
+extension/app.mjs:181:function renderExplorer(){
+extension/app.mjs:195:function selectedFolder(){const row=entries.find(e=>selected.has(e.key));return row?.folder?{...source,prefix:row.key}:source;}
+extension/app.mjs:197:function renderAddress(){const input=$('#location'),display=$('#location-display');if(!input)return;const e=selected.size===1?ordered()[listingOrder.index(selected.values().next().value)]:null,value=cloudPath(source,e&&!e.folder?e.key:source?.prefix);if(document.activeElement!==input)input.value=value;input.title=value;display.textContent=value?middlePath(value,Math.max(20,addressWidth-20),pathMeasure):'Choose a cloud folder';}
+extension/app.mjs:198:async function navigate(t,push=true,fromAPI=false){
+extension/app.mjs:205:async function loadListing(more=false){
+extension/app.mjs:212:function ordered(){return listingOrder.read(entries,sort);}
+extension/app.mjs:213:function renderFiles(){
+extension/app.mjs:235:function renderWindow(){
+extension/app.mjs:243:function selectRow(i,event){const started=performance.now();hideContext();const rows=ordered(),e=rows[i];if(!e)return;if(event.shiftKey){if(!event.ctrlKey&&!event.metaKey)selected.clear();for(let j=Math.min(anchor,i);j<=Math.max(anchor,i);j++)selected.add(rows[j].key);}else if(event.ctrlKey||event.metaKey){if(selected.has(e.key))selected.delete(e.key);else selected.add(e.key);anchor=i;}else{selected=new Set([e.key]);anchor=i;}focusIndex=i;updateSelection();paintTrace('selection',started);}
+extension/app.mjs:244:function focusRow(i){const el=$('#files'),grid=displayView()==='grid',columns=grid?gridWindow(entries.length,0,viewportHeight,viewportWidth).columns:1,h=grid?136:40,top=Math.floor(i/columns)*h;if(top<el.scrollTop)el.scrollTop=top;else if(top+h+(grid?0:40)>el.scrollTop+viewportHeight)el.scrollTop=top+h+(grid?0:40)-viewportHeight;renderWindow();el.querySelector(`[data-index="${i}"]`)?.focus({preventScroll:true});}
+extension/app.mjs:245:function updateSelection(){const rows=ordered();$('#files')?.querySelectorAll('[data-index]').forEach(row=>{const i=Number(row.dataset.index),value=String(selected.has(rows[i]?.key));if(row.getAttribute('aria-selected')!==value)row.setAttribute('aria-selected',value);row.tabIndex=i===focusIndex?0:-1;});if($('#item-count'))$('#item-count').textContent=`${entries.length} items · ${selected.size} selected`;renderAddress();}
+extension/app.mjs:250:function stopThumbnailJobs(){for(const job of thumbnailJobs.values())job.abort();thumbnailJobs.clear();}
+extension/app.mjs:251:function clearThumbnails(){stopThumbnailJobs();for(const row of thumbnailURLs.values())if(row.url)URL.revokeObjectURL(row.url);thumbnailURLs.clear();}
+extension/app.mjs:253:function thumbnailKey(e){return JSON.stringify([targetKey(source),e.key,e.etag??e.version??e.uploaded??'',e.size??null]);}
+extension/app.mjs:254:function syncThumbnails(){
+extension/app.mjs:267:function stopGalleryVisual(){stopLoadingVisual?.();stopLoadingVisual=null;const frame=$('.image-frame');if(frame)delete frame.dataset.loading;}
+extension/app.mjs:268:async function startGalleryVisual(frame,ticket,signal){
+extension/app.mjs:274:function galleryControls(e){return `<div class="gallery-controls"><button id="gallery-previous" class="gallery-arrow" title="Previous image" aria-label="Previous image" aria-keyshortcuts="ArrowLeft" ${!galleryStep(ordered(),e.key,-1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>Images in this loaded folder${cursor?' · more files may be loaded in Explorer':''}</span><button id="gallery-next" class="gallery-arrow" title="Next image" aria-label="Next image" aria-keyshortcuts="ArrowRight" ${!galleryStep(ordered(),e.key,1)?'disabled':''}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>`;}
+extension/app.mjs:275:function moveGallery(direction){if(!gallery)return;const next=galleryStep(ordered(),gallery.key,direction);if(next)void openEntry(next).catch(e=>status(imageMessage(e.code)));}
+extension/app.mjs:276:async function openEntry(e){
+extension/app.mjs:295:function hideContext(){contextTicket++;$('#context').hidden=true;$('#context').replaceChildren();}
+extension/app.mjs:296:async function contextFor(t,entry,x,y){
+extension/app.mjs:321:async function runFileAction(action,params){
+extension/app.mjs:325:async function fileActionGUI(action,entry,target=source){
+extension/app.mjs:332:async function chooseRemoteSave(entry){const capabilities=await api('describeCapabilities');if(capabilities.providers?.cloudflare?.explorerSource===false){dialog('Save to cloud','<p>This private Explorer file has no authorized remote source transfer. Cloudflare never stages file bytes through your browser.</p><button id="download-stream">Download instead</button>');listen('#download-stream','click',()=>downloadEntry(entry));return;}
+extension/app.mjs:340:function popupFooter(){return '<div id="level-action"></div><div class="show-controls" id="show-controls"></div>'+saveFeedback+'<div class="dialog-foot"><button id="cancel">Cancel</button>'+saveButton+'</div>';}
+extension/app.mjs:341:function destinationDraft(session){
+extension/app.mjs:344:function bindDestinationSave(session,readChanges,afterSave){
+extension/app.mjs:385:function openPopup(t,existing=null,managerDraft=null){
+extension/app.mjs:427:async function manager(filter='simple',page=0,session=null,message=''){
+extension/app.mjs:534:async function organize(managerDraft,back=closeDialog){
+extension/app.mjs:544:async function suggestion(){if(!$('#suggestion')||!suggestionDue)return;try{const s=await api('getOrganizationSuggestion');if(!s.eligible){$('#suggestion').replaceChildren();$('#suggestion').className='';return;}$('#suggestion').innerHTML='<span>Many direct entries. Organize your right-click menu?</span><button id="suggest-organize">Organize</button><button id="dismiss-suggestion" aria-label="Dismiss organization suggestion">×</button>';$('#suggestion').className='suggestion';listen('#suggest-organize','click',organize);listen('#dismiss-suggestion','click',async()=>{await change({type:'dismissOrganizationSuggestion',signature:s.signature});$('#suggestion').replaceChildren();$('#suggestion').className='';});}catch{}}
+extension/app.mjs:545:async function renderSettings(){
+extension/app.mjs:578:async function bootstrap(){
+extension/app.mjs:588:async function authorizeCloudflare(accountId,target){
+extension/app.mjs:593:async function cloudflarePanel(){
+extension/app.mjs:601:async function remoteHistory(cursor=null,append=[]){
+extension/app.mjs:614:async function downloadEntry(entry){
+src/chrome/mirror.mjs:3:export function mirrorRows(spec) {
+src/chrome/mirror.mjs:6:export function renderMenuMirror(document, container, spec, onSelect) {
+extension/explorer-layout.mjs:3:export function installExplorerLayout({read,save,onResize}){
+src/chrome/registrar.mjs:7:function freezeTree(value) {
+src/chrome/registrar.mjs:14:function signal(sink, event) { try { return (typeof sink === 'function' ? sink(event) : sink?.emit?.(event)) || 0; } catch { return 0; } }
+src/chrome/registrar.mjs:15:function issue(code) { return Object.assign(new Error(code), { code }); }
+src/chrome/registrar.mjs:19:export function generateChromePlan(spec) {
+src/chrome/registrar.mjs:45:export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture } = {}) {
+src/inventory/discovery.mjs:15:export function createInventoryDiscovery({fileApi,sink,clock=()=>Date.now(),maxFolders=10000}={}) {
+src/chrome/provider-panel.mjs:2:export function createShelfAttention({chrome,preference=()=>true}={}){
+src/cloudflare/inventory.mjs:2:export async function readBuckets(oauth,accountId){
+src/chrome/trusted-sender.mjs:4:export function appSenderDecision(runtime,sender){
+src/chrome/trusted-sender.mjs:12:export function trustedAppSender(runtime,sender){return appSenderDecision(runtime,sender).accepted;}
+src/cloudflare/worker.mjs:10:export class RemoteClaims {
+src/chrome/debug-host.mjs:3:export function createDebugHost({ runtime, api, getMenu, getEvidence, clock = Date.now, grantTtlMs = 300000, exportTtlMs = 30000 } = {}) {
+src/cloudflare/onboarding.mjs:12:export function createCloudflareOnboarding({current,oauth,provisioner,transport,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
+src/cloudflare/deployment.mjs:3:export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/files.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address','provenance'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
+src/cloudflare/deployment.mjs:13:export function safeWorkerDiagnostic(value){
+src/cloudflare/deployment.mjs:22:export function createProvisioner({request,readModule,load,store,authority=async()=>null}){
+src/auth/cloudflare-oauth.mjs:1:export const CLIENT_ID='59535938bc4cc093003b4385a7e2b005';
+src/auth/cloudflare-oauth.mjs:3:export const CLOUDFLARE_SCOPES=Object.freeze(['workers-scripts.admin','workers-scripts.content_read','workers-scripts.edit','workers-r2-bucket-item.read','workers-r2-bucket-item.write','workers-r2.read','workers-r2.write','workers-routes.read','workers-routes.write']);
+src/auth/cloudflare-oauth.mjs:4:export const hasWorkerWriteScope=scopes=>Array.isArray(scopes)&&['workers-scripts.admin','workers-scripts.write','workers-scripts.edit'].some(s=>scopes.includes(s));
+src/auth/cloudflare-oauth.mjs:5:export const hasWorkerCreateScope=scopes=>Array.isArray(scopes)&&['workers-scripts.admin','workers-scripts.write'].some(s=>scopes.includes(s));
+src/auth/cloudflare-oauth.mjs:6:export function cloudflareGrantStatus(session){const scopes=Array.isArray(session?.scopes)?session.scopes:[],evidence=session?.scopeEvidence??'legacy',missingScopes=CLOUDFLARE_SCOPES.filter(s=>!scopes.includes(s));return {requestedScopes:[...CLOUDFLARE_SCOPES],issuedScopes:evidence==='provider-returned'?[...scopes]:null,scopeEvidence:evidence,missingScopes,needsReconsent:missingScopes.length>0,createGrant:evidence==='provider-returned'?hasWorkerCreateScope(scopes):null};}
+src/auth/cloudflare-oauth.mjs:11:export function diagnoseCloudflare(response,body,{context='r2',scopes,requiredScopes=[]}={}){
+src/auth/cloudflare-oauth.mjs:29:async function errorBody(response){
+src/auth/cloudflare-oauth.mjs:34:export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.now,onConnected=async()=>{},onStatus=()=>{}}={}){
+src/glaciaring/agent-api.mjs:13:export function createDiagnosticAuthorizer({extensionId,allowedPaths=['/extension/workbench.html'],readSession,readGrant,clock=Date.now}={}) {
+src/glaciaring/agent-api.mjs:25:export function createAgentDebugApi({diagnostics,getMenu=()=>null,getEvidence=()=>null,resolveAction=()=>({state:'blocked',code:'ACTION_UNAVAILABLE'}),diffMenus,authorize=()=>false,build='local-build',clock=Date.now,snapshotTtlMs=300000,maxSnapshots=8,maxExportBytes=65536}={}) {
+src/cloudflare/files.mjs:5:export function validateFileIntent(i,cap){
+src/cloudflare/files.mjs:15:export async function runFileIntent(i,cap,{journal,readJournal,alive,progress}){
+src/glaciaring/support-report.mjs:4:export async function supportReport({health,snapshot,breadcrumbs,build}){
+src/cloudflare/resources.mjs:3:export const JOB_MEMORY_BUDGET=Object.freeze({isolateBytes:128*1024*1024,reservedBytes:64*1024*1024,perJobBytes:4*SPOOL_PART_BYTES});
+src/cloudflare/resources.mjs:4:export const JOB_CAPACITY=Math.floor((JOB_MEMORY_BUDGET.isolateBytes-JOB_MEMORY_BUDGET.reservedBytes)/JOB_MEMORY_BUDGET.perJobBytes);
+src/glaciaring/index.mjs:5:export function emitDiagnostic(sink, event) {
+src/glaciaring/index.mjs:22:export function createDiagnostics({capacity=512,epoch=1,build='local-build',manifest=CRITICAL_BOUNDARIES,enabled=true,clock=()=>performance.now(),retentionMs=900000,onCritical}={}) {
+src/cloudflare/public-egress.mjs:8:export function createPublicEgress({resolve,fetch:fetcher=globalThis.fetch}={}){
+src/cloudflare/public-egress.mjs:26:export const publicFetch=createPublicEgress();
+src/build-info.mjs:1:export const BUILD_INFO=Object.freeze({extensionVersion:'0.3.19',revision:'source-checkout',sourceDigest:null,workerCodeDigest:null,apiVersion:'3+1.1',remoteProtocol:'click2cloud-remote-2'});
+src/glaciaring/catalog.mjs:37:export const REASON_CODES = Object.freeze([...new Set([
+src/glaciaring/catalog.mjs:94:export const CRITICAL_BOUNDARIES = Object.freeze(definitions.map(([stage,source,test,coverage]) => Object.freeze({
+src/glaciaring/catalog.mjs:99:export const OUTCOMES = Object.freeze(['started','ok','blocked','failed','uncertain','cancelled','skipped','partial','stale','interrupted','unknown']);
+src/cloudflare/file-transport.mjs:3:export function createFileTransport({remote}){
+src/cloudflare/file-transport.mjs:13:export function fileOperationTarget(source,destination=source){
+src/dashboard/controls.mjs:27:export function createDashboardControls({fileApi,readAuth,readActivation,activateBuckets,onChange=()=>{},diagnostics,context={}}={}) {
+src/cloudflare/wire.mjs:2:export const PROTOCOL='click2cloud-remote-2';
+src/cloudflare/wire.mjs:3:export const fail=code=>{throw Object.assign(Error(code),{code});};
+src/cloudflare/wire.mjs:4:export function remoteDestination(t){
+src/cloudflare/wire.mjs:11:export async function digest(value){return b64(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(JSON.stringify(value)))));}
+src/cloudflare/wire.mjs:13:export async function signGrant(secret,payload){const data=b64(encoder.encode(JSON.stringify(payload)));return data+'.'+b64(new Uint8Array(await crypto.subtle.sign('HMAC',await hmac(secret),encoder.encode(data))));}
+src/cloudflare/wire.mjs:14:export async function verifyGrant(secret,token){
+src/cloudflare/wire.mjs:17:export async function boundedJSON(response,max=65536){
+src/dashboard/redown-bridge.mjs:4:export function createRedownDashboardBridge({
+src/glaciaring/breadcrumbs.mjs:5:export function createBreadcrumbs({read,write,clock=Date.now,epoch=1,build,capacity=32,retentionMs=604800000,delayMs=250}={}){
+src/cloudflare/writer-registry.mjs:4:export function destinationWriter(cap,ports={},factories={'cloudflare-r2':c=>cloudflareR2Writer(c.storage,ports)}){
+src/glaciaring/reliability.mjs:4:export const invariants=Object.freeze([
+src/glaciaring/reliability.mjs:17:export const failures=Object.freeze([
+src/glaciaring/reliability.mjs:36:export function describeReliability(tools,boundaries,build){
+src/cloudflare/transport.mjs:6:export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fetch,authorizeSource=async()=>true,verifyAuthority=async()=>true,clock=Date.now,record=async()=>{},pollIntervalMs=1000,expectedCodeDigest=null}){
+src/api/gateway.mjs:2:export function createAgentGateway({api,clock=Date.now}={}) {
+src/explorer/depth-inventory.mjs:4:export async function discoverDepthScope(fileApi,selection,{signal}={}){
+src/persistence/schema.mjs:6:export const modeModules=Object.freeze({simple,nested,depth});
+src/persistence/schema.mjs:7:export const BACKUP_FORMAT='click2cloud-current';
+src/persistence/schema.mjs:8:export const MAX_RECORDS=4096;
+src/persistence/schema.mjs:10:export function closed(value,keys) {
+src/persistence/schema.mjs:13:export function integer(n) {if(!Number.isSafeInteger(n)||n<0)fail();return n;}
+src/persistence/schema.mjs:14:function text(s,max=2048) {if(typeof s!=='string'||!s||s.length>max||/[\x00-\x1f\x7f]/.test(s))fail();}
+src/persistence/schema.mjs:15:function target(t) {
+src/persistence/schema.mjs:20:export function validateModeConfig(mode,raw) {
+src/persistence/schema.mjs:34:export function validateGeneration(g) {
+src/persistence/schema.mjs:39:export function validateBundle(raw) {
+src/api/permissions.mjs:1:export const permissionPolicy=Object.freeze({maxGrantTtlMs:3600000,fullConfigurationMethods:Object.freeze(['enterExplorer','initializeCloudflare','inspectCloudflare','inspectRemoteHistory','getConfiguration','inspectMenuTree','previewContextMenu','previewNativeMenu','inspectNativeACK','listDestinations','getEngineHealth','requestRestorePreview','restoreRightClickMenu','chooseBackupLocation']),interactiveAuthMethods:Object.freeze(['loginBegin','loginCancel','disconnect']),confirmation:'HOST_OWNED_ONE_OPERATION_APPROVAL',accountScope:'ALL_AFFECTED_PRIOR_AND_NEW_ACCOUNTS'});
+src/api/permissions.mjs:3:export function createPermissions({clock=Date.now}={}) {
+src/explorer/configuration.mjs:3:export const providerDefaults=Object.freeze({
+src/explorer/configuration.mjs:9:export const operationOptions=Object.freeze({
+src/explorer/configuration.mjs:16:export function validatePreferences(value={}) {
+src/explorer/configuration.mjs:25:export function resolveOptions(operation,preferences,options={}) {
+src/persistence/recovery-crawl.mjs:4:export function createRecoveryCrawl({fileApi,recovery,isAuthorized,clock=Date.now}={}) {
+src/core/source-capture.mjs:4:export async function captureSelectedStream(source,{authorizeSource,fetchSource,sink,signal,requestTimeoutMs=30000,maxBytes=Number.MAX_SAFE_INTEGER,operationId=0}={}){
+src/core/source-capture.mjs:34:export async function captureSelectedBytes(source,options={}){
+src/explorer/performance.mjs:4:export function paintTrace(kind,start=performance.now()){
+src/persistence/external-recovery.mjs:3:export function isoWeek(date) {const d=new Date(date);d.setUTCHours(0,0,0,0);d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));const year=d.getUTCFullYear();return {year,week:Math.ceil((((d-new Date(Date.UTC(year,0,1)))/86400000)+1)/7)};}
+src/persistence/external-recovery.mjs:5:export function createExternalRecovery({files,clock=Date.now}={}) {
+src/persistence/external-recovery.mjs:71:export function directoryFiles(root) {
+src/persistence/external-recovery.mjs:81:export async function copyRecoveryDirectory(from,to) {
+src/explorer/read-coalescer.mjs:3:export function coalesceFileReads(api,{authority}={}){
+src/core/menu-spec.mjs:9:export const modeModules=Object.freeze({simple,nested,depth});
+src/core/menu-spec.mjs:13:function normalizeInventory(value={}) {
+src/core/menu-spec.mjs:52:export function compileMenuSpec(options={}) {
+src/core/menu-spec.mjs:232:export function inspectMenuTree(spec,{cursor=null,limit=100,parentId,recursive=true,includeOmissions=false}={}) {
+src/core/menu-spec.mjs:252:export function diffMenuSpecs(before,after) {
+src/core/menu-provenance.mjs:4:export function menuProvenance({mode,entryId,target,title,presentationId,destinationConfig,menuPath,quickPlacement=false}){
+src/persistence/current-store.mjs:14:export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click2cloud-current-v1',sink,clock=()=>Date.now(),fault=()=>{},readEstablishment=async()=>{if(typeof globalThis.chrome?.storage?.local?.get!=='function')return {};const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,nativeGeneration:p.nativeRegistration?.desired?.generation??0};},retainEstablishment=async proof=>{if(typeof globalThis.chrome?.storage?.local?.set==='function')await chrome.storage.local.set({currentProvenance:proof});}}={}) {
+src/core/composite-menu.mjs:4:export function compileComposite({product,inventory,generation,sink}={}) {
+src/persistence/backup.mjs:9:function grant(authorized) {if(authorized!==true)throw Object.assign(Error('Explicit local backup authorization is required.'),{code:'BACKUP_AUTH_REQUIRED'});}
+src/persistence/backup.mjs:10:async function key(passphrase,salt) {
+src/persistence/backup.mjs:15:export async function encodeBackup(bundle,{passphrase,authorized=false}={}) {
+src/persistence/backup.mjs:22:export async function decodeBackup(text,{passphrase,authorized=false}={}) {
+src/persistence/node-files.mjs:4:export function nodeFiles(root) {
+src/api/explorer-context-menu.mjs:4:export function describeExplorerContextMenu(target,{entry,hasClipboard=false,mutations=false,available=true}={}){
+src/core/menu-compiler.mjs:7:export class MenuConfigurationError extends Error {
+src/core/menu-compiler.mjs:16:export function normalizePath(path = '') {
+src/core/menu-compiler.mjs:30:function stableId(input) {
+src/core/menu-compiler.mjs:39:function ancestors(path) {
+src/core/menu-compiler.mjs:44:function folderName(path) {
+src/core/menu-compiler.mjs:58:export function compileMenu({ mode, bucket, folders = [], config = {}, flatProviders = [] }) {
+src/persistence/profile-preservation.mjs:4:export const PROFILE_COPY_FORMAT='click2cloud-private-profile-copy-v1';
+src/persistence/profile-preservation.mjs:5:export const PROFILE_CHUNK_BYTES=1048576;
+src/persistence/profile-preservation.mjs:6:export const sha256=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+src/persistence/profile-preservation.mjs:7:export async function verifyProfileCopy(files,extensionId){
+src/api/whole-cloud.mjs:4:export function createWholeCloudJobs({recovery,fileApi,isAuthorized,clock=Date.now}={}) {
+src/explorer/failure-classification.mjs:3:export const providerFailureManifest=Object.freeze([
+src/explorer/failure-classification.mjs:51:export function classifyProviderFailure(result) {
+src/core/engine.mjs:10:export function createEngine({current,registrar,providers,getAuthorization,authorizeSource,fetchSource,
+src/explorer/save-provider.mjs:4:function permittedFinalKey(requested,actual) {
+src/explorer/save-provider.mjs:18:export function createFileApiSaveProvider({fileApi,resolveDestination}={}) {
+src/explorer/observed-api.mjs:7:function workerReason(data) {
+src/explorer/observed-api.mjs:15:export function observeFileApi(fileApi,{diagnostics,context={}}={}) {
+src/explorer/observed-api.mjs:54:export function observeTransports({send,http},{diagnostics,context={}}={}) {
+src/api/client.mjs:2:export function createAgentClient({gateway,handle,authenticatedActor}={}) {
+src/explorer/layout.mjs:2:export const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+src/explorer/layout.mjs:3:export const splitAt=(x,left,width)=>width>0?clamp((x-left)/width*100,0,100):50;
+src/explorer/layout.mjs:4:export function separatorKey(value,key,{min=0,max=100,step=2,vertical=true}={}){return key==='Home'?min:key==='End'?max:key===(vertical?'ArrowLeft':'ArrowUp')?clamp(value-step,min,max):key===(vertical?'ArrowRight':'ArrowDown')?clamp(value+step,min,max):null;}
+src/core/menu-identity.mjs:3:export class MenuSpecError extends Error {
+src/core/menu-identity.mjs:6:export const compare = (a,b)=>a===b?0:a<b?-1:1;
+src/core/menu-identity.mjs:7:export function freeze(value) {
+src/core/menu-identity.mjs:14:export function normalizePrefix(value='') {
+src/core/menu-identity.mjs:23:export function normalizeTarget(input) {
+src/core/menu-identity.mjs:38:export const targetKey=target=>JSON.stringify([target.provider,target.connectionId,target.accountId,target.bucketName,target.prefix]);
+src/core/menu-identity.mjs:39:export const scopeKey=target=>JSON.stringify([target.provider,target.connectionId,target.accountId,target.bucketName]);
+src/core/menu-identity.mjs:40:export function stableId(namespace,value) {
+src/core/menu-identity.mjs:53:export function targetLabel(target) { return target.prefix?target.prefix.split('/').at(-2):target.bucketName; }
+src/core/menu-identity.mjs:54:export function configRevision(current,expected) {
+src/core/menu-identity.mjs:58:export function validateRevision(value) {
+src/core/menu-identity.mjs:62:export function normalizedDestinations(values=[],{multipleTargets=false}={}) {
+src/core/menu-identity.mjs:91:export function availabilityReasons(scope,folder) {
+src/core/menu-identity.mjs:101:export const availability=(scope,folder)=>availabilityReasons(scope,folder)[0]??null;
+src/core/menu-identity.mjs:102:export function findCandidate(inventory,target) {
+src/core/menu-identity.mjs:106:export function ancestors(prefix) {
+src/core/menu-identity.mjs:110:export const intentFor=target=>freeze({...target,bucket:target.bucketName,path:target.prefix.replace(/\/$/,'')});
+src/api/config.mjs:3:export const fail=code=>{throw Object.assign(Error(code),{code});};
+src/api/config.mjs:4:export const DEFAULT_PROVIDER_VISIBILITY=Object.freeze({'google-drive':true,dropbox:true,onedrive:true,cloudflare:true});
+src/api/config.mjs:5:export function productState(raw={}) {
+src/api/config.mjs:31:export function normalizeDefaultQuick(product,configs){
+src/api/config.mjs:36:export function validateProduct(value) {
+src/api/config.mjs:44:export function migrateLegacyProduct(raw) {
+src/api/config.mjs:56:export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode','hidden','quick'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+src/api/config.mjs:57:export function applyConfigChanges(state,changes) {
+src/explorer/loading-visual-config.mjs:2:export const LOADING_MEDIA_MAX_BYTES=8*1024*1024; // One local visual, not a cloud transfer limit.
+src/explorer/loading-visual-config.mjs:4:export function loadingMedia(input){
+src/explorer/loading-visual-config.mjs:14:export function loadingVisualSummary(value){const revision=Number.isSafeInteger(value?.revision)&&value.revision>=0?value.revision:0,validMode=['math','media','plain'].includes(value?.mode),validMedia=!value?.media||value.media.blob instanceof Blob&&value.media.blob.size<=LOADING_MEDIA_MAX_BYTES&&['image/png','image/jpeg','image/webp','image/gif','video/mp4'].includes(value.media.type);if(!validMode||!validMedia||value.mode==='media'&&!value.media)return {revision,mode:validMode&&value.mode!=='media'?value.mode:'math',media:null,warning:'LOADING_MEDIA_INVALID'};return {revision,mode:value.mode,media:value.media?{name:value.media.name,type:value.media.type,size:value.media.blob.size}:null};}
+src/explorer/loading-visual-config.mjs:15:export async function loadingVisualWire(value,includeMedia=false){const out=loadingVisualSummary(value);if(includeMedia&&out.media&&value.media){const bytes=new Uint8Array(await value.media.blob.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));out.media.base64=btoa(binary);}return out;}
+src/api/menu-view.mjs:6:export function describeCanonicalContextMenu(spec,{context='link',nativeAcknowledged=false}={}){
+src/core/save-dispatcher.mjs:3:export class UnverifiedSaveError extends Error {
+src/core/save-dispatcher.mjs:8:export class SaveAuthorizationError extends Error {
+src/core/save-dispatcher.mjs:11:export async function dispatchSave({intent,file}, {providers,authorize,onVerifiedCompletion,diagnostics,context={}}={}) {
+src/explorer/location-view.mjs:3:export function cloudPath(target,key=target?.prefix??''){
+src/explorer/location-view.mjs:6:export function parseCloudPath(value){
+src/explorer/location-view.mjs:13:export function middlePath(value,width,measure){
+src/core/boundary-observation.mjs:3:export const operationIdentity = context => Number.isSafeInteger(context?.operationId) && context.operationId > 0 ? context.operationId : ++nextOperation;
+src/core/boundary-observation.mjs:4:export function observe(sink, stage, outcome, code, context = {}, requires = [], count = 0) {
+src/core/boundary-observation.mjs:13:export const errorOutcome = error => error?.uncertain === true ? 'uncertain' : error?.name === 'AbortError' ? 'cancelled' : 'failed';
+src/explorer/index.mjs:13:export function createClick2CloudFileApi({send,http}={}) {
+src/api/service.mjs:53:export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
+src/api/service.mjs:54:export function validate(schema,value) {
+src/api/service.mjs:70:export function organizationSuggestion(spec,product) {
+src/api/service.mjs:76:export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context)}={}) {
+src/core/action-resolver.mjs:11:export function resolveMenuAction(spec,selection={}) {
+src/explorer/listing-view.mjs:2:export function createListingOrder(){
+src/explorer/listing-view.mjs:6:export function rowWindow(length,scrollTop,height,rowHeight=40){const start=Math.min(Math.max(0,length-1),Math.max(0,Math.floor(Math.max(0,scrollTop-40)/rowHeight)-6));return {start,end:Math.min(length,start+Math.ceil(height/rowHeight)+14),top:start*rowHeight};}
+src/explorer/listing-view.mjs:10:export function createListingReader(read,{maxPages=64,ttlMs=10000,maxConcurrent=3,clock=Date.now}={}){
+src/explorer/listing-view.mjs:20:export function gridWindow(length,scrollTop,height,width){const columns=Math.max(1,Math.floor(width/160)),rowHeight=136,startRow=Math.min(Math.max(0,Math.ceil(length/columns)-1),Math.max(0,Math.floor(scrollTop/rowHeight)-2)),start=startRow*columns,end=Math.min(length,start+(Math.ceil(height/rowHeight)+4)*columns);return {start,end,top:startRow*rowHeight,total:Math.ceil(length/columns)*rowHeight,columns,rowHeight};}
+src/explorer/image-preview.mjs:4:export const isImage=e=>!e.folder&&/\.(png|jpe?g|gif|webp)$/i.test(e.key);
+src/explorer/image-preview.mjs:6:export function imageType(b){
+src/explorer/image-preview.mjs:14:export function galleryStep(rows,key,direction){const images=rows.filter(isImage),index=images.findIndex(e=>e.key===key),next=index+direction;return index>=0&&next>=0&&next<images.length?images[next]:null;}
+src/explorer/image-preview.mjs:16:export function imageDimensions(b,type=imageType(b)){
+src/explorer/image-preview.mjs:25:export async function readPreviewBytes(read,{source,key,etag:known,size:knownSize},{limit,signal,truncate=false,concurrency=3,onChunk}={}){
+src/explorer/image-preview.mjs:43:export function createImageReader(read,{maxBytes=32*1024*1024,maxEntries=24,ttl=10000,clock=Date.now}={}){
+src/explorer/r2-adapter.mjs:3:export function previewType(objectKey){
+src/explorer/r2-adapter.mjs:8:export function createR2Adapter({send=message=>chrome.runtime.sendMessage(message),http=globalThis.RedownCloudflareApi}={}) {
+src/explorer/file-api.mjs:4:export function objectETag(value) {
+src/explorer/file-api.mjs:10:export function location(value) {
+src/explorer/file-api.mjs:14:export function key(value) {
+src/explorer/file-api.mjs:18:export function prefix(value) { return value ? (key(value).endsWith('/') ? value : value+'/') : ''; }
+src/explorer/file-api.mjs:19:export function name(value) {
+src/explorer/file-api.mjs:22:export function entry(value) { return {key:key(value.key),folder:value.folder===true,displayName:value.displayName}; }
+src/explorer/file-api.mjs:24:export function createFileApi(adapter) {
+src/explorer/loading-visuals/math.mjs:2:export function mountMath(container){
+src/explorer/loading-visuals/media.mjs:2:export function mountMedia(container,blob,{onError=()=>{}}={}){
+src/explorer/loading-visual.mjs:4:export function mountLoadingVisual(container,selection={mode:'math'}){

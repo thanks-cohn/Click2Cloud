@@ -53,7 +53,7 @@ export function migrateLegacyProduct(raw) {
   return normalizeDefaultQuick(product,Object.fromEntries(Object.entries(raw.configs).map(([m,c])=>[m,validateModeConfig(m,c)])));
 }
 
-export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode','hidden','quick'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
+export const CONFIG_CHANGE_FIELDS={createDestination:['mode','target','label','levels','visibilityMode','hidden','quick'],updateDestination:['mode','id','label','levels','hidden','quick','order','visibilityMode'],deleteDestinationConfig:['mode','id'],setShowInChrome:['show'],setDepthDisplayBuckets:['scopes'],makeDefault:['target','ensureSimple'],clearDefault:[],setTheme:['theme'],setView:['view'],setExplorerLayout:['explorerLayout'],setFavorite:['connectionId','favorite'],setProviderPlacement:['provider','placement'],setProviderMenuVisibility:['provider','visible'],setAutoOpenAttention:['visible'],dismissOrganizationSuggestion:['signature'],updateRecoveryPolicy:['policy']};
 export function applyConfigChanges(state,changes) {
   if(!changes.length)fail('INVALID_CHANGE');
   const next=structuredClone(state),p=next.product;
@@ -85,7 +85,13 @@ if(removed.target.provider==='cloudflare'&&!next.product.defaultTarget&&!Object.
       }
     } else if(c.type==='setShowInChrome')p.show=c.show;
     else if(c.type==='setDepthDisplayBuckets')next.configs.depth.scopes=c.scopes.map(s=>{const old=next.configs.depth.scopes.find(o=>scopeKey(o.target)===scopeKey(s.target));return {...(old?.hidden!==undefined?{hidden:old.hidden}:{}),...s};});
-    else if(c.type==='makeDefault'){p.defaultTarget=normalizeTarget(c.target);p.cloudflare.removed=p.cloudflare.removed.filter(a=>a!==c.target.accountId);}
+    else if(c.type==='makeDefault'){
+      const target=normalizeTarget(c.target),rows=next.configs.simple.destinations;
+      if(c.ensureSimple&&!rows.some(row=>targetKey(row.target)===targetKey(target))){
+        rows.push({id:stableId('destination','simple'+targetKey(target)),target,order:rows.length});
+      }
+      p.defaultTarget=target;p.cloudflare.removed=p.cloudflare.removed.filter(a=>a!==target.accountId);
+    }
     else if(c.type==='clearDefault'){if(p.defaultTarget?.provider==='cloudflare')p.cloudflare.removed=[...new Set([...p.cloudflare.removed,p.defaultTarget.accountId])];p.defaultTarget=null;}
     else if(c.type==='setAutoOpenAttention')p.autoOpenAttention=c.visible;
     else if(c.type==='setTheme')p.theme=c.theme;

@@ -1,0 +1,44 @@
+{
+  "base": "a3a672754156f88bb572bfb4275d1471f0ccb4a6",
+  "requestRevision": "4a0c21e",
+  "branch": "implement/customer-history-ux-2026-11-15",
+  "validatedCurrentSourceDigest": "c09643fb7739e42c11c87ccc97f9f86ba95dc992d7edb7a06d6c43ab23d2252e",
+  "commands": {
+    "baseline": {
+      "tests": 444,
+      "pass": 444,
+      "fail": 0,
+      "skipped": 0
+    },
+    "focused": {
+      "tests": 465,
+      "pass": 465,
+      "fail": 0,
+      "skipped": 0
+    },
+    "module": {
+      "tests": 49,
+      "pass": 49,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "browserGates": 11,
+  "recovery": {
+    "PASS": 30,
+    "REPRODUCED": 3,
+    "FAIL": 0
+  },
+  "build": "PASS",
+  "diffCheck": "PASS",
+  "installedExtension": "BLOCKED_ADMINISTRATOR_POLICY",
+  "installedWindows": "NOT_TESTED",
+  "liveCloudflare": "NOT_TESTED",
+  "REDOWNChanged": false,
+  "merged": false,
+  "deployed": false,
+  "releasePackagesCreated": false,
+  "environmentDraftFieldsSaved": [
+    "install_script"
+  ]
+}

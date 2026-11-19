@@ -1,0 +1,54 @@
+{
+  "evidenceClass": "HTTP_BROWSER_UI_REAL_IDB_DOWNLOAD_FAKE_CHROME_PORT_NOT_INSTALLED_EXTENSION",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "baseline": false,
+  "results": [
+    {
+      "count": 0,
+      "privacy": "SECURE",
+      "state": "PASS",
+      "oneExportAction": true,
+      "oneDownload": true,
+      "path": "SECURE-0.zip",
+      "status": "COMPLETE \u00b7 0 Basic attempts \u00b7 0 rich events \u00b7 one ZIP \u00b7 SHA-256 3aaf9b6459273413a586ba3552c5fd90740307d3ad642570bde11e50bedfa951. Download requested; physical disk completion is not observable here.",
+      "basic": 0,
+      "rich": 0,
+      "bytes": 4931,
+      "hash": "3aaf9b6459273413a586ba3552c5fd90740307d3ad642570bde11e50bedfa951",
+      "integrity": "PASS",
+      "pageCalls": 0,
+      "heapBefore": 1611328,
+      "heapAfter": 2701726,
+      "manualNext": false
+    },
+    {
+      "count": 0,
+      "privacy": "RAW",
+      "state": "PASS",
+      "oneExportAction": true,
+      "oneDownload": true,
+      "path": "RAW-0.zip",
+      "status": "COMPLETE \u00b7 0 Basic attempts \u00b7 0 rich events \u00b7 one ZIP \u00b7 SHA-256 814def3738ab88f5a6ad800995d46243a2d187f8e849ff7edf7207c21c4c93f3. Download requested; physical disk completion is not observable here.",
+      "basic": 0,
+      "rich": 0,
+      "bytes": 4916,
+      "hash": "814def3738ab88f5a6ad800995d46243a2d187f8e849ff7edf7207c21c4c93f3",
+      "integrity": "PASS",
+      "pageCalls": 0,
+      "heapBefore": 1620216,
+      "heapAfter": 2576664,
+      "manualNext": false
+    },
+    {
+      "count": 102,
+      "privacy": "SECURE",
+      "state": "FAIL",
+      "reason": "ONE_CLICK_DID_NOT_START_DOWNLOAD",
+      "status": "FAILED \u2014 SEGMENT_CHAIN_MISMATCH",
+      "pageCalls": 1,
+      "downloadAnchorReady": false,
+      "manualNextVisible": false
+    }
+  ]
+}

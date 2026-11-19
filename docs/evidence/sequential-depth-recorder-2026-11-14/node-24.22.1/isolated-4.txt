@@ -1,0 +1,12 @@
+✔ absent Depth B plan is created for B, verified, persisted and reused; Narrow A and exact native destinations survive (8857.697061ms)
+✔ Depth recovery failures keep the exact contextual target and never dispatch or replay the clicked source (1.63635ms)
+✔ exact recovery reconciles only selected Depth B when another same-account or foreign-account scope is unprepared (6.892508ms)
+✔ exact recovery API enforces closed input, account grants and one-use confirmation before establishing setup approval (3.250237ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10345.449288

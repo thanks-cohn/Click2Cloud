@@ -12,7 +12,7 @@ export function migrateConfig(snapshot={}) {
 }
 // Bulk presentation never erases the user's custom per-level flags.
 export function levelHidden(destination,prefix){
-  if(prefix===destination.target.prefix)return false;
+  if(prefix===''||prefix===destination.target.prefix)return false;
   return destination.visibilityMode==='hide-all'||destination.visibilityMode!=='all'&&destination.levels?.[prefix]?.hidden===true;
 }
 export function project({config,inventory}) {
@@ -28,7 +28,7 @@ export function project({config,inventory}) {
       if(levelHidden(destination,prefix))continue;
       // Include projected parent in identity: two paths may hide different shared
       // levels without moving an independent sibling or corrupting its ancestry.
-      const label=destination.levels?.[prefix]?.label??(prefix===target.prefix?destination.label:undefined)??targetLabel(t);
+      const label=prefix===''?target.bucketName:destination.levels?.[prefix]?.label??(prefix===target.prefix?destination.label:undefined)??targetLabel(t);
       const placement=stableId('nested-placement',JSON.stringify([k,parent,label]));
       const prior=tree.get(placement);if(prior&&(targetKey(prior.target)!==k||prior.parentPlacement!==parent||prior.label!==label))throw new MenuSpecError('ID_COLLISION','Narrow placement identity collision.');
       if(!tree.has(placement))tree.set(placement,{placement,target:t,parentPlacement:parent,label,explicitLevel:destination.levels?.[prefix]?.label!==undefined});
@@ -44,8 +44,18 @@ export function project({config,inventory}) {
   const branches=new Set([...tree.values()].map(x=>x.parentPlacement).filter(Boolean));
   const rows=[];
   for(const row of [...tree.values()].sort((a,b)=>(a.target.prefix.split('/').length-b.target.prefix.split('/').length)||compare(scopeKey(a.target),scopeKey(b.target))||compare(a.target.prefix,b.target.prefix))) {
-    const destinations=row.destinations??[],hasChildren=branches.has(row.placement);
+    const destinations=row.destinations??[],hasChildren=branches.has(row.placement)||row.target.prefix==='';
     if(hasChildren||!destinations.length)rows.push({...row,label:row.label,role:'branch',enabled:true,reason:'NATURAL_ANCESTOR'});
+    // previewNativeMenu/dispatchSave: structural routes never manufacture a saved
+    // destination or grant. Each exact ancestor is checked independently; unavailable
+    // ancestors remain disabled and cannot enter the provider setup shortcut.
+    if(hasChildren&&!destinations.length){
+      const {scope,folder}=findCandidate(inventory,row.target),reasons=availabilityReasons(scope,folder);
+      rows.push({...row,placement:row.placement+':ancestor-save',parentPlacement:row.placement,
+        presentationId:stableId('nested-ancestor',row.placement),structuralAncestor:true,
+        label:'Save here',role:'save',enabled:reasons.length===0,
+        reason:reasons.length?'NARROW_ANCESTOR_AUTHORIZATION_REQUIRED':'NARROW_ANCESTOR_READY'});
+    }
     for(const destination of destinations){
       const quickLabel=destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target);
       rows.push({...row,placement:row.placement+':route:'+destination.id,parentPlacement:hasChildren?row.placement:row.parentPlacement,presentationId:destination.id,destinationConfig:destination,

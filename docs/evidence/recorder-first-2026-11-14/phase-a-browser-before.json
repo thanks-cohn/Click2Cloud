@@ -1,0 +1,18 @@
+{
+  "evidenceClass": "HTTP_BROWSER_UI_REAL_IDB_DOWNLOAD_FAKE_CHROME_PORT_NOT_INSTALLED_EXTENSION",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "baseline": true,
+  "results": [
+    {
+      "count": 102,
+      "privacy": "SECURE",
+      "state": "FAIL",
+      "reason": "ONE_CLICK_DID_NOT_START_DOWNLOAD",
+      "status": "Snapshot b3c9367a-9936-41af-8c81-022a1ec8458f \u00b7 SECURE part 1 ready. Summary covers this part only. N/A for unavailable measurements. {\"scope\":\"retained_observed_attempts\",\"eligible\":21,\"counts\":{\"pending\":0,\"verified\":0,\"failed\":0,\"blocked\":21,\"cancelled\":0,\"uncertain\":0,\"interrupted\":0},\"verified\":{\"numerator\":0,\"denominator\":21,\"percent\":0},\"resolvedOnly\":{\"numerator\":0,\"denominator\":21,\"percent\":0},\"metrics\":{\"clickToDispatchMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"sourceAcquireMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"sourceReadThroughputBytesPerSecond\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"providerRequestLatencyMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"uploadElapsedMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"uploadThroughputBytesPerSecond\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"verificationElapsedMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"clickToVerifiedMs\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"},\"endToEndEffectiveBytesPerSecond\":{\"samples\":0,\"mean\":\"N/A\",\"p50\":\"N/A\",\"p95\":\"N/A\",\"p99\":\"N/A\"}}}",
+      "pageCalls": 1,
+      "downloadAnchorReady": true,
+      "manualNextVisible": true
+    }
+  ]
+}

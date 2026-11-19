@@ -1,0 +1,117 @@
+{
+  "evidenceClass": "HTTP_CHROMIUM_REAL_IDB_UI_DOWNLOAD_FIXTURE_PORTS_NOT_INSTALLED_OR_LIVE",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "results": [
+    {
+      "gate": "v2-to-v3-indices-pending-restart-gap-deduplication-resume-export",
+      "state": "PASS",
+      "control": {
+        "capacity": 123,
+        "sequence": 2,
+        "count": 2,
+        "evicted": 0,
+        "gaps": 0,
+        "epoch": "new",
+        "unknownEpochs": 1
+      },
+      "rolling": {
+        "capacity": 123,
+        "sequence": 260,
+        "count": 123,
+        "evicted": 137,
+        "gaps": 0,
+        "epoch": "new",
+        "unknownEpochs": 1
+      },
+      "basicExported": 123,
+      "interruptedReason": "interrupted",
+      "richCommitted": 5,
+      "highWater": 7,
+      "gapCount": 1,
+      "unconfirmed": 1,
+      "status": "PARTIAL",
+      "issues": [
+        {
+          "reason": "rich_missing_ranges",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5,
+              "reason": "missing_or_dropped"
+            }
+          ]
+        },
+        {
+          "reason": "basic_evicted",
+          "count": 138
+        },
+        {
+          "reason": "declared_rich_gaps",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5,
+              "reason": "interrupted_unconfirmed"
+            }
+          ]
+        },
+        {
+          "reason": "unconfirmed",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5
+            }
+          ]
+        },
+        {
+          "reason": "unknown_epochs",
+          "count": 3
+        }
+      ],
+      "verifier": {
+        "path": "work/recorder-first/recovery-browser/recovered.zip",
+        "privacy": "SECURE",
+        "status": "PARTIAL",
+        "basic": 123,
+        "rich": 5,
+        "bytes": 664750,
+        "hash": "bcc3210df04999df1dbbf7acec905124acdeb38faac8807518946150d82afe24",
+        "integrity": "PASS"
+      }
+    },
+    {
+      "gate": "later-commits-excluded-from-fixed-browser-snapshot",
+      "state": "PASS",
+      "path": "work/recorder-first/recovery-browser/fixed-snapshot.zip",
+      "privacy": "SECURE",
+      "status": "COMPLETE",
+      "basic": 1,
+      "rich": 102,
+      "bytes": 333455,
+      "hash": "91b5dd22431a8bf02be11fdcf6cf4de1b4ca4e9f7158acc5919b8a991a81eeeb",
+      "integrity": "PASS"
+    },
+    {
+      "gate": "cancel-is-visible-no-download-no-recording-deletion",
+      "state": "PASS"
+    },
+    {
+      "gate": "interrupted-worker-read-fails-without-false-complete",
+      "state": "PASS"
+    },
+    {
+      "gate": "new-selected-run-never-reuses-old-run-snapshot",
+      "state": "PASS",
+      "path": "work/recorder-first/recovery-browser/new-selected-run.zip",
+      "privacy": "SECURE",
+      "status": "COMPLETE",
+      "basic": 2,
+      "rich": 0,
+      "bytes": 15492,
+      "hash": "d640c741ab6366344cdab426442b306fdbb091e2ed571927eac311f6d411a01f",
+      "integrity": "PASS"
+    }
+  ]
+}

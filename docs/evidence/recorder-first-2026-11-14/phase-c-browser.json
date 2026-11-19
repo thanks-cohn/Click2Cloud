@@ -1,0 +1,91 @@
+{
+  "evidenceClass": "HTTP_CHROMIUM_REAL_IDB_UI_DOWNLOAD_FIXTURE_PORTS_NOT_INSTALLED_OR_LIVE",
+  "browser": "155.0.8059.79",
+  "os": "linux",
+  "results": [
+    {
+      "gate": "v2-to-v3-indices-pending-restart-gap-deduplication-resume-export",
+      "state": "PASS",
+      "control": {
+        "capacity": 123,
+        "sequence": 2,
+        "count": 2,
+        "evicted": 0,
+        "gaps": 0,
+        "epoch": "new",
+        "unknownEpochs": 1
+      },
+      "interruptedReason": "interrupted",
+      "richCommitted": 5,
+      "highWater": 7,
+      "gapCount": 1,
+      "unconfirmed": 1,
+      "status": "PARTIAL",
+      "issues": [
+        {
+          "reason": "rich_missing_ranges",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5,
+              "reason": "missing_or_dropped"
+            }
+          ]
+        },
+        {
+          "reason": "declared_rich_gaps",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5,
+              "reason": "interrupted_unconfirmed"
+            }
+          ]
+        },
+        {
+          "reason": "unconfirmed",
+          "ranges": [
+            {
+              "start": 4,
+              "end": 5
+            }
+          ]
+        },
+        {
+          "reason": "unknown_epochs",
+          "count": 3
+        }
+      ],
+      "verifier": {
+        "path": "recovered.zip",
+        "privacy": "SECURE",
+        "status": "PARTIAL",
+        "basic": 3,
+        "rich": 5,
+        "bytes": 37028,
+        "hash": "1cc3452c453da5b3c1e565b360cc924598d72ed75654e7caf25570d9bfdf0041",
+        "integrity": "PASS"
+      }
+    },
+    {
+      "gate": "later-commits-excluded-from-fixed-browser-snapshot",
+      "state": "PASS",
+      "path": "fixed-snapshot.zip",
+      "privacy": "SECURE",
+      "status": "COMPLETE",
+      "basic": 1,
+      "rich": 102,
+      "bytes": 328342,
+      "hash": "afa72b38bb134cfd47b4c92d030416bb7686558b0604e78f7bfb16ec414225fe",
+      "integrity": "PASS"
+    },
+    {
+      "gate": "cancel-is-visible-no-download-no-recording-deletion",
+      "state": "PASS"
+    },
+    {
+      "gate": "interrupted-worker-read-fails-without-false-complete",
+      "state": "PASS"
+    }
+  ]
+}

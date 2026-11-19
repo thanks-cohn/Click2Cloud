@@ -1,0 +1,43 @@
+{
+  "sourceFiles": {
+    "src/recorder/host.mjs": "f305fb1886cc31b4336db190b2daff1bdd7a6019a7506e0cbe3e445aa45d95a1",
+    "src/recorder/provider-observation.mjs": "63acd6e40fcab227faa33bbe9913f856bfa68d5005e700adc9abbcd30d02e1a5",
+    "src/recorder/recorder.mjs": "47d5ea58694072086f32425b6ea3301b0db4ad4d32c3a6918fac78c05aff125c",
+    "src/recorder/schema.mjs": "1e11fa82b7591512c569d413fd08bcbd0209270d431aa094823c4f43866b4855",
+    "src/recorder/storage.mjs": "601b1559152f1634193e3d6ea777005a3ac1f38f4b338a96d8c13b6edd8d0af6",
+    "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
+    "extension/recorder-panel.mjs": "443f3a70f878b38814721aada96da366df6cc98c76e1211fbd7a15b1ee73cc11",
+    "src/recorder/export.mjs": "4a2657e13d073d712c7f1aa82d16766716460d606360ecf8c6a8c5872d1add18"
+  },
+  "productionDirty": false,
+  "sourceRevision": "e4f5e134bdc33086afad76f89030db4c264c85fe",
+  "browser": "156.0.8078.79",
+  "os": "linux",
+  "evidenceClass": "HTTP_MODULE_SERVICE_WORKER_REAL_IDB_FAKE_CHROME_PORTS_NOT_INSTALLED_EXTENSION",
+  "results": [
+    {
+      "gate": "before-dynamic-import-in-real-module-service-worker",
+      "state": "REPRODUCED",
+      "name": "TypeError",
+      "message": "import() is disallowed on ServiceWorkerGlobalScope by the HTML specification. See https://github.com/w3c/ServiceWorker/issues/1356.",
+      "stack": "TypeError: import() is disallowed on ServiceWorkerGlobalScope by the HTML specification. See https://github.com/w3c/ServiceWorker/issues/1356.\n    at http://127.0.0.1:37599/recorder-worker.mjs?before=1:7:71\n    at http://127.0.0.1:37599/recorder-worker.mjs?before=1:7:320"
+    },
+    {
+      "gate": "Basic-Debug-OFF-in-service-worker",
+      "state": "PASS"
+    },
+    {
+      "gate": "host-start-finite-cap-worker-message-export-download",
+      "state": "PASS",
+      "runId": "b43cded9-eeac-4f7d-85a3-474b97e8f822"
+    },
+    {
+      "gate": "stop-debug-off-browser-process-restart",
+      "state": "PASS"
+    },
+    {
+      "gate": "start-error-adjacent-control",
+      "state": "PASS"
+    }
+  ]
+}

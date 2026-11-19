@@ -1,0 +1,15 @@
+✔ Windows autocrlf clean checkout preserves canonical fingerprint bytes; semantic tampering still fails (88.575175ms)
+✔ a missing dispatch generation can yield STALE_GENERATION without a generation race (9.905367ms)
+✔ genuinely stale generation is rejected before any provider write (0.887401ms)
+✔ post-write session loss stays uncertain and is never retried or marked verified (5.160879ms)
+✔ post-write generation change stays uncertain; unchanged authority completes once (3.232091ms)
+✔ MV3 manifest worker graph has no dynamic imports, including re-exported dependencies (76.689614ms)
+✔ MV3 negative graph catches nested dynamic import; page-only import and comments are permitted (14.743022ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 193.190205

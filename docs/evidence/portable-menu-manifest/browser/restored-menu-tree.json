@@ -1,0 +1,972 @@
+[
+  {
+    "path": [
+      "Google Drive"
+    ],
+    "role": "provider-action",
+    "target": null
+  },
+  {
+    "path": [
+      "Dropbox"
+    ],
+    "role": "provider-action",
+    "target": null
+  },
+  {
+    "path": [
+      "OneDrive"
+    ],
+    "role": "provider-action",
+    "target": null
+  },
+  {
+    "path": [
+      "Cloudflare"
+    ],
+    "role": "branch",
+    "target": null
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "Simple 1 A"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/A/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "Simple 1 C"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/C/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "Simple 2 A"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/A/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "Simple 2 C"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/C/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA",
+      "Narrow"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA",
+      "Narrow",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2",
+      "Narrow"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2",
+      "Narrow",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA",
+      "Narrow",
+      "A"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/A/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa",
+      "C2C-QA",
+      "Narrow",
+      "C"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/C/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2",
+      "Narrow",
+      "A"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/A/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2",
+      "C2C-QA2",
+      "Narrow",
+      "C"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/C/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling01"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling01/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling02"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling02/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling03"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling03/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling04"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling04/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling05"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling05/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling06"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling06/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling07"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling07/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling08"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling08/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling09"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling09/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling10"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling10/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling11"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling11/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling12"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling12/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling13"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling13/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "Sibling14"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/Sibling14/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "L3"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "L3",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "L3",
+      "L4"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/L4/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/L4/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa (2)",
+      "C2C-QA",
+      "Depth",
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Depth/L1/L2/L3/L4/L5/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2 (2)"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2 (2)",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": ""
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2 (2)",
+      "C2C-QA"
+    ],
+    "role": "branch",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2 (2)",
+      "C2C-QA",
+      "Save here"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/"
+    }
+  },
+  {
+    "path": [
+      "Cloudflare",
+      "click2cloud-qa-2 (2)",
+      "C2C-QA",
+      "Depth"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Depth/"
+    }
+  },
+  {
+    "path": [
+      "Simple 1 B"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Simple/B/"
+    }
+  },
+  {
+    "path": [
+      "Simple 2 B"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Simple/B/"
+    }
+  },
+  {
+    "path": [
+      "Narrow 1 B"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa",
+      "prefix": "C2C-QA/Narrow/B/"
+    }
+  },
+  {
+    "path": [
+      "Narrow 2 B"
+    ],
+    "role": "save",
+    "target": {
+      "provider": "cloudflare",
+      "connectionId": "cloudflare:qa-account",
+      "accountId": "qa-account",
+      "bucketName": "click2cloud-qa-2",
+      "prefix": "C2C-QA/Narrow/B/"
+    }
+  }
+]

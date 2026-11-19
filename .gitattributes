@@ -1,0 +1,19 @@
+# Workings fingerprints are SHA-256 of canonical repository bytes (LF).
+# Keep only the fingerprinted text roots stable under Windows core.autocrlf.
+/src/**/*.mjs text eol=lf
+/src/**/*.js text eol=lf
+/src/**/*.json text eol=lf
+/src/**/*.html text eol=lf
+/src/**/*.css text eol=lf
+/extension/**/*.mjs text eol=lf
+/extension/**/*.js text eol=lf
+/extension/**/*.json text eol=lf
+/extension/**/*.html text eol=lf
+/extension/**/*.css text eol=lf
+/right2cloud-module/src/**/*.mjs text eol=lf
+/right2cloud-module/src/**/*.js text eol=lf
+/right2cloud-module/src/**/*.json text eol=lf
+/right2cloud-module/src/**/*.html text eol=lf
+/right2cloud-module/src/**/*.css text eol=lf
+# Never apply newline transformations to fingerprinted binary assets.
+*.png -text

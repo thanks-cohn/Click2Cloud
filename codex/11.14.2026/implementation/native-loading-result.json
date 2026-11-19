@@ -1,0 +1,10 @@
+{
+  "evidenceClass": "REAL_UNPACKED_EXTENSION_GENUINE_SIDE_PANEL_REQUIRED",
+  "result": "BLOCKED",
+  "blocker": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+  "browser": "156.0.8078.79",
+  "platform": "linux",
+  "policyBypassed": false,
+  "sourceDigest": "e6a6cb086d63d3b777d19eeeb8200090b4055b725c1c6182c47a1e03aa37e2d0",
+  "extensionVersion": "0.3.19"
+}

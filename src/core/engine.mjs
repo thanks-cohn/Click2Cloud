@@ -4,7 +4,7 @@ import {compileMenuSpec} from './menu-spec.mjs';
 import {resolveMenuAction} from './action-resolver.mjs';
 import {captureSelectedBytes,captureSelectedStream} from './source-capture.mjs';
 import {dispatchSave} from './save-dispatcher.mjs';
-import {operationIdentity,observe} from './boundary-observation.mjs';
+import {operationIdentity,observe,passiveObservation} from './boundary-observation.mjs';
 import {location,key} from '../explorer/file-api.mjs';
 
 export function createEngine({current,registrar,providers,getAuthorization,authorizeSource,fetchSource,
@@ -41,12 +41,14 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     }
     return result;
   }
-  async function save({itemId,generation,context='image',source,signal,attentionContext}={}) {
+  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization,observation}={}) {
+    passiveObservation(observation,{stage:'dispatch.enter'});
     const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
     // These are actual sequential prerequisites in this owner, not inferred
     // correlations between temporally adjacent independent operations.
     const saveSink=event=>{
+      passiveObservation(observation,{...event,remoteEnvelope:typeof remoteSave==='function'});
       if(typeof sink!=='function')return 0;
       const requires=event.requires?.length?event.requires:priorBoundary?[priorBoundary]:[];
       let id=0;try{id=sink({...event,operationId,generation,requires})||0;}catch{}
@@ -62,6 +64,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     try {
       const durable=await current.read();if(durable.generation.desired!==generation||durable.generation.applied!==generation)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const spec=menus.get(generation);
+      const authorizeTarget=spec?.rows.find(r=>r.id===itemId)?.origin?.mode==='depth'&&typeof depthAuthorization==='function'?depthAuthorization:getAuthorization;
       if(spec&&compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(durable))return finish({state:'blocked',code:'STALE_CONFIGURATION',operationId});
       if(!spec)return finish({state:'blocked',code:'STALE_GENERATION',operationId});
       const providerRow=spec?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
@@ -72,13 +75,13 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         return finish(await onProviderAction({provider:resolved.action.providerAction,attentionContext,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
       }
       let auth;
-      try{auth=await getAuthorization(spec?.rows.find(r=>r.id===itemId)?.target);}
+      try{auth=await authorizeTarget(spec?.rows.find(r=>r.id===itemId)?.target);}
       catch{observe(saveSink,'auth.check','failed','AUTH_CHECK_FAILED',scope);blockRemaining('auth.check');throw Object.assign(Error('Authorization could not be checked'),{code:'AUTH_CHECK_FAILED'});}
       if(!auth?.sessionId||!Array.isArray(auth.authorizedTargets)) {
         observe(saveSink,'auth.check','blocked','AUTH_REQUIRED',scope);
         blockRemaining('auth.check');
         const row=spec?.rows.find(r=>r.id===itemId);
-        const n=registrar.inspect();if(row?.role==='save'&&row.target?.provider==='cloudflare'&&row.enabled&&row.visible&&row.contexts.includes(context)&&!n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext}));
+        const n=registrar.inspect();if(row?.role==='save'&&row.target?.provider==='cloudflare'&&row.enabled&&row.visible&&row.contexts.includes(context)&&!n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext,generation}));
         return finish({state:'blocked',code:'AUTH_REQUIRED',operationId});
       }
       observe(saveSink,'auth.check','ok','AUTH_VERIFIED',scope);
@@ -89,14 +92,14 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       const resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:
         native.pending||native.desired?.generation!==generation?null:native.acknowledgedGeneration,
         authorizedTargets:auth.authorizedTargets,sink:saveSink,operationId});
-      if(resolved.state!=='completed'){blockRemaining('resolver');const row=spec?.rows.find(r=>r.id===itemId);if(row?.target?.provider==='cloudflare'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(resolved.code)&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext}));return finish({...resolved,operationId});}
+      if(resolved.state!=='completed'){blockRemaining('resolver');const row=spec?.rows.find(r=>r.id===itemId);if(row?.target?.provider==='cloudflare'&&['SCOPE_UNAUTHORIZED','ITEM_DISABLED'].includes(resolved.code)&&onProviderAction)return finish(await onProviderAction({provider:'cloudflare',requestedTarget:row.target,setupOnly:true,attentionContext,generation}));return finish({...resolved,operationId});}
       const selectedRemote=resolved.action.target.provider==='cloudflare'?remoteSave:remoteSavers[resolved.action.target.provider];
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
-        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await getAuthorization(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
-        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
-        if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});try{await onVerifiedCompletion?.(out);}catch{return finish({state:'partial',code:'COMPLETION_PENDING',operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
+        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await authorizeTarget(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onObservation:observation,onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
+        if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});observe(saveSink,'completion.history','started','REMOTE_COMPLETION_STARTED',scope);try{await onVerifiedCompletion?.(out);}catch{observe(saveSink,'completion.history','failed','REMOTE_COMPLETION_PENDING',scope);return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
       }
       activeStage='capture.acquire';
@@ -108,7 +111,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         // Recheck current authority after source capture and before upload.
         authorize:async intent=>{
           const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;
-          const latest=await getAuthorization(resolved.action.target);
+          const latest=await authorizeTarget(resolved.action.target);
           if(latest?.sessionId!==auth.sessionId)return false;
           const registration=registrar.inspect();
           if(registration.pending||registration.desired?.generation!==generation)return false;
@@ -154,6 +157,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     getMenu:generation=>menus.get(generation)??null,
     menuRetention:()=>({retained:menus.size,evictedGenerations,maxSnapshots}),
     getEvidence:()=>registrar.inspect(),
+    matchesCurrent:(spec,state)=>compiledIntent.get(spec)===menuIntent(state),
     getModeConfig:mode=>current.getModeConfig(mode),
     saveModeConfig:(mode,config,options)=>current.saveModeConfig(mode,config,options)
   });

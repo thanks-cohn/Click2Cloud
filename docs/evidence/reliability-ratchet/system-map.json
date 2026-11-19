@@ -8,12 +8,20 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.19",
+      "extensionVersion": "0.3.20",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {
       "maxGrantTtlMs": 3600000,
       "fullConfigurationMethods": [
+        "exportMenuManifest",
+        "getMenuManifestDraft",
+        "previewMenuManifest",
+        "inspectManifestBindings",
+        "commitMenuManifest",
+        "discardMenuManifest",
+        "provisionMenuManifest",
+        "undoMenuManifest",
         "enterExplorer",
         "initializeCloudflare",
         "inspectCloudflare",
@@ -39,8 +47,561 @@
     },
     "operations": [
       {
-        "method": "getGalleryLoadingVisual",
+        "method": "exportMenuManifest",
         "traceMethodIndex": 1,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getMenuManifestDraft",
+        "traceMethodIndex": 2,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "previewMenuManifest",
+        "traceMethodIndex": 3,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "json": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2097152,
+              "multiline": true
+            }
+          },
+          "required": [
+            "json"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "inspectManifestBindings",
+        "traceMethodIndex": 4,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "mapping": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "accountId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  },
+                  "connectionId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  }
+                },
+                "required": [
+                  "accountId",
+                  "connectionId"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "policy": {
+                  "enum": [
+                    "skip-identical",
+                    "add-alongside",
+                    "replace-selected"
+                  ]
+                },
+                "replaceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8192
+                  },
+                  "maxItems": 4096
+                },
+                "applyPreferences": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "policy",
+                "replaceIds",
+                "applyPreferences"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "draftId"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "discardMenuManifest",
+        "traceMethodIndex": 5,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "draftId"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "commitMenuManifest",
+        "traceMethodIndex": 6,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "previewToken": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "partial": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "draftId",
+            "previewToken",
+            "expectedRevision",
+            "idempotencyKey",
+            "partial"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "provisionMenuManifest",
+        "traceMethodIndex": 7,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draftId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "previewToken": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "draftId",
+            "previewToken",
+            "expectedRevision",
+            "idempotencyKey"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "provision",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "undoMenuManifest",
+        "traceMethodIndex": 8,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "expectedRevision",
+            "idempotencyKey"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/manifest/service.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-PERSIST-1",
+          "C2C-PERSIST-2",
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/portable-menu-manifest.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getGalleryLoadingVisual",
+        "traceMethodIndex": 9,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -93,7 +654,7 @@
       },
       {
         "method": "setGalleryLoadingVisual",
-        "traceMethodIndex": 2,
+        "traceMethodIndex": 10,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -190,7 +751,7 @@
       },
       {
         "method": "initializeCloudflare",
-        "traceMethodIndex": 3,
+        "traceMethodIndex": 11,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -243,7 +804,7 @@
       },
       {
         "method": "inspectShelfAttention",
-        "traceMethodIndex": 4,
+        "traceMethodIndex": 12,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -292,7 +853,7 @@
       },
       {
         "method": "openCloudflareDestinations",
-        "traceMethodIndex": 5,
+        "traceMethodIndex": 13,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -341,7 +902,7 @@
       },
       {
         "method": "inspectCloudflare",
-        "traceMethodIndex": 6,
+        "traceMethodIndex": 14,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -390,7 +951,7 @@
       },
       {
         "method": "checkCloudflareR2",
-        "traceMethodIndex": 7,
+        "traceMethodIndex": 15,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -482,7 +1043,7 @@
       },
       {
         "method": "selectCloudflareAccount",
-        "traceMethodIndex": 8,
+        "traceMethodIndex": 16,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -539,7 +1100,7 @@
       },
       {
         "method": "openCloudflareActivation",
-        "traceMethodIndex": 9,
+        "traceMethodIndex": 17,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -596,7 +1157,7 @@
       },
       {
         "method": "approveCloudflareSetup",
-        "traceMethodIndex": 10,
+        "traceMethodIndex": 18,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -664,7 +1225,7 @@
       },
       {
         "method": "repairCloudflareDestination",
-        "traceMethodIndex": 11,
+        "traceMethodIndex": 19,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -768,8 +1329,114 @@
         ]
       },
       {
+        "method": "recoverCloudflareDestination",
+        "traceMethodIndex": 20,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "authorizeSetup": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "provision",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/cloudflare/onboarding.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf",
+          "Chrome-native"
+        ],
+        "storageOwner": "CurrentStore setup ledger and Chrome-local exact-bucket remoteTransport registry",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "EXACT_BUCKET_CAPABILITY_AND_R2_READBACK_AND_CURRENT_NATIVE_ACK",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization",
+          "exact-configured-destination",
+          "retained-account-or-bucket-setup-approval-or-host-confirmation"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PERSIST-3",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/cloudflare-destination-recovery.test.mjs",
+          "tests/depth-plan-recovery.test.mjs"
+        ],
+        "precondition": "HOST_PROVISION_GRANT_AND_EXACT_CONFIGURED_TARGET_AND_RETAINED_SETUP_APPROVAL_OR_EXPLICIT_HOST_CONFIRMATION",
+        "postcondition": "EXACT_BUCKET_VERIFIED_PLAN_AND_CURRENT_NATIVE_ACK_WITH_NO_SOURCE_REPLAY_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
         "method": "invokeProviderAction",
-        "traceMethodIndex": 12,
+        "traceMethodIndex": 21,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -862,12 +1529,137 @@
         ]
       },
       {
-        "method": "inspectRemoteHistory",
-        "traceMethodIndex": 13,
+        "method": "getHistoryPreferences",
+        "traceMethodIndex": 22,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/persistence/current-store.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PERSIST-2"
+        ],
+        "tests": [
+          "tests/history.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "setHistoryPreferences",
+        "traceMethodIndex": 23,
         "version": "3+1.1",
         "schema": {
           "type": "object",
           "properties": {
+            "range": {
+              "enum": [
+                "all",
+                "daily",
+                "weekly"
+              ]
+            },
+            "previews": {
+              "enum": [
+                "all",
+                "first",
+                "closed"
+              ]
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "range",
+            "previews",
+            "timezone"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/persistence/current-store.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PERSIST-2"
+        ],
+        "tests": [
+          "tests/history.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "inspectRemoteHistory",
+        "traceMethodIndex": 24,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "customer": {
+              "type": "boolean"
+            },
             "cursor": {
               "type": "string",
               "minLength": 1,
@@ -924,7 +1716,7 @@
       },
       {
         "method": "inspectRemoteReceipt",
-        "traceMethodIndex": 14,
+        "traceMethodIndex": 25,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1019,7 +1811,7 @@
       },
       {
         "method": "inspectCloudflareSetup",
-        "traceMethodIndex": 15,
+        "traceMethodIndex": 26,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1082,7 +1874,7 @@
       },
       {
         "method": "cancelRemoteOperation",
-        "traceMethodIndex": 16,
+        "traceMethodIndex": 27,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1178,7 +1970,7 @@
       },
       {
         "method": "openRemoteResult",
-        "traceMethodIndex": 17,
+        "traceMethodIndex": 28,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1236,7 +2028,7 @@
       },
       {
         "method": "refreshExplorer",
-        "traceMethodIndex": 18,
+        "traceMethodIndex": 29,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1330,7 +2122,7 @@
       },
       {
         "method": "enterExplorer",
-        "traceMethodIndex": 19,
+        "traceMethodIndex": 30,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1379,7 +2171,7 @@
       },
       {
         "method": "navigateExplorer",
-        "traceMethodIndex": 20,
+        "traceMethodIndex": 31,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1468,7 +2260,7 @@
       },
       {
         "method": "readFileChunk",
-        "traceMethodIndex": 21,
+        "traceMethodIndex": 32,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1578,7 +2370,7 @@
       },
       {
         "method": "inspectExplorerContextMenu",
-        "traceMethodIndex": 22,
+        "traceMethodIndex": 33,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1693,7 +2485,7 @@
       },
       {
         "method": "previewContextMenu",
-        "traceMethodIndex": 23,
+        "traceMethodIndex": 34,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1753,7 +2545,7 @@
       },
       {
         "method": "describeCapabilities",
-        "traceMethodIndex": 24,
+        "traceMethodIndex": 35,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1807,7 +2599,7 @@
       },
       {
         "method": "getConfiguration",
-        "traceMethodIndex": 25,
+        "traceMethodIndex": 36,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1856,7 +2648,7 @@
       },
       {
         "method": "getEngineHealth",
-        "traceMethodIndex": 26,
+        "traceMethodIndex": 37,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1926,7 +2718,7 @@
       },
       {
         "method": "getProviderConnections",
-        "traceMethodIndex": 27,
+        "traceMethodIndex": 38,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -1973,7 +2765,7 @@
       },
       {
         "method": "loginBegin",
-        "traceMethodIndex": 28,
+        "traceMethodIndex": 39,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2024,7 +2816,7 @@
       },
       {
         "method": "loginStatus",
-        "traceMethodIndex": 29,
+        "traceMethodIndex": 40,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2071,7 +2863,7 @@
       },
       {
         "method": "loginCancel",
-        "traceMethodIndex": 30,
+        "traceMethodIndex": 41,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2118,7 +2910,7 @@
       },
       {
         "method": "disconnect",
-        "traceMethodIndex": 31,
+        "traceMethodIndex": 42,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2165,7 +2957,7 @@
       },
       {
         "method": "fileAction",
-        "traceMethodIndex": 32,
+        "traceMethodIndex": 43,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2176,8 +2968,12 @@
                 "copy",
                 "move",
                 "rename",
-                "delete"
+                "delete",
+                "createBucket"
               ]
+            },
+            "authorizeSetup": {
+              "type": "boolean"
             },
             "source": {
               "type": "object",
@@ -2342,7 +3138,7 @@
       },
       {
         "method": "listAccounts",
-        "traceMethodIndex": 33,
+        "traceMethodIndex": 44,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2391,7 +3187,7 @@
       },
       {
         "method": "listAuthorizedBuckets",
-        "traceMethodIndex": 34,
+        "traceMethodIndex": 45,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2453,7 +3249,7 @@
       },
       {
         "method": "listFolders",
-        "traceMethodIndex": 35,
+        "traceMethodIndex": 46,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2547,7 +3343,7 @@
       },
       {
         "method": "fileMetadata",
-        "traceMethodIndex": 36,
+        "traceMethodIndex": 47,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2642,7 +3438,7 @@
       },
       {
         "method": "readFile",
-        "traceMethodIndex": 37,
+        "traceMethodIndex": 48,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2750,7 +3546,7 @@
       },
       {
         "method": "listDestinations",
-        "traceMethodIndex": 38,
+        "traceMethodIndex": 49,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2818,7 +3614,7 @@
       },
       {
         "method": "inspectMenuTree",
-        "traceMethodIndex": 39,
+        "traceMethodIndex": 50,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2895,7 +3691,7 @@
       },
       {
         "method": "previewNativeMenu",
-        "traceMethodIndex": 40,
+        "traceMethodIndex": 51,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2944,7 +3740,7 @@
       },
       {
         "method": "inspectNativeACK",
-        "traceMethodIndex": 41,
+        "traceMethodIndex": 52,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -2993,7 +3789,7 @@
       },
       {
         "method": "getOrganizationSuggestion",
-        "traceMethodIndex": 42,
+        "traceMethodIndex": 53,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3042,7 +3838,7 @@
       },
       {
         "method": "previewConfigChange",
-        "traceMethodIndex": 43,
+        "traceMethodIndex": 54,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -3119,6 +3915,9 @@
                   "order": {
                     "type": "integer",
                     "minimum": 0
+                  },
+                  "ensureSimple": {
+                    "type": "boolean"
                   },
                   "visibilityMode": {
                     "enum": [
@@ -3730,6 +4529,9 @@
                           "prefix"
                         ],
                         "additionalProperties": false
+                      },
+                      "ensureSimple": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -4104,7 +4906,7 @@
       },
       {
         "method": "commitConfigChange",
-        "traceMethodIndex": 44,
+        "traceMethodIndex": 55,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -4181,6 +4983,9 @@
                   "order": {
                     "type": "integer",
                     "minimum": 0
+                  },
+                  "ensureSimple": {
+                    "type": "boolean"
                   },
                   "visibilityMode": {
                     "enum": [
@@ -4792,6 +5597,9 @@
                           "prefix"
                         ],
                         "additionalProperties": false
+                      },
+                      "ensureSimple": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -5122,6 +5930,17 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 8192
+            },
+            "prepareModes": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "simple",
+                  "nested",
+                  "depth"
+                ]
+              },
+              "maxItems": 3
             }
           },
           "required": [
@@ -5172,7 +5991,7 @@
       },
       {
         "method": "reconcileNativeMenu",
-        "traceMethodIndex": 45,
+        "traceMethodIndex": 56,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5228,7 +6047,7 @@
       },
       {
         "method": "chooseBackupLocation",
-        "traceMethodIndex": 46,
+        "traceMethodIndex": 57,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5283,7 +6102,7 @@
       },
       {
         "method": "inspectRecoveryCoverage",
-        "traceMethodIndex": 47,
+        "traceMethodIndex": 58,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5372,7 +6191,7 @@
       },
       {
         "method": "runRecoveryPage",
-        "traceMethodIndex": 48,
+        "traceMethodIndex": 59,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5461,7 +6280,7 @@
       },
       {
         "method": "inspectBackupRoots",
-        "traceMethodIndex": 49,
+        "traceMethodIndex": 60,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5510,7 +6329,7 @@
       },
       {
         "method": "listRecoveryPolicies",
-        "traceMethodIndex": 50,
+        "traceMethodIndex": 61,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5559,7 +6378,7 @@
       },
       {
         "method": "writeRecovery",
-        "traceMethodIndex": 51,
+        "traceMethodIndex": 62,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5608,7 +6427,7 @@
       },
       {
         "method": "requestRestorePreview",
-        "traceMethodIndex": 52,
+        "traceMethodIndex": 63,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -5693,6 +6512,9 @@
                       "order": {
                         "type": "integer",
                         "minimum": 0
+                      },
+                      "ensureSimple": {
+                        "type": "boolean"
                       },
                       "visibilityMode": {
                         "enum": [
@@ -6304,6 +7126,9 @@
                               "prefix"
                             ],
                             "additionalProperties": false
+                          },
+                          "ensureSimple": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
@@ -6684,7 +7509,7 @@
       },
       {
         "method": "restoreRightClickMenu",
-        "traceMethodIndex": 53,
+        "traceMethodIndex": 64,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -6783,6 +7608,9 @@
                       "order": {
                         "type": "integer",
                         "minimum": 0
+                      },
+                      "ensureSimple": {
+                        "type": "boolean"
                       },
                       "visibilityMode": {
                         "enum": [
@@ -7394,6 +8222,9 @@
                               "prefix"
                             ],
                             "additionalProperties": false
+                          },
+                          "ensureSimple": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
@@ -7777,7 +8608,7 @@
       },
       {
         "method": "inspectWholeCloudJobs",
-        "traceMethodIndex": 54,
+        "traceMethodIndex": 65,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7825,7 +8656,7 @@
       },
       {
         "method": "enableWholeCloudJob",
-        "traceMethodIndex": 55,
+        "traceMethodIndex": 66,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7908,7 +8739,7 @@
       },
       {
         "method": "disableWholeCloudJob",
-        "traceMethodIndex": 56,
+        "traceMethodIndex": 67,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -7985,7 +8816,7 @@
       },
       {
         "method": "dispatchExplorerSave",
-        "traceMethodIndex": 57,
+        "traceMethodIndex": 68,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8130,7 +8961,7 @@
       },
       {
         "method": "dispatchSave",
-        "traceMethodIndex": 58,
+        "traceMethodIndex": 69,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -8237,6 +9068,616 @@
         ],
         "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
         "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "searchDirectoryNames",
+        "traceMethodIndex": 70,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "query": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "pageToken": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "pageSize": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "refresh": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "source",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/explorer/directory-search.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "Derived filename IndexedDB inventory",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "scripts/test-filename-search-browser.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "listCommands",
+        "traceMethodIndex": 71,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/api/shortcuts.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getShortcutBindings",
+        "traceMethodIndex": 72,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/api/shortcuts.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "setShortcutBinding",
+        "traceMethodIndex": 73,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "commandId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "chord": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                {
+                  "enum": [
+                    null
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "commandId",
+            "chord"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/api/shortcuts.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "resetShortcutBindings",
+        "traceMethodIndex": 74,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "permission": "configure",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/api/shortcuts.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "DURABLE_READBACK_OR_EXPLICIT_PARTIAL_FAILURE",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "DURABLE_READBACK_AND_REQUIRED_ACK_OR_EXPLICIT_FAILURE",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "listDirectoryObjects",
+        "traceMethodIndex": 75,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "cursor": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/explorer/object-exports.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getPublicUrls",
+        "traceMethodIndex": 76,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "domains": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8192
+              },
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/explorer/object-exports.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
+        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "getExportObjectMetadata",
+        "traceMethodIndex": 77,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "required": [
+            "source",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "inspect",
+        "effectful": false,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/explorer/object-exports.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "CurrentStore",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "READ_ONLY_RESULT",
+        "authority": "CURRENT",
+        "dependencies": [
+          "CURRENT",
+          "account-authorization"
+        ],
+        "invariants": [
+          "C2C-AGENT-1"
+        ],
+        "tests": [
+          "tests/release-0320.test.mjs"
+        ],
+        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "postcondition": "READ_ONLY_OBSERVATION",
         "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
         "evidenceClass": "PARTIAL",
         "gaps": [
@@ -8467,9 +9908,12 @@
           "STARTED",
           "UNKNOWN",
           "UNKNOWN_REASON",
+          "HISTORY_CURSOR_INVALID",
           "REVISION_CONFLICT",
           "MIGRATION_QUARANTINED",
           "OBSERVATION_GAP",
+          "HISTORY_SKIPPED",
+          "HISTORY_COMMITTED",
           "PERSISTENCE_FAILED",
           "RESTORE_RECOVERY_REQUIRED",
           "REGISTRAR_STATE_SAVED",
@@ -8649,6 +10093,8 @@
         ],
         "owner": "src/explorer/observed-api.mjs",
         "codes": [
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
           "PROVIDER_READ_FAILED",
           "PROVIDER_NOT_IMPLEMENTED",
           "PROVIDER_ACTION",
@@ -8692,6 +10138,8 @@
         ],
         "owner": "src/explorer/observed-api.mjs",
         "codes": [
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
           "FILE_ACTION_PENDING",
           "FILE_ACTION_RESULT",
           "FILE_READ_FAILED",
@@ -8795,7 +10243,8 @@
           "PREFERENCES_UNAVAILABLE",
           "BATCH_CONCURRENCY_INVALID",
           "PREFERENCES_INVALID",
-          "PREFERENCE_UNSUPPORTED"
+          "PREFERENCE_UNSUPPORTED",
+          "FILE_SEARCH_UNAVAILABLE"
         ],
         "coverage": "partial",
         "boundaryLimit": "Gateway evidence does not certify hidden service internals.",
@@ -8809,6 +10258,8 @@
         ],
         "owner": "src/explorer/observed-api.mjs",
         "codes": [
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
           "FILE_ACTION_PENDING",
           "FILE_ACTION_RESULT",
           "FILE_READ_FAILED",
@@ -8870,7 +10321,8 @@
           "PROVIDER_FAILURE_UNKNOWN",
           "PROVIDER_RESULT_UNCONFIRMED",
           "WORKER_CONNECTION_FAILED",
-          "BATCH_CONCURRENCY_INVALID"
+          "BATCH_CONCURRENCY_INVALID",
+          "FILE_SEARCH_UNAVAILABLE"
         ],
         "coverage": "partial",
         "boundaryLimit": "Gateway evidence does not certify hidden service internals.",
@@ -9020,6 +10472,10 @@
         ],
         "owner": "src/modes/simple/index.mjs",
         "codes": [
+          "DESTINATION_NOT_REGISTERED",
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",
@@ -9094,6 +10550,10 @@
         ],
         "owner": "src/modes/nested/index.mjs",
         "codes": [
+          "DESTINATION_NOT_REGISTERED",
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",
@@ -9168,6 +10628,10 @@
         ],
         "owner": "src/modes/depth/index.mjs",
         "codes": [
+          "DESTINATION_NOT_REGISTERED",
+          "WORKER_RECOVERY_FAILED",
+          "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
+          "DEPTH_DISCOVERY_REQUIRED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "INVALID_REQUEST",
@@ -9304,7 +10768,8 @@
           "INVALID_SIBLING_INDEX",
           "INVALID_NATIVE_STATE",
           "INVALID_OBSERVED_EVIDENCE",
-          "DEPENDENCY_BLOCKED"
+          "DEPENDENCY_BLOCKED",
+          "DEFAULT_DESTINATION_UNAVAILABLE"
         ],
         "coverage": "partial",
         "boundaryLimit": "Gateway evidence does not certify hidden service internals.",
@@ -9821,9 +11286,12 @@
           "STARTED",
           "UNKNOWN",
           "UNKNOWN_REASON",
+          "HISTORY_CURSOR_INVALID",
           "REVISION_CONFLICT",
           "MIGRATION_QUARANTINED",
           "OBSERVATION_GAP",
+          "HISTORY_SKIPPED",
+          "HISTORY_COMMITTED",
           "PERSISTENCE_FAILED",
           "RESTORE_RECOVERY_REQUIRED",
           "REGISTRAR_STATE_SAVED",
@@ -9864,9 +11332,12 @@
           "STARTED",
           "UNKNOWN",
           "UNKNOWN_REASON",
+          "HISTORY_CURSOR_INVALID",
           "REVISION_CONFLICT",
           "MIGRATION_QUARANTINED",
           "OBSERVATION_GAP",
+          "HISTORY_SKIPPED",
+          "HISTORY_COMMITTED",
           "PERSISTENCE_FAILED",
           "RESTORE_RECOVERY_REQUIRED",
           "REGISTRAR_STATE_SAVED",
@@ -9907,9 +11378,12 @@
           "STARTED",
           "UNKNOWN",
           "UNKNOWN_REASON",
+          "HISTORY_CURSOR_INVALID",
           "REVISION_CONFLICT",
           "MIGRATION_QUARANTINED",
           "OBSERVATION_GAP",
+          "HISTORY_SKIPPED",
+          "HISTORY_COMMITTED",
           "PERSISTENCE_FAILED",
           "RESTORE_RECOVERY_REQUIRED",
           "REGISTRAR_STATE_SAVED",
@@ -9946,6 +11420,7 @@
         ],
         "owner": "src/core/save-dispatcher.mjs",
         "codes": [
+          "DESTINATION_NOT_REGISTERED",
           "DESTINATION_NATIVE_ACKNOWLEDGED",
           "DESTINATION_NOT_READY",
           "OK",
@@ -10048,6 +11523,7 @@
           "STARTED",
           "UNKNOWN",
           "UNKNOWN_REASON",
+          "HISTORY_CURSOR_INVALID",
           "HANDOFF_PENDING",
           "HANDOFF_FAILED",
           "HISTORY_SKIPPED",

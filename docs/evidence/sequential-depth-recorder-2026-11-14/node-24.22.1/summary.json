@@ -1,0 +1,234 @@
+{
+  "sourceRevision": "098ae67c76b00d664388c1e89b925ee00a1c0036",
+  "phase1DiagnosticPatch": true,
+  "node": "v24.22.1",
+  "os": "linux",
+  "jobs": 2,
+  "results": [
+    {
+      "label": "isolated-2",
+      "mode": "BASIC",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=BASIC C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-2-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6780.196686,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-1",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=OFF C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-1-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 7630.776943,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-3",
+      "mode": "EXPANSIVE",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=EXPANSIVE C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-3-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 6812.6117110000005,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-4",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=OFF C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-4-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 10398.331694,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-5",
+      "mode": "BASIC",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=BASIC C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-5-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 9428.028052999998,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "isolated-6",
+      "mode": "EXPANSIVE",
+      "args": [
+        "--test",
+        "tests/depth-plan-recovery.test.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=EXPANSIVE C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/isolated-6-trace node --test tests/depth-plan-recovery.test.mjs",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "durationMs": 5758.505932999997,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "full-1",
+      "mode": "OFF",
+      "args": [
+        "--test",
+        "--test-concurrency=1",
+        "tests/final-focused.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=OFF C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/full-1-trace node --test --test-concurrency=1 tests/final-focused.mjs",
+      "exit": 0,
+      "tests": 396,
+      "pass": 396,
+      "fail": 0,
+      "durationMs": 57701.912629000006,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    },
+    {
+      "label": "full-2",
+      "mode": "EXPANSIVE",
+      "args": [
+        "tests/final-focused.mjs"
+      ],
+      "command": "C2C_DEPTH_RECORDER_MODE=EXPANSIVE C2C_DEPTH_TRACE_DIR=work/sequential/repetitions/full-2-trace node tests/final-focused.mjs",
+      "exit": 0,
+      "tests": 396,
+      "pass": 396,
+      "fail": 0,
+      "durationMs": 61689.637367999996,
+      "traceEvents": 751,
+      "requestErrors": 0,
+      "requests": 87,
+      "requestLifecycles": [
+        "ready"
+      ],
+      "originChanges": 0,
+      "disposeInFlight": [
+        0,
+        0
+      ],
+      "clicks": 9,
+      "completedClicks": 8,
+      "evidenceClass": "NODE_FIXTURE"
+    }
+  ],
+  "artifactNote": "Only absolute executable paths replaced with node version; traces and test logs unchanged. Commands use repository-relative paths."
+}

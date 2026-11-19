@@ -1,0 +1,29 @@
+{
+  "baseline": "2904ff9bb1f28b82986a0f8022d38d970c014d3a",
+  "branch": "codex/depth-p0-click-save",
+  "focused": {
+    "pass": 319,
+    "total": 319
+  },
+  "full": {
+    "pass": 387,
+    "total": 388,
+    "exitCode": 1,
+    "retainedFailure": "committed known-good complete mode/provider generations do not silently drift (Simple)"
+  },
+  "depthClick": {
+    "pass": 17,
+    "total": 17
+  },
+  "combined": {
+    "pass": 40,
+    "total": 40
+  },
+  "module": {
+    "pass": 49,
+    "total": 49
+  },
+  "browserFixture": "PASS; real Chromium/IDB, synthetic provider IPC",
+  "nativeExtension": "BLOCKED: UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+  "realR2": "UNVERIFIED; zero live writes"
+}

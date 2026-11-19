@@ -27,7 +27,8 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
   await recordStage({stage:'writing',key:prepared.key,bytes:length});
   let stream=body,pipe;const cancel=new AbortController(),writeSignal=signal?AbortSignal.any([signal,cancel.signal]):cancel.signal;
   if(body instanceof ReadableStream){if(!FixedLengthStream)fail('FIXED_LENGTH_STREAM_REQUIRED');const fixed=new FixedLengthStream(length);stream=fixed.readable;pipe=body.pipeTo(fixed.writable,{signal:writeSignal});pipe.catch(()=>cancel.abort());}
-  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),httpMetadata:{contentType},customMetadata:{operationId,...provenance}});
+  const savedFileMetadata={httpMetadata:{contentType},customMetadata:{operationId,...provenance}};
+  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),...savedFileMetadata});
   let result;try{result=await wait(put,writeSignal);if(result===null){cancel.abort();return {conflict:true};}if(pipe)await wait(pipe,writeSignal);}catch(e){cancel.abort();throw e;}
   if(!result?.etag||!result.version)fail('PUT_RECEIPT_INVALID');
   let stagingCleanup;
@@ -38,8 +39,8 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
    stagingCleanup={removed,retained:staged.parts-removed};
   }
 
-  return {key:prepared.key,size:length,etag:result.etag,version:result.version,operationId,transfer:staged?'bounded-spool':'known-length-stream',...(stagingCleanup?{stagingCleanup}:{}),...(prepared.provenance?{provenance:prepared.provenance}:{})};
+  return {savedFileMetadata,savedFileMetadataOrigin:'historical-upload',key:prepared.key,size:length,etag:result.etag,version:result.version,operationId,transfer:staged?'bounded-spool':'known-length-stream',...(stagingCleanup?{stagingCleanup}:{}),...(prepared.provenance?{provenance:prepared.provenance}:{})};
  },
- async verify({receipt,signal}){const h=await wait(storage.head(receipt.key),signal);let provenance;if(h?.customMetadata?.click2cloud)try{provenance=JSON.parse(h.customMetadata.click2cloud);}catch{fail('PROVENANCE_INVALID');}return h?{key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId,...(provenance?{provenance}:{})}:null;}
+ async verify({receipt,signal}){const h=await wait(storage.head(receipt.key),signal);let provenance;if(h?.customMetadata?.click2cloud)try{provenance=JSON.parse(h.customMetadata.click2cloud);}catch{fail('PROVENANCE_INVALID');}return h?{savedFileMetadataOrigin:'current-remote',savedFileMetadata:{httpMetadata:h.httpMetadata??{},customMetadata:h.customMetadata??{}},key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId,...(provenance?{provenance}:{})}:null;}
  };
 }

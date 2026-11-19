@@ -1,0 +1,12 @@
+✔ a missing dispatch generation can yield STALE_GENERATION without a generation race (7.617776ms)
+✔ genuinely stale generation is rejected before any provider write (0.962765ms)
+✔ post-write session loss stays uncertain and is never retried or marked verified (4.283711ms)
+✔ post-write generation change stays uncertain; unchanged authority completes once (2.774967ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 98.464849

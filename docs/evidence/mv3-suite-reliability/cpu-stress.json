@@ -1,0 +1,20 @@
+[
+  {
+    "mode": "OFF",
+    "exit": 0,
+    "loadWorkers": 4,
+    "maxLoadMs": 8000
+  },
+  {
+    "mode": "BASIC",
+    "exit": 0,
+    "loadWorkers": 4,
+    "maxLoadMs": 8000
+  },
+  {
+    "mode": "EXPANSIVE",
+    "exit": 0,
+    "loadWorkers": 4,
+    "maxLoadMs": 8000
+  }
+]
