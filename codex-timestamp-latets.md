@@ -79,6 +79,18 @@ https://your-domain.example/exact/path/to/image.png     [Copy]
 
 **Additional acceptance check:** Start with an already-public bucket, right-click a nested image, choose Get URL: without typing anything, the actual URL is visible **directly under the domain input**. If a domain is newly activated during the current flow, that same row populates immediately after the verification refresh.
 
+## Additional P1 Minimal cleanup — remove generic "action needs attention" message
+
+The owner explicitly requires that **Minimal theme must never display** the generic fallback message `This action needs attention. Review the current panel or History.` (including the common uncapitalized rendering). This includes Minimal Remotes and any other ordinary Minimal panel, during/after failed actions, retries, reconnects and view refreshes. Don't replace it with another vague "Review current panel or History" message. Keep appropriate concise login/reconnect status, actual failure evidence, existing History and accessible non-Minimal/Debug diagnostics.
+
+**Source identified:** `extension/app.mjs` `quietFeedback(value,attention)` writes the exact message to `#action-feedback` as its final required-attention fallback; `status()` invokes that function. Fix the Minimal theme's presentation at this source as well as the existing Minimal Remotes cleanup; hiding only the selected-destination card will not fix this banner. Do not disable actual error reporting, save safety checks, or diagnostics.
+
+**Acceptance:** Trigger an unclassified error while Minimal is active → no generic action-needs-attention banner; change views/retry/reconnect → it stays absent. Other aesthetics retain their technical feedback. Existing authenticated operation, failure handling, History and receipts are unchanged.
+
+See also: `Issues_and_Bugs/Issues/P1_MINIMAL_REMOTES_HIDE_SETUP_AND_DUPLICATE_CLOUDFLARE_TITLE_2026-11-19.md`.
+
+---
+
 ## Owner clarification — Get URL is BOTH a result viewer and a configuration tool (P1)
 
 **User clarification (November 19, 2026):** Get URL must simultaneously display the object's existing public URL(s) **and** allow the user to add or select additional eligible public domains. Do not choose between "show result" and "configure domain"; **both functions belong in the same Get URL window**.
