@@ -8,7 +8,7 @@
 
 Users must be able to make the filename Search field **pop out and receive keyboard focus instantly**, even when responsive layout places it in Explorer More.
 
-- **Proposed shortcut: Ctrl+Shift+F7**, alongside the existing Ctrl+Shift+F8 (toolbar rows) and Ctrl+Shift+F9 (reset 50/50 pane split). Validate conflicts with Chrome/Windows before finalizing; use and document a safer chord if required.
+- **Proposed default shortcut: Ctrl+Shift+F7**, alongside default Ctrl+Shift+F8 (toolbar rows) and Ctrl+Shift+F9 (reset 50/50 pane split). These are all **user-remappable from the final Keyboard Shortcuts section in Settings**, using one shared shortcut registry. Validate conflicts with Chrome/Windows before finalizing; use and document a safer default chord if required. See [Shortcut Settings requirement](P1_USER_EDITABLE_KEYBOARD_SHORTCUTS_IN_SETTINGS_2026-11-19.md).
 - When Search is already inline and visible, focus its existing input. When hidden, show an accessible, compact search popover anchored to the Explorer toolbar and focus the **same Search form** immediately, no extra click or forced toolbar/upper-header row.
 - Enter runs the existing current-directory `searchDirectoryNames` File API with persistent IndexedDB. Typing does not trigger cloud queries. Escape closes the popover and restores focus without silently clearing the typed query or search results. Clear explicitly resets the search.
 - Preserve one authoritative search input and handler, existing query and selected folder scope, accessibility label, IME focus, and source/session fencing. No duplicate search engine or duplicate form.
