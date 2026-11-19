@@ -25,9 +25,9 @@
 - **Mandatory at the end of next-Codex:** a finished `docs/api/API-COMMAND-REFERENCE.md` with a few explanatory sentences **for every API method** (baseline inspected: 70, recount at final HEAD), its schema/effects/permissions/examples, plus automated exact registry-vs-doc coverage validation. UI-only commands and future screenshot-to-cloud must be distinguished.
 - Remotes hero: make **"The Future is Now. True Remote is Here."** the prominent headline, with **"Nothing ever gets downloaded to your computer."** as the subtitle; demote/remove the existing larger "Your clouds, one place." text without changing cloud authority.
 
-## Daily Shelf downloads badge
+## Daily Chrome extension toolbar icon badge (NOT the Shelf)
 
-[Always-visible, midnight-reset, top-right daily download count](../Issues_and_Bugs/Issues/P1_ALWAYS_VISIBLE_DAILY_SHELF_DOWNLOAD_COUNTER_2026-11-19.md) is **requested, not implemented**. Reuse verified History receipts and confirmed local download completions, never attempts. Preserve History and top-right Sun/Moon. Provide count and cloud-vs-local breakdown, correct timezone day rollover and restart recovery.
+[Daily count ON THE EXISTING CHROME EXTENSION TOOLBAR ICON](../Issues_and_Bugs/Issues/P1_DAILY_CHROME_EXTENSION_ICON_BADGE_2026-11-19.md) is **requested, not implemented**. Use `chrome.action.setBadgeText` on the existing pinned toolbar icon, counting verified completions from existing History and resetting at local midnight even when the Shelf is closed. **No Shelf counter or new Shelf header UI.** Preserve existing icon-click functionality; Chrome controls whether an action is pinned.
 
 ## Experimental
 
