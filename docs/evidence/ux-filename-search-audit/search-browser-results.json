@@ -1,0 +1,44 @@
+{
+  "evidence": "Production Shelf and File API in Chromium with real IndexedDB, fixture R2 and Chrome runtime messaging",
+  "browser": "156.0.8078.79",
+  "results": [
+    {
+      "name": "responsive search, header and keyboard shortcuts in all aesthetics at 320, 360 and 1280px",
+      "state": "PASS"
+    },
+    {
+      "name": "Enter-only search, complete provider paging, result continuation, Unicode and warm IndexedDB reuse",
+      "state": "PASS"
+    },
+    {
+      "name": "persisted cache after reload, simultaneous Shelf tabs, account isolation and programmatic File API",
+      "state": "PASS"
+    },
+    {
+      "name": "search result folder navigation, exact scope, mkdir invalidation and Go to path",
+      "state": "PASS"
+    },
+    {
+      "name": "external change refresh and honest stale offline results",
+      "state": "PASS"
+    },
+    {
+      "name": "partial inventory and obsolete results after navigation during paging",
+      "state": "PASS"
+    },
+    {
+      "name": "blocked filename IndexedDB leaves ordinary listing and cloud search working",
+      "state": "PASS"
+    }
+  ],
+  "errors": [],
+  "measurements": {
+    "warmPath": {
+      "coldUiMs": 96.72555899999861,
+      "warmUiMs": 42.064462000000276,
+      "providerReadsBeforeSearch": 1,
+      "providerReadsAfterCold": 3,
+      "providerReadsAfterWarm": 3
+    }
+  }
+}

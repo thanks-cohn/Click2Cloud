@@ -1,0 +1,29 @@
+{
+  "browser": "156.0.8078.79",
+  "tests": [
+    {
+      "name": "Concurrent compare-and-swap, exact directory scope and private-field minimization",
+      "result": "PASS"
+    },
+    {
+      "name": "Restart, stable pagination, Unicode matching, deduplication and cancellation",
+      "result": "PASS"
+    },
+    {
+      "name": "Exact mutation invalidation, late scan fencing and account purge",
+      "result": "PASS"
+    },
+    {
+      "name": "Eviction limits, rejected oversized page, and unavailable IndexedDB",
+      "result": "PASS"
+    },
+    {
+      "name": "Actual IndexedDB transaction rollback, corrupt inventory detection and safe rebuild",
+      "result": "PASS"
+    },
+    {
+      "name": "Non-destructive version incompatibility",
+      "result": "PASS"
+    }
+  ]
+}
