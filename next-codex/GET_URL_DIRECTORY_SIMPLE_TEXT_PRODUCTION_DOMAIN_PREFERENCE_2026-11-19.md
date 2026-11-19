@@ -7,6 +7,11 @@
 A creator right-clicks an authorized Cloudflare R2 **directory** → **Get URL** → chooses:
 
 - **☐ Simple Text File — one URL per line** (clear label such as **"Simple Text File, One of Each Per Line?"**; offer as an additional export choice, not a replacement for existing grouped TXT).
+- **Exactly ONE file-type scope selection** for this simple TXT, as a **radio group or equivalent mutually exclusive control** (NOT independent checkboxes):
+  - **Only image files** — recognized image files only, e.g. PNG, JPG/JPEG, GIF, WebP, AVIF, SVG, BMP, TIFF and ICO.
+  - **Only media files** — **images + video + audio** (including MP4, WebM, MOV where supported, MP3, WAV, OGG, etc.). Do not conflate media with images only. Recognize MIME types and safe common extensions, including unusual/case-varied names where metadata is reliable.
+  - **All files** — every eligible actual object in the chosen directory scope, not merely media: images, video, audio, HTML, CSS, JS, fonts, PDFs, archives, documents, binaries, extensionless files, etc.
+  - **Default is All files** so the export does not silently omit non-media files. Switching scope changes the file selection before URL generation, but never changes the source bucket/folder or custom-domain preference.
 - **☐ Use non-developmental URLs where possible** (available for the simple export). Prefer the user's *verified active linked custom domains* such as `assets.example.com` over public development endpoints such as `*.r2.dev`, and only consider any endpoint the existing trusted API actually verifies for this exact bucket.
 - **Export** downloads `directory-urls-simple.txt` ready to paste directly into an HTML/CSS/site asset list or other tool.
 
@@ -20,9 +25,39 @@ https://assets.example.com/photos/background.webp
 
 **Important:** This mode means **one selected URL for each real eligible object**, NOT one URL for each of several domains attached to the same object. Avoid duplicate lines and duplicated objects. This is a distinct plain-text format: **no JSON header, `FILE` / `END FILE` wrappers, quotes, filename labels, comments, receipt paths, statuses, HTML or other metadata** in the downloaded TXT. Plain UTF-8 text with one complete URL per line and conventional newline separators.
 
+## When only developmental public URLs exist — inline Add Domain flow
+
+For **directory Get URL**, if the bucket has **no verified linked custom website/domain** but **does have a verified enabled developmental endpoint**, reveal this friendly inline prompt without leaving the directory export:
+
+```text
+Only developmental URLs exist. Add domain?
+Website/domain: [ your-domain.com                 ]
+[Save]
+```
+
+- The domain field accepts the desired custom website. **Enter** submits the typed domain for validation and linking/verification (the same action as its submit control), **without closing the popup**, losing the directory selection, or resetting **Only image files / Only media files / All files**.
+- The user then clicks **Save** to confirm the domain choice once it is genuinely associated with the exact Cloudflare account/bucket. As soon as Cloudflare reports the custom domain active/verified, **automatically refresh the same directory export** so the checked "Use non-developmental URLs where possible" prioritizes that website for each matching file. No second right-click, re-selection or retyping.
+- **Truthfulness:** Existing 0.3.20 code only proves it can read/verify active custom domains; it does **not** prove it can create a custom-domain association in Cloudflare. If registering a domain is not supported by the current integration, Enter/Save must **not claim the website is linked**. Show the missing Cloudflare setup action, preserve typed input + file-type selection + selected directory, and offer **Recheck** then Save when the association is active. Explicit authorization is required for any action that exposes bucket contents publicly.
+- If there is **no verified public endpoint of either type**, show **"No public URLs available for this bucket. Add domain?"**, NOT the false statement that developmental URLs exist. Use the same setup/verification safeguards.
+- If the user does not add a domain, allow a clearly labeled **"Use developmental URLs for this export"** choice only when the developmental endpoint is genuinely available. Never silently override an active custom-domain preference or fabricate a production link.
+- Keep file-level Get URL's separate **input → Submit → Copy All** and clickable URL cards unchanged; existing structured grouped TXT/CSV/JSON exports must continue working.
+
+## Simple Text File scope — three mutually exclusive choices
+
+```text
+File types (choose one):
+( ) Only image files
+( ) Only media files (images, video and audio)
+(●) All files
+
+[✓] Use non-developmental URLs where possible
+```
+
+The image and media scope must be determined using grounded object metadata (MIME when trustworthy, extension where appropriate), with a documented predictable fallback when metadata is missing. Images are a subset of media; media is a subset of all files. Each selected file contributes **at most one verified URL line**. Do not include directory marker objects, unrelated bucket contents, or fake URLs. Provide outside-the-TXT counts for scanned files, filtered files, files without public URLs, custom-domain URLs, developmental fallbacks and incomplete inventories. The plain TXT itself contains only raw URLs, one per line, without headers or metadata.
+
 ## Selection/verification behavior
 
-1. **Exact chosen scope:** Reuse the existing `listExportInventory` paging for the chosen authorized directory prefix. Include nested descendant files according to the current directory-export scope; clearly label scope, file count and whether recursion is enabled, rather than inventing folder URLs. Only genuine object files with safely encodable object keys qualify. Existing `eligiblePublicObject` filename-extension allowlist filters out many valid file extensions; **evaluate all eligible actual files for the new simple export**, not just a hardcoded list of image/PDF/audio extensions, unless the format is deliberately and visibly limited. Do not include folder markers or paths outside the chosen account/bucket/prefix.
+1. **Exact chosen scope:** Reuse the existing `listExportInventory` paging for the chosen authorized directory prefix. Include nested descendant files according to the current directory-export scope; clearly label scope, file count and whether recursion is enabled, rather than inventing folder URLs. Only genuine object files with safely encodable object keys qualify. Existing `eligiblePublicObject` filename-extension allowlist filters out many valid file extensions; **for the new simple export use the chosen exclusive scope (Only image files, Only media files including video/audio, or All files), without restricting All files to the existing media/PDF extension allowlist**. Do not include folder markers or paths outside the chosen account/bucket/prefix.
 2. **Custom-domain preference checked:** For each file choose **one** active, trusted, account/bucket-matched non-development/public custom-domain URL when available; if several are valid, choose a stable deterministic domain order (or an explicitly selected preferred domain). Don't randomly change domains between exports. Verify exact key URL encoding including nested directories, Unicode and spaces.
 3. **Fallback:** If no verified custom domain exists for that object but an enabled verified public developmental endpoint exists, use that endpoint as fallback and **show that a developmental URL was used**, outside the TXT. If no valid public endpoint exists, **do not fabricate one** or emit an empty placeholder line; report the missing object(s) in UI and in existing structured export format if selected. The custom-domain preference never silently authorizes public bucket access.
 4. **Unchecked preference:** Use the normal deterministic verified-endpoint choice in the existing API (do not assume a developmental URL is necessarily available or the default). If none, truthful missing endpoint state.
@@ -41,8 +76,10 @@ https://assets.example.com/photos/background.webp
 ## Required tests
 
 - 3 files, 2 verified linked custom domains each: **exactly 3 lines** with one stable custom-domain URL per file, no JSON/headers.
-- 3 objects including an uncommon extension, nested folder and Unicode filename: all safe, authorized, verifiable URLs export once in stable order. No folder marker included.
+- 3 objects including an uncommon extension, nested folder and Unicode filename: **All files** exports each actual authorized file once in stable order. No folder marker included.
+- Mixed directory containing PNG, SVG, MP4, WebM, MP3, WAV, HTML, CSS, PDF, ZIP and extensionless objects: **Only image files** emits only PNG/SVG; **Only media files** emits PNG/SVG/MP4/WebM/MP3/WAV; **All files** emits every file with a verified URL. No three-way checkbox ambiguity; switching options preserves the chosen domain/directory.
 - Verified custom + verified `r2.dev`: preference ON selects custom; custom absent selects eligible verified developmental fallback with a truthful UI fallback count; no endpoint never produces an invented line.
+- No linked website but verified enabled developmental URL → inline **"Only developmental URLs exist. Add domain?"** input; Enter validates/initiates authorized linking, **Save** confirms after verification; after successful verified setup the same export refreshes to use the custom domain without resetting chosen file-type scope. Inactive/unlinked domains cannot yield fake success. With no public endpoint, show the truthful no-URL variant.
 - Missing public URLs: show omissions and full scan count clearly; do not claim every file was exported. Partial pagination: truthful partial warning, no silent "all done."
 - Preference OFF: still produces one deterministically chosen verified URL per file; switching settings never changes other grouped TXT/CSV/JSON outputs.
 - Plain TXT content has **exactly one canonical URL per line** and **no file identities, labels, comments or headers**; avoid duplicate URLs or extra lines.
