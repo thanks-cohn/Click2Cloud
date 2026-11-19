@@ -35,6 +35,8 @@
 
 **Get URL first-time question for BOTH files and directories:** If no valid public URL mapping exists, ask exactly **`Allow Public URL?` Yes / No**. Yes opens the domain association setup; No leaves everything private. Both object types use the same first-time UI before their normal URL editor/export flow. This is documented in experimental section 2B.
 
+**Bulk Get URL data organization:** Multiple URLs for one R2 file must be grouped under the same unambiguous file/object ID in every CSV, TXT and JSON directory export, and in its receipt. JSON: one file with `urls[]`; CSV: URL rows linked by the same object ID and indexed; TXT: each file header followed by its URL lines. Preserve file count separately from URL count. See experimental section 2B.
+
 **Also requested:** Three distinct image right-click options: **Download**, **Download with Tags**, **Download with All Metadata**, with the original unchanged and a full safe JSON manifest in the all-metadata ZIP. The new variants remain experimental. See section 2C of the experimental URL/tag specification.
 
 **Directory download + presentation:** Both individual files and directories support the two gated optional modes. In ordinary Settings, Show Download with Tags and Show Download with Metadata govern whether the two extra right-click actions appear (OFF until validated); Nest under Download governs direct siblings versus submenu (DEFAULT OFF). Recursive directory ZIP includes file bytes and readable tags/metadata manifest. See experimental specification, section 2D.
