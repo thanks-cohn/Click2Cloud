@@ -55,6 +55,39 @@ These are exactly three visible right-click image actions, not two; implement wi
 
 **UI/acceptance:** Show **Download**, **Download with Tags**, **Download with All Metadata** as three discoverable choices on image right-click; current Download behavior must stay intact. Test image formats separately (JPEG, PNG, WebP, unsupported formats), Unicode/JSON escaping, embedded metadata preservation, missing Cloudflare customMetadata, large streamed files, stale/concurrent tag changes, privacy, manifest schema, ZIP integrity, re-import and download failure. The two new options are experimental/feature-flagged OFF until proven; never imply they already ship.
 
+
+## 2D. Bulk directory Download with Tags / Download with All Metadata and opt-in right-click visibility (November 19)
+
+**Owner UX:** In File Explorer, BOTH an individual file and a DIRECTORY may be right-clicked to request either new download mode. **These are two new optional right-click entries, not a mandatory nested Download submenu.** Keep the existing plain Download directly accessible at all times.
+
+### THREE independent Settings checkboxes — in ordinary Settings (Debug OFF)
+
+- `Show Download with Tags in right-click menu` — when OFF, hide this extra right-click action for files and directories; when ON, show **Download with Tags**.
+- `Show Download with Metadata in right-click menu` — when OFF, hide this extra right-click action for files and directories; when ON, show **Download with All Metadata** (same action, explicit user-facing name).
+- `Nest under Download` — when OFF (DEFAULT), show the enabled options as direct siblings of **Download**. When ON, replace those direct entries with one **Download >** submenu containing **Download original**, plus only the two enabled modes. Never create a submenu with no added modes. Preserve the original direct Download behavior when both new mode checkboxes are OFF.
+
+The two Show flags must **default OFF until their feature is implemented and validated**, and the Nest flag defaults OFF. After validation/opt-in, showing new actions is immediate and direct, not automatically nested. These settings are separate from the Keyboard Shortcuts editor and cannot create a separate API/dispatcher. Persist preferences, migrate safely across upgrades, respect all three themes/light/dark, redraw already-open context menus safely, and retain the user's exact options across restart. Generate both file and directory context menus from the **same canonical File API action descriptors**, with different validated input scopes. Do not confuse Chrome native web-page right-click menus with the File Explorer object/directory context menu.
+
+### Directory Download with Tags
+
+- Right-click folder/prefix -> **Download with Tags** -> traverse the entire authorized directory subtree, preserving relative paths inside a single ZIP. A directory is a logical prefix, not an R2 folder body. Do not rely on only currently loaded UI rows.
+- Include all downloadable ordinary files; for tagged supported images, export the image with actual verifiable embedded tags without changing R2 original bytes. For unsupported image formats, retain the original file plus a companion `.tags.json` (and an explicit explanation in the export manifest). For ordinary non-image files, retain the original bytes and represent any supported object tags as companion metadata where embedding is not supported. Never omit a file solely because its type cannot hold embedded tags.
+- Provide a machine-readable archive manifest with per-object key, relative path, expected/verified size, tag export status (embedded/companion/none/failed), errors and total scope completeness. If any file can't be exported, present an honest partial-result receipt and unambiguous manifest; never mark ZIP as complete.
+
+### Directory Download with All Metadata
+
+- Right-click folder/prefix -> **Download with All Metadata** -> stream a ZIP that preserves the original bytes and relative structure for every authorized file.
+- Alongside each object put a safe versioned `.metadata.json` manifest entry (or a collision-safe metadata subtree) with available provider metadata, full permitted user-defined metadata including tags, HTTP headers, object identity and timestamp, verified URL mappings if available, completeness/provenance, and explicit absent/redacted fields. Include a top-level `manifest.json` with schema, export time, source bucket/prefix, counts, summary hashes/checksums when verified, per-file states and a machine-readable errors list. Never let metadata sidecar filenames overwrite user files that happen to be named `.metadata.json`; use a reserved/collision-proof archive path strategy.
+- **All Metadata does not include private credentials**, OAuth tokens, Worker secrets, signed grants, raw diagnostics or unverified public URL claims.
+
+### Safety, scale and end-to-end gates
+
+- Use R2 prefix + continuation cursor listing, explicitly choose recursive vs immediate-children behavior (**default recursive for folder download**) and preserve complete authorization scope. Fetch object metadata separately where listings omit fields; recheck each exact-object ETag/version before packaging. Detect renamed/deleted/changed objects mid-export instead of mixing unrelated versions.
+- Use streaming ZIP creation with backpressure and bounded memory; support ZIP64 or clearly reject archives that exceed the chosen library/container limits. Cloudflare Workers have a **128 MiB per-isolate memory limit** and HTTP streaming connections may be interrupted; never buffer the whole directory in the Worker or browser. For huge or long-running jobs, propose a separately approved durable checkpoint + temporary artifact executor, rather than claim browser-independent archive delivery exists already. Do not create private cloud staging artifacts or recurring charges silently.
+- The user can choose Cancel; show actual progress (items scanned, bytes packaged, files omitted/failed), output mode and estimated cost where reasonable. After a disconnect, never claim a finished download or an intact ZIP. Never delete any source objects. Avoid duplicate object bytes in the archive for retries. Validate safe relative paths, zip-slip prevention, Unicode, filename collisions and traversal loops.
+- Test 0/1/100/10,000 entries, nested prefixes, inconsistent metadata, 8,092-byte application tag budget, Unicode, unsupported formats, large objects, pagination, interrupted streams, expired grants, empty folders, denied scope, partial failures, multiple open Shelves, all combinations of the THREE Settings flags, and exact direct-vs-nested menu state.
+- **Feature flags OFF until verified; no live R2 production mutation or deployment authorized.** A successfully completed streamed archive is distinct from an accepted/queued export. Keep status/receipt semantics coherent with the canonical API.
+
 ## 3. API, reliability, privacy and test requirements
 
 - Define shared File API operations, e.g. `listObjectLinks`, `addObjectUrl`, `removeObjectUrl`, `readObjectTags`, `setObjectTags`, `exportDirectoryUrls`, but reuse actual app naming/authorization contracts. Same exact source/account/bucket/key identity as File Explorer; idempotency keys, verifiable receipts, explicit metadata ownership and tested fallback for failures.
