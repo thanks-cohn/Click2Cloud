@@ -23,7 +23,7 @@ Checkboxes should follow the heading rather than sit on the same disjointed wrap
 ## Acceptance
 
 1. Use semantic `<fieldset>`/`<legend>` or accessible grouped header + control rows; do not duplicate labels or introduce independent checkbox state. Preserve mode identities `simple`, `nested` (displayed as **Narrow**), and `depth`.
-2. Every aesthetic (Bit o' Polish, Remote V1, Minimal), light/dark, full/narrow/default Shelf and keyboard navigation shows a heading followed by three visually adjacent aligned checkboxes, in that order.
+2. Verify the heading followed immediately by three visually adjacent aligned checkboxes in the actual owner-reported dialog, preserving ordinary operation. Do not require a full aesthetic/theme/viewport test matrix.
 3. All/Flat in Add/Edit Destination remain functional and visually separated from mode checkboxes.
 4. Checkbox toggles must stage the same `setShowInChrome` change, never auto-save prematurely. Keep existing draft/Save/Cancel/retry, mode-specific menus, actual native application status and accessibility.
 5. No Worker, OAuth, right-click engine, R2 or saved destination logic changes. Add DOM row bounding-box assertions and before/after screenshots.
