@@ -2,6 +2,8 @@
 
 > **LATEST NEW REQUESTS:** [Screenshot-to-Cloud context menu, additive website/subdomain rules, per-rule shortcuts](SCREENSHOT_TO_CLOUD_CONTEXT_MENU_AND_ADDITIVE_RULES_2026-11-19.md) and [professional Destinations Manager layout, including Minimal](DESTINATIONS_MANAGER_POLISHED_STRUCTURED_DIALOG_2026-11-19.md). Both are indexed in the [authoritative deduplicated handoff](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Do not reimplement the already-existing 0.3.20 code.
 
+> **DIAGNOSTICS CLARIFICATION:** [One diagnostic system, two scope-filtered Raw/Secure ZIPs](LIGHTWEIGHT_DIAGNOSTICS_AND_RAW_SECURE_ZIPS_FOR_RULE_TRANSFERS_2026-11-19.md), not parallel recorders. Reuse existing diagnostics and keep History separate.
+
 > **CURRENT AUTHORITATIVE HANDOFF (POST-0.3.20 CODE AUDIT):** [NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Much of the older work below **already exists in 0.3.20 source** (shortcuts, API reference, version, badge, inline rename, folder Make Default, optional exports). **Do not reimplement it.** Read the new code-audited, delta-only handoff first. The newly requested **Rules** top-dropdown page is listed there as its own feature, with 25 rules per page and a feasibility gate for genuine browser download rerouting. The older steps below are HISTORICAL acceptance references, not an instruction to start over.
 
 
