@@ -234,7 +234,12 @@ try{
  await pause(1200);
  input('click','420','400','3');
  await pause(200);
- input('click','519','744');
+ // Chrome places extension actions above View page source and Inspect.
+ // Keyboard navigation avoids the host's font metrics and menu row heights.
+ input('key','End');
+ input('key','Up');
+ input('key','Up');
+ input('key','Right');
  await pause(250);
  input('key','End');
  input('key','Right');
