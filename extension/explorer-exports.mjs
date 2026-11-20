@@ -1,6 +1,6 @@
 import {exportDefaults, exportOptions, exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
 import {readPreviewBytes} from '../src/explorer/image-preview.mjs';
-import {assertExportIdentity,domainName,eligiblePublicObject,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls} from '../src/explorer/object-exports.mjs';
+import {assertExportIdentity,developmentalDomain,directoryUrlFiles,domainName,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,simpleDirectoryUrls} from '../src/explorer/object-exports.mjs';
 import {canEmbedTags,downloadJob,prepareTaggedPng,streamDownloadArchive} from '../src/explorer/download-archive.mjs';
 
 const labels={original:'Download',tags:'Download with Tags',metadata:'Download with All Metadata'};
@@ -148,66 +148,135 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   }
   async function urls(source,entry){
     try{
-      const get=(domains)=>api('getPublicUrls',{source,...(entry?{key:entry.key}:{}),...(domains?{domains}:{})},{quiet:true});
+      const get=domains=>api('getPublicUrls',{source,...(entry?{key:entry.key}:{}),...(domains?{domains}:{})},{quiet:true});
       const info=await get();
-      const next=(value,selected=value.domains)=>entry?urlEditor(source,entry,value,selected,get):directoryUrls(source,selected);
-      if(info.domains.length){next(info);return;}
+      const open=()=>entry ? urlEditor(info,get) : directoryUrls(source,info,get);
+      if(info.domains.length){open();return;}
       dialog('Allow Public URL?','<button id="public-url-yes">Yes</button> <button id="public-url-no">No</button>');
       document.querySelector('#public-url-no').onclick=closeDialog;
-      document.querySelector('#public-url-yes').onclick=()=>urlEditor(source,entry,info,[],get,next);
-    }catch(error){dialog('Get URL','<p role="alert">'+esc(safeError(error))+'</p>');}
+      document.querySelector('#public-url-yes').onclick=open;
+    }catch(error){dialog('Get URL','<p role="alert">Could not check this bucket’s public domains. '+esc(safeError(error))+'</p>');}
   }
-  function urlEditor(source,entry,info,selected,get,next){
-    const chosen=new Set(selected);
-    dialog('Get URL','<p>Connected Domain with Cloudflare? Add it to give this bucket URLs!</p><p>A bucket custom domain can expose other objects in the bucket. Cloudflare allows up to 100 custom domains per bucket. Only already connected, active domains can be used here.</p><form id="url-domain-form"><label>Domain <input id="url-domain" autocomplete="off" spellcheck="false"></label></form><div id="public-urls"></div><p id="url-result" role="status"></p><button id="choose-urls">Use selected domains</button>');
-    const list=document.querySelector('#public-urls'), feedback=document.querySelector('#url-result'), button=document.querySelector('#choose-urls');
-    function render(){
-      const links=entry?objectUrls(source,entry.key,[...chosen]).urls:[...chosen].map(domain=>({domain}));
+  function domainControls(form,get,apply,feedback){
+    const input=form.querySelector('input'),submit=form.querySelector('[type=submit]'),recheck=form.querySelector('[data-recheck]');
+    async function verify(requireName){
+      const typed=input.value.trim(),name=domainName(typed);
+      if(requireName&&!name){feedback.textContent='Enter a domain name.';input.focus();return;}
+      submit.disabled=recheck.disabled=true;
+      try{
+        const info=await get();
+        if(!form.closest('dialog[open]'))return;
+        apply(info);
+        feedback.textContent=typed
+          ? info.domains.includes(name)&&!developmentalDomain(name)
+            ? 'Cloudflare verified the active custom domain for this bucket.'
+            : 'Activate this domain under the bucket’s Custom Domains in Cloudflare, then Recheck.'
+          : info.domainCheckComplete===false?'Some endpoints could not be checked. Try Recheck again.':'Domain check updated.';
+      }catch{feedback.textContent='Could not check the bucket’s domains. Check your Cloudflare connection and Recheck.';}
+      finally{submit.disabled=recheck.disabled=false;}
+    }
+    form.onsubmit=event=>{event.preventDefault();void verify(true);};
+    recheck.onclick=()=>void verify(false);
+  }
+  function urlEditor(info,get){
+    dialog('Get URL',`<form id="url-domain-form"><label for="url-domain">Custom domain</label><div class="url-domain-row"><input id="url-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Submit</button><button type="button" id="copy-urls">Copy All</button></div><div id="public-urls" class="public-url-cards" aria-label="Verified URLs"></div><p id="url-empty"></p><button type="button" data-recheck>Recheck</button><p class="muted">Manage bucket domains in Cloudflare. Anonymous reachability has not been checked.</p><p id="url-result" role="status"></p></form>`);
+    const form=document.querySelector('#url-domain-form'),list=form.querySelector('#public-urls'),
+      feedback=form.querySelector('#url-result'),empty=form.querySelector('#url-empty'),copyAll=form.querySelector('#copy-urls');
+    async function copy(text,success){
+      try{await navigator.clipboard.writeText(text);feedback.textContent=success;}
+      catch{feedback.textContent='Could not copy. Check Chrome’s clipboard access and try again.';}
+    }
+    function render(value){
+      const links=value.file?.urls??[];
       list.replaceChildren(...links.map(item=>{
-        const row=document.createElement('p');row.textContent=item.url??item.domain;
-        if(item.url){const copy=document.createElement('button');copy.textContent='Copy';copy.onclick=()=>void navigator.clipboard.writeText(item.url).then(()=>{feedback.textContent='URL copied.';});row.append(' ',copy);}
-        const remove=document.createElement('button');remove.textContent='Remove';remove.onclick=()=>{chosen.delete(item.domain);render();};row.append(' ',remove);return row;
+        const button=document.createElement('button'),label=document.createElement('strong'),address=document.createElement('span');
+        button.type='button';button.className='public-url-card';
+        const dev=developmentalDomain(item.domain);
+        if(dev)button.classList.add('development-url');
+        label.textContent=dev?'Development URL':'Custom domain';
+        address.textContent=item.url;
+        button.append(label,address);
+        button.onclick=()=>void copy(item.url,'URL copied.');
+        return button;
       }));
-      button.disabled=!chosen.size;
+      list.hidden=!links.length;
+      empty.hidden=links.length>0&&value.domainCheckComplete!==false;
+      empty.textContent=value.domainCheckComplete===false?'Some endpoints could not be checked.':links.length?'':'No verified public URL for this object. To add one, configure the bucket’s public domain in Cloudflare and Recheck.';
+      copyAll.disabled=!links.length;
+      copyAll.onclick=()=>void copy([...new Set(links.map(item=>item.url))].join('\n'),'All URLs copied.');
     }
-    document.querySelector('#url-domain-form').onsubmit=async event=>{
-      event.preventDefault();const input=document.querySelector('#url-domain'),domain=domainName(input.value.trim());
-      if(!domain){feedback.textContent='Enter a domain name.';return;}
-      try{await get([domain]);chosen.add(domain);input.value='';feedback.textContent='Connected domain verified by Cloudflare.';render();}
-      catch{feedback.textContent='This domain is not an active custom domain on the selected R2 bucket.';}
-    };
-    button.textContent=entry?'Copy selected URLs':'Continue';
-    if(entry){
-      const note=document.createElement('p');note.textContent='Domain selections are used for this copy. Per-file URL edits cannot be saved in this build.';button.after(note);
-    }
-    button.onclick=()=>{if(!entry)return next?.(info,[...chosen]);const links=objectUrls(source,entry.key,[...chosen]).urls.map(item=>item.url);void navigator.clipboard.writeText(links.join('\n')).then(()=>{feedback.textContent='URLs copied.';});};
-    render();
+    domainControls(form,get,render,feedback);
+    render(info);
   }
-  function directoryUrls(source,domains){
-    dialog('Get all URLs from directory?','<button id="directory-url-yes">Yes</button> <button id="directory-url-no">No</button>');
-    document.querySelector('#directory-url-no').onclick=closeDialog;
-    document.querySelector('#directory-url-yes').onclick=()=>{
-      dialog('Export directory URLs','<form id="url-export-form">'+['csv','txt','json'].map(type=>`<label><input type="checkbox" name="format" value="${type}" ${type==='json'?'checked':''}> ${type.toUpperCase()}</label>`).join('')+'<button>Export</button><p id="url-export-progress" role="status"></p></form>');
-      const form=document.querySelector('#url-export-form'),progress=document.querySelector('#url-export-progress');
-      form.onsubmit=async event=>{
-        event.preventDefault();
-        const formats=new FormData(form).getAll('format'),button=form.querySelector('button');
-        if(!formats.length){progress.textContent='Choose at least one format.';return;}
-        button.disabled=true;
-        try{
-          const inventory=await collect(source,undefined,values=>{progress.textContent='Scanned '+format(values.scanned)+' files.';});
-          const verified=await api('getPublicUrls',{source,domains},{quiet:true});
-          if(!form.isConnected)return;
-          const files=inventory.files.filter(item=>eligiblePublicObject(item.key)).map(item=>objectUrls(source,item.key,verified.domains.filter(domain=>domains.includes(domain))));
-          for(const format of formats){
-            const blob=new Blob([formatUrlExport(source,files,inventory.complete,format)],{type:format==='json'?'application/json':format==='csv'?'text/csv':'text/plain'});
-            const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='directory-urls.'+format;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),30000);
-          }
-          progress.textContent=(inventory.complete?'Export ready':'Partial inventory exported')+' · '+files.length+' eligible files.';
-        }catch(error){if(form.isConnected)progress.textContent=safeError(error);}
-        finally{button.disabled=false;}
-      };
+  function directoryUrls(source,info,get){
+    dialog('Export directory URLs',`<p class="muted">Current directory only · No subfolders</p><form id="url-export-form">
+      <fieldset><legend>Export mode</legend><label><input type="radio" name="mode" value="simple" checked> One Link per Asset — Simple Text File</label>
+      <label><input type="radio" name="mode" value="all"> Get All URLs for Directory</label></fieldset>
+      <fieldset><legend>File types</legend><div class="url-export-options">${['Images','Audio','Video','All files'].map((label,index)=>`<label><input type="checkbox" name="type" value="${index===3?'all':label.toLowerCase()}" ${index===3?'checked':''}> ${label}</label>`).join('')}</div></fieldset>
+      <label id="prefer-public"><input type="checkbox" name="prefer" checked> Use non-developmental URLs where possible</label>
+      <fieldset id="url-export-formats" hidden><legend>Formats</legend><div class="url-export-options">${['txt','csv','json'].map(type=>`<label><input type="checkbox" name="format" value="${type}" ${type==='json'?'checked':''}> ${type.toUpperCase()}</label>`).join('')}</div></fieldset>
+      <p id="url-export-scope" class="muted"></p><button type="submit" class="primary">Export</button><p id="url-export-progress" role="status"></p></form>
+      <form id="directory-domain-form"><p id="directory-domain-prompt"></p><label for="directory-domain">Website/domain</label>
+      <div class="url-domain-row"><input id="directory-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Save</button><button type="button" data-recheck>Recheck</button></div>
+      <p class="muted">Configure custom domains in the bucket’s Cloudflare settings. This dialog checks the association. Anonymous reachability has not been checked.</p><p id="directory-domain-result" role="status"></p></form>`);
+    const form=document.querySelector('#url-export-form'),progress=form.querySelector('#url-export-progress'),button=form.querySelector('button');
+    const domainForm=document.querySelector('#directory-domain-form'),prompt=domainForm.querySelector('#directory-domain-prompt');
+    const types=[...form.querySelectorAll('[name=type]')];
+    let running=false;
+    const choices=()=>{
+      const data=new FormData(form);
+      return {simple:data.get('mode')==='simple',prefer:data.has('prefer'),types:new Set(data.getAll('type')),formats:data.getAll('format')};
     };
+    function sync(){
+      const {simple,prefer,types,formats}=choices(),custom=info.domains.some(domain=>!developmentalDomain(domain));
+      const onlyDev=info.domains.length>0&&!custom;
+      form.querySelector('#prefer-public').hidden=!simple;
+      form.querySelector('#url-export-formats').hidden=simple;
+      domainForm.hidden=custom&&info.domainCheckComplete!==false;
+      prompt.textContent=info.domainCheckComplete===false?'Some public endpoints could not be checked. Recheck the bucket.'
+        :onlyDev?'Only developmental URLs exist. Add domain?':'No public URLs available for this bucket. Add domain?';
+      form.querySelector('#url-export-scope').textContent=!types.size?'Select at least one file type.'
+        :simple&&onlyDev?prefer?'Uncheck “Use non-developmental URLs where possible” to export developmental URLs now.':'Exports Development URLs.'
+        :!simple&&!formats.length?'Choose at least one format.':'';
+      button.disabled=running||!types.size||!info.domains.length||(simple?prefer&&!custom:!formats.length);
+    }
+    form.onchange=event=>{
+      const input=event.target;
+      if(input.name==='type'&&input.checked){
+        for(const type of types)if(type!==input&&(input.value==='all'||type.value==='all'))type.checked=false;
+      }
+      progress.textContent='';sync();
+    };
+    domainControls(domainForm,get,value=>{info=value;sync();},domainForm.querySelector('#directory-domain-result'));
+    form.onsubmit=async event=>{
+      event.preventDefault();
+      if(button.disabled)return;
+      const {simple,prefer,types,formats}=choices();
+      running=true;sync();
+      try{
+        const inventory=await collect(source,undefined,values=>{progress.textContent='Scanned '+format(values.scanned)+' objects.';});
+        info=await get();
+        if(!form.closest('dialog[open]'))return;
+        const files=directoryUrlFiles(source,inventory.files,types).map(item=>objectUrls(source,item.key,info.domains));
+        const data=simple?simpleDirectoryUrls(files,prefer):null;
+        const urlCount=data?.count??files.reduce((sum,file)=>sum+file.urlCount,0);
+        const missing=data?.missing??files.filter(file=>!file.urlCount).length;
+        const development=data?.developmental??files.reduce((sum,file)=>sum+file.urls.filter(item=>developmentalDomain(item.domain)).length,0);
+        const counts=` · ${inventory.files.length} scanned · ${files.length} files · ${urlCount} links · ${missing} files without exported URLs · ${urlCount-development} custom · ${development} developmental`;
+        if(!inventory.complete){progress.textContent='Partial inventory. Export paused; retry to finish scanning.'+counts;return;}
+        if(!urlCount){progress.textContent='No URLs exported'+counts;return;}
+        for(const type of simple?['txt']:formats){
+          const body=simple?data.text:formatUrlExport(source,files,info.domainCheckComplete!==false,type);
+          const blob=new Blob([body],{type:type==='json'?'application/json':type==='csv'?'text/csv':'text/plain;charset=utf-8'});
+          const href=URL.createObjectURL(blob),link=document.createElement('a');
+          link.href=href;link.download=simple?'directory-urls-simple.txt':'directory-urls.'+type;
+          link.click();setTimeout(()=>URL.revokeObjectURL(href),30000);
+        }
+        progress.textContent=(info.domainCheckComplete===false||missing?'Partial URL export':'Export complete')+counts;
+      }catch(error){if(form.isConnected)progress.textContent='Export unavailable · '+safeError(error);}
+      finally{running=false;sync();}
+    };
+    sync();
   }
   async function tags(source,entry){
     try{

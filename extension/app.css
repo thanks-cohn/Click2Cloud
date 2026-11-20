@@ -52,7 +52,10 @@ body.resizing{user-select:none}
 #command-items{--filename-search-min:154px;display:flex;align-content:start;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;max-height:calc(var(--command-rows,1)*42px);overflow:hidden}
 #command-items>button,#command-items>select{flex:none;height:36px;white-space:nowrap}
 #command-items>#filename-search-form{flex:1;min-width:var(--filename-search-min);padding:2px}
-#filename-search{width:100%;min-width:0;height:32px;padding:5px 8px}
+#filename-search-form{position:relative}
+#filename-search{width:100%;min-width:0;height:32px;padding:5px 34px 5px 8px}
+#hide-filename-search{position:absolute;inset-inline-end:4px;inset-block-start:50%;transform:translateY(-50%);border:0;background:transparent;width:29px;height:28px;padding:0}
+#open-filename-search{width:82px}
 #filename-search:focus-visible{outline-offset:0}
 #go-to-path .address{margin-block-start:4px}
 #go-to-path .address input{margin:0}
@@ -168,3 +171,13 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .tag-pills{display:flex;flex-wrap:wrap;gap:6px;max-height:30vh;overflow-y:auto}
 .tag-pills button{overflow-wrap:anywhere;max-width:100%}
 .download-job summary{cursor:pointer;line-height:1.6;overflow-wrap:anywhere}
+
+.url-domain-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;margin-block:4px 10px}
+.url-domain-row input{width:100%;min-width:0;margin:0}
+.public-url-cards{display:grid;gap:6px;max-height:clamp(112px,32vh,295px);overflow:auto;padding:4px;margin-block:8px}
+button.public-url-card{display:grid;gap:3px;text-align:start;overflow-wrap:anywhere;min-width:0;padding:9px 11px}
+button.development-url{background:#fff3d5;color:#502c06;border-color:#9a5d17}
+[data-theme=dark] button.development-url{background:#3b2a14;color:#ffe3a3;border-color:#bd8c42}
+.url-export-options{display:flex;flex-wrap:wrap;gap:4px 12px}
+#url-export-form fieldset,#directory-domain-form{min-width:0;margin-block:8px;border:1px solid var(--line);padding:8px}
+#url-export-form fieldset>label{display:block}

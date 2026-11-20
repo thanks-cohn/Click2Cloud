@@ -6,7 +6,7 @@ import {createAgentGateway} from '../src/api/gateway.mjs';
 import {createShortcutStore,listCommands,normalizeChord,resolveBindings,shortcutStorageKey} from '../src/api/shortcuts.mjs';
 import {applyConfigChanges,productState} from '../src/api/config.mjs';
 import {createDailyBadge,countVerifiedSaves,nextLocalMidnight} from '../src/chrome/daily-badge.mjs';
-import {formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,verifiedDomains} from '../src/explorer/object-exports.mjs';
+import {developmentalDomain,directoryUrlFiles,simpleDirectoryUrls,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,verifiedDomains} from '../src/explorer/object-exports.mjs';
 import {downloadJob,embedPngTags,streamDownloadArchive} from '../src/explorer/download-archive.mjs';
 import {describeExplorerContextMenu} from '../src/api/explorer-context-menu.mjs';
 
@@ -17,7 +17,7 @@ const storage=()=>{
   return {values,get:async key=>({[key]:values[key]}),set:async update=>Object.assign(values,structuredClone(update))};
 };
 const active=domain=>({domain,enabled:true,status:{ownership:'active',ssl:'active'}});
-function createFixture() {
+function createFixture(readManagedDomain) {
   const preferences=storage(), calls=[], commands=listCommands(toolRegistry);
   let options={urls:false,tags:false,metadata:false};
   const api=createEngineApi({engine:{},
@@ -25,6 +25,7 @@ function createFixture() {
     shortcutStore:createShortcutStore(preferences,commands),
     oauth:{status:async()=>({state:'CONNECTED',accounts:[{id:source.accountId}]})},
     readExportOptions:async()=>options,
+    readManagedDomain,
     readCustomDomains:async()=>[active('cdn.example'),active('images.example'),{...active('inactive.example'),enabled:false}],
     fileApi:{run:async(operation,input)=>{
       calls.push({operation,input});
@@ -228,4 +229,36 @@ test('failed native ACK compensates Explorer Make Default and retains the previo
   }},'gui');
   assert.equal(result.code,'NATIVE_APPLY_INCOMPLETE');assert.equal(applyCount,2);
   assert.deepEqual(state.product.defaultTarget,prior);assert.deepEqual(state.configs.simple.destinations,[]);
+});
+
+test('directory URL modes share exact immediate scope and preserve all file types and domain groups',()=>{
+  const keys=['a.png','b.cbz','奇妙.pdf','nested/skip.jpg','nested/','', 'extensionless','audio.wav','movie.webm'];
+  const objects=keys.map(key=>({key:source.prefix+key})).concat({key:'images-old/sibling.png'});
+  const all=directoryUrlFiles(source,objects,new Set(['all']));
+  assert.deepEqual(all.map(o=>o.key),['a.png','b.cbz','奇妙.pdf','extensionless','audio.wav','movie.webm'].map(key=>source.prefix+key));
+  assert.deepEqual(directoryUrlFiles(source,objects,new Set(['images','audio','video'])).map(o=>o.key),['a.png','audio.wav','movie.webm'].map(key=>source.prefix+key));
+  assert.deepEqual(directoryUrlFiles(source,objects,new Set()),[]);
+  const domains=['pub-assets.r2.dev','cdn.example','cdn.example'];
+  const files=all.slice(0,3).map(({key})=>objectUrls(source,key,domains));
+  assert.deepEqual(JSON.parse(formatUrlExport(source,files,true,'json')).counts,{files:3,urls:6,multiUrlFiles:3});
+  assert.deepEqual(simpleDirectoryUrls(files,true).text.trimEnd().split('\n'),[
+    'https://cdn.example/images/a.png','https://cdn.example/images/b.cbz','https://cdn.example/images/%E5%A5%87%E5%A6%99.pdf']);
+  const devOnly=all.slice(0,3).map(({key})=>objectUrls(source,key,['pub-assets.r2.dev']));
+  assert.equal(simpleDirectoryUrls(devOnly,true).count,0);
+  assert.equal(simpleDirectoryUrls(devOnly,false).developmental,3);
+  assert(developmentalDomain(devOnly[0].urls[0].domain));
+  const root={...source,prefix:''};
+  assert.deepEqual(directoryUrlFiles(root,[{key:'root'},{key:'archive/item'}],new Set(['all'])),[{key:'root'}]);
+});
+test('Get URL adds only provider-confirmed managed endpoints and reports partial discovery',async()=>{
+  let result={enabled:true,domain:'pub-assets.r2.dev'};
+  const fixture=createFixture(async target=>{assert.deepEqual(target,source);if(!result)throw Error('Unavailable');return result;});
+  fixture.enable();
+  const get=()=>fixture.client.invoke('getPublicUrls',{source,key:file.key});
+  assert.equal((await get()).data.file.urls.at(-1).provenance,'cloudflare-r2-enabled-managed-domain');
+  result={...result,enabled:false};
+  assert.equal((await get()).data.file.urlCount,2);
+  result=null;
+  assert.equal((await get()).data.domainCheckComplete,false);
+  assert.equal((await get()).data.file.urlCount,2);
 });

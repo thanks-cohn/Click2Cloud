@@ -323,7 +323,7 @@ let viewEpoch=0;
 const displayedEntries=()=>filenameSearch?.entries??entries;
 function resetFilenameSearch(){
  filenameSearch?.controller.abort();filenameSearch=null;
- const input=$('#filename-search');if(input)input.value='';
+ const input=explorerShell?.querySelector('#filename-search')??$('#filename-search');if(input)input.value='';
 }
 function clearFilenameSearch(){
  const wasSearching=!!filenameSearch;resetFilenameSearch();
@@ -333,7 +333,7 @@ function clearFilenameSearch(){
  if(browseNeedsRefresh)void loadListing();
 }
 async function searchDirectoryNames(query,{more=false,refresh=false,keepPrevious=false}={}){
- if(!query.trim()){clearFilenameSearch();return;}
+ if(!query.trim())return;
  if(!source||view!=='explorer'||connection.state!=='CONNECTED')return;
  const previous=filenameSearch,pageToken=more?previous?.result?.nextPageToken:null;
  if(more&&(!pageToken||previous.loading))return;
@@ -347,7 +347,7 @@ async function searchDirectoryNames(query,{more=false,refresh=false,keepPrevious
  hideContext();renderAddress();renderFiles();
  try{
   const result=await api('searchDirectoryNames',{source:target,query,...(pageToken?{pageToken}:{}),...(refresh?{refresh:true}:{})},{quiet:true,signal:controller.signal});
-  if(controller.signal.aborted||filenameSearch!==current||view!=='explorer'||targetKey(target)!==targetKey(source))return;
+  if(controller.signal.aborted||filenameSearch!==current||targetKey(target)!==targetKey(source))return;
   if(!Array.isArray(result?.entries))throw Error('Search response unavailable.');
   current.entries=more?[...new Map([...current.entries,...result.entries].map(entry=>[entry.key,entry])).values()]:result.entries;
   current.result=result;
@@ -358,7 +358,7 @@ async function searchDirectoryNames(query,{more=false,refresh=false,keepPrevious
    current.error=/STALE|CURSOR|TOKEN/.test(error.code??'')?'Search results changed. Use Refresh to search again.':names[error.code]??'Filename search unavailable. Use Refresh to try again.';
   }
  }finally{
-  if(filenameSearch===current&&view==='explorer'){current.loading=false;renderAddress();renderFiles();}
+  if(filenameSearch===current){current.loading=false;if(view==='explorer'){renderAddress();renderFiles();}}
  }
 }
 function searchCaption(search){
@@ -385,14 +385,13 @@ function markCurrentSearchStale(){
  renderFiles();
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
- if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;explorerScroll=0;}
- else explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh)await loadListing();}else await renderSettings();}
+ explorerScroll=$('#files')?.scrollTop??0;
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function renderExplorer(){
  restoreConnection();
- if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="search" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"></form><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted" data-aesthetic-text="explorer.debug-caption"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
+ if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted" data-aesthetic-text="explorer.debug-caption"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
   $('#main').replaceChildren(explorerShell);
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
   listen('#up','click',()=>source&&navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',refreshExplorerFolder);
@@ -401,17 +400,12 @@ function renderExplorer(){
   listen('#add-location','click',()=>openPopup(selectedFolder()));
   listen('#more','click',()=>filenameSearch?searchDirectoryNames(filenameSearch.query,{more:true}):loadListing(true));
   listen('#filename-search-form','submit',event=>{
-   event.preventDefault();const input=$('#filename-search'),inOverflow=input.closest('#toolbar-overflow,#filename-search-popout');
-   if(inOverflow){explorerLayoutUI.hide();$('#files').focus({preventScroll:true});}
-   return searchDirectoryNames(input.value);
-  });
-  listen('#filename-search','input',event=>{if(!event.isComposing&&!event.target.value)clearFilenameSearch();});
-  listen('#filename-search','keydown',event=>{
-   if(event.key==='Escape'&&!event.isComposing&&(event.target.value||filenameSearch)){event.preventDefault();event.stopPropagation();clearFilenameSearch();}
+   event.preventDefault();const query=$('#filename-search').value;
+   return searchDirectoryNames(query,{keepPrevious:true});
   });
   listen('#clear-search','click',()=>{
-   clearFilenameSearch();const input=$('#filename-search');
-   (input.getClientRects().length?input:$('#toolbar-more')).focus({preventScroll:true});
+   clearFilenameSearch();
+   $('#files').focus({preventScroll:true});
   });
   listen('#location','focus',e=>e.target.select());
   listen('#location','keydown',async e=>{
@@ -438,7 +432,7 @@ function renderExplorer(){
   });
   const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:async value=>{layoutIntent=value;viewCommit=viewCommit.catch(()=>{}).then(async()=>{try{await change({type:'setExplorerLayout',explorerLayout:value});}finally{if(layoutIntent===value)layoutIntent=null;}});return viewCommit;},onResize:scheduleWindow});shortcuts.attachReferences();
  }else if(!explorerShell.isConnected){$('#main').replaceChildren(explorerShell);$('#files').scrollTop=explorerScroll;}
- $('#back').disabled=historyAt<=0;$('#forward').disabled=historyAt>=history.length-1;$('#up').disabled=!source?.prefix;$('#add-location').disabled=!source;$('#filename-search').disabled=!source||connection.state!=='CONNECTED';$('#view-switch').value=displayView();
+ $('#back').disabled=historyAt<=0;$('#forward').disabled=historyAt>=history.length-1;$('#up').disabled=!source?.prefix;$('#add-location').disabled=!source;explorerLayoutUI.setSearchAvailable(!!source&&connection.state==='CONNECTED');$('#view-switch').value=displayView();
  $('#shell').dataset.view='explorer';explorerLayoutUI?.refresh();renderAddress();renderFiles();void suggestion();
 }
 function refreshExplorerFolder(){
@@ -450,8 +444,8 @@ function selectedFolder(){const row=displayedEntries().find(e=>selected.has(e.ke
 const pathMeasure=(()=>{let ctx;return text=>{ctx??=document.createElement('canvas').getContext('2d');ctx.font='14px Segoe UI';return ctx.measureText(text).width;};})();
 function renderAddress(restore=false){const input=$('#location'),display=$('#location-display');if(!input)return;const e=selected.size===1?ordered()[listingOrder.index(selected.values().next().value)]:null,value=cloudPath(source,e&&!e.folder?e.key:source?.prefix);if(restore||document.activeElement!==input)input.value=value;input.title=value;display.textContent=value?middlePath(value,Math.max(20,addressWidth-20),pathMeasure):'Choose a cloud folder';}
 async function navigate(t,push=true,fromAPI=false){
-  listingAbort?.abort();const wasSearching=!!filenameSearch;resetFilenameSearch();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
-  source=structuredClone(t);explorerAccountId=t.accountId;if(!same||wasSearching){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
+  listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
+  source=structuredClone(t);explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
   if(view!=='explorer'){view='explorer';$('#shell').dataset.view='explorer';$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));}renderExplorer();if(!same)$('#files').scrollTop=0;paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
@@ -478,7 +472,7 @@ function renderFiles(){
    if(['ArrowDown','ArrowUp','Home','End','PageDown','PageUp',...(displayView()==='grid'?['ArrowLeft','ArrowRight']:[])].includes(event.key)&&rows.length){event.preventDefault();const step=event.key.startsWith('Page')?Math.max(1,Math.floor(viewportHeight/(displayView()==='grid'?136:40)))*cols:cols;n=event.key==='Home'?0:event.key==='End'?rows.length-1:Math.max(0,Math.min(rows.length-1,i+(event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:['ArrowDown','PageDown'].includes(event.key)?step:-step)));selectRow(n,event);focusRow(n);}
    else if(event.key==='Enter'&&rows[i]){event.preventDefault();void openEntry(rows[i]).catch(e=>status(e.message));}
    else if(event.key==='ContextMenu'||event.key==='F10'&&event.shiftKey){event.preventDefault();if(rows[i]&&!selected.has(rows[i].key))selectRow(i,{});const r=(row??el).getBoundingClientRect();void contextFor(rows[i]?.folder?{...source,prefix:rows[i].key}:source,rows[i]??null,r.left+20,r.top+20);}
-   else if(event.key==='Escape'){if(filenameSearch&&$('#context').hidden)clearFilenameSearch();else{selected.clear();updateSelection();hideContext();}}
+   else if(event.key==='Escape'&&!($('#context').hidden&&explorerLayoutUI.dismissSearch())){selected.clear();updateSelection();hideContext();}
    else if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'){event.preventDefault();hideContext();selected=new Set(rows.map(e=>e.key));updateSelection();}
   };
  }

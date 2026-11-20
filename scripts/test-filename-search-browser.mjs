@@ -124,7 +124,7 @@ async function explorer() {
   await row('notes.txt').waitFor();
 }
 async function revealSearch() {
-  if (!await searchInput().isVisible()) await moreMenu().click();
+  if (!await searchInput().isVisible()) await page.keyboard.press('Control+Shift+F7');
   await searchInput().waitFor();
   return searchInput();
 }
@@ -140,9 +140,8 @@ async function submit(query) {
 }
 
 async function assertClear() {
-  const input = await revealSearch();
-  await input.press('Escape');
-  assert.equal(await input.inputValue(),'');
+  await page.getByRole('button',{name:'Clear search',exact:true}).click();
+  assert.equal(await searchInput().inputValue(),'');
   await page.getByRole('button',{name:'Load more',exact:true}).waitFor();
   await row('notes.txt').waitFor();
 }
@@ -168,11 +167,13 @@ async function browseLayout() {
         if (width < 400) {
           assert(!await searchInput().isVisible(),'compact toolbar shows squeezed search field');
           assert(await moreMenu().isVisible());
-          await moreMenu().press('ArrowDown');
+          await moreMenu().focus();
+          await page.keyboard.press('Control+Shift+F7');
           await searchInput().waitFor();
           await searchInput().press('Escape');
           assert(await moreMenu().evaluate(el => document.activeElement === el));
         } else {
+          if(!await searchInput().isVisible())await page.keyboard.press('Control+Shift+F7');
           const boxes = await Promise.all(['#back','#forward','#up','#refresh','#filename-search','#toolbar-more'].map(selector => page.locator(selector).boundingBox()));
           assert(boxes.every(Boolean),'required toolbar item lacks visible bounds');
           for (const [i,box] of boxes.entries()) if (i) {
@@ -193,6 +194,7 @@ async function browseLayout() {
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         assert.equal(await requestCount(),0,'layout caused a search API call');
         await shot(`${appearance}-${width}-${rows}-rows`);
+        await page.locator('#files').focus();
         await page.keyboard.press('Control+Shift+F8');
       }
       await waitValue('#toolbar-splitter','1');
@@ -223,6 +225,17 @@ async function coldAndWarm() {
   assert(await row('PHOTO-archive.jpg').isHidden());
   assert(await row('notes.txt').isHidden());
   await row('Another-PHOTO.jpg').waitFor();
+  assert(await searchInput().isVisible(),'Enter hides search');
+  await row('Another-PHOTO.jpg').click();
+  assert(await searchInput().isVisible(),'selecting a result hides search');
+  await searchInput().press('Escape');
+  assert(await searchInput().isHidden());
+  assert(await row('notes.txt').isHidden());
+  await revealSearch();
+  assert.equal(await searchInput().inputValue(),'PHoTo');
+  await page.getByRole('button',{name:'Hide search',exact:true}).click();
+  assert(await searchInput().isHidden());
+  assert(await row('Another-PHOTO.jpg').isVisible());
   await shot('search-multiple-pages');
   await page.getByRole('button',{name:'Load more matches',exact:true}).click();
   await page.waitForFunction(count => window.filenameResponses.length > count,1);

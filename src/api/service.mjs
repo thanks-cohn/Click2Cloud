@@ -1,4 +1,4 @@
-import {objectUrls,objectTags,safeObjectMetadata,verifiedDomains,metadataBudget,TAG_KEY} from '../explorer/object-exports.mjs';
+import {objectUrls,objectTags,safeObjectMetadata,verifiedDomains,verifiedDevelopmentDomain,metadataBudget,TAG_KEY} from '../explorer/object-exports.mjs';
 import {apiShortcutMetadata,listCommands} from './shortcuts.mjs';
 import {locateSavedResult} from '../history/navigation.mjs';
 import {createManifestService,createManifestStore} from '../manifest/service.mjs';
@@ -98,7 +98,7 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readExportOptions}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readManagedDomain,readExportOptions}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
@@ -398,13 +398,19 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};
           }else if(method==='getPublicUrls'){
             if(!(await readExportOptions?.())?.urls||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
-            const domains=verifiedDomains(await readCustomDomains(source));
+            const [custom,managed]=await Promise.allSettled([
+              Promise.resolve().then(()=>readCustomDomains(source)).then(verifiedDomains),
+              readManagedDomain ? Promise.resolve().then(()=>readManagedDomain(source)).then(verifiedDevelopmentDomain) : null
+            ]);
+            if(custom.status==='rejected'&&(!readManagedDomain||managed.status==='rejected'))throw custom.reason;
+            const domains=[...new Set([...(custom.value??[]),...(managed.value?[managed.value]:[])])];
+            const domainCheckComplete=custom.status==='fulfilled'&&managed.status==='fulfilled';
             if(params.domains?.some(domain=>!domains.includes(domain)))fail('DOMAIN_NOT_VERIFIED');
             if(params.key){
               const result=await fileApi.run('stat',{source,key:params.key});
               if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
             }
-            data={domains,checkedAt:new Date().toISOString(),...(params.key?{file:objectUrls(source,params.key,params.domains??domains)}:{})};
+            data={domains,domainCheckComplete,checkedAt:new Date().toISOString(),...(params.key?{file:objectUrls(source,params.key,params.domains??domains)}:{})};
           }else{
             const options=await readExportOptions?.();
             if(!options?.tags&&!options?.metadata)fail('EXPORT_METADATA_EXPERIMENT_DISABLED');

@@ -66,6 +66,8 @@ try{
   await page.locator('#filename-search-popout').waitFor({state:'hidden'});
   assert.equal(await page.evaluate(()=>document.activeElement.id),'files');
   await page.keyboard.press('Control+Shift+F8');
+  assert(await page.locator('#filename-search').isHidden());
+  await page.keyboard.press('Control+Shift+F7');
   await page.locator('#command-items #filename-search').waitFor();
   assert.equal(await page.locator('#toolbar-splitter').getAttribute('aria-valuenow'),'2');
   gates.push('Search uses one accessible input in the shortcut pop-out and expanded toolbar');

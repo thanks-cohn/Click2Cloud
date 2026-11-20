@@ -62,16 +62,50 @@ export function domainName(value) {
   return domain.length <= 253 && domain.includes('.') && /[a-z]/.test(domain.split('.').at(-1)) &&
     domain.split('.').every(label => /^[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?$/.test(label)) ? domain : null;
 }
-export const eligiblePublicObject = key => /\.(png|jpe?g|gif|webp|avif|svg|bmp|tiff?|ico|pdf|txt|csv|json|mp[34]|m4a|ogg|wav|webm|zip)$/i.test(key);
+export const developmentalDomain = domain => typeof domain === 'string' && domain.endsWith('.r2.dev');
+export function verifiedDevelopmentDomain(record) {
+  const domain = domainName(record?.domain);
+  return record?.enabled === true && developmentalDomain(domain) ? domain : null;
+}
+
+const mediaExtensions = {
+  images: /\.(apng|avif|bmp|gif|heic|heif|ico|jpe?g|jfif|jxl|png|svgz?|tiff?|webp)$/i,
+  audio: /\.(aac|aiff?|alac|amr|flac|m4a|mp3|oga|ogg|opus|wav|weba|wma)$/i,
+  video: /\.(3gp|avi|flv|m4v|mkv|mov|mp4|mpe?g|ogv|webm|wmv)$/i
+};
+export function directoryUrlFiles(source, objects, types) {
+  return objects.filter(object => {
+    const {key} = object;
+    if (object.folder || !key.startsWith(source.prefix)) return false;
+    const relative = key.slice(source.prefix.length);
+    if (!relative || relative.includes('/')) return false;
+    if (types.has('all')) return true;
+    const family = object.contentType?.toLowerCase().split('/')[0];
+    const known = {image:'images',audio:'audio',video:'video'}[family];
+    // Prefer a provider media MIME type. Extensions cover generic or missing MIME metadata.
+    return known ? types.has(known) : [...types].some(type => mediaExtensions[type]?.test(relative));
+  });
+}
 export function objectUrls(source, key, domains) {
   const valid = typeof key === 'string' && key.startsWith(source.prefix) && !key.endsWith('/') &&
     key.split('/').every(part => part && part !== '.' && part !== '..' && !part.includes('\\'));
-  const urls = valid ? domains.map(domain => ({
+  const urls = valid ? [...new Set(domains)].map(domain => ({
     url: 'https://' + domain + '/' + key.split('/').map(encodeURIComponent).join('/'),
-    domain, status: 'verified-domain', provenance: 'cloudflare-r2-active-custom-domain'
+    domain, status: 'verified-domain', provenance: developmentalDomain(domain)
+      ? 'cloudflare-r2-enabled-managed-domain' : 'cloudflare-r2-active-custom-domain'
   })) : [];
   return {objectId: JSON.stringify([source.provider,source.accountId,source.bucketName,key]), bucket: source.bucketName,
     key, relativePath: key.slice(source.prefix.length), urlCount: urls.length, urls};
+}
+export function simpleDirectoryUrls(files, preferCustom) {
+  const urls = new Map();
+  for (const file of files) {
+    const choice = preferCustom ? file.urls.find(item => !developmentalDomain(item.domain)) : file.urls[0];
+    if (choice) urls.set(choice.url, choice);
+  }
+  const links = [...urls.values()];
+  return {text:links.length ? links.map(item => item.url).join('\n')+'\n' : '',
+    count:links.length, missing:files.length-links.length, developmental:links.filter(item => developmentalDomain(item.domain)).length};
 }
 export function formatUrlExport(source, files, complete, format) {
   const counts = {files: files.length, urls: files.reduce((sum,file) => sum + file.urlCount,0), multiUrlFiles: files.filter(file => file.urlCount > 1).length};

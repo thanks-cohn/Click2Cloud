@@ -34,7 +34,7 @@ export interface ShortcutCommand {commandId:string;label:string;category:string;
 export interface ManifestDraftAction {draftId:string;previewToken:string;expectedRevision:number;idempotencyKey:string}
 export interface HistoryPreferences {range:'all'|'daily'|'weekly';previews:'all'|'first'|'closed';timezone:string}
 export interface ExportObject {key:string;bucket:string;provider:string;size:number|null;contentType:string|null;etag:string|null;version:string|null;lastModified:string|null;missing:string[];redacted:string[]}
-export interface ExportUrl {url:string;domain:string;status:'verified-domain';provenance:'cloudflare-r2-active-custom-domain'}
+export interface ExportUrl {url:string;domain:string;status:'verified-domain';provenance:'cloudflare-r2-active-custom-domain'|'cloudflare-r2-enabled-managed-domain'}
 export interface Methods {
  exportMenuManifest:{};getMenuManifestDraft:{};previewMenuManifest:{json:string};discardMenuManifest:{draftId:string};
  inspectManifestBindings:{draftId:string;mapping?:Record<string,{accountId:string;connectionId:string}>;options?:{policy:'skip-identical'|'add-alongside'|'replace-selected';replaceIds?:string[];applyPreferences?:boolean}};
@@ -82,7 +82,7 @@ export interface RestorePreview {available:boolean;reason?:string;current:Config
 export interface Results {
  getHistoryPreferences:HistoryPreferences;setHistoryPreferences:HistoryPreferences;recoverCloudflareDestination:CloudflareSetupResult;
  listDirectoryObjects:{entries:ExportObject[];nextCursor:string|null};
- getPublicUrls:{domains:string[];checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
+ getPublicUrls:{domains:string[];domainCheckComplete:boolean;checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
  getExportObjectMetadata:ExportObject&{customMetadata:Record<string,string>|null;httpMetadata:Record<string,string>|null;tags:string[];availability:'observed'|'unobserved';tagBudget?:{used:number;limit:number;remaining:number;reserved:number;fits:boolean}};
  listCommands:{commands:ShortcutCommand[]};getShortcutBindings:{bindings:Record<string,string|null>};setShortcutBinding:Results['getShortcutBindings'];resetShortcutBindings:Results['getShortcutBindings'];
  getGalleryLoadingVisual:GalleryLoadingVisual;setGalleryLoadingVisual:GalleryLoadingVisual;
