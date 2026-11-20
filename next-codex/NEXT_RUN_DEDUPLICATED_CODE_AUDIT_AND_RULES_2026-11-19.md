@@ -13,6 +13,15 @@
 
 **Mandatory companion preimplementation audit:** [Screenshot + Auto-Reroute Architecture Audit (2026-11-20)](SCREENSHOT_AND_AUTOREROUTE_ARCHITECTURE_AUDIT_2026-11-20.md). This adds the FOUR screenshot safeguards and identifies what remains unimplemented or technically blocked for both engines.
 
+## Latest owner-approved canonical feature contracts (Nov 20, 2026)
+
+- **Screenshot system is FROZEN:** [`/screenshot-logic/README.md`](../screenshot-logic/README.md). This wins over older screenshot examples in this handoff. Shortcuts are signals; multiple active cards using the same keys remain additive; every matching website-only card contributes; dedup ON by default; OFF per rule→directory; one capture and browser upload; immutable capture plan, stable IDs, canonical directories, one central dispatcher. NO Exclusive Save, priority winner or takeover prompts. Do not change this behavior without new owner instruction.
+- **Auto-Reroute V1 UX and architecture:** [`/auto-reroute/README.md`](../auto-reroute/README.md). This wins over older complex-form descriptions in this handoff: the BASIC GUI is **Website + File extension + Save**, using a small preselected authorized **Saving to: Cloudflare R2 / exact folder** breadcrumb with Change, and cards directly underneath. Cards have an independent Active/Inactive toggle, far-right X Delete and click-to-edit; 25/page. Auto names Rule 1, Rule 2... with no mandatory name field. Saving a rule never downloads a file.
+- **Auto-Reroute technical mandate:** for eligible source actions, original FILE BYTES are fetched/read in the user's Chrome browser and streamed from Chrome to the EXISTING trusted Click2Cloud Worker→authorized R2. The Worker must NOT re-fetch a source URL and call it Auto-Reroute. Actual pre-download interception is limited to supported, proven sources; Chrome Downloads API cannot provide a universal body-stream takeover. Preserve normal downloads on unsupported/uncertain sources, including authenticated iCloud ZIP until independently verified. V1 extensions: PNG/JPG/JPEG/GIF/WebP, MP4/WebM, ZIP/CBZ; AVIF only if proved. One winning download rule, not screenshot additive policy.
+- The detailed technical audit remains [`next-codex/SCREENSHOT_AND_AUTOREROUTE_ARCHITECTURE_AUDIT_2026-11-20.md`](SCREENSHOT_AND_AUTOREROUTE_ARCHITECTURE_AUDIT_2026-11-20.md). Treat past sections as supporting material only where they do not conflict with these latest canonical root documents.
+
+---
+
 ## 0. Ground rules and source audit before coding
 
 1. Start from the **latest `main` HEAD (0.3.20 is already merged)**, not 0.3.19 or the historical Codex branches. Create a **new implementation branch** and leave `main` unchanged until tested changes are reviewed/merged. Do not repeat the completed version-0.3.20 bump.
@@ -108,6 +117,9 @@ Focused tests: one/multiple existing domains, Submit=Enter, new domain verified 
 **New owner request (Nov 19):** Provide a friendly **Rules** page where users configure automatic browser-download-to-cloud routing by file extension and exact cloud destination, name each rule, click **Save**, and manage existing rules. This is new functionality, **not** something already shipped in 0.3.20. Previous idea notes at `minor-fixes/major-fixes.md` are background only; do NOT reimplement an engine that isn't there, and do not confuse manual Explorer Download with automatic browser download routing.
 
 ### UI contract
+
+**Nov 20 SIMPLE GUI override:** The authoritative V1 form is **Website → File extension → Save** with small current cloud destination `Saving to`/Change selection and saved cards underneath, as frozen in [`/auto-reroute/README.md`](../auto-reroute/README.md). Do not build the older name-first multi-field form below. Auto-name Rule 1, Rule 2, etc.; card toggles Active/Inactive and far-right X deletes that rule alone. Save binds its exact authorized R2 folder, without extra mandatory text entry. The rest of the older text is background acceptance criteria only where compatible.
+
 
 - Add a **Rules** entry in the existing upper-right **More** dropdown, **immediately ABOVE Settings** (`extension/app.html` currently has Settings as its first menu item). It opens a dedicated Rules screen; don't bury it in the Settings page.
 - Simple top-of-page **New/Edit Rule** form with fields: **Rule name**, **File extension/type** (e.g. png, jpg, pdf, zip; handle leading dot/case/canonical matching safely), **Destination cloud folder** selected from an actually authorized provider/account/bucket/path (folder picker or equivalent trustworthy selection), and **Save**. Also offer an optional website/source filter if feasible via existing rules architecture, while making extension + destination the simple primary path.
