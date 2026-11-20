@@ -83,7 +83,7 @@ async function enterExplorer(){
  const attempt={epoch};enteringExplorer=attempt;
  attempt.promise=(async()=>{const r=await api('enterExplorer');if(view!=='explorer'||epoch!==navigationEpoch)return;await loadTree(r);if(view!=='explorer'||epoch!==navigationEpoch)return;
   if(r.target){await navigate(r.target,true,true);const slot=treeNodes.get(targetKey({...r.target,prefix:''}));if(slot){slot.button.setAttribute('aria-selected','true');slot.button.setAttribute('aria-expanded','true');slot.children.hidden=false;}const current=treeNodes.get(targetKey(r.target));if(current)syncTreePage(r.target,{entries,cursor,completeListing:!cursor});}
-  else{loading=false;if(r.state==='RECONNECT_REQUIRED'){source=r.preferred??source??state.product.defaultTarget;listingError='Reconnect to browse. Saved locations are preserved.';$('#tree').textContent=source?'Saved location: '+source.bucketName+'/'+source.prefix+' · Reconnect to browse.':'Reconnect to browse saved locations.';}renderExplorer();status(r.state==='RECONNECT_REQUIRED'?'Reconnect to browse. Saved locations are preserved.':r.state==='CHOOSE_ACCOUNT'?'Choose a cloud account.':'Choose an available bucket.');}
+  else{loading=false;if(r.state==='RECONNECT_REQUIRED'){source=r.preferred??source??state.product.defaultTarget;listingError='Reconnect to browse. Saved locations are preserved.';$('#tree').replaceChildren();}renderExplorer();status(r.state==='RECONNECT_REQUIRED'?'Reconnect to browse. Saved locations are preserved.':r.state==='CHOOSE_ACCOUNT'?'Choose a cloud account.':'Choose an available bucket.');}
  })().finally(()=>{if(enteringExplorer===attempt)enteringExplorer=null;});return attempt.promise;
 }
 let explorerAccountId=null;
@@ -221,7 +221,7 @@ async function connections() {
     // The browser shortcut can enter Explorer before the saved layout has loaded.
     if(view==='explorer'&&state&&!configurationIssue){
       renderExplorer();
-      $('#tree').textContent=source?'Saved location: '+source.bucketName+'/'+source.prefix+' · Reconnect to browse.':'Reconnect to browse saved locations.';
+      $('#tree').replaceChildren();
     }
   }else if(view==='explorer'&&state)await enterExplorer();
 }
