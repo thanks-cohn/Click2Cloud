@@ -459,17 +459,33 @@ try{
 
  if(process.env.C2C_SCREENSHOT_NATIVE_MENU==='1'){
   const spec=await service.evaluate(()=>click2cloud.registrar.inspect().desired);
-  const items=screenshotMenu(spec).items;
+  const items=screenshotMenu({...spec,rows:[...spec.rows,{role:'save',enabled:true,target:{...fixtureTarget,prefix:'Native/'}}]}).items;
   await service.evaluate(async items=>{
    for(const item of items)await new Promise((resolve,reject)=>chrome.contextMenus.create(item,()=>{
     const error=chrome.runtime.lastError;return error?reject(Error(error.message)):resolve();
    }));
   },items);
   const legacy={ids:items.map(item=>item.id),save:spec.rows.find(row=>row.role==='save'||row.role==='provider-action')?.id};
-  const oldService=service;
-  const restarted=browser.waitForEvent('serviceworker',{predicate:worker=>worker!==oldService&&worker.url()===oldService.url()});
-  await oldService.evaluate(()=>chrome.runtime.reload()).catch(()=>{});service=await restarted;
-  await wait(()=>service.evaluate(()=>click2cloud.registrar.inspect().lastOutcome?.state==='completed'),'native menu reconciliation after extension reload');
+  await service.evaluate(()=>{globalThis.beforeMenuReload=true;});
+  const extensions=await browser.newPage();await extensions.goto('chrome://extensions');
+  const extensionId=service.url().split('/')[2],workerUrl=service.url();
+  const reload=extensions.locator(`extensions-item#${extensionId} #dev-reload-button`);
+  const developerMode=extensions.locator('extensions-toolbar #devMode');
+  await developerMode.waitFor();
+  if(await developerMode.getAttribute('aria-pressed')!=='true')await developerMode.click();
+  await reload.click();
+  await wait(async()=>{
+   await app.reload();
+   return browser.serviceWorkers().some(worker=>worker.url()===workerUrl);
+  },'extension responds after Chrome Reload');
+  service=await wait(async()=>{
+   for(const worker of browser.serviceWorkers().filter(worker=>worker.url()===workerUrl)){
+    if(await worker.evaluate(()=>!globalThis.beforeMenuReload&&click2cloud.registrar.inspect().lastOutcome?.state==='completed').catch(()=>false))return worker;
+   }
+   return null;
+  },'native menu reconciliation after extension reload');
+  await extensions.close();
+  await app.getByRole('button',{name:'Open File Explorer',exact:true}).waitFor();
   const nativeExists=id=>service.evaluate(id=>new Promise(resolve=>chrome.contextMenus.update(id,{},()=>resolve(!chrome.runtime.lastError))),id);
   for(const id of legacy.ids)assert.equal(await nativeExists(id),false,id);
   assert(legacy.save&&await nativeExists(legacy.save),'the ordinary Cloudflare command is still registered');
