@@ -1,0 +1,165 @@
+CDP extension load { id: 'ajppphdiamdobknpamcheohmdbdbeoal' }
+Assignments [{"description":"","name":"_execute_action","shortcut":""},{"description":"Capture a screenshot to cloud","name":"screenshot.capture.alt-q","shortcut":"Alt+Q"},{"description":"Capture a screenshot to cloud (second shortcut)","name":"screenshot.capture.ctrl-shift-y","shortcut":"Ctrl+Shift+Y"},{"description":"Open or close Shelf History","name":"shelf.history.toggle","shortcut":"Alt+Shift+H"}]
+{
+  "browser": "158.0.8127.36",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "manifestVersion": "0.3.21",
+  "checks": [
+    "Alt+Q with Shelf closed captured the HTTPS viewport and saved the exact PNG to the fresh redown/screenshots/ card",
+    "Three folder selections across two buckets and one Save produced one card and zero uploads; Escape discarded the editor draft",
+    "Ctrl+Shift+Y with Shelf closed sent the same PNG to all three exact keys, including a bucket with a stale Worker record. Fixture HTTP 403 left two verified and one retryable",
+    "History Retry verified only the originally denied output with the same capture ID, output ID, key and PNG; SECURE trace has no gaps or URLs",
+    "Real Chrome History command opens its Side Panel, routes to History, then closes the same panel",
+    "R12 real browser right-click Screenshot picker writes only the selected exact folder",
+    "Chrome internal page produced a capture failure with zero uploads"
+  ],
+  "uploads": [
+    {
+      "bucket": "redown",
+      "key": "screenshots/Screenshot-42969f34-c387-4faa-ac5e-791a7eb1dda1-1.png",
+      "bytes": 5198
+    },
+    {
+      "bucket": "redown",
+      "key": "One/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-1.png",
+      "bytes": 5198
+    },
+    {
+      "bucket": "redown",
+      "key": "Two/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-2.png",
+      "bytes": 5198
+    },
+    {
+      "bucket": "qa-screenshots",
+      "key": "Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png",
+      "bytes": 5198
+    },
+    {
+      "bucket": "qa-screenshots",
+      "key": "Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png",
+      "bytes": 5198
+    },
+    {
+      "bucket": "redown",
+      "key": "Native/Screenshot-66750444-2df2-4d1a-a2e2-dcce87607f46-1.png",
+      "bytes": 4243
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/screenshots/Screenshot-42969f34-c387-4faa-ac5e-791a7eb1dda1-1.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/screenshots/Screenshot-42969f34-c387-4faa-ac5e-791a7eb1dda1-1.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots/objects"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/One/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-1.png"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/Two/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-2.png"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots/objects/Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/One/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-1.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/Two/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-2.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots/objects/Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots/objects/Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/qa-screenshots/objects/Three/Screenshot-c6459373-fbc7-4f47-b0c1-4753ecd2b484-3.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown"
+    },
+    {
+      "method": "PUT",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/Native/Screenshot-66750444-2df2-4d1a-a2e2-dcce87607f46-1.png"
+    },
+    {
+      "method": "GET",
+      "host": "api.cloudflare.com",
+      "path": "/client/v4/accounts/qa-screen/r2/buckets/redown/objects/Native/Screenshot-66750444-2df2-4d1a-a2e2-dcce87607f46-1.png"
+    }
+  ]
+}
