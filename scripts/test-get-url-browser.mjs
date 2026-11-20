@@ -103,17 +103,17 @@ const close = () => app.getByRole('dialog').getByRole('button',{name:'Close',exa
 
 try {
   await launch(true);
-  const view = await open();
+  let view = await open();
   await view.getByRole('button',{name:'No',exact:true}).click();
   assert.equal(writes().length,0,'Opening and declining are read-only');
   await open();
-  const yes = view.getByRole('button',{name:'Yes',exact:true});
-  await yes.waitFor();
+  const yes = () => view.getByRole('button',{name:'Yes',exact:true});
+  await yes().waitFor();
   if (evidence) await app.screenshot({path:join(evidence,'get-url-consent.png')});
   readbackDelay=240;
-  await yes.click();
-  const expected = view.getByText(url,{exact:true});
-  try { await expected.waitFor(); }
+  await yes().click();
+  const expected = () => view.getByText(url,{exact:true});
+  try { await expected().waitFor(); }
   catch (error) {
     if (evidence) await app.screenshot({path:join(evidence,'get-url-yes.png')});
     const recheck=view.getByRole('button',{name:'Recheck',exact:true});
@@ -136,10 +136,11 @@ try {
   await browser.close();browser=null;
   clear();readbackDelay=0;
   await launch();
+  view=app.getByRole('dialog');
   for (const filename of [key.split('/').at(-1),sibling.split('/').at(-1)]) {
     await open(filename);
     await view.getByRole('link',{name:/Open Development URL/}).waitFor();
-    assert.equal(await yes.count(),0);
+    assert.equal(await yes().count(),0);
     await close();
   }
   assert.equal(writes().length,0,'Reopening after Chromium restart must rediscover the URL');
@@ -147,27 +148,27 @@ try {
   enabled=false;custom=['static.example.org','assets.example.org','three.example.org','four.example.org','five.example.org'];
   await open();
   for (const host of custom) await view.getByText(`https://${host}/${url.split('/').slice(3).join('/')}`,{exact:true}).waitFor();
-  assert.equal(await yes.count(),0);
+  assert.equal(await yes().count(),0);
   await view.getByRole('button',{name:'Recheck',exact:true}).click();
   await view.getByText('Active custom domains found.').waitFor();
   assert.equal(writes().length,0);
   await close();
 
   custom=[];putStatus=403;
-  await open();await yes.click();
+  await open();await yes().click();
   await view.getByText(/Cloudflare denied activation/).waitFor();
   assert.equal(writes().length,1);
   assert.equal(await view.getByRole('link',{name:/Open Development URL/}).count(),0);
   await close();
 
   clear();putStatus=200;failReadback=true;
-  await open();await yes.click();
+  await open();await yes().click();
   await view.getByText(/Cloudflare has not confirmed/).waitFor();
   assert.equal(writes().length,1);
-  assert.equal(await expected.count(),0);
+  assert.equal(await expected().count(),0);
   failReadback=false;
   await view.getByRole('button',{name:'Recheck',exact:true}).click();
-  await expected.waitFor();
+  await expected().waitFor();
   assert.equal(writes().length,1);
   console.log(`${browser.browser().version()} unpacked extension: cancel, scoped activation, independent readback, inline exact URL, restart, paginated custom-only, 403 and inconclusive readback passed against local HTTPS fixture.`);
 } finally {

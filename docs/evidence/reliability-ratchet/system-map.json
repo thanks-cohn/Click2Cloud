@@ -9561,13 +9561,13 @@
         "permission": "inspect",
         "effectful": false,
         "domainOwner": "src/api/service.mjs",
-        "mechanismOwner": "src/explorer/object-exports.mjs",
+        "mechanismOwner": "src/cloudflare/r2-public-domains.mjs",
         "entryOwner": "src/api/service.mjs",
         "adapters": [
           "trusted-agent",
           "Shelf"
         ],
-        "storageOwner": "CurrentStore",
+        "storageOwner": "Cloudflare R2 bucket domain configuration",
         "errorTaxonomy": [
           "AUTHORIZATION",
           "SCHEMA",
@@ -9576,21 +9576,127 @@
           "UNCONFIRMED_EXTERNAL_EFFECT",
           "UNKNOWN_OR_UNOBSERVED"
         ],
-        "completionEvidence": "READ_ONLY_RESULT",
-        "authority": "CURRENT",
+        "completionEvidence": "READ_ONLY_CONFIGURED_DOMAINS",
+        "authority": "OAUTH",
         "dependencies": [
-          "CURRENT",
-          "account-authorization"
+          "trusted-credential-storage",
+          "exact-account-and-bucket",
+          "exact-object-if-supplied"
         ],
         "invariants": [
-          "C2C-AGENT-1"
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
         ],
         "tests": [
-          "tests/release-0320.test.mjs"
+          "tests/get-url.test.mjs",
+          "scripts/test-get-url-browser.mjs"
         ],
-        "precondition": "HOST_GRANT_AND_DOMAIN_VALIDATION",
+        "precondition": "HOST_INSPECT_GRANT_AND_AUTHORIZED_BUCKET",
         "postcondition": "READ_ONLY_OBSERVATION",
-        "retry": "EXPECTED_REVISION_GENERATION_AND_IDEMPOTENCY_WHERE_APPLICABLE",
+        "retry": "READ_CURRENT_BUCKET_DOMAINS_BEFORE_RETRY",
+        "evidenceClass": "PARTIAL",
+        "gaps": [
+          "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
+        ]
+      },
+      {
+        "method": "enableBucketPublicAccess",
+        "traceMethodIndex": 77,
+        "version": "3+1.1",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "accountId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "bucketName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "prefix": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "provider",
+                "connectionId",
+                "accountId",
+                "bucketName",
+                "prefix"
+              ],
+              "additionalProperties": false
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "confirmed": {
+              "enum": [
+                true
+              ]
+            }
+          },
+          "required": [
+            "source",
+            "confirmed"
+          ],
+          "additionalProperties": false
+        },
+        "permission": "provision",
+        "effectful": true,
+        "domainOwner": "src/api/service.mjs",
+        "mechanismOwner": "src/cloudflare/r2-public-domains.mjs",
+        "entryOwner": "src/api/service.mjs",
+        "adapters": [
+          "trusted-agent",
+          "Shelf"
+        ],
+        "storageOwner": "Cloudflare R2 bucket domain configuration",
+        "errorTaxonomy": [
+          "AUTHORIZATION",
+          "SCHEMA",
+          "STATE_INTEGRITY",
+          "REVISION_OR_GENERATION_CONFLICT",
+          "UNCONFIRMED_EXTERNAL_EFFECT",
+          "UNKNOWN_OR_UNOBSERVED"
+        ],
+        "completionEvidence": "INDEPENDENT_MANAGED_DOMAIN_READBACK_OR_ALREADY_PUBLIC",
+        "authority": "OAUTH",
+        "dependencies": [
+          "trusted-credential-storage",
+          "exact-account-and-bucket",
+          "exact-object-if-supplied",
+          "explicit-host-confirmation"
+        ],
+        "invariants": [
+          "C2C-AGENT-1",
+          "C2C-PROOF-1"
+        ],
+        "tests": [
+          "tests/get-url.test.mjs",
+          "scripts/test-get-url-browser.mjs"
+        ],
+        "precondition": "HOST_PROVISION_GRANT_AND_BUCKET_WIDE_CONSENT",
+        "postcondition": "PROVIDER_CONFIRMED_CONFIGURATION_OR_EXPLICIT_FAILURE",
+        "retry": "READ_CURRENT_BUCKET_DOMAINS_BEFORE_RETRY",
         "evidenceClass": "PARTIAL",
         "gaps": [
           "METHOD_LEVEL_LIVE_ACCEPTANCE_NOT_PROVEN"
@@ -9598,7 +9704,7 @@
       },
       {
         "method": "getExportObjectMetadata",
-        "traceMethodIndex": 77,
+        "traceMethodIndex": 78,
         "version": "3+1.1",
         "schema": {
           "type": "object",
@@ -9974,6 +10080,8 @@
         ],
         "owner": "src/core/engine.mjs",
         "codes": [
+          "AUTH_SESSION_CHANGED",
+          "AUTHORIZATION_REVOKED",
           "OK",
           "STARTED",
           "UNKNOWN",
@@ -11157,6 +11265,7 @@
         ],
         "owner": "src/core/action-resolver.mjs",
         "codes": [
+          "AUTHORIZATION_REVOKED",
           "NATIVE_RECONCILE_UNAVAILABLE",
           "NATIVE_ACK_UNAVAILABLE",
           "OK",
