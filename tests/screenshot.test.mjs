@@ -9,6 +9,7 @@ import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-
 import {createScreenshotRetryCache,screenshotRetryLifetime} from '../src/screenshot/retry-cache.mjs';
 import {screenshotDigest} from '../src/cloudflare/screenshot-wire.mjs';
 import {screenshotReceipt} from '../src/recorder/schema.mjs';
+import {historyRecord} from '../src/history/model.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
 import {exportComplete} from '../src/recorder/export.mjs';
 import {fixtureTarget,fixtureSecret,fixtureSession,localScreenshotWorker} from './fixtures/screenshot-worker.mjs';
@@ -291,6 +292,7 @@ test('Direct R2 rejects accepted PUT with absent bytes, wrong key, wrong size, w
   });
   const job=await directRunner(fixture,[rule([folder('screenshots/')])]).runner.start(screenshotCommands[0]);
   assert.notEqual(job.state,'confirmed',mode);
+  if(job.state==='failed')assert.equal(historyRecord({kind:'screenshot-to-cloud',screenshot:job}).statusLabel,'Delivery failed');
   assert.equal(job.outputs[0].code,({absent:'R2_OBJECT_UNCONFIRMED',key:'R2_UPLOAD_METADATA_MISMATCH',
    size:'R2_OBJECT_CONFLICT',digest:'R2_OBJECT_CONFLICT',envelope:'R2_API_REJECTED'})[mode]);
  }

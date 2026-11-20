@@ -23,7 +23,7 @@ export function createHistoryPage({api,goTo,retryScreenshot,loadingSelection=asy
    <ol class="screenshot-receipt-outputs">${receipt.outputs.map(output=>`<li><strong>${esc(output.state==='confirmed'?'Verified':output.state)}</strong>
     · ${esc(output.destination?.accountId)} / ${esc(output.destination?.bucketName)} / ${esc(output.key)}
     <br>${esc(output.state==='confirmed'?`${output.verification==='direct-r2-get-sha256'?'R2 GET · SHA-256 verified':'R2 checksum verified'} · ${output.bytes} bytes`:screenshotMessage(output.code,output.code??'Awaiting verification'))}</li>`).join('')}</ol>
-   ${expired&&confirmed<receipt.outputs.length?'<p>The original PNG is unavailable. Upload retry has expired.</p>':''}
+   ${expired&&confirmed<receipt.outputs.length?'<p>The original PNG is unavailable for upload retry.</p>':''}
    ${receipt.captured&&unresolved&&retryScreenshot?
     `<button data-screenshot-retry="${esc(r.operationId)}">${expired?'Check unconfirmed files in R2':'Retry unconfirmed files'}</button>`:''}<p class="history-action" role="status"></p></details></article>`;
  }
