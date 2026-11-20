@@ -1,10 +1,11 @@
 # Click2Cloud — V3+1 /scaffold Chrome Product
 
-> **NEW owner-approved feature specifications (November 20, 2026):**
-> - **[Frozen Screenshot Logic](screenshot-logic/README.md)** — immutable additive signal/subscriber model, one capture/upload, default one-image-per-directory, stable IDs, canonical directories and verified Worker fan-out. No Exclusive Save.
-> - **[Auto-Reroute Rules + Chrome Byte Streaming](auto-reroute/README.md)** — simple Website + Extension + Save cards with independent Active toggle and X delete; authorized R2 destination; eligible Chrome-byte-stream transfer, not Worker URL refetch.
-> - **[Current Codex master handoff](next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md)** — invokes both canonical documents and the technical audit. Older requirements below in this README remain historical context where they conflict.
->
+> **FINAL RELEASE-SCOPE DOCUMENTS — November 20, 2026:**
+> - **[0.3.21 FINAL Codex request](next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md)** — current, clean, authoritative next run: screenshot feature, Search/Get URL fixes, Bit o' Polish five palettes, Minimal UI cleanup, History shortcut, Destinations polish and tests. **NO Auto-Reroute**.
+> - **[0.3.21 FINAL Screenshot Logic](screenshot-logic-final/README.md)** and **[exact test matrix](screenshot-logic-final/TEST_MATRIX.md)** — one Chrome screenshot signal driven by BOTH Alt+Q and Ctrl+Shift+Y defaults; ordinary website→R2-folder cards; one capture/upload; additive Worker fan-out, dedup and receipts. This REPLACES the historical `/screenshot-logic/` directory.
+> - **[0.3.21 Bit o' Polish five color schemes](next-codex/BIT_O_POLISH_FIVE_COLOR_SCHEMES_0.3.21_2026-11-20.md)** — high-polish remains default with five independently selectable palettes in the existing Aesthetic API.
+> - **[SEPARATE 0.3.22 Auto-Reroute Codex request](next-codex/AUTO_REROUTE_0.3.22_SEPARATE_CODEX_REQUEST_2026-11-20.md)** and [deferred feature specification](auto-reroute/README.md) — preserved for later. No Rules menu/download interception in 0.3.21.
+> - Historical earlier handoffs remain for reference only where they do not conflict with these canonical documents.
 
 Cloudflare Milestone 01 integration and current evidence: [implementation handoff](foundations/cloudflare/MILESTONE_01_IMPLEMENTATION.md). Use Node 22+, `npm ci --ignore-scripts`, `npm run test:focused`, and `npm run build:extension`. Installed-Chrome and live R2 transfer acceptance remain blocked as documented; deployment alone is not READY.
 
