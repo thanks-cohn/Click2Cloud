@@ -1,5 +1,8 @@
 # New feature — Screenshot-to-Cloud destination picker, additive rules, per-rule shortcuts
 
+> **SUPERSEDED HISTORY — NOT THE 0.3.21 CODEX REQUEST.**
+> This November 19 draft contains older shortcut-card logic and keyboard assignments. The owner-final authoritative specification is **[`/screenshot-logic-final/README.md`](../screenshot-logic-final/README.md)** and **[`/screenshot-logic-final/TEST_MATRIX.md`](../screenshot-logic-final/TEST_MATRIX.md)**. Codex must implement ONLY the final logic, not this file's outdated shortcut UI. The [clean 0.3.21 master request](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md) excludes Auto-Reroute, which is deferred to 0.3.22. Preserve this file only for historical research and matching background.
+>
 **Owner additions:** November 19, 2026. **Status:** New implementation request, NOT already implemented in the inspected 0.3.20 branch. Read [the code-audited delta-only handoff](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Do not recreate the existing V3+1.1 File API, shortcut registry, Explorer, download ZIP, native save or History systems.
 
 **CANONICAL FROZEN SCREENSHOT LOGIC:** [`/screenshot-logic/README.md`](../screenshot-logic/README.md) (owner freeze Nov 20). This older long design handoff contains historical examples and implementation background. If any old detail contradicts the frozen root document—especially shortcut keys, screenshot-card subscriptions, ordinary additive matching, one-off right-click exceptions, plan/ID/Worker invariants—**the frozen root document wins**. Do not reopen Exclusive Save or invent shortcut-takeover behavior. Source code and live Chrome/R2 proof remain pending.
