@@ -3,7 +3,7 @@
 **Date:** November 19, 2026
 **Repository:** `thanks-cohn/Click2Cloud`
 **Historical audit basis:** `codex/click2cloud-0.3.20` at `2481fcf9cba262efc421844079a13939ca5985aa`; **implementation must compare current `main` HEAD**, which already includes 0.3.20, not assume this historical audit is fresh.
-**Priority:** Preserve completed 0.3.20 work; fix only demonstrated gaps; implement the newly specified Rules feature as a separate gated workstream.
+**Priority:** Preserve completed 0.3.20 work; implement and verify separately gated features as the next proposed Click2Cloud **0.3.21** release. Existing `main` source remains 0.3.20 until real implementation/release testing; do not bump prematurely.
 
 > **This is the authoritative next-run request.** The large historical `next-codex/README.md` / `CODEX_NEXT_EXPLORER_SEARCH_UI_AND_WORKER_IMPLEMENTATION_2026-11-18.md` described work that WAS implemented on the 0.3.20 branch. **Do not blindly execute their old implementation steps again.** Read the present source and tests, compare current HEAD to the audited snapshot, and do only genuine remaining deltas. Older requirements remain useful as acceptance criteria, not as proof of missing code.
 
@@ -12,6 +12,16 @@
 **Owner's latest autoreroute data path (Nov 20):** **CHROME BROWSER FETCHES THE ORIGINAL FILE BYTES and STREAMS THOSE BYTES INTO THE EXISTING TRUSTED WORKER → R2.** This is the mandatory data path for automatic download Rules; **not** Worker-side URL fetching, not a local Downloads-file upload, not merely a download-cancel event, and not a screenshot requirement. Browser fetch permissions, intercept timing, streaming upload, multipart/known-size constraints, durable receipts and fallback for unsupported downloads must be real and tested.
 
 **Mandatory companion preimplementation audit:** [Screenshot + Auto-Reroute Architecture Audit (2026-11-20)](SCREENSHOT_AND_AUTOREROUTE_ARCHITECTURE_AUDIT_2026-11-20.md). This adds the FOUR screenshot safeguards and identifies what remains unimplemented or technically blocked for both engines.
+
+## 0.3.21 RELEASE TARGET — OWNER DECISION (Nov 20, 2026)
+
+**Next intended product release is `Click2Cloud 0.3.21`** (owner shorthand: "version 3.21"), following existing `0.3.20`. The CURRENT repository baseline remains `0.3.20` until implementation and release gate; do not edit `package.json`, lockfiles, extension manifest, build artifacts, release tags or GitHub release metadata merely to make the version number appear complete in a planning document. At the actual verified release milestone, bump `package.json`, `package-lock.json` (when present/affected), `extension/manifest.json` and all generated/bundled package metadata consistently to **`0.3.21`**. Do not change `manifest_version: 3` (that describes Chrome MV3, not product version). Produce an installable extension artifact matching the new release version, with real test and source SHA evidence; any version string in user-facing UI should derive consistently from the actual build.
+
+**Milestone strategy and no-false-completion gate:** This is a substantial release and a single Codex session is NOT evidence that every new feature works. Commit/push separate reviewable sub-milestones: (1) preserve/regression-check existing 0.3.20 foundation and P1 fixes, (2) implement/test frozen screenshot signal + rules UI + immutable plan, (3) implement/test authorized Worker screenshot fan-out and per-output receipts in real Chrome/R2 where available, (4) implement simple Auto-Reroute rule cards + capability registry, (5) demonstrate eligible Chrome-origin BYTES→Worker→R2 with safe pre-download handoff, then extend V1 formats/multipart, (6) integrate/regress/test/build and **only then** mark `0.3.21` release ready. Require explicit DONE/TESTED/NOT TESTED/BLOCKED per sub-milestone. If source interception cannot be proved, report Auto-Reroute as BLOCKED/INCOMPLETE rather than claiming the entire release is complete.
+
+**Priority:** protect existing right-click save, Simple/Narrow/Depth, OAuth and receipts from speculative rewrites. Avoid one giant unreviewed change that simultaneously replaces the shortcut engine, Worker authorization and Chrome downloading.
+
+---
 
 ## Latest owner-approved canonical feature contracts (Nov 20, 2026)
 
@@ -34,7 +44,7 @@
 
 | Earlier Codex task | Evidence in current branch | What to do |
 | --- | --- | --- |
-| Extension version 0.3.20 | `extension/manifest.json` and `package.json` both show `0.3.20` | Verify generated build/install version; **do not repeat the bump** |
+| Extension baseline 0.3.20 → proposed release 0.3.21 | `extension/manifest.json` and `package.json` currently show `0.3.20` | Preserve 0.3.20 during development; at genuinely verified release bump package, lockfile, Chrome extension manifest and artifacts consistently to **0.3.21**; do not confuse `manifest_version: 3` with product version |
 | Filename search engine, current folder scope, paging, IndexedDB inventory | `src/api/service.mjs`, `extension/app.mjs`, `docs/evidence/filename-search.md`, `scripts/test-filename-search-browser.mjs` | Keep engine, only fix Search UI lifecycle below |
 | Search pop-out and Ctrl+Shift+F7; expanded toolbar, F8/F9 and removed extra More controls | `extension/explorer-layout.mjs`, `scripts/test-release-0320-browser.mjs` | Verify/reuse; add X and preserve query/results |
 | Editable shortcuts Settings card, collision checks, persistent binding resolver | `extension/shortcut-settings.mjs`, `src/api/shortcuts.mjs` | Verify only; do not build a second shortcut system |
