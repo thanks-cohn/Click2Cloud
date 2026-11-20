@@ -1,5 +1,11 @@
 # Click2Cloud — V3+1 /scaffold Chrome Product
 
+> **NEW owner-approved feature specifications (November 20, 2026):**
+> - **[Frozen Screenshot Logic](screenshot-logic/README.md)** — immutable additive signal/subscriber model, one capture/upload, default one-image-per-directory, stable IDs, canonical directories and verified Worker fan-out. No Exclusive Save.
+> - **[Auto-Reroute Rules + Chrome Byte Streaming](auto-reroute/README.md)** — simple Website + Extension + Save cards with independent Active toggle and X delete; authorized R2 destination; eligible Chrome-byte-stream transfer, not Worker URL refetch.
+> - **[Current Codex master handoff](next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md)** — invokes both canonical documents and the technical audit. Older requirements below in this README remain historical context where they conflict.
+>
+
 Cloudflare Milestone 01 integration and current evidence: [implementation handoff](foundations/cloudflare/MILESTONE_01_IMPLEMENTATION.md). Use Node 22+, `npm ci --ignore-scripts`, `npm run test:focused`, and `npm run build:extension`. Installed-Chrome and live R2 transfer acceptance remain blocked as documented; deployment alone is not READY.
 
 > **CURRENT FINAL CODEX MISSION:** See [docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md](docs/CODEX_FINAL_V3P1_GUI_WINDOWS_EXPLORER_LOGIN_AND_API_2026-11-05.md) for the authoritative next product GUI/login/Explorer/API request. It supersedes conflicting earlier UX/placement examples. Read AGENTS.md first.
