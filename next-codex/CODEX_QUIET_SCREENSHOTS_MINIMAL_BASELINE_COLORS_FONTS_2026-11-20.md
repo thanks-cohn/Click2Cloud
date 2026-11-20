@@ -226,27 +226,43 @@ This change is part of the SAME experimental branch, not a reason to rewrite the
 
 ---
 
-## H. REMOVE ALL SCREENSHOT-RELATED RIGHT-CLICK ENTRIES — owner superseding instruction (Nov 20, 2026)
+---
 
-**Remove Screenshot from Click2Cloud right-click menus COMPLETELY. This is an explicit owner reversal of the former screenshot-logic-final requirement for a one-off native right-click Screenshot action.** It applies to the browser's native Chrome page/image/link right-click menu AND the Click2Cloud File Explorer's own right-click menu. Do not leave Screenshot, Screenshot → Choose folder…, screenshot destination submenus, or Screenshot2Here in any right-click menu. Do not replace them with a differently named screenshot option. Screenshot functionality remains in **More → Screenshots** and the two keyboard shortcuts **Alt+Q** and **Ctrl+Shift+Y**.
+## H. PRECISE RIGHT-CLICK SCOPE CORRECTION — owner superseding instruction (Nov 20, 2026)
 
-**Exact code boundaries confirmed in the current repair version:**
+**CRITICAL CORRECTION TO PRIOR INCORRECT INSTRUCTIONS: REMOVE THE SCREENSHOT SUBMENU FROM CHROME'S NATIVE RIGHT-CLICK MENU ONLY. KEEP `Screenshot2Here` IN CLICK2CLOUD FILE EXPLORER'S OWN RIGHT-CLICK MENU, COMPLETELY FUNCTIONAL.**
 
-- **src/chrome/screenshot-menu.mjs**: builds native Chrome Screenshot root, direct folder submenus and Choose folder…. Stop registering these native items.
-- **extension/screenshot-background.mjs**: registerExtras() adds these items; onNativeClick() handles them and invokes screenshot.one-off. Retire native screenshot menu registration and click dispatch. Preserve the normal screenshot runner, rules, default card, shortcuts, capture, verification, retries and History.
-- **extension/background.mjs**: createChromeRegistrar receives registerExtras:screenshots.registerExtras and extraClick:screenshots.onNativeClick. Remove only these screenshot-specific integrations, keeping regular contextMenus registration, ordinary right-click Save actions, and Simple/Narrow/Depth engines unchanged.
-- **extension/app.mjs**: File Explorer context menu adds Screenshot2Here for folder/root right-click. Remove this screenshot-specific menu action. Keep + Right Click, Make Default, file management, destination operations and all other Explorer actions.
-- **src/chrome/registrar.mjs**: the canonical native menu application uses chrome.contextMenus.removeAll() followed by rebuild. Confirm upgrading and Reloading the already-installed extension **removes stale screenshot menu entries**. Do not require user to uninstall, wipe storage, or reset OAuth. Preserve registrar reliability and all existing ordinary save menus.
-- **extension/manifest.json**: retain contextMenus permission for normal Save actions, and retain both screenshot shortcut commands. No unrelated manifest-permission removal.
+These are TWO DIFFERENT context menus with separate jobs. The owner never authorized removing `Screenshot2Here`. Earlier wording requiring its removal was an assistant mistake and is explicitly WITHDRAWN. Follow this section over any other contradictory language in this request. Do not infer that removing one screenshot UI requires removing another.
 
-The prior Chrome right-click one-off screenshot and Explorer right-click Screenshot2Here UX routes are now explicitly obsolete. Remove or isolate supporting dead code narrowly, not by rewriting the save engine. **Users still create, edit and delete screenshot rules and choose multiple folders in More → Screenshots.** Saving a rule does not capture; shortcuts perform the configured capture normally.
+### REMOVE ONLY Chrome's native webpage right-click screenshot submenu
 
-**Mandatory tests:**
+- Remove `Screenshot` and its submenu items, including `Choose folder…` and destination entries, from the **native Chrome context menu** on webpages, images, links, selections, etc.
+- Relevant code: `src/chrome/screenshot-menu.mjs` generates this native submenu; `extension/screenshot-background.mjs` provides `registerExtras` and `onNativeClick`; `extension/background.mjs` wires these to `createChromeRegistrar({registerExtras:screenshots.registerExtras,extraClick:screenshots.onNativeClick,...})`. Remove or deactivate **only the native screenshot menu registration/dispatch paths**. Do not disturb normal browser right-click Cloudflare Save actions.
+- `src/chrome/registrar.mjs` uses `chrome.contextMenus.removeAll()` during reconciliation. Confirm stale Chrome screenshot entries disappear after **Reload on an existing installation**, without uninstalling Click2Cloud or losing its storage, settings, OAuth or saved rules.
+- Keep `contextMenus` permission for actual non-screenshot Save menus. Do not touch the reliable Simple/Narrow/Depth menu engines.
 
-1. Update installed-Chrome screenshot tests that previously EXPECTED a native one-off Screenshot entry: now explicitly assert NONE exists. Also assert no screenshot option in the Explorer folder/item context menu. Do not simply delete all context-menu coverage.
-2. Test an **upgraded existing extension profile**: after Reload and menu reconciliation, legacy Screenshot native items are gone, while existing rules, Cloudflare connection, History and user settings remain.
-3. Test ordinary page/link/image context-menu Saves and Simple/Narrow/Depth menus for regressions.
-4. Both Alt+Q and Ctrl+Shift+Y still upload the PNG to every saved selected directory with the original direct R2 GET/SHA-256 proof and History receipts. The More → Screenshots page remains.
-5. No regressions to quiet notifications, screenshot History previews, all public-domain URLs, Minimal/Remote V1 appearance, F7/F9, or the released F8 key.
+### PRESERVE COMPLETELY the Click2Cloud File Explorer Screenshot2Here feature
 
-**Treat any remaining Screenshot-related right-click menu entry in the delivered extension as a failed acceptance test.** Deliver working code, verified tests and an installable build, not another audit.
+- `extension/app.mjs` currently registers `action('Screenshot2Here',()=>screenshotUI.configureHere(structuredClone(t)))` when right-clicking an Explorer folder/root. **LEAVE THIS ACTION IN PLACE. DO NOT REMOVE, HIDE, RENAME OR DISABLE IT.**
+- This action CONFIGURES an existing or new Screenshot rule for the clicked Explorer directory. It is NOT the unwanted Chrome native webpage right-click screenshot capture menu. Keep the exact selected directory, website matching, add/replace rule handling, normal Save behavior, and active rule IDs intact.
+- Keep `extension/screenshot-page.mjs`'s `screenshotUI.configureHere` and its supporting folder → Screenshot-rule editing path. It must still be reachable directly by right-clicking a directory INSIDE Click2Cloud File Explorer, with the existing configuration and persistence semantics.
+- Removing Chrome's native one-off capture submenu must not accidentally remove shared helpers, screenshot rule handling, folder selection, or routing used by Explorer `Screenshot2Here` or the main `More → Screenshots` settings page.
+
+### ALSO PRESERVE
+
+- `More → Screenshots` (plural) UI, rule configuration and editing.
+- `Alt+Q` and `Ctrl+Shift+Y` screenshot capture → direct Cloudflare R2 upload → readback SHA-256 verified History receipts.
+- Default screenshots rule, previews, URLs, all enabled public domains, quiet notification preference, other context-menu actions.
+- Non-screenshot browser right-click Save and all File Explorer operations.
+
+### Strict mandatory acceptance tests
+
+1. Browser webpage/image/link native right-click: **NO Screenshot root or nested Screenshot option.** Existing native Save entries still work exactly as before.
+2. Click2Cloud File Explorer right-click on an authorized directory: **`Screenshot2Here` IS PRESENT, CLICKABLE AND WORKS.** Assert it opens rule configuration for that exact directory, permits appropriate site scope and saves a persistent rule WITHOUT taking a screenshot merely on Save.
+3. Using the configured Explorer `Screenshot2Here` rule, press Alt+Q or Ctrl+Shift+Y on a matching ordinary webpage; verify the image reaches that EXACT R2 folder and gets an independent receipt. Verify edits/add/replace and existing rules remain intact.
+4. Upgrade/reload an existing installation: old native Screenshot submenu disappears but Explorer `Screenshot2Here` REMAINS, and user settings, saved rules, OAuth, History and all other right-click menus are intact.
+5. The browser test must distinguish **native Chrome page context menu** from **internal Click2Cloud Explorer context menu**; do not write an assertion that both must lack screenshot functions. Maintain regression coverage for each separately.
+
+**Do not remove any screenshot feature other than the unwanted native Chrome browser context-menu Screenshot submenu. If `Screenshot2Here` is missing from Click2Cloud Explorer, the repair is a FAILURE.**
+
+**Deliver actual working code, tests and installable build—not only a plan.**
