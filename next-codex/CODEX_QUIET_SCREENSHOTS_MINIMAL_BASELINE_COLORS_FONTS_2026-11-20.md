@@ -318,3 +318,59 @@ These are TWO DIFFERENT context menus with separate jobs. The owner never author
 - Add tests: today's saved PNG opens and previews correctly; if the History reader is given a valid supported non-PNG image object in a controlled fixture, preview logic decodes it without an artificial hardcoded `.png` requirement; unsupported/corrupt bytes get a graceful placeholder with History receipt preserved.
 
 **This clarification supersedes any earlier 'font selector,' 'persist font separately,' or 'PNG-only preview' phrasing in this file.**
+
+---
+
+## K. Move Remove Default Location and repair Get URL activation — REDOWN comparison audit, 20 Nov 2026
+
+These are ADDITIONAL owner requirements on the SAME experimental branch, not permission to modify main or the existing working screenshot branch. Make actual source changes, prove them, build, commit and push.
+
+### K1. Move Remove Default Location to the VERY BOTTOM of Settings
+
+- In extension/app.mjs renderSettings(), the existing conditional Remove Default Location button (id clear-default) is currently placed immediately after the Settings heading.
+- Move the SAME control to the literal very bottom of the fully rendered Settings view, BELOW all other settings including controls appended dynamically (Debug, History preferences, Keyboard Shortcuts, other preferences). An element placed at the end of initial innerHTML is NOT necessarily bottom after later DOM append calls.
+- Prefer a small separated final section titled Default location with the existing Remove Default Location button. Keep it hidden when no default is configured.
+- Keep existing confirmation, clearDefault behavior, state persistence, saved destinations, cloud objects, existing event binding and keyboard accessibility. Do not create duplicate IDs or clear cloud data.
+- Browser test presence/absence and actual bottom-of-DOM order in Minimal and Remote V1.
+
+### K2. BUG: Click2Cloud says Allow Public URL? Yes but never actually activates public URLs
+
+Owner symptom: selecting Get URL on an image without an active domain repeatedly shows Allow Public URL?; clicking Yes then Recheck yields "No verified public URL for this object. To add one, configure the bucket’s public domain in Cloudflare and Recheck." and "Domain check updated." The same Yes prompt reappears when opening the SAME image again.
+
+CONFIRMED ROOT CAUSE IN CLICK2CLOUD:
+- extension/explorer-exports.mjs urls(source,entry): reads getPublicUrls and when info.domains is empty asks Allow Public URL? But the Yes callback is merely document.querySelector('#public-url-yes').onclick=open. That only opens the editor: NO managed-domain API mutation happens.
+- extension/explorer-exports.mjs domainControls(): Recheck invokes get() and re-renders info; Submit only rechecks the typed domain. "Domain check updated" means the lookup finished, NOT that public access was enabled, a hostname attached, or a public URL verified.
+- src/api/service.mjs: getPublicUrls is an inspect/read-only method. It invokes readCustomDomains and readManagedDomain and returns verified domains. It has no effectful enable action.
+- extension/background.mjs readManagedDomain/readCustomDomains read bucket domain state only. Existing image URL card DOM below the custom-domain input is capable of rendering the returned URLs, but receives an empty list because nothing was enabled by the Yes action.
+
+REDOWN REFERENCE — use the tested pattern, not a wholesale port:
+- thanks-cohn/REDOWN extension/public-addresses.js: popup only offers enable when no usable URL exists and managedPublicAccess is confirmed "disabled" for the exact selected bucket. Consent is explicit and describes bucket-wide public exposure. It invokes the dedicated enable callback, waits, and reloads URL discovery for the SAME file after success.
+- thanks-cohn/REDOWN extension/options.js: enable callback sends the separate cfEnablePublicAccess message, distinct from read-only cfPublicAddresses.
+- thanks-cohn/REDOWN extension/background.js: enableBucketPublicAccess(message,sender) verifies an authorized Explorer caller and explicit confirmed:true, GETs managed-domain state, only PUTs {"enabled":true} if currently disabled, then GETs again and requires enabled:true plus a valid actual r2.dev domain. It returns distinct denied/auth-expired/unconfirmed codes. bucketPublicAddresses discovers managed and all custom domains without changing them.
+- REDOWN tests/public-addresses.test.mjs and tests/get-url.test.mjs cover scoped one-time enable, no write for already-enabled buckets, readback, URL list refresh, cancellations, failures, stale selection, and multiple domains.
+- REDOWN uses additional Worker asset domains and an independent UI. DO NOT copy its Worker-specific URL path, special Worker setup, hidden credentials, or unrelated features into Click2Cloud. Use its read/PUT/readback and honest state transitions only.
+
+IMPLEMENT THE WORKING CLICK2CLOUD REPAIR:
+1. On Get URL, discover the ACTUAL currently enabled managed development hostname AND all active custom domains for the EXACT currently selected account/bucket. If even one active URL exists, show all actual exact-object URLs immediately in the existing Get URL URL cards UNDER the custom-domain input. Do NOT show initial public-enable consent for already-public buckets. An active custom domain works with r2.dev disabled.
+2. When there are NO active public URLs, and managed public status is confidently DISABLED (not unknown due to permissions or network), offer an explicit enable action that clearly states an entire R2 bucket will become publicly readable by anyone knowing object URLs. Never make the bucket public just because the user opened Get URL, clicked Recheck, or viewed History.
+3. The Yes action MUST actually invoke a separate validated, trusted, effectful command in src/api/service.mjs, with an authenticated Cloudflare mutation in extension/background.mjs. The command must be scoped to the exact user-authorized account and bucket with explicit confirmation, respecting authorization and any existing agent permission-grant boundary. The existing read-only getPublicUrls method must remain read-only.
+4. Use Cloudflare's documented managed-domain operation: PUT /accounts/{account_id}/r2/buckets/{bucket_name}/domains/managed with JSON body {"enabled":true}. Follow the REDOWN idempotent GET-before-PUT design: if already enabled, no redundant PUT. After any necessary PUT, independently GET the SAME managed-domain endpoint and require Cloudflare to return enabled:true with a real valid managed r2.dev hostname. Never fabricate pub-... or confuse the exact bucket with a default/current one.
+5. Immediately refresh getPublicUrls for the SAME selected image and show the full development URL directly UNDER the Get URL custom-domain input, alongside EVERY active custom-domain URL. Do not require a second right-click, a second Yes, or manual Recheck. Keep the selected file/key and optional text field intact as the mutation resolves. Reopening Get URL on that same image or a sibling in that bucket must recognize previously enabled URLs from Cloudflare state and never ask again.
+6. Recheck is a read-only state refresh. Its response must be semantically clear: "Public URL enabled" ONLY when the actual managed domain was confirmed; "No public domain configured", "Cloudflare domain check incomplete", "Cloudflare denied activation", "Reconnect required" etc. as applicable. DO NOT imply "Domain check updated" means activation succeeded. Do not claim public-object anonymous GET reachability unless separately checked.
+7. If PUT fails (401/403/scope, network, provider error), or readback is disabled/ambiguous, show one actionable error while preserving user context, and allow retry after permission/state resolution. DO NOT get into endless consent loops after ambiguous results. A 2xx response alone is insufficient for success.
+8. The custom-domain field is currently a read-only validation flow, not an actual attach action. Never imply that clicking Submit created a domain association. Implement a separate authorized attach operation if genuinely supported or label the field "Check existing domain" and link to Cloudflare's real setup. Keep the desired helper copy "If your nameservers are already with Cloudflare, simply add your domain!" only in a truthful optional attach flow.
+9. Preserve exact nested object keys (spaces, Unicode, reserved chars), all active public domains without a two-link cap, full Copy values, per-bucket isolation, and no URL for an unverified file. No new screenshot Worker dependency. Reuse current objectUrls(), verifiedDomains(), verifiedDevelopmentDomain() and existing Get URL UI.
+10. Screenshot History > URLs must REUSE the repaired bucket-domain inspection and explicit enable/readback behavior. Avoid competing duplicate public-domain activation implementations or inconsistent states in Get URL versus screenshot History.
+11. Continue to keep File Explorer Screenshot2Here and More > Screenshots. REMOVE only the unwanted Chrome native webpage Screenshot submenu per section H. Preserve all ordinary Save, Simple/Narrow/Depth and existing screenshot operations.
+
+MANDATORY TESTS:
+- Reproduce the existing RED case: Yes only opens editor, zero PUT, Recheck returns empty, same image asks again. After repair this sequence MUST be impossible.
+- Disabled bucket: confirm/cancel causes ZERO writes. Confirm/Yes causes exactly one scoped PUT when needed; GET readback verifies enabled:true and exact provider hostname; same-dialog URL cards appear with exact asset URL.
+- Reopen the same image (and a different object in same already-enabled bucket) after closing window and restarting extension: ZERO further consent or PUT, real development URL appears immediately from read-only GET.
+- Already enabled r2.dev: Get URL immediately displays the actual managed URL. Already public with custom domain but r2.dev disabled: show all actual active custom URLs and never insist on managed enable.
+- Many active domains from same bucket: every one shown; different account/bucket results never cross; no invented URL or stale result after switching files.
+- Cloudflare 401,403, failed PUT, readback lag, unknown managed-domain status, malformed response, API exception: errors are clear and accurate, no success unless confirmed, no repeated phantom-activation UX.
+- Build and focused tests, existing Get URL TXT/grouped directory exports, screenshot receipts, History image/URLs, Screenshot2Here, F7/F9, two themes and ordinary right-click save regressions. Include installed-Chrome browser evidence where runnable; distinguish local Cloudflare mock/fixture from live account verification.
+
+Official endpoint documentation: https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/domains/subresources/managed/methods/update/
+REDOWN reference documentation: thanks-cohn/REDOWN docs/explorer/GET_URL_AND_STATUS.md (section "Enable public URL from the URL menu").
