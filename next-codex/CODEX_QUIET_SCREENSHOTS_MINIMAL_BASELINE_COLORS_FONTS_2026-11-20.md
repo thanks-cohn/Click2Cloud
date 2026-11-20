@@ -222,3 +222,31 @@ The current code has different commands (do not conflate their functionality):
 **Acceptance tests:** Ctrl+Shift+F8 is a no-op in the extension even with historical saved overrides; the one/two-row toolbar UI still works; F7 focuses Search; F9 still resets panel split; Alt+Q and Ctrl+Shift+Y screenshot behavior remains unchanged; all remaining shortcut settings persist across reloads and reset defaults correctly; no impact to R2 upload/History/URLs/themes.
 
 This change is part of the SAME experimental branch, not a reason to rewrite the shortcut subsystem or the save engine.
+
+
+---
+
+## H. REMOVE ALL SCREENSHOT-RELATED RIGHT-CLICK ENTRIES — owner superseding instruction (Nov 20, 2026)
+
+**Remove Screenshot from Click2Cloud right-click menus COMPLETELY. This is an explicit owner reversal of the former screenshot-logic-final requirement for a one-off native right-click Screenshot action.** It applies to the browser's native Chrome page/image/link right-click menu AND the Click2Cloud File Explorer's own right-click menu. Do not leave Screenshot, Screenshot → Choose folder…, screenshot destination submenus, or Screenshot2Here in any right-click menu. Do not replace them with a differently named screenshot option. Screenshot functionality remains in **More → Screenshots** and the two keyboard shortcuts **Alt+Q** and **Ctrl+Shift+Y**.
+
+**Exact code boundaries confirmed in the current repair version:**
+
+- **src/chrome/screenshot-menu.mjs**: builds native Chrome Screenshot root, direct folder submenus and Choose folder…. Stop registering these native items.
+- **extension/screenshot-background.mjs**: registerExtras() adds these items; onNativeClick() handles them and invokes screenshot.one-off. Retire native screenshot menu registration and click dispatch. Preserve the normal screenshot runner, rules, default card, shortcuts, capture, verification, retries and History.
+- **extension/background.mjs**: createChromeRegistrar receives registerExtras:screenshots.registerExtras and extraClick:screenshots.onNativeClick. Remove only these screenshot-specific integrations, keeping regular contextMenus registration, ordinary right-click Save actions, and Simple/Narrow/Depth engines unchanged.
+- **extension/app.mjs**: File Explorer context menu adds Screenshot2Here for folder/root right-click. Remove this screenshot-specific menu action. Keep + Right Click, Make Default, file management, destination operations and all other Explorer actions.
+- **src/chrome/registrar.mjs**: the canonical native menu application uses chrome.contextMenus.removeAll() followed by rebuild. Confirm upgrading and Reloading the already-installed extension **removes stale screenshot menu entries**. Do not require user to uninstall, wipe storage, or reset OAuth. Preserve registrar reliability and all existing ordinary save menus.
+- **extension/manifest.json**: retain contextMenus permission for normal Save actions, and retain both screenshot shortcut commands. No unrelated manifest-permission removal.
+
+The prior Chrome right-click one-off screenshot and Explorer right-click Screenshot2Here UX routes are now explicitly obsolete. Remove or isolate supporting dead code narrowly, not by rewriting the save engine. **Users still create, edit and delete screenshot rules and choose multiple folders in More → Screenshots.** Saving a rule does not capture; shortcuts perform the configured capture normally.
+
+**Mandatory tests:**
+
+1. Update installed-Chrome screenshot tests that previously EXPECTED a native one-off Screenshot entry: now explicitly assert NONE exists. Also assert no screenshot option in the Explorer folder/item context menu. Do not simply delete all context-menu coverage.
+2. Test an **upgraded existing extension profile**: after Reload and menu reconciliation, legacy Screenshot native items are gone, while existing rules, Cloudflare connection, History and user settings remain.
+3. Test ordinary page/link/image context-menu Saves and Simple/Narrow/Depth menus for regressions.
+4. Both Alt+Q and Ctrl+Shift+Y still upload the PNG to every saved selected directory with the original direct R2 GET/SHA-256 proof and History receipts. The More → Screenshots page remains.
+5. No regressions to quiet notifications, screenshot History previews, all public-domain URLs, Minimal/Remote V1 appearance, F7/F9, or the released F8 key.
+
+**Treat any remaining Screenshot-related right-click menu entry in the delivered extension as a failed acceptance test.** Deliver working code, verified tests and an installable build, not another audit.
