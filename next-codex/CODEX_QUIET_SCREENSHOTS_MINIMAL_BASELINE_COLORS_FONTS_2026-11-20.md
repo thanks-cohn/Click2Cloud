@@ -266,3 +266,32 @@ These are TWO DIFFERENT context menus with separate jobs. The owner never author
 **Do not remove any screenshot feature other than the unwanted native Chrome browser context-menu Screenshot submenu. If `Screenshot2Here` is missing from Click2Cloud Explorer, the repair is a FAILURE.**
 
 **Deliver actual working code, tests and installable build—not only a plan.**
+
+
+---
+
+## I. Screenshot History GO TO for EACH destination — owner requirement (November 20, 2026)
+
+**Every Screenshot History entry must provide working GO TO navigation to the actual saved location(s) inside Click2Cloud File Explorer.** If the screenshot was sent to 1 folder, that folder gets GO TO; if it was sent to 3 folders, there are **3 separately functional GO TO buttons**, one beside each exact output. No arbitrary destination cap. One screenshot capture is one History entry, with a potentially multi-destination list.
+
+**Current root cause:** `extension/history-page.mjs` renders `screenshotRow(r)` separately from ordinary image rows, without any GO TO button. Ordinary `row(r)` has `data-history-goto` tied to the whole operationId, and `extension/app.mjs`'s existing `goTo(operationId)` calls `openRemoteResult({operationId})` then `navigate(result.target)` / `revealListedFile(...)`. That method assumes ONE result target; a screenshot receipt instead has `r.screenshot.outputs[]` with **separate exact destination/account/bucket/key/outputId** for each physical save. Never treat the whole screenshot's operationId as identifying all locations or navigate to whatever bucket is currently selected.
+
+**Required UI/behavior:**
+1. Render an ordinary **GO TO** button adjacent to EACH destination row under the screenshot's receipt details, aligned with exact account/bucket/prefix/key and its verified/failed/pending status. For one output, there's one. For 20 outputs, all 20 can be reached; use a bounded scrollable output list if necessary instead of making History absurdly tall. Optional top-level GO TO may directly navigate when there is exactly one destination, but must never silently choose between multiple locations.
+2. Clicking a destination-specific GO TO must switch to File Explorer, select the recorded Cloudflare account + bucket, navigate to the **exact containing folder prefix** derived from that output's saved object key/authorized target, and where the object exists, select/focus/highlight that EXACT PNG, consistent with normal History GO TO. No recapture, reupload, source rewrite, rule modification, or cloud mutation merely to navigate.
+3. Use `outputId` (plus capture/operation ID) as the stable per-button lookup handle; obtain the corresponding frozen output `destination` and `key` from trusted retained screenshot History data, not user-controlled click-supplied account/key strings or the present selected/default destination. Button attributes should not authorize arbitrary path selection. Validate the selected account, bucket, and key and recheck existing session authority before opening it.
+4. For **confirmed** outputs, attempt file-existence validation and highlight the actual file. An R2 direct Object API screenshot must NOT require the screenshot Worker to be provisioned merely for GO TO. If the usual `fileMetadata`, folder listing, or `openRemoteResult` flow requires a Worker and breaks for direct screenshot files, create the **smallest safe read-only navigation adapter** using existing authenticated Cloudflare API to resolve the actual recorded account/bucket/key. Then call existing Explorer navigation machinery; do not weaken existing anti-stale-navigation protections.
+5. For **pending/failed/unconfirmed** outputs, retain a GO TO action so the user can inspect the intended **directory** when the account/bucket still exists, but DO NOT claim the PNG exists or highlight a nonexistent object. Distinguish “Open destination folder” from “Verified file present” via normal status text. If the configured account no longer exists, bucket is inaccessible, or folder listing is offline, show a short accurate message and keep the History entry and receipt.
+6. Preserve the existing working GO TO behavior for ordinary image/download History. Do not break `Screenshot2Here` in Click2Cloud File Explorer (that is a completely separate feature the owner explicitly ordered to KEEP) or ordinary Chrome right-click Save.
+7. For prior Screenshot History entries already recorded, GO TO must work as long as the receipt has a valid destination/key and current authorization allows it. No dependence on the temporary 1-hour retry-image cache or whether public URL publication was set up. A private R2 bucket is navigable with the user's authenticated access.
+8. Keep History compact and accessible: each location has clear button labeling (e.g., “GO TO — redown/screenshots/”), sensible keyboard focus, per-button busy/error state; no entire-row disabled state preventing navigation to the other locations.
+
+**Mandatory real tests / acceptance:**
+- One screenshot saved to 1 folder: one GO TO opens that exact folder and highlights the screenshot PNG.
+- One screenshot saved to 3 distinct folders (possibly different buckets/accounts): **3 GO TO buttons**, each opens ITS OWN exact recorded folder and highlights ITS OWN exact PNG; no silent selection of the first/default/current bucket.
+- Partial 2/3: both confirmed files navigate correctly; third GO TO opens the intended location where permitted but says unverified/not found, never fabricates a saved object.
+- A screenshot from a previous session, after extension/Chrome reload and after retry image cache expiry, still navigates from retained receipt and authorized R2 object.
+- Missing/revoked Cloudflare account, deleted bucket, missing object, and navigation interrupted by user produce truthful local errors, do not change current file, and leave other GO TO buttons usable.
+- No forced Worker setup for direct R2 screenshots; preserve History image preview, expandable all-domain URLs, all saved receipt outputs, Simple/Narrow/Depth menus and normal GO TO regression tests.
+
+**This is required in the SAME dedicated experimental branch, alongside quiet notifications, the two themes, screenshot previews/URLs, and removal ONLY of the Chrome browser Screenshot submenu. DO NOT REMOVE Explorer Screenshot2Here. Implement and prove, not merely propose.**
