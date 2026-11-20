@@ -45,7 +45,20 @@ try{
       if(message.method==='getPublicUrls'&&window.fixturePublicDomains){
         const {objectUrls}=await import('/src/explorer/object-exports.mjs');
         const {source,key}=message.params,domains=window.fixturePublicDomains;
-        return {state:'completed',data:{domains,domainCheckComplete:true,...(key?{file:objectUrls(source,key,domains)}:{})}};
+        const managedDomain=domains.find(domain=>domain.endsWith('.r2.dev'))??null;
+        return {state:'completed',data:{domains,domainCheckComplete:true,managedDomain,
+          managedPublicAccess:managedDomain?'enabled':'disabled',...(key?{file:objectUrls(source,key,domains)}:{})}};
+      }
+      if(message.method==='enableBucketPublicAccess'){
+        const {objectUrls}=await import('/src/explorer/object-exports.mjs');
+        const {source,key,confirmed}=message.params;
+        if(!confirmed||source.bucketName!=='fixture-bucket')return {state:'blocked',code:'PERMISSION_DENIED'};
+        window.fixtureDomainWrites=(window.fixtureDomainWrites??0)+1;
+        if(window.fixtureHoldActivation)await new Promise(resolve=>{window.fixtureReleaseActivation=()=>{delete window.fixtureReleaseActivation;resolve();};});
+        const managedDomain='pub-provider-fixture.r2.dev';
+        window.fixturePublicDomains=[managedDomain];
+        return {state:'completed',data:{domains:[managedDomain],domainCheckComplete:true,managedDomain,
+          managedPublicAccess:'enabled',file:objectUrls(source,key,[managedDomain])}};
       }
       if(message.method==='listDirectoryObjects'&&message.params.immediate&&window.fixtureDirectoryLinks)
         return {state:'completed',data:{entries:window.fixtureDirectoryLinks.map(key=>({key})),nextCursor:null}};
@@ -156,10 +169,58 @@ try{
   for(const item of [page.getByRole('row').filter({hasText:'renamed.png'}),folder]){
     await item.click({button:'right'});
     await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
-    await page.getByRole('heading',{name:'Allow Public URL?',exact:true}).waitFor();
+    await page.getByText('Allow Public URL?',{exact:true}).waitFor();
     await page.getByRole('button',{name:'No',exact:true}).click();
   }
   gates.push('Files and folders use the same first-time public URL gate');
+  await page.evaluate(()=>{window.fixturePublicDomains=[];});
+  const reopenFileUrl=async()=>{
+    await page.getByRole('row').filter({hasText:'renamed.png'}).click({button:'right'});
+    await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
+  };
+  await reopenFileUrl();
+  const urlDialog=page.getByRole('dialog');
+  const customInput=urlDialog.getByRole('textbox',{name:'Custom domain'});
+  await urlDialog.getByRole('button',{name:'Yes',exact:true}).waitFor();
+  await urlDialog.getByRole('button',{name:'Recheck',exact:true}).click();
+  await urlDialog.getByText('No public domain configured.').waitFor();
+  assert.equal(await page.evaluate(()=>window.fixtureDomainWrites??0),0);
+  await customInput.fill('assets.example.org');
+  await page.evaluate(()=>{window.fixtureHoldActivation=true;});
+  await urlDialog.getByRole('button',{name:'Yes',exact:true}).click();
+  await urlDialog.getByText('Enabling public URL…').waitFor();
+  assert(await urlDialog.locator('#public-url-yes').isDisabled());
+  await page.waitForFunction(()=>typeof window.fixtureReleaseActivation==='function');
+  await page.evaluate(()=>{document.querySelector('#public-url-yes').click();window.fixtureReleaseActivation();});
+  const fixtureUrl='https://pub-provider-fixture.r2.dev/renamed.png';
+  const inlineUrl=urlDialog.locator('#public-urls').getByText(fixtureUrl,{exact:true});
+  await inlineUrl.waitFor();
+  assert((await inlineUrl.boundingBox()).y>(await customInput.boundingBox()).y);
+  assert.equal(await customInput.inputValue(),'assets.example.org');
+  assert.equal(await urlDialog.getByRole('link',{name:/Open Development URL/}).getAttribute('href'),fixtureUrl);
+  assert.equal(await page.evaluate(()=>window.fixtureDomainWrites),1);
+  await urlDialog.getByRole('button',{name:'Close',exact:true}).click();
+  await reopenFileUrl();
+  await urlDialog.getByText('https://pub-provider-fixture.r2.dev/renamed.png',{exact:true}).waitFor();
+  assert(await urlDialog.getByRole('button',{name:'Yes',exact:true}).isHidden());
+  assert.equal(await page.evaluate(()=>window.fixtureDomainWrites),1);
+  await urlDialog.getByRole('button',{name:'Close',exact:true}).click();
+  await page.evaluate(()=>{window.fixturePublicDomains=[];});
+  await reopenFileUrl();
+  await urlDialog.getByRole('button',{name:'Yes',exact:true}).click();
+  await urlDialog.getByText('Enabling public URL…').waitFor();
+  await page.waitForFunction(()=>typeof window.fixtureReleaseActivation==='function');
+  await urlDialog.getByRole('button',{name:'Close',exact:true}).click();
+  await page.evaluate(()=>{window.fixturePublicDomains=['assets.example'];});
+  await page.getByRole('row').filter({hasText:'notes.txt'}).click({button:'right'});
+  await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
+  // Use a different verified file for the next view while the old activation resolves.
+  await urlDialog.getByText('notes.txt',{exact:true}).waitFor();
+  await page.evaluate(()=>window.fixtureReleaseActivation());
+  await urlDialog.getByText('notes.txt',{exact:true}).waitFor();
+  assert.equal(await urlDialog.getByText(fixtureUrl,{exact:true}).count(),0);
+  await urlDialog.getByRole('button',{name:'Close',exact:true}).click();
+  gates.push('Get URL activates only after Yes and refreshes the same dialog without another prompt');
   await page.evaluate(png=>{
     window.fixtureImageData['projects/2026.png']=png;
     const fixture=window.productFixture;
@@ -198,7 +259,7 @@ try{
   await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
   const getUrl=page.getByRole('dialog');
   await getUrl.getByRole('button',{name:/Development URL https/}).waitFor();
-  assert.deepEqual(await getUrl.locator('.url-domain-row').evaluate(row=>[...row.children].map(el=>el.tagName==='INPUT'?'input':el.textContent)),['input','Submit','Copy All']);
+  assert.deepEqual(await getUrl.locator('.url-domain-row').evaluate(row=>[...row.children].map(el=>el.tagName==='INPUT'?'input':el.textContent)),['input','Check existing domain','Copy All']);
   await getUrl.getByRole('button',{name:'Copy All'}).click();
   assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'https://assets.example/renamed.png\nhttps://pub-verified.r2.dev/renamed.png');
   await getUrl.getByRole('button',{name:/Development URL https/}).press('Space');

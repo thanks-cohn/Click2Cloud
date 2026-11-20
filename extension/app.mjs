@@ -106,7 +106,7 @@ const listingReader=createListingReader(async(t,cursor,signal,fresh)=>{
  if(r.state!=='completed')throw Error(names[r.code]??r.code??'Provider listing unavailable.');
  return r.data;
 },{ttlMs:0,maxPages:0});
-async function api(method,params={}, {quiet=false,readTimeout=0,signal}={}) {
+async function api(method,params={}, {quiet=false,readTimeout=0,signal,reconnect=true}={}) {
   signal?.throwIfAborted();
   let result,timer,abort;
   try{
@@ -120,7 +120,7 @@ async function api(method,params={}, {quiet=false,readTimeout=0,signal}={}) {
   signal?.throwIfAborted();
   if(result==null)throw Object.assign(Error('ENGINE_NO_RESPONSE'),{code:'ENGINE_NO_RESPONSE',method,stage:'transport'});
   if(typeof result!=='object'||!['completed','partial','failed','blocked','uncertain','cancelled'].includes(result.state))throw Object.assign(Error('ENGINE_RESPONSE_INVALID'),{code:'ENGINE_RESPONSE_INVALID',method,stage:'transport'});
-  if(result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const code=result.code??'ENGINE_REQUEST_FAILED';reconnectAfter(code);const err=Object.assign(Error(names[code]??code),{code,method,stage:result.diagnostic?.stage??'api',diagnostic:result.diagnostic});if(!quiet)status(err.message,{attention:true});throw err;}
+  if(result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const code=result.code??'ENGINE_REQUEST_FAILED';if(reconnect)reconnectAfter(code);const err=Object.assign(Error(names[code]??code),{code,method,stage:result.diagnostic?.stage??'api',diagnostic:result.diagnostic});if(!quiet)status(err.message,{attention:true});throw err;}
   return result.data;
 }
 const explorerExports=createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange:hideContext});
@@ -649,7 +649,7 @@ async function contextFor(t,entry,x,y){
   action('Download original',()=>file?downloadEntry(file):explorerExports.download(scope,null,'original'));
   action('Download with Tags',()=>explorerExports.download(scope,file,'tags'));
   action('Download with All Metadata',()=>explorerExports.download(scope,file,'metadata'));
-  action('Get URL',()=>explorerExports.urls(scope,file));
+  action('Get URL',()=>explorerExports.urls(scope,file,()=>view==='explorer'&&contextEpoch===navigationEpoch));
   action('Add Tags',()=>explorerExports.tags(scope,file));
   if(!entry||entry.folder){action('Screenshot2Here',()=>screenshotUI.configureHere(structuredClone(t)));action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>makeExplorerDefault(t));}
   else {const save=action('Save to cloud…',()=>chooseRemoteSave(entry));if(capabilities?.providers?.cloudflare?.explorerSource===false){save.disabled=true;save.title='No authorized remote source is available for this private Explorer file.';}}

@@ -78,4 +78,5 @@ await import('./menu-manifest-workerd.test.mjs');
 await import('./history.test.mjs');
 
 import './screenshot.test.mjs';
+import './get-url.test.mjs';
 import './shelf-history-toggle.test.mjs';

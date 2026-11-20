@@ -73,6 +73,7 @@ const definitions={
   resetShortcutBindings:['configure',obj()],
   listDirectoryObjects:['inspect',obj({source:target,cursor:str,immediate:bool},['source'])],
   getPublicUrls:['inspect',obj({source:target,key:str,domains:{type:'array',items:str,maxItems:100}},['source'])],
+  enableBucketPublicAccess:['provision',obj({source:target,key:str,confirmed:{enum:[true]}},['source','confirmed'])],
   getExportObjectMetadata:['inspect',obj({source:target,key:str},['source','key'])]
 };
 export const toolRegistry=Object.freeze(Object.entries(definitions).map(([name,[scope,inputSchema]])=>Object.freeze({name,scope,version:'3+1.1',inputSchema,...(apiShortcutMetadata[name]?{command:apiShortcutMetadata[name]}:{}),effectful:!['inspect'].includes(scope)&&name!=='requestRestorePreview',transport:'trusted-local',outputSchema:obj({version:{enum:['3+1.1']},state:{enum:['completed','partial','blocked','failed','uncertain','cancelled']},code:str,data:{},diagnostic:{},receipt:{}},['version','state','code'])})));
@@ -98,9 +99,26 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readManagedDomain,readExportOptions}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readManagedDomain,enableManagedDomain,readExportOptions}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
+  async function bucketPublicDomains(source, confirmed) {
+    const [custom,managed]=await Promise.allSettled([
+      Promise.resolve().then(()=>readCustomDomains(source)).then(verifiedDomains),
+      Promise.resolve().then(()=>confirmed??readManagedDomain?.(source))
+    ]);
+    const customDomains=custom.value??verifiedDomains(custom.reason?.knownDomains??[]);
+    const managedDomain=verifiedDevelopmentDomain(managed.value);
+    const managedPublicAccess=managedDomain?'enabled':managed.value?.enabled===false?'disabled':'unknown';
+    const domainCheckComplete=custom.status==='fulfilled'&&managedPublicAccess!=='unknown';
+    const reasons=[managed.reason?.code,custom.reason?.code];
+    const authCode=reasons.find(code=>['REAUTH_REQUIRED','AUTH_REQUIRED','AUTH_SESSION_CHANGED','TOKEN_EXPIRED','AUTHORIZATION_REVOKED'].includes(code));
+    // A revoked session cannot authorize an inventory assembled during that session.
+    if(authCode)fail(authCode);
+    return {domains:[...new Set([...customDomains,...(managedDomain?[managedDomain]:[])])],managedDomain,
+      managedPublicAccess,domainCheckComplete,checkedAt:new Date().toISOString(),
+      ...(!domainCheckComplete?{domainCheckCode:reasons.find(Boolean)??'PUBLIC_DOMAIN_CHECK_INCOMPLETE'}:{})};
+  }
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
   async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection}={}){
@@ -240,7 +258,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['listDirectoryObjects','getPublicUrls','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
+        const independent=['listDirectoryObjects','getPublicUrls','enableBucketPublicAccess','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -396,7 +414,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);
-        else if(['listDirectoryObjects','getPublicUrls','getExportObjectMetadata'].includes(method)){
+        else if(['listDirectoryObjects','getPublicUrls','enableBucketPublicAccess','getExportObjectMetadata'].includes(method)){
           const source=normalizeTarget(params.source);
           if(source.provider!=='cloudflare'||source.connectionId!=='cloudflare:'+source.accountId)fail('SCOPE_UNAUTHORIZED');
           const status=await oauth.status();
@@ -407,21 +425,22 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(result.state!=='completed')fail(result.code??'EXPORT_LIST_FAILED');
             if(result.data.entries.some(entry=>typeof entry.key!=='string'||!entry.key.startsWith(source.prefix)))fail('SOURCE_SCOPE_MISMATCH');
             data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};
-          }else if(method==='getPublicUrls'){
+          }else if(method==='getPublicUrls'||method==='enableBucketPublicAccess'){
             if(!(await readExportOptions?.())?.urls||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
-            const [custom,managed]=await Promise.allSettled([
-              Promise.resolve().then(()=>readCustomDomains(source)).then(verifiedDomains),
-              readManagedDomain ? Promise.resolve().then(()=>readManagedDomain(source)).then(verifiedDevelopmentDomain) : null
-            ]);
-            if(custom.status==='rejected'&&(!readManagedDomain||managed.status==='rejected'))throw custom.reason;
-            const domains=[...new Set([...(custom.value??[]),...(managed.value?[managed.value]:[])])];
-            const domainCheckComplete=custom.status==='fulfilled'&&managed.status==='fulfilled';
-            if(params.domains?.some(domain=>!domains.includes(domain)))fail('DOMAIN_NOT_VERIFIED');
+            const activating=method==='enableBucketPublicAccess';
+            if(activating){
+              if(!enableManagedDomain)fail('PUBLIC_URL_ACTIVATION_UNAVAILABLE');
+              if(await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            }
             if(params.key){
               const result=await fileApi.run('stat',{source,key:params.key});
-              if(result.state!=='completed'||!result.data.object)fail(result.code??'OBJECT_NOT_FOUND');
+              if(result.state!=='completed')fail(result.code??'OBJECT_NOT_FOUND');
+              if(result.data?.object?.key!==params.key||result.data.object.folder)fail('OBJECT_NOT_FOUND');
             }
-            data={domains,domainCheckComplete,checkedAt:new Date().toISOString(),...(params.key?{file:objectUrls(source,params.key,params.domains??domains)}:{})};
+            const verified=activating?await enableManagedDomain(source):undefined;
+            data=await bucketPublicDomains(source,verified);
+            if(params.domains?.some(domain=>!data.domains.includes(domain)))fail('DOMAIN_NOT_VERIFIED');
+            if(params.key)data.file=objectUrls(source,params.key,params.domains??data.domains);
           }else{
             const options=await readExportOptions?.();
             if(!options?.tags&&!options?.metadata)fail('EXPORT_METADATA_EXPERIMENT_DISABLED');
@@ -632,7 +651,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,traceId,durationMs:Math.round(performance.now()-requestStarted),method,before:receipt?.before??state?.product.revision??null,after:receipt?.after??state?.product.revision??null,replayed:receipt?.replayed??false}};
       };
       // Auth must remain cancellable while a provider sign-in window is pending.
-      if(scope==='inspect'||['initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','fileAction','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
+      if(scope==='inspect'||['enableBucketPublicAccess','initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','fileAction','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
       const task=queue.then(work,work);queue=task.catch(()=>{});return await task;
     } catch(error){if(!inspectOnly)observe(diagnostics?.emit,'api.invoke','failed',REASON_CODES.includes(error?.code)?error.code:'API_INVOKE_FAILED',{operationId:traceId},startSignal?[startSignal]:[],traceMethodIndex);const code=/^[A-Z][A-Z0-9_]+$/.test(error?.code??error?.message)?error.code??error.message:'OPERATION_FAILED';return {version:'3+1.1',state:['PERMISSION_DENIED','AUTH_REQUIRED','HUMAN_INTERACTION_REQUIRED','EXTERNAL_RECOVERY_UNAVAILABLE'].includes(code)?'blocked':'failed',code,...(safeWorkerDiagnostic(error?.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:error?.diagnostic?.stage==='current-read'?{diagnostic:error.diagnostic}:{}),receipt:{operationId,traceId,method:request?.method??null}};}
   }

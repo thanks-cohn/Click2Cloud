@@ -172,9 +172,11 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .tag-pills button{overflow-wrap:anywhere;max-width:100%}
 .download-job summary{cursor:pointer;line-height:1.6;overflow-wrap:anywhere}
 
-.url-domain-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;margin-block:4px 10px}
-.url-domain-row input{width:100%;min-width:0;margin:0}
+.url-domain-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-block:4px 10px}
+.url-domain-row input{flex:1 1 12em;min-width:0;margin:0}
 .public-url-cards{display:grid;gap:6px;max-height:clamp(112px,32vh,295px);overflow:auto;padding:4px;margin-block:8px}
+.public-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+[data-public-consent]{overflow-wrap:anywhere;margin-block:8px}
 button.public-url-card{display:grid;gap:3px;text-align:start;overflow-wrap:anywhere;min-width:0;padding:9px 11px}
 button.development-url{background:#fff3d5;color:#502c06;border-color:#9a5d17}
 [data-theme=dark] button.development-url{background:#3b2a14;color:#ffe3a3;border-color:#bd8c42}

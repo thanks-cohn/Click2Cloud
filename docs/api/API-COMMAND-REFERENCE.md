@@ -111,7 +111,7 @@ Run the fixture harness repeatedly without production credentials using `npm run
 
 ## Method index
 
-The source snapshot contains **77 callable methods** under API version **3+1.1**. The implementation snapshot is `eddb0854ad7994083ae380eb01bbeaca835bce73`. The schema fingerprints below are generated from the canonical registry on 2026-11-19. The exact registry and examples are checked by `npm run check:api-docs`.
+The source snapshot contains **78 callable methods** under API version **3+1.1**. The schema fingerprints below come from the canonical registry. The exact registry and examples are checked by `npm run check:api-docs`.
 
 | Scope | Methods |
 | --- | --- |
@@ -119,7 +119,7 @@ The source snapshot contains **77 callable methods** under API version **3+1.1**
 | configure | 17 |
 | execute | 5 |
 | inspect | 42 |
-| provision | 5 |
+| provision | 6 |
 | restore | 5 |
 
 - [Portable menu manifests](#portable-menu-manifests)
@@ -740,18 +740,34 @@ await invoke('listDirectoryObjects', {"source":{"provider":"cloudflare","connect
 
 <!-- method-contract {"name":"getPublicUrls","scope":"inspect","effectful":false,"status":"experimental","input":"ef41d6cb1f266f72d3e4123e16d1874a9ce003030143b7c81bbd1ef677fff737","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
-Reads active HTTPS custom-domain associations for the exact bucket and optionally derives links for one existing object. Pass domains to require that every requested hostname is provider-verified.
+Reads Cloudflare's managed development URL and active HTTPS custom-domain associations for the exact bucket. If a key is supplied, checks that the exact object exists before deriving its links. Pass domains to require that every requested hostname is provider-verified.
 
 Returns verified domains, check time and optional grouped file links. Verification covers domain ownership and TLS configuration, while public retrieval can still be affected by site policy. Requires the Get URL experiment.
 
 **Access and status** · `inspect` · registry effectful `false` · experimental.
 
-An enabled managed r2.dev endpoint adds a development URL when Cloudflare verifies it for the same bucket. The domainCheckComplete flag indicates whether both provider checks succeeded.
+The domainCheckComplete flag indicates whether both provider checks succeeded. A managed public access state of `unknown` includes a failed read or an `enabled` response without a valid hostname.
 
 **Input** · `source` (object), `key?` (string), `domains?` (array of string). A trailing `?` marks an optional field.
 
 ```js
 await invoke('getPublicUrls', {"source":{"provider":"cloudflare","connectionId":"cloudflare:fixture","accountId":"fixture","bucketName":"test-bucket","prefix":"images/"},"key":"images/example.png"});
+```
+
+### enableBucketPublicAccess
+
+<!-- method-contract {"name":"enableBucketPublicAccess","scope":"provision","effectful":true,"status":"experimental","input":"09f35c3cd86dbbf94006beff0992af8a6baf2a75a25f4298362c76b7e969eb35","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+
+Enables the rate-limited public development URL for an exact R2 bucket after explicit bucket-wide consent. The connected account must authorize the bucket, and local agents need a matching grant and one-operation approval from the host. If a requested object key is supplied, its existence is checked before any write.
+
+When a managed or custom hostname is already usable, returns the current inventory without a PUT. After a PUT, requires an independent managed-domain GET reporting `enabled: true` with a validated hostname. Returns the same inventory shape as `getPublicUrls`, including the exact file links when a key was supplied. Finished configuration and anonymous object reachability are separate checks.
+
+**Access and status** · `provision` · registry effectful `true` · experimental.
+
+**Input** · `source` (object), `key?` (string), `confirmed` (must be `true`).
+
+```js
+await invoke('enableBucketPublicAccess', {"source":{"provider":"cloudflare","connectionId":"cloudflare:fixture","accountId":"fixture","bucketName":"test-bucket","prefix":"images/"},"key":"images/example.png","confirmed":true});
 ```
 
 ### getExportObjectMetadata

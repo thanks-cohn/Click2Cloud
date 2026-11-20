@@ -32,6 +32,7 @@ import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createVerifiedBucket} from '../src/cloudflare/inventory.mjs';
 import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
+import {createR2PublicDomains} from '../src/cloudflare/r2-public-domains.mjs';
 import {createRemoteTransport,preparedDestination,previousWorkerDigests} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
@@ -339,26 +340,9 @@ const recoveryCrawl=createRecoveryCrawl({fileApi,recovery,isAuthorized:async t=>
 const permissions=createPermissions();
 const manifestLocations=createManifestLocations({oauth,current,provisioner,transport:remote});
 const readExportOptions=async()=>exportOptions((await chrome.storage.local.get(exportPreferenceKey).catch(()=>({})))[exportPreferenceKey]);
-async function readCustomDomains(target){
- assertConnected();
- const path='/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName)+'/domains/custom';
- const response=await oauth.request(path), body=await response.json().catch(()=>null);
- if(!response.ok||body?.success!==true||!Array.isArray(body.result?.domains))
-  throw Object.assign(Error(),{code:response.status===403?'CUSTOM_DOMAIN_ACCESS_DENIED':'DOMAIN_LIST_UNAVAILABLE'});
- assertConnected();
- return body.result.domains;
-}
-async function readManagedDomain(target){
- assertConnected();
- const path='/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName)+'/domains/managed';
- const response=await oauth.request(path),body=await response.json().catch(()=>null);
- if(!response.ok||body?.success!==true||typeof body.result?.enabled!=='boolean')
-  throw Object.assign(Error(),{code:'MANAGED_DOMAIN_UNAVAILABLE'});
- assertConnected();
- return body.result;
-}
+const publicDomains=createR2PublicDomains({oauth,assertConnected});
 const shortcutStore=createShortcutStore(chrome.storage.local,listCommands(toolRegistry));
-const api=createEngineApi({engine,current,shortcutStore,onHistoryPreferenceChange:dailyBadge.refresh,readExportOptions,readCustomDomains,readManagedDomain,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,prepareFileWorker:cloudflare.ensureFileWorker,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
+const api=createEngineApi({engine,current,shortcutStore,onHistoryPreferenceChange:dailyBadge.refresh,readExportOptions,...publicDomains,manifestLocations,diagnostics,breadcrumbs,readStorageHealth:async()=>{const storage=globalThis.navigator?.storage;if(!storage?.estimate||!storage?.persisted)return {state:'UNOBSERVED'};const [persistent,usage]=await Promise.all([storage.persisted(),storage.estimate()]);return {state:'OBSERVED_READ_ONLY',persistent,usageBytes:Number.isFinite(usage.usage)?usage.usage:null,quotaBytes:Number.isFinite(usage.quota)?usage.quota:null,pastDeletionCause:'UNKNOWN'};},readNative:async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null,readState:readCurrent,fileApi,cloudflare,prepareFileWorker:cloudflare.ensureFileWorker,oauth:oauthForApi,recovery,wholeCloud,recoveryCrawl,getInventory,attention,navigate:async(target,actor)=>{await chrome.storage.session.set({explorerLocation:target});if(actor!=='gui')try{await chrome.runtime.sendMessage({channel:'engine-navigation',target});}catch{}},
   authorize:r=>r.actor==='gui'||permissions.authorize(r),confirm:r=>r.actor==='gui'||permissions.confirm(r)});
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});

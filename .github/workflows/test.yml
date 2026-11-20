@@ -57,7 +57,20 @@ jobs:
           sudo apt-get update && sudo apt-get install -y xvfb python3-xlib imagemagick
           curl --fail --silent --show-error --location --retry 3 https://storage.googleapis.com/chrome-for-testing-public/158.0.8127.36/linux64/chrome-linux64.zip -o "$RUNNER_TEMP/chrome-linux64.zip"
           unzip -q "$RUNNER_TEMP/chrome-linux64.zip" -d "$RUNNER_TEMP"
+      - name: Installed Chrome Get URL against the HTTPS fixture
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+          C2C_GET_URL_EVIDENCE: ${{ runner.temp }}/click2cloud-get-url
+        run: node scripts/test-get-url-browser.mjs
+      - name: Upload Get URL test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-get-url-browser
+          path: ${{ runner.temp }}/click2cloud-get-url
+          if-no-files-found: ignore
       - name: Installed Chrome screenshot save and retry
+        if: ${{ !cancelled() }}
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
           C2C_SCREENSHOT_PYTHON: /usr/bin/python3

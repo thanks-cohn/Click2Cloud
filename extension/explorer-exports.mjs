@@ -8,6 +8,27 @@ const settingLabels={urls:'Show Get URL in right-click menu',tags:'Show Download
 const downloadKey='download-summary:';
 const safeError=error=>/^[A-Z0-9_]{1,80}$/.test(error.code??error.message??'')?error.code??error.message:'DOWNLOAD_FAILED';
 const format=number=>number.toLocaleString();
+const emptyDomains={domains:[],domainCheckComplete:false};
+const publicDomainErrors={
+  AUTH_REQUIRED:'Reconnect Cloudflare from Remotes, then Recheck.',
+  REAUTH_REQUIRED:'Reconnect Cloudflare from Remotes, then Recheck.',
+  TOKEN_EXPIRED:'Reconnect Cloudflare from Remotes, then Recheck.',
+  HTTP_401:'Reconnect Cloudflare from Remotes, then Recheck.',
+  HTTP_403:'Cloudflare denied access to this file. Check this account’s R2 bucket permissions, then Recheck.',
+  AUTH_SESSION_CHANGED:'The Cloudflare session changed. Reconnect, then Recheck.',
+  AUTHORIZATION_REVOKED:'Reconnect Cloudflare from Remotes, then Recheck.',
+  INSUFFICIENT_SCOPE:'Cloudflare requires R2 bucket permissions. Update Cloudflare permissions from Remotes, then Recheck.',
+  PUBLIC_DOMAIN_ACCESS_DENIED:'Cloudflare denied the domain check. Check this account’s R2 bucket permissions.',
+  PUBLIC_URL_ACTIVATION_DENIED:'Cloudflare denied activation. Check this account’s R2 bucket write permission, then Recheck.',
+  PUBLIC_URL_ACTIVATION_FAILED:'Cloudflare did not confirm the enable request. Recheck the bucket before trying again.',
+  PUBLIC_URL_ACTIVATION_UNCONFIRMED:'Cloudflare has not confirmed the public development URL. Recheck the bucket before trying again.',
+  PUBLIC_URL_BUCKET_CHANGED:'Cloudflare reported a different bucket ID during verification. Recheck the selected bucket.',
+  SELECTED_BUCKET_MISSING:'Cloudflare could not find this bucket. Refresh File Explorer and check the selected location.',
+  OBJECT_NOT_FOUND:'Cloudflare could not find this file. Refresh File Explorer and try again.'
+};
+const publicDomainError=code=>publicDomainErrors[code]??'Cloudflare domain check incomplete. Try Recheck.';
+const domainStatus=info=>!info.domainCheckComplete?publicDomainError(info.domainCheckCode):
+  info.managedDomain?'Public development URL enabled.':info.domains.length?'Active custom domains found.':'No public domain configured.';
 
 export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange}) {
   let options=exportDefaults, update=Promise.resolve();
@@ -146,42 +167,83 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     if(entry&&mode==='tags'&&!canEmbedTags(entry))return offerCompanion(source,entry);
     return archive(source,entry,mode).catch(showError);
   }
-  async function urls(source,entry){
-    try{
-      const get=domains=>api('getPublicUrls',{source,...(entry?{key:entry.key}:{}),...(domains?{domains}:{})},{quiet:true});
-      const info=await get();
-      const open=()=>entry ? urlEditor(info,get) : directoryUrls(source,info,get);
-      if(info.domains.length){open();return;}
-      dialog('Allow Public URL?','<button id="public-url-yes">Yes</button> <button id="public-url-no">No</button>');
-      document.querySelector('#public-url-no').onclick=closeDialog;
-      document.querySelector('#public-url-yes').onclick=open;
-    }catch(error){dialog('Get URL','<p role="alert">Could not check this bucket’s public domains. '+esc(safeError(error))+'</p>');}
+  function urls(source,entry,isCurrent){
+    const params={source:structuredClone(source),...(entry?{key:entry.key}:{})};
+    const get=()=>api('getPublicUrls',params,{quiet:true,reconnect:false});
+    const enable=()=>api('enableBucketPublicAccess',{...params,confirmed:true},{quiet:true,reconnect:false});
+    const controls={get,enable,isCurrent};
+    if(entry)urlEditor(params.source,entry,controls);
+    else directoryUrls(params.source,controls);
   }
-  function domainControls(form,get,apply,feedback){
+  function domainConsent(source){
+    return `<section data-public-consent hidden><p><strong>Allow Public URL?</strong></p>
+      <p>Enable a public development URL for <strong>${esc(source.bucketName)}</strong> in account ${esc(source.accountId)}? Anyone who knows a file’s URL can read it in this entire bucket. The development URL is rate-limited.</p>
+      <button type="button" id="public-url-yes">Yes</button> <button type="button" id="public-url-no">No</button></section>`;
+  }
+  function domainControls(form,{get,enable,isCurrent=()=>true},apply,feedback){
     const input=form.querySelector('input'),submit=form.querySelector('[type=submit]'),recheck=form.querySelector('[data-recheck]');
-    async function verify(requireName){
+    const consent=form.querySelector('[data-public-consent]'),yes=consent.querySelector('#public-url-yes');
+    let busy=false;
+    function current(){
+      if(!form.closest('dialog[open]'))return false;
+      if(isCurrent())return true;
+      closeDialog();return false;
+    }
+    function begin(message){
+      busy=true;submit.disabled=recheck.disabled=yes.disabled=true;
+      consent.hidden=true;feedback.textContent=message;
+    }
+    function finish(){busy=false;submit.disabled=recheck.disabled=yes.disabled=false;}
+    function render(info){
+      apply(info);
+      consent.hidden=info.domainCheckComplete!==true||info.managedPublicAccess!=='disabled'||info.domains.length>0;
+    }
+    async function verify(requireName=false){
+      if(busy||!current())return;
       const typed=input.value.trim(),name=domainName(typed);
       if(requireName&&!name){feedback.textContent='Enter a domain name.';input.focus();return;}
-      submit.disabled=recheck.disabled=true;
+      begin('Checking public domains…');
       try{
         const info=await get();
-        if(!form.closest('dialog[open]'))return;
-        apply(info);
-        feedback.textContent=typed
+        if(!current())return;
+        render(info);
+        feedback.textContent=requireName
           ? info.domains.includes(name)&&!developmentalDomain(name)
             ? 'Cloudflare verified the active custom domain for this bucket.'
-            : 'Activate this domain under the bucket’s Custom Domains in Cloudflare, then Recheck.'
-          : info.domainCheckComplete===false?'Some endpoints could not be checked. Try Recheck again.':'Domain check updated.';
-      }catch{feedback.textContent='Could not check the bucket’s domains. Check your Cloudflare connection and Recheck.';}
-      finally{submit.disabled=recheck.disabled=false;}
+            : info.domainCheckComplete?'Configure this domain in Cloudflare, then Recheck.':domainStatus(info)
+          : domainStatus(info);
+      }catch(error){if(current()){apply(emptyDomains);feedback.textContent=publicDomainError(error.code);}}
+      finally{finish();}
     }
+    async function activate(){
+      if(busy||consent.hidden||!current())return;
+      begin('Enabling public URL…');
+      try{
+        const verified=await enable();
+        if(!current())return;
+        apply(verified);
+        feedback.textContent='Verifying…';
+        const fresh=await get();
+        if(!current())return;
+        apply(fresh);
+        feedback.textContent=domainStatus(fresh);
+      }catch(error){
+        if(!current())return;
+        if(['OBJECT_NOT_FOUND','AUTH_REQUIRED','REAUTH_REQUIRED','AUTH_SESSION_CHANGED','AUTHORIZATION_REVOKED'].includes(error.code))apply(emptyDomains);
+        feedback.textContent=publicDomainError(error.code);
+      }
+      finally{finish();}
+    }
+    yes.onclick=()=>void activate();
+    consent.querySelector('#public-url-no').onclick=closeDialog;
     form.onsubmit=event=>{event.preventDefault();void verify(true);};
     recheck.onclick=()=>void verify(false);
+    void verify();
   }
-  function urlEditor(info,get){
-    dialog('Get URL',`<form id="url-domain-form"><label for="url-domain">Custom domain</label><div class="url-domain-row"><input id="url-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Submit</button><button type="button" id="copy-urls">Copy All</button></div><div id="public-urls" class="public-url-cards" aria-label="Verified URLs"></div><p id="url-empty"></p><button type="button" data-recheck>Recheck</button><p class="muted">Manage bucket domains in Cloudflare. Anonymous reachability has not been checked.</p><p id="url-result" role="status"></p></form>`);
+  function urlEditor(source,entry,controls){
+    dialog('Get URL',`<form id="url-domain-form"><p class="muted">${esc(entry.displayName??entry.key)}</p><label for="url-domain">Custom domain</label><div class="url-domain-row"><input id="url-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Check existing domain</button><button type="button" id="copy-urls" disabled>Copy All</button></div><div id="public-urls" class="public-url-cards" aria-label="Verified URLs" hidden></div>${domainConsent(source)}<button type="button" data-recheck>Recheck</button><p id="url-result" role="status"></p><p class="muted"><a href="https://dash.cloudflare.com/?to=/:account/r2/overview" target="_blank" rel="noopener noreferrer">Manage bucket domains in Cloudflare</a>. Anonymous file access has not been checked.</p></form>`);
     const form=document.querySelector('#url-domain-form'),list=form.querySelector('#public-urls'),
-      feedback=form.querySelector('#url-result'),empty=form.querySelector('#url-empty'),copyAll=form.querySelector('#copy-urls');
+      feedback=form.querySelector('#url-result'),copyAll=form.querySelector('#copy-urls');
     async function copy(text,success){
       try{await navigator.clipboard.writeText(text);feedback.textContent=success;}
       catch{feedback.textContent='Could not copy. Check Chrome’s clipboard access and try again.';}
@@ -189,26 +251,31 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     function render(value){
       const links=value.file?.urls??[];
       list.replaceChildren(...links.map(item=>{
-        const button=document.createElement('button'),label=document.createElement('strong'),address=document.createElement('span');
+        const row=document.createElement('div'),button=document.createElement('button'),label=document.createElement('strong'),
+          address=document.createElement('span'),copyLabel=document.createElement('span'),open=document.createElement('a');
+        row.className='public-url-row';
         button.type='button';button.className='public-url-card';
         const dev=developmentalDomain(item.domain);
         if(dev)button.classList.add('development-url');
         label.textContent=dev?'Development URL':'Custom domain';
         address.textContent=item.url;
-        button.append(label,address);
+        copyLabel.textContent='Copy';
+        button.append(label,address,copyLabel);
         button.onclick=()=>void copy(item.url,'URL copied.');
-        return button;
+        open.href=item.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Open';
+        open.setAttribute('aria-label',`Open ${label.textContent} for ${item.domain}`);
+        row.append(button,open);
+        return row;
       }));
       list.hidden=!links.length;
-      empty.hidden=links.length>0&&value.domainCheckComplete!==false;
-      empty.textContent=value.domainCheckComplete===false?'Some endpoints could not be checked.':links.length?'':'No verified public URL for this object. To add one, configure the bucket’s public domain in Cloudflare and Recheck.';
       copyAll.disabled=!links.length;
       copyAll.onclick=()=>void copy([...new Set(links.map(item=>item.url))].join('\n'),'All URLs copied.');
     }
-    domainControls(form,get,render,feedback);
-    render(info);
+    domainControls(form,controls,render,feedback);
   }
-  function directoryUrls(source,info,get){
+  function directoryUrls(source,controls){
+    const {get,isCurrent=()=>true}=controls;
+    let info=emptyDomains;
     dialog('Export directory URLs',`<p class="muted">Current directory only · No subfolders</p><form id="url-export-form">
       <fieldset><legend>Export mode</legend><label><input type="radio" name="mode" value="simple" checked> One Link per Asset — Simple Text File</label>
       <label><input type="radio" name="mode" value="all"> Get All URLs for Directory</label></fieldset>
@@ -217,7 +284,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       <fieldset id="url-export-formats" hidden><legend>Formats</legend><div class="url-export-options">${['txt','csv','json'].map(type=>`<label><input type="checkbox" name="format" value="${type}" ${type==='json'?'checked':''}> ${type.toUpperCase()}</label>`).join('')}</div></fieldset>
       <p id="url-export-scope" class="muted"></p><button type="submit" class="primary">Export</button><p id="url-export-progress" role="status"></p></form>
       <form id="directory-domain-form"><p id="directory-domain-prompt"></p><label for="directory-domain">Website/domain</label>
-      <div class="url-domain-row"><input id="directory-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Save</button><button type="button" data-recheck>Recheck</button></div>
+      <div class="url-domain-row"><input id="directory-domain" autocomplete="off" spellcheck="false" placeholder="assets.example.com"><button type="submit">Check existing domain</button><button type="button" data-recheck>Recheck</button></div>${domainConsent(source)}
       <p class="muted">Configure custom domains in the bucket’s Cloudflare settings. This dialog checks the association. Anonymous reachability has not been checked.</p><p id="directory-domain-result" role="status"></p></form>`);
     const form=document.querySelector('#url-export-form'),progress=form.querySelector('#url-export-progress'),button=form.querySelector('button');
     const domainForm=document.querySelector('#directory-domain-form'),prompt=domainForm.querySelector('#directory-domain-prompt');
@@ -247,7 +314,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       }
       progress.textContent='';sync();
     };
-    domainControls(domainForm,get,value=>{info=value;sync();},domainForm.querySelector('#directory-domain-result'));
+    domainControls(domainForm,controls,value=>{info=value;sync();},domainForm.querySelector('#directory-domain-result'));
     form.onsubmit=async event=>{
       event.preventDefault();
       if(button.disabled)return;
@@ -256,7 +323,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       try{
         const inventory=await collect(source,undefined,values=>{progress.textContent='Scanned '+format(values.scanned)+' objects.';},true);
         info=await get();
-        if(!form.closest('dialog[open]'))return;
+        if(!form.closest('dialog[open]')||!isCurrent())return;
         const files=directoryUrlFiles(source,inventory.files,types).map(item=>objectUrls(source,item.key,info.domains));
         const data=simple?simpleDirectoryUrls(files,prefer):null;
         const urlCount=data?.count??files.reduce((sum,file)=>sum+file.urlCount,0);

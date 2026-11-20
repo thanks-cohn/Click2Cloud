@@ -41,7 +41,7 @@ export interface Methods {
  commitMenuManifest:ManifestDraftAction&{partial:boolean};provisionMenuManifest:ManifestDraftAction;undoMenuManifest:{expectedRevision:number;idempotencyKey:string};
  getHistoryPreferences:{};setHistoryPreferences:HistoryPreferences;
  recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean;screenshotUpgrade?:boolean};
- listDirectoryObjects:{source:Target;cursor?:string;immediate?:boolean};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
+ listDirectoryObjects:{source:Target;cursor?:string;immediate?:boolean};getPublicUrls:{source:Target;key?:string;domains?:string[]};enableBucketPublicAccess:{source:Target;key?:string;confirmed:true};getExportObjectMetadata:{source:Target;key:string};
  listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};
  fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};
@@ -82,7 +82,8 @@ export interface RestorePreview {available:boolean;reason?:string;current:Config
 export interface Results {
  getHistoryPreferences:HistoryPreferences;setHistoryPreferences:HistoryPreferences;recoverCloudflareDestination:CloudflareSetupResult;
  listDirectoryObjects:{entries:ExportObject[];nextCursor:string|null};
- getPublicUrls:{domains:string[];domainCheckComplete:boolean;checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
+ getPublicUrls:{domains:string[];managedDomain:string|null;managedPublicAccess:'enabled'|'disabled'|'unknown';domainCheckComplete:boolean;domainCheckCode?:string;checkedAt:string;file?:{objectId:string;bucket:string;key:string;relativePath:string;urlCount:number;urls:ExportUrl[]}};
+ enableBucketPublicAccess:Results['getPublicUrls'];
  getExportObjectMetadata:ExportObject&{customMetadata:Record<string,string>|null;httpMetadata:Record<string,string>|null;tags:string[];availability:'observed'|'unobserved';tagBudget?:{used:number;limit:number;remaining:number;reserved:number;fits:boolean}};
  listCommands:{commands:ShortcutCommand[]};getShortcutBindings:{bindings:Record<string,string|null>};setShortcutBinding:Results['getShortcutBindings'];resetShortcutBindings:Results['getShortcutBindings'];
  getGalleryLoadingVisual:GalleryLoadingVisual;setGalleryLoadingVisual:GalleryLoadingVisual;
