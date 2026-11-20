@@ -1,5 +1,8 @@
 # Screenshot Logic — FROZEN V1 Execution Contract
 
+> **HISTORICAL / SUPERSEDED FOR CLICK2CLOUD 0.3.21 — DO NOT USE AS THE CODEX IMPLEMENTATION CONTRACT.**
+> The latest owner-final screenshot logic, UI, both keyboard defaults, exact capture algorithm and tests are in **[`/screenshot-logic-final/README.md`](../screenshot-logic-final/README.md)** and **[`/screenshot-logic-final/TEST_MATRIX.md`](../screenshot-logic-final/TEST_MATRIX.md)**. Codex MUST READ THE FINAL DIRECTORY instead of relying on this earlier design. Any per-card shortcut controls, older command names, default/backup hierarchy or special shortcut-anchor rule examples here are obsolete. This file is preserved only as historical reference.
+>
 **Status:** DESIGN FROZEN by owner, November 20, 2026. **Location:** `/screenshot-logic/`. **Purpose:** the single concise, authoritative implementation contract for the Click2Cloud Screenshot-to-Cloud engine. This freezes behavior, not a claim that feature code already exists or passed live tests. Do NOT alter its user-visible semantics without a new owner decision.
 
 ## FINAL OWNER CLARIFICATION — TWO ALWAYS-ON DEFAULT SCREENSHOT SHORTCUTS
