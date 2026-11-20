@@ -5,13 +5,31 @@ Branch: `codex/minimal-baseline-palette-fonts-quiet-screenshots-2026-11-20`.
 Base: the verified screenshot-repair branch HEAD `6b91b750c3a2b972e9dfc83588ef430cf81fd377`.
 **Do not change the working repair branch or main. Keep exact screenshot upload code, OAuth and save engine unaffected.**
 
+## EXECUTION ORDER OVERRIDE — PRIORITY ZERO: FIX Get URL BEFORE ALL OTHER WORK
+
+**OWNER DIRECTIVE (November 20, 2026): CODEX MUST START WITH SECTION K2, REPAIR GET URL PUBLIC ACTIVATION FIRST, AND IMPLEMENT/TEST/COMMIT THAT REPAIR BEFORE TOUCHING ANY OTHER FEATURE.** This specifically supersedes the older "notification fix first" wording in the original request. The sections retain their letter names for traceability, but letter order is NOT execution order.
+
+**Phase 0 / FIRST deliverable — Get URL works end-to-end:**
+1. Read exact Click2Cloud source paths `extension/explorer-exports.mjs` (`urls()`, `domainControls()`, `urlEditor()`), `src/api/service.mjs` (`getPublicUrls`), `extension/background.mjs` (Cloudflare domain GET/OAuth transport) and their tests; reproduce Yes → editor → Recheck with NO actual PUT.
+2. Read exact REDOWN reference files `thanks-cohn/REDOWN/extension/public-addresses.js`, `extension/options.js`, `extension/background.js` (`bucketPublicAddresses`, `enableBucketPublicAccess`), `docs/explorer/GET_URL_AND_STATUS.md` and `tests/get-url.test.mjs` plus `tests/public-addresses.test.mjs`. Use their explicit discovery-versus-enable split and permission/readback/refresh/race guards, not their Worker-domain features.
+3. Implement actual Click2Cloud Cloudflare managed-domain enable path: trusted, explicitly confirmed, account/bucket-scoped action; GET initial status, PUT only if needed, GET again to independently require `enabled:true` and actual validated `.r2.dev` hostname. Read-only `getPublicUrls` and `Recheck` stay read-only. Handle 401/403/permission and inconclusive reads truthfully.
+4. Immediately rediscover URLs for the SAME image and show actual, exact-key public development URL **UNDER the existing Get URL input**, plus ALL existing active custom URLs. If custom-only URL(s) already exist, display them without making users enable r2.dev. Prevent stale-file updates and double-click duplicate mutations. No repeated phantom Yes prompt.
+5. Add focused failing-before/passing-after tests: explicitly zero writes on open/cancel/recheck, exactly one authorized PUT for a confirmed disabled bucket, real readback, same-window URL visible, no reprompt after reopening/reloading, custom-domain-only, multi-domain, wrong bucket, false success, stale selection, 401/403/unknown. Run build and the relevant Get URL test slice BEFORE starting anything else.
+6. **STOP/GATE:** Commit and push the independently verifiable Get URL fix on this SAME experimental branch as the FIRST implementation commit. Report changed files, test results, commit and artifact/smoke evidence. If Cloudflare permissions/browser/runtime block verification, report the exact blocker and do NOT describe the fix as proven or proceed as if Phase 0 passed. Never make any real bucket publicly accessible without the owner's informed action in the extension itself; mock the API for automatic tests.
+
+**Only AFTER Phase 0 is complete and verified:** do notification spam (Section A), Minimal/two themes/palettes (B/D/J), screenshot History cards, destinations and URLs (D/F/I/N), UI shortcuts, Settings and Remotes polishing (G–O). Reuse the now-fixed Get URL API in History URLs to avoid two inconsistent activation mechanisms. Do not combine Phase 0 with an unrelated large-scale UI rewrite.
+
+**REDOWN is a tested implementation reference, not proof of a live public URL:** its `docs/explorer/GET_URL_AND_STATUS.md` (22 Oct 2026) reports 25 focused mocked/provider tests; browser and live-account confirmation were NOT part of that verification. Keep managed-domain configuration confirmation distinct from anonymous HTTP object reachability. Adapt its logic to Click2Cloud instead of claiming its results already prove Click2Cloud works.
+
+---
+
 ## Outcome
 
 1. The user does NOT want permanent system notifications every time a screenshot is taken. A successful Alt+Q or Ctrl+Shift+Y should not create a Windows/Chrome desktop notification; neither should ordinary retry outcomes. History and unobtrusive in-app status must still work.
 2. The user wants a new experimental UI architecture in which the **Minimal interface itself is the baseline structure**. CSS must NOT build "Minimal" as a secondary theme layered over a bigger UI. Instead CSS/presentation tokens should provide **five coordinated color-and-typography palettes**; choosing a palette applies its complementary heading/body/control fonts automatically, with NO separate font-selection UI, applied to the same minimal baseline layout. No full theme changes to component layout, spacing architecture, content visibility, menu structure or feature accessibility just because a palette changes.
 3. Show real before/after browser visual evidence and functional test results. The user wants a practical, simpler UX rather than an abstract aesthetic framework.
 
-## A. Notification fix (first and smallest task)
+## A. Notification fix (AFTER Priority Zero Get URL repair)
 
 Existing source: `extension/screenshot-background.mjs`, in the `notify(job,{recorded})` callback. After `send({channel:'screenshot-result',...})`, it **unconditionally invokes `chrome.notifications.create('screenshot-'+job.plan.operationId,...)`** for every completed screenshot, whether verified, failed or partial.
 
@@ -58,7 +76,7 @@ Acceptance:
 
 ## Codex execution and delivery
 
-Make the actual source changes on this branch, not merely a report. Commit and push. Report exact files, commit SHA, tests and failures. Provide a working built extension artifact or unambiguous build commands. Don't merge to main or replace the known working screenshot repair branch without owner approval. **Prioritize fixing the notification spam immediately, then the separate Minimal-first palette/font experiment.**
+Make the actual source changes on this branch, not merely a report. Commit and push. Report exact files, commit SHA, tests and failures. Provide a working built extension artifact or unambiguous build commands. Don't merge to main or replace the known working screenshot repair branch without owner approval. **EXECUTION ORDER: FIRST implement, validate, commit and push K2 Get URL activation repair (Priority Zero). ONLY THEN address notification spam (A), then the Minimal-first palette/font experiment and remaining sections. The earlier notification-first direction is withdrawn.**
 
 ---
 
@@ -333,6 +351,8 @@ These are ADDITIONAL owner requirements on the SAME experimental branch, not per
 - Browser test presence/absence and actual bottom-of-DOM order in Minimal and Remote V1.
 
 ### K2. BUG: Click2Cloud says Allow Public URL? Yes but never actually activates public URLs
+
+**THIS IS PRIORITY ZERO — FIRST IMPLEMENTATION MILESTONE.** Complete and verify this repair as a small standalone code change before notification/UI/palette work, as instructed at the top of this file. Do not merely audit or propose: implement, build, test, push and report its commit. REDOWN's GET/explicit PUT/independent readback/refresh flow is the reference.
 
 Owner symptom: selecting Get URL on an image without an active domain repeatedly shows Allow Public URL?; clicking Yes then Recheck yields "No verified public URL for this object. To add one, configure the bucket’s public domain in Cloudflare and Recheck." and "Domain check updated." The same Yes prompt reappears when opening the SAME image again.
 
