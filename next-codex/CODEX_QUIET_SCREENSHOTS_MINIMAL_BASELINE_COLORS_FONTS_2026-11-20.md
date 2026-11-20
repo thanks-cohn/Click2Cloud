@@ -274,6 +274,8 @@ These are TWO DIFFERENT context menus with separate jobs. The owner never author
 
 **Every Screenshot History entry must provide working GO TO navigation to the actual saved location(s) inside Click2Cloud File Explorer.** If the screenshot was sent to 1 folder, that folder gets GO TO; if it was sent to 3 folders, there are **3 separately functional GO TO buttons**, one beside each exact output. No arbitrary destination cap. One screenshot capture is one History entry, with a potentially multi-destination list.
 
+**NON-NEGOTIABLE PRESENTATION: ONE IMAGE PREVIEW AT THE TOP OF THE SCREENSHOT HISTORY ENTRY, NEVER ONE PREVIEW PER DESTINATION.** Even with 3, 20, or 100 output locations, the capture has exactly ONE shared thumbnail, shown above the destination list and the per-location GO TO actions. Each output row contains concise location, status, and its own GO TO button ONLY—not another image, preview slot, image loading animation, or duplicated screenshot card. Use a single verified output as the source of that shared preview (with a safe existing-cache fallback where supported), without implying other outputs are verified. Keep the destination list compact/scrollable as needed.
+
 **Current root cause:** `extension/history-page.mjs` renders `screenshotRow(r)` separately from ordinary image rows, without any GO TO button. Ordinary `row(r)` has `data-history-goto` tied to the whole operationId, and `extension/app.mjs`'s existing `goTo(operationId)` calls `openRemoteResult({operationId})` then `navigate(result.target)` / `revealListedFile(...)`. That method assumes ONE result target; a screenshot receipt instead has `r.screenshot.outputs[]` with **separate exact destination/account/bucket/key/outputId** for each physical save. Never treat the whole screenshot's operationId as identifying all locations or navigate to whatever bucket is currently selected.
 
 **Required UI/behavior:**
@@ -287,6 +289,7 @@ These are TWO DIFFERENT context menus with separate jobs. The owner never author
 8. Keep History compact and accessible: each location has clear button labeling (e.g., “GO TO — redown/screenshots/”), sensible keyboard focus, per-button busy/error state; no entire-row disabled state preventing navigation to the other locations.
 
 **Mandatory real tests / acceptance:**
+- With 1, 3, 20 or 100 destinations, the screenshot History entry renders exactly ONE top-level thumbnail total. Each destination line has its own GO TO but NO duplicate thumbnail or separate preview fetch. Verify the thumbnail uses only one existing verified image; partial verification is still shown truthfully.
 - One screenshot saved to 1 folder: one GO TO opens that exact folder and highlights the screenshot PNG.
 - One screenshot saved to 3 distinct folders (possibly different buckets/accounts): **3 GO TO buttons**, each opens ITS OWN exact recorded folder and highlights ITS OWN exact PNG; no silent selection of the first/default/current bucket.
 - Partial 2/3: both confirmed files navigate correctly; third GO TO opens the intended location where permitted but says unverified/not found, never fabricates a saved object.
