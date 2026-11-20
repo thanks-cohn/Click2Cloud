@@ -1,4 +1,4 @@
-# Codex: quiet screenshots + Minimal as true base UI, color/font-only styling experiment
+# Codex: PRIORITY ZERO — Repair Get URL public activation first; then screenshots, themes and Explorer UX
 
 **Owner request, November 20, 2026. Execute on this dedicated experimental branch.**
 Branch: `codex/minimal-baseline-palette-fonts-quiet-screenshots-2026-11-20`.
