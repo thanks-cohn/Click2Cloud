@@ -296,8 +296,28 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
   }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
+    readScreenshotReceipts:()=>transact('readonly',async ({state})=>{
+      const receipts=[];
+      let size=0;
+      const scan=state.openCursor(IDBKeyRange.bound('remote-result:','remote-result:\uffff'));
+      await new Promise((resolve,reject)=>{
+        scan.onerror=()=>reject(scan.error);
+        scan.onsuccess=()=>{
+          const cursor=scan.result;
+          if(!cursor){resolve();return;}
+          const row=cursor.value.value;
+          if(row.kind==='screenshot-to-cloud'&&row.screenshot){
+            size+=JSON.stringify(row.screenshot).length*2;
+            if(size>32*1024*1024){reject(error('SCREENSHOT_RECEIPT_EXPORT_TOO_LARGE'));return;}
+            receipts.push(row.screenshot);
+          }
+          cursor.continue();
+        };
+      });
+      return receipts.sort((a,b)=>b.plan.startedAt.localeCompare(a.plan.startedAt));
+    }),
     readRemoteResults:({cursor,limit,customer=false}={})=>transact('readonly',async s=>{if(customer&&typeof s.state.openCursor==='function'&&typeof IDBKeyRange==='function')return customerHistoryPage(s,{cursor,limit});const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const visible=customer?all.filter(r=>r.kind!=='readiness'&&(r.kind!=='depth-click'||!r.cause||!all.some(s=>s.operationId===r.cause))):all;const start=cursor?visible.findIndex(x=>x.operationId===cursor)+1:0,items=visible.slice(start,start+limit);return {items,nextCursor:start+limit<visible.length?items.at(-1)?.operationId:null};}),
     readHistoryPreferences:()=>transact('readonly',async s=>(await request(s.state.get('historyPreferences')))?.value??{...historyDefaults}),
     setHistoryPreferences:value=>transact('readwrite',async s=>{const validated=validateHistoryPreferences(value);s.state.put({id:'historyPreferences',value:validated});return validated;}),

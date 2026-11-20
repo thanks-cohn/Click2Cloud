@@ -34,6 +34,16 @@
     "https://*/*",
     "http://*/*"
   ],
+  "commands": {
+    "screenshot.capture.alt-q": {
+      "suggested_key": { "default": "Alt+Q" },
+      "description": "Capture a screenshot to cloud"
+    },
+    "screenshot.capture.ctrl-shift-y": {
+      "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "MacCtrl+Shift+Y" },
+      "description": "Capture a screenshot to cloud (second shortcut)"
+    }
+  },
   "side_panel": {
     "default_path": "extension/app.html"
   }

@@ -11,7 +11,7 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
   const dot=filename.lastIndexOf('.'),stem=dot>0?filename.slice(0,dot):filename,ext=dot>0?filename.slice(dot):'';
   return {key:keyFor(destination,`${stem}-${operationId}${ext}`),destination};
  },
- async write({prepared,body,length,contentType,operationId,signal,provenance}){
+ async write({prepared,body,length,contentType,operationId,signal,provenance,checksum}){
   let staged=null;
   // Unknown length is staged as independently conditional bounded objects, never a whole-file buffer.
   // Final PUT is still atomic If-None-Match:*. Parts are retained for reconciliation; no unsafe cleanup.
@@ -28,7 +28,7 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
   let stream=body,pipe;const cancel=new AbortController(),writeSignal=signal?AbortSignal.any([signal,cancel.signal]):cancel.signal;
   if(body instanceof ReadableStream){if(!FixedLengthStream)fail('FIXED_LENGTH_STREAM_REQUIRED');const fixed=new FixedLengthStream(length);stream=fixed.readable;pipe=body.pipeTo(fixed.writable,{signal:writeSignal});pipe.catch(()=>cancel.abort());}
   const savedFileMetadata={httpMetadata:{contentType},customMetadata:{operationId,...provenance}};
-  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),...savedFileMetadata});
+  const put=storage.put(prepared.key,stream,{onlyIf:new Headers({'If-None-Match':'*'}),...savedFileMetadata,...(checksum?{sha256:checksum}:{})});
   let result;try{result=await wait(put,writeSignal);if(result===null){cancel.abort();return {conflict:true};}if(pipe)await wait(pipe,writeSignal);}catch(e){cancel.abort();throw e;}
   if(!result?.etag||!result.version)fail('PUT_RECEIPT_INVALID');
   let stagingCleanup;
@@ -41,6 +41,6 @@ export function cloudflareR2Writer(storage,{FixedLengthStream=globalThis.FixedLe
 
   return {savedFileMetadata,savedFileMetadataOrigin:'historical-upload',key:prepared.key,size:length,etag:result.etag,version:result.version,operationId,transfer:staged?'bounded-spool':'known-length-stream',...(stagingCleanup?{stagingCleanup}:{}),...(prepared.provenance?{provenance:prepared.provenance}:{})};
  },
- async verify({receipt,signal}){const h=await wait(storage.head(receipt.key),signal);let provenance;if(h?.customMetadata?.click2cloud)try{provenance=JSON.parse(h.customMetadata.click2cloud);}catch{fail('PROVENANCE_INVALID');}return h?{savedFileMetadataOrigin:'current-remote',savedFileMetadata:{httpMetadata:h.httpMetadata??{},customMetadata:h.customMetadata??{}},key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId,...(provenance?{provenance}:{})}:null;}
+ async verify({receipt,signal,includeChecksum=false}){const h=await wait(storage.head(receipt.key),signal);let provenance;if(h?.customMetadata?.click2cloud)try{provenance=JSON.parse(h.customMetadata.click2cloud);}catch{fail('PROVENANCE_INVALID');}return h?{savedFileMetadataOrigin:'current-remote',savedFileMetadata:{httpMetadata:h.httpMetadata??{},customMetadata:h.customMetadata??{}},key:receipt.key,size:h.size,etag:h.etag,version:h.version,operationId:h.customMetadata?.operationId,...(includeChecksum&&h.checksums?.sha256?{sha256:Array.from(new Uint8Array(h.checksums.sha256),byte=>byte.toString(16).padStart(2,'0')).join('')}:{}),...(provenance?{provenance}:{})}:null;}
  };
 }

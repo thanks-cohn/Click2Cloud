@@ -31,7 +31,8 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
  const archive=archiveEntries(),csv=v=>'"'+String(v==null?'N/A':typeof v==='object'?JSON.stringify(v):v).replaceAll('"','""')+'"';
  let basicAfter=0,richAfter=0,basicCount=0,richCount=0,pages=0,basicDone=snapshot.basic.count===0,richDone=!snapshot.rich||snapshot.rich.highWater===0,priorHash=null,maxPageEvents=0,lastBasicSequence=0;
  const missingRanges=[],segments=[];
- const progress=phase=>onProgress({phase,pages,basicCount,richCount,bytes:archive.bytes,basicExpected:snapshot.basic.count,richExpected:snapshot.rich?.committed??0});
+ let transferCount=0;
+ const progress=phase=>onProgress({phase,pages,basicCount,richCount,transferCount,transferExpected:snapshot.transfers?.count,bytes:archive.bytes,basicExpected:snapshot.basic.count,richExpected:snapshot.rich?.committed??0});
  archive.write('basic-attempts.jsonl','');archive.write('basic-attempts.csv',FIELDS.concat(['sequence','snapshotPosition']).join(',')+'\n');archive.write('full-events.jsonl','');
  const readPage=async params=>{
   signal?.throwIfAborted();let timer,abort;
@@ -72,6 +73,16 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
   if(!basicDone&&!page.basic.length||!richDone&&!page.segments.length)throw Error('EXPORT_CURSOR_STALLED');
   progress('reading');await new Promise(ok=>setTimeout(ok,0));
  }
+ if(snapshot.transfers){
+  archive.write('screenshot-receipts.jsonl','');
+  while(transferCount<snapshot.transfers.count){
+   const page=await readPage({transfersAfter:transferCount,privacy,consent});
+   if(!Array.isArray(page.transfers)||!page.transfers.length||page.transfersNext!==transferCount+page.transfers.length||
+    page.transfersNext>snapshot.transfers.count)throw Error('EXPORT_TRANSFER_CURSOR_INVALID');
+   archive.write('screenshot-receipts.jsonl',page.transfers.map(receipt=>JSON.stringify(receipt)).join('\n')+'\n');
+   transferCount=page.transfersNext;pages++;progress('reading');
+  }
+ }
  signal?.throwIfAborted();
  if(snapshot.rich&&richAfter<snapshot.rich.highWater)missingRanges.push({start:richAfter+1,end:snapshot.rich.highWater,reason:'missing_tail'});
  if(snapshot.rich&&richCount===snapshot.rich.committed&&priorHash!==snapshot.rich.head)throw Error('ARCHIVE_HEAD_MISMATCH');
@@ -85,12 +96,12 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
  if(snapshot.rich?.gaps?.length)issues.push({reason:'declared_rich_gaps',ranges:snapshot.rich.gaps.map(g=>({start:number(g.start),end:number(g.end),reason:['interrupted_unconfirmed','queue_overload'].includes(g.reason)?g.reason:'unavailable'}))});
  if(snapshot.rich?.pending?.length)issues.push({reason:'unconfirmed',ranges:snapshot.rich.pending.map(g=>({start:number(g.start),end:number(g.end)}))});
  if(snapshot.rich?.unknownEpochs)issues.push({reason:'unknown_epochs',count:snapshot.rich.unknownEpochs});
- const status=issues.length?'PARTIAL':'COMPLETE',counts={basicExpected:snapshot.basic.count,basicExported:basicCount,richExpected:snapshot.rich?.committed??0,richExported:richCount};
- archive.write('README.md',`Click2Cloud diagnostics v2 · ${privacy}\n${status}: fixed committed snapshot, every internal page read automatically. Unreceived/last-commit risk remains UNKNOWN. N/A is unavailable, never zero. Archive integrity/coverage is not installed Chrome or live-provider certification. Download request is not proof of a physical disk write.\n`);
+ const status=issues.length?'PARTIAL':'COMPLETE',counts={basicExpected:snapshot.basic.count,basicExported:basicCount,richExpected:snapshot.rich?.committed??0,richExported:richCount,...(snapshot.transfers?{transfersExpected:snapshot.transfers.count,transfersExported:transferCount}:{})};
+ archive.write('README.md',`Click2Cloud diagnostics v2 · ${privacy} · ${snapshot.scope??'right-click-save'}\n${status}: fixed committed snapshot, every internal page read automatically. Unreceived/last-commit risk remains UNKNOWN. N/A is unavailable, never zero. Archive integrity/coverage is not installed Chrome or live-provider certification. Download request is not proof of a physical disk write.\n`);
  archive.write('performance-summary.json',JSON.stringify({privacy,scope:'full_committed_basic_snapshot',...safeStatistics(snapshot.basic.statistics)}));
  archive.write('recorder-health.json',JSON.stringify({privacy,basic:safeHealth(snapshot.basic.health),rich:safeHealth(snapshot.richHealth)}));
  archive.write('coverage.json',JSON.stringify({privacy,...snapshot.coverage,status,...counts,issues,missingRanges,evicted:snapshot.basic.control.evicted??null,basicHighWater:snapshot.basic.control.sequence,richHighWater:snapshot.rich?.highWater??null,unknownEpochs:snapshot.rich?.unknownEpochs??0,unreceivedEvents:'UNKNOWN',lastCommitRisk:'UNKNOWN'}));
- const manifest={schemaVersion:2,privacy,snapshotId:snapshot.id,runId:snapshot.rich?.id??null,status,completeSnapshot:basicCount===snapshot.basic.count&&richCount===(snapshot.rich?.committed??0)&&!missingRanges.length,counts,basicHighWater:snapshot.basic.control.sequence,basicRetained:snapshot.basic.count,richHighWater:snapshot.rich?.highWater??null,richCommitted:snapshot.rich?.committed??null,missingRanges,issues,segments,files:archive.hashes(),processing:{pages,maxPageEvents,limitBytes:MAX_EXPORT_BYTES},evidenceClass:'locally_recorded_committed_metadata_not_live_certification'};
+ const manifest={schemaVersion:2,privacy,scope:snapshot.scope??'right-click-save',snapshotId:snapshot.id,runId:snapshot.rich?.id??null,status,completeSnapshot:basicCount===snapshot.basic.count&&richCount===(snapshot.rich?.committed??0)&&!missingRanges.length,counts,basicHighWater:snapshot.basic.control.sequence,basicRetained:snapshot.basic.count,richHighWater:snapshot.rich?.highWater??null,richCommitted:snapshot.rich?.committed??null,missingRanges,issues,segments,files:archive.hashes(),processing:{pages,maxPageEvents,limitBytes:MAX_EXPORT_BYTES},evidenceClass:'locally_recorded_committed_metadata_not_live_certification'};
  archive.write('MANIFEST.json',JSON.stringify(manifest));progress('verifying');
  const {blob}=archive.finish(),hash=await hashBlob(blob,signal);signal?.throwIfAborted();progress('ready');return {blob,hash,status,manifest,counts};
 }

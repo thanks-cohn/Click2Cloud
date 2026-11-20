@@ -54,7 +54,7 @@ export function safeObjectMetadata(object, source) {
 export function verifiedDomains(records) {
   if (!Array.isArray(records)) throw exportError('DOMAIN_LIST_UNAVAILABLE');
   const active = records.filter(item => item?.enabled === true && item.status?.ownership === 'active' && item.status?.ssl === 'active');
-  return [...new Set(active.map(item => domainName(item.domain)).filter(Boolean))].sort();
+  return [...new Set(active.map(item => domainName(item.domain)).filter(domain => domain && !developmentalDomain(domain)))].sort();
 }
 export function domainName(value) {
   if (typeof value !== 'string' || !/^[a-z\d.-]+$/i.test(value)) return null;
@@ -88,7 +88,7 @@ export function directoryUrlFiles(source, objects, types) {
 }
 export function objectUrls(source, key, domains) {
   const valid = typeof key === 'string' && key.startsWith(source.prefix) && !key.endsWith('/') &&
-    key.split('/').every(part => part && part !== '.' && part !== '..' && !part.includes('\\'));
+    key.split('/').every(part => part && part !== '.' && part !== '..');
   const urls = valid ? [...new Set(domains)].map(domain => ({
     url: 'https://' + domain + '/' + key.split('/').map(encodeURIComponent).join('/'),
     domain, status: 'verified-domain', provenance: developmentalDomain(domain)

@@ -44,8 +44,8 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     };
   }
   function metadata(source,key,signal){return api('getExportObjectMetadata',{source,key},{quiet:true,signal});}
-  function collect(source,signal,onProgress){return listExportInventory((source,cursor)=>
-    api('listDirectoryObjects',{source,...(cursor?{cursor}:{})},{quiet:true,signal}),source,{signal,onProgress});}
+  function collect(source,signal,onProgress,immediate=false){return listExportInventory((source,cursor)=>
+    api('listDirectoryObjects',{source,...(cursor?{cursor}:{}),...(immediate?{immediate:true}:{})},{quiet:true,signal}),source,{signal,onProgress});}
   async function refreshJobs(){
     try{const stored=await chrome.storage?.session?.get(null);
       for(const [key,job] of Object.entries(stored??{}))if(key.startsWith(downloadKey)&&!active.has(job?.jobId)&&job?.createdAt)jobs.set(job.jobId,job);
@@ -254,7 +254,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       const {simple,prefer,types,formats}=choices();
       running=true;sync();
       try{
-        const inventory=await collect(source,undefined,values=>{progress.textContent='Scanned '+format(values.scanned)+' objects.';});
+        const inventory=await collect(source,undefined,values=>{progress.textContent='Scanned '+format(values.scanned)+' objects.';},true);
         info=await get();
         if(!form.closest('dialog[open]'))return;
         const files=directoryUrlFiles(source,inventory.files,types).map(item=>objectUrls(source,item.key,info.domains));

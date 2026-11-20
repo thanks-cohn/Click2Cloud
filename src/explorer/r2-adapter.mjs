@@ -166,8 +166,8 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     prepareBucket:({source},o)=>{const l=location(source);return message('cfProvision',{...l,profileName:l.bucketName,folders:{}},o).then(result=>({verification:result.verification,menuUpdated:result.menuUpdated,menuError:result.menuError}));},
     createBucket:({accountId,name:n},o)=>message('cfCreateBucket',{accountId,name:n},o),
     publicUrls:({source},o)=>message('cfPublicAddresses',location(source),o),
-    async listRaw({source,cursor=''},options={}) {
-      const l=location(source),p=await page(l,l.prefix,cursor,'',options);
+    async listRaw({source,cursor='',immediate=false},options={}) {
+      const l=location(source),p=await page(l,l.prefix,cursor,immediate?'/':'',options);
       return {entries:p.objects.map(object=>({...object,key:String(object.key||object.name||''),folder:false})),cursor:p.cursor};
     },
     async list({source,cursor=''},options) {

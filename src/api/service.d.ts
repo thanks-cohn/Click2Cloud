@@ -40,8 +40,8 @@ export interface Methods {
  inspectManifestBindings:{draftId:string;mapping?:Record<string,{accountId:string;connectionId:string}>;options?:{policy:'skip-identical'|'add-alongside'|'replace-selected';replaceIds?:string[];applyPreferences?:boolean}};
  commitMenuManifest:ManifestDraftAction&{partial:boolean};provisionMenuManifest:ManifestDraftAction;undoMenuManifest:{expectedRevision:number;idempotencyKey:string};
  getHistoryPreferences:{};setHistoryPreferences:HistoryPreferences;
- recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean};
- listDirectoryObjects:{source:Target;cursor?:string};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
+ recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean;screenshotUpgrade?:boolean};
+ listDirectoryObjects:{source:Target;cursor?:string;immediate?:boolean};getPublicUrls:{source:Target;key?:string;domains?:string[]};getExportObjectMetadata:{source:Target;key:string};
  listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};
  fileAction:{action:'mkdir'|'copy'|'move'|'rename'|'delete'|'createBucket';authorizeSetup?:boolean;source:Target;destination?:Target;entry?:{key:string;folder:boolean;displayName?:string};name?:string;conflict?:'keep'|'skip'|'replace';idempotencyKey:string};
  initializeCloudflare:{resume?:boolean};inspectShelfAttention:{};openCloudflareDestinations:{};inspectCloudflare:{};checkCloudflareR2:{accountId?:string;target?:Target};selectCloudflareAccount:{accountId:string};openCloudflareActivation:{accountId:string};

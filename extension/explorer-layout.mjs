@@ -88,6 +88,11 @@ export function installExplorerLayout({read,save,onResize}){
    }
   }
   const visible=extra.length&&primary.length?[...primary,rowBreak,...extra]:[...primary,...extra];
+  if(!dismissed&&!pinned&&!visible.includes(search)&&(search.contains(focused)||search.querySelector('input').value)){
+   pinned=true;returnFocus=more;searchPanel.append(search);
+   layout();if(search.contains(focused))focused.focus({preventScroll:true});
+   return;
+  }
   if(dismissed&&!searchPanel.contains(search))searchPanel.append(search);
   if(pinned&&searchPanel.hidden){searchPanel.hidden=false;searchPanel.showPopover?.();}
   const hidden=nodes.filter(node=>!visible.includes(node)&&(node!==search&&node!==opener||!pinned&&node===searchControl));

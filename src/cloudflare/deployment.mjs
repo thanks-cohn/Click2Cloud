@@ -1,6 +1,6 @@
 import {diagnoseCloudflare,hasWorkerWriteScope,hasWorkerCreateScope,CLOUDFLARE_SCOPES} from '../auth/cloudflare-oauth.mjs';
 import {PROTOCOL,remoteDestination,fail,digest} from './wire.mjs';
-export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/files.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address','provenance'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
+export const WORKER_MODULES=['src/cloudflare/worker.mjs','src/cloudflare/files.mjs','src/cloudflare/screenshot-wire.mjs','src/cloudflare/screenshot-worker.mjs','src/cloudflare/wire.mjs','src/cloudflare/resources.mjs','src/cloudflare/writer-registry.mjs','src/cloudflare/public-egress.mjs','src/cloudflare/public-address.mjs',...['cloudflare-worker','cloudflare-r2-writer','source-fetch','verification','common','public-address','provenance'].map(n=>'right2cloud-module/src/'+n+'.mjs')];
 // Official endpoint permission alternatives are recorded in the accompanying
 // Cloudflare OpenAPI evidence. OAuth scope names are not account-role grants.
 const WORKER_OPERATIONS={
@@ -32,11 +32,12 @@ export function createProvisioner({request,readModule,load,store,authority=async
   }return body.result;
  }
 
- return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName,expandScope=false,sourceBucket}={}){
+ return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName,expandScope=false,sourceBucket,updateOnly=false}={}){
   if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await planKey(d,sourceBucket);
   if(sourceBucket===d.bucketName)sourceBucket=undefined;
   const identity=await authority();let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
   let plan=await load(key);
+  if(updateOnly&&!plan)fail('WORKER_SETUP_REQUIRED');
   try{if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.sourceBucket!==sourceBucket||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')))fail('TRANSPORT_PLAN_INVALID');if(plan&&!/^[a-f0-9]{64}$/.test(plan.secret??'')&&!renewSigning)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');const renewing=!!plan&&(renewSigning||plan.signingRenewalPending===true);if(renewing)rebuild=true;if(plan?.failure&&!retryDenied)throw workerError(safeWorkerDiagnostic(plan.failure));
   if(identity&&!auth.selectedAccountVerified)fail('WRONG_ACCOUNT');
   const expanding=expandScope&&!!plan?.prefixScope;
@@ -62,7 +63,7 @@ export function createProvisioner({request,readModule,load,store,authority=async
     if(plan.state==='ready'&&!rebuild){if(!bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest))fail('WORKER_BUILD_MISMATCH');return plan;}
     if(plan.state==='pending'&&!renewing&&!expanding&&desiredBinding&&plan.codeDigest===codeDigest&&deployedDigest===codeDigest){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');delete plan.failure;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
     if(plan.state==='pending'&&!rebuild&&!previousBinding)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
-   }else{recoveredMissing=true;workerIntent='create';}
+   }else{if(updateOnly)fail('WORKER_SETUP_REQUIRED');recoveredMissing=true;workerIntent='create';}
   }
   if(plan&&!['ready','pending'].includes(plan.state))fail('PROVISION_RECONCILE_REQUIRED');
   auth={...auth,workerIntent};

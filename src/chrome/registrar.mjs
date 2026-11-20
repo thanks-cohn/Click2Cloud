@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, dispatchOwnsAuthorization=false } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, registerExtras, extraClick, dispatchOwnsAuthorization=false } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -156,6 +156,10 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
           rowSignals.set(row.itemId, rowSignal); if (rowSignal) failureSignals.push(rowSignal);
         }
       }
+      // Supplemental user actions share the native owner and removeAll cycle.
+      // Their availability is independent of the canonical save-row ACK.
+      try{await registerExtras?.(spec,properties=>native('create',[properties]));}
+      catch{emit('chrome.ack','failed','SUPPLEMENTAL_MENU_UNAVAILABLE',id,spec.generation);}
       acknowledgements = freeze(acks);
       if (!failed.size) acknowledged = spec;
       durable = await save({ desired: spec, appliedGeneration: acknowledged?.generation ?? null, epoch, state: failed.size ? 'partial' : 'acknowledged' }, id, spec.generation) && durable;
@@ -240,7 +244,10 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       return outcome;
     } finally { observed('native.terminal',{result:outcome??{state:'uncertain'}}); }
   }
-  const listener = (info, tab) => { try{onGesture?.(info,tab);}catch{}void handleClick(info, tab).catch(()=>{}); };
+  const listener = (info, tab) => {
+    try{if(extraClick?.(info,tab))return;onGesture?.(info,tab);}catch{}
+    void handleClick(info, tab).catch(()=>{});
+  };
   chrome.contextMenus.onClicked?.addListener(listener);
   const owner = freeze({ apply, inspect, resolveClick, handleClick,
     async recover(spec) {

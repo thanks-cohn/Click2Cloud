@@ -46,7 +46,7 @@ const definitions={
   getGalleryLoadingVisual:['inspect',obj({includeMedia:bool})],setGalleryLoadingVisual:['configure',obj({expectedRevision:num,mode:{enum:['math','media','plain']},removeMedia:bool,media:obj({name:{type:'string',minLength:1,maxLength:256},type:{enum:['image/png','image/jpeg','image/webp','image/gif','video/mp4']},base64:{type:'string',minLength:1,maxLength:11184812}},['name','type','base64'])},['expectedRevision','mode'])],
   initializeCloudflare:['provision',obj({resume:bool})],inspectShelfAttention:['inspect',obj()],openCloudflareDestinations:['configure',obj()],inspectCloudflare:['inspect',obj()],checkCloudflareR2:['inspect',obj({accountId:str,target})],selectCloudflareAccount:['configure',obj({accountId:str},['accountId'])],openCloudflareActivation:['configure',obj({accountId:str},['accountId'])],
   approveCloudflareSetup:['provision',obj({accountId:str,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],repairCloudflareDestination:['provision',obj({accountId:str,target,expectedRevision:num,idempotencyKey:str},['accountId','expectedRevision','idempotencyKey'])],
-  recoverCloudflareDestination:['provision',obj({target,expectedRevision:num,idempotencyKey:str,authorizeSetup:bool},['target'])],
+  recoverCloudflareDestination:['provision',obj({target,expectedRevision:num,idempotencyKey:str,authorizeSetup:bool,screenshotUpgrade:bool},['target'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   getHistoryPreferences:['inspect',obj()],setHistoryPreferences:['configure',obj({range:{enum:['all','daily','weekly']},previews:{enum:['all','first','closed']},timezone:str},['range','previews','timezone'])],
   inspectRemoteHistory:['inspect',obj({customer:bool,cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
@@ -71,7 +71,7 @@ const definitions={
   listCommands:['inspect',obj()],getShortcutBindings:['inspect',obj()],
   setShortcutBinding:['configure',obj({commandId:str,chord:{oneOf:[str,{enum:[null]}]}},['commandId','chord'])],
   resetShortcutBindings:['configure',obj()],
-  listDirectoryObjects:['inspect',obj({source:target,cursor:str},['source'])],
+  listDirectoryObjects:['inspect',obj({source:target,cursor:str,immediate:bool},['source'])],
   getPublicUrls:['inspect',obj({source:target,key:str,domains:{type:'array',items:str,maxItems:100}},['source'])],
   getExportObjectMetadata:['inspect',obj({source:target,key:str},['source','key'])]
 };
@@ -274,9 +274,10 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           // Existing approval can resume this exact configured bucket. New
           // approval is a separately confirmed, account-scoped provision action.
           if(method==='recoverCloudflareDestination'){
-            if(params.authorizeSetup&&await confirm({actor,scope,method,params})!==true)fail('CONFIRMATION_REQUIRED');
+            if(params.screenshotUpgrade&&!params.authorizeSetup||params.authorizeSetup&&await confirm({actor,scope,method,params})!==true)
+              fail('CONFIRMATION_REQUIRED');
             data=await cloudflare.recoverDestination(params);
-            if(data.state==='completed'){
+            if(data.state==='completed'&&!params.screenshotUpgrade){
               const native=await applyCurrent({refreshDepth:true,refreshTargets:[params.target],depthTarget:params.target});
               let readiness=nativeReadiness(await cloudflare.check(params.target.accountId,params.target));
               const evidence=engine.getEvidence?.(),row=evidence?.desired?.rows?.find(r=>r.role==='save'&&r.target&&targetKey(r.target)===targetKey(params.target)&&r.enabled&&r.visible&&r.actionKind!=='attention');
@@ -285,7 +286,17 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             }
           }
           if(method==='invokeProviderAction'){if(!await current.reserveOperation(actor+':provider:'+params.idempotencyKey,Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(params)))),b=>b.toString(16).padStart(2,'0')).join('')))fail('SAVE_RETRY_REQUIRES_INSPECTION');if(params.source){if(!Number.isSafeInteger(params.generation))fail('GENERATION_REQUIRED');const spec=engine.getMenu(params.generation),row=spec?.rows.find(r=>r.providerAction===params.provider||r.role==='save'&&r.id===stableId('provider-entry',params.provider)||r.role==='save'&&r.target?.provider===params.provider&&state.product.defaultTarget&&targetKey(r.target)===targetKey(state.product.defaultTarget));if(!row)fail('CANONICAL_ACTION_UNAVAILABLE');data=await engine.save({itemId:row.id,generation:params.generation,context:'link',source:params.source});}else data=await cloudflare.invoke(params);}
-          if(method==='inspectRemoteHistory')data=await cloudflare.history(params);
+          if(method==='inspectRemoteHistory'){
+            const rows=await cloudflare.history(params);
+            const sanitize=row=>{
+              if(row.kind!=='screenshot-to-cloud')return row;
+              const {screenshot,...base}=row;
+              if(actor!=='gui')return {...base,historyContext:undefined};
+              const context=screenshot.plan.context;
+              return {...base,screenshot:{...screenshot,plan:{...screenshot.plan,context:context?{url:row.historyContext?.hostPageURL}:null}}};
+            };
+            data=Array.isArray(rows)?rows.map(sanitize):{...rows,items:rows.items.map(sanitize)};
+          }
           if(method==='inspectRemoteReceipt')data=await cloudflare.receipt(params);
         }
         else if(method==='inspectShelfAttention')data=await attention?.read()??null;
@@ -392,7 +403,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(status.state!=='CONNECTED'||!status.accounts?.some(account=>account.id===source.accountId))fail('AUTH_REQUIRED');
           if(params.key&&(!params.key.startsWith(source.prefix)||params.key.endsWith('/')))fail('SOURCE_SCOPE_MISMATCH');
           if(method==='listDirectoryObjects'){
-            const result=await fileApi.run('listRaw',{source,cursor:params.cursor});
+            const result=await fileApi.run('listRaw',{source,cursor:params.cursor,...(params.immediate?{immediate:true}:{})});
             if(result.state!=='completed')fail(result.code??'EXPORT_LIST_FAILED');
             if(result.data.entries.some(entry=>typeof entry.key!=='string'||!entry.key.startsWith(source.prefix)))fail('SOURCE_SCOPE_MISMATCH');
             data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};

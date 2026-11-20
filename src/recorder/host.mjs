@@ -1,11 +1,11 @@
-import {secureBasic,secureEvent} from './schema.mjs';
+import {secureBasic,secureEvent,screenshotReceipt} from './schema.mjs';
 import {sha256} from './storage.mjs';
 import {providerObservation} from './provider-observation.mjs';
 import {createRecorder} from './recorder.mjs';
 // Dedicated local versioned channel, accepted only after appSenderDecision in the
 // existing message owner. No agent/debug grant implies RAW collection authority.
-export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorder:providedRecorder}){
- const recorder=providedRecorder??createRecorder({build});let debug=false;const snapshots=new Map();
+export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorder:providedRecorder,readScreenshotReceipts}){
+ const recorder=providedRecorder??createRecorder({build});let debug=false,screenshotSnapshot;const snapshots=new Map();
  // No await of recorder DB readiness in bootstrap or on a delivered gesture.
  try{debug=(await chrome.storage.local.get('uiDebugMode')).uiDebugMode===true;}catch{}
  void recorder.setDebug(debug).catch(()=>{});
@@ -28,8 +28,38 @@ export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorde
     if(message.method==='capacity')data=await recorder.setCapacity(p.value,p.confirmed===true);
     if(message.method==='start')data=await recorder.start({limit:p.limit,unlimited:p.unlimited===true,consent:p.consent===true});
     if(message.method==='stop')data=await recorder.stop();
-    if(message.method==='snapshot'){data=await recorder.snapshot(p.runId);data.coverage.startupGapsLowerBound=startupGaps();snapshots.set(data.id,data);if(snapshots.size>8)snapshots.delete(snapshots.keys().next().value);}
-    if(message.method==='page'){const snap=snapshots.get(p.snapshotId);if(!snap)throw Error('SNAPSHOT_NOT_OPEN');if(!['RAW','SECURE'].includes(p.privacy))throw Error('PRIVACY_REQUIRED');if(p.privacy==='RAW'&&p.consent!==true)throw Error('RAW_EXPORT_CONSENT_REQUIRED');for(const key of ['basicAfter','richAfter'])if(p[key]!==undefined&&(!Number.isSafeInteger(p[key])||p[key]<0))throw Error('INVALID_CURSOR');data=await recorder.page(snap,p);if(p.privacy==='SECURE'){for(const segment of data.segments)if(await sha256(segment.priorHash+'\n'+segment.jsonl)!==segment.hash)throw Error('SEGMENT_HASH_MISMATCH');data={...data,basic:data.basic.map(row=>({...secureBasic(row),sequence:row.sequence,snapshotPosition:row.snapshotPosition})),segments:data.segments.map(s=>({start:s.start,end:s.end,sourceHash:s.hash,priorSourceHash:s.priorHash,events:s.jsonl.trim().split('\n').map(line=>secureEvent(JSON.parse(line)))}))};}}
+    if(message.method==='snapshot'){
+     const scope=p.scope??'right-click-save';
+     if(scope==='screenshot-to-cloud'){
+      if(!readScreenshotReceipts)throw Error('SCREENSHOT_RECEIPTS_UNAVAILABLE');
+      const receipts=await readScreenshotReceipts();
+      data={id:crypto.randomUUID(),scope,transfers:{count:receipts.length},
+       basic:{available:true,count:0,control:{sequence:0}},coverage:{}};
+      screenshotSnapshot={id:data.id,receipts};
+     }else if(scope==='right-click-save'){
+      data=await recorder.snapshot(p.runId);
+      data.scope=scope;data.coverage.startupGapsLowerBound=startupGaps();
+      snapshots.set(data.id,data);if(snapshots.size>8)snapshots.delete(snapshots.keys().next().value);
+     }else throw Error('INVALID_RECORDER_SCOPE');
+    }
+    if(message.method==='page'){
+     if(!['RAW','SECURE'].includes(p.privacy))throw Error('PRIVACY_REQUIRED');
+     if(p.privacy==='RAW'&&p.consent!==true)throw Error('RAW_EXPORT_CONSENT_REQUIRED');
+     for(const key of ['basicAfter','richAfter','transfersAfter'])if(p[key]!==undefined&&(!Number.isSafeInteger(p[key])||p[key]<0))throw Error('INVALID_CURSOR');
+     if(screenshotSnapshot?.id===p.snapshotId){
+      const start=p.transfersAfter??0;
+      const transfers=screenshotSnapshot.receipts.slice(start,start+5).map(job=>screenshotReceipt(job,{secure:p.privacy==='SECURE'}));
+      data={transfers,transfersNext:start+transfers.length};
+     }else{
+      const snap=snapshots.get(p.snapshotId);if(!snap)throw Error('SNAPSHOT_NOT_OPEN');
+      data=await recorder.page(snap,p);
+      if(p.privacy==='SECURE'){
+       for(const segment of data.segments)if(await sha256(segment.priorHash+'\n'+segment.jsonl)!==segment.hash)throw Error('SEGMENT_HASH_MISMATCH');
+       data={...data,basic:data.basic.map(row=>({...secureBasic(row),sequence:row.sequence,snapshotPosition:row.snapshotPosition})),
+        segments:data.segments.map(s=>({start:s.start,end:s.end,sourceHash:s.hash,priorSourceHash:s.priorHash,events:s.jsonl.trim().split('\n').map(line=>secureEvent(JSON.parse(line)))}))};
+      }
+     }
+    }
    }
    return {version:2,state:'completed',data};
   }catch(error){return {version:2,state:'failed',code:/^[A-Z_]+$/.test(error.message)?error.message:'RECORDER_UNAVAILABLE'};}}

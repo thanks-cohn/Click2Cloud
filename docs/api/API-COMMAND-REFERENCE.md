@@ -460,15 +460,15 @@ await invoke('repairCloudflareDestination', {"accountId":"fixture","expectedRevi
 
 ### recoverCloudflareDestination
 
-<!-- method-contract {"name":"recoverCloudflareDestination","scope":"provision","effectful":true,"status":"implemented","input":"76d71338da41d95a532feedb19d51053f80ada249cb56ad81ffe73913c00bf72","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+<!-- method-contract {"name":"recoverCloudflareDestination","scope":"provision","effectful":true,"status":"implemented","input":"c129b83a0925cb9822c2ac8f290d3715de11b063318515cef346bd0468affce7","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
-Checks and repairs the exact configured bucket or folder using retained setup approval when valid. Use authorizeSetup only after explicit approval for this request.
+Checks and repairs the exact configured bucket or folder using retained setup approval when valid. Use authorizeSetup only after explicit approval for this request. The screenshotUpgrade option updates the existing Worker in its exact scope and verifies a readiness object. This option requires authorizeSetup.
 
 Returns target readiness and reconciliation evidence. It does not replay the original source, and real save authorization is checked separately.
 
 **Access and status** · `provision` · registry effectful `true` · implemented.
 
-**Input** · `target` (object), `expectedRevision?` (integer), `idempotencyKey?` (string), `authorizeSetup?` (boolean). A trailing `?` marks an optional field.
+**Input** · `target` (object), `expectedRevision?` (integer), `idempotencyKey?` (string), `authorizeSetup?` (boolean), `screenshotUpgrade?` (boolean). A trailing `?` marks an optional field.
 
 ```js
 await invoke('recoverCloudflareDestination', {"target":{"provider":"cloudflare","connectionId":"cloudflare:fixture","accountId":"fixture","bucketName":"test-bucket","prefix":"images/"},"authorizeSetup":false});
@@ -720,7 +720,7 @@ await invoke('searchDirectoryNames', {"source":{"provider":"cloudflare","connect
 
 ### listDirectoryObjects
 
-<!-- method-contract {"name":"listDirectoryObjects","scope":"inspect","effectful":false,"status":"implemented","input":"a048a80c8ad32e347c0d206d450837e80ccb2fb06ae2e80afdd35fb1affd85c2","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+<!-- method-contract {"name":"listDirectoryObjects","scope":"inspect","effectful":false,"status":"implemented","input":"a6d4d5fe13682dad5b8df392c3ac224c87a938653c2f2107704ea1ba61f73a58","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
 Lists raw object inventory recursively under one authorized prefix. Follow nextCursor until null and enforce a finite budget and valid cursor progression.
 
@@ -728,7 +728,9 @@ Returns normalized source facts and nextCursor. ZIP streaming and URL export con
 
 **Access and status** · `inspect` · registry effectful `false` · implemented.
 
-**Input** · `source` (object), `cursor?` (string). A trailing `?` marks an optional field.
+Set immediate to ask R2 for direct children with a delimiter. Directory URL exports use this option and independently check the exact prefix boundary. Archive Download keeps recursive enumeration.
+
+**Input** · `source` (object), `cursor?` (string), `immediate?` (boolean). A trailing `?` marks an optional field.
 
 ```js
 await invoke('listDirectoryObjects', {"source":{"provider":"cloudflare","connectionId":"cloudflare:fixture","accountId":"fixture","bucketName":"test-bucket","prefix":"images/"}});
@@ -743,6 +745,8 @@ Reads active HTTPS custom-domain associations for the exact bucket and optionall
 Returns verified domains, check time and optional grouped file links. Verification covers domain ownership and TLS configuration, while public retrieval can still be affected by site policy. Requires the Get URL experiment.
 
 **Access and status** · `inspect` · registry effectful `false` · experimental.
+
+An enabled managed r2.dev endpoint adds a development URL when Cloudflare verifies it for the same bucket. The domainCheckComplete flag indicates whether both provider checks succeeded.
 
 **Input** · `source` (object), `key?` (string), `domains?` (array of string). A trailing `?` marks an optional field.
 

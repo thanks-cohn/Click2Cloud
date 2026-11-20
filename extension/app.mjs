@@ -1,3 +1,4 @@
+import {createScreenshotPage,screenshotMessage,screenshotRequest} from './screenshot-page.mjs';
 import {createAestheticHost} from '../src/aesthetic/host.mjs';
 const aesthetic=createAestheticHost({root:document.documentElement,storage:chrome.storage?.local});
 const aestheticReady=aesthetic.restore();
@@ -267,7 +268,7 @@ function renderRemotes(){
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);$$('[data-placeholder]').forEach(b=>b.onclick=()=>api('invokeProviderAction',{provider:b.dataset.placeholder,idempotencyKey:crypto.randomUUID()}).catch(e=>status(e.message)));
   listen('#open-explorer','click',async()=>{await show('explorer');});
-  const summary=$('#remote-summary'),concise=$('#remote-summary-attention');void api('inspectRemoteHistory',{}, {quiet:true}).then(rows=>{const last=rows.find(r=>r.kind!=='readiness');if(view==='remotes'&&summary?.isConnected&&last)summary.textContent=(last.state==='verified'?'Saved and verified.':last.state==='pending'?'Saving…':last.state==='uncertain'?'Save uncertain. Inspect before retrying.':'Not saved.')+(names[last.code]?' '+names[last.code]:'');
+  const summary=$('#remote-summary'),concise=$('#remote-summary-attention');void api('inspectRemoteHistory',{}, {quiet:true}).then(rows=>{const last=rows.find(r=>r.kind!=='readiness'&&r.kind!=='screenshot-to-cloud');if(view==='remotes'&&summary?.isConnected&&last)summary.textContent=(last.state==='verified'?'Saved and verified.':last.state==='pending'?'Saving…':last.state==='uncertain'?'Save uncertain. Inspect before retrying.':'Not saved.')+(names[last.code]?' '+names[last.code]:'');
    if(concise?.isConnected&&last&&['pending','uncertain','failed','blocked','partial'].includes(last.state)){
     concise.textContent=last.state==='pending'?'Saving…':last.state==='uncertain'||last.state==='partial'?'Save unconfirmed. Check History before retrying.':'Save unavailable. Check History for details.';
     concise.hidden=false;
@@ -324,7 +325,11 @@ async function revealListedFile(key,target){
  if(!entries.some(e=>e.key===key)){selected.clear();updateSelection();status('This file is unavailable in the listing. Refresh or reconnect before trying again.',{attention:true});throw Error('RESULT_NOT_FOUND');}
  selected=new Set([key]);ordered();focusIndex=listingOrder.index(key);updateSelection();focusRow(focusIndex);
 }
-const historyUI=createHistoryPage({api,loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
+const screenshotUI=createScreenshotPage({api,dialog,closeDialog,esc,windowId:shelfWindow});
+const historyUI=createHistoryPage({api,updateScreenshotWorker:async target=>{
+ await refreshState();
+ return api('recoverCloudflareDestination',{target,screenshotUpgrade:true,authorizeSetup:true,expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()});
+},retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
  const result=await api('openRemoteResult',{operationId},{quiet:true});
  closeDialog();selected.clear();await navigate(result.target);await revealListedFile(result.highlightKey,result.target);
 }});
@@ -395,7 +400,7 @@ function markCurrentSearchStale(){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function renderExplorer(){
@@ -644,7 +649,7 @@ async function contextFor(t,entry,x,y){
   action('Download with All Metadata',()=>explorerExports.download(scope,file,'metadata'));
   action('Get URL',()=>explorerExports.urls(scope,file));
   action('Add Tags',()=>explorerExports.tags(scope,file));
-  if(!entry||entry.folder){action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>makeExplorerDefault(t));}
+  if(!entry||entry.folder){action('Screenshot2Here',()=>screenshotUI.configureHere(structuredClone(t)));action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>makeExplorerDefault(t));}
   else {const save=action('Save to cloud…',()=>chooseRemoteSave(entry));if(capabilities?.providers?.cloudflare?.explorerSource===false){save.disabled=true;save.title='No authorized remote source is available for this private Explorer file.';}}
   const mutation=action;
   if(entry){
@@ -1103,6 +1108,7 @@ async function renderSettings(){
   await historyUI.settings(historySettings);
   if(historySettings.isConnected){
     explorerExports.mountSettings(historySettings.parentElement);
+    void screenshotUI.settings(historySettings.parentElement);
     shortcuts.mount(historySettings.parentElement);
   }
 }
@@ -1115,7 +1121,7 @@ headerMenu.addEventListener('click',()=>closeHeaderMore());
 headerMenu.addEventListener('keydown',e=>{const items=headerItems();if(e.key==='Escape'){e.preventDefault();closeHeaderMore(true);}else if(items.length&&['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();let i=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}else if(e.key==='Tab')closeHeaderMore(true);});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 $$('header nav [data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view).catch(e=>status(e.message)));listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
-document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
+document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open)e.preventDefault();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
 $('#dialog').addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
@@ -1125,6 +1131,7 @@ async function bootstrap(){
  const description=readWithRetry(()=>api('describeCapabilities',{}, {quiet:true,readTimeout:5000})).then(value=>{capabilities=value;}).catch(()=>{});
  await Promise.allSettled([configuration,session,description]);
  await focusShelf().catch(()=>{});
+ await screenshotUI.chooseForCapture().catch(()=>{});
 }
 void bootstrap();
 
@@ -1153,7 +1160,7 @@ async function cloudflarePanel(){
 }
 async function remoteHistory(cursor=null,append=[]){
  if(!debugMode)return;
- const intent=++viewEpoch;const result=await api('inspectRemoteHistory',{limit:20,...(cursor?{cursor}:{})}),page=Array.isArray(result)?{items:result,nextCursor:null}:result,rows=[...append,...page.items];if(intent!==viewEpoch||!debugMode)return;
+ const intent=++viewEpoch;const result=await api('inspectRemoteHistory',{limit:20,...(cursor?{cursor}:{})}),page=Array.isArray(result)?{items:result,nextCursor:null}:result,rows=[...append,...page.items.filter(row=>row.kind!=='screenshot-to-cloud')];if(intent!==viewEpoch||!debugMode)return;
  dialog('Save results',rows.length?rows.map(r=>r.kind==='depth-click'?`<div><strong>Depth click · ${esc(r.state)}</strong><p>${esc(r.code)} · ${esc(r.operationId)}</p><p>No transfer receipt is implied by this click record.</p><details><summary>Click boundary details</summary><pre>${esc(r.stage)}${r.cause?'\nRelated operation: '+esc(r.cause):''}</pre></details></div>`:`<div><strong>${esc(r.state)}</strong> · ${esc(names[r.code]??r.code)}${r.receipt?.provenance?.sourceUrl?'<p><a href="'+esc(r.receipt.provenance.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Original source'+(r.receipt.provenance.sourceRedacted==='true'?' (credential query removed)':'')+'</a></p>':''}<p>${esc(r.receipt?.key??r.stage??'No verified key')} · ${esc(r.durationMs??'—')} ms</p><button data-receipt="${esc(r.operationId)}">Inspect receipt</button>${['pending','uncertain'].includes(r.state)&&r.kind!=='readiness'?'<button data-cancel-operation="'+esc(r.operationId)+'">Request cancellation</button>':''}${r.state==='verified'&&r.kind!=='readiness'?'<button data-goto="'+esc(r.operationId)+'">GO TO</button>':''}</div>`).join(''):'<p>No remote operations recorded.</p>',page.nextCursor?'<button id="more-results">Load more</button>':'',true);
  $$('[data-receipt]').forEach(b=>b.onclick=async()=>{
   const saved=rows.find(r=>r.operationId===b.dataset.receipt);
@@ -1181,10 +1188,26 @@ async function downloadEntry(entry){
 
 chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(sender?.id!==chrome.runtime.id)return;
+ if(message?.channel==='screenshot-choose-folder'){
+  void shelfWindow.then(id=>{if(id===message.windowId)return screenshotUI.chooseForCapture();}).catch(()=>{});
+  return;
+ }
+ if(message?.channel==='screenshot-result'){
+  if(view==='history'&&message.recorded)void historyUI.load().catch(()=>{});
+  void shelfWindow.then(id=>{
+   if(message.windowId!=null&&id!==message.windowId)return;
+   const feedback=$('#action-feedback');
+   feedback.textContent=message.recorded===false?'The screenshot result could not be added to History.':
+    message.state==='confirmed'?`Screenshot saved · ${message.confirmed} verified`:
+     screenshotMessage(message.code,'Screenshot needs review. Open History for the result.');
+   feedback.hidden=false;
+  }).catch(()=>{});
+  return;
+ }
  if(message?.channel==='depth-click-outcome'){status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state)});return;}
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}
  if(message?.channel==='shelf-attention'){void focusShelf().catch(e=>status(e.message));return;}
- if(message?.channel==='connection-changed'){void (async()=>{const before=JSON.stringify([connection?.state,connection?.accounts]);listingReader.invalidate();if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;renderFiles();}await connections();if(view==='explorer'&&connection.state==='CONNECTED'&&before===JSON.stringify([connection.state,connection.accounts])&&source)await loadListing();if(view==='remotes'&&$('#remotes-connection'))renderRemotes();})().catch(e=>status(e.message));return;}
+ if(message?.channel==='connection-changed'){void (async()=>{const before=JSON.stringify([connection?.state,connection?.accounts]);listingReader.invalidate();await connections();if(view==='explorer'&&connection.state==='CONNECTED'&&before===JSON.stringify([connection.state,connection.accounts])&&source)await reloadCurrentDirectory();if(view==='remotes'&&$('#remotes-connection'))renderRemotes();})().catch(e=>status(e.message));return;}
  if(message?.channel==='engine-navigation'&&message.target){if(view!=='explorer')return;void navigate(message.target,true,true).catch(e=>status(e.message));return;}
  if(message?.channel==='filename-inventory-changed'){
   if(source&&view==='explorer'&&message.scopes?.some(d=>scopeKey(source)===scopeKey(d)&&

@@ -6,6 +6,7 @@ import {verifyGrant,PROTOCOL,digest,boundedJSON,fail} from './wire.mjs';
 import {destinationWriter} from './writer-registry.mjs';
 import {publicFetch} from './public-egress.mjs';
 import {JOB_MEMORY_BUDGET,JOB_CAPACITY} from './resources.mjs';
+import {readScreenshot,runScreenshot} from './screenshot-worker.mjs';
 const safeCode=e=>/^[A-Z_]+$/.test(e?.code??'')?e.code:'REQUEST_REJECTED';
 export class RemoteClaims {
  constructor(state,env,ports={}){this.state=state;this.env=env;this.ports=ports;this.running=new Set();this.progress=new Map();this.admitted=0;}
@@ -86,6 +87,18 @@ export class RemoteClaims {
     return Response.json({state:'pending',code:'REMOTE_ACCEPTED',operationId,retryAfterMs:125},{status:202});
    }
    const cap=await this.authenticate(request);
+   if((path==='/screenshot'||path==='/screenshot/verify')&&cap.use==='screenshot'){
+    if(this.admitted>=JOB_CAPACITY)return Response.json({state:'blocked',code:'RESOURCE_BUSY'},{status:429});
+    this.admitted++;admissionHeld=true;
+    const job=await readScreenshot(request,cap,this.env.PREFIX_SCOPE??'',path==='/screenshot'?'write':'verify');
+    operationId=job.intent.operationId;possibleWrite=!!job.image;
+    const allowed=async()=>cap.expiresAt>Date.now()&&!await this.state.storage.get('revoked:'+cap.principal+':'+cap.sessionId);
+    try{
+     const result=runScreenshot(job,cap,allowed);
+     this.state.waitUntil(result);
+     return Response.json(await result);
+    }finally{this.admitted--;admissionHeld=false;}
+   }
    if(path==='/files'&&cap.use==='files'){
     const intent=await boundedJSON(request,65536);operationId=intent.operationId;validateFileIntent(intent,cap);if(cap.operationId!==operationId||cap.fileDigest!==await digest(intent))fail('CAPABILITY_DENIED');
     const key=this.key(cap,operationId);if(this.admitted>=JOB_CAPACITY)return Response.json({state:'blocked',code:'RESOURCE_BUSY',operationId});
@@ -98,7 +111,7 @@ export class RemoteClaims {
    if(path==='/capabilities'&&cap.use==='status'){
     const list=await this.env.STORAGE.list({prefix:cap.destination.prefix?cap.destination.prefix+'/':'',limit:1});
     const sourceBound=cap.sourceBucket?!!await cap.sourceStorage?.list({limit:1}):false;
-    return Response.json({state:'completed',...(cap.sourceBucket?{sourceBucket:cap.sourceBucket,sourceBound}:{}),protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,provenanceSchema:1,sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
+    return Response.json({state:'completed',...(cap.sourceBucket?{sourceBucket:cap.sourceBucket,sourceBound}:{}),protocol:PROTOCOL,codeDigest:this.env.CODE_DIGEST,destination:cap.destination,storageBound:!!list,durableClaims:true,conditionalCreate:true,provenanceSchema:1,screenshotTransfer:'signed-png-fan-out-v1',sourcePolicy:'public-https-native-fetch',transfer:'stream-or-bounded-spool-conditional-put',multipartConditionalCompletion:'NOT_VERIFIED',fileOperations:['mkdir','copy','move','rename','delete'],resourceAdmission:{...JOB_MEMORY_BUDGET,active: this.admitted,capacity:JOB_CAPACITY}});
    }
    if(path==='/lease'&&['save','files'].includes(cap.use)){
     const key=this.key(cap,cap.operationId),job=await this.state.storage.get(key);
@@ -130,5 +143,5 @@ export class RemoteClaims {
 }
 export default {async fetch(request,env){
  try{await verifyGrant(env.SIGNING_KEY,request.headers.get('authorization')?.replace(/^Bearer /,''));}catch{return Response.json({state:'blocked',code:'CAPABILITY_DENIED'},{status:403});}
- try{return await env.CLAIMS.get(env.CLAIMS.idFromName('remote-claims-v1')).fetch(request);}catch{return Response.json({state:new URL(request.url).pathname==='/remote-save'?'uncertain':'blocked',code:'SERVICE_UNAVAILABLE'},{status:503});}
+ try{return await env.CLAIMS.get(env.CLAIMS.idFromName('remote-claims-v1')).fetch(request);}catch{return Response.json({state:['/remote-save','/screenshot'].includes(new URL(request.url).pathname)?'uncertain':'blocked',code:'SERVICE_UNAVAILABLE'},{status:503});}
 }};

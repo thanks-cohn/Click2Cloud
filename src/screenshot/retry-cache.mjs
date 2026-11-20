@@ -1,0 +1,42 @@
+import {SCREENSHOT_BYTES} from '../cloudflare/screenshot-wire.mjs';
+
+const cacheName='click2cloud-screenshot-retry-v1';
+const retryLifetime=60*60*1000;
+const cacheBytes=48*1024*1024;
+// CacheStorage uses HTTP(S) keys. These are local cache identities only.
+const key=id=>'https://click2cloud.invalid/screenshot-retry/'+id;
+
+export function createScreenshotRetryCache(storage=globalThis.caches,clock=Date.now){
+ let writes=Promise.resolve();
+ const serial=work=>{
+  const result=writes.catch(()=>{}).then(async()=>work(await storage.open(cacheName)));
+  writes=result;
+  return result;
+ };
+ async function prune(cache,needed=0){
+  const entries=[];
+  for(const request of await cache.keys()){
+   const response=await cache.match(request);
+   const expires=Number(response?.headers.get('x-capture-expires'));
+   const bytes=Number(response?.headers.get('x-capture-size'));
+   if(expires<=clock()||!bytes||bytes>SCREENSHOT_BYTES)await cache.delete(request);
+   else entries.push({request,expires,bytes});
+  }
+  let bytes=entries.reduce((sum,entry)=>sum+entry.bytes,0);
+  entries.sort((a,b)=>a.expires-b.expires);
+  for(const entry of entries){
+   if(bytes+needed<=cacheBytes)break;
+   await cache.delete(entry.request);bytes-=entry.bytes;
+  }
+ }
+ return {
+  store:(id,image)=>serial(async cache=>{
+   await prune(cache,image.size);
+   await cache.put(key(id),new Response(image,{headers:{'content-type':'image/png',
+    'x-capture-expires':String(clock()+retryLifetime),'x-capture-size':String(image.size)}}));
+  }),
+  read:id=>serial(async cache=>{await prune(cache);const response=await cache.match(key(id));return response?.blob()??null;}),
+  remove:id=>serial(cache=>cache.delete(key(id))),
+  prune:()=>serial(cache=>prune(cache))
+ };
+}

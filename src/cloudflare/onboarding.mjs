@@ -165,16 +165,25 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  // A verified probe is resumed by operation ID; an uncertain probe is never
  // replayed. A completed ledger is not current readiness evidence.
  function recoverDestination(options){const target=normalizeTarget(options.target);remoteDestination(target);return withSetupLock(target.accountId,()=>recoverDestinationLocked({...options,target}));}
- async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false}){
-  const accountId=target.accountId,auth=await account(accountId),s=await current.read(),scope=configuredScope(s,target);
+ async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false,screenshotUpgrade=false}){
+  const accountId=target.accountId,auth=await account(accountId),s=await current.read();
   const blocked=(code,extra={})=>({state:'blocked',code,accountId,target,...extra});
   if(expectedRevision!==undefined&&s.product.revision!==expectedRevision)return blocked('REVISION_CONFLICT');
+  if(!screenshotUpgrade&&!configuredScope(s,target))return blocked('TARGET_NOT_CONFIGURED');
+  const plan=await provisioner.lookup?.(target);
+  const screenshotScope=screenshotUpgrade&&plan?.accountId===accountId&&plan.bucketName===target.bucketName&&
+    (!plan.prefixScope||target.prefix.startsWith(plan.prefixScope+'/'))?target:null;
+  const selectedScope=state=>screenshotScope??configuredScope(state,target);
+  const scope=selectedScope(s);
   if(!scope)return blocked('TARGET_NOT_CONFIGURED');
+  if(screenshotUpgrade&&(!authorizeSetup||!screenshotScope))return blocked('SCREENSHOT_WORKER_UPDATE_REQUIRED');
   const bucketKey=await digest([accountId,target.bucketName]),approvalKey='approval:destination:'+bucketKey;
   const retainApproval=()=>current.writeSetupOperation?.(approvalKey,{accountId,bucketName:target.bucketName,approved:true});
-  const plan=await provisioner.lookup?.(target),expandScope=authorizeSetup&&!!plan?.prefixScope;
+  const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope;
   const observed=await transport.status(target);
-  const initialStatus=expandScope?{state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'}:observed;
+  const update=screenshotUpgrade&&!transport.screenshotWorkerCurrent(plan);
+  const initialStatus=expandScope?{state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'}:
+   update?{state:'blocked',code:'WORKER_UPGRADE_APPROVAL_REQUIRED'}:observed;
   if(initialStatus.state==='READY'){
    if(authorizeSetup&&!await destinationApproved(target))await retainApproval();
    return {state:'completed',code:'CLOUDFLARE_READY',accountId,target,readiness:initialStatus,reused:true};
@@ -209,7 +218,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    if(pending.scopeTarget&&targetKey(pending.scopeTarget)!==targetKey(probeScope))return blocked('DESTINATIONS_CHANGED_DURING_SETUP',{setupTarget:probeTarget});
    const stillAuthorized=async()=>{
     if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
-    const now=await current.read(),clickedScope=configuredScope(now,target),originalScope=configuredScope(now,probeTarget);
+    const now=await current.read(),clickedScope=selectedScope(now),originalScope=configuredScope(now,probeTarget);
     if(!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!originalScope||targetKey(originalScope)!==targetKey(probeScope)||!await destinationApproved(target)||!await destinationApproved(probeTarget))fail('DESTINATIONS_CHANGED_DURING_SETUP');
    };
    try{
@@ -228,7 +237,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    if(!setupScope||pending.scopeTarget&&targetKey(pending.scopeTarget)!==targetKey(setupScope))return blocked('DESTINATIONS_CHANGED_DURING_SETUP',{setupTarget});
    const resumed=await recoverDestinationLocked({target:setupTarget,expectedRevision:s.product.revision,idempotencyKey:pendingPointer.idempotencyKey});
    if(resumed.state!=='completed')return {...resumed,target,setupTarget};
-   const now=await current.read(),clickedScope=configuredScope(now,target);
+   const now=await current.read(),clickedScope=selectedScope(now);
    if((await oauth.authority()).sessionId!==auth.sessionId||!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!await destinationApproved(target))return blocked('DESTINATIONS_CHANGED_DURING_SETUP',{setupTarget});
    const readiness=await transport.status(target);
    if(readiness.state!=='READY')return blocked(readiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness',setupTarget});
@@ -255,7 +264,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   const progress=async(stage,extra={})=>{progressRecord={...progressRecord,stage,...extra};await current.writeSetupOperation(setupId,progressRecord);};
   const stillSelected=async()=>{
    if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
-   const now=await current.read(),currentScope=configuredScope(now,target);if(!currentScope||targetKey(currentScope)!==targetKey(scope)||!await destinationApproved(target))fail('DESTINATIONS_CHANGED_DURING_SETUP');return true;
+   const now=await current.read(),currentScope=selectedScope(now);if(!currentScope||targetKey(currentScope)!==targetKey(scope)||!await destinationApproved(target))fail('DESTINATIONS_CHANGED_DURING_SETUP');return true;
   };
   try{
    await stillSelected();
@@ -269,13 +278,13 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     // neither a child click nor the Default can widen an existing plan.
     const currentPlan=await provisioner.lookup?.(target);
     const prepareOptions={approved:true,prefixScope:expandScope?'':currentPlan?.prefixScope??'',...(expandScope?{expandScope:true}:{}),
-      inspect:true,rebuild:authorizeSetup&&requiresUpgrade,renewSigning:authorizeSetup&&requiresSigningRepair,retryDenied:true};
+      inspect:true,rebuild:authorizeSetup&&requiresUpgrade,renewSigning:!screenshotUpgrade&&authorizeSetup&&requiresSigningRepair,retryDenied:true,...(screenshotUpgrade?{updateOnly:true}:{})};
     try{await provisioner.prepare(target,prepareOptions);}catch(error){
      // A pending plan can reveal its older build only during owned settings
      // inspection. Explicit repair approval covers that discovered upgrade;
      // an automatic recovery leaves it pending for informed authorization.
-     if(!authorizeSetup||!['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(error.code))throw error;
-     await provisioner.prepare(target,{...prepareOptions,rebuild:true,renewSigning:error.code==='WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'});
+     if(!authorizeSetup||screenshotUpgrade&&error.code==='WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'||!['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(error.code))throw error;
+     await provisioner.prepare(target,{...prepareOptions,rebuild:true,renewSigning:!screenshotUpgrade&&error.code==='WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'});
     }
     await progress('worker-prepared');
     let capability;

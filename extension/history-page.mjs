@@ -1,15 +1,32 @@
+import {screenshotMessage} from './screenshot-page.mjs';
 import {mountLoadingVisual} from '../src/explorer/loading-visual.mjs';
 import {customerRows,historyPage,historyGroups,historyDefaults,exportHistory} from '../src/history/model.mjs';
 import {isImage,createImageReader} from '../src/explorer/image-preview.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(url,label)=>url?`<p>${esc(label)}: <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a></p>`:`<p>${esc(label)}: Not captured</p>`;
-export function createHistoryPage({api,goTo,loadingSelection=async()=>({mode:'math'})}){
+export function createHistoryPage({api,goTo,retryScreenshot,updateScreenshotWorker,loadingSelection=async()=>({mode:'math'})}){
  let epoch=0,controller,observer,urls=[],page=1,prefs={...historyDefaults},rows=[],manual=new Map(),pending=new Map(),active=0,wake=()=>{};
  const reader=createImageReader(p=>api('readFileChunk',p,{quiet:true}),{maxBytes:8*1024*1024,maxEntries:8});
  function stop(){epoch++;wake=()=>{};for(const job of pending.values())job.abort();pending.clear();controller?.abort();observer?.disconnect();urls.forEach(URL.revokeObjectURL);urls=[];}
  async function* pages(){let cursor;const seen=new Set();do{const result=await api('inspectRemoteHistory',{customer:true,limit:100,...(cursor?{cursor}:{})},{quiet:true}),p=Array.isArray(result)?{items:result}:result;yield p.items;cursor=p.nextCursor;if(cursor&&seen.has(cursor))throw Error('HISTORY_CURSOR_STALLED');seen.add(cursor);}while(cursor);}
  async function load(){stop();const ticket=epoch;const preferences=await api('getHistoryPreferences',{}, {quiet:true}),all=[];for await(const p of pages()){all.push(...customerRows(p));await new Promise(r=>setTimeout(r,0));if(ticket!==epoch)return;}prefs=preferences;rows=all;if(ticket===epoch)render();}
- function row(r){const image=r.canGoTo&&isImage({key:r.objectKey}),auto=image&&(prefs.previews==='all'||prefs.previews==='first'&&page===1),open=manual.has(r.operationId)?manual.get(r.operationId):auto;
+ function screenshotRow(r){
+  const receipt=r.screenshot,confirmed=receipt.outputs.filter(output=>output.state==='confirmed').length;
+  const upgrade=receipt.outputs.some(output=>output.code==='SCREENSHOT_WORKER_UPDATE_REQUIRED');
+  return `<article class="history-row" data-operation="${esc(r.operationId)}"><div class="history-line">
+   <span class="history-dot ${r.status}" aria-hidden="true"></span><span class="history-status">${esc(r.statusLabel)}</span>
+   <strong>Screenshot</strong><time datetime="${esc(r.timestamp)}">${esc(new Date(r.timestamp).toLocaleString(undefined,{timeZone:prefs.timezone}))}</time></div>
+   <details><summary>${receipt.outputs.length?`${confirmed} of ${receipt.outputs.length} files verified`:'Capture details'}</summary>
+   <p>Capture ID ${esc(receipt.captureId)}</p>${r.hostPageURL?link(r.hostPageURL,'Page'):''}
+   ${receipt.code?`<p>${esc(screenshotMessage(receipt.code,receipt.code))}</p>`:''}
+   <ol class="screenshot-receipt-outputs">${receipt.outputs.map(output=>`<li><strong>${esc(output.state==='confirmed'?'Verified':output.state)}</strong>
+    · ${esc(output.destination?.accountId)} / ${esc(output.destination?.bucketName)} / ${esc(output.key)}
+    <br>${esc(output.state==='confirmed'?`R2 checksum verified · ${output.bytes} bytes`:screenshotMessage(output.code,output.code??'Awaiting verification'))}</li>`).join('')}</ol>
+   ${upgrade&&updateScreenshotWorker?'<button data-screenshot-update>Update existing Worker</button>':''}
+   ${receipt.captured&&receipt.outputs.some(output=>output.state!=='confirmed'&&output.code!=='SCREENSHOT_CROSS_BUCKET_UNSUPPORTED')&&retryScreenshot?
+    `<button data-screenshot-retry="${esc(r.operationId)}">Retry unconfirmed files</button>`:''}<p class="history-action" role="status"></p></details></article>`;
+ }
+ function row(r){if(r.screenshot)return screenshotRow(r);const image=r.canGoTo&&isImage({key:r.objectKey}),auto=image&&(prefs.previews==='all'||prefs.previews==='first'&&page===1),open=manual.has(r.operationId)?manual.get(r.operationId):auto;
  const metadata=r.savedFileMetadata;let parsed;try{parsed=JSON.parse(metadata?.customMetadata?.click2cloud);}catch{}
  return `<article class="history-row" data-operation="${esc(r.operationId)}"><div class="history-line"><span class="history-dot ${r.status}" aria-hidden="true"></span><span class="history-status">${esc(r.statusLabel)}</span><strong>${esc(r.filename??'Filename not captured')}</strong>${r.canGoTo?`<button data-history-goto="${esc(r.operationId)}">GO TO</button>`:''}<time datetime="${esc(r.timestamp)}">${esc(r.timestamp?new Date(r.timestamp).toLocaleString(undefined,{timeZone:prefs.timezone}):'Date not captured')}</time></div><p class="history-action" role="status"></p><details data-history-more="${esc(r.operationId)}" ${open?'open':''}><summary>More</summary>${image?'<div class="history-preview" data-preview="'+esc(r.operationId)+'"><p>Image preview loads when visible.</p></div>':''}<details><summary>Source &amp; links</summary><p>${esc(r.hostPageTitle??r.hostname??'Page name not captured')}</p>${link(r.hostPageURL,'Host page URL')}${link(r.sourceURL,'Original source URL')}<p>Public object URL: ${esc(r.availability.publicObjectURLs)}</p><p>Destination: ${esc(r.bucket??'Not captured')} / ${esc(r.objectKey??r.prefix??'Not captured')}</p></details><details><summary>Metadata</summary><p>${esc(r.metadataAvailability)}${r.metadataRedacted?' · sensitive fields redacted':''}</p>${metadata?'<pre>'+esc(JSON.stringify(metadata,null,2))+'</pre>'+(parsed?'<p>Parsed click2cloud provenance</p><pre>'+esc(JSON.stringify(parsed,null,2))+'</pre>':''):''}</details></details></article>`;
  }
@@ -18,6 +35,22 @@ export function createHistoryPage({api,goTo,loadingSelection=async()=>({mode:'ma
  document.querySelector('#main').innerHTML=`<section class="page history-page"><h1>History</h1><p>Saved files and attempted saves · ${result.total} operations · ${esc(prefs.timezone)}</p><p>History is kept forever. Change display and image preferences or export all records in Settings → History.</p>${content||'<p>No saves in this display range.</p>'}<nav aria-label="History pages"><button id="history-prev" ${page===1?'disabled':''}>Previous</button><span>Page ${page} of ${result.pages}</span><button id="history-next" ${page===result.pages?'disabled':''}>Next</button></nav></section>`;
  document.querySelector('#history-prev').onclick=()=>{page--;render();};document.querySelector('#history-next').onclick=()=>{page++;render();};
  document.querySelectorAll('[data-history-goto]').forEach(b=>b.onclick=async()=>{b.disabled=true;const feedback=b.closest('article').querySelector('.history-action');try{await goTo(b.dataset.historyGoto);}catch(e){feedback.textContent=({RESULT_NOT_FOUND:'This file no longer exists.',RESULT_CHANGED:'The recorded file has changed; no other file was selected.',RESULT_LOOKUP_FAILED:'This file is unavailable. Reconnect or check access in Remotes.',AUTH_REQUIRED:'Reconnect in Remotes to locate this file.',SCOPE_UNAUTHORIZED:'This account is not currently authorized.'})[e.code??e.message]??'The saved file could not be located. Check access and refresh before retrying.';b.disabled=false;}});
+ document.querySelectorAll('[data-screenshot-update]').forEach(button=>button.onclick=async()=>{
+  const row=rows.find(item=>item.operationId===button.closest('article').dataset.operation);
+  const target=row.screenshot.outputs.find(output=>output.code==='SCREENSHOT_WORKER_UPDATE_REQUIRED')?.destination;
+  const feedback=button.closest('details').querySelector('.history-action');
+  if(!target||!confirm('Update the private Click2Cloud Worker for '+target.bucketName+'? This saves a small verification file in the bucket. Cloudflare may charge for usage.'))return;
+  button.disabled=true;feedback.textContent='Updating the existing Worker…';
+  try{await updateScreenshotWorker(target);feedback.textContent='Worker update verified. Retry the unconfirmed files.';}
+  catch(error){feedback.textContent=screenshotMessage(error.code,'Worker update unavailable. Check Cloudflare access in Remotes.');}
+  finally{button.disabled=false;}
+ });
+ document.querySelectorAll('[data-screenshot-retry]').forEach(button=>button.onclick=async()=>{
+  const feedback=button.closest('details').querySelector('[role=status]');
+  button.disabled=true;feedback.textContent='Checking unconfirmed files…';
+  try{await retryScreenshot(button.dataset.screenshotRetry);if(button.isConnected)await load();}
+  catch(error){feedback.textContent=screenshotMessage(error.code,'Could not retry this capture.');button.disabled=false;}
+ });
  const queue=[],queued=new Set();
  const eligible=el=>el.isConnected&&[...el.closest('article').querySelectorAll(':scope > details')].every(d=>d.open)&&(()=>{let n=el.parentElement;while(n&&n!==document.body){if(n.tagName==='DETAILS'&&!n.open)return false;n=n.parentElement;}return true;})();
  const pump=()=>{while(active<2&&queue.length){const el=queue.shift();if(!eligible(el)){queued.delete(el);continue;}if(pending.has(el)||el.querySelector('img'))continue;active++;void preview(el,ticket,()=>{queued.delete(el);observer.unobserve(el);observer.observe(el);}).finally(()=>{active--;wake();});}};

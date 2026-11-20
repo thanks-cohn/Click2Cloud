@@ -37,3 +37,32 @@ export function rawFields(input){const out=Object.fromEntries(RAW_FIELDS.map(k=>
 const uuid=v=>/^[a-f0-9-]{36}$/i.test(v??'')?v:null;
 const instant=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(v)?v:null;
 export function secureEvent(e){return {schemaVersion:2,runId:uuid(e.runId),sequence:Number.isSafeInteger(e.sequence)?e.sequence:null,attemptId:/^[a-f0-9-]{36}$/i.test(e.attemptId??'')?e.attemptId:null,workerEpoch:uuid(e.workerEpoch),menuGeneration:number(e.menuGeneration),engineOperationId:number(e.engineOperationId),remoteOperationId:uuid(e.remoteOperationId),reasonCode:null,stage:STAGES.includes(e.stage)?e.stage:'N/A',outcome:[...STATES,'started','ok','skipped','observed'].includes(e.outcome)?e.outcome:'N/A',monotonicMs:number(e.monotonicMs),timestampUtc:instant(e.timestampUtc),providerId:PROVIDERS.includes(e.providerId)?e.providerId:'other',mode:['simple','narrow','depth','other'].includes(e.mode)?e.mode:'other',context:['image','link','page','video','audio','other'].includes(e.context)?e.context:'other',metrics:Object.fromEntries(METRICS.map(k=>[k,number(e.metrics?.[k])])),availability:Object.fromEntries([...METRICS.filter(k=>number(e.metrics?.[k])===null),...['providerId','mode','context'].filter(k=>!e[k]||e[k]==='other')].map(k=>[k,{value:'N/A',reason:availabilityReason(e.availability?.[k]?.reason)}])),proofLevel:['independently_verified','provider_accepted','unknown'].includes(e.proofLevel)?e.proofLevel:'unknown',privacy:'SECURE',raw:Object.fromEntries(RAW_FIELDS.map(k=>[k,null])),rawAvailability:Object.fromEntries(RAW_FIELDS.map(k=>[k,{value:'N/A',reason:'redacted'}]))};}
+
+// Screenshot receipts use the same RAW/SECURE export boundary. Project only
+// observed scalars in SECURE so paths, names, URLs and cloud metadata cannot leak.
+export function screenshotReceipt(job,{secure=false}={}){
+ const {plan}=job;
+ const ids={captureId:uuid(plan.captureId),signalId:uuid(plan.signalId),operationId:uuid(plan.operationId),jobId:uuid(plan.jobId)};
+ const contributors=(plan.matchedRuleIds??[]).map(uuid).filter(Boolean);
+ const states=['confirmed','partial','pending','unknown','failed','blocked'];
+ const state=value=>states.includes(value)?value:'unknown';
+ const code=value=>/^[A-Z][A-Z0-9_]{1,79}$/.test(value??'')?value:null;
+ const outputId=value=>typeof value==='string'&&/^[a-f0-9-]{36}-[1-9][0-9]*$/.test(value)?value:null;
+ return {schemaVersion:1,kind:'screenshot-to-cloud',...ids,commandId:plan.commandId,configurationVersion:number(plan.configurationVersion),
+  dedup:typeof plan.dedup==='boolean'?plan.dedup:null,state:state(job.state),code:code(job.code),
+  startedAt:instant(plan.startedAt),finishedAt:instant(job.finishedAt),matchedRuleIds:contributors,
+  ...(secure?{}:{source:plan.context,matchedRules:plan.matchedRules??[]}),
+  captured:job.captured?{mime:'image/png',bytes:number(job.captured.bytes),at:instant(job.captured.at),...(secure?{}:{sha256:job.captured.sha256})}:null,
+  attempts:job.attempts.map(attempt=>({startedAt:instant(attempt.startedAt),finishedAt:instant(attempt.finishedAt),
+   requestedBytes:number(attempt.requestedBytes),receivedBytes:number(attempt.receivedBytes),code:code(attempt.code),
+   state:['started','worker-responded','readback-only','unconfirmed'].includes(attempt.state)?attempt.state:'unconfirmed',
+   outputIds:attempt.outputIds.map(outputId).filter(Boolean)})),
+  outputs:plan.outputs.map((target,index)=>{
+   const observation=job.outputs[index]??{};
+   return {outputId:outputId(target.outputId),ruleIds:target.ruleIds.map(uuid).filter(Boolean),state:state(observation.state),
+    at:instant(observation.at),code:code(observation.code),bytes:number(observation.bytes),
+    comparison:['match','mismatch','unknown','not_checked'].includes(observation.comparison)?observation.comparison:'not_checked',
+    verification:observation.verification==='independent-r2-head-sha256'?observation.verification:null,
+    ...(secure?{}:{destination:target.target,key:target.key,checksum:observation.checksum,etag:observation.etag,version:observation.version})};
+  })};
+}

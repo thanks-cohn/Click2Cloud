@@ -885,3 +885,41 @@ operation ID. See [implementation evidence](../../docs/evidence/r2-operations-ov
 Explorer’s **Make Default** sends one `commitConfigChange` operation with `type: 'makeDefault'`, the exact `target`, and `ensureSimple: true`. The normal revision and idempotency checks apply. The service verifies that the folder is in authorized inventory or confirms the exact prefix through the File API. `applyConfigChanges` reuses an existing Simple row or creates one with a deterministic ID, then applies Default and Quick precedence.
 
 The existing Worker readiness check runs before the local commit. An exact durable setup approval can be reused where the host grants provisioning authority. Insufficient provider access stops the operation. After commit, the existing registrar must acknowledge an enabled save row for the target. A failed native application compensates the focused change if it still owns the current revision. The browser fixture exercises the Simple row and ACK. The installed menu and live R2 path require independent verification. [API command reference](../../docs/api/API-COMMAND-REFERENCE.md)
+
+## Screenshot and Shelf History
+
+The registrar creates a supplemental **Screenshot** subtree in the same
+Chrome registration cycle as the canonical menu. Ready, visible Cloudflare
+save rows supply exact folder shortcuts. **Choose folder** opens the same
+authorized Cloudflare selector in the Shelf. The single native click listener
+routes these screenshot IDs before the ordinary save dispatcher.
+Registration failures for this subtree have a separate diagnostic code.
+
+Explorer **Screenshot2Here** uses `inspectExplorerContextMenu` for action
+availability. The browser picker lists authorized accounts, buckets and folders
+through `listAccounts`, `listAuthorizedBuckets` and `listFolders`. Rule edits
+use the trusted Shelf message channel, with an immutable rule ID, an edit
+revision and a fresh account/bucket check for each newly selected directory.
+Saving a rule stores configuration. A browser one-off captures only the
+explicitly chosen directory.
+
+Both Chrome screenshot commands use one dispatcher. It freezes the matching
+rules and the ordered exact output keys before calling Chrome’s capture API
+once. Host matching respects DNS label boundaries. Exact page URLs use the
+serialized browser URL, including its query and fragment. Chrome’s focused
+window, active tab and main document identity are checked before and after
+capture. The single PNG upload uses the existing signed Worker and R2 binding.
+An output is confirmed by an independent R2 HEAD with the matching SHA-256,
+size and output identity. A single request can address multiple prefixes in the
+same binding. Other accounts or buckets are recorded as blocked. Retry uses
+the existing keys and any recoverable original image. History holds the
+per-output receipt, and the same diagnostics archive exporter offers scoped RAW
+and SECURE ZIPs. A user-approved `recoverCloudflareDestination` request with
+`screenshotUpgrade` updates an existing scoped Worker using the same setup
+ledger and readback. It requires explicit authorization and preserves scope.
+
+## Explorer directory URLs
+
+The two directory URL exports use `listDirectoryObjects` with immediate scope
+and `getPublicUrls` for the exact bucket. Both check immediate file membership
+independently. Grouped ZIP Download continues to use recursive inventory.

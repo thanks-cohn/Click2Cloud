@@ -181,3 +181,23 @@ button.development-url{background:#fff3d5;color:#502c06;border-color:#9a5d17}
 .url-export-options{display:flex;flex-wrap:wrap;gap:4px 12px}
 #url-export-form fieldset,#directory-domain-form{min-width:0;margin-block:8px;border:1px solid var(--line);padding:8px}
 #url-export-form fieldset>label{display:block}
+
+.screenshot-page{max-width:720px}
+.screenshot-page h2{margin-block:18px 8px}
+#screenshot-form fieldset,#screenshot-editor fieldset,#screenshot-here fieldset,#screenshot-one-off fieldset{
+  min-width:0;border:1px solid var(--line);border-radius:var(--a-geometry-surface,6px);padding:10px;margin-block:8px 10px
+}
+.screenshot-site{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-block:4px}
+.screenshot-site :is(input,select),#screenshot-editor input{margin:0;min-width:0;max-width:100%}
+.screenshot-site input{flex:1 1 160px}
+.screenshot-picker{max-height:260px;overflow:auto;margin-top:8px;padding:6px;border:1px solid var(--line)}
+.screenshot-picker>button{display:block;text-align:start;width:100%;margin:3px 0;white-space:normal;overflow-wrap:anywhere}
+.screenshot-picker-path,.screenshot-destination{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-block:4px;overflow-wrap:anywhere}
+.screenshot-picker-path strong,.screenshot-destination span{flex:1;min-width:0}
+.screenshot-card{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:start;gap:6px;border:1px solid var(--line);border-radius:var(--a-geometry-surface,6px);padding:6px;margin-bottom:6px;background:var(--panel)}
+button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere;gap:3px;background:transparent;border-color:transparent;box-shadow:none}
+.screenshot-card-body span{font-size:.88em;color:var(--muted)}
+.screenshot-card [aria-pressed=true]{background:var(--selected)}
+.screenshot-pagination{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.screenshot-receipt-outputs{padding-inline-start:20px;max-height:300px;overflow:auto;overflow-wrap:anywhere}
+.screenshot-receipt-outputs li{margin-block:8px}
