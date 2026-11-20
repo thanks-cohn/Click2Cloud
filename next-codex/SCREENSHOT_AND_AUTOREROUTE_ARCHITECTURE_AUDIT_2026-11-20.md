@@ -2,6 +2,18 @@
 
 **Date:** 2026-11-20. **Scope:** Click2Cloud, GitHub main, v0.3.20 source and binding next-codex requirements. **Status:** Design/specification audit; NOT evidence either new feature is implemented, or live Chrome/Worker/R2 tests passed.
 
+## UPDATED OWNER DECISION (Nov 20) — THIS IS AN AUDIT, NOT A LIST OF NEW RELEASE BLOCKERS
+
+**Priority override:** [master 0.3.21 Codex request](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md), [canonical Auto-Reroute V1 spec](../auto-reroute/README.md), and [frozen Screenshot Logic](../screenshot-logic/README.md) supersede this older audit wherever it recommends extra security layers, arbitrary rule-count limits, new permission/consent prompts, or exhaustive edge-case work BEFORE proving a basic real browser-byte transfer.
+
+- Screenshot keys are **signals** with unlimited matching card subscribers. Chrome's documented limit of four SUGGESTED keyboard shortcuts is not a rule-card limit. Existing F7/F8/F9 shortcuts are local Explorer document key handlers in `extension/shortcut-settings.mjs`; no Chrome manifest commands are registered yet. Chrome can declare many commands; only four receive suggested defaults, and further declared commands may be manually assigned. Codex should verify real availability and share each valid signal across all matching rule cards.
+- No arbitrary cap on active screenshot rules or user-intended cloud outputs. The original audit's workload/concurrency examples are runtime implementation considerations, NOT a mandate to suppress requests or build a new complex queue before functionality exists. Preserve output identities and truthful receipts.
+- Do NOT open a speculative security-hardening workstream. Reuse existing Cloudflare login, previously chosen destination authorization, and verified R2 storage writes; don't allow accidentally writing to a different bucket. Additional threat-model/secret-handling features are FOLLOW-UP, not prerequisites for demonstrating the approved features.
+- Preserve user-selected **Raw Receipt** operational evidence and the separate **Secure Receipt** redacted export. A RAW export is intentionally more detailed, possibly including original source URLs and metadata; label it as such rather than silently applying Secure redaction to both. No need to embed screenshot/file bytes in routine receipts.
+- Auto-Reroute priority is ONE real eligible website click + original bytes read by Chrome + one existing Worker byte upload + real R2 stored result; other formats and comprehensive lifetime/interruption tests follow. Unsupported sources fall back to ordinary Chrome downloading. Extra checks should be justified by a demonstrated bug or necessary browser/provider requirement, not speculation.
+
+---
+
 ## Executive disposition
 
 | System | Logic | Implemented now? | Codex release gate |
