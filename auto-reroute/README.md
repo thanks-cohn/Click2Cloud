@@ -1,10 +1,18 @@
 # Auto-Reroute — Simple Rules UI + Chrome-Byte Streaming Implementation Contract
 
-**Status:** APPROVED DESIGN FOR CODEX IMPLEMENTATION, November 20, 2026. **Location:** `/auto-reroute/`. This document is the current authoritative V1 Auto-Reroute scope and simple user-facing rule-card contract. It does NOT claim Chrome interception or R2 streaming is currently implemented. Keep this engine separate from frozen [Screenshot Logic](../screenshot-logic/README.md).
+**Status:** DEFERRED TO SEPARATE CODEX RUN FOR CLICK2CLOUD 0.3.22, November 20, 2026. **Location:** `/auto-reroute/`. This document is the current authoritative V1 Auto-Reroute scope and simple user-facing rule-card contract. It does NOT claim Chrome interception or R2 streaming is currently implemented. Keep this engine separate from frozen [Screenshot Logic](../screenshot-logic/README.md).
+
+## RELEASE SCOPE UPDATE — DEFERRED TO 0.3.22 (OWNER FINAL DECISION)
+
+**This entire Auto-Reroute specification is excluded from the Click2Cloud 0.3.21 Codex run.** Preserve it unchanged as the substantive functional requirements for a **new, separate 0.3.22 Codex run**. Do NOT create a More → Rules page, download interception engine, Auto-Reroute cards, browser fetch/stream handlers, or new Auto-Reroute Worker routes in 0.3.21. The 0.3.21 More menu must have **Screenshot** as its own entry, but NO new Rules/Auto-Reroute entry. In 0.3.22, add Rules separately without touching Screenshot behavior.
+
+**Next independent execution request:** [`next-codex/AUTO_REROUTE_0.3.22_SEPARATE_CODEX_REQUEST_2026-11-20.md`](../next-codex/AUTO_REROUTE_0.3.22_SEPARATE_CODEX_REQUEST_2026-11-20.md). Start that later run from the completed 0.3.21 release, not this 0.3.20-era baseline. The rest of this document describes the 0.3.22 feature, not work to be done now.
+
+---
 
 ## NOV 20 OWNER OVERRIDE — WORKING FIRST, MINIMAL FRICTION
 
-**This is binding for 0.3.21 and supersedes the earlier exhaustive preflight/hardening language in older audits.** Implement a genuine, usable Auto-Reroute first, not a theoretical zero-risk abstraction. User's UI stays WEBSITE → EXTENSION → SAVE, a visible current R2 destination, and saved cards below with Active ON/OFF and X Delete. No additional required technical fields, warnings or security-option dialogs in this simple flow.
+**This is binding for 0.3.22 (NOT the 0.3.21 run) and supersedes the earlier exhaustive preflight/hardening language in older audits.** Implement a genuine, usable Auto-Reroute first, not a theoretical zero-risk abstraction. User's UI stays WEBSITE → EXTENSION → SAVE, a visible current R2 destination, and saved cards below with Active ON/OFF and X Delete. No additional required technical fields, warnings or security-option dialogs in this simple flow.
 
 - **Do one real, minimal transfer first:** intercept a controllable eligible public HTTP(S) download action before Chrome commits to an ordinary local download; retrieve its actual response bytes in a Chrome extension context; send those bytes from Chrome to the EXISTING Worker; write the unchanged file to the selected R2 folder; show a truthful verified result. Extend formats and more sources only after that real path works. A saved card is not proof a website supports interception.
 - **Avoid gratuitous gating:** do NOT require repeated account reconfirmations, multiple destination rechecks, verbose security prompts, special user decisions, full-file content scanning, universal HTTP-header forensic tests, broad threat-model rewrites or mandatory exhaustive edge-case coverage before delivering a basic supported-path prototype. Use the existing connection/session and destination selection as far as reliable. Build the smallest valid authenticated Worker receive/write endpoint rather than inventing a new authorization platform.
@@ -135,4 +143,4 @@ Eligible browser download action (supported HTTP(S) link)
 - Earlier requirements, superseded where UX disagrees with this simple form: [next-codex master handoff](../next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md) and [architecture audit](../next-codex/SCREENSHOT_AND_AUTOREROUTE_ARCHITECTURE_AUDIT_2026-11-20.md).
 - Chrome docs: [Downloads API](https://developer.chrome.com/docs/extensions/reference/api/downloads) and [fetch request streaming](https://developer.chrome.com/docs/capabilities/web-apis/fetch-streaming-requests).
 
-**Authority:** For V1 Auto-Reroute Rules GUI and Chrome byte-transport semantics, THIS document supersedes older examples that put a complex rule form on top, treat websites as unverified CDNs, offer audio/PDF as live types, or let the Worker re-fetch the source instead of receiving the Chrome byte stream. Core screenshot behavior remains frozen independently in `/screenshot-logic/`.
+**Authority for the separate 0.3.22 Codex run only:** For Auto-Reroute Rules GUI and Chrome byte-transport semantics, THIS document supersedes older examples that put a complex rule form on top, treat websites as unverified CDNs, offer audio/PDF as live types, or let the Worker re-fetch the source instead of receiving the Chrome byte stream. Core screenshot behavior remains frozen independently in `/screenshot-logic/`.
