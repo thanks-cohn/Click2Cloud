@@ -1,5 +1,7 @@
 # Next-Codex — extend ONE existing diagnostic system for Screenshot and browser-reroute transfers
 
+> **RELEASE-SCOPE OVERRIDE (Nov 20, 2026):** For the **0.3.21 Codex run**, implement/extend this ONE recorder ONLY for **existing right-click saves and Screenshot-to-Cloud** (including all fan-out target results). Every mention below of `browser-download-reroute`, download bytes/originating downloads or new Auto-Reroute transfer scopes is **DEFERRED** to the separate 0.3.22 Codex request. The current authoritative screenshot logic is [`/screenshot-logic-final/`](../screenshot-logic-final/README.md). Preserve RAW detailed and SECURE redacted export, but do not build an Auto-Reroute-specific UI/engine/receipt workflow in 0.3.21.
+>
 **Owner instruction, November 19, 2026:** **NO colliding, competing, or parallel diagnostic systems.** This document supersedes any wording suggesting a new event collector/recorder. Extend or adapt the **existing Click2Cloud diagnostic/recorder/export architecture** with isolated categories and consistent versioned schemas. The new screenshot and browser-download rule features are not yet implemented on 0.3.20.
 
 ## One authoritative system, distinct workflows
