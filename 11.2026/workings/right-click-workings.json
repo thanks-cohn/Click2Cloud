@@ -9201,25 +9201,25 @@
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "extension/aesthetic.css": "e2b110dfe891e9520cf256bf515d2c120c71011960d68c717c4442ec4761b77d",
-      "extension/app.css": "257f65677c8dcca8cea1760f0b43fc817b6d66421053c0be55b65b271892910e",
+      "extension/app.css": "cb33eec742124ccea3cd6ea1cfdf5cabaf9a11fdb8f13da244513fdc6fc1d931",
       "extension/app.html": "ab8289a2738e84134d149c2ae770a67f1c254897c0b690caa5fd4170623a7e06",
-      "extension/app.mjs": "7b1222d31422f1c71cc4ab0bc03f03b862a1fff9987b3d38a489eef16f7b81e6",
-      "extension/background.mjs": "8773e7202125e73bf88c2266de3c8d0e9dd03e1c0ec4d4db4dc212773d63b803",
+      "extension/app.mjs": "3a61ed6f547894a9f54c265aa9a27d059a125c9de9486adfeb5e6865b53571a4",
+      "extension/background.mjs": "2dd965299ffb0f79e657e393a7cd0187eb305c93df7cc413355b74ff3f81c5a7",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-exports.mjs": "cd9f031bc608fa6238cccc15d58a0b2a0985d649be4d82ee94526a7a52deafaf",
       "extension/explorer-layout.mjs": "d38dbeb059a12118c7bd06e0942e705abc640fa9f273a8c8cb046376fdb5cafd",
-      "extension/history-page.mjs": "92f9841e2ea8b76a0c7e93ffa5286e85f9a86274de060a3f13b01f9d5dce3fb6",
+      "extension/history-page.mjs": "013e22ee65b6b1e1bf9376319d771c290436be584757c18ac0477f8fe2aba17c",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/manifest-panel.mjs": "9f5628407f67b9e76e331e68a32a2c8b2a992c6304e0581ef5a6d15ccd8a1300",
-      "extension/manifest.json": "f5e9413e841dac6232d86a3cd7aebdfe3018e9c0e3d889ebc2eb1818cfff517f",
+      "extension/manifest.json": "8972c2c3f913bc7c886058b8f68c0255dfa0cfde8dc8caf516aa86c9f7a641a2",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
       "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
-      "extension/recorder-panel.mjs": "dab1b42cc7fa80d4e02deb18dd1995a69acd0d43a5dc06f598a6696d8d21c01f",
-      "extension/screenshot-background.mjs": "69831d48425e6c6f58b756f924692a9e91bec8558e610e9551d033e29a3c3ebd",
-      "extension/screenshot-page.mjs": "4da560543f9176ef11ae26e14d22720ac5735391e1482ed7bea89037e995aec7",
+      "extension/recorder-panel.mjs": "148c75ec0cbd3b869a3b725f815e6dc253f3e9d8c54c61e730411fd4c2acfb58",
+      "extension/screenshot-background.mjs": "9c4947315c78eaf72c86d54d6c3bf865a37031191e36012fa9d4cf2807e93c56",
+      "extension/screenshot-page.mjs": "6b61bce7c72debdc020182615c6906d6c3f1cf3778004f6f3ee9c14a94648923",
       "extension/shortcut-settings.mjs": "05d9e2c91a827a7c56764bbacb783b2a4f1e50691b3a1406b58abbe8eed81211",
       "right2cloud-module/src/cloudflare-r2-writer.mjs": "783c946420cec6cc77dd1d42058c5c1892e17a515ed919e79791c6624c5fb8a2",
       "right2cloud-module/src/cloudflare-worker.mjs": "37911044110cad6b4249e525f608550d51b5c42e6c6acc08193e7c890d263566",
@@ -9240,7 +9240,7 @@
       "src/api/service.mjs": "9cf0dd4ddaf7a2313780dbb500172844fa1ea59894bc84ce79011868c40cde05",
       "src/api/shortcuts.mjs": "8501e52f01e5897b9f13f99071f4080fa7e3412138086ebe61f27dd3fac60a66",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
-      "src/auth/cloudflare-oauth.mjs": "c8e5a7922dad6d3bd082c03b6c97b8f207a7e31bc14fd5dee2632873ed4e53e2",
+      "src/auth/cloudflare-oauth.mjs": "ecb69d3a5d4ff63f29f1c02994c9e506d189ce3fa40c10463db92cea47c61210",
       "src/build-info.mjs": "04f087ea8ef955c1db840fb0cadf2584a1e19c94c7cb72d2f0ccb5901e9b1c3c",
       "src/chrome/command-bindings.mjs": "e699a5b21c59b27da3fae72aa4df66232f7196c23d0d4e66f9db0dff927fdf14",
       "src/chrome/daily-badge.mjs": "35db062eb8aae1d5e3c2f33d507d4f3f207b40f842c99b97c270f5fc3cc5ef8d",
@@ -9251,7 +9251,7 @@
       "src/chrome/registrar.mjs": "2803813b12f149256f3eae58631765aba622f254c964d5fdbc4924aed3219666",
       "src/chrome/screenshot-menu.mjs": "a0a7a5b749721def90387ddc52ef6cbd3f2e30fa9cf41a98cc6eb4048026ee21",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/chrome/visible-tab-screenshot.mjs": "acba0782671d453b42e7fc5678d992e5c78b039af999066c479d1225e5836b40",
+      "src/chrome/visible-tab-screenshot.mjs": "0e836bb443750fa0eb5784a3263713e41af31fe591646a5aba1d0c26708b9510",
       "src/cloudflare/deployment.mjs": "c29bfc8bab9e1f0e3c5cde7d82deafc7f7deb86b0519b6fe771a79f81260c942",
       "src/cloudflare/file-transport.mjs": "69922c6f6ea8098ab9cfa6dcd03326fe774d2cfb3d37c463f55de98ea588c1e6",
       "src/cloudflare/files.mjs": "c4ae42b72be96a04c89f6c7d57cfb17e28a19fd8347b2d92ceefc6ce040122b2",
@@ -9261,9 +9261,10 @@
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/resources.mjs": "20fc79c7d389edd667e5afb7e9ae9efccabcb25a9a19103718001b0a2635a5b5",
+      "src/cloudflare/screenshot-direct-upload.mjs": "19c477f270be1b1b1de2afbfbc4b5113044f00ccc177611596dab929545a5ddd",
       "src/cloudflare/screenshot-wire.mjs": "0026483e1eec5b72daecdff5f8d28c08ffa16806ad4a56e64085f6816e1d90d0",
       "src/cloudflare/screenshot-worker.mjs": "f1ab47d33036675eb1c878aa9ee297c11ec93fd0812b1f0628df3c71310e57f3",
-      "src/cloudflare/transport.mjs": "6edff94bc893ed9c6d6776128cc9c1bb0c61b5152cde70e05b556d51f82fe31a",
+      "src/cloudflare/transport.mjs": "c607a2ce39a947390c3f0fdd591902e2ade6c39d4aa1abf878216d407cb5f1db",
       "src/cloudflare/wire.mjs": "12a5a32d2846d215d97dc33d1ab1e88929f527c1a2d3d73de80ced903d128dd0",
       "src/cloudflare/worker.mjs": "5a1ea1ea1bad2f79845a6f80d83b4d2ffc7f5a3b4fd1e7e460df75e13d0fc57d",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -9334,12 +9335,12 @@
       "src/recorder/host.mjs": "321734f82439f1f4cd40adbc7036f03ad8e075e983b9d51ac5264b83a08af8a2",
       "src/recorder/provider-observation.mjs": "6742a3baa498377baa0c05723510970a0145c261371ad128223219a119162f4a",
       "src/recorder/recorder.mjs": "912cc977a2065bd8823cd350c582d84f30ca2179549a50e0959f24d867b4c4bb",
-      "src/recorder/schema.mjs": "b13bdd21a80acc9d0425995342af9fcddbabd56b2013efa035d9092c12c62d56",
+      "src/recorder/schema.mjs": "f18a9e9c9a114fae1772fd876f71d35d43732bcb1fb1c45657c7e715e652fbce",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "src/screenshot/capture.mjs": "29bbd44e6f4dc2f491928328f01b37c3c145a231eaae6cc45ccc409f16133710",
-      "src/screenshot/retry-cache.mjs": "2e97024507ccc556bf7c72b214e5e35ad63f61fb40aadd42838cd4f645a592e0",
-      "src/screenshot/rules.mjs": "36072dd5cb65dbc5eb47ed2838db00259929304c782a73eccc1deac6d7dfad7a"
+      "src/screenshot/capture.mjs": "013de06854ce9a713e9e020fa389d1df1459012fe92c77e7c284e89f382e65d2",
+      "src/screenshot/retry-cache.mjs": "7e7f2fdfd7321039e6c6f0c734c4e9ce1d8a02c8e5c1567aeab252a2f0402ee6",
+      "src/screenshot/rules.mjs": "a2f759a3a02491d751bf3f6afd0af1b7dec9454ca5ab6b615d01bfa00acfdbc8"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -12383,36 +12384,41 @@
         "id": "SCREENSHOT_SIGNAL",
         "preconditions": "A delivered Chrome command with a matching active rule or a native one-off to an authorized exact destination.",
         "trigger": "Both default Chrome screenshot commands share a signal. A native Screenshot item selects one directory.",
-        "guard": "Check the active tab, window, document and exact Cloudflare Worker binding with current authorization.",
-        "actual": "Freeze contributing rules, targets, dedup and keys. Capture one viewport and send one signed PNG request. Verify each R2 object individually. The supplemental native subtree uses the existing registrar.",
+        "guard": "Check the active tab, focused window, primary document, canonical R2 target and OAuth session and account.",
+        "actual": "Freeze matching rules, targets, dedup and keys. Capture one viewport. Send an authenticated direct R2 PUT per output with bounded concurrency. Confirm only after exact-key GET matches byte length and SHA-256. The supplemental native subtree uses the existing registrar.",
         "apiMethods": [
+          "listAccounts",
+          "listAuthorizedBuckets",
           "listFolders",
           "inspectExplorerContextMenu",
-          "inspectRemoteHistory",
-          "recoverCloudflareDestination"
+          "inspectRemoteHistory"
         ],
         "identity": "Signal, capture and operation IDs with per-output ID, exact key, Cloudflare account/bucket/prefix and rule contributors.",
         "nextState": "Confirmed, partial, blocked, failed or unknown receipts.",
-        "uiEffect": "Screenshot cards, native one-off, History and scoped RAW/SECURE receipts.",
-        "externalResourceEffect": "Conditional writes and independent R2 HEAD checksum in a single authorized binding.",
-        "persistence": "Validated rule snapshot in Chrome storage, existing History result, bounded transient retry image cache.",
+        "uiEffect": "Folder checkboxes with one Save, a normal editable Default Screenshots card or setup offer, native one-off, per-output History and scoped RAW/SECURE receipts.",
+        "externalResourceEffect": "Direct authenticated PNG PUT and exact-key byte readback. The legacy Worker screenshot route is separate.",
+        "persistence": "Existing rules and dedup in Chrome storage, a default-card initialization or dismissal marker, existing History results and the bounded original-PNG retry cache.",
         "errors": [
+          "TAB_URL_UNAVAILABLE",
+          "CHROME_CAPTURE_PERMISSION_DENIED",
           "SCREENSHOT_PAGE_CHANGED",
-          "SCREENSHOT_CROSS_BUCKET_UNSUPPORTED",
+          "SCREENSHOT_NO_MATCHING_RULES",
+          "R2_BUCKET_ACCESS_DENIED",
+          "R2_OBJECT_CONFLICT",
           "SCREENSHOT_ORIGINAL_UNAVAILABLE",
-          "SCREENSHOT_WORKER_UPDATE_REQUIRED"
+          "AUTH_SESSION_CHANGED"
         ],
-        "retry": "Recover original bytes and keys; independently inspect unresolved objects and retain successful proofs.",
+        "retry": "Read each unresolved exact key. Reuse the frozen key and original PNG if absent and bytes are available. Preserve independently confirmed outputs.",
         "sourceRefs": [
           {
             "path": "src/screenshot/rules.mjs",
-            "symbol": "function capturePlan",
-            "line": 101
+            "symbol": "export function capturePlan",
+            "line": 117
           },
           {
             "path": "src/chrome/visible-tab-screenshot.mjs",
-            "symbol": "openVisibleTabSource",
-            "line": 3
+            "symbol": "export async function openVisibleTabSource",
+            "line": 7
           },
           {
             "path": "src/chrome/registrar.mjs",
@@ -12420,14 +12426,19 @@
             "line": 45
           },
           {
-            "path": "src/cloudflare/screenshot-worker.mjs",
-            "symbol": "async function runScreenshot",
-            "line": 21
+            "path": "src/cloudflare/screenshot-direct-upload.mjs",
+            "symbol": "export function createDirectScreenshotUpload",
+            "line": 48
+          },
+          {
+            "path": "src/screenshot/capture.mjs",
+            "symbol": "export function createScreenshotCapture",
+            "line": 17
           }
         ],
         "verification": {
-          "level": "INSTALLED_CHROME_AND_LOCAL_WORKERD_FIXTURE",
-          "testFile": "tests/screenshot.test.mjs",
+          "level": "INSTALLED_CHROME_AND_LOCAL_HTTPS_R2_API_FIXTURE",
+          "testFile": "scripts/test-screenshot-browser.mjs",
           "runtime": "LIVE_CLOUDFLARE_UNVERIFIED"
         },
         "contractViolation": null
@@ -13340,7 +13351,7 @@
         "installedWindows": "NOT_VERIFIED"
       }
     },
-    "sourceState": "working source with exact hashes",
+    "sourceState": "Working source with exact hashes on the 0.3.21 screenshot repair branch",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -15256,7 +15267,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "69a72c8e41807efd05e7461103e1b7229912d0986d96a180d1e71892ae308cfd",
+    "digest": "e28bc9af81dc42af6a411722fbac987a3c801c3869bf11f08b104a52262bbd94",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",

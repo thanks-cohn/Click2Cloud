@@ -43,3 +43,34 @@ jobs:
           git archive 3b24320138ff0ebbf50a0e6a912a5d2800038676 | tar -x -C /tmp/c2c-working-checkpoint
           C2C_NARROW_PHASE=3 C2C_COMPOSITION_GATE=1 C2C_NARROW_EVIDENCE="${{ runner.temp }}/click2cloud-composition" node scripts/test-phased-narrow-browser.mjs
           node scripts/assert-reliability-receipts.mjs "${{ runner.temp }}/click2cloud-current-recovery/browser.json" "${{ runner.temp }}/click2cloud-boot/results.json" "${{ runner.temp }}/click2cloud-original-shelf/results.json"
+  screenshot-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:extension
+      - name: Install Chrome for Testing and X11 dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb python3-xlib imagemagick
+          curl --fail --silent --show-error --location --retry 3 https://storage.googleapis.com/chrome-for-testing-public/158.0.8127.36/linux64/chrome-linux64.zip -o "$RUNNER_TEMP/chrome-linux64.zip"
+          unzip -q "$RUNNER_TEMP/chrome-linux64.zip" -d "$RUNNER_TEMP"
+      - name: Installed Chrome screenshot save and retry
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+          C2C_SCREENSHOT_PYTHON: /usr/bin/python3
+          C2C_SCREENSHOT_EVIDENCE: ${{ runner.temp }}/click2cloud-screenshot
+          C2C_SCREENSHOT_NATIVE_MENU: '1'
+        run: |
+          mkdir -p "$C2C_SCREENSHOT_EVIDENCE"
+          xvfb-run -a -s "-screen 0 1400x1000x24" node scripts/test-screenshot-browser.mjs 2>&1 | tee "$C2C_SCREENSHOT_EVIDENCE/browser.log"
+        shell: bash
+      - name: Upload screenshot test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-screenshot-browser
+          path: ${{ runner.temp }}/click2cloud-screenshot
+          if-no-files-found: error

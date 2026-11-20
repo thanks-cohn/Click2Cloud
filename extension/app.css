@@ -192,6 +192,8 @@ button.development-url{background:#fff3d5;color:#502c06;border-color:#9a5d17}
 .screenshot-site input{flex:1 1 160px}
 .screenshot-picker{max-height:260px;overflow:auto;margin-top:8px;padding:6px;border:1px solid var(--line)}
 .screenshot-picker>button{display:block;text-align:start;width:100%;margin:3px 0;white-space:normal;overflow-wrap:anywhere}
+.screenshot-picker-row{display:flex;align-items:center;gap:6px;margin-block:4px}
+.screenshot-picker-row label{flex:1;min-width:0;padding:4px;cursor:pointer;overflow-wrap:anywhere}
 .screenshot-picker-path,.screenshot-destination{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-block:4px;overflow-wrap:anywhere}
 .screenshot-picker-path strong,.screenshot-destination span{flex:1;min-width:0}
 .screenshot-card{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:start;gap:6px;border:1px solid var(--line);border-radius:var(--a-geometry-surface,6px);padding:6px;margin-bottom:6px;background:var(--panel)}

@@ -1,63 +1,90 @@
 import {ordinaryPage,screenshotError} from '../screenshot/rules.mjs';
 
-export async function openVisibleTabSource(chrome,deliveredTab){
+const pngSignature=[137,80,78,71,13,10,26,10];
+const captureError=(code,stage,browserError)=>Object.assign(screenshotError(code),{stage,browserError});
+const pageChanged=()=>captureError('SCREENSHOT_PAGE_CHANGED','tab-observation');
+
+export async function openVisibleTabSource(chrome,deliveredTab,{trace=()=>{}}={}){
  const {tabs,windows,webNavigation}=chrome;
- let current,changed=false,closed=false;
+ let current,tabId=deliveredTab?.id,windowId=deliveredTab?.windowId,changed=false,closed=false;
  const remove=[];
  function listen(event,fn){
   if(!event?.addListener)return;
   event.addListener(fn);
   remove.push(()=>event.removeListener(fn));
  }
- const watchedTab=id=>id===(current?.tabId??deliveredTab?.id);
- listen(tabs.onActivated,info=>{if(info.windowId===(current?.windowId??deliveredTab?.windowId))changed=true;});
- listen(tabs.onUpdated,(id,info)=>{if(watchedTab(id)&&(info.url!==undefined||info.status==='loading'||info.discarded))changed=true;});
- listen(tabs.onRemoved,id=>{if(watchedTab(id))changed=true;});
- listen(tabs.onReplaced,(_added,removed)=>{if(watchedTab(removed))changed=true;});
- listen(windows.onFocusChanged,id=>{if(id!==(current?.windowId??deliveredTab?.windowId))changed=true;});
+ listen(tabs.onActivated,info=>{if(info.windowId===windowId&&info.tabId!==tabId)changed=true;});
+ listen(tabs.onUpdated,(id,info)=>{if(id===tabId&&(info.url!==undefined||info.status==='loading'||info.discarded))changed=true;});
+ listen(tabs.onRemoved,id=>{if(id===tabId)changed=true;});
+ listen(tabs.onReplaced,(_added,removed)=>{if(removed===tabId)changed=true;});
+ listen(windows.onFocusChanged,id=>{if(id>=0&&windowId!==undefined&&id!==windowId)changed=true;});
  for(const name of ['onBeforeNavigate','onCommitted','onHistoryStateUpdated','onReferenceFragmentUpdated','onErrorOccurred']){
-  listen(webNavigation?.[name],info=>{if(info.frameId===0&&watchedTab(info.tabId))changed=true;});
+  listen(webNavigation?.[name],info=>{if(info.frameId===0&&info.tabId===tabId)changed=true;});
  }
  function close(){
   if(closed)return;
   closed=true;
   for(const dispose of remove)dispose();
  }
- async function observe(){
-  const window=await windows.getLastFocused();
-  if(!window.focused||window.type!=='normal')throw screenshotError('SCREENSHOT_WINDOW_UNAVAILABLE');
-  const [tab]=await tabs.query({windowId:window.id,active:true});
-  if(!Number.isInteger(tab?.id)||tab.windowId!==window.id||
-   (Number.isInteger(deliveredTab?.id)&&deliveredTab.id!==tab.id)||
-   (Number.isInteger(deliveredTab?.windowId)&&deliveredTab.windowId!==window.id))throw screenshotError('SCREENSHOT_PAGE_CHANGED');
+ async function observe(initial=false){
+  let window;
+  try{
+   window=Number.isInteger(windowId)&&windows.get?
+    await windows.get(windowId):await windows.getLastFocused();
+  }catch{throw captureError('SCREENSHOT_WINDOW_UNAVAILABLE','window-observation','chrome-window-error');}
+  if(!window?.focused||window.type!=='normal'||!Number.isInteger(window.id))
+   throw captureError('SCREENSHOT_WINDOW_UNAVAILABLE','window-observation');
+  windowId=window.id;
+  let tab;
+  try{[tab]=await tabs.query({windowId,active:true});}
+  catch{throw captureError('SCREENSHOT_TAB_QUERY_FAILED','tab-observation','chrome-tabs-query-error');}
+  if(changed||!Number.isInteger(tab?.id)||tab.windowId!==windowId||
+   (Number.isInteger(tabId)&&tabId!==tab.id)||tab.pendingUrl)throw pageChanged();
+  tabId=tab.id;
+  if(initial)trace('TAB_RESOLVED','ok',{commandTab:Number.isInteger(deliveredTab?.id)});
+  // A Chrome command can arrive without a Tab argument. Query the active tab
+  // in the explicit window and corroborate its URL/document with webNavigation.
+  if(!tab.url)throw captureError('TAB_URL_UNAVAILABLE','tab-observation');
   const url=ordinaryPage(tab.url);
-  if(!url)throw screenshotError(tab.url?'SCREENSHOT_PAGE_UNSUPPORTED':'SCREENSHOT_PERMISSION_REQUIRED');
-  const frame=await webNavigation?.getFrame({tabId:tab.id,frameId:0});
-  if(changed||tab.pendingUrl||!frame?.documentId||frame.errorOccurred||
-   (frame.documentLifecycle&&frame.documentLifecycle!=='active')||ordinaryPage(frame.url)?.href!==url.href)
-   throw screenshotError('SCREENSHOT_PAGE_CHANGED');
-  return {windowId:window.id,tabId:tab.id,url:url.href,documentId:frame.documentId};
+  if(!url)throw captureError('SCREENSHOT_PAGE_UNSUPPORTED','page-eligibility');
+  if(initial&&deliveredTab?.url&&ordinaryPage(deliveredTab.url)?.href!==url.href)throw pageChanged();
+  let frame;
+  try{frame=await webNavigation?.getFrame({tabId,frameId:0});}
+  catch{throw captureError('SCREENSHOT_FRAME_UNAVAILABLE','tab-observation','chrome-frame-error');}
+  if(changed||!frame?.documentId||frame.errorOccurred||
+   (frame.documentLifecycle&&frame.documentLifecycle!=='active')||ordinaryPage(frame.url)?.href!==url.href)throw pageChanged();
+  if(initial)trace('PAGE_ELIGIBLE','ok');
+  return {windowId,tabId,url:url.href,documentId:frame.documentId};
  }
  async function verify(){
   const next=await observe();
   if(closed||changed||next.tabId!==current.tabId||next.windowId!==current.windowId||
-   next.url!==current.url||next.documentId!==current.documentId)throw screenshotError('SCREENSHOT_PAGE_CHANGED');
+   next.url!==current.url||next.documentId!==current.documentId)throw pageChanged();
  }
  try{
-  current=await observe();
+  current=await observe(true);
   return {context:current,close,async capture(){
    await verify();
    let data;
+   trace('CAPTURE_REQUESTED','started');
    try{
     data=await tabs.captureVisibleTab(current.windowId,{format:'png'});
    }catch(error){
-    const code=/MAX_CAPTURE_VISIBLE_TAB_CALLS|rate/i.test(error?.message)?'SCREENSHOT_CAPTURE_RATE_LIMIT':
-     /permission|cannot access|activeTab/i.test(error?.message)?'SCREENSHOT_PERMISSION_REQUIRED':'SCREENSHOT_CAPTURE_FAILED';
-    throw screenshotError(code);
+    const message=error?.message??'';
+    if(/MAX_CAPTURE_VISIBLE_TAB_CALLS|quota|rate limit/i.test(message))
+     throw captureError('SCREENSHOT_CAPTURE_RATE_LIMIT','capture-api','chrome-rate-limit');
+    if(/permission|cannot access|activeTab|all_urls/i.test(message))
+     throw captureError('CHROME_CAPTURE_PERMISSION_DENIED','capture-api','chrome-permission-denied');
+    throw captureError('SCREENSHOT_CAPTURE_FAILED','capture-api','chrome-capture-error');
    }
    await verify();
-   if(typeof data!=='string'||!data.startsWith('data:image/png;base64,'))throw screenshotError('SCREENSHOT_CAPTURE_FAILED');
-   return fetch(data).then(response=>response.blob());
+   try{
+    if(typeof data!=='string'||!data.startsWith('data:image/png;base64,'))throw Error();
+    const image=await fetch(data).then(response=>response.blob());
+    const signature=new Uint8Array(await image.slice(0,8).arrayBuffer());
+    if(!pngSignature.every((byte,index)=>signature[index]===byte))throw Error();
+    return image;
+   }catch{throw captureError('SCREENSHOT_PNG_INVALID','png-validation');}
   }};
  }catch(error){close();throw error;}
 }

@@ -1,7 +1,7 @@
 import {SCREENSHOT_BYTES} from '../cloudflare/screenshot-wire.mjs';
 
 const cacheName='click2cloud-screenshot-retry-v1';
-const retryLifetime=60*60*1000;
+export const screenshotRetryLifetime=60*60*1000;
 const cacheBytes=48*1024*1024;
 // CacheStorage uses HTTP(S) keys. These are local cache identities only.
 const key=id=>'https://click2cloud.invalid/screenshot-retry/'+id;
@@ -33,7 +33,7 @@ export function createScreenshotRetryCache(storage=globalThis.caches,clock=Date.
   store:(id,image)=>serial(async cache=>{
    await prune(cache,image.size);
    await cache.put(key(id),new Response(image,{headers:{'content-type':'image/png',
-    'x-capture-expires':String(clock()+retryLifetime),'x-capture-size':String(image.size)}}));
+    'x-capture-expires':String(clock()+screenshotRetryLifetime),'x-capture-size':String(image.size)}}));
   }),
   read:id=>serial(async cache=>{await prune(cache);const response=await cache.match(key(id));return response?.blob()??null;}),
   remove:id=>serial(cache=>cache.delete(key(id))),

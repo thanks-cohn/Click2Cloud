@@ -50,8 +50,9 @@ function validatedRule(value){
  return {ruleId:value.ruleId,name:value.name.trim(),active:value.active,revision:value.revision,websites,destinations};
 }
 const defaults=()=>({schemaVersion:1,revision:0,dedup:true,rules:[]});
+export const screenshotDefaultName='Default Screenshots';
 
-export function createScreenshotRules({storage,authorizeTarget}){
+export function createScreenshotRules({storage,authorizeTarget,discoverDefault=async()=>null}){
  let writes=Promise.resolve();
  async function read(){
   const saved=(await storage.get(screenshotPreference))[screenshotPreference];
@@ -62,10 +63,25 @@ export function createScreenshotRules({storage,authorizeTarget}){
   if(new Set(rules.map(rule=>rule.ruleId)).size!==rules.length)throw screenshotError('SCREENSHOT_RULES_UNAVAILABLE');
   return {...saved,rules};
  }
- function change(method,params){
+ function change(method,params={}){
   const work=writes.catch(()=>{}).then(async()=>{
    const config=await read();
-   if(method==='dedup'){
+   if(['initialize-default','save-default','dismiss-default'].includes(method)){
+    if(config.defaultHandled)return config;
+    const existing=config.rules.some(rule=>rule.name===screenshotDefaultName&&
+     (!rule.websites.length||rule.websites.some(site=>site.kind==='all'))&&
+     rule.destinations.some(target=>target.bucketName==='redown'&&target.prefix==='screenshots/'));
+    if(!existing&&method==='initialize-default'&&(config.revision!==0||config.rules.length))return config;
+    if(!existing&&method!=='dismiss-default'){
+     const inputs=method==='initialize-default'?[await discoverDefault()]:params.destinations;
+     if(method==='initialize-default'&&!inputs[0])return config;
+     const rule=validatedRule({ruleId:crypto.randomUUID(),revision:1,name:screenshotDefaultName,
+      websites:[{kind:'all'}],destinations:inputs,active:true});
+     if(method==='save-default')for(const target of rule.destinations)await authorizeTarget(target);
+     config.rules.unshift(rule);
+    }
+    config.defaultHandled=true;
+   }else if(method==='dedup'){
     if(typeof params.enabled!=='boolean')throw screenshotError('SCREENSHOT_RULE_INVALID');
     config.dedup=params.enabled;
    }else{

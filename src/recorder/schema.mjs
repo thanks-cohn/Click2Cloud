@@ -36,6 +36,15 @@ export const RAW_FIELDS=Object.freeze(['pageUrl','sourceUrl','finalUrl','filenam
 export function rawFields(input){const out=Object.fromEntries(RAW_FIELDS.map(k=>[k,null]));for(const k of RAW_FIELDS)try{const v=input?.[k];if(typeof v==='string'&&v.length<=8192)out[k]=v;}catch{}return out;}
 const uuid=v=>/^[a-f0-9-]{36}$/i.test(v??'')?v:null;
 const instant=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(v)?v:null;
+const screenshotStages=['COMMAND_RECEIVED','TAB_RESOLVED','PAGE_ELIGIBLE','RULES_MATCHED','CAPTURE_REQUESTED',
+ 'PNG_CAPTURED','R2_PUT_SENT','R2_RESPONSE','R2_READBACK','VERIFIED','PENDING','FAILED'];
+const captureStages=['window-observation','tab-observation','page-eligibility','rule-matching','capture-preparation',
+ 'capture-api','png-validation','r2-upload'];
+const browserErrors=['chrome-window-error','chrome-tabs-query-error','chrome-frame-error','chrome-rate-limit',
+ 'chrome-permission-denied','chrome-capture-error'];
+const screenshotMethod=value=>value==='direct-r2-object-api'?value:null;
+const screenshotHttpStatus=value=>Number.isInteger(value)&&value>=100&&value<=599?value:null;
+const screenshotProviderCodes=value=>(Array.isArray(value)?value:[]).filter(item=>Number.isSafeInteger(item)||typeof item==='string'&&/^\d{1,16}$/.test(item)).slice(0,16);
 export function secureEvent(e){return {schemaVersion:2,runId:uuid(e.runId),sequence:Number.isSafeInteger(e.sequence)?e.sequence:null,attemptId:/^[a-f0-9-]{36}$/i.test(e.attemptId??'')?e.attemptId:null,workerEpoch:uuid(e.workerEpoch),menuGeneration:number(e.menuGeneration),engineOperationId:number(e.engineOperationId),remoteOperationId:uuid(e.remoteOperationId),reasonCode:null,stage:STAGES.includes(e.stage)?e.stage:'N/A',outcome:[...STATES,'started','ok','skipped','observed'].includes(e.outcome)?e.outcome:'N/A',monotonicMs:number(e.monotonicMs),timestampUtc:instant(e.timestampUtc),providerId:PROVIDERS.includes(e.providerId)?e.providerId:'other',mode:['simple','narrow','depth','other'].includes(e.mode)?e.mode:'other',context:['image','link','page','video','audio','other'].includes(e.context)?e.context:'other',metrics:Object.fromEntries(METRICS.map(k=>[k,number(e.metrics?.[k])])),availability:Object.fromEntries([...METRICS.filter(k=>number(e.metrics?.[k])===null),...['providerId','mode','context'].filter(k=>!e[k]||e[k]==='other')].map(k=>[k,{value:'N/A',reason:availabilityReason(e.availability?.[k]?.reason)}])),proofLevel:['independently_verified','provider_accepted','unknown'].includes(e.proofLevel)?e.proofLevel:'unknown',privacy:'SECURE',raw:Object.fromEntries(RAW_FIELDS.map(k=>[k,null])),rawAvailability:Object.fromEntries(RAW_FIELDS.map(k=>[k,{value:'N/A',reason:'redacted'}]))};}
 
 // Screenshot receipts use the same RAW/SECURE export boundary. Project only
@@ -48,21 +57,56 @@ export function screenshotReceipt(job,{secure=false}={}){
  const state=value=>states.includes(value)?value:'unknown';
  const code=value=>/^[A-Z][A-Z0-9_]{1,79}$/.test(value??'')?value:null;
  const outputId=value=>typeof value==='string'&&/^[a-f0-9-]{36}-[1-9][0-9]*$/.test(value)?value:null;
- return {schemaVersion:1,kind:'screenshot-to-cloud',...ids,commandId:plan.commandId,configurationVersion:number(plan.configurationVersion),
+ const failureStage=value=>captureStages.includes(value)?value:null;
+ const trace=(job.trace??[]).filter(event=>screenshotStages.includes(event.stage)).map(event=>({
+  captureId:ids.captureId,outputId:outputId(event.outputId),stage:event.stage,at:instant(event.at),code:code(event.code),
+  outcome:[...states,'ok','started','no-match','unconfirmed'].includes(event.outcome)?event.outcome:null,
+  failureStage:failureStage(event.failureStage),browserError:browserErrors.includes(event.browserError)?event.browserError:null,
+  ...(typeof event.commandTab==='boolean'?{commandTab:event.commandTab}:{}),
+  ...(Number.isSafeInteger(event.attempt)?{attempt:event.attempt}:{}),
+  httpStatus:screenshotHttpStatus(event.httpStatus),providerCodes:screenshotProviderCodes(event.providerCodes),
+  recoverable:typeof event.recoverable==='boolean'?event.recoverable:null
+ }));
+ const latestAttempt=job.attempts.at(-1),traceGaps=[];
+ if(job.schemaVersion===2){
+  const has=stage=>trace.some(event=>event.stage===stage);
+  const expected=job.captured?screenshotStages.slice(0,6):['COMMAND_RECEIVED'];
+  for(const stage of expected)if(!has(stage))traceGaps.push({stage,outputId:null});
+  if(!job.finishedAt&&!latestAttempt)traceGaps.push({stage:'CAPTURE_RESULT',outputId:null});
+  const byOutput=new Map();
+  for(const event of trace)if(event.outputId&&event.attempt===job.attempts.length){
+   if(!byOutput.has(event.outputId))byOutput.set(event.outputId,[]);
+   byOutput.get(event.outputId).push(event);
+  }
+  for(const id of latestAttempt?.outputIds??[]){
+   const events=byOutput.get(id)??[];
+   if(!events.some(event=>['VERIFIED','PENDING','FAILED'].includes(event.stage)))traceGaps.push({stage:'OUTPUT_RESULT',outputId:outputId(id)});
+   if(events.filter(event=>event.stage==='R2_PUT_SENT').length>events.filter(event=>event.stage==='R2_RESPONSE').length)
+    traceGaps.push({stage:'R2_RESPONSE',outputId:outputId(id)});
+   if(events.some(event=>event.stage==='VERIFIED')&&!events.some(event=>event.stage==='R2_READBACK'&&event.outcome==='ok'))
+    traceGaps.push({stage:'R2_READBACK',outputId:outputId(id)});
+  }
+ }
+ return {schemaVersion:job.schemaVersion===2?2:1,kind:'screenshot-to-cloud',...ids,commandId:plan.commandId,configurationVersion:number(plan.configurationVersion),
+  ...(job.schemaVersion===2?{method:screenshotMethod(job.method),failureStage:failureStage(job.failureStage),trace,traceGaps,
+   retryExpiresAt:instant(job.retryExpiresAt),originalUnavailable:job.originalUnavailable===true}:{}),
   dedup:typeof plan.dedup==='boolean'?plan.dedup:null,state:state(job.state),code:code(job.code),
   startedAt:instant(plan.startedAt),finishedAt:instant(job.finishedAt),matchedRuleIds:contributors,
   ...(secure?{}:{source:plan.context,matchedRules:plan.matchedRules??[]}),
   captured:job.captured?{mime:'image/png',bytes:number(job.captured.bytes),at:instant(job.captured.at),...(secure?{}:{sha256:job.captured.sha256})}:null,
   attempts:job.attempts.map(attempt=>({startedAt:instant(attempt.startedAt),finishedAt:instant(attempt.finishedAt),
    requestedBytes:number(attempt.requestedBytes),receivedBytes:number(attempt.receivedBytes),code:code(attempt.code),
-   state:['started','worker-responded','readback-only','unconfirmed'].includes(attempt.state)?attempt.state:'unconfirmed',
+   ...(attempt.method?{method:screenshotMethod(attempt.method)}:{}),
+   state:['started','worker-responded','direct-r2-completed','readback-only','unconfirmed'].includes(attempt.state)?attempt.state:'unconfirmed',
    outputIds:attempt.outputIds.map(outputId).filter(Boolean)})),
   outputs:plan.outputs.map((target,index)=>{
    const observation=job.outputs[index]??{};
    return {outputId:outputId(target.outputId),ruleIds:target.ruleIds.map(uuid).filter(Boolean),state:state(observation.state),
     at:instant(observation.at),code:code(observation.code),bytes:number(observation.bytes),
     comparison:['match','mismatch','unknown','not_checked'].includes(observation.comparison)?observation.comparison:'not_checked',
-    verification:observation.verification==='independent-r2-head-sha256'?observation.verification:null,
+    verification:['independent-r2-head-sha256','direct-r2-get-sha256'].includes(observation.verification)?observation.verification:null,
+    ...(observation.method?{method:screenshotMethod(observation.method),httpStatus:screenshotHttpStatus(observation.httpStatus),
+     providerCodes:screenshotProviderCodes(observation.providerCodes),recoverable:observation.recoverable===true}:{}),
     ...(secure?{}:{destination:target.target,key:target.key,checksum:observation.checksum,etag:observation.etag,version:observation.version})};
   })};
 }

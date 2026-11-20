@@ -268,12 +268,7 @@ void Promise.resolve().then(async()=>{
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
-const screenshots=createScreenshotBackground({chrome,attention,transport:remote,current,fileApi,
- authorizeBucket:async target=>{
-  const auth=await setupOauth.authority();
-  if(!auth.accounts.some(account=>account.id===target.accountId))throw Object.assign(Error(),{code:'SCOPE_UNAUTHORIZED'});
-  return checkSelectedBucket(target,auth);
- },
+const screenshots=createScreenshotBackground({chrome,attention,oauth:setupOauth,current,fileApi,
  activeNative:async()=>{
   const live=registrar.inspect();
   if(live.pending)return null;

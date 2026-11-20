@@ -1,4 +1,4 @@
-import {createScreenshotPage,screenshotMessage,screenshotRequest} from './screenshot-page.mjs';
+import {createScreenshotPage,screenshotFeedback,screenshotRequest} from './screenshot-page.mjs';
 import {createAestheticHost} from '../src/aesthetic/host.mjs';
 const aesthetic=createAestheticHost({root:document.documentElement,storage:chrome.storage?.local});
 const aestheticReady=aesthetic.restore();
@@ -331,10 +331,7 @@ async function revealListedFile(key,target){
  selected=new Set([key]);ordered();focusIndex=listingOrder.index(key);updateSelection();focusRow(focusIndex);
 }
 const screenshotUI=createScreenshotPage({api,dialog,closeDialog,esc,windowId:shelfWindow});
-const historyUI=createHistoryPage({api,updateScreenshotWorker:async target=>{
- await refreshState();
- return api('recoverCloudflareDestination',{target,screenshotUpgrade:true,authorizeSetup:true,expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()});
-},retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
+const historyUI=createHistoryPage({api,retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
  const result=await api('openRemoteResult',{operationId},{quiet:true});
  closeDialog();selected.clear();await navigate(result.target);await revealListedFile(result.highlightKey,result.target);
 }});
@@ -1224,9 +1221,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   void shelfWindow.then(id=>{
    if(message.windowId!=null&&id!==message.windowId)return;
    const feedback=$('#action-feedback');
-   feedback.textContent=message.recorded===false?'The screenshot result could not be added to History.':
-    message.state==='confirmed'?`Screenshot saved · ${message.confirmed} verified`:
-     screenshotMessage(message.code,'Screenshot needs review. Open History for the result.');
+   feedback.textContent=screenshotFeedback(message);
    feedback.hidden=false;
   }).catch(()=>{});
   return;

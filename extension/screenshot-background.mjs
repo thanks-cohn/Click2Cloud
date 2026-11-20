@@ -4,24 +4,34 @@ import {createScreenshotRetryCache} from '../src/screenshot/retry-cache.mjs';
 import {chooseScreenshotFolderId,isScreenshotMenuItem,screenshotMenu} from '../src/chrome/screenshot-menu.mjs';
 import {openVisibleTabSource} from '../src/chrome/visible-tab-screenshot.mjs';
 import {captureHistoryContext,safeHistoryURL} from '../src/history/model.mjs';
+import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-upload.mjs';
 
 const requestKey=windowId=>'screenshot-folder-request:'+windowId;
 const folderRequestLifetime=5*60*1000;
-export function createScreenshotBackground({chrome,attention,transport,current,fileApi,authorizeBucket,activeNative}){
+export function createScreenshotBackground({chrome,attention,oauth,current,fileApi,activeNative}){
  const storage=chrome.storage.local,session=chrome.storage.session;
  const pendingWindows=new Set(),retryCache=createScreenshotRetryCache();
+ const uploader=createDirectScreenshotUpload(oauth);
  const send=message=>chrome.runtime.sendMessage(message).catch(()=>{});
  async function authorizeTarget(input){
   const target=screenshotTarget(input);
-  await authorizeBucket(target);
-  if(target.prefix){
-   const listed=await fileApi.run('list',{source:target});
-   if(listed.state!=='completed'||listed.data.folderExists!==true)throw screenshotError('SCREENSHOT_FOLDER_UNAVAILABLE');
-  }
+  const auth=await oauth.authority();
+  if(!auth.accounts.some(account=>account.id===target.accountId))throw screenshotError('SCOPE_UNAUTHORIZED');
+  await uploader.checkBucket(target,auth.sessionId);
   return target;
  }
- const rules=createScreenshotRules({storage,authorizeTarget});
- const runner=createScreenshotCapture({chrome,rules,transport,retryCache,
+ async function discoverDefault(){
+  try{
+   const auth=await oauth.authority();
+   const selected=auth.accounts.length===1?auth.accounts[0].id:(await current.read()).product.cloudflare.selectedAccountId;
+   if(!auth.accounts.some(account=>account.id===selected))return null;
+   const target={provider:'cloudflare',connectionId:'cloudflare:'+selected,accountId:selected,bucketName:'redown',prefix:'screenshots/'};
+   await uploader.checkBucket(target,auth.sessionId);
+   return target;
+  }catch{return null;}
+ }
+ const rules=createScreenshotRules({storage,authorizeTarget,discoverDefault});
+ const runner=createScreenshotCapture({chrome,rules,uploader,retryCache,
   record:job=>current.recordRemoteResult({
    operationId:job.plan.operationId,kind:'screenshot-to-cloud',state:job.state,code:job.code,
    attemptedFilename:'Screenshot',bytes:job.captured?.bytes,historyContext:captureHistoryContext({pageUrl:job.plan.context?.url}),
@@ -29,17 +39,24 @@ export function createScreenshotBackground({chrome,attention,transport,current,f
     {...job.plan.context,url:safeHistoryURL(job.plan.context.url)}:null}}
   }),
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},
+  progress:job=>send({channel:'screenshot-result',state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
   async notify(job,{recorded}){
    const confirmed=job.outputs.filter(output=>output.state==='confirmed').length;
-   for(const [index,result] of job.outputs.entries())if(result.state==='confirmed'){
+   const retryable=job.outputs.filter(output=>job.cachedAt&&!job.originalUnavailable&&output.state!=='confirmed'&&output.recoverable).length;
+   const lastAttempt=job.attempts.at(-1);
+   for(const [index,result] of job.outputs.entries())if(result.state==='confirmed'&&lastAttempt?.outputIds.includes(result.outputId)){
     const {target,key}=job.plan.outputs[index];
     try{void Promise.resolve(fileApi.noteRemoteWrite({state:'verified',operationId:result.outputId,destination:{...target,provider:'cloudflare-r2',prefix:target.prefix.slice(0,-1)},receipt:{key}})).catch(()=>{});}
     catch{}
    }
-   await send({channel:'screenshot-result',windowId:job.plan.context?.windowId,confirmed,total:job.outputs.length,state:job.state,code:job.code,recorded});
-   if((job.state!=='confirmed'||!recorded)&&chrome.notifications?.create){
-    const message=recorded?(confirmed?`${confirmed} of ${job.outputs.length} files verified. Open History for details.`:'Open History for the capture result and available retries.')
-     :'The capture result could not be added to History.';
+   const code=job.code??(confirmed?undefined:job.outputs.find(output=>output.code)?.code);
+   await send({channel:'screenshot-result',windowId:job.plan.context?.windowId,confirmed,total:job.outputs.length,state:job.state,code,recorded,retryable});
+   if(chrome.notifications?.create){
+    const message=recorded?(confirmed?`Saved to ${confirmed} of ${job.outputs.length} locations.${retryable?` Retry remaining ${retryable} in History.`:''}`:
+     code==='SCREENSHOT_NO_MATCHING_RULES'?'Create or enable a matching rule in More → Screenshot.':
+     code==='R2_BUCKET_ACCESS_DENIED'?'Check Cloudflare access to the bucket shown in History.':
+     retryable?'Screenshot captured. Open History to retry unconfirmed files.':'Open History for the screenshot result.'):
+     'The capture result could not be added to History.';
     try{await chrome.notifications.create('screenshot-'+job.plan.operationId,{type:'basic',iconUrl:chrome.runtime.getURL('extension/icon.png'),title:'Click2Cloud Screenshot',message});}catch{}
    }
   }
@@ -74,8 +91,9 @@ export function createScreenshotBackground({chrome,attention,transport,current,f
   return true;
  }
  async function request(method,params={},sender){
-  if(method==='read')return rules.read();
-  if(['save','toggle','delete','dedup'].includes(method))return rules.change(method,params);
+  if(method==='read')return rules.change('initialize-default');
+  if(method==='suggest-default')return discoverDefault();
+  if(['save','toggle','delete','dedup','save-default','dismiss-default'].includes(method))return rules.change(method,params);
   if(method==='retry'&&captureUuid(params.operationId))return runner.retry(params.operationId);
   if(method==='folder-request')return sender?.tab?null:folderRequest(params.windowId);
   if(method==='choose-folder'){

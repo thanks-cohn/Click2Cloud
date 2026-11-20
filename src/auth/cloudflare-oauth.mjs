@@ -89,11 +89,21 @@ export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.
  }
  async function request(path,options={}){
   if(typeof path!=='string'||!/^\/accounts(?:[/?]|$)/.test(path)||path.includes('..'))throw failure('PROVIDER_PATH_DENIED');
-  const {timeoutMs=30000,...fetchOptions}=options,session=await access(),account=/^\/accounts\/([^/?]+)/.exec(path)?.[1];if(account&&!session.accounts.some(a=>a.id===decodeURIComponent(account)))throw failure('WRONG_ACCOUNT');
-  const method=String(fetchOptions.method??'GET').toUpperCase(),safe=['GET','HEAD'].includes(method),run=async current=>{if((await read())?.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');const headers=new Headers(fetchOptions.headers);headers.set('authorization','Bearer '+current.accessToken);return fetch('https://api.cloudflare.com/client/v4'+path,{...fetchOptions,headers,redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(timeoutMs),...(fetchOptions.signal?[fetchOptions.signal]:[])])});};
+  const {timeoutMs=30000,expectedSession,requiredScopes=[],onSend,...fetchOptions}=options;
+  const session=await access(undefined,expectedSession),account=/^\/accounts\/([^/?]+)/.exec(path)?.[1];
+  const method=String(fetchOptions.method??'GET').toUpperCase(),safe=['GET','HEAD'].includes(method);
+  const run=async current=>{
+   const latest=await read();
+   if(latest?.sessionId!==session.sessionId||current.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');
+   if(account&&!latest.accounts.some(a=>a.id===decodeURIComponent(account)))throw failure('WRONG_ACCOUNT');
+   if(latest.scopeEvidence==='provider-returned'&&requiredScopes.some(scope=>!latest.scopes?.includes(scope)))throw failure('INSUFFICIENT_SCOPE');
+   const headers=new Headers(fetchOptions.headers);headers.set('authorization','Bearer '+current.accessToken);
+   onSend?.();
+   return fetch('https://api.cloudflare.com/client/v4'+path,{...fetchOptions,headers,redirect:'error',signal:AbortSignal.any([AbortSignal.timeout(timeoutMs),...(fetchOptions.signal?[fetchOptions.signal]:[])])});
+  };
   let response;try{response=await run(session);}catch(e){if(e.code)throw e;throw failure('TRANSIENT_API_FAILURE');}
   const b=[401,403].includes(response.status)?await errorBody(response):null,diagnostic=diagnoseCloudflare(response,b,{context:path.includes('/workers')?'worker':'r2'});
-  if(safe&&['TOKEN_EXPIRED','REAUTH_REQUIRED'].includes(diagnostic.code)&&[401,403].includes(response.status)&&session.refreshToken){await response.body?.cancel();const renewed=await access(session.accessToken,session.sessionId);try{response=await run(renewed);}catch{throw failure('TRANSIENT_API_FAILURE');}}
+  if(safe&&['TOKEN_EXPIRED','REAUTH_REQUIRED'].includes(diagnostic.code)&&[401,403].includes(response.status)&&session.refreshToken){await response.body?.cancel();const renewed=await access(session.accessToken,session.sessionId);try{response=await run(renewed);}catch(e){if(e.code)throw e;throw failure('TRANSIENT_API_FAILURE');}}
   if((await read())?.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');
   if(!safe&&[401,403].includes(response.status)&&['TOKEN_EXPIRED','REAUTH_REQUIRED'].includes(diagnostic.code)&&session.refreshToken){await access(session.accessToken,session.sessionId);throw failure('TOKEN_EXPIRED',diagnostic);}
   if(response.status===401){await critical(async()=>{const current=await read();if(current?.sessionId!==session.sessionId)throw failure('AUTH_SESSION_CHANGED');await store({...current,reconnectRequired:true,diagnostic:{code:'REAUTH_REQUIRED'}});});throw failure('REAUTH_REQUIRED',diagnostic);}return response;

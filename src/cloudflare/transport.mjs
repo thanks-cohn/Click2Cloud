@@ -77,7 +77,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    if(target||previousTarget&&scopeKey(previousTarget)!==scope){block(group,'SCREENSHOT_CROSS_BUCKET_UNSUPPORTED');continue;}
    try{
     const plan=await lookup(group[0].target);
-    const inside=group.filter(({target})=>!plan?.prefixScope||target.prefix.startsWith(plan.prefixScope+'/'));
+    const inside=group.filter(({target})=>!plan?.prefixScope||target.prefix===plan.prefixScope||target.prefix.startsWith(plan.prefixScope+'/'));
     const inScope=new Set(inside);
     block(group.filter(output=>!inScope.has(output)),'WORKER_DESTINATION_SCOPE_REQUIRED');
     if(!inside.length)continue;
