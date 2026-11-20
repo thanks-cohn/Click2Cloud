@@ -36,3 +36,36 @@ test('Aesthetic 1.1 only allows semantic text roles and fully clears them betwee
  assert.deepEqual(host.list().map(theme=>theme.name),["Bit o' Polish",'Remote V1','Minimal']);
  assert.equal((await setup().host.restore()).id,'high-polish');
 });
+
+test('Bit o’ Polish palettes are typed, complete, legible in both modes and stored independently',async()=>{
+ const {host,vars,writes,root}=setup();
+ await host.restore();
+ assert.equal(host.getPalette(),'original-rose');
+ const original=new Map(vars);
+ assert.deepEqual(host.listPalettes().map(item=>item.id),['original-rose','ocean-blue','emerald-forest','amethyst','sunset-amber']);
+ for(const item of host.listPalettes().slice(1)){
+  assert.equal((await host.applyPalette(item.id)).error,null);
+  assert.equal(host.getActive().id,'high-polish');
+  assert.equal(root.dataset.theme,'light');
+  assert.equal(vars.get('--a-spacing-page'),original.get('--a-spacing-page'));
+  for(const mode of ['light','dark']){
+   const v=key=>vars.get('--a-color-'+key+'-'+mode);
+   for(const surface of ['background','surface','raised','selection'])for(const text of ['text','muted'])assert(contrast(v(text),v(surface))>=4.5,item.id+' '+mode+' '+text+' on '+surface);
+   assert(contrast(v('focus'),v('surface'))>=3);
+   assert(contrast(v('accent'),v('surface'))>=4.5);
+  }
+ }
+ assert.equal((await host.applyPalette('custom')).error,'PALETTE_UNAVAILABLE');
+ const [key]=Object.keys(writes.at(-1));
+ assert.notEqual(key,AESTHETIC_PREFERENCE_KEY);
+ const restarted=createAestheticHost({root,storage:{get:async()=>({...writes.at(-1),[AESTHETIC_PREFERENCE_KEY]:{schemaVersion:1,id:'minimal'}})}});
+ await restarted.restore();
+ assert.equal(restarted.getPalette(),'sunset-amber');
+ assert.equal(vars.get('--a-color-background-light'),minimal.tokens['color.background'].$value.light);
+ await restarted.apply({id:'standard',persist:false});
+ assert.equal(vars.size,0);
+ await restarted.apply({id:'high-polish',persist:false});
+ assert.equal(vars.get('--a-color-background-light'),'#fbf6f0');
+ await host.applyPalette('original-rose');
+ assert.deepEqual(vars,original);
+});

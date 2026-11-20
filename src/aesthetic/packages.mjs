@@ -27,3 +27,29 @@ export const minimal={schemaVersion:1,id:'minimal',name:'Minimal',version:'1.0.0
   'destinations.availability-hint','status.verbose-technical-detail','settings.help-copy'
  ].map(role=>[role,'hide']))
 };
+
+const palette=(id,name,tokens)=>({id,name,tokens});
+const colorOverlay=tokens=>Object.fromEntries(Object.entries(tokens).map(([name,[light,dark]])=>['color.'+name,color(light,dark)]));
+export const bitOPolishPalettes=[
+ palette('original-rose','Original Rose',Object.fromEntries(Object.entries(highPolish.tokens).filter(([name])=>name.startsWith('color.')))),
+ palette('ocean-blue','Ocean Blue',colorOverlay({
+  background:['#f1f6fb','#101722'],surface:['#ffffff','#182436'],raised:['#e6eef8','#21324a'],
+  text:['#192a40','#ecf4ff'],muted:['#4d607b','#afc4e1'],border:['#c6d5e8','#3c506c'],
+  accent:['#1458ba','#78b6ff'],selection:['#dceaff','#263e60'],focus:['#164d9b','#9bccff']
+ })),
+ palette('emerald-forest','Emerald Forest',colorOverlay({
+  background:['#f2f8f5','#101c19'],surface:['#ffffff','#192a24'],raised:['#e2f0e9','#213a30'],
+  text:['#1c332a','#eaf7f1'],muted:['#486457','#b4d3c5'],border:['#c0d8cb','#3c5c4e'],
+  accent:['#166c56','#79e0bd'],selection:['#d9efe4','#254d3e'],focus:['#14614e','#8ff0ce']
+ })),
+ palette('amethyst','Amethyst',colorOverlay({
+  background:['#f6f3fb','#181323'],surface:['#ffffff','#241d32'],raised:['#ece5f5','#322745'],
+  text:['#312542','#f6efff'],muted:['#655372','#c6b6d9'],border:['#d7cbe6','#55446c'],
+  accent:['#7542ad','#c4a1ff'],selection:['#ecdef9','#463261'],focus:['#653596','#dabdff']
+ })),
+ palette('sunset-amber','Sunset Amber',colorOverlay({
+  background:['#fbf6f0','#211810'],surface:['#fffdf9','#2d2218'],raised:['#f4e9db','#3c2d20'],
+  text:['#38271a','#f9efe2'],muted:['#70553e','#d8c1a7'],border:['#decab5','#604931'],
+  accent:['#a35405','#ffc36a'],selection:['#f7e5cb','#563823'],focus:['#854806','#ffd398']
+ }))
+];

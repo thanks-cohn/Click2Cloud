@@ -1,6 +1,7 @@
-import {standard,highPolish,minimal} from './packages.mjs';
+import {standard,highPolish,minimal,bitOPolishPalettes} from './packages.mjs';
 export const AESTHETIC_API_VERSION='1.1';
 export const AESTHETIC_PREFERENCE_KEY='aestheticPreferenceV1';
+export const PALETTE_PREFERENCE_KEY='aestheticPalettePreferenceV1';
 // Only wrappers marked by the trusted app/stylesheet may use these roles.
 export const textRoles=Object.freeze([
  'explorer.debug-caption','remotes.intro-copy','remotes.connection-explanation','remotes.provider-description',
@@ -36,18 +37,80 @@ export function validateAesthetic(manifest){
 }
 // Only the trusted host receives root/storage. Packages remain inert data.
 export function createAestheticHost({root,storage}={}){
- const registry=new Map(),applied=new Set();let active=standard.id,lastError=null,sequence=0,writes=Promise.resolve();
- function register(manifest){const result=validateAesthetic(manifest);if(!result.valid)return result;if(registry.has(manifest.id))return {valid:false,errors:['PACKAGE_ALREADY_REGISTERED']};registry.set(manifest.id,structuredClone(manifest));return result;}
+ const registry=new Map(),palettes=new Map(),applied=new Set();
+ let active=standard.id,palette='original-rose',lastError=null,sequence=0,writes=Promise.resolve();
+ function register(manifest){
+  const result=validateAesthetic(manifest);
+  if(!result.valid)return result;
+  if(registry.has(manifest.id))return {valid:false,errors:['PACKAGE_ALREADY_REGISTERED']};
+  registry.set(manifest.id,structuredClone(manifest));
+  return result;
+ }
  register(highPolish);register(standard);register(minimal);
- function paint(id){const m=registry.get(id);for(const name of applied)root?.style.removeProperty(name);applied.clear();for(const [name,t] of Object.entries(id==='standard'?{}:{...registry.get('high-polish').tokens,...m.tokens})){if(t.$type==='color')for(const mode of ['light','dark']){const key=variable(name)+'-'+mode;root?.style.setProperty(key,t.$value[mode]);applied.add(key);}else{const key=variable(name);root?.style.setProperty(key,String(t.$value));applied.add(key);}}active=id;
-  if(root){
-   root.dataset.aesthetic=id;
-   const hidden=Object.entries(m.visibility??{}).filter(([,value])=>value==='hide').map(([role])=>role);
-   if(hidden.length)root.dataset.aestheticHide=hidden.join(' ');
-   else delete root.dataset.aestheticHide;
-  }}
- async function apply({id='standard',persist=true}={}){sequence++;lastError=registry.has(id)?null:'PACKAGE_UNAVAILABLE';paint(lastError?'standard':id);const result=getActive();if(persist){const selected=active;writes=writes.catch(()=>{}).then(()=>{if(!storage?.set)throw Error('PREFERENCE_WRITE_FAILED');return storage.set({[AESTHETIC_PREFERENCE_KEY]:{schemaVersion:1,id:selected}});});try{await writes;}catch{lastError='PREFERENCE_WRITE_FAILED';}}return {...result,error:lastError};}
- function getActive(){return {apiVersion:AESTHETIC_API_VERSION,id:active,version:registry.get(active).version,error:lastError};}
- async function restore(){const ticket=sequence;try{const saved=(await storage?.get(AESTHETIC_PREFERENCE_KEY))?.[AESTHETIC_PREFERENCE_KEY];if(ticket!==sequence)return getActive();if(saved===undefined)return apply({id:'high-polish',persist:false});if(!plain(saved)||!keys(saved,['schemaVersion','id'])||saved.schemaVersion!==1){paint('standard');lastError='PREFERENCE_INVALID';return getActive();}return apply({id:saved.id,persist:false});}catch{if(ticket===sequence){paint('standard');lastError='PREFERENCE_READ_FAILED';}return getActive();}}
- return Object.freeze({register,validate:validateAesthetic,apply,getActive,list:()=>[...registry.values()].map(({id,name})=>({id,name})),resetToStandard:()=>apply({id:'standard'}),restore});
+ const colors=Object.keys(tokenTypes).filter(name=>tokenTypes[name]==='color');
+ for(const scheme of bitOPolishPalettes){
+  if(Object.keys(scheme.tokens).length!==colors.length||!colors.every(name=>scheme.tokens[name])||
+    !validateAesthetic({...highPolish,...scheme}).valid)throw Error('BUILT_IN_PALETTE_INVALID');
+  palettes.set(scheme.id,structuredClone(scheme));
+ }
+ function paint(id){
+  const manifest=registry.get(id);
+  const tokens=id===standard.id?{}:{...registry.get(highPolish.id).tokens,...manifest.tokens,
+    ...(id===highPolish.id?palettes.get(palette).tokens:{})};
+  for(const name of applied)root?.style.removeProperty(name);
+  applied.clear();
+  for(const [name,token] of Object.entries(tokens)){
+   const vars=token.$type==='color'?['light','dark'].map(mode=>[variable(name)+'-'+mode,token.$value[mode]]):[[variable(name),String(token.$value)]];
+   for(const [key,value] of vars){root?.style.setProperty(key,value);applied.add(key);}
+  }
+  active=id;
+  if(!root)return;
+  root.dataset.aesthetic=id;
+  const hidden=Object.entries(manifest.visibility??{}).filter(([,value])=>value==='hide').map(([role])=>role);
+  if(hidden.length)root.dataset.aestheticHide=hidden.join(' ');
+  else delete root.dataset.aestheticHide;
+ }
+ function persistPreference(key,id){
+  writes=writes.catch(()=>{}).then(()=>{
+   if(!storage?.set)throw Error('PREFERENCE_WRITE_FAILED');
+   return storage.set({[key]:{schemaVersion:1,id}});
+  });
+  return writes;
+ }
+ async function apply({id=standard.id,persist=true}={}){
+  const ticket=++sequence;
+  const error=registry.has(id)?null:'PACKAGE_UNAVAILABLE';
+  paint(error?standard.id:id);
+  lastError=error;
+  const result=getActive();
+  if(persist)try{await persistPreference(AESTHETIC_PREFERENCE_KEY,active);}
+  catch{if(sequence===ticket)lastError='PREFERENCE_WRITE_FAILED';return {...result,error:'PREFERENCE_WRITE_FAILED'};}
+  return result;
+ }
+ async function applyPalette(id){
+  if(!palettes.has(id))return {id:palette,error:'PALETTE_UNAVAILABLE'};
+  sequence++;
+  palette=id;
+  if(active===highPolish.id)paint(active);
+  try{await persistPreference(PALETTE_PREFERENCE_KEY,id);return {id,error:null};}
+  catch{return {id,error:'PREFERENCE_WRITE_FAILED'};}
+ }
+ const getActive=()=>({apiVersion:AESTHETIC_API_VERSION,id:active,version:registry.get(active).version,error:lastError});
+ const isPreference=saved=>plain(saved)&&keys(saved,['schemaVersion','id'])&&saved.schemaVersion===1;
+ async function restore(){
+  const ticket=sequence;
+  try{
+   const values=await storage?.get([AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY]);
+   if(ticket!==sequence)return getActive();
+   const saved=values?.[AESTHETIC_PREFERENCE_KEY],scheme=values?.[PALETTE_PREFERENCE_KEY];
+   palette=isPreference(scheme)&&palettes.has(scheme.id)?scheme.id:'original-rose';
+   if(saved===undefined)return apply({id:highPolish.id,persist:false});
+   if(isPreference(saved))return apply({id:saved.id,persist:false});
+   paint(standard.id);lastError='PREFERENCE_INVALID';
+  }catch{if(ticket===sequence){paint(standard.id);lastError='PREFERENCE_READ_FAILED';}}
+  return getActive();
+ }
+ return Object.freeze({register,validate:validateAesthetic,apply,getActive,list:()=>[...registry.values()].map(({id,name})=>({id,name})),
+  listPalettes:()=>[...palettes.values()].map(({id,name,tokens})=>({id,name,preview:structuredClone(tokens['color.accent'].$value)})),
+  getPalette:()=>palette,applyPalette,resetToStandard:()=>apply({id:standard.id}),restore});
 }

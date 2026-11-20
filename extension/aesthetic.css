@@ -85,3 +85,13 @@
 .reconnect-needed{border-color:#589577;animation:reconnect-edge 2s ease-in-out infinite}
 @keyframes reconnect-edge{50%{box-shadow:0 0 0 2px #58957785}}
 @media(prefers-reduced-motion:reduce){.reconnect-needed{animation:none}}
+
+.palette-settings{border:0;padding:0;margin:10px 0 12px;min-width:0}
+.palette-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,142px),1fr));gap:6px}
+.palette-choice{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--a-geometry-control);cursor:pointer}
+.palette-choice:has(input:checked){background:var(--selected);border-color:var(--accent)}
+.palette-choice input{margin:0}
+.palette-swatch{display:block;flex:none;width:15px;height:15px;border-radius:50%;background:var(--swatch-dark)}
+[data-theme=light] .palette-swatch{background:var(--swatch-light)}
+[data-aesthetic=minimal] .reconnect-needed{animation:none}
+[data-aesthetic=minimal]:not([data-debug-mode=on]) .worker-diagnostics{display:none}
