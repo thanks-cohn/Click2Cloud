@@ -988,7 +988,6 @@ async function manager(filter='simple',page=0,session=null,message=''){
   const rowLabel=d=>d.label??d.target.prefix.split('/').filter(Boolean).at(-1)??d.target.bucketName;
   const isDefault=d=>!!product.defaultTarget&&targetKey(d.target)===targetKey(product.defaultTarget);
   const pathLabel=t=>(connection.accounts?.find(account=>account.id===t.accountId)?.name??t.accountId)+' · '+t.bucketName+'/'+t.prefix;
-  const defaultLocationLabel=t=>t.bucketName+'/'+t.prefix;
   const rowHtml=(d,i)=>`<div class="dest-row ${d.hidden?'hidden':''}">
     <div class="manager-row-name"><strong>${esc(rowLabel(d))}</strong><div class="muted" title="${esc(pathLabel(d.target))}">Cloudflare R2 · ${esc(pathLabel(d.target))}</div></div>
     <div class="controls">
@@ -1003,7 +1002,7 @@ async function manager(filter='simple',page=0,session=null,message=''){
     <div class="manager-mode-bar"><div class="tabs" role="group" aria-label="Destination mode">${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
      `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}" aria-pressed="${mode===filter}">${label}</button>`).join('')}</div>
      <button id="organize" aria-label="Organize Right-Click">Organize</button></div>
-    <section class="manager-default"><h3>Default destination</h3><p title="${esc(product.defaultTarget?defaultLocationLabel(product.defaultTarget):'')}">${product.defaultTarget?esc(defaultLocationLabel(product.defaultTarget)):'No default selected'}</p></section>
+    <section class="manager-default"><h3>Default destination</h3><p title="${esc(product.defaultTarget?pathLabel(product.defaultTarget):'')}">${product.defaultTarget?esc(pathLabel(product.defaultTarget)):'No default selected'}</p></section>
     <p class="muted">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
     <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted manager-empty">No destinations in this mode.</p>'}</div>
     <div id="destination-delete-confirmation" class="card" role="group" aria-labelledby="destination-delete-title" hidden></div>
