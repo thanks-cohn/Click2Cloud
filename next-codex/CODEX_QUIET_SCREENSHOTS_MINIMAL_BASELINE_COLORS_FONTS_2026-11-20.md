@@ -435,7 +435,18 @@ CURRENT SOURCE AUDIT: extension/app.mjs renderConnection() currently renders **O
 - Specifically IN THE **File Explorer tab**, when the OAuth connection is truly **CONNECTED**, do NOT display an **Open File Explorer** action at all. It would navigate to the page the user is already on. Do not accidentally hide or disable the actual top-navigation **File Explorer tab** button (`header nav [data-view=explorer]`): only the redundant action button is being removed.
 - When the user is **LOGGED OUT / DISCONNECTED** on the File Explorer tab, the corresponding visible action should read **Log In** (not Open File Explorer), and clicking it should invoke the existing Cloudflare login flow. When a reconnect is explicitly needed, truthful **Log In / Reconnect** language is allowed, but never mislabel the action as opening Explorer. CONNECTING/VERIFYING/UNKNOWN should show honest pending/check states, never falsely show Sign Out as authenticated.
 - On successful login, the Log In action disappears and the authenticated Explorer content is shown without an Open File Explorer action. On sign out, the Log In action reappears and any Sign Out button vanishes immediately. Do not depend merely on which tab is visible: actual verified connection state controls login/signout visibility.
-- When the user is signed in and is on **Remotes**, a genuinely useful navigation control to open File Explorer may remain there; the prohibition is about showing a redundant Open File Explorer button while IN File Explorer. Preserve legitimate navigation.
+- **REQUIRED, NOT OPTIONAL: The Remotes tab MUST KEEP its existing Open File Explorer button.** The 'hide redundant Open File Explorer' instruction applies ONLY to the File Explorer tab while authenticated. Clicking the Remotes tab's button must continue navigating to File Explorer as before. Do not globally hide, delete, rename, disable or remove the Remotes button or its handler. Preserve existing Remotes login/disconnected-state behavior rather than making the Explorer-only visibility rule apply there.
+
+**Tab-specific acceptance matrix (no ambiguity):**
+
+| Current tab | Cloudflare auth | Open File Explorer action | Log In action | Bottom Sign Out |
+|---|---|---|---|---|
+| **Remotes** | Connected | **PRESENT and functional** | Existing Remotes login UX unchanged | Do not duplicate/move the Explorer-footer Sign Out into Remotes |
+| **File Explorer** | Connected | **ABSENT (redundant)** | Absent | **PRESENT**, immediately RIGHT of Manage Destinations |
+| **File Explorer** | Disconnected | **ABSENT; show Log In instead** | **PRESENT and functional** | **ABSENT** |
+| **Remotes** | Disconnected | Keep Remotes' pre-existing controls and authentication handling; do not apply Explorer-only hide rule | Preserve login flow | Preserve existing Remotes auth UX |
+
+Test changing tabs while logged in: **Remotes → Open File Explorer visible; File Explorer → Open File Explorer absent; return to Remotes → Open File Explorer visible again**. This is tab-specific visibility, not a global authenticated-state ban on the button.
 
 ### N3. Sign Out immediately to the RIGHT of bottom Manage Destinations, only while CONNECTED
 
