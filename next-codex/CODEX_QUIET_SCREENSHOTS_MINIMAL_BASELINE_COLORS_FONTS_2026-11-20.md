@@ -457,3 +457,24 @@ Test changing tabs while logged in: **Remotes → Open File Explorer visible; Fi
 - Acceptance tests: logged out Explorer shows Log In and NO Sign Out; connected Explorer shows NO redundant Open File Explorer button, with Sign Out to the right of Manage Destinations; toggling Manage from icon width to expanded label width shifts Sign Out correctly and never overlaps; ensure behavior works across widths, with collapsed panels, after auth expiry/reconnect, and after sign out/login; maintain Remotes view, keyboard navigation and accessible focus.
 
 **Implement this in the SAME experimental branch together with Sections A–M. Do not mark the current source as already repaired: requirements here remain pending until Codex makes code changes, runs tests, pushes and supplies a build.**
+
+---
+
+## O. Remotes headline and subtitle spacing — text must stay EXACT (Nov 20, 2026)
+
+Owner asks to **space, format, and structure** this exact existing Remotes-tab copy properly. Do NOT rewrite the language, add slogans, substitute synonyms, change capitalization, or change punctuation:
+
+```text
+The Future is Now. True Remote is Here.
+
+Nothing ever gets downloaded to your computer.
+```
+
+- Use the first sentence as a proper semantic H1 heading (not the literal Markdown `#` character in the UI) and the second as one distinct supporting paragraph directly under the heading.
+- Create a compact, clearly structured Remotes introduction/hero group: tidy responsive left alignment consistent with existing design, readable heading line-height, a deliberate but modest vertical gap between headline and subtitle, and a clearly larger gap after the subtitle before the Cloudflare connection card and other Remotes content. Do NOT stack the sentences without breathing room or let default paragraph margins create irregular/inconsistent separation.
+- Existing markup is already in `extension/app.mjs` `renderRemotes()` as `<h1 class="remotes-headline">...` followed by `<p class="remotes-subtitle">...`; existing `extension/app.css` has `.remotes-headline` and `.remotes-subtitle` sizes but lacks explicit coordinating margins/gap. Reuse those hooks, optionally wrap them in a dedicated minimal Remotes hero grouping; avoid global changes to H1/P spacing or other tabs.
+- The font combinations should follow whichever Minimal color-and-typography palette the user selected; Remote V1 retains its own theme. Structure/spacing stays stable when switching palettes and light/dark modes.
+- On narrow Shelf widths, headline may wrap naturally at word boundaries, but do not clip it or overlap the subtitle. Keep good legibility and separation from the Cloudflare card. Do not insert hard-coded `<br>` tags or fake extra blank strings; use semantic HTML and local CSS for spacing.
+- Do not remove or change any Remotes login controls or **Open File Explorer button**. The button MUST remain functional on the Remotes tab while connected, per Section N.
+
+Acceptance: in both themes and light/dark at compact and wide widths, exact copy appears once each with a visible intentional heading/subtitle gap and sensible following whitespace; no changes to wording, Remotes actions, other pages or authentication state behavior. Test browser layout or screenshots where available.
