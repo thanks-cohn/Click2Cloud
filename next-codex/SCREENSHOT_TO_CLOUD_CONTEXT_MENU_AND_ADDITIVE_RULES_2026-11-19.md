@@ -2,6 +2,8 @@
 
 **Owner additions:** November 19, 2026. **Status:** New implementation request, NOT already implemented in the inspected 0.3.20 branch. Read [the code-audited delta-only handoff](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Do not recreate the existing V3+1.1 File API, shortcut registry, Explorer, download ZIP, native save or History systems.
 
+**CANONICAL FROZEN SCREENSHOT LOGIC:** [`/screenshot-logic/README.md`](../screenshot-logic/README.md) (owner freeze Nov 20). This older long design handoff contains historical examples and implementation background. If any old detail contradicts the frozen root document—especially shortcut keys, screenshot-card subscriptions, ordinary additive matching, one-off right-click exceptions, plan/ID/Worker invariants—**the frozen root document wins**. Do not reopen Exclusive Save or invent shortcut-takeover behavior. Source code and live Chrome/R2 proof remain pending.
+
 ## LATEST OWNER CLARIFICATION — same keyboard shortcut remains ADDITIVE (Nov 20, 2026)
 
 **Supersedes earlier takeover/one-active-owner proposals.** Multiple ACTIVE screenshot shortcut cards MAY share the EXACT SAME keyboard shortcut. When it is pressed, match **ALL enabled shortcut cards with those keys** whose website conditions include the active page, and **EVERY enabled matching website-only additive screenshot rule**. Their destinations accumulate, with a single capture and one browser→Worker image upload. No shortcut takeover, deactivate-previous-card dialog, forced switch-off, implicit replacement, per-card 'winner' or restriction that only one card may be Active. There is no Exclusive Save mode or rule winner; ordinary rule Active switches are user-controlled and one rule never deactivates another.
