@@ -167,3 +167,26 @@ test('Concurrent confirmed requests for one account and bucket share their one P
   assert.deepEqual((await Promise.all([first,second])).map(result=>result.data.managedDomain),[domain,domain]);
   assert.equal(f.writes().length,1);
 });
+
+test('Custom attach sends the exact zone and hostname, keeps older domains and checks activation independently',async()=>{
+  const hostname='new.example.org',zoneId='c'.repeat(32),calls=[];
+  let added=false,reads=0;
+  const oauth={authority:async()=>({sessionId:'authorized-session',accounts:[{id:source.accountId}]}),async request(path,options){
+    assert.equal(path,base+'custom');assert.equal(options.expectedSession,'authorized-session');
+    calls.push(options.method??'GET');
+    if(options.method==='POST'){
+      assert.deepEqual(JSON.parse(options.body),{domain:hostname,zoneId,enabled:true});
+      assert.deepEqual(options.requiredScopes,['workers-r2.write']);
+      added=true;return Response.json({success:true,result:{domain:hostname,zoneId,enabled:true}});
+    }
+    const domain=reads++>1?active(hostname):{...active(hostname),status:{ownership:'active',ssl:'initializing'}};
+    return Response.json({success:true,result:{domains:[{...active('existing.example.org'),zoneId,zoneName:'example.org'},...(added?[domain]:[])]}});
+  }};
+  const provider=createR2PublicDomains({oauth});
+  await assert.rejects(provider.connectCustomDomain(source,'unowned.example.net'),{code:'CUSTOM_DOMAIN_ZONE_REQUIRED'});
+  reads=0;
+  assert.deepEqual(await provider.connectCustomDomain(source,hostname),{domain:hostname,state:'pending'});
+  assert.deepEqual(await provider.connectCustomDomain(source,hostname,zoneId),{domain:hostname,state:'active'});
+  assert.deepEqual(calls,['GET','GET','POST','GET','GET']);
+  assert.deepEqual((await provider.readCustomDomains(source,'authorized-session')).map(record=>record.domain),['existing.example.org',hostname]);
+});

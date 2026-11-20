@@ -130,6 +130,25 @@ try{
   await card.getByText('Ctrl+Shift+F7',{exact:true}).waitFor();
   gates.push('Shortcut remapping rejects a collision, activates live, survives reload, and restores defaults');
 
+  const pane=page.locator('#pane-splitter'),manage=page.locator('#manage'),signOut=page.locator('#manage + #sign-out');
+  const split=async value=>page.waitForFunction(expected=>document.querySelector('#pane-splitter').getAttribute('aria-valuenow')===expected,String(value));
+  for(const [mode,cycle] of [['alternate',[0,50,100,50]],['left',[0,50]],['right',[100,50]]]){
+    await openSettings();await page.locator('#divider-cycle').selectOption(mode);
+    await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+    await pane.dblclick();await split(50);
+    await pane.press('ArrowLeft');await split(48);
+    await pane.press('Control+Shift+F9');await split(50);
+    for(let press=0;press<12;press++){
+      await pane.press('Control+Shift+F9');await split(cycle[press%cycle.length]);
+      const manageBox=await manage.boundingBox(),signBox=await signOut.boundingBox();
+      assert(manageBox&&signBox&&signBox.x>=manageBox.x+manageBox.width);
+    }
+  }
+  await page.reload();await openSettings();
+  assert.equal(await page.locator('#divider-cycle').inputValue(),'right');
+  await page.locator('#divider-cycle').selectOption('alternate');
+  gates.push('F9 cycles 12 times in each mode across the true extremes, recovers from a manual adjustment, and persists the mode');
+
   await page.setViewportSize({width:1050,height:800});
   await page.getByRole('button',{name:'File Explorer',exact:true}).click();
   await page.getByRole('row').filter({hasText:'test.png'}).dblclick();

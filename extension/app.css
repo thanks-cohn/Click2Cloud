@@ -251,8 +251,8 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 
 .reconnect-needed{border-color:var(--accent)}
 .palette-settings{border:0;padding:0;margin:10px 0 12px;min-width:0}
-.palette-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:6px}
-.palette-choice{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;cursor:pointer;font-family:var(--control-font)}
+.palette-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,166px),1fr));gap:6px}
+.palette-choice{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;cursor:pointer;font-family:var(--control-font);line-height:20px}
 .palette-choice:has(input:checked){background:var(--selected);border-color:var(--accent)}
 .palette-choice input[type=radio]{display:inline;width:auto;margin:0;accent-color:var(--accent)}
 .palette-swatch{display:block;flex:none;width:15px;height:15px;border-radius:50%;background:var(--swatch-dark)}

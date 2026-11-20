@@ -362,8 +362,8 @@ const historyUI=createHistoryPage({api,screenshotRequest,retryScreenshot:operati
  if(navigation!==navigationEpoch||view!=='explorer')return;
  const file=outputId?result.object?.key:result.highlightKey;
  if(file)await revealListedFile(file,result.target);
- else if(outputId)status(result.code==='RESULT_NOT_FOUND'?'The recorded file no longer exists. Opened its folder.':
-  result.code==='RESULT_CHANGED'?'The file at this key has changed. Opened its folder.':'Opened the destination folder. The screenshot file is unverified.',{attention:true});
+ else if(outputId&&!listingError)$('#listing-state').textContent=result.code==='RESULT_NOT_FOUND'?'The recorded file no longer exists. Opened its folder.':
+  result.code==='RESULT_CHANGED'?'The file at this key has changed. Opened its folder.':'Opened the destination folder. The screenshot file is unverified.';
 }});
 let viewEpoch=0,pendingSearchFocus=false,lastSearchSequence=-1;
 function focusPendingSearch(){
@@ -1259,6 +1259,7 @@ async function downloadEntry(entry){
  }catch(error){try{await writer?.abort();}catch{}throw error;}
 }
 
+let screenshotFeedbackTimer;
 chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(sender?.id!==chrome.runtime.id)return;
  if(['shelf-history-show','shelf-explorer-search'].includes(message?.channel)){
@@ -1285,8 +1286,13 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   void shelfWindow.then(id=>{
    if(message.windowId!=null&&id!==message.windowId)return;
    const feedback=$('#action-feedback');
-   feedback.textContent=screenshotFeedback(message);
+   const text=screenshotFeedback(message);
+   clearTimeout(screenshotFeedbackTimer);
+   feedback.textContent=text;
    feedback.hidden=false;
+   if(message.state!=='uploading')screenshotFeedbackTimer=setTimeout(()=>{
+    if(feedback.textContent===text){feedback.textContent='';feedback.hidden=true;}
+   },6000);
   }).catch(()=>{});
   return;
  }

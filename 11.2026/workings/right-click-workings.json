@@ -9201,9 +9201,9 @@
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "extension/aesthetic.css": "3618b95c47b3c95e18fffe4b35aa88f32f319e81de97213ea745e1afa3a75f51",
-      "extension/app.css": "42f6e03a0bf6e71e43f091e9d7340d280b7d1f7a899bbb39daba0da1d7b68cef",
+      "extension/app.css": "da5d86c7e9e648075de3b4b23a96da5773260c540c6354c0c03935b935ceb55f",
       "extension/app.html": "64c844799265a8629621d45fd882047588f81c9e83517aa3def0ab6334101795",
-      "extension/app.mjs": "4582d4b7e765edf6d20fe462b75391c1fd4be8dc3d19d6e0512ce8a33968acc6",
+      "extension/app.mjs": "39b7e7804930847096080643b74f0e68568a61a63d751f39512034d7ad2ca650",
       "extension/background.mjs": "ca04163f69e3266cef1c8a380cf06c98885a059dcdb16d5728f987b809e92a06",
       "extension/cloudflare-setup-view.mjs": "6fa93e58609dcc04f504c27630d2a6718d5fe0cc1eb2456053782a23a7b2b549",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",

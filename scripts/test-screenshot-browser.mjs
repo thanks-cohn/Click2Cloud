@@ -20,6 +20,7 @@ const manifest=JSON.parse(await readFile(join(extension,'manifest.json'),'utf8')
 assert.equal(manifest.version,'0.3.21');
 const uploads=[],requests=[],checks=[],objects=new Map();
 const publicBuckets=new Set(),attached=new Map(),customWrites=[];
+let showLongDomainList=false;
 const qaDomain='pub-632e30fd.r2.dev',zoneId='c'.repeat(32),connectedDomain='new.screenshot.example.test';
 const activeDomain=domain=>({domain,enabled:true,zoneId,zoneName:'screenshot.example.test',status:{ownership:'active',ssl:'active'}});
 const etag=bytes=>`"${createHash('sha256').update(bytes).digest('hex')}"`;
@@ -68,6 +69,7 @@ const resource=https({key:await readFile(keys),cert:await readFile(cert)},async 
      attached.set(bucket,0);return json(200,data);
     }
     const domains=bucket==='redown'?[activeDomain('cdn.screenshot.example.test'),activeDomain('images.screenshot.example.test')]:[];
+    if(bucket==='redown'&&showLongDomainList)for(let index=0;index<98;index++)domains.push(activeDomain(`custom-${index}.screenshot.example.test`));
     if(attached.has(bucket)){
      const reads=attached.get(bucket)+1;attached.set(bucket,reads);
      domains.push(reads>=3?activeDomain(connectedDomain):{...activeDomain(connectedDomain),status:{ownership:'active',ssl:'initializing'}});
@@ -270,6 +272,14 @@ try{
  app.once('dialog',prompt=>prompt.dismiss());await enable.click();
  assert.equal(publicBuckets.size,0);
  app.once('dialog',prompt=>prompt.accept());await enable.click();
+ await qaUrls.getByText(/Cloudflare requires R2 bucket permissions/).waitFor();
+ assert.equal(publicBuckets.size,0);
+ await service.evaluate(async()=>{
+  const {click2cloudOAuth:session}=await chrome.storage.local.get('click2cloudOAuth');
+  await chrome.storage.local.set({click2cloudOAuth:{...session,scopes:[...session.scopes,'workers-r2.write']}});
+ });
+ await qaUrls.getByRole('button',{name:'Refresh',exact:true}).click();
+ app.once('dialog',prompt=>prompt.accept());await enable.click();
  await qaUrls.getByText(`https://${qaDomain}/${publicPath}`,{exact:true}).waitFor();
  assert.deepEqual([...publicBuckets],['qa-screenshots']);
  await qaUrls.getByRole('button',{name:/Development URL https/}).click();
@@ -314,6 +324,39 @@ try{
   await app.getByRole('button',{name:'History',exact:true}).click();
  }
  checks.push('After the retry image cache is deleted and the app reloads, History reads one R2 thumbnail and all three GO TO buttons select their own recorded file');
+ const bytes=Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7','base64');
+ const populated=structuredClone(retried),historicalId=crypto.randomUUID(),captureId=crypto.randomUUID();
+ const checksum=createHash('sha256').update(bytes).digest('hex');
+ populated.plan={...populated.plan,captureId,operationId:historicalId,startedAt:new Date().toISOString(),outputs:[]};
+ populated.captured={...populated.captured,bytes:bytes.length,sha256:checksum};
+ populated.finishedAt=new Date().toISOString();populated.attempts=[];populated.outputs=[];
+ for(let index=1;index<=100;index++){
+  const outputId=captureId+'-'+index,key='One/legacy-image-'+index;
+  populated.plan.outputs.push({outputId,key,target:{...fixtureTarget,bucketName:'redown',prefix:'One/'},ruleIds:[]});
+  populated.outputs.push({outputId,state:'confirmed',verification:'direct-r2-get-sha256',bytes:bytes.length,checksum});
+  objects.set('redown/'+key,bytes);
+ }
+ await service.evaluate(screenshot=>click2cloud.current.recordRemoteResult({kind:'screenshot-to-cloud',operationId:screenshot.plan.operationId,
+  state:'confirmed',code:'SCREENSHOT_SAVED',screenshot}),populated);
+ await app.getByRole('button',{name:'History',exact:true}).click();
+ const long=app.locator(`[data-operation="${historicalId}"]`),longCards=long.locator('.screenshot-destination');
+ await long.locator('.history-preview img').waitFor();
+ assert.equal(await long.locator('img').count(),1);
+ assert.equal(await longCards.count(),100);
+ assert(await long.evaluate(entry=>entry.scrollHeight>entry.clientHeight));
+ const last=longCards.last(),lastUrls=last.locator('[data-output-urls]');
+ showLongDomainList=true;
+ await lastUrls.getByText('URLs',{exact:true}).click();
+ await wait(async()=>await lastUrls.getByRole('link',{name:/Open Custom domain/}).count()===100,'100 exact URLs in the last History card');
+ const lastOpen=lastUrls.getByRole('link',{name:/Open Custom domain/}).last();
+ await lastOpen.focus();
+ assert(await lastOpen.evaluate(node=>node===document.activeElement));
+ assert(await lastUrls.locator('.history-public-list').evaluate(el=>el.scrollHeight>el.clientHeight&&el.scrollTop>0));
+ assert(await long.evaluate(entry=>entry.scrollTop>0&&entry.scrollWidth<=entry.clientWidth));
+ assert((await lastOpen.getAttribute('href')).endsWith('/One/legacy-image-100'));
+ await last.locator('[data-screenshot-goto]').click();
+ await app.locator('#files [aria-selected=true]').filter({hasText:'legacy-image-100'}).waitFor();
+ checks.push('A retained test capture with a GIF at an extensionless key has one thumbnail; all 100 destination cards and 100 domain links are reachable');
  await page.bringToFront();input('focus');
  input('key','Alt_L','Shift_L','h');
  const ui=await wait(async()=>{

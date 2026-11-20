@@ -54,6 +54,11 @@ results.push({gate:'five palette color and font sets preserve settings DOM, cont
 await page.reload();await page.waitForFunction(()=>window.productFixture);await page.waitForFunction(()=>document.documentElement.dataset.aesthetic==='minimal'&&document.documentElement.style.getPropertyValue('--a-color-accent-light')==='#1458ba');
 await page.evaluate(bytes=>{const f=window.productFixture;f.setReady('fixture-bucket');window.fixtureImageData={'image.png':bytes};f.r2Objects.set('fixture-bucket:image.png',{bucketName:'fixture-bucket',key:'image.png',displayName:'image.png',folder:false,size:bytes.length,etag:'fixture-preview'});},Array.from(await readFile(join(root,'tests/fixtures/images/picture.png'))));results.push({gate:'appearance-restores-after-reload-separate-from-CURRENT',state:'PASS'});
 const shot=async name=>{await page.screenshot({path:join(out,name+'.png')});};
+await settings();
+for(const name of ['Original Rose','Ocean Blue','Emerald Forest','Amethyst','Sunset Amber']){
+ await palette.getByRole('radio',{name}).check();await shot('palette-'+name.replaceAll(' ','-'));
+}
+await palette.getByRole('radio',{name:'Ocean Blue'}).check();
 const measurements=[];
 for(const mode of ['standard','minimal'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
  await page.setViewportSize({width,height:850});await settings();await page.locator('#appearance').selectOption(mode);await page.locator('#setting-theme').selectOption(theme);
@@ -165,6 +170,45 @@ const themeDuringSave=await page.evaluate(async()=>{
 });
 assert.deepEqual(themeDuringSave,{completion:'verified',object:true});
 results.push({gate:'appearance-switches-during-active-save-preserve-worker-call-and-receipt',state:'PASS'});
+await page.getByRole('button',{name:'Remotes',exact:true}).click();
+await page.getByRole('button',{name:'Open File Explorer',exact:true}).click();
+await page.locator('#manage + #sign-out').waitFor();
+assert.equal(await page.getByRole('button',{name:'Open File Explorer',exact:true}).count(),0);
+const measureFooter=async width=>{
+ await page.setViewportSize({width,height:850});
+ const [manage,signOut]=await Promise.all(['#manage','#manage + #sign-out'].map(selector=>page.locator(selector).boundingBox()));
+ assert(manage&&signOut&&signOut.x>=manage.x+manage.width&&signOut.x+signOut.width<=width);
+ return [manage,signOut];
+};
+const [expandedManage,expandedSign]=await measureFooter(1100),[compactManage,compactSign]=await measureFooter(360);
+assert(expandedManage.width>compactManage.width&&expandedSign.x>compactSign.x);
+await page.locator('#manage + #sign-out').click();
+await page.getByRole('button',{name:'Log In',exact:true}).waitFor();
+assert.equal(await page.locator('#sign-out').count(),0);
+await page.getByRole('button',{name:'Log In',exact:true}).click();
+await page.locator('#manage + #sign-out').waitFor();
+await page.getByRole('button',{name:'Remotes',exact:true}).click();
+await page.getByRole('button',{name:'Open File Explorer',exact:true}).waitFor();
+assert.equal(await page.locator('#manage-slot #sign-out').count(),0);
+results.push({gate:'Explorer login and flexible footer follow auth and preserve the Remotes action',state:'PASS'});
+await page.evaluate(async()=>{
+ const f=window.productFixture,state=await f.current.read();
+ const response=await f.api.invoke({version:'3+1.1',method:'commitConfigChange',params:{changes:[{type:'makeDefault',target:f.target}],
+  expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()}},'gui');
+ if(response.state!=='completed')throw Error(response.code);
+});
+await page.reload();
+for(const theme of ['minimal','standard']){
+ await settings();await page.locator('#appearance').selectOption(theme);
+ const clear=page.getByRole('button',{name:'Remove Default Location',exact:true});
+ await clear.waitFor();assert(await clear.evaluate(button=>button.closest('section')===document.querySelector('#main .page').lastElementChild));
+}
+await page.getByRole('button',{name:'Remove Default Location',exact:true}).click();
+assert.equal(await page.getByRole('button',{name:'Remove Default Location',exact:true}).count(),1);
+page.once('dialog',prompt=>prompt.accept());
+await page.getByRole('button',{name:'Remove Default Location',exact:true}).click();
+await page.getByRole('button',{name:'Remove Default Location',exact:true}).waitFor({state:'detached'});
+results.push({gate:'Remove Default Location is last in both themes and keeps its confirmation',state:'PASS'});
 await page.emulateMedia({reducedMotion:'reduce'});const transition=await page.locator('#theme').evaluate(el=>getComputedStyle(el).transitionDuration);assert.equal(transition,'0s');
 results.push({gate:'reduced-motion-disables-overlay-transitions',state:'PASS'});
 await writeFile(join(out,'interaction-measurements.json'),JSON.stringify(measurements,null,2));assert.deepEqual(errors,[]);

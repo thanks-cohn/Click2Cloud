@@ -14,6 +14,7 @@ import {createRecorderHost} from '../src/recorder/host.mjs';
 import {exportComplete} from '../src/recorder/export.mjs';
 import {fixtureTarget,fixtureSecret,fixtureSession,localScreenshotWorker} from './fixtures/screenshot-worker.mjs';
 import {createScreenshotBackground} from '../extension/screenshot-background.mjs';
+import {retainedScreenshotOutput,matchScreenshotObject} from '../src/history/screenshot-output.mjs';
 
 const folder=prefix=>({...fixtureTarget,prefix});
 const rule=(destinations,websites=[],active=true)=>({ruleId:crypto.randomUUID(),name:'fixture',revision:1,websites,destinations,active});
@@ -45,6 +46,26 @@ const store=()=>{
  const kept=new Map();
  return {kept,record:async job=>kept.set(job.plan.operationId,structuredClone(job)),read:async id=>structuredClone(kept.get(id))};
 };
+test('History resolves only the selected retained screenshot output and recognizes changed objects',()=>{
+ const plan=makePlan([rule([folder('One/'),{...folder('Other/'),bucketName:'another-bucket'}])]);
+ const outputs=plan.outputs.map(output=>({outputId:output.outputId,state:'confirmed',bytes:png.length,
+  checksum:bytesHash,verification:'direct-r2-get-sha256'}));
+ const row={kind:'screenshot-to-cloud',screenshot:{plan,outputs,captured:{bytes:png.length,sha256:bytesHash}}};
+ const identity={operationId:plan.operationId,outputId:outputs[1].outputId};
+ const result=retainedScreenshotOutput(row,identity);
+ assert.equal(result.target.bucketName,'another-bucket');
+ assert.equal(result.target.prefix,'Other/');
+ assert.equal(result.key,plan.outputs[1].key);
+ assert.equal(result.checksum,bytesHash);
+ assert(matchScreenshotObject(result,{key:result.key,size:String(png.length)}));
+ assert.equal(matchScreenshotObject(result,{key:plan.outputs[0].key,size:png.length}),false);
+ assert.equal(matchScreenshotObject(result,{key:result.key,size:png.length+1}),false);
+ assert.throws(()=>retainedScreenshotOutput(row,{...identity,operationId:crypto.randomUUID()}),{code:'RESULT_NOT_FOUND'});
+ outputs[1].state='blocked';
+ assert.equal(retainedScreenshotOutput(row,identity).confirmed,false);
+ const bad=structuredClone(row);bad.screenshot.plan.outputs[1].key='Different/image.png';
+ assert.throws(()=>retainedScreenshotOutput(bad,identity),{code:'SOURCE_SCOPE_MISMATCH'});
+});
 test('Screenshot R04–R08 and C01–C07 additivity, URL boundaries, OR, cardinality, and exact R2 identities',()=>{
  const google=rule([folder('photos/')],[forSite('domain','Google.COM.'),forSite('host','mail.google.com'),forSite('url',context.url)]);
  const all=rule([folder('general/')]);
