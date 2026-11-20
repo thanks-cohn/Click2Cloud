@@ -135,7 +135,7 @@ try{
     scopeEvidence:'provider-returned',accounts:[{id:target.accountId,name:'Screenshot test account'}]}
   });
  },{target:fixtureTarget,grants,session:fixtureSession});
- const app=await browser.newPage();await app.goto(c2c);
+ let app=await browser.newPage();await app.goto(c2c);
  app.on('pageerror',error=>console.error('App error',error.message));
  app.setDefaultTimeout(8000);
  await app.getByRole('button',{name:'Sign out'}).waitFor();
@@ -472,10 +472,11 @@ try{
   const reload=extensions.locator(`extensions-item#${extensionId} #dev-reload-button`);
   const developerMode=extensions.locator('extensions-toolbar #devMode');
   await developerMode.waitFor();
-  if(await developerMode.getAttribute('aria-pressed')!=='true')await developerMode.click();
+  if(!await reload.isVisible())await developerMode.click();
   await reload.click();
+  app=await browser.newPage();app.setDefaultTimeout(8000);
   await wait(async()=>{
-   await app.reload();
+   await app.goto(c2c);
    return browser.serviceWorkers().some(worker=>worker.url()===workerUrl);
   },'extension responds after Chrome Reload');
   service=await wait(async()=>{
