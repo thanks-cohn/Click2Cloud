@@ -2,6 +2,18 @@
 
 **Owner additions:** November 19, 2026. **Status:** New implementation request, NOT already implemented in the inspected 0.3.20 branch. Read [the code-audited delta-only handoff](NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md). Do not recreate the existing V3+1.1 File API, shortcut registry, Explorer, download ZIP, native save or History systems.
 
+## UI boundary — NO "Screenshot capture" or "Capture & delivery" tab
+
+**Owner correction:** An earlier interactive mockup invented a third navigation tab named **"Screenshot capture"** (also shown as **"Capture & delivery"**) with controls for "Active browser page", "Screenshot using a saved shortcut", "Browser right-click → Screenshot → choose destination", "Triggering shortcut", "Matching destination preview" and "Simulate screenshot and cloud delivery". **This entire third tab/panel was ONLY a demonstration/test harness, NOT a requested product tab, popup, page or workflow step. DO NOT BUILD IT into Click2Cloud.**
+
+The intended *actual* user interface is ONLY:
+1. **More ▾ → Screenshot:** simple **Website/URL → Cloud destination** additive routing form, then Save, then saved rule cards below. **NO shortcut field**, no capture simulation, no triggering-shortcut selector or delivery preview.
+2. **Click a saved card in that Screenshot page:** open ONLY that rule's contextual full editor (website-routing editor for additive website card; shortcut manager for shortcut card). No generic third manager tab.
+3. **File Explorer folder right-click → Screenshot2Here:** quick popup to create a screenshot shortcut bound to the chosen folder or reassign one existing shortcut using a scrollable list. Not the full manager and not a capture.
+4. **Actual user-triggered screenshot:** Press the previously configured supported shortcut (or invoke the existing explicitly requested browser right-click Screenshot action, if implemented). The extension silently matches enabled website rules, captures ONCE, uploads bytes ONCE to the trusted Worker, and the Worker writes to authorized destinations. This is **background execution following a user gesture**, NOT another UI screen. Show compact normal success/partial/failure feedback only as appropriate. Advanced diagnostics and receipts remain available in their established places.
+
+**QA/illustration:** A separate testing harness may simulate a URL and route results for automated tests, but must not be presented as a real navigation tab or shipped as a user-facing "capture and delivery" control. Keep product navigation lean.
+
 ## 1. Entry points and their distinct actions
 
 1. **Browser right-click menu → Screenshot → choose destination**. Display genuine authorized provider/account/bucket/folder locations for a **user-initiated** screenshot; select one exact location and send the captured image **to that one location only**. Optionally include an explicitly distinct **Use matching Screenshot Rules** action for all matching destinations. The location picker must not silently use a previous/default bucket or some other saved destination. **Separate action in Click2Cloud File Explorer: right-click ANY authorized directory → `Screenshot2Here` opens shortcut-to-folder CONFIGURATION, not an immediate capture.** Detailed contract in §2B.
