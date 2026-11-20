@@ -26,6 +26,11 @@ const readinessNames={CLOUDFLARE_READY:'Ready to save',READY:'Ready to save',NOT
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const connectionElement=$('#connection');
 const shelfWindow=chrome.windows?.getCurrent?Promise.resolve().then(()=>chrome.windows.getCurrent()).then(w=>w.id).catch(()=>null):Promise.resolve(null);
+const shelfView=async(method,next)=>{
+ const windowId=await shelfWindow;
+ if(!Number.isInteger(windowId))return null;
+ return chrome.runtime.sendMessage({channel:'shelf-history',method,windowId,view:next});
+};
 const restoreConnection=()=>{if(connectionElement.parentElement!==document.querySelector('aside'))document.querySelector('aside').insertBefore(connectionElement,$('#tree'));};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const debugPreference=createDebugPreference(chrome);let debugMode=false;
@@ -400,7 +405,7 @@ function markCurrentSearchStale(){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){$('#main').innerHTML='<section class="page"><h1>History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function renderExplorer(){
@@ -918,25 +923,29 @@ async function manager(filter='simple',page=0,session=null,message=''){
   const isDepth=filter==='depth';
   const rowLabel=d=>d.label??d.target.prefix.split('/').filter(Boolean).at(-1)??d.target.bucketName;
   const isDefault=d=>!!product.defaultTarget&&targetKey(d.target)===targetKey(product.defaultTarget);
+  const pathLabel=t=>(connection.accounts?.find(account=>account.id===t.accountId)?.name??t.accountId)+' · '+t.bucketName+'/'+t.prefix;
   const rowHtml=(d,i)=>`<div class="dest-row ${d.hidden?'hidden':''}">
-    <strong>${esc(rowLabel(d))}</strong><div class="muted">Cloudflare R2 · ${esc(d.target.accountId+' · '+d.target.bucketName+'/'+d.target.prefix)}</div>
-    ${isDepth?'':`<button data-default="${i}" aria-pressed="${isDefault(d)}" ${isDefault(d)?'class="badge" aria-label="Default destination: '+esc(rowLabel(d))+'"':''}>${isDefault(d)?'Default':'Make Default'}</button>`}
+    <div class="manager-row-name"><strong>${esc(rowLabel(d))}</strong><div class="muted" title="${esc(pathLabel(d.target))}">Cloudflare R2 · ${esc(pathLabel(d.target))}</div></div>
     <div class="controls">
-      <button data-hide="${i}" aria-label="${isDepth?'Change visibility for '+esc(d.target.bucketName):'Change Visibility'}" aria-pressed="${!d.hidden}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>
+      ${isDepth?'':`<button data-default="${i}" aria-pressed="${isDefault(d)}" ${isDefault(d)?'aria-label="Default destination: '+esc(rowLabel(d))+'"':''}>${isDefault(d)?'Default':'Make Default'}</button>`}
       ${isDepth?`<label>Maximum depth <input data-manager-depth="${i}" type="number" min="1" step="1" value="${d.maxDepth}" aria-label="Display depth for ${esc(d.target.bucketName)}"></label>`:
-      `<button data-quick="${i}" aria-pressed="${!!d.quick}">${d.quick?'Quick ✓':'Quick Select'}</button><button data-edit="${i}" aria-label="Edit Menu Title">✎</button>`}
-      <button data-delete="${i}" aria-label="${isDepth?'Remove Depth bucket '+esc(d.target.bucketName):'Remove destination configuration'}">🗑</button>
+       `<button data-quick="${i}" aria-pressed="${!!d.quick}">${d.quick?'Quick ✓':'Quick Select'}</button><button class="manager-icon" data-edit="${i}" aria-label="Edit Menu Title" title="Edit Menu Title">✎</button>`}
+      <button class="manager-icon" data-hide="${i}" aria-label="${isDepth?'Change visibility for '+esc(d.target.bucketName):'Change Visibility'}" aria-pressed="${!d.hidden}" title="Change visibility"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M1 10Q10 -2 19 10Q10 22 1 10Z"/><circle cx="10" cy="10" r="3"/>${d.hidden?'<path d="M2 2L18 18"/>':''}</svg></button>
+      <button class="manager-icon" data-delete="${i}" aria-label="${isDepth?'Remove Depth bucket '+esc(d.target.bucketName):'Remove destination configuration'}" title="Remove destination"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M4 5h12M8 5V3h4v2M6 5l1 12h6l1-12M9 8v6m2-6v6"/></svg></button>
     </div></div>`;
-  dialog('Destinations',`<div class="between"><div class="tabs">${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
-    `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}">${label}</button>`).join('')}</div>
-    <button id="organize" class="circle" aria-label="Organize Right-Click" title="Organize Right-Click">☷</button></div>
+  dialog('Destinations',`<div class="destinations-manager">
+    <p class="manager-purpose muted">Choose where Chrome’s right-click menu saves files.</p>
+    <div class="manager-mode-bar"><div class="tabs" role="group" aria-label="Destination mode">${[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
+     `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}" aria-pressed="${mode===filter}">${label}</button>`).join('')}</div>
+     <button id="organize" aria-label="Organize Right-Click">Organize</button></div>
+    <section class="manager-default"><h3>Default destination</h3><p title="${esc(product.defaultTarget?pathLabel(product.defaultTarget):'')}">${product.defaultTarget?esc(pathLabel(product.defaultTarget)):'No default selected'}</p></section>
     <p class="muted" data-aesthetic-text="destinations.availability-hint">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
-    <p class="wrap-text">${product.defaultTarget?'Default: '+esc(product.defaultTarget.accountId+' · '+product.defaultTarget.bucketName+'/'+product.defaultTarget.prefix):'No default selected'}</p>
-    <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted">No assigned destinations in this filter.</p>'}</div>
+    <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted manager-empty">No destinations in this mode.</p>'}</div>
     <div id="destination-delete-confirmation" class="card" role="group" aria-labelledby="destination-delete-title" hidden></div>
     ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
-    <div class="show-controls">${showInChrome(product.show,'data-manager-show')}</div>
-    ${destinationSetupDisclosure}${saveFeedback}`,`<div class="dialog-foot"><button id="previous" ${!page?'disabled':''}>Previous</button><span>${total?`${page*20+1}–${Math.min(total,page*20+20)} of ${total}`:'0 destinations'}</span><button id="next" ${(page+1)*20>=total?'disabled':''}>Next</button>${saveButton}</div>`);
+    <section class="show-controls manager-chrome">${showInChrome(product.show,'data-manager-show')}</section>
+    ${destinationSetupDisclosure}</div>`,
+    `<div class="dialog-foot manager-footer">${saveFeedback}<nav aria-label="Destination pages"><button id="previous" ${!page?'disabled':''}>Previous</button><span>${total?`${page*20+1}–${Math.min(total,page*20+20)} of ${total}`:'0 destinations'}</span><button id="next" ${(page+1)*20>=total?'disabled':''}>Next</button></nav>${saveButton}</div>`);
   const feedback=$('#destination-save-status');
   feedback.textContent=message||(session.changes.length?'Unsaved changes':'');feedback.hidden=!feedback.textContent;
   const stage=edit=>{
@@ -1129,6 +1138,8 @@ async function bootstrap(){
  const configuration=readWithRetry(()=>refreshState({quiet:true,readTimeout:5000})).catch(error=>{configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};}).finally(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();});
  const session=connections().finally(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();});
  const description=readWithRetry(()=>api('describeCapabilities',{}, {quiet:true,readTimeout:5000})).then(value=>{capabilities=value;}).catch(()=>{});
+ const startingView=viewEpoch;
+ void shelfView('intent').then(intent=>{if(intent?.view==='history'&&viewEpoch===startingView)return show('history');}).catch(()=>{});
  await Promise.allSettled([configuration,session,description]);
  await focusShelf().catch(()=>{});
  await screenshotUI.chooseForCapture().catch(()=>{});
@@ -1188,6 +1199,22 @@ async function downloadEntry(entry){
 
 chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(sender?.id!==chrome.runtime.id)return;
+ if(message?.channel==='shelf-history-show'){
+  const intent=viewEpoch;
+  void shelfWindow.then(async id=>{
+   if(id!==message.windowId||(await shelfView('intent'))?.view!=='history'||intent!==viewEpoch)return;
+   closeDialog();await show('history');
+  }).catch(error=>status(error.message));
+  return;
+ }
+ if(message?.channel==='shelf-history-feedback'){
+  void shelfWindow.then(id=>{if(id===message.windowId){
+   const feedback=$('#action-feedback');
+   feedback.textContent=message.code==='SHELF_CLOSE_UNAVAILABLE'?'Use the Shelf close button in this version of Chrome.':'Chrome could not change the Shelf. Try the shortcut again.';
+   feedback.hidden=false;
+  }}).catch(()=>{});
+  return;
+ }
  if(message?.channel==='screenshot-choose-folder'){
   void shelfWindow.then(id=>{if(id===message.windowId)return screenshotUI.chooseForCapture();}).catch(()=>{});
   return;

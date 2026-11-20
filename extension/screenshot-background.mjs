@@ -3,7 +3,7 @@ import {createScreenshotCapture} from '../src/screenshot/capture.mjs';
 import {createScreenshotRetryCache} from '../src/screenshot/retry-cache.mjs';
 import {chooseScreenshotFolderId,isScreenshotMenuItem,screenshotMenu} from '../src/chrome/screenshot-menu.mjs';
 import {openVisibleTabSource} from '../src/chrome/visible-tab-screenshot.mjs';
-import {captureHistoryContext} from '../src/history/model.mjs';
+import {captureHistoryContext,safeHistoryURL} from '../src/history/model.mjs';
 
 const requestKey=windowId=>'screenshot-folder-request:'+windowId;
 const folderRequestLifetime=5*60*1000;
@@ -25,7 +25,8 @@ export function createScreenshotBackground({chrome,attention,transport,current,f
   record:job=>current.recordRemoteResult({
    operationId:job.plan.operationId,kind:'screenshot-to-cloud',state:job.state,code:job.code,
    attemptedFilename:'Screenshot',bytes:job.captured?.bytes,historyContext:captureHistoryContext({pageUrl:job.plan.context?.url}),
-   screenshot:job
+   screenshot:{...job,plan:{...job.plan,context:job.plan.context?
+    {...job.plan.context,url:safeHistoryURL(job.plan.context.url)}:null}}
   }),
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},
   async notify(job,{recorded}){
@@ -72,14 +73,14 @@ export function createScreenshotBackground({chrome,attention,transport,current,f
   })().catch(()=>{});
   return true;
  }
- async function request(method,params={}){
+ async function request(method,params={},sender){
   if(method==='read')return rules.read();
   if(['save','toggle','delete','dedup'].includes(method))return rules.change(method,params);
   if(method==='retry'&&captureUuid(params.operationId))return runner.retry(params.operationId);
-  if(method==='folder-request')return folderRequest(params.windowId);
+  if(method==='folder-request')return sender?.tab?null:folderRequest(params.windowId);
   if(method==='choose-folder'){
    const windowId=params.windowId;
-   if(!Number.isInteger(windowId)||pendingWindows.has(windowId))throw screenshotError('SCREENSHOT_FOLDER_REQUEST_EXPIRED');
+   if(sender?.tab||!Number.isInteger(windowId)||pendingWindows.has(windowId))throw screenshotError('SCREENSHOT_FOLDER_REQUEST_EXPIRED');
    pendingWindows.add(windowId);
    try{
     const pending=await folderRequest(windowId);

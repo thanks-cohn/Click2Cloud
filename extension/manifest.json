@@ -42,6 +42,10 @@
     "screenshot.capture.ctrl-shift-y": {
       "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "MacCtrl+Shift+Y" },
       "description": "Capture a screenshot to cloud (second shortcut)"
+    },
+    "shelf.history.toggle": {
+      "suggested_key": { "default": "Alt+Shift+H" },
+      "description": "Open or close Shelf History"
     }
   },
   "side_panel": {

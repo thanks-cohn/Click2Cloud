@@ -201,3 +201,36 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 .screenshot-pagination{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .screenshot-receipt-outputs{padding-inline-start:20px;max-height:300px;overflow:auto;overflow-wrap:anywhere}
 .screenshot-receipt-outputs li{margin-block:8px}
+
+#dialog:has(.destinations-manager){width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+#dialog-content:has(.destinations-manager){max-height:calc(100dvh - 26px)}
+#dialog-content:has(.destinations-manager) :is(.dialog-head,.manager-footer){flex:none}
+#dialog-content:has(.destinations-manager) .dialog-body{min-height:0}
+.manager-purpose{margin:0 0 12px}
+.manager-mode-bar,.manager-footer nav{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.manager-mode-bar{justify-content:space-between;margin-bottom:14px}
+.manager-mode-bar .tabs{margin:0;gap:0;flex:0 1 auto;padding:3px;background:var(--bg);border:1px solid var(--line);border-radius:var(--a-geometry-control,6px)}
+.manager-mode-bar .tabs button{background:transparent;border-color:transparent;box-shadow:none}
+.manager-mode-bar .tabs button[aria-pressed=true]{background:var(--selected);border-color:var(--line);color:var(--text)}
+.manager-default,.manager-chrome{margin-block:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--a-geometry-surface,6px)}
+.manager-default h3{font-size:1em;margin:0}
+.manager-default p{margin:3px 0 0;overflow-wrap:anywhere}
+.destinations-manager #dest-list{display:grid;gap:6px;margin-block:8px}
+.destinations-manager .dest-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:10px;border:1px solid var(--line);border-radius:var(--a-geometry-surface,6px)}
+.destinations-manager .dest-row .controls{justify-content:end;align-items:center;gap:5px;margin:0}
+.manager-row-name strong{display:block;margin-bottom:3px}
+.manager-row-name .muted{font-size:.85em}
+.destinations-manager .dest-row button{min-height:32px}
+.destinations-manager .dest-row button.manager-icon{display:inline-grid;place-items:center;width:32px;padding:0}
+.destinations-manager .dest-row #destination-delete-confirmation{grid-column:1/-1;margin:6px 0 0}
+.manager-chrome{justify-content:flex-start}
+.manager-chrome h3,.manager-footer p{margin:0}
+.manager-chrome .show-mode-checkboxes{flex-wrap:wrap}
+.manager-footer{justify-content:space-between}
+.manager-footer p{flex:0 0 100%;overflow-wrap:anywhere}
+.manager-footer button.primary{min-width:78px;margin-inline-start:auto}
+.manager-empty{margin:0;padding:12px 0}
+@media(max-width:600px){
+ .destinations-manager .dest-row{grid-template-columns:minmax(0,1fr)}
+ .destinations-manager .dest-row .controls{justify-content:start}
+}

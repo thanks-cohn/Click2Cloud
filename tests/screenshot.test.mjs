@@ -137,6 +137,17 @@ test('Screenshot W01/W02/W05/W07 actual local workerd one image, distinct R2 obj
    const saved=await bucket.get(job.plan.outputs[index].key);
    assert.deepEqual(Buffer.from(await saved.arrayBuffer()),png);
   }
+  const repeated=Array.from({length:100},()=>rule([folder('Many/')]));
+  for(const dedup of [true,false]){
+   const count=dedup?1:100,requests=bodies.length;
+   const repeatedRunner=createScreenshotCapture({chrome:browser.chrome,rules:{read:async()=>({revision:2,dedup,rules:repeated})},
+    transport,retryCache:cacheFixture(),...receipts});
+   const capture=await repeatedRunner.start(screenshotCommands[1],browser.tab);
+   assert.equal(capture.outputs.filter(output=>output.state==='confirmed').length,count);
+   assert.equal(new Set(capture.plan.outputs.map(output=>output.key)).size,count);
+   assert.deepEqual(bodies.slice(requests),['/screenshot','/screenshot/verify']);
+  }
+  assert.equal((await bucket.list({prefix:'Many/'})).objects.length,101);
   console.log('Screenshot workerd receipt '+JSON.stringify({captureId:job.plan.captureId,ruleIds:job.plan.matchedRuleIds,
    physicalFiles:listed.objects.length,outputs:job.outputs.map(({outputId,state,verification})=>({outputId,state,verification}))}));
  }finally{await worker.dispose();}

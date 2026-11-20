@@ -918,8 +918,16 @@ and SECURE ZIPs. A user-approved `recoverCloudflareDestination` request with
 `screenshotUpgrade` updates an existing scoped Worker using the same setup
 ledger and readback. It requires explicit authorization and preserves scope.
 
-## Explorer directory URLs
+The separate Shelf command opens or selects History in the existing window’s
+extension panel, then closes that panel on the next press from History.
+Actual Chrome assignments appear in Settings. Browser compatibility and
+Cloudflare proof are separate acceptance checks. [Screenshot test matrix](../../screenshot-logic-final/TEST_MATRIX.md)
+
+## Explorer directory URLs and Destinations Manager
 
 The two directory URL exports use `listDirectoryObjects` with immediate scope
 and `getPublicUrls` for the exact bucket. Both check immediate file membership
-independently. Grouped ZIP Download continues to use recursive inventory.
+independently. Grouped ZIP Download continues to use recursive inventory. The
+Destinations Manager groups its draft controls and status around the existing
+`commitConfigChange` Save. Its 20-row paging, confirmation and native ACK
+still use the same manager and registrar code.

@@ -1,3 +1,5 @@
+import {shelfHistoryCommand} from '../src/chrome/provider-panel.mjs';
+import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
 import {eventChord, defaultBindings, shortcutStorageKey, uiCommands} from '../src/api/shortcuts.mjs';
 
 export function installShortcuts({invoke, context, runUI, runAPI, updateReferences}) {
@@ -35,8 +37,17 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
     mount(parent) {
       const card = document.createElement('section');
       card.className = 'card';
-      card.innerHTML = '<h2>Keyboard Shortcuts</h2><p>Shortcuts work while Click2Cloud has focus.</p><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p>';
+      card.innerHTML = '<h2>Keyboard Shortcuts</h2><div class="settings-row shortcut-row"><span>Shelf ↔ History</span><kbd data-history-key>Checking Chrome…</kbd><button data-change-history type="button">Change shortcut</button></div><p data-chrome-shortcut-status role="status"></p><p>Explorer shortcuts work while Click2Cloud has focus.</p><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p>';
       parent.append(card);
+      const historyKey=card.querySelector('[data-history-key]'),chromeStatus=card.querySelector('[data-chrome-shortcut-status]');
+      async function readHistoryKey(){
+        try{historyKey.textContent=(await chromeCommandBindings(chrome)).get(shelfHistoryCommand)??'Unassigned';}
+        catch{historyKey.textContent='Unavailable';}
+      }
+      card.querySelector('[data-change-history]').onclick=()=>void openChromeShortcuts(chrome).catch(()=>{chromeStatus.textContent='Open chrome://extensions/shortcuts in Chrome.';});
+      void readHistoryKey();
+      const refreshOnFocus=()=>{if(card.isConnected)void readHistoryKey();else window.removeEventListener('focus',refreshOnFocus);};
+      window.addEventListener('focus',refreshOnFocus);
       const rows = card.querySelector('.shortcut-rows'), feedback = card.querySelector('.shortcut-feedback');
       let capture, busy = false, restoreFocus;
       const button = (label, action, name = label) => {

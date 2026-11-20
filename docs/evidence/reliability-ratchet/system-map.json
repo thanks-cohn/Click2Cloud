@@ -1383,6 +1383,9 @@
             },
             "authorizeSetup": {
               "type": "boolean"
+            },
+            "screenshotUpgrade": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -9443,6 +9446,9 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 8192
+            },
+            "immediate": {
+              "type": "boolean"
             }
           },
           "required": [

@@ -53,7 +53,12 @@ export function installExplorerLayout({read,save,onResize}){
   }
  });
 
- function openMore(){if(overflow.hidden){overflow.hidden=false;overflow.showPopover?.();}more.setAttribute('aria-expanded','true');positionMore();overflow.querySelector('input:not(:disabled),button:not(:disabled),select:not(:disabled),[tabindex="0"]')?.focus({preventScroll:true});}
+ function openMore(){
+  if(overflow.hidden){overflow.hidden=false;overflow.showPopover?.();}
+  more.setAttribute('aria-expanded','true');positionMore();
+  const controls=[...overflow.querySelectorAll('input:not(:disabled),button:not(:disabled),select:not(:disabled),[tabindex="0"]')];
+  (controls.find(control=>!search.contains(control))??controls[0])?.focus({preventScroll:true});
+ }
 
  const place=(parent,children)=>{if(children.length===parent.children.length&&children.every((n,i)=>parent.children[i]===n))return;parent.replaceChildren(...children);};
  function layout(){frame=0;const focused=toolbar.contains(document.activeElement)||overflow.contains(document.activeElement)?document.activeElement:null;if(shell.dataset.view!=='explorer')return;

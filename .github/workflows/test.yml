@@ -17,6 +17,12 @@ jobs:
       - run: npm run test:focused
       - run: node --test right2cloud-module/tests/module.test.mjs
       - run: npm run build:extension
+      - name: Upload unpacked extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-unpacked
+          path: dist/click2cloud
+          if-no-files-found: error
       # Real IndexedDB crash/recovery guard in the existing job. No cloud credentials.
       - name: CURRENT persistence and native-authority regression
         env:

@@ -10,7 +10,7 @@ import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
 import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {attachFilenameSearch} from '../src/explorer/search-file-api.mjs';
-import {createShelfAttention} from '../src/chrome/provider-panel.mjs';
+import {createShelfAttention,createShelfHistoryToggle,shelfHistoryCommand} from '../src/chrome/provider-panel.mjs';
 import {createDailyBadge} from '../src/chrome/daily-badge.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
@@ -46,7 +46,10 @@ const diagnostics=createDiagnostics({epoch:workerEpoch,build:BUILD_INFO.revision
 let connectionObservation=null,attentionPreference=null;
 const dailyBadge=createDailyBadge({chrome,
  readHistory:()=>current.readRemoteResults(),readPreferences:()=>current.readHistoryPreferences()});
-const attention=createShelfAttention({chrome,preference:()=>attentionPreference,notify:()=>{void dailyBadge.refresh();}});
+const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
+ void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
+}});
+const attention=createShelfAttention({chrome,preference:()=>attentionPreference,onOpened:shelfHistory.opened,notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},engine,revoking=false;
 function assertConnected(){if(revoking)throw Object.assign(Error(),{code:'AUTHORIZATION_REVOKED'});}
@@ -279,7 +282,10 @@ const screenshots=createScreenshotBackground({chrome,attention,transport:remote,
   return nativeRegistration?.state==='acknowledged'&&nativeRegistration.appliedGeneration===nativeRegistration.desired?.generation
    ?nativeRegistration.desired:null;
  }});
-chrome.commands?.onCommand?.addListener((command,tab)=>screenshots.onCommand(command,tab));
+chrome.commands?.onCommand?.addListener((command,tab)=>{
+ if(command===shelfHistoryCommand)shelfHistory.command(tab);
+ else screenshots.onCommand(command,tab);
+});
 const registrar=createChromeRegistrar({chrome,registerExtras:screenshots.registerExtras,extraClick:screenshots.onNativeClick,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
 },beforeClick:async info=>{
     if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
@@ -369,9 +375,14 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));
     return true;
   }
+  if(message?.channel==='shelf-history'){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond(null);return false;}
+    shelfHistory.request(message.method,message.windowId,message.view,sender).then(respond,()=>respond(null));
+    return true;
+  }
   if(message?.channel==='screenshot'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({state:'blocked',code:'UNTRUSTED_APP_SENDER'});return false;}
-    screenshots.request(message.method,message.params).then(data=>respond({state:'completed',data}),error=>
+    screenshots.request(message.method,message.params,sender).then(data=>respond({state:'completed',data}),error=>
      respond({state:'failed',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'SCREENSHOT_REQUEST_FAILED'}));
     return true;
   }

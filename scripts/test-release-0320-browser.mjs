@@ -41,7 +41,16 @@ try{
         for(const listener of events)listener(Object.fromEntries(Object.entries(update).map(([key,value])=>[key,{oldValue:data[key],newValue:value}])),'local');
       }
     };
-    globalThis.chrome={runtime:{id:'release-fixture',onMessage:{addListener:fn=>messages.add(fn)},sendMessage:async message=>(await host).invoke({version:message.version,method:message.method,params:message.params})},
+    globalThis.chrome={runtime:{id:'release-fixture',onMessage:{addListener:fn=>messages.add(fn)},sendMessage:async message=>{
+      if(message.method==='getPublicUrls'&&window.fixturePublicDomains){
+        const {objectUrls}=await import('/src/explorer/object-exports.mjs');
+        const {source,key}=message.params,domains=window.fixturePublicDomains;
+        return {state:'completed',data:{domains,domainCheckComplete:true,...(key?{file:objectUrls(source,key,domains)}:{})}};
+      }
+      if(message.method==='listDirectoryObjects'&&message.params.immediate&&window.fixtureDirectoryLinks)
+        return {state:'completed',data:{entries:window.fixtureDirectoryLinks.map(key=>({key})),nextCursor:null}};
+      return (await host).invoke({version:message.version,method:message.method,params:message.params});
+    }},
       storage:{local:storage,onChanged:{addListener:fn=>events.add(fn)}}};
   },{png});
   const origin='http://127.0.0.1:'+server.address().port;
@@ -179,6 +188,44 @@ try{
   await page.locator('.download-job summary').click();
   await page.getByText(/^RRReceipt-.*\.json$/).waitFor();
   assert.equal(await page.getByText('UNCONFIRMED_AT_RECEIPT_CREATION').count(),0);
+  await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+  await page.evaluate(()=>{
+    window.fixturePublicDomains=['assets.example','pub-verified.r2.dev'];
+    window.fixtureDirectoryLinks=['projects/2026.png','projects/report.cbz','projects/奇妙.pdf','projects/nested/skip.jpg','projects/'];
+  });
+  await page.context().grantPermissions(['clipboard-read','clipboard-write'],{origin});
+  await page.getByRole('row').filter({hasText:'renamed.png'}).click({button:'right'});
+  await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
+  const getUrl=page.getByRole('dialog');
+  await getUrl.getByRole('button',{name:/Development URL https/}).waitFor();
+  assert.deepEqual(await getUrl.locator('.url-domain-row').evaluate(row=>[...row.children].map(el=>el.tagName==='INPUT'?'input':el.textContent)),['input','Submit','Copy All']);
+  await getUrl.getByRole('button',{name:'Copy All'}).click();
+  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'https://assets.example/renamed.png\nhttps://pub-verified.r2.dev/renamed.png');
+  await getUrl.getByRole('button',{name:/Development URL https/}).press('Space');
+  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'https://pub-verified.r2.dev/renamed.png');
+  await getUrl.getByRole('button',{name:'Close',exact:true}).click();
+  await folder.click({button:'right'});
+  await page.getByRole('menuitem',{name:'Get URL',exact:true}).click();
+  const exportUrl=async()=>{
+    const [download]=await Promise.all([page.waitForEvent('download'),getUrl.getByRole('button',{name:'Export',exact:true}).click()]);
+    return await readFile(await download.path(),'utf8');
+  };
+  const simple=(await exportUrl()).trimEnd().split('\n');
+  assert.equal(simple.length,3);assert(simple.every(url=>url.startsWith('https://assets.example/projects/')));
+  assert(simple.some(url=>url.endsWith('%E5%A5%87%E5%A6%99.pdf')));
+  await getUrl.getByRole('radio',{name:'Get All URLs for Directory'}).check();
+  assert.deepEqual(JSON.parse(await exportUrl()).counts,{files:3,urls:6,multiUrlFiles:3});
+  await getUrl.getByRole('radio',{name:'One Link per Asset — Simple Text File'}).check();
+  await getUrl.getByRole('checkbox',{name:'All files'}).uncheck();
+  assert(await getUrl.getByRole('button',{name:'Export',exact:true}).isDisabled());
+  await getUrl.getByRole('checkbox',{name:'Images'}).check();
+  await page.evaluate(()=>window.fixturePublicDomains=['pub-verified.r2.dev']);
+  await getUrl.getByRole('button',{name:'Export',exact:true}).click();
+  await getUrl.getByText('Only developmental URLs exist. Add domain?').waitFor();
+  await getUrl.getByRole('checkbox',{name:'Use non-developmental URLs where possible'}).uncheck();
+  assert.equal((await exportUrl()).trim(),'https://pub-verified.r2.dev/projects/2026.png');
+  await getUrl.getByRole('button',{name:'Close',exact:true}).click();
+  gates.push('Get URL copies verified development cards and exports three immediate files as three or six links');
   gates.push('Folder download delivers a ZIP, and Debug Downloads shows only its receipt filename');
   assert.deepEqual(pageErrors,[]);
   console.log(JSON.stringify({passed:gates.length,gates},null,2));
