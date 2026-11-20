@@ -200,3 +200,25 @@ Screenshot  ·  Saved and verified
 10. With 1–2 domains, URL section remains compact without a redundant scrollbar. With 20 or 100 active URLs, all entries remain reachable in a vertically scrollable max-height URLs region, with working full-value Copy/Open and keyboard/mousewheel scrolling; the History card height stays bounded and no other History entries change layout.
 
 **IMPORTANT product constraint:** public r2.dev access makes the entire selected bucket accessible over the internet (where keys are known), and Cloudflare says r2.dev is rate-limited/development-only. Disclose that consequence clearly in the one user-initiated confirmation, never turn it on automatically just to render an image thumbnail. Authenticated thumbnail previews continue to work for PRIVATE buckets.
+
+---
+
+## G. Release Ctrl+Shift+F8 — owner instruction (November 20, 2026)
+
+**User wants Ctrl+Shift+F8 FREE/UNASSIGNED, not intercepted by Click2Cloud.** Keep `Ctrl+Shift+F7` for the Explorer filename-search shortcut.
+
+The current code has different commands (do not conflate their functionality):
+- `src/api/shortcuts.mjs` declares `explorer.toggleToolbarRows` → **Ctrl+Shift+F8** (toggles Explorer toolbar between one/two rows).
+- Same file declares `explorer.focusSearch` → **Ctrl+Shift+F7** (focuses filename search).
+- `extension/shortcut-settings.mjs` renders bindings from this command catalog; `extension/app.mjs` dispatches the corresponding shortcuts; `extension/explorer-layout.mjs` supplies `explorer.toggleToolbarRows` and exposes the toolbar splitter/row resize control.
+
+**Implement on this branch:**
+1. Remove the `Ctrl+Shift+F8` default keyboard binding and **retire the dedicated `explorer.toggleToolbarRows` keyboard command from the active shortcuts catalog**. Do not reassign the toolbar toggle to another key automatically. Do not keep a hidden keyboard listener that still intercepts Ctrl+Shift+F8. This chord becomes available for the browser, other applications, or a future manual user assignment.
+2. Keep the toolbar row count / resize feature available through its normal mouse/pointer and keyboard-accessible UI control. Removing F8 must NOT remove toolbar layout settings, splitter dragging, or the ability to choose the row count. Do not break Explorer toolbar rendering.
+3. Keep `explorer.focusSearch` **Ctrl+Shift+F7** enabled, plus `Ctrl+Shift+F9` panel-split reset and existing screenshot shortcuts. Do not change their command IDs, meanings, or user-selected settings.
+4. Handle existing stored shortcut preferences: if `commandShortcutBindings` contains a historical override for `explorer.toggleToolbarRows`, it must no longer activate; loading/resetting settings must not resurrect it. Prefer an additive migration or catalog filtering that preserves remaining valid overrides and user custom key mappings. In Settings → Keyboard Shortcuts remove the obsolete Toggle toolbar rows shortcut row, and update any tooltips, `aria-keyshortcuts`, help text, and docs that still claim F8 is in use.
+5. **Release** means that pressing Ctrl+Shift+F8 while Click2Cloud Explorer has focus must not call its toolbar-toggle command, preventDefault(), change toolbar row count, or claim the chord. The chord itself should not be globally marked reserved if you want it available for future customization.
+
+**Acceptance tests:** Ctrl+Shift+F8 is a no-op in the extension even with historical saved overrides; the one/two-row toolbar UI still works; F7 focuses Search; F9 still resets panel split; Alt+Q and Ctrl+Shift+Y screenshot behavior remains unchanged; all remaining shortcut settings persist across reloads and reset defaults correctly; no impact to R2 upload/History/URLs/themes.
+
+This change is part of the SAME experimental branch, not a reason to rewrite the shortcut subsystem or the save engine.
