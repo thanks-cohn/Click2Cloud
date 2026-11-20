@@ -48,6 +48,7 @@
       "description": "Open or close Shelf History"
     },
     "shelf.explorer.search": {
+      "suggested_key": { "default": "Alt+Shift+F" },
       "description": "Open File Explorer and focus filename search"
     }
   },
