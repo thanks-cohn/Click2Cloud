@@ -374,3 +374,41 @@ MANDATORY TESTS:
 
 Official endpoint documentation: https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/domains/subresources/managed/methods/update/
 REDOWN reference documentation: thanks-cohn/REDOWN docs/explorer/GET_URL_AND_STATUS.md (section "Enable public URL from the URL menu").
+
+---
+
+## L. Ctrl+Shift+F9 — configurable divider cycling (owner-confirmed)
+
+Replace reset-only behavior for the File Explorer vertical pane divider with a repeating cycle whenever Ctrl+Shift+F9 is pressed while Explorer is focused.
+
+- Default BOTH SIDES: Center 50% → far left 0% → Center 50% → far right 100% → Center 50% → far left 0% ... forever.
+- LEFT ONLY: Center 50% → far left 0% → Center 50% → far left 0% ... forever.
+- RIGHT ONLY: Center 50% → far right 100% → Center 50% → far right 100% ... forever.
+- Expose a three-choice Settings preference named Ctrl+Shift+F9 divider cycle with Alternate left/right (default), Left only, Right only. Persist it across Chrome restarts; do not overwrite the saved physical divider position merely because the user changes the mode.
+- On initial activation from an arbitrary manually dragged divider position other than the center/extreme known to the cycle, reset to center, then follow the chosen pattern. If already centered, the first press should go to the next extreme rather than wasting a press on an unchanged center. Always return to center between extremes. If manually dragged after cycling, reset progression predictably.
+- Existing extension/explorer-layout.mjs uses split percentages 0 (folder tree collapsed), 50 (center), 100 (file area collapsed). Use these real semantics, not 4%/96% approximations. Reuse existing changeLayout('split',value), persistence, ARIA/inert handling, and current layout architecture. The shortcut must work even after either pane collapses and must return to center next press.
+- Preserve manual splitter dragging, keyboard separator control, double click to center, other UI controls, preferences, and folder listings.
+- Keep Ctrl+Shift+F9's existing stable command ID explorer.resetPanelSplit and default chord. Change only the display label to 'Cycle Explorer divider' or equivalent truthful wording. Do not restore the retired Ctrl+Shift+F8 command.
+- Tests: assert at least 12 consecutive presses in each of the three modes, manual drag between presses, collapse at both extremes, mode changes, persistence across reload, and no File Explorer rendering/toolbar/save side effects.
+
+## M. Ctrl+Shift+F7 — ONE KEY from ANY CHROME WEBSITE opens File Explorer AND search
+
+OWNER INTENT: The user can be reading ANY ordinary webpage in Chrome, without Click2Cloud already open or focused, press Ctrl+Shift+F7 ONCE, and Click2Cloud's Shelf/side panel opens directly to File Explorer, its filename search field pops OUT, receives keyboard focus, and is immediately ready for typing. This is not just 'focus search inside an already opened Explorer'! Pressing F7 while the Shelf is already open should switch to Explorer and expand/focus search again. Do NOT replace the history shortcut Alt+Shift+H or modify screenshot shortcuts. Pressing Enter must NOT hide filename search; only Escape or its X should dismiss it, per earlier search UX contract.
+
+Source audit:
+- Current src/api/shortcuts.mjs declares explorer.focusSearch Ctrl+Shift+F7 as an extension-INTERNAL UI command with context:'explorer' and requires:'activeDirectory'.
+- Current extension/shortcut-settings.mjs listens for keydown inside the extension document, not the active website. It cannot trigger when the extension Shelf is closed or another Chrome website has keyboard focus.
+- Current extension/explorer-layout.mjs has focusSearch() logic, including a pinned pop-out search panel. Reuse it rather than creating an unrelated second search bar.
+- Current extension/background.mjs routes Chrome commands via chrome.commands.onCommand for history and the screenshot commands. Its shelfHistory state/sidePanel infrastructure and extension/app.mjs's show('explorer') should be reused for startup and view readiness.
+
+Required sequence: user keyboard shortcut event in Chrome → trusted extension action/open Shelf (or bring existing Shelf to front) → select File Explorer view → await Explorer initialization, restored authorized folder and search component readiness → run current pop-out focusSearch() on the actual #filename-search input → keyboard focus placed there. No user need to first click Click2Cloud, change views, or click Search.
+Do NOT block F7 merely because context.view != explorer or activeDirectory is currently false; opening the Explorer and showing/focusing its search is the point. If no account or bucket is authorized, show the Explorer connection/choose-location status accurately and preserve a ready search UX when a directory becomes available. Do not route the shortcut to History.
+Use one persistent/sequence-scoped request intent to survive MV3 service-worker cold boot and sidePanel startup. Avoid race conditions where a delayed History intent or previous navigation steals focus; repeated presses while opening should deduplicate, not flicker/close the Shelf. Preserve app restore behavior, access boundaries, and Chrome's user-gesture requirements for sidePanel.open(). Calling sidePanel.open must occur within a valid user-triggered command context, not after long awaited reads. No URL/tab scraping or webpage content access is needed.
+
+IMPORTANT CHROME API FEASIBILITY GATE: Official Chrome commands documentation currently lists letters, digits, navigation and media keys, but NOT function keys F1–F12 as supported suggested_key values. Therefore DO NOT blindly put Ctrl+Shift+F7 into extension/manifest.json and claim success: that could make the extension fail manifest validation. First confirm with the actual target installed Chrome version whether that exact chord can be registered by chrome.commands and is returned as active by chrome.commands.getAll(). Chrome can also reject conflicting shortcuts or restrict built-in browser shortcuts. If F7 is unsupported as a native Chrome-wide command, preserve in-Shelf F7 behavior and the new open-Explorer/focus-search command action, expose a Chrome-supported alternate command binding as an explicitly documented fallback that the owner can set in chrome://extensions/shortcuts; never silently substitute a different key or promise that exact F7 works everywhere. Do not request blanket permission or inject always-on content scripts across every site solely as a hidden workaround. Report the exact observed Chrome limitation and a precise user choice for binding.
+
+Chrome 'in browser' shortcut means any normal Chrome tab while Chrome has focus, NOT system-global across other desktop applications. Do not set global:true automatically. Use real Chrome keyboard command integration rather than page-specific keydown listeners; no prompts/permissions needed merely to search local Cloudflare folder names.
+
+Acceptance: start with Shelf closed and focus on ordinary HTTPS websites (at least three unrelated domains), press requested F7 chord where Chrome supports it or supported configured fallback where it does not; Shelf opens directly to Explorer, pop-out search visible and focused, ready for typing; also works from Shelf on History/Remotes/Settings and with Shelf already on Explorer; Escape/X close, Enter does not; Alt+Shift+H still toggles History independently. Test Chrome cold boot/MV3 restart, permission not connected, delay races, rapid repeats, and restoration, and report exact active Chrome binding in deliverable. Do not merely test in-app keyboard simulation.
+
+This feature and L are required in the SAME experimental implementation, test, push, build deliverable.
