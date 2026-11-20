@@ -30,6 +30,42 @@
 
 **Required proof matrix:** TEN distinct enabled matching rules (e.g., multiple same-shortcut shortcut cards AND matching website-only cards) pointing to ONE directory: ON = one capture, one browser upload, **ONE R2 file**; OFF = one capture, one upload, **TEN distinct R2 objects** with separate rule-attributed receipts. Each shortcut card's matching OR website patterns count once. Two active shortcut cards with same keys are allowed and both contribute. With three distinct authorized directories, ON yields 3 files; OFF yields one object for each matching rule→folder association. Partial failures and retries preserve output intent identity.
 
+## FOUR ARCHITECTURAL SAFEGUARDS — APPROVED NOV 20, 2026
+
+**Binding for Codex; not yet implemented.** Keep the original additive model: multiple ACTIVE screenshot cards may subscribe to the same keyboard shortcut, and ALL matching shortcut-card destinations and matching website-only rules contribute. One user signal means ONE screenshot capture and ONE browser-to-Worker image upload. There is no Exclusive Save, priority winner or forced shortcut takeover. The global setting Single file per screenshot per directory is ON by default and applies only to THIS capture.
+
+### 1. One central signal dispatcher
+- Create ONE screenshot command-event entrypoint, not one listener/capture call per saved rule. One actual Chrome command emits one internal screenshot signal. Rule cards subscribe to signal IDs; one shortcut can have unlimited rule subscribers without adding separate browser commands for every card.
+- Preserve the current src/api/shortcuts.mjs uniqueness check between DIFFERENT commands. It rejects duplicate command key bindings today. Do not mistakenly use that one-to-one bindings map as the rule-card subscription table. Put many rule IDs under one supported screenshot signal, and keep collisions with unrelated commands blocked.
+- Current extension/manifest.json lacks a commands declaration. Browser-wide keys require real manifest-declared Chrome commands and genuine Chrome assignment, verified using chrome.commands.getAll(). Unlimited rule listeners do not grant unlimited arbitrary browser-global shortcuts. Do not claim keys entered into the app are registered when they are not.
+- Assign a unique signalId to each intentionally distinct keypress. Coalesce retries of the SAME event only; do not use a time-based debounce that suppresses two separate rapid keypresses. Website-only rules cannot trigger captures without an eligible screenshot action.
+- Browser right-click Screenshot to a specific folder remains a distinct one-off single-target action, not an implicit additive shortcut signal.
+
+### 2. Immutable capture plan
+- At trigger, snapshot the command/signal, trusted active tab ID, window ID, URL and navigation identity, all matching rule IDs and their exact authorized folder targets, the dedup setting and rule configuration version. OR website conditions within one card make that card contribute only once.
+- Validate matching and folder authority before sending screenshot bytes. Freeze the planned capture and destinations: edits, disables, changes to URL scope, shortcut or dedup setting during flight may affect only a LATER capture, never this one.
+- chrome.tabs.captureVisibleTab(windowId) captures the window's ACTIVE tab, not a specific tab ID. Verify the active tab/window/navigation immediately before capture and again immediately afterward. If the identity is uncertain or the user switches tabs, fail safely without uploading potentially wrong-page pixels.
+- Never silently substitute a different bucket/folder for a revoked or unauthorized destination; allow separately valid planned outputs to complete with truthful PARTIAL status.
+
+### 3. Unique capture and output IDs
+- Distinguish signalId (keypress event), captureId (one image for that signal), operationId/jobId (one Worker fan-out job), ruleId (saved card identity), and outputId (one planned physical R2 object). NEW keypress means NEW captureId even when pixels are identical. RETRY means SAME captureId and SAME outputId/key.
+- With directory-dedup ON: output identity is deterministically tied to captureId + canonicalDirectoryId; receipt lists ALL contributing rule IDs. With OFF: output identity is deterministically tied to captureId + ruleId + canonicalDirectoryId (and a stable ordinal only if an explicit separate intent exists). Multiple matching website conditions in ONE card count ONCE.
+- Use durable output claims/journals with idempotency and retry verification so response loss, MV3 restarts, partial Worker completion or repeated requests cannot create accidental duplicate objects. Retry failed or uncertain outputs only; preserve successful ones. Do not re-capture and call it a retry.
+- Report per-output attempted, verified, failed, unknown and skipped states, contributing rules and verification method; Worker acceptance (including HTTP 202) is not proof of stored R2 bytes.
+
+### 4. Canonical directory identity
+- Define one pure provider-aware destination identity helper shared by the planner and backend validation: authorized provider + immutable connection/account + bucket/container + EXACT provider-canonical directory prefix. Never deduplicate by folder display label alone.
+- R2 keys/prefixes can be case-sensitive; do not blindly lowercase key paths, decode arbitrary percent escapes, normalize Unicode into different object keys, or collapse meaningful path segments. Equate only representations the provider guarantees to be the same directory. Validate root, prefix boundaries, trailing delimiter, Unicode and malformed/traversal cases.
+- ON means one NEW object per unique directory PER CAPTURE, not once per directory forever. OFF means one separate NEW object per distinct matching rule-to-directory association. Same folder labels in different accounts/buckets must never collapse.
+
+### 5. Worker and tests for the four safeguards
+- Existing src/cloudflare/worker.mjs authenticates one deployment-bound account/bucket/prefix and right2cloud-module/src/cloudflare-worker.mjs has a single-target writer. Extend the EXISTING trusted Worker narrowly for screenshot-only, same-bucket multiple-prefix authorized fan-out first. Verify every target server-side. Cross-bucket/account is not operational unless separately bound, authorized and tested.
+- One captured PNG can be buffered once under an explicit screenshot size budget for fan-out; do not attempt to consume a one-shot ReadableStream repeatedly or reupload once from the browser per destination. Bound CPU, Worker memory, concurrency and operation lifetime.
+- Required matrix: zero matching shortcut rules => zero captures; 100 same-shortcut matching rules => one capture/upload; 10 rules to one folder => ON one object/OFF ten objects; 3 distinct folders => ON three objects; two OR website conditions inside same card => one rule claim; two real keypresses => two new captures; retry same output => no new object; mid-flight edit => unchanged plan; tab/window changes => no wrong-tab upload; same display folder name in different accounts => different identities; unauthorized output => rejected with truthful partial/failed receipt.
+- Preserve current Simple/Narrow/Depth save engines and shared diagnostic recorder. Add module tests for pure matcher, directory identity, ID and planning, plus browser-level event integration and real disposable R2 proof only when available.
+
+---
+
 ## FINAL OWNER DECISION — REMOVE EXCLUSIVE SAVE COMPLETELY (Nov 20, 2026)
 
 **There is NO Exclusive Save switch, mode, designated exclusive folder, conflict resolution, automatic rule suppression, priority/winner, state stack or restoration feature in Screenshot Rules.** Remove its controls, old tests, documents and dispatch logic. Preserve only the ordinary per-card **Active ON/OFF** switch, which affects THAT rule alone, and the separate global **Single file per screenshot per directory** setting. A saved rule never automatically disables another saved rule just because their websites/shortcuts/folders intersect.
