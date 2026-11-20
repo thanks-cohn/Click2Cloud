@@ -9247,7 +9247,7 @@
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
-      "src/chrome/provider-panel.mjs": "2dabdd4d001c748312963e0c04dc000fb1eed62fc09d8b2ab97a473304a9d122",
+      "src/chrome/provider-panel.mjs": "b3482f82ec4806e5081e66fb367248d4cd0a0ca66415f68e4b189c7b303f8f66",
       "src/chrome/registrar.mjs": "2803813b12f149256f3eae58631765aba622f254c964d5fdbc4924aed3219666",
       "src/chrome/screenshot-menu.mjs": "a0a7a5b749721def90387ddc52ef6cbd3f2e30fa9cf41a98cc6eb4048026ee21",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
@@ -12456,7 +12456,7 @@
           {
             "path": "src/chrome/provider-panel.mjs",
             "symbol": "function createShelfHistoryToggle",
-            "line": 32
+            "line": 34
           },
           {
             "path": "extension/app.mjs",

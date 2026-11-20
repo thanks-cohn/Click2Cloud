@@ -1,8 +1,11 @@
+const appPath='extension/app.html';
+const isShelfPath=path=>typeof path==='string'&&path.split('#')[0].replace(/^\//,'')===appPath;
+
 // One Chrome Shelf attention adapter. It never starts OAuth or changes cloud state.
 export function createShelfAttention({chrome,preference=()=>true,notify=async()=>{},onOpened=()=>false}={}){
  let serial=0,last=null;const gestures=new WeakMap();
  // Chrome 141+ reports actual panel opening, unlike ordinary focus/OAuth returns.
- chrome.sidePanel?.onOpened?.addListener(info=>{if(!Number.isInteger(info.windowId)||info.path?.split('#')[0]!=='extension/app.html'||onOpened(info))return;try{void chrome.runtime.sendMessage({channel:'shelf-opened',windowId:info.windowId}).catch(()=>{});}catch{}});
+ chrome.sidePanel?.onOpened?.addListener(info=>{if(!Number.isInteger(info.windowId)||!isShelfPath(info.path)||onOpened(info))return;try{void chrome.runtime.sendMessage({channel:'shelf-opened',windowId:info.windowId}).catch(()=>{});}catch{}});
  const providers=['cloudflare','google-drive','dropbox','onedrive'];
  const safeError=e=>/user gesture/i.test(e?.message??'')?'SIDE_PANEL_GESTURE_REQUIRED':/not.*available|undefined|not supported/i.test(e?.message??'')?'SIDE_PANEL_UNAVAILABLE':'SIDE_PANEL_OPEN_FAILED';
  function open(tabId,windowId){try{if(!chrome.sidePanel?.open)return Promise.resolve({state:'blocked',code:'SIDE_PANEL_UNAVAILABLE',operation:'sidePanel.open'});return Promise.resolve(chrome.sidePanel.open(Number.isInteger(tabId)?{tabId}:{windowId})).then(()=>({state:'opened',operation:'sidePanel.open'}),e=>({state:'blocked',code:safeError(e),operation:'sidePanel.open'}));}catch(e){return Promise.resolve({state:'blocked',code:safeError(e),operation:'sidePanel.open'});}}
@@ -25,7 +28,6 @@ export function createShelfAttention({chrome,preference=()=>true,notify=async()=
 }
 
 export const shelfHistoryCommand='shelf.history.toggle';
-const appPath='extension/app.html';
 const shelfStateKey=windowId=>'shelf-view:'+windowId;
 const views=new Set(['remotes','explorer','history','settings','screenshot','downloads']);
 
@@ -109,7 +111,7 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   });
  }
  function opened(info){
-  if(info.path?.split('#')[0]!==appPath||!Number.isInteger(info.windowId))return false;
+  if(!isShelfPath(info.path)||!Number.isInteger(info.windowId))return false;
   const id=info.windowId;
   if(early.has(id))return true;
   const state=windowState(id);
@@ -118,7 +120,7 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   return false;
  }
  panel?.onClosed?.addListener(info=>{
-  if(info.path?.split('#')[0]!==appPath||!Number.isInteger(info.windowId))return;
+  if(!isShelfPath(info.path)||!Number.isInteger(info.windowId))return;
   const id=info.windowId,state=windowState(id);
   // A newer open can already be in progress while Chrome delivers the close.
   if(state.intent==='history'&&state.opening)return;

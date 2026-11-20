@@ -12,7 +12,7 @@ function fixture(initial={}, {deferOpen=false}={}){
  chrome.sidePanel={open:({windowId})=>{
   calls.push(['open',windowId]);
   return deferOpen?new Promise(resolve=>{release=resolve;}):Promise.resolve();
- },close:async({windowId})=>{calls.push(['close',windowId]);callbacks.closed({windowId,path:'extension/app.html'});},
+ },close:async({windowId})=>{calls.push(['close',windowId]);callbacks.closed({windowId,path:'/extension/app.html'});},
  onClosed:{addListener:fn=>{callbacks.closed=fn;}}};
  return {chrome,calls,values,callbacks,release:()=>release()};
 }
@@ -35,7 +35,7 @@ test('Shelf History Chrome command cycles per window and respects manual close a
  await settle();
  assert.deepEqual(f.calls.filter(([op])=>op==='close'),[['close',1]]);
  assert.equal(f.values['shelf-view:2'].open,true);
- f.callbacks.closed({windowId:2,path:'extension/app.html'});
+ f.callbacks.closed({windowId:2,path:'/extension/app.html'});
  toggle.command({windowId:2});
  await settle();
  assert.deepEqual(f.calls.filter(([op])=>op==='open').at(-1),['open',2]);
