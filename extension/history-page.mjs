@@ -20,7 +20,7 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
   const {destination,key,outputId}=output;
   const verified=output.state==='confirmed';
   const name=destination?.bucketName??'Destination unavailable';
-  return `<section class="screenshot-destination" data-output-id="${esc(outputId)}"><div class="screenshot-destination-line">
+  return `<section class="history-destination-card" data-output-id="${esc(outputId)}"><div class="history-destination-line">
    <div><strong>${esc(name)} / ${esc(key??destination?.prefix??'')}</strong><small>${esc(destination?.accountId??'Account unavailable')}</small></div>
    <button data-screenshot-goto aria-label="GO TO — ${esc(name+'/'+(key??destination?.prefix??''))}" ${outputId&&destination?'':'disabled'}>GO TO</button></div>
    <p>${esc(verified?`${output.verification==='direct-r2-get-sha256'?'Verified · R2 GET · SHA-256':'Verified · R2 checksum'} · ${output.bytes} bytes`:screenshotMessage(output.code,output.code??'Awaiting verification'))}</p>

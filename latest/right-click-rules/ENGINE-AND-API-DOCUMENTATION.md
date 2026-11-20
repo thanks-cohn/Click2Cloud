@@ -1,19 +1,20 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
-## Screenshot commands and one-off captures in 0.3.21
+## Screenshot commands in the Minimal experiment
 
-`extension/screenshot-background.mjs` handles both Chrome screenshot commands
-and the `Screenshot` submenu registered through the existing native registrar.
-The trusted Shelf screenshot channel owns rule writes and retries. The picker
+`extension/screenshot-background.mjs` handles both Chrome screenshot commands.
+Native reconciliation removes the legacy webpage Screenshot submenu during
+extension reload. The trusted Shelf screenshot channel owns rule writes, retries,
+and History lookup by retained capture and output IDs. The picker
 uses `3+1.1` `listAccounts`, `listAuthorizedBuckets` and `listFolders`. The
-Explorer entry comes from `inspectExplorerContextMenu` and screenshot receipts
+Explorer Screenshot2Here entry comes from `inspectExplorerContextMenu` and screenshot receipts
 are available through `inspectRemoteHistory` and the Screenshot captures debug
 scope. Screenshot rule Save writes configuration only.
 
 The dispatcher resolves the active tab in the delivered or focused window,
 checks the primary document before and after capture, and freezes the selected
 account, bucket, prefix and output key. A shortcut matches all active rules.
-The native one-off freezes one selected folder. Direct R2 delivery checks the
+Direct R2 delivery checks the
 signed-in account and OAuth session, PUTs each output and confirms it only after
 matching the exact GET length and SHA-256. Retry reads the original key before
 any new PUT and preserves verified outputs. The legacy Worker screenshot route

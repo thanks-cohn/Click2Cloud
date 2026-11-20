@@ -41,7 +41,7 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
    searchPanel.hidden=false;searchPanel.showPopover?.();positionPanel(searchPanel);
    layout();
   }
-  input.focus({preventScroll:true});return true;
+  input.focus({preventScroll:true});if(forcePopout)input.select();return true;
  }
  opener.onclick=()=>focusSearch();
  search.querySelector('#hide-filename-search').onclick=dismissSearch;

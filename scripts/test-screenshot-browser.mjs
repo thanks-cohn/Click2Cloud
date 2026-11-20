@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import {chromium} from 'playwright-core';
 import {createHash} from 'node:crypto';
 import {fixtureTarget,fixtureSession} from '../tests/fixtures/screenshot-worker.mjs';
+import {screenshotMenu} from '../src/chrome/screenshot-menu.mjs';
 import {digest} from '../src/cloudflare/wire.mjs';
 // Real installed, headed Chromium. OAuth identity and the R2 API use an
 // isolated HTTPS fixture. No credentials or live buckets are used.
@@ -257,9 +258,12 @@ try{
  await writeFile(join(out,'screenshot-fixture-secure.zip'),Buffer.from(diagnostics.zip));
  await writeFile(join(out,'installed-screenshot-receipt.json'),JSON.stringify({single,partial,retried,secure:receiptExport},null,2));
  checks.push('History Retry verified only the originally denied output with the same capture ID, output ID, key and PNG; SECURE trace has no gaps or URLs');
- const cards=partialRow.locator('.screenshot-destination');
+ const cards=partialRow.locator('.history-destination-card');
  await cards.nth(2).getByText(/Verified · R2 GET/).waitFor();
  assert.equal(await cards.count(),3);
+ const locationBox=await cards.first().locator('.history-destination-line').boundingBox();
+ const urlBox=await cards.first().getByText('URLs',{exact:true}).boundingBox();
+ assert(locationBox&&urlBox&&urlBox.y>=locationBox.y+locationBox.height);
  assert.equal(await partialRow.locator('[data-preview]').count(),1);
  const qaUrls=cards.nth(2).locator('[data-output-urls]');
  const qaKey=retried.plan.outputs[2].key,publicPath=qaKey.split('/').map(encodeURIComponent).join('/');
@@ -339,7 +343,7 @@ try{
  await service.evaluate(screenshot=>click2cloud.current.recordRemoteResult({kind:'screenshot-to-cloud',operationId:screenshot.plan.operationId,
   state:'confirmed',code:'SCREENSHOT_SAVED',screenshot}),populated);
  await app.getByRole('button',{name:'History',exact:true}).click();
- const long=app.locator(`[data-operation="${historicalId}"]`),longCards=long.locator('.screenshot-destination');
+ const long=app.locator(`[data-operation="${historicalId}"]`),longCards=long.locator('.history-destination-card');
  await long.locator('.history-preview img').waitFor();
  assert.equal(await long.locator('img').count(),1);
  assert.equal(await longCards.count(),100);
@@ -421,9 +425,14 @@ try{
   input('key','Escape');
   await wait(()=>shelf.evaluate("document.querySelector('#filename-search-popout').hidden"),'Escape dismisses Search');
   if(host===searchHosts[0]){
-   await shelf.evaluate("document.querySelector('header [data-view=remotes]').click()");
-   input('key','Alt_L','Shift_L','f');input('key','Alt_L','Shift_L','f');
-   await wait(()=>shelf.evaluate(searchFocused),'Explorer search comes forward from Remotes');
+   for(const view of ['remotes','history','settings','explorer']){
+    await shelf.evaluate(`document.querySelector('header [data-view=${view}]').click()`);
+    await wait(()=>shelf.evaluate(`document.querySelector('#shell').dataset.view==='${view}'`),view+' Shelf view');
+    input('key','Alt_L','Shift_L','f');input('key','Alt_L','Shift_L','f');
+    await wait(()=>shelf.evaluate(searchFocused),'Explorer search comes forward from '+view);
+   }
+   await shelf.evaluate("document.querySelector('#hide-filename-search').click()");
+   await wait(()=>shelf.evaluate("document.querySelector('#filename-search-popout').hidden"),'X dismisses Search');
   }
   await shelf.detach();
   await service.evaluate(async()=>chrome.sidePanel.close({windowId:(await chrome.windows.getLastFocused()).id}));
@@ -431,16 +440,32 @@ try{
  }
  checks.push('Chrome Alt+Shift+F was assigned through Chrome shortcut settings and opened focused Explorer search from three fixture HTTPS origins; Enter stayed open and Escape dismissed it');
 
+ const fixtureSessionData=await service.evaluate(async()=>{
+  const {click2cloudOAuth}=await chrome.storage.local.get('click2cloudOAuth');
+  await chrome.storage.local.remove('click2cloudOAuth');return click2cloudOAuth;
+ });
+ await page.bringToFront();input('focus');input('key','Alt_L','Shift_L','f');
+ const loggedOutShelf=await inspectShelf();
+ await wait(()=>loggedOutShelf.evaluate("document.querySelector('#shell').dataset.view==='explorer'&&document.querySelector('#login')?.textContent==='Log In'"),'Chrome search opens a truthful disconnected Explorer');
+ await service.evaluate(async session=>{
+  await chrome.storage.local.set({click2cloudOAuth:session});
+  await chrome.runtime.sendMessage({channel:'connection-changed'}).catch(()=>{});
+ },fixtureSessionData);
+ await wait(()=>loggedOutShelf.evaluate("!!document.querySelector('#filename-search-popout:not([hidden]) #filename-search:focus')"),'authorization makes the pending search ready');
+ await loggedOutShelf.detach();
+ await service.evaluate(async()=>chrome.sidePanel.close({windowId:(await chrome.windows.getLastFocused()).id}));
+ await wait(async()=>!(await contexts()).length,'close reconnected search Shelf');
+ checks.push('A browser shortcut opened Explorer while disconnected and focused the pending search when the fixture account returned');
+
  if(process.env.C2C_SCREENSHOT_NATIVE_MENU==='1'){
-  const legacy=await service.evaluate(async()=>{
-   const {screenshotMenu}=await import(chrome.runtime.getURL('src/chrome/screenshot-menu.mjs'));
-   const spec=click2cloud.registrar.inspect().desired;
-   const items=screenshotMenu(spec).items;
+  const spec=await service.evaluate(()=>click2cloud.registrar.inspect().desired);
+  const items=screenshotMenu(spec).items;
+  await service.evaluate(async items=>{
    for(const item of items)await new Promise((resolve,reject)=>chrome.contextMenus.create(item,()=>{
     const error=chrome.runtime.lastError;return error?reject(Error(error.message)):resolve();
    }));
-   return {ids:items.map(item=>item.id),save:spec.rows.find(row=>row.role==='save'||row.role==='provider-action')?.id};
-  });
+  },items);
+  const legacy={ids:items.map(item=>item.id),save:spec.rows.find(row=>row.role==='save'||row.role==='provider-action')?.id};
   const oldService=service;
   const restarted=browser.waitForEvent('serviceworker',{predicate:worker=>worker!==oldService&&worker.url()===oldService.url()});
   await oldService.evaluate(()=>chrome.runtime.reload()).catch(()=>{});service=await restarted;

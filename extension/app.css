@@ -262,10 +262,10 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 @media(max-width:480px){.page{padding:var(--narrow-page-padding)}}
 
 .history-screenshot{max-block-size:clamp(280px,70dvh,640px);overflow:auto;scroll-padding-block:8px;overflow-wrap:anywhere;padding-inline:4px}
-.screenshot-destination{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:10px;margin-block:7px}
-.screenshot-destination-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px}
-.screenshot-destination-line small{display:block}
-.screenshot-destination p{margin:4px 0}
+.history-destination-card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:10px;margin-block:7px}
+.history-destination-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px}
+.history-destination-line small{display:block}
+.history-destination-card p{margin:4px 0}
 .history-public-list{max-block-size:min(240px,45dvh);overflow:auto;scroll-padding-block:4px}
 .history-domain-form{border-block-start:1px solid var(--line);margin-block-start:10px;padding-block-start:4px}
 .history-domain-form input{min-width:0}
