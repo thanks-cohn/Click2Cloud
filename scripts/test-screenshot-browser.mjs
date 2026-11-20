@@ -143,7 +143,7 @@ try{
  await app.getByRole('button',{name:'Sign out'}).waitFor();
  async function openScreenshot(){
   await app.locator('#header-more').click();
-  assert.deepEqual(await app.locator('#header-menu > button:visible').allTextContents(),['Screenshots','Settings']);
+  assert.deepEqual(await app.locator('#header-menu > button:visible:not([data-debug-only])').allTextContents(),['Screenshots','Settings']);
   await app.getByRole('menuitem',{name:'Screenshots',exact:true}).click();
  }
  await openScreenshot();
@@ -551,7 +551,9 @@ try{
   checks.push('After Chrome Reload and without cached screenshot bytes, the original single-output receipt previews its saved R2 image and GO TO selects that exact file');
  }
  await app.goto(c2c);
- await app.getByRole('button',{name:'File Explorer',exact:true}).click();
+ await app.getByRole('button',{name:'Open File Explorer',exact:true}).click();
+ await app.waitForFunction(()=>document.querySelector('#location')?.title.startsWith('cloudflare://'));
+ await app.getByRole('button',{name:'More Explorer actions',exact:true}).click();
  const location=app.locator('#location');
  await location.fill(cloudPath({...fixtureTarget,bucketName:'redown',prefix:''}));
  await location.press('Enter');
