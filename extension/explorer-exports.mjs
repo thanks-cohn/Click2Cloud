@@ -24,11 +24,34 @@ const publicDomainErrors={
   PUBLIC_URL_ACTIVATION_UNCONFIRMED:'Cloudflare has not confirmed the public development URL. Recheck the bucket before trying again.',
   PUBLIC_URL_BUCKET_CHANGED:'Cloudflare reported a different bucket ID during verification. Recheck the selected bucket.',
   SELECTED_BUCKET_MISSING:'Cloudflare could not find this bucket. Refresh File Explorer and check the selected location.',
-  OBJECT_NOT_FOUND:'Cloudflare could not find this file. Refresh File Explorer and try again.'
+  OBJECT_NOT_FOUND:'Cloudflare could not find this file. Refresh File Explorer and try again.',
+  RESULT_NOT_FOUND:'Cloudflare could not find the recorded file.',
+  RESULT_CHANGED:'The object at this key no longer matches the recorded screenshot.',
+  SCREENSHOT_OBJECT_UNCONFIRMED:'Public links are available after this file is verified.'
 };
-const publicDomainError=code=>publicDomainErrors[code]??'Cloudflare domain check incomplete. Try Recheck.';
-const domainStatus=info=>!info.domainCheckComplete?publicDomainError(info.domainCheckCode):
+export const publicDomainError=code=>publicDomainErrors[code]??'Cloudflare domain check incomplete. Try Recheck.';
+export const domainStatus=info=>!info.domainCheckComplete?publicDomainError(info.domainCheckCode):
   info.managedDomain?'Public development URL enabled.':info.domains.length?'Active custom domains found.':'No public domain configured.';
+
+export function renderPublicUrlCards(container,links,onCopy){
+  container.replaceChildren(...links.map(item=>{
+    const row=document.createElement('div'),button=document.createElement('button'),label=document.createElement('strong'),
+      address=document.createElement('span'),copyLabel=document.createElement('span'),open=document.createElement('a');
+    row.className='public-url-row';
+    button.type='button';button.className='public-url-card';
+    const dev=developmentalDomain(item.domain);
+    if(dev)button.classList.add('development-url');
+    label.textContent=dev?'Development URL':'Custom domain';
+    address.textContent=item.url;
+    copyLabel.textContent='Copy';
+    button.append(label,address,copyLabel);
+    button.onclick=()=>onCopy(item.url);
+    open.href=item.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Open';
+    open.setAttribute('aria-label',`Open ${label.textContent} for ${item.domain}`);
+    row.append(button,open);
+    return row;
+  }));
+}
 
 export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange}) {
   let options=exportDefaults, update=Promise.resolve();
@@ -250,23 +273,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     }
     function render(value){
       const links=value.file?.urls??[];
-      list.replaceChildren(...links.map(item=>{
-        const row=document.createElement('div'),button=document.createElement('button'),label=document.createElement('strong'),
-          address=document.createElement('span'),copyLabel=document.createElement('span'),open=document.createElement('a');
-        row.className='public-url-row';
-        button.type='button';button.className='public-url-card';
-        const dev=developmentalDomain(item.domain);
-        if(dev)button.classList.add('development-url');
-        label.textContent=dev?'Development URL':'Custom domain';
-        address.textContent=item.url;
-        copyLabel.textContent='Copy';
-        button.append(label,address,copyLabel);
-        button.onclick=()=>void copy(item.url,'URL copied.');
-        open.href=item.url;open.target='_blank';open.rel='noopener noreferrer';open.textContent='Open';
-        open.setAttribute('aria-label',`Open ${label.textContent} for ${item.domain}`);
-        row.append(button,open);
-        return row;
-      }));
+      renderPublicUrlCards(list,links,url=>void copy(url,'URL copied.'));
       list.hidden=!links.length;
       copyAll.disabled=!links.length;
       copyAll.onclick=()=>void copy([...new Set(links.map(item=>item.url))].join('\n'),'All URLs copied.');

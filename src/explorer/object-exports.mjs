@@ -90,7 +90,7 @@ export function objectUrls(source, key, domains) {
   const valid = typeof key === 'string' && key.startsWith(source.prefix) && !key.endsWith('/') &&
     key.split('/').every(part => part && part !== '.' && part !== '..');
   const urls = valid ? [...new Set(domains)].map(domain => ({
-    url: 'https://' + domain + '/' + key.split('/').map(encodeURIComponent).join('/'),
+    url: 'https://' + domain + '/' + key.split('/').map(segment=>encodeURIComponent(segment).replace(/[!'()*]/g,char=>'%'+char.charCodeAt(0).toString(16).toUpperCase())).join('/'),
     domain, status: 'verified-domain', provenance: developmentalDomain(domain)
       ? 'cloudflare-r2-enabled-managed-domain' : 'cloudflare-r2-active-custom-domain'
   })) : [];

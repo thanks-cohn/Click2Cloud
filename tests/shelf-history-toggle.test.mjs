@@ -67,3 +67,23 @@ test('Cold Chrome background restores the prior window view and preserves rapid 
  partial.command({windowId:1});
  assert.deepEqual(unavailable,['SHELF_CLOSE_UNAVAILABLE']);
 });
+
+test('Chrome Explorer search survives cold startup and stale History messages without closing the Shelf',async()=>{
+ const f=fixture({'shelf-view:1':{view:'history',open:true,sequence:7}},{deferOpen:true});
+ const shelf=createShelfHistoryToggle({chrome:f.chrome}),sender={documentId:'panel'};
+ shelf.search({windowId:1});shelf.search({windowId:1});
+ assert.deepEqual(f.calls,[['open',1]],'Chrome received the open call in the command gesture');
+ await settle();
+ const intent=await shelf.request('intent',1,null,sender);
+ assert.deepEqual(intent,{view:'explorer',focusSearch:true,sequence:8});
+ await shelf.request('view',1,'history',sender);
+ const restarted=createShelfHistoryToggle({chrome:f.chrome});
+ assert.deepEqual(await restarted.request('intent',1,null,sender),intent);
+ await restarted.request('search-complete',1,null,sender,7);
+ assert.deepEqual(await restarted.request('intent',1,null,sender),intent);
+ await restarted.request('search-complete',1,null,sender,8);
+ assert.equal(await restarted.request('intent',1,null,sender),null);
+ f.release();restarted.command({windowId:1});await settle();
+ assert.deepEqual(await restarted.request('intent',1,null,sender),{view:'history'});
+ assert.equal(f.calls.filter(([kind])=>kind==='close').length,0);
+});

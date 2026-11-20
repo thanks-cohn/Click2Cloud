@@ -250,7 +250,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     if(native.state!=='completed')return {...data,native,state:'partial',code:'NATIVE_APPLY_INCOMPLETE'};
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
-  async function invoke(request,actor) {
+  async function invoke(request,actor,{screenshotHistory=false}={}) {
     const operationId=crypto.randomUUID(),traceId=operationIdentity(),requestStarted=performance.now(),inspectOnly=['getEngineHealth','describeCapabilities','requestRestorePreview'].includes(request?.method);const traceMethodIndex=toolRegistry.findIndex(t=>t.name===request?.method)+1;const startSignal=inspectOnly?0:observe(diagnostics?.emit,'api.invoke','started','API_INVOKE_STARTED',{operationId:traceId},[],traceMethodIndex);
     try {
       if(request?.version!=='3+1.1'||Object.keys(request).some(k=>!['version','method','params'].includes(k))||!Object.hasOwn(definitions,request.method))fail('VERSION_OR_METHOD_UNSUPPORTED');
@@ -426,7 +426,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             if(result.data.entries.some(entry=>typeof entry.key!=='string'||!entry.key.startsWith(source.prefix)))fail('SOURCE_SCOPE_MISMATCH');
             data={entries:result.data.entries.map(object=>({...safeObjectMetadata(object,source),customMetadata:undefined,httpMetadata:undefined})),nextCursor:result.data.cursor||null};
           }else if(method==='getPublicUrls'||method==='enableBucketPublicAccess'){
-            if(!(await readExportOptions?.())?.urls||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
+            if((!screenshotHistory&&!(await readExportOptions?.())?.urls)||!readCustomDomains)fail('PUBLIC_URL_EXPERIMENT_DISABLED');
             const activating=method==='enableBucketPublicAccess';
             if(activating){
               if(!enableManagedDomain)fail('PUBLIC_URL_ACTIVATION_UNAVAILABLE');

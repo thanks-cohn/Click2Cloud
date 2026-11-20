@@ -1408,8 +1408,7 @@ The Keyboard Shortcuts card is last in ordinary Settings. The resolver ignores t
 
 | Stable command ID | Kind | Default | Effect |
 | --- | --- | --- | --- |
-| `explorer.toggleToolbarRows` | ui | Ctrl+Shift+F8 | Local Explorer layout |
-| `explorer.resetPanelSplit` | ui | Ctrl+Shift+F9 | Local Explorer layout |
+| `explorer.resetPanelSplit` | ui | Ctrl+Shift+F9 | Local Explorer layout, cycles through center and configured extremes |
 | `explorer.focusSearch` | ui | Ctrl+Shift+F7 | Local focus |
 | `file.refreshExplorer` | api | Unassigned | Read the current folder from the provider |
 

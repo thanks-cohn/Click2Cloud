@@ -1,97 +1,29 @@
-/* Trusted semantic adapter v1. Declarative packages supply only validated tokens.
-   Unlayered intentionally: app.css is unlayered; this scoped sheet follows it. */
-:root[data-aesthetic]:not([data-aesthetic=standard]){--bg:var(--a-color-background-dark);--panel:var(--a-color-surface-dark);--raised:var(--a-color-raised-dark);--text:var(--a-color-text-dark);--muted:var(--a-color-muted-dark);--line:var(--a-color-border-dark);--accent:var(--a-color-accent-dark);--selected:var(--a-color-selection-dark);--focus:var(--a-color-focus-dark);font-family:var(--a-typography-family);font-size:var(--a-typography-size);font-variant-numeric:tabular-nums}
-:root[data-aesthetic]:not([data-aesthetic=standard])[data-theme=light]{--bg:var(--a-color-background-light);--panel:var(--a-color-surface-light);--raised:var(--a-color-raised-light);--text:var(--a-color-text-light);--muted:var(--a-color-muted-light);--line:var(--a-color-border-light);--accent:var(--a-color-accent-light);--selected:var(--a-color-selection-light);--focus:var(--a-color-focus-light)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) body{line-height:1.45;-webkit-font-smoothing:antialiased}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(button,input,select,textarea){border-radius:var(--a-geometry-control);box-shadow:0 1px 1px #00000008;transition:background-color var(--a-motion-feedback),border-color var(--a-motion-feedback);max-width:100%}
-:where([data-aesthetic]:not([data-aesthetic=standard])) button{font-weight:550}
-:where([data-aesthetic]:not([data-aesthetic=standard])) button:hover:not(:disabled){border-color:var(--muted)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) button:disabled{opacity:var(--a-state-disabled)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(button,input,select,summary,[tabindex]):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .primary{background:var(--accent);color:var(--panel)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .primary:hover{background:var(--accent);filter:brightness(.93)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .app-header{box-shadow:0 1px 0 #00000008}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header strong{letter-spacing:-.3px;white-space:nowrap;font-weight:650}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button{color:var(--muted)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) header nav button.active{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(h1,h2,h3){letter-spacing:-.025em;color:var(--text)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) h1{font-size:26px;line-height:1.25;font-weight:650;margin-bottom:12px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) h2{font-size:15px;font-weight:650}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:var(--a-spacing-page);width:100%;max-width:960px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .page>p{color:var(--muted);max-width:76ch}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .card{padding:var(--a-spacing-card);border-radius:var(--a-geometry-surface);margin:16px 0;box-shadow:0 2px 6px #00000006}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .card>h2{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(label,.settings-row){font-size:13px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) label select{margin-left:6px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(.target,pre){background:var(--bg);border:1px solid var(--line);border-radius:var(--a-geometry-control);padding:12px;line-height:1.6}
-:where([data-aesthetic]:not([data-aesthetic=standard])) aside{padding:16px 12px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) aside>h2{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:4px 8px 14px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) #tree button{padding:7px 9px;border-radius:5px;box-shadow:none;font-weight:450}
-:where([data-aesthetic]:not([data-aesthetic=standard])) #tree button[aria-selected=true]{background:var(--selected);color:var(--text)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(.toolbar,#explorer-commands){background:var(--panel);border-color:var(--line)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .address{background:var(--bg);border:1px solid var(--line);border-radius:var(--a-geometry-control)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .address input{background:transparent;box-shadow:none}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(th,td){padding-inline:14px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) th{font-size:11px;letter-spacing:.035em;text-transform:uppercase}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(#context,#toolbar-overflow,.header-more [role=menu],dialog){border:1px solid var(--line);border-radius:var(--a-geometry-overlay);box-shadow:var(--a-elevation-overlay)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(#context,#toolbar-overflow,.header-more [role=menu]){padding:6px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) #context button{padding:8px 10px;font-weight:450;box-shadow:none}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .dialog-head{padding:18px 20px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .dialog-body{padding:20px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .dialog-foot{background:var(--bg);padding:14px 20px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .dest-row{padding:12px 0}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-page details{border-color:var(--line);padding-block:8px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) summary{font-weight:550;border-radius:4px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-row{border-color:var(--line);padding:16px 4px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line{gap:10px;align-items:center}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line strong{font-weight:600;flex:1;min-width:100px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line time{color:var(--muted)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-status{font-size:11px;color:var(--muted)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-preview{border-radius:var(--a-geometry-control)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(.history-page a,.dialog-body a){color:var(--accent);text-underline-offset:3px}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .history-page>nav{padding-top:16px;border-top:1px solid var(--line)}
-@media(max-width:700px){:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:20px}:where([data-aesthetic]:not([data-aesthetic=standard])) .card{padding:16px}}
-@media(max-width:480px){:where([data-aesthetic]:not([data-aesthetic=standard])) .page{padding:16px}:where([data-aesthetic]:not([data-aesthetic=standard])) .history-line time{width:100%}}
-/* Keep theme switches instantaneous: interpolating surface colors can briefly
-   put light text on the old light surface. Hover feedback uses borders only. */
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(button,input,select,textarea){transition:border-color var(--a-motion-feedback)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .brand{display:inline-block;position:relative;width:18px;height:18px;font-size:0!important;vertical-align:middle;pointer-events:none}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .brand::before{content:'';position:absolute;right:1px;top:1px;width:11px;height:11px;border-top:2px solid currentColor;border-right:2px solid currentColor}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .brand::after{content:'';position:absolute;left:0;top:9px;width:19px;height:2px;background:currentColor;transform:rotate(-45deg)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) :is(.page,.card,.dialog-body)>button{margin-inline-end:calc(var(--a-spacing-unit)*1.5);margin-block-end:var(--a-spacing-unit)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .settings-row input[role=switch]{appearance:none;flex:0 0 36px;width:36px;height:22px;border-radius:20px;padding:2px;background:var(--raised);position:relative;cursor:pointer;margin:0}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .settings-row input[role=switch]::after{content:'';display:block;width:16px;height:16px;border-radius:50%;background:var(--muted)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .settings-row input[role=switch]:checked{background:var(--accent);border-color:var(--accent)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) .settings-row input[role=switch]:checked::after{background:var(--panel);transform:translateX(14px)}
-:where([data-aesthetic]:not([data-aesthetic=standard])) input::file-selector-button{font:inherit;color:var(--text);background:var(--raised);border:1px solid var(--line);border-radius:4px;padding:4px 8px;margin-right:10px;cursor:pointer}
-
-/* Aesthetic API 1.1. Only reviewed explanatory wrappers can be hidden. */
-[data-aesthetic-hide~="explorer.debug-caption"] [data-aesthetic-text="explorer.debug-caption"]{display:none}
-[data-aesthetic-hide~="remotes.intro-copy"] [data-aesthetic-text="remotes.intro-copy"]{display:none}
-[data-aesthetic-hide~="remotes.connection-explanation"] [data-aesthetic-text="remotes.connection-explanation"]{display:none}
-[data-aesthetic-hide~="remotes.provider-description"] [data-aesthetic-text="remotes.provider-description"]{display:none}
-[data-aesthetic-hide~="remotes.connected-caption"] [data-aesthetic-text="remotes.connected-caption"]{display:none}
-[data-aesthetic-hide~="remotes.previous-result-detail"] [data-aesthetic-text="remotes.previous-result-detail"]{display:none}
-[data-aesthetic-hide~="destinations.worker-explanation"] [data-aesthetic-text="destinations.worker-explanation"]{display:none}
-[data-aesthetic-hide~="destinations.availability-hint"] [data-aesthetic-text="destinations.availability-hint"]{display:none}
-[data-aesthetic-hide~="status.verbose-technical-detail"] [data-aesthetic-text="status.verbose-technical-detail"]{display:none}
-[data-aesthetic-hide~="settings.help-copy"] [data-aesthetic-text="settings.help-copy"]{display:none}
-.minimal-only{display:none}
-[data-aesthetic=minimal] .minimal-only{display:revert}
-[data-aesthetic=minimal] #selected-save-setup{display:none}
-[data-aesthetic=minimal] header nav button.active{background:var(--selected)}
-[data-aesthetic=minimal] .card{box-shadow:none;margin-block:10px}
-[data-aesthetic=minimal] .card>h2{padding-bottom:6px;margin-bottom:8px}
-.reconnect-needed{border-color:#589577;animation:reconnect-edge 2s ease-in-out infinite}
-@keyframes reconnect-edge{50%{box-shadow:0 0 0 2px #58957785}}
-@media(prefers-reduced-motion:reduce){.reconnect-needed{animation:none}}
-
-.palette-settings{border:0;padding:0;margin:10px 0 12px;min-width:0}
-.palette-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,142px),1fr));gap:6px}
-.palette-choice{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--a-geometry-control);cursor:pointer}
-.palette-choice:has(input:checked){background:var(--selected);border-color:var(--accent)}
-.palette-choice input{margin:0}
-.palette-swatch{display:block;flex:none;width:15px;height:15px;border-radius:50%;background:var(--swatch-dark)}
-[data-theme=light] .palette-swatch{background:var(--swatch-light)}
-[data-aesthetic=minimal] .reconnect-needed{animation:none}
-[data-aesthetic=minimal]:not([data-debug-mode=on]) .worker-diagnostics{display:none}
+/* Palettes supply color and typography only. Layout belongs to app.css. */
+:root:not([data-aesthetic=standard]){
+ --bg:var(--a-color-background-dark,#12151b);
+ --panel:var(--a-color-surface-dark,#1b2028);
+ --raised:var(--a-color-raised-dark,#252d38);
+ --text:var(--a-color-text-dark,#eef1f6);
+ --muted:var(--a-color-muted-dark,#aab6c7);
+ --line:var(--a-color-border-dark,#364252);
+ --accent:var(--a-color-accent-dark,#ff6687);
+ --selected:var(--a-color-selection-dark,#392936);
+ --focus:var(--a-color-focus-dark,#ff8ca5);
+ --heading-font:var(--a-font-heading,Georgia,Cambria,"Liberation Serif",serif);
+ --body-font:var(--a-font-body,"Segoe UI",system-ui,sans-serif);
+ --control-font:var(--a-font-control,"Trebuchet MS","Liberation Sans",sans-serif);
+ --heading-weight:var(--a-weight-heading,700);
+ --body-weight:var(--a-weight-body,400);
+ --control-weight:var(--a-weight-control,550);
+}
+:root:not([data-aesthetic=standard])[data-theme=light]{
+ --bg:var(--a-color-background-light,#f4f5f7);
+ --panel:var(--a-color-surface-light,#fff);
+ --raised:var(--a-color-raised-light,#eceff3);
+ --text:var(--a-color-text-light,#202734);
+ --muted:var(--a-color-muted-light,#596576);
+ --line:var(--a-color-border-light,#d5dbe4);
+ --accent:var(--a-color-accent-light,#b7193e);
+ --selected:var(--a-color-selection-light,#fce8ed);
+ --focus:var(--a-color-focus-light,#a8173a);
+}

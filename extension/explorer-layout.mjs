@@ -1,6 +1,6 @@
-import {splitAt,separatorKey,clamp} from '../src/explorer/layout.mjs';
+import {splitAt,separatorKey,clamp,cycleDivider} from '../src/explorer/layout.mjs';
 // Presentation only: pointer frames never call the engine. Persist once per gesture.
-export function installExplorerLayout({read,save,onResize}){
+export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alternate'}){
  const shell=document.querySelector('#shell'),aside=shell.querySelector('aside'),split=document.querySelector('#pane-splitter'),toolbar=document.querySelector('#explorer-commands'),bar=document.querySelector('#toolbar-splitter'),overflow=document.querySelector('#toolbar-overflow'),more=document.querySelector('#toolbar-more'),commands=document.querySelector('#command-items'),nodes=[...commands.children],moreActions=[...document.querySelector('#explorer-more-actions')?.children??[]],widths=new Map();let preference={...read()},frame=0,drag=null,maxRows=7,pendingSaves=0;
  const navigation=['back','forward','up','refresh'].map(id=>document.getElementById(id));
  const search=commands.querySelector('#filename-search-form'),opener=commands.querySelector('#open-filename-search');
@@ -9,7 +9,7 @@ export function installExplorerLayout({read,save,onResize}){
  const searchPanel=document.createElement('div');
  searchPanel.id='filename-search-popout';searchPanel.setAttribute('popover','manual');
  searchPanel.hidden=true;document.body.append(searchPanel);
- let returnFocus,pinned=false,dismissed=false;
+ let returnFocus,pinned=false,dismissed=false,nextExtreme=0;
  // Escape both clipping ancestors and their stacking contexts. The native
  // popover top layer also stays above splitters; body portal is the fallback.
  document.body.append(overflow);overflow.setAttribute('popover','manual');
@@ -30,11 +30,11 @@ export function installExplorerLayout({read,save,onResize}){
   returnFocus=null;
   return true;
  }
- function focusSearch(){
+ function focusSearch(forcePopout=false){
   const input=search.querySelector('input');
   if(input.disabled||drag)return false;
   if(dismissed){dismissed=false;layout();}
-  if(!commands.contains(search)&&!pinned){
+  if((forcePopout||!commands.contains(search))&&!pinned){
    const current=document.activeElement;
    returnFocus=search.contains(current)||overflow.contains(current)?more:current;
    closeMore();pinned=true;searchPanel.append(search);
@@ -43,7 +43,7 @@ export function installExplorerLayout({read,save,onResize}){
   }
   input.focus({preventScroll:true});return true;
  }
- opener.onclick=focusSearch;
+ opener.onclick=()=>focusSearch();
  search.querySelector('#hide-filename-search').onclick=dismissSearch;
  search.addEventListener('focusin',()=>{if(overflow.contains(search))focusSearch();});
  document.addEventListener('keydown',e=>{
@@ -62,8 +62,10 @@ export function installExplorerLayout({read,save,onResize}){
 
  const place=(parent,children)=>{if(children.length===parent.children.length&&children.every((n,i)=>parent.children[i]===n))return;parent.replaceChildren(...children);};
  function layout(){frame=0;const focused=toolbar.contains(document.activeElement)||overflow.contains(document.activeElement)?document.activeElement:null;if(shell.dataset.view!=='explorer')return;
+  const active=document.activeElement;
+  if(preference.split===0&&aside.contains(active)||preference.split===100&&document.querySelector('#main').contains(active))split.focus({preventScroll:true});
   shell.style.setProperty('--tree-split',preference.split+'%');aside.inert=preference.split===0;document.querySelector('#main').inert=preference.split===100;shell.dataset.collapsed=preference.split===0?'tree':preference.split===100?'files':'';split.setAttribute('aria-valuenow',String(Math.round(preference.split)));split.setAttribute('aria-valuetext',Math.round(preference.split)+'% folder tree');
-  shell.toggleAttribute('data-manage-in-toolbar',shell.clientWidth*preference.split/100<44);
+  shell.toggleAttribute('data-manage-in-toolbar',shell.clientWidth*preference.split/100<(shell.querySelector('#manage-slot #sign-out')?118:44));
   more.hidden=false;
   const toolbarStyle=getComputedStyle(toolbar),commandStyle=getComputedStyle(commands);
   const available=Math.max(0,toolbar.clientWidth-parseFloat(toolbarStyle.paddingLeft)-parseFloat(toolbarStyle.paddingRight)-parseFloat(toolbarStyle.columnGap)-more.offsetWidth);
@@ -108,7 +110,7 @@ export function installExplorerLayout({read,save,onResize}){
  const persist=()=>{pendingSaves++;split.setAttribute('aria-busy','true');bar.setAttribute('aria-busy','true');void save({...preference}).catch(()=>{preference={...read()};schedule();}).finally(()=>{pendingSaves--;split.setAttribute('aria-busy',String(pendingSaves>0));bar.setAttribute('aria-busy',String(pendingSaves>0));});};
  function changeLayout(property,value){if(preference[property]===value)return;preference[property]=value;schedule();persist();}
  function finish(){if(!drag)return;const d=drag;drag=null;document.body.classList.remove('resizing');if(d.el.hasPointerCapture?.(d.id))d.el.releasePointerCapture(d.id);if(d.initial.split!==preference.split||d.initial.toolbarRows!==preference.toolbarRows)persist();}
- function bind(el,vertical){el.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();el.focus({preventScroll:true});closeMore();drag={el,id:e.pointerId,initial:{...preference},start:e.clientY,rows:preference.toolbarRows,rect:shell.getBoundingClientRect()};el.setPointerCapture(e.pointerId);document.body.classList.add('resizing');});el.addEventListener('pointermove',e=>{if(drag?.el!==el||drag.id!==e.pointerId)return;if(vertical)preference.split=splitAt(e.clientX,drag.rect.left,drag.rect.width);else preference.toolbarRows=clamp(Math.round(drag.rows+(e.clientY-drag.start)/42),1,maxRows);schedule();});for(const name of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(name,finish);el.addEventListener('keydown',e=>{const next=separatorKey(vertical?preference.split:preference.toolbarRows,e.key,{vertical,min:vertical?0:1,max:vertical?100:maxRows,step:vertical?2:1});if(next===null)return;e.preventDefault();if(next===preference[vertical?'split':'toolbarRows'])return;preference[vertical?'split':'toolbarRows']=next;schedule();persist();});el.addEventListener('dblclick',()=>{if(preference[vertical?'split':'toolbarRows']===(vertical?50:1))return;preference[vertical?'split':'toolbarRows']=vertical?50:1;schedule();persist();});}
+ function bind(el,vertical){el.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();el.focus({preventScroll:true});closeMore();drag={el,id:e.pointerId,initial:{...preference},start:e.clientY,rows:preference.toolbarRows,rect:shell.getBoundingClientRect()};el.setPointerCapture(e.pointerId);document.body.classList.add('resizing');});el.addEventListener('pointermove',e=>{if(drag?.el!==el||drag.id!==e.pointerId)return;if(vertical){preference.split=splitAt(e.clientX,drag.rect.left,drag.rect.width);nextExtreme=0;}else preference.toolbarRows=clamp(Math.round(drag.rows+(e.clientY-drag.start)/42),1,maxRows);schedule();});for(const name of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(name,finish);el.addEventListener('keydown',e=>{const next=separatorKey(vertical?preference.split:preference.toolbarRows,e.key,{vertical,min:vertical?0:1,max:vertical?100:maxRows,step:vertical?2:1});if(next===null)return;e.preventDefault();if(next===preference[vertical?'split':'toolbarRows'])return;preference[vertical?'split':'toolbarRows']=next;if(vertical)nextExtreme=0;schedule();persist();});el.addEventListener('dblclick',()=>{if(preference[vertical?'split':'toolbarRows']===(vertical?50:1))return;preference[vertical?'split':'toolbarRows']=vertical?50:1;if(vertical)nextExtreme=0;schedule();persist();});}
  bind(split,true);bind(bar,false);window.addEventListener('blur',finish);
  more.onclick=()=>{overflow.hidden?openMore():closeMore();};
  const escape=e=>{if(e.key==='Escape'&&!e.defaultPrevented&&!overflow.hidden){e.preventDefault();closeMore();more.focus({preventScroll:true});}};
@@ -118,16 +120,19 @@ export function installExplorerLayout({read,save,onResize}){
  document.addEventListener('focusin',e=>{if(!toolbar.contains(e.target)&&!overflow.contains(e.target))closeMore();});
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.addEventListener('scroll',positionMore,true);
  const observer=new ResizeObserver(schedule);observer.observe(toolbar);observer.observe(shell);layout();
- return {refresh(){if(!drag)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,
+ return {refresh(){if(!drag)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
   setSearchAvailable(available){opener.disabled=search.querySelector('input').disabled=!available;},
   setShortcuts(bindings){
-   for(const [id,el] of [['explorer.toggleToolbarRows',bar],['explorer.resetPanelSplit',split],['explorer.focusSearch',search.querySelector('input')]]){
+   for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',search.querySelector('input')]]){
     const chord=bindings[id];if(chord)el.setAttribute('aria-keyshortcuts',chord.replace(/^Ctrl/, 'Control'));else el.removeAttribute('aria-keyshortcuts');
    }
   },
   commands:{
-   'explorer.toggleToolbarRows':()=>{if(drag)return false;changeLayout('toolbarRows',preference.toolbarRows===1?2:1);return true;},
-   'explorer.resetPanelSplit':()=>{if(drag)return false;changeLayout('split',50);return true;},
+   'explorer.resetPanelSplit':()=>{
+    if(drag)return false;
+    const next=cycleDivider(preference.split,readCycleMode(),nextExtreme);
+    nextExtreme=next.nextExtreme;changeLayout('split',next.position);return true;
+   },
    'explorer.focusSearch':focusSearch
   },inspect:()=>({...preference,maxRows})};
 }

@@ -1,5 +1,5 @@
 import {diagnoseCloudflare} from '../auth/cloudflare-oauth.mjs';
-import {verifiedDevelopmentDomain, verifiedDomains} from '../explorer/object-exports.mjs';
+import {developmentalDomain, domainName, verifiedDevelopmentDomain, verifiedDomains} from '../explorer/object-exports.mjs';
 import {scopeKey} from '../core/menu-identity.mjs';
 
 const failure = code => Object.assign(Error(code), {code});
@@ -16,8 +16,10 @@ export function createR2PublicDomains({oauth, assertConnected=()=>{}, readbackDe
     const body = await response.json().catch(()=>null);
     assertConnected();
     if (response.ok && body?.success===true && body.result && typeof body.result==='object') return body;
-    const {code} = diagnoseCloudflare(response,body);
+    const {code,providerCodes} = diagnoseCloudflare(response,body);
     if (['REAUTH_REQUIRED','TOKEN_EXPIRED','INSUFFICIENT_SCOPE','WRONG_ACCOUNT'].includes(code)) throw failure(code);
+    if (options.method==='POST')throw Object.assign(failure(response.status===403?'CUSTOM_DOMAIN_ACCESS_DENIED':errorCode),
+      {httpStatus:response.status,providerCodes:providerCodes.slice(0,8)});
     if (response.status===403) throw failure(options.method==='PUT'?'PUBLIC_URL_ACTIVATION_DENIED':'PUBLIC_DOMAIN_ACCESS_DENIED');
     if (response.status===404) throw failure('SELECTED_BUCKET_MISSING');
     throw failure(errorCode);
@@ -96,5 +98,29 @@ export function createR2PublicDomains({oauth, assertConnected=()=>{}, readbackDe
     finally { activations.delete(key); }
   }
 
-  return Object.freeze({readManagedDomain, readCustomDomains, enableManagedDomain});
+  async function connectCustomDomain(source,hostname,zoneId){
+    const domain=domainName(hostname);
+    if(!domain||developmentalDomain(domain))throw failure('CUSTOM_DOMAIN_INVALID');
+    const auth=await oauth.authority();
+    if(!auth.sessionId||!auth.accounts?.some(account=>account.id===source.accountId))throw failure('AUTH_REQUIRED');
+    const records=await readCustomDomains(source,auth.sessionId);
+    const state=record=>verifiedDomains([record]).length?'active':record?.enabled===false?'disabled':'pending';
+    const existing=records.find(record=>domainName(record?.domain)===domain);
+    if(existing)return {domain,state:state(existing)};
+    const knownZone=records.filter(record=>{
+      const zone=domainName(record?.zoneName);
+      return zone&&(domain===zone||domain.endsWith('.'+zone))&&/^[\da-f]{32}$/i.test(record.zoneId??'');
+    }).sort((a,b)=>b.zoneName.length-a.zoneName.length)[0];
+    const selectedZone=zoneId?.trim()||knownZone?.zoneId;
+    if(!/^[\da-f]{32}$/i.test(selectedZone??''))throw failure('CUSTOM_DOMAIN_ZONE_REQUIRED');
+    const {result}=await request(source,'custom',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({domain,enabled:true,zoneId:selectedZone}),expectedSession:auth.sessionId,
+      requiredScopes:['workers-r2.write']},'CUSTOM_DOMAIN_CONNECT_FAILED');
+    if(domainName(result.domain)!==domain||result.enabled!==true||result.zoneId!==selectedZone)throw failure('CUSTOM_DOMAIN_UNCONFIRMED');
+    const observed=(await readCustomDomains(source,auth.sessionId)).find(record=>domainName(record?.domain)===domain);
+    if(observed?.zoneId&&observed.zoneId!==selectedZone)throw failure('CUSTOM_DOMAIN_UNCONFIRMED');
+    return {domain,state:state(observed)};
+  }
+
+  return Object.freeze({readManagedDomain, readCustomDomains, enableManagedDomain, connectCustomDomain});
 }

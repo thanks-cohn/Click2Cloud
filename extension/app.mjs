@@ -9,6 +9,9 @@ import {loadingMedia,LOADING_MEDIA_MAX_BYTES} from '../src/explorer/loading-visu
 import {levelHidden} from '../src/modes/nested/index.mjs';
 import {isImage,galleryStep,createImageReader,readPreviewBytes} from '../src/explorer/image-preview.mjs';
 import {installExplorerLayout} from './explorer-layout.mjs';
+import {dividerCycleKey,dividerModes,normalizeDividerMode} from '../src/explorer/layout.mjs';
+import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
+import {shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
 import {installShortcuts} from './shortcut-settings.mjs';
 import {createExplorerExports,noteDownload} from './explorer-exports.mjs';
 import {downloadJob} from '../src/explorer/download-archive.mjs';
@@ -26,10 +29,10 @@ const readinessNames={CLOUDFLARE_READY:'Ready to save',READY:'Ready to save',NOT
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const connectionElement=$('#connection');
 const shelfWindow=chrome.windows?.getCurrent?Promise.resolve().then(()=>chrome.windows.getCurrent()).then(w=>w.id).catch(()=>null):Promise.resolve(null);
-const shelfView=async(method,next)=>{
+const shelfView=async(method,next,sequence)=>{
  const windowId=await shelfWindow;
  if(!Number.isInteger(windowId))return null;
- return chrome.runtime.sendMessage({channel:'shelf-history',method,windowId,view:next});
+ return chrome.runtime.sendMessage({channel:'shelf-history',method,windowId,view:next,sequence});
 };
 const restoreConnection=()=>{if(connectionElement.parentElement!==document.querySelector('aside'))document.querySelector('aside').insertBefore(connectionElement,$('#tree'));};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -50,7 +53,6 @@ function applyDebugMode(enabled){
  }else if(diagnosticDialog)$('#header-more').focus({preventScroll:true});
 }
 debugPreference.subscribe(applyDebugMode);applyDebugMode(false);void debugPreference.ready.then(applyDebugMode);
-const isMinimal=()=>aesthetic.getActive().id==='minimal';
 function quietFeedback(value,attention){
  const feedback=$('#action-feedback');if(!feedback)return;
  const required=attention??(/^[A-Z][A-Z0-9_]+$/.test(value)&&!['READY','CLOUDFLARE_READY'].includes(value)||/could not|cannot|failed|not confirmed|not ready|not saved|uncertain|blocked|unavailable|required|denied|reconnect|needs attention|incomplete|conflict|missing|corrupt|not authorized|not prepared/i.test(value));
@@ -59,7 +61,7 @@ function quietFeedback(value,attention){
     /auth|token|reconnect|log in|sign.in|permission|scope/i.test(value)?'Reconnect Cloudflare or review access in Remotes.':
     /worker|setup|prepare|not ready/i.test(value)?'Prepare this destination in Remotes before saving.':
     /configuration|revision|generation|storage|current_/i.test(value)?'Configuration needs attention. Review the current panel before retrying.':null;
-  feedback.textContent=actionable??(isMinimal()?(names[value]??''):'This action needs attention. Review the current panel or History.');
+  feedback.textContent=actionable??names[value]??'Review the current panel or History for details.';
   feedback.hidden=!feedback.textContent;
  }
  else if(/^Saving remotely/i.test(value)){feedback.textContent='Saving remotely…';feedback.hidden=false;}
@@ -87,17 +89,15 @@ async function enterExplorer(){
 let explorerAccountId=null;
 let shelfRequest=null,cloudflareState=null,reconnectNeeded=false,confirmExplorerDelete=true;
 const deletePreference='explorerConfirmDeleteV1';
+let dividerMode='alternate';
+const dividerReady=chrome.storage?.local?.get(dividerCycleKey).then(value=>{dividerMode=normalizeDividerMode(value[dividerCycleKey]);}).catch(()=>{});
+chrome.storage?.onChanged?.addListener((changes,area)=>{if(area==='local'&&changes[dividerCycleKey])dividerMode=normalizeDividerMode(changes[dividerCycleKey].newValue);});
 void chrome.storage?.local?.get(deletePreference).then(v=>{confirmExplorerDelete=v?.[deletePreference]!==false;}).catch(()=>{});
 const reconnectCodes=new Set(['AUTH_REQUIRED','REAUTH_REQUIRED','TOKEN_EXPIRED','HTTP_401','AUTH_SESSION_CHANGED','AUTHORIZATION_REVOKED']);
 function reconnectAfter(code){
  if(!reconnectCodes.has(code)||reconnectNeeded)return;
  reconnectNeeded=true;
- void (async()=>{
-  await connections();
-  if(connection.state==='CONNECTED'||isMinimal())return;
-  if($('#dialog').open)closeDialog();
-  await show('remotes');
- })().catch(error=>status(error.message));
+ void connections().catch(error=>status(error.message));
 }
 const treeFolders=new Map(),treeNodes=new Map(),bucketTargets=[];let previewUrl,previewEpoch=0,navigationEpoch=0,focusIndex=0,listingError='',renderedWindow=null,capabilities=null,contextReturnElement=null,treeEpoch=0;
 const listingOrder=createListingOrder();
@@ -200,13 +200,33 @@ function dialog(title,body,footer='',debugOnly=false) {
 async function connections() {
   const ticket=++connectionEpoch;let next;try{next=await readWithRetry(()=>api('loginStatus',{}, {quiet:true,readTimeout:5000}));}catch(error){next={state:'UNAVAILABLE',accounts:[],diagnostic:{code:error.code??'AUTH_STATUS_UNAVAILABLE'}};}if(ticket!==connectionEpoch)return;const before=JSON.stringify([connection?.state,connection?.accounts]);connection=next;if(connection.state==='CONNECTED')reconnectNeeded=false;
   if(reconnectCodes.has(connection.diagnostic?.code)||connection.state==='DISCONNECTED'&&connection.identityVerified)reconnectNeeded=true;
-  if(reconnectNeeded&&view==='explorer'&&!isMinimal())void show('remotes').catch(error=>status(error.message));
   imageReader.clear();clearThumbnails();if(before!==JSON.stringify([connection.state,connection.accounts])){navigationEpoch++;previewEpoch++;if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;}if(previewUrl||$('#preview-state'))closeDialog();listingReader.invalidate();imageReader.clear();clearThumbnails();treeFolders.clear();treeEpoch++;treeNodes.clear();$('#tree').replaceChildren();bucketTargets.length=0;if(connection.state!=='CONNECTED'){navigationEpoch++;listingEpoch++;entries=[];selected.clear();loading=false;listingError='Reconnect to browse. Saved locations are preserved.';if(view==='explorer'){renderExplorer();$('#tree').textContent=source?'Saved location: '+source.bucketName+'/'+source.prefix+' · Reconnect to browse.':'Reconnect to browse saved locations.';}}}
   renderConnection();if(view==='explorer'&&state&&connection.state==='CONNECTED'&&before!==JSON.stringify([connection.state,connection.accounts]))await enterExplorer();
 }
+async function signOut(event){
+  const button=event.currentTarget;button.disabled=true;
+  try{await api('disconnect');cloudflareState=null;await connections();if(view==='remotes')renderRemotes();status('Signed out. Saved destinations remain.');}
+  finally{button.disabled=false;}
+}
 function renderConnection(){
-  connectionElement.innerHTML=`${view==='remotes'?'':'<strong>☁ Cloudflare</strong>'}<p class="muted" ${connection.state==='CONNECTED'?'data-aesthetic-text="remotes.connected-caption"':''}>${esc(connection.state==='CONNECTED'?'Connected':connection.state==='CONNECTING'?'Signing in…':connection.state==='VERIFYING'?'Authorization received; account verification pending':connection.state==='DISCONNECTED'?'Not connected':connection.state==='UNKNOWN'?'Checking connection…':'Connection status unavailable')}</p>${connection.diagnostic?.code?'<p class="muted" data-aesthetic-text="status.verbose-technical-detail">Connection unavailable · '+esc(connection.diagnostic.code)+'</p>':''}${connection.state==='CONNECTED'?'<button id="browse">Open File Explorer</button><button id="sign-out">Sign out</button>'+(connection.permissions?.needsReconsent?'<button id="reauthorize">Update Cloudflare permissions</button>':''):connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':reconnectNeeded?'<button id="login" class="reconnect-needed">Reconnect</button>':'<button id="login">Log in</button>'}`;
-  listen('#sign-out','click',async()=>{await api('disconnect');cloudflareState=null;await connections();if(view==='remotes')renderRemotes();status('Signed out. Saved destinations remain.');});listen('#reauthorize','click',()=>login('#reauthorize'));listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());listen('#cancel-login','click',async()=>{await api('loginCancel');await connections();});listen('#browse','click',async()=>{await show('explorer');});
+  const inExplorer=view==='explorer',connected=connection.state==='CONNECTED',existing=$('#manage-slot #sign-out');
+  if(!inExplorer||!connected)existing?.remove();
+  else if(!existing){
+    const button=document.createElement('button');button.id='sign-out';button.type='button';button.textContent='Sign Out';
+    $('#manage-slot').append(button);listen('#manage-slot #sign-out','click',signOut);
+  }
+  const caption={CONNECTED:'Connected',CONNECTING:'Signing in…',VERIFYING:'Authorization received. Checking account access…',
+    DISCONNECTED:'Not connected',UNKNOWN:'Checking connection…'}[connection.state]??'Connection status unavailable';
+  const updatePermissions=connection.permissions?.needsReconsent?'<button id="reauthorize">Update Cloudflare permissions</button>':'';
+  const controls=connected?(inExplorer?'':'<button id="browse">Open File Explorer</button><button id="sign-out">Sign out</button>')+updatePermissions:
+    connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':
+    connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':
+    connection.state==='UNKNOWN'?'' : `<button id="login" ${reconnectNeeded?'class="reconnect-needed"':''}>${inExplorer?'Log In':reconnectNeeded?'Reconnect':'Log in'}</button>`;
+  connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}<p class="muted">${caption}</p>${connection.diagnostic?.code?
+    '<details><summary>Connection details</summary><p>'+esc(names[connection.diagnostic.code]??connection.diagnostic.code)+'</p></details>':''}${controls}`;
+  listen('#connection #sign-out','click',signOut);listen('#reauthorize','click',()=>login('#reauthorize'));
+  listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());
+  listen('#cancel-login','click',async()=>{await api('loginCancel');await connections();});listen('#browse','click',()=>show('explorer'));
 }
 async function login(selector='#login',params={}) {
   const intent=viewEpoch;
@@ -217,10 +237,10 @@ async function login(selector='#login',params={}) {
   try{const result=await pending;cloudflareState=result.initialization??null;if(cloudflareState?.state==='completed')await finishCloudflareSetup(cloudflareState,selectedCloudflareTarget());status(result.state==='CONNECTED'?(cloudflareState?.selectedReady?'Prepared and verified · make a new right-click to save.':cloudflareState?'Cloudflare connected · '+(names[cloudflareState.code]??cloudflareState.code)+' · '+(cloudflareState.stage??'cloudflare-initialization'):'Cloudflare connected.'):result.state==='VERIFYING'?'Authorization received; account verification pending.':'Cloudflare sign-in is still in progress.');}catch(error){status(error.message);}finally{await connections();if(view==='remotes'&&intent===viewEpoch)renderRemotes();}
 }
 function workerFailureMarkup(d){
- if(d?.context==='r2')return `<p class="minimal-only" role="alert">Check R2 access in Cloudflare, then log in again.</p><p role="alert" data-aesthetic-text="status.verbose-technical-detail">R2 bucket discovery · HTTP ${esc(d.httpStatus??'not received')} · Cloudflare codes ${esc((d.providerCodes??[]).join(', ')||'not returned')}. ${esc(names[d.code]??'Check R2 access for the selected Cloudflare account, then log in again.')}</p>`;
+ if(d?.context==='r2')return `<p role="alert">Check R2 access in Cloudflare, then log in again.</p><details><summary>R2 bucket discovery</summary><p>R2 bucket discovery · HTTP ${esc(d.httpStatus??'not received')} · Cloudflare codes ${esc((d.providerCodes??[]).join(', ')||'not returned')}. ${esc(names[d.code]??'Check R2 access for the selected Cloudflare account, then log in again.')}</p></details>`;
  if(d?.kind!=='cloudflare-worker-access')return '';
  const upgraded=connection?.permissions?.needsReconsent===false&&!d.sessionScopes.includes('workers-scripts.admin'),action=upgraded?'The updated authorization has been requested. Resume the existing setup once to verify its actual authority; no new setup approval is needed.':d.correctiveAction;
- return `<div class="card"><p data-aesthetic-text="status.verbose-technical-detail" role="alert">${esc(action)}</p><p data-aesthetic-text="status.verbose-technical-detail">${esc(d.method)} ${esc(d.endpoint)} · HTTP ${esc(d.httpStatus??'not received')} · Cloudflare codes ${esc(d.providerCodes.join(', ')||'not returned')}</p><details class="worker-diagnostics"><summary>Safe Cloudflare diagnostics</summary><pre id="cf-worker-diagnostics">${esc(JSON.stringify(d,null,2))}</pre></details>${!upgraded&&(d.missingScopes?.includes('workers-scripts.admin')||d.workerIntent==='create'&&!d.sessionScopes.includes('workers-scripts.admin'))?'<button id="reauthorize-worker">Reauthorize Cloudflare</button>':''}<button id="resume-worker">Resume existing setup after correction</button></div>`;
+ return `<div class="card"><p role="alert">${esc(action)}</p><p>${esc(d.method)} ${esc(d.endpoint)} · HTTP ${esc(d.httpStatus??'not received')} · Cloudflare codes ${esc(d.providerCodes.join(', ')||'not returned')}</p><details class="worker-diagnostics"><summary>Safe Cloudflare diagnostics</summary><pre id="cf-worker-diagnostics">${esc(JSON.stringify(d,null,2))}</pre></details>${!upgraded&&(d.missingScopes?.includes('workers-scripts.admin')||d.workerIntent==='create'&&!d.sessionScopes.includes('workers-scripts.admin'))?'<button id="reauthorize-worker">Reauthorize Cloudflare</button>':''}<button id="resume-worker">Resume existing setup after correction</button></div>`;
 }
 async function resumeWorkerSetup(){
  const button=$('#resume-worker')??$('#cf-authorize')??$('#prepare-selected');if(button)button.disabled=true;
@@ -233,7 +253,7 @@ function selectedSetupMarkup(){
  const target=shelfRequest?.provider==='cloudflare'&&shelfRequest.target;if(!target)return '';
  const code=cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target)?cloudflareState.code??cloudflareState.worker?.code??cloudflareState.state:shelfRequest.code;
  const verified=cloudflareState?.selectedReady===true&&cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target),approval=['SETUP_APPROVAL_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(code),label=selectedSetupLabel(target,connection?.accounts);
- return `<div class="card" id="selected-save-setup"><h2>Selected save destination</h2><p>${esc(label)}</p><p role="status">${verified?'Prepared and verified · make a new right-click to save.':'<span class="minimal-only">Save unavailable.</span><span data-aesthetic-text="status.verbose-technical-detail">Not saved · '+esc(code??'WORKER_SETUP_REQUIRED')+' · '+esc(names[code]??readinessNames[code]??'Prepare this selected destination, then make a new right-click.')+'</span>'}</p>${code==='WORKER_DESTINATION_SCOPE_REQUIRED'?'<button id="authorize-selected">Authorize bucket access</button>':verified?'':`<p>Preparation uses this exact bucket and folder. Cloudflare may charge for Worker/R2 usage and a small retained verification file. The original source is not replayed.</p><button id="prepare-selected">Inspect / prepare selected destination</button>${approval?'<button id="authorize-selected">Authorize selected destination</button>':''}`}</div>`;
+ return `<div class="card" id="selected-save-setup"><h2>Selected save destination</h2><p>${esc(label)}</p><p role="status">${verified?'Prepared and verified · make a new right-click to save.':'<span>Not saved · '+esc(code??'WORKER_SETUP_REQUIRED')+' · '+esc(names[code]??readinessNames[code]??'Prepare this selected destination, then make a new right-click.')+'</span>'}</p>${code==='WORKER_DESTINATION_SCOPE_REQUIRED'?'<button id="authorize-selected">Authorize bucket access</button>':verified?'':`<p>Preparation uses this exact bucket and folder. Cloudflare may charge for Worker/R2 usage and a small retained verification file. The original source is not replayed.</p><button id="prepare-selected">Inspect / prepare selected destination</button>${approval?'<button id="authorize-selected">Authorize selected destination</button>':''}`}</div>`;
 }
 // recover/approve owns remote changes. Re-read the exact scoped transport and
 // native ACK afterward; never turn an outer completed response into UI READY.
@@ -261,7 +281,7 @@ function workerUpdateMarkup(readiness){
 }
 function ordinarySetupReview(){
  if(connection?.state!=='CONNECTED')return '';
- if(shelfRequest?.target)return cloudflareState?.selectedReady?'':'<button id="review-selected" class="minimal-only">Review save setup</button>';
+ if(shelfRequest?.target)return cloudflareState?.selectedReady?'':'<button id="review-selected">Review save setup</button>';
  const code=cloudflareState?.code??cloudflareState?.state??shelfRequest?.code;
  return ['SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','WORKER_SETUP_REQUIRED','ACCOUNT_AMBIGUOUS','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','NOT_ACTIVATED','R2_CONFIRMED_INACTIVE'].includes(code)
   ?'<button id="review-selected">Review save setup</button>':'';
@@ -269,7 +289,7 @@ function ordinarySetupReview(){
 function renderRemotes(){
   if(view!=='remotes')return;
   connectionElement.remove();
-  $('#main').innerHTML=`<section class="page"><h1 class="remotes-headline">The Future is Now. True Remote is Here.</h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p>${configurationIssue?recoveryCard():''}<p class="muted" data-aesthetic-text="remotes.intro-copy">Connect an account, browse its folders, and choose where to save.</p><div class="card"><h2>☁ Cloudflare R2</h2><p data-aesthetic-text="remotes.intro-copy">${connection?.state==='CONNECTED'?'Signed in to Cloudflare.':'Log in below to connect your account.'}</p>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status" data-aesthetic-text="status.verbose-technical-detail">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><p id="remote-summary" role="status" data-aesthetic-text="remotes.previous-result-detail"></p><p id="remote-summary-attention" role="status" hidden></p><p class="muted" data-aesthetic-text="remotes.provider-description">Google Drive, Dropbox and OneDrive are not available yet.</p><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
+  $('#main').innerHTML=`<section class="page"><div class="remotes-intro"><h1 class="remotes-headline">The Future is Now. True Remote is Here.</h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p></div>${configurationIssue?recoveryCard():''}<div class="card"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><p id="remote-summary" role="status"></p><p id="remote-summary-attention" role="status" hidden></p><p class="muted">Google Drive, Dropbox and OneDrive are not available yet.</p><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);$$('[data-placeholder]').forEach(b=>b.onclick=()=>api('invokeProviderAction',{provider:b.dataset.placeholder,idempotencyKey:crypto.randomUUID()}).catch(e=>status(e.message)));
   listen('#open-explorer','click',async()=>{await show('explorer');});
@@ -330,12 +350,33 @@ async function revealListedFile(key,target){
  if(!entries.some(e=>e.key===key)){selected.clear();updateSelection();status('This file is unavailable in the listing. Refresh or reconnect before trying again.',{attention:true});throw Error('RESULT_NOT_FOUND');}
  selected=new Set([key]);ordered();focusIndex=listingOrder.index(key);updateSelection();focusRow(focusIndex);
 }
-const screenshotUI=createScreenshotPage({api,dialog,closeDialog,esc,windowId:shelfWindow});
-const historyUI=createHistoryPage({api,retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async operationId=>{
- const result=await api('openRemoteResult',{operationId},{quiet:true});
- closeDialog();selected.clear();await navigate(result.target);await revealListedFile(result.highlightKey,result.target);
+const screenshotUI=createScreenshotPage({api,dialog,closeDialog,esc});
+let historyNavigation=0;
+const historyUI=createHistoryPage({api,screenshotRequest,retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async (operationId,outputId)=>{
+ const ticket=++historyNavigation,previousView=viewEpoch;
+ const result=outputId?await screenshotRequest('history-output',{operationId,outputId}):await api('openRemoteResult',{operationId},{quiet:true});
+ if(ticket!==historyNavigation||previousView!==viewEpoch||view!=='history')return;
+ historyUI.stop();selected.clear();
+ const navigation=navigationEpoch+1;
+ await navigate(result.target);
+ if(navigation!==navigationEpoch||view!=='explorer')return;
+ const file=outputId?result.object?.key:result.highlightKey;
+ if(file)await revealListedFile(file,result.target);
+ else if(outputId)status(result.code==='RESULT_NOT_FOUND'?'The recorded file no longer exists. Opened its folder.':
+  result.code==='RESULT_CHANGED'?'The file at this key has changed. Opened its folder.':'Opened the destination folder. The screenshot file is unverified.',{attention:true});
 }});
-let viewEpoch=0;
+let viewEpoch=0,pendingSearchFocus=false,lastSearchSequence=-1;
+function focusPendingSearch(){
+ if(pendingSearchFocus&&view==='explorer'&&source&&connection.state==='CONNECTED'&&explorerLayoutUI?.focusSearch(true))pendingSearchFocus=false;
+}
+async function useShelfIntent(intent){
+ if(intent?.view==='history'){closeDialog();await show('history');return;}
+ if(intent?.view!=='explorer'||!intent.focusSearch||intent.sequence<=lastSearchSequence)return;
+ lastSearchSequence=intent.sequence;
+ closeDialog();pendingSearchFocus=true;
+ try{await show('explorer');focusPendingSearch();}
+ finally{await shelfView('search-complete',undefined,intent.sequence);}
+}
 const displayedEntries=()=>filenameSearch?.entries??entries;
 function resetFilenameSearch(){
  filenameSearch?.controller.abort();filenameSearch=null;
@@ -402,12 +443,12 @@ function markCurrentSearchStale(){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}if(next==='history'){$('#main').innerHTML='<section class="page"><h1>History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){pendingSearchFocus=false;explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}renderConnection();if(next==='history'){$('#main').innerHTML='<section class="page"><h1>History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function renderExplorer(){
  restoreConnection();
- if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted" data-aesthetic-text="explorer.debug-caption"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
+ if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
   $('#main').replaceChildren(explorerShell);
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
   listen('#up','click',()=>source&&navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',refreshExplorerFolder);
@@ -446,10 +487,10 @@ function renderExplorer(){
    if(key){await revealListedFile(key,target);}
    else if(view==='explorer')$('#files').focus({preventScroll:true});
   });
-  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:async value=>{layoutIntent=value;viewCommit=viewCommit.catch(()=>{}).then(async()=>{try{await change({type:'setExplorerLayout',explorerLayout:value});}finally{if(layoutIntent===value)layoutIntent=null;}});return viewCommit;},onResize:scheduleWindow});shortcuts.attachReferences();
+  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:async value=>{layoutIntent=value;viewCommit=viewCommit.catch(()=>{}).then(async()=>{try{await change({type:'setExplorerLayout',explorerLayout:value});}finally{if(layoutIntent===value)layoutIntent=null;}});return viewCommit;},onResize:scheduleWindow,readCycleMode:()=>dividerMode});shortcuts.attachReferences();
  }else if(!explorerShell.isConnected){$('#main').replaceChildren(explorerShell);$('#files').scrollTop=explorerScroll;}
  $('#back').disabled=historyAt<=0;$('#forward').disabled=historyAt>=history.length-1;$('#up').disabled=!source?.prefix;$('#add-location').disabled=!source;explorerLayoutUI.setSearchAvailable(!!source&&connection.state==='CONNECTED');$('#view-switch').value=displayView();
- $('#shell').dataset.view='explorer';explorerLayoutUI?.refresh();renderAddress();renderFiles();void suggestion();
+ $('#shell').dataset.view='explorer';explorerLayoutUI?.refresh();renderAddress();renderFiles();focusPendingSearch();void suggestion();
 }
 function refreshExplorerFolder(){
  imageReader.clear();clearThumbnails();listingReader.invalidate();
@@ -463,7 +504,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){view='explorer';$('#shell').dataset.view='explorer';$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));}renderExplorer();if(!same)$('#files').scrollTop=0;paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));}renderExplorer();if(!same)$('#files').scrollTop=0;paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -809,7 +850,7 @@ async function chooseRemoteSave(entry){const capabilities=await api('describeCap
 const completedDestinationMessage=result=>result.destinationReadiness?.length?'Saved · Ready for right-click':'Saved · Chrome menu acknowledged';
 const saveButton='<button id="save" class="primary">Save</button>';
 const saveFeedback='<p id="destination-save-status" class="muted" role="status" aria-live="polite" hidden></p>';
-const destinationSetupDisclosure='<p class="muted" data-aesthetic-text="destinations.worker-explanation">Save prepares or maintains the private Cloudflare Worker for the selected destinations and checks a small R2 verification file when needed. Worker and R2 usage may incur charges. Setup covers the selected bucket.</p><details class="minimal-only"><summary>Setup and usage</summary><p>Save can authorize a private Worker for the selected bucket and a small R2 verification file. Cloudflare usage may incur charges.</p></details>';
+const destinationSetupDisclosure='<details><summary>Setup and usage</summary><p>Save prepares or maintains the private Cloudflare Worker for the selected destinations and checks a small R2 verification file when needed. Worker and R2 usage may incur charges. Setup covers the selected bucket.</p></details>';
 function showInChrome(display,attribute){
  return '<h3>Show in Chrome</h3><div class="show-mode-checkboxes">'+[['simple','Simple'],['nested','Narrow'],['depth','Depth']].map(([mode,label])=>
   `<label><input ${attribute}="${mode}" type="checkbox" ${display[mode]?'checked':''}> ${label}</label>`).join('')+'</div>';
@@ -936,7 +977,7 @@ async function manager(filter='simple',page=0,session=null,message=''){
      `<button data-manager-mode="${mode}" class="${mode===filter?'active':''}" aria-pressed="${mode===filter}">${label}</button>`).join('')}</div>
      <button id="organize" aria-label="Organize Right-Click">Organize</button></div>
     <section class="manager-default"><h3>Default destination</h3><p title="${esc(product.defaultTarget?pathLabel(product.defaultTarget):'')}">${product.defaultTarget?esc(pathLabel(product.defaultTarget)):'No default selected'}</p></section>
-    <p class="muted" data-aesthetic-text="destinations.availability-hint">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
+    <p class="muted">${connection?.state==='CONNECTED'?'Availability depends on the connected account.':'Reconnect to use saved destinations.'}</p>
     <div id="dest-list"${isDepth?' class="depth-destinations"':''}>${items.map(rowHtml).join('')||'<p class="muted manager-empty">No destinations in this mode.</p>'}</div>
     <div id="destination-delete-confirmation" class="card" role="group" aria-labelledby="destination-delete-title" hidden></div>
     ${isDepth?'<div id="manager-buckets"></div>':''}<button id="browse-destinations">Browse Cloudflare buckets</button>
@@ -1051,12 +1092,12 @@ async function organize(managerDraft,back=closeDialog){
 }
 async function suggestion(){if(!$('#suggestion')||!suggestionDue)return;try{const s=await api('getOrganizationSuggestion');if(!s.eligible){$('#suggestion').replaceChildren();$('#suggestion').className='';return;}$('#suggestion').innerHTML='<span>Many direct entries. Organize your right-click menu?</span><button id="suggest-organize">Organize</button><button id="dismiss-suggestion" aria-label="Dismiss organization suggestion">×</button>';$('#suggestion').className='suggestion';listen('#suggest-organize','click',organize);listen('#dismiss-suggestion','click',async()=>{await change({type:'dismissOrganizationSuggestion',signature:s.signature});$('#suggestion').replaceChildren();$('#suggestion').className='';});}catch{}}
 async function renderSettings(){
-  await aestheticReady;
+  await Promise.all([aestheticReady,dividerReady]);
   const [recovery,visual]=await Promise.all([api('inspectBackupRoots'),api('getGalleryLoadingVisual')]);if(view!=='settings')return;const policy=state.product.recovery;
   const providerMenuOptions=[['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']];
-  $('#main').innerHTML=`<section class="page"><h1>Settings</h1>${state.product.defaultTarget?'<button id="clear-default">Remove Default Location</button>':''}<div class="card"><h2>Appearance</h2><div class="settings-row"><label for="appearance">Appearance</label><select id="appearance">${aesthetic.list().map(theme=>'<option value="'+esc(theme.id)+'">'+esc(theme.name)+'</option>').join('')}</select></div><fieldset id="aesthetic-palette" class="palette-settings"><legend>Color scheme</legend><div class="palette-options">${aesthetic.listPalettes().map(({id,name,preview})=>`<label class="palette-choice"><input type="radio" name="bit-o-polish-palette" value="${esc(id)}"><span class="palette-swatch" aria-hidden="true" style="--swatch-light:${preview.light};--swatch-dark:${preview.dark}"></span><span>${esc(name)}</span></label>`).join('')}</div></fieldset><p id="aesthetic-status" role="status"></p><div class="settings-row"><label for="setting-theme">Theme</label><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option></select></div></div><div class="card"><h2>Gallery loading visual</h2><label for="loading-visual-mode">Loading visual</label><select id="loading-visual-mode"><option value="math">Mathematical geometry</option><option value="media">My local media</option><option value="plain">Plain placeholder</option></select><label>Choose local loading media <input id="loading-visual-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4"></label><p class="muted">${esc(visual.warning?'Custom media is unavailable; choose a replacement or remove it.':visual.media?.name??'No custom media selected')}. One local visual, up to 8 MiB; never uploaded. Reduced motion uses a still frame.</p><button id="loading-visual-remove" ${!visual.media&&!visual.warning?'disabled':''}>Remove local media</button><p id="loading-visual-result" role="status"></p></div><div class="card"><h2>Right-click menu</h2><p class="muted">Choose which cloud providers appear in Chrome's right-click menu. Turning one off keeps its account, files and saved destinations.</p>${providerMenuOptions.map(([provider,name])=>`<label class="settings-row"><span>${name}</span><input type="checkbox" data-provider-visible="${provider}" ${state.product.providerVisibility?.[provider]!==false?'checked':''} aria-label="Show ${name} in Chrome right-click menu"></label>`).join('')}</div>${manifestCard}<div class="card"><h2>Favorite Cloud</h2><p class="muted">A personal marker for future use. It does not change saves or menus.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-favorite="${i}" ${state.product.favorites.includes('cloudflare:'+a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')||'<p class="muted">Connect an account to mark a favorite.</p>'}</div><div id="settings-recovery" class="card" data-debug-only hidden><h2>Recovery Mode</h2><p class="muted">External storage: ${esc(recovery.state)}. Automatic Windows known-folder storage requires a native companion.</p><label>Cadence <select id="cadence"><option value="weekly">Weekly · Monday</option><option value="daily">Daily</option></select></label><label><input type="checkbox" id="simple-recovery" ${policy.simple?'checked':''}> Simple Recovery</label><label><input type="checkbox" id="narrow-recovery" ${policy.nested?'checked':''}> Narrow Recovery</label><details><summary>Bucket recovery crawl</summary><p class="muted">Recovery depth is independent of Chrome display depth. Expand accounts in File Explorer to discover buckets.</p>${bucketTargets.map((b,i)=>{const policy=state.product.recovery.buckets.find(p=>p.target.accountId===b.accountId&&p.target.bucketName===b.bucketName);return `<label><input data-recovery="${i}" type="checkbox" ${policy?.enabled?'checked':''}> ${esc(b.bucketName)} <input type="number" min="1" data-crawl-depth="${i}" aria-label="Recovery depth for ${esc(b.bucketName)}" value="${policy?.depth??10}"></label>`;}).join('')}</details><label>Windows Backup Location <select id="backup-location"><option value="automatic">Automatic · Local AppData</option><option value="documents">Documents</option></select></label><p class="muted">Windows locations are unavailable without a native companion. A user-authorized external folder can be attached separately.</p><button id="choose-backup">Choose external backup folder</button><button id="backup-now">Back up now</button><button id="restore">Restore My Right-Click Menu</button></div><div id="settings-whole-cloud" class="card" data-debug-only hidden><h2>Save Whole Cloud</h2><p class="muted">Read-only bucket/key outline. Starts only when explicitly enabled and external storage is authorized. Lost authorization quietly pauses the job.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-whole="${i}"> Cloudflare · ${esc(a.name)}</label>`).join('')||'<p class="muted">No connected supported accounts.</p>'}<button id="enable-whole">Enable selected accounts</button><button id="stop-whole">Stop selected accounts</button><button id="whole-status">Inspect jobs</button><pre id="jobs"></pre></div><div id="settings-connection" class="card" data-debug-only hidden><h2>Connection</h2><p id="oauth-redirect-uri" class="muted wrap-text">${esc(connection?.redirectUri??'')}</p><button id="disconnect" ${!connection?.authenticated&&connection?.state!=='CONNECTED'?'disabled':''}>Disconnect Cloudflare</button></div><div class="card"><h2>Programmatic access</h2><p class="muted" data-aesthetic-text="settings.help-copy">The V3+1 API powers these controls. Agent execution requires a separate local grant scoped to methods, accounts, and expiry. No public endpoint or active MCP connection.</p><button id="capabilities">Inspect API capabilities</button><pre id="api-info"></pre></div></section>`;
+  $('#main').innerHTML=`<section class="page"><h1>Settings</h1><div class="card"><h2>Appearance</h2><div class="settings-row"><label for="appearance">Theme</label><select id="appearance">${aesthetic.list().map(theme=>'<option value="'+esc(theme.id)+'">'+esc(theme.name)+'</option>').join('')}</select></div><fieldset id="aesthetic-palette" class="palette-settings"><legend>Color and typography</legend><div class="palette-options">${aesthetic.listPalettes().map(({id,name,preview})=>`<label class="palette-choice"><input type="radio" name="aesthetic-palette" value="${esc(id)}"><span class="palette-swatch" aria-hidden="true" style="--swatch-light:${preview.light};--swatch-dark:${preview.dark}"></span><span>${esc(name)}</span></label>`).join('')}</div><div data-palette-preview aria-label="Palette preview"><h3 id="palette-preview-name"></h3><p>Folder names and descriptions</p><button type="button" aria-disabled="true">Example control</button></div></fieldset><p id="aesthetic-status" role="status"></p><div class="settings-row"><label for="setting-theme">Color mode</label><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option></select></div></div><div class="card"><h2>Gallery loading visual</h2><label for="loading-visual-mode">Loading visual</label><select id="loading-visual-mode"><option value="math">Mathematical geometry</option><option value="media">My local media</option><option value="plain">Plain placeholder</option></select><label>Choose local loading media <input id="loading-visual-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4"></label><p class="muted">${esc(visual.warning?'Custom media is unavailable; choose a replacement or remove it.':visual.media?.name??'No custom media selected')}. One local visual, up to 8 MiB; never uploaded. Reduced motion uses a still frame.</p><button id="loading-visual-remove" ${!visual.media&&!visual.warning?'disabled':''}>Remove local media</button><p id="loading-visual-result" role="status"></p></div><div class="card"><h2>Right-click menu</h2><p class="muted">Choose which cloud providers appear in Chrome's right-click menu. Turning one off keeps its account, files and saved destinations.</p>${providerMenuOptions.map(([provider,name])=>`<label class="settings-row"><span>${name}</span><input type="checkbox" data-provider-visible="${provider}" ${state.product.providerVisibility?.[provider]!==false?'checked':''} aria-label="Show ${name} in Chrome right-click menu"></label>`).join('')}</div>${manifestCard}<div class="card"><h2>Favorite Cloud</h2><p class="muted">A personal marker for future use. It does not change saves or menus.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-favorite="${i}" ${state.product.favorites.includes('cloudflare:'+a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')||'<p class="muted">Connect an account to mark a favorite.</p>'}</div><div id="settings-recovery" class="card" data-debug-only hidden><h2>Recovery Mode</h2><p class="muted">External storage: ${esc(recovery.state)}. Automatic Windows known-folder storage requires a native companion.</p><label>Cadence <select id="cadence"><option value="weekly">Weekly · Monday</option><option value="daily">Daily</option></select></label><label><input type="checkbox" id="simple-recovery" ${policy.simple?'checked':''}> Simple Recovery</label><label><input type="checkbox" id="narrow-recovery" ${policy.nested?'checked':''}> Narrow Recovery</label><details><summary>Bucket recovery crawl</summary><p class="muted">Recovery depth is independent of Chrome display depth. Expand accounts in File Explorer to discover buckets.</p>${bucketTargets.map((b,i)=>{const policy=state.product.recovery.buckets.find(p=>p.target.accountId===b.accountId&&p.target.bucketName===b.bucketName);return `<label><input data-recovery="${i}" type="checkbox" ${policy?.enabled?'checked':''}> ${esc(b.bucketName)} <input type="number" min="1" data-crawl-depth="${i}" aria-label="Recovery depth for ${esc(b.bucketName)}" value="${policy?.depth??10}"></label>`;}).join('')}</details><label>Windows Backup Location <select id="backup-location"><option value="automatic">Automatic · Local AppData</option><option value="documents">Documents</option></select></label><p class="muted">Windows locations are unavailable without a native companion. A user-authorized external folder can be attached separately.</p><button id="choose-backup">Choose external backup folder</button><button id="backup-now">Back up now</button><button id="restore">Restore My Right-Click Menu</button></div><div id="settings-whole-cloud" class="card" data-debug-only hidden><h2>Save Whole Cloud</h2><p class="muted">Read-only bucket/key outline. Starts only when explicitly enabled and external storage is authorized. Lost authorization quietly pauses the job.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-whole="${i}"> Cloudflare · ${esc(a.name)}</label>`).join('')||'<p class="muted">No connected supported accounts.</p>'}<button id="enable-whole">Enable selected accounts</button><button id="stop-whole">Stop selected accounts</button><button id="whole-status">Inspect jobs</button><pre id="jobs"></pre></div><div id="settings-connection" class="card" data-debug-only hidden><h2>Connection</h2><p id="oauth-redirect-uri" class="muted wrap-text">${esc(connection?.redirectUri??'')}</p><button id="disconnect" ${!connection?.authenticated&&connection?.state!=='CONNECTED'?'disabled':''}>Disconnect Cloudflare</button></div><div class="card"><h2>Programmatic access</h2><p class="muted">The V3+1 API powers these controls. Agent execution requires a separate local grant scoped to methods, accounts, and expiry. No public endpoint or active MCP connection.</p><button id="capabilities">Inspect API capabilities</button><pre id="api-info"></pre></div></section>`;
   mountManifestPanel($('#portable-menu-manifests'),{api:(method,params)=>api(method,params,{quiet:true}),accounts:()=>connection?.accounts??[],getRevision:()=>state.product.revision,onApplied:async()=>{await refreshState();}});
-  const debugCard=document.createElement('div');debugCard.className='card';debugCard.innerHTML='<h2>Debug</h2><label><input id="debug-mode" type="checkbox"> Debug Mode</label><p class="muted" data-aesthetic-text="settings.help-copy">Show diagnostic status and inspect safe local details. This does not grant additional access or change saving.</p><div id="debug-details" data-debug-only hidden><button id="show-save-results">Review save results</button><button id="debug-health">Inspect safe diagnostics</button><pre id="debug-health-output"></pre><div id="recorder-panel"></div></div><p id="debug-preference-result" role="status"></p>';$('#main .page').append(debugCard);applyDebugMode(debugMode);
+  const debugCard=document.createElement('div');debugCard.className='card';debugCard.innerHTML='<h2>Debug</h2><label><input id="debug-mode" type="checkbox"> Debug Mode</label><p class="muted">Show diagnostic status and inspect safe local details. This does not grant additional access or change saving.</p><div id="debug-details" data-debug-only hidden><button id="show-save-results">Review save results</button><button id="debug-health">Inspect safe diagnostics</button><pre id="debug-health-output"></pre><div id="recorder-panel"></div></div><p id="debug-preference-result" role="status"></p>';$('#main .page').append(debugCard);applyDebugMode(debugMode);
   void import('./recorder-panel.mjs').then(m=>m.mountRecorderPanel(document.querySelector('#recorder-panel'))).catch(()=>{});
   const historySettings=document.createElement('div');historySettings.className='card';$('#main .page').append(historySettings);
   listen('#debug-mode','change',async event=>{const enabled=event.target.checked,feedback=$('#debug-preference-result');try{if(!enabled&&!confirm('Turn Debug Mode off and stop any expansive forensic recording? Basic diagnostics stays on.')){event.target.checked=true;return;}if(!enabled){let deadline;try{await Promise.race([chrome.runtime.sendMessage({channel:'recorder',version:2,method:'stop',params:{}}),new Promise(resolve=>{deadline=setTimeout(resolve,2000);})]);}catch{}finally{clearTimeout(deadline);}}await debugPreference.set(enabled);applyDebugMode(enabled);if(feedback.isConnected)feedback.textContent='';}catch{applyDebugMode(debugPreference.enabled);if(feedback.isConnected)feedback.textContent='Debug Mode is OFF for this window; the preference could not be saved. Try again.';}});
@@ -1073,7 +1114,8 @@ async function renderSettings(){
   const appearance=$('#appearance'),palettes=$('#aesthetic-palette'),appearanceStatus=$('#aesthetic-status');
   function syncAppearance(){
    appearance.value=aesthetic.getActive().id;
-   palettes.hidden=appearance.value!=='high-polish';
+   palettes.hidden=appearance.value!=='minimal';
+   $('#palette-preview-name').textContent=aesthetic.listPalettes().find(palette=>palette.id===aesthetic.getPalette())?.name??'';
    for(const option of palettes.querySelectorAll('input'))option.checked=option.value===aesthetic.getPalette();
   }
   appearance.onchange=async event=>{
@@ -1083,8 +1125,10 @@ async function renderSettings(){
    appearanceStatus.textContent=result.error?'Appearance applied for this session. The preference could not be saved.':'';
   };
   palettes.onchange=async event=>{
-   const result=await aesthetic.applyPalette(event.target.value);
-   appearanceStatus.textContent=result.error?'Color scheme applied for this session. The preference could not be saved.':'';
+   const pending=aesthetic.applyPalette(event.target.value);
+   syncAppearance();
+   const result=await pending;
+   appearanceStatus.textContent=result.error?'Palette applied for this session. The preference could not be saved.':'';
   };
   syncAppearance();
   $('#setting-theme').value=state.product.theme;$('#cadence').value=policy.cadence;$('#backup-location').value=policy.location;
@@ -1096,7 +1140,6 @@ async function renderSettings(){
   listen('#loading-visual-mode','change',async e=>{try{await saveVisual({mode:e.target.value});}catch(error){e.target.value=visual.mode;$('#loading-visual-result').textContent=error.code??error.message;}});
   listen('#loading-visual-remove','click',()=>saveVisual({mode:visual.mode==='media'?'math':visual.mode,removeMedia:true}));
   listen('#loading-visual-file','change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>LOADING_MEDIA_MAX_BYTES)throw Error('LOADING_MEDIA_TOO_LARGE');let binary='';const bytes=new Uint8Array(await file.arrayBuffer());for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));const media={name:file.name,type:file.type,base64:btoa(binary)};loadingMedia(media);await saveVisual({mode:'media',media});}catch(error){$('#loading-visual-result').textContent=error.code??error.message;}});
-  listen('#clear-default','click',async()=>{if(confirm('Remove the default destination? Cloud files are kept. If all saved destinations are also removed, the next login can initialize redown again.')){await change({type:'clearDefault'});await renderSettings();}});
   for(const id of ['cadence','simple-recovery','narrow-recovery','backup-location'])listen('#'+id,'change',()=>change({type:'updateRecoveryPolicy',policy:{...state.product.recovery,cadence:$('#cadence').value,simple:$('#simple-recovery').checked,nested:$('#narrow-recovery').checked,location:$('#backup-location').value}}));
   for(const input of $$('[data-recovery], [data-crawl-depth]'))input.onchange=()=>change({type:'updateRecoveryPolicy',policy:{...state.product.recovery,buckets:[...state.product.recovery.buckets.filter(s=>!bucketTargets.some(b=>b.accountId===s.target.accountId&&b.bucketName===s.target.bucketName)),...bucketTargets.map((b,i)=>({target:b,enabled:$(`[data-recovery="${i}"]`).checked,depth:Number($(`[data-crawl-depth="${i}"]`).value)}))]}}).catch(e=>status(e.message));
   listen('#choose-backup','click',async()=>{
@@ -1114,8 +1157,31 @@ async function renderSettings(){
   await historyUI.settings(historySettings);
   if(historySettings.isConnected){
     explorerExports.mountSettings(historySettings.parentElement);
-    void screenshotUI.settings(historySettings.parentElement);
-    shortcuts.mount(historySettings.parentElement);
+    const page=historySettings.parentElement;
+    await screenshotUI.settings(page);
+    if(!page.isConnected)return;
+    shortcuts.mount(page);
+    const divider=document.createElement('label');
+    divider.innerHTML='<span>Ctrl+Shift+F9 divider cycle</span> <select id="divider-cycle">'+Object.entries(dividerModes).map(([value,label])=>`<option value="${value}">${label}</option>`).join('')+'</select>';
+    page.append(divider);
+    const select=divider.querySelector('select');select.value=dividerMode;
+    listen('#divider-cycle','change',async()=>{try{await chrome.storage.local.set({[dividerCycleKey]:select.value});dividerMode=select.value;}
+      catch(error){select.value=dividerMode;throw error;}});
+    const chromeSearch=document.createElement('section');chromeSearch.className='card';
+    chromeSearch.innerHTML='<h2>Chrome-wide Explorer search</h2><p id="chrome-explorer-binding" role="status">Checking shortcut…</p><p>Set a Chrome shortcut for “Open File Explorer and focus filename search”, such as Alt+Shift+F. Ctrl+Shift+F7 is available inside File Explorer.</p><button id="open-chrome-shortcuts" type="button">Open Chrome shortcut settings</button>';
+    page.append(chromeSearch);
+    const binding=chromeSearch.querySelector('#chrome-explorer-binding');
+    const refreshBinding=async()=>{try{binding.textContent=(await chromeCommandBindings(chrome)).get(shelfExplorerSearchCommand)??'Unassigned in Chrome';}
+      catch{binding.textContent='Chrome shortcut status unavailable';}};
+    listen('#open-chrome-shortcuts','click',()=>openChromeShortcuts(chrome));
+    window.addEventListener('focus',()=>{if(binding.isConnected)void refreshBinding();},{once:true});
+    void refreshBinding();
+    if(state.product.defaultTarget){
+      const section=document.createElement('section');section.className='card';
+      section.innerHTML='<h2>Default location</h2><button id="clear-default">Remove Default Location</button>';
+      page.append(section);
+  listen('#clear-default','click',async()=>{if(confirm('Remove the default destination? Cloud files are kept. If all saved destinations are also removed, the next login can initialize redown again.')){await change({type:'clearDefault'});await renderSettings();}});
+    }
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
@@ -1136,10 +1202,9 @@ async function bootstrap(){
  const session=connections().finally(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();});
  const description=readWithRetry(()=>api('describeCapabilities',{}, {quiet:true,readTimeout:5000})).then(value=>{capabilities=value;}).catch(()=>{});
  const startingView=viewEpoch;
- void shelfView('intent').then(intent=>{if(intent?.view==='history'&&viewEpoch===startingView)return show('history');}).catch(()=>{});
+ void shelfView('intent').then(intent=>{if(viewEpoch===startingView)return useShelfIntent(intent);}).catch(()=>{});
  await Promise.allSettled([configuration,session,description]);
  await focusShelf().catch(()=>{});
- await screenshotUI.chooseForCapture().catch(()=>{});
 }
 void bootstrap();
 
@@ -1161,7 +1226,7 @@ async function cloudflarePanel(){
  cloudflareState={...readiness,code,selectedReady:ready,...(target?{target,accountId}:{} )};
  const needsApproval=['SETUP_APPROVAL_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(code);
  const setupNeeded=accountId&&!readiness.diagnostic&&['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED'].includes(readiness.state)&&!['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED','WORKER_DESTINATION_SCOPE_REQUIRED'].includes(code);
- $('#main').innerHTML=`<section class="page"><h1>Cloudflare R2</h1>${target?'<h2>Selected save destination</h2><p>'+esc(selectedSetupLabel(target,accounts))+'</p>':''}<p role="status" data-aesthetic-text="status.verbose-technical-detail">${esc(ready?'Prepared and verified · make a new right-click to save.':(target?'Not saved · '+code+' · ':'')+(names[code]??readinessNames[readiness.state]??code))}</p><p class="minimal-only" role="status">${ready?'Ready to save.':'Save unavailable.'}</p>${!shelfRequest?.target&&accounts.length>1?'<label>Authorized account<select id="cf-account"><option value="">Choose an account</option>'+accounts.map(a=>'<option value="'+esc(a.id)+'" '+(a.id===accountId?'selected':'')+'>'+esc(a.name??a.id)+'</option>').join('')+'</select></label>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(readiness.diagnostic)}${setupNeeded?'<p>'+(target?'Prepare this exact bucket and folder using saved approval, or authorize preparation once if needed. No original source is replayed. Cloudflare may charge for Worker/R2 usage and a small retained verification file.':result.onboarding.setupAuthorized?'Setup approval is already saved. Resume the same interrupted operation after correcting Cloudflare access.':'Authorize automatic setup for this account: create/reuse redown only when no destinations or default exist, prepare saved destinations, and verify a small retained readiness file. Cloudflare may charge for usage. Cloud files are never deleted.')+'</p><button id="cf-authorize">'+(target?(!needsApproval&&result.onboarding.setupAuthorized?'Inspect / prepare selected destination':'Authorize selected destination'):(result.onboarding.setupAuthorized?'Inspect / resume existing setup':'Authorize automatic setup'))+'</button>':''}<button id="cf-remotes">Back to Remotes</button><details><summary>Advanced diagnostics</summary><pre>${esc(JSON.stringify({state:readiness.state,code,worker:readiness.worker?.code,target:target?{accountId:target.accountId,bucketName:target.bucketName,prefix:target.prefix}:undefined},null,2))}</pre><button id="cf-refresh">Refresh status</button></details></section>`;
+ $('#main').innerHTML=`<section class="page"><h1>Cloudflare R2</h1>${target?'<h2>Selected save destination</h2><p>'+esc(selectedSetupLabel(target,accounts))+'</p>':''}<p role="status">${esc(ready?'Prepared and verified · make a new right-click to save.':(target?'Not saved · '+code+' · ':'')+(names[code]??readinessNames[readiness.state]??code))}</p>${!shelfRequest?.target&&accounts.length>1?'<label>Authorized account<select id="cf-account"><option value="">Choose an account</option>'+accounts.map(a=>'<option value="'+esc(a.id)+'" '+(a.id===accountId?'selected':'')+'>'+esc(a.name??a.id)+'</option>').join('')+'</select></label>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(readiness.diagnostic)}${setupNeeded?'<p>'+(target?'Prepare this exact bucket and folder using saved approval, or authorize preparation once if needed. No original source is replayed. Cloudflare may charge for Worker/R2 usage and a small retained verification file.':result.onboarding.setupAuthorized?'Setup approval is already saved. Resume the same interrupted operation after correcting Cloudflare access.':'Authorize automatic setup for this account: create/reuse redown only when no destinations or default exist, prepare saved destinations, and verify a small retained readiness file. Cloudflare may charge for usage. Cloud files are never deleted.')+'</p><button id="cf-authorize">'+(target?(!needsApproval&&result.onboarding.setupAuthorized?'Inspect / prepare selected destination':'Authorize selected destination'):(result.onboarding.setupAuthorized?'Inspect / resume existing setup':'Authorize automatic setup'))+'</button>':''}<button id="cf-remotes">Back to Remotes</button><details><summary>Advanced diagnostics</summary><pre>${esc(JSON.stringify({state:readiness.state,code,worker:readiness.worker?.code,target:target?{accountId:target.accountId,bucketName:target.bucketName,prefix:target.prefix}:undefined},null,2))}</pre><button id="cf-refresh">Refresh status</button></details></section>`;
  listen('#update-worker','click',()=>authorizeCloudflare(accountId,target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#cf-account','change',async e=>{if(!e.target.value)return;await api('selectCloudflareAccount',{accountId:e.target.value});cloudflareState=await api('checkCloudflareR2',{accountId:e.target.value});await refreshState();await cloudflarePanel();});
  listen('#cf-authorize','click',async()=>{if(needsApproval||!result.onboarding.setupAuthorized)return authorizeCloudflare(accountId,target);return resumeWorkerSetup();});
  listen('#cf-refresh','click',cloudflarePanel);listen('#cf-remotes','click',()=>show('remotes'));
@@ -1196,11 +1261,14 @@ async function downloadEntry(entry){
 
 chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(sender?.id!==chrome.runtime.id)return;
- if(message?.channel==='shelf-history-show'){
-  const intent=viewEpoch;
+ if(['shelf-history-show','shelf-explorer-search'].includes(message?.channel)){
+  const requestedAt=viewEpoch;
   void shelfWindow.then(async id=>{
-   if(id!==message.windowId||(await shelfView('intent'))?.view!=='history'||intent!==viewEpoch)return;
-   closeDialog();await show('history');
+   if(id!==message.windowId)return;
+   const intent=await shelfView('intent');
+   if(message.channel==='shelf-history-show'&&(requestedAt!==viewEpoch||intent?.view!=='history'))return;
+   if(message.channel==='shelf-explorer-search'&&(intent?.view!=='explorer'||intent.sequence!==message.sequence))return;
+   await useShelfIntent(intent);
   }).catch(error=>status(error.message));
   return;
  }
@@ -1210,10 +1278,6 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
    feedback.textContent=message.code==='SHELF_CLOSE_UNAVAILABLE'?'Use the Shelf close button in this version of Chrome.':'Chrome could not change the Shelf. Try the shortcut again.';
    feedback.hidden=false;
   }}).catch(()=>{});
-  return;
- }
- if(message?.channel==='screenshot-choose-folder'){
-  void shelfWindow.then(id=>{if(id===message.windowId)return screenshotUI.chooseForCapture();}).catch(()=>{});
   return;
  }
  if(message?.channel==='screenshot-result'){

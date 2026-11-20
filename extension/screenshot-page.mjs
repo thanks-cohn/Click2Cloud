@@ -10,9 +10,9 @@ const screenshotMessages={
  SCREENSHOT_HOST_INVALID:'Enter a hostname such as example.com.',
  SCREENSHOT_URL_INVALID:'Enter a full HTTP or HTTPS page URL.',
  SCREENSHOT_RULE_CHANGED:'This rule changed in another Shelf. Reopen it to edit the latest version.',
- SCREENSHOT_RULE_NOT_FOUND:'This rule was deleted. Reopen Screenshot to refresh the cards.',
+ SCREENSHOT_RULE_NOT_FOUND:'This rule was deleted. Reopen Screenshots to refresh the cards.',
  SCREENSHOT_FOLDER_UNAVAILABLE:'This folder could not be verified in Cloudflare. Select an available directory.',
- SCREENSHOT_FOLDER_REQUEST_EXPIRED:'Open Screenshot from the webpage’s right-click menu again.',
+ SCREENSHOT_FOLDER_REQUEST_EXPIRED:'The screenshot folder request expired.',
  SCREENSHOT_PAGE_CHANGED:'The active tab or page changed during capture.',
  SCREENSHOT_PAGE_UNSUPPORTED:'Chrome can capture supported HTTP and HTTPS webpages.',
  SCREENSHOT_PERMISSION_REQUIRED:'Chrome did not grant access to capture this tab.',
@@ -20,7 +20,7 @@ const screenshotMessages={
  TAB_URL_UNAVAILABLE:'Chrome did not provide the active page URL. Focus the webpage and press the shortcut again.',
  SCREENSHOT_WINDOW_UNAVAILABLE:'Focus a normal Chrome window and try again.',
  SCREENSHOT_PNG_INVALID:'Chrome returned an invalid screenshot image.',
- SCREENSHOT_NO_MATCHING_RULES:'Create or enable a matching rule in More → Screenshot.',
+ SCREENSHOT_NO_MATCHING_RULES:'Create or enable a matching rule in More → Screenshots.',
  R2_BUCKET_ACCESS_DENIED:'Check your Cloudflare access to this bucket, then retry from History.',
  SELECTED_BUCKET_MISSING:'This bucket is no longer available to the connected Cloudflare account.',
  INSUFFICIENT_SCOPE:'Reconnect Cloudflare with permission to read and write R2 objects.',
@@ -51,10 +51,10 @@ export function screenshotFeedback({state,confirmed,total,retryable,code,recorde
 export async function screenshotRequest(method,params={}){
  const result=await chrome.runtime.sendMessage({channel:'screenshot',method,params});
  if(result?.state==='completed')return result.data;
- throw Object.assign(Error(result?.code??'SCREENSHOT_REQUEST_FAILED'),{code:result?.code});
+ throw Object.assign(Error(result?.code??'SCREENSHOT_REQUEST_FAILED'),{code:result?.code,httpStatus:result?.httpStatus,providerCodes:result?.providerCodes});
 }
 
-export function createScreenshotPage({api,dialog,closeDialog,esc,windowId}){
+export function createScreenshotPage({api,dialog,closeDialog,esc}){
  const element=(tag,text)=>Object.assign(document.createElement(tag),text===undefined?{}:{textContent:text});
  const button=(label,action)=>{
   const control=element('button',label);
@@ -210,7 +210,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,windowId}){
  }
  async function mount(parent){
   const page=element('section');page.className='page screenshot-page';
-  page.innerHTML='<h1>Screenshot</h1><p class="muted" data-keys></p><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
+  page.innerHTML='<h1>Screenshots</h1><p class="muted" data-keys></p><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
   parent.replaceChildren(page);
   const form=page.querySelector('form'),cards=page.querySelector('[data-cards]'),pager=page.querySelector('[data-pages]'),feedback=page.querySelector('[data-rule-status]');
   const readSites=sites(form.querySelector('[data-websites]'),[{kind:'all'}]);
@@ -311,26 +311,9 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,windowId}){
   }
   form.elements.card.onchange=redraw;redraw();
  }
- async function chooseForCapture(){
-  const id=await windowId;
-  if(!Number.isInteger(id))return;
-  const pending=await screenshotRequest('folder-request',{windowId:id});
-  if(!pending||document.querySelector('#screenshot-one-off'))return;
-  dialog('Screenshot to folder','<form id="screenshot-one-off"><fieldset><legend>Cloudflare directory</legend><div data-directories></div></fieldset><button class="primary" disabled>Capture and save</button><p role="status"></p></form>');
-  const form=document.querySelector('#screenshot-one-off'),save=form.querySelector('button[disabled]'),feedback=form.querySelector('[role=status]');
-  const targets=directories(form.querySelector('[data-directories]'),[],count=>{save.disabled=!count;});
-  form.onsubmit=async event=>{
-   event.preventDefault();save.disabled=true;feedback.textContent='Capturing…';
-   try{
-    const result=await screenshotRequest('choose-folder',{windowId:id,id:pending.id,target:targets()[0]});
-    if(result?.state==='confirmed')closeDialog();
-    else feedback.textContent=screenshotMessage(result?.code??result?.outputs[0]?.code,'Open History for the capture result.');
-   }catch(error){feedback.textContent=screenshotMessage(error.code,'Could not save the screenshot.');save.disabled=false;}
-  };
- }
  async function settings(container){
   const control=element('section');control.className='card';
-  control.innerHTML='<h2>Screenshot</h2><label><input type="checkbox" disabled> Single file per screenshot per directory</label><p role="status"></p>';
+  control.innerHTML='<h2>Screenshots</h2><label><input type="checkbox" disabled> Single file per screenshot per directory</label><p role="status"></p>';
   container.append(control);
   const input=control.querySelector('input'),feedback=control.querySelector('[role=status]');
   try{input.checked=(await screenshotRequest('read')).dedup;input.disabled=false;}
@@ -342,5 +325,5 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,windowId}){
    finally{input.disabled=false;}
   };
  }
- return {mount,settings,configureHere,chooseForCapture};
+ return {mount,settings,configureHere};
 }

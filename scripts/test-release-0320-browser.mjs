@@ -89,6 +89,10 @@ try{
   assert.equal(await page.evaluate(()=>document.activeElement.id),'files');
   await page.keyboard.press('Control+Shift+F8');
   assert(await page.locator('#filename-search').isHidden());
+  assert.equal(await page.locator('#toolbar-splitter').getAttribute('aria-valuenow'),'1');
+  await page.locator('#toolbar-splitter').press('ArrowDown');
+  await page.waitForFunction(()=>document.querySelector('#toolbar-splitter').getAttribute('aria-valuenow')==='2');
+  await page.locator('#files').focus();
   await page.keyboard.press('Control+Shift+F7');
   await page.locator('#command-items #filename-search').waitFor();
   assert.equal(await page.locator('#toolbar-splitter').getAttribute('aria-valuenow'),'2');
@@ -102,11 +106,11 @@ try{
     await page.getByRole('menuitem',{name:'Settings',exact:true}).click();
   };
   await openSettings();
-  const card=page.locator('main .page > section.card').last();
+  const card=page.locator('main .page > section.card').filter({has:page.getByRole('heading',{name:'Keyboard Shortcuts'})});
   await card.getByRole('heading',{name:'Keyboard Shortcuts'}).waitFor();
   await card.getByRole('button',{name:'Change shortcut for Focus filename Search'}).click();
   const capture=card.getByRole('textbox',{name:/Press your new shortcut/});
-  await capture.press('Control+Shift+F8');
+  await capture.press('Control+Shift+F9');
   await card.getByRole('button',{name:'Save',exact:true}).click();
   await card.getByText('This shortcut is already assigned.').waitFor();
   await capture.press('Control+Shift+F4');

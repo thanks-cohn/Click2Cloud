@@ -9,6 +9,7 @@ import {createDailyBadge,countVerifiedSaves,nextLocalMidnight} from '../src/chro
 import {developmentalDomain,directoryUrlFiles,simpleDirectoryUrls,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,verifiedDomains} from '../src/explorer/object-exports.mjs';
 import {downloadJob,embedPngTags,streamDownloadArchive} from '../src/explorer/download-archive.mjs';
 import {describeExplorerContextMenu} from '../src/api/explorer-context-menu.mjs';
+import {cycleDivider,normalizeDividerMode} from '../src/explorer/layout.mjs';
 
 const source={provider:'cloudflare',accountId:'fixture',connectionId:'cloudflare:fixture',bucketName:'test-bucket',prefix:'images/'};
 const file={key:'images/pic, café.png',etag:'v1',size:3};
@@ -40,16 +41,33 @@ function createFixture(readManagedDomain) {
 test('canonical shortcut methods advertise UI and API commands and reject invalid or collided keys', async()=>{
   const {client}=createFixture(), invoke=client.invoke;
   const commands=(await invoke('listCommands')).data.commands;
-  assert.equal(commands.filter(command=>command.kind==='ui').length,3);
+  assert.equal(commands.filter(command=>command.kind==='ui').length,2);
   assert.equal(commands.find(command=>command.kind==='api').method,'refreshExplorer');
   const id='explorer.focusSearch';
   assert.equal((await invoke('getShortcutBindings')).data.bindings[id],'Ctrl+Shift+F7');
   assert.equal((await invoke('setShortcutBinding',{commandId:id,chord:'Shift+Control+F4'})).data.bindings[id],'Ctrl+Shift+F4');
-  assert.equal((await invoke('setShortcutBinding',{commandId:id,chord:'Ctrl+Shift+F8'})).code,'SHORTCUT_COLLISION');
+  assert.equal((await invoke('setShortcutBinding',{commandId:id,chord:'Ctrl+Shift+F9'})).code,'SHORTCUT_COLLISION');
   assert.equal((await invoke('setShortcutBinding',{commandId:id,chord:'Ctrl+Shift+T'})).code,'SHORTCUT_INVALID_OR_RESERVED');
   assert.equal((await invoke('setShortcutBinding',{commandId:id,chord:null})).data.bindings[id],null);
   assert.equal((await invoke('resetShortcutBindings')).data.bindings[id],'Ctrl+Shift+F7');
   assert.equal(normalizeChord('A'),null);
+});
+test('The divider cycles through both true extremes in each mode and releases the retired F8 command',()=>{
+  for(const [mode,sequence] of [['alternate',[0,50,100,50]],['left',[0,50]],['right',[100,50]]]){
+    let position=50,nextExtreme=0;
+    for(let press=0;press<12;press++){
+      ({position,nextExtreme}=cycleDivider(position,mode,nextExtreme));
+      assert.equal(position,sequence[press%sequence.length]);
+    }
+    assert.deepEqual(cycleDivider(36,mode,nextExtreme),{position:50,nextExtreme:0});
+  }
+  assert.equal(normalizeDividerMode('unknown'),'alternate');
+  const commands=listCommands(toolRegistry),historical={version:1,overrides:{
+    'explorer.toggleToolbarRows':'Ctrl+Shift+F8','explorer.focusSearch':'Ctrl+Shift+F4'}};
+  const bindings=resolveBindings(commands,historical);
+  assert.equal(bindings['explorer.toggleToolbarRows'],undefined);
+  assert.equal(bindings['explorer.focusSearch'],'Ctrl+Shift+F4');
+  assert.equal(normalizeChord('Ctrl+Shift+F8'),'Ctrl+Shift+F8');
 });
 test('shortcut storage serializes concurrent changes and keeps prior bindings on failure',async()=>{
   const preferences=storage(),catalog=listCommands(toolRegistry),store=createShortcutStore(preferences,catalog);

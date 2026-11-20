@@ -3,7 +3,7 @@
 import {chromium} from 'playwright-core';import {createServer} from 'node:http';import {readFile,mkdir,writeFile,mkdtemp,rm} from 'node:fs/promises';import {resolve,join,extname} from 'node:path';import {tmpdir} from 'node:os';import assert from 'node:assert/strict';
 const root=resolve(new URL('../',import.meta.url).pathname),out=resolve(process.env.C2C_AESTHETIC_EVIDENCE??'work/foundation/aesthetic');await mkdir(out,{recursive:true});let context,server;const results=[],errors=[],profile=await mkdtemp(join(tmpdir(),'c2c-history-'));
 try{server=createServer(async(req,res)=>{try{const p=resolve(root,'.'+new URL(req.url,'http://local').pathname);if(!p.startsWith(root+'/'))return res.writeHead(403).end();res.setHeader('Content-Type',({'.mjs':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png'})[extname(p)]??'application/octet-stream');res.end(await readFile(p));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
-context=await chromium.launchPersistentContext(profile,{executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox'],viewport:{width:1100,height:850}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+context=await chromium.launchPersistentContext(profile,{executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true,args:['--no-sandbox'],viewport:{width:1100,height:850}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
 await page.addInitScript(()=>{const listeners=[],data={uiDebugMode:false};globalThis.chrome={runtime:{id:'fixture',onMessage:{addListener:fn=>listeners.push(fn)},sendMessage:async message=>{(window.engineCalls??=[]).push(message.method);return (await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method:message.method,params:message.params});}},storage:{local:{get:async keys=>Object.fromEntries([keys].flat().map(key=>[key,key.startsWith('aesthetic')?JSON.parse(localStorage.getItem(key)??'null')??undefined:data[key]])),set:async v=>{Object.assign(data,v);for(const key of Object.keys(v))if(key.startsWith('aesthetic'))localStorage.setItem(key,JSON.stringify(v[key]));}},onChanged:{addListener(){}}}};window.fixtureNotify=message=>listeners.forEach(fn=>fn(message,{id:'fixture'}));});
 await page.goto('http://127.0.0.1:'+server.address().port+'/extension/app.html?fixturePerformance=1');await page.waitForFunction(()=>window.productFixture);
 await page.waitForFunction(()=>!document.querySelector('[data-view=history]').disabled);
@@ -17,38 +17,63 @@ const snapshot=()=>page.evaluate(async()=>({
  effects:window.engineCalls.filter(method=>/^(set|commit|dispatch|initialize|approve|recover|fileAction)/.test(method))
 }));
 const before=await snapshot();
-assert.deepEqual(await page.locator('#appearance option').allTextContents(),["Bit o' Polish",'Remote V1','Minimal']);
-await page.locator('#appearance').selectOption('high-polish');
+assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1']);
+assert.equal(await page.locator('#appearance').inputValue(),'minimal');
 const palette=page.locator('#aesthetic-palette');
-assert.equal(await palette.getByRole('radio').count(),5);
+assert.deepEqual(await palette.getByRole('radio').all().then(items=>Promise.all(items.map(item=>item.getAttribute('value')))),
+ ['original-rose','ocean-blue','emerald-forest','amethyst','sunset-amber']);
 assert(await palette.getByRole('radio',{name:'Original Rose'}).isChecked());
+const schemeChecks=await page.evaluate(async()=>{
+ const {palettes}=await import('/src/aesthetic/packages.mjs');
+ const main=document.querySelector('#main'),settings=main.firstElementChild,grid=document.querySelector('.palette-options');
+ const result=[];
+ for(const {id} of palettes){
+  grid.querySelector(`input[value="${id}"]`).click();
+  const font=selector=>getComputedStyle(document.querySelector(selector)).fontFamily;
+  result.push({id,panelRetained:main.firstElementChild===settings,
+   fonts:[font('#palette-preview-name'),font('[data-palette-preview] p'),font('[data-palette-preview] button')],
+   accent:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+   geometry:[main.clientWidth,settings.clientWidth,grid.getBoundingClientRect().width,
+    ...[...grid.children].map(choice=>choice.getBoundingClientRect().height)]});
+ }
+ return result;
+});
+assert.equal(new Set(schemeChecks.map(scheme=>JSON.stringify(scheme.fonts))).size,5);
+assert.equal(new Set(schemeChecks.map(scheme=>scheme.accent)).size,5);
+assert.equal(new Set(schemeChecks.map(scheme=>JSON.stringify(scheme.geometry))).size,1);
+assert(schemeChecks.every(scheme=>scheme.panelRetained));
 await palette.getByRole('radio',{name:'Ocean Blue'}).check();
 assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--a-color-background-dark')),'#101722');
-await page.locator('#appearance').selectOption('minimal');
+await page.locator('#appearance').selectOption('standard');
 assert(await palette.isHidden());
-await page.locator('#appearance').selectOption('high-polish');
+await page.locator('#appearance').selectOption('minimal');
 assert(await palette.getByRole('radio',{name:'Ocean Blue'}).isChecked());
 assert.deepEqual(await snapshot(),before);
-assert.equal(await page.locator('html').getAttribute('data-aesthetic'),'high-polish');
-results.push({gate:'actual-settings-switch-changes-zero-engine-calls-configuration-or-loader-preference',state:'PASS'});
-await page.reload();await page.waitForFunction(()=>window.productFixture);await page.waitForFunction(()=>document.documentElement.dataset.aesthetic==='high-polish'&&document.documentElement.style.getPropertyValue('--a-color-accent-light')==='#1458ba');
+await page.evaluate(()=>localStorage.setItem('aestheticPreferenceV1',JSON.stringify({schemaVersion:1,id:'high-polish'})));
+results.push({gate:'five palette color and font sets preserve settings DOM, control geometry and durable product state',state:'PASS'});
+await page.reload();await page.waitForFunction(()=>window.productFixture);await page.waitForFunction(()=>document.documentElement.dataset.aesthetic==='minimal'&&document.documentElement.style.getPropertyValue('--a-color-accent-light')==='#1458ba');
 await page.evaluate(bytes=>{const f=window.productFixture;f.setReady('fixture-bucket');window.fixtureImageData={'image.png':bytes};f.r2Objects.set('fixture-bucket:image.png',{bucketName:'fixture-bucket',key:'image.png',displayName:'image.png',folder:false,size:bytes.length,etag:'fixture-preview'});},Array.from(await readFile(join(root,'tests/fixtures/images/picture.png'))));results.push({gate:'appearance-restores-after-reload-separate-from-CURRENT',state:'PASS'});
 const shot=async name=>{await page.screenshot({path:join(out,name+'.png')});};
 const measurements=[];
-for(const mode of ['standard','high-polish','minimal'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
+for(const mode of ['standard','minimal'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
  await page.setViewportSize({width,height:850});await settings();await page.locator('#appearance').selectOption(mode);await page.locator('#setting-theme').selectOption(theme);
  await page.waitForFunction(({mode,theme})=>document.documentElement.dataset.aesthetic===mode&&document.documentElement.dataset.theme===theme,{mode,theme});
- const tag=`${mode}-${theme}-${width}`;await page.waitForTimeout(160);await shot(tag+'-settings');if(mode==='high-polish'&&theme==='dark'&&width===360){const cards=page.locator('#main .card:visible');for(let i=1;i<await cards.count();i++){await cards.nth(i).scrollIntoViewIfNeeded();await shot(tag+'-settings-card-'+i);}await page.locator('#main').evaluate(el=>el.scrollTop=0);}
+ const tag=`${mode}-${theme}-${width}`;await page.waitForTimeout(160);await shot(tag+'-settings');if(mode==='minimal'&&theme==='dark'&&width===360){const cards=page.locator('#main .card:visible');for(let i=1;i<await cards.count();i++){await cards.nth(i).scrollIntoViewIfNeeded();await shot(tag+'-settings-card-'+i);}await page.locator('#main').evaluate(el=>el.scrollTop=0);}
  for(const view of ['Remotes','History','File Explorer']){
   await page.getByRole('button',{name:view,exact:true}).click();await page.waitForTimeout(80);await shot(tag+'-'+view.replaceAll(' ','-'));
-  if(mode==='minimal'&&view==='Remotes'){
+  if(view==='Remotes'){
    await page.getByText('The Future is Now. True Remote is Here.',{exact:true}).waitFor();
-   assert.equal(await page.getByText('Signed in to Cloudflare.',{exact:true}).isVisible(),false);
+   const headline=await page.locator('.remotes-headline').boundingBox(),subtitle=await page.locator('.remotes-subtitle').boundingBox(),card=await page.locator('#main .card').first().boundingBox();
+   assert(subtitle.y>=headline.y+headline.height+7);
+   assert(card.y-(subtitle.y+subtitle.height)>subtitle.y-(headline.y+headline.height));
+   await page.getByRole('button',{name:'Open File Explorer',exact:true}).waitFor();
    assert.equal(await page.getByRole('button',{name:'Cloudflare status'}).isVisible(),false);
    assert.equal(await page.getByRole('button',{name:'Save results',exact:true}).isVisible(),false);
   }
-  if(mode==='minimal'&&view==='File Explorer'){
-   assert.equal(await page.locator('#item-count').isVisible(),false);
+  if(view==='File Explorer'){
+   assert.equal(await page.getByRole('button',{name:'Open File Explorer',exact:true}).count(),0);
+   assert(await page.locator('#manage + #sign-out').isVisible());
+   assert(await page.locator('#item-count').isVisible());
    assert(await page.getByRole('row').filter({hasText:'image.png'}).first().isVisible());
    assert(await page.locator('#refresh').isEnabled());
   }
@@ -65,11 +90,11 @@ for(const mode of ['standard','high-polish','minimal'])for(const theme of ['dark
 await page.setViewportSize({width:1100,height:850});
 await settings();await page.locator('#debug-mode').check();
 await page.waitForFunction(()=>document.documentElement.dataset.debugMode==='on');
-for(const mode of ['standard','high-polish','minimal']){
+for(const mode of ['standard','minimal']){
  await settings();await page.locator('#appearance').selectOption(mode);
  await page.getByRole('button',{name:'Manage Destinations',exact:true}).click();await shot(mode+'-destinations');
  if(mode==='minimal'){
-  assert.equal(await page.getByText('Availability depends on the connected account.',{exact:true}).isVisible(),false);
+  assert(await page.getByText('Availability depends on the connected account.',{exact:true}).isVisible());
   assert.equal(await page.getByText(/Save prepares or maintains the private Cloudflare Worker/).isVisible(),false);
   assert(await page.getByText('Setup and usage',{exact:true}).isVisible());
   assert(await page.getByRole('button',{name:'Save',exact:true}).isEnabled());
@@ -82,7 +107,7 @@ await page.evaluate(async()=>{await window.productFixture.current.setHistoryPref
 await page.getByRole('button',{name:'History',exact:true}).click();await page.locator('.history-row').first().waitFor();
 await page.locator('.history-row').first().waitFor();await page.evaluate(()=>document.querySelectorAll('[data-history-more]').forEach(el=>el.open=false));await page.waitForTimeout(100);await page.waitForFunction(()=>!document.querySelector('.history-preview[data-loading]'));
 const independent=await page.evaluate(async()=>{const f=window.productFixture,methodCount=window.engineCalls.length,{createAestheticHost}=await import('/src/aesthetic/host.mjs'),h=createAestheticHost({root:document.documentElement}),before=await f.current.read(),visual=await f.current.readGalleryLoadingVisual(),history=document.querySelector('.history-page').innerHTML;
- window.fixtureImageDelay={'image.png':200};const reading=f.fileApi.run('readChunk',{source:f.target,key:'image.png',offset:0,length:65536});while(!window.fixtureImageReadActive)await new Promise(r=>setTimeout(r,5));for(let i=0;i<30;i++)await h.apply({id:['high-polish','standard','minimal'][i%3],persist:false});const read=await reading;window.fixtureImageDelay={};return {before,after:await f.current.read(),visual,afterVisual:await f.current.readGalleryLoadingVisual(),historySame:history===document.querySelector('.history-page').innerHTML,readState:read.state,bytes:read.data.bytes.length,extraCalls:window.engineCalls.length-methodCount};});
+ window.fixtureImageDelay={'image.png':200};const reading=f.fileApi.run('readChunk',{source:f.target,key:'image.png',offset:0,length:65536});while(!window.fixtureImageReadActive)await new Promise(r=>setTimeout(r,5));for(let i=0;i<30;i++)await h.apply({id:['high-polish','standard','minimal'][i%2],persist:false});const read=await reading;window.fixtureImageDelay={};return {before,after:await f.current.read(),visual,afterVisual:await f.current.readGalleryLoadingVisual(),historySame:history===document.querySelector('.history-page').innerHTML,readState:read.state,bytes:read.data.bytes.length,extraCalls:window.engineCalls.length-methodCount};});
 assert.deepEqual(independent.before,independent.after);assert.deepEqual(independent.visual,independent.afterVisual);assert(independent.historySame);assert.equal(independent.readState,'completed');assert(independent.bytes>0);assert.equal(independent.extraCalls,0);results.push({gate:'30-mid-read-switches-preserve-exact-History-DOM-data-and-pending-file-read-with-zero-engine-calls',state:'PASS'});
 await settings();await page.locator('#appearance').selectOption('minimal');
 await page.getByRole('button',{name:'File Explorer',exact:true}).click();
@@ -132,8 +157,9 @@ const themeDuringSave=await page.evaluate(async()=>{
  const result=invoke('dispatchSave',{itemId:route.id,generation:acknowledgedGeneration,context:'link',idempotencyKey:crypto.randomUUID(),
   source:{url:'https://example.com/theme-save.txt',filename:'theme-save.txt'}});
  await pending;
- const {createAestheticHost}=await import('/src/aesthetic/host.mjs'),host=createAestheticHost({root:document.documentElement});
- for(const id of ['standard','high-polish','minimal'])await host.apply({id,persist:false});
+ const {createAestheticHost}=await import('/src/aesthetic/host.mjs'),host=createAestheticHost({root:document.documentElement,storage:{set:async()=>{}}});
+ for(const id of ['standard','minimal'])await host.apply({id,persist:false});
+ for(const id of ['ocean-blue','original-rose','amethyst'])await host.applyPalette(id);
  finish();const saved=await result;f.fixtureTransport.save=original;
  return {completion:saved.data?.completion,object:f.r2Objects.has(f.target.bucketName+':theme-save.txt')};
 });

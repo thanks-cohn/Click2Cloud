@@ -14,7 +14,7 @@ const baseline = process.env.C2C_UX_BASELINE;
 const baselineOnly = process.env.C2C_UX_BASELINE_ONLY === '1';
 const widths = [280, 320, 360, 480, 600, 1100];
 // 360px is Chromium's default side-panel content width in 156.0.8078.79.
-const appearances = ['standard', 'high-polish', 'minimal'];
+const appearances = ['standard', 'minimal'];
 const results = [];
 const measurements = {};
 const errors = [];
@@ -262,6 +262,8 @@ async function shortcuts() {
   await page.getByRole('heading', {name:'Destinations', exact:true}).waitFor();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Control+Shift+F8');
+  assert.equal(await toolbar.getAttribute('aria-valuenow'),'1');
+  await toolbar.press('ArrowDown');
   await value('#toolbar-splitter', '2');
   await page.locator('#add-location').waitFor();
   assert(await page.locator('#add-location').isEnabled());
@@ -272,7 +274,7 @@ async function shortcuts() {
   await page.keyboard.press('Control+Shift+F9');
   await value('#pane-splitter', '50');
   assert.equal(await toolbar.getAttribute('aria-valuenow'), '2', 'pane reset changed the toolbar');
-  await page.keyboard.press('Control+Shift+F8');
+  await toolbar.press('Home');
   await value('#toolbar-splitter', '1');
   assert.equal(await pane.getAttribute('aria-valuenow'), '50', 'toolbar toggle changed the pane');
   await page.locator('#toolbar-more').press('ArrowDown');

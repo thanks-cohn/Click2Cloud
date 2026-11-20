@@ -4,8 +4,7 @@ const command = (commandId, label, defaultChord, extra = {}) => Object.freeze({
   shortcutEligible: true, ...extra
 });
 export const uiCommands = Object.freeze([
-  command('explorer.toggleToolbarRows', 'Toggle one or two toolbar rows', 'Ctrl+Shift+F8', {effects: 'Local Explorer layout'}),
-  command('explorer.resetPanelSplit', 'Reset panels to 50/50', 'Ctrl+Shift+F9', {effects: 'Local Explorer layout'}),
+  command('explorer.resetPanelSplit', 'Cycle Explorer divider', 'Ctrl+Shift+F9', {effects: 'Local Explorer layout'}),
   command('explorer.focusSearch', 'Focus filename Search', 'Ctrl+Shift+F7', {effects: 'Local focus', requires: 'activeDirectory'})
 ]);
 export const apiShortcutMetadata = Object.freeze({

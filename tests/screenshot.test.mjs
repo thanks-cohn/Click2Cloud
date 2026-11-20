@@ -13,6 +13,7 @@ import {historyRecord} from '../src/history/model.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
 import {exportComplete} from '../src/recorder/export.mjs';
 import {fixtureTarget,fixtureSecret,fixtureSession,localScreenshotWorker} from './fixtures/screenshot-worker.mjs';
+import {createScreenshotBackground} from '../extension/screenshot-background.mjs';
 
 const folder=prefix=>({...fixtureTarget,prefix});
 const rule=(destinations,websites=[],active=true)=>({ruleId:crypto.randomUUID(),name:'fixture',revision:1,websites,destinations,active});
@@ -181,8 +182,44 @@ function directFixture(handler,{scopes=itemGrants,scopeEvidence='provider-return
   }
   return objects.has(identity)?new Response(objects.get(identity),{headers:{'content-type':'image/png'}}):new Response(null,{status:404});
  }});
- return {uploader:createDirectScreenshotUpload(oauth,{backoff:async()=>{}}),calls,objects,state};
+ return {oauth,uploader:createDirectScreenshotUpload(oauth,{backoff:async()=>{}}),calls,objects,state};
 }
+test('Screenshot completion and retry send Shelf and History results without desktop notifications',async()=>{
+ let failCapture=false, denyUpload=false, terminal;
+ const browser=browserFixture(()=>{if(failCapture)throw Error('Capture unavailable');});
+ const provider=directFixture(({call})=>{
+  if(!call.path.includes('/objects'))return Response.json({success:true,result:{name:fixtureTarget.bucketName}});
+  if(call.method==='PUT'&&denyUpload)return Response.json({success:false,errors:[{code:10000}]},{status:403});
+ });
+ const saved=new Map(), settings={}, notices=[];
+ const local={get:async key=>({[key]:settings[key]}),set:async update=>Object.assign(settings,structuredClone(update))};
+ Object.assign(browser.chrome,{storage:{local},runtime:{
+  getURL:path=>'chrome-extension://fixture/'+path,
+  async sendMessage(message){if(message.channel==='screenshot-result'&&message.state!=='uploading')setImmediate(()=>terminal?.(message));}
+ },notifications:{async create(...args){notices.push(args);}}});
+ const background=createScreenshotBackground({chrome:browser.chrome,oauth:provider.oauth,retryCache:cacheFixture(),
+  current:{read:async()=>({product:{cloudflare:{}}}),recordRemoteResult:async job=>saved.set(job.operationId,structuredClone(job)),readRemoteResult:async id=>saved.get(id)},
+  fileApi:{noteRemoteWrite(){}}});
+ await background.request('save',{name:'Quiet test',websites:[],destinations:[folder('quiet/')]});
+ async function capture(command){
+  const result=new Promise(resolve=>{terminal=resolve;});
+  background.onCommand(command,browser.tab);
+  return result;
+ }
+ assert.equal((await capture(screenshotCommands[0])).state,'confirmed');
+ denyUpload=true;
+ assert.equal((await capture(screenshotCommands[1])).state,'blocked');
+ const blocked=[...saved.values()].at(-1);
+ denyUpload=false;
+ const feedback=new Promise(resolve=>{terminal=resolve;});
+ await background.request('retry',{operationId:blocked.operationId});
+ assert.equal((await feedback).state,'confirmed');
+ assert.equal(saved.get(blocked.operationId).screenshot.state,'confirmed');
+ failCapture=true;
+ assert.equal((await capture(screenshotCommands[0])).state,'failed');
+ assert.equal(saved.size,3);
+ assert.deepEqual(notices,[]);
+});
 function directRunner(fixture,targetRules,options={}){
  const {browser=browserFixture(),receipts=store(),cache=cacheFixture(),dedup=true,record}=options;
  const runner=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup,rules:targetRules})},

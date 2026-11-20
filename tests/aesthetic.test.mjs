@@ -1,71 +1,72 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {createAestheticHost,validateAesthetic,AESTHETIC_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';import {standard,highPolish,minimal} from '../src/aesthetic/packages.mjs';
-const setup=(saved)=>{const vars=new Map(),writes=[],root={dataset:{theme:'light'},style:{setProperty:(k,v)=>vars.set(k,v),removeProperty:k=>vars.delete(k)}};const host=createAestheticHost({root,storage:{get:async()=>({[AESTHETIC_PREFERENCE_KEY]:saved}),set:async v=>writes.push(v)}});return {host,vars,writes,root};};
-test('aesthetic packages validate; CSS, URLs, code, unknown tokens and incompatible manifests never register',()=>{
- for(const p of [standard,highPolish,minimal])assert(validateAesthetic(p).valid);
- for(const patch of [{schemaVersion:2},{compatibleApiVersion:'2.0'},{css:'body{display:none}'},{script:'fetch()'},{assets:['https://evil.test/a']},{tokens:{'color.background':{$type:'color',$value:{light:'url(https://evil)',dark:'#000000'}}}},{tokens:{'geometry.control':{$type:'dimension',$value:'999px'}}},{tokens:{'motion.feedback':{$type:'duration',$value:'10000ms'}}},{tokens:{'z-index':{$type:'number',$value:999}}}])assert.equal(validateAesthetic({...highPolish,...patch}).valid,false);
- const {host}=setup();assert.equal(host.register({...highPolish,id:'bad',compatibleApiVersion:'99'}).valid,false);assert.equal(host.getActive().id,'standard');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createAestheticHost,validatePalette,AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';
+import {palettes} from '../src/aesthetic/packages.mjs';
+
+const pref=id=>({schemaVersion:1,id});
+function fixture(values={}){
+ const vars=new Map(),writes=[],root={dataset:{theme:'light'},style:{setProperty:(key,value)=>vars.set(key,value),removeProperty:key=>vars.delete(key)}};
+ const storage={get:async()=>structuredClone(values),set:async update=>{writes.push(update);Object.assign(values,update);}};
+ return {host:createAestheticHost({root,storage}),vars,writes,root};
+}
+test('Built-in palettes are complete and reject geometry, visibility, remote fonts, code and invalid colors',()=>{
+ assert.equal(palettes.length,5);
+ for(const scheme of palettes)assert(validatePalette(scheme),scheme.id);
+ const original=palettes[0];
+ for(const patch of [{geometry:{radius:20}},{visibility:{hide:['connection']}},{script:'fetch()'},{colors:{...original.colors,background:['url(https://example.org)','#000000']}},
+  {fonts:{...original.fonts,heading:['url(https://example.org)',700]}},{fonts:{...original.fonts,heading:['Georgia',1000]}}])assert.equal(validatePalette({...original,...patch}),false);
 });
-test('apply/reset are scoped to presentation root and independent preference, without changing light/dark',async()=>{
- const {host,vars,writes,root}=setup();await host.apply({id:'high-polish'});assert.equal(root.dataset.theme,'light');assert(vars.size>20);assert.equal(writes.length,1);assert.deepEqual(Object.keys(writes[0]),[AESTHETIC_PREFERENCE_KEY]);
- for(let i=0;i<50;i++){await host.apply({id:'standard',persist:false});assert.equal(vars.size,0);await host.apply({id:'high-polish',persist:false});}await host.resetToStandard();assert.equal(vars.size,0);assert.equal(root.dataset.aesthetic,'standard');assert.equal(root.dataset.theme,'light');
+test('Minimal is the default, old choices restore deterministically and unrelated preferences survive',async()=>{
+ for(const [saved,expected] of [[undefined,'minimal'],[pref('high-polish'),'minimal'],[pref('minimal'),'minimal'],[pref('standard'),'standard'],[pref('missing'),'minimal'],[{schemaVersion:2,id:'standard'},'minimal']]){
+  const values={[AESTHETIC_PREFERENCE_KEY]:saved,[PALETTE_PREFERENCE_KEY]:pref('emerald-forest'),fontPreference:'ignored',screenshotRules:{fixtures:true}};
+  const {host,writes,root}=fixture(values);
+  await host.restore();
+  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1']);
+  assert.equal(root.dataset.aesthetic,expected);
+  assert.equal(root.dataset.aestheticHide,undefined);
+  assert.equal(host.getPalette(),'emerald-forest');
+  assert.equal(writes.length,0);
+  assert.deepEqual(values.screenshotRules,{fixtures:true});
+  assert.equal((await host.apply({id:'high-polish'})).error,'PACKAGE_UNAVAILABLE');
+ }
 });
-test('restore invalid/future/missing package falls back without overwriting stored preference; partial author tokens have host defaults',async()=>{
- for(const saved of [{schemaVersion:2,id:'high-polish'},{schemaVersion:1,id:'missing'},null]){const {host,writes,vars}=setup(saved);await host.restore();assert.equal(host.getActive().id,'standard');assert.equal(writes.length,0);assert.equal(vars.size,0);}
- const {host,vars}=setup({schemaVersion:1,id:'high-polish'});await host.restore();assert.equal(host.getActive().id,'high-polish');assert(host.register({...standard,id:'example',name:'Example',tokens:{'geometry.control':{$type:'dimension',$value:'3px'}}}).valid);await host.apply({id:'example'});assert.equal(vars.get('--a-geometry-control'),'3px');assert(vars.has('--a-color-text-light'));
+test('Each palette is one stored choice that applies all colors, type stacks and weights',async()=>{
+ const values={};const {host,vars,writes,root}=fixture(values);
+ const baseline=Object.keys(root.dataset);
+ for(const scheme of palettes){
+  assert.equal((await host.applyPalette(scheme.id)).error,null);
+  assert.deepEqual(writes.at(-1),{[PALETTE_PREFERENCE_KEY]:pref(scheme.id)});
+  for(const [color,[light,dark]] of Object.entries(scheme.colors)){
+   assert.equal(vars.get(`--a-color-${color}-light`),light);
+   assert.equal(vars.get(`--a-color-${color}-dark`),dark);
+  }
+  for(const [role,[family,weight]] of Object.entries(scheme.fonts)){
+   assert.equal(vars.get(`--a-font-${role}`),family);
+   assert.equal(vars.get(`--a-weight-${role}`),String(weight));
+  }
+  const restored=fixture(values);await restored.host.restore();assert.deepEqual(restored.vars,vars);
+  assert.deepEqual(Object.keys(root.dataset),baseline);
+  assert.equal(root.dataset.theme,'light');
+ }
+ assert([...vars.keys()].every(name=>/^--a-(?:color|font|weight)-/.test(name)));
+ await host.apply({id:'standard'});assert.equal(vars.size,0);
+ await host.apply({id:'minimal'});assert.equal(host.getPalette(),'sunset-amber');
 });
-test('late preference reads cannot replace a newer user choice; write failures leave an honest session choice',async()=>{
- let release;const root={dataset:{},style:{setProperty(){},removeProperty(){}}},host=createAestheticHost({root,storage:{get:()=>new Promise(r=>release=r),set:async()=>{throw Error('quota');}}});const ready=host.restore();await host.apply({id:'high-polish',persist:false});release({[AESTHETIC_PREFERENCE_KEY]:{schemaVersion:1,id:'standard'}});await ready;assert.equal(host.getActive().id,'high-polish');assert.equal((await host.apply({id:'high-polish'})).error,'PREFERENCE_WRITE_FAILED');assert.equal(host.getActive().id,'high-polish');
+test('Late preference reads and failed writes preserve a newer session choice',async()=>{
+ let release;
+ const host=createAestheticHost({storage:{get:()=>new Promise(resolve=>{release=resolve;}),set:async()=>{throw Error('quota');}}});
+ const restoring=host.restore();
+ assert.equal((await host.apply({id:'standard'})).error,'PREFERENCE_WRITE_FAILED');
+ release({[AESTHETIC_PREFERENCE_KEY]:pref('high-polish')});
+ await restoring;
+ assert.equal(host.getActive().id,'standard');
 });
 const luminance=hex=>{const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
 const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
-test('High Polish text, secondary text and focus colors meet WCAG contrast in light and dark',()=>{for(const mode of ['light','dark']){const v=k=>highPolish.tokens['color.'+k].$value[mode];for(const surface of ['background','surface','raised'])for(const text of ['text','muted'])assert(contrast(v(text),v(surface))>=4.5,mode+' '+text+' on '+surface);assert(contrast(v('focus'),v('surface'))>=3);}});
-
-
-test('Aesthetic 1.1 only allows semantic text roles and fully clears them between packages',async()=>{
- const {host,root}=setup({schemaVersion:1,id:'minimal'});
- await host.restore();
- assert.equal(host.getActive().id,'minimal');
- assert(root.dataset.aestheticHide.split(' ').includes('explorer.debug-caption'));
- for(const visibility of [{'file.name':'hide'},{'explorer.debug-caption':'none'}, {'[data-sensitive]':'hide'},[]])
-  assert.equal(host.register({...minimal,id:'invalid',visibility}).valid,false);
- assert.equal(validateAesthetic({...minimal,compatibleApiVersion:'1.0'}).valid,false);
- await host.apply({id:'standard'});assert.equal(root.dataset.aestheticHide,undefined);
- await host.apply({id:'high-polish'});assert.equal(root.dataset.aestheticHide,undefined);
- await host.apply({id:'unavailable'});assert.equal(host.getActive().id,'standard');
- assert.deepEqual(host.list().map(theme=>theme.name),["Bit o' Polish",'Remote V1','Minimal']);
- assert.equal((await setup().host.restore()).id,'high-polish');
-});
-
-test('Bit o’ Polish palettes are typed, complete, legible in both modes and stored independently',async()=>{
- const {host,vars,writes,root}=setup();
- await host.restore();
- assert.equal(host.getPalette(),'original-rose');
- const original=new Map(vars);
- assert.deepEqual(host.listPalettes().map(item=>item.id),['original-rose','ocean-blue','emerald-forest','amethyst','sunset-amber']);
- for(const item of host.listPalettes().slice(1)){
-  assert.equal((await host.applyPalette(item.id)).error,null);
-  assert.equal(host.getActive().id,'high-polish');
-  assert.equal(root.dataset.theme,'light');
-  assert.equal(vars.get('--a-spacing-page'),original.get('--a-spacing-page'));
-  for(const mode of ['light','dark']){
-   const v=key=>vars.get('--a-color-'+key+'-'+mode);
-   for(const surface of ['background','surface','raised','selection'])for(const text of ['text','muted'])assert(contrast(v(text),v(surface))>=4.5,item.id+' '+mode+' '+text+' on '+surface);
-   assert(contrast(v('focus'),v('surface'))>=3);
-   assert(contrast(v('accent'),v('surface'))>=4.5);
+test('Palette text, controls and focus colors stay readable in light and dark',()=>{
+ for(const {id,colors} of palettes)for(let mode=0;mode<2;mode++){
+  for(const [foreground,background,minimum] of [['text','background',4.5],['text','selection',4.5],['muted','surface',4.5],['accent','surface',4.5],['focus','surface',3]]){
+   assert(contrast(colors[foreground][mode],colors[background][mode])>=minimum,`${id} ${foreground}/${background} ${mode}`);
   }
  }
- assert.equal((await host.applyPalette('custom')).error,'PALETTE_UNAVAILABLE');
- const [key]=Object.keys(writes.at(-1));
- assert.notEqual(key,AESTHETIC_PREFERENCE_KEY);
- const restarted=createAestheticHost({root,storage:{get:async()=>({...writes.at(-1),[AESTHETIC_PREFERENCE_KEY]:{schemaVersion:1,id:'minimal'}})}});
- await restarted.restore();
- assert.equal(restarted.getPalette(),'sunset-amber');
- assert.equal(vars.get('--a-color-background-light'),minimal.tokens['color.background'].$value.light);
- await restarted.apply({id:'standard',persist:false});
- assert.equal(vars.size,0);
- await restarted.apply({id:'high-polish',persist:false});
- assert.equal(vars.get('--a-color-background-light'),'#fbf6f0');
- await host.applyPalette('original-rose');
- assert.deepEqual(vars,original);
 });

@@ -28,6 +28,7 @@ export function createShelfAttention({chrome,preference=()=>true,notify=async()=
 }
 
 export const shelfHistoryCommand='shelf.history.toggle';
+export const shelfExplorerSearchCommand='shelf.explorer.search';
 const shelfStateKey=windowId=>'shelf-view:'+windowId;
 const views=new Set(['remotes','explorer','history','settings','screenshot','downloads']);
 
@@ -43,20 +44,24 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
    if(!key.startsWith(shelfStateKey(''))||!views.has(value?.view))continue;
    const id=Number(key.slice(shelfStateKey('').length));
    if(!Number.isInteger(id)||windows.has(id))continue;
-   windows.set(id,{open:value.open===true,view:value.view,intent:value.intent==='history'?'history':null,sequence:0,opening:null});
+   windows.set(id,{open:value.open===true,view:value.view,intent:['history','search'].includes(value.intent)?value.intent:null,
+    sequence:Number.isSafeInteger(value.sequence)?value.sequence:0,opening:null});
   }
  }).catch(()=>{}).finally(()=>{restored=true;});
  function persist(id,state){
-  return session.set({[shelfStateKey(id)]:{open:state.open,view:state.view,intent:state.intent}}).catch(()=>{});
+  return session.set({[shelfStateKey(id)]:{open:state.open,view:state.view,intent:state.intent,sequence:state.sequence}}).catch(()=>{});
  }
  function open(id){
   try{return panel.open({windowId:id});}
   catch(error){return Promise.reject(error);}
  }
- function showHistory(id,state,opening){
+ function showIntent(id,state,opening,intent){
   const sequence=++state.sequence;
-  state.open=true;state.view='history';state.intent='history';state.opening=opening??state.opening;
-  void persist(id,state).then(()=>chrome.runtime.sendMessage({channel:'shelf-history-show',windowId:id}).catch(()=>{}));
+  state.open=true;state.view=intent==='search'?'explorer':'history';state.intent=intent;state.opening=opening??state.opening;
+  const channel=intent==='search'?'shelf-explorer-search':'shelf-history-show';
+  void persist(id,state).then(()=>{
+   if(sequence===state.sequence)return chrome.runtime.sendMessage({channel,windowId:id,sequence}).catch(()=>{});
+  });
   if(!opening)return;
   void opening.then(()=>{if(state.opening===opening)state.opening=null;},()=>{
    if(state.opening===opening)state.opening=null;
@@ -81,32 +86,41 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
    }
   });
  }
- function regularCommand(id){
+ function regularCommand(id,intent){
   const state=windowState(id);
+  if(intent==='search'){
+   if(state.intent==='search'&&state.opening)return;
+   showIntent(id,state,open(id),intent);return;
+  }
   if(state.open&&state.view==='history'){closeHistory(id,state);return;}
   // Invoke Chrome before the gesture is lost to any storage or runtime IO.
-  showHistory(id,state,state.open?null:open(id));
+  showIntent(id,state,state.open?null:open(id),'history');
  }
- function command(tab){
+ function command(tab,intent='history'){
   const id=tab?.windowId;
   if(!panel?.open){feedback(id,'SHELF_OPEN_UNAVAILABLE');return;}
   if(!Number.isInteger(id)){
-   void chrome.windows.getLastFocused().then(window=>{if(window.focused)regularCommand(window.id);}).catch(()=>{});
+   void chrome.windows.getLastFocused().then(window=>{if(window.focused)regularCommand(window.id,intent);}).catch(()=>{});
    return;
   }
-  if(restored||windows.has(id)){regularCommand(id);return;}
+  if(restored||windows.has(id)){regularCommand(id,intent);return;}
   // Chrome can wake the background with the key event. Keep the gesture
   // while the prior panel state is coming back from chrome.storage.session.
   const pending=early.get(id);
-  if(pending){pending.presses++;return;}
-  const opening=open(id),queued={opening,presses:1};
+  if(pending){
+   if(intent==='search'){pending.intent='search';pending.presses=0;pending.afterSearch=true;}
+   else{pending.intent='history';pending.presses++;}
+   return;
+  }
+  const opening=open(id),queued={opening,intent,presses:intent==='history'?1:0,afterSearch:intent==='search'};
   opening.catch(()=>{});early.set(id,queued);
   void ready.then(()=>{
    if(early.get(id)!==queued)return;
    early.delete(id);
    const state=windowState(id);
-   const endedOnHistory=(state.open&&state.view==='history')!==(queued.presses%2===1);
-   if(endedOnHistory)showHistory(id,state,opening);
+   if(queued.intent==='search'){showIntent(id,state,opening,'search');return;}
+   const endedOnHistory=(!queued.afterSearch&&state.open&&state.view==='history')!==(queued.presses%2===1);
+   if(endedOnHistory)showIntent(id,state,opening,'history');
    else{state.opening=opening;closeHistory(id,state);}
   });
  }
@@ -115,7 +129,7 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   const id=info.windowId;
   if(early.has(id))return true;
   const state=windowState(id);
-  if(state.intent==='history'||state.intent==='close'||state.opening)return true;
+  if(state.intent||state.opening)return true;
   state.open=true;state.view='remotes';void persist(id,state);
   return false;
  }
@@ -123,14 +137,14 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   if(!isShelfPath(info.path)||!Number.isInteger(info.windowId))return;
   const id=info.windowId,state=windowState(id);
   // A newer open can already be in progress while Chrome delivers the close.
-  if(state.intent==='history'&&state.opening)return;
+  if(['history','search'].includes(state.intent)&&state.opening)return;
   state.open=false;state.view='remotes';state.intent=null;
   void persist(id,state);
  });
  chrome.windows?.onRemoved?.addListener(id=>{
   windows.delete(id);early.delete(id);void session.remove(shelfStateKey(id)).catch(()=>{});
  });
- async function request(method,id,view,sender){
+ async function request(method,id,view,sender,sequence){
   if(!Number.isInteger(id))return null;
   const contexts=await chrome.runtime.getContexts?.({contextTypes:['SIDE_PANEL'],documentUrls:[chrome.runtime.getURL(appPath)]})??[];
   // A global SIDE_PANEL can have neither a window ID nor sender document
@@ -140,11 +154,15 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   if(!ownPanel)return null;
   await ready;
   const state=windowState(id);
-  if(method==='intent')return state.intent==='history'?{view:'history'}:null;
-  if(method==='view'&&state.open&&views.has(view)){
+  if(method==='intent')return state.intent==='search'?{view:'explorer',focusSearch:true,sequence:state.sequence}:
+   state.intent==='history'?{view:'history'}:null;
+  if(method==='search-complete'&&state.intent==='search'&&state.sequence===sequence){
+   state.intent=null;await persist(id,state);
+  }
+  if(method==='view'&&state.open&&views.has(view)&&state.intent!=='search'){
    state.view=view;state.intent=null;await persist(id,state);
   }
   return null;
  }
- return {command,opened,request};
+ return {command,search:tab=>command(tab,'search'),opened,request};
 }

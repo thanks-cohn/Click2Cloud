@@ -147,7 +147,7 @@ async function assertClear() {
 }
 
 async function browseLayout() {
-  for (const [index, appearance] of ['standard','high-polish','minimal'].entries()) {
+  for (const [index, appearance] of ['standard','minimal'].entries()) {
     await page.locator('#header-more').click();
     await nav('settings');
     await page.locator('#appearance').selectOption(appearance);
@@ -156,7 +156,7 @@ async function browseLayout() {
     await explorer();
     await page.locator('#toolbar-splitter').press('Home');
     await waitValue('#toolbar-splitter','1');
-    await page.keyboard.press('Control+Shift+F9');
+    await page.locator('#pane-splitter').dblclick();
     await waitValue('#pane-splitter','50');
     for (const width of [320,360,1280]) {
       await page.setViewportSize({width,height:760});
@@ -194,8 +194,7 @@ async function browseLayout() {
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         assert.equal(await requestCount(),0,'layout caused a search API call');
         await shot(`${appearance}-${width}-${rows}-rows`);
-        await page.locator('#files').focus();
-        await page.keyboard.press('Control+Shift+F8');
+        await page.locator('#toolbar-splitter').press(rows==='1'?'ArrowDown':'Home');
       }
       await waitValue('#toolbar-splitter','1');
       assert.equal(await page.locator('#pane-splitter').getAttribute('aria-valuenow'),'50');

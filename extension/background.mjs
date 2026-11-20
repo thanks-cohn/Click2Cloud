@@ -10,7 +10,7 @@ import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
 import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {attachFilenameSearch} from '../src/explorer/search-file-api.mjs';
-import {createShelfAttention,createShelfHistoryToggle,shelfHistoryCommand} from '../src/chrome/provider-panel.mjs';
+import {createShelfAttention,createShelfHistoryToggle,shelfHistoryCommand,shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
 import {createDailyBadge} from '../src/chrome/daily-badge.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
@@ -269,20 +269,24 @@ void Promise.resolve().then(async()=>{
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
-const screenshots=createScreenshotBackground({chrome,attention,oauth:setupOauth,current,fileApi,
- activeNative:async()=>{
-  const live=registrar.inspect();
-  if(live.pending)return null;
-  if(live.acknowledgedGeneration===live.desired?.generation&&live.desired)return live.desired;
-  const {nativeRegistration}=await chrome.storage.local.get('nativeRegistration');
-  return nativeRegistration?.state==='acknowledged'&&nativeRegistration.appliedGeneration===nativeRegistration.desired?.generation
-   ?nativeRegistration.desired:null;
- }});
+const screenshots=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,historyUrls:async(method,output,params)=>{
+ if(method==='history-connect-domain'){
+  if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
+  if(typeof params.domain!=='string'||params.zoneId!==undefined&&typeof params.zoneId!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
+  return publicDomains.connectCustomDomain(output.target,params.domain,params.zoneId);
+ }
+ const enable=method==='history-enable-public-urls';
+ const result=await api.invoke({version:'3+1.1',method:enable?'enableBucketPublicAccess':'getPublicUrls',
+  params:{source:output.target,key:output.key,...(enable?{confirmed:params.confirmed}:{})}},'gui',{screenshotHistory:true});
+ if(result.state!=='completed')throw Object.assign(Error(result.code),{code:result.code});
+ return result.data;
+}});
 chrome.commands?.onCommand?.addListener((command,tab)=>{
  if(command===shelfHistoryCommand)shelfHistory.command(tab);
+ else if(command===shelfExplorerSearchCommand)shelfHistory.search(tab);
  else screenshots.onCommand(command,tab);
 });
-const registrar=createChromeRegistrar({chrome,registerExtras:screenshots.registerExtras,extraClick:screenshots.onNativeClick,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
+const registrar=createChromeRegistrar({chrome,observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
 },beforeClick:async info=>{
     if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     const previous=registrar.inspect().desired??(await chrome.storage.local.get('nativeRegistration')).nativeRegistration?.desired;
@@ -356,13 +360,14 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   }
   if(message?.channel==='shelf-history'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond(null);return false;}
-    shelfHistory.request(message.method,message.windowId,message.view,sender).then(respond,()=>respond(null));
+    shelfHistory.request(message.method,message.windowId,message.view,sender,message.sequence).then(respond,()=>respond(null));
     return true;
   }
   if(message?.channel==='screenshot'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({state:'blocked',code:'UNTRUSTED_APP_SENDER'});return false;}
-    screenshots.request(message.method,message.params,sender).then(data=>respond({state:'completed',data}),error=>
-     respond({state:'failed',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'SCREENSHOT_REQUEST_FAILED'}));
+    screenshots.request(message.method,message.params).then(data=>respond({state:'completed',data}),error=>
+     respond({state:'failed',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'SCREENSHOT_REQUEST_FAILED',
+      ...(Number.isSafeInteger(error?.httpStatus)?{httpStatus:error.httpStatus}:{}),...(error?.providerCodes?{providerCodes:error.providerCodes}:{})}));
     return true;
   }
   if(message?.channel==='recorder'){

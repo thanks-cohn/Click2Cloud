@@ -1,74 +1,46 @@
-import {standard,highPolish,minimal,bitOPolishPalettes} from './packages.mjs';
+import {standard,minimal,palettes} from './packages.mjs';
+
 export const AESTHETIC_API_VERSION='1.1';
 export const AESTHETIC_PREFERENCE_KEY='aestheticPreferenceV1';
 export const PALETTE_PREFERENCE_KEY='aestheticPalettePreferenceV1';
-// Only wrappers marked by the trusted app/stylesheet may use these roles.
-export const textRoles=Object.freeze([
- 'explorer.debug-caption','remotes.intro-copy','remotes.connection-explanation','remotes.provider-description',
- 'remotes.connected-caption','remotes.previous-result-detail','destinations.worker-explanation',
- 'destinations.availability-hint','status.verbose-technical-detail','settings.help-copy'
-]);
-export const tokenTypes=Object.freeze({
- ...Object.fromEntries(['background','surface','raised','text','muted','border','accent','selection','focus'].map(k=>['color.'+k,'color'])),
- 'typography.family':'fontFamily','typography.size':'dimension','spacing.unit':'dimension','spacing.page':'dimension','spacing.card':'dimension','spacing.navGap':'dimension','spacing.navInline':'dimension',
- 'geometry.control':'dimension','geometry.surface':'dimension','geometry.overlay':'dimension','elevation.overlay':'shadow','motion.feedback':'duration','state.disabled':'number'
-});
-const plain=x=>!!x&&Object.getPrototypeOf(x)===Object.prototype;
-const keys=(x,allowed)=>Object.keys(x).every(k=>allowed.includes(k));
-const hex=x=>typeof x==='string'&&/^#[\da-f]{6}(?:[\da-f]{2})?$/i.test(x);
-const dimension=x=>typeof x==='string'&&/^\d+(?:\.\d+)?px$/.test(x)&&parseFloat(x)<=48;
-const variable=name=>'--a-'+name.replaceAll('.','-');
-export function validateAesthetic(manifest){
- const errors=[];
- if(!plain(manifest)||!keys(manifest,['schemaVersion','id','name','version','compatibleApiVersion','tokens','visibility']))return {valid:false,errors:['MANIFEST_INVALID']};
- if(manifest.schemaVersion!==1||!['1.0',AESTHETIC_API_VERSION].includes(manifest.compatibleApiVersion))errors.push('API_INCOMPATIBLE');
- if(!/^[a-z][a-z0-9-]{0,47}$/.test(manifest.id??'')||typeof manifest.name!=='string'||!manifest.name.trim()||manifest.name.length>80||!/^\d+\.\d+\.\d+$/.test(manifest.version??''))errors.push('IDENTITY_INVALID');
- if(!plain(manifest.tokens)||Object.keys(manifest.tokens).length>32)return {valid:false,errors:[...errors,'TOKENS_INVALID']};
- if(Object.hasOwn(manifest,'visibility')){
-  if(manifest.compatibleApiVersion!=='1.1'||!plain(manifest.visibility)||!keys(manifest.visibility,textRoles)||
-   Object.values(manifest.visibility).some(value=>!['show','hide'].includes(value)))errors.push('VISIBILITY_INVALID');
- }
- for(const [name,t] of Object.entries(manifest.tokens)){
-  const type=tokenTypes[name];if(!type||!plain(t)||!keys(t,['$type','$value'])||t.$type!==type){errors.push('TOKEN_INVALID:'+name);continue;}
-  const v=t.$value,ok=type==='color'?plain(v)&&keys(v,['light','dark'])&&hex(v.light)&&hex(v.dark):type==='dimension'?dimension(v)&&(!name.startsWith('typography')||parseFloat(v)>=12):type==='fontFamily'?typeof v==='string'&&v.length<160&&/^[a-zA-Z ,"'-]+$/.test(v):type==='duration'?typeof v==='string'&&/^\d+ms$/.test(v)&&parseInt(v)<=200:type==='number'?Number.isFinite(v)&&v>=0.4&&v<=1:type==='shadow'?typeof v==='string'&&/^0 \d{1,2}px \d{1,2}px #[\da-f]{8}$/i.test(v):false;
-  if(!ok)errors.push('VALUE_INVALID:'+name);
- }
- return {valid:!errors.length,errors};
+const themes=new Map([minimal,standard].map(theme=>[theme.id,theme]));
+const colorNames=['background','surface','raised','text','muted','border','accent','selection','focus'];
+const fontRoles=['heading','body','control'];
+const plain=value=>!!value&&Object.getPrototypeOf(value)===Object.prototype;
+const hex=value=>typeof value==='string'&&/^#[\da-f]{6}$/i.test(value);
+const fontFamily=value=>typeof value==='string'&&value.length>0&&value.length<160&&/^[a-zA-Z ,"'-]+$/.test(value);
+
+export function validatePalette(scheme){
+ if(!plain(scheme)||Object.keys(scheme).some(key=>!['id','name','colors','fonts'].includes(key))||
+   !/^[a-z][a-z0-9-]{0,47}$/.test(scheme.id??'')||typeof scheme.name!=='string'||!scheme.name.trim())return false;
+ const {colors,fonts}=scheme;
+ if(!plain(colors)||Object.keys(colors).length!==colorNames.length||!plain(fonts)||Object.keys(fonts).length!==fontRoles.length)return false;
+ return colorNames.every(name=>Array.isArray(colors[name])&&colors[name].length===2&&colors[name].every(hex))&&
+  fontRoles.every(role=>Array.isArray(fonts[role])&&fonts[role].length===2&&fontFamily(fonts[role][0])&&
+   Number.isInteger(fonts[role][1])&&fonts[role][1]>=400&&fonts[role][1]<=750);
 }
-// Only the trusted host receives root/storage. Packages remain inert data.
+const schemes=new Map(palettes.map(scheme=>{
+ if(!validatePalette(scheme))throw Error('BUILT_IN_PALETTE_INVALID');
+ return [scheme.id,scheme];
+}));
+
 export function createAestheticHost({root,storage}={}){
- const registry=new Map(),palettes=new Map(),applied=new Set();
- let active=standard.id,palette='original-rose',lastError=null,sequence=0,writes=Promise.resolve();
- function register(manifest){
-  const result=validateAesthetic(manifest);
-  if(!result.valid)return result;
-  if(registry.has(manifest.id))return {valid:false,errors:['PACKAGE_ALREADY_REGISTERED']};
-  registry.set(manifest.id,structuredClone(manifest));
-  return result;
- }
- register(highPolish);register(standard);register(minimal);
- const colors=Object.keys(tokenTypes).filter(name=>tokenTypes[name]==='color');
- for(const scheme of bitOPolishPalettes){
-  if(Object.keys(scheme.tokens).length!==colors.length||!colors.every(name=>scheme.tokens[name])||
-    !validateAesthetic({...highPolish,...scheme}).valid)throw Error('BUILT_IN_PALETTE_INVALID');
-  palettes.set(scheme.id,structuredClone(scheme));
- }
- function paint(id){
-  const manifest=registry.get(id);
-  const tokens=id===standard.id?{}:{...registry.get(highPolish.id).tokens,...manifest.tokens,
-    ...(id===highPolish.id?palettes.get(palette).tokens:{})};
-  for(const name of applied)root?.style.removeProperty(name);
-  applied.clear();
-  for(const [name,token] of Object.entries(tokens)){
-   const vars=token.$type==='color'?['light','dark'].map(mode=>[variable(name)+'-'+mode,token.$value[mode]]):[[variable(name),String(token.$value)]];
-   for(const [key,value] of vars){root?.style.setProperty(key,value);applied.add(key);}
-  }
-  active=id;
+ const applied=new Set();
+ let active=minimal.id,palette=palettes[0].id,lastError=null,sequence=0,writes=Promise.resolve();
+ function paint(){
   if(!root)return;
-  root.dataset.aesthetic=id;
-  const hidden=Object.entries(manifest.visibility??{}).filter(([,value])=>value==='hide').map(([role])=>role);
-  if(hidden.length)root.dataset.aestheticHide=hidden.join(' ');
-  else delete root.dataset.aestheticHide;
+  for(const name of applied)root.style.removeProperty(name);
+  applied.clear();
+  root.dataset.aesthetic=active;
+  if(active!==minimal.id)return;
+  const {colors,fonts}=schemes.get(palette);
+  const set=(key,value)=>{root.style.setProperty(key,String(value));applied.add(key);};
+  for(const [name,[light,dark]] of Object.entries(colors)){
+   set('--a-color-'+name+'-light',light);set('--a-color-'+name+'-dark',dark);
+  }
+  for(const [role,[family,weight]] of Object.entries(fonts)){
+   set('--a-font-'+role,family);set('--a-weight-'+role,weight);
+  }
  }
  function persistPreference(key,id){
   writes=writes.catch(()=>{}).then(()=>{
@@ -77,40 +49,43 @@ export function createAestheticHost({root,storage}={}){
   });
   return writes;
  }
- async function apply({id=standard.id,persist=true}={}){
+ const getActive=()=>({apiVersion:AESTHETIC_API_VERSION,id:active,version:themes.get(active).version,error:lastError});
+ async function apply({id=minimal.id,persist=true}={}){
   const ticket=++sequence;
-  const error=registry.has(id)?null:'PACKAGE_UNAVAILABLE';
-  paint(error?standard.id:id);
-  lastError=error;
+  lastError=themes.has(id)?null:'PACKAGE_UNAVAILABLE';
+  active=lastError?minimal.id:id;
+  paint();
   const result=getActive();
-  if(persist)try{await persistPreference(AESTHETIC_PREFERENCE_KEY,active);}
+  if(persist&&!lastError)try{await persistPreference(AESTHETIC_PREFERENCE_KEY,id);}
   catch{if(sequence===ticket)lastError='PREFERENCE_WRITE_FAILED';return {...result,error:'PREFERENCE_WRITE_FAILED'};}
   return result;
  }
  async function applyPalette(id){
-  if(!palettes.has(id))return {id:palette,error:'PALETTE_UNAVAILABLE'};
-  sequence++;
-  palette=id;
-  if(active===highPolish.id)paint(active);
+  if(!schemes.has(id))return {id:palette,error:'PALETTE_UNAVAILABLE'};
+  sequence++;palette=id;
+  paint();
   try{await persistPreference(PALETTE_PREFERENCE_KEY,id);return {id,error:null};}
   catch{return {id,error:'PREFERENCE_WRITE_FAILED'};}
  }
- const getActive=()=>({apiVersion:AESTHETIC_API_VERSION,id:active,version:registry.get(active).version,error:lastError});
- const isPreference=saved=>plain(saved)&&keys(saved,['schemaVersion','id'])&&saved.schemaVersion===1;
+ const isPreference=value=>plain(value)&&value.schemaVersion===1&&typeof value.id==='string';
  async function restore(){
   const ticket=sequence;
   try{
    const values=await storage?.get([AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY]);
    if(ticket!==sequence)return getActive();
    const saved=values?.[AESTHETIC_PREFERENCE_KEY],scheme=values?.[PALETTE_PREFERENCE_KEY];
-   palette=isPreference(scheme)&&palettes.has(scheme.id)?scheme.id:'original-rose';
-   if(saved===undefined)return apply({id:highPolish.id,persist:false});
-   if(isPreference(saved))return apply({id:saved.id,persist:false});
-   paint(standard.id);lastError='PREFERENCE_INVALID';
-  }catch{if(ticket===sequence){paint(standard.id);lastError='PREFERENCE_READ_FAILED';}}
+   if(isPreference(scheme)&&schemes.has(scheme.id))palette=scheme.id;
+   // Keep the durable IDs for Minimal and Remote V1 and read old Bit o' Polish
+   // preferences as Minimal. The independently saved palette stays intact.
+   if(saved===undefined||isPreference(saved)&&saved.id==='high-polish')return apply({persist:false});
+   if(isPreference(saved)&&themes.has(saved.id))return apply({id:saved.id,persist:false});
+   lastError='PREFERENCE_INVALID';
+  }catch{if(ticket===sequence)lastError='PREFERENCE_READ_FAILED';}
+  if(ticket===sequence)paint();
   return getActive();
  }
- return Object.freeze({register,validate:validateAesthetic,apply,getActive,list:()=>[...registry.values()].map(({id,name})=>({id,name})),
-  listPalettes:()=>[...palettes.values()].map(({id,name,tokens})=>({id,name,preview:structuredClone(tokens['color.accent'].$value)})),
-  getPalette:()=>palette,applyPalette,resetToStandard:()=>apply({id:standard.id}),restore});
+ paint();
+ return Object.freeze({apply,getActive,list:()=>[...themes.values()].map(({id,name})=>({id,name})),
+  listPalettes:()=>palettes.map(({id,name,colors})=>({id,name,preview:{light:colors.accent[0],dark:colors.accent[1]}})),
+  getPalette:()=>palette,applyPalette,restore});
 }

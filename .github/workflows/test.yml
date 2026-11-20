@@ -54,9 +54,13 @@ jobs:
       - run: npm run build:extension
       - name: Install Chrome for Testing and X11 dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y xvfb python3-xlib imagemagick
+          sudo apt-get update && sudo apt-get install -y xvfb python3-xlib imagemagick tesseract-ocr
           curl --fail --silent --show-error --location --retry 3 https://storage.googleapis.com/chrome-for-testing-public/158.0.8127.36/linux64/chrome-linux64.zip -o "$RUNNER_TEMP/chrome-linux64.zip"
           unzip -q "$RUNNER_TEMP/chrome-linux64.zip" -d "$RUNNER_TEMP"
+      - name: Probe exact Ctrl+Shift+F7 manifest support
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+        run: node scripts/probe-chrome-f7.mjs
       - name: Installed Chrome Get URL against the HTTPS fixture
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
@@ -87,3 +91,21 @@ jobs:
           name: click2cloud-screenshot-browser
           path: ${{ runner.temp }}/click2cloud-screenshot
           if-no-files-found: error
+      - name: Compare palette and layout browser evidence
+        if: ${{ !cancelled() }}
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+        run: |
+          mkdir -p "$RUNNER_TEMP/click2cloud-appearance-before"
+          git archive f2ba964ecf1e0ce455031538190d7baaf9de1c57 | tar -x -C "$RUNNER_TEMP/click2cloud-appearance-before"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/click2cloud-appearance-before/node_modules"
+          sed -i "s|executablePath:'/usr/bin/chromium'|executablePath:process.env.C2C_CHROME_EXECUTABLE|" "$RUNNER_TEMP/click2cloud-appearance-before/scripts/test-aesthetic-browser.mjs"
+          (cd "$RUNNER_TEMP/click2cloud-appearance-before" && C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/before" node scripts/test-aesthetic-browser.mjs)
+          C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/after" node scripts/test-aesthetic-browser.mjs
+      - name: Upload appearance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-appearance-browser
+          path: ${{ runner.temp }}/click2cloud-appearance
+          if-no-files-found: ignore
