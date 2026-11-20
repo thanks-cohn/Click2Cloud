@@ -12,12 +12,51 @@
 
 The top **New / Edit Screenshot Rule** form has:
 - **Name** (editable; empty defaults to `Rule 1`, `Rule 2`, ... independent screenshot-rule numbering; stable underlying IDs, no renumbering on deletion).
-- **Website/URL scope for screenshot SHORTCUT**: **All websites**, entire site/domain (`example.com`, with clearly stated apex/subdomain semantics), **specific hostname/subdomain** (`shop.example.com` only), explicit wildcard (`*.example.com`), OR **specific full URL** (`https://shop.example.com/products/item`). User decides **where the screenshot made with THAT shortcut goes** for this exact scope. For exact URL matches, compare a normalized trustworthy tab origin + path, and include query only when explicitly chosen; ignore URL fragment by default, never match a different path/host/lookalike suffix by substring. For domain scopes, never treat `evil-example.com` as `example.com`. Read the actual active tab URL at capture time, not webpage-injected or edited string. Avoid logging private query parameters. Retain distinct rules for different sites/hosts/pages instead of forcing one global target.
+- **Screenshot shortcut website/URL matching — FOUR mutually exclusive levels:** **(1) All websites** (permitted active browser pages); **(2) Entire domain + subdomains** (e.g. `google.com` matches `google.com`, `mail.google.com`, `maps.google.com` and all their pages, NOT `notgoogle.com`); **(3) Exact hostname** (e.g. `google.com` matches any page on `google.com` such as `google.com/search` and `google.com/preferences`, but NOT `mail.google.com`; selecting `mail.google.com` matches that host's pages only, not `foo.mail.google.com`); **(4) Specific full URL** (e.g. `https://google.com/search` matches that normalized scheme, exact hostname and exact path only, not `/preferences`). Provide distinct clear labels for (2) vs (3)—do not ambiguously label both "Specific website or subdomain". Exact-URL query matching may be optional and explicitly configurable; ignore fragments by default, never silently widen scope. Canonicalize safely using hostname label boundaries, NOT substring matching; use the trusted active-tab URL at capture time and keep sensitive query strings out of Secure diagnostics. The chosen shortcut routes its authorized screenshot only to its scope's exact destination.
 - **Destination**: authorized provider/account/bucket and exact directory prefix; choose via real destination picker, not free-typed unverified targets.
 - **Optional shortcut**: a clear **Set shortcut / Change / Remove** control in the rule editor, with persisted command binding, collision feedback and a concise description: "Take screenshot and send to this destination." Prefer the existing `src/api/shortcuts.mjs` canonical shortcut validation/storage and `extension/shortcut-settings.mjs` UI conventions, not a competing key engine.
 - **Save**: only confirm after actual persistence, then immediately render the new/edited rule below. No accidental enabling if destination/capture prerequisites are missing.
 
 Under the setup and **Save** button, **Saved Screenshot Rules** shows organized compact cards/rows each with name, site condition, exact destination, optional keyboard shortcut, **Activate/Disable switch**, Edit affordance and **X delete at the far right**. X deletes only this rule, never cloud data; retain keyboard accessibility, a safe confirmation as appropriate, and no accidental capture from clicking X. Disabled rules remain visible. Persist across restart. Show **25 rules per page** then Prev/Next + page number starting on rule 26. 25 is page size, not a total cap. Keep a separate saved list for general **Rules** (download routing) with the same 25-per-page, X-delete and Activate/Disable pattern.
+
+## 2A. Screenshot manager saved-card click → full Edit Screenshot Rule popup
+
+**Distinct workflow:** Top-right **More ▾ → Screenshot** opens the Screenshot Rules management page. The rule editor/setup is at the top; **below it is a scrollable/paginated list of saved rule cards**. A user scrolls down to the rule they want and **clicks its card** to open the **Edit Screenshot Rule** popup. The card itself (including its name/description area) is the editor trigger; do not require hunting for a tiny pencil icon. Keyboard Enter/Space on a focused card opens the same editor. The per-card **Activate/Disable** switch and far-right **X Delete** are their own actions and must NOT open the editor or trigger a screenshot.
+
+**This edit popup is intentionally DIFFERENT from Screenshot2Here**. Screenshot2Here is a fast context-menu flow for assigning/reassigning a shortcut's **destination** to the right-clicked folder. The full **Edit Screenshot Rule** popup allows the user to inspect and edit **ALL properties of an existing rule** in one organized form:
+
+- **Name** (existing/custom, editable).
+- **Shortcut** (current key chord; Set/Change/Remove using the canonical shortcut registry, with collision checking).
+- **Website/URL match scope** using the **four separate choices** above: All websites; Entire domain + subdomains; Exact hostname; Specific full URL. Show the relevant domain/hostname/URL input only for that selection. Changing the scope is an explicit edit, not an incidental effect of editing the destination.
+- **Cloud destination** (currently authorized account, bucket and exact folder, with Change/Browse), plus clear current path.
+- **Enabled/Disabled** state (or expose the switch exclusively on the card; in either case keep it synchronized).
+- **Cancel / Save** footer and close X; edits are **staged until Save** and discard on Cancel/close. Confirm actual persistence before stating Saved. Keep the user on the same screenshot-rules list/page and update that card in place; no duplicated rule or shortcut binding. Use one stable rule ID throughout.
+
+**Example layout:**
+
+```text
+More ▾ → Screenshot
+  New Screenshot Rule [setup and Save]
+  Saved Screenshot Rules
+    [ Ctrl+Shift+F6  ·  Rule 1  ·  All websites     (ON)   X ] ← click card
+    [ Ctrl+Alt+P     ·  Product Pages · shop.example.com (ON) X ]
+                         ↓
+  ┌──────── Edit Screenshot Rule ─────────── X ┐
+  │ Rule name       [ Product Pages          ] │
+  │ Shortcut        [ Ctrl+Alt+P ] [Change]    │
+  │ Match scope:                                │
+  │  ( ) All websites                           │
+  │  ( ) Entire domain and subdomains           │
+  │  (●) Exact hostname    [shop.example.com]  │
+  │  ( ) Specific full URL                      │
+  │ Destination     [ Cloudflare / photos/products ] │
+  │                              [Cancel] [Save]│
+  └─────────────────────────────────────────────┘
+```
+
+**Scoping and reassignment:** Opening the full editor must prefill the saved rule, not start a new rule. Editing `shop.example.com` from Exact hostname to Entire domain + subdomains affects only this rule, after Save. Conversely, **Screenshot2Here** selecting this existing shortcut and replacing its destination **must retain its previous matching scope and name**, unless the user later deliberately edits them here. Both interfaces use the same existing persisted rule and shortcut registry, never competing settings or diagnostic systems.
+
+**Tests:** Create a rule in Screenshot2Here → More → Screenshot → scroll down → click its card → see the correct shortcut, exact destination and preselected scope; change name, destination, scope and shortcut in Edit popup → Save → existing card updates without duplication and persists after restart. Cancel/close leaves everything unchanged. Toggle and X on card do not open edit. With 26+ rules, paginate then edit a card on page 2 without moving or losing other cards.
 
 ## 2B. File Explorer directory right-click → Screenshot2Here (shortcut destination manager)
 
@@ -93,6 +132,7 @@ Unlike ordinary browser-download reroute rules (which must avoid multiple accide
 4. Create 26 screenshot rules => page 1 has 25, page 2 has 1; edit, X-delete, enable/disable and restart persist correctly. General download Rules uses the same management controls and pagination independently.
 5. Assign a unique shortcut to screenshot `Rule 2`; pressing that shortcut => only its precise destination receives a screenshot, no other additive rules fire. Reject shortcut conflicts with other rule shortcuts and existing F7/F8/F9 bindings; remaps and deletion remain consistent. Disabled rule's shortcut cannot trigger upload.
 6. **Screenshot2Here directory popup:** test new shortcut input, 30 existing shortcuts in scrollable chooser, replace-one shortcut old/new path confirmation, no duplicate command, retained exact-URL matcher, Save-only persistence, Cancel, conflicted shortcut validation, and UI/Settings sync after restart.
-7. Genuine Chrome capture/capability, exact target routing, proper consent, safe error reporting, and receipts are proven in focused fixtures and (only if available) authorized Chrome/R2 disposable-object checks. Mark anything not exercised as unverified.
+7. **Screenshot Rules card → Edit popup:** click any saved card (including on page 2 of pagination) to open populated full rule editor; edit name, shortcut, domain/hostname/full-URL scope, cloud destination and enabled state; Save updates one rule only, Cancel/X discards. Card's Activate/Disable and X Delete do not inadvertently open the editor or take screenshots. Confirm complete domain matches all subdomains, exact hostname excludes subdomains, exact URL excludes unrelated page paths.
+8. Genuine Chrome capture/capability, exact target routing, proper consent, safe error reporting, and receipts are proven in focused fixtures and (only if available) authorized Chrome/R2 disposable-object checks. Mark anything not exercised as unverified.
 
 **Do not reimplement the already built shortcut registry, Chrome save menus, general download ZIP, or filename-search system. No broad Worker redesign.**
