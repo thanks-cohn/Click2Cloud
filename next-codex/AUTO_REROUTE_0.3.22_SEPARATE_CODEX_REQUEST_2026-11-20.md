@@ -6,7 +6,7 @@
 
 - **0.3.21:** Screenshot-to-Cloud (More → Screenshot), existing Search/Get URL/Minimal UI/Destinations Manager fixes, Shelf/History shortcut, shared screenshot receipts, regressions and release.
 - **0.3.22 (THIS SEPARATE RUN ONLY):** Automatic eligible browser-download-to-R2 routing; its own More → Rules entry, website+extension saved rule cards, Chrome-byte transfer to the existing Worker, actual download interception and verifiable R2 receipts.
-- Preserve the frozen 0.3.21 Screenshot logic and both Chrome-scoped default shortcuts `Alt+Q` and `Ctrl+Shift+Y`. Do not change their listener semantics, screenshot UI, worker screenshot routes or Explorer F7/F8/F9 shortcuts.
+- Preserve the fully final 0.3.21 Screenshot contract in [`/screenshot-logic-final/README.md`](../screenshot-logic-final/README.md) and its [test matrix](../screenshot-logic-final/TEST_MATRIX.md), including the two equal default Chrome-scoped shortcuts `Alt+Q` and `Ctrl+Shift+Y`. Do not change additive matching, simplified screenshot UI, capture/fan-out semantics, Worker screenshot routes or Explorer F7/F8/F9 shortcuts. Do not use the older `/screenshot-logic/` draft as authority.
 - Start this later request from the latest released/merged **0.3.21** baseline, not historical 0.3.20 files. Use a separate Codex branch and report commit SHAs. Raise product version to **0.3.22** only when the new feature and regressions are genuinely verified.
 
 ## Binding complete architecture and UX specification
