@@ -345,6 +345,10 @@ function treeNode(parent,t,label){
 async function revealListedFile(key,target){
  if(view!=='explorer'||!source||targetKey(source)!==targetKey(target))return;
  const ticket=navigationEpoch,seen=new Set();
+ if(!entries.some(entry=>entry.key===key)&&!cursor&&!listingError){
+  await loadListing(false,true);
+  if(ticket!==navigationEpoch||view!=='explorer'||filenameSearch)return;
+ }
  while(!entries.some(e=>e.key===key)&&cursor){if(seen.has(cursor))throw Error('PAGINATION_STALLED');seen.add(cursor);await loadListing(true);if(ticket!==navigationEpoch||view!=='explorer'||filenameSearch)return;}
  if(filenameSearch)return;
  if(!entries.some(e=>e.key===key)){selected.clear();updateSelection();status('This file is unavailable in the listing. Refresh or reconnect before trying again.',{attention:true});throw Error('RESULT_NOT_FOUND');}

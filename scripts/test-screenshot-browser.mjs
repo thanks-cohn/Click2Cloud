@@ -504,6 +504,8 @@ try{
  await writeFile(join(out,'results.json'),JSON.stringify(evidence,null,2));
 }catch(error){
  console.error(error,JSON.stringify({checks,requests,uploads:uploads.length}));
-
+ try{const visible=browser?.pages().find(page=>page.url().endsWith('/extension/app.html'));
+  if(visible)await visible.screenshot({path:join(out,'failure-state.png')});}
+ catch{}
  process.exitCode=1;
 }finally{await browser?.close();await new Promise(ok=>resource.close(ok));await rm(profile,{recursive:true,force:true});}
