@@ -125,3 +125,73 @@ In addition to earlier checks, confirm and report:
 - Provide before/after screenshots or browser assertions, exact test commands/results, implementation commit/branch, and a downloadable build if possible. Report lack of real live Cloudflare verification rather than claiming it.
 
 **The user wants a tangible built result, not merely an audit.**
+
+---
+
+## F. Owner's additional requirement — Screenshot History → expandable “URLs” and one-time bucket-publication setup
+
+**Added November 20, 2026. This is in scope for THIS SAME experimental branch and is not optional.**
+
+**Desired everyday UX:**
+
+- A screenshot History row displays its real thumbnail (per D3). Immediately **under the thumbnail**, show a compact collapsed expander labeled **URLs**.
+- Expanding **URLs** shows all existing, valid, provider-confirmed public addresses for that screenshot, each as a clickable, read-only full URL and with a visible **Copy** action. Render the exact URL for the screenshot's R2 object key in each verified output destination. If there are multiple confirmed destination buckets, group links by the exact bucket/path and show their own domains (including multiple custom domains, where actually enabled). No fabricated URLs, no private Cloudflare API endpoint shown as “public,” and no link for an unconfirmed output claimed as uploaded.
+- If the screenshot's verified bucket has **no publicly enabled domain or r2.dev development hostname**, keep the expander and show a single clean action **“Enable public URLs for this bucket”** (a button within that expander, not an unsolicited popup on every History open). Click that action to present a short **confirmation popup**, clearly naming the actual R2 bucket/account and explaining **this makes the bucket's objects publicly readable, not just this screenshot**. User may Cancel; viewing History or expanding URLs alone must NEVER change bucket visibility. No repeat prompts when already enabled.
+- On **Yes / Enable**, request enabling Cloudflare's **Public Development URL (r2.dev)** for THAT bucket using the user's existing authorized Cloudflare OAuth session. If the current token lacks the API grant, show a specific **Reconnect/authorize** action; do not silently fail or claim the change succeeded. Handle the real provider response. **Re-read** the bucket's managed-domain status and use its returned exact domain to build the full screenshot URL. Only mark it active after Cloudflare actually reports `enabled: true`; show concise propagation/pending status if public read is not yet available. Do not invent a hostname or hardcode `pub-...` IDs.
+- After successful managed-public enabling, keep **URLs** expandable and at minimum display the actual **Public development URL** for each verified object in that bucket, with copy/open and a brief “Development / rate-limited” indication. Whether or not a user supplies a custom domain, the verified development URL should remain displayed while the r2.dev feature is actually enabled.
+- Immediately below or adjacent to the public URL section, reveal an OPTIONAL text field **“Custom domain”** with an example such as `assets.example.com`, plus a separate **Connect domain** action. Put this friendly helper sentence near it: **“If your nameservers are already with Cloudflare, simply add your domain!”** However, do not treat typing alone as a successful domain connection.
+- A custom domain can only be attached when Cloudflare's real R2 custom-domain prerequisites are satisfied: the domain/zone must be present in the same Cloudflare account as the R2 bucket, and Cloudflare must accept/verify the connection. If an eligible Cloudflare-managed zone is already present, offer a short attach flow with actual status and API error detail when it fails. If not, explain briefly how to add that domain to the same Cloudflare account first (or open the official Cloudflare setup screen), without blocking the development URL. Custom domain may be **Initializing** before becoming **Active**; show it as **pending**, not as a confirmed working URL. Recheck/poll status within sensible bounds and offer manual Refresh. Never silently change DNS for unrelated zones.
+- An existing active **custom domain** must be used to display a custom URL **without requiring r2.dev to be enabled**. Do not ask users to make their bucket public again when it is already exposed through a usable custom domain. Only offer r2.dev enabling as an optional separate choice if they want the development URL as well.
+- When an enabled custom domain becomes active, add its exact screenshot URL to the **URLs** expander alongside any still-enabled development URL. It is possible for both to appear. If access is later disabled, remove or accurately mark its URL unavailable after status refresh; never claim a disabled domain still works.
+- URLs do not require the screenshot to be recaptured, uploaded again, renamed, moved, or written to any new location. Publication applies at **bucket** level, and the screenshot object key remains exactly unchanged.
+- All browser-facing copy/open operations must use HTTPS addresses derived from validated Cloudflare-provided enabled domains plus precisely encoded **object-key path segments** (preserve slash separators, percent-encode spaces/Unicode/reserved characters). Never double-encode existing key material, invent a bucket segment in the URL, confuse `redown` bucket with `redown/` key prefix, or use the current/default bucket in place of the screenshot receipt's actual bucket.
+- Screenshots that are not confirmed in any R2 destination may still show local image preview if available, but **no invented public asset URL**. Once verification succeeds and domain status is known, refreshing History should expose the corresponding URLs.
+- Keep this URL view unobtrusive; no system notifications, repetitive modal prompts, or public-domain network calls merely because a screenshot capture occurred. Resolve publication details on demand when URLs expands or is refreshed, cache per-bucket read status briefly where appropriate, and keep History performance predictable.
+
+**Existing functionality to REUSE rather than cloning:**
+
+- `extension/background.mjs` already has `readCustomDomains(target)` and `readManagedDomain(target)`, using authenticated `oauth.request`. They currently READ `GET /accounts/{account}/r2/buckets/{bucket}/domains/custom` and `GET .../domains/managed`; extend these through a narrow trusted API command for Screenshot History if needed.
+- `src/explorer/r2-adapter.mjs` already exposes a `publicUrls` file-API operation. Check how the current Get URL flow and domain/source mapping works and reuse the same code where compatible. Do not confuse provider-specific R2 direct upload verification with public link readiness.
+- Cloudflare's documented managed-domain enable endpoint is **`PUT /accounts/{account_id}/r2/buckets/{bucket_name}/domains/managed`**, request JSON **`{"enabled": true}`**, result includes **`domain`** and **`enabled`**. Attach-custom-domain API is **`POST /accounts/{account_id}/r2/buckets/{bucket_name}/domains/custom`**; follow the documented request and domain/zone requirements and subsequent status checks. Do not fake success from a 2xx response without validating `success` and returned fields.
+- Official documentation:
+  - https://developers.cloudflare.com/r2/buckets/public-buckets/
+  - https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/domains/subresources/managed/methods/update/
+  - https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/domains/subresources/custom/methods/create/
+
+**UI sketch (conceptual only, actual implementation uses current History layout):**
+
+```text
+Screenshot  ·  Saved and verified
+┌───────────────────────────┐
+│    ACTUAL PNG THUMBNAIL   │
+└───────────────────────────┘
+> URLs
+    [when expanded and public]
+    Public development URL  [Copy]  [Open]
+    https://<actual-cloudflare-domain>.r2.dev/<exact-encoded-object-key>
+    Custom domain URL       [Copy]  [Open]   (if actually active)
+    https://assets.example.com/<exact-encoded-object-key>
+
+    [when no public access exists]
+    No public URL for this bucket.
+    [Enable public URLs for this bucket]
+       -> confirm bucket-wide public access
+       -> call Cloudflare & confirm enabled
+       -> show ACTUAL r2.dev URL
+       -> Optional Custom domain [assets.example.com] [Connect domain]
+          "If your nameservers are already with Cloudflare, simply add your domain!"
+```
+
+**Tests and release gate for section F:**
+
+1. Screenshot with 1 confirmed output + enabled r2.dev returns one correct encoded public URL under image; clicking Copy copies that exact URL.
+2. Existing active custom domain + disabled r2.dev shows only the active custom URL and does not prompt for public development.
+3. No public domain: just expanding URLs performs no writes; explicit Enable triggers one clear confirmation; Cancel performs zero provider mutations; Yes performs exactly one scoped managed-domain enable and re-read; actual provider domain is displayed after enabled.
+4. Optional custom domain absent: actual r2.dev URL remains shown. Custom domain entered with valid owned zone: attach, status pending, eventually active and then show both URLs. Invalid/unowned domain: short actionable error, r2.dev link unaffected.
+5. Three destinations across two buckets: links shown only for actual confirmed outputs, never mixed account/bucket/keys, duplicated exact URLs removed. Failure in one bucket does not block links for another.
+6. Disabled managed domain or custom domain reported inactive: not represented as an active public URL. Unknown API status: “unavailable” instead of invented URL.
+7. Special keys containing spaces, Unicode, #, %, ? and nested prefixes produce exactly correct URL paths.
+8. Existing History image previews, thumbnail lazy-loading, file Get URL, Cloudflare OAuth, screenshots direct upload/verification, Simple/Narrow/Depth right-click and restart recovery regressions remain green.
+9. Installed Chrome + local HTTPS Cloudflare API fixture tests actual confirmation, list, copy, optional custom domain, and shows correct public links in History. **Real Cloudflare account access and DNS activation must be reported as untested if unavailable.**
+
+**IMPORTANT product constraint:** public r2.dev access makes the entire selected bucket accessible over the internet (where keys are known), and Cloudflare says r2.dev is rate-limited/development-only. Disclose that consequence clearly in the one user-initiated confirmation, never turn it on automatically just to render an image thumbnail. Authenticated thumbnail previews continue to work for PRIVATE buckets.
