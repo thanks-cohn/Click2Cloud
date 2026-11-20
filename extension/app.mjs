@@ -198,10 +198,32 @@ function dialog(title,body,footer='',debugOnly=false) {
   listen('#close-dialog','click',closeDialog);if(!$('#dialog').open)$('#dialog').showModal();else if(wasOpen){const previous=focusedId&&document.getElementById(focusedId);(previous&&!previous.disabled?previous:$('#close-dialog')).focus({preventScroll:true});}
 }
 async function connections() {
-  const ticket=++connectionEpoch;let next;try{next=await readWithRetry(()=>api('loginStatus',{}, {quiet:true,readTimeout:5000}));}catch(error){next={state:'UNAVAILABLE',accounts:[],diagnostic:{code:error.code??'AUTH_STATUS_UNAVAILABLE'}};}if(ticket!==connectionEpoch)return;const before=JSON.stringify([connection?.state,connection?.accounts]);connection=next;if(connection.state==='CONNECTED')reconnectNeeded=false;
+  const ticket=++connectionEpoch;
+  let next;
+  try{next=await readWithRetry(()=>api('loginStatus',{}, {quiet:true,readTimeout:5000}));}
+  catch(error){next={state:'UNAVAILABLE',accounts:[],diagnostic:{code:error.code??'AUTH_STATUS_UNAVAILABLE'}};}
+  if(ticket!==connectionEpoch)return;
+  const before=JSON.stringify([connection?.state,connection?.accounts]);
+  connection=next;
+  const changed=before!==JSON.stringify([connection.state,connection.accounts]);
+  if(connection.state==='CONNECTED')reconnectNeeded=false;
   if(reconnectCodes.has(connection.diagnostic?.code)||connection.state==='DISCONNECTED'&&connection.identityVerified)reconnectNeeded=true;
-  imageReader.clear();clearThumbnails();if(before!==JSON.stringify([connection.state,connection.accounts])){navigationEpoch++;previewEpoch++;if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;}if(previewUrl||$('#preview-state'))closeDialog();listingReader.invalidate();imageReader.clear();clearThumbnails();treeFolders.clear();treeEpoch++;treeNodes.clear();$('#tree').replaceChildren();bucketTargets.length=0;if(connection.state!=='CONNECTED'){navigationEpoch++;listingEpoch++;entries=[];selected.clear();loading=false;listingError='Reconnect to browse. Saved locations are preserved.';if(view==='explorer'){renderExplorer();$('#tree').textContent=source?'Saved location: '+source.bucketName+'/'+source.prefix+' · Reconnect to browse.':'Reconnect to browse saved locations.';}}}
-  renderConnection();if(view==='explorer'&&state&&connection.state==='CONNECTED'&&before!==JSON.stringify([connection.state,connection.accounts]))await enterExplorer();
+  renderConnection();
+  imageReader.clear();clearThumbnails();
+  if(!changed)return;
+  navigationEpoch++;previewEpoch++;
+  if(filenameSearch){resetFilenameSearch();selected.clear();focusIndex=0;anchor=0;}
+  if(previewUrl||$('#preview-state'))closeDialog();
+  listingReader.invalidate();imageReader.clear();clearThumbnails();treeFolders.clear();treeEpoch++;treeNodes.clear();
+  $('#tree').replaceChildren();bucketTargets.length=0;
+  if(connection.state!=='CONNECTED'){
+    navigationEpoch++;listingEpoch++;entries=[];selected.clear();loading=false;listingError='Reconnect to browse. Saved locations are preserved.';
+    // The browser shortcut can enter Explorer before the saved layout has loaded.
+    if(view==='explorer'&&state&&!configurationIssue){
+      renderExplorer();
+      $('#tree').textContent=source?'Saved location: '+source.bucketName+'/'+source.prefix+' · Reconnect to browse.':'Reconnect to browse saved locations.';
+    }
+  }else if(view==='explorer'&&state)await enterExplorer();
 }
 async function signOut(event){
   const button=event.currentTarget;button.disabled=true;

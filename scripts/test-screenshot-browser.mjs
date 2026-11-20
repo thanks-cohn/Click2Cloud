@@ -9,6 +9,7 @@ import {createHash} from 'node:crypto';
 import {fixtureTarget,fixtureSession} from '../tests/fixtures/screenshot-worker.mjs';
 import {screenshotMenu} from '../src/chrome/screenshot-menu.mjs';
 import {digest} from '../src/cloudflare/wire.mjs';
+import {cloudPath} from '../src/explorer/location-view.mjs';
 // Real installed, headed Chromium. OAuth identity and the R2 API use an
 // isolated HTTPS fixture. No credentials or live buckets are used.
 const out=resolve(process.env.C2C_SCREENSHOT_EVIDENCE??'work/screenshot-browser'),profile=await mkdtemp(join(tmpdir(),'c2c-screenshot-chrome-'));
@@ -17,6 +18,7 @@ const executablePath=process.env.C2C_CHROME_EXECUTABLE;
 const siteHost='screenshot.example.test',extension=resolve('dist/click2cloud');
 const searchHosts=['search-one.example','search-two.test','search-three.invalid'];
 const bucketBase='/client/v4/accounts/'+fixtureTarget.accountId+'/r2/buckets';
+const bucketFolders={redown:['One/','Native/'],'other-screenshots':['Two/'],'qa-screenshots':['Three/']};
 const manifest=JSON.parse(await readFile(join(extension,'manifest.json'),'utf8'));
 assert.equal(manifest.version,'0.3.21');
 const uploads=[],requests=[],checks=[],objects=new Map();
@@ -48,10 +50,10 @@ const resource=https({key:await readFile(keys),cert:await readFile(cert)},async 
   requests.push({method:request.method,host:url.host,path:url.pathname});
   assert.equal(url.hostname,'api.cloudflare.com');
   assert.equal(request.headers.authorization,'Bearer disposable-local-token');
-  if(url.pathname===bucketBase)return json(200,{buckets:[{name:'redown'},{name:'qa-screenshots'}]});
+  if(url.pathname===bucketBase)return json(200,{buckets:Object.keys(bucketFolders).map(name=>({name}))});
   const suffix=url.pathname.slice(bucketBase.length);
   const [,bucket,resourceName,...segments]=suffix.split('/');
-  if(!['redown','qa-screenshots'].includes(bucket))return json(404,null,[{code:10006}]);
+  if(!Object.hasOwn(bucketFolders,bucket))return json(404,null,[{code:10006}]);
   if(!resourceName)return json(200,{name:bucket});
   if(resourceName==='domains'){
    const [type]=segments;
@@ -80,7 +82,7 @@ const resource=https({key:await readFile(keys),cert:await readFile(cert)},async 
   }
   if(resourceName!=='objects')return json(404,null);
   if(!segments.length){
-   const folders=bucket==='redown'?['One/','Two/','Native/']:['Three/'];
+   const folders=bucketFolders[bucket];
    const prefix=url.searchParams.get('prefix')??'',delimiter=url.searchParams.get('delimiter');
    const files=[...objects].flatMap(([identity,bytes])=>{
     if(!identity.startsWith(bucket+'/'+prefix))return [];
@@ -184,6 +186,8 @@ try{
  await form.getByRole('button',{name:'Browse redown'}).click();
  const firstFolder=form.getByRole('checkbox',{name:'One',exact:true});
  await firstFolder.check();await firstFolder.uncheck();await firstFolder.check();
+ await form.getByRole('button',{name:'Back'}).click();
+ await form.getByRole('button',{name:'Browse other-screenshots'}).click();
  await form.getByRole('checkbox',{name:'Two',exact:true}).check();
  await form.getByRole('button',{name:'Back'}).click();
  await form.getByRole('button',{name:'Browse qa-screenshots'}).click();
@@ -194,14 +198,14 @@ try{
  const card=app.locator('.screenshot-card');
  await card.waitFor();
  assert.equal(await card.count(),1);
- assert.match(await card.innerText(),/redown\/One\/.*redown\/Two\/.*qa-screenshots\/Three\//s);
+ assert.match(await card.innerText(),/redown\/One\/.*other-screenshots\/Two\/.*qa-screenshots\/Three\//s);
  assert.equal(uploads.length,1);
  await card.locator('[data-rule-edit]').click();
  await app.locator('#screenshot-editor').getByRole('button',{name:/Remove redown\/One/}).click();
  await app.keyboard.press('Escape');
  await app.locator('#dialog').waitFor({state:'hidden'});
  assert.match(await card.innerText(),/redown\/One\//);
- checks.push('Three folder selections across two buckets and one Save produced one card and zero uploads; Escape discarded the editor draft');
+ checks.push('Three folder selections across three buckets and one Save produced one rule and zero uploads; Escape discarded the editor draft');
  await page.bringToFront();input('focus');input('click','420','400');
  input('key','Control_L','Shift_L','y');
  const partial=await wait(async()=>(await receipts()).find(job=>job.state==='partial'),'Ctrl+Shift+Y partial direct R2 receipt');
@@ -222,6 +226,23 @@ try{
  await app.bringToFront();
  await app.locator('button[data-view="history"]:visible').click();
  const partialRow=app.locator('[data-operation="'+partial.plan.operationId+'"]');
+ const cards=partialRow.locator('.history-destination-card');
+ async function goToFile(row,output){
+  await row.locator('[data-screenshot-goto]').click();
+  const leaf=output.key.split('/').at(-1);
+  const file=app.locator('#files [aria-selected=true]').filter({hasText:leaf});
+  await file.waitFor();
+  assert.equal(await file.count(),1);
+  assert.equal(await app.locator('#location').inputValue(),cloudPath(output.target,output.key));
+  await app.getByRole('button',{name:'History',exact:true}).click();
+ }
+ for(let index=0;index<2;index++)await goToFile(cards.nth(index),partial.plan.outputs[index]);
+ await cards.nth(2).locator('[data-screenshot-goto]').click();
+ await app.getByText('Opened the destination folder. The screenshot file is unverified.',{exact:true}).waitFor();
+ assert.equal(await app.locator('#location').inputValue(),cloudPath(partial.plan.outputs[2].target));
+ assert.equal(await app.locator('#files [aria-selected=true]').count(),0);
+ await app.getByRole('button',{name:'History',exact:true}).click();
+ checks.push('The partial receipt navigates to two exact verified files and opens the unconfirmed destination folder without selecting a file');
  await partialRow.getByText('2 of 3 files verified',{exact:true}).click();
  await partialRow.getByRole('button',{name:'Retry unconfirmed files'}).click();
  const retried=await wait(async()=>(await receipts()).find(job=>job.plan.operationId===partial.plan.operationId&&job.state==='confirmed'),'History direct retry');
@@ -258,7 +279,6 @@ try{
  await writeFile(join(out,'screenshot-fixture-secure.zip'),Buffer.from(diagnostics.zip));
  await writeFile(join(out,'installed-screenshot-receipt.json'),JSON.stringify({single,partial,retried,secure:receiptExport},null,2));
  checks.push('History Retry verified only the originally denied output with the same capture ID, output ID, key and PNG; SECURE trace has no gaps or URLs');
- const cards=partialRow.locator('.history-destination-card');
  await cards.nth(2).getByText(/Verified · R2 GET/).waitFor();
  assert.equal(await cards.count(),3);
  const locationBox=await cards.first().locator('.history-destination-line').boundingBox();
@@ -302,7 +322,7 @@ try{
  assert.equal(await qaUrls.getByRole('link',{name:/Open (Development URL|Custom domain)/}).count(),2);
  assert.equal(await cards.nth(0).locator('[data-output-urls]').getAttribute('open'),null);
  await qaUrls.getByText('URLs',{exact:true}).click();
- const redownUrls=cards.nth(1).locator('[data-output-urls]');
+ const redownUrls=cards.first().locator('[data-output-urls]');
  await redownUrls.getByText('URLs',{exact:true}).click();
  await redownUrls.getByRole('link',{name:/Open Custom domain for cdn/}).waitFor();
  assert.equal(await redownUrls.getByRole('link',{name:/Open Custom domain/}).count(),2);
@@ -320,13 +340,7 @@ try{
  assert.equal(await partialRow.locator('img').count(),1);
  assert(requests.slice(previewReads).some(r=>r.method==='GET'&&r.path.endsWith('/objects/'+retried.plan.outputs[0].key)));
  await app.screenshot({path:join(out,'history-verified-thumbnail.png')});
- for(let index=0;index<3;index++){
-  const leaf=retried.plan.outputs[index].key.split('/').at(-1);
-  await cards.nth(index).locator('[data-screenshot-goto]').click();
-  const selected=app.locator('#files [aria-selected=true]').filter({hasText:leaf});await selected.waitFor();
-  assert.equal(await selected.count(),1);
-  await app.getByRole('button',{name:'History',exact:true}).click();
- }
+ for(let index=0;index<3;index++)await goToFile(cards.nth(index),retried.plan.outputs[index]);
  checks.push('After the retry image cache is deleted and the app reloads, History reads one R2 thumbnail and all three GO TO buttons select their own recorded file');
  const bytes=Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7','base64');
  const populated=structuredClone(retried),historicalId=crypto.randomUUID(),captureId=crypto.randomUUID();
@@ -403,6 +417,13 @@ try{
   }
   return {evaluate,detach:()=>cdp.send('Target.detachFromTarget',{sessionId})};
  }
+ async function closeShelf(){
+  const windowId=await service.evaluate(async()=>(await chrome.windows.getLastFocused()).id);
+  await service.evaluate(id=>chrome.sidePanel.close({windowId:id}),windowId);
+  const key='shelf-view:'+windowId;
+  await wait(async()=>!(await contexts()).length&&await app.evaluate(async key=>
+   (await chrome.storage.session.get(key))[key]?.open===false,key),'Chrome closed the Shelf and recorded the closed window');
+ }
  assert.equal(installed.find(entry=>entry.name==='shelf.explorer.search').shortcut,'');
  const shortcutPage=await browser.newPage();await shortcutPage.goto('chrome://extensions/shortcuts');
  const searchCommand=shortcutPage.locator('.command-entry').filter({hasText:'Open File Explorer and focus filename search'});
@@ -435,26 +456,36 @@ try{
    await wait(()=>shelf.evaluate("document.querySelector('#filename-search-popout').hidden"),'X dismisses Search');
   }
   await shelf.detach();
-  await service.evaluate(async()=>chrome.sidePanel.close({windowId:(await chrome.windows.getLastFocused()).id}));
-  await wait(async()=>!(await contexts()).length,'search Shelf closed');
+  await closeShelf();
  }
  checks.push('Chrome Alt+Shift+F was assigned through Chrome shortcut settings and opened focused Explorer search from three fixture HTTPS origins; Enter stayed open and Escape dismissed it');
 
  const fixtureSessionData=await service.evaluate(async()=>{
   const {click2cloudOAuth}=await chrome.storage.local.get('click2cloudOAuth');
-  await chrome.storage.local.remove('click2cloudOAuth');return click2cloudOAuth;
+  await chrome.storage.local.remove('click2cloudOAuth');
+  await chrome.runtime.sendMessage({channel:'connection-changed'}).catch(()=>{});
+  return click2cloudOAuth;
  });
+ await app.locator('#login').waitFor();
  await page.bringToFront();input('focus');input('key','Alt_L','Shift_L','f');
  const loggedOutShelf=await inspectShelf();
- await wait(()=>loggedOutShelf.evaluate("document.querySelector('#shell').dataset.view==='explorer'&&document.querySelector('#login')?.textContent==='Log In'"),'Chrome search opens a truthful disconnected Explorer');
+ try{
+  await wait(()=>loggedOutShelf.evaluate("document.querySelector('#shell').dataset.view==='explorer'&&document.querySelector('#login')?.textContent==='Log In'"),'Chrome search opens a truthful disconnected Explorer');
+ }catch(error){
+  const view=await loggedOutShelf.evaluate(`(async()=>({view:document.querySelector('#shell')?.dataset.view,
+   login:document.querySelector('#login')?.textContent,connection:document.querySelector('#connection p')?.textContent,
+   windowId:(await chrome.windows.getCurrent()).id,
+   states:Object.fromEntries(Object.entries(await chrome.storage.session.get(null)).filter(([key])=>key.startsWith('shelf-view:')))}))()`).catch(()=>null);
+  console.error('Disconnected Explorer Shelf',JSON.stringify(view));
+  throw error;
+ }
  await service.evaluate(async session=>{
   await chrome.storage.local.set({click2cloudOAuth:session});
   await chrome.runtime.sendMessage({channel:'connection-changed'}).catch(()=>{});
  },fixtureSessionData);
  await wait(()=>loggedOutShelf.evaluate("!!document.querySelector('#filename-search-popout:not([hidden]) #filename-search:focus')"),'authorization makes the pending search ready');
  await loggedOutShelf.detach();
- await service.evaluate(async()=>chrome.sidePanel.close({windowId:(await chrome.windows.getLastFocused()).id}));
- await wait(async()=>!(await contexts()).length,'close reconnected search Shelf');
+ await closeShelf();
  checks.push('A browser shortcut opened Explorer while disconnected and focused the pending search when the fixture account returned');
 
  if(process.env.C2C_SCREENSHOT_NATIVE_MENU==='1'){
@@ -466,13 +497,17 @@ try{
    }));
   },items);
   const legacy={ids:items.map(item=>item.id),save:spec.rows.find(row=>row.role==='save'||row.role==='provider-action')?.id};
+  const preserved=()=>service.evaluate(async()=>({storage:await chrome.storage.local.get(['click2cloudOAuth','screenshotRulesV1']),
+   searchShortcut:(await chrome.commands.getAll()).find(command=>command.name==='shelf.explorer.search')?.shortcut}));
+  const beforeReload=await preserved();
   await service.evaluate(()=>{globalThis.beforeMenuReload=true;});
   const extensions=await browser.newPage();await extensions.goto('chrome://extensions');
   const extensionId=service.url().split('/')[2],workerUrl=service.url();
   const reload=extensions.locator(`extensions-item#${extensionId} #dev-reload-button`);
   const developerMode=extensions.locator('extensions-toolbar #devMode');
   await developerMode.waitFor();
-  if(!await reload.isVisible())await developerMode.click();
+  if(await developerMode.getAttribute('aria-checked')!=='true')await developerMode.click();
+  await wait(()=>extensions.evaluate(async()=>(await chrome.developerPrivate.getProfileConfiguration()).inDeveloperMode),'Chrome Developer mode enabled');
   await reload.click();
   app=await browser.newPage();app.setDefaultTimeout(8000);
   await wait(async()=>{
@@ -487,6 +522,7 @@ try{
   },'native menu reconciliation after extension reload');
   await extensions.close();
   await app.getByRole('button',{name:'Open File Explorer',exact:true}).waitFor();
+  assert.deepEqual(await preserved(),beforeReload);
   const nativeExists=id=>service.evaluate(id=>new Promise(resolve=>chrome.contextMenus.update(id,{},()=>resolve(!chrome.runtime.lastError))),id);
   for(const id of legacy.ids)assert.equal(await nativeExists(id),false,id);
   assert(legacy.save&&await nativeExists(legacy.save),'the ordinary Cloudflare command is still registered');
@@ -505,14 +541,20 @@ try{
    assert.match(text,/save|copy|reload|inspect|open/i,'actual native menu must be visible in '+name);
    assert.doesNotMatch(text,/screenshot|choose folder/i);
   }
-  checks.push('An extension reload removed Chrome’s pre-existing native Screenshot submenu and kept its ordinary Cloudflare menu; webpage, link and image menus have no screenshot entry');
+  checks.push('Chrome Reload removed the native Screenshot submenu from webpage, link and image menus and retained ordinary Cloudflare Save, screenshot rules, Cloudflare connection and shortcut settings');
+  await app.getByRole('button',{name:'History',exact:true}).click();
+  const singleRow=app.locator(`[data-operation="${single.plan.operationId}"]`);
+  await singleRow.locator('[data-preview]').scrollIntoViewIfNeeded();
+  await singleRow.locator('[data-preview] img').waitFor();
+  assert.equal(await singleRow.locator('.history-destination-card').count(),1);
+  await goToFile(singleRow,single.plan.outputs[0]);
+  checks.push('After Chrome Reload and without cached screenshot bytes, the original single-output receipt previews its saved R2 image and GO TO selects that exact file');
  }
  await app.goto(c2c);
  await app.getByRole('button',{name:'File Explorer',exact:true}).click();
- const rootFolder=app.getByRole('treeitem',{name:/redown/});
- await rootFolder.waitFor();
- if(await rootFolder.getAttribute('aria-expanded')==='true')await rootFolder.click();
- await rootFolder.click();
+ const location=app.locator('#location');
+ await location.fill(cloudPath({...fixtureTarget,bucketName:'redown',prefix:''}));
+ await location.press('Enter');
  const selectedFolder=app.getByRole('row').filter({hasText:'Native'});
  await selectedFolder.click({button:'right'});
  await app.getByRole('menuitem',{name:'Screenshot2Here',exact:true}).click();
@@ -521,7 +563,7 @@ try{
  await here.getByRole('textbox',{name:'Website',exact:true}).fill(siteHost);
  const beforeRule=uploads.length;
  await here.getByRole('button',{name:'Save',exact:true}).click();
- await here.waitFor({state:'detached'});
+ await here.waitFor({state:'hidden'});
  assert.equal(uploads.length,beforeRule,'Screenshot2Here Save edits rules without capturing');
  await app.reload();await openScreenshot();
  await app.getByText(/redown\/Native\//).first().waitFor();
