@@ -4,11 +4,11 @@
 
 ## Current owner requirements — shortcut manager has MULTIPLE destinations
 
-**Shortcut-card manager (opened ONLY by clicking its shortcut card under More → Screenshot):** Show a vertically scrollable **Destinations** list, not a single destination selector. Each saved shortcut route has ONE key chord, an optional website/host/full-URL scope (blank website = **All websites**), and **one or more authorized cloud destinations**. The user may click **+ Add destination** to append another folder, or **Change** / **Remove** on an individual destination row. Show exact provider/account/bucket/folder per row, support as many authorized folders as required with scrolling, prevent identical target duplicates, and validate each target. Stage changes until **Save Changes**; Cancel restores the original. Removing a folder removes its mapping only, **not cloud data**. The shortcut card summarizes key chord, scope, destination count and the list of folders. Website-rule cards still have exactly one additive destination and **no shortcut control**.
+**Shortcut-card manager (opened ONLY by clicking its shortcut card under More → Screenshot):** Show TWO independent scrollable lists: **Websites (0 or more)** with **+ Add website**, Edit/Change and Remove per website, AND **Destinations (1 or more)** with **+ Add destination**, Change and Remove per folder. Each website entry selects one of four explicit match levels: entire domain+subdomains, exact hostname, specific full URL, or the All-websites fallback. **ZERO websites in the list means ALL websites for that shortcut route**; do not force typing a site or automatically delete the shortcut when its last website entry is removed. Do not allow an implicit All-websites catchall *in addition* to explicit sites in the same route; when a user chooses All websites, clear/review any redundant scoped entries explicitly. Each listed website is an **OR match**: a screenshot shortcut pressed on ANY matching listed website routes to **ALL folders in this card's destination list**. The website list does NOT create new shortcut commands or uploads. Support enough entries to scroll, remove one website without affecting remaining sites, key chord, or destinations, reject duplicate/invalid URLs and ambiguous same-key overlaps with other saved shortcut route groups. The Destinations list shows exact authorized provider/account/bucket/folder per row, prevents identical destinations, stages all changes until Save Changes, and removes destination associations only—not cloud objects. The saved shortcut card summarizes the chord, website count/match summary, destination count and locations. Website-rule cards still have exactly one additive destination and **no shortcut control**.
 
 **Screenshot2Here:** File Explorer folder right-click → Screenshot2Here remains a **quick assignment**, not the full manager. It can (a) create a new shortcut route pointing at the selected folder, (b) select an existing shortcut route and **replace a chosen destination**, OR (c) **add the selected folder to that shortcut's destinations**. This must be an explicit choice so adding doesn't overwrite existing folders. Selecting an existing route does not change its website scope or other assigned folders. A newly created shortcut with blank website restriction means All websites.
 
-**One key, site-aware groups:** The same keyboard chord may be reused by distinct website-specific shortcut routes, with only **one Chrome command registration**. Route by current URL to the most specific enabled matching shortcut group (**specific URL > exact hostname > domain with subdomains > All websites fallback**), then include **ALL folders on that chosen group's destination list**. An empty website condition is an All-websites fallback, never an invalid condition. Reject ambiguous equal-specificity conflicts, not disjoint website routes sharing a key. The selected shortcut group's folder list and any matching additive website-rule destinations are unioned/deduplicated, then sent by **one browser upload to the existing trusted Worker** for independently verified server-side writes.
+**One key, site-aware groups:** One shortcut route card may contain MULTIPLE explicit website/URL matches using OR semantics and ONE destination collection shared across those matches. The same keyboard chord may also be reused by distinct website-specific shortcut route cards, with only **one Chrome command registration**. Route by current URL to the most specific enabled matching shortcut group (**specific URL > exact hostname > domain with subdomains > All websites fallback**), then include **ALL folders on that chosen group's destination list**. An empty website condition is an All-websites fallback, never an invalid condition. Reject ambiguous equal-specificity conflicts, not disjoint website routes sharing a key. The selected shortcut group's folder list and any matching additive website-rule destinations are unioned/deduplicated, then sent by **one browser upload to the existing trusted Worker** for independently verified server-side writes.
 
 **Deactivate does NOT delete:** Turning a saved website or shortcut rule OFF leaves the card visible, editable, with all configured folders, key, scope and name preserved through restart and pagination (25 cards per page). Disabled rules do not execute; they can be reactivated. **Only the X on the far right of the saved card in More → Screenshot removes the entire rule**. A per-destination Remove button in the shortcut manager deletes just that destination association, not its card or cloud object. Active shortcut rules must have at least one destination.
 
@@ -16,26 +16,34 @@
 
 **Shortcut-card manager mockup:**
 ```text
-┌──────── Manage Screenshot Shortcut ────────── X ┐
-│ Name            [ My Screenshots             ] │
-│ Keyboard key    [ Ctrl+Shift+F6 ] [ Change ]    │
-│ Website scope   [ All websites ▼ ]             │
-│ Website / URL   [ (blank = all websites)    ]  │
-│                                                 │
-│ Destinations (2)                                │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ Cloudflare R2 / redown / screenshots/       │ │
-│ │                          [Change] [Remove]  │ │
-│ │ Cloudflare R2 / redown / archive/           │ │
-│ │                          [Change] [Remove]  │ │
-│ └─────────────────────────────────────────────┘ │
-│             [+ Add destination]                 │
-│                                                 │
-│ [Active]                    [Cancel] [Save]     │
-└─────────────────────────────────────────────────┘
+┌──────── Manage Screenshot Shortcut ──────────── X ┐
+│ Name             [ My Screenshots               ] │
+│ Shortcut         [ Ctrl+Shift+F6 ] [ Change ]      │
+│                                                    │
+│ Websites (2) — any listed website qualifies       │
+│ ┌────────────────────────────────────────────────┐ │
+│ │ Entire domain + subdomains: google.com         │ │
+│ │                            [Edit] [Remove]     │ │
+│ │ Exact hostname: youtube.com                    │ │
+│ │                            [Edit] [Remove]     │ │
+│ └────────────────────────────────────────────────┘ │
+│               [+ Add website]                     │
+│ If this list is empty → All websites              │
+│                                                    │
+│ Destinations (2)                                  │
+│ ┌────────────────────────────────────────────────┐ │
+│ │ Cloudflare / redown / screenshots/             │ │
+│ │                            [Change] [Remove]   │ │
+│ │ Cloudflare / redown / archive/                 │ │
+│ │                            [Change] [Remove]   │ │
+│ └────────────────────────────────────────────────┘ │
+│               [+ Add destination]                 │
+│                                                    │
+│ Active  [●]                  [Cancel] [Save]       │
+└────────────────────────────────────────────────────┘
 ```
 
-**Proof:** Add two folders to `Ctrl+Shift+F6` with blank website, press it on an arbitrary allowed host → one capture, one inbound Worker upload, two verified R2 objects. Add a matching website-only additive destination → three distinct writes, still one browser upload. Disable that shortcut group → its saved card persists and is reactivatable. Two different host-specific groups sharing the same chord choose different primary *destination lists*; disable a host-specific route and All-websites fallback works. Remove just one destination in its card manager → rule and other folders persist; far-right X on the saved card deletes only that rule configuration.
+**Proof:** Add `google.com` as Entire domain+subdomains AND `youtube.com` as Exact hostname to ONE shortcut card, with `redown/screenshots/` and `redown/archive/` as its two destinations; pressing that chord on EITHER matching host yields one capture, one inbound Worker upload, and two verified R2 objects. On an unrelated host with nonempty website list, no screenshot route applies unless another fallback shortcut card exists. Remove only `google.com` → YouTube still matches; removing the last website leaves the card enabled with **All websites** matching. Cancel leaves the saved website list intact; Save persists across restart. Add two folders to `Ctrl+Shift+F6` with zero websites, press it on an arbitrary allowed host → one capture, one inbound Worker upload, two verified R2 objects. Add a matching website-only additive destination → three distinct writes, still one browser upload. Disable that shortcut group → its saved card persists and is reactivatable. Two different host-specific groups sharing the same chord choose different primary *destination lists*; disable a host-specific route and All-websites fallback works. Remove just one destination in its card manager → rule and other folders persist; far-right X on the saved card deletes only that rule configuration.
 
 ## UI boundary — NO "Screenshot capture" or "Capture & delivery" tab
 
@@ -83,12 +91,12 @@ Under the setup and **Save** button, **Saved Screenshot Rules** shows TWO distin
 
 - **Name** (existing/custom, editable).
 - **Shortcut (shortcut cards ONLY):** current key chord with Set/Change/Remove through the canonical registry; conflict checked. **Website-rule cards have no shortcut control** even inside their full editor.
-- **Website/URL match scope** using the **four separate choices** above: All websites; Entire domain + subdomains; Exact hostname; Specific full URL. Show the relevant domain/hostname/URL input only for that selection. Changing the scope is an explicit edit, not an incidental effect of editing the destination.
+- **Websites list (shortcut cards ONLY):** an editable collection of 0+ independently scoped domain/subdomain, exact hostname, and exact-full-URL conditions, with `+ Add website`, Edit and Remove per entry. **Any matching entry qualifies (OR)**; zero entries = All websites, not disabled. The website-rule card manager edits only its one website/URL rule and does NOT show a multi-website shortcut collection. Changing website scope is an explicit staged edit and does not change the folder list.
 - **Cloud destinations:** Website-rule cards edit one additional folder. Shortcut-rule cards have a SCROLLABLE MULTI-DESTINATION LIST and **+ Add destination**, Change and Remove per folder; blank website restriction means All websites. Save changes as one staged update.
 - **Enabled/Disabled** state (or expose the switch exclusively on the card; in either case keep it synchronized).
 - **Cancel / Save** footer and close X; edits are **staged until Save** and discard on Cancel/close. Confirm actual persistence before stating Saved. Keep the user on the same screenshot-rules list/page and update that card in place; no duplicated rule or shortcut binding. Use one stable rule ID throughout.
 
-**TWO context-specific per-card full-manager popups:** Clicking a **Shortcut Destination** card (created by Screenshot2Here) opens its comprehensive shortcut manager: current key chord/remapping, optional website/URL scope (**blank = All websites**), a SCROLLABLE list of one or more cloud destination folders with **+ Add destination / Change / Remove per row**, enabled state, name, Save/Cancel. Clicking an **Additive Website Destination** card (created in More → Screenshot) opens its **website-rule manager**: scope/domain/URL, additional destination, name, enabled state, Save/Cancel—**NO shortcut input or binding control**, because this card is for routing existing captures, not creating screenshot shortcuts. Each popup is specific to the card clicked; no full manager is opened from the More menu itself, nor from Screenshot2Here quick popup. To create or reassign a shortcut, use Screenshot2Here; it then gets its own shortcut card. No implicit conversion between website cards and shortcut cards. Disabling an additive website card stops its extra copy but never disables the independent original screenshot shortcut.
+**TWO context-specific per-card full-manager popups:** Clicking a **Shortcut Destination** card (created by Screenshot2Here) opens its comprehensive shortcut manager: current key chord/remapping, a SCROLLABLE list of **zero or more website/URL match entries** with **+ Add website / Edit / Remove** (empty = All websites; OR matching), plus a separate SCROLLABLE list of one or more cloud destination folders with **+ Add destination / Change / Remove per row**, enabled state, name, Save/Cancel. Clicking an **Additive Website Destination** card (created in More → Screenshot) opens its **website-rule manager**: scope/domain/URL, additional destination, name, enabled state, Save/Cancel—**NO shortcut input or binding control**, because this card is for routing existing captures, not creating screenshot shortcuts. Each popup is specific to the card clicked; no full manager is opened from the More menu itself, nor from Screenshot2Here quick popup. To create or reassign a shortcut, use Screenshot2Here; it then gets its own shortcut card. No implicit conversion between website cards and shortcut cards. Disabling an additive website card stops its extra copy but never disables the independent original screenshot shortcut.
 
 **Example layout:**
 
@@ -212,7 +220,9 @@ Ctrl+Shift+F6 at https://google.com/search
 4. Create 26 screenshot rules => page 1 has 25, page 2 has 1; edit, X-delete, enable/disable and restart persist correctly. General download Rules uses the same management controls and pagination independently.
 5. Assign a unique shortcut to screenshot `Rule 2`; pressing it on a matching host causes ONE capture and ONE browser-to-Worker upload, then server-side writes to **Rule 2's primary folder PLUS every enabled matching NO-SHORTCUT additive rule destination**, never triggering other shortcut-bearing rules. Disable one additive rule → its target is omitted but the primary remains. Reject key collisions including F7/F8/F9; disabled triggering rules cannot initiate captures.
 6. **Screenshot2Here directory popup:** test new shortcut input, 30 existing shortcuts in scrollable chooser, replace-one shortcut old/new path confirmation, no duplicate command, retained exact-URL matcher, Save-only persistence, Cancel, conflicted shortcut validation, and UI/Settings sync after restart.
-7. **Screenshot saved cards → DIFFERENT full popups:** clicking a Shortcut Destination card opens its shortcut manager (including chord remapping, optional URL scope and a **scrollable list of folders with + Add destination / Change / Remove**), while clicking an Additive Website Destination card opens its website-rule manager (URL scope + additive folder, NO shortcut field). Both open only on card click, including on page 2; Save updates one stable rule only, Cancel/X discards. Independent toggle/delete do not open a manager or take screenshots. Verify domain/subdomain/exact-host/exact-URL boundaries.
+7. **Screenshot saved cards → DIFFERENT full popups:** clicking a Shortcut Destination card opens its shortcut manager with the key plus **two independently scrollable collections**, Websites (0+ entries; + Add website, Edit/Remove, OR match, empty = All websites) and Destinations (1+; + Add destination, Change/Remove), while clicking an Additive Website Destination card opens its website-rule manager (its one URL scope + additive folder, **NO shortcut field**). Card-only managers, Save-only persistence, Cancel/X discard, no accidental capture, 25/page and retained disabled cards.
+7A. **Multiple websites on one shortcut:** Google and YouTube website entries share the SAME chord and folder list; pressing on either matches, unrelated host does not; removing Google only retains YouTube and all folders; removing the last site makes that shortcut unrestricted (All websites). Reject duplicate site entries or ambiguous same-key overlaps with a different route card; only one browser command registration and one screenshot/upload.
+
 8. Genuine Chrome capture/capability, exact target routing, proper consent, safe error reporting, and receipts are proven in focused fixtures and (only if available) authorized Chrome/R2 disposable-object checks. Mark anything not exercised as unverified.
 
 **Do not reimplement the already built shortcut registry, Chrome save menus, general download ZIP, or filename-search system. No broad Worker redesign.**
