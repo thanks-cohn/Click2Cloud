@@ -51,7 +51,7 @@ The repair request supersedes the frozen test matrix's single Worker transfer an
 
 ## Install and verify with your R2 account
 
-1. Download and extract the build from the [0.3.21 screenshot repair release](https://github.com/thanks-cohn/Click2Cloud/releases/tag/v0.3.21-screenshot-repair). For an existing unpacked install, keep the same Chrome profile and extension entry, copy the new files over the existing unpacked folder, and click **Reload** in `chrome://extensions`. For a first install, use **Developer mode → Load unpacked** and select the extracted `click2cloud` folder containing `manifest.json`. Confirm version **0.3.21**.
+1. Download and extract the [0.3.21 extension ZIP](https://raw.githubusercontent.com/thanks-cohn/Click2Cloud/b5a6fffe253a7b8d7894db244f79b5e2ff08443b/artifacts/Click2Cloud-0.3.21-screenshot-repair.zip). For an existing unpacked install, keep the same Chrome profile and extension entry, copy the new files over the existing unpacked folder, and click **Reload** in `chrome://extensions`. For a first install, use **Developer mode → Load unpacked** and select the extracted `click2cloud` folder containing `manifest.json`. Confirm version **0.3.21**.
 2. Open **More → Screenshot**. In the rule form, choose the website scope, open **Choose folders**, browse with the chevron, check one or more folder rows, and click **Save** once. For a single-rule test, turn off other matching cards, including **Default Screenshots** if it points elsewhere.
 3. Close Shelf. Focus `https://example.com/` and press **Alt+Q**. Open **History** and expand the latest screenshot. It should list the exact chosen destination and **R2 GET · SHA-256 verified**. Repeat with **Ctrl+Shift+Y** to verify a distinct capture. View assignments at `chrome://extensions/shortcuts` if either key fails to trigger.
 4. In the Cloudflare dashboard, open **R2 Object Storage**, select the exact bucket and key from History, and download the PNG. Compare its SHA-256 to `captured.sha256` in your local RAW **Settings → Debug → Export scope → Screenshot captures** ZIP, in `screenshot-receipts.jsonl`. On Windows, run `Get-FileHash -Algorithm SHA256 .\Screenshot-<id>-1.png`. On macOS or Linux, run `shasum -a 256 Screenshot-<id>-1.png` with the real filename.
@@ -69,3 +69,5 @@ npm run build:extension
 ```
 
 Load `dist/click2cloud` in Chrome. SHA-256 of the published extension ZIP is `da4abb8c9e5410495f4bb4ff2262a89a340809fe5b5d15e47740e3f65701f5ff`.
+
+The downloadable ZIP, browser log, checksum, and fixture SECURE ZIP are published on the [build branch](https://github.com/thanks-cohn/Click2Cloud/tree/b5a6fffe253a7b8d7894db244f79b5e2ff08443b/artifacts).

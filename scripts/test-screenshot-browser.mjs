@@ -170,7 +170,10 @@ try{
  assert.equal(partial.outputs[2].code,'R2_BUCKET_ACCESS_DENIED');
  assert.equal(partial.outputs[2].httpStatus,403);
  assert.equal(uploads.length,4);
+ assert.deepEqual(uploads.slice(1).map(({bucket,key})=>bucket+'/'+key).sort(),
+  partial.plan.outputs.map(({target,key})=>target.bucketName+'/'+key).sort());
  assert(uploads.slice(1).every(item=>item.png.equals(uploads[1].png)));
+ const rejected=uploads.slice(1).find(({bucket,key})=>bucket==='qa-screenshots'&&key===partial.plan.outputs[2].key);
  assert.equal((await contexts()).length,0);
  checks.push('Ctrl+Shift+Y with Shelf closed sent the same PNG to all three exact keys, including a bucket with a stale Worker record. Fixture HTTP 403 left two verified and one retryable');
  denied=false;
@@ -183,8 +186,9 @@ try{
  assert.deepEqual(retried.plan.outputs,partial.plan.outputs);
  assert.deepEqual(retried.outputs.slice(0,2),partial.outputs.slice(0,2));
  assert.equal(uploads.length,5);
- assert.equal(uploads[3].key,uploads[4].key);
- assert(uploads[3].png.equals(uploads[4].png));
+ assert.equal(uploads[4].bucket,rejected.bucket);
+ assert.equal(uploads[4].key,rejected.key);
+ assert(rejected.png.equals(uploads[4].png));
  for(const output of retried.plan.outputs){
   assert.equal(createHash('sha256').update(objects.get(output.target.bucketName+'/'+output.key)).digest('hex'),retried.captured.sha256);
  }
