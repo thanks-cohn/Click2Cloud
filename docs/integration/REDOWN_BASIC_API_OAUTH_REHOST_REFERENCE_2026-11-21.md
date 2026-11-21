@@ -6,6 +6,15 @@
 **Planning ancestry:** The earlier planning sheet lives on `planning/redown-basic-api-oauth-reference-2026-11-21`; this file has been carried onto the actual code-integration branch, based on alpha-base **not** the older planning/main commit.
 **Execution decision (owner, November 21):** Begin isolated Basic integration coding **now** on alpha-base. Do not misrepresent pending Windows Chrome/live R2 validation as done, and do not merge/deploy until repaired Remote and combined-provider acceptance tests pass.
 
+## Active two-repository branch restriction (supersedes historical branch references)
+
+Codex receives **two repositories** but is allowed to work on **only these two branches**:
+
+- **Writable destination:** `thanks-cohn/Click2Cloud` @ `codex/redown-basic-api-integration-0323-alpha-base-2026-11-21`, based on saved alpha tag `400c050`. Commit and push integration code **only here**.
+- **Read-only source:** `thanks-cohn/redown-basic` @ `main` (observed at `75a738803e61cf7fa62c50328aa6ca5cc2cd70dc`). Read/transplant modules from **main only**; no modifications to the source repo.
+- Never switch to other branches (including `implement/portable-shelf-auth-host-v1`, `implement/reliable-provider-saves`, Click2Cloud `main`, or the former planning branch), even when mentioned elsewhere in this historical reference. Do not use alternate branches for comparison/cherry-picks, nor create new branches, without owner's explicit authorization.
+- If a supplied repository/branch differs, stop and request the exact authorized branch before using it.
+
 ## Owner's objective
 
 Create one unified REDOWN Chrome MV3 extension with:
@@ -56,7 +65,7 @@ Create one unified REDOWN Chrome MV3 extension with:
 
 ## Confirmed Basic API-centric architecture (source inspected)
 
-Source repo: [thanks-cohn/redown-basic](https://github.com/thanks-cohn/redown-basic), `main` was `75a738803e61cf7fa62c50328aa6ca5cc2cd70dc` when inspected; the historical portability branch [implement/portable-shelf-auth-host-v1](https://github.com/thanks-cohn/redown-basic/tree/implement/portable-shelf-auth-host-v1) was `128ee88e2660327e87cba8b60865e6c0e92bc5d1`. Recheck before transplant.
+Approved source: [thanks-cohn/redown-basic, **main only**](https://github.com/thanks-cohn/redown-basic/tree/main), observed at commit `75a738803e61cf7fa62c50328aa6ca5cc2cd70dc`. Recheck current **main** HEAD only; earlier portability branch is historical context and **must NOT be used or switched to without new owner authorization**.
 
 - [docs/API.md](https://github.com/thanks-cohn/redown-basic/blob/main/docs/API.md) explicitly defines internal API v1: `api.describe`, `providers.list/getStatus/checkSaveReadiness/goTo`, `auth.connect/reconnect/refresh`, `saves.start/getAttempt`, `history.list/get/delete/clear`, `counter.get`, `diagnostics.list/getForAttempt/clear/exportZip`, and `settings.get/update`.
 - [docs/ARCHITECTURE.md](https://github.com/thanks-cohn/redown-basic/blob/main/docs/ARCHITECTURE.md) documents the single coordinator, durable attempts, ledger/counter and diagnostics isolation, and a trusted-only internal message boundary. There is **no public HTTP API**.
@@ -81,6 +90,16 @@ Source repo: [thanks-cohn/redown-basic](https://github.com/thanks-cohn/redown-ba
 - Preserve Basic's existing recording of `SAVED`, `FAILED`, `UNCERTAIN`; only proven saves count. History deletion does not delete cloud files or ledger data; diagnostics may be disabled independently of saves.
 - Do not claim "fully integrated" on mocked tests alone. Test actual browser authorization and actual provider writes, or explicitly mark unverified.
 - **State at handoff:** This file does not itself transplant code or configure OAuth. The dedicated branch is now available for Codex to implement the modules. Its preserved parent tag must remain unchanged; do not merge or deploy without real Chrome/live-provider gates.
+
+## Final premium visual quality requirements and Frames theme
+
+**Owner-approved mockup is a visual direction, NOT a locked palette.** Production implementation must feel polished and high-end, styled according to current Settings selections. Every new Basic card uses host-owned semantic components and is restyled immediately by the active REDOWN **theme, color scheme/palette, typography preferences, light/dark mode and Aesthetic API settings**; never import Basic's CSS or force the mockup's blue/white colors.
+
+**Add an optional selectable theme named `Frames`** as a first-class host theme, alongside existing themes. Design it as a professional Windows-inspired desktop experience with refined panel frames, precise typography, subtle depth, disciplined alignment and restrained surfaces. It should cover the **whole extension**, not just the new cards: tabs/header, Remotes, Cloudflare login, Explorer, History, Settings, previews/dialogs, status feedback and diagnostic surfaces. Frames is **not a hard-coded color palette**; it must honor independently selected palettes and light/dark modes, retain preference persistence, and preserve Aesthetic API isolation. Respect reduced motion, accessibility, existing functions and bounded memory.
+
+**Test matrix:** identify the complete actual theme inventory and palette options from host code. Verify every available theme × palette × light/dark combination, plus relevant font and visual settings, at compact/expanded Shelf widths. Assert the exact Remotes H1 slogan, three **full-width vertical cards** and existing Cloudflare immediately underneath in that order. All original Basic actions stay present: Sign In / context-dependent Reconnect or Approve, Refresh and GO TO; truthfully display readiness, reasons and save outcomes. Test normal/disabled/error/loading/focus states, contrast, line wraps, responsive layouts and persisted selections. Add automated tests and representative browser screenshots; do not allow presentation regressions to affect the save engine.
+
+**Product quality versus release status:** aim for a deployment-quality result and fix aesthetic rough edges, but the alpha base is not fully Windows/live R2 verified and Basic's three providers have not yet passed live OAuth/save/readback. Do not merge, deploy, release or claim production readiness until those acceptance gates pass.
 
 ## Final owner-confirmed Remotes composition (supersedes any grouping or responsive-grid suggestion)
 
