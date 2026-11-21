@@ -7,6 +7,24 @@
 >
 > Implement real improvements to the existing Click2Cloud source. This is **NOT** merely another analysis, document or speculative rewrite. **The right-click issue is P0 and the first release gate**. Worker durability is a deliberately scoped, subsequent gate. Do not trade known-good remote-save behavior for a massive redesign.
 
+## PRIME DIRECTIVE / STOP-THE-LINE GATE — NATIVE RIGHT-CLICK MENU FIRST
+
+**OWNER RECONFIRMED (November 21, 2026): This is a RIGHT-CLICK MENU REPAIR RUN above all else.** Codex must **IMPLEMENT and verify** the disappearing native Chrome right-click menu repair **BEFORE spending implementation effort on Golden Age, Oceania, the glossy red R, SNES badge flashes, preview chevrons, immersive zoom, Search toggling or other P1 appearance/UX.** Documentation, fixtures and a visually attractive Shelf do not satisfy P0. If time or scope is limited, finish the right-click availability fix and its evidence; explicitly defer every visual feature. **Do not stop after an audit or an updated spec**.
+
+**Read these existing directories/documents first, in the following source-of-truth hierarchy (not as a mandate to follow outdated release instructions blindly):**
+
+1. \`next_codex_request-11.21.2026.md\` — original source-grounded P0 always-right-click restoration contract, lifecycle triggers, incremental registrar and fault testing. Where it references **0.3.22**, treat that as the **immutable broken diagnostic baseline**; the working source is now **0.3.23**.
+2. \`latest/right-click-rules/README.md\` and \`latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md\` — the existing canonical native-menu rules, menu/target semantics and API traceability. Respect approved Simple/Narrow/Depth/Default/Quick behavior, preserving user-selected provider visibility. Differentiate proposed rules from actual current source.
+3. \`docs/requests/P0-REDOWN-BASELINE-CLICK2CLOUD-RIGHT-CLICK-RESTORATION-2026-11-07.md\` — historical REDOWN-as-working-reference rationale and functional restoration requirements; inspect today's implementation rather than assuming November 7 code/branches are current.
+4. \`longetivity-and-robustness.md\` — permanent minimal/fast/durable architecture charter: native right-click independent of Shelf, History, screenshot, login/network and long upload; no heavy speculative scheduler.
+5. \`next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md\` (this document) — authoritative **current 0.3.23 implementation scope and mandatory B01–B09 acceptance matrix**; use this to resolve conflicts with historical docs.
+
+**P0 acceptance before ANY cosmetic work:** On a real installed Chrome 0.3.23 build, verify a working, visible native menu **before first login**, immediately **after login/reconnect**, at normal page right-click, after extension reload/Chrome startup/MV3 worker suspend–wake, and when backend/cloud connectivity fails (subject to Chrome's own restricted contexts and intentionally hidden providers). **A missing menu is a failure even if the Shelf, OAuth and API are healthy**. Before-login actions may truthfully route to login/attention, but never invent a save receipt. Under ready auth, menu items must route to the exact authorized account/bucket/key with verified save proof. The native menu survives repeated quick clicking and screenshot activity; no \`removeAll\`-induced empty menu window in ordinary reconcile. Test only registered supported contexts, include failure injection and Chrome ACK **plus actual visible menu evidence**.
+
+**Required delivery discipline:** Commit and report the P0 source repair and focused tests first; supply a real browser repro/fixed evidence set, menu trees and dispatch IDs, lifecycle/failure tests and observed RAM/latency (and identify any unavailable test environment honestly). If P0 remains failing, the release is **BLOCKED** and no Golden Age/Oceania/theme/icon work may be represented as making 0.3.23 ready. Never modify the protected \`redown-0.3.22-BROKEN-pre-repair-2026-11-21\` tag.
+
+---
+
 ## FULL 0.3.23 OWNER CONSOLIDATION — DO NOT DROP ANY PREVIOUS REQUIREMENT
 
 **This is the comprehensive Codex request, not only an icon/badge ticket.** The following owner-approved work must be tracked together, **without treating every item as permission to rewrite the whole product**. Work in phased, independently tested commits; do P0 first. The earlier P0 audit, B01–B09 stress requirements and longevity charter below remain controlling.
