@@ -151,7 +151,7 @@ try{
 
   await page.setViewportSize({width:1050,height:800});
   await page.getByRole('button',{name:'File Explorer',exact:true}).click();
-  await page.getByRole('row').filter({hasText:'test.png'}).dblclick();
+  await page.locator('#files [data-index]').filter({hasText:'test.png'}).first().press('Enter');
   await page.locator('img.preview:not([hidden])').waitFor();
   assert.equal(await page.getByText('Images in this loaded folder').count(),0);
   await page.locator('#dialog-title').dblclick();

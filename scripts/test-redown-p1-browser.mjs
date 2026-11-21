@@ -211,15 +211,17 @@ try{
   const name=style??theme;
   const save=await page.evaluate(async name=>{
    const {api,registrar,target,r2Objects}=window.productFixture;
+   await api.reconcile();
    const {desired,acknowledgedGeneration}=registrar.inspect(),row=desired.rows.find(item=>item.role==='save');
    const filename='p1-'+name+'.txt';
    const result=await api.invoke({version:'3+1.1',method:'dispatchSave',params:{
     itemId:row.id,generation:acknowledgedGeneration,context:'link',idempotencyKey:crypto.randomUUID(),
     source:{url:'https://example.com/'+filename,filename}
    }},'gui');
-   return {state:result.state,completion:result.data?.completion,object:r2Objects.has(target.bucketName+':'+filename)};
+   if(result.state!=='completed'||result.data?.completion!=='verified')throw Error(JSON.stringify(result));
+   return r2Objects.has(target.bucketName+':'+filename);
   },name);
-  assert.deepEqual(save,{state:'completed',completion:'verified',object:true});
+  assert.equal(save,true);
   await clickView('history');
   await page.locator('.history-row').filter({hasText:'p1-'+name+'.txt'}).first().waitFor();
   await page.unroute(blockedCss,route);
@@ -230,7 +232,8 @@ try{
  const durable=await page.evaluate(async()=>{
   const {createCurrentStore}=await import('/src/persistence/current-store.mjs');
   let now=Date.parse('2026-11-21T23:59:59Z');
-  const store=createCurrentStore({dbName:'p1-badge-proof',clock:()=>now});
+  const storeOptions={dbName:'p1-badge-proof',readEstablishment:async()=>({})};
+  const store=createCurrentStore({...storeOptions,clock:()=>now});
   const id='capture-once',out={outputId:'one',state:'confirmed',verification:'direct-r2-get-sha256'};
   const row={kind:'screenshot-to-cloud',operationId:id,screenshot:{plan:{operationId:id,outputs:[{outputId:'one'},{outputId:'two'}]}}};
   const callbacks=[],onVerified=receipt=>callbacks.push(receipt.badgeVerifiedAt);
@@ -241,7 +244,7 @@ try{
   now+=2000;
   await write('confirmed',[out,{...out,outputId:'two'}]);
   await store.close();
-  const reopened=createCurrentStore({dbName:'p1-badge-proof'});
+  const reopened=createCurrentStore(storeOptions);
   const saved=await reopened.readRemoteResult(id);
   await reopened.close();
   return {callbacks,first,saved:saved.badgeVerifiedAt};

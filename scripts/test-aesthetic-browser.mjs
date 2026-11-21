@@ -212,7 +212,8 @@ await page.reload();
 for(const theme of ['minimal','standard']){
  await settings();await page.locator('#appearance').selectOption(theme);
  const clear=page.getByRole('button',{name:'Remove Default Location',exact:true});
- await clear.waitFor();assert(await clear.evaluate(button=>button.closest('section')===document.querySelector('#main .page').lastElementChild));
+ await clear.waitFor();
+ await page.waitForFunction(()=>document.querySelector('#clear-default')?.closest('section')===document.querySelector('#main .page')?.lastElementChild);
 }
 await page.getByRole('button',{name:'Remove Default Location',exact:true}).click();
 assert.equal(await page.getByRole('button',{name:'Remove Default Location',exact:true}).count(),1);
