@@ -323,7 +323,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if(method==='inspectRemoteHistory'){
             const ids=params.operationIds;
             if(ids&&(actor!=='gui'||!params.customer||params.cursor||params.limit))fail('INVALID_REQUEST');
-            const rows=ids?(await Promise.all([...new Set(ids)].map(id=>current.readRemoteResult(id))))
+            const uniqueIds=ids&&[...new Set(ids)];
+            const rows=ids?(await (current.readRemoteResultsById?.(uniqueIds)??Promise.all(uniqueIds.map(id=>current.readRemoteResult(id)))))
               .filter(row=>row&&!['readiness','depth-click'].includes(row.kind)):await cloudflare.history(params);
             const sanitize=row=>{
               if(row.kind!=='screenshot-to-cloud')return row;

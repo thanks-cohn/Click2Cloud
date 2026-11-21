@@ -38,6 +38,7 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
    void send({channel:'screenshot-history-changed',operationId:job.plan.operationId});
   },
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},
+  transient:outcome=>send({channel:'screenshot-result',transient:true,...outcome}),
   progress:job=>send({channel:'screenshot-result',state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
   async notify(job,{recorded}){
    const confirmed=job.outputs.filter(output=>output.state==='confirmed').length;

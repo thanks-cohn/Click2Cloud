@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {capturePlan,createScreenshotRules,screenshotCommands,screenshotIds,websiteCondition} from '../src/screenshot/rules.mjs';
 import {createScreenshotCapture} from '../src/screenshot/capture.mjs';
+import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOAuth} from '../src/auth/cloudflare-oauth.mjs';
 import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-upload.mjs';
@@ -132,6 +133,86 @@ test('Screenshot S02–S09/C08–C10 dispatch preserves independent IDs, frozen 
  const raced=createScreenshotCapture({chrome:race.chrome,rules:{change:async()=>config},uploader,retryCache:cacheFixture(),...receipts});
  assert.equal((await raced.start(screenshotCommands[1],race.tab)).code,'SCREENSHOT_PAGE_CHANGED');
  assert.equal(race.captures(),1);assert.equal(uploads.length,3);assert.equal(race.chrome.tabs.onActivated.size(),0);
+});
+
+test('B03 logged-out screenshot shortcuts leave no durable history, retry bytes or upload work',async()=>{
+ const browser=browserFixture(),receipts=store(),cache=cacheFixture(),feedback=[];
+ const runner=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>assert.fail('No screenshot rules for denied admission')},
+  uploader:{authority:async()=>{throw Object.assign(Error(),{code:'AUTH_REQUIRED'});},deliver:async()=>assert.fail('No upload')},
+  retryCache:cache,...receipts,transient:outcome=>feedback.push(outcome)});
+ for(const count of [1,10,50,100]){
+  const results=await Promise.all(Array.from({length:count},(_,i)=>runner.start(screenshotCommands[i%2],browser.tab)));
+  assert(results.every(item=>item.state==='blocked'&&['AUTH_REQUIRED','SCREENSHOT_BUSY'].includes(item.code)));
+  assert.equal(receipts.kept.size,0);
+  assert.equal(cache.files.size,0);
+  assert.equal(browser.captures(),0);
+  assert.equal(browser.chrome.tabs.onActivated.size(),0);
+ }
+ assert(feedback.some(item=>item.code==='AUTH_REQUIRED'));
+});
+
+test('B02 10, 50 and 100 screenshot bursts bound capture, fan-out, feedback and listeners',async(t)=>{
+ for(const count of [10,50,100]){
+  const browser=browserFixture(),receipts=store(),cache=cacheFixture(),feedback=[];
+  let release,entered,uploads=0,inFlight=0,peak=0;
+  const holding=new Promise(resolve=>release=resolve),admitted=new Promise(resolve=>entered=resolve);
+  const capture=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup:true,rules:[rule([folder('a/'),folder('b/'),folder('c/'),folder('d/')]) ]})},
+   uploader:{authority:async()=>({sessionId:fixtureSession}),async deliver({output}){
+    uploads++;inFlight++;peak=Math.max(peak,inFlight);if(inFlight===6)entered();
+    await holding;inFlight--;return {outputId:output.outputId,state:'confirmed',bytes:png.length};
+   }},retryCache:cache,...receipts,transient:value=>feedback.push(value)});
+  const then=performance.now();
+  const commands=Array.from({length:count},(_,i)=>capture.start(screenshotCommands[i%2],browser.tab));
+  const busy=await Promise.all(commands.slice(2));
+  const admissionMs=performance.now()-then;
+  assert(busy.every(item=>item.code==='SCREENSHOT_BUSY'));
+  await admitted;assert.equal(receipts.kept.size,2);
+  assert.equal(browser.captures(),2);assert.equal(cache.files.size,2);
+  release();const completed=await Promise.all(commands.slice(0,2));
+  assert(completed.every(item=>item.state==='confirmed'));
+  assert.equal(cache.files.size,0);assert.equal(uploads,8);assert.equal(inFlight,0);
+  assert.equal(browser.chrome.tabs.onActivated.size(),0);assert.equal(feedback.length,1);
+  t.diagnostic(JSON.stringify({commands:count,accepted:2,busy:busy.length,peakUploadTasks:peak,blobBytes:2*png.length,busyAdmissionMs:Number(admissionMs.toFixed(2))}));
+ }
+});
+
+test('B04 screenshot admitted before an OAuth change remains one truthful blocked History operation',async()=>{
+ const browser=browserFixture(),receipts=store(),cache=cacheFixture(),states=[];
+ let reads=0;
+ const runner=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup:true,rules:[rule([folder('a/')])]})},
+  uploader:{authority:async()=>({sessionId:reads++? 'other-session':fixtureSession}),deliver:async()=>assert.fail('Changed session cannot write')},
+  retryCache:cache,...receipts,record:async job=>{states.push([job.plan.operationId,job.state]);await receipts.record(job);}});
+ const job=await runner.start(screenshotCommands[0],browser.tab);
+ assert.equal(job.state,'blocked');assert.equal(job.outputs[0].code,'AUTH_SESSION_CHANGED');
+ assert.equal(receipts.kept.size,1);assert.equal(cache.files.size,1);
+ assert.equal(states[0][1],'pending');assert.equal(states.at(-1)[1],'blocked');
+ assert(states.every(([id])=>id===job.plan.operationId));
+});
+
+test('B08 pending screenshot uploads do not prevent cold native registration or independent gesture dispatch',async()=>{
+ const browser=browserFixture(),receipts=store(),cache=cacheFixture();
+ const rendered=new Map(),listeners=new Set();
+ const chrome={runtime:{},contextMenus:{create(row,cb){rendered.set(row.id,row);cb();},
+  update(id,props,cb){rendered.set(id,{...rendered.get(id),...props});cb();},removeAll(){assert.fail('A wake must preserve registered entries');},
+  onClicked:{addListener:fn=>listeners.add(fn),removeListener:fn=>listeners.delete(fn)}}};
+ const route={id:'provider',parentId:null,siblingIndex:0,type:'normal',role:'provider-action',providerAction:'cloudflare',label:'Cloudflare',enabled:true,visible:true,contexts:['page']};
+ const spec={schemaVersion:1,generation:1,rows:[route]};
+ let nativeReceipt,release,started;
+ const upload=new Promise(resolve=>release=resolve),active=new Promise(resolve=>started=resolve);
+ const capture=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup:true,rules:[rule([folder('mix/')])]})},
+  uploader:{authority:async()=>({sessionId:fixtureSession}),async deliver({output}){started();await upload;return {outputId:output.outputId,state:'confirmed'};}},
+  retryCache:cache,...receipts});
+ const owner=()=>createChromeRegistrar({chrome,readRegistration:async()=>nativeReceipt,persist:async value=>{nativeReceipt=value;},
+  dispatch:async action=>({state:'blocked',code:action.providerAction==='cloudflare'?'LOGIN_REQUIRED':'UNEXPECTED_PROVIDER'})});
+ let registrar=owner();await registrar.apply(spec);
+ const screenshot=capture.start(screenshotCommands[0],browser.tab);
+ await active;
+ registrar.close();registrar=owner();
+ assert.equal((await registrar.apply(spec)).state,'completed');
+ assert.equal((await registrar.handleClick({menuItemId:route.id,pageUrl:'https://example.org'})).code,'LOGIN_REQUIRED');
+ assert.equal(rendered.size,1);assert.equal(listeners.size,1);
+ release();assert.equal((await screenshot).state,'confirmed');
+ assert.equal(cache.files.size,0);assert.equal(browser.chrome.tabs.onActivated.size(),0);
 });
 
 test('Screenshot W01/W02/W05/W07 actual local workerd one image, distinct R2 objects, lost HTTP ACK and unsupported bucket',async()=>{

@@ -9,6 +9,7 @@ const link=(url,label)=>url?`<p>${esc(label)}: <a href="${esc(url)}" target="_bl
 const screenshotFile=receipt=>receipt.outputs.find(output=>output.state==='confirmed'&&output.outputId&&output.destination&&output.key);
 const screenshotName=receipt=>(screenshotFile(receipt)??receipt.outputs.find(output=>output.key))?.key.split('/').at(-1)??'Screenshot';
 const previewLimit=4*1024*1024,screenshotPreviewLimit=12*1024*1024;
+const historyLookupBatch=64,maxDirtyOperations=2048;
 export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,loadingSelection=async()=>({mode:'math'})}){
  let epoch=0,controller,observer,urls=[],page=1,prefs={...historyDefaults},rows=[],manual=new Map(),pending=new Map(),active=0,wake=()=>{};
  let mountEpoch=0,mounted=false,loading=false,refreshTimer,historyRevision=0,refreshing=false,reload=false;
@@ -34,7 +35,7 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
  function invalidate(id){
   historyRevision++;
   if(!mounted||!id)return;
-  if(dirty.size===64&&!dirty.has(id)){dirty.clear();reload=true;}
+  if(dirty.size===maxDirtyOperations&&!dirty.has(id)){dirty.clear();reload=true;}
   dirty.add(id);scheduleRefresh();
  }
  function scheduleRefresh(){
@@ -48,7 +49,11 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
   try{
    const updates=[];
    if(all){for await(const p of pages()){if(ticket!==mountEpoch)return;updates.push(...customerRows(p));}}
-   else updates.push(...customerRows(await api('inspectRemoteHistory',{customer:true,operationIds:ids},{quiet:true})));
+   else for(let first=0;first<ids.length;first+=historyLookupBatch){
+    const batch=await api('inspectRemoteHistory',{customer:true,operationIds:ids.slice(first,first+historyLookupBatch)},{quiet:true});
+    if(ticket!==mountEpoch)return;
+    updates.push(...customerRows(batch));
+   }
    if(ticket!==mountEpoch||!updates.length&&!all)return;
    const visible=()=>historyPage(rows,{page,range:prefs.range,timezone:prefs.timezone});
    const old=visible();
@@ -63,10 +68,13 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
    const main=document.querySelector('#main'),scroll=main.scrollTop;
    const groups=new Map([...main.querySelectorAll('[data-history-group]')].map(group=>[group.dataset.historyGroup,group.open]));
    const focus=document.activeElement;
-   const article=focus.closest('[data-operation]'),index=article?[...article.querySelectorAll('button,summary')].indexOf(focus):-1;
+   const article=focus.closest('[data-operation]');
+   const controlType=['button','summary'].includes(focus.localName)?focus.localName:null;
+   const index=article&&controlType?[...article.querySelectorAll(controlType)].indexOf(focus):-1;
    render(groups);main.scrollTop=scroll;
    const restored=article&&main.querySelector('[data-operation="'+CSS.escape(article.dataset.operation)+'"]');
-   (index<0?restored:restored?.querySelectorAll('button,summary')[index])?.focus({preventScroll:true});
+   const control=index>=0&&restored?.querySelectorAll(controlType)[index];
+   (control||restored)?.focus({preventScroll:true});
   }catch{/* Opening History again reads durable records. */}
   finally{refreshing=false;scheduleRefresh();}
  }

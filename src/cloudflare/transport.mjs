@@ -27,6 +27,8 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
  // Per-gesture capability evidence, never persisted or shared across clicks.
  // Fresh OAuth, plan, prefix and verifyAuthority checks still run before each use.
  const readyProofs=new WeakMap();
+ const maxActiveSaves=32;
+ let activeSaves=0;
  const planIdentity=plan=>digest([plan.state,plan.accountId,plan.bucketName,plan.protocol,plan.url,plan.secret,plan.prefixScope??'',plan.codeDigest,plan.verifiedTargets]);
  async function cap(target,{use='status',operationId,source,provenance,fileIntent,screenshotIntent,screenshotAction,sourceBucket,live=true}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
@@ -139,53 +141,59 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   // The Worker still rejects prefix escape before returning capabilities.
   const exact=plan.verifiedTargets?.[c.destination.prefix],proof=(exact?.codeDigest===plan.codeDigest?exact:null)??Object.values(plan.verifiedTargets??{}).find(p=>p.codeDigest===plan.codeDigest),ready=!!proof&&!!plan.codeDigest&&proof.codeDigest===plan.codeDigest;const result={state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,destination:target,sourcePolicy:r.sourcePolicy,transfer:r.transfer,multipartConditionalCompletion:r.multipartConditionalCompletion,checkedAt:clock()};if(ready&&await planIdentity(plan)===c.planIdentity)readyProofs.set(result,{at:clock(),sessionId:c.sessionId,destination:c.destination,planIdentity:c.planIdentity});return result;}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},
   async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,dispatchPreparationMs,readinessMs}){
-   const timings={pollCount:0,...(Number.isFinite(dispatchPreparationMs)?{dispatchPreparationMs}:{}),...(Number.isFinite(readinessMs)?{readinessMs}:{})};const timed=async(name,stage,fn)=>{const started=performance.now();try{try{onBoundary?.(stage,'started','REMOTE_STAGE_STARTED');}catch{}const result=await fn();try{onBoundary?.(stage,result===false?'blocked':result==null?'uncertain':['blocked','failed','uncertain'].includes(result?.state)?result.state:'ok',result===false?'REMOTE_STAGE_DENIED':result==null?'REMOTE_STAGE_UNVERIFIED':'REMOTE_STAGE_COMPLETE');}catch{}return result;}catch(e){try{onBoundary?.(stage,'failed','REMOTE_STAGE_FAILED');}catch{}throw e;}finally{timings[name]=(timings[name]??0)+Math.round(performance.now()-started);}};
-   const historyContext=source?.historyContext,attemptedFilename=source?.filename,saveMode=provenance?.presentation?.placement==='quick'?'quick':provenance?.mode;
-   const recordOperation=value=>record({...value,historyContext,attemptedFilename,saveMode});
-   try{source=canonicalSource({...source,url:sourceURL(source?.url).href});}catch(e){return {state:'blocked',code:e.code??'SOURCE_INVALID',operationId,destination:remoteDestination(target)};}
-   const start=performance.now(),destination=remoteDestination(target);
-   // Durable Worker claims own duplicate prevention. Optional History cannot
-   // prevent dispatch or participation in a pending Worker operation.
-   let recordingProgress=false,dispatched=false;
-   const recordProgress=value=>{
-    if(recordingProgress)return;
-    recordingProgress=true;
-    void Promise.resolve().then(()=>recordOperation(value)).catch(()=>{}).finally(()=>{recordingProgress=false;});
-   };
-   recordProgress({state:'pending',code:'REMOTE_PREPARING',operationId,destination});
-   // An instance lasts one operation; imported module URL/promise retention ends here.
-   const saver=createRemoteSaver({authorize:()=>timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)),
-    getPreparedWorkerCapability:()=>timed('capabilityMs','worker.capability',()=>cap(target,{use:'save',operationId,source,provenance,live:false})),
-    recheckAuthorization:(_i,c)=>timed('authorizationRecheckMs','auth.check',async()=>await recheck(c,target,{matchPlan:true,reportDenial:!dispatched})&&await authorize()),
-    authenticatedRequest:(c,intent,o)=>timed('workerRequestMs','transfer.upload',async()=>{
-     dispatched=true;
-     const submittedAt=performance.now();
-     let result=await post(c,'/remote-save',intent,o.signal,onObservation),lastLease=clock(),statusCap;
-     const hinted=result.state==='pending'&&Number.isFinite(result.retryAfterMs);
-     if(hinted)await pollDelay(Math.min(pollIntervalMs,Math.max(50,Math.min(300,result.retryAfterMs))),o.signal);
-     while(result.state==='pending'){
-      if(!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST'};
-      if(clock()-lastLease>=30000){const renewed=await cap(target,{use:'save',operationId,source,provenance});if(renewed.sessionId!==c.sessionId)return {state:'uncertain',code:'AUTHORIZATION_LOST'};Object.assign(c,renewed);const lease=await post(c,'/lease',{},o.signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED'};lastLease=clock();statusCap=null;}
-      // Status grants are read-only. Keep them invocation-local and invalidate
-      // on OAuth session change; lease renewal and verification stay live.
-      statusCap??=await cap(target,{operationId,live:false});
-      if(statusCap.sessionId!==c.sessionId||!await recheck(statusCap,target,{live:false}))return {state:'uncertain',code:'AUTHORIZATION_LOST'};
-      result=await post(statusCap,'/operation',{operationId,receiptOnly:true},o.signal);
-      timings.pollCount++;if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
-      if(result.state==='verified')return {state:'written',receipt:result.receipt};
-      if(result.state==='pending'){
-       recordProgress({state:'pending',code:result.code,operationId,destination,stage:result.stage,bytes:result.bytes});
-       // Account for the Worker hold and first poll against the original
-       // cadence. Slow responses do not add the hold to every save.
-       await pollDelay(hinted&&timings.pollCount===1?Math.max(0,pollIntervalMs-(performance.now()-submittedAt)):pollIntervalMs,o.signal);
+   // A transfer can retain polling and network state while the remote Worker
+   // runs. Reject excess work immediately; there is no URL or promise queue.
+   if(activeSaves>=maxActiveSaves)return {state:'blocked',code:'RESOURCE_BUSY',operationId};
+   activeSaves++;
+   try{
+    const timings={pollCount:0,...(Number.isFinite(dispatchPreparationMs)?{dispatchPreparationMs}:{}),...(Number.isFinite(readinessMs)?{readinessMs}:{})};const timed=async(name,stage,fn)=>{const started=performance.now();try{try{onBoundary?.(stage,'started','REMOTE_STAGE_STARTED');}catch{}const result=await fn();try{onBoundary?.(stage,result===false?'blocked':result==null?'uncertain':['blocked','failed','uncertain'].includes(result?.state)?result.state:'ok',result===false?'REMOTE_STAGE_DENIED':result==null?'REMOTE_STAGE_UNVERIFIED':'REMOTE_STAGE_COMPLETE');}catch{}return result;}catch(e){try{onBoundary?.(stage,'failed','REMOTE_STAGE_FAILED');}catch{}throw e;}finally{timings[name]=(timings[name]??0)+Math.round(performance.now()-started);}};
+    const historyContext=source?.historyContext,attemptedFilename=source?.filename,saveMode=provenance?.presentation?.placement==='quick'?'quick':provenance?.mode;
+    const recordOperation=value=>record({...value,historyContext,attemptedFilename,saveMode});
+    try{source=canonicalSource({...source,url:sourceURL(source?.url).href});}catch(e){return {state:'blocked',code:e.code??'SOURCE_INVALID',operationId,destination:remoteDestination(target)};}
+    const start=performance.now(),destination=remoteDestination(target);
+    // Durable Worker claims own duplicate prevention. Optional History cannot
+    // prevent dispatch or participation in a pending Worker operation.
+    let recordingProgress=false,dispatched=false;
+    const recordProgress=value=>{
+     if(recordingProgress)return;
+     recordingProgress=true;
+     void Promise.resolve().then(()=>recordOperation(value)).catch(()=>{}).finally(()=>{recordingProgress=false;});
+    };
+    recordProgress({state:'pending',code:'REMOTE_PREPARING',operationId,destination});
+    // An instance lasts one operation; imported module URL/promise retention ends here.
+    const saver=createRemoteSaver({authorize:()=>timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)),
+     getPreparedWorkerCapability:()=>timed('capabilityMs','worker.capability',()=>cap(target,{use:'save',operationId,source,provenance,live:false})),
+     recheckAuthorization:(_i,c)=>timed('authorizationRecheckMs','auth.check',async()=>await recheck(c,target,{matchPlan:true,reportDenial:!dispatched})&&await authorize()),
+     authenticatedRequest:(c,intent,o)=>timed('workerRequestMs','transfer.upload',async()=>{
+      dispatched=true;
+      const submittedAt=performance.now();
+      let result=await post(c,'/remote-save',intent,o.signal,onObservation),lastLease=clock(),statusCap;
+      const hinted=result.state==='pending'&&Number.isFinite(result.retryAfterMs);
+      if(hinted)await pollDelay(Math.min(pollIntervalMs,Math.max(50,Math.min(300,result.retryAfterMs))),o.signal);
+      while(result.state==='pending'){
+       if(!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST'};
+       if(clock()-lastLease>=30000){const renewed=await cap(target,{use:'save',operationId,source,provenance});if(renewed.sessionId!==c.sessionId)return {state:'uncertain',code:'AUTHORIZATION_LOST'};Object.assign(c,renewed);const lease=await post(c,'/lease',{},o.signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED'};lastLease=clock();statusCap=null;}
+       // Status grants are read-only. Keep them invocation-local and invalidate
+       // on OAuth session change; lease renewal and verification stay live.
+       statusCap??=await cap(target,{operationId,live:false});
+       if(statusCap.sessionId!==c.sessionId||!await recheck(statusCap,target,{live:false}))return {state:'uncertain',code:'AUTHORIZATION_LOST'};
+       result=await post(statusCap,'/operation',{operationId,receiptOnly:true},o.signal);
+       timings.pollCount++;if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
+       if(result.state==='verified')return {state:'written',receipt:result.receipt};
+       if(result.state==='pending'){
+        recordProgress({state:'pending',code:result.code,operationId,destination,stage:result.stage,bytes:result.bytes});
+        // Account for the Worker hold and first poll against the original
+        // cadence. Slow responses do not add the hold to every save.
+        await pollDelay(hinted&&timings.pollCount===1?Math.max(0,pollIntervalMs-(performance.now()-submittedAt)):pollIntervalMs,o.signal);
+       }
       }
-     }
-     if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
-     return result;
-    }),
-    verifyObject:(c,receipt,o)=>timed('verificationMs','transfer.verify',async()=>{const r=await post(c,'/verify',receipt,o.signal);if(r.state==='completed')passiveObservation(onObservation,{stage:'provider.verification',providerOperationId:operationId,receipt,proof:r.proof});return r.state==='completed'?r.proof:null;})});
-   const result=await saver({operationId,source,destination,provenance,signal});
-   const final={...result,timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
+      if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
+      return result;
+     }),
+     verifyObject:(c,receipt,o)=>timed('verificationMs','transfer.verify',async()=>{const r=await post(c,'/verify',receipt,o.signal);if(r.state==='completed')passiveObservation(onObservation,{stage:'provider.verification',providerOperationId:operationId,receipt,proof:r.proof});return r.state==='completed'?r.proof:null;})});
+    const result=await saver({operationId,source,destination,provenance,signal});
+    const final={...result,timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
+   }finally{activeSaves--;}
   },
   async files({target,intent,signal,sourceBucket}){
    const operationId=intent.operationId;let dispatched=false;

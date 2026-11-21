@@ -1,6 +1,9 @@
 import {ordinaryPage,screenshotError} from '../screenshot/rules.mjs';
+import {SCREENSHOT_BYTES} from '../cloudflare/screenshot-wire.mjs';
 
 const pngSignature=[137,80,78,71,13,10,26,10];
+const pngDataPrefix='data:image/png;base64,';
+const maxEncodedLength=pngDataPrefix.length+Math.ceil(SCREENSHOT_BYTES/3)*4;
 const captureError=(code,stage,browserError)=>Object.assign(screenshotError(code),{stage,browserError});
 const pageChanged=()=>captureError('SCREENSHOT_PAGE_CHANGED','tab-observation');
 
@@ -78,8 +81,10 @@ export async function openVisibleTabSource(chrome,deliveredTab,{trace=()=>{}}={}
     throw captureError('SCREENSHOT_CAPTURE_FAILED','capture-api','chrome-capture-error');
    }
    await verify();
+   if(typeof data==='string'&&data.length>maxEncodedLength)
+    throw captureError('SCREENSHOT_IMAGE_SIZE_UNSUPPORTED','png-validation');
    try{
-    if(typeof data!=='string'||!data.startsWith('data:image/png;base64,'))throw Error();
+    if(typeof data!=='string'||!data.startsWith(pngDataPrefix))throw Error();
     const image=await fetch(data).then(response=>response.blob());
     const signature=new Uint8Array(await image.slice(0,8).arrayBuffer());
     if(!pngSignature.every((byte,index)=>signature[index]===byte))throw Error();

@@ -39,7 +39,7 @@ async function waitFor(predicate,label){
 }
 async function openChrome(){
  const executablePath=process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium';
- const browser=await chromium.launchPersistentContext(profile,{headless:false,executablePath,viewport:null,
+ const browser=await chromium.launchPersistentContext(profile,{headless:false,executablePath,viewport:null,timeout:20000,
   ignoreDefaultArgs:['--disable-extensions'],args:['--no-sandbox','--window-position=0,0','--window-size=1300,900',`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});
  report.browser=browser.browser().version();
  return browser;

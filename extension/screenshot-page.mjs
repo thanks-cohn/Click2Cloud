@@ -32,6 +32,7 @@ const screenshotMessages={
  R2_OBJECT_CONFLICT:'R2 returned different bytes at this key. This file needs inspection.',
  R2_UPLOAD_METADATA_MISMATCH:'R2 reported an unexpected object key or size. This file needs inspection.',
  SCREENSHOT_CAPTURE_RATE_LIMIT:'Chrome limited capture frequency. Wait before pressing a shortcut again.',
+ SCREENSHOT_BUSY:'Two screenshots are in progress. Try the shortcut again when one finishes.',
  SCREENSHOT_WORKER_UPDATE_REQUIRED:'Update the existing Click2Cloud Worker to enable screenshots.',
  SCREENSHOT_CROSS_BUCKET_UNSUPPORTED:'This capture can write to one account and bucket. This directory is outside its Worker binding.',
  SCREENSHOT_ORIGINAL_UNAVAILABLE:'The original image is unavailable for retry.',
@@ -42,10 +43,11 @@ const screenshotMessages={
  SCOPE_UNAUTHORIZED:'This Cloudflare account is unavailable or unauthorized.'
 };
 export const screenshotMessage=(code,fallback)=>screenshotMessages[code]??fallback;
-export function screenshotFeedback({state,confirmed,total,retryable,code,recorded}){
+export function screenshotFeedback({state,confirmed,total,retryable,code,recorded,transient}){
  if(state==='uploading')return `Screenshot captured. Uploading to ${total} ${total===1?'folder':'folders'}…`;
  if(recorded===false)return 'The screenshot result could not be added to History.';
  if(confirmed)return `Saved to ${confirmed} of ${total} locations.${retryable?` Retry remaining ${retryable} in History.`:''}`;
+ if(transient)return screenshotMessage(code,'The screenshot could not start. Try again after checking your Cloudflare connection.');
  return screenshotMessage(code,retryable?'Screenshot captured. Upload delayed. Retry in History.':'Open History for the screenshot result.');
 }
 export async function screenshotRequest(method,params={}){

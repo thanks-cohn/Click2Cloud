@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import {setTimeout as pause} from 'node:timers/promises';
 import {createEngineApi} from '../src/api/service.mjs';
 import {productState} from '../src/api/config.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
+import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createEngine} from '../src/core/engine.mjs';
 
 const request = {version:'3+1.1', method:'loginBegin', params:{}};
@@ -123,7 +125,7 @@ test('P0 first login and reconnect schedule the canonical menu even when setup f
  assert.deepEqual(state.configs,{simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}});
 });
 
-test('P0 100, 500 and 1000 native clicks keep exact targets, unique operations and an unchanged registration',async()=>{
+test('P0 100, 500 and 1000 native clicks keep exact targets, unique operations and an unchanged registration',async(t)=>{
  const f=chromeFixture();
  const state={product:productState(),configs:{simple:{destinations:[{id:'saved',target,label:'Saved'}]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:null}};
  const current={read:async()=>structuredClone(state),setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;}};
@@ -139,8 +141,42 @@ test('P0 100, 500 and 1000 native clicks keep exact targets, unique operations a
  const id=compiled.rows.find(row=>row.role==='save').id,mutationCount=f.calls.length;
  for(const count of [100,500,1000]){
   received=new Set();
-  const outcomes=await Promise.all(Array.from({length:count},(_,i)=>registrar.handleClick({menuItemId:id,linkUrl:`https://example.org/${i}`})));
+  const before=process.memoryUsage().rss,latency=[];
+  let peak=before;
+  const outcomes=await Promise.all(Array.from({length:count},async(_,i)=>{
+   const started=performance.now();
+   const outcome=await registrar.handleClick({menuItemId:id,linkUrl:`https://example.org/${i}`});
+   latency.push(performance.now()-started);
+   if(i%10===0)peak=Math.max(peak,process.memoryUsage().rss);
+   return outcome;
+  }));
   assert(outcomes.every(outcome=>outcome.completion==='verified'));
   assert.equal(received.size,count);assert.equal(f.calls.length,mutationCount);assert.equal(f.listeners.size,1);
+  latency.sort((a,b)=>a-b);
+  const percentile=p=>Number(latency[Math.ceil(count*p)-1].toFixed(2));
+  peak=Math.max(peak,process.memoryUsage().rss);
+  await pause(25);globalThis.gc?.();
+  t.diagnostic(JSON.stringify({clicks:count,p50Ms:percentile(.5),p95Ms:percentile(.95),p99Ms:percentile(.99),processRssBefore:before,processRssSampledPeak:peak,processRssAfterIdle:process.memoryUsage().rss}));
  }
+});
+
+test('B01 remote transport admits at most 32 independent saves and returns capacity feedback without queueing',async()=>{
+ let entered,release,active=0,peak=0,network=0;
+ const admitted=new Promise(resolve=>entered=resolve),gate=new Promise(resolve=>release=resolve);
+ const recorded=[];
+ const transport=createRemoteTransport({oauth:{},lookup:async()=>null,fetch:async()=>{network++;assert.fail('Denied fixture authority cannot reach a Worker');},record:async row=>recorded.push(row)});
+ const input={target,source:{url:'https://example.org/object',filename:'object'},async authorize(){
+  active++;peak=Math.max(peak,active);if(active===32)entered();await gate;active--;return false;
+ }};
+ const operations=Array.from({length:1000},()=>transport.save(input));
+ const rejected=await Promise.all(operations.slice(32));
+ assert(rejected.every(outcome=>outcome.code==='RESOURCE_BUSY'));
+ await admitted;release();
+ const accepted=await Promise.all(operations.slice(0,32));
+ assert(accepted.every(outcome=>outcome.state==='blocked'&&outcome.code!=='RESOURCE_BUSY'));
+ assert.equal(peak,32);assert.equal(active,0);assert.equal(network,0);
+ const known=new Set(recorded.map(row=>row.operationId));assert.equal(known.size,32);
+ assert(accepted.every(row=>known.has(row.operationId)));
+ assert(rejected.every(row=>!known.has(row.operationId)));
+ assert.notEqual((await transport.save({...input,authorize:async()=>false})).code,'RESOURCE_BUSY');
 });

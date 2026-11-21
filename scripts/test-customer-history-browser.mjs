@@ -3,8 +3,11 @@
 import {chromium} from 'playwright-core';import {createServer} from 'node:http';import {readFile,mkdir,writeFile,mkdtemp,rm} from 'node:fs/promises';import {resolve,join,extname} from 'node:path';import {tmpdir} from 'node:os';import assert from 'node:assert/strict';
 const root=resolve(new URL('../',import.meta.url).pathname),out=resolve(process.env.C2C_HISTORY_EVIDENCE??'/tmp/c2c-history-browser');await mkdir(out,{recursive:true});let context,server;const results=[],errors=[],profile=await mkdtemp(join(tmpdir(),'c2c-history-'));
 try{server=createServer(async(req,res)=>{try{const p=resolve(root,'.'+new URL(req.url,'http://local').pathname);if(!p.startsWith(root+'/'))return res.writeHead(403).end();res.setHeader('Content-Type',({'.mjs':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png'})[extname(p)]??'application/octet-stream');res.end(await readFile(p));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
-context=await chromium.launchPersistentContext(profile,{executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox'],viewport:{width:1100,height:850}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
-await page.addInitScript(()=>{const listeners=[],data={uiDebugMode:false};globalThis.chrome={runtime:{id:'fixture',onMessage:{addListener:fn=>listeners.push(fn)},sendMessage:async message=>(await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method:message.method,params:message.params})},storage:{local:{get:async key=>({[key]:data[key]}),set:async v=>Object.assign(data,v)},onChanged:{addListener(){}}}};window.fixtureNotify=message=>listeners.forEach(fn=>fn(message,{id:'fixture'}));});
+context=await chromium.launchPersistentContext(profile,{executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true,args:['--no-sandbox'],viewport:{width:1100,height:850}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(()=>{const listeners=[],data={uiDebugMode:false};globalThis.chrome={runtime:{id:'fixture',onMessage:{addListener:fn=>listeners.push(fn)},sendMessage:async message=>{
+ if(message.method==='inspectRemoteHistory')window.historyRequests?.push(message.params);
+ return (await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method:message.method,params:message.params});
+}},storage:{local:{get:async key=>({[key]:data[key]}),set:async v=>Object.assign(data,v)},onChanged:{addListener(){}}}};window.fixtureNotify=message=>listeners.forEach(fn=>fn(message,{id:'fixture'}));});
 await page.goto('http://127.0.0.1:'+server.address().port+'/extension/app.html?fixturePerformance=1');await page.waitForFunction(()=>window.productFixture);
 await page.waitForFunction(()=>!document.querySelector('[data-view=history]').disabled);
 await page.evaluate(bytes=>{window.fixtureImageData={};window.fixtureHistoryPNG=bytes;},Array.from(await readFile(join(root,'tests/fixtures/images/picture.png'))));
@@ -58,5 +61,61 @@ await page.locator('#command-items #add-location').waitFor();
 assert(await page.locator('#command-items #filename-search').isVisible());
 assert(await page.locator('#toolbar-overflow #location').isHidden());
 results.push({gate:'expanded-toolbar-retains-search-and-second-row-right-click',state:'PASS'});
-await page.screenshot({path:join(out,'explorer-condensed.png'),fullPage:true});assert.deepEqual(errors,[]);
+await page.screenshot({path:join(out,'explorer-condensed.png'),fullPage:true});
+
+// Use the real Shelf, typed API, and IndexedDB. The test controls the result
+// records and message delivery so there are no provider credentials involved.
+await page.evaluate(async()=>{
+ const {current}=window.productFixture;
+ for(let first=0;first<2200;first+=100)await Promise.all(Array.from({length:100},(_,i)=>current.recordRemoteResult({operationId:'prior-'+(first+i),kind:'save',state:'failed',attemptedFilename:'Previous result'})));
+ await current.setHistoryPreferences({range:'all',previews:'closed',timezone:'America/Chicago'});
+ window.historyRequests=[];
+ window.seedLiveHistory=async(id,kind,state)=>{
+  const screenshot=kind==='screenshot-to-cloud'?{state,plan:{operationId:id,captureId:crypto.randomUUID(),outputs:[]},outputs:[],attempts:[],trace:[]}:undefined;
+  const verified=state==='verified'?{proofKind:'independent-head-version-size',receipt:{key:id+'.txt',size:3}}:{};
+  await current.recordRemoteResult({operationId:id,kind,state,screenshot,attemptedFilename:id,...verified});
+ };
+});
+await page.getByRole('button',{name:'History',exact:true}).click();
+await page.getByText('Page 2 of 93',{exact:true}).waitFor();
+await page.getByRole('button',{name:'Previous',exact:true}).click();
+await page.getByText('Page 1 of 93',{exact:true}).waitFor();
+const started=Date.now();
+await page.evaluate(async()=>{
+ window.historyRequests.length=0;
+ const {seedLiveHistory:seed,fixtureNotify:notify}=window;
+ await Promise.all(Array.from({length:130},(_,i)=>seed('burst-save-'+i,'save','pending')));
+ await seed('burst-shot','screenshot-to-cloud','pending');
+ await seed('burst-top-save','save','pending');
+ for(let i=0;i<130;i++)notify({channel:'remote-result',result:{operationId:'burst-save-'+i,kind:'save',state:'pending'}});
+ notify({channel:'screenshot-history-changed',operationId:'burst-shot'});
+ notify({channel:'remote-result',result:{operationId:'burst-top-save',kind:'save',state:'pending'}});
+});
+const liveShot=page.locator('[data-operation="burst-shot"]'),liveSave=page.locator('[data-operation="burst-top-save"]');
+await liveShot.getByText('Pending verification',{exact:true}).waitFor();
+await liveSave.getByText('Saving…',{exact:true}).waitFor();
+const liveMs=Date.now()-started;
+const batches=await page.evaluate(()=>window.historyRequests.map(params=>params.operationIds?.length??0));
+assert.deepEqual(batches,[64,64,4]);
+const focusedControl=liveSave.getByText('More',{exact:true});
+await focusedControl.focus();
+await page.evaluate(async()=>{
+ const {seedLiveHistory:seed,fixtureNotify:notify}=window;
+ await seed('burst-top-save','save','verified');await seed('burst-shot','screenshot-to-cloud','blocked');
+ notify({channel:'remote-result',result:{operationId:'burst-top-save',kind:'save',state:'verified'}});
+ notify({channel:'screenshot-history-changed',operationId:'burst-shot'});
+});
+await liveSave.getByText('Saved and verified',{exact:true}).waitFor();
+await liveShot.getByText('Delivery blocked',{exact:true}).waitFor();
+assert.equal(await focusedControl.evaluate(element=>document.activeElement===element),true);
+assert.equal(await page.locator('.history-preview img').count(),0);
+results.push({gate:'B05/B07-open-History-burst-with-2301-prior-rows',state:'PASS',batches,fixtureElapsedMs:liveMs});
+
+await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+await page.evaluate(async()=>{await window.seedLiveHistory('closed-save','save','failed');await window.seedLiveHistory('closed-shot','screenshot-to-cloud','blocked');});
+await page.getByRole('button',{name:'History',exact:true}).click();
+await page.locator('[data-operation="closed-save"]').getByText('Not saved',{exact:true}).waitFor();
+await page.locator('[data-operation="closed-shot"]').getByText('Delivery blocked',{exact:true}).waitFor();
+results.push({gate:'B06-closed-History-reconciles-both-operation-types-on-reopen',state:'PASS'});
+assert.deepEqual(errors,[]);
 }catch(e){try{const p=context.pages().at(-1);await writeFile(join(out,'failure-dom.html'),await p.content());await writeFile(join(out,'failure-debug.json'),JSON.stringify(await p.evaluate(()=>({previews:[...document.querySelectorAll('[data-preview]')].map(el=>({text:el.textContent,rect:el.getBoundingClientRect().toJSON()})),calls:window.productFixture?.calls,settings:document.querySelector('.history-page')?.innerText})),null,2));}catch{}results.push({gate:'browser-acceptance',state:'FAIL',message:e.message,stack:e.stack});process.exitCode=1;}finally{await context?.close();if(server)await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});await writeFile(join(out,'results.json'),JSON.stringify({evidenceClass:'REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE',results,errors},null,2));console.log(JSON.stringify(results,null,2));}

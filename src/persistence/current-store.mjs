@@ -298,6 +298,31 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
   return Object.freeze({
     recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
+    readRemoteResultsById:ids=>transact('readonly',async s=>{
+      const results=await Promise.all(ids.map(id=>request(s.state.get('remote-result:'+id))));
+      if(results.every(Boolean))return results.map(row=>row.value);
+      const legacy=new Map(((await request(s.state.get('remoteResults')))?.value??[]).map(row=>[row.operationId,row]));
+      return results.map((row,index)=>row?.value??legacy.get(ids[index])??null);
+    }),
+    countRemoteResults:matches=>transact('readonly',async s=>{
+      const legacy=new Map(((await request(s.state.get('remoteResults')))?.value??[]).map(row=>[row.operationId,row]));
+      let count=0;
+      await new Promise((resolve,reject)=>{
+        const r=s.state.openCursor(IDBKeyRange.bound('remote-result:','remote-result:\uffff'));
+        r.onerror=()=>reject(r.error);
+        r.onsuccess=()=>{
+          const cursor=r.result;if(!cursor){resolve();return;}
+          try{
+            const row=cursor.value.value;
+            legacy.delete(row.operationId);
+            if(matches(row))count++;
+            cursor.continue();
+          }catch(error){reject(error);}
+        };
+      });
+      for(const row of legacy.values())if(matches(row))count++;
+      return count;
+    }),
     readScreenshotReceipts:()=>transact('readonly',async ({state})=>{
       const receipts=[];
       let size=0;

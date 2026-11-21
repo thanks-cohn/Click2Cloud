@@ -50,7 +50,7 @@ for(const event of ['error','unhandledrejection'])globalThis.addEventListener?.(
 const diagnostics=createDiagnostics({epoch:workerEpoch,build:BUILD_INFO.revision,onCritical:breadcrumbs.enqueue}),current=createCurrentStore({sink:diagnostics,readEstablishment:async()=>{await trustedStorage();const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,uncertain:!!p.currentProvenance&&(p.currentProvenance.version!==1||p.currentProvenance.established!==true),nativeGeneration:p.nativeRegistration?.desired?.generation??0,native:{present:!!p.nativeRegistration,desiredGeneration:p.nativeRegistration?.desired?.generation??null,appliedGeneration:p.nativeRegistration?.appliedGeneration??null,state:['applying','acknowledged','applied','failed','partial'].includes(p.nativeRegistration?.state)?p.nativeRegistration.state:'unknown',rowCount:p.nativeRegistration?.desired?.rows?.length??0,roles:Object.fromEntries(['save','branch','provider-action','separator','navigation'].map(role=>[role,(p.nativeRegistration?.desired?.rows??[]).filter(r=>r.role===role).length]))}};},retainEstablishment:async proof=>{await chrome.storage.local.set({currentProvenance:proof});}});
 let connectionObservation=null,attentionPreference=null;
 const dailyBadge=createDailyBadge({chrome,
- readHistory:()=>current.readRemoteResults(),readPreferences:()=>current.readHistoryPreferences()});
+ countHistory:current.countRemoteResults,readPreferences:()=>current.readHistoryPreferences()});
 const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
  void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
 }});
@@ -84,11 +84,10 @@ async function prepared(target){
 const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
- const inventoryUpdate=fileApi.noteRemoteWrite(value);
  const saved=await current.recordRemoteResult(value);
  if(saved.kind==='save'&&saved.state==='verified')void dailyBadge.refresh();
- await inventoryUpdate;
  try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
+ try{void Promise.resolve(fileApi.noteRemoteWrite(saved)).catch(()=>{});}catch{}
  return saved;
 }
 const executeFileMessage=createFileTransport({remote});
@@ -307,8 +306,19 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
     let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction&&action.actionKind!=='attention')return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
-  },onOutcome:result=>{void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});}
+  },onOutcome:result=>{
+    if(result.code==='RESOURCE_BUSY'&&!showSaveBusy())return;
+    void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});
+  }
 });
+let lastSaveBusy=0;
+function showSaveBusy(){
+ const now=Date.now();
+ if(now-lastSaveBusy<500)return false;
+ lastSaveBusy=now;
+ void chrome.runtime.sendMessage({channel:'remote-result',result:{kind:'save',state:'blocked',code:'RESOURCE_BUSY'}}).catch(()=>{});
+ return true;
+}
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
   remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:invokeProviderAction,
   authorizeSource:async s=>{if(s.bytes instanceof Uint8Array)return true;try{const u=new URL(s.url);return ['https:','http:'].includes(u.protocol)&&await chrome.permissions.contains({origins:[u.origin+'/*']});}catch{return false;}},fetchSource:fetch});

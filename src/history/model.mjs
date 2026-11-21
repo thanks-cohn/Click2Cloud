@@ -17,13 +17,24 @@ export function validateHistoryPreferences(p){
  try{new Intl.DateTimeFormat('en',{timeZone:p.timezone}).format();}catch{throw Error('HISTORY_TIMEZONE_INVALID');}
  return {range:p.range,previews:p.previews,timezone:p.timezone};
 }
-export function dayKey(at,timezone){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(at));const get=k=>parts.find(p=>p.type===k).value;return `${get('year')}-${get('month')}-${get('day')}`;}
+const historyDateFormats=new Map();
+export function dayKey(at,timezone){
+ let format=historyDateFormats.get(timezone);
+ if(!format){
+  format=new Intl.DateTimeFormat('en-CA',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'});
+  if(historyDateFormats.size>=8)historyDateFormats.delete(historyDateFormats.keys().next().value);
+  historyDateFormats.set(timezone,format);
+ }
+ const parts=format.formatToParts(new Date(at)),get=k=>parts.find(p=>p.type===k).value;
+ return `${get('year')}-${get('month')}-${get('day')}`;
+}
 export function weekKey(day){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));const year=d.getUTCFullYear(),start=new Date(Date.UTC(year,0,1));return `${year}-W${String(Math.ceil(((d-start)/86400000+1)/7)).padStart(2,'0')}`;}
 const validDate=value=>/^\d{4}-\d{2}-\d{2}$/.test(value??'')&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
 export function inHistoryRange(at,{range='all',timezone=historyDefaults.timezone,start,end,now=Date.now()}={}){
- if(!at||!Number.isFinite(new Date(at).getTime()))return range==='all';
+ if(range==='all')return true;
+ if(!at||!Number.isFinite(new Date(at).getTime()))return false;
  const day=dayKey(at,timezone),today=dayKey(now,timezone);
- if(range==='all')return true;if(range==='daily')return day===today;if(range==='weekly')return weekKey(day)===weekKey(today);
+ if(range==='daily')return day===today;if(range==='weekly')return weekKey(day)===weekKey(today);
  if(range!=='custom'||!validDate(start)||!validDate(end)||start>end)throw Error('HISTORY_DATE_RANGE_INVALID');return day>=start&&day<=end;
 }
 const secretName=/token|signature|credential|secret|password|authorization|api[-_]?key|^x-amz-|^x-goog-/i;

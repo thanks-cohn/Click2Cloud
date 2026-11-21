@@ -15,35 +15,48 @@ function midnightEdge(now, timezone, forward) {
 }
 export const nextLocalMidnight = (now, timezone) => midnightEdge(now, timezone, true);
 
+function verifiedSave(row, start, end) {
+  const at = row.updatedAt ?? row.at;
+  return (!row.kind || row.kind === 'save') && row.state === 'verified' && !!row.proofKind &&
+    !!row.receipt?.key && !!row.operationId && Number.isFinite(at) && at >= start && at < end;
+}
 function countRows(rows, start, end) {
   const seen = new Set();
-  for (const row of rows) {
-    const at = row.updatedAt ?? row.at;
-    if ((row.kind && row.kind !== 'save') || row.state !== 'verified' || !row.proofKind ||
-        !row.receipt?.key || !row.operationId || !Number.isFinite(at) || at < start || at >= end) continue;
-    seen.add(row.operationId);
-  }
+  for (const row of rows) if(verifiedSave(row,start,end))seen.add(row.operationId);
   return seen.size;
 }
 export function countVerifiedSaves(rows, now, timezone) {
   return countRows(rows,midnightEdge(now,timezone,false),nextLocalMidnight(now,timezone));
 }
 
-export function createDailyBadge({chrome, readHistory, readPreferences, clock = Date.now}) {
+export function createDailyBadge({chrome, readHistory, countHistory, readPreferences, clock = Date.now}) {
   let tail = Promise.resolve();
+  let refreshing, requested = false;
   const readLocal = async () => (await chrome.storage?.local?.get(localTotalsKey))?.[localTotalsKey] ?? {};
   function refresh() {
+    requested = true;
+    if (refreshing) return refreshing;
     const update = tail.then(async () => {
+      do {
+        requested = false;
+        await paint();
+      } while (requested);
+    });
+    refreshing = update.finally(() => { refreshing = null; });
+    tail = refreshing.catch(() => {});
+    return refreshing;
+  }
+  async function paint() {
       const now = clock();
       let when = now + 60000, text = '!';
       try {
         const {timezone} = await readPreferences();
-        const rows = await readHistory();
         const local = await readLocal(), start=midnightEdge(now,timezone,false);
         const midnight = nextLocalMidnight(now,timezone);
         const downloads=Object.entries(local.minutes??{}).reduce((total,[minute,files])=>
           minute*60000>=start&&minute*60000<midnight&&Number.isSafeInteger(files)?total+files:total,0);
-        const count = countRows(rows,start,midnight)+downloads;
+        const verified = countHistory ? await countHistory(row=>verifiedSave(row,start,midnight)) : countRows(await readHistory(),start,midnight);
+        const count = verified+downloads;
         text = count >= 1000 ? '1k+' : String(count);
         when = midnight;
       } catch { /* A timed retry will reconcile temporarily unavailable History. */ }
@@ -52,9 +65,6 @@ export function createDailyBadge({chrome, readHistory, readPreferences, clock = 
         Promise.resolve().then(() => chrome.action.setBadgeBackgroundColor({color: '#253b70'})),
         Promise.resolve().then(() => chrome.alarms.create(rolloverAlarm, {when}))
       ]);
-    });
-    tail = update.catch(() => {});
-    return update;
   }
   function recordLocal(jobId, files) {
     if (!/^[a-f0-9-]{36}$/.test(jobId??'') || !Number.isSafeInteger(files) || files<1 || files>20000) return Promise.reject(Error('DOWNLOAD_COMPLETION_INVALID'));

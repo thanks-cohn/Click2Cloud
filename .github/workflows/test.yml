@@ -17,6 +17,11 @@ jobs:
       - run: npm run test:focused
       - run: node --test right2cloud-module/tests/module.test.mjs
       - run: npm run build:extension
+      - name: Live History burst regression
+        env:
+          C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
+          C2C_HISTORY_EVIDENCE: ${{ runner.temp }}/click2cloud-history
+        run: node scripts/test-customer-history-browser.mjs
       - name: Upload unpacked extension
         uses: actions/upload-artifact@v4
         with:
@@ -63,6 +68,19 @@ jobs:
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
         run: node scripts/probe-chrome-f7.mjs
+      - name: Native Chrome menu availability
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+          C2C_SCREENSHOT_PYTHON: /usr/bin/python3
+          C2C_NATIVE_MENU_EVIDENCE: ${{ runner.temp }}/click2cloud-native-menu
+        run: xvfb-run -a -s "-screen 0 1400x1000x24" node scripts/test-native-menu-browser.mjs
+      - name: Upload native Chrome menu evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-native-menu
+          path: ${{ runner.temp }}/click2cloud-native-menu
+          if-no-files-found: ignore
       - name: Installed Chrome Get URL against the HTTPS fixture
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
