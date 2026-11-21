@@ -12,6 +12,13 @@ export const nostalgia={
  ]
 };
 export const themePackages=[goldenAge,oceania,nostalgia];
+export const busyCursorPackages=Object.freeze([
+ {id:'system',name:'System Default'},
+ {id:'hourglass',name:'Classic Hourglass'},
+ {id:'ring',name:'Spinning Ring'},
+ {id:'arrow-busy',name:'Arrow + Busy'},
+ {id:'redown-pulse',name:'REDOWN Pulse'}
+]);
 
 const palette=(id,name,colors,fonts)=>({id,name,colors,fonts});
 export const palettes=[

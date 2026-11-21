@@ -184,7 +184,11 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .history-preview{position:relative;max-width:240px;min-height:48px}.history-preview[data-loading]{height:180px;overflow:hidden;background:var(--bg);border-radius:5px}.history-preview[data-loading]>p{position:absolute;inset:auto 8px 0;text-align:center;font-size:12px}
 
 .remotes-intro{margin-block-end:22px}
-.remotes-intro .remotes-headline{font-size:clamp(25px,5vw,42px);line-height:1.16;margin:0}
+.remotes-intro{container-type:inline-size}
+.remotes-intro .remotes-headline{font-size:clamp(14px,8.2cqi,42px);line-height:1.16;margin:0}
+.remotes-headline span{display:block;white-space:nowrap}
+@container (width < 155px){.remotes-headline span{white-space:normal}}
+.history-page .history-headline{font-size:clamp(20px,5vw,36px);line-height:1.15}
 .remotes-subtitle{font-size:clamp(15px,2.4vw,20px);margin:8px 0 0}
 .show-controls>h3{flex:0 0 100%;font-size:14px;margin:0}
 .show-mode-checkboxes,.show-mode-actions{flex:0 0 100%;display:flex;gap:clamp(5px,2vw,16px);align-items:center}
@@ -192,7 +196,34 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 #dialog-title{min-width:0;overflow-wrap:anywhere}
 #dialog-title input{max-width:100%}
 .preview-rename-status{display:block;font-size:12px;color:var(--muted)}
-.rename-notice{position:fixed;inset:auto 12px 12px auto;z-index:10;pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0003;font-size:12px}
+.explorer-mini-toast{position:fixed;inset:auto 12px 12px auto;z-index:10;max-width:calc(100vw - 24px);pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0003;font-size:12px}
+.explorer-busy-cursor{display:none;position:fixed;z-index:11;width:14px;height:14px;pointer-events:none;color:var(--accent);filter:drop-shadow(0 0 1px var(--bg))}
+:root[data-operation-busy]:not(:is([data-busy-cursor=hourglass],[data-busy-cursor=ring],[data-busy-cursor=arrow-busy],[data-busy-cursor=redown-pulse])) :is(#shell,#dialog,#shell *,#dialog *){cursor:progress}
+:root[data-busy-cursor=hourglass] .explorer-busy-cursor:not([hidden]){display:block;background:currentColor;clip-path:polygon(12% 0,88% 0,85% 23%,62% 49%,85% 76%,88% 100%,12% 100%,15% 76%,38% 49%,15% 23%)}
+:root:is([data-busy-cursor=ring],[data-busy-cursor=arrow-busy]) .explorer-busy-cursor:not([hidden]){display:block;border:2px solid var(--line);border-top-color:currentColor;border-radius:50%;animation:busy-spin .8s linear infinite}
+:root[data-busy-cursor=arrow-busy] .explorer-busy-cursor:not([hidden]){width:10px;height:10px}
+:root[data-busy-cursor=redown-pulse] .explorer-busy-cursor:not([hidden]){display:grid;place-items:center;border-radius:3px;background:#b70e2f;color:#fff;font:700 10px/1 system-ui;animation:busy-pulse 1s ease-in-out infinite}
+:root[data-busy-cursor=redown-pulse] .explorer-busy-cursor::before{content:"R"}
+@keyframes busy-spin{to{transform:rotate(360deg)}}
+@keyframes busy-pulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.explorer-busy-cursor{animation:none!important}}
+@media (forced-colors:active){
+ .explorer-busy-cursor{display:none!important}
+ :root[data-operation-busy] :is(#shell,#dialog,#shell *,#dialog *){cursor:progress}
+}
+#files.list th:first-child{width:100%}
+#files.details table{min-width:var(--details-min,420px)}
+#files.details :is(th,td):nth-child(2){display:table-cell}
+#files.details th{width:var(--details-width)}
+#files.details th:first-child{width:var(--details-width,48%)}
+#files .file-item-name{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.details-column-grip{display:none}
+#files.details th{position:sticky}
+#files.details .details-column-grip{display:block;position:absolute;right:0;top:0;bottom:0;width:9px;cursor:col-resize;touch-action:none;border-right:1px solid var(--line)}
+.details-column-grip:is(:hover,:focus-visible){background:var(--selected)}
+.explorer-marquee{position:fixed;z-index:4;pointer-events:none;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 19%,transparent)}
+#files.marquee-selecting{user-select:none}
+#files tr[data-drop-folder],#files .file-tile[data-drop-folder]>div{outline:2px solid var(--accent);outline-offset:-2px;background:var(--selected)}
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .shortcut-row>span{flex:1}

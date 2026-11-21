@@ -18,6 +18,19 @@ import {createExplorerExports,noteDownload} from './explorer-exports.mjs';
 import {downloadJob} from '../src/explorer/download-archive.mjs';
 import {selectedSetupReady,selectedSetupLabel,selectedSetupCode} from './cloudflare-setup-view.mjs';
 let fileClipboard=null;
+const fileClipboardKey='explorerClipboardV1';
+let clipboardChanged=false;
+void chrome.storage?.session?.get(fileClipboardKey).then(values=>{
+ if(!clipboardChanged)fileClipboard=values[fileClipboardKey]??null;
+}).catch(()=>{});
+function keepClipboard(clip){
+ clipboardChanged=true;
+ fileClipboard=clip;
+ // Large selections remain usable in the current Shelf without growing
+ // session storage. Only references are kept here, never image bytes.
+ const stored=clip?.entries.length<=512?clip:null;
+ void chrome.storage?.session?.set({[fileClipboardKey]:stored}).catch(()=>{});
+}
 import {describeExplorerContextMenu} from '../src/api/explorer-context-menu.mjs';
 import {accountLabel,destinationPath} from './cloudflare-labels.mjs';
 import {cloudPath,parseCloudPath,middlePath} from '../src/explorer/location-view.mjs';
@@ -27,6 +40,12 @@ import {providerDefaults} from '../src/explorer/configuration.mjs';
 import {createListingOrder,createListingReader,rowWindow,gridWindow} from '../src/explorer/listing-view.mjs';
 import {ancestors,scopeKey,targetKey} from '../src/core/menu-identity.mjs';
 import {createDebugPreference} from '../src/chrome/debug-preference.mjs';
+import {createExplorerOperationFeedback} from './explorer-operation-feedback.mjs';
+import {createExplorerImageClipboard} from './explorer-image-clipboard.mjs';
+import {installExplorerMarquee} from './explorer-marquee.mjs';
+import {installDetailsColumns} from './explorer-details-columns.mjs';
+const operationFeedback=createExplorerOperationFeedback(document);
+const copyImageToClipboard=createExplorerImageClipboard(params=>api('readFileChunk',params,{quiet:true}));
 const readinessNames={CLOUDFLARE_READY:'Ready to save',READY:'Ready to save',NOT_ACTIVATED:'R2 is unavailable. Correct it manually with Cloudflare, then Check again.',RECONNECT_REQUIRED:'Log in to reconnect Cloudflare.',INSUFFICIENT_PERMISSION:'Cloudflare did not grant the required access. Reconnect with the necessary permissions.',NETWORK_UNAVAILABLE:'Cloudflare could not be reached. Try again when the connection is available.',ACCOUNT_AMBIGUOUS:'Choose the Cloudflare account to use.',UNKNOWN:'R2 readiness is not confirmed. Retry Check R2 or review account permissions.',REPAIR_REQUIRED:'This destination needs its private save connection prepared or repaired.',SETUP_RESUME_REQUIRED:'Setup approval is saved. Resume the existing initialization when ready.',SETUP_APPROVAL_REQUIRED:'Approve initial setup to make Cloudflare saving ready.',CHOOSE_DESTINATION:'Choose a folder in Explorer and make it your default.',DESTINATION_UNAVAILABLE:'The selected destination is unavailable. Reconnect or choose another.'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const reportedShelfEvents=new Set();
@@ -83,6 +102,7 @@ let configurationIssue=null;
 let state,connection={state:'UNKNOWN',accounts:[]},view='remotes',source=null,entries=[],selected=new Set(),history=[],historyAt=-1,cursor='',loading=false,sort={key:'displayName',direction:1},anchor=0,listingEpoch=0;
 let filenameSearch=null,browseNeedsRefresh=false;
 let explorerLayoutUI=null,layoutIntent=null,gallery=null,galleryReturnKey=null,previewAbort=null;
+let marquee,draggedFiles,dropFolder;
 let suggestionDue=false,enteringExplorer=null,connectionEpoch=0,explorerShell,contextTicket=0,viewportWidth=800,viewportHeight=400,paintPending=false,presentationView=null,viewCommit=Promise.resolve(),addressWidth=0,listingAbort=null,explorerScroll=0;
 const displayView=()=>presentationView??state.product.view;
 const scheduleWindow=()=>{if(paintPending)return;paintPending=true;requestAnimationFrame(()=>{paintPending=false;if(view==='explorer')renderWindow();});};
@@ -202,6 +222,7 @@ async function change(changes,{confirmed=false,expectedRevision=state.product.re
 function listen(selector,event,fn){$(selector)?.addEventListener(event,e=>{try{Promise.resolve(fn(e)).catch(error=>status(error.message,{attention:true}));}catch(error){status(error.message,{attention:true});}});}
 function closeDialog(){immersiveView?.dispose();immersiveView=null;$('#dialog').removeAttribute('data-immersive');stopGalleryVisual();const returnKey=galleryReturnKey;gallery=null;galleryReturnKey=null;previewAbort?.abort();previewEpoch++;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}$('#dialog').close();if(returnKey&&view==='explorer'){const i=listingOrder.index(returnKey);if(i!==undefined){focusIndex=i;focusRow(i);}}}
 function dialog(title,body,footer='',debugOnly=false) {
+  marquee?.cancel();
   const wasOpen=$('#dialog').open,focusedId=$('#dialog').contains(document.activeElement)?document.activeElement.id:null;
   $('#dialog').toggleAttribute('data-debug-only-dialog',debugOnly);
   hideContext();if(!body.includes('data-gallery')){$('#dialog').removeAttribute('data-immersive');immersiveView?.dispose();immersiveView=null;}if(gallery&&!body.includes('data-gallery')){stopGalleryVisual();gallery=null;galleryReturnKey=null;previewAbort?.abort();}$('#dialog-content').innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2><button id="close-dialog" aria-label="Close">×</button></div><div class="dialog-body">${body}</div>${footer}`;
@@ -321,7 +342,7 @@ function ordinarySetupReview(){
 function renderRemotes(){
   if(view!=='remotes')return;
   connectionElement.remove();
-  $('#main').innerHTML=`<section class="page"><div class="remotes-intro"><h1 class="remotes-headline">The Future Is Now. True Remote Is Here.</h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p></div>${configurationIssue?recoveryCard():''}<div class="card"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
+  $('#main').innerHTML=`<section class="page"><div class="remotes-intro"><h1 class="remotes-headline"><span>The Future Is Now.</span> <span>True Remote Is Here.</span></h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p></div>${configurationIssue?recoveryCard():''}<div class="card"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);$$('[data-placeholder]').forEach(b=>b.onclick=()=>api('invokeProviderAction',{provider:b.dataset.placeholder,idempotencyKey:crypto.randomUUID()}).catch(e=>status(e.message)));
   listen('#open-explorer','click',async()=>{await show('explorer');});
@@ -479,7 +500,7 @@ function markCurrentSearchStale(){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){finishSearchIntent();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}renderConnection();if(next==='history'){$('#main').innerHTML='<section class="page"><h1>History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='remotes'){renderRemotes();return;}renderConnection();if(next==='history'){$('#main').innerHTML='<section class="page"><h1>History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function saveExplorerLayout(value){
@@ -505,7 +526,7 @@ function renderExplorer(){
  if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button></div>`;
   $('#main').replaceChildren(explorerShell);
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
-  listen('#up','click',()=>source&&navigate({...source,prefix:ancestors(source.prefix).at(-2)??''}));listen('#refresh','click',refreshExplorerFolder);
+  listen('#up','click',navigateParent);listen('#refresh','click',refreshExplorerFolder);
   listen('#view-switch','change',e=>{const value=e.target.value,start=performance.now(),el=$('#files'),oldGrid=displayView()==='grid',anchor=Math.floor(Math.max(0,el.scrollTop-(oldGrid?0:40))/(oldGrid?136:40))*(oldGrid?gridWindow(displayedEntries().length,0,viewportHeight,viewportWidth).columns:1);presentationView=value;renderExplorer();el.scrollTop=Math.floor(anchor/(value==='grid'?gridWindow(displayedEntries().length,0,viewportHeight,viewportWidth).columns:1))*(value==='grid'?136:40);renderWindow();paintTrace('view',start);viewCommit=viewCommit.catch(()=>{}).then(async()=>{if(presentationView!==value)return;try{await change({type:'setView',view:value});}catch(error){status(error.message);}finally{if(presentationView===value)presentationView=null;if(view==='explorer')renderExplorer();}});});
   listen('#create-bucket','click',createBucketGUI);
   listen('#add-location','click',()=>openPopup(selectedFolder()));
@@ -546,6 +567,9 @@ function renderExplorer(){
  $('#back').disabled=historyAt<=0;$('#forward').disabled=historyAt>=history.length-1;$('#up').disabled=!source?.prefix;$('#add-location').disabled=!source;explorerLayoutUI.setSearchAvailable(!!source&&connection.state==='CONNECTED');$('#view-switch').value=displayView();
  $('#shell').dataset.view='explorer';explorerLayoutUI?.refresh();renderAddress();renderFiles();focusPendingSearch();void suggestion();
 }
+function navigateParent(){
+ if(source?.prefix)return navigate({...source,prefix:ancestors(source.prefix).at(-2)??''});
+}
 function refreshExplorerFolder(){
  imageReader.clear();clearThumbnails();listingReader.invalidate();
  if(filenameSearch)return searchDirectoryNames(filenameSearch.query,{refresh:true});
@@ -569,6 +593,7 @@ function parseLocation(value){
 }
 function renderAddress(restore=false){const input=$('#location'),display=$('#location-display');if(!input)return;const e=selected.size===1?ordered()[listingOrder.index(selected.values().next().value)]:null,value=displayLocation(source,e&&!e.folder?e.key:source?.prefix);if(restore||document.activeElement!==input)input.value=value;input.title=value;display.textContent=value?middlePath(value,Math.max(20,addressWidth-20),pathMeasure):'Choose a cloud folder';}
 async function navigate(t,push=true,fromAPI=false){
+  marquee?.cancel();clearDropFolder();typedName='';
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
@@ -579,10 +604,64 @@ async function loadListing(more=false,fresh=false){
   if(!source||more&&loading)return;browseNeedsRefresh=false;listingAbort?.abort();const controller=new AbortController();listingAbort=controller;const epoch=++listingEpoch,t=structuredClone(source),scroll=$('#files')?.scrollTop??0;loading=true;listingError='';renderFiles();
   try{const data=await listingReader.page(t,more?cursor:'',fresh,controller.signal);if(epoch!==listingEpoch||targetKey(t)!==targetKey(source))return;
     entries=more?[...new Map([...entries,...data.entries].map(e=>[e.key,e])).values()]:data.entries;cursor=data.cursor??'';treeFolders.set(targetKey(t),entries.filter(e=>e.folder));syncTreePage(t,{entries,cursor,completeListing:!cursor});paintTrace('listing');status(`${entries.length} items · ${t.bucketName}`);
+    if(fresh&&!filenameSearch){
+     ordered();selected=new Set([...selected].filter(key=>listingOrder.index(key)!==undefined));
+     if(selected.size===1)focusIndex=anchor=listingOrder.index(selected.values().next().value);
+    }
   }catch(error){if(epoch===listingEpoch&&view==='explorer'&&error.name!=='AbortError'){listingError=error.message;status(error.message+(entries.length?' · Showing previous results.':''));}}
   finally{if(epoch===listingEpoch){loading=false;if(view==='explorer'){renderFiles();if(more&&!filenameSearch)$('#files').scrollTop=scroll;}}}
 }
 function ordered(){return listingOrder.read(displayedEntries(),sort);}
+function selectedFileEntries(){
+ const rows=ordered();
+ return [...selected].map(key=>rows[listingOrder.index(key)]).filter(Boolean);
+}
+const fileReference=({key,folder,displayName})=>({key,folder,...(displayName?{displayName}:{})});
+let typedName='',lastTypeAt=0;
+function selectByName(event,rows,index){
+ const now=performance.now(),letter=event.key.toLocaleLowerCase();
+ if(now-lastTypeAt>750)typedName='';
+ const cycling=typedName===letter;
+ if(!cycling)typedName+=letter;
+ lastTypeAt=now;
+ const matches=entry=>(entry.displayName??fileLeaf(entry)).toLocaleLowerCase().startsWith(typedName);
+ const start=cycling?(index+1)%rows.length:0;
+ const after=rows.findIndex((entry,i)=>i>=start&&matches(entry));
+ const next=after<0&&start?rows.findIndex(matches):after;
+ if(next>=0){selectRow(next,{});focusRow(next);}
+}
+function clearDropFolder(){
+ dropFolder?.removeAttribute('data-drop-folder');dropFolder=null;
+}
+function bindFileDrag(pane){
+ const dragType='application/x-redown-files';
+ function target(event){
+  const row=event.target.closest('[data-index]');
+  const entry=row&&ordered()[Number(row.dataset.index)];
+  if(!draggedFiles||!entry?.folder||draggedFiles.entries.some(item=>item.folder&&entry.key.startsWith(item.key)))return {};
+  return {row,entry};
+ }
+ pane.addEventListener('dragstart',event=>{
+  if(!event.target.closest('[data-file-drag]')||$('#dialog').open)return;
+  const row=event.target.closest('[data-index]'),i=Number(row.dataset.index);
+  if(!selected.has(ordered()[i].key))selectRow(i,{});
+  draggedFiles={source:structuredClone(source),entries:selectedFileEntries().map(fileReference),action:'move'};
+  event.dataTransfer.setData(dragType,'move');
+  event.dataTransfer.effectAllowed='move';
+ });
+ pane.addEventListener('dragover',event=>{
+  const {row}=target(event);
+  if(row!==dropFolder){clearDropFolder();if(row){dropFolder=row;row.dataset.dropFolder='';}}
+  if(row){event.preventDefault();event.dataTransfer.dropEffect='move';}
+ });
+ pane.addEventListener('dragleave',event=>{if(!pane.contains(event.relatedTarget))clearDropFolder();});
+ pane.addEventListener('dragend',()=>{draggedFiles=null;clearDropFolder();});
+ pane.addEventListener('drop',event=>{
+  const {entry}=target(event),clip=draggedFiles;draggedFiles=null;clearDropFolder();
+  if(!entry||!event.dataTransfer.types.includes(dragType))return;
+  event.preventDefault();void pasteFiles({...source,prefix:entry.key},clip);
+ });
+}
 function renderFiles(){
  const el=$('#files');if(!el)return;
  if(connection?.state!=='CONNECTED'){
@@ -595,19 +674,49 @@ function renderFiles(){
  el.className='file-scroll '+displayView();el.setAttribute('aria-busy',String(busy));
  if(!el.querySelector('table')){el.innerHTML=`<div class="empty"></div><table role="grid" aria-label="Files" aria-multiselectable="true"><thead><tr>${[['Name','displayName'],['Date Modified','uploaded'],['Type','folder'],['Size','size']].map(([label,k])=>`<th><button data-sort="${k}">${label}</button></th>`).join('')}</tr></thead><tbody></tbody></table><div class="grid-tiles" role="grid" aria-label="Files" aria-multiselectable="true" hidden></div>`;
   el.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{hideContext();sort={key:b.dataset.sort,direction:sort.key===b.dataset.sort?-sort.direction:1};focusIndex=0;el.scrollTop=0;renderWindow();});
+  const table=el.querySelector('table');
+  installDetailsColumns(table);
+  marquee=installExplorerMarquee(el,{
+   readRows:ordered,readLayout:()=>displayView()==='grid'
+    ?{columns:gridWindow(0,0,viewportHeight,viewportWidth).columns,rowHeight:136,header:0}
+    :{columns:1,rowHeight:40,header:table.tHead.offsetHeight},
+   readSelection:()=>selected,setSelection:value=>{selected=value;},onChange:updateSelection,
+   onCommit:mode=>{
+    const index=listingOrder.index(selected.values().next().value);
+    if(index===undefined)return;
+    focusIndex=index;if(mode!=='add')anchor=index;updateSelection();
+   },
+   available:()=>view==='explorer'&&!$('#dialog').open&&$('#context').hidden
+  });
+  bindFileDrag(el);
   el.addEventListener('scroll',scheduleWindow,{passive:true});
-  el.onclick=event=>{const row=event.target.closest('[data-index]');if(!row)return;selectRow(Number(row.dataset.index),event);row.focus({preventScroll:true});};
+  el.onclick=event=>{if(marquee.takeClick())return;const row=event.target.closest('[data-index]');if(!row)return;selectRow(Number(row.dataset.index),event);row.focus({preventScroll:true});};
   el.ondblclick=event=>{const row=event.target.closest('[data-index]');if(row)void openEntry(ordered()[Number(row.dataset.index)]).catch(e=>status(e.message));};
   el.oncontextmenu=event=>{const row=event.target.closest('[data-index]');event.preventDefault();if(!row){if(source)void contextFor(source,null,event.clientX,event.clientY);return;}const i=Number(row.dataset.index),e=ordered()[i];if(!selected.has(e.key))selectRow(i,{});focusIndex=i;void contextFor(e.folder?{...source,prefix:e.key}:source,e,event.clientX,event.clientY);};
-  el.onkeydown=event=>{if($('#dialog').open)return;const row=event.target.closest('[data-index]'),rows=ordered(),i=row?Number(row.dataset.index):focusIndex,cols=displayView()==='grid'?gridWindow(rows.length,0,viewportHeight,viewportWidth).columns:1;let n;
+  el.onkeydown=event=>{if(event.defaultPrevented||event.isComposing||$('#dialog').open||!$('#context').hidden||event.target.closest('input,textarea,select,[contenteditable]'))return;
+   const row=event.target.closest('[data-index]'),rows=ordered(),i=row?Number(row.dataset.index):focusIndex,cols=displayView()==='grid'?gridWindow(rows.length,0,viewportHeight,viewportWidth).columns:1;
+   const control=event.ctrlKey||event.metaKey,key=event.key,plain=!control&&!event.altKey&&!event.shiftKey;
+   const connected=source&&connection.state==='CONNECTED';
+   if(connected&&!event.altKey){
+    const action=plain?{
+     Delete:()=>deleteExplorerFiles(selectedFileEntries(),source),F5:refreshExplorerFolder,Backspace:navigateParent
+    }[key]:control?event.shiftKey?{n:()=>fileActionGUI('mkdir',null,source)}[key.toLowerCase()]:{
+     c:()=>copyExplorerFiles(source,selectedFileEntries(),true),x:()=>cutExplorerFiles(source,selectedFileEntries()),
+     v:()=>pasteFiles(structuredClone(source))
+    }[key.toLowerCase()]:null;
+    if(action){event.preventDefault();if(!event.repeat)void Promise.resolve(action()).catch(error=>status(error.message,{attention:true}));return;}
+   }
+   let n;
    if(['ArrowDown','ArrowUp','Home','End','PageDown','PageUp',...(displayView()==='grid'?['ArrowLeft','ArrowRight']:[])].includes(event.key)&&rows.length){event.preventDefault();const step=event.key.startsWith('Page')?Math.max(1,Math.floor(viewportHeight/(displayView()==='grid'?136:40)))*cols:cols;n=event.key==='Home'?0:event.key==='End'?rows.length-1:Math.max(0,Math.min(rows.length-1,i+(event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:['ArrowDown','PageDown'].includes(event.key)?step:-step)));selectRow(n,event);focusRow(n);}
    else if(event.key==='Enter'&&rows[i]){event.preventDefault();void openEntry(rows[i]).catch(e=>status(e.message));}
-   else if(event.key==='F2'&&row&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&selected.size===1&&selected.has(rows[i]?.key)){
-    event.preventDefault();if(!event.repeat)void fileActionGUI('rename',rows[i]);
+   else if(key==='F2'&&plain&&selected.size===1){
+    const entry=rows[listingOrder.index(selected.values().next().value)];
+    if(entry){event.preventDefault();if(!event.repeat)void fileActionGUI('rename',entry);}
    }
    else if(event.key==='ContextMenu'||event.key==='F10'&&event.shiftKey){event.preventDefault();if(rows[i]&&!selected.has(rows[i].key))selectRow(i,{});const r=(row??el).getBoundingClientRect();void contextFor(rows[i]?.folder?{...source,prefix:rows[i].key}:source,rows[i]??null,r.left+20,r.top+20);}
    else if(event.key==='Escape'&&!($('#context').hidden&&explorerLayoutUI.dismissSearch())){selected.clear();updateSelection();hideContext();}
    else if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'){event.preventDefault();hideContext();selected=new Set(rows.map(e=>e.key));updateSelection();}
+   else if(rows.length&&!control&&!event.altKey&&event.key.length===1&&event.key.trim()){event.preventDefault();selectByName(event,rows,i);}
   };
  }
  const inactive=displayView()==='grid'?el.querySelector('tbody'):el.querySelector('.grid-tiles');if(inactive.childElementCount)inactive.replaceChildren();
@@ -638,9 +747,9 @@ function renderListingCaption(){
 function renderWindow(){
  const el=$('#files');if(!el||el.hidden||view!=='explorer')return;if(viewportWidth<1||viewportHeight<1){stopThumbnailJobs();return;}const grid=displayView()==='grid',body=grid?el.querySelector('.grid-tiles'):el.querySelector('tbody');if(!body)return;const rows=ordered();let range=grid?gridWindow(rows.length,el.scrollTop,viewportHeight,viewportWidth):rowWindow(rows.length,el.scrollTop,viewportHeight);if(grid&&renderedWindow?.body===body&&renderedWindow.columns!==range.columns){const anchor=Math.floor(el.scrollTop/136)*renderedWindow.columns;el.scrollTop=Math.floor(anchor/range.columns)*136;range=gridWindow(rows.length,el.scrollTop,viewportHeight,viewportWidth);}
  if(renderedWindow?.body===body&&renderedWindow.rows===rows&&renderedWindow.start===range.start&&renderedWindow.end===range.end&&renderedWindow.columns===range.columns){syncThumbnails();return;}const focused=el.contains(document.activeElement)?document.activeElement.dataset.index:null;renderedWindow={body,rows,start:range.start,end:range.end,columns:range.columns};
- const icon=e=>e.folder?'📁':'▤',label=e=>esc(e.displayName??e.key),spacer=height=>height?grid?`<div aria-hidden="true" style="grid-column:1/-1;height:${height}px"></div>`:`<tr aria-hidden="true" class="row-spacer"><td colspan="4" style="height:${height}px;padding:0;border:0"></td></tr>`:'';
+ const icon=e=>e.folder?'📁':'▤',label=e=>esc(e.displayName??e.key),spacer=height=>height?grid?`<div class="row-spacer" aria-hidden="true" style="grid-column:1/-1;height:${height}px"></div>`:`<tr aria-hidden="true" class="row-spacer"><td colspan="4" style="height:${height}px;padding:0;border:0"></td></tr>`:'';
  if(grid){body.style.gridTemplateColumns=`repeat(${range.columns},minmax(0,1fr))`;body.setAttribute('aria-rowcount',String(Math.ceil(rows.length/range.columns)));body.setAttribute('aria-colcount',String(range.columns));}
- body.innerHTML=spacer(range.top)+rows.slice(range.start,range.end).map((e,j)=>{const i=range.start+j,attrs=`tabindex="${i===focusIndex?'0':'-1'}" data-index="${i}" aria-rowindex="${grid?Math.floor(i/range.columns)+1:i+2}" aria-selected="${selected.has(e.key)}"`;return grid?`${i%range.columns===0?'<div role="row" class="tile-row">':''}<div role="gridcell" aria-colindex="${i%range.columns+1}" class="file-tile" ${attrs}><div><span aria-hidden="true">${icon(e)}</span><div class="tile-label" title="${label(e)}">${label(e)}</div></div></div>${(i+1)%range.columns===0||i===range.end-1?'</div>':''}`:`<tr ${attrs}><td><span class="${e.folder?'folder-icon':'file-icon'}" aria-hidden="true">${icon(e)}</span>${label(e)}</td><td>${esc(e.uploaded??e.last_modified??'—')}</td><td>${e.folder?'File folder':esc(e.key.split('.').at(-1)?.toUpperCase()??'File')}</td><td>${e.folder?'':Number.isFinite(Number(e.size))?Number(e.size).toLocaleString()+' B':'—'}</td></tr>`;}).join('')+spacer(grid?range.total-Math.ceil(range.end/range.columns)*range.rowHeight:(rows.length-range.end)*40);
+ body.innerHTML=spacer(range.top)+rows.slice(range.start,range.end).map((e,j)=>{const i=range.start+j,attrs=`tabindex="${i===focusIndex?'0':'-1'}" data-index="${i}" aria-rowindex="${grid?Math.floor(i/range.columns)+1:i+2}" aria-selected="${selected.has(e.key)}"`;return grid?`${i%range.columns===0?'<div role="row" class="tile-row">':''}<div role="gridcell" aria-colindex="${i%range.columns+1}" class="file-tile" ${attrs}><div data-file-drag draggable="true"><span aria-hidden="true">${icon(e)}</span><div class="tile-label" title="${label(e)}">${label(e)}</div></div></div>${(i+1)%range.columns===0||i===range.end-1?'</div>':''}`:`<tr ${attrs}><td><span class="file-item-name" data-file-drag draggable="true" title="${label(e)}"><span class="${e.folder?'folder-icon':'file-icon'}" aria-hidden="true">${icon(e)}</span>${label(e)}</span></td><td><span class="file-cell-text">${esc(e.uploaded??e.last_modified??'—')}</span></td><td><span class="file-cell-text">${e.folder?'File folder':esc(e.key.split('.').at(-1)?.toUpperCase()??'File')}</span></td><td><span class="file-cell-text">${e.folder?'':Number.isFinite(Number(e.size))?Number(e.size).toLocaleString()+' B':'—'}</span></td></tr>`;}).join('')+spacer(grid?range.total-Math.ceil(range.end/range.columns)*range.rowHeight:(rows.length-range.end)*40);
  syncThumbnails();if(focused!==undefined&&focused!==null)(body.querySelector(`[data-index="${focused}"]`)??el).focus({preventScroll:true});
 }
 function selectRow(i,event){const started=performance.now();hideContext();const rows=ordered(),e=rows[i];if(!e)return;if(event.shiftKey){if(!event.ctrlKey&&!event.metaKey)selected.clear();for(let j=Math.min(anchor,i);j<=Math.max(anchor,i);j++)selected.add(rows[j].key);}else if(event.ctrlKey||event.metaKey){if(selected.has(e.key))selected.delete(e.key);else selected.add(e.key);anchor=i;}else{selected=new Set([e.key]);anchor=i;}focusIndex=i;updateSelection();paintTrace('selection',started);}
@@ -669,7 +778,7 @@ function thumbnailKey(e){return JSON.stringify([targetKey(source),e.key,e.etag??
 function syncThumbnails(){
  if(thumbnailFrame)return;thumbnailFrame=requestAnimationFrame(()=>{thumbnailFrame=0;const cells=view==='explorer'&&displayView()==='grid'&&viewportWidth>0?[...$('#files').querySelectorAll('[data-index]')]:[],wanted=new Map();for(const cell of cells){const e=ordered()[Number(cell.dataset.index)];if(e&&isImage(e))wanted.set(thumbnailKey(e),{cell,e});}
  for(const [key,job] of thumbnailJobs)if(!wanted.has(key)){job.abort();thumbnailJobs.delete(key);}
- for(const [key,{cell,e}] of [...wanted].slice(0,THUMBNAIL_ENTRIES)){const old=thumbnailURLs.get(key);if(old){if(old.url&&!cell.querySelector('img')){const img=new Image();img.alt=e.displayName??e.key;img.src=old.url;img.className='thumbnail';cell.querySelector('span').replaceWith(img);}else if(old.error){cell.title=imageMessage(old.error);cell.dataset.thumbnail='unavailable';}continue;}
+ for(const [key,{cell,e}] of [...wanted].slice(0,THUMBNAIL_ENTRIES)){const old=thumbnailURLs.get(key);if(old){if(old.url&&!cell.querySelector('img')){const img=new Image();img.alt=e.displayName??e.key;img.src=old.url;img.className='thumbnail';img.draggable=false;cell.querySelector('span').replaceWith(img);}else if(old.error){cell.title=imageMessage(old.error);cell.dataset.thumbnail='unavailable';}continue;}
   if(thumbnailJobs.has(key)||thumbnailActive>=2||thumbnailJobs.size>=2)continue;
   const controller=new AbortController(),captured=structuredClone(source);thumbnailJobs.set(key,controller);thumbnailActive++;
   void (async()=>{let bitmap;try{const value=await imageReader.load(captured,e,{limit:4*1024*1024,signal:controller.signal,concurrency:1});controller.signal.throwIfAborted();try{const ratio=Math.min(1,THUMBNAIL_EDGE/Math.max(value.width,value.height));bitmap=await createImageBitmap(value.blob,{resizeWidth:Math.max(1,Math.round(value.width*ratio)),resizeHeight:Math.max(1,Math.round(value.height*ratio)),resizeQuality:'low'});}catch{throw Object.assign(Error(),{code:'IMAGE_DECODE_FAILED'});}controller.signal.throwIfAborted();if(bitmap.width*bitmap.height>64*1024*1024)throw Object.assign(Error(),{code:'PREVIEW_SIZE_LIMIT'});const scale=Math.min(1,THUMBNAIL_EDGE/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);const blob=await new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('IMAGE_DECODE_FAILED')),'image/png'));controller.signal.throwIfAborted();thumbnailURLs.set(key,{url:URL.createObjectURL(blob),etag:value.etag});}
@@ -718,21 +827,7 @@ const renameExtension=name=>name.lastIndexOf('.')>0?name.slice(name.lastIndexOf(
 const renameConflict=error=>['FILES_SKIPPED','FILE_CONFLICT'].includes(error.code);
 const renameUnconfirmed=error=>!renameConflict(error)&&(error.outcome==='uncertain'||
  /UNCONFIRMED|RETRY_REQUIRES_INSPECTION|ENGINE_RESPONSE_CHANNEL_CLOSED|ENGINE_NO_RESPONSE/.test(error.code??''));
-let renameNotice,renameNoticeTimer,editPreviewFilename;
-function clearRenameNotice(){
- clearTimeout(renameNoticeTimer);
- renameNotice?.remove();
- renameNotice=null;
-}
-function showRenamed(){
- clearRenameNotice();
- renameNotice=document.createElement('div');
- renameNotice.className='rename-notice';
- renameNotice.setAttribute('role','status');
- ($('#dialog').open&&gallery?$('#dialog'):document.body).append(renameNotice);
- renameNotice.textContent='Renamed!';
- renameNoticeTimer=setTimeout(clearRenameNotice,1800);
-}
+let editPreviewFilename;
 function selectBasename(input){
  input.focus();
  input.setSelectionRange(0,input.value.length-renameExtension(input.value).length);
@@ -743,11 +838,14 @@ async function renameFile(entry,target,draft){
   throw Object.assign(Error(),{code:'FILENAME_INVALID'});
  const name=extension&&!renameExtension(draft)?draft+extension:draft;
  if(name===original)return entry;
- clearRenameNotice();
  const navigation=navigationEpoch;
- const result=await runFileAction('rename',{source:target,entry:{key:entry.key,folder:false},name,conflict:'skip'});
- const data=result.data??result,key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+name;
- if(data.code!=='FILE_ACTION_VERIFIED'||data.receipt?.key!==key)throw Object.assign(Error(),{code:'FILE_RENAME_UNCONFIRMED'});
+ const key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+name;
+ const data=await presentOperation('rename',async()=>{
+  const result=await runFileAction('rename',{source:target,entry:{key:entry.key,folder:false},name,conflict:'skip'});
+  const data=result.data??result;
+  if(data.code!=='FILE_ACTION_VERIFIED'||data.receipt?.key!==key)throw Object.assign(Error(),{code:'FILE_RENAME_UNCONFIRMED'});
+  return data;
+ });
  const renamed={...entry,key,displayName:name,etag:data.receipt.etag,size:data.receipt.size};
  listingReader.invalidate();
  if(view==='explorer'&&navigation===navigationEpoch&&targetKey(target)===targetKey(source)){
@@ -767,7 +865,6 @@ async function renameFile(entry,target,draft){
    const index=listingOrder.index(key);
    if(index!==undefined){focusIndex=anchor=index;updateSelection();}
   }).catch(()=>{});
-  showRenamed();
  }
  return renamed;
 }
@@ -788,7 +885,7 @@ function bindInlineRename(entry,target,ticket){
    if(saving)return;
    if(event.key==='Escape'||input.value===name){cancel();return;}
    if(input.readOnly)return;
-   saving=input.readOnly=true;feedback.textContent='Renaming…';
+   saving=input.readOnly=true;feedback.textContent='';
    try{
     const renamed=await renameFile(entry,target,input.value);
     if(ticket!==previewEpoch||!input.isConnected)return;
@@ -861,13 +958,15 @@ async function contextFor(t,entry,x,y){
   action('Download with All Metadata',()=>explorerExports.download(scope,file,'metadata'));
   action('Get URL',()=>explorerExports.urls(scope,file,()=>view==='explorer'&&contextEpoch===navigationEpoch));
   action('Add Tags',()=>explorerExports.tags(scope,file));
+  action('Copy Image to Clipboard',()=>writeExplorerImage(origin,file));
   if(!entry||entry.folder){action('Screenshot2Here',()=>screenshotUI.configureHere(structuredClone(t)));action('+ Right Click',()=>openPopup(structuredClone(t)));action('Make Default',()=>makeExplorerDefault(t));}
   else {const save=action('Save to cloud…',()=>chooseRemoteSave(entry));if(capabilities?.providers?.cloudflare?.explorerSource===false){save.disabled=true;save.title='No authorized remote source is available for this private Explorer file.';}}
   const mutation=action;
   if(entry){
-   mutation('Copy',()=>{fileClipboard={source:origin,entries:capturedSelection,action:'copy'};status(fileClipboard.entries.length+' items ready to paste.');});
-   mutation('Cut',()=>{fileClipboard={source:origin,entries:capturedSelection,action:'move'};status(fileClipboard.entries.length+' items ready to move. Sources remain until paste.');});
-   mutation('Move',()=>fileActionGUI('move',entry,origin));mutation('Rename',()=>fileActionGUI('rename',entry,origin));mutation('Delete',()=>fileActionGUI('delete',entry,origin));
+   mutation('Copy',()=>copyExplorerFiles(origin,capturedSelection));
+   mutation('Cut',()=>cutExplorerFiles(origin,capturedSelection));
+   mutation('Move',()=>fileActionGUI('move',entry,origin));mutation('Rename',()=>fileActionGUI('rename',entry,origin));
+   mutation('Delete',()=>deleteExplorerFiles(capturedSelection,origin));
    action('Properties',async()=>{const r=await api(entry.folder?'listFolders':'fileMetadata',entry.folder?{source:{...origin,prefix:entry.key}}:{source:origin,key:entry.key});const metadata=!entry.folder&&isImage(entry)&&explorerExports.options.tags?await api('getExportObjectMetadata',{source:origin,key:entry.key},{quiet:true}).catch(()=>null):null;
     dialog('Properties',(metadata?'<p>Tags · '+esc(metadata.availability==='observed'?metadata.tags.join(', ')||'None':'Unavailable')+'</p>':'')+'<pre>'+esc(JSON.stringify(r,null,2))+'</pre>');});
   }
@@ -904,6 +1003,7 @@ function setupDisclosure(title,run,detail=workerCost){
  });
 }
 function fileError(action,error){
+ if(action==='New Folder'&&error.code==='FOLDER_ALREADY_EXISTS')return 'That folder already exists.';
  if(action==='Rename'){
   if(renameConflict(error))return 'That name is already in use.';
   if(renameUnconfirmed(error))return 'Rename unconfirmed. Close the editor and refresh this folder before retrying.';
@@ -939,6 +1039,20 @@ async function runFileAction(action,params,authorizeSetup=false,idempotencyKey=c
   throw error;
  }
 }
+async function presentOperation(kind,run){
+ let finish;
+ try{finish=operationFeedback.start(kind);}catch{/* Optional presentation. */}
+ try{
+  const result=await run();
+  try{finish?.(true);}catch{/* Optional presentation. */}
+  return result;
+ }catch(error){
+  try{finish?.(false,$('#dialog').open&&['rename','mkdir','delete','move'].includes(kind)?null:
+   renameUnconfirmed(error)?'Outcome unconfirmed. Refresh before retrying.':
+   error.code==='FILE_SETUP_APPROVAL_REQUIRED'?'File access needs review.':undefined);}catch{/* Optional presentation. */}
+  throw error;
+ }
+}
 function namedOperation(title,label,value,run,{bucket=false,singleRename=false}={}){
  dialog(title,'<form id="file-name-form"><label>'+esc(label)+' <input id="file-name" '+(bucket?'required minlength="3" maxlength="63"':'maxlength="1024"')+' value="'+esc(value)+'"></label><button type="submit">'+(singleRename?'Save':esc(title))+'</button><p id="file-feedback" role="status"></p></form>');
  const form=$('#file-name-form'),input=$('#file-name'),button=form.querySelector('button'),feedback=$('#file-feedback');
@@ -946,7 +1060,7 @@ function namedOperation(title,label,value,run,{bucket=false,singleRename=false}=
  form.onsubmit=async event=>{
   event.preventDefault();
   if(button.disabled)return;
-  button.disabled=true;feedback.textContent=singleRename?'Renaming…':'Working…';
+  button.disabled=true;feedback.textContent=singleRename||title==='New Folder'?'':'Working…';
   if(singleRename)input.readOnly=true;
   try{
    const renamed=await run(input.value);
@@ -965,11 +1079,14 @@ function namedOperation(title,label,value,run,{bucket=false,singleRename=false}=
  };
 }
 async function finishFileAction(action,params,approve=false,idempotencyKey){
- const result=await runFileAction(action,params,approve,idempotencyKey);
+ const result=await presentOperation(action,async()=>{
+  const result=await runFileAction(action,params,approve,idempotencyKey);
+  if(!(result.data??result).code?.endsWith('_VERIFIED'))
+   throw Object.assign(Error(),{code:(result.data??result).code??'FILE_ACTION_UNCONFIRMED'});
+  return result;
+ });
  listingReader.invalidate();
  if(view==='explorer')await reloadCurrentDirectory();
- const code=result.data?.code;
- status(code?.endsWith('_VERIFIED')?(action==='mkdir'?'Folder created and verified.':'File action verified.'):code??'File action verified.');
  return result;
 }
 function offerFilePreparation(title,run,detail){
@@ -1014,39 +1131,90 @@ async function fileActionGUI(action,entry,target=source){
    offerFilePreparation('Move',(prefix,allow)=>finishFileAction(action,{...params,destination:{...captured,prefix:prefix&&!prefix.endsWith('/')?prefix+'/':prefix}},allow)));
   return;
  }
- const remove=offerFilePreparation('Delete',allow=>finishFileAction(action,params,allow));
+}
+async function deleteExplorerFiles(entries,target){
+ if(!entries.length)return;
+ const captured=structuredClone(target);
+ const remaining=entries.map(fileReference);
+ let changed=false;
+ const remove=offerFilePreparation('Delete',allow=>presentOperation('delete',async()=>{
+  try{
+   while(remaining.length){
+    const result=await runFileAction('delete',{source:captured,entry:remaining[0]},allow);
+    if((result.data??result).code!=='FILE_ACTION_VERIFIED')throw Object.assign(Error(),{code:'FILE_ACTION_UNCONFIRMED'});
+    selected.delete(remaining.shift().key);
+    changed=true;
+   }
+  }finally{
+   if(changed){listingReader.invalidate();if(view==='explorer')void reloadCurrentDirectory();}
+  }
+ }));
  if(confirmExplorerDelete){
-  dialog('Delete permanently?', '<p>'+esc(entry.displayName??entry.key)+(entry.folder?' and all objects inside it':'')+'</p><p role="status" id="delete-feedback"></p>',
+  const [entry]=entries;
+  const summary=entries.length===1?esc(entry.displayName??entry.key)+(entry.folder?' and all objects inside it':''):
+   'Delete '+entries.length+' selected items, including the contents of selected folders?';
+  dialog('Delete permanently?', '<p>'+summary+'</p><p role="status" id="delete-feedback"></p>',
    '<div class="dialog-foot"><button id="cancel-delete">Cancel</button><button id="confirm-delete">Delete</button></div>');
   listen('#cancel-delete','click',closeDialog);
   listen('#confirm-delete','click',async()=>{
-   const button=$('#confirm-delete');button.disabled=true;$('#delete-feedback').textContent='Deleting…';
+   const button=$('#confirm-delete');button.disabled=true;$('#delete-feedback').textContent='';
    try{await remove();if(button.isConnected)closeDialog();}
    catch(error){if(button.isConnected){$('#delete-feedback').textContent=fileError('Delete',error);button.disabled=false;}}
   });
  }else try{await remove();}catch(error){status(fileError('Delete',error),{attention:true});}
 }
-async function pasteFiles(destination){
- const original=fileClipboard;if(!original)return;
- const clip=structuredClone(original);let completed=0;
+function cutExplorerFiles(target,entries){
+ if(!entries.length)return;
+ keepClipboard({source:structuredClone(target),entries:entries.map(fileReference),action:'move'});
+ operationFeedback.notify('Cut to cloud clipboard.');
+}
+async function copyExplorerFiles(target,entries,writeImage=false){
+ if(!entries.length)return;
+ keepClipboard({source:structuredClone(target),entries:entries.map(fileReference),action:'copy'});
+ if(!writeImage||!entries.some(isImage))return operationFeedback.notify('Copied!');
+ if(entries.length!==1)return operationFeedback.notify('Cloud copied. Select one image for the image clipboard.');
+ await writeExplorerImage(target,entries[0],true);
+}
+async function writeExplorerImage(target,entry,cloudCopied=false){
+ let finish;
+ try{finish=operationFeedback.start('copy');}catch{/* Optional presentation. */}
+ try{
+  await copyImageToClipboard(target,entry);
+ }catch{
+  try{finish?.(false,cloudCopied?'Cloud copied. Image clipboard unavailable.':undefined);}catch{/* Optional presentation. */}
+  return;
+ }
+ try{finish?.(true,cloudCopied?'Copied! Cloud and image clipboard.':undefined);}catch{/* Optional presentation. */}
+}
+async function pasteFiles(destination,dragged){
+ const original=dragged??fileClipboard;if(!original||clipboardTransferPending)return;
+ const clip=structuredClone(original),kind=dragged?'move':'paste';let completed=0;
  const transfer=async approved=>{
+  if(clipboardTransferPending)return;
+  clipboardTransferPending=true;
   try{
-   for(const entry of clip.entries.slice(completed)){
-    await runFileAction(clip.action,{source:clip.source,destination,entry},approved);
-    completed++;
-    if(clip.action==='move'&&fileClipboard===original)original.entries.shift();
-   }
+   await presentOperation(kind,async()=>{
+    for(;completed<clip.entries.length;completed++){
+     const entry=clip.entries[completed],result=await runFileAction(clip.action,{source:clip.source,destination,entry},approved);
+     if((result.data??result).code!=='FILE_ACTION_VERIFIED')throw Object.assign(Error(),{code:'FILE_ACTION_UNCONFIRMED'});
+     if(clip.action==='move'&&source&&targetKey(source)===targetKey(clip.source))selected.delete(entry.key);
+     if(clip.action==='move'&&fileClipboard===original){
+      original.entries.shift();
+      keepClipboard(original.entries.length?original:null);
+     }
+    }
+   });
   }catch(error){
    if(error.code==='FILE_SETUP_APPROVAL_REQUIRED'&&!approved){setupDisclosure('Prepare file transfer',()=>transfer(true));return;}
-   status((completed?completed+' items verified. ':'')+fileError('Paste',error),{attention:true});
    if(approved)throw error;
   }finally{
-   if(fileClipboard===original&&!original.entries.length)fileClipboard=null;
-   if(completed&&view==='explorer'){listingReader.invalidate();await reloadCurrentDirectory();}
+   clipboardTransferPending=false;
+   if(completed&&view==='explorer'){listingReader.invalidate();void reloadCurrentDirectory();}
   }
  };
  await transfer(false);
 }
+let clipboardTransferPending=false;
 async function chooseRemoteSave(entry){const capabilities=await api('describeCapabilities');if(capabilities.providers?.cloudflare?.explorerSource===false){dialog('Save to cloud','<p>This private Explorer file has no authorized remote source transfer. Cloudflare never stages file bytes through your browser.</p><button id="download-stream">Download instead</button>');listen('#download-stream','click',()=>downloadEntry(entry));return;}
   const captured=structuredClone(source),menu=await api('previewContextMenu',{context:'link'}),leaves=[];
   function render(items){return items.map(item=>{if(item.role==='save'||item.role==='provider-action'){const i=leaves.push(item)-1;return `<p><button data-cloud-save="${i}" ${!item.enabled||!menu.nativeAcknowledged?'disabled':''}>${esc(item.label)}${!item.enabled?' · '+esc(item.reason):''}</button></p>`;}return item.role==='branch'?`<details open><summary>${esc(item.label)}</summary>${render(item.children)}</details>`:'';}).join('');}
@@ -1327,6 +1495,18 @@ async function renderSettings(){
   });
   const preference=document.createElement('label');preference.innerHTML='<input id="auto-attention" type="checkbox"> Automatically open login/attention';$('#main .page').prepend(preference);$('#auto-attention').checked=state.product.autoOpenAttention;listen('#auto-attention','change',e=>change({type:'setAutoOpenAttention',visible:e.target.checked}));
   const appearance=$('#appearance'),palettes=$('#aesthetic-palette'),appearanceStatus=$('#aesthetic-status');
+  const cursorSetting=document.createElement('div');
+  cursorSetting.className='settings-row';
+  cursorSetting.innerHTML='<label for="busy-cursor-style">Busy Cursor Style</label><select id="busy-cursor-style">'+
+   aesthetic.listBusyCursors().map(({id,name})=>'<option value="'+esc(id)+'">'+esc(name)+'</option>').join('')+'</select>';
+  appearance.closest('.settings-row').after(cursorSetting);
+  const busyCursor=cursorSetting.querySelector('select');
+  busyCursor.value=aesthetic.getBusyCursor();
+  busyCursor.onchange=async()=>{
+   const result=await aesthetic.applyBusyCursor(busyCursor.value);
+   busyCursor.value=result.id;
+   appearanceStatus.textContent=result.error?'Busy cursor changed for this session. The preference could not be saved.':'';
+  };
   const nostalgiaStyle=$('#nostalgia-style');
   function syncAppearance(){
    appearance.value=aesthetic.getActive().id;

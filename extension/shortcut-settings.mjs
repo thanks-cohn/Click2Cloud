@@ -1,6 +1,25 @@
-import {shelfHistoryCommand} from '../src/chrome/provider-panel.mjs';
+import {shelfHistoryCommand,shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
 import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
 import {eventChord, defaultBindings, shortcutStorageKey, uiCommands} from '../src/api/shortcuts.mjs';
+import {screenshotCommands} from '../src/screenshot/rules.mjs';
+
+const fixedExplorerKeys=[
+ ['F2','Rename selected item or preview image'],['Delete','Delete selected items'],
+ ['Ctrl+C','Copy selected items'],['Ctrl+X','Cut selected items'],['Ctrl+V','Paste into current folder'],
+ ['F5','Refresh current folder'],['Backspace','Go to parent folder'],['Ctrl+Shift+N','New Folder'],
+ ['Letters and numbers','Select matching name'],['Ctrl+A','Select all loaded items'],
+ ['Arrow keys, Home, End, Page Up, Page Down','Navigate items'],
+ ['Shift / Ctrl with navigation','Extend / adjust selection'],
+ ['Enter','Open item'],['Shift+F10 / Menu','Open item menu'],['Escape','Dismiss or clear selection'],
+ ['Left / Right on a column separator','Resize a Details column'],
+ ['Left / Right in preview','Previous / next image'],['+ / − in immersive view','Zoom image']
+];
+const chromeShortcuts=[
+ [shelfHistoryCommand,'Shelf ↔ History'],
+ [shelfExplorerSearchCommand,'Open File Explorer Search'],
+ [screenshotCommands[0],'Capture screenshot to cloud'],
+ [screenshotCommands[1],'Capture screenshot to cloud (second shortcut)']
+];
 
 export function installShortcuts({invoke, context, runUI, runAPI, updateReferences}) {
   let commands = uiCommands, bindings = defaultBindings(commands), editor, refreshVersion = 0;
@@ -39,17 +58,36 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
     mount(parent) {
       const card = document.createElement('section');
       card.className = 'card';
-      card.innerHTML = '<h2>Keyboard Shortcuts</h2><div class="settings-row shortcut-row"><span>Shelf ↔ History</span><kbd data-history-key>Checking Chrome…</kbd><button data-change-history type="button">Change shortcut</button></div><p data-chrome-shortcut-status role="status"></p><p>Explorer shortcuts work while Click2Cloud has focus.</p><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p>';
+      card.innerHTML = '<h2>Keyboard Shortcuts</h2><h3>Chrome-wide</h3><div class="chrome-shortcut-rows"></div><p data-chrome-shortcut-status role="status"></p><h3>File Explorer only</h3><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p><div class="fixed-shortcut-rows"></div>';
       parent.append(card);
-      const historyKey=card.querySelector('[data-history-key]'),chromeStatus=card.querySelector('[data-chrome-shortcut-status]');
-      async function readHistoryKey(){
-        try{historyKey.textContent=(await chromeCommandBindings(chrome)).get(shelfHistoryCommand)??'Unassigned';}
-        catch{historyKey.textContent='Unavailable';}
+      const chromeRows=card.querySelector('.chrome-shortcut-rows'),chromeStatus=card.querySelector('[data-chrome-shortcut-status]');
+      for(const [id,text] of chromeShortcuts){
+        const row=document.createElement('div');
+        row.className='settings-row shortcut-row';
+        const label=document.createElement('span'),key=document.createElement('kbd'),change=document.createElement('button');
+        label.textContent=text;key.dataset.chromeKey=id;key.textContent='Checking Chrome…';
+        if(id===shelfHistoryCommand){key.dataset.historyKey='';change.dataset.changeHistory='';}
+        change.type='button';change.textContent='Change shortcut';change.setAttribute('aria-label','Change Chrome shortcut for '+text);
+        change.onclick=()=>void openChromeShortcuts(chrome).catch(()=>{chromeStatus.textContent='Open chrome://extensions/shortcuts in Chrome.';});
+        row.append(label,key,change);chromeRows.append(row);
       }
-      card.querySelector('[data-change-history]').onclick=()=>void openChromeShortcuts(chrome).catch(()=>{chromeStatus.textContent='Open chrome://extensions/shortcuts in Chrome.';});
-      void readHistoryKey();
-      const refreshOnFocus=()=>{if(card.isConnected)void readHistoryKey();else window.removeEventListener('focus',refreshOnFocus);};
+      async function readChromeKeys(){
+        let bindings;
+        try{bindings=await chromeCommandBindings(chrome);}catch{/* Chrome did not provide bindings. */}
+        for(const key of chromeRows.querySelectorAll('[data-chrome-key]'))
+          key.textContent=bindings?(bindings.get(key.dataset.chromeKey)??'Unassigned'):'Unavailable';
+      }
+      void readChromeKeys();
+      const refreshOnFocus=()=>{if(card.isConnected)void readChromeKeys();else window.removeEventListener('focus',refreshOnFocus);};
       window.addEventListener('focus',refreshOnFocus);
+      const fixed=card.querySelector('.fixed-shortcut-rows');
+      for(const [chord,text] of fixedExplorerKeys){
+        const row=document.createElement('div');
+        row.className='settings-row shortcut-row';
+        const label=document.createElement('span'),key=document.createElement('kbd'),status=document.createElement('small');
+        label.textContent=text;key.textContent=chord;status.textContent='Fixed / Not customizable';
+        row.append(label,key,status);fixed.append(row);
+      }
       const rows = card.querySelector('.shortcut-rows'), feedback = card.querySelector('.shortcut-feedback');
       let capture, busy = false, restoreFocus;
       const button = (label, action, name = label) => {

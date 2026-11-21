@@ -114,12 +114,14 @@ jobs:
           name: redown-p1-installed-browser
           path: ${{ runner.temp }}/redown-p1-installed
           if-no-files-found: error
-      - name: Installed Chrome single-file Rename against local Worker and R2 emulator
+      - name: Installed Chrome Rename and File Explorer against local Worker and R2 emulator
         if: ${{ !cancelled() }}
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
           C2C_RENAME_EVIDENCE: ${{ runner.temp }}/click2cloud-rename
-        run: node scripts/test-rename-browser.mjs
+        run: |
+          node scripts/test-rename-browser.mjs
+          C2C_EXPLORER_ESSENTIALS=1 C2C_RENAME_EVIDENCE="$C2C_RENAME_EVIDENCE/essentials" node scripts/test-rename-browser.mjs
       - name: Upload Rename browser evidence
         if: always()
         uses: actions/upload-artifact@v4

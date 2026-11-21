@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createAestheticHost,validatePalette,AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';
-import {palettes,themePackages} from '../src/aesthetic/packages.mjs';
+import {createAestheticHost,validatePalette,AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY,BUSY_CURSOR_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';
+import {palettes,themePackages,busyCursorPackages} from '../src/aesthetic/packages.mjs';
 
 const pref=id=>({schemaVersion:1,id});
 function fixture(values={},options={}){
@@ -60,6 +60,23 @@ test('Late preference reads and failed writes preserve a newer session choice',a
  release({[AESTHETIC_PREFERENCE_KEY]:pref('high-polish')});
  await restoring;
  assert.equal(host.getActive().id,'standard');
+});
+test('Busy cursors persist independently and removed or disabled packages fall back to System Default',async()=>{
+ const values={[AESTHETIC_PREFERENCE_KEY]:pref('standard'),[PALETTE_PREFERENCE_KEY]:pref('emerald-forest')};
+ const {host}=fixture(values);
+ await host.restore();
+ for(const {id} of busyCursorPackages){
+  assert.deepEqual(await host.applyBusyCursor(id),{id,error:null});
+  const restored=fixture(values);
+  await restored.host.restore();
+  assert.equal(restored.root.dataset.busyCursor,id);
+  assert.equal(restored.host.getActive().id,'standard');
+  assert.equal(restored.host.getPalette(),'emerald-forest');
+ }
+ const reduced=fixture(values,{busyPackages:busyCursorPackages.map(item=>({...item,enabled:item.id!=='redown-pulse'}))});
+ await reduced.host.restore();
+ assert.equal(reduced.host.getBusyCursor(),'system');
+ assert.deepEqual(values[BUSY_CURSOR_PREFERENCE_KEY],pref('redown-pulse'));
 });
 const luminance=hex=>{const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
 const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};

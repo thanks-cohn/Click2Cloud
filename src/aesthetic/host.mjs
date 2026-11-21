@@ -1,8 +1,9 @@
-import {standard,minimal,palettes,themePackages} from './packages.mjs';
+import {standard,minimal,palettes,themePackages,busyCursorPackages} from './packages.mjs';
 
 export const AESTHETIC_API_VERSION='1.1';
 export const AESTHETIC_PREFERENCE_KEY='aestheticPreferenceV1';
 export const PALETTE_PREFERENCE_KEY='aestheticPalettePreferenceV1';
+export const BUSY_CURSOR_PREFERENCE_KEY='aestheticBusyCursorV1';
 const colorNames=['background','surface','raised','text','muted','border','accent','selection','focus'];
 const fontRoles=['heading','body','control'];
 const plain=value=>!!value&&Object.getPrototypeOf(value)===Object.prototype;
@@ -30,13 +31,25 @@ function hasStylesheet(root,id){
  return !view||view.getComputedStyle(root).getPropertyValue('--a-package').trim()===id;
 }
 
-export function createAestheticHost({root,storage,packages=themePackages}={}){
+export function createAestheticHost({root,storage,packages=themePackages,busyPackages=busyCursorPackages}={}){
  const themes=new Map([minimal,standard,...packages].map(theme=>[theme.id,theme]));
  const styles=themes.get('nostalgia')?.styles??[];
  const defaultStyle=styles[0]?.id;
  let nostalgiaStyle=defaultStyle;
  const applied=new Set();
  let active=minimal.id,palette=palettes[0].id,lastError=null,sequence=0,writes=Promise.resolve();
+ const systemCursor=busyCursorPackages[0];
+ const cursors=new Map([systemCursor,...busyPackages.filter(item=>item?.id&&item.name&&item.enabled!==false&&item.id!==systemCursor.id)].map(item=>[item.id,item]));
+ let busyCursor=systemCursor.id,cursorRevision=0;
+ function setCursor(id){
+  busyCursor=cursors.has(id)?id:systemCursor.id;
+  if(root)root.dataset.busyCursor=busyCursor;
+ }
+ async function applyBusyCursor(id){
+  cursorRevision++;setCursor(id);
+  try{await persistPreference(BUSY_CURSOR_PREFERENCE_KEY,{schemaVersion:1,id:busyCursor});return {id:busyCursor,error:null};}
+  catch{return {id:busyCursor,error:'PREFERENCE_WRITE_FAILED'};}
+ }
  function paint(){
   if(!root)return;
   for(const name of applied)root.style.removeProperty(name);
@@ -96,9 +109,11 @@ export function createAestheticHost({root,storage,packages=themePackages}={}){
  }
  const isPreference=value=>plain(value)&&value.schemaVersion===1&&typeof value.id==='string';
  async function restore(){
-  const ticket=sequence;
+  const ticket=sequence,cursorTicket=cursorRevision;
   try{
-   const values=await storage?.get([AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY]);
+   const values=await storage?.get([AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY,BUSY_CURSOR_PREFERENCE_KEY]);
+   const cursor=values?.[BUSY_CURSOR_PREFERENCE_KEY];
+   if(cursorTicket===cursorRevision&&isPreference(cursor))setCursor(cursor.id);
    if(ticket!==sequence)return getActive();
    const saved=values?.[AESTHETIC_PREFERENCE_KEY],scheme=values?.[PALETTE_PREFERENCE_KEY];
    if(isPreference(scheme)&&schemes.has(scheme.id))palette=scheme.id;
@@ -116,11 +131,13 @@ export function createAestheticHost({root,storage,packages=themePackages}={}){
   if(ticket===sequence)paint();
   return getActive();
  }
- paint();
+ paint();setCursor(systemCursor.id);
  return Object.freeze({apply,getActive,list:()=>[...themes.values()].map(({id,name})=>({id,name})),
   listPalettes:()=>palettes.map(({id,name,colors})=>({id,name,preview:{light:colors.accent[0],dark:colors.accent[1]}})),
   getPalette:()=>palette,applyPalette,restore,
   listNostalgiaStyles:()=>styles.map(({id,name})=>({id,name})),
   getNostalgiaStyle:()=>nostalgiaStyle,
-  applyNostalgiaStyle:style=>apply({id:'nostalgia',style})});
+  applyNostalgiaStyle:style=>apply({id:'nostalgia',style}),
+  listBusyCursors:()=>[...cursors.values()].map(({id,name})=>({id,name})),
+  getBusyCursor:()=>busyCursor,applyBusyCursor});
 }
