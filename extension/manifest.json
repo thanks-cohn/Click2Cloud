@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Click2Cloud",
+  "name": "REDOWN",
   "version": "0.3.20",
-  "description": "Click2Cloud \u2014 cloud Explorer and secure V3+1 native save destinations.",
+  "description": "Click2Cloud — cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",
     "storage",
@@ -19,7 +19,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Click2Cloud \u2014 Remotes"
+    "default_title": "REDOWN — Remotes"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'"
@@ -36,19 +36,27 @@
   ],
   "commands": {
     "screenshot.capture.alt-q": {
-      "suggested_key": { "default": "Alt+Q" },
+      "suggested_key": {
+        "default": "Alt+Q"
+      },
       "description": "Capture a screenshot to cloud"
     },
     "screenshot.capture.ctrl-shift-y": {
-      "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "MacCtrl+Shift+Y" },
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "MacCtrl+Shift+Y"
+      },
       "description": "Capture a screenshot to cloud (second shortcut)"
     },
     "shelf.history.toggle": {
-      "suggested_key": { "default": "Alt+Shift+H" },
+      "suggested_key": {
+        "default": "Alt+Shift+H"
+      },
       "description": "Open or close Shelf History"
     }
   },
   "side_panel": {
     "default_path": "extension/app.html"
-  }
+  },
+  "short_name": "REDOWN"
 }
