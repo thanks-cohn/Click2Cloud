@@ -50,10 +50,10 @@ On the normal Remotes screen, each Google Drive, OneDrive, and Dropbox full-widt
 1. recognizable provider icon;
 2. provider name;
 3. original Basic action buttons (Sign In / Reconnect or Approve, Refresh, GO TO).
-Keep Cloudflare's existing login/connection section beneath the three Basic cards and retain the opening slogan "From the Web to your Cloud." above the Google Drive card.
+Keep Cloudflare's existing login/connection section beneath the three Basic cards and retain the opening slogan "All Your Clouds. One Place." above the Google Drive card.
 
 **Exact Remotes page order (owner-approved):**
-1. Opening H1: **From the Web to your Cloud.**
+1. Opening H1: **All Your Clouds. One Place.**
 2. Full-width compact **Google Drive** card (icon, name, original buttons).
 3. Full-width compact **OneDrive** card (icon, name, original buttons).
 4. Full-width compact **Dropbox** card (icon, name, original buttons).
@@ -83,6 +83,15 @@ Current bottom-right notification/status overlays cover/interrupt History Prev/N
 - Short, succinct, appropriately dismissed feedback should remain discoverable for essential failures; do not silently swallow an error.
 - Respect keyboard operation, zoom, narrow side panels and screen readers.
 - Preserve reliable diagnostic access separately from customer-facing polish.
+
+## P0: timed transient notifications — no two-hour stale banner
+
+**Owner's November 21 screenshot:** a bottom-right notification reading **`Review the current panel or History for details.`** persisted for **two hours**. This is a defect, even if it is not currently covering buttons. In the next authorized Codex implementation run, repair the actual notification creator/lifecycle and apply the same principle to all transient Shelf notification surfaces.
+- **Automatic expiry is mandatory:** default ~5 seconds for neutral/success feedback, ~8–10 seconds for errors/recovery summaries; this exact generic message must time out as well. A message cannot remain indefinitely merely because the user never interacts with it.
+- Keep the separate **instant hover-dismiss** rule above; auto-dismiss and hover dismissal are both mandatory. Do not obstruct History pagination or other clickable controls during the brief display.
+- Durable failure details live in History/diagnostics; do not use a persistent floating toast as error retention. True dialogs requiring explicit user action remain dialogs, not transient toasts.
+- Use stable event IDs, one active lifetime per toast, cleanup on rerender/unmount/worker restart, dedup repeated status-poll emissions, and do not let stale timers erase a new notification or closed toasts reappear when the Shelf is reopened.
+- Validate with fake-time and Edge/Chrome narrow-panel tests for auto-expiry, hover/keyboard dismissal, repeated events, remount, navigation, and original Cloudflare behavior.
 
 ## P0: REDOWN toolbar counter must include all verified right-click saves and screenshots
 **Owner requirement:** "All right-click saves and screenshots should increase the REDOWN counter at the top in the little extension area of Chrome."
