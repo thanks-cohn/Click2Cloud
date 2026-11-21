@@ -31,6 +31,10 @@ The native extension-owned right-click entries are reportedly absent. The exact 
 - Follow actual GUI OAuth `connect` / reconnect completion into the canonical menu reconciliation path. **Explicitly prove immediate post-login registration**; do not assume login automatically triggers native recreation just because startup does.
 - Use `latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md`, `11.2026/workings/right-click-workings.json` and `Issues_and_Bugs/README.md`; treat source, desired rules and installed-Chrome evidence as distinct proof classes.
 
+### Additional source-reviewed post-login lead (November 21)
+
+In `extension/background.mjs`, the OAuth `onConnected` callback clears a cache and emits `connection-changed` but does **not** itself call `nativeReady()` or native menu reconciliation. In `src/api/service.mjs` (`loginBegin`), `applyCurrent` runs after `finishInitialization` on a completed Cloudflare initializer, or in a separate fallback when `hasSaved` is true; if onboarding is blocked **and** `hasSaved` is false, this code path appears not to call native reconciliation. The startup path may also suppress errors. **Investigate whether this leaves provider actions missing immediately after login**, but do **not** claim this is the proven production root cause. Menu registration for enabled providers must be independent of Cloudflare readiness or pre-existing saved targets. Validate with real Chrome, including first login with no destinations and login with blocked setup.
+
 ## Read-only diagnostics BEFORE changing state
 
 1. Identify installed extension ID, exact commit/build, Chrome/profile, page URL class (redacted), right-click target (image/link/page), and explicit provider visibility settings.
