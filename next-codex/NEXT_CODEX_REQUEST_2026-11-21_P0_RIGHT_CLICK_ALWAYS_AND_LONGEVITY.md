@@ -7,6 +7,59 @@
 >
 > Implement real improvements to the existing Click2Cloud source. This is **NOT** merely another analysis, document or speculative rewrite. **The right-click issue is P0 and the first release gate**. Worker durability is a deliberately scoped, subsequent gate. Do not trade known-good remote-save behavior for a massive redesign.
 
+## FULL 0.3.23 OWNER CONSOLIDATION — DO NOT DROP ANY PREVIOUS REQUIREMENT
+
+**This is the comprehensive Codex request, not only an icon/badge ticket.** The following owner-approved work must be tracked together, **without treating every item as permission to rewrite the whole product**. Work in phased, independently tested commits; do P0 first. The earlier P0 audit, B01–B09 stress requirements and longevity charter below remain controlling.
+
+### P0 — Always present, fast, crash-resistant right-click and screenshots
+
+- **Chrome native right-click ALWAYS:** On eligible supported Chrome pages, a visible/enabled provider action appears before login, immediately after login/reconnect, and after worker activation/restart. Login and cloud status must not erase it. Refactor the existing one canonical registrar to eliminate ordinary destructive \`removeAll\` rebuilding; preserve stable IDs, safe recovery actions and exact Simple/Narrow/Depth/Quick/Default targets.
+- **Zero uncontrolled RAM spikes from a simple gesture:** Aggressive repeated right-click saves and screenshot shortcuts must not produce 2 GB extension-generated memory growth, accumulating PNG blobs, stalled Chrome processes, repeated heavyweight initialization, lost gestures, or Shelf crashes. The user may click a lot; admissions stay quick, and expensive stages use measured, small, isolated concurrency bounds. A genuine browser capture quota is answered with honest transient feedback and without crashing; do not queue unlimited screenshot captures that would capture the wrong later tab.
+- **Stress tests are release gates:** 100/500/1,000 repeated right-click saves; 10/50/100 rapid screenshot commands; mixed workloads and Chrome worker wake; measured before/peak/after-idle RAM, outstanding tasks, event-listener cleanup, p50/p95/p99 latency, no duplicate/wrong-target writes. Do not claim real Chrome success from simulated tests.
+- **No heavyweight durability machinery by default:** No unnecessary global serialized save bottleneck, frequent network health checks, per-click/per-byte checkpoints, a second logging database, or complex new scheduler. Preserve true remote saving and fast ordinary behavior. Cloudflare execution recovery enhancements are optional, evidence-gated and implemented separately when they demonstrably improve an actual failure.
+
+### P0 — Automatic History with an explicit logged-out screenshot exception
+
+- **Live History:** Every genuinely accepted right-click remote-save attempt and authenticated screenshot attempt records its true state and automatically updates the open History view, including verified/failure/partial/uncertain transitions, **without refreshing or reopening**. The existing \`remote-result\` and \`screenshot-history-changed\` → \`historyUI.invalidate(operationId)\` path is the starting point. Preserve all-time historical retention, pagination, lazy previews and stable IDs; do not fully refetch/decode lifetime History for each event.
+- **Logged-out screenshot shortcuts are NOT History events:** Check session BEFORE writing initial screenshot \`checkpoint(job)\`, capturing bytes or creating retry-cache entries. When the user is logged out, screenshot shortcut commands add **zero** pending, failed or ghost History rows, do not upload or increment the verified badge, and may display transient login attention. In particular inspect \`src/screenshot/capture.mjs:start()\` which currently checkpoints before \`uploader.authority()\` in the downstream delivery path. A screenshot validly accepted while logged in remains a real History attempt if auth expires later.
+- **Preserve History under bursts:** Targeted coalesced invalidation with bounded queued IDs; avoid the current 64-dirty-ID fallback turning ordinary bursts into expensive complete-history rereads. Open/closed History and thousands of older rows must stay responsive. A late UI subscription should reconcile from durable records without an always-on polling loop.
+
+### P1 — Version 0.3.23 REDOWN branding and external icon only
+
+**Already committed in source (do NOT repeat, revert or downgrade):** \`extension/manifest.json\` now declares name/short_name \`REDOWN\`, version \`0.3.23\`, and action title \`REDOWN — Remotes\`; \`extension/app.html\` page \`<title>\`/accessible brand label was aligned to \`REDOWN\`; \`package.json\` and \`package-lock.json\` version are \`0.3.23\`. These metadata changes do NOT implement the red icon artwork or badge animation.
+
+**Still to implement:** Replace the current Chrome toolbar/Extensions-list/Chrome-owned side-panel *outer header* icon (beside the REDOWN title) with the user's approved glossy, rounded, bright-red button bearing a bold white **R**, visually based on the user-provided vintage red **B**-button reference. Produce a crisp Chrome-compatible set (at least 16, 32, 48, 128px), use consistent icon references in the manifest/action as necessary, and validate actual appearance in installed Chrome. **The current \`extension/manifest.json\` points its 16px icon to \`extension/menu-icon.png\`; inspect all actual icon usages before replacing the referenced asset.** No arrow in that outer header.
+
+**CRITICAL DO-NOT-TOUCH:** The **R tile INSIDE the Shelf** at \`extension/app.html\` under \`<strong class="brand-tile">R</strong>\`, its CSS and geometry, remains **exactly unchanged**. The external Chrome header/extension icon is NOT the same thing as the internal Shelf tile. Do not alter Shelf navigation, Remotes/File Explorer/History positioning, theme styling or the Shelf R markup in pursuit of this icon.
+
+### P1 — Accurate badge counting + SNES-style TWO-PULSE green success flash
+
+- **Reuse the existing daily badge owner.** Inspect \`src/chrome/daily-badge.mjs\`, which currently counts verified \`kind=save\` remote rows plus separately verified local download totals, resets according to the configured timezone's local midnight, and uses a blue-gray badge background \`#253b70\`. \`extension/background.mjs:recordRemote\` already refreshes for verified saves. Extend this owner—**do not create a second independent counter**. Preserve current daily rollover/timezone and existing download tally unless the owner separately changes the meaning of the badge.
+- **Count verified screenshot captures as well as right-click remote saves.** An authenticated screenshot may have multiple destination outputs: for the user's requested **+1 per successful screenshot**, count the unique capture/operation ID **once when at least one intended output is independently confirmed**, not +1 per fan-out destination, retry attempt, update message or duplicate callback; explicitly test partial multi-destination cases and document the chosen success definition. Count a verified right-click save **once per unique operation ID**. No increment for blocked, failed, pending, unknown/unverified or logged-out shortcut events. Verify real provider evidence before marking verified; avoid a hot-path full-History scan on every flash if a compact incremental read is safe.
+- **Exactly two crisp green badge pulses per normal verified success**: \`GREEN 100ms → normal/off 85ms → GREEN 100ms → normal/restored\`, approximate SNES arcade timing with **no smooth fade**. Flash **only the numbered Chrome toolbar badge background**; the red R icon itself remains red, and the internal Shelf R is untouched. Return to original normal badge color and correct number on completion, error, interruption and idle.
+- **Burst coalescing:** Every distinct verified operation affects the correct count, but a rapid burst must **not** queue a hundred animations or create unbounded timers and memory. Maintain a single bounded visual animation coordinator; coalesce/drop redundant flash animations where needed without dropping verified counts. Avoid repeated whole-History scans and ensure badge/background restoration on MV3 activation where possible. Never block a save, screenshot, menu click or History recording to play a flash. Test worker suspension, concurrent screen captures, rapid verified saves, midnight rollover and updates to a verified result.
+- **Source details:** Current \`src/chrome/daily-badge.mjs:countRows\` explicitly excludes \`kind !== 'save'\`; screenshot results are stored as \`kind:'screenshot-to-cloud'\`. The screenshot recorder lives in \`extension/screenshot-background.mjs\`. This is a real existing gap: a screenshot success currently doesn't automatically increment the ordinary save count. Change the projection narrowly and prove no wrong counts or duplicates.
+
+### P1 — Existing reported Shelf layout defect, separately scoped
+
+Re-test/repair the existing **More** dropdown trigger overlapping the light/dark sun/moon control after expanding/shrinking the Shelf, notably the Emerald Forest palette. Preserve all five Bit o' Polish palettes, existing navigation, responsive behavior, keyboard access and no Shelf R brand tile changes. **Do after P0** in a separate styling commit; do not let the layout fix disturb the native right-click or change the icon just approved for the Chrome-owned outer header.
+
+### Long-horizon follow-on — low-maintenance, high-reliability Cloudflare operations
+
+Preserve existing signed operation identity, exact account/bucket/key, Durable Object claim/readback verification and safe retries. An accepted Durable Object claim with \`waitUntil\` is not guaranteed independently restartable execution, so audit actual failure modes and remote source accessibility. **Do not deploy extra Queues/Workflows/alarms or persistent checkpoint machinery merely because it exists**. Propose a minimal measurable fix only if a reproduced customer-relevant interruption genuinely requires it and the owner approves added cost/complexity. Keep actual file content true remote, preserve Cloudflare authority, Worker bindings, OAuth/extension ID and customer configuration.
+
+### Required staged delivery / report
+
+1. **Milestone A / P0:** non-destructive menu repair, pre/post-login and worker wake, rapid-save/screenshot burst resistance, automatic live History, ZERO logged-out shortcut History entries; real Chrome evidence distinguished from fixtures.
+2. **Milestone B / visual P1:** externally visible glossy red R icon in toolbar/Chrome side-panel header only, existing internal Shelf R unchanged, daily verified screenshot+save count, double green SNES badge pulse; actual Chrome screenshot and memory/performance proof.
+3. **Milestone C / separate P1 UX:** More/theme overlap repair across palette/resize combinations; independent regression results.
+4. **Milestone D / conditional future:** remote-job interruption and backwards compatibility audit, no unnecessary scheduler, no net responsiveness regression.
+5. **End-of-run:** exact branch/commit/test status, installed Chrome/path/build identity, independent provider receipts or honest blockers, memory p95/peak, all accepted actions accounted, badge count/double-flash test, History live refresh test, and unchanged known-broken 0.3.22 tag.
+
+**No cosmetic feature justifies changing \`key\`, OAuth redirect, private data, permission grants or changing the actual native save engine beyond the separately specified P0 reliability patch.**
+
+---
+
 ## OWNER PRIORITY OVERRIDE — TWO INVARIANTS PLUS AUTOMATIC HISTORY
 
 **P0 #1: RIGHT-CLICK MUST ALWAYS BE AVAILABLE.** Enabled Chrome native menu entries must be available on supported pages before login, immediately after login/reconnect, after MV3 worker wake, and **while users are rapidly saving or taking screenshots**. Never tie menu registration/gesture admission to a transfer, UI, History refresh, cloud status or global upload lock. Do not rebuild the menu on each click.
@@ -25,7 +78,7 @@
 
 **Repository:** \`thanks-cohn/Click2Cloud\`.
 
-**Working source:** branch \`codex/minimal-baseline-palette-fonts-quiet-screenshots-2026-11-20\`, manifest version **0.3.22**.
+**Working source:** branch \`codex/minimal-baseline-palette-fonts-quiet-screenshots-2026-11-20\`, currently manifest/package version **0.3.23** after branding metadata commits. The **original** protected broken reference is still 0.3.22. Repair the current 0.3.23 HEAD, using the 0.3.22 tag as the diagnostic before-baseline; never revert the manifest to 0.3.22.
 
 **Preserved known-broken baseline:** annotated tag \`redown-0.3.22-BROKEN-pre-repair-2026-11-21\`, source commit \`91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32\`. **Never delete, rewrite, retarget or replace this tag.** The documentation commits after it do not mean the code was repaired.
 
