@@ -28,6 +28,8 @@ The precise pixel width, theme (light/dark), Chrome zoom and full matrix of affe
 
 **These are inspection leads, not a proven root cause.**
 
+**Issue tracking:** [GitHub #20](https://github.com/thanks-cohn/Click2Cloud/issues/20). This is tracked in `Issues_and_Bugs/README.md` and `next-codex/` beneath the native-menu P0.
+
 ## Acceptance / evidence
 
 1. In real installed Windows Chrome, activate Bit o' Polish **Emerald Forest**; widen the Shelf from the right edge, then narrow it through the header's desktop/compact breakpoints. No `More` / theme control collision, clipping, or click interception.
