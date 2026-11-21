@@ -50,7 +50,19 @@ On the normal Remotes screen, each Google Drive, OneDrive, and Dropbox full-widt
 1. recognizable provider icon;
 2. provider name;
 3. original Basic action buttons (Sign In / Reconnect or Approve, Refresh, GO TO).
-Keep Cloudflare's existing login/connection section under these cards and the required slogan "From the Web to your Cloud." above them.
+Keep Cloudflare's existing login/connection section beneath the three Basic cards and retain the opening slogan "From the Web to your Cloud." above the Google Drive card.
+
+**Exact Remotes page order (owner-approved):**
+1. Opening H1: **From the Web to your Cloud.**
+2. Full-width compact **Google Drive** card (icon, name, original buttons).
+3. Full-width compact **OneDrive** card (icon, name, original buttons).
+4. Full-width compact **Dropbox** card (icon, name, original buttons).
+5. **Original two-line standalone editorial heading placed BETWEEN Dropbox and Cloudflare R2**, with these two exact sentences on separate rows/lines:
+   - **The Future is NOW.**
+   - **True Remote is Here.**
+6. Existing **Cloudflare R2** card/login section beneath that heading.
+
+The two lines belong to one distinct typographic interlude; use deliberate whitespace, balanced alignment, theme-specific elegant typography, and visually appealing responsive scaling. Keep both sentences intact, in this exact capitalization/punctuation and order. **Never run the sentences together on one line, truncate them, or insert the heading inside the Dropbox or Cloudflare card.** Fit narrow side panels naturally without overflow or awkward word wrapping. This is the user's original REDOWN headline, not an extra provider status message. Each visual theme (Frames, Golden Age, Oceania) should style the same two-line heading according to its own identity, under the Aesthetic API.
 - Remove permanent on-card paragraphs: "Not connected", repetitive authorization explanations, "authorization cancelled/denied", "No recent save attempt", "Ready to Save" essays, etc.
 - Do **not** remove actual readiness/authentication logic, error reporting, permission recovery, screen-reader announcements, or verification truth. Use compact accessible contextual/help-on-demand and non-obstructive transient feedback for important states. A failed save must never look successful.
 - Use polished bundled provider icons; be consistent in sizing and alignment across themes.
