@@ -82,6 +82,18 @@ Source repo: [thanks-cohn/redown-basic](https://github.com/thanks-cohn/redown-ba
 - Do not claim "fully integrated" on mocked tests alone. Test actual browser authorization and actual provider writes, or explicitly mark unverified.
 - **State at handoff:** This file does not itself transplant code or configure OAuth. The dedicated branch is now available for Codex to implement the modules. Its preserved parent tag must remain unchanged; do not merge or deploy without real Chrome/live-provider gates.
 
+## Final owner-confirmed Remotes composition (supersedes any grouping or responsive-grid suggestion)
+
+**This is a vertical stack, not a row or multi-column grid.** After existing Remotes navigation tabs, display the exact H1 slogan **`From the Web to your Cloud.`** and then four full-width sections in strict order:
+1. **Google Drive** provider card with its existing Basic actions
+2. **OneDrive** provider card with its existing Basic actions
+3. **Dropbox** provider card with its existing Basic actions
+4. Existing **Cloudflare R2** login/card unchanged and directly below
+
+Each of the three new provider cards **must retain REDOWN Basic's fully functional original controls**: **Sign In** or context-sensitive **Reconnect / Approve**, **Refresh**, and **GO TO**, plus readiness/authorization state, reason/next action and recent outcome where applicable. These are NOT minimalist single-Connect tiles. GO TO only opens provider website, not OAuth. Preserve accessible button placement and truthfully reported outcomes.
+
+Only transplant provider card behavior/semantics, **zero existing Basic visual CSS**. The host Aesthetic API controls color, typography, borders, backgrounds, radii, focus and feedback; structural layout, if needed, is minimal, scoped and host-owned. Every viewport must display a single vertical column. Never let wide screens switch to three columns.
+
 ## Owner's final presentation placement and CSS-isolation rule
 
 - **Location/order:** Existing Remotes screen, Google Drive + OneDrive + Dropbox auth cards aesthetically grouped on **top**, then the existing Cloudflare R2 login underneath. Do not build a competing Basic page or alter Cloudflare's authorization UX.
