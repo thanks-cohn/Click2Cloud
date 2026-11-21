@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "icons": {"16": "extension/menu-icon.png"},
+  "icons": {"16": "extension/icons/redown-16.png", "32": "extension/icons/redown-32.png", "48": "extension/icons/redown-48.png", "128": "extension/icons/redown-128.png"},
   "name": "REDOWN",
   "short_name": "REDOWN",
   "version": "0.3.23",
@@ -21,7 +21,8 @@
     "type": "module"
   },
   "action": {
-    "default_title": "REDOWN \u2014 Remotes"
+    "default_title": "REDOWN \u2014 Remotes",
+    "default_icon": {"16": "extension/icons/redown-16.png", "32": "extension/icons/redown-32.png", "48": "extension/icons/redown-48.png", "128": "extension/icons/redown-128.png"}
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'"
