@@ -84,6 +84,19 @@ Current bottom-right notification/status overlays cover/interrupt History Prev/N
 - Respect keyboard operation, zoom, narrow side panels and screen readers.
 - Preserve reliable diagnostic access separately from customer-facing polish.
 
+## P0: REDOWN toolbar counter must include all verified right-click saves and screenshots
+**Owner requirement:** "All right-click saves and screenshots should increase the REDOWN counter at the top in the little extension area of Chrome."
+
+This refers to the numeric badge on the **REDOWN Chrome toolbar extension icon** (not just a count inside Remotes/History, and not the unrelated decorative odometer).
+- Include **every supported provider**: existing verified Cloudflare R2 right-click saves plus newly integrated REDOWN Basic Google Drive, OneDrive and Dropbox right-click saves. Also include successfully verified screenshot-to-cloud capture operations. The single Chrome badge should reflect the aggregate, across provider boundaries, not separate isolated counters.
+- **Never count mere clicks, screenshots that were only captured locally but never saved to cloud, queued/pending, cancelled, failed, or uncertain saves.** Increment only on durable, verified destination confirmation; keep the existing verified-only contract.
+- Preserve the existing daily badge semantics, locale/timezone rollover, persisted/reconstructed totals, and success pulse feedback. Existing `src/chrome/daily-badge.mjs` and `tests/daily-badge.test.mjs` already define a daily verified-save badge. Extend/integrate that path instead of creating a competing toolbar counter.
+- Deduplicate by stable operation/capture identity. A screenshot with more than one confirmed destination is **one capture event**, not an accidental duplicate; a right-click operation counts once after its verified result. Retried callbacks, duplicate receipts, worker restarts, reauthorization, History refreshes, and UI rerenders must not inflate the badge. Reconcile from committed receipts on startup.
+- Keep the correct count when the Shelf is closed, minimized or not running; it belongs to the extension's background/state logic, not to a visible tab.
+- Maintain distinct internal counters where necessary, but present one trustworthy total on the Chrome toolbar. Ensure behavior when the display cap (currently `1k+`) is reached, when History is temporarily unavailable, and when a local date changes.
+- Add targeted integration tests covering each provider's verified save, confirmed screenshot, deduplication, denied/uncertain events, worker restart, persisted total recovery and multi-provider aggregation. Verify the Chrome toolbar badge in real Windows Chrome before claiming final acceptance.
+- This is a requirement for a **future implementation run only**. No code changes are authorized by this note.
+
 ## P0: History scale and feel
 Owner wants **uncapped, metadata-first History**, with images/previews derived on demand, not hundreds of thousands of images stored in the log.
 - History currently collects all cursor pages in `extension/history-page.mjs` before slicing 25 items for display. Replace in a future authorized run with **genuine indexed, cursor/page-backed retrieval**; bounded memory and lazy previews, not merely a 25-row DOM hiding a million-row JavaScript array.
