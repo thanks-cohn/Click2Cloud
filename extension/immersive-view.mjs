@@ -1,3 +1,5 @@
+const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+
 // Uses the gallery's existing image and URL. Only its displayed size changes.
 export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
  const frame=dialog.querySelector('.image-frame'),image=frame.querySelector('img');
@@ -22,6 +24,7 @@ export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
   const clamp=n=>Math.max(0,Math.min(1,n));
   const x=before.width?clamp((anchor.x-before.left)/before.width):.5;
   const y=before.height?clamp((anchor.y-before.top)/before.height):.5;
+  value=Math.max(Number(slider.min),Math.min(Number(slider.max),value));
   slider.value=String(value);percent.value=slider.value+'%';
   frame.toggleAttribute('data-zoomed',value>100);
   size();
@@ -53,11 +56,36 @@ export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
   return true;
  }
 
+ function escape(){
+  if(!dialog.hasAttribute('data-immersive'))return false;
+  if(Number(slider.value)>100){zoom(100);return true;}
+  return exit();
+ }
+
+ function handleKey(event){
+  if(!dialog.hasAttribute('data-immersive')||slider.disabled)return false;
+  if(event.key==='+'||event.code==='NumpadAdd'||event.shiftKey&&event.code==='Equal'){
+   zoom(Number(slider.value)+25);
+   return true;
+  }
+  if(event.key==='-'||event.code==='NumpadSubtract'){
+   zoom(Number(slider.value)-25);
+   return true;
+  }
+  const direction=Object.hasOwn(directions,event.key)?directions[event.key]:null;
+  if(Number(slider.value)<=100||!direction)return false;
+  const step=Math.max(32,Math.min(120,Math.round(Math.min(frame.clientWidth,frame.clientHeight)/5)));
+  const within=(current,delta,max)=>Math.min(max,Math.max(0,current+delta*step));
+  frame.scrollTo({left:within(frame.scrollLeft,direction[0],frame.scrollWidth-frame.clientWidth),
+   top:within(frame.scrollTop,direction[1],frame.scrollHeight-frame.clientHeight),behavior:'instant'});
+  return true;
+ }
+
  enter.onclick=open;exitButton.onclick=exit;fit.onclick=()=>zoom(100);
  slider.oninput=()=>zoom(Number(slider.value));
  image.onclick=event=>{
   if(dialog.hasAttribute('data-immersive'))zoom(Number(slider.value)===100?200:100,{x:event.clientX,y:event.clientY});
  };
  if(initiallyImmersive)open();
- return {exit,dispose,ready(){enter.disabled=slider.disabled=fit.disabled=false;size();}};
+ return {escape,handleKey,dispose,ready(){enter.disabled=slider.disabled=fit.disabled=false;size();}};
 }

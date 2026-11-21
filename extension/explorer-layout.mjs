@@ -4,12 +4,13 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  const shell=document.querySelector('#shell'),aside=shell.querySelector('aside'),split=document.querySelector('#pane-splitter'),toolbar=document.querySelector('#explorer-commands'),bar=document.querySelector('#toolbar-splitter'),overflow=document.querySelector('#toolbar-overflow'),more=document.querySelector('#toolbar-more'),commands=document.querySelector('#command-items'),nodes=[...commands.children],moreActions=[...document.querySelector('#explorer-more-actions')?.children??[]],widths=new Map();let preference={...read()},frame=0,drag=null,maxRows=7,saving=false,queued=null,saveTimer;
  const navigation=['back','forward','up','refresh'].map(id=>document.getElementById(id));
  const search=commands.querySelector('#filename-search-form'),opener=commands.querySelector('#open-filename-search');
+ const input=search.querySelector('input');
  const secondary=['add-location','view-switch'].map(id=>document.getElementById(id));
  const rowBreak=document.createElement('div');rowBreak.className='toolbar-row-break';rowBreak.setAttribute('aria-hidden','true');
  const searchPanel=document.createElement('div');
  searchPanel.id='filename-search-popout';searchPanel.setAttribute('popover','manual');
  searchPanel.hidden=true;document.body.append(searchPanel);
- let returnFocus,pinned=false,dismissed=false,nextExtreme=0;
+ let returnFocus,pinned=false,dismissed=false,revealed=false,nextExtreme=0;
  // Escape both clipping ancestors and their stacking contexts. The native
  // popover top layer also stays above splitters; body portal is the fallback.
  document.body.append(overflow);overflow.setAttribute('popover','manual');
@@ -22,26 +23,43 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
   if(searchPanel.matches(':popover-open'))searchPanel.hidePopover();
   searchPanel.hidden=true;
  }
+ function canReturnTo(element){
+  return element&&element!==document.body&&element.isConnected&&element.getClientRects().length&&
+   !element.disabled&&!element.closest('[inert]')&&!search.contains(element);
+ }
+ function restoreSearchFocus(...fallbacks){
+  for(const candidate of [returnFocus,...fallbacks,split]){
+   if(!canReturnTo(candidate))continue;
+   candidate.focus({preventScroll:true});
+   if(document.activeElement===candidate)return true;
+  }
+  return false;
+ }
  function dismissSearch(){
   if(dismissed||(!pinned&&!search.getClientRects().length))return false;
-  pinned=false;dismissed=true;hideSearchPanel();closeMore();layout();
-  (returnFocus?.isConnected&&returnFocus.getClientRects().length?returnFocus:
-   commands.contains(opener)?opener:more).focus({preventScroll:true});
+  pinned=false;dismissed=true;revealed=false;hideSearchPanel();closeMore();layout();
+  restoreSearchFocus(opener,more);
   returnFocus=null;
   return true;
  }
  function focusSearch(forcePopout=false){
-  const input=search.querySelector('input');
   if(input.disabled||drag)return false;
+  const current=document.activeElement;
+  if(canReturnTo(current))returnFocus=overflow.contains(current)?more:current;
   if(dismissed){dismissed=false;layout();}
   if((forcePopout||!commands.contains(search))&&!pinned){
-   const current=document.activeElement;
-   returnFocus=search.contains(current)||overflow.contains(current)?more:current;
    closeMore();pinned=true;searchPanel.append(search);
    searchPanel.hidden=false;searchPanel.showPopover?.();positionPanel(searchPanel);
    layout();
   }
-  input.focus({preventScroll:true});return document.activeElement===input;
+  input.focus({preventScroll:true});
+  if(document.activeElement!==input)return false;
+  revealed=true;
+  return true;
+ }
+ function toggleSearchFocus(){
+  if(document.activeElement!==input)return focusSearch();
+  return restoreSearchFocus(opener,document.querySelector('#files'),more);
  }
  opener.onclick=()=>focusSearch();
  search.querySelector('#hide-filename-search').onclick=dismissSearch;
@@ -95,8 +113,8 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
    }
   }
   const visible=extra.length&&primary.length?[...primary,rowBreak,...extra]:[...primary,...extra];
-  if(!dismissed&&!pinned&&!visible.includes(search)&&(search.contains(focused)||search.querySelector('input').value)){
-   pinned=true;returnFocus=more;searchPanel.append(search);
+  if(!dismissed&&!pinned&&!visible.includes(search)&&(revealed||search.contains(focused)||input.value)){
+   pinned=true;returnFocus??=more;searchPanel.append(search);
    layout();if(search.contains(focused))focused.focus({preventScroll:true});
    return;
   }
@@ -140,9 +158,9 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.addEventListener('scroll',positionMore,true);
  const observer=new ResizeObserver(schedule);observer.observe(toolbar);observer.observe(shell);layout();
  return {refresh(){if(!drag&&!saving&&!queued)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
-  setSearchAvailable(available){opener.disabled=search.querySelector('input').disabled=!available;},
+  setSearchAvailable(available){opener.disabled=input.disabled=!available;},
   setShortcuts(bindings){
-   for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',search.querySelector('input')]]){
+   for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',input]]){
     const chord=bindings[id];if(chord)el.setAttribute('aria-keyshortcuts',chord.replace(/^Ctrl/, 'Control'));else el.removeAttribute('aria-keyshortcuts');
    }
   },
@@ -152,6 +170,6 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
     const next=cycleDivider(preference.split,readCycleMode(),nextExtreme);
     nextExtreme=next.nextExtreme;changeLayout('split',next.position);return true;
    },
-   'explorer.focusSearch':focusSearch
+   'explorer.focusSearch':toggleSearchFocus
   },inspect:()=>({...preference,maxRows})};
 }

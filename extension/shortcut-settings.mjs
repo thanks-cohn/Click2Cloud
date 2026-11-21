@@ -22,7 +22,7 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
   void refresh().catch(() => {});
   document.addEventListener('keydown', event => {
     if (event.defaultPrevented || event.repeat || event.isComposing ||
-        event.target.closest?.('input,select,textarea,[contenteditable],dialog,[role=menu],#toolbar-overflow') ||
+        event.target.closest?.('dialog,[role=menu],#toolbar-overflow') ||
         document.querySelector('dialog[open],#context:not([hidden]),#header-menu:not([hidden])')) return;
     const chord = eventChord(event);
     if (!chord) return;
@@ -30,6 +30,8 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
     const selected = commands.find(item => bindings[item.commandId] === chord && item.context === active.view &&
       (!item.requires || active[item.requires]));
     if (!selected) return;
+    const editing=event.target.closest?.('input,select,textarea,[contenteditable]');
+    if(editing&&!(editing.id==='filename-search'&&selected.commandId==='explorer.focusSearch'))return;
     if (selected.kind === 'api' ? runAPI(selected) : runUI(selected.commandId)) event.preventDefault();
   });
   return {

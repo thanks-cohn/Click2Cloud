@@ -755,7 +755,25 @@ function bindInlineRename(entry,target,ticket){
  title.ondblclick=edit;
  title.onkeydown=event=>{if(event.target===title&&(event.key==='F2'||event.key==='Enter')){event.preventDefault();edit();}};
 }
-$('#dialog').addEventListener('keydown',e=>{if(!gallery||e.target.closest('input:not([type=range]),textarea,select,[contenteditable=true]'))return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();e.stopPropagation();moveGallery(e.key==='ArrowRight'?1:-1);}});
+const previewInput='input:not([type=range]),textarea,select,[contenteditable]';
+function dismissPreview(){
+ if(!immersiveView?.escape())closeDialog();
+}
+$('#dialog').addEventListener('keydown',event=>{
+ if(!gallery||event.defaultPrevented||event.isComposing||event.ctrlKey||event.altKey||event.metaKey||
+    event.target.closest(previewInput))return;
+ if(event.key==='Escape'){
+  event.preventDefault();
+  if(!event.repeat)dismissPreview();
+  return;
+ }
+ if(event.target.closest('input[type=range]'))return;
+ if(immersiveView?.handleKey(event))event.preventDefault();
+ else if(event.key==='ArrowLeft'||event.key==='ArrowRight'){
+  event.preventDefault();
+  moveGallery(event.key==='ArrowRight'?1:-1);
+ }
+});
 
 function hideContext(){contextTicket++;$('#context').hidden=true;$('#context').replaceChildren();}
 async function contextFor(t,entry,x,y){
@@ -1301,7 +1319,10 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more')
 document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 $$('header nav [data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view).catch(e=>status(e.message)));listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
 document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open)e.preventDefault();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
-$('#dialog').addEventListener('cancel',event=>{event.preventDefault();if(!immersiveView?.exit())closeDialog();});
+$('#dialog').addEventListener('cancel',event=>{
+ event.preventDefault();
+ if(!gallery||!document.activeElement?.closest(previewInput))dismissPreview();
+});
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
  view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header nav button, #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');
