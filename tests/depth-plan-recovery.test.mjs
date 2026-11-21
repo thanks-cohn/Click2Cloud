@@ -71,7 +71,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
   const aKey=await digest(['fixture','narrow-a']),bKey=await digest(['fixture','depth-b']),beforeA=structuredClone(plans.get(aKey));assert.equal(plans.has(bKey),false);
   const auth=async target=>{trace('authorization.begin',{targetRef:ref(target),ack:registrar.inspect().acknowledgedGeneration,pending:registrar.inspect().pending});const status=await transport.status(target);trace('authorization.end',{targetRef:ref(target),state:status.state,code:status.code,sessionEqual:true});return {sessionId:'fixture-session',authorizedTargets:status.state==='READY'?[target]:[]};};
   let engine;const depthClick=createDepthNativeClick({current,oauth,transport:domainOptions.transport,lookup:target=>provisioner.lookup(target),inspect:()=>registrar.inspect(),authorize:auth,recover:async params=>{const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params},'gui');return out.data??out;}});
-  const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},removeAll:callback=>callback(),create:(_properties,callback)=>callback()}};
+  const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},remove:(_id,callback)=>callback(),create:(_properties,callback)=>callback()}};
   registrar=createChromeRegistrar({chrome,depthClick,observeClick:observation.observeClick,sink:e=>trace('registrar.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),getAuthorization:async info=>auth(registrar.inspect().desired.rows.find(row=>row.id===info.menuItemId).target),dispatch:(_action,{info,generation,depthAuthorization,observation:observe})=>{trace('dispatch.enter',{generation,desired:state.generation.desired,applied:state.generation.applied,ack:registrar.inspect().acknowledgedGeneration,pending:registrar.inspect().pending});return engine.save({observation:observe,itemId:info.menuItemId,generation,depthAuthorization,context:'link',source:sourceFromClick(info)});}});
   engine=createEngine({current,registrar,getAuthorization:auth,diagnostics:e=>trace('engine.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),remoteSave:input=>transport.save(input),providerSetupActions:true});
   const inventory=ready=>({scopes:[{target:{...a,prefix:''},folders:['kept/','simple/'],authorized:true,workerReady:true,complete:true},{target:b,folders:['Images/','Images/Artwork/',...deep.split('/').filter(Boolean).map((_,index)=>deep.split('/').slice(0,index+1).join('/')+'/')],authorized:true,workerReady:ready,complete:true}]});
@@ -143,7 +143,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
      const ready=auth&&preparedDestination(await provisioner.lookup(target),target,expectedCodeDigest).state==='READY';
      return ready?{sessionId:auth.sessionId,authorizedTargets:[target]}:null;
     };
-    const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},removeAll:callback=>callback(),
+    const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},remove:(_id,callback)=>callback(),
      create:(properties,callback)=>{
       if(nativeFailure&&properties.title==='Narrow test')chrome.runtime.lastError={message:'fixture ACK failure'};
       callback();delete chrome.runtime.lastError;
@@ -246,7 +246,7 @@ test('exact recovery reconciles only selected Depth B when another same-account 
   const state={product:productState({show:{simple:false,nested:false,depth:true,flat:false}}),configs:{simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[{target:b,maxDepth:12},{target:c,maxDepth:40}]}},generation:{desired:0,applied:null}};
   const saved=structuredClone(state.configs),requests=[];let coverage='covered';
   const current={read:async()=>structuredClone(state),setDesiredGeneration:async generation=>state.generation.desired=generation,acknowledgeGeneration:async generation=>state.generation.applied=generation};
-  const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},removeAll:callback=>callback(),create:(_properties,callback)=>callback()}};
+  const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},remove:(_id,callback)=>callback(),create:(_properties,callback)=>callback()}};
   const registrar=createChromeRegistrar({chrome}),engine=createEngine({current,registrar,getAuthorization:async()=>({sessionId:'s',authorizedTargets:[selected]}),providerSetupActions:true});
   const cloudflare={recoverDestination:async params=>{assert.deepEqual(params.target,selected);return {state:'completed',code:'CLOUDFLARE_READY',target:selected};},check:async(accountId,target)=>{assert.equal(accountId,'fixture');assert.deepEqual(target,selected);return {state:'READY',accountId,target};}};
   const api=createEngineApi({engine,current,oauth:{},cloudflare,authorize:async({params,bindings})=>{assert.deepEqual(params.target,selected);assert(!bindings?.some(target=>target.bucketName===c.bucketName));return true;},getInventory:async options=>{

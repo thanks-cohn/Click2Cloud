@@ -100,7 +100,7 @@ test('settings commit distinguishes storage, discovery and Chrome errors and con
     setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;}
   };
   const chrome={runtime:{},contextMenus:{
-    removeAll:callback=>callback(),create:(props,callback)=>{
+    remove:(_id,callback)=>callback(),create:(props,callback)=>{
       if(nativeFailed&&props.title==='same')chrome.runtime.lastError={message:'fixture'};
       callback();delete chrome.runtime.lastError;
     }

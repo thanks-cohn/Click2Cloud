@@ -9202,9 +9202,9 @@
     "sourceFiles": {
       "extension/aesthetic.css": "3618b95c47b3c95e18fffe4b35aa88f32f319e81de97213ea745e1afa3a75f51",
       "extension/app.css": "28a59fb13b47568c4a4e2dc4e498ff19f9ba499c5bffee7dcabaaf7507b73873",
-      "extension/app.html": "18063ef8f19e96d13f13d96c445435b8e265fef6cda443a212db5085a84c2f0f",
+      "extension/app.html": "d039157a5c6e9cac60915996ec9198d3c25687533bd492ce90b7aca1d1234ed1",
       "extension/app.mjs": "f1632eb7d8117cdaf065d38f0ca65ae60fc31186651880be29fe05248f3edc0d",
-      "extension/background.mjs": "78ed2f29c98d6517b09c314881752471ebf23f6a9b570024769106b481f53f03",
+      "extension/background.mjs": "7b61a3ff0e2b20d144bac7e569487cef213a82f0199adcb0d2b128199a78549f",
       "extension/cloudflare-labels.mjs": "d8150c3c6da73c9c74acf993c9980795a0d0243039c442377aa5100c47f7f257",
       "extension/cloudflare-setup-view.mjs": "aa8386ccc6c8cb4e13d34b3598c0d7c301dfaa2f16eb2f83e2c469ee7a8bae71",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
@@ -9215,7 +9215,7 @@
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/immersive-view.mjs": "9a74295215d3bdcd30e2ce95969307cf7930d7fcce2fedb2f7335b562224662e",
       "extension/manifest-panel.mjs": "f07e728e4a26e8945b914bf56f1c26ef8897d59a11e303614eb9c1699c107adf",
-      "extension/manifest.json": "4b095ecd31d5f78e27953dfa828181a7ebfebd9d356aa0840f616ea279c7c847",
+      "extension/manifest.json": "12981f9166fbdfd84d88aee8dd167b6b90f6774c1248c2c621581b7df9e554ba",
       "extension/menu-icon.png": "faee0bdc563f2efd0f747485e25f6d36e6b8e094a96b887d50d1408cb0beb358",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
@@ -9241,7 +9241,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "5ce2c4a864bd99c4cf82cd555ae8027b5f341b6ed63fa0bb255795a8cd985a94",
+      "src/api/service.mjs": "f2687e7b667c2f2bce45b141bd4501d8f3fab6cde2237385e199fe53b31f2bb8",
       "src/api/shortcuts.mjs": "e294d5fabcd88fbd8090506cf5617de0d9bd6685d4566619feb1c54ef34f7db7",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "92e44670b1a591c5ebe75e61476fb3a53badd1555260f7db1b6bee3521ef85f8",
@@ -9252,7 +9252,7 @@
       "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "f8dee4664dc9eda087802fbb7d0f8e5e0eccda228fe410461a31bc32a97c8d1a",
-      "src/chrome/registrar.mjs": "2803813b12f149256f3eae58631765aba622f254c964d5fdbc4924aed3219666",
+      "src/chrome/registrar.mjs": "2eb2a31418ad0f1dfea9871e7ef49fb1a915504fff565ee186e4dfcb5747d598",
       "src/chrome/screenshot-menu.mjs": "a0a7a5b749721def90387ddc52ef6cbd3f2e30fa9cf41a98cc6eb4048026ee21",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/chrome/visible-tab-screenshot.mjs": "0e836bb443750fa0eb5784a3263713e41af31fe591646a5aba1d0c26708b9510",
@@ -9276,7 +9276,7 @@
       "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "9d064e09b515f687c3d8bddeea1e919b7b17973c324516859e8ec495df075c0d",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "f9788aa4bacdb39c095d636ee74a1db31de568113331b4770c7b9bb4ed31f6f6",
+      "src/core/engine.mjs": "fb688dcf9d9b1c1e3e8ea1336eb469ce81b0626fcc02742deb4552dae8448c6a",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
       "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
       "src/core/menu-provenance.mjs": "1b0044640d068729d5d260ac3be558dcedae5c5e4322c0039726ead80eb3c987",
@@ -9312,7 +9312,7 @@
       "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "8bc0402ab039f1f4dbc202a32f6d9c2be1612b746220ba42cdfee358ab083f4b",
-      "src/glaciaring/catalog.mjs": "e7ec3bd81c51f4bd67d966f345dc6a9eea2cc7e5d1414ba9741f846ed1943e88",
+      "src/glaciaring/catalog.mjs": "c49229a280084bbb05ac8ade1f6db03c5ca761fdf4553d1f47a76fc175be9670",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "4cb85bec8ea3b1ce664c436648756f868a179d3fd2709f78e801dcfba784e032",
       "src/glaciaring/support-report.mjs": "89ddf6b76469492630b2978dbdd4ea590fbb47b43bdfb3a4d9e5d6ccbc207443",
@@ -9364,25 +9364,33 @@
       {
         "id": "ENTRY_REGISTER",
         "preconditions": "Worker starts",
-        "trigger": "entry",
-        "guard": "storageReady then API reconcile",
-        "actual": "No menu registration on Shelf/worker import or OAuth. Existing lifecycle events, explicit configuration/setup and native-click owners reconcile; CURRENT and auth readiness are separate.",
+        "trigger": "MV3 worker evaluation, installation, Chrome startup, successful Login/reconnect, or validated menu edits",
+        "guard": "Validated CURRENT and one serialized API reconcile; zero-assignment bootstrap does not inspect cloud inventory",
+        "actual": "Reuse stable IDs; cold workers establish a fresh Chrome ACK by update or create. Only known obsolete IDs are removed after replacement rows acknowledge. Login schedules local reconciliation independently of provisioning.",
         "apiMethods": [
           "reconcileNativeMenu",
           "inspectNativeACK"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Compile composite and apply one registrar after loading saved inventory",
-        "uiEffect": "Compile composite and apply one registrar after loading saved inventory",
+        "nextState": "Retain, update or create the canonical parent-first projection; preserve healthy rows on partial failure",
+        "uiEffect": "Visible eligible provider entries remain independent of cloud setup or Shelf opening",
         "externalResourceEffect": "none",
         "persistence": "CURRENT generation and local nativeRegistration",
-        "errors": [],
+        "errors": [
+          "NATIVE_APPLY_INCOMPLETE",
+          "REGISTRAR_STATE_WRITE_FAILED",
+          "CONFIGURATION_RECORD_MISSING",
+          "CONFIGURATION_CORRUPT"
+        ],
         "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
         "sourceRefs": [
           {
             "path": "extension/background.mjs",
-            "symbol": "async function readCurrent",
-            "line": 172
+            "symbol": "function scheduleNative"
+          },
+          {
+            "path": "src/chrome/registrar.mjs",
+            "symbol": "async function upsert"
           }
         ],
         "verification": {
@@ -11920,7 +11928,7 @@
       },
       {
         "id": "C2C-PERSIST-3",
-        "actual": "Native apply checks CURRENT before queued prepare and before removeAll; prepare persistence failure leaves native menus untouched. Saves revalidate durable desired/applied generation.",
+        "actual": "Native apply checks CURRENT before preparing the mutation journal and before targeted Chrome operations. Failed prepare persistence leaves native menus untouched; saves revalidate durable desired and applied generation.",
         "sourceRefs": [
           {
             "path": "src/chrome/registrar.mjs",

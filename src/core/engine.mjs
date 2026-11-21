@@ -36,7 +36,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     if(spec.generation>state.generation.desired)await current.setDesiredGeneration(spec.generation,{expectedGeneration:state.generation.desired});
     retain(spec);
     const result=await registrar.apply(spec);
-    if(result.state==='completed'&&result.appliedGeneration===spec.generation) {
+    if(result.state==='completed'&&result.appliedGeneration===spec.generation&&state.generation.applied!==spec.generation) {
       try{await current.acknowledgeGeneration(spec.generation);}catch{return {...result,state:'partial',code:'PERSISTENCE_FAILED'};}
     }
     return result;

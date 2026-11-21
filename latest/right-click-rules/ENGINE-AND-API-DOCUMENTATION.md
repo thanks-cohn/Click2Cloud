@@ -1,5 +1,36 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
+## 0.3.23 native menu lifecycle
+
+`extension/background.mjs:scheduleNative` joins startup, installation, worker
+evaluation, and successful `3+1.1` `loginBegin` or disconnect with the existing
+`reconcileNativeMenu` implementation. Lifecycle work validates durable CURRENT
+before compilation. A confirmed empty assignment compiles the standard provider
+actions from saved visibility alone. Established assignments use local inventory
+and retained Depth observations. Login schedules this work as soon as OAuth
+reports `CONNECTED`, independently of setup or cloud availability. Passive work
+does not provision anything. Settings and explicit `reconcileNativeMenu` retain
+their configure scope, expected generation, and fresh verification paths.
+
+`src/chrome/registrar.mjs:apply` validates the parent-first plan before touching
+Chrome. It retains unchanged rows in the current worker, probes IDs with
+`update` on a cold worker, and creates only IDs Chrome reports missing. A lost
+create callback is followed by an update to establish a current ACK. Known
+obsolete IDs are removed after replacements acknowledge. The existing
+`nativeRegistration` record journals IDs that may have survived a partial apply.
+Reloads revalidate the projection against CURRENT before reusing a generation.
+Missing or corrupt CURRENT blocks mutation, and transient API failures preserve
+healthy rows for a subsequent reconciliation.
+
+`inspectNativeACK` reports confirmed and partial Chrome operations independently
+of visible rendering. A partially acknowledged generation cannot authorize a
+save. A confirmed provider-only action still reaches the existing attention
+entrypoint when CURRENT binds that ID and action. Normal native saves remain
+owned by `dispatchSave` and revalidate the current generation, action, provider
+account, bucket and prefix. Regression coverage lives in
+`tests/native-menu-lifecycle.test.mjs`. Installed browser acceptance is tracked
+in the release evidence separately.
+
 ## Screenshot commands in the Minimal experiment
 
 `extension/screenshot-background.mjs` handles both Chrome screenshot commands.
@@ -83,7 +114,8 @@ Destination manager (extension/app.mjs)
                             └── src/modes/depth/index.mjs: project(...)
                         └── src/core/engine.mjs: apply(spec)
                             └── src/chrome/registrar.mjs:
-                                generateChromePlan(spec) → removeAll → create
+                                generateChromePlan(spec) → retain/update/create by ID
+                                → remove known obsolete IDs
                                 → native ACK / persisted generation
 ```
 

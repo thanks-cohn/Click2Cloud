@@ -17,6 +17,9 @@ elif action=='click':
     xtest.fake_input(client,X.MotionNotify,x=x,y=y)
     xtest.fake_input(client,X.ButtonPress,button)
     xtest.fake_input(client,X.ButtonRelease,button)
+elif action=='move':
+    x,y=map(int,sys.argv[2:4])
+    xtest.fake_input(client,X.MotionNotify,x=x,y=y)
 else:
     repeat=int(sys.argv[2]) if action=='repeat' else 1
     keys=[client.keysym_to_keycode(XK.string_to_keysym(k)) for k in sys.argv[3 if action=='repeat' else 2:]]

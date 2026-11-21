@@ -42,14 +42,15 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, epoch = 1, dispatch, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, registerExtras, extraClick, dispatchOwnsAuthorization=false } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, readRegistration, retiredRoots = [], epoch = 1, dispatch, dispatchAttention, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, dispatchOwnsAuthorization=false } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
-  if (!chrome?.contextMenus?.create || !chrome.contextMenus.removeAll) throw issue('CHROME_UNAVAILABLE');
+  if (!chrome?.contextMenus?.create) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
   let queue = Promise.resolve();
   let desired = null;
   let generated = null;
   let acknowledged = null;
+  let lastAcknowledged = null;
   let observed = null;
   const nextId = () => nextOperationId ? nextOperationId() : operationIdentity();
   let closed = false;
@@ -57,6 +58,8 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
   let lastOutcome = null;
   let acknowledgements = freeze([]);
   const accepted = new Map();
+  const known = new Map(), installed = new Map(), inFlight = new Map();
+  let registrationLoaded = false, registration;
 
   const emit = (stage, outcome, code, id, generation, requires = [], count = 0) => signal(sink, { stage, outcome, code, operationId: id, generation, epoch, requires, count });
   function native(method, args) {
@@ -69,11 +72,37 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
         const nativeError = chrome.runtime?.lastError;
         if (settled) return;
         settled = true; clearTimeout(timer);
-        nativeError ? reject(issue('CHROME_API_ERROR')) : resolve();
+        if (!nativeError) { resolve(); return; }
+        // Only these exact Chromium errors inform discovery. Never retain raw
+        // messages or interpret permission, callback or parent errors as absence.
+        const itemId = typeof args[0] === 'string' ? args[0] : args[0].id;
+        const code = nativeError.message === `Cannot find menu item with id ${itemId}` ? 'CHROME_ITEM_MISSING'
+          : nativeError.message === `Cannot create item with duplicate id ${itemId}` ? 'CHROME_ITEM_EXISTS' : 'CHROME_API_ERROR';
+        reject(issue(code));
       };
       try { chrome.contextMenus[method](...args, callback); }
       catch { if (!settled) { settled = true; clearTimeout(timer); reject(issue('CHROME_API_THROW')); } }
     });
+  }
+  async function upsert(properties) {
+    const { id, ...changes } = properties;
+    const update = async () => { await native('update', [id, changes]); return 'update'; };
+    const create = async () => { await native('create', [properties]); return 'create'; };
+    if (!chrome.contextMenus.update) return create();
+    try { return await update(); }
+    catch (error) { if (error.code !== 'CHROME_ITEM_MISSING') throw error; }
+    try { return await create(); }
+    catch (error) {
+      // Chrome may have created the row even though its callback never arrived.
+      if (!['CHROME_ITEM_EXISTS', 'CHROME_ACK_TIMEOUT'].includes(error.code)) throw error;
+      try { return await update(); }
+      catch (probe) { if (probe.code === 'CHROME_ITEM_MISSING') throw error; throw probe; }
+    }
+  }
+  async function remove(itemId) {
+    try { await native('remove', [itemId]); }
+    catch (error) { if (error.code !== 'CHROME_ITEM_MISSING') throw error; }
+    installed.delete(itemId);
   }
   async function save(value, id, generation) {
     if (!persist) return true;
@@ -89,6 +118,8 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       return sameTarget && row.actionId === b.rows[i].actionId && x.id === y.id && x.parentId === y.parentId && x.title === y.title && x.type === y.type && x.enabled === y.enabled && x.visible === y.visible && x.contexts.join(',') === y.contexts.join(',');
     });
   }
+  const nativePropertiesEqual = (a, b) => a && JSON.stringify(a) === JSON.stringify(b);
+  const currentFailure = error => ['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CORRUPT','CONFIGURATION_CONFLICT','STALE_GENERATION'].includes(error?.code) ? error.code : 'CURRENT_READ_UNAVAILABLE';
   function apply(spec) {
     if (closed) { emit('chrome.apply', 'blocked', 'REGISTRAR_CLOSED', nextId(), spec?.generation); return Promise.resolve(freeze({ state: 'blocked', code: 'REGISTRAR_CLOSED' })); }
     const id = nextId();
@@ -101,6 +132,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     }
     const previous = accepted.get(spec.generation);
     if (previous && !samePlan(previous, plan)) { emit('chrome.plan', 'blocked', 'GENERATION_CONFLICT', id, spec.generation); return Promise.resolve(freeze({ state: 'blocked', code: 'GENERATION_CONFLICT', generation: spec.generation })); }
+    if (inFlight.has(spec.generation)) return inFlight.get(spec.generation);
     if (!pending && (!persist || lastOutcome?.persistence === 'saved') && acknowledged?.generation === spec.generation && samePlan(generateChromePlan(acknowledged), plan)) {
       emit('chrome.apply', 'ok', 'UNCHANGED_ACK_REUSED', id, spec.generation);
       return Promise.resolve(freeze({ state: 'completed', code: 'UNCHANGED_ACK_REUSED', generation: spec.generation, appliedGeneration: acknowledged.generation, failedItems: 0, nativeMutations: 0 }));
@@ -112,28 +144,40 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     desired = spec; generated = plan; pending++;
     const planSignal = emit('chrome.plan', 'ok', 'PLAN_GENERATED', id, spec.generation, [], spec.rows.length);
     const work = async () => {
-      try{await beforeApply(spec);}catch(e){pending--;return lastOutcome=freeze({state:'blocked',code:['CONFIGURATION_RECORD_MISSING','CONFIGURATION_CORRUPT','CONFIGURATION_CONFLICT','STALE_GENERATION'].includes(e.code)?e.code:'CURRENT_READ_UNAVAILABLE',generation:spec.generation,appliedGeneration:null});}
+      const blocked = code => lastOutcome = freeze({ state: 'blocked', code, generation: spec.generation, appliedGeneration: null });
+      try { await beforeApply(spec); }
+      catch (error) { return blocked(currentFailure(error)); }
+      if (!registrationLoaded) {
+        try { registration = await readRegistration?.(); registrationLoaded = true; }
+        catch { emit('persistence.read','failed','REGISTRAR_STATE_READ_FAILED',id,spec.generation); }
+        // The saved list is a mutation journal, never a fresh Chrome ACK.
+        for (const rows of [registration?.desired?.rows, registration?.nativeRows]) {
+          if (!Array.isArray(rows)) continue;
+          for (const row of rows) if (typeof row?.id === 'string' && row.id && (row.parentId == null || typeof row.parentId === 'string')) known.set(row.id, row.parentId ?? null);
+        }
+        if (!Array.isArray(registration?.nativeRows)) for (const root of retiredRoots) known.set(root, null);
+      }
       const acks = [];
       const failed = new Set();
-      let durable = await save({ desired: spec, appliedGeneration: null, epoch, state: 'applying' }, id, spec.generation);
-      if(!durable){pending--;return lastOutcome=freeze({state:'blocked',code:'REGISTRAR_STATE_WRITE_FAILED',generation:spec.generation,appliedGeneration:null});}
-      try{await beforeApply(spec);}catch{pending--;return lastOutcome=freeze({state:'blocked',code:'CURRENT_READ_UNAVAILABLE',generation:spec.generation,appliedGeneration:null});}
+      const wanted = new Map(plan.rows.map(row => [row.itemId, row.parentId]));
+      const priorParents = new Map(known);
+      const possible = new Map([...known, ...wanted]);
+      const obsolete = [...known].filter(([itemId]) => !wanted.has(itemId));
+      // Existing builds without the journal are upgraded once. For an equal
+      // acknowledged plan a cold worker only probes Chrome, with no disk writes.
+      const stableRegistration = registration?.state === 'acknowledged' && registration.appliedGeneration === spec.generation &&
+        Array.isArray(registration.nativeRows) && !obsolete.length && registration.nativeRows.length === wanted.size &&
+        registration.nativeRows.every(row => wanted.has(row.id) && wanted.get(row.id) === row.parentId);
+      const record = (state, rows, appliedGeneration) => ({ desired: spec, appliedGeneration, epoch, state, nativeRows: [...rows].map(([id, parentId]) => ({ id, parentId })) });
+      if (!stableRegistration && !await save(record('applying', possible, null), id, spec.generation)) return blocked('REGISTRAR_STATE_WRITE_FAILED');
+      try { await beforeApply(spec); }
+      catch (error) { return blocked(currentFailure(error)); }
+      for (const [itemId, parent] of possible) known.set(itemId, parent);
       const applySignal = emit('chrome.apply', 'started', 'APPLY_STARTED', id, spec.generation, planSignal ? [planSignal] : []);
       const rowSignals = new Map();
       const failureSignals = [];
       let acknowledgedCount = 0;
-      // removeAll is intentional: stable IDs are preserved in the new plan,
-      // and serialization guarantees no mixed generation after partial errors.
-      // Clearing invalidates old ACKs immediately, even if callback is lost.
       acknowledged = null; observed = null;
-      try { await native('removeAll', []); }
-      catch (error) {
-        emit('chrome.ack', 'uncertain', error.code, id, spec.generation);
-        acknowledgements = freeze([freeze({ method: 'removeAll', state: 'uncertain', code: error.code })]);
-        lastOutcome = freeze({ state: 'uncertain', code: error.code, generation: spec.generation, appliedGeneration: null });
-        pending--; return lastOutcome;
-      }
-      acks.push(freeze({ method: 'removeAll', state: 'acknowledged', code: 'CHROME_ACK' }));
       for (let rowIndex = 0; rowIndex < plan.rows.length; rowIndex++) {
         const row = plan.rows[rowIndex];
         const prerequisites = [applySignal, rowSignals.get(row.parentId)].filter(Boolean);
@@ -145,34 +189,53 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
           continue;
         }
         try {
-          await native('create', [row.properties]);
-          acks.push(freeze({ method: 'create', itemId: row.itemId, state: 'acknowledged', code: 'CHROME_ACK' }));
+          const priorParent = priorParents.get(row.itemId);
+          // Chrome update cannot detach a child to the top level. Canonical
+          // generated IDs bind their parent, so this only affects supplied IDs.
+          if (!row.parentId && (installed.get(row.itemId)?.parentId ?? priorParent)) await remove(row.itemId);
+          const method = nativePropertiesEqual(installed.get(row.itemId), row.properties) ? 'retain' : await upsert(row.properties);
+          installed.set(row.itemId, row.properties);
+          acks.push(freeze({ method, itemId: row.itemId, state: 'acknowledged', code: 'CHROME_ACK' }));
           acknowledgedCount++;
           rowSignals.set(row.itemId, emit('chrome.ack', 'ok', 'ITEM_ACKNOWLEDGED', id, spec.generation, prerequisites, rowIndex + 1));
         } catch (error) {
+          installed.delete(row.itemId);
           failed.add(row.itemId);
           acks.push(freeze({ method: 'create', itemId: row.itemId, state: error.code === 'CHROME_ACK_TIMEOUT' ? 'uncertain' : 'failed', code: error.code }));
           const rowSignal = emit('chrome.ack', error.code === 'CHROME_ACK_TIMEOUT' ? 'uncertain' : 'failed', error.code, id, spec.generation, prerequisites, rowIndex + 1);
           rowSignals.set(row.itemId, rowSignal); if (rowSignal) failureSignals.push(rowSignal);
         }
       }
-      // Supplemental user actions share the native owner and removeAll cycle.
-      // Their availability is independent of the canonical save-row ACK.
-      try{await registerExtras?.(spec,properties=>native('create',[properties]));}
-      catch{emit('chrome.ack','failed','SUPPLEMENTAL_MENU_UNAVAILABLE',id,spec.generation);}
+      // Remove only known obsolete IDs after applying replacements. Descendant
+      // removal first avoids cascading through a surviving or moved child.
+      if (!failed.size) for (const [itemId] of obsolete.reverse()) {
+        try {
+          await remove(itemId);
+          known.delete(itemId);
+          acks.push(freeze({ method:'remove', itemId, state:'acknowledged', code:'CHROME_ACK' }));
+        } catch (error) {
+          failed.add(itemId);
+          acks.push(freeze({ method:'remove', itemId, state:'failed', code:error.code }));
+          const rowSignal = emit('chrome.ack','failed',error.code,id,spec.generation);
+          if (rowSignal) failureSignals.push(rowSignal);
+        }
+      }
       acknowledgements = freeze(acks);
-      if (!failed.size) acknowledged = spec;
-      durable = await save({ desired: spec, appliedGeneration: acknowledged?.generation ?? null, epoch, state: failed.size ? 'partial' : 'acknowledged' }, id, spec.generation) && durable;
+      if (!failed.size) acknowledged = lastAcknowledged = spec;
+      const receipt = record(failed.size ? 'partial' : 'acknowledged', known, acknowledged?.generation ?? null);
+      const durable = stableRegistration && !failed.size || await save(receipt, id, spec.generation);
+      if (durable) registration = receipt;
       lastOutcome = freeze({ state: failed.size ? 'partial' : durable ? 'completed' : 'partial', code: failed.size ? 'NATIVE_APPLY_INCOMPLETE' : durable ? 'NATIVE_ACKNOWLEDGED' : 'PERSISTENCE_FAILED', generation: spec.generation, appliedGeneration: acknowledged?.generation ?? null, failedItems: failed.size, persistence: durable ? 'saved' : 'failed' });
       emit('chrome.apply', failed.size ? 'partial' : 'ok', lastOutcome.code, id, spec.generation, failureSignals.length ? failureSignals : applySignal ? [applySignal] : [], acknowledgedCount);
-      pending--; return lastOutcome;
+      return lastOutcome;
     };
-    const result = queue.then(work, work);
+    const result = queue.then(work, work).finally(() => { pending--; inFlight.delete(spec.generation); });
+    inFlight.set(spec.generation, result);
     queue = result.catch(() => {});
     return result;
   }
   function inspect() {
-    return freeze({ schemaVersion: 1, epoch, pending, desired, generated, acknowledgedGeneration: acknowledged?.generation ?? null, acknowledgements, observed, lastOutcome,
+    return freeze({ schemaVersion: 1, epoch, pending, desired, generated, acknowledgedGeneration: acknowledged?.generation ?? null, lastAcknowledged, acknowledgements, observed, lastOutcome,
       coverage: freeze({ nativeApi: acknowledged ? 'acknowledged' : 'unknown', nativeBehavior: observed ? 'independently_observed' : 'not_observed', nativeRendering: observed?.rendering ? 'independently_observed' : 'not_observed', gaps: freeze([...(observed?.rendering ? [] : ['NATIVE_RENDERING_NOT_OBSERVED']), ...(observed && !observed.complete ? ['NATIVE_OBSERVATION_PARTIAL'] : [])]) }) });
   }
   function resolveClick(selection = {}) {
@@ -195,11 +258,23 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       try{const out=await dispatch(r.action,{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{}),generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
     const rowForDepth=()=>desired?.rows.find(r=>r.id===String(info.menuItemId));
+    const row=rowForDepth(), context=['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page';
+    // If only part of Chrome's tree acknowledged, a confirmed provider-only
+    // row can still open attention. This path never supplies a save source.
+    if(dispatchAttention&&!pending&&lastOutcome?.generation===desired?.generation&&
+      lastOutcome?.code==='NATIVE_APPLY_INCOMPLETE'&&row?.role==='provider-action'&&
+      row.enabled&&row.visible&&row.contexts.includes(context)&&installed.has(row.id)){
+      let result;
+      try{result=await dispatchAttention(row.providerAction,info);}
+      catch{result=freeze({state:'failed',code:'PROVIDER_ACTION_FAILED'});}
+      try{onOutcome?.(result);}catch{}
+      return result;
+    }
     // The product engine already validates durable CURRENT, ACK, context,
     // exact action binding and fresh authority. Do not do a second resolution
     // with a different authority observation before sending it the gesture.
     if(dispatchOwnsAuthorization){
-      const row=rowForDepth(),generation=acknowledged?.generation;
+      const generation=acknowledged?.generation;
       if(!pending&&generation!=null&&desired?.generation===generation&&row?.role==='save'&&dispatch){
         let result;
         try{result=await dispatch(row,{info,tab,generation,observation,depthAuthorization});}
@@ -245,7 +320,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
     } finally { observed('native.terminal',{result:outcome??{state:'uncertain'}}); }
   }
   const listener = (info, tab) => {
-    try{if(extraClick?.(info,tab))return;onGesture?.(info,tab);}catch{}
+    try{onGesture?.(info,tab);}catch{}
     void handleClick(info, tab).catch(()=>{});
   };
   chrome.contextMenus.onClicked?.addListener(listener);

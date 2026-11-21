@@ -29,7 +29,7 @@ for(const readiness of [{state:'blocked',code:'WORKER_SETUP_REQUIRED'},{state:'P
  const f=fixture({ready:readiness}),spec=await f.start();await f.emit(spec.rows.find(r=>r.role==='save'));
  assert.equal(f.writes.length,0);assert.equal(f.records.at(-1).state,'blocked');assert.equal(f.feedback.length,1);if(readiness.code==='WORKER_SETUP_REQUIRED')assert.equal(f.feedback[0].reason,'FOLLOWUP_PLAN_MISSING');
 });
-for(const failure of ['Cloudflare','Images','Artwork','remove','timeout'])test('Depth native ACK failure retains fail-closed authority and durable feedback: '+failure,async()=>{
+for(const failure of ['Cloudflare','Images','Artwork','timeout'])test('Depth native ACK failure retains fail-closed authority and durable feedback: '+failure,async()=>{
  const f=fixture({fail:failure}),spec=await f.start();await f.emit(spec.rows.find(r=>r.role==='save'));assert.equal(f.writes.length,0);assert.equal(f.records.at(-1).state,'blocked');assert.equal(f.feedback.length,1);assert.equal(f.registrar.inspect().acknowledgedGeneration,null);
 });
 test('Worker plan discriminators are mode-local and cannot borrow accounts/buckets',()=>{

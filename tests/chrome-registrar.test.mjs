@@ -42,7 +42,7 @@ test('single registrar tracks desired generated ACK and independent observation 
   const evidence = r.inspect();
   assert.equal(evidence.desired.generation, 1); assert.equal(evidence.generated.evidenceClass, 'generated');
   assert.equal(evidence.acknowledgedGeneration, 1); assert.equal(evidence.observed, null);
-  assert.equal(evidence.acknowledgements.length, 7); assert.equal(events.filter(x => x.code === 'ITEM_ACKNOWLEDGED').length, 6);
+  assert.equal(evidence.acknowledgements.length, 6); assert.equal(events.filter(x => x.code === 'ITEM_ACKNOWLEDGED').length, 6);
   const before = f.mutations.length;
   assert.equal((await r.apply(spec())).code, 'UNCHANGED_ACK_REUSED'); assert.equal(f.mutations.length, before);
   assert.throws(() => r.addObservedEvidence({ generation: 2, testId: 'native', itemIds: [] }), /INVALID_OBSERVED_EVIDENCE/);
@@ -68,10 +68,12 @@ test('lost callback is uncertainty even when create returned correct-looking ID'
   assert.equal(r.inspect().acknowledgedGeneration, null);
 });
 
-test('removeAll missing ACK invalidates old generation and never claims installed state', async () => {
-  let lost = false; const f = fakeChrome(id => lost && id === 'removeAll' ? 'lost' : 'ok'); const r = createChromeRegistrar({ chrome: f.chrome, timeoutMs: 5 });
-  await r.apply(spec()); lost = true;
-  assert.equal((await r.apply(spec(2))).state, 'uncertain'); assert.equal(r.inspect().acknowledgedGeneration, null);
+test('an unchanged native tree advances its logical generation without clearing Chrome', async () => {
+  const f = fakeChrome(); const r = createChromeRegistrar({ chrome: f.chrome });
+  await r.apply(spec()); const before = f.mutations.length;
+  assert.equal((await r.apply(spec(2))).state, 'completed');
+  assert.equal(r.inspect().acknowledgedGeneration, 2);
+  assert.equal(f.mutations.length, before);
 });
 
 test('serial generations reject stale/conflicting plans; restart does not trust historical ACK; sink throws harmlessly', async () => {

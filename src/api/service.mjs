@@ -99,7 +99,7 @@ export function organizationSuggestion(spec,product) {
   return {count,eligible:count>=7&&product.suggestionDismissed!==signature,signature};
 }
 /** Same source-owned API for GUI and separately granted local agents. No network listener. */
-export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readManagedDomain,enableManagedDomain,readExportOptions}={}) {
+export function createEngineApi({engine,current,fileApi,oauth,getInventory,authorize,confirm=async()=>false,navigate=async()=>{},recovery,wholeCloud,recoveryCrawl,cloudflare,attention,diagnostics,breadcrumbs,readNative=async()=>null,scheduleNative,readStorageHealth=async()=>({state:'UNOBSERVED'}),readState=context=>current.read(context),prepareFileWorker,manifestStore=createManifestStore(),manifestLocations,shortcutStore,onHistoryPreferenceChange,readCustomDomains,readManagedDomain,enableManagedDomain,readExportOptions}={}) {
   if(!engine||!current||typeof authorize!=='function')throw TypeError('Trusted owners required');
   let queue=Promise.resolve(),nativeQueue=Promise.resolve(),traceInspector;
   async function bucketPublicDomains(source, confirmed) {
@@ -121,14 +121,30 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
   }
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
-  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection}={}){
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection,lifecycle=false}={}){
     try{
-      const state=await current.read();
+      const state=await (lifecycle?loadCurrent():current.read());
       const selectedDepthKeys=saveSelection&&new Set(saveSelection.filter(s=>s.mode==='depth').map(s=>scopeKey(s.target)));
-      const inventory=await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,preparedTargets,saveSelection,
+      const emptyAssignment=lifecycle&&!state.product.defaultTarget&&Object.values(state.configs).every(config=>!(config.destinations??config.scopes).length);
+      // The verified empty projection needs only CURRENT and Chrome. Existing
+      // configurations use local readiness and Depth observations on wake.
+      const inventory=lifecycle&&emptyAssignment?{scopes:[]}:await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,preparedTargets,saveSelection,localOnly:lifecycle,
         refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare
           ?state.configs.depth.scopes.filter(s=>(!depthTarget||scopeKey(s.target)===scopeKey(depthTarget))&&(!selectedDepthKeys||selectedDepthKeys.has(scopeKey(s.target)))):[]});
-      const spec=await engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory});
+      const options={mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory};
+      let spec;
+      if(lifecycle&&state.generation.desired>0){
+        const generation=state.generation.desired;
+        const cached=engine.getMenu(generation)??(await readNative().catch(()=>null))?.desired;
+        if(cached?.generation===generation){
+          const candidate=await engine.compile({...options,generation});
+          // A persisted spec is only a comparison baseline. Never dispatch
+          // from it without compiling the same routes from validated CURRENT.
+          const signature=({mode,modeRevision,rows})=>JSON.stringify({mode,modeRevision,rows});
+          if(signature(candidate)===signature(cached))spec=engine.getMenu(generation)??candidate;
+        }
+      }
+      spec??=await engine.compile(options);
       const native=await engine.apply(spec);
       const selectedDepth=depthTarget&&inventory.depthScopes?.filter(s=>scopeKey(s.target)===scopeKey(depthTarget));
       const configuredDepth=depthTarget&&state.configs.depth?.scopes.some(s=>scopeKey(s.target)===scopeKey(depthTarget));
@@ -147,7 +163,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     nativeQueue=task.catch(()=>{});
     return task;
   }
-  const reconcile=({refreshDepthReadiness=true}={})=>applyCurrent({refreshDepthReadiness});
+  const reconcile=({refreshDepthReadiness=true,lifecycle=false}={})=>applyCurrent({refreshDepthReadiness,lifecycle});
   const manifests=createManifestService({current,readCurrent:loadCurrent,store:manifestStore,locations:manifestLocations,oauth,authorize,confirm,applyCurrent,version:BUILD_INFO.extensionVersion});
   // Save selects current visible routes. No cloud action is derived from rows
   // merely observed in Explorer, hidden entries or a previous menu generation.
@@ -365,6 +381,11 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         else if(['loginBegin','loginCancel','disconnect'].includes(method)) {
           if(await confirm({actor,method,params})!==true)fail('HUMAN_INTERACTION_REQUIRED');
           if(method==='loginBegin'&&params.verifyOnly){await oauth.authority();data=await oauth.status();}else data=await oauth[{loginBegin:'connect',loginCancel:'cancel',disconnect:'disconnect'}[method]]();
+          if(method==='loginBegin'&&data?.state==='CONNECTED'){
+            // OAuth and local menu maintenance can finish independently of
+            // provisioning, even on a first login with no saved destinations.
+            if(scheduleNative)scheduleNative('NATIVE_LOGIN');
+          }
           // Explicit Login includes authorized save preparation. Authentication
           // stays successful even if local state or provider setup is blocked.
           if(method==='loginBegin'&&!params.verifyOnly&&data?.state==='CONNECTED'){
