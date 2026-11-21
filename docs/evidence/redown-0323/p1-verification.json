@@ -1,0 +1,55 @@
+{
+  "version": "0.3.23",
+  "branch": "codex/redown-0323-p1-complete-visual-ux-2026-11-21",
+  "branchStart": "83a04a8bbe6367e641a4a7c16d70e5dd491578fa",
+  "p0Base": "c2b608f3c4c9344713d83ed73b98120b0bef8106",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "release": "BLOCKED",
+  "preservedDiagnosticTag": {
+    "name": "redown-0.3.22-BROKEN-pre-repair-2026-11-21",
+    "tagObject": "2811ce0b1d3ac5060ac7966f4d39cb7b119f645d",
+    "commit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32"
+  },
+  "baselineActions": 44927295094,
+  "installedEvidenceActions": 44932356129,
+  "tests": {
+    "npmTestPassed": 612,
+    "focusedPassed": 520,
+    "right2cloudPassed": 49,
+    "p1ChromiumFixturePassed": 18,
+    "searchFixturePassed": 7,
+    "galleryFixturePassed": 29,
+    "appearanceFixturePassed": 20,
+    "historyFixturePassed": 13,
+    "currentRecoveryFixturePassed": 30,
+    "bootLoginFixturePassed": 16,
+    "releaseUXFixturePassed": 9,
+    "localWorkerdIndependentReadbacks": 4,
+    "installedLinuxThemeModesPassed": 14
+  },
+  "milestones": [
+    {"id":"A","scenario":"External REDOWN R","commit":"460f129","state":"BUILT","expected":"Red and white Chrome icon across modes","actual":"Four validated PNG sizes and unchanged extension identity","proof":"Build and asset visual inspection","remaining":"Installed Windows toolbar, extension list and side-panel header visual checks"},
+    {"id":"B","scenario":"Detachable Shelf themes","commit":"b464800","state":"PASS","expected":"Five themes, three nested Nostalgia styles and safe fallback","actual":"All fourteen theme modes rendered in installed Linux Shelf. Each optional stylesheet absence passed Chromium fallback, Explorer, History and fixture save","proof":"Unit tests, Chromium data fixtures and installed Linux extension","remaining":"Windows view matrix and live provider tests with optional CSS absent"},
+    {"id":"C","scenario":"Header More and color mode","commit":"ecd3562","state":"PASS","expected":"Independent hit targets and one visible History entry","actual":"All palettes, themes and modes passed repeat resize, pointer and keyboard checks","proof":"Chromium fixture DOM and screenshots","remaining":"Genuine Windows side-panel widths"},
+    {"id":"D","scenario":"Verified badge and pulses","commit":"2760716","state":"PASS","expected":"One count per independently confirmed operation and two discrete pulses","actual":"Partial fanout, duplicate receipts, local timezone, wake, error and 100-success burst covered","proof":"Unit tests, Chromium IndexedDB, installed screenshot HTTPS fixture","remaining":"Windows toolbar pulse observation and authorized R2"},
+    {"id":"E","scenario":"Gallery chevrons","commit":"f3a27c9","state":"PASS","expected":"Mirrored chevrons with generous transparent hit targets","actual":"First, middle, last, pointer and keyboard navigation passed across appearances","proof":"Chromium fixture gallery and screenshots","remaining":"Windows installed gallery visual review"},
+    {"id":"F","scenario":"Shelf Search and immersive keyboard","commit":"20fb430","state":"PASS","expected":"Alternating focus, query retention, bounded pan, synchronized zoom and staged Escape","actual":"Search and gallery browser suites passed. After 105 immersive cycles the heap decreased and zoom added zero image reads","proof":"Chromium fixture interactions and installed screenshot HTTPS fixture","remaining":"Windows Shelf focus and process measurements"}
+  ],
+  "native": {
+    "linuxFreshInstall": "OS menu on a page, image and link plus logged-out LOGIN_REQUIRED click passed",
+    "linuxLifecycle": "Fresh worker ACK observed before an ambiguous OCR result. Final native rendering and browser restart gate remains open pending the updated harness.",
+    "windowsOriginalProfileUpgrade": "BLOCKED",
+    "windowsPostLoginReconnect": "BLOCKED",
+    "authorizedLiveR2": "BLOCKED"
+  },
+  "galleryResources": {
+    "cycles": 105,
+    "extraImageReads": 0,
+    "heapBeforeBytes": 11370696,
+    "heapAfterBytes": 11329044,
+    "listenersBefore": 352,
+    "listenersAfter": 355,
+    "rendererTaskSeconds": 1.039379
+  },
+  "screenshots": ["p1-shelf-themes.png", "p1-header-gallery.png"]
+}
