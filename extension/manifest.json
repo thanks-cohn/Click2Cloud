@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "icons": {"16": "extension/menu-icon.png"},
-  "name": "Click2Cloud",
-  "version": "0.3.22",
-  "description": "Click2Cloud \u2014 cloud Explorer and secure V3+1 native save destinations.",
+  "name": "REDOWN",
+  "short_name": "REDOWN",
+  "version": "0.3.23",
+  "description": "REDOWN \u2014 cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",
     "storage",
@@ -20,7 +21,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Click2Cloud \u2014 Remotes"
+    "default_title": "REDOWN \u2014 Remotes"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'"
