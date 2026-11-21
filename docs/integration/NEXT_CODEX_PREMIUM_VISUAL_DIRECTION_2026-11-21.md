@@ -97,6 +97,22 @@ This refers to the numeric badge on the **REDOWN Chrome toolbar extension icon**
 - Add targeted integration tests covering each provider's verified save, confirmed screenshot, deduplication, denied/uncertain events, worker restart, persisted total recovery and multi-provider aggregation. Verify the Chrome toolbar badge in real Windows Chrome before claiming final acceptance.
 - This is a requirement for a **future implementation run only**. No code changes are authorized by this note.
 
+## P0: Google Drive Sign In silently fails in Microsoft Edge — browser compatibility
+**Owner's field report (November 21, 2026):** Clicking **Google Drive → Sign In** in REDOWN briefly flashes a little loading/time indicator, then it disappears **without any sign-in popup or tab**. The owner was testing in **Microsoft Edge** and has not yet verified whether the same behavior occurs in Google Chrome. Treat Edge as a reported environment, not an experimentally proven sole cause.
+
+**Strong code-level lead, confirmed against official platform docs:**
+- Current `src/basic/lib/auth.js` uses `chrome.identity.getAuthToken({interactive:true, ...})` for Google authentication. Microsoft's official Edge extension API support documentation explicitly lists **`identity.getAuthToken` as unsupported**, and points developers to **`identity.launchWebAuthFlow`** as an alternative (https://learn.microsoft.com/microsoft-edge/extensions/developer-guide/api-support).
+- The Google `getAuthToken` call's catch block collapses API errors into `AUTH_CANCELLED` with "Google authorization was cancelled or denied", which is potentially misleading when the underlying cause is an unsupported API/browser runtime or OAuth configuration mismatch.
+- Verify the behavior on fresh Microsoft Edge **and** Google Chrome installs of the exact build; capture browser/runtime identity support, extension ID, provider OAuth client/redirect configuration, and minimal sanitized error codes without exposing access tokens. Do not assume Chrome is working until actually tested.
+
+**Next implementation run requirements (not implemented by this documentation change):**
+- Make Google Drive Sign In launch a working, explicit user-initiated Google OAuth consent experience in every officially supported browser. If Edge is within supported browsers, design a proper Edge-compatible Google OAuth flow via supported browser APIs (consider `launchWebAuthFlow`, PKCE/state, browser-specific redirect URI/client registration) with correct consent, scoped authorization, token handling, and verification. Do not merely change one API call and assume the OAuth client configuration will still work.
+- Preserve the existing Google Drive API scope, provider isolation, OAuth security properties, exact extension identity where applicable, and verified-only save logic. No silent authentication bypasses and no fake connected state.
+- If Chrome-only support is deliberately chosen instead, make the limitation explicit and user-friendly, **not a silent flash** or a generic "cancelled" message.
+- Display a concise actionable error when opening auth is genuinely unavailable; never present "user cancelled" when the user did not cancel. Keep provider cards clean (icon/name/buttons) and use unobtrusive recoverable feedback.
+- Regression/acceptance: Google consent window/tab actually appears and completes; status becomes correctly ready; a known-byte right-click file is saved and verified, with correct History entry and badge; cover cancel, denied scope, unsupported API, missing OAuth registration, worker restart, and Edge/Chrome separately.
+- **No extra source-access/security setup screens** are authorized by this note. Standard necessary Google OAuth consent itself is part of the original **Sign In** action, not an additional REDOWN permission wizard.
+
 ## P0: ZERO extra REDOWN security/setup steps — right-click → save → done
 **Owner correction (supersedes the previous permission-onboarding proposal):** **NO EXTRA SECURITY STEPS. NO EXTRA PERMISSION BUTTONS. NO "ONE-TIME SOURCE ACCESS SETUP" WORKFLOW.** The user has already signed into their cloud provider. The intended product experience is exactly **"right-click → save → done"**, not "right-click → failed attempt → go to Remotes → Allow access to CloudFront → right-click again."
 
