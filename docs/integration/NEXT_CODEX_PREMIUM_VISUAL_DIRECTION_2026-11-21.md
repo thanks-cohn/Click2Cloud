@@ -77,6 +77,9 @@ SaveAnywhere's hover behavior impressed the owner: cards grow slightly and acqui
 ## P0: notifications must never block History pagination
 Current bottom-right notification/status overlays cover/interrupt History Prev/Next and other interactive elements in the narrow side panel (owner screenshot).
 - Redesign position/flow and stacking so notifications do **not** occlude pagination, bottom action buttons, form fields, file operations or navigation.
+- **Owner's explicit hover-to-dismiss behavior:** Whenever the pointer moves onto/over a transient notification, dismiss that notification immediately (or fade it out promptly with an imperceptibly short motion) so the user can click what lies behind it. Do **not** require a tiny close button, move the notification away from the pointer, or make it reappear when the pointer leaves. Hover dismissal must not accidentally trigger underlying controls; the user should be able to click them normally after dismissal.
+- This hover behavior is a **second line of defense**, not a substitute for non-obstructing layout. Notifications should not sit over History Previous/Next buttons or other navigation even when the user never hovers.
+- Apply consistently to customer-facing transient notifications across Remotes, History and Explorer. Avoid hijacking keyboard focus. Provide a keyboard-accessible dismissal path and screen-reader-friendly announcement; ensure critical failure/recovery details remain discoverable in a durable History/detail/diagnostics surface even after the toast is dismissed.
 - Short, succinct, appropriately dismissed feedback should remain discoverable for essential failures; do not silently swallow an error.
 - Respect keyboard operation, zoom, narrow side panels and screen readers.
 - Preserve reliable diagnostic access separately from customer-facing polish.
