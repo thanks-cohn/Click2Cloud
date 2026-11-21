@@ -7,6 +7,20 @@
 >
 > Implement real improvements to the existing Click2Cloud source. This is **NOT** merely another analysis, document or speculative rewrite. **The right-click issue is P0 and the first release gate**. Worker durability is a deliberately scoped, subsequent gate. Do not trade known-good remote-save behavior for a massive redesign.
 
+## OWNER PRIORITY OVERRIDE — TWO INVARIANTS PLUS AUTOMATIC HISTORY
+
+**P0 #1: RIGHT-CLICK MUST ALWAYS BE AVAILABLE.** Enabled Chrome native menu entries must be available on supported pages before login, immediately after login/reconnect, after MV3 worker wake, and **while users are rapidly saving or taking screenshots**. Never tie menu registration/gesture admission to a transfer, UI, History refresh, cloud status or global upload lock. Do not rebuild the menu on each click.
+
+**P0 #2: RAPID SUCCESSIVE ACTIONS MUST NOT CRASH OR BLOAT THE PRODUCT.** A single right-click must not cause an extension-generated multi-gigabyte (~2 GB) RAM spike. Repeated saves and screenshot shortcuts must not launch unbounded concurrent captures/PNG copies, network calls, progress writes, image previews, listeners or retained promises. Keep user gestures quick; bound only expensive downstream work. If a browser quota or true capacity limit is reached, issue immediate, honest BUSY/rate-limit status with an operation ID where accepted—never freeze, silently drop accepted distinct actions, or pretend success. **Reliability that makes normal saving materially slower is a regression.**
+
+**P0 #3: BOTH RIGHT-CLICK SAVES AND SUCCESSFULLY AUTHORIZED SCREENSHOTS UPDATE HISTORY AUTOMATICALLY.** The open History page updates itself after an attempt is durably recorded and again when its status changes, without refresh, reopening the Shelf or manually switching views. Preserve the full lifetime History, honest pending/verified/blocked/uncertain distinctions, lazy thumbnails and stable operation IDs. Notifications are best-effort; durable data is authoritative.
+
+**MANDATORY SCREENSHOT EXCEPTION: when the user is NOT LOGGED IN, pressing any screenshot shortcut MUST NOT create a History entry—not a pending record, not a failure record, and not a phantom screenshot.** Check authenticated session **before** screenshot job journaling and before capturing/retaining PNG bytes. A lightweight nonpersistent "Log in to take screenshots" notification/attention is permitted. If a valid logged-in screenshot starts and a later provider/auth/network failure occurs, **that accepted attempt does belong in History** with its true state; do not erase it retroactively. Apply the exception to each screenshot shortcut and the corresponding capture path; do not accidentally suppress unrelated right-click save results.
+
+**Performance veto:** Do not introduce a heavy scheduler, per-byte/per-click checkpoints, a new global queue, duplicate persistent stores or per-result full-History reads. Benchmark latency, CPU, memory, listener counts, outstanding jobs and History refresh cost **before and after** any reliability patch. New durability work must be a net reliability improvement without severe hot-path slowdown.
+
+---
+
 ## 0. Read-first controlling documents, correct repository and baseline
 
 **Repository:** \`thanks-cohn/Click2Cloud\`.
@@ -64,6 +78,36 @@ Restricted Chrome pages, disabled extension, failed worker registration/evaluati
 
 **P0.5 — Bounded diagnostics and explicit emergency repair.** Reuse existing \`nativeRegistration\`, CURRENT, \`chrome.storage.local\`, IndexedDB and existing recorder. Add small bounded state/attempt/epoch/ACK/error codes and the login→reconcile trace. Errors must not disappear through empty catches without a record. Keep RAW vs SECURE export guarantees; do not log secrets or original source URLs in secure reports. A targeted manual native-repair control can be available as a last resort but must not be required for normal use. A healthy no-op should not churn native menu entries.
 
+### P0.6 — Rapid saves/screenshots, live History and logged-out shortcut exclusion
+
+**Inspect these actual 0.3.22 source locations before changing code:**
+- \`src/screenshot/capture.mjs\`: \`active\` tracks individual IDs, not an obvious global bound on many distinct captures; \`start()\` currently creates a pending job and calls \`void checkpoint(job)\` **before** session authorization. \`finish(job)\` journals failures. This may create a **logged-out shortcut History row**, violating the new requirement. Verify the complete caller authorization path and fix before committing.
+- \`extension/screenshot-background.mjs\`: \`onCommand\` starts jobs; \`record(job)\` persists screenshot results and emits \`screenshot-history-changed\`; \`notify\` sends \`screenshot-result\`. Preserve the existing owner and separate transient logged-out attention from persisted accepted operations.
+- \`src/screenshot/capture.mjs\`: \`deliver()\` may run **up to 3 output uploads per screenshot**, compounding concurrent captures; multiple structured-clone checkpoints and image hashing can be expensive under bursts. \`src/screenshot/retry-cache.mjs\` has a **48 MiB local cache quota**, not a hard limit on active in-memory Blobs. \`src/chrome/visible-tab-screenshot.mjs\` already classifies Chrome capture quota errors. No source inspection alone proves the owner's feared 2 GB spike; profile rather than presume.
+- \`extension/background.mjs:recordRemote\` durably persists right-click save results and emits \`remote-result\`; \`extension/app.mjs\` handles both result channels and \`historyUI.invalidate\`. \`extension/history-page.mjs\` already coalesces invalidation for ~150ms, but **overflow at 64 distinct dirty IDs can force a full History reread**. On a long-lived History, repeated bursts could cause substantial unnecessary I/O and UI work. Keep the existing pipeline, fix its failure/race and burst cases—not a second History engine.
+
+**Implementation must satisfy ALL:**
+1. **Fast independent gesture admission:** right-click availability and dispatch never await ongoing transfers, screenshot conversions or History rendering. Preserve a separately accounted ID/receipt for every actually accepted action; don't conflate distinct gestures or accept work that cannot be tracked.
+2. **Bound only expensive work:** enforce small empirically chosen limits for active screenshot capture, PNG/Blob bytes, screenshot fan-out, remote stream concurrency and preview decoding. Do not enqueue unlimited PNGs or hold original full-resolution bytes after no longer needed; release image references and event listeners on every completion/failure. Queueing screenshots must never capture a later page/tab instead of the original gesture; prefer immediate clear busy/rate-limit responses if valid immediate capture isn't possible. Don't impose one giant serial bottleneck on normal saves.
+3. **Logged-out shortcut guard BEFORE writing History:** with no authenticated session, no screenshot History record, no retry cache, no upload and preferably no capture. Transient UI feedback only. Protect against session race: a screenshot accepted while logged in stays in History if auth subsequently expires and is marked blocked/uncertain as appropriate. Repeated logged-out shortcuts must leave History count and durable screenshot writes unchanged.
+4. **Live History from the canonical record:** save results and screenshot captures publish bounded coalescible ID-based invalidations after durable result updates; History refreshes changed IDs without reopening or polling constantly. Pending→verified/failed/partial/uncertain transitions reuse the SAME ID; don't lose notifications when the panel is mounted/unmounted. Reopen/focus reconciles cheaply from persisted data, without re-fetching cloud bytes for a list update.
+5. **History stays lightweight and complete:** no arbitrary lifetime cap, no full archive scan on ordinary bursts, no O(history-size) work per event, no automatic decoding of all thumbnails, no focus/scroll/selection loss. Maintain existing pagination, lazily loaded previews, export semantics and chronological ordering. Avoid writing whole job copies at each trivial progress callback.
+6. **Fail independently and honestly:** optional History/cache/recorder failures must not make native menu disappear or crash the screenshot/save dispatcher. If actual Chrome capture quota or cloud quota is hit, report it promptly and keep the product usable.
+
+| Test | Release acceptance |
+| --- | --- |
+| B01: 100, 500 and 1,000 rapid right-click saves | Menu stays registered/visible, responsive, exact account+bucket per operation, no extension crash, no runaway memory/tasks; all accepted operations accounted for |
+| B02: 10, 50 and 100 rapid screenshot shortcuts | Stable bounded in-flight image bytes and output fan-out; Chrome quota produces honest busy/rate-limit result, not crash or false capture |
+| B03: logged-out shortcut once and in bursts | ZERO screenshot History rows, ZERO screenshot retry-cache entries or uploads; transient login feedback allowed |
+| B04: logged-in screenshot followed by auth expiration or network error | One retained History row with actual blocked/pending/uncertain state; correct operation ID and no false success |
+| B05: History open during bursts of remote saves and screenshots | New rows/status changes appear automatically without refresh or reopening; no duplicate or lost IDs |
+| B06: History closed, then reopened after work completes | Durable changes displayed accurately, including both types; no reliance on a live UI message |
+| B07: 100+ unique result updates with thousands of old History records | Batched targeted updates, no repeated full archive rereads, no massive preview decode, preserved focus/scroll/pagination |
+| B08: mixed save/screenshot/History interactions through worker wake | Native menu never starved, no accumulating listeners, blobs, orphaned promises or memory growth across repeated rounds |
+| B09: repeat bursts in real Windows Chrome with process memory sampling | Record before/peak/post-idle RAM per process, latency p50/p95/p99, task counts, screenshot bytes, failures, receipts and Chrome version; actual hardware/browser tests distinct from mocks |
+
+Do not treat "survived tests" as a proof of literally unlimited capacity. Actual capture quotas, user hardware and provider limits exist. **The goal is graceful, fast, predictable behavior under extreme customer clicking, never a crashed product.**
+
 ### P0 proof gates before any durability feature is attempted
 
 Implement the R01–R22 matrix in the controlling P0 document as relevant, especially:
@@ -77,13 +121,13 @@ Implement the R01–R22 matrix in the controlling P0 document as relevant, espec
 - **Actual installed Windows Chrome:** observe the native rendered entry, exact menu gesture and authorized disposable R2 save/readback where permitted, comparing the unchanged bad tag with the repaired build.
 - **Separate truth:** unit fixtures, mocks, Chrome API ACK, visually rendered native menu, Worker response, R2 verified object and History receipt are different evidence classes. Mark each **PASS / FAIL / BLOCKED / NOT TESTED**.
 
-**P0 release gate:** Do not call the native-menu defect FIXED until real installed Chrome acceptance passes in the affected use case. If the environment blocks unpacked Chrome or live provider verification, finish safe, testable source repairs and mark real acceptance **BLOCKED/OPEN**. Never claim success based on a screenshot fixture or ACK.
+**P0 release gate:** BOTH native-menu availability AND rapid-fire save/screenshot stability, plus automatic History updates and NO logged-out screenshot History records, must pass. Do not call the native-menu defect FIXED until real installed Chrome acceptance passes in the affected use case. If the environment blocks unpacked Chrome or live provider verification, finish safe, testable source repairs and mark real acceptance **BLOCKED/OPEN**. Never claim success based on a screenshot fixture or ACK.
 
 ---
 
 ## 2. P1 follow-on: make the remote Worker as durable as its receipts
 
-**This is a second, explicitly separated workstream.** Start implementation only after the P0 native source patch and focused regressions have been completed and isolated. If the available Codex run is insufficient, leave a precise design, scoped follow-up task and reproducible test fixtures rather than performing an unreviewed Worker overhaul in the same patch.
+**This is a second, explicitly separated workstream.** Start only after the P0 native menu, burst stability, logged-out screenshot exclusion and automatic History acceptance tests have passed. **Never add a scheduler because it sounds sophisticated.** An unnecessary scheduler, checkpoint or remote handshake is itself a reliability/performance regression. If the available Codex run is insufficient, leave a precise design, scoped follow-up task and reproducible test fixtures rather than performing an unreviewed Worker overhaul in the same patch.
 
 ### What Click2Cloud already does well (preserve it)
 
@@ -143,14 +187,14 @@ These rules apply immediately to implementation choices, but do **not** justify 
 
 **Gate A:** No proven destructive loss of native menu in tested supported failure cases, first-login menu always returns when Chrome permits, exact right-click routing and config preserved. Real installed-Chrome evidence required for "fixed."
 
-### Milestone B — Remote executor audit and bounded proof (follow immediately after A, but keep commits separate)
+### Milestone B — Minimal, speed-preserving remote interruption audit (no default heavy scheduler)
 
 1. Trace \`src/cloudflare/worker.mjs\`, \`src/cloudflare/transport.mjs\`, \`src/cloudflare/deployment.mjs\`, \`right2cloud-module/src/*\` and Durable Object claim/recovery boundaries.
 2. Produce failure-injection fixtures for worker interruption, remote write ACK loss, job duplicate admission, 30-second lease transitions, revoked authorization and browser shutdown.
-3. If the smallest safe recovery mechanism is confirmed and does not require new unauthorized infrastructure/permissions, implement a **separately reviewed** minimal scheduler with one coordinator, checkpoints and idempotent restart; otherwise deliver an exact design proposal and leave live infrastructure unchanged.
-4. Measure before/after operation status and performance; test actual Cloudflare when owner-approved credentials/test bucket are available.
+3. **Do not implement a large new scheduler, workflow/queue service, per-byte checkpoint system, global lock or duplicated job database by default.** First demonstrate an actual unrecoverable interrupted job that cannot be handled by existing remote intent + safe readback. Research a minimal optional coordinator with necessary—not excessive—durable checkpoints. If new infrastructure/cost or material hot-path complexity is needed, propose it for explicit owner review and leave production unchanged until approval. Avoid repeated health checks or DB transactions on every normal save.
+4. Benchmark before/after worker RAM, concurrent in-flight jobs, startup, right-click latency, screenshot duration, checkpoints/storage writes per operation, cloud calls per operation, History refresh work, p50/p95/p99 and crash rate. **Any material degradation fails this milestone** unless justified by a proven customer failure and explicitly accepted. Test actual Cloudflare only with owner-approved disposable resources.
 
-**Gate B:** Proven safe interruption/restart behavior for supported sources, not merely \`waitUntil\` or saved claims. Never report an indefinite running task if it is really orphaned.
+**Gate B:** Better interruption handling **without slowing the existing ordinary click/screenshot path, increasing RAM or destabilizing burst workloads**. Only claim actual autonomous recovery after a platform-backed execution test. Otherwise retain the fast current path and record an honest OPEN risk, not a heavy speculative fix.
 
 ### Milestone C — Upgrade, operations and release hardening (separate follow-up if necessary)
 
@@ -171,7 +215,7 @@ These rules apply immediately to implementation choices, but do **not** justify 
 - No new buckets, Worker deployments, billable infrastructure, public domain attachment, remote deletion or token rotation without existing explicit approval and exact authorization.
 - No blind local file download→upload staging, no new browser disk cache, no large extra IndexedDB database. Small durable metadata is appropriate; actual file bytes stay true remote.
 - No bogus auto-default, root bucket recreation, multiple Cloudflare headings, fabricated folders or unintended changes to Simple/Narrow/Depth/Default/Quick.
-- No deletion or mangling of History, Search, Screenshots, Shelf, Get URL, lightbox, Bit o' Polish themes, or work already underway on separate 0.3.22 Auto-Reroute; nonregression tests only unless separately authorized.
+- Preserve History, Search, Screenshots, Shelf, Get URL, lightbox, Bit o' Polish themes and separate Auto-Reroute. **Scoped repairs to live History updates, the logged-out screenshot logging exclusion, burst control and resource leaks ARE explicitly authorized by this November 21 owner override.** Do not redesign unrelated UI or cap historical records.
 - No claiming a mock test, simulated Worker, saved \`nativeRegistration\` ACK, screenshot fixture, \`202 Accepted\`, or Worker response means visible menu or verified R2 save.
 - If Chrome forbids unpacked installation or the environment has no authorized test account, document **BLOCKED** and provide exact owner-run real-Chrome test steps. Do not bypass policies or invent test evidence.
 - When encountering older contradictory directions, use controlling newer owner instructions; isolate and document unresolved contradictions rather than silently changing user-visible behavior.
@@ -181,6 +225,8 @@ These rules apply immediately to implementation choices, but do **not** justify 
 ## 6. Required test campaigns and report format
 
 ### Phase A core release gates (all must be accounted for)
+
+- Rapid-fire native save + screenshot tests B01–B09, screenshot shortcut **logged-out means zero History**, live History updates from both operation types without manual refresh, and measured bounded RAM/latency under load.
 
 - First install (zero saved config) before login; first login success with and without cloud setup; reconnect; OAuth expired/revoked; Cloudflare offline.
 - Chrome worker load/install/start/suspend/wake; original Windows profile; multiple tabs/windows; page, image and link supported contexts.
@@ -218,6 +264,8 @@ Provide **bullet-by-bullet**:
 - Work branch, precise starting SHA, new commit hashes, changed files and clean/dirty working-tree state.
 - Which of the known 0.3.22 failure mechanisms was actually reproduced, and which remain hypotheses.
 - Implementation summary of non-destructive native registration and why it does not remove healthy entries.
+- Measured rapid-action/screenshot stress results; in-flight PNG/Blob bounds, settled memory, p95 latency, screenshot quota behavior and whether any extension process crashed.
+- Demonstrated automatic History updates for both save and screenshot, plus zero logged-out shortcut entries in History.
 - Concrete post-login, reconnect, no-destination and worker-load behavior proved.
 - Exact Simple/Narrow/Depth/Quick/Default and other-provider nonregressions.
 - Native registration test count, before/after failures, production-vs-fixture evidence and any new failing tests.
