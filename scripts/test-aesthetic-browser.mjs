@@ -101,13 +101,13 @@ for(const mode of ['standard','minimal']){
  if(mode==='minimal'){
   assert(await page.getByText('Availability depends on the connected account.',{exact:true}).isVisible());
   assert.equal(await page.getByText(/Save prepares or maintains the private Cloudflare Worker/).isVisible(),false);
-  assert(await page.getByText('Setup and usage',{exact:true}).isVisible());
+  assert(await page.getByText('Setup and Usage',{exact:true}).isVisible());
   assert(await page.getByRole('button',{name:'Save',exact:true}).isEnabled());
  }
  for(const name of ['Simple','Narrow','Depth']){await page.getByRole('button',{name,exact:true}).click();await shot(mode+'-destinations-'+name);}await page.keyboard.press('Escape');
  await page.locator('#header-more').click();await page.getByRole('menuitem',{name:'Help · Diagnose',exact:true}).click();await page.getByRole('button',{name:'Copy reviewed report'}).waitFor();await shot(mode+'-help');await page.locator('#close-dialog').click();await page.locator('#dialog').waitFor({state:'hidden'});
  await page.getByRole('button',{name:'File Explorer',exact:true}).click();
- const imageRow=page.locator('#files tr[data-index]').filter({hasText:'image.png'}).first();
+ const imageRow=page.locator('#files [data-index]').filter({hasText:'image.png'}).first();
  await imageRow.press('Enter');try{await page.locator('img.preview').waitFor();}catch(error){
   console.error('Gallery fixture diagnostic',await page.evaluate(()=>({
    title:document.querySelector('#dialog-title')?.textContent,

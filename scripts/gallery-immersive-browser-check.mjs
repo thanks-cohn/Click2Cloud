@@ -105,6 +105,9 @@ export async function checkImmersiveView(page){
  assert(await page.getByRole('row').filter({hasText:'immersive-a-portrait.png'}).evaluate(row=>row===document.activeElement||row.contains(document.activeElement)));
 
  const beforeCycles=await heap(),countersBefore=await cdp.send('Memory.getDOMCounters');
+ await cdp.send('Performance.enable');
+ const rendererSeconds=async()=>(await cdp.send('Performance.getMetrics')).metrics.find(entry=>entry.name==='TaskDuration')?.value;
+ const taskBefore=await rendererSeconds();
  const cycles=105;
  const extraReads=await page.evaluate(async count=>{
   const readCount=()=>window.productFixture.calls.filter(call=>call.operation==='readChunk').length;
@@ -129,6 +132,7 @@ export async function checkImmersiveView(page){
   }
   return extra;
  },cycles);
+ const taskAfter=await rendererSeconds();
  const afterCycles=await heap(),countersAfter=await cdp.send('Memory.getDOMCounters');
  assert.equal(extraReads,0);
  assert(countersAfter.jsEventListeners<=countersBefore.jsEventListeners+3,{countersBefore,countersAfter});
@@ -139,5 +143,5 @@ export async function checkImmersiveView(page){
  await page.getByLabel('View',{exact:true}).selectOption('grid');
  return {gate:'immersive-portrait-landscape-scroll-navigation-and-escape',state:'PASS',clickZoomCycles:12,openZoomPanCloseCycles:cycles,
   immersiveAdditionalReads:extraReads,gcHeapBeforeBytes:before,gcHeapImmersiveBytes:during,
-  gcHeapBeforeCycles:beforeCycles,gcHeapAfterCycles:afterCycles,countersBefore,countersAfter};
+  gcHeapBeforeCycles:beforeCycles,gcHeapAfterCycles:afterCycles,countersBefore,countersAfter,rendererTaskSeconds:taskAfter-taskBefore};
 }

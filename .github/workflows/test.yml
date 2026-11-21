@@ -41,6 +41,7 @@ jobs:
             ${{ runner.temp }}/redown-p1-search
           if-no-files-found: ignore
       - name: Upload unpacked extension
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: click2cloud-unpacked
@@ -48,6 +49,7 @@ jobs:
           if-no-files-found: error
       # Real IndexedDB crash/recovery guard in the existing job. No cloud credentials.
       - name: CURRENT persistence and native-authority regression
+        if: ${{ !cancelled() }}
         env:
           C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
           C2C_RECOVERY_EVIDENCE: ${{ runner.temp }}/click2cloud-current-recovery
@@ -99,6 +101,19 @@ jobs:
           name: click2cloud-native-menu
           path: ${{ runner.temp }}/click2cloud-native-menu
           if-no-files-found: ignore
+      - name: Installed Chrome P1 appearance
+        if: ${{ !cancelled() }}
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+          C2C_P1_INSTALLED_EVIDENCE: ${{ runner.temp }}/redown-p1-installed
+        run: node scripts/test-redown-p1-installed-browser.mjs
+      - name: Upload installed P1 appearance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redown-p1-installed-browser
+          path: ${{ runner.temp }}/redown-p1-installed
+          if-no-files-found: error
       - name: Installed Chrome Get URL against the HTTPS fixture
         if: ${{ !cancelled() }}
         env:
@@ -139,8 +154,10 @@ jobs:
           git archive f2ba964ecf1e0ce455031538190d7baaf9de1c57 | tar -x -C "$RUNNER_TEMP/click2cloud-appearance-before"
           ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/click2cloud-appearance-before/node_modules"
           sed -i "s|executablePath:'/usr/bin/chromium'|executablePath:process.env.C2C_CHROME_EXECUTABLE|" "$RUNNER_TEMP/click2cloud-appearance-before/scripts/test-aesthetic-browser.mjs"
-          (cd "$RUNNER_TEMP/click2cloud-appearance-before" && C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/before" node scripts/test-aesthetic-browser.mjs)
-          C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/after" node scripts/test-aesthetic-browser.mjs
+          failures=0
+          (cd "$RUNNER_TEMP/click2cloud-appearance-before" && C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/before" node scripts/test-aesthetic-browser.mjs) || failures=1
+          C2C_AESTHETIC_EVIDENCE="$RUNNER_TEMP/click2cloud-appearance/after" node scripts/test-aesthetic-browser.mjs || failures=1
+          exit "$failures"
       - name: Upload appearance evidence
         if: always()
         uses: actions/upload-artifact@v4

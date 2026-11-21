@@ -95,13 +95,22 @@ try{
  };
  const configure=await page.evaluate(async()=>{
   const {api,current,target}=window.productFixture,state=await current.read();
-  return api.invoke({version:'3+1.1',method:'commitConfigChange',params:{changes:[{type:'createDestination',mode:'simple',target}],
+  return api.invoke({version:'3+1.1',method:'commitConfigChange',params:{changes:[{type:'createDestination',mode:'simple',target},{type:'setView',view:'details'}],
    expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()}},'gui');
  });
  assert.equal(configure.state,'completed');
  await open();
  const menuBefore=await nativeMenu();
  assert(menuBefore.some(row=>row.role==='save'));
+ await page.evaluate(async()=>{
+  const {current,target}=window.productFixture;
+  await current.setHistoryPreferences({range:'all',previews:'closed',timezone:'America/Chicago'});
+  for(const [operationId,state,key] of [['p1-verified','verified','01-first.png'],['p1-failed','failed','unavailable.png']]){
+   await current.recordRemoteResult({operationId,kind:'save',state,attemptedFilename:key,destination:target,
+    ...(state==='verified'?{proofKind:'independent-head-version-size',receipt:{key,size:window.fixtureImageData[key].length,etag:'fixture-preview'}}:
+     {code:'CLOUDFLARE_RETRY_NEEDED'})});
+  }
+ });
  for(const {theme,palette,style,tile} of cases){
   await page.setViewportSize({width:900,height:760});
   await settings();
@@ -143,7 +152,7 @@ try{
    if(!palette||palette==='original-rose')await shot(tag+'-remotes');
    await clickView('explorer');
    const row=name=>list().getByRole('row').filter({hasText:name});
-   await row('01-first.png').dblclick();
+   await row('01-first.png').press('Enter');
    await page.locator('img.preview:not([hidden])').waitFor();
    const prev=page.locator('#gallery-previous'),next=page.locator('#gallery-next');
    assert(await prev.isDisabled());
@@ -173,7 +182,7 @@ try{
     await view.selectOption('details');
    }
    await clickView('history');
-   await page.getByRole('heading',{name:'History',exact:true}).waitFor();
+   await page.locator('.history-row').first().waitFor();
    if(!palette||palette==='original-rose')await shot(tag+'-history');
    await settings();
   }
@@ -184,7 +193,7 @@ try{
  // Serve the same production app without each stylesheet, with persisted selection.
  for(const {theme,style} of [{theme:'golden-age'},{theme:'oceania'},{theme:'nostalgia'},...cases.filter(row=>row.style)]){
   const names=style?[style]:theme==='nostalgia'?['kawaii','dungeon-master','heroine']:[theme];
-  const blockedCss=path=>names.some(name=>path.endsWith('/themes/'+name+'.css'));
+  const blockedCss=url=>names.some(name=>url.pathname.endsWith('/themes/'+name+'.css'));
   const route=locator=>locator.abort();
   await page.route(blockedCss,route);
   await page.evaluate(({theme,style})=>{

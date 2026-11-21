@@ -214,6 +214,15 @@ async function browseLayout() {
 }
 
 async function coldAndWarm() {
+  // Grid intentionally loads visible thumbnails. Measure the filename-only
+  // path in Details, where the app does not request any image bytes.
+  await page.locator('#view-switch').evaluate(select=>{
+    select.value='details';
+    select.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  await page.locator('#files.details').waitFor();
+  const countReads=()=>page.evaluate(()=>window.filenameRequests.filter(item=>['readFile','readFileChunk'].includes(item.method)).length);
+  const previousReads=await countReads();
   const input = await revealSearch();
   const before = (await providerCalls(page)).length;
   await input.fill('PHoTo');
@@ -268,8 +277,7 @@ async function coldAndWarm() {
   assert.deepEqual(warm.result.data.entries.map(r=>r.key),['Cafe\u0301.JPG']);
   await row('Cafe\u0301.JPG').waitFor();
   assert.equal((await providerCalls(page)).length,afterCold.length);
-  const byteReads=(await page.evaluate(() => window.filenameRequests)).filter(item=>['readFile','readFileChunk'].includes(item.method));
-  assert.deepEqual(byteReads,[],'Details filename search must not read file bodies');
+  assert.equal(await countReads(),previousReads,'Details filename search must not read file bodies');
   measurements.warmPath={coldUiMs:cold.elapsedMs,warmUiMs:warm.elapsedMs,providerReadsBeforeSearch:before,providerReadsAfterCold:afterCold.length,providerReadsAfterWarm:(await providerCalls(page)).length};
   await assertClear();
 }

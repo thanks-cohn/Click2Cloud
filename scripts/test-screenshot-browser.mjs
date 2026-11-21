@@ -152,7 +152,9 @@ try{
  await app.getByRole('button',{name:'Sign out'}).waitFor();
  async function openScreenshot(){
   await app.locator('#header-more').click();
-  assert.deepEqual(await app.locator('#header-menu > button:visible:not([data-debug-only])').allTextContents(),['Screenshots','Settings']);
+  const visible=await app.locator('#header-menu > button:visible:not([data-debug-only])').allTextContents();
+  const compact=await app.locator('header nav > [data-view=history]').isHidden();
+  assert.deepEqual(visible,compact?['Screenshots','Settings','History']:['Screenshots','Settings']);
   await app.getByRole('menuitem',{name:'Screenshots',exact:true}).click();
  }
  await openScreenshot();
@@ -597,9 +599,13 @@ try{
   assert.equal(await app.locator('img.preview').getAttribute('src'),original);
   await app.keyboard.press('Escape');
   assert(await app.locator('#dialog').isVisible());
+  assert.equal(await app.locator('#dialog').getAttribute('data-immersive'),'');
+  assert.equal(await app.getByRole('slider',{name:'Zoom relative to Fit'}).inputValue(),'100');
+  await app.keyboard.press('Escape');
   assert.equal(await app.locator('#dialog').getAttribute('data-immersive'),null);
   await app.keyboard.press('Escape');
-  checks.push('The installed preview reused the verified screenshot for immersive two-axis zoom and two-stage Escape');
+  assert(await app.locator('#dialog').isHidden());
+  checks.push('The installed preview reused the verified screenshot for immersive two-axis zoom and three-stage Escape');
 
   checks.push('After Chrome Reload and without cached screenshot bytes, the original single-output receipt previews its saved R2 image and GO TO selects that exact file');
  }

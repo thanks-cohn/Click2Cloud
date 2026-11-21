@@ -104,18 +104,36 @@ try{
  // hide a bootstrap failure by doing the work themselves.
  const app=await context.newPage();await app.goto(appUrl);
  const cdp=await context.newCDPSession(app);
+ const lifecycle=[];
+ cdp.on('ServiceWorker.workerVersionUpdated',({versions})=>{
+  for(const version of versions)if(version.scriptURL===workerUrl)lifecycle.push(version.runningStatus);
+ });
  await cdp.send('ServiceWorker.enable');
  const cloudId=report.rows.find(row=>row.label==='Cloudflare').id;
  await worker.evaluate(itemId=>new Promise((ok,fail)=>chrome.contextMenus.remove(itemId,()=>chrome.runtime.lastError?fail(Error(chrome.runtime.lastError.message)):ok())),cloudId);
- const closed=context.waitForEvent('serviceworker',{predicate:item=>item.url()===workerUrl&&item!==worker,timeout:15000});
+ const marker=()=>worker.evaluate(()=>globalThis.nativeFixtureMarker).catch(()=>null);
+ const mark=()=>worker.evaluate(()=>{globalThis.nativeFixtureMarker=true;});
+ await mark();
+ let stopped=false;
+ worker.once('close',()=>{stopped=true;});
+ lifecycle.length=0;
  await cdp.send('ServiceWorker.stopAllWorkers');
- await app.evaluate(()=>chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method:'getEngineHealth',params:{}}));
- worker=await closed;
- await readyWorker();
+ await waitFor(()=>stopped||lifecycle.includes('stopped'),'Chrome to stop the extension service worker');
+ const wake=await app.evaluate(()=>chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method:'getEngineHealth',params:{}}));
+ assert.equal(wake.state,'completed');
+ worker=await readyWorker();
+ assert.equal(await marker(),undefined,'worker globals must be new after cold wake');
  await nativeMenu(page,'worker-wake-after-lost-row','page');
- await worker.evaluate(()=>chrome.runtime.reload());
- await waitFor(()=>context.serviceWorkers().some(item=>item.url()===workerUrl&&item!==worker),'extension reload');
- await readyWorker();
+ await mark();
+ await worker.evaluate(()=>chrome.runtime.reload()).catch(error=>{
+  if(!/closed|destroyed/i.test(error.message))throw error;
+ });
+ await waitFor(async()=>{
+  const active=await readyWorker();
+  const reloaded=await active.evaluate(()=>globalThis.nativeFixtureMarker!==true).catch(()=>false);
+  if(reloaded)worker=active;
+  return reloaded;
+ },'extension reload');
  await nativeMenu(page,'extension-reload','page');
 
  await context.close();
