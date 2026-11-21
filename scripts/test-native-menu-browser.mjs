@@ -63,11 +63,14 @@ async function nativeMenu(page, scenario, contextName, {click=false}={}){
  const element=contextName==='page'?null:page.locator(contextName==='image'?'img':'a');
  const box=element?await element.boundingBox():{x:420,y:260,width:2,height:2};
  const offset=await page.evaluate(()=>({top:screenY+outerHeight-innerHeight,left:screenX}));
- input('click',String(Math.round(offset.left+box.x+box.width/2)),String(Math.round(offset.top+box.y+box.height/2)),'3');
+ const x=Math.round(offset.left+box.x+box.width/2),y=Math.round(offset.top+box.y+box.height/2);
+ input('click',String(x),String(y),'3');
  await sleep(220);
  const base=join(out,`${scenario}-${contextName}`);
  const top=readScreen(base+'.png');
- const group=top.find(row=>/^REDOWN$/i.test(row[11]));
+ // The extension tab and the side-panel title can both read REDOWN.
+ // Find the label next to the context gesture, below Chrome's tab strip.
+ const group=top.find(row=>/^REDOWN$/i.test(row[11])&&Number(row[7])>=offset.top&&Math.abs(Number(row[6])-x)<280);
  assert(group,'Chrome native REDOWN group missing: '+top.map(row=>row[11]).join(' '));
  const point=row=>[String(Number(row[6])+Math.floor(Number(row[8])/2)),String(Number(row[7])+Math.floor(Number(row[9])/2))];
  // Select the actual parent row. Hover alone can leave a Chrome Views
@@ -134,7 +137,8 @@ try{
  await waitFor(()=>stopped||lifecycle.includes('stopped'),'Chrome to stop the extension service worker');
  const wake=await app.evaluate(()=>chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method:'getEngineHealth',params:{}}));
  assert.equal(wake.state,'completed');
- await readyFromShelf('worker wake');
+ const ack=await readyFromShelf('worker wake');
+ report.scenarios.push({scenario:'worker wake ACK',status:'PASS',proof:'Chrome service-worker stop and current registrar ACK',generation:ack.acknowledgedGeneration});
  await nativeMenu(page,'worker-wake-after-lost-row','page');
  await app.evaluate(()=>chrome.runtime.reload()).catch(error=>{
   if(!/closed|destroyed/i.test(error.message))throw error;

@@ -13,7 +13,28 @@ Object.defineProperty(window,'indexedDB',{configurable:true,value:{open(...args)
 for(const [kind,key] of [['local','bootChromeLocal'],['session','bootChromeSession']])chrome.storage[kind]={setAccessLevel:async()=>{fixture.counts.access++;if(mode==='acl'&&fixture.counts.access===1)throw Object.assign(Error(),{name:'UnknownError'});},get:async k=>{const data=JSON.parse(localStorage.getItem(key)??'{}');return typeof k==='string'?{[k]:data[k]}:data;},set:async v=>{const data=JSON.parse(localStorage.getItem(key)??'{}');localStorage.setItem(key,JSON.stringify({...data,...v}));},remove:async k=>{const d=JSON.parse(localStorage.getItem(key)??'{}');delete d[k];localStorage.setItem(key,JSON.stringify(d));}};
 if(mode==='lost'&&!localStorage.bootNativeLost){await chrome.storage.local.set({nativeRegistration:{desired:{generation:583,rows:[{role:'save',target:t}]},appliedGeneration:583,state:'applied'}});localStorage.bootNativeLost='1';}
 chrome.identity={getRedirectURL:()=> 'https://ajppphdiamdobknpamcheohmdbdbeoal.chromiumapp.org/cloudflare',launchWebAuthFlow:async({url})=>{fixture.counts.oauth++;const u=new URL(url),reply=u.searchParams.get('redirect_uri')+'?state='+encodeURIComponent(u.searchParams.get('state'))+'&code=fixture-code';if(fixture.holdLogin)return new Promise(ok=>fixture.completeLogin=()=>ok(reply));return reply;}};
-chrome.contextMenus.create=(_p,cb)=>{fixture.counts.native++;fixture.nativeEntries??=[];fixture.nativeEntries.push(_p);if(fixture.holdNative){fixture.nativeCallbacks.push(cb);return;}if(fixture.failNative)chrome.runtime.lastError={message:'fixture denied'};cb();chrome.runtime.lastError=null;};
+const menuItems=new Map();
+function nativeCallback(callback,message,commit){
+ fixture.counts.native++;
+ const finish=()=>{
+  const failure=fixture.failNative?'fixture denied':message;
+  if(!failure)commit();
+  chrome.runtime.lastError=failure?{message:failure}:null;
+  try{callback();}finally{chrome.runtime.lastError=null;}
+ };
+ if(fixture.holdNative)fixture.nativeCallbacks.push(finish);
+ else finish();
+}
+const missing=id=>'Cannot find menu item with id '+id;
+chrome.contextMenus.create=(properties,callback)=>{
+ fixture.nativeEntries??=[];fixture.nativeEntries.push(properties);
+ return nativeCallback(callback,menuItems.has(properties.id)?'Cannot create item with duplicate id '+properties.id:null,
+  ()=>menuItems.set(properties.id,properties));
+};
+chrome.contextMenus.update=(id,patch,callback)=>nativeCallback(callback,menuItems.has(id)?null:missing(id),
+ ()=>menuItems.set(id,{...menuItems.get(id),...patch}));
+chrome.contextMenus.remove=(id,callback)=>nativeCallback(callback,menuItems.has(id)?null:missing(id),()=>menuItems.delete(id));
+chrome.contextMenus.removeAll=callback=>{menuItems.clear();callback();};
 window.fetch=async(url,options={})=>{const path=String(url);if(path==='https://dash.cloudflare.com/oauth2/token'){fixture.counts.token++;if(fixture.tokenOffline)throw TypeError('fixture token offline');return Response.json({access_token:'synthetic-access',refresh_token:'synthetic-refresh',expires_in:3600});}if(path.startsWith('https://api.cloudflare.com/client/v4/accounts?')){fixture.counts.identity++;if(fixture.offline)throw TypeError('fixture offline');return Response.json({success:true,result:[{id:'fixture-account',name:'Fixture account'}]});}if(path.startsWith('https://api.cloudflare.com')||path.includes('.workers.dev')){if(mode==='workflow'){fixture.counts.otherCloud++;return fetchOriginal('/fixture-'+(path.includes('.workers.dev')?'worker':'cloud')+'?path='+encodeURIComponent(path),options);}fixture.counts.otherCloud++;if(!['GET','HEAD'].includes(options.method??'GET'))fixture.counts.resourceWrites++;throw Error('FIXTURE_CLOUD_WORK_FORBIDDEN');}return fetchOriginal(url,options);};
 fixture.failNative=mode==='native-fail';fixture.holdNative=mode==='native-hold';fixture.holdLogin=mode==='cancel';fixture.offline=mode==='offline';fixture.tokenOffline=mode==='token-offline';fixture.nativeCallbacks=[];
 await import((window.bootCodeRoot??'')+'/extension/background.mjs');fixture.engine=globalThis.click2cloud;fixture.hostReady=true;
