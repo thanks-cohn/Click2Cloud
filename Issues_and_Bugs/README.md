@@ -1,5 +1,11 @@
 # Click2Cloud — Issues and Bugs
 
+**November 21 owner-reported blockers and regression (new; NOT claimed fixed):**
+
+- **P0 CRITICAL / RELEASE BLOCKER — native Chrome right-click menu is missing, especially immediately after successful Login/Reconnect.** [Full incident + required always-available acceptance](Bugs/P0_CRITICAL_NATIVE_RIGHT_CLICK_MENU_MISSING_AFTER_LOGIN_2026-11-21.md) · [GitHub #19](https://github.com/thanks-cohn/Click2Cloud/issues/19). This is Chrome's native right-click menu, **not** the Shelf Explorer menu. Must appear immediately following sign-in, before and after native Worker/service-worker lifecycle transitions, with no Shelf reopen or manual restore. Logged as source investigation, not verified root cause or successful repair.
+- **P1 — Shelf header visual collision on shrink/re-expand, observed with Emerald Forest.** [More overlaps sun/moon theme toggle](Bugs/P1_SHELF_HEADER_MORE_THEME_OVERLAP_ON_RESIZE_EMERALD_FOREST_2026-11-21.md). Maintain separate tap targets and responsive header layouts in every palette, light/dark and resize direction. This is a distinct layout issue; do not conflate with P0 native context-menu absence.
+
+
 **Repository issue register; owner-reported November 7, 2026.** These Markdown files are scoped Codex work items, not evidence that any change has been implemented. Keep defects separate from feature/UX requirements and record actual Chrome test results before closing.
 
 **Status note (merged November 19, 2026):** This issue register preserves historical descriptions, including items marked *requested* that now have code in 0.3.20. Use [the code-audited, delta-only next-Codex handoff](../next-codex/NEXT_RUN_DEDUPLICATED_CODE_AUDIT_AND_RULES_2026-11-19.md) to distinguish implemented source from remaining gaps. Existing P0 wrong-destination reports remain open pending real proof.
