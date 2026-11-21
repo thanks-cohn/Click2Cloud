@@ -28,6 +28,10 @@ The owner's phrase: **"I want Golden Age to feel like truly a Pinterest thing."*
 - A coherent light and dark treatment is essential. Avoid copying Pinterest logos, branding, exact interface or simply setting `#e60023`; preserve REDOWN identity and Aesthetic API palette preferences.
 - Cards in this theme should look *designed and desirable*, not like generic HTML panels with red styling.
 
+- **Essential Pinterest-like image grid:** Golden Age's image-heavy views should offer a genuine *masonry-style*, staggered grid: cards of a consistent column width but **different heights according to the image's aspect ratio**, with occasional visually larger/taller images. Avoid a wall of identically sized rectangular thumbnails. The uneven rhythm, within reason, is key to the feeling of Pinterest and visual discovery. Use the actual images, not decorative stock placeholders.
+- **Controlled variation, not random chaos:** preserve image proportions rather than stretching or awkwardly cropping, make columns responsive to side-panel width, maintain tidy gutters and readable labels, and provide stable ordering. On very narrow widths, fall back gracefully to one column. This is a visual gallery mode where appropriate—do not force masonry on data tables or chronological History records.
+- **Keep the performance cost low:** do not download full-resolution originals for gallery tiles. Use existing bounded thumbnail/read paths, lazy load only visible or near-visible items, cache sparingly, avoid loading thousands of cards/bytes into RAM, and use lightweight CSS layout where suitable. Avoid heavy masonry JS dependencies, constant reflows, unnecessary animations, or preloading entire folders. Ensure keyboard and screen-reader navigation remain coherent.
+
 ## Theme identity: Oceania must feel like the GOLDEN AGE of Tumblr
 The owner's phrase: **"I want Oceania to also be its own thing and feel FULLY like golden age Tumblr!"**
 
