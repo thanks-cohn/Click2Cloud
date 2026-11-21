@@ -28,6 +28,19 @@ The owner's phrase: **"I want Golden Age to feel like truly a Pinterest thing."*
 - A coherent light and dark treatment is essential. Avoid copying Pinterest logos, branding, exact interface or simply setting `#e60023`; preserve REDOWN identity and Aesthetic API palette preferences.
 - Cards in this theme should look *designed and desirable*, not like generic HTML panels with red styling.
 
+## Theme identity: Oceania must feel like the GOLDEN AGE of Tumblr
+The owner's phrase: **"I want Oceania to also be its own thing and feel FULLY like golden age Tumblr!"**
+
+**Terminology is critical:** "Golden Age" is the name of REDOWN's **Pinterest-inspired theme** above. The **golden age of Tumblr** is the cultural/design reference for the **separate Oceania theme**, not an instruction to make Golden Age look like Tumblr. Treat the aspirational reference as the early-to-mid-2010s Tumblr era (roughly 2011–2015), without pretending there was one universal Tumblr aesthetic.
+
+- **Personality:** intimate, expressive, dreamy, nostalgic, a little rebellious, and deeply personal; a beautifully curated Tumblr blog you can get lost in, not a corporate storage dashboard, not a Pinterest pinboard, and not Frames with another palette. Capture the feeling of discovering art, photography, short writing, music-era imagery, and a sequence of evocative posts.
+- **Visual language:** a thoughtful blog/feed rhythm, generous atmospheric imagery where there is real user media, distinctive editorial/indie typography, carefully layered indigo/navy/dusk or sea-glass accents appropriate to Oceania, subtle soft-grunge/film/archival textures where efficient, tasteful contrast between quiet typography and expressive visual moments. The mood should be nostalgic yet professionally composed, not dated/sloppy.
+- **Signature details:** consider Tumblr-era cues such as post-like cards, date/collection stamps, tasteful tag-like metadata, elegant text snippets, captivating photo framing, personal scrapbook accents, and delicate transitions; use as inspiration rather than directly copying Tumblr icons, branding, reblog buttons, site chrome, or identical feed layouts. Meaningful actual statuses and actions must not be disguised as decorative social-media actions.
+- **Every surface:** apply the theme coherently to Remotes, History, Explorer image/gallery views, Settings, dialogs, empty/loading/feedback states and navigation. History can feel like an evocative archive **without** sacrificing exact chronological grouping, pagination, GO TO, receipt truth or metadata visibility. Explorer still must work as a functional file manager; never force image-heavy layouts on plain-file rows.
+- **Strong separation:** Golden Age = polished Pinterest-like collecting/inspiration-board aesthetics; Oceania = personal, expressive early-2010s Tumblr-like blog/archive atmosphere; Frames = engineered premium Windows-inspired desktop craftsmanship. These are distinct complete experiences, not interchangeable red/blue color themes.
+- **Performance & control:** rely on existing actual media; no bundled giant background images, no remote theme trackers, no persistent animations, no fake content, and no offscreen thumbnail loading. Preserve low-memory operation, lazy media rendering, responsive narrow side panels, light/dark, Aesthetic API fonts/colors, reduced motion and accessible focus.
+- **Test it visually:** show distinctive side-by-side screenshots of the *same* Remotes, History and Explorer content in Oceania, Golden Age and Frames. If they feel like merely recolored versions of the same generic panel, the task is not finished.
+
 ## P0: provider cards — radically less text
 On the normal Remotes screen, each Google Drive, OneDrive, and Dropbox full-width stacked card should display **only**:
 1. recognizable provider icon;
@@ -61,7 +74,7 @@ Owner wants **uncapped, metadata-first History**, with images/previews derived o
 
 ## Acceptance for NEXT IMPLEMENTATION RUN (not for this doc-only task)
 - Side-by-side owner-reference visual review against competitor, but original REDOWN styling.
-- Clear distinct identities for **Frames vs Golden Age vs other themes**, with comprehensive coverage of Remotes, History, Explorer, Settings and dialogs.
+- Clear distinct identities for **Frames vs Golden Age vs Oceania vs other themes**, with comprehensive coverage of Remotes, History, Explorer, Settings and dialogs.
 - Light/dark, all palettes/fonts, narrow/wide panels, zoom/keyboard focus/reduced motion.
 - Beautiful provider cards showing only icon/name/buttons during normal operation; errors recoverable without clutter.
 - Non-obstructed History pagination and genuinely bounded-memory retrieval.
