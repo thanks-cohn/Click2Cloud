@@ -10,6 +10,22 @@
 
 ---
 
+## NEW OWNER OVERRIDE — permanent fast-path and History invariants (November 21, 2026)
+
+**A. Native right-click must remain accessible:** On eligible Chrome pages with enabled extension/provider, right-click is ALWAYS the lightweight independent entrypoint—even under screenshot bursts, many uploads, a stuck remote Worker, or History rendering. Never repeatedly clear the menu or tie it to a global upload/diagnostics/History lock.
+
+**B. No crashes from fast successive actions:** Ordinary right-clicks and screenshot shortcuts, even if rapidly repeated, must not trigger runaway RAM/CPU, 2 GB extension-driven spikes, unbounded active jobs/PNG bytes, event listeners, lost handlers, stuck Shelf or worker crashes. Keep quick gesture admission and bounded expensive concurrency; under true platform/browser quota, respond with an honest retryable busy/rate-limit result. No arbitrary slowdown and no unlimited in-memory queue. **Durability mechanisms that materially degrade click speed, screenshot speed, responsiveness or memory are unacceptable without measured justification and explicit owner approval.**
+
+**C. Automatic History updates:** Right-click saves and *logged-in* screenshot jobs automatically appear/update in the open History page after durable recording, with pending and final status reflecting the same operation. History is complete since the first entry, with no arbitrary cap, but updates must be batched/targeted rather than reloading all History or decoding every image after each event.
+
+**D. Logged-out screenshot shortcuts must produce NO History:** Check authorization before screenshot capture and any persistent pending/failure checkpoint. A shortcut pressed while logged out should give only transient login feedback—not a History entry, retry-cache PNG or upload. Repeated logged-out shortcuts leave History unchanged. If an authenticated screenshot was accepted and authentication later expires, its real accepted operation stays in History with its truthful failure/uncertain outcome.
+
+**E. No speculative heavyweight job platform:** Durable Objects, alarm scheduling, Workflows, Queues and frequent checkpointing are NOT mandated. Prioritize correctness and fast stability; first reproduce a real interruption and measure whether existing operation identity/readback resolves it. Propose the lightest optional recoverability enhancement *only when evidence establishes a gap*. Avoid new databases/remote services, per-byte checkpoints and extra hot-path cloud calls without explicit owner approval.
+
+**These are P0 behavioral requirements, ahead of optional long-running remote execution work.** Companion implementation request: [next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md](next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md), including B01–B09 tests.
+
+---
+
 ## I. Product promise: durability before feature count
 
 The user should experience a quiet, dependable, right-click-first product. Clicking an eligible native menu item should **always expose the intended extension action** in Chrome-supported contexts when the extension is installed, enabled, working and its visibility setting is on. The user should not need to restart Chrome, reload the extension, open the Shelf or repeat login to resurrect native menus.
@@ -151,6 +167,8 @@ Implement the detailed P0 request in [next_codex_request-11.21.2026.md](next_cod
 
 ## VI. Priority design: restartable remote operations
 
+**Performance/complexity veto:** This section is a **conditional future design**, not authorization to build a heavy scheduler or repeated checkpoints. Current right-click and screenshot throughput, peak/settled RAM and crash resistance are more important than speculative unattended execution. Do not implement a new queue, Workflows service, alarm coordinator or per-byte journal merely because the architecture could support it. Demonstrate a customer-relevant recovery gap, measure baseline, choose the smallest safe change, and obtain explicit owner approval for new infrastructure or significant runtime overhead. The existing fast remote-save behavior must remain fast. Screenshots in particular should never be blocked by ordinary remote-job orchestration or generate hidden History rows while logged out.
+
 ### A. Separate admission, execution, verification and delivery
 
 Suggested canonical state machine:
@@ -263,7 +281,7 @@ Build a reproducible **failure matrix**, automated wherever possible, while runn
 | Security | Revocation during operation, forged Worker capability, wrong connection or source | Fail closed for remote effects; safe native attention remains |
 | Privacy | Public domain absent, private bucket, source provenance in customer receipt | No silent sharing; redaction and user control |
 
-**Stress practice:** Use the prior 900–1000-save experience as a floor for repeated automated exercises, then increase concurrency, failures and test diversity. For every run, report exact attempts, independent provider receipts, false successes, wrong-target cases, unexpected duplicates, unresolved states, memory/resources, browser/version and elapsed time. Do not claim a 1000/1000 pass if receipts are merely simulation acknowledgements.
+**Stress practice:** Exercise rapid-fire right-clicks (100/500/1,000), screenshot shortcuts (10/50/100 with Chrome capture quota), mixed save/screenshot bursts, History open/closed, and 1,000+ repeated saves. Test that unauthenticated screenshot shortcuts create exactly **zero History records**, while accepted logged-in saves/screenshots update History without manual refresh. Verify no 2 GB extension-driven memory spike, growing listener count, native menu disappearance, unbounded PNG Blob retention, full-history reload on every burst or worker crash. Measure per-process peak/settled RAM, latency, task count, History refresh cost and actual provider verification; platform limits return truthful errors. Use the prior 900–1000-save experience as a floor for repeated automated exercises, then increase concurrency, failures and test diversity. For every run, report exact attempts, independent provider receipts, false successes, wrong-target cases, unexpected duplicates, unresolved states, memory/resources, browser/version and elapsed time. Do not claim a 1000/1000 pass if receipts are merely simulation acknowledgements.
 
 ## XI. Observability without becoming a second source of failure
 
@@ -303,11 +321,11 @@ Minimum events to distinguish include:
 
 **Gate 2 — Transfer correctness:** Assert exact account/bucket/prefix, conditional/idempotent writes, immutable operation identity and independent R2 verification. Do not let source/download ambiguity become a false receipt.
 
-**Gate 3 — Durable unattended execution:** Implement a platform-backed scheduler/recovery mechanism only after demonstrating retry semantics, source independence, authority expiry and safe result reconciliation. Record precise unsupported long-job cases.
+**Gate 3 — Durable unattended execution (optional, evidence/approval gated):** First prove a genuine unrecoverable job failure; benchmark interruption recovery versus normal save/screenshot speed, RAM, checkpoints and cloud costs. Do not implement a heavyweight scheduler or frequent journal unless the smallest safe method is approved and maintains fast-path performance. Record precise unsupported long-job cases.
 
 **Gate 4 — Upgrade and customer resilience:** Test old/new extension↔Worker compatibility, existing account permissions, broken setup recovery, package/manifest verification, Chrome profile migrations and safe rollback.
 
-**Gate 5 — Multi-customer scale:** Inject overload, concurrent customers, realistic network faults and repeated 1000+ saves. Meet measured release SLOs without compromising security or remote-first simplicity.
+**Gate 5 — Multi-customer scale:** Inject overload, repeated 1000+ right-click saves, screenshot shortcut bursts, open-History update floods, logged-out screenshot exclusions, concurrent customers and realistic network faults. Meet measured release SLOs without compromising security or remote-first simplicity.
 
 **Gate 6 — Maintainability:** Periodically remove dead branches, measure long-term costs and update the compatibility policy. Only refactor working foundational parts when evidence justifies the risk.
 
