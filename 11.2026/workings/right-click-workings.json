@@ -9201,9 +9201,9 @@
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "extension/aesthetic.css": "41d302efffae1f4b1ca0cb7bef391f5a0e8956ee1cf7070cb6fd1b2fddbfac63",
-      "extension/app.css": "cbb3f26c642f2a1fbdc51f0954b4f38269be5059d71ded87df7cd1b76553c9b8",
+      "extension/app.css": "bc76107f05e4afbe2268718325736990d33bd3ed392a066261f08a7989117720",
       "extension/app.html": "fef43b3d4ce5579e1ebc85f6db7ef05e88fba8dc0d9baa0e60ba5887f11298c7",
-      "extension/app.mjs": "df07fbd9a16603ed8e087fbc912c7cb8d72f2c64b03d4cfe99acd8e857ea3808",
+      "extension/app.mjs": "c47bee419d3d1812f3e089a979133e8f373f6e721a6af9641aaeafac26a87f9c",
       "extension/background.mjs": "4c39ba6d02273d0ed4d6fad069586b25cef1e82716a29092c1bedea7589e2ada",
       "extension/cloudflare-labels.mjs": "d8150c3c6da73c9c74acf993c9980795a0d0243039c442377aa5100c47f7f257",
       "extension/cloudflare-setup-view.mjs": "aa8386ccc6c8cb4e13d34b3598c0d7c301dfaa2f16eb2f83e2c469ee7a8bae71",
@@ -9250,7 +9250,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "1ec51f7d107b5b36ceedfd0522dfec0eca765dee614d88d0fbb2b5dfac974074",
+      "src/api/service.mjs": "f9ab0a997a3dbaec142992376f93b8f1cd30896dce7f49f680558647b1a47b75",
       "src/api/shortcuts.mjs": "e294d5fabcd88fbd8090506cf5617de0d9bd6685d4566619feb1c54ef34f7db7",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "92e44670b1a591c5ebe75e61476fb3a53badd1555260f7db1b6bee3521ef85f8",
@@ -9278,7 +9278,7 @@
       "src/cloudflare/screenshot-direct-upload.mjs": "19c477f270be1b1b1de2afbfbc4b5113044f00ccc177611596dab929545a5ddd",
       "src/cloudflare/screenshot-wire.mjs": "0026483e1eec5b72daecdff5f8d28c08ffa16806ad4a56e64085f6816e1d90d0",
       "src/cloudflare/screenshot-worker.mjs": "f1ab47d33036675eb1c878aa9ee297c11ec93fd0812b1f0628df3c71310e57f3",
-      "src/cloudflare/transport.mjs": "3be114eff67311360e113401614cb204891f365dacb673fa8e5ab14860c34cf5",
+      "src/cloudflare/transport.mjs": "4800b66179821ff52ffa44b9eb983c76f87bbc56e3abaf28f74578d5735caebf",
       "src/cloudflare/wire.mjs": "12a5a32d2846d215d97dc33d1ab1e88929f527c1a2d3d73de80ced903d128dd0",
       "src/cloudflare/worker.mjs": "5a1ea1ea1bad2f79845a6f80d83b4d2ffc7f5a3b4fd1e7e460df75e13d0fc57d",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -9315,13 +9315,13 @@
       "src/explorer/object-exports.mjs": "3aae075968b96db78e60839db7641e243d8deda28a3f5715f56b8e51cfa8182a",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
       "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
-      "src/explorer/r2-adapter.mjs": "2b5c22a4c970edf0e056f77c199224e302e9209c43c311938d99f64759fdbea3",
+      "src/explorer/r2-adapter.mjs": "034b777ff74c17b1a36b7768cb1673a40b701f61fb2c335dd5c01edbf55f68f9",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "8bc0402ab039f1f4dbc202a32f6d9c2be1612b746220ba42cdfee358ab083f4b",
-      "src/glaciaring/catalog.mjs": "c49229a280084bbb05ac8ade1f6db03c5ca761fdf4553d1f47a76fc175be9670",
+      "src/glaciaring/catalog.mjs": "14d09a16542f082227a9dfd2e2ce605be301de4f7de6ecd26360fadfc98f84d5",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "4cb85bec8ea3b1ce664c436648756f868a179d3fd2709f78e801dcfba784e032",
       "src/glaciaring/support-report.mjs": "89ddf6b76469492630b2978dbdd4ea590fbb47b43bdfb3a4d9e5d6ccbc207443",
@@ -11857,15 +11857,15 @@
         ],
         "trigger": "EXPLORER_FILE_ACTION",
         "guard": "Canonical account/prefix authorization and existing file-action confirmation",
-        "actual": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
+        "actual": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent. Ordinary single-file Rename shares fileAction across Explorer and both previews. The signed Worker must support Rename for the object's actual parent, with live R2 authority and a matching deployed build. The selected right-click default is independent.",
         "apiMethods": [
           "fileAction",
           "inspectExplorerContextMenu",
           "inspectRemoteReceipt"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
-        "uiEffect": "GUI context descriptors come from inspectExplorerContextMenu. Clipboard is transient UI intent; fileAction provides equivalent explicit authorized source/destination effects through the same File API and Worker. Failed operations remain in History.",
+        "nextState": "Single-file Rename verifies the new key and source disposition through the existing Worker journal. A collision leaves both objects intact. Uncertain outcomes require inspection before retrying.",
+        "uiEffect": "After a verified Rename, Explorer updates selection, the preview updates its title and gallery position, and Shelf briefly shows Renamed!",
         "externalResourceEffect": "Authorized R2 file/folder mutation; same-bucket only",
         "persistence": "Existing History and Worker operation journal",
         "errors": [
@@ -11873,6 +11873,7 @@
           "FILE_SOURCE_CHANGED",
           "FILE_COPY_UNCONFIRMED",
           "FILE_DELETE_UNCONFIRMED",
+          "FILE_RENAME_UNCONFIRMED",
           "CROSS_BUCKET_TRANSFER_UNAVAILABLE"
         ],
         "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
@@ -11880,7 +11881,7 @@
           {
             "path": "src/api/service.mjs",
             "symbol": "method==='fileAction'",
-            "line": 233
+            "line": 421
           },
           {
             "path": "src/cloudflare/files.mjs",
@@ -11894,9 +11895,9 @@
           }
         ],
         "verification": {
-          "level": "SOURCE_LOCAL_BROWSER_WORKERD_AND_LIVE_CLOUDFLARE",
-          "status": "SEE_RESTORATION_EVIDENCE",
-          "testFile": "tests/redown-restoration.test.mjs"
+          "level": "INSTALLED_LINUX_CHROME_LOCAL_WORKERD_R2",
+          "status": "WINDOWS_AND_LIVE_R2_UNVERIFIED",
+          "testFile": "tests/rename-regression.test.mjs"
         },
         "contractViolation": null
       },
@@ -13006,7 +13007,7 @@
         "effectful": true,
         "owner": "src/api/service.mjs:invoke",
         "authorization": "Same trusted scopes and account bindings, current transfer authority and applicable confirmation",
-        "coverage": "See zero-stutter evidence; installed Windows unverified"
+        "coverage": "Unit and installed Linux Chrome Rename against local workerd and R2 emulation. Windows and live R2 unverified."
       },
       {
         "method": "listAccounts",

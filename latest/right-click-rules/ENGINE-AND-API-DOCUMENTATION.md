@@ -930,6 +930,15 @@ and possible charges before calling with `authorizeSetup`. Trusted tool
 callers also need the provision grant. `Create Bucket` is in Explorer More and
 reads back the exact authorized name following the single create attempt.
 
+For an ordinary single-file Rename, the Explorer context menu, F2, and both
+image viewers call the same `fileAction` operation. The API signs for the
+object's parent folder, including when the Explorer search lists a descendant.
+It reuses a ready plan that covers that folder. The transport checks live R2
+authorization and the deployed Worker capabilities and digest before dispatch.
+A collision uses the existing conditional write and skip policy. The API
+records a verified receipt only for the requested new key and operation.
+Inspect the folder before retrying an uncertain result.
+
 Each ordinary Worker binds one R2 bucket. Narrow saved leaves and visible
 ancestors, including bucket root, use its bucket-wide readiness. The signed
 capability still binds the exact account, bucket, prefix, operation and

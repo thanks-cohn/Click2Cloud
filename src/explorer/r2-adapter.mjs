@@ -198,7 +198,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     },
     async mkdir({source,name:n},o){const l=location(source);return message('cfCreateFolder',{...l,name:name(n)},o);},
     copy:(input,o)=>transfer('copy',input,o),move:(input,o)=>transfer('move',input,o),
-    rename:({source,entry:e,newName},o)=>message('cfRenameEntry',{source:location(source),entry:entry(e),newName:name(newName)},o),
+    rename:({source,entry:e,newName,conflict='keep'},o)=>message('cfRenameEntry',{source:location(source),entry:entry(e),newName:name(newName),conflict},o),
     delete:({source,entries},o)=>message('cfDeleteObjects',{source:location(source),entries:entries.map(entry)},o),
     async upload({source,file,key:k,conflict='keep',stagingPrefix='.redown-beta-uploads/'},options={}) {
       options=resolveOptions('upload',{},options);const {signal,onProgress}=options;

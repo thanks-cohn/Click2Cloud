@@ -192,6 +192,7 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 #dialog-title{min-width:0;overflow-wrap:anywhere}
 #dialog-title input{max-width:100%}
 .preview-rename-status{display:block;font-size:12px;color:var(--muted)}
+.rename-notice{position:fixed;inset:auto 12px 12px auto;z-index:10;pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0003;font-size:12px}
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .shortcut-row>span{flex:1}
@@ -351,7 +352,9 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 #dialog[data-immersive]::backdrop{background:#000}
 #dialog[data-immersive] :is(#close-dialog,.gallery-controls,.gallery-actions){display:none}
 #dialog[data-immersive] .dialog-head{flex-basis:34px;padding:0 44px 0 12px;border:0}
-#dialog[data-immersive] #dialog-title{pointer-events:none;font-size:12px;opacity:.8}
+#dialog[data-immersive] #dialog-title{cursor:text;font-size:12px;opacity:.8}
+#dialog[data-immersive] .dialog-head:has(#dialog-title input){flex-basis:54px}
+#dialog[data-immersive] #dialog-title input{padding:2px 6px;font-size:13px}
 #dialog[data-immersive] .dialog-body{padding:0;gap:0}
 #dialog[data-immersive] .image-frame{
  display:flex;overflow:auto;overflow-anchor:none;overscroll-behavior:contain;

@@ -425,18 +425,33 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           const createBucket=params.action==='createBucket',needsName=params.action==='mkdir'||createBucket;
           if(needsName?!params.name:!params.entry||!params.entry.key.startsWith(s.prefix))fail('SOURCE_SCOPE_MISMATCH');
           if(createBucket&&(s.prefix||s.bucketName!==params.name||!/^[a-z0-9](?:[a-z0-9-]{1,61})[a-z0-9]$/.test(params.name)))fail('BUCKET_NAME_INVALID');
-          const operationTarget=fileOperationTarget(s,d),sourceBucket=s.bucketName===d.bucketName?undefined:s.bucketName;
           if(['rename'].includes(params.action)&&!params.name||['copy','move'].includes(params.action)&&!params.destination)fail('INVALID_REQUEST');
+          const singleRename=params.action==='rename'&&!params.entry.folder;
+          if(singleRename&&targetKey(s)!==targetKey(d))fail('FILE_SCOPE_MISMATCH');
+          // Search can surface descendants of the current folder. Sign a
+          // single-file rename for the object's actual parent in either view.
+          const fileSource=singleRename?{...s,prefix:params.entry.key.slice(0,params.entry.key.lastIndexOf('/')+1)}:s;
+          const operationTarget=fileOperationTarget(fileSource,singleRename?fileSource:d),sourceBucket=s.bucketName===d.bucketName?undefined:s.bucketName;
           if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');
           if(params.authorizeSetup&&prepareFileWorker&&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:[s,d]})!==true)fail('PERMISSION_DENIED');
-          if(!createBucket&&prepareFileWorker)await prepareFileWorker(operationTarget,{sourceBucket,authorizeSetup:params.authorizeSetup});
+          // Ordinary rename uses the signed file transport's exact-prefix
+          // readiness check. The setup path requires a bucket-wide binding
+          // and can perform infrastructure changes only with explicit consent.
+          if(!createBucket&&prepareFileWorker&&(!singleRename||params.authorizeSetup))await prepareFileWorker(operationTarget,{sourceBucket,authorizeSetup:params.authorizeSetup});
           if(!await current.reserveOperation(actor+':files:'+params.idempotencyKey,await digest(params)))fail('FILE_RETRY_REQUIRES_INSPECTION');
-          const input={source:s,...(params.destination?{destination:d}:{}),...(params.entry?{entry:params.entry,entries:[params.entry]}:{}),...(params.name?{name:params.name,newName:params.name}:{}),conflict:params.conflict??'keep'};
+          const input={source:fileSource,...(!singleRename&&params.destination?{destination:d}:{}),...(params.entry?{entry:params.entry,entries:[params.entry]}:{}),...(params.name?{name:params.name,newName:params.name}:{}),conflict:singleRename?'skip':params.conflict??'keep'};
           const destination=remoteDestination(operationTarget);
           await current.recordRemoteResult?.({kind:'file-action',operationId,state:'pending',code:'FILE_ACTION_PENDING',destination});
           data=await fileApi.run(params.action,createBucket?{accountId:s.accountId,name:params.name}:input,{operationId});
           if(params.action==='rename'&&data.state!=='completed'&&!data.code&&data.data?.code)data={...data,code:data.data.code};
-          const r=data.data;await current.recordRemoteResult?.({kind:'file-action',operationId,state:data.state==='completed'&&r?.receipt?'verified':data.state,code:r?.code??data.code??'FILE_ACTION_RESULT',destination,receipt:r?.receipt});
+          const r=data.data,receipt=r?.receipt;
+          if(singleRename&&data.state==='completed'&&(r?.code!=='FILE_ACTION_VERIFIED'||r.completed!==1||receipt?.key!==fileSource.prefix+params.name||
+            receipt.operationId!==operationId||!receipt.etag||!receipt.version||!Number.isSafeInteger(receipt.size)||receipt.size<0||
+            ['provider','connectionId','accountId','bucketName','prefix'].some(field=>receipt.destination?.[field]!==destination[field]))){
+            data={state:'uncertain',code:'FILE_RENAME_UNCONFIRMED'};
+          }
+          const finalReceipt=data.data?.receipt;
+          await current.recordRemoteResult?.({kind:'file-action',operationId,state:data.state==='completed'&&finalReceipt?'verified':data.state,code:data.code??r?.code??'FILE_ACTION_RESULT',destination,receipt:finalReceipt});
         }
         else if(method==='listAccounts')data=await fileApi.run('accounts');
         else if(method==='listAuthorizedBuckets')data=await fileApi.run('buckets',params);

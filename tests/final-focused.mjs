@@ -25,6 +25,7 @@ await import('./save-receipt-repair.test.mjs');
 
 await import('./redown-restoration.test.mjs');
 await import('./restoration-files.test.mjs');
+await import('./rename-regression.test.mjs');
 
 await import('./latest-quick-rules.test.mjs');
 

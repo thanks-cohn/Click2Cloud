@@ -130,7 +130,7 @@ async function api(method,params={}, {quiet=false,readTimeout=0,signal,reconnect
   signal?.throwIfAborted();
   if(result==null)throw Object.assign(Error('ENGINE_NO_RESPONSE'),{code:'ENGINE_NO_RESPONSE',method,stage:'transport'});
   if(typeof result!=='object'||!['completed','partial','failed','blocked','uncertain','cancelled'].includes(result.state))throw Object.assign(Error('ENGINE_RESPONSE_INVALID'),{code:'ENGINE_RESPONSE_INVALID',method,stage:'transport'});
-  if(result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const code=result.code??'ENGINE_REQUEST_FAILED';if(reconnect)reconnectAfter(code);const err=Object.assign(Error(names[code]??code),{code,method,stage:result.diagnostic?.stage??'api',diagnostic:result.diagnostic});if(!quiet)status(err.message,{attention:true});throw err;}
+  if(result.state!=='completed'&&!(result.state==='partial'&&result.data?.configuration)){const code=result.code??'ENGINE_REQUEST_FAILED';if(reconnect)reconnectAfter(code);const err=Object.assign(Error(names[code]??code),{code,outcome:result.state,method,stage:result.diagnostic?.stage??'api',diagnostic:result.diagnostic});if(!quiet)status(err.message,{attention:true});throw err;}
   return result.data;
 }
 const explorerExports=createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange:hideContext});
@@ -602,6 +602,9 @@ function renderFiles(){
   el.onkeydown=event=>{if($('#dialog').open)return;const row=event.target.closest('[data-index]'),rows=ordered(),i=row?Number(row.dataset.index):focusIndex,cols=displayView()==='grid'?gridWindow(rows.length,0,viewportHeight,viewportWidth).columns:1;let n;
    if(['ArrowDown','ArrowUp','Home','End','PageDown','PageUp',...(displayView()==='grid'?['ArrowLeft','ArrowRight']:[])].includes(event.key)&&rows.length){event.preventDefault();const step=event.key.startsWith('Page')?Math.max(1,Math.floor(viewportHeight/(displayView()==='grid'?136:40)))*cols:cols;n=event.key==='Home'?0:event.key==='End'?rows.length-1:Math.max(0,Math.min(rows.length-1,i+(event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:['ArrowDown','PageDown'].includes(event.key)?step:-step)));selectRow(n,event);focusRow(n);}
    else if(event.key==='Enter'&&rows[i]){event.preventDefault();void openEntry(rows[i]).catch(e=>status(e.message));}
+   else if(event.key==='F2'&&row&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&selected.size===1&&selected.has(rows[i]?.key)){
+    event.preventDefault();if(!event.repeat)void fileActionGUI('rename',rows[i]);
+   }
    else if(event.key==='ContextMenu'||event.key==='F10'&&event.shiftKey){event.preventDefault();if(rows[i]&&!selected.has(rows[i].key))selectRow(i,{});const r=(row??el).getBoundingClientRect();void contextFor(rows[i]?.folder?{...source,prefix:rows[i].key}:source,rows[i]??null,r.left+20,r.top+20);}
    else if(event.key==='Escape'&&!($('#context').hidden&&explorerLayoutUI.dismissSearch())){selected.clear();updateSelection();hideContext();}
    else if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'){event.preventDefault();hideContext();selected=new Set(rows.map(e=>e.key));updateSelection();}
@@ -710,50 +713,103 @@ async function openEntry(e){
   paintTrace('preview-ready',started);
  }catch(error){if(ticket!==previewEpoch||controller.signal.aborted)return;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}stopGalleryVisual();const message=imageMessage(error.code);if(image){$('#preview-state').hidden=true;const alert=$('#preview-error');alert.hidden=false;alert.textContent=message;alert.dataset.code=error.code??'FILE_READ_FAILED';$('img.preview').hidden=true;}else{$('#preview-state').textContent=message;$('#preview-state').setAttribute('role','alert');}}
 }
+const fileLeaf=entry=>entry.key.replace(/\/$/,'').split('/').at(-1);
+const renameExtension=name=>name.lastIndexOf('.')>0?name.slice(name.lastIndexOf('.')):'';
+const renameConflict=error=>['FILES_SKIPPED','FILE_CONFLICT'].includes(error.code);
+const renameUnconfirmed=error=>!renameConflict(error)&&(error.outcome==='uncertain'||
+ /UNCONFIRMED|RETRY_REQUIRES_INSPECTION|ENGINE_RESPONSE_CHANNEL_CLOSED|ENGINE_NO_RESPONSE/.test(error.code??''));
+let renameNotice,renameNoticeTimer,editPreviewFilename;
+function clearRenameNotice(){
+ clearTimeout(renameNoticeTimer);
+ renameNotice?.remove();
+ renameNotice=null;
+}
+function showRenamed(){
+ clearRenameNotice();
+ renameNotice=document.createElement('div');
+ renameNotice.className='rename-notice';
+ renameNotice.setAttribute('role','status');
+ ($('#dialog').open&&gallery?$('#dialog'):document.body).append(renameNotice);
+ renameNotice.textContent='Renamed!';
+ renameNoticeTimer=setTimeout(clearRenameNotice,1800);
+}
+function selectBasename(input){
+ input.focus();
+ input.setSelectionRange(0,input.value.length-renameExtension(input.value).length);
+}
+async function renameFile(entry,target,draft){
+ const original=fileLeaf(entry),extension=renameExtension(original);
+ if(!draft||draft!==draft.trim()||draft==='.'||draft==='..'||/[\\/\x00-\x1f\x7f]/.test(draft))
+  throw Object.assign(Error(),{code:'FILENAME_INVALID'});
+ const name=extension&&!renameExtension(draft)?draft+extension:draft;
+ if(name===original)return entry;
+ clearRenameNotice();
+ const navigation=navigationEpoch;
+ const result=await runFileAction('rename',{source:target,entry:{key:entry.key,folder:false},name,conflict:'skip'});
+ const data=result.data??result,key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+name;
+ if(data.code!=='FILE_ACTION_VERIFIED'||data.receipt?.key!==key)throw Object.assign(Error(),{code:'FILE_RENAME_UNCONFIRMED'});
+ const renamed={...entry,key,displayName:name,etag:data.receipt.etag,size:data.receipt.size};
+ listingReader.invalidate();
+ if(view==='explorer'&&navigation===navigationEpoch&&targetKey(target)===targetKey(source)){
+  const replace=rows=>rows.map(row=>row.key===entry.key?renamed:row);
+  entries=replace(entries);
+  if(filenameSearch)filenameSearch.entries=replace(filenameSearch.entries);
+  if(selected.delete(entry.key))selected.add(key);
+  if(gallery?.key===entry.key){gallery.key=key;galleryReturnKey=key;}
+  ordered();
+  const i=listingOrder.index(key);
+  if(i!==undefined&&selected.has(key))focusIndex=anchor=i;
+  renderFiles();
+  // Keep the verified result visible immediately, then reconcile the listing.
+  void reloadCurrentDirectory().then(()=>{
+   if(view!=='explorer'||navigation!==navigationEpoch||!selected.has(key))return;
+   ordered();
+   const index=listingOrder.index(key);
+   if(index!==undefined){focusIndex=anchor=index;updateSelection();}
+  }).catch(()=>{});
+  showRenamed();
+ }
+ return renamed;
+}
 function bindInlineRename(entry,target,ticket){
- const title=$('#dialog-title'),name=entry.displayName??entry.key.split('/').at(-1);
- title.tabIndex=0;title.title='Double-click or press F2 to rename';
- const edit=()=>{
+ const title=$('#dialog-title'),name=fileLeaf(entry);
+ title.tabIndex=0;title.title='Rename filename (F2)';
+ const edit=editPreviewFilename=()=>{
   if(title.querySelector('input'))return;
   const input=document.createElement('input'),feedback=document.createElement('span');
   input.value=name;input.maxLength=1024;input.setAttribute('aria-label','Image filename');
   feedback.setAttribute('role','status');feedback.className='preview-rename-status';
-  title.replaceChildren(input,feedback);input.focus();input.select();
+  title.replaceChildren(input,feedback);selectBasename(input);
   const cancel=()=>{title.textContent=name;title.focus();};
+  let saving=false;
   input.addEventListener('keydown',async event=>{
    if(event.isComposing||!['Enter','Escape'].includes(event.key))return;
    event.preventDefault();event.stopPropagation();
+   if(saving)return;
    if(event.key==='Escape'||input.value===name){cancel();return;}
-   const newName=input.value;
-   if(!newName.trim()||newName==='.'||newName==='..'||newName.includes('/')||newName.includes('\\')){feedback.textContent='Enter a filename without path separators.';return;}
-   input.readOnly=true;feedback.textContent='Renaming…';
+   if(input.readOnly)return;
+   saving=input.readOnly=true;feedback.textContent='Renaming…';
    try{
-    const result=await runFileAction('rename',{source:target,entry:{key:entry.key,folder:false},name:newName,conflict:'skip'});
-    const data=result.data??result;
-    const key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+newName;
-    if(!data.code?.endsWith('_VERIFIED')||data.receipt?.key!==key)throw Object.assign(Error(),{code:data.code??'FILE_RENAME_UNCONFIRMED'});
-    listingReader.invalidate();
-    if(ticket!==previewEpoch||view!=='explorer'||targetKey(target)!==targetKey(source))return;
-    galleryReturnKey=key;gallery.key=key;selected=new Set([key]);
-    title.textContent=newName;title.focus();
-    const renamed={...entry,key,displayName:newName,etag:data.receipt.etag??entry.etag,size:data.receipt.size??entry.size};
+    const renamed=await renameFile(entry,target,input.value);
+    if(ticket!==previewEpoch||!input.isConnected)return;
+    title.textContent=fileLeaf(renamed);title.focus();
     bindInlineRename(renamed,target,ticket);
     $('#download-stream').onclick=()=>{void downloadEntry(renamed).catch(error=>status(error.message));};
     if($('#preview-tags'))$('#preview-tags').onclick=()=>{void explorerExports.tags(target,renamed);};
-    await reloadCurrentDirectory();
-    if(ticket===previewEpoch&&gallery?.key===key){
-     $('#gallery-previous').disabled=!galleryStep(ordered(),key,-1);
-     $('#gallery-next').disabled=!galleryStep(ordered(),key,1);
-    }
+    $('#gallery-previous').disabled=!galleryStep(ordered(),renamed.key,-1);
+    $('#gallery-next').disabled=!galleryStep(ordered(),renamed.key,1);
    }catch(error){
     if(!input.isConnected)return;
-    feedback.textContent=/EXIST|CONFLICT|SKIP/.test(error.code??'')?'That name is already in use.':fileError('Rename',error);
-    input.readOnly=/UNCERTAIN|UNCONFIRMED|INSPECTION/.test(error.code??'');
+    feedback.textContent=fileError('Rename',error);
+    input.readOnly=renameUnconfirmed(error);
+   }finally{
+    saving=false;
    }
   });
  };
- title.ondblclick=edit;
- title.onkeydown=event=>{if(event.target===title&&(event.key==='F2'||event.key==='Enter')){event.preventDefault();edit();}};
+ title.onclick=event=>{if(event.target===title&&immersiveView&&$('#dialog').hasAttribute('data-immersive'))edit();};
+ title.ondblclick=()=>{if(!$('#dialog').hasAttribute('data-immersive'))edit();};
+ title.onkeydown=event=>{if(event.target===title&&event.key==='Enter'){event.preventDefault();edit();}};
 }
 const previewInput='input:not([type=range]),textarea,select,[contenteditable]';
 function dismissPreview(){
@@ -765,6 +821,11 @@ $('#dialog').addEventListener('keydown',event=>{
  if(event.key==='Escape'){
   event.preventDefault();
   if(!event.repeat)dismissPreview();
+  return;
+ }
+ if(event.key==='F2'&&!event.shiftKey){
+  event.preventDefault();
+  if(!event.repeat)editPreviewFilename?.();
   return;
  }
  if(event.target.closest('input[type=range]'))return;
@@ -843,7 +904,26 @@ function setupDisclosure(title,run,detail=workerCost){
  });
 }
 function fileError(action,error){
- if(action==='Rename'&&error.code==='FILE_SETUP_APPROVAL_REQUIRED')return 'Rename needs Cloudflare setup. Review the selected destination in Remotes.';
+ if(action==='Rename'){
+  if(renameConflict(error))return 'That name is already in use.';
+  if(renameUnconfirmed(error))return 'Rename unconfirmed. Close the editor and refresh this folder before retrying.';
+  const message={
+   FILENAME_INVALID:'Enter a filename without path separators or spaces at the ends.',
+   FILE_KEY_INVALID:'The full file path is too long or contains an invalid character.',
+   FILE_NOT_FOUND:'The original file could not be found. Refresh the folder.',
+   WORKER_SETUP_REQUIRED:'This bucket has no ready file connection. Review this bucket in Remotes.',
+   FILE_SETUP_APPROVAL_REQUIRED:'This folder action requires a prepared bucket. Review this bucket in Remotes.',
+   WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED:'The file connection is missing its signing key. Ask the account owner to review it in Remotes.',
+   WORKER_DESTINATION_SCOPE_REQUIRED:'This folder is outside the existing file connection’s scope. Ask the account owner to review access.',
+   WORKER_UPGRADE_APPROVAL_REQUIRED:'The saved file connection uses an incompatible Worker version. Review it in Remotes.',
+   WORKER_BUILD_MISMATCH:'The saved and deployed Worker versions differ. Ask the account owner to review the file connection.',
+   WORKER_FILE_API_REPAIR_REQUIRED:'The existing file connection does not support Rename. Ask the account owner to review it.',
+   WORKER_NOT_READY:'Cloudflare did not confirm the file connection. Try again when it is available.',
+   TRANSPORT_UNAVAILABLE:'The file connection is unavailable. Try again when it is reachable.',
+   SELECTED_BUCKET_MISSING:'Cloudflare could not find this bucket. Refresh Explorer.'
+  }[error.code];
+  if(message)return message;
+ }
  if(reconnectCodes.has(error.code))return 'Reconnect Cloudflare and try again.';
  if(['WORKER_CREATE_PERMISSION_REQUIRED','INSUFFICIENT_SCOPE','WORKER_PERMISSION_DENIED','AUTHORIZATION_DENIED','PERMISSION_DENIED'].includes(error.code))return 'Cloudflare denied access. Review your account permissions.';
  if(/UNCERTAIN|UNCONFIRMED|RETRY_REQUIRES_INSPECTION|INTERRUPTED|ENGINE_RESPONSE_CHANNEL_CLOSED|ENGINE_NO_RESPONSE/.test(error.code??''))return action==='New Folder'?'Folder creation was not confirmed. Inspect this folder in Explorer or check History before starting a new attempt.':'Outcome unconfirmed. Refresh both locations before retrying.';
@@ -859,16 +939,29 @@ async function runFileAction(action,params,authorizeSetup=false,idempotencyKey=c
   throw error;
  }
 }
-function namedOperation(title,label,value,run,{bucket=false}={}){
- dialog(title,'<form id="file-name-form"><label>'+esc(label)+' <input id="file-name" '+(bucket?'required minlength="3" maxlength="63"':'maxlength="1024"')+' value="'+esc(value)+'"></label><button type="submit">'+esc(title)+'</button><p id="file-feedback" role="status"></p></form>');
+function namedOperation(title,label,value,run,{bucket=false,singleRename=false}={}){
+ dialog(title,'<form id="file-name-form"><label>'+esc(label)+' <input id="file-name" '+(bucket?'required minlength="3" maxlength="63"':'maxlength="1024"')+' value="'+esc(value)+'"></label><button type="submit">'+(singleRename?'Save':esc(title))+'</button><p id="file-feedback" role="status"></p></form>');
  const form=$('#file-name-form'),input=$('#file-name'),button=form.querySelector('button'),feedback=$('#file-feedback');
- input.focus();
+ if(singleRename)selectBasename(input);else input.focus();
  form.onsubmit=async event=>{
   event.preventDefault();
   if(button.disabled)return;
-  button.disabled=true;feedback.textContent='Working…';
-  try{await run(input.value);if(form.isConnected)closeDialog();}
-  catch(error){if(form.isConnected){feedback.textContent=fileError(title,error);button.disabled=false;}}
+  button.disabled=true;feedback.textContent=singleRename?'Renaming…':'Working…';
+  if(singleRename)input.readOnly=true;
+  try{
+   const renamed=await run(input.value);
+   if(!form.isConnected||!$('#dialog').open)return;
+   closeDialog();
+   if(singleRename&&view==='explorer'&&selected.has(renamed.key)){
+    const index=listingOrder.index(renamed.key);
+    if(index!==undefined)focusRow(index);
+   }
+  }catch(error){
+   if(!form.isConnected||!$('#dialog').open)return;
+   feedback.textContent=fileError(title,error);
+   button.disabled=singleRename&&renameUnconfirmed(error);
+   if(singleRename)input.readOnly=button.disabled;
+  }
  };
 }
 async function finishFileAction(action,params,approve=false,idempotencyKey){
@@ -900,6 +993,10 @@ async function createBucketGUI(){
 }
 async function fileActionGUI(action,entry,target=source){
  const captured=structuredClone(target),params={source:captured,...(entry?{entry:{key:entry.key,folder:entry.folder}}:{})};
+ if(action==='rename'&&!entry.folder){
+  namedOperation('Rename','New name',fileLeaf(entry),name=>renameFile(entry,captured,name),{singleRename:true});
+  return;
+ }
  if(action==='mkdir'||action==='rename'){
   const title=action==='mkdir'?'New Folder':'Rename';
   const attempts=new Map();

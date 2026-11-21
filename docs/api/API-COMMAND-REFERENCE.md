@@ -674,6 +674,8 @@ await invoke('readFile', {"source":{"provider":"cloudflare","connectionId":"clou
 
 Executes the selected mkdir, copy, move, rename, delete or createBucket action against exact authorized locations. Provide the action-specific entry, name or destination and choose a conflict policy where applicable.
 
+Single-file Rename stays in the selected object's parent folder. The existing signed Worker capability must match that folder and support Rename. An occupied name leaves both objects intact. Successful completion includes a receipt for the exact new key after the Worker verifies the copy and source removal.
+
 Returns the File API outcome and an available provider receipt. Host confirmation, authorized preparation and verified source/destination matter because writes can change or remove objects. Inspect uncertain results before retrying.
 
 **Access and status** · `execute` · registry effectful `true` · implemented.

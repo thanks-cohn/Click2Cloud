@@ -199,9 +199,16 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    const operationId=intent.operationId;let dispatched=false;
    try{
    const c=await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket});
-   if(!expectedCodeDigest||c.codeDigest!==expectedCodeDigest){
+   const singleRename=intent.action==='rename'&&intent.entry?.folder===false;
+   if(singleRename||!expectedCodeDigest||c.codeDigest!==expectedCodeDigest){
     const check=await cap(target,{sourceBucket,live:false}),features=await post(check,'/capabilities',{});
-    if(check.sessionId!==c.sessionId||!features.fileOperations?.includes(intent.action))return {state:'blocked',code:'WORKER_FILE_API_REPAIR_REQUIRED',operationId};
+    if(singleRename){
+     if(check.sessionId!==c.sessionId||check.planIdentity!==c.planIdentity||!await recheck(c,target,{live:false,matchPlan:true}))fail('AUTHORIZATION_REVOKED');
+     if(features.state!=='completed')fail(features.code??'WORKER_NOT_READY');
+     if(features.codeDigest!==c.codeDigest)fail('WORKER_BUILD_MISMATCH');
+     if(features.protocol!==PROTOCOL||!equal(features.destination,c.destination)||!features.storageBound||!features.durableClaims||!features.conditionalCreate)fail('WORKER_NOT_READY');
+    }
+    if(check.sessionId!==c.sessionId||!Array.isArray(features.fileOperations)||!features.fileOperations.includes(intent.action))fail('WORKER_FILE_API_REPAIR_REQUIRED');
    }
    dispatched=true;
    let result=await post(c,'/files',intent,signal),lastLease=clock();

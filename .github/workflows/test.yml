@@ -114,6 +114,19 @@ jobs:
           name: redown-p1-installed-browser
           path: ${{ runner.temp }}/redown-p1-installed
           if-no-files-found: error
+      - name: Installed Chrome single-file Rename against local Worker and R2 emulator
+        if: ${{ !cancelled() }}
+        env:
+          C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
+          C2C_RENAME_EVIDENCE: ${{ runner.temp }}/click2cloud-rename
+        run: node scripts/test-rename-browser.mjs
+      - name: Upload Rename browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: click2cloud-rename-browser
+          path: ${{ runner.temp }}/click2cloud-rename
+          if-no-files-found: ignore
       - name: Installed Chrome Get URL against the HTTPS fixture
         if: ${{ !cancelled() }}
         env:
