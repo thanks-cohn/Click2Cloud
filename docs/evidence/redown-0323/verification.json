@@ -1,0 +1,257 @@
+{
+  "release": "0.3.23",
+  "releaseGate": "BLOCKED",
+  "branch": "codex/minimal-baseline-palette-fonts-quiet-screenshots-2026-11-20",
+  "startingCommit": "630c2ddb537f06ce65f38e76be2d507eaed978fe",
+  "diagnosticTag": {
+    "name": "redown-0.3.22-BROKEN-pre-repair-2026-11-21",
+    "tagObject": "2811ce0b1d3ac5060ac7966f4d39cb7b119f645d",
+    "commit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+    "remoteVerified": true
+  },
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "browserPolicyEvidence": "installed-browser-policy.png",
+  "rows": [
+    {
+      "scenario": "R06–R12 and R19–R20 native crash and lifecycle faults",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "60ed41b13b43cc1a928fa8d9ac995e51eac34c55",
+      "testMethod": "Pinned source fixture and tests/native-menu-lifecycle.test.mjs",
+      "environment": "Node on Debian Linux, Chrome callbacks mocked",
+      "expectedOutcome": "Healthy rows survive; one current owner; stale routes cannot save.",
+      "baselineOutcome": "Lost create callback after removeAll erased the only native row.",
+      "actualOutcome": "Unaffected row remained; 20 cold activations shared stable IDs, one listener, and no menu journal rewrites.",
+      "proofClass": "SOURCE_AND_CHROME_CALLBACK_FIXTURE",
+      "status": "PASS",
+      "remainingRisk": "Original Windows profile and Chrome native sibling order are open."
+    },
+    {
+      "scenario": "R01–R05 and R15–R17 empty, login, reconnect, offline and visibility",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "60ed41b13b43cc1a928fa8d9ac995e51eac34c55",
+      "testMethod": "Canonical API native lifecycle fixture and existing visibility tests",
+      "environment": "Node on Debian Linux, Chrome callbacks mocked",
+      "expectedOutcome": "Visible providers remain independent of OAuth and setup.",
+      "baselineOutcome": "Ordinary evaluation did not reconcile; blocked setup with empty configuration could skip reconciliation.",
+      "actualOutcome": "Four provider actions from validated empty state. Login schedules native reconcile when OAuth connects and initialization remains blocked.",
+      "proofClass": "CHROME_AND_OAUTH_FIXTURE",
+      "status": "PASS",
+      "remainingRisk": "Actual post-login Chrome and R2 behavior are open."
+    },
+    {
+      "scenario": "R13–R14 and R17 exact target authority",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "60ed41b13b43cc1a928fa8d9ac995e51eac34c55",
+      "testMethod": "Simple, Narrow, Depth, Default and Quick tests and local workerd R2",
+      "environment": "Node and local workerd",
+      "expectedOutcome": "Only the exact current and authorized destination receives a save.",
+      "baselineOutcome": "Historical fixture behavior retained.",
+      "actualOutcome": "Existing binding, readback and idempotency tests exercise exact targets; wrong accounts and stale IDs fail closed.",
+      "proofClass": "LOCAL_WORKERD_R2_AND_CALLBACK_FIXTURES",
+      "status": "PASS",
+      "remainingRisk": "Live R2 readback and real native ordering are open."
+    },
+    {
+      "scenario": "B01 100 / 500 / 1000 save gestures",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "1237fdced2cc1dee6d865f4fc3c3627c004e72c8",
+      "testMethod": "Measured Node fixture and saturated production transport",
+      "environment": [
+        "Node v24.22.1",
+        "Debian Linux"
+      ],
+      "expectedOutcome": "Independent operation IDs, no wrong target writes and bounded admitted remote work.",
+      "baselineOutcome": "Not measured against the diagnostic tag.",
+      "actualOutcome": "Unique exact-target fixture dispatch and 32 transport slots; overflow returned RESOURCE_BUSY.",
+      "proofClass": "CALLBACK_AND_TRANSPORT_FIXTURES",
+      "status": "PASS",
+      "remainingRisk": "Actual browser process sampling and provider performance are open."
+    },
+    {
+      "scenario": "B02–B04 screenshot bursts and logged-out exception",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "1237fdced2cc1dee6d865f4fc3c3627c004e72c8",
+      "testMethod": "Screenshot runner and Chrome quota fixtures",
+      "environment": "Node v24.22.1 on Linux",
+      "expectedOutcome": "At most 2 capture slots, 6 upload tasks and zero logged-out jobs.",
+      "baselineOutcome": "Runner wrote pending before checking authority and lacked a total capture bound.",
+      "actualOutcome": "10/50/100 burst fixtures admitted 2 per run. No logged-out captures, uploads, retry entries or History rows. An accepted session-change job retained its blocked receipt.",
+      "proofClass": "CAPTURE_CALLBACK_AND_PROVIDER_FIXTURES",
+      "status": "PASS",
+      "remainingRisk": "Actual browser capture quota behavior and process memory remain open."
+    },
+    {
+      "scenario": "B05–B07 Live and reopened History",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "1237fdced2cc1dee6d865f4fc3c3627c004e72c8",
+      "testMethod": "scripts/test-customer-history-browser.mjs",
+      "environment": "Chromium 156 on Linux, actual IndexedDB and production Shelf",
+      "expectedOutcome": "Open History tracks both job types and batches IDs; reopening displays durable items.",
+      "baselineOutcome": "A burst of more than 64 distinct IDs could reload the entire archive.",
+      "actualOutcome": "132 IDs over 2301 previous rows used 64/64/4 lookups. Both operation types updated and reopened, with keyboard focus retained.",
+      "proofClass": "REAL_CHROMIUM_DOM_IDB_WITH_FIXTURE_MESSAGING",
+      "status": "PASS",
+      "remainingRisk": "Real native and live provider messaging remain open."
+    },
+    {
+      "scenario": "B08 Mixed activity across simulated worker wake",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "c570b941f3733b523206f1a2373d4797a1a1f965",
+      "testMethod": "Held screenshot upload and separately reconstructed production registrar",
+      "environment": "Node on Debian Linux, Chrome callbacks mocked",
+      "expectedOutcome": "Screenshot tasks do not starve native menu registration or dispatch.",
+      "baselineOutcome": "Not run.",
+      "actualOutcome": "Cold registrar re-ACKed while upload was held; deterministic dispatch and listener/byte cleanup passed.",
+      "proofClass": "CHROME_AND_UPLOAD_FIXTURE",
+      "status": "PASS",
+      "remainingRisk": "Actual MV3 teardown with in-flight work remains open."
+    },
+    {
+      "scenario": "R18, R21–R22 and B09 installed browser and live provider",
+      "baselineCommit": "91aad92e11ccd3ad28bbc4c40ca1ec3be614ec32",
+      "patchCommit": "1237fdced2cc1dee6d865f4fc3c3627c004e72c8",
+      "testMethod": "Headed Chromium unpacked extension load and independent Windows/R2 evidence requirements",
+      "environment": "Chromium 156.0.8078.79, Debian Linux",
+      "expectedOutcome": "Visually rendered native Chrome menu, verified object readback, original-profile regression and Windows per-process memory.",
+      "baselineOutcome": "Protected baseline symptom reproduced only in a fault fixture.",
+      "actualOutcome": "Administrator disabled unpacked extensions. Windows Chrome and live R2 access unavailable.",
+      "proofClass": "OS_DIALOG_POLICY_DENIAL",
+      "status": "BLOCKED",
+      "remainingRisk": "No Chrome menu registration ACK, genuine visible menu, live Worker request or independently verified R2 write for this release."
+    }
+  ],
+  "stress": [
+    {
+      "clicks": 100,
+      "p50Ms": 44.05,
+      "p95Ms": 45.35,
+      "p99Ms": 47.2,
+      "processRssBefore": 38469632,
+      "processRssSampledPeak": 44105728,
+      "processRssAfterIdle": 44761088
+    },
+    {
+      "clicks": 500,
+      "p50Ms": 146.13,
+      "p95Ms": 147.51,
+      "p99Ms": 147.86,
+      "processRssBefore": 44761088,
+      "processRssSampledPeak": 64028672,
+      "processRssAfterIdle": 63041536
+    },
+    {
+      "clicks": 1000,
+      "p50Ms": 302.48,
+      "p95Ms": 305.57,
+      "p99Ms": 305.81,
+      "processRssBefore": 63041536,
+      "processRssSampledPeak": 81182720,
+      "processRssAfterIdle": 81203200
+    },
+    {
+      "commands": 10,
+      "accepted": 2,
+      "busy": 8,
+      "peakUploadTasks": 6,
+      "blobBytes": 580,
+      "busyAdmissionMs": 0.74
+    },
+    {
+      "commands": 50,
+      "accepted": 2,
+      "busy": 48,
+      "peakUploadTasks": 6,
+      "blobBytes": 580,
+      "busyAdmissionMs": 0.85
+    },
+    {
+      "commands": 100,
+      "accepted": 2,
+      "busy": 98,
+      "peakUploadTasks": 6,
+      "blobBytes": 580,
+      "busyAdmissionMs": 0.96
+    }
+  ],
+  "history": {
+    "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+    "results": [
+      {
+        "gate": "101-operation-history-first-page-25",
+        "state": "PASS"
+      },
+      {
+        "gate": "separate-safe-links-exact-upload-metadata-no-technical-panel",
+        "state": "PASS"
+      },
+      {
+        "gate": "history-25-page-boundaries-last-page-one",
+        "state": "PASS"
+      },
+      {
+        "gate": "persistent-history-settings",
+        "state": "PASS"
+      },
+      {
+        "gate": "settings-export-101-operations-independent-of-visible-page-all-three-formats",
+        "state": "PASS"
+      },
+      {
+        "gate": "production-GO-TO-selects-png-pdf-docx-txt-zip-bin-video-audio",
+        "state": "PASS"
+      },
+      {
+        "gate": "missing-object-does-not-highlight-unrelated-file",
+        "state": "PASS"
+      },
+      {
+        "gate": "preview-all-first-closed-on-first-and-second-page-bounded-reads",
+        "state": "PASS"
+      },
+      {
+        "gate": "collapsed-date-group-no-new-preview-reads",
+        "state": "PASS"
+      },
+      {
+        "gate": "condensed-explorer-navigation-search-and-go-to-path-overflow",
+        "state": "PASS"
+      },
+      {
+        "gate": "expanded-toolbar-retains-search-and-second-row-right-click",
+        "state": "PASS"
+      },
+      {
+        "gate": "B05/B07-open-History-burst-with-2301-prior-rows",
+        "state": "PASS",
+        "batches": [
+          64,
+          64,
+          4
+        ],
+        "fixtureElapsedMs": 456
+      },
+      {
+        "gate": "B06-closed-History-reconciles-both-operation-types-on-reopen",
+        "state": "PASS"
+      }
+    ],
+    "errors": []
+  },
+  "legacyBootFixture": {
+    "status": "FAIL",
+    "baselineAlsoFails": true,
+    "outcome": "Both starting branch and patch time out waiting for the exact Log in accessible button before the healthy case can execute."
+  },
+  "testSummary": {
+    "npmTest": {
+      "passed": 607,
+      "failed": 0
+    },
+    "historyBrowser": {
+      "passed": 13,
+      "failed": 0
+    },
+    "extensionBuild": "PASS",
+    "apiDocs": "PASS"
+  }
+}

@@ -11,6 +11,7 @@ and retained Depth observations. Login schedules this work as soon as OAuth
 reports `CONNECTED`, independently of setup or cloud availability. Passive work
 does not provision anything. Settings and explicit `reconcileNativeMenu` retain
 their configure scope, expected generation, and fresh verification paths.
+The screenshot host initializes on demand outside the native registration path.
 
 `src/chrome/registrar.mjs:apply` validates the parent-first plan before touching
 Chrome. It retains unchanged rows in the current worker, probes IDs with

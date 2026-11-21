@@ -272,7 +272,8 @@ void Promise.resolve().then(async()=>{
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
-const screenshots=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,historyUrls:async(method,output,params)=>{
+let screenshots;
+const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,historyUrls:async(method,output,params)=>{
  if(method==='history-connect-domain'){
   if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
   if(typeof params.domain!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
@@ -287,7 +288,7 @@ const screenshots=createScreenshotBackground({chrome,oauth:setupOauth,current,fi
 chrome.commands?.onCommand?.addListener((command,tab)=>{
  if(command===shelfHistoryCommand)shelfHistory.command(tab);
  else if(command===shelfExplorerSearchCommand)shelfHistory.search(tab);
- else screenshots.onCommand(command,tab);
+ else try{screenshotHost().onCommand(command,tab);}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}
 });
 const readNativeRegistration=async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null;
 const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration:readNativeRegistration,retiredRoots:['click2cloud-screenshot'],observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await readNativeRegistration())?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
@@ -392,7 +393,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   }
   if(message?.channel==='screenshot'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({state:'blocked',code:'UNTRUSTED_APP_SENDER'});return false;}
-    screenshots.request(message.method,message.params).then(data=>respond({state:'completed',data}),error=>
+    Promise.resolve().then(()=>screenshotHost().request(message.method,message.params)).then(data=>respond({state:'completed',data}),error=>
      respond({state:'failed',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'SCREENSHOT_REQUEST_FAILED',
       ...(Number.isSafeInteger(error?.httpStatus)?{httpStatus:error.httpStatus}:{}),...(error?.providerCodes?{providerCodes:error.providerCodes}:{})}));
     return true;
@@ -417,7 +418,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
 });
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
-chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{await screenshots.prune();try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
+chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{await screenshotHost().prune();}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
 // Fresh validation on every state-dependent request; failures do not poison auth
 // or future read attempts. Never reinterpret an established missing CURRENT as empty.
 async function readCurrent(context){await trustedStorage();const saved=await current.read(context),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING',origin:'BACKGROUND_NATIVE_FENCE',subreason:'NATIVE_GENERATION_WITH_ZERO_CURRENT'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return saved;}
