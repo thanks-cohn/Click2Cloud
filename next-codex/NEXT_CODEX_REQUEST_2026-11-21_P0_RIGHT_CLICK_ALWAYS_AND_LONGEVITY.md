@@ -40,6 +40,25 @@
 - **Burst coalescing:** Every distinct verified operation affects the correct count, but a rapid burst must **not** queue a hundred animations or create unbounded timers and memory. Maintain a single bounded visual animation coordinator; coalesce/drop redundant flash animations where needed without dropping verified counts. Avoid repeated whole-History scans and ensure badge/background restoration on MV3 activation where possible. Never block a save, screenshot, menu click or History recording to play a flash. Test worker suspension, concurrent screen captures, rapid verified saves, midnight rollover and updates to a verified result.
 - **Source details:** Current \`src/chrome/daily-badge.mjs:countRows\` explicitly excludes \`kind !== 'save'\`; screenshot results are stored as \`kind:'screenshot-to-cloud'\`. The screenshot recorder lives in \`extension/screenshot-background.mjs\`. This is a real existing gap: a screenshot success currently doesn't automatically increment the ordinary save count. Change the projection narrowly and prove no wrong counts or duplicates.
 
+### P1 UX — premium gallery preview navigation arrows, NO CIRCLES
+
+**Owner's explicit aesthetic change (November 21):** In the *regular Shelf preview/gallery*, the left/right arrows currently resemble little awkward or lopsided triangles trapped inside round buttons. Make the **arrow glyphs themselves** beautiful, symmetrical and refined; **remove the visible circular button backgrounds/outlines entirely**. The result should feel premium, clean, deliberate and appropriately spaced, not like tiny triangle-in-a-bubble controls.
+
+**Source-grounded target:** \`extension/app.mjs:galleryControls(e)\` creates the existing \`#gallery-previous\` and \`#gallery-next\` buttons with SVG path chevrons and accessible labels. \`extension/app.css\` styles \`.gallery-controls .gallery-arrow\` with a visible filled background/hover, while a later rule \`[data-gallery] .gallery-arrow{width:36px;height:32px;border-radius:50%}\` explicitly makes the controls circular. **Edit this existing presentation layer and its SVG drawing if necessary; DO NOT replace the gallery navigation engine.**
+
+**Implementation contract:**
+
+- Use **matching, visually balanced, correctly proportioned thin-to-medium stroke chevrons** or a similarly polished minimalist arrow treatment (properly centered in equal-size left/right hit areas). No lopsided triangles, uneven stroke geometry, encircling disk, bubble, round border, filled tile, unnecessary flourish or clutter.
+- **Increase the visual breathing room** between navigation controls and the gallery image/title, with symmetric spacing and clean baselines. Keep placement consistent with the existing Gallery/Preview header and responsive Shelf widths; avoid squeezing the image or causing overflow.
+- **Keep generous invisible pointer hit targets** and visible keyboard focus indication. The visual arrow glyph may be small/elegant, but mouse/touch click access must not shrink with it. Hover/pressed/disabled states should use tasteful stroke/color/opacity or subtle noncircular feedback compatible with every Bit o' Polish palette, Remote V1 and both dark/light themes. A focused arrow must be discoverable for keyboard accessibility without reinstating a permanently visible circle.
+- Preserve **previous/next image click behavior**, actual enabled/disabled boundary logic, keyboard left/right navigation in normal preview, and the separate immersive behavior: arrows pan the zoomed image inside immersive rather than navigating to another file. No extra preview copy, image re-fetch, event listener, worker wake or resource-heavy animation.
+- **Do not change** the internal Shelf R brand tile, external Chrome red-R icon, screenshot capture, History, native right-click menu, title/rename UI or unrelated dialogs.
+- **Verify visually and functionally** at ordinary and narrow Shelf widths with short/long filenames, first/middle/last gallery item, five Bit o' Polish palettes, light/dark, focus/hover/disabled states and repeated open/next/previous/immersive/close cycles. Compare visual geometry and click hit areas before/after, and record actual Chrome acceptance separately from mock tests.
+
+**Desired visual shorthand:** *Refined mirrored chevrons, no circles, better spacing, accessible invisible hit targets, no changes to underlying gallery semantics.*
+
+---
+
 ### P1 UX — SHELF-LOCAL keyboard improvements: Ctrl+Shift+F7 Search toggle + immersive image navigation
 
 **Owner clarification:** ALL keyboard behaviors below operate **only inside the REDOWN Shelf** when the Shelf owns focus. **Do NOT register any new Chrome-wide shortcut, modify \`extension/manifest.json\` commands or ask the user to visit \`chrome://extensions/shortcuts\`** for immersive navigation or zoom. The existing distinct Chrome-level command that opens Explorer is outside this request. Reuse existing Shelf listeners and controllers, with one owner for each event.
@@ -86,7 +105,7 @@ Preserve existing signed operation identity, exact account/bucket/key, Durable O
 
 1. **Milestone A / P0:** non-destructive menu repair, pre/post-login and worker wake, rapid-save/screenshot burst resistance, automatic live History, ZERO logged-out shortcut History entries; real Chrome evidence distinguished from fixtures.
 2. **Milestone B / visual P1:** externally visible glossy red R icon in toolbar/Chrome side-panel header only, existing internal Shelf R unchanged, daily verified screenshot+save count, double green SNES badge pulse; actual Chrome screenshot and memory/performance proof.
-3. **Milestone C / separate P1 UX:** More/theme overlap repair across palette/resize combinations; independent regression results.
+3. **Milestone C / separate P1 UX:** polished circle-free preview chevrons and spacing, Shelf-only Ctrl+Shift+F7 search toggle, immersive pan/zoom/Escape behavior, and Emerald Forest More/theme overlap repair across palettes and resize combinations; independent visual and functional regression results.
 4. **Milestone D / conditional future:** remote-job interruption and backwards compatibility audit, no unnecessary scheduler, no net responsiveness regression.
 5. **End-of-run:** exact branch/commit/test status, installed Chrome/path/build identity, independent provider receipts or honest blockers, memory p95/peak, all accepted actions accounted, badge count/double-flash test, History live refresh test, and unchanged known-broken 0.3.22 tag.
 
