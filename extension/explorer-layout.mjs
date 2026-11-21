@@ -1,7 +1,7 @@
 import {splitAt,separatorKey,clamp,cycleDivider} from '../src/explorer/layout.mjs';
 // Presentation only: pointer frames never call the engine. Persist once per gesture.
 export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alternate'}){
- const shell=document.querySelector('#shell'),aside=shell.querySelector('aside'),split=document.querySelector('#pane-splitter'),toolbar=document.querySelector('#explorer-commands'),bar=document.querySelector('#toolbar-splitter'),overflow=document.querySelector('#toolbar-overflow'),more=document.querySelector('#toolbar-more'),commands=document.querySelector('#command-items'),nodes=[...commands.children],moreActions=[...document.querySelector('#explorer-more-actions')?.children??[]],widths=new Map();let preference={...read()},frame=0,drag=null,maxRows=7,pendingSaves=0;
+ const shell=document.querySelector('#shell'),aside=shell.querySelector('aside'),split=document.querySelector('#pane-splitter'),toolbar=document.querySelector('#explorer-commands'),bar=document.querySelector('#toolbar-splitter'),overflow=document.querySelector('#toolbar-overflow'),more=document.querySelector('#toolbar-more'),commands=document.querySelector('#command-items'),nodes=[...commands.children],moreActions=[...document.querySelector('#explorer-more-actions')?.children??[]],widths=new Map();let preference={...read()},frame=0,drag=null,maxRows=7,saving=false,queued=null,saveTimer;
  const navigation=['back','forward','up','refresh'].map(id=>document.getElementById(id));
  const search=commands.querySelector('#filename-search-form'),opener=commands.querySelector('#open-filename-search');
  const secondary=['add-location','view-switch'].map(id=>document.getElementById(id));
@@ -41,7 +41,7 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
    searchPanel.hidden=false;searchPanel.showPopover?.();positionPanel(searchPanel);
    layout();
   }
-  input.focus({preventScroll:true});if(forcePopout)input.select();return true;
+  input.focus({preventScroll:true});return document.activeElement===input;
  }
  opener.onclick=()=>focusSearch();
  search.querySelector('#hide-filename-search').onclick=dismissSearch;
@@ -107,11 +107,30 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
   toolbar.style.setProperty('--command-rows',rows);bar.setAttribute('aria-valuenow',String(rows));bar.setAttribute('aria-valuemax',String(maxRows));if(focused&&document.activeElement!==focused){if(overflow.contains(focused)&&overflow.hidden)more.focus({preventScroll:true});else focused.focus({preventScroll:true});}positionMore();onResize();
  }
  const schedule=()=>{if(!frame)frame=requestAnimationFrame(layout);};
- const persist=()=>{pendingSaves++;split.setAttribute('aria-busy','true');bar.setAttribute('aria-busy','true');void save({...preference}).catch(()=>{preference={...read()};schedule();}).finally(()=>{pendingSaves--;split.setAttribute('aria-busy',String(pendingSaves>0));bar.setAttribute('aria-busy',String(pendingSaves>0));});};
+ function persist(){
+  const idle=!queued&&!saving;
+  queued={...preference};
+  if(idle){split.setAttribute('aria-busy','true');bar.setAttribute('aria-busy','true');}
+  if(saving)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(flush,60);
+ }
+ async function flush(){
+  clearTimeout(saveTimer);saveTimer=undefined;
+  if(saving||!queued)return;
+  saving=true;
+  while(queued){
+   const next=queued;queued=null;
+   try{await save(next);}
+   catch{if(!queued&&!drag){preference={...read()};nextExtreme=0;schedule();}}
+  }
+  saving=false;
+  split.setAttribute('aria-busy','false');bar.setAttribute('aria-busy','false');
+ }
  function changeLayout(property,value){if(preference[property]===value)return;preference[property]=value;schedule();persist();}
  function finish(){if(!drag)return;const d=drag;drag=null;document.body.classList.remove('resizing');if(d.el.hasPointerCapture?.(d.id))d.el.releasePointerCapture(d.id);if(d.initial.split!==preference.split||d.initial.toolbarRows!==preference.toolbarRows)persist();}
  function bind(el,vertical){el.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();el.focus({preventScroll:true});closeMore();drag={el,id:e.pointerId,initial:{...preference},start:e.clientY,rows:preference.toolbarRows,rect:shell.getBoundingClientRect()};el.setPointerCapture(e.pointerId);document.body.classList.add('resizing');});el.addEventListener('pointermove',e=>{if(drag?.el!==el||drag.id!==e.pointerId)return;if(vertical){preference.split=splitAt(e.clientX,drag.rect.left,drag.rect.width);nextExtreme=0;}else preference.toolbarRows=clamp(Math.round(drag.rows+(e.clientY-drag.start)/42),1,maxRows);schedule();});for(const name of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(name,finish);el.addEventListener('keydown',e=>{const next=separatorKey(vertical?preference.split:preference.toolbarRows,e.key,{vertical,min:vertical?0:1,max:vertical?100:maxRows,step:vertical?2:1});if(next===null)return;e.preventDefault();if(next===preference[vertical?'split':'toolbarRows'])return;preference[vertical?'split':'toolbarRows']=next;if(vertical)nextExtreme=0;schedule();persist();});el.addEventListener('dblclick',()=>{if(preference[vertical?'split':'toolbarRows']===(vertical?50:1))return;preference[vertical?'split':'toolbarRows']=vertical?50:1;if(vertical)nextExtreme=0;schedule();persist();});}
- bind(split,true);bind(bar,false);window.addEventListener('blur',finish);
+ bind(split,true);bind(bar,false);window.addEventListener('blur',finish);window.addEventListener('pagehide',flush);
  more.onclick=()=>{overflow.hidden?openMore():closeMore();};
  const escape=e=>{if(e.key==='Escape'&&!e.defaultPrevented&&!overflow.hidden){e.preventDefault();closeMore();more.focus({preventScroll:true});}};
  overflow.addEventListener('keydown',escape);more.addEventListener('keydown',e=>{escape(e);if(e.key==='ArrowDown'){e.preventDefault();openMore();}});
@@ -120,7 +139,7 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  document.addEventListener('focusin',e=>{if(!toolbar.contains(e.target)&&!overflow.contains(e.target))closeMore();});
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.addEventListener('scroll',positionMore,true);
  const observer=new ResizeObserver(schedule);observer.observe(toolbar);observer.observe(shell);layout();
- return {refresh(){if(!drag)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
+ return {refresh(){if(!drag&&!saving&&!queued)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
   setSearchAvailable(available){opener.disabled=search.querySelector('input').disabled=!available;},
   setShortcuts(bindings){
    for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',search.querySelector('input')]]){

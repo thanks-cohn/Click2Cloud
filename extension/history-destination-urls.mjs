@@ -3,9 +3,11 @@ import {domainStatus,publicDomainError,renderPublicUrlCards} from './explorer-ex
 
 const customErrors={
  CUSTOM_DOMAIN_INVALID:'Enter a Cloudflare custom hostname such as assets.example.com.',
- CUSTOM_DOMAIN_ZONE_REQUIRED:'Enter the Zone ID from this account’s Cloudflare dashboard. Add the domain to the account first if needed.',
+ CUSTOM_DOMAIN_ZONE_UNAVAILABLE:'This domain isn’t available in the connected Cloudflare account.',
+ CUSTOM_DOMAIN_ZONE_FORBIDDEN:'Cloudflare permission is needed to find this domain.',
+ CUSTOM_DOMAIN_ZONE_LOOKUP_FAILED:'Cloudflare could not verify the domain in this account. Try again or check Cloudflare domain setup.',
  CUSTOM_DOMAIN_ACCESS_DENIED:'Cloudflare denied this connection. Check R2 write access and make sure the zone belongs to this account.',
- CUSTOM_DOMAIN_CONNECT_FAILED:'Cloudflare rejected the custom domain. Check the hostname and the Zone ID in the bucket’s account.',
+ CUSTOM_DOMAIN_CONNECT_FAILED:'Cloudflare rejected the custom domain. Check the hostname in the bucket’s account.',
  CUSTOM_DOMAIN_UNCONFIRMED:'Cloudflare has not confirmed the association. Refresh before trying again.'
 };
 
@@ -22,7 +24,6 @@ export function wireHistoryDestinationUrls(details,{request,params,location,conf
    <button type="button" data-refresh>Refresh</button>
    <form class="history-domain-form"><label>Custom domain <input name="domain" placeholder="assets.example.com" autocomplete="off" spellcheck="false"></label>
     <p class="muted">If your nameservers are already with Cloudflare, simply add your domain!</p>
-    <label data-zone hidden>Cloudflare Zone ID <input name="zoneId" autocomplete="off" spellcheck="false" maxlength="32"></label>
     <button>Connect domain</button> <a href="https://dash.cloudflare.com/?to=/:account/r2/overview" target="_blank" rel="noopener noreferrer">Cloudflare domain setup</a>
    </form><p class="muted">Development URLs are rate-limited. Anonymous file access has not been checked.</p>`;
   const list=body.querySelector('.history-public-list'),feedback=body.querySelector('[role=status]'),
@@ -45,9 +46,6 @@ export function wireHistoryDestinationUrls(details,{request,params,location,conf
    feedback.textContent=message;
    try{await work();}
    catch(error){if(current()){
-    if(error.code==='CUSTOM_DOMAIN_ZONE_REQUIRED'){
-     form.querySelector('[data-zone]').hidden=false;form.elements.zoneId.focus();
-    }
     const details=[error.httpStatus&&'HTTP '+error.httpStatus,error.providerCodes?.length&&'Cloudflare '+error.providerCodes.join(', ')].filter(Boolean);
     feedback.textContent=(customErrors[error.code]??publicDomainError(error.code))+(details.length?' '+details.join(' · ')+'.':'');
    }}finally{busy=false;controls.forEach(control=>{control.disabled=false;});}
@@ -59,7 +57,7 @@ export function wireHistoryDestinationUrls(details,{request,params,location,conf
   }
   refresh.onclick=()=>void run('Checking public domains…',discover);
   enable.onclick=()=>{
-   if(busy||!confirm(`Enable public development URLs for ${location.bucketName} in account ${location.accountId}? Anyone who knows a file’s URL can read it in this entire bucket.`))return;
+   if(busy||!confirm(`Enable public development URLs for ${location.bucketName}? Anyone who knows a file’s URL can read it in this entire bucket.`))return;
    enable.hidden=true;
    void run('Enabling public URL…',async()=>{
     const verified=await request('history-enable-public-urls',{...params,confirmed:true});
@@ -69,11 +67,11 @@ export function wireHistoryDestinationUrls(details,{request,params,location,conf
   };
   form.onsubmit=event=>{
    event.preventDefault();
-   const domain=domainName(form.elements.domain.value.trim()),zoneId=form.elements.zoneId.value.trim();
+   const domain=domainName(form.elements.domain.value.trim());
    if(!domain||developmentalDomain(domain)){feedback.textContent=customErrors.CUSTOM_DOMAIN_INVALID;form.elements.domain.focus();return;}
-   if(busy||!confirm(`Connect ${domain} to ${location.bucketName} in account ${location.accountId}? Anyone who knows a file’s URL can read it through this domain.`))return;
+   if(busy||!confirm(`Connect ${domain} to ${location.bucketName}? Anyone who knows a file’s URL can read it through this domain.`))return;
    void run('Connecting custom domain…',async()=>{
-    const attached=await request('history-connect-domain',{...params,domain,...(zoneId?{zoneId}:{}),confirmed:true});
+    const attached=await request('history-connect-domain',{...params,domain,confirmed:true});
     if(!current())return;
     for(const delay of [0,350,900,1800]){
      if(delay)await new Promise(resolve=>setTimeout(resolve,delay));

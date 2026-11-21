@@ -20,7 +20,7 @@ const searchHosts=['search-one.example','search-two.test','search-three.invalid'
 const bucketBase='/client/v4/accounts/'+fixtureTarget.accountId+'/r2/buckets';
 const bucketFolders={redown:['One/','Native/'],'other-screenshots':['Two/'],'qa-screenshots':['Three/']};
 const manifest=JSON.parse(await readFile(join(extension,'manifest.json'),'utf8'));
-assert.equal(manifest.version,'0.3.21');
+assert.equal(manifest.version,'0.3.22');
 const uploads=[],requests=[],checks=[],objects=new Map();
 const publicBuckets=new Set(),attached=new Map(),customWrites=[];
 let showLongDomainList=false;
@@ -50,6 +50,11 @@ const resource=https({key:await readFile(keys),cert:await readFile(cert)},async 
   requests.push({method:request.method,host:url.host,path:url.pathname});
   assert.equal(url.hostname,'api.cloudflare.com');
   assert.equal(request.headers.authorization,'Bearer disposable-local-token');
+  if(url.pathname==='/client/v4/zones'){
+   assert.equal(url.searchParams.get('account.id'),fixtureTarget.accountId);
+   const name=url.searchParams.get('name');
+   return json(200,name==='screenshot.example.test'?[{name,id:zoneId,account:{id:fixtureTarget.accountId}}]:[]);
+  }
   if(url.pathname===bucketBase)return json(200,{buckets:Object.keys(bucketFolders).map(name=>({name}))});
   const suffix=url.pathname.slice(bucketBase.length);
   const [,bucket,resourceName,...segments]=suffix.split('/');
@@ -208,7 +213,7 @@ try{
  checks.push('Three folder selections across three buckets and one Save produced one rule and zero uploads; Escape discarded the editor draft');
  await page.bringToFront();input('focus');input('click','420','400');
  input('key','Control_L','Shift_L','y');
- const partial=await wait(async()=>(await receipts()).find(job=>job.state==='partial'),'Ctrl+Shift+Y partial direct R2 receipt');
+ const partial=await wait(async()=>(await receipts()).find(job=>job.state==='partial'&&job.finishedAt),'Ctrl+Shift+Y partial direct R2 receipt');
  assert.notEqual(partial.plan.captureId,single.plan.captureId);
  assert.equal(partial.plan.matchedRuleIds.length,1);
  assert.deepEqual(partial.outputs.map(out=>out.state),['confirmed','confirmed','blocked']);
@@ -227,19 +232,19 @@ try{
  await app.locator('button[data-view="history"]:visible').click();
  const partialRow=app.locator('[data-operation="'+partial.plan.operationId+'"]');
  const cards=partialRow.locator('.history-destination-card');
- async function goToFile(row,output){
+ async function goToFile(row,output,{stay=false}={}){
   await row.locator('[data-screenshot-goto]').click();
   const leaf=output.key.split('/').at(-1);
   const file=app.locator('#files [aria-selected=true]').filter({hasText:leaf});
   await file.waitFor();
   assert.equal(await file.count(),1);
-  assert.equal(await app.locator('#location').inputValue(),cloudPath(output.target,output.key));
-  await app.getByRole('button',{name:'History',exact:true}).click();
+  assert.equal(await app.locator('#location').inputValue(),cloudPath(output.target,output.key).replace(fixtureTarget.accountId,'account-1'));
+  if(!stay)await app.getByRole('button',{name:'History',exact:true}).click();
  }
  for(let index=0;index<2;index++)await goToFile(cards.nth(index),partial.plan.outputs[index]);
  await cards.nth(2).locator('[data-screenshot-goto]').click();
  await app.getByText('Opened the destination folder. The screenshot file is unverified.',{exact:true}).waitFor();
- assert.equal(await app.locator('#location').inputValue(),cloudPath(partial.plan.outputs[2].target));
+ assert.equal(await app.locator('#location').inputValue(),cloudPath(partial.plan.outputs[2].target).replace(fixtureTarget.accountId,'account-1'));
  assert.equal(await app.locator('#files [aria-selected=true]').count(),0);
  await app.getByRole('button',{name:'History',exact:true}).click();
  checks.push('The partial receipt navigates to two exact verified files and opens the unconfirmed destination folder without selecting a file');
@@ -312,11 +317,7 @@ try{
  await domainInput.fill(connectedDomain);
  const connect=qaUrls.getByRole('button',{name:'Connect domain',exact:true});
  app.once('dialog',prompt=>prompt.accept());await connect.click();
- const zone=qaUrls.getByRole('textbox',{name:'Cloudflare Zone ID'});
- await zone.waitFor();
- assert.equal(customWrites.length,0);
- await zone.fill(zoneId);
- app.once('dialog',prompt=>prompt.accept());await connect.click();
+ assert.equal(await qaUrls.getByRole('textbox',{name:'Cloudflare Zone ID'}).count(),0);
  await qaUrls.getByText(`https://${connectedDomain}/${publicPath}`,{exact:true}).waitFor();
  assert.equal(customWrites.length,1);
  assert.equal(await qaUrls.getByRole('link',{name:/Open (Development URL|Custom domain)/}).count(),2);
@@ -424,14 +425,21 @@ try{
   await wait(async()=>!(await contexts()).length&&await app.evaluate(async key=>
    (await chrome.storage.session.get(key))[key]?.open===false,key),'Chrome closed the Shelf and recorded the closed window');
  }
- assert.equal(installed.find(entry=>entry.name==='shelf.explorer.search').shortcut,'');
  const shortcutPage=await browser.newPage();await shortcutPage.goto('chrome://extensions/shortcuts');
  const searchCommand=shortcutPage.locator('.command-entry').filter({hasText:'Open File Explorer and focus filename search'});
- await searchCommand.getByRole('button',{name:/edit/i}).click();
- await shortcutPage.keyboard.press('Alt+Shift+F');
  const chromeBinding=()=>service.evaluate(async()=>(await chrome.commands.getAll()).find(command=>command.name==='shelf.explorer.search')?.shortcut);
+ await searchCommand.getByRole('button',{name:/edit/i}).click();
+ await shortcutPage.keyboard.press('Control+Shift+F7');
+ await pause(200);
+ const f7Assignable=await chromeBinding()==='Ctrl+Shift+F7';
+ if(await chromeBinding()!=='Alt+Shift+F'){
+  await shortcutPage.keyboard.press('Escape');
+  await searchCommand.getByRole('button',{name:/edit/i}).click();
+  await shortcutPage.keyboard.press('Alt+Shift+F');
+ }
  await wait(async()=>await chromeBinding()==='Alt+Shift+F','configured Chrome shortcut');
  await shortcutPage.close();
+ checks.push('Chrome shortcut settings '+(f7Assignable?'accepted':'did not accept')+' Ctrl+Shift+F7 as a browser-wide shortcut');
  for(const host of searchHosts){
   await page.goto('https://'+host+'/');
   await page.bringToFront();input('focus');input('click','420','400');
@@ -454,6 +462,11 @@ try{
    }
    await shelf.evaluate("document.querySelector('#hide-filename-search').click()");
    await wait(()=>shelf.evaluate("document.querySelector('#filename-search-popout').hidden"),'X dismisses Search');
+   await shelf.evaluate("document.querySelector('#pane-splitter').focus()");
+   input('key','Control_L','Shift_L','F7');
+   await wait(()=>shelf.evaluate("document.activeElement?.id==='filename-search'"),'Shelf-local Ctrl+Shift+F7 focuses filename Search');
+   input('key','Escape');
+
   }
   await shelf.detach();
   await closeShelf();
@@ -484,6 +497,30 @@ try{
   await chrome.runtime.sendMessage({channel:'connection-changed'}).catch(()=>{});
  },fixtureSessionData);
  await wait(()=>loggedOutShelf.evaluate("!!document.querySelector('#filename-search-popout:not([hidden]) #filename-search:focus')"),'authorization makes the pending search ready');
+ const dividerBursts=[];
+ async function dividerBurst(shelf,mode,count,realKeys){
+  const readLayout=()=>service.evaluate(async()=>{const product=(await click2cloud.current.read()).product;return {split:product.explorerLayout.split,revision:product.revision};});
+  await service.evaluate(mode=>chrome.storage.local.set({explorerDividerCycleV1:mode}),mode);
+  await pause(100);
+  await shelf.evaluate(`(()=>{document.querySelector('#hide-filename-search')?.click();const splitter=document.querySelector('#pane-splitter');splitter.focus();
+   splitter.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true,cancelable:true}));})()`);
+  await wait(async()=>(await readLayout()).split===0,'starting divider position');
+  const before=await readLayout();
+  if(realKeys)input('repeat',String(count),'Control_L','Shift_L','F9');
+  else await shelf.evaluate(`(()=>{const splitter=document.querySelector('#pane-splitter');
+   for(let i=0;i<${count};i++)splitter.dispatchEvent(new KeyboardEvent('keydown',{key:'F9',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));})()`);
+  const expected=mode==='left'?0:mode==='right'?100:count%4===0?0:100;
+  await wait(async()=>await shelf.evaluate("document.querySelector('#pane-splitter').getAttribute('aria-busy')==='false'")&&(await readLayout()).split===expected,'divider converges and persists');
+  const after=await readLayout();
+  assert(after.revision-before.revision<(realKeys?count:10));
+  dividerBursts.push({mode,count,realKeys,commits:after.revision-before.revision,split:after.split});
+ }
+ await dividerBurst(loggedOutShelf,'alternate',50,true);
+ await dividerBurst(loggedOutShelf,'left',200,false);
+ await dividerBurst(loggedOutShelf,'right',1000,false);
+ checks.push('Installed Shelf divider converges under 50 native key taps and 200/1000 synthetic taps: '+JSON.stringify(dividerBursts));
+ await loggedOutShelf.evaluate("document.querySelector('#pane-splitter').dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true,cancelable:true}))");
+ await loggedOutShelf.evaluate("document.querySelector('#pane-splitter').dispatchEvent(new KeyboardEvent('keydown',{key:'F9',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}))");
  await loggedOutShelf.detach();
  await closeShelf();
  checks.push('A browser shortcut opened Explorer while disconnected and focused the pending search when the fixture account returned');
@@ -547,7 +584,19 @@ try{
   await singleRow.locator('[data-preview]').scrollIntoViewIfNeeded();
   await singleRow.locator('[data-preview] img').waitFor();
   assert.equal(await singleRow.locator('.history-destination-card').count(),1);
-  await goToFile(singleRow,single.plan.outputs[0]);
+  await goToFile(singleRow,single.plan.outputs[0],{stay:true});
+  await app.locator('#files [aria-selected=true]').dblclick();
+  const original=await app.locator('img.preview:not([hidden])').getAttribute('src');
+  await app.getByRole('button',{name:'Immersive View'}).click();
+  await app.getByRole('slider',{name:'Zoom relative to Fit'}).fill('400');
+  assert(await app.locator('.image-frame').evaluate(el=>el.scrollWidth>el.clientWidth&&el.scrollHeight>el.clientHeight));
+  assert.equal(await app.locator('img.preview').getAttribute('src'),original);
+  await app.keyboard.press('Escape');
+  assert(await app.locator('#dialog').isVisible());
+  assert.equal(await app.locator('#dialog').getAttribute('data-immersive'),null);
+  await app.keyboard.press('Escape');
+  checks.push('The installed preview reused the verified screenshot for immersive two-axis zoom and two-stage Escape');
+
   checks.push('After Chrome Reload and without cached screenshot bytes, the original single-output receipt previews its saved R2 image and GO TO selects that exact file');
  }
  await app.goto(c2c);
@@ -584,8 +633,71 @@ try{
  assert.equal(uploads.length,beforeRestricted);
  await assertQuiet();
  checks.push('Chrome internal page produced a capture failure with zero uploads');
+
+ await app.bringToFront();
+ await app.getByRole('button',{name:'History',exact:true}).click();
+ await app.locator('.history-page').waitFor();
+ await page.goto('https://'+siteHost+'/');await page.bringToFront();input('focus');input('click','420','400');
+ const known=new Set((await receipts()).map(job=>job.plan.operationId));
+ input('key','Alt_L','q');
+ const live=await wait(async()=>(await receipts()).find(job=>job.state==='confirmed'&&!known.has(job.plan.operationId)),'new durable screenshot');
+ const liveRow=app.locator('[data-operation="'+live.plan.operationId+'"]');
+ await liveRow.getByText('Saved and verified',{exact:true}).waitFor();
+ assert.equal(await liveRow.count(),1);
+ checks.push('An open History page picked up a new verified screenshot receipt without reopening or refreshing');
+
+ const contrast=await app.evaluate(async()=>{
+  const {createAestheticHost}=await import(chrome.runtime.getURL('src/aesthetic/host.mjs'));
+  const root=document.documentElement,theme=root.dataset.theme;
+  const aesthetics=createAestheticHost({root,storage:{set:async()=>{}}});
+  const tile=document.querySelector('.brand-tile'),canvas=document.createElement('canvas');
+  canvas.width=canvas.height=1;
+  const pixel=canvas.getContext('2d');
+  const luminance=color=>{
+   pixel.fillStyle=color;pixel.fillRect(0,0,1,1);
+   return [...pixel.getImageData(0,0,1,1).data].slice(0,3).map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4)
+    .reduce((total,c,i)=>total+c*[.2126,.7152,.0722][i],0);
+  };
+  const measurements=[];
+  for(const id of ['minimal','standard']){
+   await aesthetics.apply({id,persist:false});
+   for(const palette of id==='minimal'?aesthetics.listPalettes().map(item=>item.id):['remote-v1']){
+    if(id==='minimal')await aesthetics.applyPalette(palette);
+    for(const mode of ['light','dark']){
+     root.dataset.theme=mode;
+     const style=getComputedStyle(tile),a=luminance(style.color),b=luminance(style.backgroundColor);
+     measurements.push({palette,mode,ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),width:tile.offsetWidth,height:tile.offsetHeight});
+    }
+   }
+  }
+  root.dataset.theme=theme;
+  return measurements;
+ });
+ assert(contrast.every(result=>result.ratio>=4.5&&result.width===result.height));
+ checks.push('R tile met 4.5:1 in all 12 palette and color-mode combinations, minimum '+Math.min(...contrast.map(result=>result.ratio)).toFixed(2)+':1');
+
+ await service.evaluate(()=>chrome.storage.local.remove('click2cloudOAuth'));
+ await browser.setOffline(true);
+ const outside=[];
+ app.on('request',request=>{if(/^https?:/.test(request.url()))outside.push(request.url());});
+ await app.reload();
+ await app.locator('#header-more').click();
+ await app.getByRole('menuitem',{name:'Settings',exact:true}).click();
+ await app.getByRole('heading',{name:'File Explorer Settings',exact:true}).waitFor();
+ await app.getByRole('heading',{name:'Divider Cycle',exact:true}).waitFor();
+ await app.getByRole('heading',{name:'Gallery Loading Visual',exact:true}).waitFor();
+ await app.locator('#aesthetic-palette input[value=amethyst]').check();
+ assert(await app.locator('.brand-tile').isVisible());
+ await app.getByRole('button',{name:'File Explorer',exact:true}).click();
+ await app.locator('#login').waitFor();
+ assert(!await app.locator('#files').isVisible());
+ assert.equal(await app.locator('#listing-state').textContent(),'');
+ assert.equal(await app.locator('#tree').textContent(),'');
+ assert.deepEqual(outside,[]);
+ checks.push('Installed Shelf booted offline with packaged appearance, separate Settings cards and blank unauthenticated listing');
+
  const evidence={browser:browser.browser().version(),extensionId:service.url().split('/')[2],manifestVersion:manifest.version,
-  checks,uploads:uploads.map(({bucket,key,png})=>({bucket,key,bytes:png.length})),requests};
+  checks,contrast,uploads:uploads.map(({bucket,key,png})=>({bucket,key,bytes:png.length})),requests};
  console.log(JSON.stringify(evidence,null,2));
  await writeFile(join(out,'results.json'),JSON.stringify(evidence,null,2));
 }catch(error){

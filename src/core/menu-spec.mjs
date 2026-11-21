@@ -140,7 +140,7 @@ export function compileMenuSpec(options={}) {
           if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
         }
         if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
-        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:label,parentId,role:'save',placement:'assigned:'+routeKey(row),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
+        const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:'REDOWN',parentId,role:'save',placement:'assigned:'+routeKey(row),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
         if(active.length===1&&!hierarchy)save(active[0],null,id);
         else {
           const parent=add({id,label,origin,placement:'provider:cloudflare'});
@@ -172,7 +172,7 @@ export function compileMenuSpec(options={}) {
       }
       // Providers lead; independent Quick leaves follow in user-configured order.
       // Availability stays truthful (including setup actions), independently of placement.
-      for(const row of quickRows)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive'].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});
+      for(const row of quickRows)add({...row,label:['Cloudflare','Google Drive','Dropbox','OneDrive',...(composition.cloudflareShape==='flat-save'?['REDOWN']:[])].includes(row.label)?'Quick: '+row.label:row.label,placement:'quick:'+row.placement,origin:{mode:row.sourceMode,provider:row.target.provider}});
       // Trusted future contributors remain independent flat actions. No second
       // Cloudflare owner or legacy REDOWN/provider parent is accepted here.
       for(const peer of options.flatProviders??[])if(!['cloudflare','google-drive','dropbox','onedrive'].includes(peer.target?.provider)&&options.product?.providerVisibility?.[peer.target?.provider]!==false)add({id:peer.id,label:peer.label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,placement:'flat:'+peer.id,origin:{mode:null,provider:peer.target.provider}});

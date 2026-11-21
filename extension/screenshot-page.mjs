@@ -5,7 +5,7 @@ import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-b
 const scopes=[['all','All websites'],['domain','Entire domain + subdomains'],['host','Exact hostname'],['url','Specific full URL']];
 const scopeName=kind=>scopes.find(([id])=>id===kind)?.[1];
 const describeSite=site=>site.value?`${site.value} · ${scopeName(site.kind)}`:scopeName(site.kind);
-const describeTarget=target=>`${target.bucketName}/${target.prefix} · ${target.accountId}`;
+import {accountLabel,destinationPath} from './cloudflare-labels.mjs';
 const screenshotMessages={
  SCREENSHOT_HOST_INVALID:'Enter a hostname such as example.com.',
  SCREENSHOT_URL_INVALID:'Enter a full HTTP or HTTPS page URL.',
@@ -54,7 +54,11 @@ export async function screenshotRequest(method,params={}){
  throw Object.assign(Error(result?.code??'SCREENSHOT_REQUEST_FAILED'),{code:result?.code,httpStatus:result?.httpStatus,providerCodes:result?.providerCodes});
 }
 
-export function createScreenshotPage({api,dialog,closeDialog,esc}){
+export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccounts=()=>[]}){
+ const describeTarget=target=>{
+  const accounts=connectedAccounts(),account=accounts.find(item=>item.id===target?.accountId);
+  return destinationPath(target)+(account&&accounts.length>1?' · '+accountLabel(account,accounts):'');
+ };
  const element=(tag,text)=>Object.assign(document.createElement(tag),text===undefined?{}:{textContent:text});
  const button=(label,action)=>{
   const control=element('button',label);
@@ -83,7 +87,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
   return ()=>[...holder.children].map(row=>websiteCondition({kind:row.querySelector('select').value,value:row.querySelector('input').value}));
  }
  function picker(holder,toggle,isSelected){
-  let ticket=0;
+  let ticket=0,accounts=[];
   function view(place={}){void page(place);}
   async function page(place,cursor=''){
    const requested=++ticket;
@@ -92,7 +96,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
    if(oldMore)oldMore.remove();
    const {account,target}=place;
    if(!cursor){
-    const title=element('strong',target?target.bucketName+'/'+target.prefix:account?account.name??account.id:'Cloudflare accounts');
+    const title=element('strong',target?target.bucketName+'/'+target.prefix:account?accountLabel(account,accounts):'Cloudflare accounts');
     const path=element('div');path.className='screenshot-picker-path';path.append(title);
     if(account)path.prepend(button('Back',()=>{
      if(!target){view();return;}
@@ -111,10 +115,11 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
     if(requested!==ticket||!holder.isConnected)return;
     if(result.state!=='completed')throw Error(result.code);
     const data=result.data,rows=target?data.entries.filter(item=>item.folder):account?data.buckets:data.accounts;
+    if(!target&&!account)accounts=data.accounts;
     if(!cursor&&!rows.length)progress.textContent=target?'No subfolders.':account?'No authorized buckets.':'Connect Cloudflare in Remotes to select a directory.';
     else progress.remove();
     for(const item of rows){
-     const name=target?item.displayName??item.key:item.name??item.id;
+     const name=target?item.displayName??item.key:account?item.name:accountLabel(item,accounts);
      const next=target?{account,target:{...target,prefix:item.key}}:account?{account,target:{
       provider:'cloudflare',accountId:account.id,connectionId:'cloudflare:'+account.id,bucketName:item.name,prefix:''}}:{account:item};
      if(!next.target){holder.append(button(name,()=>view(next)));continue;}
@@ -170,15 +175,17 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
   return ()=>targets;
  }
  async function editor(initial,after){
+  const bindings=await chromeCommandBindings(chrome).catch(()=>new Map());
   const editingDefault=!initial.ruleId;
-  dialog(editingDefault?'Set up Default Screenshots':'Edit screenshot rule','<form id="screenshot-editor"><label>Name <input name="rule-name" required></label><fieldset><legend>Websites · any match</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare directories</legend><div data-directories></div></fieldset><button class="primary">Save</button> <button type="button" data-cancel>Cancel</button><p role="status"></p></form>');
+  dialog(editingDefault?'Set up Default Screenshots':'Edit Screenshot Rule','<form id="screenshot-editor"><label>Name <input name="rule-name" required></label><fieldset><legend>Websites · Any Match</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button> <button type="button" data-cancel>Cancel</button><p role="status"></p></form>');
   const form=document.querySelector('#screenshot-editor'),name=form.elements['rule-name'];
   name.value=initial.name;name.readOnly=editingDefault;
   form.querySelector('[data-cancel]').onclick=closeDialog;
   const readSites=sites(form.querySelector('[data-websites]'),initial.websites,!editingDefault);
   if(editingDefault)form.querySelector('[data-websites] select').disabled=true;
   const readTargets=directories(form.querySelector('[data-directories]'),initial.destinations,null,{multiple:true});
-  wireSave(form,()=>({ruleId:initial.ruleId,expectedRevision:initial.revision,name:name.value,websites:readSites(),destinations:readTargets()}),config=>{
+  const shortcut=shortcutField(form,initial.shortcut,bindings);
+  wireSave(form,()=>({shortcut:shortcut.value,ruleId:initial.ruleId,expectedRevision:initial.revision,name:name.value,websites:readSites(),destinations:readTargets()}),config=>{
    closeDialog();after(config,initial.ruleId);
   },editingDefault?'save-default':'save');
  }
@@ -197,9 +204,17 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
    finally{save.disabled=false;}
   };
  }
- async function shortcutHint(hint){
+ function shortcutField(form,value,bindings){
+  const label=element('label','Screenshot Shortcut ');
+  const select=element('select');
+  select.append(new Option('',''),...screenshotCommands.map((id,index)=>new Option(shortcutLabel(id,index,bindings),id)));
+  select.value=value??'';label.append(select);
+  form.querySelector('button[type=submit],button.primary').before(label);
+  return select;
+ }
+ const shortcutLabel=(id,index,bindings)=>bindings.get(id)||(index===0?'Alt+Q':'Ctrl+Shift+Y')+' command (unassigned)';
+ function shortcutHint(hint,bindings){
   try{
-   const bindings=await chromeCommandBindings(chrome);
    const keys=screenshotCommands.map(id=>bindings.get(id)).filter(Boolean);
    hint.replaceChildren(element('span',keys.length?'Chrome shortcuts · '+keys.join(' · '):'Assign a screenshot shortcut in Chrome.'));
    if(keys.length<screenshotCommands.length){
@@ -210,12 +225,15 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
  }
  async function mount(parent){
   const page=element('section');page.className='page screenshot-page';
-  page.innerHTML='<h1>Screenshots</h1><p class="muted" data-keys></p><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
+  page.innerHTML='<h1>Screenshots</h1><p class="muted" data-keys></p><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
   parent.replaceChildren(page);
   const form=page.querySelector('form'),cards=page.querySelector('[data-cards]'),pager=page.querySelector('[data-pages]'),feedback=page.querySelector('[data-rule-status]');
   const readSites=sites(form.querySelector('[data-websites]'),[{kind:'all'}]);
   const readTargets=directories(form.querySelector('[data-directories]'),[],null,{multiple:true});
   let config,pageIndex=0;
+  const bindings=await chromeCommandBindings(chrome).catch(()=>new Map());
+  if(!page.isConnected)return;
+  const shortcut=shortcutField(form,null,bindings);
   function render(next,focusId){
    if(!page.isConnected)return;
    config=next;
@@ -230,6 +248,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
     edit.append(element('strong',rule.name),
      element('span',rule.websites.length?rule.websites.map(describeSite).join(' or '):'All websites'),
      element('span',rule.destinations.map(describeTarget).join(' · ')));
+    if(rule.shortcut)edit.append(element('span',shortcutLabel(rule.shortcut,screenshotCommands.indexOf(rule.shortcut),bindings)));
     const active=button(rule.active?'Active':'Inactive',()=>void mutate('toggle',{ruleId:rule.ruleId,active:!rule.active},rule.ruleId));
     active.setAttribute('aria-pressed',String(rule.active));
     active.setAttribute('aria-label',(rule.active?'Active':'Inactive')+' · '+rule.name);
@@ -265,10 +284,10 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
    try{render(await screenshotRequest(method,params),focusId);feedback.textContent=method==='delete'?'Rule deleted.':'';}
    catch(error){feedback.textContent=screenshotMessage(error.code,'Could not update this screenshot rule.');}
   }
-  wireSave(form,()=>{const websites=readSites();return {name:websites[0]?.value??'All websites',websites,destinations:readTargets()};},saved=>{
+  wireSave(form,()=>{const websites=readSites();return {shortcut:shortcut.value,name:websites[0]?.value??'All websites',websites,destinations:readTargets()};},saved=>{
    pageIndex=0;render(saved);form.querySelector('[role=status]').textContent='Rule saved.';
   });
-  void shortcutHint(page.querySelector('[data-keys]'));
+  shortcutHint(page.querySelector('[data-keys]'),bindings);
   const updated=(changes,area)=>{
    if(!page.isConnected){chrome.storage.onChanged.removeListener(updated);return;}
    if(area==='local'&&changes[screenshotPreference])void screenshotRequest('read').then(next=>{if(!config||next.revision>config.revision)render(next);}).catch(()=>{});
@@ -290,7 +309,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc}){
   const form=document.querySelector('#screenshot-here'),fields=form.querySelector('[data-fields]');
   function redraw(){
    const rule=config.rules.find(item=>item.ruleId===form.elements.card.value);
-   fields.innerHTML='<fieldset><legend>Websites · any match</legend><div data-websites></div></fieldset>';
+   fields.innerHTML='<fieldset><legend>Websites · Any Match</legend><div data-websites></div></fieldset>';
    const readSites=sites(fields.querySelector('[data-websites]'),rule?rule.websites:[{kind:'all'}],!!rule);
    if(rule){
     const label=element('label','Directory action ');

@@ -8,7 +8,7 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.20",
+      "extensionVersion": "0.3.22",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {
@@ -1660,6 +1660,16 @@
         "schema": {
           "type": "object",
           "properties": {
+            "operationIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8192
+              },
+              "maxItems": 64,
+              "minItems": 1
+            },
             "customer": {
               "type": "boolean"
             },
@@ -10016,6 +10026,11 @@
         ],
         "owner": "src/persistence/current-store.mjs",
         "codes": [
+          "OBSERVATION_SHELF_STARTED",
+          "OBSERVATION_SHELF_EXCEPTION",
+          "OBSERVATION_WORKER_STARTED",
+          "OBSERVATION_WORKER_EXCEPTION",
+          "OBSERVATION_DIVIDER_WRITE_FAILED",
           "OK",
           "STARTED",
           "UNKNOWN",
@@ -11397,6 +11412,11 @@
         ],
         "owner": "src/persistence/current-store.mjs",
         "codes": [
+          "OBSERVATION_SHELF_STARTED",
+          "OBSERVATION_SHELF_EXCEPTION",
+          "OBSERVATION_WORKER_STARTED",
+          "OBSERVATION_WORKER_EXCEPTION",
+          "OBSERVATION_DIVIDER_WRITE_FAILED",
           "OK",
           "STARTED",
           "UNKNOWN",
@@ -11443,6 +11463,11 @@
         ],
         "owner": "src/persistence/current-store.mjs",
         "codes": [
+          "OBSERVATION_SHELF_STARTED",
+          "OBSERVATION_SHELF_EXCEPTION",
+          "OBSERVATION_WORKER_STARTED",
+          "OBSERVATION_WORKER_EXCEPTION",
+          "OBSERVATION_DIVIDER_WRITE_FAILED",
           "OK",
           "STARTED",
           "UNKNOWN",
@@ -11489,6 +11514,11 @@
         ],
         "owner": "src/persistence/current-store.mjs",
         "codes": [
+          "OBSERVATION_SHELF_STARTED",
+          "OBSERVATION_SHELF_EXCEPTION",
+          "OBSERVATION_WORKER_STARTED",
+          "OBSERVATION_WORKER_EXCEPTION",
+          "OBSERVATION_DIVIDER_WRITE_FAILED",
           "OK",
           "STARTED",
           "UNKNOWN",
@@ -11659,6 +11689,11 @@
         ],
         "owner": "src/glaciaring/index.mjs",
         "codes": [
+          "OBSERVATION_SHELF_STARTED",
+          "OBSERVATION_SHELF_EXCEPTION",
+          "OBSERVATION_WORKER_STARTED",
+          "OBSERVATION_WORKER_EXCEPTION",
+          "OBSERVATION_DIVIDER_WRITE_FAILED",
           "OK",
           "STARTED",
           "UNKNOWN",

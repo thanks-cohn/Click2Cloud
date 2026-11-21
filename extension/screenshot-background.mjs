@@ -28,12 +28,15 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
  }
  const rules=createScreenshotRules({storage,authorizeTarget,discoverDefault});
  const runner=createScreenshotCapture({chrome,rules,uploader,retryCache,
-  record:job=>current.recordRemoteResult({
+  async record(job){
+   await current.recordRemoteResult({
    operationId:job.plan.operationId,kind:'screenshot-to-cloud',state:job.state,code:job.code,
    attemptedFilename:'Screenshot',bytes:job.captured?.bytes,historyContext:captureHistoryContext({pageUrl:job.plan.context?.url}),
    screenshot:{...job,plan:{...job.plan,context:job.plan.context?
     {...job.plan.context,url:safeHistoryURL(job.plan.context.url)}:null}}
-  }),
+   });
+   void send({channel:'screenshot-history-changed',operationId:job.plan.operationId});
+  },
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},
   progress:job=>send({channel:'screenshot-result',state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
   async notify(job,{recorded}){

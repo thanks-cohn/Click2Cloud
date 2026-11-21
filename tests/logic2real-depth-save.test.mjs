@@ -42,7 +42,7 @@ for(const [name,limits,folders] of fixtures)test('Depth fixture: '+name,()=>{
     const visible=['',...folders[i].filter(p=>p.split('/').length-1<=limits[i])];
     for(const prefix of visible){
       const children=visible.some(p=>p!==prefix&&p.startsWith(prefix));
-      const path=['Cloudflare',...(targets.length>1?[target.bucketName]:[]),...prefix.split('/').filter(Boolean),...(children?[targets.length===1&&!prefix?target.bucketName+'/':'Save here']:[])];
+      const path=[targets.length===1&&visible.length===1?'REDOWN':'Cloudflare',...(targets.length>1?[target.bucketName]:[]),...prefix.split('/').filter(Boolean),...(children?[targets.length===1&&!prefix?target.bucketName+'/':'Save here']:[])];
       expected.push([path.join(' > '),targetKey({...target,prefix})]);
     }
   }
@@ -77,7 +77,7 @@ test('a fresh Depth tree replaces stale Explorer folders, including a successful
   const compile=folders=>compileMenuSpec({mode:'composite',product:productState({show:showDepth}),configs:{depth:{scopes:[{target,maxDepth:2}]}},
     inventory:{scopes:[{...common,folders:['removed/']}],depthScopes:[{...common,folders}]}});
   assert.deepEqual(menuActions(compile(['added/'])).map(x=>x.row.target.prefix),['','added/']);
-  assert.deepEqual(menuActions(compile([])).map(x=>x.path),[['Cloudflare']]);
+  assert.deepEqual(menuActions(compile([])).map(x=>x.path),[['REDOWN']]);
   assert.throws(()=>compileMenuSpec({mode:'depth',configs:{depth:{scopes:[{target,maxDepth:0}]}}}),{code:'INVALID_DEPTH'});
 });
 
@@ -162,7 +162,7 @@ test('settings commit distinguishes storage, discovery and Chrome errors and con
     ]});
     assert.equal(applied.state,'completed');
     const {row,path}=menuActions(registrar.inspect().desired).find(({row})=>row.target.prefix===target.prefix);
-    assert.deepEqual(path,mode==='simple'?['Cloudflare']:['Cloudflare','redown','a','Pick']);
+    assert.deepEqual(path,mode==='simple'?['REDOWN']:['Cloudflare','redown','a','Pick']);
     assert.equal((await registrar.handleClick({menuItemId:row.id,linkUrl:'https://example.org/sample.txt'})).receipt.key,'a/same/sample.txt');
   }
   registrar.close();

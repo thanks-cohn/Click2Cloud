@@ -88,9 +88,12 @@ export function createCloudflareOAuth({chrome,fetch=globalThis.fetch,clock=Date.
   })).finally(()=>{refreshing=null;});
  }
  async function request(path,options={}){
-  if(typeof path!=='string'||!/^\/accounts(?:[/?]|$)/.test(path)||path.includes('..'))throw failure('PROVIDER_PATH_DENIED');
+  const zoneQuery=typeof path==='string'&&path.startsWith('/zones?')?new URLSearchParams(path.slice(7)):null;
+  const zoneAccount=zoneQuery?.get('account.id');
+  const zoneLookup=zoneAccount&&zoneQuery.get('name')&&zoneQuery.size===2&&String(options.method??'GET').toUpperCase()==='GET';
+  if(typeof path!=='string'||(!/^\/accounts(?:[/?]|$)/.test(path)&&!zoneLookup)||path.includes('..'))throw failure('PROVIDER_PATH_DENIED');
   const {timeoutMs=30000,expectedSession,requiredScopes=[],onSend,...fetchOptions}=options;
-  const session=await access(undefined,expectedSession),account=/^\/accounts\/([^/?]+)/.exec(path)?.[1];
+  const session=await access(undefined,expectedSession),account=/^\/accounts\/([^/?]+)/.exec(path)?.[1]??zoneAccount;
   const method=String(fetchOptions.method??'GET').toUpperCase(),safe=['GET','HEAD'].includes(method);
   const run=async current=>{
    const latest=await read();

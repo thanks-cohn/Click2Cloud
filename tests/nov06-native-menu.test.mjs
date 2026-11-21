@@ -7,7 +7,7 @@ function compile(targets=[],options={}){const product=productState({defaultTarge
 const root=spec=>spec.rows.filter(r=>r.parentId===null),cloud=spec=>root(spec).filter(r=>r.origin.provider==='cloudflare');
 test('Nov6 exact zero/one/two/one/zero native shapes preserve stable provider identity',()=>{
  const specs=[compile(),compile([],{defaultTarget:redown}),compile([photos],{defaultTarget:redown}),compile([photos]),compile()];
- for(const spec of specs){assert.deepEqual(root(spec).map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare']);assert.equal(cloud(spec).length,1);generateChromePlan(spec);assert(!spec.rows.some(r=>/REDOWN|Cloudflare R2|Other Clouds/.test(r.label)));}
+ for(const [index,spec] of specs.entries()){assert.deepEqual(root(spec).map(r=>r.label),['Google Drive','Dropbox','OneDrive',[1,3].includes(index)?'REDOWN':'Cloudflare']);assert.equal(cloud(spec).length,1);generateChromePlan(spec);assert(!spec.rows.some(r=>/Cloudflare R2|Other Clouds/.test(r.label)));}
  assert.equal(new Set(specs.map(s=>cloud(s)[0].id)).size,1);assert.equal(cloud(specs[0])[0].role,'provider-action');assert.equal(cloud(specs[1])[0].role,'save');assert.equal(cloud(specs[1])[0].target.prefix,'');assert.equal(cloud(specs[2])[0].role,'branch');assert.deepEqual(specs[2].rows.filter(r=>r.parentId===cloud(specs[2])[0].id).map(r=>targetKey(r.target)),[redown,photos].map(targetKey));assert.equal(targetKey(cloud(specs[3])[0].target),targetKey(photos));
 });
 test('gateA discovered buckets do not inflate count; checked overlapping mode routes remain independent',()=>{
@@ -44,7 +44,7 @@ test('future trusted flat provider ports replace their one canonical entry, neve
  const target={provider:'dropbox',connectionId:'dropbox:a',accountId:'a',bucketName:'root',prefix:''};const spec=compileMenuSpec({mode:'composite',product:productState(),configs:configs(),inventory:{scopes:[]},flatProviders:[{id:'trusted-dropbox-port',label:'Dropbox',target,enabled:true}]});assert.deepEqual(root(spec).map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare']);assert.equal(root(spec)[1].role,'save');assert.equal(root(spec)[1].target.provider,'dropbox');
 });
 test('explicit Quick labels cannot rename or duplicate a canonical provider heading',()=>{
- const c=configs();c.simple.destinations=[{target:redown,label:'Cloudflare',quick:true},{target:photos}];const spec=compile([],{configs:c});assert.equal(root(spec).filter(r=>r.label==='Cloudflare').length,1);assert(root(spec).some(r=>r.label==='Quick: Cloudflare'));assert.equal(spec.rows.filter(r=>r.role==='save'&&r.parentId!==null).length,0);assert.equal(targetKey(cloud(spec)[0].target),targetKey(photos));
+ const c=configs();c.simple.destinations=[{target:redown,label:'Cloudflare',quick:true},{target:photos}];const spec=compile([],{configs:c});assert.equal(root(spec).filter(r=>r.label==='REDOWN').length,1);assert(root(spec).some(r=>r.label==='Quick: Cloudflare'));assert.equal(spec.rows.filter(r=>r.role==='save'&&r.parentId!==null).length,0);assert.equal(targetKey(cloud(spec)[0].target),targetKey(photos));
 });
 
 test('hidden destination eye wins over Flat without deleting its saved default',()=>{const c=configs();c.simple.destinations=[{target:redown,hidden:true}];const spec=compile([],{configs:c,defaultTarget:redown,product:{show:{simple:true,nested:true,depth:false,flat:true}}});assert.equal(cloud(spec)[0].role,'provider-action');assert.equal(cloud(spec)[0].target,null);assert(c.simple.destinations[0].hidden);});

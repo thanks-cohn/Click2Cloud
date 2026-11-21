@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {compileMenuSpec,modeModules} from '../src/core/menu-spec.mjs';import {productState} from '../src/api/config.mjs';import {targetKey} from '../src/core/menu-identity.mjs';import {createEngine} from '../src/core/engine.mjs';import {createEngineApi} from '../src/api/service.mjs';import {createChromeRegistrar,generateChromePlan} from '../src/chrome/registrar.mjs';
 const redown={provider:'cloudflare',connectionId:'cloudflare:a',accountId:'a',bucketName:'redown',prefix:''},quick={...redown,bucketName:'4chan'},photos={...redown,bucketName:'photos',prefix:'saved/'};
 const configs=()=>({simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}}),inventory={scopes:[redown,quick,photos].map(t=>({target:{...t,prefix:''},authorized:true,workerReady:true,complete:true,folders:[t.prefix]}))};
-const roots=s=>s.rows.filter(r=>!r.parentId),provider=s=>roots(s).find(r=>r.label==='Cloudflare');
+const roots=s=>s.rows.filter(r=>!r.parentId),provider=s=>roots(s).find(r=>['Cloudflare','REDOWN'].includes(r.label));
 function compile(rows,options={}){const c=configs();c.simple.destinations=rows.map((r,n)=>({id:'d'+n,...r}));const product=productState({defaultTarget:redown,...options});return compileMenuSpec({mode:'composite',configs:c,product,defaultTarget:product.defaultTarget,inventory});}
 const keys=rows=>rows.filter(r=>r.target).map(r=>targetKey(r.target));
 test('latest Quick decision matrix: promotion, Default, order, Flat, hidden and no forced fallback',()=>{
@@ -16,7 +16,7 @@ test('latest Quick decision matrix: promotion, Default, order, Flat, hidden and 
  [[{target:redown},{target:quick,quick:true,hidden:true}],{},'save',[redown],[]],
  [[{target:quick,quick:true}],{defaultTarget:null},'provider-action',[],[quick]],
  [[],{defaultTarget:null},'provider-action',[],[]]
- ]){const before=JSON.stringify(rows),s=compile(rows,options),p=provider(s);assert.equal(p.role,shape);assert.deepEqual(keys(shape==='save'?[p]:s.rows.filter(r=>r.parentId===p.id)),children.map(targetKey));assert.deepEqual(keys(roots(s).slice(4)),shortcuts.map(targetKey));assert.deepEqual(roots(s).slice(0,4).map(r=>r.label),['Google Drive','Dropbox','OneDrive','Cloudflare']);assert.equal(JSON.stringify(rows),before);assert.equal(new Set(s.rows.map(r=>r.id)).size,s.rows.length);generateChromePlan(s);}
+ ]){const before=JSON.stringify(rows),s=compile(rows,options),p=provider(s);assert.equal(p.role,shape);assert.deepEqual(keys(shape==='save'?[p]:s.rows.filter(r=>r.parentId===p.id)),children.map(targetKey));assert.deepEqual(keys(roots(s).slice(4)),shortcuts.map(targetKey));assert.deepEqual(roots(s).slice(0,4).map(r=>r.label),['Google Drive','Dropbox','OneDrive',shape==='save'?'REDOWN':'Cloudflare']);assert.equal(JSON.stringify(rows),before);assert.equal(new Set(s.rows.map(r=>r.id)).size,s.rows.length);generateChromePlan(s);}
  const hidden=compile([{target:redown},{target:quick,quick:true}],{providerVisibility:{cloudflare:false}});assert(!hidden.rows.some(r=>r.target?.provider==='cloudflare'));assert.equal(hidden.composition.cloudflareShape,'hidden');
 });
 test('API preview/commit/ACK, native routing, stored flags and restart use the same Quick projection',async()=>{

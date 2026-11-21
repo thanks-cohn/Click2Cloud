@@ -1000,15 +1000,15 @@ await invoke('invokeProviderAction', {"provider":"cloudflare","idempotencyKey":"
 
 ### inspectRemoteHistory
 
-<!-- method-contract {"name":"inspectRemoteHistory","scope":"inspect","effectful":false,"status":"implemented","input":"e1c6432cc675582e11774fdfd4de6e272c7282c55a264df7e396c090d4da7ad8","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+<!-- method-contract {"name":"inspectRemoteHistory","scope":"inspect","effectful":false,"status":"implemented","input":"e1e7ca46b7a32bb8a1089bf6814d1117d22656392c2e17aa7e07527a699615dd","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
 Fetches existing remote-save and diagnostic results. Supply limit and cursor to page, or select the customer projection when displaying ordinary History.
 
-Returns rows or a page with nextCursor. Status and independent proof should be interpreted from each record.
+Returns rows or a page with nextCursor. The Shelf can refresh up to 64 affected operation IDs in one read with customer enabled and pagination omitted. Status and independent proof should be interpreted from each record.
 
 **Access and status** · `inspect` · registry effectful `false` · implemented.
 
-**Input** · `customer?` (boolean), `cursor?` (string), `limit?` (integer). A trailing `?` marks an optional field.
+**Input** · `operationIds?` (Shelf-only array of operation IDs), `customer?` (boolean), `cursor?` (string), `limit?` (integer). A trailing `?` marks an optional field.
 
 ```js
 await invoke('inspectRemoteHistory', {"customer":true,"limit":25});

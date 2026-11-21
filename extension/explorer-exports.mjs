@@ -71,7 +71,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   function mountSettings(parent){
     const card=document.createElement('section');
     card.className='card';settingsCard=card;
-    card.innerHTML='<h2>Explorer downloads and links</h2>'+Object.entries(settingLabels).map(([flag,label])=>
+    card.innerHTML='<h2>Explorer Downloads and Links</h2>'+Object.entries(settingLabels).map(([flag,label])=>
       `<label><input type="checkbox" data-export-option="${flag}" ${options[flag]?'checked':''}> ${label}</label>`).join('')+'<p role="status"></p>';
     parent.append(card);
     card.onchange=event=>{
@@ -184,7 +184,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   }
   function showError(error){
     if(error.name==='AbortError')return;
-    dialog('Download unavailable','<p role="alert">'+esc(safeError(error))+'</p>');
+    dialog('Download Unavailable','<p role="alert">'+esc(safeError(error))+'</p>');
   }
   function download(source,entry,mode){
     if(entry&&mode==='tags'&&!canEmbedTags(entry))return offerCompanion(source,entry);
@@ -200,7 +200,7 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   }
   function domainConsent(source){
     return `<section data-public-consent hidden><p><strong>Allow Public URL?</strong></p>
-      <p>Enable a public development URL for <strong>${esc(source.bucketName)}</strong> in account ${esc(source.accountId)}? Anyone who knows a file’s URL can read it in this entire bucket. The development URL is rate-limited.</p>
+      <p>Enable a public development URL for <strong>${esc(source.bucketName)}</strong>? Anyone who knows a file’s URL can read it in this entire bucket. The development URL is rate-limited.</p>
       <button type="button" id="public-url-yes">Yes</button> <button type="button" id="public-url-no">No</button></section>`;
   }
   function domainControls(form,{get,enable,isCurrent=()=>true},apply,feedback){
@@ -283,11 +283,11 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   function directoryUrls(source,controls){
     const {get,isCurrent=()=>true}=controls;
     let info=emptyDomains;
-    dialog('Export directory URLs',`<p class="muted">Current directory only · No subfolders</p><form id="url-export-form">
-      <fieldset><legend>Export mode</legend><label><input type="radio" name="mode" value="simple" checked> One Link per Asset — Simple Text File</label>
-      <label><input type="radio" name="mode" value="all"> Get All URLs for Directory</label></fieldset>
-      <fieldset><legend>File types</legend><div class="url-export-options">${['Images','Audio','Video','All files'].map((label,index)=>`<label><input type="checkbox" name="type" value="${index===3?'all':label.toLowerCase()}" ${index===3?'checked':''}> ${label}</label>`).join('')}</div></fieldset>
-      <label id="prefer-public"><input type="checkbox" name="prefer" checked> Use non-developmental URLs where possible</label>
+    dialog('Export Directory URLs',`<p class="muted">Current directory only · No subfolders</p><form id="url-export-form">
+      <fieldset class="url-export-modes"><legend>Export Mode</legend><label><span>One Link per Asset — Simple Text File</span> <input type="radio" name="mode" value="simple" checked></label>
+      <label><span>Get All URLs for Directory</span> <input type="radio" name="mode" value="all"></label></fieldset>
+      <fieldset><legend>File Types</legend><div class="url-export-options">${['Images','Audio','Video','All files'].map((label,index)=>`<label><input type="checkbox" name="type" value="${index===3?'all':label.toLowerCase()}" ${index===3?'checked':''}> ${label}</label>`).join('')}</div></fieldset>
+      <label id="prefer-public"><input type="checkbox" name="prefer"> Use non-developmental URLs where possible</label>
       <fieldset id="url-export-formats" hidden><legend>Formats</legend><div class="url-export-options">${['txt','csv','json'].map(type=>`<label><input type="checkbox" name="format" value="${type}" ${type==='json'?'checked':''}> ${type.toUpperCase()}</label>`).join('')}</div></fieldset>
       <p id="url-export-scope" class="muted"></p><button type="submit" class="primary">Export</button><p id="url-export-progress" role="status"></p></form>
       <form id="directory-domain-form"><p id="directory-domain-prompt"></p><label for="directory-domain">Website/domain</label>

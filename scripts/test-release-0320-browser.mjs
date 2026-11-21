@@ -68,7 +68,7 @@ try{
   },{png});
   const origin='http://127.0.0.1:'+server.address().port;
   await page.goto(origin+'/extension/app.html?fixtureImages=1&fixtureRelease0320=1');
-  await page.getByRole('heading',{name:'The Future is Now. True Remote is Here.'}).waitFor();
+  await page.getByRole('heading',{name:'The Future Is Now. True Remote Is Here.'}).waitFor();
   await page.getByText('Nothing ever gets downloaded to your computer.',{exact:true}).waitFor();
   assert.equal(await page.getByText('☁ Cloudflare',{exact:true}).count(),0);
   await page.waitForFunction(()=>window.productFixture);

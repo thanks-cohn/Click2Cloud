@@ -36,7 +36,7 @@
 #shell[data-collapsed=files]>main{visibility:hidden}
 #shell:not([data-view=explorer])>main{visibility:visible}
 #manage-slot{position:absolute;z-index:3;inset-inline-start:0;inset-block-end:0;inline-size:var(--tree-split);padding:8px;pointer-events:none;container-type:inline-size;display:flex;align-items:center;gap:6px}
-#manage{display:inline-flex;align-items:center;gap:6px;min-block-size:36px;max-inline-size:100%;padding:6px 8px;white-space:nowrap;font-size:12px;pointer-events:auto}
+#manage{display:inline-flex;align-items:center;gap:5px;min-block-size:36px;max-inline-size:100%;padding:6px;white-space:nowrap;font-size:11px;pointer-events:auto}
 #manage svg{flex:none}
 #manage-slot #sign-out{flex:none;min-block-size:36px;font-size:12px;white-space:nowrap;pointer-events:auto}
 #shell[data-view=explorer]:not([data-manage-in-toolbar])>aside{padding-block-end:56px}
@@ -45,11 +45,11 @@
 #shell[data-view=explorer][data-manage-in-toolbar]:has(#sign-out){--manage-toolbar-width:118px}
 #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{inset-inline-start:calc(var(--tree-split) + 8px);inset-block:8px auto;inline-size:var(--manage-toolbar-width,36px);padding:0}
 #shell[data-view=explorer][data-manage-in-toolbar] #explorer-commands{padding-inline-start:calc(var(--manage-toolbar-width,36px) + 14px)}
-@container(max-width:151px){
+@container(max-width:142px){
  #manage{inline-size:36px;justify-content:center;padding:0}
  #manage span{display:none}
 }
-@container(max-width:235px){
+@container(max-width:226px){
  #manage-slot:has(#sign-out) #manage{inline-size:36px;justify-content:center;padding:0}
  #manage-slot:has(#sign-out) #manage span{display:none}
 }
@@ -131,14 +131,11 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 
 /* Three independent More controls: application navigation, History row, Explorer. */
 .app-header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;flex:none;gap:clamp(6px,2vw,16px);height:56px;padding:0 clamp(8px,2vw,16px);border-bottom:1px solid var(--line);background:var(--panel)}
-.app-header>strong{display:flex;align-items:center;gap:6px;white-space:nowrap}
-.brand{color:var(--accent);font-size:22px;line-height:1}
 .app-header nav{display:flex;align-items:center;gap:clamp(2px,1vw,6px);white-space:nowrap}
 .app-header nav button{min-block-size:34px;padding:6px clamp(5px,1.2vw,10px);border:none}
 #theme{display:grid;place-items:center;inline-size:36px;block-size:36px;padding:0;font-size:20px}
 :root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,#header-compact-history,.header-more-icon,.explorer-compact-label{display:none}
 @media(max-width:480px){
- .app-header .brand-name{position:absolute;inline-size:1px;block-size:1px;clip-path:inset(50%);overflow:hidden}
  .app-header nav button{font-size:12px}
 }
 @media(max-width:350px){
@@ -270,3 +267,82 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 .history-domain-form{border-block-start:1px solid var(--line);margin-block-start:10px;padding-block-start:4px}
 .history-domain-form input{min-width:0}
 .public-url-row a,.history-domain-form a{color:var(--accent);text-underline-offset:2px}
+
+/* Keep fixed virtualization geometry. Natural thumbnail proportions provide
+   visual variety inside the same predictable card slots. */
+.file-scroll.grid .file-tile{padding:4px}
+.file-scroll.grid .file-tile>div{
+ overflow:hidden;padding:0;border-radius:12px;background:var(--raised);
+}
+.file-scroll.grid .file-tile :is(.thumbnail,span){
+ height:96px;width:100%;background:var(--panel);
+}
+.file-scroll.grid .file-tile span{display:grid;place-items:center;font-size:26px}
+.file-scroll.grid .tile-label{
+ margin:0;padding:6px 9px;text-align:start;font-size:12px;
+ font-weight:var(--control-weight);line-height:1.3;
+}
+.file-scroll.grid .file-tile:hover>div{border-color:var(--accent)}
+.file-scroll.grid .file-tile[aria-selected=true]>div{background:var(--selected);border-color:var(--accent)}
+
+#files.details{container-type:inline-size}
+#files.details table{width:100%;table-layout:fixed}
+#files.details :is(th,td):first-child{width:auto}
+#files.details th:nth-child(2){width:25%}
+#files.details th:nth-child(3){width:clamp(48px,17cqi,105px)}
+#files.details th:last-child{width:clamp(52px,21cqi,120px)}
+#files.details :is(th,td):nth-child(2){display:table-cell}
+@container (width < 515px){
+ #files.details :is(th,td):nth-child(2){display:none}
+}
+
+.app-header>.brand-tile{
+ display:grid;place-items:center;inline-size:30px;block-size:30px;
+ padding:0;border-radius:8px;color:var(--bg);
+ background:color-mix(in srgb,var(--text) 92%,var(--accent));
+ font:700 20px/1 Georgia,serif;
+}
+
+dialog:has([data-gallery]){border-radius:18px;background:var(--panel)}
+dialog:has([data-gallery]) .dialog-head{flex-basis:52px;border-bottom:1px solid var(--line)}
+dialog:has([data-gallery]) #dialog-title{font-size:clamp(15px,3.4vw,22px);line-height:1.25}
+dialog:has([data-gallery]) .dialog-body{gap:8px;padding:8px clamp(8px,2.5vw,20px)}
+[data-gallery]{gap:8px}
+[data-gallery] .gallery-controls{order:1;flex-basis:32px;justify-content:center;gap:8px}
+[data-gallery] .gallery-arrow{width:36px;height:32px;border-radius:50%}
+[data-gallery] .image-frame{border-radius:11px;border:1px solid var(--line)}
+.gallery-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding-block-start:8px;border-top:1px solid var(--line)}
+.gallery-actions #download-stream{border-color:var(--accent)}
+
+.history-domain-form>a{display:block;width:max-content;max-width:100%;white-space:nowrap;margin-top:8px}
+#url-export-form .url-export-modes>label{display:flex;align-items:center;gap:6px;font-size:clamp(11px,3.1vw,14px)}
+#url-export-form .url-export-modes input{flex:none;width:auto;margin:0}
+
+#dialog:not([data-immersive]) :is(#exit-immersive,.immersive-controls){display:none}
+#dialog[data-immersive]{
+ --panel:#000;--bg:#000;--text:#f4f4f4;--line:#555;
+ position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;
+ margin:0;padding:0;border:0;border-radius:0;background:#000;color:var(--text);
+}
+#dialog[data-immersive]::backdrop{background:#000}
+#dialog[data-immersive] :is(#close-dialog,.gallery-controls,.gallery-actions){display:none}
+#dialog[data-immersive] .dialog-head{flex-basis:34px;padding:0 44px 0 12px;border:0}
+#dialog[data-immersive] #dialog-title{pointer-events:none;font-size:12px;opacity:.8}
+#dialog[data-immersive] .dialog-body{padding:0;gap:0}
+#dialog[data-immersive] .image-frame{
+ display:flex;overflow:auto;overflow-anchor:none;overscroll-behavior:contain;
+ border:0;border-radius:0;scrollbar-color:#797979 #171717;
+}
+#dialog[data-immersive] .image-frame img.preview{
+ position:static;flex:none;margin:auto;max-width:none;max-height:none;cursor:zoom-in;
+}
+#dialog[data-immersive] .image-frame img.preview[hidden]{display:none}
+#dialog[data-immersive] .image-frame[data-zoomed] img.preview{cursor:zoom-out}
+#exit-immersive{position:absolute;inset:4px 8px auto auto;z-index:1;min-width:28px;padding:2px 6px}
+.immersive-controls{
+ flex:none;display:flex;align-items:center;gap:12px;justify-content:center;
+ padding:8px 12px;border-top:1px solid #262626;font-size:13px;
+}
+.immersive-controls label{flex:0 1 270px;min-width:0;margin:0}
+.immersive-controls input{width:100%;min-width:0;accent-color:var(--accent)}
+.immersive-controls output{min-inline-size:4ch;font-variant-numeric:tabular-nums}

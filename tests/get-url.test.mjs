@@ -172,7 +172,15 @@ test('Custom attach sends the exact zone and hostname, keeps older domains and c
   const hostname='new.example.org',zoneId='c'.repeat(32),calls=[];
   let added=false,reads=0;
   const oauth={authority:async()=>({sessionId:'authorized-session',accounts:[{id:source.accountId}]}),async request(path,options){
-    assert.equal(path,base+'custom');assert.equal(options.expectedSession,'authorized-session');
+    assert.equal(options.expectedSession,'authorized-session');
+    if(path.startsWith('/zones?')){
+      const query=new URLSearchParams(path.slice(7));
+      assert.equal(query.get('account.id'),source.accountId);
+      const name=query.get('name');
+      const zone=name==='example.org'?{name,id:zoneId,account:{id:source.accountId}}:null;
+      return Response.json({success:true,result:zone?[zone]:[]});
+    }
+    assert.equal(path,base+'custom');
     calls.push(options.method??'GET');
     if(options.method==='POST'){
       assert.deepEqual(JSON.parse(options.body),{domain:hostname,zoneId,enabled:true});
@@ -180,13 +188,13 @@ test('Custom attach sends the exact zone and hostname, keeps older domains and c
       added=true;return Response.json({success:true,result:{domain:hostname,zoneId,enabled:true}});
     }
     const domain=reads++>1?active(hostname):{...active(hostname),status:{ownership:'active',ssl:'initializing'}};
-    return Response.json({success:true,result:{domains:[{...active('existing.example.org'),zoneId,zoneName:'example.org'},...(added?[domain]:[])]}});
+    return Response.json({success:true,result:{domains:[{...active('existing.example.org'),zoneId,zoneName:'example.org'},...(added?[{...domain,zoneId}]:[])]}});
   }};
   const provider=createR2PublicDomains({oauth});
-  await assert.rejects(provider.connectCustomDomain(source,'unowned.example.net'),{code:'CUSTOM_DOMAIN_ZONE_REQUIRED'});
+  await assert.rejects(provider.connectCustomDomain(source,'unowned.example.net'),{code:'CUSTOM_DOMAIN_ZONE_UNAVAILABLE'});
   reads=0;
   assert.deepEqual(await provider.connectCustomDomain(source,hostname),{domain:hostname,state:'pending'});
-  assert.deepEqual(await provider.connectCustomDomain(source,hostname,zoneId),{domain:hostname,state:'active'});
+  assert.deepEqual(await provider.connectCustomDomain(source,hostname),{domain:hostname,state:'active'});
   assert.deepEqual(calls,['GET','GET','POST','GET','GET']);
   assert.deepEqual((await provider.readCustomDomains(source,'authorized-session')).map(record=>record.domain),['existing.example.org',hostname]);
 });

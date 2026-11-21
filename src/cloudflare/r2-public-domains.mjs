@@ -7,7 +7,7 @@ const authFailures = new Set(['AUTH_REQUIRED','REAUTH_REQUIRED','TOKEN_EXPIRED',
   'AUTHORIZATION_REVOKED','INSUFFICIENT_SCOPE','PUBLIC_DOMAIN_ACCESS_DENIED']);
 
 export function createR2PublicDomains({oauth, assertConnected=()=>{}, readbackDelays=[200,450]}={}) {
-  const activations = new Map();
+  const activations = new Map(),attachments = new Map();
   const path = ({accountId,bucketName}) => `/accounts/${encodeURIComponent(accountId)}/r2/buckets/${encodeURIComponent(bucketName)}/domains/`;
 
   async function request(source, endpoint, options, errorCode) {
@@ -98,27 +98,54 @@ export function createR2PublicDomains({oauth, assertConnected=()=>{}, readbackDe
     finally { activations.delete(key); }
   }
 
-  async function connectCustomDomain(source,hostname,zoneId){
+  async function findZone(source,domain,expectedSession){
+    const labels=domain.split('.');
+    for(let index=0;index<labels.length-1;index++){
+      const name=labels.slice(index).join('.');
+      assertConnected();
+      const response=await oauth.request('/zones?'+new URLSearchParams({'account.id':source.accountId,name}),
+        {cache:'no-store',timeoutMs:10000,expectedSession});
+      const body=await response.json().catch(()=>null);
+      assertConnected();
+      if(response.status===403||diagnoseCloudflare(response,body).code==='INSUFFICIENT_SCOPE')
+        throw failure('CUSTOM_DOMAIN_ZONE_FORBIDDEN');
+      if(!response.ok||body?.success!==true||!Array.isArray(body.result))throw failure('CUSTOM_DOMAIN_ZONE_LOOKUP_FAILED');
+      const zones=body.result.filter(zone=>domainName(zone.name)===name);
+      if(zones.length>1||body.result_info?.total_pages>1)throw failure('CUSTOM_DOMAIN_ZONE_LOOKUP_FAILED');
+      if(zones.length===1){
+        const zone=zones[0];
+        if(zone.account?.id!==source.accountId||!/^[\da-f]{32}$/i.test(zone.id))throw failure('CUSTOM_DOMAIN_ZONE_UNAVAILABLE');
+        return zone.id;
+      }
+    }
+    throw failure('CUSTOM_DOMAIN_ZONE_UNAVAILABLE');
+  }
+
+  async function connectCustomDomain(source,hostname){
     const domain=domainName(hostname);
     if(!domain||developmentalDomain(domain))throw failure('CUSTOM_DOMAIN_INVALID');
     const auth=await oauth.authority();
     if(!auth.sessionId||!auth.accounts?.some(account=>account.id===source.accountId))throw failure('AUTH_REQUIRED');
-    const records=await readCustomDomains(source,auth.sessionId);
+    const key=JSON.stringify([auth.sessionId,scopeKey(source),domain]);
+    if(attachments.has(key))return attachments.get(key);
+    const pending=attach(source,domain,auth.sessionId);
+    attachments.set(key,pending);
+    try{return await pending;}
+    finally{attachments.delete(key);}
+  }
+
+  async function attach(source,domain,sessionId){
+    const records=await readCustomDomains(source,sessionId);
     const state=record=>verifiedDomains([record]).length?'active':record?.enabled===false?'disabled':'pending';
     const existing=records.find(record=>domainName(record?.domain)===domain);
     if(existing)return {domain,state:state(existing)};
-    const knownZone=records.filter(record=>{
-      const zone=domainName(record?.zoneName);
-      return zone&&(domain===zone||domain.endsWith('.'+zone))&&/^[\da-f]{32}$/i.test(record.zoneId??'');
-    }).sort((a,b)=>b.zoneName.length-a.zoneName.length)[0];
-    const selectedZone=zoneId?.trim()||knownZone?.zoneId;
-    if(!/^[\da-f]{32}$/i.test(selectedZone??''))throw failure('CUSTOM_DOMAIN_ZONE_REQUIRED');
+    const selectedZone=await findZone(source,domain,sessionId);
     const {result}=await request(source,'custom',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({domain,enabled:true,zoneId:selectedZone}),expectedSession:auth.sessionId,
+      body:JSON.stringify({domain,enabled:true,zoneId:selectedZone}),expectedSession:sessionId,
       requiredScopes:['workers-r2.write']},'CUSTOM_DOMAIN_CONNECT_FAILED');
     if(domainName(result.domain)!==domain||result.enabled!==true||result.zoneId!==selectedZone)throw failure('CUSTOM_DOMAIN_UNCONFIRMED');
-    const observed=(await readCustomDomains(source,auth.sessionId)).find(record=>domainName(record?.domain)===domain);
-    if(observed?.zoneId&&observed.zoneId!==selectedZone)throw failure('CUSTOM_DOMAIN_UNCONFIRMED');
+    const observed=(await readCustomDomains(source,sessionId)).find(record=>domainName(record?.domain)===domain);
+    if(!observed||observed.zoneId!==selectedZone)throw failure('CUSTOM_DOMAIN_UNCONFIRMED');
     return {domain,state:state(observed)};
   }
 

@@ -67,7 +67,7 @@ for(const mode of ['standard','minimal'])for(const theme of ['dark','light'])for
  for(const view of ['Remotes','History','File Explorer']){
   await page.getByRole('button',{name:view,exact:true}).click();await page.waitForTimeout(80);await shot(tag+'-'+view.replaceAll(' ','-'));
   if(view==='Remotes'){
-   await page.getByText('The Future is Now. True Remote is Here.',{exact:true}).waitFor();
+   await page.getByText('The Future Is Now. True Remote Is Here.',{exact:true}).waitFor();
    const headline=await page.locator('.remotes-headline').boundingBox(),subtitle=await page.locator('.remotes-subtitle').boundingBox(),card=await page.locator('#main .card').first().boundingBox();
    assert(subtitle.y>=headline.y+headline.height+7);
    assert(card.y-(subtitle.y+subtitle.height)>subtitle.y-(headline.y+headline.height));

@@ -18,8 +18,13 @@ elif action=='click':
     xtest.fake_input(client,X.ButtonPress,button)
     xtest.fake_input(client,X.ButtonRelease,button)
 else:
-    keys=[client.keysym_to_keycode(XK.string_to_keysym(k)) for k in sys.argv[2:]]
-    for key in keys:xtest.fake_input(client,X.KeyPress,key)
-    for key in reversed(keys):xtest.fake_input(client,X.KeyRelease,key)
+    repeat=int(sys.argv[2]) if action=='repeat' else 1
+    keys=[client.keysym_to_keycode(XK.string_to_keysym(k)) for k in sys.argv[3 if action=='repeat' else 2:]]
+    for _ in range(repeat):
+        for key in keys:xtest.fake_input(client,X.KeyPress,key)
+        for key in reversed(keys):xtest.fake_input(client,X.KeyRelease,key)
+        if repeat>1:
+            client.sync()
+            time.sleep(.004)
 client.sync()
 time.sleep(.04)

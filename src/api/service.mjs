@@ -49,7 +49,7 @@ const definitions={
   recoverCloudflareDestination:['provision',obj({target,expectedRevision:num,idempotencyKey:str,authorizeSetup:bool,screenshotUpgrade:bool},['target'])],
   invokeProviderAction:['execute',obj({provider:{enum:['cloudflare','google-drive','dropbox','onedrive']},generation:num,source:obj({url:str,filename:str,responseFilename:bool},['url','filename']),idempotencyKey:str},['provider','idempotencyKey'])],
   getHistoryPreferences:['inspect',obj()],setHistoryPreferences:['configure',obj({range:{enum:['all','daily','weekly']},previews:{enum:['all','first','closed']},timezone:str},['range','previews','timezone'])],
-  inspectRemoteHistory:['inspect',obj({customer:bool,cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
+  inspectRemoteHistory:['inspect',obj({operationIds:{...arr(str),minItems:1,maxItems:64},customer:bool,cursor:str,limit:{type:'integer',minimum:1,maximum:100}})],inspectRemoteReceipt:['inspect',obj({operationId:str,target},['operationId'])],inspectCloudflareSetup:['inspect',obj({accountId:str,idempotencyKey:str},['accountId','idempotencyKey'])],cancelRemoteOperation:['execute',obj({target,operationId:str},['target','operationId'])],openRemoteResult:['inspect',obj({operationId:str},['operationId'])],refreshExplorer:['inspect',obj({source:target,cursor:str},['source'])],enterExplorer:['inspect',obj()],navigateExplorer:['inspect',obj({target},['target'])],readFileChunk:['inspect',obj({source:target,key:str,offset:num,etag:str,length:{type:'integer',minimum:1,maximum:65536}},['source','key','offset'])],
   inspectExplorerContextMenu:['inspect',obj({target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),hasClipboard:bool},['target'])],previewContextMenu:['inspect',obj({context:{enum:['image','link','page','selection','video','audio']}})],describeCapabilities:['inspect',obj({section:{enum:['reliability']}})],getConfiguration:['inspect',obj()],getEngineHealth:['inspect',obj({view:{enum:['health','trace','support']},operationId:num,cursor:str,limit:{type:'integer',minimum:1,maximum:128}})],getProviderConnections:['inspect',obj()],
   loginBegin:['auth',obj({verifyOnly:bool})],loginStatus:['inspect',obj()],loginCancel:['auth',obj()],disconnect:['auth',obj()],
   fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete','createBucket']},authorizeSetup:bool,source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
@@ -87,7 +87,7 @@ export function validate(schema,value) {
     for(const k of schema.required??[])if(!Object.hasOwn(value,k))fail('INVALID_REQUEST');
     for(const [k,v] of Object.entries(value)) {if(['__proto__','constructor','prototype'].includes(k))fail('INVALID_REQUEST');const sub=schema.properties?.[k]??schema.additionalProperties;if(!sub)fail('INVALID_REQUEST');if(sub!==true)validate(sub,v);}
   }
-  if(schema.type==='array'){if(!Array.isArray(value)||value.length>(schema.maxItems??Number.MAX_SAFE_INTEGER))fail('INVALID_REQUEST');for(const v of value)validate(schema.items,v);}
+  if(schema.type==='array'){if(!Array.isArray(value)||value.length<(schema.minItems??0)||value.length>(schema.maxItems??Number.MAX_SAFE_INTEGER))fail('INVALID_REQUEST');for(const v of value)validate(schema.items,v);}
   if(schema.type==='string'&&(typeof value!=='string'||value.length<(schema.minLength??0)||value.length>(schema.maxLength??8192)||(!schema.multiline&&/[\x00-\x1f]/.test(value))))fail('INVALID_REQUEST');
   if(schema.type==='integer'&&(!Number.isSafeInteger(value)||value<(schema.minimum??0)||value>(schema.maximum??Number.MAX_SAFE_INTEGER)))fail('INVALID_REQUEST');
   if(schema.type==='boolean'&&typeof value!=='boolean')fail('INVALID_REQUEST');
@@ -305,11 +305,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           }
           if(method==='invokeProviderAction'){if(!await current.reserveOperation(actor+':provider:'+params.idempotencyKey,Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(params)))),b=>b.toString(16).padStart(2,'0')).join('')))fail('SAVE_RETRY_REQUIRES_INSPECTION');if(params.source){if(!Number.isSafeInteger(params.generation))fail('GENERATION_REQUIRED');const spec=engine.getMenu(params.generation),row=spec?.rows.find(r=>r.providerAction===params.provider||r.role==='save'&&r.id===stableId('provider-entry',params.provider)||r.role==='save'&&r.target?.provider===params.provider&&state.product.defaultTarget&&targetKey(r.target)===targetKey(state.product.defaultTarget));if(!row)fail('CANONICAL_ACTION_UNAVAILABLE');data=await engine.save({itemId:row.id,generation:params.generation,context:'link',source:params.source});}else data=await cloudflare.invoke(params);}
           if(method==='inspectRemoteHistory'){
-            const rows=await cloudflare.history(params);
+            const ids=params.operationIds;
+            if(ids&&(actor!=='gui'||!params.customer||params.cursor||params.limit))fail('INVALID_REQUEST');
+            const rows=ids?(await Promise.all([...new Set(ids)].map(id=>current.readRemoteResult(id))))
+              .filter(row=>row&&!['readiness','depth-click'].includes(row.kind)):await cloudflare.history(params);
             const sanitize=row=>{
               if(row.kind!=='screenshot-to-cloud')return row;
               const {screenshot,...base}=row;
               if(actor!=='gui')return {...base,historyContext:undefined};
+              if(!screenshot?.plan)return base;
               const context=screenshot.plan.context;
               return {...base,screenshot:{...screenshot,plan:{...screenshot.plan,context:context?{url:row.historyContext?.hostPageURL}:null}}};
             };

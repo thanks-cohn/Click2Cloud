@@ -47,7 +47,9 @@ function validatedRule(value){
    !Number.isSafeInteger(value.revision)||value.revision<1)throw screenshotError('SCREENSHOT_RULE_INVALID');
  const websites=[...new Map(value.websites.map(site=>{const item=websiteCondition(site);return [JSON.stringify(item),item];})).values()];
  const destinations=[...new Map(value.destinations.map(input=>{const target=screenshotTarget(input);return [targetKey(target),target];})).values()];
- return {ruleId:value.ruleId,name:value.name.trim(),active:value.active,revision:value.revision,websites,destinations};
+ const shortcut=value.shortcut||null;
+ if(shortcut&&!screenshotCommands.includes(shortcut))throw screenshotError('SCREENSHOT_RULE_INVALID');
+ return {...(shortcut?{shortcut}:{}),ruleId:value.ruleId,name:value.name.trim(),active:value.active,revision:value.revision,websites,destinations};
 }
 const defaults=()=>({schemaVersion:1,revision:0,dedup:true,rules:[]});
 export const screenshotDefaultName='Default Screenshots';
@@ -76,7 +78,7 @@ export function createScreenshotRules({storage,authorizeTarget,discoverDefault=a
      const inputs=method==='initialize-default'?[await discoverDefault()]:params.destinations;
      if(method==='initialize-default'&&!inputs[0])return config;
      const rule=validatedRule({ruleId:crypto.randomUUID(),revision:1,name:screenshotDefaultName,
-      websites:[{kind:'all'}],destinations:inputs,active:true});
+      websites:[{kind:'all'}],destinations:inputs,shortcut:params.shortcut,active:true});
      if(method==='save-default')for(const target of rule.destinations)await authorizeTarget(target);
      config.rules.unshift(rule);
     }
@@ -90,7 +92,7 @@ export function createScreenshotRules({storage,authorizeTarget,discoverDefault=a
     if(method==='save'){
      if(prior&&prior.revision!==params.expectedRevision)throw screenshotError('SCREENSHOT_RULE_CHANGED');
      const rule=validatedRule({ruleId:prior?.ruleId??crypto.randomUUID(),revision:(prior?.revision??0)+1,
-      name:params.name,websites:params.websites,destinations:params.destinations,active:prior?.active??true});
+      name:params.name,websites:params.websites,destinations:params.destinations,shortcut:Object.hasOwn(params,'shortcut')?params.shortcut:prior?.shortcut,active:prior?.active??true});
      const previous=new Set(prior?.destinations.map(targetKey));
      for(const target of rule.destinations)if(!previous.has(targetKey(target)))await authorizeTarget(target);
      if(prior)config.rules[index]=rule;
@@ -120,7 +122,7 @@ export function capturePlan({ids,config,context,oneOff,startedAt}){
  const url=ordinaryPage(context.url);
  if(!url)throw screenshotError('SCREENSHOT_PAGE_UNSUPPORTED');
  for(const rule of rules){
-  if(!rule.active||!matchesWebsite(rule.websites,url))continue;
+  if(!rule.active||rule.shortcut&&rule.shortcut!==ids.commandId||!matchesWebsite(rule.websites,url))continue;
   if(rule.ruleId)matchedRules.push({ruleId:rule.ruleId,name:rule.name});
   for(const target of rule.destinations){
    const identity=JSON.stringify([targetKey(target),config.dedup?null:rule.ruleId]);

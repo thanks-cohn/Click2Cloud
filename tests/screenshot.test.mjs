@@ -1,3 +1,4 @@
+import {exportHistory} from '../src/history/model.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -477,4 +478,44 @@ test('Screenshot W08 scoped RAW and SECURE ZIP receipts preserve IDs and redact 
  assert(secureText.includes(direct.plan.captureId)&&secureText.includes('direct-r2-get-sha256')&&secureText.includes('R2_READBACK'));
  assert.equal(screenshotReceipt(job,{secure:true}).outputs[0].comparison,'match');
  assert(!rawText.includes(png.toString('base64')));
+});
+
+test('an optional screenshot command assignment separates overlapping rules, and clearing restores both',async()=>{
+ let saved;
+ const storage={get:async()=>({screenshotRulesV1:saved}),set:async values=>{saved=structuredClone(values.screenshotRulesV1);}};
+ const rules=createScreenshotRules({storage,authorizeTarget:async()=>{}});
+ const websites=[forSite('domain','google.com')];
+ const first=(await rules.change('save',{name:'Work',websites,destinations:[folder('work/')],shortcut:screenshotCommands[0]})).rules[0];
+ const second=(await rules.change('save',{name:'Personal',websites,destinations:[folder('personal/')],shortcut:screenshotCommands[1]})).rules[0];
+ const prefixes=(config,commandId)=>capturePlan({ids:screenshotIds(commandId),config,context,startedAt:new Date().toISOString()})
+  .outputs.map(output=>output.target.prefix);
+ assert.deepEqual(prefixes(await rules.read(),screenshotCommands[0]),['work/']);
+ assert.deepEqual(prefixes(await rules.read(),screenshotCommands[1]),['personal/']);
+ const updated=await rules.change('save',{...second,expectedRevision:second.revision,shortcut:''});
+ assert.deepEqual(prefixes(updated,screenshotCommands[0]),['personal/','work/']);
+ assert.deepEqual(prefixes(updated,screenshotCommands[1]),['personal/']);
+ assert.equal(updated.rules[0].ruleId,second.ruleId);
+ assert.deepEqual(updated.rules[1],first);
+ await assert.rejects(rules.change('save',{...second,expectedRevision:second.revision,shortcut:screenshotCommands[0]}),{code:'SCREENSHOT_RULE_CHANGED'});
+});
+
+test('History exports one multi-destination screenshot receipt in all formats and can omit it entirely',async()=>{
+ const at=Date.parse('2026-11-20T17:00:00Z');
+ const plan=makePlan([rule([folder('one/'),folder('two/'),folder('three/')])]);
+ const screenshot={plan,state:'partial',attempts:[],trace:[],outputs:plan.outputs.map((output,index)=>({
+  outputId:output.outputId,state:index===0?'confirmed':'failed',bytes:png.length,verification:'direct-r2-get-sha256'
+ }))};
+ const saved=[{kind:'save',operationId:'ordinary',state:'failed',at},
+  {kind:'screenshot-to-cloud',operationId:plan.operationId,state:'partial',at,screenshot}];
+ for(const format of ['json','jsonl','csv'])for(const includeScreenshots of [true,false]){
+  let text='',counts;
+  for await(const part of exportHistory([saved.slice(0,1),saved.slice(1)],{format,includeScreenshots,onComplete:value=>{counts=value;},
+   range:'custom',start:'2026-11-20',end:'2026-11-20',timezone:'UTC'}))text+=part;
+  assert.deepEqual(counts,{operations:includeScreenshots?2:1,screenshots:Number(includeScreenshots)});
+  assert(text.includes('ordinary'));
+  assert.equal(text.includes(plan.operationId),includeScreenshots);
+  assert.equal(text.includes(plan.outputs[2].outputId),includeScreenshots);
+  if(format==='csv')assert.match(text.split('\r\n')[0],/"screenshot"/);
+  if(format==='json'&&includeScreenshots)assert.equal(JSON.parse(text).operations[1].screenshot.outputs.length,3);
+ }
 });

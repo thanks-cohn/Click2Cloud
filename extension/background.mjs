@@ -43,6 +43,9 @@ let storageReady;
 function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
 const workerEpoch=crypto.getRandomValues(new Uint32Array(1))[0]||1;
 const breadcrumbs=createBreadcrumbs({epoch:workerEpoch,build:BUILD_INFO.revision,read:async()=>(await chrome.storage.local.get('criticalBreadcrumbs')).criticalBreadcrumbs,write:value=>chrome.storage.local.set({criticalBreadcrumbs:value})});
+const lifecycle=(code,outcome='failed')=>breadcrumbs.enqueue({stage:'lifecycle',code,outcome});
+lifecycle('OBSERVATION_WORKER_STARTED','ok');
+for(const event of ['error','unhandledrejection'])globalThis.addEventListener?.(event,()=>lifecycle('OBSERVATION_WORKER_EXCEPTION'));
 const diagnostics=createDiagnostics({epoch:workerEpoch,build:BUILD_INFO.revision,onCritical:breadcrumbs.enqueue}),current=createCurrentStore({sink:diagnostics,readEstablishment:async()=>{await trustedStorage();const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,uncertain:!!p.currentProvenance&&(p.currentProvenance.version!==1||p.currentProvenance.established!==true),nativeGeneration:p.nativeRegistration?.desired?.generation??0,native:{present:!!p.nativeRegistration,desiredGeneration:p.nativeRegistration?.desired?.generation??null,appliedGeneration:p.nativeRegistration?.appliedGeneration??null,state:['applying','acknowledged','applied','failed','partial'].includes(p.nativeRegistration?.state)?p.nativeRegistration.state:'unknown',rowCount:p.nativeRegistration?.desired?.rows?.length??0,roles:Object.fromEntries(['save','branch','provider-action','separator','navigation'].map(role=>[role,(p.nativeRegistration?.desired?.rows??[]).filter(r=>r.role===role).length]))}};},retainEstablishment:async proof=>{await chrome.storage.local.set({currentProvenance:proof});}});
 let connectionObservation=null,attentionPreference=null;
 const dailyBadge=createDailyBadge({chrome,
@@ -272,8 +275,8 @@ void Promise.resolve().then(async()=>{
 const screenshots=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,historyUrls:async(method,output,params)=>{
  if(method==='history-connect-domain'){
   if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
-  if(typeof params.domain!=='string'||params.zoneId!==undefined&&typeof params.zoneId!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
-  return publicDomains.connectCustomDomain(output.target,params.domain,params.zoneId);
+  if(typeof params.domain!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
+  return publicDomains.connectCustomDomain(output.target,params.domain);
  }
  const enable=method==='history-enable-public-urls';
  const result=await api.invoke({version:'3+1.1',method:enable?'enableBucketPublicAccess':'getPublicUrls',
@@ -353,6 +356,14 @@ const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??reg
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
+  if(message?.channel==='shelf-breadcrumb'){
+    if(appSenderDecision(chrome.runtime,sender).accepted){
+      if(message.event==='started')lifecycle('OBSERVATION_SHELF_STARTED','ok');
+      if(message.event==='exception')lifecycle('OBSERVATION_SHELF_EXCEPTION');
+      if(message.event==='divider-write-failed')lifecycle('OBSERVATION_DIVIDER_WRITE_FAILED');
+    }
+    return false;
+  }
   if(message?.channel==='verified-local-download'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({accepted:false});return false;}
     dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));

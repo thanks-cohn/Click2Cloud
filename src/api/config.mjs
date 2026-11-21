@@ -5,7 +5,7 @@ export const DEFAULT_PROVIDER_VISIBILITY=Object.freeze({'google-drive':true,drop
 export function productState(raw={}) {
   if(raw?.configs)return migrateLegacyProduct(raw).product;
   const defaults={schemaVersion:1,revision:0,theme:'dark',show:{simple:true,nested:true,depth:false,flat:false},defaultTarget:null,
-    autoOpenAttention:true,menuCustomized:raw?.menuCustomized??(Number(raw?.revision)>0),providerVisibility:{...DEFAULT_PROVIDER_VISIBILITY},cloudflare:{initialized:[],pending:[],selectedAccountId:null,removed:[]},favorites:[],placement:{},suggestionDismissed:null,view:'details',explorerLayout:{split:50,toolbarRows:1},recovery:{cadence:'weekly',simple:true,nested:true,buckets:[],location:'automatic'},wholeCloud:{connections:[],enabled:false}};
+    autoOpenAttention:true,menuCustomized:raw?.menuCustomized??(Number(raw?.revision)>0),providerVisibility:{...DEFAULT_PROVIDER_VISIBILITY},cloudflare:{initialized:[],pending:[],selectedAccountId:null,removed:[]},favorites:[],placement:{},suggestionDismissed:null,view:'grid',explorerLayout:{split:50,toolbarRows:1},recovery:{cadence:'weekly',simple:true,nested:true,buckets:[],location:'automatic'},wholeCloud:{connections:[],enabled:false}};
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>!Object.hasOwn(defaults,k)))fail('INVALID_STATE');
   const s={...defaults,...structuredClone(raw)};s.cloudflare={removed:[],...s.cloudflare};
   if(!s.providerVisibility||typeof s.providerVisibility!=='object'||Array.isArray(s.providerVisibility)||Object.keys(s.providerVisibility).some(k=>!Object.hasOwn(DEFAULT_PROVIDER_VISIBILITY,k))||Object.values(s.providerVisibility).some(v=>typeof v!=='boolean'))fail('INVALID_STATE');

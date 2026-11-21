@@ -1,3 +1,4 @@
+import {accountLabel,destinationPath} from './cloudflare-labels.mjs';
 import {targetKey} from '../src/core/menu-identity.mjs';
 
 // Presentation gate for recoverCloudflareDestination/checkCloudflareR2. The
@@ -14,7 +15,7 @@ export function selectedSetupReady(target,readiness,native){
 export function selectedSetupLabel(target,accounts=[]){
  if(!target)return '';
  const account=accounts.find(item=>item.id===target.accountId);
- return (account?.name??target.accountId)+' · '+target.bucketName+'/'+(target.prefix??'');
+ return accountLabel(account,accounts)+' · '+destinationPath(target);
 }
 
 // A read-only status may only see the missing plan; retain the recovery action
