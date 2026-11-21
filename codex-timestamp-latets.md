@@ -1,3 +1,13 @@
+# November 21, 2026 — New critical right-click and Shelf UI follow-ups
+
+1. **P0 / CRITICAL, FIRST PRIORITY:** [Native Chrome right-click menu missing, including immediately after login/reconnect](Issues_and_Bugs/Bugs/P0_CRITICAL_NATIVE_RIGHT_CLICK_MENU_MISSING_AFTER_LOGIN_2026-11-21.md) · [GitHub #19](https://github.com/thanks-cohn/Click2Cloud/issues/19). Right-click must ALWAYS work on supported Chrome contexts without Shelf reopen/refresh; preserve durable destinations, register enabled provider entries before login and promptly after successful login regardless of Worker/R2 readiness, ensure restart/wake resilience and accurate click feedback. Real Windows Chrome rendering and save receipts required. This is **reported**, not an implemented fix or browser PASS.
+2. **P1 / UI REGRESSION:** [Shelf More dropdown trigger overlaps adjacent sun/moon theme button after expand → shrink, observed with Emerald Forest](Issues_and_Bugs/Bugs/P1_SHELF_HEADER_MORE_THEME_OVERLAP_ON_RESIZE_EMERALD_FOREST_2026-11-21.md) · [GitHub #20](https://github.com/thanks-cohn/Click2Cloud/issues/20). After P0, repair responsive header layout and test all five Bit o' Polish palettes at narrow widths; prevent overlap, preserve distinct keyboard/pointer targets. **Reported, not implemented/tested.**
+3. **Chrome naming change committed separately:** `extension/manifest.json` on `codex/click2cloud-0.3.21` now declares the extension's Chrome display name **REDOWN**, retaining extension key/version/ID. A local rebuild/reload and installed-Chrome display check remain necessary. **Changing the name does not repair native menu registration.**
+
+The existing November 19 Search/Get URL requests below remain queued after the P0 fix. Do not erase them or interpret this addendum as permission to implement the deferred 0.3.22 Auto-Reroute engine.
+
+---
+
 # Latest Codex follow-up — persistent Explorer filename Search
 
 **Recorded:** November 19, 2026 (America/Chicago)  
