@@ -115,10 +115,17 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .loading-visual .loading-media,.loading-visual .loading-geometry{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.65}
 .image-frame:has(.loading-visual) #preview-state{align-items:flex-end;font-size:12px}
 
-.gallery-controls .gallery-arrow{display:grid;place-items:center;width:44px;height:36px;padding:7px;border-radius:10px;background:var(--bg);transition:background-color 120ms,border-color 120ms}
-.gallery-arrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.gallery-controls .gallery-arrow:hover:not(:disabled){border-color:var(--accent);background:var(--raised)}
-.gallery-controls .gallery-arrow:active:not(:disabled){background:var(--selected)}
+.gallery-controls .gallery-arrow{
+ display:grid;place-items:center;inline-size:44px;block-size:44px;
+ padding:0;border:0;border-radius:4px;background:transparent;color:var(--muted);
+}
+.gallery-arrow svg{
+ width:24px;height:24px;fill:none;stroke:currentColor;
+ stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+.gallery-controls .gallery-arrow:hover:not(:disabled){color:var(--text)}
+.gallery-controls .gallery-arrow:active:not(:disabled){color:var(--accent)}
+.gallery-controls .gallery-arrow:focus-visible{outline-offset:-3px}
 .gallery-controls .gallery-arrow:disabled{opacity:.35}
 .gallery-controls span{flex:1;text-align:center}
 /* Manifest review is a readable private diff, not an ellipsized Explorer row. */
@@ -323,10 +330,9 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 dialog:has([data-gallery]){border-radius:18px;background:var(--panel)}
 dialog:has([data-gallery]) .dialog-head{flex-basis:52px;border-bottom:1px solid var(--line)}
 dialog:has([data-gallery]) #dialog-title{font-size:clamp(15px,3.4vw,22px);line-height:1.25}
-dialog:has([data-gallery]) .dialog-body{gap:8px;padding:8px clamp(8px,2.5vw,20px)}
-[data-gallery]{gap:8px}
-[data-gallery] .gallery-controls{order:1;flex-basis:32px;justify-content:center;gap:8px}
-[data-gallery] .gallery-arrow{width:36px;height:32px;border-radius:50%}
+dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20px) 10px}
+[data-gallery]{gap:6px}
+[data-gallery] .gallery-controls{order:1;flex-basis:44px;justify-content:center;gap:clamp(14px,5vw,30px)}
 [data-gallery] .image-frame{border-radius:11px;border:1px solid var(--line)}
 .gallery-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding-block-start:8px;border-top:1px solid var(--line)}
 .gallery-actions #download-stream{border-color:var(--accent)}
