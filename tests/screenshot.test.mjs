@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {capturePlan,createScreenshotRules,screenshotCommands,screenshotIds,websiteCondition} from '../src/screenshot/rules.mjs';
 import {createScreenshotCapture} from '../src/screenshot/capture.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
+import {compileMenuSpec} from '../src/core/menu-spec.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOAuth} from '../src/auth/cloudflare-oauth.mjs';
 import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-upload.mjs';
@@ -195,8 +196,8 @@ test('B08 pending screenshot uploads do not prevent cold native registration or 
  const chrome={runtime:{},contextMenus:{create(row,cb){rendered.set(row.id,row);cb();},
   update(id,props,cb){rendered.set(id,{...rendered.get(id),...props});cb();},removeAll(){assert.fail('A wake must preserve registered entries');},
   onClicked:{addListener:fn=>listeners.add(fn),removeListener:fn=>listeners.delete(fn)}}};
- const route={id:'provider',parentId:null,siblingIndex:0,type:'normal',role:'provider-action',providerAction:'cloudflare',label:'Cloudflare',enabled:true,visible:true,contexts:['page']};
- const spec={schemaVersion:1,generation:1,rows:[route]};
+ const spec=compileMenuSpec({mode:'composite'});
+ const route=spec.rows.find(row=>row.providerAction==='cloudflare');
  let nativeReceipt,release,started;
  const upload=new Promise(resolve=>release=resolve),active=new Promise(resolve=>started=resolve);
  const capture=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup:true,rules:[rule([folder('mix/')])]})},
@@ -210,7 +211,7 @@ test('B08 pending screenshot uploads do not prevent cold native registration or 
  registrar.close();registrar=owner();
  assert.equal((await registrar.apply(spec)).state,'completed');
  assert.equal((await registrar.handleClick({menuItemId:route.id,pageUrl:'https://example.org'})).code,'LOGIN_REQUIRED');
- assert.equal(rendered.size,1);assert.equal(listeners.size,1);
+ assert.equal(rendered.size,spec.rows.length);assert.equal(listeners.size,1);
  release();assert.equal((await screenshot).state,'confirmed');
  assert.equal(cache.files.size,0);assert.equal(browser.chrome.tabs.onActivated.size(),0);
 });
