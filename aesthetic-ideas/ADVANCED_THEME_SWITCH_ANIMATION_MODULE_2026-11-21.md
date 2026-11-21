@@ -43,7 +43,7 @@ This is a visual flourish around **real theme selection**, never a simulated the
 **All effect code is a detachable Aesthetic API animation module. It must never be an essential import of, or gate for, REDOWN's core.**
 
 Proposed implementation layout, after P0:
-\`\`\`text
+```text
 src/aesthetic/
   host.mjs                 # existing theme registry / authoritative apply+restore
   packages.mjs             # existing theme descriptions
@@ -54,17 +54,17 @@ extension/
   aesthetic-motion.css    # OPTIONAL scoped stylesheet; no global override
 aesthetic-ideas/
   ADVANCED_THEME_SWITCH_ANIMATION_MODULE_2026-11-21.md  # this design/acceptance spec
-\`\`\`
+```
 
 The module exposes a compact visual-only interface such as
-\`mountThemeSwitcher({anchor, root, listThemes, selectTheme, motionPreference}) → {open,close,destroy}\`.
+`mountThemeSwitcher({anchor, root, listThemes, selectTheme, motionPreference}) → {open,close,destroy}`.
 Names are **proposed**, not claims that those exports exist today.
 
 - **Authority boundary:** The existing trusted Aesthetic API owns theme and style eligibility, selection, persistence, color roles and typography. The visual module accepts *only* a finite, validated list of themes and makes a callback on direct user selection. No remote JavaScript, arbitrary CSS or data from cloud files.
-- **No privileged capabilities:** Do not import or call \`src/core/engine.mjs\`, \`extension/background.mjs\`, native \`chrome.contextMenus\`, OAuth, Cloudflare workers, screenshot providers, History persistence or file transfer APIs. No access to cloud tokens or arbitrary network activity.
+- **No privileged capabilities:** Do not import or call `src/core/engine.mjs`, `extension/background.mjs`, native `chrome.contextMenus`, OAuth, Cloudflare workers, screenshot providers, History persistence or file transfer APIs. No access to cloud tokens or arbitrary network activity.
 - **Lifecycle:** Mount on demand when advanced mode is enabled and the picker is used; close/destroy removes listeners, animation handles, popup DOM, observers and references. Use a single active transition controller with cancellation/coalescing; a second selection cancels/replaces the first without queueing unlimited motion.
 - **Graceful removal:** If either motion module/CSS file is deleted, unregistered, fails to import or throws while animating, theme selection must still work through the native standard Aesthetic API selector, with instant fallback and no blank Shelf. The native Chrome right-click menu and extension worker **must be unaffected**.
-- **CSS/styling:** Scoped root/overlay classes only. Do not animate thousands of individual filenames, History rows or thumbnail nodes. Prefer **one bounded overlay layer** and compositor-friendly \`transform\` + \`opacity\`. Use CSS custom-property switching only through the host; no eager image snapshots, canvas/WebGL, animated filters, large blur radii, heavy shadows, motion libraries or background workers.
+- **CSS/styling:** Scoped root/overlay classes only. Do not animate thousands of individual filenames, History rows or thumbnail nodes. Prefer **one bounded overlay layer** and compositor-friendly `transform` + `opacity`. Use CSS custom-property switching only through the host; no eager image snapshots, canvas/WebGL, animated filters, large blur radii, heavy shadows, motion libraries or background workers.
 - **Typography staging:** Change the authoritative theme promptly via Aesthetic API and visually choreograph only the overlay; ensure the actual final theme tokens/contrast and screen-reader semantic state remain accurate. Never delay focus, confirmation, saving or route changes until a visual timer ends. If typography font fallback differs by OS, complete without layout jank or remote font loads.
 - **No asset licensing surprises:** No sampled copyrighted audio, anime clips, third-party game/logo art, remote icon or font assets. Implement spheres, drops and one glint with light CSS or bundled original tiny vectors.
 
@@ -91,4 +91,4 @@ Names are **proposed**, not claims that those exports exist today.
 
 ## Delivery status and relationship to P0
 
-This document creates **no runtime implementation**. Treat it as a scoped Aesthetic API motion-module specification in \`/aesthetic-ideas\`. The **first release gate remains fixing and independently verifying the disappearing native Chrome right-click menu** using \`next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md\`. Advanced animation is a later opt-in presentation milestone. **Do not let its presence in the repository displace the right-click repair or the required themes.**
+This document creates **no runtime implementation**. Treat it as a scoped Aesthetic API motion-module specification in `/aesthetic-ideas`. The **first release gate remains fixing and independently verifying the disappearing native Chrome right-click menu** using `next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md`. Advanced animation is a later opt-in presentation milestone. **Do not let its presence in the repository displace the right-click repair or the required themes.**
