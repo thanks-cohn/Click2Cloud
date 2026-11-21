@@ -17,7 +17,7 @@ const snapshot=()=>page.evaluate(async()=>({
  effects:window.engineCalls.filter(method=>/^(set|commit|dispatch|initialize|approve|recover|fileAction)/.test(method))
 }));
 const before=await snapshot();
-assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1']);
+assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia']);
 assert.equal(await page.locator('#appearance').inputValue(),'minimal');
 const palette=page.locator('#aesthetic-palette');
 assert.deepEqual(await palette.getByRole('radio').all().then(items=>Promise.all(items.map(item=>item.getAttribute('value')))),
@@ -105,7 +105,18 @@ for(const mode of ['standard','minimal']){
   assert(await page.getByRole('button',{name:'Save',exact:true}).isEnabled());
  }
  for(const name of ['Simple','Narrow','Depth']){await page.getByRole('button',{name,exact:true}).click();await shot(mode+'-destinations-'+name);}await page.keyboard.press('Escape');
- await page.locator('#header-more').click();await page.getByRole('menuitem',{name:'Help · Diagnose',exact:true}).click();await page.getByRole('button',{name:'Copy reviewed report'}).waitFor();await shot(mode+'-help');await page.keyboard.press('Escape');await page.getByRole('button',{name:'File Explorer',exact:true}).click();await page.getByRole('row').filter({hasText:'image.png'}).first().dblclick();await page.locator('img.preview').waitFor();await shot(mode+'-gallery');await page.keyboard.press('Escape');
+ await page.locator('#header-more').click();await page.getByRole('menuitem',{name:'Help · Diagnose',exact:true}).click();await page.getByRole('button',{name:'Copy reviewed report'}).waitFor();await shot(mode+'-help');await page.locator('#close-dialog').click();await page.locator('#dialog').waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+ const imageRow=page.locator('#files tr[data-index]').filter({hasText:'image.png'}).first();
+ await imageRow.press('Enter');try{await page.locator('img.preview').waitFor();}catch(error){
+  console.error('Gallery fixture diagnostic',await page.evaluate(()=>({
+   title:document.querySelector('#dialog-title')?.textContent,
+   preview:document.querySelector('#preview-error')?.dataset.code,
+   lastImageRead:window.productFixture?.calls.filter(call=>call.operation==='readChunk').at(-1),
+   errors:window.fixtureImageData?.['image.png']?.length
+  })));
+  throw error;
+ }await shot(mode+'-gallery');await page.keyboard.press('Escape');
 }
 
 await page.evaluate(async()=>{await window.productFixture.current.setHistoryPreferences({range:'all',previews:'closed',timezone:'America/Chicago'});});

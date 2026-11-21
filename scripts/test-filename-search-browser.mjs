@@ -165,11 +165,21 @@ async function browseLayout() {
         await frames();
         assert.equal(await searchInput().count(),1,'filename search input must have one owner');
         if (width < 400) {
+          if(await searchInput().isVisible()){
+            assert(await page.locator('#filename-search-popout').isVisible(),'an open search stays reachable after shrinking');
+            await searchInput().press('Escape');
+          }
           assert(!await searchInput().isVisible(),'compact toolbar shows squeezed search field');
           assert(await moreMenu().isVisible());
           await moreMenu().focus();
           await page.keyboard.press('Control+Shift+F7');
           await searchInput().waitFor();
+          assert(await searchInput().evaluate(el=>el===document.activeElement));
+          await page.keyboard.press('Control+Shift+F7');
+          assert(await moreMenu().evaluate(el=>el===document.activeElement));
+          assert(await searchInput().isVisible());
+          await page.keyboard.press('Control+Shift+F7');
+          assert(await searchInput().evaluate(el=>el===document.activeElement));
           await searchInput().press('Escape');
           assert(await moreMenu().evaluate(el => document.activeElement === el));
         } else {
@@ -207,6 +217,12 @@ async function coldAndWarm() {
   const input = await revealSearch();
   const before = (await providerCalls(page)).length;
   await input.fill('PHoTo');
+  await page.keyboard.press('Control+Shift+F7');
+  assert(!await input.evaluate(el=>el===document.activeElement));
+  assert(await input.isVisible());
+  assert.equal(await input.inputValue(),'PHoTo');
+  await page.keyboard.press('Control+Shift+F7');
+  assert(await input.evaluate(el=>el===document.activeElement));
   await frames();
   assert.equal(await requestCount(),0,'typing invoked the search API');
   assert.equal((await providerCalls(page)).length,before,'typing invoked the provider');
@@ -252,7 +268,8 @@ async function coldAndWarm() {
   assert.deepEqual(warm.result.data.entries.map(r=>r.key),['Cafe\u0301.JPG']);
   await row('Cafe\u0301.JPG').waitFor();
   assert.equal((await providerCalls(page)).length,afterCold.length);
-  assert(!(await page.evaluate(() => window.filenameRequests)).some(item => ['readFile','readFileChunk'].includes(item.method)));
+  const byteReads=(await page.evaluate(() => window.filenameRequests)).filter(item=>['readFile','readFileChunk'].includes(item.method));
+  assert.deepEqual(byteReads,[],'Details filename search must not read file bodies');
   measurements.warmPath={coldUiMs:cold.elapsedMs,warmUiMs:warm.elapsedMs,providerReadsBeforeSearch:before,providerReadsAfterCold:afterCold.length,providerReadsAfterWarm:(await providerCalls(page)).length};
   await assertClear();
 }

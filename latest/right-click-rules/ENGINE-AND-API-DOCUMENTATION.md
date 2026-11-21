@@ -32,6 +32,28 @@ account, bucket and prefix. Regression coverage lives in
 `tests/native-menu-lifecycle.test.mjs`. Installed browser acceptance is tracked
 in the release evidence separately.
 
+## 0.3.23 verified History badge
+
+The Chrome badge projects the same durable receipts exposed by the existing
+`3+1.1` `inspectRemoteHistory` and `inspectRemoteReceipt` methods. The save
+dispatcher and authorization checks still own the save. The daily badge reads no
+credentials, grants no authority, and registers no menu items.
+
+`recordRemoteResult` commits the first verification time for a save with proof
+and a receipt key. A screenshot counts at its first independently confirmed,
+intended output. A partially successful fanout counts once for the capture
+operation ID. Subsequent confirmations, retries and status updates preserve the
+first timestamp. A logged-out shortcut creates no receipt or badge event. The
+optional completion callback runs after the transaction commits, and a callback
+failure has no effect on History or the provider outcome.
+
+On worker wake and when the History timezone or day changes, the badge rebuilds
+from History. Subsequent verified writes update its bounded current-day
+projection. Independently verified local downloads retain their existing tally.
+The Chrome action badge background pulses green for 100 ms, normal for 85 ms,
+and green for 100 ms. One animation covers a burst. Idle, errors and worker
+startup restore the normal background. The badge does not submit or retry work.
+
 ## Screenshot commands in the Minimal experiment
 
 `extension/screenshot-background.mjs` handles both Chrome screenshot commands.

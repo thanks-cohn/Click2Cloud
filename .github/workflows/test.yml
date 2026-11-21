@@ -22,6 +22,24 @@ jobs:
           C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
           C2C_HISTORY_EVIDENCE: ${{ runner.temp }}/click2cloud-history
         run: node scripts/test-customer-history-browser.mjs
+      - name: REDOWN P1 Shelf appearance and isolation
+        if: ${{ !cancelled() }}
+        env:
+          C2C_CHROME_EXECUTABLE: /usr/bin/google-chrome
+          C2C_P1_EVIDENCE: ${{ runner.temp }}/redown-p1-shelf
+          C2C_FILENAME_BROWSER_EVIDENCE: ${{ runner.temp }}/redown-p1-search
+        run: |
+          node scripts/test-redown-p1-browser.mjs
+          node scripts/test-filename-search-browser.mjs
+      - name: Upload REDOWN P1 Shelf evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redown-p1-shelf-browser
+          path: |
+            ${{ runner.temp }}/redown-p1-shelf
+            ${{ runner.temp }}/redown-p1-search
+          if-no-files-found: ignore
       - name: Upload unpacked extension
         uses: actions/upload-artifact@v4
         with:
@@ -82,6 +100,7 @@ jobs:
           path: ${{ runner.temp }}/click2cloud-native-menu
           if-no-files-found: ignore
       - name: Installed Chrome Get URL against the HTTPS fixture
+        if: ${{ !cancelled() }}
         env:
           C2C_CHROME_EXECUTABLE: ${{ runner.temp }}/chrome-linux64/chrome
           C2C_GET_URL_EVIDENCE: ${{ runner.temp }}/click2cloud-get-url

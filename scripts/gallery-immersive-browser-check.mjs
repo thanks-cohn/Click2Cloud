@@ -55,27 +55,89 @@ export async function checkImmersiveView(page){
  assert.equal(await preview.getAttribute('src'),url);
  assert.equal(await reads(),initialReads);
  const during=await heap();
- await dial.fill('250');await dial.press('ArrowRight');
+ await page.keyboard.press('Shift+Equal');
+ assert.equal(await dial.inputValue(),'125');
+ await page.keyboard.press('NumpadAdd');
+ assert.equal(await dial.inputValue(),'150');
+ await page.keyboard.press('NumpadSubtract');
+ await page.keyboard.press('-');
+ await page.keyboard.press('-');
+ assert.equal(await dial.inputValue(),'100');
+ await page.keyboard.press('ArrowRight');
  await page.locator('#dialog-title').filter({hasText:'immersive-b-landscape.png'}).waitFor();
  await preview.waitFor();
  assert.equal(await dial.inputValue(),'100');
  assert.deepEqual(await geometry(),{dx:0,dy:0,fit:true});
- await dial.fill('400');
+ await dial.fill('399');
+ await dial.press('ArrowRight');
+ assert.equal(await dial.inputValue(),'400','slider arrow remains a slider command');
+ await page.getByRole('button',{name:'Exit Immersive View'}).focus();
+ await page.keyboard.press('Shift+Equal');
+ assert.equal(await dial.inputValue(),'400');
  const landscape=await geometry();
  assert(landscape.dx>0&&landscape.dy>0&&landscape.fit);
+ const scroll=()=>preview.evaluate(img=>[img.parentElement.scrollLeft,img.parentElement.scrollTop]);
+ await preview.evaluate(img=>img.parentElement.scrollTo(0,0));
+ for(const key of ['ArrowRight','ArrowDown'])await page.keyboard.press(key);
+ const middle=await scroll();
+ assert(middle.every(value=>value>0));
+ for(const key of ['ArrowLeft','ArrowUp'])await page.keyboard.press(key);
+ assert.deepEqual(await scroll(),[0,0]);
+ assert.equal(await dialog.locator('#dialog-title').textContent(),'immersive-b-landscape.png');
+ await page.keyboard.press('Escape');
+ assert.equal(await dialog.getAttribute('data-immersive'),'');
+ assert.equal(await dial.inputValue(),'100');
+ assert.deepEqual(await scroll(),[0,0]);
  await page.keyboard.press('Escape');
  assert(await dialog.isVisible());
  assert.equal(await dialog.getAttribute('data-immersive'),null);
  assert.deepEqual(await dialog.boundingBox(),normal);
- await page.getByRole('button',{name:'Immersive View'}).click();
- await page.getByRole('button',{name:'Exit Immersive View'}).click();
+ assert.equal(await dialog.locator('#dialog-title').textContent(),'immersive-b-landscape.png');
+ await dialog.locator('#dialog-title').press('F2');
+ const rename=page.getByRole('textbox',{name:'Image filename'});
+ await rename.press('ArrowLeft');
+ await rename.press('Control+Shift+F7');
+ assert.equal(await rename.inputValue(),'immersive-b-landscape.png');
+ await rename.press('Escape');
  assert(await dialog.isVisible());
  await page.keyboard.press('Escape');
  assert(!await dialog.isVisible());
+ assert(await page.getByRole('row').filter({hasText:'immersive-a-portrait.png'}).evaluate(row=>row===document.activeElement||row.contains(document.activeElement)));
+
+ const beforeCycles=await heap(),countersBefore=await cdp.send('Memory.getDOMCounters');
+ const cycles=105;
+ const extraReads=await page.evaluate(async count=>{
+  const readCount=()=>window.productFixture.calls.filter(call=>call.operation==='readChunk').length;
+  const wait=async predicate=>{
+   for(let frame=0;frame<90;frame++){
+    if(predicate())return;
+    await new Promise(requestAnimationFrame);
+   }
+   throw Error('Gallery cycle did not settle');
+  };
+  const key=value=>document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:value,bubbles:true,cancelable:true}));
+  let extra=0;
+  for(let i=0;i<count;i++){
+   document.querySelector('#files tr[data-index]').dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));
+   await wait(()=>document.querySelector('img.preview:not([hidden])'));
+   const before=readCount();
+   document.querySelector('#immersive-view').click();
+   key('+');key('ArrowDown');key('ArrowRight');
+   for(let stage=0;stage<3;stage++)key('Escape');
+   if(document.querySelector('#dialog').open)throw Error('Gallery did not close');
+   extra+=readCount()-before;
+  }
+  return extra;
+ },cycles);
+ const afterCycles=await heap(),countersAfter=await cdp.send('Memory.getDOMCounters');
+ assert.equal(extraReads,0);
+ assert(countersAfter.jsEventListeners<=countersBefore.jsEventListeners+3,{countersBefore,countersAfter});
+ assert(afterCycles-beforeCycles<4*1024*1024,{beforeCycles,afterCycles});
  await page.evaluate(saved=>window.productFixture.entries.splice(0,Infinity,...saved),saved);
  await page.setViewportSize(previous);
  await page.locator('#refresh').evaluate(button=>button.click());
  await page.getByLabel('View',{exact:true}).selectOption('grid');
- return {gate:'immersive-portrait-landscape-scroll-navigation-and-escape',state:'PASS',zoomCycles:12,
-  immersiveAdditionalReads:0,gcHeapBeforeBytes:before,gcHeapImmersiveBytes:during};
+ return {gate:'immersive-portrait-landscape-scroll-navigation-and-escape',state:'PASS',clickZoomCycles:12,openZoomPanCloseCycles:cycles,
+  immersiveAdditionalReads:extraReads,gcHeapBeforeBytes:before,gcHeapImmersiveBytes:during,
+  gcHeapBeforeCycles:beforeCycles,gcHeapAfterCycles:afterCycles,countersBefore,countersAfter};
 }

@@ -297,7 +297,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
   }
   return Object.freeze({
-    async recordRemoteResult(value,{onVerified}={}){
+    recordRemoteResult:async (value,{onVerified}={})=>{
       const {row,firstVerified}=await transact('readwrite',async s=>{
         if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');
         const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;

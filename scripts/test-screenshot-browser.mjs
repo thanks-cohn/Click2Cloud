@@ -20,7 +20,11 @@ const searchHosts=['search-one.example','search-two.test','search-three.invalid'
 const bucketBase='/client/v4/accounts/'+fixtureTarget.accountId+'/r2/buckets';
 const bucketFolders={redown:['One/','Native/'],'other-screenshots':['Two/'],'qa-screenshots':['Three/']};
 const manifest=JSON.parse(await readFile(join(extension,'manifest.json'),'utf8'));
-assert.equal(manifest.version,'0.3.22');
+const sourceManifest=JSON.parse(await readFile('extension/manifest.json','utf8'));
+assert.equal(manifest.version,sourceManifest.version);
+assert.equal(manifest.name,'REDOWN');
+assert.equal(createHash('sha256').update(Buffer.from(manifest.key,'base64')).digest('hex').slice(0,32)
+ .replace(/[0-9a-f]/g,digit=>String.fromCharCode(97+parseInt(digit,16))),'ajppphdiamdobknpamcheohmdbdbeoal');
 const uploads=[],requests=[],checks=[],objects=new Map();
 const publicBuckets=new Set(),attached=new Map(),customWrites=[];
 let showLongDomainList=false;

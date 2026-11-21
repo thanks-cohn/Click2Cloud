@@ -28,6 +28,8 @@ const server = createServer((req,res)=>{
 await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
 const pageUrl=`http://127.0.0.1:${server.address().port}/`;
 await mkdir(out,{recursive:true});
+await mkdir(join(profile,'Default'),{recursive:true});
+await writeFile(join(profile,'Default','Preferences'),JSON.stringify({extensions:{pinned_extensions:[id]}}));
 let context;
 const input=(...args)=>execFileSync(process.env.C2C_SCREENSHOT_PYTHON??'python3',['tests/fixtures/screenshot-x11.py',...args]);
 async function waitFor(predicate,label){
@@ -68,12 +70,18 @@ async function nativeMenu(page, scenario, contextName, {click=false}={}){
  const group=top.find(row=>/^REDOWN$/i.test(row[11]));
  assert(group,'Chrome native REDOWN group missing: '+top.map(row=>row[11]).join(' '));
  const point=row=>[String(Number(row[6])+Math.floor(Number(row[8])/2)),String(Number(row[7])+Math.floor(Number(row[9])/2))];
- input('move',...point(group));
- await sleep(330);
- const children=readScreen(base+'-providers.png');
- const cloud=children.find(row=>/^Cloudflare$/i.test(row[11]));
+ // Select the actual parent row. Hover alone can leave a Chrome Views
+ // submenu shut when the context menu opens under a stationary pointer.
+ input('click',...point(group));
+ let children,cloud;
+ for(let attempt=0;attempt<8&&!cloud;attempt++){
+  await sleep(175);
+  children=readScreen(base+'-providers.png');
+  cloud=children.find(row=>/^Cloudflare$/i.test(row[11]));
+ }
  assert(cloud,'Chrome native Cloudflare action missing: '+children.map(row=>row[11]).join(' '));
- if(click)input('click',...point(cloud));else input('key','Escape');
+ assert.equal(children.filter(row=>/^Cloudflare$/i.test(row[11])).length,1);
+ if(click)input('click',...point(cloud));else{input('key','Escape');input('key','Escape');}
  report.scenarios.push({scenario,context:contextName,status:'PASS',proof:'OS-rendered native menu',selected:click?'Cloudflare':null});
 }
 async function normalPage(){const page=await context.newPage();await page.goto(pageUrl);return page;}
@@ -87,6 +95,8 @@ try{
  for(const name of ['page','image','link'])await nativeMenu(page,'first-install',name,{click:name==='page'});
  const outcome=await waitFor(()=>worker.evaluate(async()=>(await chrome.storage.local.get('lastSave')).lastSave),'actual native click outcome');
  assert.equal(outcome.state,'blocked');
+ await sleep(350);
+ execFileSync('import',['-window','root',join(out,'toolbar-and-side-panel.png')]);
  report.scenarios.push({scenario:'logged-out native click',status:'PASS',proof:'Chrome onClicked and production outcome',code:outcome.code});
 
  // Lose one actual Chrome row and stop the real service worker. A trusted
