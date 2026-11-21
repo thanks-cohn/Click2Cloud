@@ -114,7 +114,7 @@ try{
  for(const {theme,palette,style,tile} of cases){
   await page.setViewportSize({width:900,height:760});
   await settings();
-  assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia']);
+  assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
   await page.locator('#appearance').selectOption(theme);
   assert.equal(await page.locator('#aesthetic-palette').isVisible(),theme==='minimal');
   assert.equal(await page.locator('#nostalgia-style-row').isVisible(),theme==='nostalgia');

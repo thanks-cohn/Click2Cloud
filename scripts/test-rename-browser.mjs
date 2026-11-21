@@ -79,7 +79,7 @@ let context,page,appURL;
 const row=name=>page.locator('#files [data-index]').filter({hasText:name});
 const title=name=>page.getByRole('heading',{name,exact:true});
 const inline=()=>page.getByRole('textbox',{name:'Image filename'});
-const shot=async name=>{if(evidence)await page.screenshot({path:join(evidence,name+'.png')});};
+const shot=async name=>{if(evidence&&page)await page.screenshot({path:join(evidence,name+'.png')});};
 async function openShelf(name,{reusePage=false}={}){
  if(!reusePage)page=await context.newPage();
  page.setDefaultTimeout(6500);
@@ -332,7 +332,7 @@ async function explorerEssentials(){
  }
  await shot('virtualized-grid-selection');
  let headlineChecks=0;
- for(const [theme,style] of [['minimal'],['standard'],['golden-age'],['oceania'],['nostalgia','kawaii'],
+ for(const [theme,style] of [['minimal'],['standard'],['frames'],['golden-age'],['oceania'],['nostalgia','kawaii'],
   ['nostalgia','dungeon-master'],['nostalgia','heroine']]){
   for(const color of ['dark','light']){
    await settings();
@@ -342,15 +342,15 @@ async function explorerEssentials(){
    await page.getByRole('button',{name:'Remotes',exact:true}).click();
    for(const width of [280,360,570]){
     await page.setViewportSize({width,height:740});
-    const lines=await page.locator('.remotes-headline span').evaluateAll(spans=>spans.map(el=>{
+    const headline=await page.locator('.remotes-headline').evaluate(el=>{
      const range=document.createRange();range.selectNodeContents(el);
-     return {text:el.textContent,lines:range.getClientRects().length, fits:range.getBoundingClientRect().right<=el.getBoundingClientRect().right+1};
-    }));
-    assert.deepEqual(lines,[{text:'The Future Is Now.',lines:1,fits:true},{text:'True Remote Is Here.',lines:1,fits:true}]);
+     return {text:el.textContent,fits:range.getBoundingClientRect().right<=el.getBoundingClientRect().right+1};
+    });
+    assert.deepEqual(headline,{text:'From the Web to your Cloud.',fits:true});
     headlineChecks++;
    }
    await page.setViewportSize({width:360,height:740});
-   if(theme==='golden-age'&&color==='dark')await shot('remotes-two-lines');
+   if(theme==='golden-age'&&color==='dark')await shot('remotes-slogan');
    await page.getByRole('button',{name:'History',exact:true}).click();
    await page.getByRole('heading',{name:'The Rest is History',exact:true}).waitFor();
    assert.equal(await page.getByText(/History is kept forever|Saved files and attempted saves/).count(),0);

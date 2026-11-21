@@ -21,7 +21,7 @@ test('Minimal is the default, old choices restore deterministically and unrelate
   const values={[AESTHETIC_PREFERENCE_KEY]:saved,[PALETTE_PREFERENCE_KEY]:pref('emerald-forest'),fontPreference:'ignored',screenshotRules:{fixtures:true}};
   const {host,writes,root}=fixture(values);
   await host.restore();
-  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia']);
+  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
   assert.equal(root.dataset.aesthetic,expected);
   assert.equal(root.dataset.aestheticHide,undefined);
   assert.equal(host.getPalette(),'emerald-forest');
@@ -135,4 +135,23 @@ test('Removed themes and removed or corrupt Nostalgia variants restore Minimal w
    {...theme,styles:theme.styles.filter(style=>style.id!==id)}:theme));
  }
  await check('nostalgia',{id:'heroine'},themePackages);
+});
+
+test('Frames persists the selected palette and falls back when the stylesheet is absent', async () => {
+ const values={};const {host,vars}=fixture(values);
+ for(const palette of palettes){
+  await host.applyPalette(palette.id);
+  await host.apply({id:'frames'});
+  const restored=fixture(values);
+  await restored.host.restore();
+  assert.equal(restored.host.getActive().id,'frames');
+  assert.deepEqual(restored.vars,vars);
+  assert.equal(vars.get('--a-color-accent-light'),palette.colors.accent[0]);
+  assert.equal(vars.get('--a-color-accent-dark'),palette.colors.accent[1]);
+ }
+ const unavailable=fixture(values);
+ unavailable.root.ownerDocument={defaultView:{getComputedStyle:()=>({getPropertyValue:()=>''})}};
+ assert.equal((await unavailable.host.restore()).error,'PACKAGE_UNAVAILABLE');
+ assert.equal(unavailable.host.getActive().id,'minimal');
+ assert.equal(values[AESTHETIC_PREFERENCE_KEY].id,'frames');
 });

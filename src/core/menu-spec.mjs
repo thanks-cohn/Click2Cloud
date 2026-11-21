@@ -139,7 +139,7 @@ export function compileMenuSpec(options={}) {
           const peers=(options.flatProviders??[]).filter(p=>p.target?.provider===provider),peer=peers.length===1?peers[0]:peers.find(p=>defaultTarget&&targetKey(p.target)===targetKey(defaultTarget));
           if(peer){add({id,label,role:'save',target:normalizeTarget(peer.target),enabled:peer.enabled===true,origin,placement:'provider:'+provider});continue;}
         }
-        if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:provider==='cloudflare'?'PROVIDER_ACTION':'PROVIDER_NOT_IMPLEMENTED'});continue;}
+        if(provider!=='cloudflare'||!active.length){add({id,label,role:'provider-action',providerAction:provider,origin,reason:'PROVIDER_ACTION',...(provider==='cloudflare'?{}:{contexts:['image','link','video','audio']})});continue;}
         const save=(row,parentId=null,leafId)=>add({...row,...(leafId?{id:leafId}:{}),label:parentId?row.label:'REDOWN',parentId,role:'save',placement:'assigned:'+routeKey(row),origin:{...origin,mode:row.sourceMode??null},contexts:['image','link','video','audio','page']});
         if(active.length===1&&!hierarchy)save(active[0],null,id);
         else {

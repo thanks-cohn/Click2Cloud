@@ -1,5 +1,5 @@
 /* Palettes supply color and typography only. Layout belongs to app.css. */
-:root[data-aesthetic=minimal]{
+:root:is([data-aesthetic=minimal],[data-aesthetic=frames]){
  --bg:var(--a-color-background-dark,#12151b);
  --panel:var(--a-color-surface-dark,#1b2028);
  --raised:var(--a-color-raised-dark,#252d38);
@@ -16,7 +16,7 @@
  --body-weight:var(--a-weight-body,400);
  --control-weight:var(--a-weight-control,550);
 }
-:root[data-aesthetic=minimal][data-theme=light]{
+:root:is([data-aesthetic=minimal],[data-aesthetic=frames])[data-theme=light]{
  --bg:var(--a-color-background-light,#f4f5f7);
  --panel:var(--a-color-surface-light,#fff);
  --raised:var(--a-color-raised-light,#eceff3);
@@ -27,3 +27,16 @@
  --selected:var(--a-color-selection-light,#fce8ed);
  --focus:var(--a-color-focus-light,#a8173a);
 }
+
+/* Remotes uses the same type, surfaces and controls as the rest of the Shelf. */
+.remote-providers{display:flex;flex-direction:column;min-width:0}
+.remote-provider{min-width:0;overflow-wrap:anywhere}
+.remote-provider h2{margin-block:0 .55em}
+.remote-provider p{margin-block:.4em}
+.remote-provider-actions{display:flex;flex-wrap:wrap;gap:8px;margin-block:12px 8px}
+.remote-provider button{min-block-size:36px;max-inline-size:100%;white-space:normal;overflow-wrap:anywhere}
+.remote-provider-actions button[aria-disabled=true]{opacity:.6;cursor:progress}
+.remote-provider :is([data-feedback],[data-reason],[data-navigation]):empty{margin-block:0}
+.remote-provider [data-save-state]{font-weight:600}
+.remote-provider [data-save-state=FAILED]{color:var(--error,var(--text))}
+.remote-provider [data-save-state=SAVED]{color:var(--accent)}

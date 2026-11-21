@@ -1,0 +1,34 @@
+:root[data-aesthetic=frames] {
+  --a-package: frames;
+  --card-radius: 10px;
+  --control-radius: 6px;
+  --dialog-radius: 12px;
+  --thumb-radius: 6px;
+  --history-gap: 8px;
+  --history-padding: 12px;
+  --tile-padding: 6px;
+  --heading-tracking: -.02em;
+  --button-ink: var(--bg);
+  --frame-hover: var(--selected);
+  --frame-edge: 1px solid var(--line);
+  --field: var(--panel);
+  --panel-fill: var(--panel);
+  --surface-shadow: 0 1px 2px color-mix(in srgb, var(--text) 9%, transparent);
+  --menu-shadow: 0 8px 24px color-mix(in srgb, #000 25%, transparent);
+  --page-padding: clamp(12px, 3.5vw, 28px);
+}
+:root[data-aesthetic=frames] .remotes-headline {
+  font-size: clamp(22px, 6cqi, 38px);
+}
+:root[data-aesthetic=frames] :is(.toolbar, #explorer-commands, .dialog-head, .dialog-foot) {
+  background: var(--raised);
+  border-color: var(--line);
+}
+:root[data-aesthetic=frames] dialog[data-immersive] {
+  background: var(--bg);
+  color: var(--text);
+}
+:root[data-aesthetic=frames] :is(button, select, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

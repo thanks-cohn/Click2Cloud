@@ -1,3 +1,4 @@
+import {BASIC_CHANNEL, basicMenuProvider, createBasicHost} from '../src/basic/host.mjs';
 import {createScreenshotBackground} from './screenshot-background.mjs';
 import {exportOptions,exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
 import {captureHistoryContext} from '../src/history/model.mjs';
@@ -42,6 +43,7 @@ import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-ide
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
 let storageReady;
 function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
+const basic=createBasicHost({chrome,trustedStorage});
 const workerEpoch=crypto.getRandomValues(new Uint32Array(1))[0]||1;
 const breadcrumbs=createBreadcrumbs({epoch:workerEpoch,build:BUILD_INFO.revision,read:async()=>(await chrome.storage.local.get('criticalBreadcrumbs')).criticalBreadcrumbs,write:value=>chrome.storage.local.set({criticalBreadcrumbs:value})});
 const lifecycle=(code,outcome='failed')=>breadcrumbs.enqueue({stage:'lifecycle',code,outcome});
@@ -290,13 +292,18 @@ chrome.commands?.onCommand?.addListener((command,tab)=>{
  else try{screenshotHost().onCommand(command,tab);}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}
 });
 const readNativeRegistration=async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null;
-const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration:readNativeRegistration,retiredRoots:['click2cloud-screenshot'],observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await readNativeRegistration())?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED'});
+const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration:readNativeRegistration,retiredRoots:['click2cloud-screenshot'],observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await readNativeRegistration())?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:!basicMenuProvider(provider)&&(row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED')});
 },beforeClick:async info=>{
-    if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     const native=registrar.inspect(),itemId=String(info.menuItemId);
+    const delivered=native.desired?.rows.find(r=>r.id===itemId);
+    // Basic uses its own authorization. The registrar still checks current
+    // native acknowledgement, visibility and click context before dispatch.
+    if(delivered?.role==='provider-action'&&basicMenuProvider(delivered.providerAction)&&
+      !native.pending&&native.acknowledgedGeneration===native.desired.generation)return;
+    if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     const retained=native.lastAcknowledged?null:await readNativeRegistration();
     const previous=native.lastAcknowledged??(retained?.state==='acknowledged'?retained.desired:null);
-    const prior=previous?.rows.find(r=>r.id===itemId)??native.desired?.rows.find(r=>r.id===itemId&&r.role==='provider-action');
+    const prior=previous?.rows.find(r=>r.id===itemId)??(delivered?.role==='provider-action'?delivered:null);
     await nativeReady();
     const next=registrar.inspect().desired?.rows.find(r=>r.id===itemId);
     if(!prior||!next||prior.role!==next.role||prior.actionId!==next.actionId)
@@ -304,6 +311,8 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
   },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,dispatchOwnsAuthorization:true,
   dispatchAttention:(provider,info)=>invokeProviderAction({provider,emptyAssignment:provider==='cloudflare',attentionContext:attention.context(info)}),
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
+    const provider=basicMenuProvider(action.providerAction);
+    if(provider)return basic.click(provider,info,tab);
     let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction&&action.actionKind!=='attention')return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{
@@ -372,6 +381,10 @@ const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??reg
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
+  if(message?.channel===BASIC_CHANNEL){
+    basic.request(message,sender).then(respond);
+    return true;
+  }
   if(message?.channel==='shelf-breadcrumb'){
     if(appSenderDecision(chrome.runtime,sender).accepted){
       if(message.event==='started')lifecycle('OBSERVATION_SHELF_STARTED','ok');

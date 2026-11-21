@@ -57,7 +57,7 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
   root.dataset.aesthetic=active;
   if(active==='nostalgia')root.dataset.nostalgiaStyle=nostalgiaStyle;
   else delete root.dataset.nostalgiaStyle;
-  if(active!==minimal.id)return;
+  if(active!==minimal.id&&active!=='frames')return;
   const {colors,fonts}=schemes.get(palette);
   const set=(key,value)=>{root.style.setProperty(key,String(value));applied.add(key);};
   for(const [name,[light,dark]] of Object.entries(colors)){

@@ -4,7 +4,16 @@ import {chromium} from 'playwright-core';import {createServer} from 'node:http';
 const root=resolve(new URL('../',import.meta.url).pathname),out=resolve(process.env.C2C_AESTHETIC_EVIDENCE??'work/foundation/aesthetic');await mkdir(out,{recursive:true});let context,server;const results=[],errors=[],profile=await mkdtemp(join(tmpdir(),'c2c-history-'));
 try{server=createServer(async(req,res)=>{try{const p=resolve(root,'.'+new URL(req.url,'http://local').pathname);if(!p.startsWith(root+'/'))return res.writeHead(403).end();res.setHeader('Content-Type',({'.mjs':'text/javascript','.css':'text/css','.html':'text/html','.png':'image/png'})[extname(p)]??'application/octet-stream');res.end(await readFile(p));}catch{res.writeHead(404).end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
 context=await chromium.launchPersistentContext(profile,{executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true,args:['--no-sandbox'],viewport:{width:1100,height:850}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
-await page.addInitScript(()=>{const listeners=[],data={uiDebugMode:false};globalThis.chrome={runtime:{id:'fixture',onMessage:{addListener:fn=>listeners.push(fn)},sendMessage:async message=>{(window.engineCalls??=[]).push(message.method);return (await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method:message.method,params:message.params});}},storage:{local:{get:async keys=>Object.fromEntries([keys].flat().map(key=>[key,key.startsWith('aesthetic')?JSON.parse(localStorage.getItem(key)??'null')??undefined:data[key]])),set:async v=>{Object.assign(data,v);for(const key of Object.keys(v))if(key.startsWith('aesthetic'))localStorage.setItem(key,JSON.stringify(v[key]));}},onChanged:{addListener(){}}}};window.fixtureNotify=message=>listeners.forEach(fn=>fn(message,{id:'fixture'}));});
+await page.addInitScript(()=>{const listeners=[],data={uiDebugMode:false};globalThis.chrome={runtime:{id:'fixture',onMessage:{addListener:fn=>listeners.push(fn)},sendMessage:async message=>{(window.engineCalls??=[]).push(message.method);if(message.channel==='redown-basic-v1'){
+ if(message.op==='history.latestOutcome')return {ok:true,value:null};
+ if(message.op==='providers.goTo')return {ok:true,value:{opened:true}};
+ const connected=message.op==='auth.connect';
+ return {ok:true,value:{connected,authorized:connected,ready:connected}};
+}return (await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method:message.method,params:message.params});}},storage:{local:{get:async keys=>Object.fromEntries([keys].flat().map(key=>[key,key.startsWith('aesthetic')?JSON.parse(localStorage.getItem(key)??'null')??undefined:data[key]])),set:async v=>{Object.assign(data,v);for(const key of Object.keys(v))if(key.startsWith('aesthetic'))localStorage.setItem(key,JSON.stringify(v[key]));}},onChanged:{addListener(){}}}};globalThis.chrome.permissions={request:async ({origins})=>{
+ window.requestedSourceOrigins=origins;
+ return true;
+}};
+window.fixtureNotify=message=>listeners.forEach(fn=>fn(message,{id:'fixture'}));});
 await page.goto('http://127.0.0.1:'+server.address().port+'/extension/app.html?fixturePerformance=1');await page.waitForFunction(()=>window.productFixture);
 await page.waitForFunction(()=>!document.querySelector('[data-view=history]').disabled);
 
@@ -17,7 +26,7 @@ const snapshot=()=>page.evaluate(async()=>({
  effects:window.engineCalls.filter(method=>/^(set|commit|dispatch|initialize|approve|recover|fileAction)/.test(method))
 }));
 const before=await snapshot();
-assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia']);
+assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
 assert.equal(await page.locator('#appearance').inputValue(),'minimal');
 const palette=page.locator('#aesthetic-palette');
 assert.deepEqual(await palette.getByRole('radio').all().then(items=>Promise.all(items.map(item=>item.getAttribute('value')))),
@@ -59,18 +68,65 @@ for(const name of ['Original Rose','Ocean Blue','Emerald Forest','Amethyst','Sun
  await palette.getByRole('radio',{name}).check();await shot('palette-'+name.replaceAll(' ','-'));
 }
 await palette.getByRole('radio',{name:'Ocean Blue'}).check();
+await page.getByRole('button',{name:'Remotes',exact:true}).click();
+const provider=page.getByRole('region',{name:'Google Drive'});
+await provider.getByRole('button',{name:'Sign In'}).click();
+await provider.getByRole('button',{name:'Reconnect / Approve'}).waitFor();
+await provider.getByRole('button',{name:'GO TO Google Drive'}).click();
+assert.equal(await provider.locator('[data-readiness]').textContent(),'Ready to Save');
+await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
+ id:'fixture-source',provider:'google',state:'FAILED',code:'SOURCE_UNAVAILABLE',sourceOrigin:'https://images.example:8443'
+}}));
+await provider.getByRole('button',{name:'Allow access to images.example'}).click();
+assert.deepEqual(await page.evaluate(()=>window.requestedSourceOrigins),['https://images.example/*']);
+await provider.getByText('Access granted. Right-click the source again to save.').waitFor();
+await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
+ id:'fixture-uncertain',provider:'google',state:'UNCERTAIN'
+}}));
+await provider.getByText('Save could not be verified').waitFor();
+assert.equal(await provider.getByRole('button',{name:'Allow access to images.example'}).isVisible(),false);
+results.push({gate:'independent-provider-actions-and-explicit-source-access-without-save-replay',state:'PASS'});
+for(const width of [360,1100]){
+ await page.setViewportSize({width,height:850});
+ const cases=await page.evaluate(async()=>{
+  const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
+  const host=createAestheticHost({root:document.documentElement});
+  const results=[];
+  for(const {id} of host.list())for(const style of id==='nostalgia'?host.listNostalgiaStyles().map(x=>x.id):[undefined]){
+   for(const {id:palette} of host.listPalettes())for(const mode of ['light','dark']){
+    document.documentElement.dataset.theme=mode;
+    await host.apply({id,style,persist:false});
+    await host.applyPalette(palette);
+    if(host.getActive().id!==id)throw Error('Theme unavailable: '+id);
+    const stack=document.querySelector('.remote-providers');
+    const cards=[...stack.children,stack.nextElementSibling];
+    const rects=cards.map(card=>card.getBoundingClientRect());
+    if(cards.length!==4||!rects.every((r,i)=>r.width>0&&(!i||r.top>=rects[i-1].bottom&&r.x===rects[0].x&&r.width===rects[0].width)))
+     throw Error('Provider layout failed: '+[id,style,palette,mode]);
+    if(document.documentElement.scrollWidth>innerWidth||cards.some(card=>card.scrollWidth>card.clientWidth+1))
+     throw Error('Provider overflow: '+[id,style,palette,mode]);
+    results.push([id,style,palette,mode]);
+   }
+  }
+  return results;
+ });
+ results.push({gate:'provider-theme-matrix',width,cases:cases.length,state:'PASS'});
+}
 const measurements=[];
-for(const mode of ['standard','minimal'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
+for(const mode of ['standard','minimal','frames'])for(const theme of ['dark','light'])for(const width of [1100,600,360]){
  await page.setViewportSize({width,height:850});await settings();await page.locator('#appearance').selectOption(mode);await page.locator('#setting-theme').selectOption(theme);
  await page.waitForFunction(({mode,theme})=>document.documentElement.dataset.aesthetic===mode&&document.documentElement.dataset.theme===theme,{mode,theme});
  const tag=`${mode}-${theme}-${width}`;await page.waitForTimeout(160);await shot(tag+'-settings');if(mode==='minimal'&&theme==='dark'&&width===360){const cards=page.locator('#main .card:visible');for(let i=1;i<await cards.count();i++){await cards.nth(i).scrollIntoViewIfNeeded();await shot(tag+'-settings-card-'+i);}await page.locator('#main').evaluate(el=>el.scrollTop=0);}
  for(const view of ['Remotes','History','File Explorer']){
   await page.getByRole('button',{name:view,exact:true}).click();await page.waitForTimeout(80);await shot(tag+'-'+view.replaceAll(' ','-'));
   if(view==='Remotes'){
-   await page.getByText('The Future Is Now. True Remote Is Here.',{exact:true}).waitFor();
-   const headline=await page.locator('.remotes-headline').boundingBox(),subtitle=await page.locator('.remotes-subtitle').boundingBox(),card=await page.locator('#main .card').first().boundingBox();
-   assert(subtitle.y>=headline.y+headline.height+7);
-   assert(card.y-(subtitle.y+subtitle.height)>subtitle.y-(headline.y+headline.height));
+   await page.getByRole('heading',{name:'From the Web to your Cloud.',exact:true}).waitFor();
+   const cards=await page.locator('#main .card').evaluateAll(elements=>elements.slice(0,4).map(card=>{
+    const rect=card.getBoundingClientRect();
+    return {label:card.querySelector('h2').textContent,x:rect.x,y:rect.y,bottom:rect.bottom,width:rect.width};
+   }));
+   assert.deepEqual(cards.map(card=>card.label),['Google Drive','OneDrive','Dropbox','☁ Cloudflare R2']);
+   assert(cards.every((card,i)=>!i||card.y>=cards[i-1].bottom&&card.x===cards[0].x&&card.width===cards[0].width));
    await page.getByRole('button',{name:'Open File Explorer',exact:true}).waitFor();
    assert.equal(await page.getByRole('button',{name:'Cloudflare status'}).isVisible(),false);
    assert.equal(await page.getByRole('button',{name:'Save results',exact:true}).isVisible(),false);
@@ -79,7 +135,7 @@ for(const mode of ['standard','minimal'])for(const theme of ['dark','light'])for
    assert.equal(await page.getByRole('button',{name:'Open File Explorer',exact:true}).count(),0);
    assert(await page.locator('#manage + #sign-out').isVisible());
    assert(await page.locator('#item-count').isVisible());
-   assert(await page.getByRole('row').filter({hasText:'image.png'}).first().isVisible());
+   await page.getByRole('row').filter({hasText:'image.png'}).first().waitFor();
    assert(await page.locator('#refresh').isEnabled());
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Page horizontal overflow '+tag+' '+view);

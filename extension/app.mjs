@@ -1,3 +1,4 @@
+import {createBasicProviderCards} from './basic-provider-cards.mjs';
 import {wireImmersiveView} from './immersive-view.mjs';
 import {createScreenshotPage,screenshotFeedback,screenshotRequest} from './screenshot-page.mjs';
 import {createAestheticHost} from '../src/aesthetic/host.mjs';
@@ -339,12 +340,16 @@ function ordinarySetupReview(){
  return ['SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','WORKER_SETUP_REQUIRED','ACCOUNT_AMBIGUOUS','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','NOT_ACTIVATED','R2_CONFIRMED_INACTIVE'].includes(code)
   ?'<button id="review-selected">Review save setup</button>':'';
 }
+const basicCards=createBasicProviderCards({runtime:chrome.runtime,permissions:chrome.permissions,document});
 function renderRemotes(){
   if(view!=='remotes')return;
   connectionElement.remove();
-  $('#main').innerHTML=`<section class="page"><div class="remotes-intro"><h1 class="remotes-headline"><span>The Future Is Now.</span> <span>True Remote Is Here.</span></h1><p class="remotes-subtitle">Nothing ever gets downloaded to your computer.</p></div>${configurationIssue?recoveryCard():''}<div class="card"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div><div id="future-providers"><button data-placeholder="google-drive">Google Drive</button><button data-placeholder="dropbox">Dropbox</button><button data-placeholder="onedrive">OneDrive</button></div></section>`;
+  const focusedProvider=document.activeElement?.closest('.remote-provider')?document.activeElement:null;
+  $('#main').innerHTML=`<section class="page"><div class="remotes-intro"><h1 class="remotes-headline">From the Web to your Cloud.</h1></div><div id="basic-provider-slot"></div><div class="card"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status">${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup">Cloudflare status</button><button id="remote-history">Save results</button></div>${configurationIssue?recoveryCard():''}</section>`;
+  basicCards.mount($('#basic-provider-slot'));
+  focusedProvider?.focus({preventScroll:true});
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
-  listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);$$('[data-placeholder]').forEach(b=>b.onclick=()=>api('invokeProviderAction',{provider:b.dataset.placeholder,idempotencyKey:crypto.randomUUID()}).catch(e=>status(e.message)));
+  listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
 }
@@ -1510,7 +1515,7 @@ async function renderSettings(){
   const nostalgiaStyle=$('#nostalgia-style');
   function syncAppearance(){
    appearance.value=aesthetic.getActive().id;
-   palettes.hidden=appearance.value!=='minimal';
+   palettes.hidden=!['minimal','frames'].includes(appearance.value);
    $('#nostalgia-style-row').hidden=appearance.value!=='nostalgia';
    nostalgiaStyle.value=aesthetic.getNostalgiaStyle()??'';
    $('#palette-preview-name').textContent=aesthetic.listPalettes().find(palette=>palette.id===aesthetic.getPalette())?.name??'';
@@ -1702,6 +1707,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   return;
  }
  if(message?.channel==='depth-click-outcome'){status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state)});return;}
+ if(message?.channel==='redown-basic-attempt'){basicCards.onAttempt(message.attempt);return;}
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}
  if(message?.channel==='shelf-attention'){void focusShelf().catch(e=>status(e.message));return;}
  if(message?.channel==='connection-changed'){void (async()=>{const before=JSON.stringify([connection?.state,connection?.accounts]);listingReader.invalidate();await connections();if(view==='explorer'&&connection.state==='CONNECTED'&&before===JSON.stringify([connection.state,connection.accounts])&&source)await reloadCurrentDirectory();if(view==='remotes'&&$('#remotes-connection'))renderRemotes();})().catch(e=>status(e.message));return;}

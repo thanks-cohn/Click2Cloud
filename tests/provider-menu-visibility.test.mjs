@@ -58,3 +58,17 @@ test('hiding all providers yields no native provider or descendant rows; prefere
   const restored=compileMenuSpec(input);
   assert.deepEqual(restored.rows.filter(r=>r.parentId===null).map(r=>r.origin.provider),['google-drive','dropbox','onedrive','cloudflare']);
 });
+
+test('Basic native actions use resource contexts, while the R2 route retains its page and resource contexts', () => {
+  const spec=compileMenuSpec(initial());
+  for(const provider of ['google-drive','onedrive','dropbox']){
+    const action=spec.rows.find(row=>row.providerAction===provider);
+    assert.equal(action.role,'provider-action');
+    assert.equal(action.parentId,null);
+    assert.equal(action.enabled,true);
+    assert.deepEqual(action.contexts,['image','link','video','audio']);
+  }
+  const r2=spec.rows.find(row=>row.origin?.provider==='cloudflare');
+  assert.ok(r2.contexts.includes('page'));
+  assert.ok(r2.contexts.includes('image'));
+});

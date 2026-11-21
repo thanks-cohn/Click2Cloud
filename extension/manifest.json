@@ -28,7 +28,21 @@
     "extension_pages": "script-src 'self'; object-src 'none'"
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu2FOFIYSlNnsFqHpF2AfbFseeW3kTQjN/swVY1iEOgCphfSmW1riR7heWs9zkPM912k+hnVtECOp0B2ppbqZP9PBHHAYdHf/VQ3CSndq561O0M3LeVc/S6OIU03g92TWTs5EncYbgCshNNhJlxkAcxxYXBPGraQt6Y6JxDoSQMW9oYxSC2+1ROSvnjuqD9B+UcIi91h0n4qzgzbmriaGMbaSOBxZrq6Q3PjdIIypNJHk9vjnRoZ1qFmv9M5B8gtQxXCwy1EO6MXsaCmboBh0NB5Wq8en1cIZyhTu8WmTU7HP60wWfNSwhvOQCT650orihJCZWTuyVRCLXhBB+L1kdQIDAQAB",
+  "oauth2": {
+    "client_id": "763628402500-nnvp04squ9dfpbsvp64egvgkhddlb0ff.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/drive.file"]
+  },
   "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://login.microsoftonline.com/*",
+    "https://graph.microsoft.com/*",
+    "https://*.1drv.com/*",
+    "https://*.onedrive.com/*",
+    "https://*.my.microsoftpersonalcontent.com/*",
+    "https://*.sharepoint.com/*",
+    "https://*.sharepoint-df.com/*",
+    "https://api.dropboxapi.com/*",
+    "https://content.dropboxapi.com/*",
     "https://api.cloudflare.com/*",
     "https://dash.cloudflare.com/*",
     "https://*.workers.dev/*"

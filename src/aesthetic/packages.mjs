@@ -11,7 +11,8 @@ export const nostalgia={
   {id:'heroine',name:'Heroine',stylesheet:'heroine'}
  ]
 };
-export const themePackages=[goldenAge,oceania,nostalgia];
+export const frames={id:'frames',name:'Frames',version:'1.0.0',stylesheet:'frames'};
+export const themePackages=[goldenAge,oceania,nostalgia,frames];
 export const busyCursorPackages=Object.freeze([
  {id:'system',name:'System Default'},
  {id:'hourglass',name:'Classic Hourglass'},

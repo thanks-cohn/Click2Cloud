@@ -34,7 +34,7 @@ try{
   await extensions.waitForFunction(({id,version})=>document.querySelector('extensions-manager')?.shadowRoot?.querySelector('extensions-item-list')?.shadowRoot?.querySelector('#'+id)?.data?.version===version,{id:expectedId,version:BUILD_INFO.extensionVersion});
   evidence.checks.push({name:'chrome-extensions-version-and-id',state:'PASS',version:BUILD_INFO.extensionVersion});
   await extensions.close();evidence.checks.push({name:'actual-service-worker-ready',state:'PASS'});
-  const opener=await context.newPage();await opener.goto(appUrl);await opener.getByRole('heading',{name:'The Future Is Now. True Remote Is Here.'}).waitFor({timeout:15000});
+  const opener=await context.newPage();await opener.goto(appUrl);await opener.getByRole('heading',{name:'From the Web to your Cloud.'}).waitFor({timeout:15000});
   const openerSession=await context.newCDPSession(opener),openerId=(await openerSession.send('Target.getTargetInfo')).targetInfo.targetId;
   // Automation supplies a real user gesture to Chrome's real sidePanel API.
   const opened=await openerSession.send('Runtime.evaluate',{expression:'(async()=>{await chrome.sidePanel.open({windowId:(await chrome.windows.getCurrent()).id});return true;})()',userGesture:true,awaitPromise:true,returnByValue:true});
