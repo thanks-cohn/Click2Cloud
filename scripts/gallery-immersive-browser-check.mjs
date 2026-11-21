@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 // Paints real images with the production gallery. Provider reads are fixtures.
-export async function checkImmersiveView(page){
+export async function checkImmersiveView(page,{screenshot}={}){
  const previous=page.viewportSize(),saved=await page.evaluate(()=>structuredClone(window.productFixture.entries));
  await page.getByLabel('View',{exact:true}).selectOption('details');
  await page.setViewportSize({width:410,height:700});
@@ -76,6 +76,7 @@ export async function checkImmersiveView(page){
  assert.equal(await dial.inputValue(),'400');
  const landscape=await geometry();
  assert(landscape.dx>0&&landscape.dy>0&&landscape.fit);
+ if(screenshot)await page.screenshot({path:screenshot});
  const scroll=()=>preview.evaluate(img=>[img.parentElement.scrollLeft,img.parentElement.scrollTop]);
  await preview.evaluate(img=>img.parentElement.scrollTo(0,0));
  for(const key of ['ArrowRight','ArrowDown'])await page.keyboard.press(key);

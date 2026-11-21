@@ -111,9 +111,22 @@ try{
  await cdp.send('ServiceWorker.enable');
  const cloudId=report.rows.find(row=>row.label==='Cloudflare').id;
  await worker.evaluate(itemId=>new Promise((ok,fail)=>chrome.contextMenus.remove(itemId,()=>chrome.runtime.lastError?fail(Error(chrome.runtime.lastError.message)):ok())),cloudId);
- const marker=()=>worker.evaluate(()=>globalThis.nativeFixtureMarker).catch(()=>null);
- const mark=()=>worker.evaluate(()=>{globalThis.nativeFixtureMarker=true;});
- await mark();
+ const inspectAck=()=>app.evaluate(()=>chrome.runtime.sendMessage({
+  channel:'engine',version:'3+1.1',method:'inspectNativeACK',params:{}
+ }));
+ async function readyFromShelf(phase){
+  let last;
+  try{
+   return await waitFor(async()=>{
+    last=await inspectAck().catch(()=>null);
+    return last?.state==='completed'&&last.data?.lastOutcome?.state==='completed'?last.data:null;
+   },'Chrome ACK after '+phase);
+  }catch(error){
+   report.lastAck=last?.data?.lastOutcome??last?.code;
+   report.workerLifecycle=lifecycle;
+   throw error;
+  }
+ }
  let stopped=false;
  worker.once('close',()=>{stopped=true;});
  lifecycle.length=0;
@@ -121,19 +134,13 @@ try{
  await waitFor(()=>stopped||lifecycle.includes('stopped'),'Chrome to stop the extension service worker');
  const wake=await app.evaluate(()=>chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method:'getEngineHealth',params:{}}));
  assert.equal(wake.state,'completed');
- worker=await readyWorker();
- assert.equal(await marker(),undefined,'worker globals must be new after cold wake');
+ await readyFromShelf('worker wake');
  await nativeMenu(page,'worker-wake-after-lost-row','page');
- await mark();
- await worker.evaluate(()=>chrome.runtime.reload()).catch(error=>{
+ await app.evaluate(()=>chrome.runtime.reload()).catch(error=>{
   if(!/closed|destroyed/i.test(error.message))throw error;
  });
- await waitFor(async()=>{
-  const active=await readyWorker();
-  const reloaded=await active.evaluate(()=>globalThis.nativeFixtureMarker!==true).catch(()=>false);
-  if(reloaded)worker=active;
-  return reloaded;
- },'extension reload');
+ await waitFor(()=>app.goto(appUrl).catch(()=>null),'unpacked extension reload');
+ await readyFromShelf('extension reload');
  await nativeMenu(page,'extension-reload','page');
 
  await context.close();

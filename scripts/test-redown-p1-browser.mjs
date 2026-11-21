@@ -136,6 +136,8 @@ try{
     await page.setViewportSize({width,height:760});
     geometryOK(await headerGeometry());
     assert.equal(await page.locator('#header-more').getAttribute('aria-expanded'),'true');
+    assert.equal(await page.locator('header [data-view=history]:visible').count(),1);
+    assert.equal(await page.locator('#header-compact-history').isVisible(),width<=329);
     if(width===260&&id==='emerald-forest')await shot(tag+'-narrow-menu');
    }
    await page.keyboard.press('Escape');

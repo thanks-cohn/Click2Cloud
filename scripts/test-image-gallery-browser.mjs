@@ -19,7 +19,7 @@ for(const ext of ['png','jpg','webp','gif']){await page.getByRole('gridcell').fi
 if(process.env.C2C_GALLERY_GEOMETRY==='1'&&!live)results.push(await checkGalleryGeometry(page,{baseline:process.env.C2C_GALLERY_BASELINE==='1',screenshot:join(evidence,'stable-gallery-frame.png')}));
 if(process.env.C2C_GALLERY_LOADING==='1'&&!live)results.push(await checkGalleryLoading(page,{screenshot:join(evidence,'local-media-loader.png')}));
 if(process.env.C2C_GALLERY_NAVIGATION==='1')results.push(await checkGalleryNavigation(page,{screenshot:join(evidence,'polished-gallery-navigation.png')}));
-if(!live)results.push(await checkImmersiveView(page));
+if(!live)results.push(await checkImmersiveView(page,{screenshot:join(evidence,'immersive-zoom-and-pan.png')}));
 // Real browser FileSystemWritableFileStream/OPFS, only the picker is substituted.
 for(const name of ['picture.png','picture.jpg','picture.webp','picture.gif',live?'large.png':'large.jpg']){
  await page.getByRole('gridcell').filter({hasText:name}).dblclick();await page.locator('img.preview:not([hidden])').waitFor();

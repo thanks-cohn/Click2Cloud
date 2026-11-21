@@ -9201,7 +9201,7 @@
     "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
     "sourceFiles": {
       "extension/aesthetic.css": "41d302efffae1f4b1ca0cb7bef391f5a0e8956ee1cf7070cb6fd1b2fddbfac63",
-      "extension/app.css": "2f5a029b459a6636c8f8d702ef515acefc68437fe8bd0349fc72f7e564f20201",
+      "extension/app.css": "cbb3f26c642f2a1fbdc51f0954b4f38269be5059d71ded87df7cd1b76553c9b8",
       "extension/app.html": "fef43b3d4ce5579e1ebc85f6db7ef05e88fba8dc0d9baa0e60ba5887f11298c7",
       "extension/app.mjs": "df07fbd9a16603ed8e087fbc912c7cb8d72f2c64b03d4cfe99acd8e857ea3808",
       "extension/background.mjs": "4c39ba6d02273d0ed4d6fad069586b25cef1e82716a29092c1bedea7589e2ada",

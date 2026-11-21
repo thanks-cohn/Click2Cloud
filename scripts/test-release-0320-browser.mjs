@@ -151,6 +151,11 @@ try{
 
   await page.setViewportSize({width:1050,height:800});
   await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+  await page.locator('#view-switch').evaluate(select=>{
+    select.value='details';
+    select.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  await page.locator('#files.details').waitFor();
   await page.locator('#files [data-index]').filter({hasText:'test.png'}).first().press('Enter');
   await page.locator('img.preview:not([hidden])').waitFor();
   assert.equal(await page.getByText('Images in this loaded folder').count(),0);

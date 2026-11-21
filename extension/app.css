@@ -149,7 +149,7 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .app-header nav button{min-block-size:34px;padding:6px clamp(5px,1.2vw,10px);border:none}
 .app-header nav>button{min-inline-size:0;overflow:hidden;text-overflow:ellipsis}
 #theme{display:grid;place-items:center;inline-size:var(--theme-size);block-size:var(--theme-size);padding:0;font-size:20px}
-:root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,#header-compact-history,.header-more-icon,.explorer-compact-label{display:none}
+:root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,.header-more-icon,.explorer-compact-label{display:none}
 @media(max-width:480px){
  .app-header nav button{font-size:12px}
 }
@@ -159,9 +159,10 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
  .header-more-label{display:none}
  .header-more-icon{display:inline;font-size:18px;line-height:1}
 }
+#header-menu #header-compact-history{display:none}
 @media(max-width:329px){
  .app-header nav>[data-view=history]{display:none}
- #header-compact-history{display:block}
+ #header-menu #header-compact-history{display:block}
 }
 @media(max-width:279px){
  .explorer-label{display:none}
