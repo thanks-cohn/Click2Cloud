@@ -1,4 +1,5 @@
 import {historyDefaults,validateHistoryPreferences} from '../history/model.mjs';
+import {hasVerifiedSave,verifiedSaveTime} from '../history/verified-save.mjs';
 import {loadingMedia,loadingVisualSummary,loadingVisualWire} from '../explorer/loading-visual-config.mjs';
 import {safeRemoteDiagnostic} from '../../right2cloud-module/src/common.mjs';
 // Adapted transaction/journal/desired-applied fences from REDOWN right-click-current.js
@@ -296,7 +297,30 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
   }
   return Object.freeze({
-    recordRemoteResult:value=>transact('readwrite',async s=>{if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;if(value.state==='pending'&&previous&&previous.state!=='pending')return previous;const safe={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??clock(),updatedAt:clock()};s.state.put({id:'remote-result:'+value.operationId,value:safe});return safe;}),
+    async recordRemoteResult(value,{onVerified}={}){
+      const {row,firstVerified}=await transact('readwrite',async s=>{
+        if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');
+        const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;
+        if(value.state==='pending'&&previous&&previous.state!=='pending')return {row:previous};
+        const updatedAt=clock();
+        const row={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',
+          operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,
+          ...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),
+          destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,
+          timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,
+          attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,
+          ...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??updatedAt,updatedAt};
+        const priorTime=verifiedSaveTime(previous);
+        const firstVerified=priorTime===undefined&&hasVerifiedSave(row);
+        if(firstVerified||priorTime!==undefined)row.badgeVerifiedAt=priorTime??updatedAt;
+        s.state.put({id:'remote-result:'+value.operationId,value:row});
+        return {row,firstVerified};
+      });
+      if(firstVerified&&onVerified){
+        try{void Promise.resolve(onVerified(row)).catch(()=>{});}catch{/* Badge failures cannot alter a committed receipt. */}
+      }
+      return row;
+    },
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResultsById:ids=>transact('readonly',async s=>{
       const results=await Promise.all(ids.map(id=>request(s.state.get('remote-result:'+id))));

@@ -84,8 +84,7 @@ async function prepared(target){
 const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 async function recordRemote(value){
- const saved=await current.recordRemoteResult(value);
- if(saved.kind==='save'&&saved.state==='verified')void dailyBadge.refresh();
+ const saved=await current.recordRemoteResult(value,{onVerified:dailyBadge.recordVerified});
  try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
  try{void Promise.resolve(fileApi.noteRemoteWrite(saved)).catch(()=>{});}catch{}
  return saved;
@@ -273,7 +272,7 @@ void Promise.resolve().then(async()=>{
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
 let screenshots;
-const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,historyUrls:async(method,output,params)=>{
+const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:dailyBadge.recordVerified,historyUrls:async(method,output,params)=>{
  if(method==='history-connect-domain'){
   if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
   if(typeof params.domain!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});

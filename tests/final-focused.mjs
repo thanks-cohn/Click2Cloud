@@ -81,3 +81,5 @@ await import('./history.test.mjs');
 import './screenshot.test.mjs';
 import './get-url.test.mjs';
 import './shelf-history-toggle.test.mjs';
+import './daily-badge.test.mjs';
+import './aesthetic.test.mjs';

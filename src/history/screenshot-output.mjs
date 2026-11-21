@@ -1,5 +1,6 @@
 import {captureUuid,screenshotError,screenshotTarget} from '../screenshot/rules.mjs';
 import {objectETag} from '../explorer/file-api.mjs';
+import {independentlyConfirmedScreenshot} from './verified-save.mjs';
 
 export function retainedScreenshotOutput(record,{operationId,outputId}){
  const job=record?.kind==='screenshot-to-cloud'?record.screenshot:null;
@@ -12,8 +13,7 @@ export function retainedScreenshotOutput(record,{operationId,outputId}){
   new TextEncoder().encode(key).length>1024||/[\x00-\x1f]/.test(key))throw screenshotError('SOURCE_SCOPE_MISMATCH');
  const target=screenshotTarget({...scope,prefix:key.slice(0,key.lastIndexOf('/')+1)});
  if(target.prefix+key.split('/').at(-1)!==key)throw screenshotError('SOURCE_SCOPE_MISMATCH');
- const confirmed=observed?.state==='confirmed'&&(!observed.outputId||observed.outputId===outputId)&&
-  ['direct-r2-get-sha256','independent-r2-head-sha256'].includes(observed.verification);
+ const confirmed=independentlyConfirmedScreenshot(observed,outputId);
  return {target,key,confirmed,bytes:observed?.bytes??job.captured?.bytes,etag:observed?.etag,
   checksum:observed?.checksum??job.captured?.sha256};
 }
