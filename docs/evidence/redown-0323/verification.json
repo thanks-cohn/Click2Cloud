@@ -253,5 +253,272 @@
     },
     "extensionBuild": "PASS",
     "apiDocs": "PASS"
-  }
+  },
+  "generatedMenuTrees": {
+    "proofClass": "SOURCE_PROJECTION_ONLY",
+    "empty": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "Cloudflare",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:89a372375b51a98e",
+        "target": null
+      }
+    ],
+    "savedSimple": [
+      {
+        "id": "c2c:provider-entry:ddb2a5cd46965023",
+        "parentId": null,
+        "label": "Google Drive",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:ddb2a5cd46965023",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:0251fec64383f085",
+        "parentId": null,
+        "label": "Dropbox",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:0251fec64383f085",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:2fd331323c9add35",
+        "parentId": null,
+        "label": "OneDrive",
+        "role": "provider-action",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:provider-action:2fd331323c9add35",
+        "target": null
+      },
+      {
+        "id": "c2c:provider-entry:89a372375b51a98e",
+        "parentId": null,
+        "label": "REDOWN",
+        "role": "save",
+        "contexts": [
+          "image",
+          "link",
+          "video",
+          "audio",
+          "page"
+        ],
+        "actionId": "c2c:action:3802c3d049a8461c",
+        "target": {
+          "provider": "cloudflare",
+          "connectionId": "cloudflare:fixture",
+          "accountId": "fixture",
+          "bucketName": "fixture-bucket",
+          "prefix": "chosen/"
+        }
+      }
+    ]
+  },
+  "changedFiles": [
+    {
+      "change": "M",
+      "path": ".github/workflows/test.yml"
+    },
+    {
+      "change": "M",
+      "path": "11.2026/workings/right-click-workings.json"
+    },
+    {
+      "change": "A",
+      "path": "docs/evidence/redown-0323/VERIFICATION.md"
+    },
+    {
+      "change": "A",
+      "path": "docs/evidence/redown-0323/installed-browser-policy.png"
+    },
+    {
+      "change": "A",
+      "path": "docs/evidence/redown-0323/verification.json"
+    },
+    {
+      "change": "M",
+      "path": "docs/evidence/reliability-ratchet/system-map.json"
+    },
+    {
+      "change": "M",
+      "path": "extension/app.mjs"
+    },
+    {
+      "change": "M",
+      "path": "extension/background.mjs"
+    },
+    {
+      "change": "M",
+      "path": "extension/history-page.mjs"
+    },
+    {
+      "change": "M",
+      "path": "extension/screenshot-background.mjs"
+    },
+    {
+      "change": "M",
+      "path": "extension/screenshot-page.mjs"
+    },
+    {
+      "change": "M",
+      "path": "latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md"
+    },
+    {
+      "change": "M",
+      "path": "scripts/test-customer-history-browser.mjs"
+    },
+    {
+      "change": "A",
+      "path": "scripts/test-native-menu-browser.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/api/service.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/chrome/daily-badge.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/chrome/registrar.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/chrome/visible-tab-screenshot.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/cloudflare/transport.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/core/engine.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/glaciaring/catalog.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/history/model.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/persistence/current-store.mjs"
+    },
+    {
+      "change": "M",
+      "path": "src/screenshot/capture.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/chrome-registrar.test.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/depth-p0-click.test.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/depth-plan-recovery.test.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/final-focused.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/fixtures/screenshot-x11.py"
+    },
+    {
+      "change": "M",
+      "path": "tests/latest-quick-rules.test.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/logic2real-depth-save.test.mjs"
+    },
+    {
+      "change": "A",
+      "path": "tests/native-menu-lifecycle.test.mjs"
+    },
+    {
+      "change": "M",
+      "path": "tests/screenshot.test.mjs"
+    }
+  ]
 }
