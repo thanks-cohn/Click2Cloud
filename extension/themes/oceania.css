@@ -1,0 +1,34 @@
+:root[data-aesthetic=oceania]{
+ --a-package:oceania;
+ --bg:#1d2a3b;--panel:#2c3e53;--raised:#364b63;--text:#f2f5f8;
+ --muted:#c0cedb;--line:#577087;--accent:#b5d8f6;--selected:#40566c;--focus:#f1daab;
+ --button-ink:#18283a;--frame:#27394e;--frame-ink:#f4ebd8;--frame-hover:#415872;
+ --frame-accent:#f4ebd8;--frame-focus:#f1daab;--frame-edge:2px solid #4e647d;
+ --heading-font:Georgia,Cambria,"Liberation Serif",serif;
+ --body-font:"Helvetica Neue","Segoe UI",Arial,sans-serif;
+ --control-font:"Trebuchet MS","Segoe UI",Arial,sans-serif;
+ --card-radius:6px;--card-padding:16px;--card-margin:15px;
+ --control-radius:4px;--dialog-radius:8px;--thumb-radius:3px;--tile-padding:5px;
+ --history-padding:12px 14px;--history-gap:12px;
+ --surface-shadow:0 3px 0 #0002,0 5px 0 -1px #647d9660;
+ --error:#ffbac1;
+}
+:root[data-aesthetic=oceania][data-theme=light]{
+ --bg:#e9eff3;--panel:#fff;--raised:#edf2f6;--text:#263646;
+ --muted:#50667c;--line:#c0cdd9;--accent:#244f7b;--selected:#dce8f3;--focus:#244f7b;
+ --button-ink:#fff;--error:#912939;
+ --surface-shadow:0 3px 0 #cdd8e3,0 5px 0 -1px #becddb;
+}
+:root[data-aesthetic=oceania] .brand-tile{
+ color:#f4ebd8;background:#35465c;border-radius:5px;
+ font-family:"Bookman Old Style",Georgia,Cambria,serif;
+}
+:root[data-aesthetic=oceania] .remotes-intro{
+ border-block-end:3px double var(--line);padding-block:4px 16px;
+}
+:root[data-aesthetic=oceania] :is(.card,.history-row) h2{
+ font-size:18px;border-block-end:1px solid var(--line);padding-block-end:8px;
+}
+:root[data-aesthetic=oceania] #files th{
+ box-shadow:inset 0 -2px var(--line);
+}

@@ -1,0 +1,96 @@
+/* Full-theme surfaces reuse the Shelf's existing layout and virtual row sizes. */
+:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=nostalgia]){
+ --primary-text:var(--button-ink);
+ --page-padding:clamp(14px,4vw,30px);
+ --frame:var(--panel);
+ --frame-ink:var(--text);
+ --heading-tracking:normal;
+ --heading-slant:normal;
+ --control-border:1px solid var(--line);
+ --control-weight:600;
+ --body-font:"Segoe UI",system-ui,sans-serif;
+ --control-font:var(--body-font);
+}
+:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=nostalgia]) {
+ & :is(h1,h2,h3,.remotes-headline){
+  letter-spacing:var(--heading-tracking);
+  font-style:var(--heading-slant);
+ }
+ & .app-header{
+  background:var(--frame-fill,var(--frame));
+  color:var(--frame-ink);
+  border-block-end:var(--frame-edge,1px solid var(--line));
+ }
+ & .app-header :is(nav>button,#theme,#header-more){background:transparent;color:inherit}
+ & .app-header :is(nav>button,#theme,#header-more):hover:not(:disabled){background:var(--frame-hover)}
+ & .app-header nav>button.active{
+  background:var(--frame-hover);
+  box-shadow:inset 0 -2px var(--frame-accent,var(--accent));
+ }
+ & .app-header :focus-visible{outline-color:var(--frame-focus,var(--focus))}
+ & :is(button,input,select,textarea):not(.gallery-arrow,.brand-tile){
+  border-radius:var(--control-radius);
+ }
+ & :is(input:not([type=range],[type=checkbox],[type=radio]),select,textarea){
+  background:var(--field,var(--bg));
+  border:var(--control-border);
+ }
+ & button:not(.gallery-arrow):disabled{opacity:.55}
+ & button:not(.gallery-arrow):active:not(:disabled){box-shadow:inset 0 1px 2px #0003}
+ & :is(.card,.history-row,.history-destination-card){
+  border:1px solid var(--line);
+  border-radius:var(--card-radius);
+  background:var(--panel-fill,var(--panel));
+  box-shadow:var(--surface-shadow,none);
+ }
+ & .history-row{padding:var(--history-padding);margin-block:var(--history-gap)}
+ & :is(.history-day,.history-week,.history-year)>summary{
+  color:var(--accent);
+  font-family:var(--heading-font);
+  font-weight:700;
+ }
+ & .history-page>nav{
+  border-block-start:1px solid var(--line);
+  padding-block-start:12px;
+ }
+ & :is(.history-page,.card,.dialog-body) a{color:var(--accent);text-underline-offset:.18em}
+ & .settings-row{padding-block-end:8px;border-block-end:1px solid var(--line)}
+ & :is(.toolbar,#explorer-commands,#tree .children){border-color:var(--line)}
+ & :is(#explorer-commands,#shell>aside){background:var(--panel-fill,var(--panel))}
+ & .file-scroll.grid .file-tile>div{
+  padding:var(--tile-padding);
+  border-radius:var(--thumb-radius);
+  box-shadow:var(--surface-shadow,none);
+ }
+ & .file-tile .thumbnail{background:var(--bg);border-radius:var(--thumb-radius)}
+ & #files tbody tr[data-index]>td:first-child{box-shadow:inset 2px 0 transparent}
+ & #files tbody tr[data-index][aria-selected=true]>td:first-child{box-shadow:inset 2px 0 var(--accent)}
+ & .empty{
+  margin:12px;padding:clamp(12px,4vw,32px);
+  border:1px dashed var(--line);border-radius:var(--card-radius);
+  background:var(--panel);overflow-wrap:anywhere;
+ }
+ & :is(#listing-state,#preview-state,#preview-error,.history-status){font-weight:600}
+ & #preview-error{color:var(--error,var(--text))}
+ & :is(.target,.suggestion,.tabs){border-radius:var(--control-radius)}
+ & .tabs{padding:4px;background:var(--raised)}
+ & :is(#header-menu,#context,#toolbar-overflow,#filename-search-popout){
+  color:var(--text);
+  border-color:var(--line);
+  border-radius:var(--control-radius);
+  box-shadow:var(--menu-shadow,0 8px 20px #0005);
+ }
+ & #header-menu :is(button,button:hover:not(:disabled)){color:var(--text)}
+ & dialog:not([data-immersive]){
+  border-radius:var(--dialog-radius);
+  background:var(--panel-fill,var(--panel));
+  box-shadow:var(--menu-shadow,0 8px 20px #0005);
+ }
+ & dialog:not([data-immersive]) :is(.dialog-head,.gallery-actions){
+  border-color:var(--line);
+ }
+ & dialog:not([data-immersive]) .image-frame{
+  border-radius:var(--thumb-radius);
+  box-shadow:inset 0 0 0 1px var(--line);
+ }
+}

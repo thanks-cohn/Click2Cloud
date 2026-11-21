@@ -1,0 +1,37 @@
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master]{
+ --a-package:dungeon-master;
+ --bg:#08090b;--panel:#171a20;--raised:#282f39;--text:#f7f8fa;
+ --muted:#bec9d7;--line:#586575;--accent:#c6d8ef;--selected:#343f4b;--focus:#e5eef9;
+ --button-ink:#14171d;--frame:#101216;--frame-ink:#f7f8fa;--frame-hover:#313740;
+ --frame-focus:#e5eef9;--frame-accent:#c6d8ef;--frame-edge:3px double #6c7888;
+ --frame-fill:linear-gradient(174deg,#2e3440 0%,#101216 48%,#0b0d11 79%,#1b1f27 100%);
+ --panel-fill:linear-gradient(163deg,var(--raised),var(--panel) 34%,var(--panel) 80%,var(--bg));
+ --heading-font:Georgia,"Palatino Linotype",serif;
+ --heading-tracking:.035em;
+ --card-radius:2px;--card-padding:16px;--card-margin:13px;
+ --control-radius:2px;--dialog-radius:4px;--thumb-radius:2px;--tile-padding:6px;
+ --history-padding:12px;--history-gap:7px;
+ --surface-shadow:inset 0 1px #b4c4d438,2px 2px #0005;
+ --error:#ffc2bc;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master][data-theme=light]{
+ --bg:#c3cbd5;--panel:#e6ebf0;--raised:#d7dfe8;--text:#242932;
+ --muted:#465565;--line:#7a899b;--accent:#344f6b;--selected:#c1d0e0;--focus:#2d527a;
+ --button-ink:#fff;--error:#8e2830;
+ --surface-shadow:inset 0 1px #fff9,2px 2px #53627a3d;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .brand-tile{
+ color:#fff;background:#08090b;border-radius:4px;
+ box-shadow:inset 0 0 0 1px #8290a3,inset 0 2px #c6d8ef55;
+ font-family:"Segoe UI",Arial,sans-serif;font-weight:900;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .remotes-intro{
+ border-block-end:3px double var(--line);padding-block:6px 14px;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] :is(.card,.history-row){
+ border-inline-start:3px double var(--line);
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .card>h2{
+ font-size:16px;text-transform:uppercase;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .history-dot{border-radius:1px}

@@ -1,9 +1,8 @@
-import {standard,minimal,palettes} from './packages.mjs';
+import {standard,minimal,palettes,themePackages} from './packages.mjs';
 
 export const AESTHETIC_API_VERSION='1.1';
 export const AESTHETIC_PREFERENCE_KEY='aestheticPreferenceV1';
 export const PALETTE_PREFERENCE_KEY='aestheticPalettePreferenceV1';
-const themes=new Map([minimal,standard].map(theme=>[theme.id,theme]));
 const colorNames=['background','surface','raised','text','muted','border','accent','selection','focus'];
 const fontRoles=['heading','body','control'];
 const plain=value=>!!value&&Object.getPrototypeOf(value)===Object.prototype;
@@ -24,7 +23,18 @@ const schemes=new Map(palettes.map(scheme=>{
  return [scheme.id,scheme];
 }));
 
-export function createAestheticHost({root,storage}={}){
+// Each optional stylesheet stamps its own scoped rule. Missing or disabled CSS
+// leaves the built-in styles available without loading any other scripts.
+function hasStylesheet(root,id){
+ const view=root?.ownerDocument?.defaultView;
+ return !view||view.getComputedStyle(root).getPropertyValue('--a-package').trim()===id;
+}
+
+export function createAestheticHost({root,storage,packages=themePackages}={}){
+ const themes=new Map([minimal,standard,...packages].map(theme=>[theme.id,theme]));
+ const styles=themes.get('nostalgia')?.styles??[];
+ const defaultStyle=styles[0]?.id;
+ let nostalgiaStyle=defaultStyle;
  const applied=new Set();
  let active=minimal.id,palette=palettes[0].id,lastError=null,sequence=0,writes=Promise.resolve();
  function paint(){
@@ -32,6 +42,8 @@ export function createAestheticHost({root,storage}={}){
   for(const name of applied)root.style.removeProperty(name);
   applied.clear();
   root.dataset.aesthetic=active;
+  if(active==='nostalgia')root.dataset.nostalgiaStyle=nostalgiaStyle;
+  else delete root.dataset.nostalgiaStyle;
   if(active!==minimal.id)return;
   const {colors,fonts}=schemes.get(palette);
   const set=(key,value)=>{root.style.setProperty(key,String(value));applied.add(key);};
@@ -42,29 +54,44 @@ export function createAestheticHost({root,storage}={}){
    set('--a-font-'+role,family);set('--a-weight-'+role,weight);
   }
  }
- function persistPreference(key,id){
+ function persistPreference(key,preference){
   writes=writes.catch(()=>{}).then(()=>{
    if(!storage?.set)throw Error('PREFERENCE_WRITE_FAILED');
-   return storage.set({[key]:{schemaVersion:1,id}});
+   return storage.set({[key]:preference});
   });
   return writes;
  }
  const getActive=()=>({apiVersion:AESTHETIC_API_VERSION,id:active,version:themes.get(active).version,error:lastError});
- async function apply({id=minimal.id,persist=true}={}){
+ async function apply({id=minimal.id,style=nostalgiaStyle,persist=true}={}){
   const ticket=++sequence;
-  lastError=themes.has(id)?null:'PACKAGE_UNAVAILABLE';
+  const theme=themes.get(id),variant=id==='nostalgia'?styles.find(item=>item.id===style):undefined;
+  lastError=!theme||id==='nostalgia'&&!variant?'PACKAGE_UNAVAILABLE':null;
   active=lastError?minimal.id:id;
+  const previousStyle=nostalgiaStyle;
+  if(variant)nostalgiaStyle=variant.id;
   paint();
+  const stylesheet=theme?.stylesheet??variant?.stylesheet;
+  if(stylesheet&&!hasStylesheet(root,stylesheet)){
+   nostalgiaStyle=previousStyle;
+   active=minimal.id;
+   lastError='PACKAGE_UNAVAILABLE';
+   paint();
+  }
   const result=getActive();
-  if(persist&&!lastError)try{await persistPreference(AESTHETIC_PREFERENCE_KEY,id);}
-  catch{if(sequence===ticket)lastError='PREFERENCE_WRITE_FAILED';return {...result,error:'PREFERENCE_WRITE_FAILED'};}
+  if(persist&&!lastError)try{
+   await persistPreference(AESTHETIC_PREFERENCE_KEY,{schemaVersion:1,id,
+    ...(nostalgiaStyle?{nostalgiaStyle}:{})});
+  }catch{
+   if(sequence===ticket)lastError='PREFERENCE_WRITE_FAILED';
+   return {...result,error:'PREFERENCE_WRITE_FAILED'};
+  }
   return result;
  }
  async function applyPalette(id){
   if(!schemes.has(id))return {id:palette,error:'PALETTE_UNAVAILABLE'};
   sequence++;palette=id;
   paint();
-  try{await persistPreference(PALETTE_PREFERENCE_KEY,id);return {id,error:null};}
+  try{await persistPreference(PALETTE_PREFERENCE_KEY,{schemaVersion:1,id});return {id,error:null};}
   catch{return {id,error:'PREFERENCE_WRITE_FAILED'};}
  }
  const isPreference=value=>plain(value)&&value.schemaVersion===1&&typeof value.id==='string';
@@ -78,7 +105,12 @@ export function createAestheticHost({root,storage}={}){
    // Keep the durable IDs for Minimal and Remote V1 and read old Bit o' Polish
    // preferences as Minimal. The independently saved palette stays intact.
    if(saved===undefined||isPreference(saved)&&saved.id==='high-polish')return apply({persist:false});
-   if(isPreference(saved)&&themes.has(saved.id))return apply({id:saved.id,persist:false});
+   if(isPreference(saved)){
+    const style=saved.nostalgiaStyle===undefined?defaultStyle:saved.nostalgiaStyle;
+    if(styles.some(item=>item.id===style))nostalgiaStyle=style;
+    if(themes.has(saved.id))return apply({id:saved.id,style,persist:false});
+   }
+   active=minimal.id;
    lastError='PREFERENCE_INVALID';
   }catch{if(ticket===sequence)lastError='PREFERENCE_READ_FAILED';}
   if(ticket===sequence)paint();
@@ -87,5 +119,8 @@ export function createAestheticHost({root,storage}={}){
  paint();
  return Object.freeze({apply,getActive,list:()=>[...themes.values()].map(({id,name})=>({id,name})),
   listPalettes:()=>palettes.map(({id,name,colors})=>({id,name,preview:{light:colors.accent[0],dark:colors.accent[1]}})),
-  getPalette:()=>palette,applyPalette,restore});
+  getPalette:()=>palette,applyPalette,restore,
+  listNostalgiaStyles:()=>styles.map(({id,name})=>({id,name})),
+  getNostalgiaStyle:()=>nostalgiaStyle,
+  applyNostalgiaStyle:style=>apply({id:'nostalgia',style})});
 }

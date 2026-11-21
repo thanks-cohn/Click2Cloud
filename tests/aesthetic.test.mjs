@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAestheticHost,validatePalette,AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';
-import {palettes} from '../src/aesthetic/packages.mjs';
+import {palettes,themePackages} from '../src/aesthetic/packages.mjs';
 
 const pref=id=>({schemaVersion:1,id});
-function fixture(values={}){
+function fixture(values={},options={}){
  const vars=new Map(),writes=[],root={dataset:{theme:'light'},style:{setProperty:(key,value)=>vars.set(key,value),removeProperty:key=>vars.delete(key)}};
  const storage={get:async()=>structuredClone(values),set:async update=>{writes.push(update);Object.assign(values,update);}};
- return {host:createAestheticHost({root,storage}),vars,writes,root};
+ return {host:createAestheticHost({root,storage,...options}),vars,writes,root};
 }
 test('Built-in palettes are complete and reject geometry, visibility, remote fonts, code and invalid colors',()=>{
  assert.equal(palettes.length,5);
@@ -21,7 +21,7 @@ test('Minimal is the default, old choices restore deterministically and unrelate
   const values={[AESTHETIC_PREFERENCE_KEY]:saved,[PALETTE_PREFERENCE_KEY]:pref('emerald-forest'),fontPreference:'ignored',screenshotRules:{fixtures:true}};
   const {host,writes,root}=fixture(values);
   await host.restore();
-  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1']);
+  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia']);
   assert.equal(root.dataset.aesthetic,expected);
   assert.equal(root.dataset.aestheticHide,undefined);
   assert.equal(host.getPalette(),'emerald-forest');
@@ -69,4 +69,53 @@ test('Palette text, controls and focus colors stay readable in light and dark',(
    assert(contrast(colors[foreground][mode],colors[background][mode])>=minimum,`${id} ${foreground}/${background} ${mode}`);
   }
  }
+});
+
+test('Nostalgia variants persist with the theme while the Minimal palette survives theme changes',async()=>{
+ const values={}, {host,root,vars}=fixture(values);
+ assert.deepEqual(host.listNostalgiaStyles(),[
+  {id:'kawaii',name:'Kawaii (Neon Pink)'},{id:'dungeon-master',name:'Dungeon Master'},{id:'heroine',name:'Heroine'}
+ ]);
+ await host.applyPalette('emerald-forest');
+ for(const id of ['golden-age','oceania','nostalgia']){
+  assert.equal((await host.apply({id})).error,null);
+  assert.equal(root.dataset.aesthetic,id);
+  assert.equal(root.dataset.nostalgiaStyle,id==='nostalgia'?'kawaii':undefined);
+  assert.equal(vars.size,0);
+ }
+ await host.applyNostalgiaStyle('heroine');
+ await host.apply({id:'standard'});
+ assert.equal(root.dataset.nostalgiaStyle,undefined);
+ const reopened=fixture(values);
+ await reopened.host.restore();
+ assert.equal(reopened.host.getActive().id,'standard');
+ await reopened.host.apply({id:'nostalgia'});
+ assert.equal(reopened.root.dataset.nostalgiaStyle,'heroine');
+ await reopened.host.apply({id:'minimal'});
+ assert.equal(reopened.host.getPalette(),'emerald-forest');
+ assert.equal(reopened.vars.get('--a-color-accent-light'),'#166c56');
+});
+
+test('Removed themes and removed or corrupt Nostalgia variants restore Minimal without preference writes',async()=>{
+ const check=async(id,nostalgiaStyle,packages)=>{
+  const values={
+   [AESTHETIC_PREFERENCE_KEY]:{...pref(id),nostalgiaStyle},
+   [PALETTE_PREFERENCE_KEY]:pref('amethyst'),
+   destinations:[{bucketName:'saved'}],history:[{operationId:'saved'}],credentials:{fixture:true}
+  };
+  const snapshot=structuredClone(values);
+  const {host,root,writes,vars}=fixture(values,{packages});
+  assert.equal((await host.restore()).id,'minimal');
+  assert.equal(root.dataset.nostalgiaStyle,undefined);
+  assert.equal(vars.get('--a-color-accent-light'),'#7542ad');
+  assert.equal(writes.length,0);
+  assert.deepEqual(values,snapshot);
+ };
+ for(const {id} of themePackages)await check(id,undefined,themePackages.filter(theme=>theme.id!==id));
+ const nostalgia=themePackages.find(theme=>theme.id==='nostalgia');
+ for(const {id} of nostalgia.styles){
+  await check('nostalgia',id,themePackages.map(theme=>theme===nostalgia?
+   {...theme,styles:theme.styles.filter(style=>style.id!==id)}:theme));
+ }
+ await check('nostalgia',{id:'heroine'},themePackages);
 });

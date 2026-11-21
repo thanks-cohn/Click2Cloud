@@ -1,0 +1,26 @@
+:root[data-aesthetic=golden-age]{
+ --a-package:golden-age;
+ --bg:#151517;--panel:#232326;--raised:#303034;--text:#f7f7f8;
+ --muted:#c4c4ca;--line:#45454c;--accent:#ff8495;--selected:#48252e;--focus:#ff9eab;
+ --button-ink:#251116;--frame-hover:#3b2a30;--error:#ffaeb8;
+ --heading-font:"Segoe UI","Helvetica Neue",Arial,sans-serif;
+ --heading-weight:750;--heading-tracking:-.035em;
+ --card-radius:20px;--card-padding:clamp(14px,3vw,24px);--card-margin:16px;
+ --control-radius:14px;--dialog-radius:22px;--thumb-radius:14px;--tile-padding:6px;
+ --history-padding:14px;--history-gap:10px;
+ --surface-shadow:0 2px 6px #0002;
+}
+:root[data-aesthetic=golden-age][data-theme=light]{
+ --bg:#f7f7f7;--panel:#fff;--raised:#efeff0;--text:#191919;
+ --muted:#626268;--line:#dedee2;--accent:#c90026;--selected:#fce5ea;--focus:#c90026;
+ --button-ink:#fff;--frame-hover:#fce5ea;--error:#a51639;
+ --surface-shadow:0 2px 8px #21131a0e;
+}
+:root[data-aesthetic=golden-age] .brand-tile{
+ color:#fff;background:#e60023;border-radius:9px;
+ font-family:var(--heading-font);font-weight:800;
+}
+:root[data-aesthetic=golden-age] .remotes-intro{margin-block:8px 26px}
+:root[data-aesthetic=golden-age] .remotes-intro p{color:var(--muted);max-width:40ch}
+:root[data-aesthetic=golden-age] .card>h2{font-size:17px}
+:root[data-aesthetic=golden-age] .history-line strong{font-weight:750}

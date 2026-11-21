@@ -1,0 +1,40 @@
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine]{
+ --a-package:heroine;
+ --bg:#24131c;--panel:#3b202e;--raised:#4f2b3f;--text:#fff0df;
+ --muted:#ebc2cb;--line:#9c6272;--accent:#ff91bf;--selected:#643049;--focus:#ffcd89;
+ --button-ink:#331627;--frame:#321b28;--frame-ink:#fff0df;--frame-hover:#563049;
+ --frame-focus:#ffcd89;--frame-accent:#ffcd89;--frame-edge:3px solid #ae3f74;
+ --heading-font:"Arial Black","Segoe UI",sans-serif;
+ --heading-weight:850;--heading-tracking:-.025em;--heading-slant:italic;
+ --body-font:"Trebuchet MS","Segoe UI",sans-serif;
+ --card-radius:2px 12px;--card-padding:16px;--card-margin:14px;
+ --control-radius:2px 8px;--dialog-radius:4px 18px;--thumb-radius:2px 10px;--tile-padding:6px;
+ --history-padding:13px;--history-gap:9px;
+ --surface-shadow:3px 3px 0 #9e3e6d55;
+ --error:#ffc2cb;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine][data-theme=light]{
+ --bg:#fff1e5;--panel:#fffbf6;--raised:#f7ded9;--text:#431d36;
+ --muted:#694052;--line:#c88a9e;--accent:#a51959;--selected:#ffdce9;--focus:#901544;
+ --button-ink:#fff;--error:#921b4e;
+ --surface-shadow:3px 3px 0 #e4b59074;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .brand-tile{
+ color:#3b1629;background:#ffc979;border-radius:2px 9px;
+ box-shadow:inset 0 0 0 1px #6c264a,inset 0 0 0 3px #ffdcab;
+ font-family:var(--heading-font);font-weight:900;font-style:italic;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro{position:relative;padding-block-end:14px}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro::after{
+ content:"";display:block;width:84px;height:8px;margin-block-start:14px;
+ background:
+  radial-gradient(ellipse at 22% 39%,#481e32 11%,#a8583b 15% 24%,transparent 30%),
+  radial-gradient(ellipse at 69% 60%,#481e32 10%,#a8583b 13% 23%,transparent 29%),
+  #edb375;
+ background-size:19px 8px,23px 8px,auto;
+ border-radius:2px 0 6px 0;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .card>h2{
+ font-size:18px;padding-inline-start:9px;border-inline-start:4px solid var(--accent);
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .history-row{border-inline-start:3px solid var(--accent)}

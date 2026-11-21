@@ -1,0 +1,35 @@
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii]{
+ --a-package:kawaii;
+ --bg:#23142e;--panel:#382348;--raised:#4a315e;--text:#fff3fa;
+ --muted:#e1cff5;--line:#8b65a7;--accent:#ff92cc;--selected:#5c2f5b;--focus:#ffb5df;
+ --button-ink:#36163f;--frame:#39254d;--frame-hover:#573568;
+ --frame-edge:3px solid #b259a6;--error:#ffb6d9;
+ --heading-font:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI",sans-serif;
+ --heading-weight:800;--control-weight:700;
+ --card-radius:13px;--card-padding:15px;--card-margin:14px;
+ --control-radius:9px;--dialog-radius:16px;--thumb-radius:9px;--tile-padding:6px;
+ --history-padding:13px;--history-gap:8px;
+ --surface-shadow:3px 3px 0 #1b1024;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii][data-theme=light]{
+ --bg:#fff3fa;--panel:#fffefe;--raised:#f1e8ff;--text:#3c174d;
+ --muted:#6c427e;--line:#bd93d0;--accent:#ad176a;--selected:#ffe0f3;--focus:#86125a;
+ --button-ink:#fff;--frame:#f7e6ff;--frame-hover:#f3d0ee;
+ --frame-edge:3px solid #e58bc8;--error:#8e1b5a;
+ --surface-shadow:3px 3px 0 #dcc7f5;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] .brand-tile{
+ color:#3c174d;background:#ff4fa9;border-radius:9px;
+ font-family:var(--heading-font);font-weight:900;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] :is(.remotes-intro,.history-page) h1{
+ text-shadow:2px 2px var(--line);
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] .card>h2{
+ display:flex;gap:9px;align-items:baseline;font-size:16px;
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] .card>h2::before{
+ content:"";flex:none;width:7px;height:7px;background:var(--accent);
+ box-shadow:3px 3px var(--line);
+}
+:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] .history-dot{border-radius:2px}

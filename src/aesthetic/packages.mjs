@@ -1,6 +1,18 @@
 // The legacy theme keeps its existing preference ID. Theme structure lives in app.css.
 export const standard={id:'standard',name:'Remote V1',version:'1.0.0'};
 export const minimal={id:'minimal',name:'Minimal',version:'1.0.0'};
+export const goldenAge={id:'golden-age',name:'Golden Age',version:'1.0.0',stylesheet:'golden-age'};
+export const oceania={id:'oceania',name:'Oceania',version:'1.0.0',stylesheet:'oceania'};
+export const nostalgia={
+ id:'nostalgia',name:'Nostalgia',version:'1.0.0',
+ styles:[
+  {id:'kawaii',name:'Kawaii (Neon Pink)',stylesheet:'kawaii'},
+  {id:'dungeon-master',name:'Dungeon Master',stylesheet:'dungeon-master'},
+  {id:'heroine',name:'Heroine',stylesheet:'heroine'}
+ ]
+};
+export const themePackages=[goldenAge,oceania,nostalgia];
+
 const palette=(id,name,colors,fonts)=>({id,name,colors,fonts});
 export const palettes=[
  palette('original-rose','Original Rose',{
