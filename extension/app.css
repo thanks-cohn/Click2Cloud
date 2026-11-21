@@ -130,29 +130,46 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 #portable-menu-manifests details{margin:12px 0}
 
 /* Three independent More controls: application navigation, History row, Explorer. */
-.app-header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;flex:none;gap:clamp(6px,2vw,16px);height:56px;padding:0 clamp(8px,2vw,16px);border-bottom:1px solid var(--line);background:var(--panel)}
-.app-header nav{display:flex;align-items:center;gap:clamp(2px,1vw,6px);white-space:nowrap}
+.app-header{
+ --header-gap:clamp(6px,2vw,16px);
+ --header-padding:clamp(8px,2vw,16px);
+ --theme-size:36px;
+ position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) var(--theme-size);
+ align-items:center;flex:none;gap:var(--header-gap);height:56px;padding:0 var(--header-padding);
+ border-bottom:1px solid var(--line);background:var(--panel);
+}
+.app-header nav{display:flex;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px);white-space:nowrap}
 .app-header nav button{min-block-size:34px;padding:6px clamp(5px,1.2vw,10px);border:none}
-#theme{display:grid;place-items:center;inline-size:36px;block-size:36px;padding:0;font-size:20px}
+.app-header nav>button{min-inline-size:0;overflow:hidden;text-overflow:ellipsis}
+#theme{display:grid;place-items:center;inline-size:var(--theme-size);block-size:var(--theme-size);padding:0;font-size:20px}
 :root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,#header-compact-history,.header-more-icon,.explorer-compact-label{display:none}
 @media(max-width:480px){
  .app-header nav button{font-size:12px}
 }
-@media(max-width:350px){
+@media(max-width:374px){
  .app-header nav{gap:2px}
  .app-header nav>button{padding-inline:4px}
  .header-more-label{display:none}
  .header-more-icon{display:inline;font-size:18px;line-height:1}
 }
-@media(max-width:310px){
+@media(max-width:329px){
  .app-header nav>[data-view=history]{display:none}
  #header-compact-history{display:block}
 }
-@media(max-width:260px){
+@media(max-width:279px){
  .explorer-label{display:none}
  .explorer-compact-label{display:inline}
 }
-.header-more{position:relative;display:inline-block}.header-more [role=menu]{position:absolute;right:0;top:100%;z-index:60;background:var(--panel,#20232a);border:1px solid var(--border,#666);padding:6px;min-width:160px}.header-more [role=menu] button{display:block;width:100%;text-align:left}
+.header-more{flex:none;margin-inline-start:auto}
+#header-more{min-inline-size:34px}
+#header-menu{
+ position:absolute;z-index:60;inset-block-start:100%;
+ inset-inline-end:calc(var(--theme-size) + var(--header-gap) + var(--header-padding));
+ inline-size:min(182px,calc(100% - var(--theme-size) - var(--header-gap) - 2 * var(--header-padding)));
+ max-block-size:calc(100dvh - 56px);overflow:auto;
+ background:var(--panel);border:1px solid var(--line);padding:6px;
+}
+#header-menu button{display:block;inline-size:100%;text-align:start;white-space:normal;overflow-wrap:anywhere}
 .history-row{border-bottom:1px solid var(--border,#68717d);padding:14px 0}.history-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.history-line strong{overflow-wrap:anywhere}.history-line time{margin-left:auto;font-size:.85em}.history-dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;background:#428bff}.history-dot.verified{background:#28ae5d}.history-dot.failed{background:#ee5050}.history-status{font-size:.85em}.history-page details{padding:8px 0 8px 12px}.history-page summary{cursor:pointer}.history-page pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:24em;overflow:auto}.history-page a{overflow-wrap:anywhere}.history-preview img{max-width:240px;max-height:180px}.history-page>nav{display:flex;gap:16px;align-items:center;margin-top:16px}
 
 /* Shared image-loading slot, bounded independently of History content. */
