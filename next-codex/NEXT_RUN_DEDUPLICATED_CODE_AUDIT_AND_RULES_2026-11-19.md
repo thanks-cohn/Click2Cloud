@@ -1,5 +1,12 @@
 # CLICK2CLOUD 0.3.21 — FINAL CANONICAL CODEX REQUEST
 
+> **NOVEMBER 21, 2026 — NEW OWNER PRIORITY OVERRIDE (CURRENT):** Before following the 0.3.21 enhancement sequence, investigate and **REPAIR P0 / CRITICAL native Chrome right-click menu missing**, including IMMEDIATE registration after every successful login/reconnect, cold boot, Chrome restart, MV3 worker wake and mode changes. The [source-inspected owner incident](../Issues_and_Bugs/Bugs/P0_CRITICAL_NATIVE_RIGHT_CLICK_MENU_MISSING_AFTER_LOGIN_2026-11-21.md) and [GitHub #19](https://github.com/thanks-cohn/Click2Cloud/issues/19) define the live Windows Chrome acceptance gate. Preserve persisted destinations and show unavailable actions with honest login/setup feedback; do not let network/Worker readiness gate menu visibility. Distinguish actual Chrome-rendered menu from simulation and API ACK; prove save/feedback separately. This is **not** the separately deferred P0 wrong-bucket investigation mentioned below. **No P0 repair or real-browser pass is claimed by this request.**
+
+> **P1 UI ADDENDUM, AFTER THE P0:** Fix the [Shelf header More/theme button overlap after width expansion then narrowing, observed with Emerald Forest](../Issues_and_Bugs/Bugs/P1_SHELF_HEADER_MORE_THEME_OVERLAP_ON_RESIZE_EMERALD_FOREST_2026-11-21.md). Source leads: `extension/app.css` header grid + nowrap flex nav + breakpoints, `extension/app.html`, `extension/aesthetic.css`; ensure independent accessible More and sun/moon hitboxes across all five Bit o' Polish palettes and light/dark, responsive and repeated resizes. Do not introduce new header/menus or reduce click targets. Bug is OPEN and only owner-observed, not code-fixed.
+
+> **Manifest branding update:** `extension/manifest.json` on `codex/click2cloud-0.3.21` now declares `name` / `short_name` as `REDOWN` and action title `REDOWN — Remotes`. Preserve original extension key, stable Chrome ID, existing OAuth redirect and internal Click2Cloud source names. Build and confirm actual Chrome rendering separately; display-name change is unrelated to P0 repair.
+
+
 **Date/Owner decisions:** November 20, 2026. **Repository:** `thanks-cohn/Click2Cloud`. **Base:** current GitHub `main`, currently product version `0.3.20`. **Next intended release:** **0.3.21**. **This file is the authoritative next Codex run.** It replaces conflicting/historical instructions previously in this long handoff. Source code/build changes are NOT claimed to have happened.
 
 ## Read these specifications IN THIS ORDER
