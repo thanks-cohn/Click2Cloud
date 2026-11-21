@@ -14,6 +14,22 @@
 
 ---
 
+## Controlling November 21 addition — zero crash during bursts; live History; logged-out screenshot exception
+
+**This section overrides earlier "screenshots out of scope" and generic queue/checkpoint wording only to the extent necessary for these explicit owner-approved P0 behaviors.**
+
+- **Right-click ALWAYS accessible on eligible Chrome pages**—including while many saves or screenshots are being handled. Keep native menu registration independent of slow upload/capture/History work. No full menu rebuild on every click.
+- **Fast succession of saves or screenshots must never destabilize the extension.** Bound actual expensive concurrency, active image/PNG memory, uploads, listeners and in-flight promises. A single click must not cause an extension-related ~2 GB RAM spike; repeated gestures must not cause worker/Shelf crash or runaway growth. No needless global lock, expensive per-click checkpoint series or sluggish scheduler. On genuine quotas, report a truthful busy/rate-limit status without losing the native menu.
+- **Automatic live History for accepted operations:** right-click saves and authenticated screenshot results should appear/update in the open History without refresh/reopening. Use the existing durable record + \`remote-result\` and \`screenshot-history-changed\` notifications, not a second History pipeline. Preserve unlimited historical records while avoiding whole-archive scans and full preview decoding per burst.
+- **NO History entry for logged-out screenshot shortcut:** Check actual auth before persisting the first screenshot job or attempting to capture/cache image bytes. A logged-out shortcut may show transient login feedback but must add **zero** History rows, failed/pending ghost records or retry-cache PNGs. A screenshot accepted while logged in must remain in History even if later authorization/upload fails.
+- **Explicit screenshot source problem to inspect:** \`src/screenshot/capture.mjs:start\` creates a pending job and invokes \`void checkpoint(job)\` before user authority is checked by the delivery path; \`finish\` also records a failed operation. Fix this boundary without hiding genuine already-accepted attempts. The active Set guards IDs rather than obvious global burst capacity; up to 3 upload workers **per capture** can multiply concurrency.
+- **History source performance problem to inspect:** \`extension/history-page.mjs\` uses a 150ms coalesced refresh, but exceeding 64 distinct dirty operation IDs can request a full archive reload. In long-running History, this is a burst performance risk; improve targeted reconciliation and preserve scroll/focus/lazy previews.
+- **Acceptance tests:** 100/500/1,000 rapid native saves; 10/50/100 rapid screenshot shortcuts; mixed save/screenshot; open/closed History live updates; logged-out shortcut bursts creating zero records; real Windows Chrome peak/post-idle process RAM, latency, callbacks, active image bytes, worker restarts and verified R2 receipts. Count mocks and real evidence separately. No silent accepted-command loss or false success.
+
+**The detailed newer controlling implementation request is [next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md](next-codex/NEXT_CODEX_REQUEST_2026-11-21_P0_RIGHT_CLICK_ALWAYS_AND_LONGEVITY.md); its B01–B09 gates are mandatory before Milestone B.** Remote-job scheduling is optional and evidence-gated; do not install a heavyweight one as a default.
+
+---
+
 ## 1. First principles extracted from REDOWN — adapt the proven engineering, not its entire application
 
 **Actual REDOWN version inspected:** [REDOWN main at c78babc314acc5891203e95b169f027756e956c1](https://github.com/thanks-cohn/REDOWN/tree/c78babc314acc5891203e95b169f027756e956c1). Functional references:
