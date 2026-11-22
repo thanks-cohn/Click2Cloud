@@ -2,7 +2,7 @@ import {screenshotReceipt} from '../recorder/schema.mjs';
 // Customer projections of canonical remote-result records. Never infer remote proof,
 // public URLs, upload metadata, or page titles from unrelated diagnostics.
 export const HISTORY_PAGE_SIZE=25;
-export const historyDefaults=Object.freeze({range:'all',previews:'all',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'});
+export const historyDefaults=Object.freeze({range:'all',previews:'all',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',expandScreenshotHostURL:false});
 export function safeHistoryURL(raw){
  try{const u=new URL(raw);if(!['https:','http:'].includes(u.protocol)||u.username||u.password)return null;
  for(const k of [...u.searchParams.keys()])if(/token|signature|credential|secret|password|authorization|api[-_]?key|^x-amz-|^x-goog-|^(auth|sig|key|code|access_token)$/i.test(k))u.searchParams.delete(k);
@@ -13,9 +13,10 @@ export function captureHistoryContext(info={},tab={}){
  return {hostPageURL,sourceURL,hostPageTitle:hostPageURL&&typeof tab.title==='string'?tab.title.slice(0,512):null,hostname:hostPageURL?new URL(hostPageURL).hostname:null};
 }
 export function validateHistoryPreferences(p){
- if(!p||!['all','daily','weekly'].includes(p.range)||!['all','first','closed'].includes(p.previews))throw Error('HISTORY_PREFERENCE_INVALID');
+ if(!p||!['all','daily','weekly'].includes(p.range)||!['all','first','closed'].includes(p.previews)||
+    p.expandScreenshotHostURL!==undefined&&typeof p.expandScreenshotHostURL!=='boolean')throw Error('HISTORY_PREFERENCE_INVALID');
  try{new Intl.DateTimeFormat('en',{timeZone:p.timezone}).format();}catch{throw Error('HISTORY_TIMEZONE_INVALID');}
- return {range:p.range,previews:p.previews,timezone:p.timezone};
+ return {range:p.range,previews:p.previews,timezone:p.timezone,expandScreenshotHostURL:p.expandScreenshotHostURL??false};
 }
 const historyDateFormats=new Map();
 export function dayKey(at,timezone){

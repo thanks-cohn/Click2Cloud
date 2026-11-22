@@ -1,4 +1,4 @@
-import {exportHistory} from '../src/history/model.mjs';
+import {exportHistory,validateHistoryPreferences} from '../src/history/model.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -583,12 +583,13 @@ test('an optional screenshot command assignment separates overlapping rules, and
 
 test('History exports one multi-destination screenshot receipt in all formats and can omit it entirely',async()=>{
  const at=Date.parse('2026-11-20T17:00:00Z');
+ const hostPageURL='https://capture.example/article?q=1';
  const plan=makePlan([rule([folder('one/'),folder('two/'),folder('three/')])]);
  const screenshot={plan,state:'partial',attempts:[],trace:[],outputs:plan.outputs.map((output,index)=>({
   outputId:output.outputId,state:index===0?'confirmed':'failed',bytes:png.length,verification:'direct-r2-get-sha256'
  }))};
  const saved=[{kind:'save',operationId:'ordinary',state:'failed',at},
-  {kind:'screenshot-to-cloud',operationId:plan.operationId,state:'partial',at,screenshot}];
+  {kind:'screenshot-to-cloud',operationId:plan.operationId,state:'partial',at,screenshot,historyContext:{hostPageURL}}];
  for(const format of ['json','jsonl','csv'])for(const includeScreenshots of [true,false]){
   let text='',counts;
   for await(const part of exportHistory([saved.slice(0,1),saved.slice(1)],{format,includeScreenshots,onComplete:value=>{counts=value;},
@@ -597,7 +598,26 @@ test('History exports one multi-destination screenshot receipt in all formats an
   assert(text.includes('ordinary'));
   assert.equal(text.includes(plan.operationId),includeScreenshots);
   assert.equal(text.includes(plan.outputs[2].outputId),includeScreenshots);
+  assert.equal(text.includes(hostPageURL),includeScreenshots);
   if(format==='csv')assert.match(text.split('\r\n')[0],/"screenshot"/);
-  if(format==='json'&&includeScreenshots)assert.equal(JSON.parse(text).operations[1].screenshot.outputs.length,3);
+  if(format==='json'&&includeScreenshots){
+   const record=JSON.parse(text).operations.find(row=>row.operationId===plan.operationId);
+   assert.equal(record.screenshot.outputs.length,3);assert.equal(record.hostPageURL,hostPageURL);
+  }
+  if(format==='jsonl'&&includeScreenshots)
+   assert.equal(text.trim().split('\n').map(JSON.parse).find(row=>row.operationId===plan.operationId).hostPageURL,hostPageURL);
+  if(format==='csv'&&includeScreenshots){
+   const cells=line=>line.match(/"(?:[^"]|"")*"/g);
+   const [header,,,shot]=text.trim().split('\r\n').map(cells);
+   assert.equal(shot[header.indexOf('"operationId"')],'"'+plan.operationId+'"');
+   assert.equal(shot[header.indexOf('"hostPageURL"')],'"'+hostPageURL+'"');
+  }
  }
+});
+
+test('Screenshot Host URL defaults to collapsed and validates only booleans',()=>{
+ const old={range:'weekly',previews:'first',timezone:'America/Chicago'};
+ assert.deepEqual(validateHistoryPreferences(old),{...old,expandScreenshotHostURL:false});
+ assert.deepEqual(validateHistoryPreferences({...old,expandScreenshotHostURL:true}),{...old,expandScreenshotHostURL:true});
+ assert.throws(()=>validateHistoryPreferences({...old,expandScreenshotHostURL:'true'}),/HISTORY_PREFERENCE_INVALID/);
 });

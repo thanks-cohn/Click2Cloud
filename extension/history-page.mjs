@@ -12,13 +12,14 @@ const previewLimit=4*1024*1024,screenshotPreviewLimit=12*1024*1024;
 const historyLookupBatch=64,maxDirtyOperations=2048;
 export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,loadingSelection=async()=>({mode:'math'})}){
  let epoch=0,controller,observer,urls=[],page=1,prefs={...historyDefaults},rows=[],manual=new Map(),pending=new Map(),active=0,wake=()=>{};
+ const hostDisclosures=new Map();
  let mountEpoch=0,mounted=false,loading=false,refreshTimer,historyRevision=0,refreshing=false,reload=false;
  const dirty=new Set();
  const reader=createImageReader(p=>api('readFileChunk',p,{quiet:true}),{maxBytes:8*1024*1024,maxEntries:8});
  function resetPreviews(){epoch++;wake=()=>{};for(const job of pending.values())job.abort();pending.clear();controller?.abort();observer?.disconnect();urls.forEach(URL.revokeObjectURL);urls=[];}
  async function* pages(){let cursor;const seen=new Set();do{const result=await api('inspectRemoteHistory',{customer:true,limit:100,...(cursor?{cursor}:{})},{quiet:true}),p=Array.isArray(result)?{items:result}:result;yield p.items;cursor=p.nextCursor;if(cursor&&seen.has(cursor))throw Error('HISTORY_CURSOR_STALLED');seen.add(cursor);}while(cursor);}
  function stop(){
-  mountEpoch++;mounted=false;loading=false;reload=false;dirty.clear();clearTimeout(refreshTimer);refreshTimer=undefined;resetPreviews();
+  mountEpoch++;mounted=false;loading=false;reload=false;dirty.clear();hostDisclosures.clear();clearTimeout(refreshTimer);refreshTimer=undefined;resetPreviews();
  }
  async function load(){
   stop();mounted=true;loading=true;
@@ -93,14 +94,18 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
   const receipt=r.screenshot,confirmed=receipt.outputs.filter(output=>output.state==='confirmed').length;
   const expired=receipt.originalUnavailable||receipt.retryExpiresAt&&Date.parse(receipt.retryExpiresAt)<=Date.now();
   const unresolved=receipt.outputs.some(output=>output.state!=='confirmed'&&output.recoverable!==false);
+  const hostOpen=hostDisclosures.get(r.operationId)??prefs.expandScreenshotHostURL;
   return `<article class="history-row history-screenshot" aria-label="Screenshot ${esc(screenshotName(receipt))}" tabindex="0" data-operation="${esc(r.operationId)}"><div class="history-line">
    <span class="history-dot ${r.status}" aria-hidden="true"></span><span class="history-status">${esc(r.statusLabel)}</span>
    <strong>${esc(screenshotName(receipt))}</strong><time datetime="${esc(r.timestamp)}">${esc(r.timestamp?new Date(r.timestamp).toLocaleString(undefined,{timeZone:prefs.timezone}):'Date not captured')}</time></div>
    <details data-history-more="${esc(r.operationId)}" ${expanded(r.operationId)?'open':''}><summary>Screenshot Preview</summary>
-    ${screenshotFile(receipt)?'<div class="history-preview" data-preview="'+esc(r.operationId)+'"><p>Image preview loads when visible.</p></div>':'<p>Screenshot preview unavailable.</p>'}</details>
+    ${screenshotFile(receipt)?'<div class="history-preview" data-preview="'+esc(r.operationId)+'"><p>Image preview loads when visible.</p></div>':'<p>Screenshot preview unavailable.</p>'}
+    <details data-history-host-url="${esc(r.operationId)}" ${hostOpen?'open':''}><summary>Host URL</summary>
+     <p>${esc(r.hostPageURL??'Host URL not captured')}</p></details>
+   </details>
    ${receipt.outputs.map(destinationCard).join('')}
    <details><summary>${receipt.outputs.length?`${confirmed} of ${receipt.outputs.length} files verified`:'Capture details'}</summary>
-   <p>Capture ID ${esc(receipt.captureId)}</p>${r.hostPageURL?link(r.hostPageURL,'Page'):''}
+   <p>Capture ID ${esc(receipt.captureId)}</p>
    ${receipt.code?`<p>${esc(screenshotMessage(receipt.code,receipt.code))}</p>`:''}
    ${expired&&confirmed<receipt.outputs.length?'<p>The original PNG is unavailable for upload retry.</p>':''}
    ${receipt.captured&&unresolved&&retryScreenshot?
@@ -146,7 +151,17 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
  wake=pump;
  observer=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting&&eligible(e.target)&&!queued.has(e.target)){queued.add(e.target);queue.push(e.target);}else if(!e.isIntersecting&&pending.has(e.target)){pending.get(e.target).abort();queued.delete(e.target);}pump();},{rootMargin:'50px'});
  document.querySelectorAll('[data-preview]').forEach(el=>observer.observe(el));
- document.querySelectorAll('.history-page details').forEach(d=>d.addEventListener('toggle',()=>{if(d.dataset.historyMore)manual.set(d.dataset.historyMore,d.open);if(d.open)for(const el of d.querySelectorAll('[data-preview]')){if(!queued.has(el)){observer.unobserve(el);observer.observe(el);}}else for(const el of d.querySelectorAll('[data-preview]')){pending.get(el)?.abort();if(el.querySelector('img'))continue;queued.delete(el);}}));
+ document.querySelectorAll('.history-page details').forEach(d=>d.addEventListener('toggle',()=>{
+  if(d.dataset.historyHostUrl){
+   if(!d.isConnected)return;
+   if(d.open===Boolean(prefs.expandScreenshotHostURL))hostDisclosures.delete(d.dataset.historyHostUrl);
+   else hostDisclosures.set(d.dataset.historyHostUrl,d.open);
+   return;
+  }
+  if(d.dataset.historyMore)manual.set(d.dataset.historyMore,d.open);
+  if(d.open)for(const el of d.querySelectorAll('[data-preview]')){if(!queued.has(el)){observer.unobserve(el);observer.observe(el);}}
+  else for(const el of d.querySelectorAll('[data-preview]')){pending.get(el)?.abort();if(el.querySelector('img'))continue;queued.delete(el);}
+ }));
  }
  async function preview(el,ticket,retry){
  const r=rows.find(r=>r.operationId===el.dataset.preview);if(!r)return;
@@ -186,9 +201,9 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
   }
   if(revision!==historyRevision)throw Error('HISTORY_CHANGED_DURING_EXPORT');
  }
- async function settings(container){const p=await api('getHistoryPreferences',{}, {quiet:true});container.innerHTML=`<h2>History</h2><p>Keep all records forever. Display filters never delete saved history.</p><label>History display range <select id="history-range"><option value="all">All Time</option><option value="daily">Today / Daily</option><option value="weekly">This Week / Weekly</option></select></label><label>Image preview auto-expansion <select id="history-previews"><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label><label>Display / export timezone <input id="history-timezone" value="${esc(p.timezone)}"></label><button id="history-save-prefs">Save History preferences</button><h3>Export History</h3><label>Export range <select id="history-export-range"><option value="all">All Time / Since the beginning</option><option value="weekly">Weekly</option><option value="daily">Daily</option><option value="custom">Custom Date Range</option></select></label><label>Start date <input id="history-start" type="date"></label><label>End date <input id="history-end" type="date"></label><label>Format <select id="history-format"><option value="json">JSON</option><option value="csv">CSV</option><option value="jsonl">JSONL</option></select></label><label><input id="history-privacy" type="checkbox"> Omit browsing page title and source URLs</label><p>Exports may contain browsing provenance. Review before sharing.</p><label><input id="history-include-screenshots" type="checkbox" checked> Include Screenshots</label><button id="history-export">Export History</button><p id="history-settings-status" role="status"></p>`;
- const $=s=>container.querySelector(s);$('#history-range').value=p.range;$('#history-previews').value=p.previews;
- $('#history-save-prefs').onclick=async()=>{try{prefs=await api('setHistoryPreferences',{range:$('#history-range').value,previews:$('#history-previews').value,timezone:$('#history-timezone').value},{quiet:true});$('#history-settings-status').textContent='History preferences saved.';}catch{$('#history-settings-status').textContent='Preferences could not be saved. Check the timezone.';}};
+ async function settings(container){const p=await api('getHistoryPreferences',{}, {quiet:true});container.innerHTML=`<h2>History</h2><p>Keep all records forever. Display filters never delete saved history.</p><label>History display range <select id="history-range"><option value="all">All Time</option><option value="daily">Today / Daily</option><option value="weekly">This Week / Weekly</option></select></label><label>Image preview auto-expansion <select id="history-previews"><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label><label><input id="history-expand-screenshot-host-url" type="checkbox"> Expand screenshot Host URL by default</label><label>Display / export timezone <input id="history-timezone" value="${esc(p.timezone)}"></label><button id="history-save-prefs">Save History preferences</button><h3>Export History</h3><label>Export range <select id="history-export-range"><option value="all">All Time / Since the beginning</option><option value="weekly">Weekly</option><option value="daily">Daily</option><option value="custom">Custom Date Range</option></select></label><label>Start date <input id="history-start" type="date"></label><label>End date <input id="history-end" type="date"></label><label>Format <select id="history-format"><option value="json">JSON</option><option value="csv">CSV</option><option value="jsonl">JSONL</option></select></label><label><input id="history-privacy" type="checkbox"> Omit browsing page title and source URLs</label><p>Exports may contain browsing provenance. Review before sharing.</p><label><input id="history-include-screenshots" type="checkbox" checked> Include Screenshots</label><button id="history-export">Export History</button><p id="history-settings-status" role="status"></p>`;
+ const $=s=>container.querySelector(s);$('#history-range').value=p.range;$('#history-previews').value=p.previews;$('#history-expand-screenshot-host-url').checked=p.expandScreenshotHostURL===true;
+ $('#history-save-prefs').onclick=async()=>{try{prefs=await api('setHistoryPreferences',{range:$('#history-range').value,previews:$('#history-previews').value,timezone:$('#history-timezone').value,expandScreenshotHostURL:$('#history-expand-screenshot-host-url').checked},{quiet:true});$('#history-settings-status').textContent='History preferences saved.';}catch{$('#history-settings-status').textContent='Preferences could not be saved. Check the timezone.';}};
  $('#history-export').onclick=async()=>{let writer;const b=$('#history-export');b.disabled=true;$('#history-settings-status').textContent='Exporting History…';try{let count=0;const format=$('#history-format').value,options={format,includeScreenshots:$('#history-include-screenshots').checked,onComplete:result=>{count=result.operations;},range:$('#history-export-range').value,start:$('#history-start').value,end:$('#history-end').value,timezone:$('#history-timezone').value,privacy:$('#history-privacy').checked,now:Date.now()};const chunks=exportHistory(exportPages(historyRevision),options);const first=await chunks.next();const name='click2cloud-history.'+format;
  if(window.showSaveFilePicker){const handle=await window.showSaveFilePicker({suggestedName:name});writer=await handle.createWritable();if(!first.done)await writer.write(first.value);for await(const part of chunks)await writer.write(part);await writer.close();}
  else {const parts=[first.value];let bytes=first.value?.length??0;for await(const part of chunks){bytes+=part.length;if(bytes>16*1024*1024)throw Error('EXPORT_STREAM_REQUIRED');parts.push(part);}const url=URL.createObjectURL(new Blob(parts,{type:format==='json'?'application/json':format==='csv'?'text/csv':'application/x-ndjson'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

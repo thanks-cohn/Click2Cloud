@@ -368,8 +368,19 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       return receipts.sort((a,b)=>b.plan.startedAt.localeCompare(a.plan.startedAt));
     }),
     readRemoteResults:({cursor,limit,customer=false}={})=>transact('readonly',async s=>{if(customer&&typeof s.state.openCursor==='function'&&typeof IDBKeyRange==='function')return customerHistoryPage(s,{cursor,limit});const rows=await request(s.state.getAll()),legacy=rows.find(x=>x.id==='remoteResults')?.value??[],all=[...new Map([...legacy,...rows.filter(x=>x.id.startsWith('remote-result:')).map(x=>x.value)].map(x=>[x.operationId,x])).values()].sort((a,b)=>b.at-a.at||a.operationId.localeCompare(b.operationId));if(limit===undefined)return all;const visible=customer?all.filter(r=>r.kind!=='readiness'&&(r.kind!=='depth-click'||!r.cause||!all.some(s=>s.operationId===r.cause))):all;const start=cursor?visible.findIndex(x=>x.operationId===cursor)+1:0,items=visible.slice(start,start+limit);return {items,nextCursor:start+limit<visible.length?items.at(-1)?.operationId:null};}),
-    readHistoryPreferences:()=>transact('readonly',async s=>(await request(s.state.get('historyPreferences')))?.value??{...historyDefaults}),
-    setHistoryPreferences:value=>transact('readwrite',async s=>{const validated=validateHistoryPreferences(value);s.state.put({id:'historyPreferences',value:validated});return validated;}),
+    readHistoryPreferences:()=>transact('readonly',async s=>{
+      const saved=(await request(s.state.get('historyPreferences')))?.value;
+      return saved?{...saved,expandScreenshotHostURL:saved.expandScreenshotHostURL===true}:{...historyDefaults};
+    }),
+    setHistoryPreferences:value=>transact('readwrite',async s=>{
+      const validated=validateHistoryPreferences(value);
+      if(value.expandScreenshotHostURL===undefined){
+        const saved=(await request(s.state.get('historyPreferences')))?.value;
+        validated.expandScreenshotHostURL=saved?.expandScreenshotHostURL===true;
+      }
+      s.state.put({id:'historyPreferences',value:validated});
+      return validated;
+    }),
     readGalleryLoadingVisual:async(includeMedia=false)=>{const value=await transact('readonly',async s=>(await request(s.state.get('galleryLoadingVisual')))?.value??{revision:0,mode:'math'});return loadingVisualWire(value,includeMedia);},
     setGalleryLoadingVisual:async input=>{const media=input.media?loadingMedia(input.media):null;return transact('readwrite',async s=>{const old=(await request(s.state.get('galleryLoadingVisual')))?.value??{revision:0,mode:'math'};const summary=loadingVisualSummary(old);if(input.expectedRevision!==summary.revision)throw error('REVISION_CONFLICT');const value={revision:summary.revision+1,mode:input.mode,...(!input.removeMedia&&old.media?{media:old.media}:{}),...(media?{media}:{})};if(value.mode==='media'&&!loadingVisualSummary(value).media)throw error('LOADING_MEDIA_REQUIRED');s.state.put({id:'galleryLoadingVisual',value});return loadingVisualSummary((await request(s.state.get('galleryLoadingVisual'))).value);});},
     readExplorerLocation:()=>transact('readonly',async s=>(await request(s.state.get('explorerLocation')))?.value??null),
