@@ -44,7 +44,17 @@ try{
  await page.evaluate(()=>window.debugFixture.failWrite=false);await page.locator('#debug-mode').check();await page.waitForFunction(()=>localStorage.getItem('fixtureDebugMode')==='true');await page.evaluate(()=>window.debugFixture.failWrite=true);await page.locator('#debug-mode').uncheck();await page.getByText('Debug Mode is OFF for this window; the preference could not be saved. Try again.',{exact:true}).waitFor();assert.equal(await page.locator('#status').isVisible(),false);assert.equal(await page.locator('#debug-mode').isChecked(),false);result.checks.push('Failed enable and failed disable both fail closed for this window and explain unsaved preference inline');
  await page.evaluate(()=>window.debugFixture.failApiMethod='describeCapabilities');await page.locator('#capabilities').click();await page.locator('#action-feedback').waitFor();assert.equal(await page.locator('#status').isVisible(),false);assert.match(await page.locator('#action-feedback').innerText(),/Reconnect Cloudflare/);result.checks.push('Known API failures remain visible and actionable OFF even when their mapped prose is not a raw diagnostic code');
  const denied=await open(true);await denied.waitForFunction(()=>window.debugFixture.storageReadCompleted);assert.equal(await denied.evaluate(()=>document.documentElement.dataset.debugMode),'off');assert.equal(await denied.locator('#status').isVisible(),false);await denied.close();result.checks.push('Preference read failure starts OFF even when persisted fixture value was ON');
- await page.evaluate(async()=>{const f=window.productFixture,t=f.target;await f.current.recordRemoteResult({kind:'save',operationId:'debug-pending-summary',state:'pending',code:'REMOTE_TRANSFER_STARTED',destination:{provider:'cloudflare-r2',connectionId:t.connectionId,accountId:t.accountId,bucketName:t.bucketName,prefix:'',conflictPolicy:'keep-both'}});});await page.locator('[data-view="remotes"]').click();const pendingSummary=page.locator('#remote-summary-attention');await pendingSummary.waitFor();assert.equal(await pendingSummary.innerText(),'Saving…');assert.equal(await page.getByText('Not saved.',{exact:true}).count(),0);result.checks.push('Pending durable History projects Saving…');
+ await page.bringToFront();
+ await page.locator('[data-view="remotes"]').click();
+ await page.evaluate(async()=>{
+  const {current,target}=window.productFixture,operationId='debug-pending-summary';
+  const result={kind:'save',operationId,state:'pending',code:'REMOTE_TRANSFER_STARTED',destination:target};
+  await current.recordRemoteResult(result);
+  window.emitDebugFixture({channel:'remote-result',result});
+ });
+ await page.getByText('Saving remotely…',{exact:true}).filter({visible:true}).first().waitFor();
+ assert.equal(await page.getByText('Not saved.',{exact:true}).count(),0);
+ result.checks.push('A pending remote save shows bounded neutral feedback');
  // Narrow feedback fits the viewport while Manage Destinations remains independently reachable.
  await page.setViewportSize({width:320,height:800});await page.evaluate(()=>window.emitDebugFixture({channel:'depth-click-outcome',state:'completed',code:'DEPTH_CLICK_COMPLETED',message:'Depth save completed; inspect its verified remote receipt.'}));
  const layout=()=>page.evaluate(()=>{const rect=id=>{const r=document.querySelector(id).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,feedback:rect('#action-feedback'),manage:rect('#manage')};});result.narrowLayout={baseline:await layout(),scenarios:[]};

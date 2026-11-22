@@ -119,6 +119,10 @@ try{
   await page.setViewportSize({width:900,height:760});
   await settings();
   assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
+  const basicDiagnostics=page.getByRole('button',{name:'Export Other Cloud Provider Diagnostics',exact:true});
+  assert.equal(await basicDiagnostics.count(),1);
+  assert(await basicDiagnostics.isVisible());
+  assert.match(await page.locator('#basic-diagnostics-description').innerText(),/Google Drive, OneDrive, and Dropbox/);
   await page.locator('#appearance').selectOption(theme);
   assert.equal(await page.locator('#aesthetic-palette').isVisible(),['minimal','frames'].includes(theme));
   assert.equal(await page.locator('#nostalgia-style-row').isVisible(),theme==='nostalgia');
