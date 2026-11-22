@@ -325,7 +325,8 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
     // native acknowledgement, visibility and click context before dispatch.
     if(delivered?.role==='provider-action'&&basicMenuProvider(delivered.providerAction)&&!native.pending){
       const state=await readCurrent();
-      if(native.desired.generation===state.generation.desired&&engine.matchesCurrent(native.desired,state))return;
+      if(state.product.providerVisibility[delivered.providerAction]!==true)throw Object.assign(Error(),{code:'STALE_GENERATION'});
+      if(native.desired.generation===state.generation.desired)return;
     }
     const retained=native.lastAcknowledged?null:await readNativeRegistration();
     const previous=native.lastAcknowledged??(retained?.state==='acknowledged'?retained.desired:null);

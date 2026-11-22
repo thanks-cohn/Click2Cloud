@@ -80,7 +80,8 @@ try{
  await emit('repeat');
  assert(await banner.isHidden());
  await emit('hover');
- await banner.hover();
+ const hoverTarget=await banner.boundingBox();
+ await noticePage.mouse.move(hoverTarget.x+hoverTarget.width/2,hoverTarget.y+hoverTarget.height/2);
  assert(await banner.isHidden());
  await emit('hover');
  assert(await banner.isHidden());

@@ -13,10 +13,12 @@ worker compiles from validated CURRENT with unconfirmed Cloudflare routes requir
 attention. Login schedules local reconciliation as soon as OAuth reports
 `CONNECTED`. Passive reconciliation makes no provider requests or provisioning writes.
 Settings and explicit `reconcileNativeMenu` retain their configure scope and
-expected generation. When an explicit Cloudflare check is needed, an existing
-current ACK or a fresh local apply makes Basic available before the live read.
-Live refresh has a 25-second deadline. A failed refresh reports Cloudflare inventory
-as pending, and the registrar keeps the local ACKs.
+expected generation. Standalone native reconciliation reuses current ACKs or
+applies the local projection before refreshing Cloudflare. Explicit destination
+preparation and manifest import preserve the exact discovery and apply order.
+Live refresh has a 25-second deadline, and a failure reports Cloudflare inventory
+as pending. An already acknowledged Basic action can use its current visibility
+and generation while Cloudflare determines the result of an unrelated edit.
 The screenshot host initializes on demand outside the native registration path.
 
 `src/chrome/registrar.mjs:apply` validates the parent-first plan before touching

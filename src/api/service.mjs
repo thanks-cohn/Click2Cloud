@@ -136,9 +136,10 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       ]);
     }finally{clearTimeout(timer);}
   }
-  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection,lifecycle=false}={}){
+  async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection,lifecycle=false,primeBasic=false}={}){
     try{
       const state=await loadCurrent();
+      const generation=state.generation?.desired;
       const selectedDepthKeys=saveSelection&&new Set(saveSelection.filter(s=>s.mode==='depth').map(s=>scopeKey(s.target)));
       const hasCloudflareRoutes=state.product.providerVisibility.cloudflare&&
         (state.product.defaultTarget||Object.values(state.configs).some(config=>(config.destinations??config.scopes).length));
@@ -148,14 +149,14 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       const local={currentState:state,preparedTargets,saveSelection,localOnly:true};
       const evidence=engine.getEvidence?.();
       const currentAck=!evidence?.pending&&evidence?.lastOutcome?.state==='completed'&&
-        evidence.acknowledgedGeneration===state.generation.desired&&engine.matchesCurrent(evidence.desired,state)
+        evidence.acknowledgedGeneration===generation&&engine.matchesCurrent?.(evidence.desired,state)
         ?evidence.lastOutcome:null;
       const pending=error=>({state:'pending',code:/^[A-Z][A-Z0-9_]+$/.test(error?.code??'')?error.code:'CLOUDFLARE_INVENTORY_UNAVAILABLE'});
       async function applyInventory(inventory,generation){
         const options={mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory};
         let spec;
         if(generation>0){
-          const retained=engine.getMenu(generation);
+          const retained=engine.getMenu?.(generation);
           const cached=retained??(await readNative().catch(()=>null))?.desired;
           if(cached?.generation===generation){
             const candidate=await engine.compile({...options,generation});
@@ -168,27 +169,28 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         return engine.apply(spec??await engine.compile(options));
       }
       let inventory,localNative,cloudflareInventory;
-      if(!live||!currentAck){
+      if(!live||primeBasic&&!currentAck){
         if(hasCloudflareRoutes)try{inventory=await nativeInventory(local,1500);}catch(error){cloudflareInventory=pending(error);}
         // Keep an already acknowledged, current plan when the cache itself
         // cannot be read. A cold worker still needs a fresh canonical apply.
         localNative=cloudflareInventory&&currentAck
-          ?{...currentAck,retained:true}:await applyInventory(inventory??{scopes:[]},lifecycle?state.generation.desired:undefined);
+          ?{...currentAck,retained:true}:await applyInventory(inventory??{scopes:[]},lifecycle?generation:undefined);
       }
       if(live){
-        // Chrome has already seen the local plan. A slow Cloudflare refresh
-        // can hold up its own result without invalidating Basic's native ACKs.
+        // A standalone native reconcile primes Basic before a live refresh.
+        // Explicit Cloudflare edits retain their exact discovery/ACK ordering.
         if(localNative&&!['completed','partial'].includes(localNative.state))return localNative;
         try{inventory=await nativeInventory({...local,localOnly:false,refreshTargets,refreshDepthReadiness,refreshDepthScopes,depthBudget},25000);}
         catch(error){
-          const native=localNative??{...currentAck,retained:true};
           cloudflareInventory=pending(error);
+          if(!primeBasic)return {state:'blocked',code:cloudflareInventory.code,cloudflareInventory};
+          const native=localNative??{...currentAck,retained:true};
           return {...native,cloudflareInventory,...(native.state==='completed'?{state:'partial',code:cloudflareInventory.code}:{})};
         }
       }
       inventory??={scopes:[]};
       cloudflareInventory=live?inventory.cloudflareInventory:cloudflareInventory??inventory.cloudflareInventory;
-      const native=live?await applyInventory(inventory,localNative?.appliedGeneration??state.generation.desired):localNative;
+      const native=live?await applyInventory(inventory,primeBasic?(localNative?.appliedGeneration??generation):undefined):localNative;
       if(cloudflareInventory){
         return {...native,cloudflareInventory,...(live&&native.state==='completed'?{state:'partial',code:cloudflareInventory.code}:{})};
       }
@@ -209,7 +211,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     nativeQueue=task.catch(()=>{});
     return task;
   }
-  const reconcile=({refreshDepthReadiness=true,lifecycle=false}={})=>applyCurrent({refreshDepthReadiness,lifecycle});
+  const reconcile=({refreshDepthReadiness=true,lifecycle=false}={})=>applyCurrent({refreshDepthReadiness,lifecycle,primeBasic:true});
   const manifests=createManifestService({current,readCurrent:loadCurrent,store:manifestStore,locations:manifestLocations,oauth,authorize,confirm,applyCurrent,version:BUILD_INFO.extensionVersion});
   // Save selects current visible routes. No cloud action is derived from rows
   // merely observed in Explorer, hidden entries or a previous menu generation.
@@ -308,7 +310,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     return row&&!row.enabled?{...readiness,state:'REPAIR_REQUIRED',code:row.reason??'DESTINATION_NOT_READY'}:readiness;
   }
   async function finishInitialization(data,{refreshDepthReadiness=true}={}){
-    const native=await reconcile({refreshDepthReadiness});if(data.state!=='completed')return {...data,native};
+    const native=await applyCurrent({refreshDepthReadiness});if(data.state!=='completed')return {...data,native};
     if(native.state!=='completed')return {...data,native,state:'partial',code:'NATIVE_APPLY_INCOMPLETE'};
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
@@ -619,6 +621,8 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             receipt=unchanged?{after:state.product.revision,replayed:false}:await current.commitProduct({...next,expectedRevision:params.expectedRevision,idempotencyKey:actor+':'+params.idempotencyKey,fingerprint:JSON.stringify(params),...(readySave?{destinationSelection:selected}:{}),traceContext:{operationId:traceId,requires:startSignal?[startSignal]:[]}});
             const added=[...new Map(params.changes.flatMap(c=>['createDestination','makeDefault'].includes(c.type)?[c.target]:[]).map(t=>[targetKey(t),t])).values()];
             const refreshDepth=readySave?selected.some(s=>s.mode==='depth'):params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);
+            const visibilityOnly=params.changes.every(c=>c.type==='setProviderMenuVisibility');
+            const changesBasicVisibility=params.changes.some(c=>c.type==='setProviderMenuVisibility'&&c.provider!=='cloudflare');
             const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();
             const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
             const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
@@ -627,7 +631,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             try{native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
               ?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true})
               :!readySave&&receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
-                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined});}
+                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!visibilityOnly&&!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined,primeBasic:changesBasicVisibility});}
             catch(error){
               if(!newDefault||!params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple))throw error;
               native={state:'partial',code:error.code??'NATIVE_RECONCILE_UNAVAILABLE'};
@@ -685,7 +689,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             data={configuration,native,backup,destinationReadiness};
           }
         }
-        else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await applyCurrent({refreshDepth:true,refreshDepthReadiness:true});}
+        else if(method==='reconcileNativeMenu'){if(await authorize({actor,scope,method,params,bindings:{configs:state.configs,defaultTarget:state.product.defaultTarget}})!==true)fail('PERMISSION_DENIED');if(params.expectedGeneration!==state.generation.desired)fail('GENERATION_CONFLICT');data=await applyCurrent({refreshDepth:true,refreshDepthReadiness:true,primeBasic:true});}
         else if(method==='chooseBackupLocation'){if(await confirm({actor,method,params})!==true)fail('CONFIRMATION_REQUIRED');data=await recovery.choose(params);}
         else if(method==='inspectRecoveryCoverage')data=await recoveryCrawl.inspect(params.target);
         else if(method==='runRecoveryPage'){const policy=state.product.recovery.buckets.find(b=>scopeKey(b.target)===scopeKey(params.target));if(!policy?.enabled)fail('RECOVERY_NOT_ENABLED');data=await recoveryCrawl.tick(policy,{cadence:state.product.recovery.cadence});}
