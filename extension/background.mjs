@@ -422,7 +422,9 @@ const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel===BASIC_CHANNEL){
-    basic.request(message,sender).then(respond);
+    basic.request(message,sender).then(respond,()=>respond({
+      ok:false,error:{code:'BASIC_HOST_FAILED',message:'The provider service could not respond. Reopen the Shelf and try again.'},
+    }));
     return true;
   }
   if(message?.channel==='shelf-breadcrumb'){

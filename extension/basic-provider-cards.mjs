@@ -4,14 +4,36 @@ const providers = [
   ['dropbox', 'Dropbox', 'dropbox.png'],
 ];
 const outcomes = {SAVED: 'Save verified', FAILED: 'Save failed', UNCERTAIN: 'Save could not be verified'};
+const actionTimeout = {
+  'auth.connect': 120000,
+  'auth.reconnect': 120000,
+  'auth.refresh': 45000,
+  'providers.getStatus': 45000,
+};
+const failure = (code, message) => Object.assign(Error(message), {code});
 
 export function createBasicProviderCards({runtime, document, permissions}) {
   const stack = document.createElement('div');
   stack.className = 'remote-providers';
   const cards = new Map();
   async function call(op, provider) {
-    const reply = await runtime.sendMessage({channel: 'redown-basic-v1', api: 1, op, input: {provider}});
-    if (!reply?.ok) throw Error([reply?.error?.message, reply?.error?.nextAction].filter(Boolean).join(' ') || 'Provider unavailable.');
+    const response = Promise.resolve().then(() =>
+      runtime.sendMessage({channel: 'redown-basic-v1', api: 1, op, input: {provider}})).catch(() => {
+      throw failure('BASIC_MESSAGE_REJECTED', 'The provider service connection closed. Reopen the Shelf and try again.');
+    });
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(failure('BASIC_MESSAGE_TIMEOUT',
+        'The provider service took too long to respond. Check for an open sign-in window, or reopen the Shelf.')),
+      actionTimeout[op] ?? 12000);
+    });
+    const reply = await Promise.race([response, timeout]).finally(() => clearTimeout(timer));
+    if (reply?.ok === false && typeof reply.error?.code === 'string' && typeof reply.error.message === 'string') {
+      throw failure(reply.error.code, [reply.error.message, reply.error.nextAction].filter(Boolean).join(' '));
+    }
+    if (reply?.ok !== true || (op !== 'history.latestOutcome' && (!reply.value || typeof reply.value !== 'object'))) {
+      throw failure('BASIC_MESSAGE_INVALID', 'The provider service returned no usable response. Reopen the Shelf and try again.');
+    }
     return reply.value;
   }
   function recent(id, result) {
@@ -37,7 +59,9 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
     card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
       [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
-    card.availability.textContent = status.connected && !status.ready ? card.readiness.textContent : '';
+    card.readiness.dataset.reason = status.reason ?? '';
+    card.availability.textContent = !status.ready && status.reason && status.reason !== 'AUTH_REQUIRED'
+      ? card.readiness.textContent : '';
   }
   for (const [id, label, icon] of providers) {
     const section = document.createElement('section');
@@ -75,6 +99,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       const buttons = changesStatus ? [card.connect, card.refresh] : [button];
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
+      delete feedback.dataset.code;
       feedback.textContent = changesStatus ? 'Checking authorization…' : 'Opening provider…';
       try {
         const result = await call(op, id);
@@ -82,7 +107,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
         feedback.textContent = '';
       } catch (error) {
         feedback.textContent = error.message;
-        if (changesStatus) await call('providers.getStatus', id).then(status => paint(card, status), () => {});
+        feedback.dataset.code = error.code;
       } finally {
         for (const control of buttons) control.removeAttribute('aria-disabled');
       }
@@ -123,6 +148,8 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       }, error => {
         if (revision !== card.revision) return;
         card.readiness.textContent = error.message;
+        card.readiness.dataset.reason = error.code;
+        card.availability.textContent = error.message;
       });
       void call('history.latestOutcome', id).then(result => {
         if (!card.outcome.dataset.saveState) recent(id, result);

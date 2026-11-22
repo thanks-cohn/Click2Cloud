@@ -39,6 +39,7 @@ export function createAuth({
   config = CONFIG,
   now = Date.now,
   crypto = globalThis.crypto,
+  trustedStorage = () => chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" }),
 }) {
   const pending = new Map(),
     epochs = new Map();
@@ -60,16 +61,30 @@ export function createAuth({
         "Choose one of the three supported providers.",
       );
   }
-  async function secure() {
-    await chrome.storage.local.setAccessLevel({
-      accessLevel: "TRUSTED_CONTEXTS",
-    });
+  async function storage(work) {
+    try {
+      return await work();
+    } catch {
+      throw fail(
+        "AUTH_STORAGE_UNAVAILABLE",
+        "Secure browser credential storage is unavailable.",
+        "Check browser extension storage, then Refresh.",
+      );
+    }
   }
-  const load = async (id) => (await chrome.storage.local.get(key(id)))[key(id)];
+  let secured;
+  function secure() {
+    if (!secured) {
+      secured = storage(trustedStorage);
+      void secured.catch(() => { secured = undefined; });
+    }
+    return secured;
+  }
+  const load = (id) => storage(async () => (await chrome.storage.local.get(key(id)))[key(id)]);
   async function save(id, value, ticket = generation(id)) {
     await secure();
     checkGeneration(id, ticket);
-    await chrome.storage.local.set({ [key(id)]: value });
+    await storage(() => chrome.storage.local.set({ [key(id)]: value }));
   }
   function client(id) {
     const value =
@@ -306,9 +321,10 @@ export function createAuth({
   }
   async function state(id) {
     valid(id);
-    const record = await load(id);
-    let message, reason, nextAction;
+    let record, message, reason, nextAction;
     try {
+      await secure();
+      record = await load(id);
       await single(`token:${id}:${generation(id)}`, () => getToken(id));
       return {
         provider: id,
@@ -447,6 +463,7 @@ export function createAuth({
     refresh: state,
     async reconnect(id) {
       valid(id);
+      await secure();
       epochs.set(id, generation(id) + 1);
       if (id === "google") {
         try {
@@ -461,7 +478,7 @@ export function createAuth({
           /* No usable cached grant. */
         }
       }
-      await chrome.storage.local.remove(key(id));
+      await storage(() => chrome.storage.local.remove(key(id)));
       return connect(id);
     },
     token: (id) => single(`token:${id}:${generation(id)}`, () => getToken(id)),

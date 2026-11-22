@@ -35,9 +35,16 @@ export function validateSettings(input) {
 export async function openStore(
   indexedDB = globalThis.indexedDB,
   name = "redown-remote-basic-v1",
+  { signal, onBlocked } = {},
 ) {
+  signal?.throwIfAborted();
   const opening = indexedDB.open(name, 1);
+  opening.onblocked = onBlocked ?? null;
   opening.onupgradeneeded = () => {
+    if (signal?.aborted) {
+      opening.transaction.abort();
+      return;
+    }
     const db = opening.result;
     const attempts = db.createObjectStore("attempts", { keyPath: "id" });
     attempts.createIndex("createdAt", "createdAt");
@@ -52,20 +59,33 @@ export async function openStore(
     db.createObjectStore("meta");
   };
   const db = await req(opening);
+  if (signal?.aborted) {
+    db.close();
+    throw signal.reason;
+  }
   db.onversionchange = () => db.close();
-  async function run(names, mode, fn) {
+  async function run(names, mode, fn, signal) {
+    signal?.throwIfAborted();
     const tx = db.transaction(names, mode);
     const completion = done(tx);
+    // Observe abort even when a queued request has not reached its handler.
+    if (signal) void completion.catch(() => {});
+    const abort = () => {
+      try {
+        tx.abort();
+      } catch {}
+    };
+    signal?.addEventListener("abort", abort, { once: true });
     try {
       const value = await fn(tx);
       await completion;
       return value;
     } catch (e) {
-      try {
-        tx.abort();
-      } catch {}
+      abort();
       await completion.catch(() => {});
       throw e;
+    } finally {
+      signal?.removeEventListener("abort", abort);
     }
   }
   const read = (store, key) =>
@@ -348,7 +368,7 @@ export async function openStore(
             r.onsuccess = () => resolve(r.result?.key || 0);
           }),
       ),
-    recover: () =>
+    recover: (signal) =>
       run(["attempts"], "readwrite", async (tx) => {
         let count = 0;
         const index = tx.objectStore("attempts").index("state");
@@ -380,6 +400,6 @@ export async function openStore(
           });
         }
         return { interrupted: count };
-      }),
+      }, signal),
   };
 }

@@ -78,7 +78,7 @@ export function validateBasicRequest(message) {
   validate(message.op, input);
   return input;
 }
-export function createApi({ store, auth, coordinator, chrome }) {
+export function createApi({ store, auth, coordinator, chrome, durable = () => ({store, coordinator}) }) {
   const status = async (provider) => ({
     ...PROVIDERS.find((p) => p.id === providerId(provider)),
     ...(await auth.status(provider)),
@@ -112,36 +112,39 @@ export function createApi({ store, auth, coordinator, chrome }) {
       case "auth.refresh":
         await auth.refresh(input.provider);
         return status(input.provider);
+    }
+    const {store: data, coordinator: saves} = await durable();
+    switch (op) {
       case "saves.start":
-        return coordinator.start(input);
+        return saves.start(input);
       case "history.latestOutcome":
-        return store.latestOutcome(input.provider);
+        return data.latestOutcome(input.provider);
       case "saves.getAttempt":
       case "history.get":
-        return (await store.getAttempt(input.id)) || null;
+        return (await data.getAttempt(input.id)) || null;
       case "history.list":
-        return store.historyList(input);
+        return data.historyList(input);
       case "history.delete":
-        return store.historyDelete(input.id);
+        return data.historyDelete(input.id);
       case "history.clear":
-        return store.historyClear();
+        return data.historyClear();
       case "counter.get":
-        return store.counter();
+        return data.counter();
       case "settings.get":
-        return store.settings();
+        return data.settings();
       case "settings.update":
-        return store.updateSettings(input);
+        return data.updateSettings(input);
       case "diagnostics.list":
-        return store.diagnosticsList(input);
+        return data.diagnosticsList(input);
       case "diagnostics.getForAttempt":
-        return store.diagnosticsForAttempt(input.id, {
+        return data.diagnosticsForAttempt(input.id, {
           page: input.page,
           pageSize: input.pageSize,
         });
       case "diagnostics.clear":
-        return store.diagnosticsClear();
+        return data.diagnosticsClear();
       case "diagnostics.exportZip": {
-        const { bytes, filename } = await exportDiagnostics(store);
+        const { bytes, filename } = await exportDiagnostics(data);
         const downloadId = await chrome.downloads.download({
           url: zipDataUrl(bytes),
           filename,
