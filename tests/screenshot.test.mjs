@@ -581,6 +581,37 @@ test('an optional screenshot command assignment separates overlapping rules, and
  await assert.rejects(rules.change('save',{...second,expectedRevision:second.revision,shortcut:screenshotCommands[0]}),{code:'SCREENSHOT_RULE_CHANGED'});
 });
 
+test('Both browser commands dispatch one capture to their matching saved rule',async()=>{
+ const browser=browserFixture(),saved=new Map(),settings={};
+ const provider=directFixture(({call})=>!call.path.includes('/objects')?
+  Response.json({success:true,result:{name:fixtureTarget.bucketName}}):null);
+ let notify;
+ Object.assign(browser.chrome,{
+  storage:{local:{get:async key=>({[key]:settings[key]}),set:async values=>Object.assign(settings,values)}},
+  runtime:{getURL:path=>'chrome-extension://fixture/'+path,async sendMessage(message){
+   if(message.channel==='screenshot-result'&&message.state!=='uploading')setImmediate(()=>notify(message));
+  }},
+ });
+ const background=createScreenshotBackground({chrome:browser.chrome,oauth:provider.oauth,retryCache:cacheFixture(),
+  current:{read:async()=>({product:{cloudflare:{}}}),recordRemoteResult:async row=>saved.set(row.operationId,structuredClone(row)),
+   readRemoteResult:async id=>saved.get(id)},fileApi:{noteRemoteWrite(){}}});
+ for(const [index,command] of screenshotCommands.entries())
+  await background.request('save',{name:'Shortcut '+index,websites:[],destinations:[folder('command'+index+'/')],shortcut:command});
+ for(const [index,command] of screenshotCommands.entries()){
+  const result=new Promise(resolve=>{notify=resolve;});
+  background.onCommand(command,browser.tab);
+  const confirmed=await result;
+  assert.equal(confirmed.state,'confirmed');
+  const {plan,outputs}=saved.get(confirmed.operationId).screenshot;
+  assert.equal(plan.commandId,command);
+  assert.deepEqual(plan.outputs.map(output=>output.target.prefix),['command'+index+'/']);
+  assert.equal(outputs.length,1);
+ }
+ assert.equal(browser.captures(),2);
+ assert.equal(saved.size,2);
+ assert.equal(provider.calls.filter(call=>call.method==='PUT').length,2);
+});
+
 test('History exports one multi-destination screenshot receipt in all formats and can omit it entirely',async()=>{
  const at=Date.parse('2026-11-20T17:00:00Z');
  const hostPageURL='https://capture.example/article?q=1';

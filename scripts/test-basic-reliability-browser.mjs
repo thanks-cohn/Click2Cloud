@@ -206,6 +206,21 @@ try {
     assert.equal((await page.evaluate(() => basicLifecycle.call('history.list'))).value.total, 5);
     evidence.checks.push({gate: 'cold-native-menu-dispatch-and-independent-provider-failure', result: startup});
 
+    const shortcutOffer = await page.evaluate(async () => {
+      const {screenshotShortcutSetupKey: key} = await import('/candidate/src/chrome/command-bindings.mjs');
+      basicLifecycle.emit('installed', {reason: 'update'});
+      const onUpdate = basicLifecycle.read('local')[key];
+      basicLifecycle.emit('installed', {reason: 'install'});
+      const onInstall = basicLifecycle.read('local')[key];
+      await chrome.storage.local.set({[key]: false});
+      basicLifecycle.emit('startup');
+      basicLifecycle.emit('installed', {reason: 'update'});
+      return {onUpdate: onUpdate ?? null, onInstall, afterDismissal: basicLifecycle.read('local')[key],
+        listeners: basicLifecycle.snapshot().listeners.installed};
+    });
+    assert.deepEqual(shortcutOffer, {onUpdate: null, onInstall: true, afterDismissal: false, listeners: 1});
+    evidence.checks.push({gate: 'new-install-only-shortcut-offer', result: shortcutOffer});
+
     await page.clock.install();
     await page.evaluate(async () => {
       const f = basicLifecycle;

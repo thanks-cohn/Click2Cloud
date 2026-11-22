@@ -13,6 +13,7 @@ import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
 import {attachFilenameSearch} from '../src/explorer/search-file-api.mjs';
 import {createShelfAttention,createShelfHistoryToggle,shelfHistoryCommand,shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
 import {createDailyBadge} from '../src/chrome/daily-badge.mjs';
+import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
@@ -499,7 +500,10 @@ async function nativeReady(){
  if(!e.pending&&e.acknowledgedGeneration===state.generation.desired&&e.acknowledgedGeneration!==null&&engine.matchesCurrent(e.desired,state))return e.lastOutcome;
  return scheduleNative('NATIVE_CLICK');
 }
-for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(()=>{scheduleNative('NATIVE_STARTUP');void dailyBadge.refresh();});
+for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.addListener(details=>{
+ scheduleNative('NATIVE_STARTUP');void dailyBadge.refresh();
+ if(details?.reason==='install')void chrome.storage.local.set({[screenshotShortcutSetupKey]:true}).catch(()=>{});
+});
 scheduleNative('NATIVE_ACTIVATION');
 // Developer/native-companion integration only: no externally_connectable manifest,
 // external messages, content scripts, localhost server, or client-issued grants.

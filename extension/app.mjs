@@ -514,7 +514,7 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
-async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view)notifications.clear();if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view)notifications.clear();if(next!=='history')historyUI.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
 }if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
@@ -1808,4 +1808,4 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   else status(result.state==='pending'?'Saving remotely · '+(result.stage??'accepted'):names[result.code]??result.code??result.state,{attention:result.state!=='pending',noticeKey});
  })().catch(e=>status(e.message));
 });
-window.addEventListener('focus',()=>{focusPendingSearch();void connections().then(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}).catch(e=>status(e.message));});
+window.addEventListener('focus',()=>{focusPendingSearch();if(view==='screenshot')void screenshotUI.refreshShortcuts();void connections().then(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}).catch(e=>status(e.message));});

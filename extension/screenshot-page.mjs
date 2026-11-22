@@ -1,6 +1,6 @@
 import {targetKey} from '../src/core/menu-identity.mjs';
 import {screenshotCommands,screenshotDefaultName,screenshotPreference,screenshotRulePageSize,websiteCondition} from '../src/screenshot/rules.mjs';
-import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
+import {chromeCommandBindings,openChromeShortcuts,screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 
 const scopes=[['all','All websites'],['domain','Entire domain + subdomains'],['host','Exact hostname'],['url','Specific full URL']];
 const scopeName=kind=>scopes.find(([id])=>id===kind)?.[1];
@@ -57,6 +57,8 @@ export async function screenshotRequest(method,params={}){
 }
 
 export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccounts=()=>[]}){
+ let mounted;
+ function stop(){mounted?.stop();mounted=undefined;}
  const describeTarget=target=>{
   const accounts=connectedAccounts(),account=accounts.find(item=>item.id===target?.accountId);
   return destinationPath(target)+(account&&accounts.length>1?' · '+accountLabel(account,accounts):'');
@@ -209,32 +211,71 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
  function shortcutField(form,value,bindings){
   const label=element('label','Screenshot Shortcut ');
   const select=element('select');
-  select.append(new Option('',''),...screenshotCommands.map((id,index)=>new Option(shortcutLabel(id,index,bindings),id)));
+  select.append(new Option('',''),...screenshotCommands.map(id=>new Option(shortcutLabel(id,bindings),id)));
   select.value=value??'';label.append(select);
   form.querySelector('button[type=submit],button.primary').before(label);
   return select;
  }
- const shortcutLabel=(id,index,bindings)=>bindings.get(id)||(index===0?'Alt+Q':'Ctrl+Shift+Y')+' command (unassigned)';
- function shortcutHint(hint,bindings){
-  try{
-   const keys=screenshotCommands.map(id=>bindings.get(id)).filter(Boolean);
-   hint.replaceChildren(element('span',keys.length?'Chrome shortcuts · '+keys.join(' · '):'Assign a screenshot shortcut in Chrome.'));
-   if(keys.length<screenshotCommands.length){
-    const change=button('Chrome shortcut settings',()=>{void openChromeShortcuts(chrome).catch(()=>{hint.textContent='Open chrome://extensions/shortcuts in Chrome.';});});
-    hint.append(' ',change);
+ const suggestedKey=id=>chrome.runtime.getManifest?.()?.commands?.[id]?.suggested_key?.default??
+  (id===screenshotCommands[0]?'Alt+Q':'Ctrl+Shift+Y');
+ const shortcutLabel=(id,bindings)=>bindings?.get(id)??(suggestedKey(id)+(bindings?' command (unassigned)':' command (suggested)'));
+ function shortcutStatus(hint,updateLabels){
+  let bindings,offered=false,revision=0;
+  const statuses=element('p'),help=element('span'),feedback=element('span');
+  statuses.setAttribute('aria-live','polite');feedback.setAttribute('role','status');
+  const labels=screenshotCommands.map(id=>{
+   const label=element('span');
+   label.dataset.shortcutStatus=id;return label;
+  });
+  statuses.append(labels[0],' · ',labels[1],help);
+  const change=button('Chrome shortcut settings',()=>{
+   feedback.textContent='';
+   void openChromeShortcuts(chrome).catch(()=>{feedback.textContent=' Open chrome://extensions/shortcuts in Chrome.';});
+  });
+  const notice=element('p','Set up missing screenshot shortcut ');
+  notice.dataset.shortcutSetup='';
+  notice.append(button('Dismiss',finish));
+  hint.append(statuses,change,feedback,notice);
+  function finish(){
+   offered=false;notice.hidden=true;
+   void chrome.storage.local.set({[screenshotShortcutSetupKey]:false}).catch(()=>{
+    if(hint.isConnected)feedback.textContent=' The browser could not save this dismissal.';
+   });
+  }
+  function paint(){
+   const missing=bindings&&screenshotCommands.some(id=>!bindings.get(id));
+   for(const [index,id] of screenshotCommands.entries()){
+    const suggested=suggestedKey(id),key=bindings?.get(id);
+    const text=key?key+' — Assigned'+(key!==suggested?' (suggested '+suggested+')':''):
+     suggested+' — '+(bindings?'Unassigned':bindings===null?'Status unavailable':'Checking assignment…');
+    if(labels[index].textContent!==text)labels[index].textContent=text;
    }
-  }catch{hint.textContent='Shortcut assignments are unavailable. Check Chrome’s extension shortcut settings.';}
+   const tip=missing?' · Choose a shortcut in Chrome.':'';
+   if(help.textContent!==tip)help.textContent=tip;
+   change.hidden=bindings===undefined||Boolean(bindings&&!missing);
+   notice.hidden=!offered||!missing;
+   if(offered&&bindings&&!missing)finish();
+  }
+  paint();
+  return {
+   async refresh(){
+    const ticket=++revision;
+    const next=typeof chrome.commands?.getAll==='function'?await chromeCommandBindings(chrome).catch(()=>null):null;
+    if(ticket!==revision||!hint.isConnected)return;
+    bindings=next;updateLabels(next);paint();
+   },
+   setOffer(value){if(hint.isConnected){offered=value===true;paint();}},
+  };
  }
  async function mount(parent){
+  stop();
   const page=element('section');page.className='page screenshot-page';
-  page.innerHTML='<h1>Screenshots</h1><p class="muted" data-keys></p><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
+  page.innerHTML='<h1>Screenshots</h1><div class="muted" data-keys></div><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
   parent.replaceChildren(page);
   const form=page.querySelector('form'),cards=page.querySelector('[data-cards]'),pager=page.querySelector('[data-pages]'),feedback=page.querySelector('[data-rule-status]');
   const readSites=sites(form.querySelector('[data-websites]'),[{kind:'all'}]);
   const readTargets=directories(form.querySelector('[data-directories]'),[],null,{multiple:true});
-  let config,pageIndex=0;
-  const bindings=await chromeCommandBindings(chrome).catch(()=>new Map());
-  if(!page.isConnected)return;
+  let config,pageIndex=0,bindings=null;
   const shortcut=shortcutField(form,null,bindings);
   function render(next,focusId){
    if(!page.isConnected)return;
@@ -250,7 +291,9 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
     edit.append(element('strong',rule.name),
      element('span',rule.websites.length?rule.websites.map(describeSite).join(' or '):'All websites'),
      element('span',rule.destinations.map(describeTarget).join(' · ')));
-    if(rule.shortcut)edit.append(element('span',shortcutLabel(rule.shortcut,screenshotCommands.indexOf(rule.shortcut),bindings)));
+    if(rule.shortcut){
+     const label=element('span',shortcutLabel(rule.shortcut,bindings));label.dataset.ruleShortcut=rule.shortcut;edit.append(label);
+    }
     const active=button(rule.active?'Active':'Inactive',()=>void mutate('toggle',{ruleId:rule.ruleId,active:!rule.active},rule.ruleId));
     active.setAttribute('aria-pressed',String(rule.active));
     active.setAttribute('aria-label',(rule.active?'Active':'Inactive')+' · '+rule.name);
@@ -289,18 +332,29 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
   wireSave(form,()=>{const websites=readSites();return {shortcut:shortcut.value,name:websites[0]?.value??'All websites',websites,destinations:readTargets()};},saved=>{
    pageIndex=0;render(saved);form.querySelector('[role=status]').textContent='Rule saved.';
   });
-  shortcutHint(page.querySelector('[data-keys]'),bindings);
+  const shortcuts=shortcutStatus(page.querySelector('[data-keys]'),next=>{
+   bindings=next;
+   for(const option of shortcut.options)if(option.value)option.textContent=shortcutLabel(option.value,bindings);
+   for(const label of cards.querySelectorAll('[data-rule-shortcut]'))label.textContent=shortcutLabel(label.dataset.ruleShortcut,bindings);
+  });
+  void shortcuts.refresh();
+  void chrome.storage.local.get(screenshotShortcutSetupKey).then(value=>shortcuts.setOffer(value[screenshotShortcutSetupKey]),()=>{});
   const updated=(changes,area)=>{
-   if(!page.isConnected){chrome.storage.onChanged.removeListener(updated);return;}
-   if(area==='local'&&changes[screenshotPreference])void screenshotRequest('read').then(next=>{if(!config||next.revision>config.revision)render(next);}).catch(()=>{});
+   if(!page.isConnected||area!=='local')return;
+   if(changes[screenshotShortcutSetupKey])shortcuts.setOffer(changes[screenshotShortcutSetupKey].newValue);
+   if(changes[screenshotPreference])void screenshotRequest('read').then(next=>{if(!config||next.revision>config.revision)render(next);}).catch(()=>{});
   };
   chrome.storage?.onChanged?.addListener(updated);
   const refreshDefault=message=>{
-   if(!page.isConnected){chrome.runtime.onMessage.removeListener(refreshDefault);return;}
+   if(!page.isConnected)return;
    if(message?.channel==='connection-changed'&&!config?.defaultHandled)
     void screenshotRequest('read').then(next=>{if(!config||next.revision>config.revision)render(next);}).catch(()=>{});
   };
   chrome.runtime.onMessage.addListener(refreshDefault);
+  mounted={refresh:shortcuts.refresh,stop(){
+   chrome.storage?.onChanged?.removeListener?.(updated);
+   chrome.runtime.onMessage.removeListener?.(refreshDefault);
+  }};
   try{render(await screenshotRequest('read'));}
   catch(error){feedback.textContent=screenshotMessage(error.code,'Could not read saved screenshot rules.');}
  }
@@ -346,5 +400,5 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
    finally{input.disabled=false;}
   };
  }
- return {mount,settings,configureHere};
+ return {mount,stop,refreshShortcuts:()=>mounted?.refresh(),settings,configureHere};
 }

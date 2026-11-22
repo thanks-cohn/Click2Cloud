@@ -31,8 +31,9 @@ const context = await browser.newContext({viewport: {width: 1100, height: 800}})
 const page = await context.newPage();
 page.on('pageerror', error => report.errors.push(error.message));
 page.setDefaultTimeout(8000);
-await page.addInitScript(() => {
-  const listeners = new Set(), connected = new Set();
+const buildManifest = JSON.parse(await readFile(join(build, 'manifest.json'), 'utf8'));
+await page.addInitScript(manifest => {
+  const listeners = new Set(), connected = new Set(), storageListeners = new Set();
   const store = () => JSON.parse(localStorage.getItem('fixtureSettings') ?? '{}');
   const status = provider => ({provider, ready: connected.has(provider), connected: connected.has(provider),
     reason: connected.has(provider) ? 'READY' : 'AUTH_REQUIRED'});
@@ -41,8 +42,14 @@ await page.addInitScript(() => {
     resetWorker() { connected.clear(); this.operations.length = 0; },
     updateStatus(provider) { for (const listener of listeners) listener({channel: 'redown-basic-status', status: status(provider)}, {id: 'fixture'}); },
   };
+  window.shortcutFixture = {
+    tabs: [],
+    assign(assigned) {localStorage.setItem('fixtureKeyAssignments', JSON.stringify(assigned));},
+    flags() {return {runtime: listeners.size, storage: storageListeners.size};},
+  };
   Object.defineProperty(globalThis, 'chrome', {value: {
-    runtime: {id: 'fixture', onMessage: {addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn)},
+    runtime: {id: 'fixture', getManifest: () => manifest,
+      onMessage: {addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn)},
       async sendMessage(message) {
         if (message.channel === 'redown-basic-v1') {
           const {op, input: {provider}} = message;
@@ -54,14 +61,26 @@ await page.addInitScript(() => {
         }
         if (message.channel === 'engine')
           return (await import('/tests/product-browser-host.mjs')).invoke({version: message.version, method: message.method, params: message.params});
+        if (message.channel === 'screenshot')
+          return {state: 'completed', data: {rules: [], revision: 0, defaultHandled: true}};
       },
     },
+    commands: {getAll: async () => {
+      if (shortcutFixture.unavailable) throw Error('Fixture Commands API failure');
+      return JSON.parse(localStorage.getItem('fixtureKeyAssignments') ?? '[]');
+    }},
+    tabs: {create: async options => {shortcutFixture.tabs.push(options.url);}},
     storage: {local: {
       get: async keys => { const data = store(); return Object.fromEntries([keys].flat().map(key => [key, data[key]])); },
-      set: async values => localStorage.setItem('fixtureSettings', JSON.stringify({...store(), ...values})),
-    }, onChanged: {addListener() {}, removeListener() {}}},
+      set: async values => {
+        const old = store();
+        localStorage.setItem('fixtureSettings', JSON.stringify({...old, ...values}));
+        for (const listener of storageListeners)
+          listener(Object.fromEntries(Object.entries(values).map(([key, newValue]) => [key, {oldValue: old[key], newValue}])), 'local');
+      },
+    }, onChanged: {addListener: fn => storageListeners.add(fn), removeListener: fn => storageListeners.delete(fn)}},
   }});
-});
+}, buildManifest);
 const geometry = () => page.evaluate(() => {
   const header = document.querySelector('.app-header'), nav = header.querySelector('nav');
   const pick = (el, index) => {
@@ -159,6 +178,7 @@ try {
   await page.setViewportSize({width: 320, height: 800});
   await page.reload();
   await page.waitForFunction(() => document.documentElement.dataset.aesthetic === 'frames');
+  await page.locator('#theme:enabled').waitFor();
   const more = page.getByRole('button', {name: 'More', exact: true});
   await more.focus();
   await page.keyboard.press('ArrowDown');
@@ -190,6 +210,71 @@ try {
     for (const id of ['google', 'onedrive', 'dropbox']) providerFixture.updateStatus(id);
   });
   assert.equal(await page.getByRole('button', {name: 'Sign In', exact: true}).count(), 3);
+
+  const ids = ['screenshot.capture.alt-q', 'screenshot.capture.ctrl-shift-y'];
+  const keys = ['Alt+Q', 'Ctrl+Shift+Y'];
+  const shortcutStatus = page.locator('[data-shortcut-status]');
+  const setupKey = 'screenshotShortcutSetupOfferV1';
+  const suggested = manifest => ids.map(id => manifest.commands[id].suggested_key.default);
+  assert.deepEqual(suggested(buildManifest), keys);
+  assert.deepEqual(suggested(JSON.parse(await readFile('extension/manifest.json', 'utf8'))), keys);
+  const openScreenshots = async () => {
+    await page.getByRole('button', {name: 'More', exact: true}).click();
+    await page.getByRole('menuitem', {name: 'Screenshots', exact: true}).click();
+    await page.getByRole('heading', {name: 'Screenshots', exact: true}).waitFor();
+  };
+  async function setCommands(binding, focus = false) {
+    await page.evaluate(({binding, ids, focus}) => {
+      shortcutFixture.assign(binding.flatMap((shortcut, index) => shortcut === null ? [] : [{name: ids[index], shortcut}]));
+      if (focus) window.dispatchEvent(new Event('focus'));
+    }, {binding, ids, focus});
+  }
+  async function verifyLabels(expected) {
+    await page.waitForFunction(expected => {
+      const actual = [...document.querySelectorAll('[data-shortcut-status]')].map(item => item.textContent);
+      return JSON.stringify(actual) === JSON.stringify(expected);
+    }, expected);
+    assert.deepEqual(await shortcutStatus.evaluateAll(labels => labels.map(label => label.dataset.shortcutStatus)), ids);
+  }
+  const originalListeners = await page.evaluate(() => shortcutFixture.flags());
+  await page.evaluate(key => chrome.storage.local.set({[key]: true}), setupKey);
+  await setCommands(keys);
+  await openScreenshots();
+  await verifyLabels(['Alt+Q — Assigned', 'Ctrl+Shift+Y — Assigned']);
+  await page.waitForFunction(async key => (await chrome.storage.local.get(key))[key] === false, setupKey);
+  for (const [binding, labels] of [
+    [['Alt+Q', null], ['Alt+Q — Assigned', 'Ctrl+Shift+Y — Unassigned']],
+    [[null, 'Ctrl+Shift+Y'], ['Alt+Q — Unassigned', 'Ctrl+Shift+Y — Assigned']],
+    [[null, ''], ['Alt+Q — Unassigned', 'Ctrl+Shift+Y — Unassigned']],
+    [['Alt+Shift+8', 'Ctrl+Shift+Y'], ['Alt+Shift+8 — Assigned (suggested Alt+Q)', 'Ctrl+Shift+Y — Assigned']],
+  ]) {
+    await setCommands(binding, true);
+    await verifyLabels(labels);
+    assert(await page.locator('[data-shortcut-setup]').isHidden());
+  }
+  await page.evaluate(() => {shortcutFixture.unavailable = true; window.dispatchEvent(new Event('focus'));});
+  await verifyLabels(['Alt+Q — Status unavailable', 'Ctrl+Shift+Y — Status unavailable']);
+  await page.evaluate(() => {shortcutFixture.unavailable = false;});
+  await page.getByRole('button', {name: 'Remotes', exact: true}).click();
+  assert.deepEqual(await page.evaluate(() => shortcutFixture.flags()), originalListeners);
+
+  await page.evaluate(key => chrome.storage.local.set({[key]: true}), setupKey);
+  await setCommands(['Alt+Q', null]);
+  await openScreenshots();
+  await verifyLabels(['Alt+Q — Assigned', 'Ctrl+Shift+Y — Unassigned']);
+  const prompt = page.locator('[data-shortcut-setup]');
+  await prompt.waitFor();
+  assert.match(await prompt.innerText(), /Set up missing screenshot shortcut/);
+  await page.getByRole('button', {name: 'Chrome shortcut settings'}).click();
+  assert.deepEqual(await page.evaluate(() => shortcutFixture.tabs), ['chrome://extensions/shortcuts']);
+  await prompt.getByRole('button', {name: 'Dismiss'}).click();
+  await prompt.waitFor({state: 'hidden'});
+  await page.reload();
+  await page.locator('#theme:enabled').waitFor();
+  await openScreenshots();
+  await verifyLabels(['Alt+Q — Assigned', 'Ctrl+Shift+Y — Unassigned']);
+  assert(await prompt.isHidden());
+  report.shortcuts = 'PASS';
   assert.deepEqual(report.errors, []);
   report.result = 'PASS';
 } catch (error) {
