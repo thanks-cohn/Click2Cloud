@@ -1,4 +1,4 @@
-# CODEX P0/P1 — Restore Alt+Q screenshots and investigate URL-independent desktop capture
+# CODEX P0/P1 — Repair 0.3.24 Chrome shortcut regressions and investigate URL-independent desktop capture
 
 **User report:** Alt+Q screenshots worked perfectly before updating to REDOWN 0.3.24. After the update, Alt+Q reports: **"Chrome did not grant permission to capture this tab."** Investigate and fix this P0 regression **before** attempting the separately scoped URL-independent desktop/application screenshot feature. The owner also requires missing URL fields in History to display **N/A**, not a fabricated value or a broken expandable field.
 
@@ -17,6 +17,19 @@
 5. Document the actual root cause, change(s), evidence, why existing tests missed it, and prevention in `docs/integration/REDOWN_0324_SCREENSHOT_REGRESSION.md` and add a risk entry to `P0-safety-risk-register.md`. Mark untested root-cause theories as hypotheses; if live Chrome cannot be tested, state the specific installed acceptance gate as UNVERIFIED.
 6. Add focused regression fixtures and, when available, actual installed Chrome checks for Alt+Q, the alternate shortcut, ordinary permitted tab, withheld/blocked pages, shortcut global vs in-Chrome scope, command-without-tab, worker restart, repeated calls and accurate screenshot receipt/History handling. Avoid invasive changes without evidence.
 
+## Phase A2 — P0: Restore Ctrl+Shift+F File Explorer search focus (same release regression)
+
+**Additional owner report:** Immediately after updating to 0.3.24, **Ctrl+Shift+F** no longer opens/changes the Shelf to Files and focuses filename search. REDOWN displays **"Chrome could not change the Shelf. Try the shortcut again."** This used to work before the update. Investigate this alongside Alt+Q as a potential common Chrome permission/extension-update/shortcut invocation regression. Do not dismiss either as user configuration without evidence.
+
+**Source-grounded clues:** The installed 0.3.24 `extension/background.mjs` dispatches the `shelf.explorer.search` command to `shelfHistory.search(tab)`. In `src/chrome/provider-panel.mjs`, the search path calls `chrome.sidePanel.open({windowId})` and `showIntent(...,'search')`; an opening promise rejection produces `SHELF_OPEN_FAILED`, which `extension/app.mjs` maps to the generic visible message. The `provider-panel.mjs` file's blob SHA is unchanged between `5e1cb5f` and `cd4c8dd3`. The message indicates REDOWN handled a Shelf open failure; it does **not** prove the precise Chrome API rejection or a shared root cause with capture.
+
+1. Compare installed behavior and all relevant 0.3.23 vs 0.3.24 manifest permissions, shortcut bindings/scope, user gesture lifetime, command event tab/window context, `sidePanel.setOptions/open/onOpened`, initialization order, stored intent, tab focus and Shelf Explorer search-focus acknowledgment.
+2. Capture the **actual sanitized rejection message/category** from `chrome.sidePanel.open`, rather than collapsing everything into `SHELF_OPEN_FAILED`. Determine whether Chrome denied the action, the window was missing or unfocused, the gesture was lost, the panel was already open, the extension update had pending approval, or another cause. Do not conflate this with search field failure if the panel never opened.
+3. Restore the pre-upgrade action: one Ctrl+Shift+F should open or select **Files** and focus the filename search, using Chrome-supported APIs, without a second shortcut. Maintain existing open Shelf state and handle absent command tab/global shortcut scope safely. Preserve the existing single horizontal nav and all themes.
+4. Add focused reproducible tests for sidePanel opening and rejection causes, post-open routing/focus, already-open panel, worker restart, permissions after update, global vs In Chrome, and simultaneous extension state changes. Where feasible, run actual installed Chrome tests; mark live tests UNVERIFIED if unavailable.
+5. Record the precise verified root cause(s) of **both** broken shortcuts and why pre-release fixtures missed them in `docs/integration/REDOWN_0324_SCREENSHOT_REGRESSION.md` (rename/report scope appropriately if desired), and the P0 risk register. If common cause is unproven, document independent causes separately. Address P0 repairs **before** phase B desktop capture development.
+6. Ensure the search shortcut is actually configured and dispatched. The current manifest suggests `Alt+Shift+F` for `shelf.explorer.search`; the owner's actual binding is **Ctrl+Shift+F**, which Chrome may have assigned through shortcut settings. Preserve user-configured bindings; do not overwrite them with the manifest suggested default.
+
 ## Phase B — P1: Research and implement URL-independent screenshot capture for desktop applications, only if safely feasible
 
 **User goal:** A screenshot of File Explorer, another Windows application, or the selected desktop/screen should not require any page URL. Alt+Q should remain useful in Chrome. Research Chrome's supported `desktopCapture` / `tabCapture` / `tabs.captureVisibleTab` permission and user-gesture differences, `chrome.desktopCapture.chooseDesktopMedia` source-picker requirements, OS permission behavior, global-shortcut constraints, and where a Windows native companion would be necessary. A global Chrome shortcut by itself does not grant unrestricted desktop or window capture.
@@ -31,7 +44,7 @@
 
 ## Safety, gates, and delivery
 - Update existing P0 risk register with foreseeable capture permission failures, credential/screen privacy, picker cancellation, blank/blocked sources, worker interruptions, memory/capture leaks, unsupported global triggers, History serialization and duplicate receipts; mitigate critical risks before affected changes.
-- P0 must pass on ordinary real Chrome tabs before calling the screenshot regression fixed. Test desktop mode separately, don't conflate it with the P0 repair.
+- P0 must pass on ordinary real Chrome tabs AND Ctrl+Shift+F must open Files and focus search before calling the combined shortcut regression fixed. Test desktop mode separately, don't conflate it with the P0 repair.
 - Distinguish mocks/fixtures from real installed Windows Chrome and real desktop capture; if the managed Chromium environment rejects installation, do not claim live PASS.
 - Commit and push safe, tested checkpoints **only** on the authorized branch. Report exact commit, tests, cause, Windows verification steps, new desktop-capture capability or blockers, and remaining risks. Never label unverified capture flows successful.
 
