@@ -1,7 +1,7 @@
 # NEXT CODEX RUN — REDOWN Premium Aesthetics + Cloudflare-Independent Right-Click + Existing Basic Diagnostics Button
 
 Date: 2026-11-21
-Status: OWNER-APPROVED **SCOPED FUTURE IMPLEMENTATION BRIEF** — documenting work only; this commit does not implement or release product code.
+Status: OWNER-APPROVED **SCOPED CODEX IMPLEMENTATION BRIEF** — this document is the instructions for the next separate Codex run. Authoring/updating this file alone does not implement product code. **Upon executing this brief, Codex MUST commit and push completed implementation work to the existing authorized GitHub branch**. No merge, production/cloud deployment, or Chrome Web Store publication.
 
 > **CODEX: READ THIS FILE FIRST AND TREAT IT AS THE SOLE CONTROLLING TASK LIST.** This document is complete and self-contained. Do **not** treat any older file named `codex-request-*`, `NEXT_CODEX_*`, `NEXT_CODEX_PREMIUM_*`, historical branch request, README checklist, or legacy P0/P1 milestone as authorization to add work. Use the specifically named past files **only as non-controlling evidence for the visual design**, and use source code/tests only as implementation references. When in doubt, use THIS file; do not synthesize a larger scope.
 
@@ -27,7 +27,7 @@ Both lines **CENTERED on the same vertical axis**. **SECOND line visually LARGER
 - **Destination repository:** `thanks-cohn/Click2Cloud`
 - **ONLY writable branch:** `codex/redown-basic-api-integration-0323-alpha-base-2026-11-21`
 - **READ-ONLY reference:** `thanks-cohn/REDOWN` / `main`. `thanks-cohn/redown-basic` / `main` is also READ-ONLY if consultation is necessary.
-- Do not switch/create branches, merge, deploy, release, change the Chrome extension ID/manifest key, OAuth redirects, Cloudflare account/workers/buckets, or modify unrelated repositories.
+- Do not switch/create branches, **merge into main, force-push, deploy to Cloudflare/production, publish to Chrome Web Store, or cut a release**. **Git commit + ordinary Git push to the existing authorized branch IS explicitly required after implementation.** Do not change the Chrome extension ID/manifest key, OAuth redirects, Cloudflare account/workers/buckets, or modify unrelated repositories.
 - **THIS is the only controlling scope for the next run.** Follow the section 0 priority order even if older documents are headed `CODEX IMPLEMENTATION REQUEST`, `NEXT CODEX RUN`, `REQUIRED`, `CONTROLLING`, `P0` or `P1`. Older references are NOT a second task queue. The earlier, comprehensive `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md` and `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md` remain non-controlling visual/reference material only; their History engineering, History exports, diagnostics overhaul, large ZIP streaming, recorder fixes, universal badge/counter, provider-source transport changes and general resilience refactors **ARE NOT AUTHORIZED IN THIS RUN**.
 - Exactly **three deliverables**: (1) high-quality **aesthetic/visual UX** ported from the previous request; (2) **Cloudflare-independent Basic native right-click menus**; (3) **one Settings button** invoking already implemented Basic `diagnostics.exportZip`. No extra features. Implement in independently testable/reversible commits, not a sweeping rewrite.
 - Keep the existing one native context-menu owner, one MV3 worker, `CURRENT` integrity fence, receipt verification, original Cloudflare R2 engine, Explorer, History record machinery, screenshot pipeline, and existing provider OAuth behavior. No invasive restructuring in the name of appearance.
@@ -109,7 +109,18 @@ Order **must** be:
 
 ## E. Mandatory execution/checks and exclusions
 
-**Suggested independent commits:** (1) native provider menu independence with targeted REDOWN-derived fault tests; (2) Frames/Golden Age/Oceania + compatible existing appearance/palettes; (3) Remotes cards/slogan/icon/nav/History H1 and hover; (4) notification lifecycle repair; (5) Basic existing export button. Run relevant unit/browser and build checks after each stage and final regression suite.
+### E0. Mandatory GitHub delivery — owner explicitly authorizes this
+
+1. At start confirm repository, exact existing branch and upstream GitHub remote; **never create/switch/merge/cherry-pick another branch**.
+2. Implement the three allowed workstreams as real source/CSS/test changes. Build and run focused + comprehensive regressions; compare verified R2 baseline and native menu behavior.
+3. Make clean, reviewable Git commits **only on** `codex/redown-basic-api-integration-0323-alpha-base-2026-11-21`. Preserve unrelated user changes and historical data.
+4. **PUSH ALL COMPLETE WORK TO GITHUB** using normal non-force push to `thanks-cohn/Click2Cloud` on that **same branch**; confirm remote HEAD/commit hashes. GitHub delivery is required, not optional. Do not end after audits, drafts or unpushed local implementation.
+5. Report the exact branch URL, commits, test/CI results, real-browser evidence and remaining defects. Never call failed/untested gates PASS. If normal push is rejected, preserve work and report the error without force pushing, resetting or hiding incomplete work.
+6. **No merge to `main`, no pull request merge, no production Cloudflare deploy, no Chrome Web Store publication, no release.** This request uses “deploy to GitHub” to mean **push source changes to the authorized GitHub feature branch**, not ship them to customers.
+
+
+
+**Required independently identifiable commits:** (1) native provider menu independence with targeted REDOWN-derived fault tests; (2) Frames/Golden Age/Oceania + compatible existing appearance/palettes; (3) Remotes cards/slogan/icon/nav/History H1 and hover; (4) notification lifecycle repair; (5) Basic existing export button. Run relevant unit/browser and build checks after each stage and final regression suite. **After work is done, COMMIT and PUSH to GitHub on the sole authorized branch.** This is mandatory delivery, not a documentation-only result. If tests fail, retain and push safely scoped work with exact failures and do not claim release readiness; never push knowingly destructive regressions. If push is rejected, report exact error and the existing local commit SHA; do not force-push or create another branch.
 
 **Minimum proof:** 
 - Real or simulated Cloudflare R2 success, login, exactly targeted Simple/Narrow/Depth menus and preserved GO TO, History and Explorer; **never claim live proof where only mock tests ran**.
@@ -117,7 +128,7 @@ Order **must** be:
 - Visual before/after screenshots using the same representative data in all three premium themes and light/dark at narrow/wide widths and 100/125% zoom; test pointer/keyboard/reduced-motion/contrast.
 - Notification timing, no overlays over History paging or controls, original Basic card buttons, exact owner-approved copy, **visually centered pyramid interlude with noticeably smaller `The Future is NOW.` above larger `True Remote is Here.`** in each of the three themes at narrow and wide widths, one History H1.
 - Diagnostics API invoked exactly once per click, respected old size limit, no Cloudflare interaction.
-- Preserve established extension identity, native ID ownership, canonical CURRENT, verified R2 receipts, original History storage, provider OAuth and screenshot code. Report PASS / FAIL / UNVERIFIED with exact tests and changed files; stop before merge/deploy.
+- Preserve established extension identity, native ID ownership, canonical CURRENT, verified R2 receipts, original History storage, provider OAuth and screenshot code. Report PASS / FAIL / UNVERIFIED with exact tests and changed files. **Verify the GitHub remote branch contains every pushed commit, list exact commit URLs, report remote HEAD, and report CI status if available.** Stop before **merge/production deployment/Chrome Web Store release**; GitHub branch push is required.
 
 **Explicitly OUT OF SCOPE** (even if demanded by an older referenced document): Basic History card integration, merged History timeline architecture, any History exports, canonical storage/index migrations, Cloudflare recorder/diagnostics overhaul, master Unlimited settings change, new Basic SECURE format, ZIP streaming/512 MiB export, native scheduler, source size, cross-provider badge/counter changes, screenshot saving changes, Google/OneDrive/Dropbox source transport rewrites, universal file API, worker rewrite, new aesthetic sphere animations, and unrelated reliability/backlog fixes.
 
