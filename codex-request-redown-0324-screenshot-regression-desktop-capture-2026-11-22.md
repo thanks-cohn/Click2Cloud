@@ -54,6 +54,19 @@ The owner reports that the same REDOWN 0.3.24 functionality **works well in Micr
 - Preserve the shortcut system and single-worker architecture; avoid broad rewrites, extra listeners, duplicated command handling, or excessive background resource use. Diagnose the actual cause and add focused **Chrome-first** regression tests so new versions cannot silently break shortcuts.
 - Report each action's status as **PASS / FAIL / BLOCKED / UNVERIFIED** with Chrome evidence, with Edge compatibility separately. No release-ready claim based on tests that only confirm the two reported failures or on Edge-only results.
 
+## P0 — Fixed four-slot Chrome shortcut registration priority
+
+**Owner directive:** If REDOWN must prioritize only four browser-level shortcut registrations, reserve the four `chrome.commands` entries **in this exact priority order**:
+
+1. **Alt+Q** — primary screenshot capture: `screenshot.capture.alt-q`.
+2. **Ctrl+Shift+Y** — secondary screenshot capture: `screenshot.capture.ctrl-shift-y` (preserve user reassignment if present).
+3. **File Explorer search finder** — `shelf.explorer.search`, opens/selects **Files** and focuses filename search. The owner uses **Ctrl+Shift+F**; the manifest's suggested default may differ. Respect the effective user-configured binding.
+4. **History pop-out/toggle** — `shelf.history.toggle`, opens/closes or switches to History according to established behavior. Preserve the effective user-configured binding.
+
+**All other shortcuts should remain in-house within the Shelf/Explorer while its UI has focus**; do not allocate additional Chrome-level command registrations or displace these four. Preserve internal keyboard actions, controls and customization rather than removing functionality. Differentiate these scope boundaries in settings: browser-wide extension commands vs Shelf-only shortcuts. Do not silently move one of the four out of `chrome.commands`, and do not promise Shelf-only shortcuts will work when the Shelf is not focused.
+
+Chrome may restrict some shortcut combinations or impose shortcut limits. Keep the four command **identities and order of priority**; let users choose supported key combinations through Chrome shortcut settings. Do not forcibly overwrite existing user assignments, and report conflicts/unsupported combinations accurately. Audit registration and actual execution for all four in official Google Chrome, including a fresh profile and an updated existing profile; Edge remains secondary. Test that Shelf-internal shortcuts remain operational without Chrome registrations.
+
 ## Phase B — P1: Research and implement URL-independent screenshot capture for desktop applications, only if safely feasible
 
 **User goal:** A screenshot of File Explorer, another Windows application, or the selected desktop/screen should not require any page URL. Alt+Q should remain useful in Chrome. Research Chrome's supported `desktopCapture` / `tabCapture` / `tabs.captureVisibleTab` permission and user-gesture differences, `chrome.desktopCapture.chooseDesktopMedia` source-picker requirements, OS permission behavior, global-shortcut constraints, and where a Windows native companion would be necessary. A global Chrome shortcut by itself does not grant unrestricted desktop or window capture.
