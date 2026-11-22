@@ -35,11 +35,11 @@ Order **must** be:
 2. **Google Drive** compact full-width provider card.
 3. **OneDrive** compact full-width provider card.
 4. **Dropbox** compact full-width provider card.
-5. A **standalone editorial interlude with TWO distinct lines**: `The Future is NOW.` on line one, `True Remote is Here.` on line two. Never merge, truncate, or embed inside a card.
+5. A **standalone, horizontally CENTERED, two-line typographic pyramid / forced-perspective interlude**: `The Future is NOW.` on the FIRST line in noticeably **smaller type**, and `True Remote is Here.` on the SECOND line in **visibly larger, more prominent type**. Center both lines on the same vertical axis; the wider/larger bottom line forms a balanced pyramid-like silhouette. Preserve the exact punctuation and capitalization. Do not invert the hierarchy, align either line left, merge them, truncate them, or embed the interlude inside a provider card. Size responsively so this hierarchy survives narrow Chrome/Edge side panels without horizontal overflow.
 6. The **original Cloudflare R2** login/connection card and existing behavior.
 
 - Normal Basic cards prominently present **only bundled recognizable icon, provider name, and ORIGINAL existing Basic actions**: Sign In, Reconnect/Approve, Refresh, GO TO where applicable. Preserve exact click wiring and truthful permission/readiness/error/accessibility info. Remove repetitive permanent status essays such as 'Not connected', 'No recent save attempt', 'Ready to Save' from the normal card face; surface crucial failures contextually or via accessible details, never fake readiness or success.
-- Use the same hierarchy in Frames/Golden Age/Oceania while letting each theme give original visual character to the interlude, buttons and cards. Polish spacing, icon consistency and copy; avoid requiring Cloudflare connection to render Basic cards.
+- Use the same **centered, small-top / large-bottom pyramid hierarchy** in Frames/Golden Age/Oceania while letting each theme give original visual character to the interlude, buttons and cards. Polish spacing, icon consistency and copy; avoid requiring Cloudflare connection to render Basic cards.
 - Native browser-owned menu and Edge/Chrome side-panel chrome are outside app CSS; style only extension-owned UI.
 
 ### B3. Elegant hover, movement and state feedback
