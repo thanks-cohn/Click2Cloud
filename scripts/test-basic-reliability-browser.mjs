@@ -308,6 +308,26 @@ try {
       chase: chase.map(({state, at}, index) => ({state, elapsedMs: Math.round(at - chase[0].at),
         ...(index ? {previousStateMs: Math.round(at - chase[index - 1].at)} : {})})),
     }});
+
+    await page.waitForFunction(() => click2cloud.registrar.inspect().acknowledgedGeneration !== null);
+    await page.evaluate(() => {
+      const f = basicLifecycle;
+      f.oneDrive = true;
+      f.oneDriveObject = 'fixture-onedrive-next';
+      f.oneDriveName = 'one-click (1).txt';
+      const row = click2cloud.registrar.inspect().desired.rows.find(row => row.providerAction === 'onedrive');
+      f.emit('menu.click', {menuItemId: row.id, srcUrl: 'https://files.example/one-click.txt',
+        pageUrl: 'https://page.example/'}, {id: 3, windowId: 1});
+    });
+    await page.waitForFunction(() => basicLifecycle.read('local').lastSave?.code === 'SAVED' && basicLifecycle.badge === '2');
+    const ready = await page.evaluate(async () => {
+      const f = basicLifecycle, attemptId = f.read('local').lastSave.operationId;
+      const {value:receipt} = await f.call('history.get', {id:attemptId});
+      return {count:(await f.call('counter.get')).value.count, objectId:receipt.objectId,
+        name:receipt.filename, writes:f.counts.providerWrites, popups:f.counts.popups, tabs:f.counts.tabOpens};
+    });
+    assert.deepEqual(ready, {count:2, objectId:'fixture-onedrive-next', name:'one-click (1).txt', writes:2, popups:0, tabs:0});
+    evidence.checks.push({gate:'already-authorized-native-onedrive-completes-with-one-click', result:ready});
   } finally { await nativeContext.close(); }
   assert.deepEqual(evidence.errors ?? [], []);
 } catch (error) {

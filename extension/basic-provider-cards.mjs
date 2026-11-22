@@ -1,4 +1,4 @@
-import {WAITING, WEB_SOURCE_PERMISSIONS} from '../src/basic/lib/common.js';
+import {WAITING, WEB_SOURCE_PERMISSIONS} from '../src/basic/save-protocol.mjs';
 
 const providers = [
   ['google', 'Google Drive', 'google-drive.png'],

@@ -175,7 +175,8 @@ export async function basicLifecycleFixture({build, manifest, transient = null})
       return Response.json({id: url.pathname.endsWith('root') ? 'fixture-root' : 'fixture-account'});
     }
     if (fixture.oneDrive) {
-      const name = 'one-click.txt', objectId = 'fixture-onedrive-object';
+      const name = 'one-click.txt', objectId = fixture.oneDriveObject ?? 'fixture-onedrive-object';
+      const savedName = fixture.oneDriveName ?? name;
       const bytes = new TextEncoder().encode('Fixture OneDrive object');
       if (url.hostname === 'login.microsoftonline.com' && url.pathname.endsWith('/token')) {
         const form = new URLSearchParams(options.body);
@@ -194,14 +195,14 @@ export async function basicLifecycleFixture({build, manifest, transient = null})
         if (new Headers(options.headers).has('authorization') || String(options.body) !== String(bytes))
           throw Error('Unexpected fixture upload data');
         counts.providerWrites++;
-        return Response.json({id: objectId, name}, {status: 201});
+        return Response.json({id: objectId, name: savedName}, {status: 201});
       }
       if (url.hostname === 'graph.microsoft.com' && url.pathname.endsWith('/items/' + objectId)) {
         counts.providerReads++;
         if (counts.providerWrites !== 2) throw Error('Attempted readback without a write');
         const hash = await crypto.subtle.digest('SHA-256', bytes);
         const sha256Hash = [...new Uint8Array(hash)].map(n => n.toString(16).padStart(2, '0')).join('');
-        return Response.json({id: objectId, name, size: bytes.length, parentReference: {id: 'fixture-root'}, file: {hashes: {sha256Hash}}});
+        return Response.json({id: objectId, name: savedName, size: bytes.length, parentReference: {id: 'fixture-root'}, file: {hashes: {sha256Hash}}});
       }
     }
     if (options?.method && !['GET', 'HEAD'].includes(options.method)) counts.providerWrites++;

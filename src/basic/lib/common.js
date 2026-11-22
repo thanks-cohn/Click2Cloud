@@ -4,8 +4,7 @@ export const PROVIDERS = Object.freeze([
   { id: "onedrive", label: "OneDrive", website: "https://onedrive.live.com/" },
 ]);
 export const TERMINAL = new Set(["SAVED", "FAILED", "UNCERTAIN"]);
-export const WAITING = new Set(["AWAITING_AUTH", "AWAITING_SOURCE"]);
-export const WEB_SOURCE_PERMISSIONS = Object.freeze(["https://*/*", "http://*/*"]);
+export {WAITING} from '../save-protocol.mjs';
 export function fail(
   code,
   message,
