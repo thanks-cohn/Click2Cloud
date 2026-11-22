@@ -1,1 +1,1 @@
-export const BUILD_INFO=Object.freeze({extensionVersion:'0.3.22',revision:'source-checkout',sourceDigest:null,workerCodeDigest:null,apiVersion:'3+1.1',remoteProtocol:'click2cloud-remote-2'});
+export const BUILD_INFO=Object.freeze({extensionVersion:'0.3.24',revision:'source-checkout',sourceDigest:null,workerCodeDigest:null,apiVersion:'3+1.1',remoteProtocol:'click2cloud-remote-2'});

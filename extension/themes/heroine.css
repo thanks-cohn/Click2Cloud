@@ -19,16 +19,6 @@
  --button-ink:#fff;--error:#921b4e;
  --surface-shadow:3px 3px 0 #e4b59074;
 }
-:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro{position:relative;padding-block-end:14px}
-:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro::after{
- content:"";display:block;width:84px;height:8px;margin-block-start:14px;
- background:
-  radial-gradient(ellipse at 22% 39%,#481e32 11%,#a8583b 15% 24%,transparent 30%),
-  radial-gradient(ellipse at 69% 60%,#481e32 10%,#a8583b 13% 23%,transparent 29%),
-  #edb375;
- background-size:19px 8px,23px 8px,auto;
- border-radius:2px 0 6px 0;
-}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .card>h2{
  font-size:18px;padding-inline-start:9px;border-inline-start:4px solid var(--accent);
 }

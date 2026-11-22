@@ -1,6 +1,6 @@
 // Real unpacked Chrome with a disposable, disconnected profile.
 import assert from 'node:assert/strict';
-import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {chromium} from 'playwright-core';
@@ -22,7 +22,8 @@ try{
  const identity=await worker.evaluate(()=>({
   id:chrome.runtime.id,version:chrome.runtime.getManifest().version,name:chrome.runtime.getManifest().name
  }));
- assert.deepEqual(identity,{id,version:'0.3.23',name:'REDOWN'});
+ const {version}=JSON.parse(await readFile('extension/manifest.json','utf8'));
+ assert.deepEqual(identity,{id,version,name:'REDOWN'});
  report.browser=context.browser().version();
  const page=await context.newPage();
  page.setDefaultTimeout(8000);

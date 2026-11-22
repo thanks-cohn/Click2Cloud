@@ -151,26 +151,23 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
  border-bottom:1px solid var(--line);background:var(--panel);
 }
 .brand-lockup img{display:block}
-.app-header nav{display:flex;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px)}
+.app-header nav{display:flex;flex-wrap:nowrap;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px)}
 .app-header nav button{min-block-size:36px;padding:5px clamp(5px,1.2vw,10px);border:none}
 .app-header nav>button{flex:none;min-inline-size:34px;white-space:nowrap}
 #theme{display:grid;place-items:center;inline-size:var(--theme-size);block-size:var(--theme-size);padding:0;font-size:20px}
-:root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,.header-more-icon,.explorer-compact-label{display:none}
+:root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun{display:none}
 @media(max-width:460px){
  .app-header nav{gap:3px}
  .app-header nav>button{padding-inline:4px;font-size:clamp(11px,3.4vw,13px)}
  .app-header :is(nav>button,#header-more,#theme):focus-visible{outline-offset:-2px}
- .header-more-label{display:none}
- .header-more-icon{display:inline;font-size:18px;line-height:1}
- .explorer-label{display:none}
- .explorer-compact-label{display:inline}
 }
 @media(max-width:320px){
  .app-header{--header-gap:3px;--header-padding:5px}
  .app-header nav>button{padding-inline:2px}
 }
-.header-more{flex:none;margin-inline-start:auto}
-#header-more{min-inline-size:36px}
+.app-header nav>button[data-view=history]{margin-inline-start:auto}
+.header-more{flex:none}
+#header-more{min-inline-size:36px;font-size:18px;line-height:1}
 #header-menu{
  position:absolute;z-index:60;inset-block-start:100%;
  inset-inline-end:var(--header-padding);
@@ -188,7 +185,6 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .remotes-intro{container-type:inline-size}
 .remotes-intro .remotes-headline{font-size:clamp(14px,8.2cqi,42px);line-height:1.16;margin:0}
 .remotes-headline span{display:block;white-space:nowrap}
-@container (width < 155px){.remotes-headline span{white-space:normal}}
 .history-page .history-headline{font-size:clamp(20px,5vw,36px);line-height:1.15}
 .remotes-subtitle{font-size:clamp(15px,2.4vw,20px);margin:8px 0 0}
 .show-controls>h3{flex:0 0 100%;font-size:14px;margin:0}

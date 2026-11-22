@@ -68,3 +68,14 @@ Bing source and November 22 Dropbox ZIP were unavailable for inspection.
   no simultaneous green. The queued work is capped at three chases including the active chase.
   Startup restores the normal icon and badge color without replaying animations. Pinned toolbar,
   operating system browser themes and real MV3 suspension are unverified.
+
+## Shelf and version checkpoint
+
+- The Shelf fixture passed 192 theme, palette, color mode and width cases, including 280 CSS
+  pixels. Files, Remotes, History and More fit on one row. Each slogan sentence fits on one line.
+  Heroine loses the decorative strip and its padding. The tested theme-owned framing remains.
+- Files, Remotes, History, More, keyboard focus, provider actions and screenshot shortcut
+  feedback remain reachable. A synthetic withheld grant continued the same attempt and a
+  failed save produced a temporary notification outside the provider cards.
+- The package, manifest and source build metadata report 0.3.24. The packaged extension ID,
+  default icon, registered client, commands and single worker entry point match the baseline.

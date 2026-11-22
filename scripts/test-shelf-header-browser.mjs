@@ -33,12 +33,17 @@ page.on('pageerror', error => report.errors.push(error.message));
 page.setDefaultTimeout(8000);
 const buildManifest = JSON.parse(await readFile(join(build, 'manifest.json'), 'utf8'));
 await page.addInitScript(manifest => {
-  const listeners = new Set(), connected = new Set(), storageListeners = new Set();
+  const listeners = new Set(), connected = new Set(), storageListeners = new Set(), pending = new Map();
   const store = () => JSON.parse(localStorage.getItem('fixtureSettings') ?? '{}');
   const status = provider => ({provider, ready: connected.has(provider), connected: connected.has(provider),
     reason: connected.has(provider) ? 'READY' : 'AUTH_REQUIRED'});
   window.providerFixture = {
     operations: [],
+    grants: [],
+    attempt(value) {
+      if (value.state === 'AWAITING_SOURCE') pending.set(value.provider, value);
+      for (const listener of listeners) listener({channel: 'redown-basic-attempt', attempt: value}, {id: 'fixture'});
+    },
     resetWorker() { connected.clear(); this.operations.length = 0; },
     updateStatus(provider) { for (const listener of listeners) listener({channel: 'redown-basic-status', status: status(provider)}, {id: 'fixture'}); },
   };
@@ -52,9 +57,14 @@ await page.addInitScript(manifest => {
       onMessage: {addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn)},
       async sendMessage(message) {
         if (message.channel === 'redown-basic-v1') {
-          const {op, input: {provider}} = message;
-          window.providerFixture.operations.push({op, provider});
+          const {op, input: {provider, id}} = message;
+          window.providerFixture.operations.push({op, provider, id});
           if (op === 'history.latestOutcome') return {ok: true, value: null};
+          if (op === 'saves.pending') return {ok: true, value: pending.get(provider) ?? null};
+          if (op === 'saves.resume' && pending.get(provider)?.id === id) {
+            pending.delete(provider);
+            return {ok: true, value: {id, provider, state: 'SAVED'}};
+          }
           if (op === 'providers.goTo') return {ok: true, value: {opened: true}};
           if (op === 'auth.connect' || op === 'auth.reconnect') connected.add(provider);
           return {ok: true, value: status(provider)};
@@ -69,6 +79,7 @@ await page.addInitScript(manifest => {
       if (shortcutFixture.unavailable) throw Error('Fixture Commands API failure');
       return JSON.parse(localStorage.getItem('fixtureKeyAssignments') ?? '[]');
     }},
+    permissions: {request: async value => {providerFixture.grants.push(value);return true;}},
     tabs: {create: async options => {shortcutFixture.tabs.push(options.url);}},
     storage: {local: {
       get: async keys => { const data = store(); return Object.fromEntries([keys].flat().map(key => [key, data[key]])); },
@@ -98,11 +109,23 @@ const geometry = () => page.evaluate(() => {
       width: box.width, height: box.height, verticalCenter: box.y + box.height / 2, labels,
       font: index === 0 ? null : getComputedStyle(el).fontFamily};
   };
+  const title = document.querySelector('.remotes-headline');
+  const titleBounds = title.getBoundingClientRect();
+  const intro = title.parentElement;
+  const slogan = [...title.children].map(line => {
+    const range = document.createRange();
+    range.selectNodeContents(line);
+    const box = range.getBoundingClientRect();
+    const row = line.getBoundingClientRect();
+    return {text: line.textContent, count: range.getClientRects().length, top: row.top, bottom: row.bottom,
+      fits: box.left >= titleBounds.left - 1 && box.right <= titleBounds.right + 1};
+  });
   return {
     width: header.clientWidth, scrollWidth: header.scrollWidth, height: header.getBoundingClientRect().height,
     navWidth: nav.clientWidth, navScrollWidth: nav.scrollWidth, contentTop: document.querySelector('#shell').getBoundingClientRect().top,
     theme: document.documentElement.dataset.theme, wordmark: header.querySelector('.brand-lockup').textContent.trim(),
-    controls: ['.brand-lockup img', '[data-view=remotes]', '[data-view=explorer]', '[data-view=history]', '#header-more', '#theme']
+    slogan, strip: getComputedStyle(intro, '::after').content, introPadding: getComputedStyle(intro).paddingBlockEnd,
+    controls: ['.brand-lockup img', '[data-view=explorer]', '[data-view=remotes]', '[data-view=history]', '#header-more', '#theme']
       .map((selector, index) => pick(header.querySelector(selector), index)),
   };
 });
@@ -123,7 +146,11 @@ try {
   assert.equal(await page.title(), 'REDOWN');
   assert.equal(await page.locator('.brand-lockup img[alt=REDOWN]').count(), 1);
   assert.equal(await page.locator('.brand-lockup strong').count(), 0);
-  if (baseline) assert.equal(await readFile(join(build, 'manifest.json'), 'utf8'), await readFile(join(baseline, 'manifest.json'), 'utf8'));
+  assert.equal(buildManifest.version, '0.3.24');
+  if (baseline) {
+    const before = JSON.parse(await readFile(join(baseline, 'manifest.json'), 'utf8'));
+    for (const key of ['action', 'key', 'oauth2', 'commands', 'background']) assert.deepEqual(buildManifest[key], before[key], key);
+  }
 
   const inventory = await page.evaluate(async () => {
     const {createAestheticHost} = await import('/src/aesthetic/host.mjs');
@@ -160,6 +187,12 @@ try {
           assert.equal(data.controls[0].height, 35, tag);
           assert(data.height >= 55 && data.height <= 57 && Math.abs(data.contentTop - data.height) <= 1, tag);
           assert(data.scrollWidth <= data.width && data.navScrollWidth <= data.navWidth, tag + ' overflow');
+          const [, , remotesControl, historyControl, moreControl] = data.controls;
+          assert(historyControl.left - remotesControl.right > moreControl.left - historyControl.right, tag + ' missing flexible gap');
+          assert.deepEqual(data.slogan.map(line => line.text), ['All Your Clouds.', 'One Place.'], tag);
+          assert(data.slogan.every(line => line.count === 1 && line.fits) && data.slogan[0].bottom <= data.slogan[1].top + 1, tag + ' slogan wraps');
+          if (style === 'heroine') assert.deepEqual([data.strip, data.introPadding], ['none', '0px'], tag);
+          if (id === 'frames') assert.equal(data.introPadding, '12px', tag);
           for (const [index, control] of data.controls.entries()) {
             assert(control.left >= 0 && control.right <= width, tag + ' off-screen');
             assert(Math.abs(control.verticalCenter - data.controls[0].verticalCenter) < 1, tag + ' wrapped');
@@ -195,6 +228,28 @@ try {
   const theme = await page.locator('html').getAttribute('data-theme');
   await page.keyboard.press('Space');
   await page.waitForFunction(previous => document.documentElement.dataset.theme !== previous, theme);
+
+  for (const [view, name] of [['explorer', 'File Explorer'], ['history', 'History'], ['remotes', 'Remotes']]) {
+    const button = page.getByRole('button', {name, exact:true});
+    await button.click();
+    await page.locator(`#shell[data-view=${view}]`).waitFor();
+    assert.equal(await button.getAttribute('aria-current'), 'page');
+  }
+  assert.deepEqual(await page.locator('.app-header nav > button, #header-more').allTextContents(), ['Files', 'Remotes', 'History', '⋯']);
+
+  const oneDriveCard = page.getByRole('region', {name:'OneDrive'});
+  await page.evaluate(() => providerFixture.attempt({id:'fixture-failed', provider:'onedrive', state:'FAILED', message:'Fixture failure'}));
+  await page.getByText('Fixture failure', {exact:true}).first().waitFor();
+  assert.equal(await oneDriveCard.getByText(/Fixture failure|Save failed/i).count(), 0);
+  await page.evaluate(() => providerFixture.attempt({id:'fixture-pending', provider:'onedrive', state:'AWAITING_SOURCE'}));
+  const continueSave = oneDriveCard.getByRole('button', {name:'Allow web access and continue'});
+  await continueSave.click();
+  await continueSave.waitFor({state:'hidden'});
+  const continuation = await page.evaluate(() => ({grants:providerFixture.grants,
+    resume:providerFixture.operations.filter(op => op.op === 'saves.resume')}));
+  assert.deepEqual(continuation, {grants:[{origins:['https://*/*', 'http://*/*']}],
+    resume:[{op:'saves.resume', provider:'onedrive', id:'fixture-pending'}]});
+  report.saveFeedback = 'PASS';
 
   for (const [id, name] of [['google', 'Google Drive'], ['onedrive', 'OneDrive'], ['dropbox', 'Dropbox']]) {
     const card = page.getByRole('region', {name});

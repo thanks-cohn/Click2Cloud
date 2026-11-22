@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {createServer} from 'node:http';
-import {mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
@@ -93,7 +93,7 @@ try{
  context=await openChrome();
  let worker=await readyWorker(),page=await normalPage();
  report.version=await worker.evaluate(()=>chrome.runtime.getManifest().version);
- assert.equal(report.version,'0.3.23');
+ assert.equal(report.version,JSON.parse(await readFile('extension/manifest.json','utf8')).version);
  report.rows=await worker.evaluate(()=>click2cloud.registrar.inspect().desired.rows.map(({id,label,role,actionId})=>({id,label,role,actionId})));
  for(const name of ['page','image','link'])await nativeMenu(page,'first-install',name,{click:name==='page'});
  const outcome=await waitFor(()=>worker.evaluate(async()=>(await chrome.storage.local.get('lastSave')).lastSave),'actual native click outcome');
