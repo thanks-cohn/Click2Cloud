@@ -2,12 +2,18 @@
 
 **User report:** Alt+Q screenshots worked perfectly before updating to REDOWN 0.3.24. After the update, Alt+Q reports: **"Chrome did not grant permission to capture this tab."** Investigate and fix this P0 regression **before** attempting the separately scoped URL-independent desktop/application screenshot feature. The owner also requires missing URL fields in History to display **N/A**, not a fabricated value or a broken expandable field.
 
-**Required deliverable version: `0.3.25`.** Treat `0.3.24` as the regression baseline and `0.3.25` as the target new release. Update package manifest, lockfile, extension manifest, generated build metadata, and any applicable displayed version identifiers consistently according to repository conventions. Verify the packaged output reports `0.3.25`, retains the established extension ID, and preserves existing user data. Do not claim `0.3.25` has been released or installed merely because the source version is changed.
+**REQUIRED THREE-VERSION DISTINCTION — DO NOT CONFUSE THESE ROLES:**
+
+- **0.3.23 = LAST WORKING BEHAVIORAL BASELINE**, at commit `5e1cb5f`. This is the version the owner reports had working Chrome shortcuts and screenshots; investigate its behavior and reproduce it as the acceptance reference.
+- **0.3.24 = REGRESSED COMPARISON VERSION**, at commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. It introduced or exposed the broken Google Chrome shortcut behavior. Diff **0.3.23 → 0.3.24** and find out WHY it broke. Do **not** treat 0.3.24 as the working baseline or overwrite the user's observed 0.3.23 baseline with it.
+- **0.3.25 = NEW ISOLATED REPAIR VERSION / REQUIRED DELIVERABLE.** Restore 0.3.23's working Chrome shortcut and screenshot behavior while preserving unrelated functioning 0.3.24 enhancements. Give the fixed build the distinct version `0.3.25` to isolate and identify the repair. Do not simply roll back or rename 0.3.24.
+
+**Required deliverable version: `0.3.25`.** Update package manifest, lockfile, extension manifest, generated build metadata, and any applicable displayed version identifiers consistently according to repository conventions. Verify the packaged output reports `0.3.25`, retains the established extension ID, and preserves existing user data. Do not claim `0.3.25` has been released or installed merely because the source version is changed.
 
 ## Authorized scope and preservation
 - Sole writable repository: `thanks-cohn/Click2Cloud`
 - Sole writable existing branch: `codex/redown-basic-api-integration-0323-alpha-base-2026-11-21`
-- Starting REDOWN 0.3.24 reference: `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`; compare to last working 0.3.23 (`5e1cb5f`) and earlier known-good screenshot history if needed.
+- **Working behavioral baseline:** REDOWN **0.3.23** at `5e1cb5f`. **Broken/regression comparison:** **0.3.24** at `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. **Repair target:** **0.3.25** on the sole authorized writable branch. Compare precisely 0.3.23 → 0.3.24 before changing the current code. Preserve unrelated 0.3.24 improvements.
 - Preserve all 0.3.24 features: broad browser-approved source permissions, cloud saving, current Basic API, verification, existing History/data, universal toolbar counter, success chase animation, Shelf layouts/themes, single worker, and Cloudflare R2. No unrelated rewrite, storage reset, extension ID/key switch, new branch, production deployment, or secret leakage.
 
 ## Phase A — P0: Investigate and restore previously working Alt+Q
