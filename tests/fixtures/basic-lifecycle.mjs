@@ -1,6 +1,6 @@
 // Serialized into a Chromium page. Chrome APIs and provider HTTP are fixtures;
 // the packaged MV3 modules, card DOM, and IndexedDB implementation are real.
-export async function basicLifecycleFixture({build, manifest}) {
+export async function basicLifecycleFixture({build, manifest, transient = null}) {
   const id = 'ajppphdiamdobknpamcheohmdbdbeoal';
   const base = location.origin + build;
   const read = name => JSON.parse(localStorage.getItem('fixture:' + name) ?? '{}');
@@ -56,7 +56,7 @@ export async function basicLifecycleFixture({build, manifest}) {
     });
   }
   const fixture = window.basicLifecycle = {
-    send, emit, read, write, counts, transient: null, rejectGoogle: false, withholdSource: false,
+    send, emit, read, write, counts, transient, rejectGoogle: false, withholdSource: false, toolbar: [],
     call: (op, input = {}) => send({channel: 'redown-basic-v1', api: 1, op, input}),
     snapshot: () => ({
       ...counts, listeners: Object.fromEntries([...events].map(([k, v]) => [k, v.size])),
@@ -64,6 +64,8 @@ export async function basicLifecycleFixture({build, manifest}) {
       configuredMenuItems: Object.keys(read('menus')).length,
     }),
   };
+  const recordToolbar = () => fixture.toolbar.push({at:performance.now(), state:
+    fixture.iconGreen ? (fixture.badgeGreen ? 'both' : 'icon') : fixture.badgeGreen ? 'badge' : 'idle'});
   Object.defineProperty(globalThis, 'chrome', {configurable: true, value: {
     runtime, storage: {local: storage('local'), session: storage('session'), onChanged: event('storage')},
     commands: {onCommand: event('command')},
@@ -75,7 +77,8 @@ export async function basicLifecycleFixture({build, manifest}) {
       removeAll(cb) { counts.removedAll = (counts.removedAll ?? 0) + 1; write('menus', {}); cb(); },
     },
     action: {onClicked: event('action'), setBadgeText: async ({text}) => { fixture.badge = text; },
-      setBadgeBackgroundColor: async () => {}, setIcon: async () => {}},
+      setBadgeBackgroundColor: async ({color}) => { fixture.badgeGreen = color === '#087a35'; recordToolbar(); },
+      setIcon: async ({path}) => { fixture.iconGreen = path[16].includes('-success-'); recordToolbar(); }},
     alarms: {onAlarm: event('alarm'), create: async name => { alarms.add(name); }},
     windows: {getCurrent: async () => ({id: 1}), onRemoved: event('window.removed')},
     sidePanel: {setOptions: async () => {}, onOpened: event('panel.opened'), onClosed: event('panel.closed')},

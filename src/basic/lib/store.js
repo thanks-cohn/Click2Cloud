@@ -10,6 +10,28 @@ const req = (r) =>
     r.onsuccess = () => resolve(r.result);
     r.onerror = () => reject(r.error);
   });
+const badgeAuditKey = ["badge-audit", 1];
+const badgeMinute = "badge-minute";
+const auditPageSize = 64;
+const minuteOf = at => Math.floor(at / 60_000);
+function legacyVerifiedAt(attempt, receipt) {
+  if (attempt?.state !== "SAVED" || attempt.confirmed !== true ||
+      attempt.provider !== receipt?.provider || attempt.objectId !== receipt?.objectId) return undefined;
+  const at = Date.parse(attempt.updatedAt);
+  return Number.isFinite(at) ? at : undefined;
+}
+async function addBadgeCount(meta, at) {
+  const key = [badgeMinute, minuteOf(at)];
+  await req(meta.put(((await req(meta.get(key))) ?? 0) + 1, key));
+}
+// Retain available proof dates even if History is cleared before the audit reaches them.
+async function retainLegacyDate(ledger, attempt) {
+  if (attempt?.state !== "SAVED" || attempt.badgeVerifiedAt !== undefined) return;
+  const receipt = await req(ledger.get(attempt.id));
+  if (!receipt || receipt.badgeIndexed || receipt.verifiedAt !== undefined) return;
+  const verifiedAt = legacyVerifiedAt(attempt, receipt);
+  if (verifiedAt !== undefined) await req(ledger.put({...receipt, verifiedAt}));
+}
 const done = (tx) =>
   new Promise((resolve, reject) => {
     tx.oncomplete = resolve;
@@ -95,6 +117,35 @@ export async function openStore(
     ...DEFAULTS,
     ...(await read("meta", "settings")),
   });
+  let auditComplete = false;
+  async function auditBadge() {
+    if (auditComplete) return true;
+    if ((await read("meta", badgeAuditKey))?.complete) return auditComplete = true;
+    const complete = await run(["meta", "ledger", "attempts"], "readwrite", async tx => {
+      const meta = tx.objectStore("meta"), ledger = tx.objectStore("ledger");
+      const progress = (await req(meta.get(badgeAuditKey))) ?? {after:null, undated:0};
+      if (progress.complete) return true;
+      const range = progress.after === null ? null : IDBKeyRange.lowerBound(progress.after, true);
+      const receipts = await req(ledger.getAll(range, auditPageSize + 1));
+      for (const receipt of receipts.slice(0, auditPageSize)) {
+        progress.after = receipt.id;
+        if (receipt.badgeIndexed) continue;
+        const at = receipt.verifiedAt ?? legacyVerifiedAt(
+          await req(tx.objectStore("attempts").get(receipt.id)), receipt);
+        if (!Number.isFinite(at)) {
+          progress.undated++;
+          continue;
+        }
+        await addBadgeCount(meta, at);
+        await req(ledger.put({...receipt, verifiedAt:at, badgeIndexed:true}));
+      }
+      progress.complete = receipts.length <= auditPageSize;
+      await req(meta.put(progress, badgeAuditKey));
+      return progress.complete;
+    });
+    auditComplete = complete;
+    return complete;
+  }
   async function prune(tx, cap) {
     if (cap === null) return;
     const store = tx.objectStore("events");
@@ -231,12 +282,12 @@ export async function openStore(
         await req(s.put(next));
         return next;
       }),
-    finish: (id, patch) =>
-      run(["attempts", "ledger", "meta"], "readwrite", async (tx) => {
+    finish: async (id, patch, onVerified) => {
+      const {attempt, firstVerified} = await run(["attempts", "ledger", "meta"], "readwrite", async (tx) => {
         const s = tx.objectStore("attempts"),
           a = await req(s.get(id));
         if (!a) throw fail("ATTEMPT_NOT_FOUND", "Save attempt not found.");
-        if (TERMINAL.has(a.state)) return a;
+        if (TERMINAL.has(a.state)) return {attempt:a};
         if (!TERMINAL.has(patch.state))
           throw fail("INVALID_TRANSITION", "A terminal outcome is required.");
         if (
@@ -253,24 +304,35 @@ export async function openStore(
           id,
           updatedAt: new Date().toISOString(),
         };
+        let firstVerified = false;
         if (next.state === "SAVED") {
           const ledger = tx.objectStore("ledger"),
             meta = tx.objectStore("meta");
           if (!(await req(ledger.get(id)))) {
+            next.badgeVerifiedAt = Date.parse(next.updatedAt);
             await req(
               ledger.add({
                 id,
                 provider: a.provider,
                 objectId: patch.objectId,
+                verifiedAt: next.badgeVerifiedAt,
+                badgeIndexed: true,
               }),
             );
             const count = (await req(meta.get("count"))) || 0;
             await req(meta.put(count + 1, "count"));
+            await addBadgeCount(meta, next.badgeVerifiedAt);
+            firstVerified = true;
           }
         }
         await req(s.put(next));
-        return next;
-      }),
+        return {attempt:next, firstVerified};
+      });
+      if (firstVerified && onVerified) {
+        try { void Promise.resolve(onVerified(attempt)).catch(() => {}); } catch {}
+      }
+      return attempt;
+    },
     noteDiagnosticsWarning: (id) =>
       run(["attempts"], "readwrite", async (tx) => {
         const s = tx.objectStore("attempts"),
@@ -284,6 +346,13 @@ export async function openStore(
           );
       }),
     counter: async () => ({ count: (await read("meta", "count")) || 0 }),
+    async verifiedCount({start, end}) {
+      const complete = await auditBadge();
+      const range = IDBKeyRange.bound([badgeMinute, Math.ceil(start / 60_000)],
+        [badgeMinute, Math.ceil(end / 60_000)], false, true);
+      const totals = await run(["meta"], "readonly", tx => req(tx.objectStore("meta").getAll(range)));
+      return {count:totals.reduce((sum, value) => sum + value, 0), complete};
+    },
     historyList: async (input) =>
       list("attempts", {
         pageSize: (await settings()).pageSize,
@@ -291,29 +360,35 @@ export async function openStore(
         index: "createdAt",
       }),
     historyDelete: (id) =>
-      run(["attempts"], "readwrite", async (tx) => {
+      run(["attempts", "ledger"], "readwrite", async (tx) => {
         const s = tx.objectStore("attempts");
         const a = await req(s.get(id));
         if (a && !TERMINAL.has(a.state))
           throw fail("ATTEMPT_ACTIVE", "Wait until the save finishes.");
+        await retainLegacyDate(tx.objectStore("ledger"), a);
         await req(s.delete(id));
         return { deleted: !!a };
       }),
     historyClear: () =>
-      run(["attempts"], "readwrite", async (tx) => {
+      run(["attempts", "ledger"], "readwrite", async (tx) => {
         const s = tx.objectStore("attempts");
         let deleted = 0;
         await new Promise((resolve, reject) => {
           const r = s.openCursor();
           r.onerror = () => reject(r.error);
-          r.onsuccess = () => {
+          r.onsuccess = async () => {
             const c = r.result;
             if (!c) return resolve();
-            if (TERMINAL.has(c.value.state)) {
-              c.delete();
-              deleted++;
+            try {
+              if (TERMINAL.has(c.value.state)) {
+                await retainLegacyDate(tx.objectStore("ledger"), c.value);
+                c.delete();
+                deleted++;
+              }
+              c.continue();
+            } catch (error) {
+              reject(error);
             }
-            c.continue();
           };
         });
         return { deleted };

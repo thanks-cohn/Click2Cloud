@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {setImmediate as tick} from 'node:timers/promises';
 import {countVerifiedSaves,createDailyBadge} from '../src/chrome/daily-badge.mjs';
+import {createCurrentStore} from '../src/persistence/current-store.mjs';
+import 'fake-indexeddb/auto';
 
 const now=Date.parse('2026-11-02T05:59:59Z'), timezone='America/Chicago';
 const verified=(operationId,at=now)=>({
@@ -32,25 +34,35 @@ test('badge counts a screenshot once per capture with a matching independent out
 });
 
 function badgeFixture(){
- let nowTime=now,alarmListener,alarm,scanCount=0,error;
- const stored=new Map(),colors=[],texts=[],waits=[];
+ let nowTime=now,alarmListener,alarm,scanCount=0,basicReads=0,error,iconError;
+ let iconGreen=false,badgeGreen=false;
+ const stored=new Map(),states=[],texts=[],waits=[];
+ const basic={count:0,complete:true};
+ function readLights(){
+  assert(!(iconGreen&&badgeGreen),'the background and badge must never be green together');
+  states.push(iconGreen?'icon':badgeGreen?'badge':'idle');
+ }
  const chrome={
-  action:{setBadgeText:async({text})=>texts.push(text),setBadgeBackgroundColor:async({color})=>colors.push(color)},
+  action:{setBadgeText:async({text})=>texts.push(text),
+   setIcon:async({path})=>{if(iconError&&path[16].includes('success'))throw iconError;iconGreen=path[16].includes('success');readLights();},
+   setBadgeBackgroundColor:async({color})=>{badgeGreen=color==='#087a35';readLights();}},
   alarms:{onAlarm:{addListener:fn=>{alarmListener=fn;}},create:async(name,value)=>{alarm={name,...value};}}
  };
  const make=()=>createDailyBadge({chrome,clock:()=>nowTime,readPreferences:async()=>{
   if(error)throw error;
   return {timezone};
  },countHistory:async match=>{scanCount++;await tick();for(const row of stored.values())match(row);},
+ countBasic:async()=>{basicReads++;if(basic.error)throw basic.error;return {...basic};},
  wait:(duration,signal)=>new Promise(resolve=>{
   waits.push({duration,resolve});
   signal.addEventListener('abort',resolve,{once:true});
  })});
- return {make,colors,texts,waits,scans:()=>scanCount,store:row=>stored.set(row.operationId,row),fail:()=>{error=Error('unavailable');},
+ return {make,states,texts,waits,basic,basicReads:()=>basicReads,scans:()=>scanCount,store:row=>stored.set(row.operationId,row),
+  fail:()=>{error=Error('unavailable');},failIcon:()=>{iconError=Error('unavailable');},
   restore:()=>{error=undefined;},rollover:()=>{nowTime=alarm.when;alarmListener(alarm);}};
 }
 
-test('Concurrent receipts coalesce the two pulses and count without rescanning each write',async()=>{
+test('Concurrent receipts coalesce overflow but count without rescanning each write',async()=>{
  const f=badgeFixture(),badge=f.make();
  await badge.refresh();
  const feed=row=>{f.store(row);return badge.recordVerified(row);};
@@ -58,21 +70,22 @@ test('Concurrent receipts coalesce the two pulses and count without rescanning e
  await tick();
  assert.equal(f.texts.at(-1),'100');
  assert.equal(f.scans(),1);
- assert.deepEqual(f.waits.map(w=>w.duration),[100]);
+ assert.deepEqual(f.waits.map(w=>w.duration),[140]);
  const partial=screenshot('capture','partial',[one]);
  await feed(partial);
  await feed({...partial,screenshot:{...partial.screenshot,outputs:[one,two]}});
  assert.equal(f.texts.at(-1),'101');
- for(let i=0;i<3;i++){f.waits[i].resolve();await tick();}
- assert.deepEqual(f.waits.map(w=>w.duration),[100,85,100]);
- assert.deepEqual(f.colors.slice(-4),['#087a35','#253b70','#087a35','#253b70']);
+ for(let i=0;i<f.waits.length;i++){f.waits[i].resolve();await tick();assert(i<21);}
+ const durations=[140,24,140,24,140,24,140];
+ assert.deepEqual(f.waits.map(w=>w.duration),[...durations,...durations,...durations]);
+ for(let i=0;i<3;i++) assert.deepEqual(f.states.slice(2+i*8,10+i*8),['icon','idle','badge','idle','icon','idle','badge','idle']);
  assert.equal(f.scans(),1);
 
  const workerWake=f.make();
  await workerWake.refresh();
  assert.equal(f.texts.at(-1),'101');
- assert.equal(f.colors.at(-1),'#253b70');
- assert.equal(f.waits.length,3);
+ assert.equal(f.states.at(-1),'idle');
+ assert.equal(f.waits.length,21);
  f.rollover();
  await workerWake.refresh();
  assert.equal(f.texts.at(-1),'0');
@@ -86,15 +99,74 @@ test('badge failures abort a live flash and restore normal before a retry',async
  f.store(row);
  await badge.recordVerified(row);
  await tick();
- assert.equal(f.colors.at(-1),'#087a35');
+ assert.equal(f.states.at(-1),'icon');
  f.fail();
  await badge.refresh();
  await tick();
  assert.equal(f.texts.at(-1),'!');
- assert.equal(f.colors.at(-1),'#253b70');
- assert.deepEqual(f.waits.map(w=>w.duration),[100]);
+ assert.equal(f.states.at(-1),'idle');
+ assert.deepEqual(f.waits.map(w=>w.duration),[140]);
  f.restore();
  await badge.refresh();
  assert.equal(f.texts.at(-1),'1');
- assert.equal(f.colors.at(-1),'#253b70');
+ assert.equal(f.states.at(-1),'idle');
+});
+
+test('Basic receipt projection joins legacy host receipts and reads again only on a new commit',async()=>{
+ const f=badgeFixture(),badge=f.make();
+ f.basic.count=2;f.store(verified('r2-before-upgrade'));
+ await badge.refresh();await badge.refresh();
+ assert.equal(f.texts.at(-1),'3');
+ assert.equal(f.basicReads(),1);
+ assert.equal(f.waits.length,0);
+ f.basic.count++;
+ await badge.recordBasicVerified(now);
+ assert.equal(f.texts.at(-1),'4');
+ assert.equal(f.basicReads(),2);
+ assert.equal(f.states.at(-1),'icon');
+ const newWorker=f.make();
+ await newWorker.refresh();
+ assert.equal(f.texts.at(-1),'4');
+ assert.equal(f.states.at(-1),'idle');
+ assert.equal(f.waits.length,1);
+});
+
+test('Incomplete Basic migration shows a verified lower bound and icon API failures restore idle',async()=>{
+ const f=badgeFixture(),badge=f.make();
+ f.basic.count=2;f.basic.complete=false;f.store(verified('r2-before-upgrade'));
+ await badge.refresh();
+ assert.equal(f.texts.at(-1),'3+');
+ assert.equal(f.waits.length,0);
+ f.basic.complete=true;f.basic.count=6;
+ await badge.refresh();
+ assert.equal(f.texts.at(-1),'7');
+ f.basic.error=Error('unavailable');f.failIcon();
+ await badge.recordBasicVerified(now);
+ await tick();
+ assert.equal(f.texts.at(-1),'7+');
+ assert.equal(f.states.at(-1),'idle');
+ assert.equal(f.waits.length,0);
+});
+
+test('A replay of a legacy host receipt preserves its verified day and never signals success again',async()=>{
+ const dbName=crypto.randomUUID();
+ const current=createCurrentStore({dbName,clock:()=>now+1000});
+ await current.readRemoteResults();
+ const db=await new Promise((resolve,reject)=>{
+  const open=indexedDB.open(dbName);open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error);
+ });
+ try{
+  const receipt=verified('legacy-r2');
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction('state','readwrite');
+   tx.objectStore('state').put({id:'remoteResults',value:[receipt]});
+   tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error);
+  });
+  assert.equal((await current.recordRemoteResult({...receipt,state:'pending'})).state,'verified');
+  let flashes=0;
+  const stored=await current.recordRemoteResult(receipt,{onVerified:()=>flashes++});
+  assert.equal(flashes,0);
+  assert.equal(stored.badgeVerifiedAt,now);
+  assert.equal(await current.countRemoteResults(row=>row.badgeVerifiedAt===now),1);
+ }finally{db.close();await current.close();}
 });

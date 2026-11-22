@@ -198,10 +198,7 @@ export function createCoordinator({
           : {}),
         message: "Provider confirmed the saved file.",
         nextAction: "View the file on the provider website.",
-      });
-      if (a.state === "SAVED") {
-        try { void Promise.resolve(onVerified(a)).catch(() => {}); } catch {}
-      }
+      }, onVerified);
       await event(a, "SAVED", "Success", {
         bytes: a.bytes,
         durationMs,

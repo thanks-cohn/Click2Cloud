@@ -26,10 +26,12 @@ const manifest=JSON.parse(await readFile(new URL('manifest.json',output),'utf8')
 for(const size of [16,32,48,128]){
  const path=manifest.icons?.[size];
  if(!path||manifest.action?.default_icon?.[size]!==path)throw Error('REDOWN_ICON_REFERENCE_INVALID');
- const png=await readFile(new URL(path,output));
- if(png.length<24||png.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
-    png.toString('ascii',12,16)!=='IHDR'||png.readUInt32BE(16)!==size||png.readUInt32BE(20)!==size)
-  throw Error('REDOWN_ICON_DIMENSIONS_INVALID: '+path);
+ for(const asset of [path,`extension/icons/redown-success-${size}.png`]){
+  const png=await readFile(new URL(asset,output));
+  if(png.length<24||png.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+     png.toString('ascii',12,16)!=='IHDR'||png.readUInt32BE(16)!==size||png.readUInt32BE(20)!==size)
+   throw Error('REDOWN_ICON_DIMENSIONS_INVALID: '+asset);
+ }
 }
 const id=createHash('sha256').update(Buffer.from(manifest.key,'base64')).digest('hex').slice(0,32).replace(/[0-9a-f]/g,x=>String.fromCharCode(97+parseInt(x,16)));
 if(id!=='ajppphdiamdobknpamcheohmdbdbeoal')throw Error('OAUTH_EXTENSION_ID_MISMATCH');

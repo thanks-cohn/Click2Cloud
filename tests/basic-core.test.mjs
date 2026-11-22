@@ -487,3 +487,59 @@ for(const encoding of ['utf16le','utf16be'])test(`source rejects disguised HTML 
 test('browser AbortError numeric code maps to actionable source timeout',async()=>{
  await assert.rejects(acquireSource(input,{timeoutMs:1,fetch:async(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(new DOMException('aborted','AbortError')),{once:true}))}),{code:'SOURCE_TIMEOUT'});
 });
+
+test('Basic verified accounting resumes a bounded old-ledger audit and retains dates through History deletion', async () => {
+  const name = crypto.randomUUID();
+  let store = await openStore(indexedDB, name);
+  const start = Date.parse(new Date().toISOString().slice(0, 10));
+  const end = start + 86400000;
+  const date = new Date(start + 3600000).toISOString();
+  const db = await new Promise((resolve, reject) => {
+    const opening = indexedDB.open(name);
+    opening.onsuccess = () => resolve(opening.result);
+    opening.onerror = () => reject(opening.error);
+  });
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(['attempts', 'ledger', 'meta'], 'readwrite');
+      const receipts = tx.objectStore('ledger'), history = tx.objectStore('attempts');
+      for (let i = 0; i < 130; i++) {
+        const id = 'old-' + String(i).padStart(3, '0');
+        const receipt = {id, provider:'google', objectId:'object-' + id};
+        receipts.add(receipt);
+        if (i === 129) continue; // Already erased in an older version. The date cannot be recovered.
+        const updatedAt = i === 0 ? new Date(start - 1000).toISOString() : date;
+        history.add({...receipt, updatedAt, createdAt:updatedAt, state:'SAVED', confirmed:true});
+      }
+      tx.objectStore('meta').put(130, 'count');
+      tx.oncomplete = resolve;
+      tx.onabort = () => reject(tx.error);
+    });
+    await store.historyDelete('old-100');
+    assert.deepEqual(await store.verifiedCount({start, end}), {count:63, complete:false});
+    store.close();
+    store = await openStore(indexedDB, name);
+    const providers = ['google', 'onedrive', 'dropbox'];
+    const callbacks = [];
+    const notify = row => callbacks.push(row.provider);
+    for (const provider of providers) await store.begin({id:provider, provider, createdAt:date, state:'CONFIRMING'});
+    const success = provider => store.finish(provider, {state:'SAVED', confirmed:true, objectId:'new-'+provider}, notify);
+    await Promise.all([...providers.map(success), success('dropbox')]);
+    const failed = ['FAILED', 'UNCERTAIN'];
+    for (const state of failed) {
+      await store.begin({id:state, provider:'dropbox', createdAt:date, state:'CONFIRMING'});
+      await store.finish(state, {state, confirmed:false}, notify);
+    }
+    await store.historyClear();
+    assert.equal((await store.verifiedCount({start, end})).complete, false);
+    assert.deepEqual(await store.verifiedCount({start, end}), {count:131, complete:true});
+    assert.deepEqual(await store.verifiedCount({start:start-86400000, end:start}), {count:1, complete:true});
+    assert.deepEqual(await store.counter(), {count:133});
+    assert.deepEqual(callbacks.sort(), providers.sort());
+    assert.equal((await store.historyList({})).total, 0);
+    await assert.rejects(store.begin({id:'dropbox', provider:'dropbox', state:'RECEIVED'}), {code:'ALREADY_COMPLETED'});
+  } finally {
+    db.close();
+    store.close();
+  }
+});

@@ -300,7 +300,10 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     recordRemoteResult:async (value,{onVerified}={})=>{
       const {row,firstVerified}=await transact('readwrite',async s=>{
         if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');
-        const previous=(await request(s.state.get('remote-result:'+value.operationId)))?.value;
+        const stored=(await request(s.state.get('remote-result:'+value.operationId)))?.value;
+        const legacy=async()=>((await request(s.state.get('remoteResults')))?.value??[])
+          .find(receipt=>receipt.operationId===value.operationId);
+        const previous=stored??(await legacy());
         if(value.state==='pending'&&previous&&previous.state!=='pending')return {row:previous};
         const updatedAt=clock();
         const row={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',
@@ -310,8 +313,11 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
           timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,
           attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,
           ...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??updatedAt,updatedAt};
-        const priorTime=verifiedSaveTime(previous);
-        const firstVerified=priorTime===undefined&&hasVerifiedSave(row);
+        let priorTime=verifiedSaveTime(previous);
+        const verified=hasVerifiedSave(row);
+        // Old CURRENT builds stored these receipts in a single History entry.
+        if(priorTime===undefined&&stored&&verified)priorTime=verifiedSaveTime(await legacy());
+        const firstVerified=priorTime===undefined&&verified;
         if(firstVerified||priorTime!==undefined)row.badgeVerifiedAt=priorTime??updatedAt;
         s.state.put({id:'remote-result:'+value.operationId,value:row});
         return {row,firstVerified};

@@ -44,7 +44,6 @@ import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-ide
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
 let storageReady;
 function trustedStorage(){if(!storageReady){const attempt=Promise.resolve().then(()=>Promise.all(['local','session'].map(k=>chrome.storage[k].setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}))));storageReady=attempt;attempt.catch(()=>{if(storageReady===attempt)storageReady=null;});}return storageReady;}
-const basic=createBasicHost({chrome,trustedStorage});
 const workerEpoch=crypto.getRandomValues(new Uint32Array(1))[0]||1;
 const breadcrumbs=createBreadcrumbs({epoch:workerEpoch,build:BUILD_INFO.revision,read:async()=>(await chrome.storage.local.get('criticalBreadcrumbs')).criticalBreadcrumbs,write:value=>chrome.storage.local.set({criticalBreadcrumbs:value})});
 const lifecycle=(code,outcome='failed')=>breadcrumbs.enqueue({stage:'lifecycle',code,outcome});
@@ -53,7 +52,9 @@ for(const event of ['error','unhandledrejection'])globalThis.addEventListener?.(
 const diagnostics=createDiagnostics({epoch:workerEpoch,build:BUILD_INFO.revision,onCritical:breadcrumbs.enqueue}),current=createCurrentStore({sink:diagnostics,readEstablishment:async()=>{await trustedStorage();const p=await chrome.storage.local.get(['nativeRegistration','currentProvenance']);return {established:!!p.currentProvenance||!!p.nativeRegistration,uncertain:!!p.currentProvenance&&(p.currentProvenance.version!==1||p.currentProvenance.established!==true),nativeGeneration:p.nativeRegistration?.desired?.generation??0,native:{present:!!p.nativeRegistration,desiredGeneration:p.nativeRegistration?.desired?.generation??null,appliedGeneration:p.nativeRegistration?.appliedGeneration??null,state:['applying','acknowledged','applied','failed','partial'].includes(p.nativeRegistration?.state)?p.nativeRegistration.state:'unknown',rowCount:p.nativeRegistration?.desired?.rows?.length??0,roles:Object.fromEntries(['save','branch','provider-action','separator','navigation'].map(role=>[role,(p.nativeRegistration?.desired?.rows??[]).filter(r=>r.role===role).length]))}};},retainEstablishment:async proof=>{await chrome.storage.local.set({currentProvenance:proof});}});
 let connectionObservation=null,attentionPreference=null;
 const dailyBadge=createDailyBadge({chrome,
- countHistory:current.countRemoteResults,readPreferences:()=>current.readHistoryPreferences()});
+ countHistory:current.countRemoteResults,countBasic:range=>basic.verifiedCount(range),
+ readPreferences:()=>current.readHistoryPreferences()});
+const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt)});
 const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
  void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
 }});

@@ -89,5 +89,11 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
       return {state: 'failed', code};
     }
   }
-  return {request: api.message, click};
+  async function verifiedCount(range) {
+    if (!ready && !opening && typeof indexedDB.databases === 'function' &&
+        !(await indexedDB.databases()).some(db => db.name === 'redown-remote-basic-v1'))
+      return {count:0, complete:true};
+    return (await durable()).store.verifiedCount(range);
+  }
+  return {request: api.message, click, verifiedCount};
 }

@@ -52,3 +52,19 @@ Bing source and November 22 Dropbox ZIP were unavailable for inspection.
   fields are distinguishable in local evidence. Installed registration, account access and the
   owner's Dropbox object locations remain unverified. The Cloudflare grant and API paths were
   exercised for isolation in the fixture. Real token refresh and R2 access remain unverified.
+
+## Global badge checkpoint
+
+- Basic verification updates the original ledger, lifetime total, History and today's badge
+  projection atomically in the existing version-1 database. The badge also counts existing
+  Cloudflare/host receipts and local downloads. Replays cannot move a receipt to a new day or
+  signal another success. History deletion retains any available legacy proof date. Older deleted
+  receipts without a date keep their lifetime credit. They cannot be assigned to a specific day.
+- The legacy audit is resumable in batches of 64 ledger entries. A badge ending in `+` during
+  reconciliation shows a verified lower bound. The established `1k+` cap still applies. Missing
+  or blocked Basic storage leaves Cloudflare and authenticated provider status independent.
+- The toolbar uses static icon assets and four 140 ms pulses with three 24 ms handoffs. Packaged
+  fixture recording showed two alternating icon and badge pulses with a normal final state and
+  no simultaneous green. The queued work is capped at three chases including the active chase.
+  Startup restores the normal icon and badge color without replaying animations. Pinned toolbar,
+  operating system browser themes and real MV3 suspension are unverified.

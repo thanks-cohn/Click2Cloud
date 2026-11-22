@@ -5,6 +5,9 @@ const localTotalsKey = 'verifiedLocalDownloadTotals';
 const rolloverAlarm = 'click2cloud-daily-badge';
 const normal = '#253b70', green = '#087a35';
 const displayLimit = 1000;
+const pulseMs = 140, handoffMs = 24, queueLimit = 3;
+const iconPaths = suffix => Object.fromEntries([16, 32, 48, 128].map(size => [size, `extension/icons/redown${suffix}-${size}.png`]));
+const idleIcon = iconPaths(''), successIcon = iconPaths('-success');
 
 function midnightEdge(now, timezone, forward) {
   const today = dayKey(now, timezone), horizon = 27 * 3600000;
@@ -39,11 +42,17 @@ function waitForPulse(ms,signal) {
   });
 }
 
-export function createDailyBadge({chrome, readHistory, countHistory, readPreferences, clock = Date.now, wait = waitForPulse}) {
+export function createDailyBadge({chrome, readHistory, countHistory, countBasic, readPreferences, clock = Date.now, wait = waitForPulse}) {
   let tail = Promise.resolve();
-  let refreshing, requested = false, day, flash, flashTime;
+  let refreshing, requested = false, day, flash, idleReady = false, basicRevision = 0;
+  const successes = [];
   const readLocal = async () => (await chrome.storage?.local?.get(localTotalsKey))?.[localTotalsKey] ?? {};
   const color = value => Promise.resolve().then(() => chrome.action.setBadgeBackgroundColor({color:value}));
+  const icon = path => Promise.resolve().then(() => chrome.action.setIcon?.({path}));
+  async function restore() {
+    const results = await Promise.allSettled([icon(idleIcon), color(normal)]);
+    return results.every(result => result.status === 'fulfilled');
+  }
   function refresh() {
     requested = true;
     if (refreshing) return refreshing;
@@ -58,9 +67,11 @@ export function createDailyBadge({chrome, readHistory, countHistory, readPrefere
     return refreshing;
   }
   function remember(row, projection) {
-    // Badge text saturates at 1k+, so the in-memory deduplication set can also stop there.
-    if(projection?.ids.size<displayLimit&&row.operationId&&inDay(verifiedSaveTime(row),projection))
-      projection.ids.add(row.operationId);
+    if (!projection || !row.operationId || !inDay(verifiedSaveTime(row), projection)) return true;
+    if (projection.ids.has(row.operationId)) return false;
+    // The durable host receipts retain the exact count. Bound the worker's cache.
+    if (projection.ids.size < displayLimit) projection.ids.add(row.operationId);
+    return true;
   }
   async function countToday(now,timezone) {
     if(day?.timezone===timezone&&inDay(now,day))return day;
@@ -70,31 +81,57 @@ export function createDailyBadge({chrome, readHistory, countHistory, readPrefere
     if(countHistory)await countHistory(row=>{remember(row,projection);return false;});
     return projection;
   }
+  function queueSuccess(at) {
+    if (successes.length + Number(!!flash) < queueLimit) successes.push(at);
+  }
   function recordVerified(row) {
     const at=verifiedSaveTime(row);
     if(!row.operationId||!Number.isFinite(at))return;
-    remember(row,day);
-    if(!flash)flashTime=at;
+    if (remember(row,day)) queueSuccess(at);
     return refresh();
+  }
+  function recordBasicVerified(at) {
+    if (!Number.isFinite(at)) return;
+    basicRevision++;
+    queueSuccess(at);
+    return refresh();
+  }
+  async function basicTotal(projection) {
+    if (!countBasic) return {count:0, complete:true};
+    const revision = basicRevision;
+    if (projection.basicRevision === revision) return projection.basic;
+    const result = await countBasic({start:projection.start, end:projection.end});
+    if (result.complete) {
+      projection.basic = result;
+      projection.basicRevision = revision;
+    }
+    return result;
   }
   async function playFlash(controller) {
     const {signal}=controller;
+    idleReady = false;
     try{
-      for(const [value,duration] of [[green,100],[normal,85],[green,100]]){
-        if(signal.aborted)break;
-        await color(value);
-        if(!signal.aborted)await wait(duration,signal);
+      const steps = [
+        [() => icon(successIcon), pulseMs], [() => icon(idleIcon), handoffMs],
+        [() => color(green), pulseMs], [() => color(normal), handoffMs],
+        [() => icon(successIcon), pulseMs], [() => icon(idleIcon), handoffMs],
+        [() => color(green), pulseMs], [() => color(normal), 0],
+      ];
+      for (const [apply, duration] of steps) {
+        if (signal.aborted) return;
+        await apply();
+        if (duration && !signal.aborted) await wait(duration, signal);
       }
+      idleReady = true;
     }catch{/* Always attempt to restore the idle color. */}
     finally{
-      await color(normal).catch(()=>{});
+      if (!idleReady) idleReady = await restore();
       flash=undefined;
+      if (successes.length) void refresh();
     }
   }
   async function paint() {
-    const successAt=flashTime;
-    flashTime=undefined;
-    if(!flash)await color(normal).catch(()=>{});
+    if (!flash && !idleReady) idleReady = await restore();
     const now = clock();
     let when = now + 60000, text = '!';
     try {
@@ -103,9 +140,10 @@ export function createDailyBadge({chrome, readHistory, countHistory, readPrefere
       const downloads=Object.entries(local.minutes??{}).reduce((total,[minute,files])=>
         inDay(minute*60000,projection)&&Number.isSafeInteger(files)?total+files:total,0);
       const verified=countHistory?projection.ids.size:countVerifiedSaves(await readHistory(),now,timezone);
-      const count=verified+downloads;
-      text=count>=displayLimit?'1k+':String(count);
-      when=projection.end;
+      const basic = await basicTotal(projection).catch(() => ({count:projection.basic?.count ?? 0, complete:false}));
+      const count=verified+downloads+basic.count;
+      text=count>=displayLimit?'1k+':basic.complete?String(count):count>0?`${count}+`:'!';
+      when=basic.complete?projection.end:Math.min(projection.end, when);
     } catch {
       day=undefined; // A timed retry will reconcile temporarily unavailable History.
     }
@@ -113,10 +151,20 @@ export function createDailyBadge({chrome, readHistory, countHistory, readPrefere
       Promise.resolve().then(() => chrome.action.setBadgeText({text})),
       Promise.resolve().then(() => chrome.alarms.create(rolloverAlarm, {when}))
     ]);
-    if(text==='!'||text==='0'||badge.status==='rejected')flash?.abort();
-    else if(!flash&&day&&inDay(successAt,day)){
-      flash=new AbortController();
-      void playFlash(flash);
+    if(text==='!'||text==='0'||badge.status==='rejected') {
+      successes.length = 0;
+      flash?.controller.abort();
+    } else if (day) {
+      if (flash && !inDay(flash.at, day)) flash.controller.abort();
+      if (!flash && idleReady) {
+        while (successes.length) {
+          const at = successes.shift();
+          if (!inDay(at, day)) continue;
+          flash = {at, controller:new AbortController()};
+          void playFlash(flash.controller);
+          break;
+        }
+      }
     }
   }
   function recordLocal(jobId, files) {
@@ -133,5 +181,5 @@ export function createDailyBadge({chrome, readHistory, countHistory, readPrefere
     return mutation.then(refresh);
   }
   chrome.alarms.onAlarm.addListener(alarm => { if (alarm.name === rolloverAlarm) void refresh(); });
-  return Object.freeze({refresh,recordLocal,recordVerified});
+  return Object.freeze({refresh,recordLocal,recordVerified,recordBasicVerified});
 }

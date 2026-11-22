@@ -41,7 +41,7 @@ const fixturePage = async context => {
   await page.goto(origin + '/fixture');
   return page;
 };
-const start = async (page, build) => page.evaluate(basicLifecycleFixture, {build, manifest: await manifest(build)});
+const start = async (page, build, transient) => page.evaluate(basicLifecycleFixture, {build, manifest: await manifest(build), transient});
 
 async function seed(page, repository) {
   return page.evaluate(async repository => {
@@ -120,10 +120,9 @@ try {
   try {
     let page = await fixturePage(context);
     const old = await seed(page, builds['/baseline'] ? '/baseline' : '/candidate');
-    await start(page, '/candidate');
+    await start(page, '/candidate', 'blocked');
     const result = await page.evaluate(async () => {
       const f = basicLifecycle;
-      f.transient = 'blocked';
       const counter = f.call('counter.get');
       const status = await Promise.all(['google', 'onedrive', 'dropbox'].map(provider => f.call('providers.getStatus', {provider})));
       const r2 = await f.send({channel: 'engine', version: '3+1.1', method: 'getProviderConnections', params: {}});
@@ -285,20 +284,29 @@ try {
     assert.equal(result.replay.error.code, 'PENDING_SAVE_NOT_FOUND');
     assert.equal(result.history.value.total, 1);
     const [receipt] = result.history.value.items;
-    assert.deepEqual({id: receipt.id, name: receipt.filename, root: receipt.destination.rootId, object: receipt.objectId},
-      {id: pending.attempt.id, name: 'one-click.txt', root: 'fixture-root', object: 'fixture-onedrive-object'});
+    assert.deepEqual({id: receipt.id, name: receipt.filename, bytes: receipt.bytes,
+      root: receipt.destination.rootId, object: receipt.objectId},
+    {id: pending.attempt.id, name: 'one-click.txt', bytes: 23, root: 'fixture-root', object: 'fixture-onedrive-object'});
     assert.equal(result.count, 1);
     assert.equal(result.writes, 2);
     assert.equal(result.popups, 0);
     assert.doesNotMatch(JSON.stringify(result), /synthetic-private/);
+    await page.waitForFunction(() => basicLifecycle.badge === '1' &&
+      basicLifecycle.toolbar.filter(entry => entry.state === 'badge').length === 2 && basicLifecycle.toolbar.at(-1).state === 'idle');
+    const chase = await page.evaluate(() => basicLifecycle.toolbar.slice(basicLifecycle.toolbar.findIndex(row => row.state === 'icon')));
+    assert.deepEqual(chase.map(row => row.state), ['icon', 'idle', 'badge', 'idle', 'icon', 'idle', 'badge', 'idle']);
     await page.close();
     page = await fixturePage(nativeContext);
     await start(page, '/candidate');
     assert.equal((await page.evaluate(() => basicLifecycle.call('counter.get'))).value.count, 1);
+    await page.waitForFunction(() => basicLifecycle.badge === '1');
+    assert.deepEqual(await page.evaluate(() => [...new Set(basicLifecycle.toolbar.map(row => row.state))]), ['idle']);
     evidence.checks.push({gate: 'native-onedrive-oauth-withheld-source-continuation-verified-readback', result: {
       attemptId: receipt.id, account: receipt.destination.accountId, root: receipt.destination.rootId,
-      objectId: receipt.objectId, name: receipt.filename, bytes: receipt.size, basicCounter: result.count,
-      popups: pending.popups, writes: result.writes, restartReceiptCount: 1,
+      objectId: receipt.objectId, name: receipt.filename, bytes: receipt.bytes, basicCounter: result.count,
+      popups: pending.popups, writes: result.writes, restartReceiptCount: 1, restartGlobalBadge: 1,
+      chase: chase.map(({state, at}, index) => ({state, elapsedMs: Math.round(at - chase[0].at),
+        ...(index ? {previousStateMs: Math.round(at - chase[index - 1].at)} : {})})),
     }});
   } finally { await nativeContext.close(); }
   assert.deepEqual(evidence.errors ?? [], []);
