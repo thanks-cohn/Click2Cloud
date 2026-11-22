@@ -18,3 +18,32 @@ export function createListingReader(read,{maxPages=64,ttlMs=10000,maxConcurrent=
 }
 
 export function gridWindow(length,scrollTop,height,width){const columns=Math.max(1,Math.floor(width/160)),rowHeight=136,startRow=Math.min(Math.max(0,Math.ceil(length/columns)-1),Math.max(0,Math.floor(scrollTop/rowHeight)-2)),start=startRow*columns,end=Math.min(length,start+(Math.ceil(height/rowHeight)+4)*columns);return {start,end,top:startRow*rowHeight,total:Math.ceil(length/columns)*rowHeight,columns,rowHeight};}
+
+// Explorer's image-rich Golden Age grid. Geometry is independent of the DOM
+// so offscreen tiles and thumbnails can stay virtualized.
+export function masonryLayout(length, width, aspectAt){
+ const gap=10,columns=Math.max(1,Math.min(6,Math.floor(width/176)));
+ const tileWidth=Math.max(1,(width-gap*(columns+1))/columns);
+ const lanes=Array.from({length:columns},()=>[]),edges=lanes.map(()=>gap);
+ const tiles=Array.from({length},(_,index)=>{
+  const column=edges.indexOf(Math.min(...edges));
+  const media=Math.round(Math.min(320,Math.max(34,(tileWidth-20)*aspectAt(index))));
+  const top=edges[column],height=media+42,left=gap+(tileWidth+gap)*column;
+  const tile={index,column,top,bottom:top+height,left,width:tileWidth,height,media};
+  edges[column]=tile.bottom+gap;
+  lanes[column].push(tile);
+  return tile;
+ });
+ function visible(top,bottom,left=0,right=width){
+  const indices=[];
+  for(const lane of lanes){
+   const first=lane[0];
+   if(!first||first.left>=right||first.left+tileWidth<=left)continue;
+   let low=0,high=lane.length;
+   while(low<high){const mid=(low+high)>>>1;if(lane[mid].bottom<=top)low=mid+1;else high=mid;}
+   for(let i=low;i<lane.length&&lane[i].top<bottom;i++)indices.push(lane[i].index);
+  }
+  return indices.sort((a,b)=>a-b);
+ }
+ return {tiles,columns,total:Math.max(...edges),visible};
+}

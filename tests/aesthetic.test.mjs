@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAestheticHost,validatePalette,AESTHETIC_PREFERENCE_KEY,PALETTE_PREFERENCE_KEY,BUSY_CURSOR_PREFERENCE_KEY} from '../src/aesthetic/host.mjs';
 import {palettes,themePackages,busyCursorPackages} from '../src/aesthetic/packages.mjs';
+import {masonryLayout} from '../src/explorer/listing-view.mjs';
 
 const pref=id=>({schemaVersion:1,id});
 function fixture(values={},options={}){
@@ -154,4 +155,22 @@ test('Frames persists the selected palette and falls back when the stylesheet is
  assert.equal((await unavailable.host.restore()).error,'PACKAGE_UNAVAILABLE');
  assert.equal(unavailable.host.getActive().id,'minimal');
  assert.equal(values[AESTHETIC_PREFERENCE_KEY].id,'frames');
+});
+
+test('Golden Age uses varied image heights and a bounded, ordered window at each width',()=>{
+ const aspectAt=index=>[1.5,.55,1,.75][index%4];
+ const wide=masonryLayout(10000,600,aspectAt);
+ assert(wide.columns>1);
+ const [portrait,landscape,square]=wide.tiles;
+ assert(portrait.height>square.height&&square.height>landscape.height);
+ assert.equal(portrait.width,landscape.width);
+ assert(wide.tiles[wide.columns].top<portrait.bottom,'the shorter column accepts the next tile');
+ const indices=wide.visible(1600,2350);
+ assert(indices.length>0&&indices.length<40);
+ assert.deepEqual(indices,[...indices].sort((a,b)=>a-b));
+ assert(indices.every(index=>wide.tiles[index].bottom>1600&&wide.tiles[index].top<2350));
+ assert.deepEqual(wide.visible(portrait.top,portrait.top+20,portrait.left+1,portrait.left+2),[0]);
+ const narrow=masonryLayout(15,225,aspectAt);
+ assert.equal(narrow.columns,1);
+ assert(narrow.tiles.every((tile,index)=>index===0||tile.top>narrow.tiles[index-1].bottom));
 });

@@ -1,26 +1,111 @@
-:root[data-aesthetic=golden-age]{
- --a-package:golden-age;
- --bg:#151517;--panel:#232326;--raised:#303034;--text:#f7f7f8;
- --muted:#c4c4ca;--line:#45454c;--accent:#ff8495;--selected:#48252e;--focus:#ff9eab;
- --button-ink:#251116;--frame-hover:#3b2a30;--error:#ffaeb8;
- --heading-font:"Segoe UI","Helvetica Neue",Arial,sans-serif;
- --heading-weight:750;--heading-tracking:-.035em;
- --card-radius:20px;--card-padding:clamp(14px,3vw,24px);--card-margin:16px;
- --control-radius:14px;--dialog-radius:22px;--thumb-radius:14px;--tile-padding:6px;
- --history-padding:14px;--history-gap:10px;
- --surface-shadow:0 2px 6px #0002;
+:root[data-aesthetic=golden-age] {
+  --a-package: golden-age;
+  --bg: #1b1718;
+  --panel: #2b2225;
+  --raised: #382b31;
+  --text: #fff2e9;
+  --muted: #cdb9b5;
+  --line: #5b444d;
+  --accent: #ffc2a8;
+  --selected: #493039;
+  --focus: #ffccae;
+  --button-ink: #2f1c20;
+  --frame-hover: var(--selected);
+  --error: #ffb7be;
+  --heading-font: "Palatino Linotype", Georgia, "Liberation Serif", serif;
+  --heading-weight: 700;
+  --heading-tracking: -.035em;
+  --card-radius: 24px;
+  --card-padding: clamp(14px, 3.6vw, 25px);
+  --card-margin: 16px;
+  --control-radius: 18px;
+  --dialog-radius: 24px;
+  --thumb-radius: 16px;
+  --tile-padding: 7px;
+  --history-padding: 15px 17px;
+  --history-gap: 13px;
+  --surface-shadow: 0 4px 14px #0003;
+  --surface-hover: 0 9px 22px #0004;
 }
-:root[data-aesthetic=golden-age][data-theme=light]{
- --bg:#f7f7f7;--panel:#fff;--raised:#efeff0;--text:#191919;
- --muted:#626268;--line:#dedee2;--accent:#c90026;--selected:#fce5ea;--focus:#c90026;
- --button-ink:#fff;--frame-hover:#fce5ea;--error:#a51639;
- --surface-shadow:0 2px 8px #21131a0e;
+:root[data-aesthetic=golden-age][data-theme=light] {
+  --bg: #faf4eb;
+  --panel: #fffdf8;
+  --raised: #f3e7da;
+  --text: #302420;
+  --muted: #68534d;
+  --line: #e2cfc2;
+  --accent: #92394c;
+  --selected: #f5dedc;
+  --focus: #92394c;
+  --button-ink: #fffaf5;
+  --error: #9b253d;
+  --surface-shadow: 0 4px 14px #693c2510;
+  --surface-hover: 0 9px 22px #693c2528;
 }
-:root[data-aesthetic=golden-age] .brand-tile{
- color:#fff;background:#e60023;border-radius:9px;
- font-family:var(--heading-font);font-weight:800;
+:root[data-aesthetic=golden-age] {
+  & .brand-tile {
+    color: #fff;
+    background: #e60023;
+    border-radius: 9px;
+  }
+  & .remotes-intro {
+    margin-block: clamp(10px, 3vw, 28px) 23px;
+    text-align: center;
+  }
+  & .remotes-intro .remotes-headline {
+    margin-inline: auto;
+    max-inline-size: 19ch;
+    font-size: clamp(24px, 8.2cqi, 47px);
+  }
+  & .page > h1 {
+    font-size: clamp(25px, 6vw, 38px);
+  }
+  & .card > h2 {
+    font-size: 18px;
+  }
+  & .history-line strong {
+    font-weight: 700;
+  }
+  & .history-day > summary {
+    padding-block: 3px;
+  }
+  & .history-preview img {
+    border-radius: var(--thumb-radius);
+  }
+  & .settings-row {
+    padding-block-end: 10px;
+  }
+  & :is(.toolbar, #explorer-commands, .dialog-head) {
+    background: var(--panel);
+  }
+  & #files .grid-tiles[data-masonry]:not([hidden]) {
+    display: block;
+    position: relative;
+  }
+  & .grid-tiles[data-masonry] .file-tile {
+    position: absolute;
+    padding: 3px;
+    overflow: visible;
+    border-radius: var(--thumb-radius);
+  }
+  & .grid-tiles[data-masonry] .file-tile > div {
+    padding: 6px;
+    text-align: start;
+  }
+  & .grid-tiles[data-masonry] .file-tile :is(img, span) {
+    display: block;
+    width: 100%;
+    height: var(--pin-image-size);
+    border-radius: calc(var(--thumb-radius) - 5px);
+    background: var(--bg);
+    object-fit: contain;
+  }
+  & .grid-tiles[data-masonry] .file-tile span {
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+  }
+  & .grid-tiles[data-masonry] .tile-label {
+    padding-inline: 4px;
+  }
 }
-:root[data-aesthetic=golden-age] .remotes-intro{margin-block:8px 26px}
-:root[data-aesthetic=golden-age] .remotes-intro p{color:var(--muted);max-width:40ch}
-:root[data-aesthetic=golden-age] .card>h2{font-size:17px}
-:root[data-aesthetic=golden-age] .history-line strong{font-weight:750}

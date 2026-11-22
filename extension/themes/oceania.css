@@ -1,34 +1,101 @@
-:root[data-aesthetic=oceania]{
- --a-package:oceania;
- --bg:#1d2a3b;--panel:#2c3e53;--raised:#364b63;--text:#f2f5f8;
- --muted:#c0cedb;--line:#577087;--accent:#b5d8f6;--selected:#40566c;--focus:#f1daab;
- --button-ink:#18283a;--frame:#27394e;--frame-ink:#f4ebd8;--frame-hover:#415872;
- --frame-accent:#f4ebd8;--frame-focus:#f1daab;--frame-edge:2px solid #4e647d;
- --heading-font:Georgia,Cambria,"Liberation Serif",serif;
- --body-font:"Helvetica Neue","Segoe UI",Arial,sans-serif;
- --control-font:"Trebuchet MS","Segoe UI",Arial,sans-serif;
- --card-radius:6px;--card-padding:16px;--card-margin:15px;
- --control-radius:4px;--dialog-radius:8px;--thumb-radius:3px;--tile-padding:5px;
- --history-padding:12px 14px;--history-gap:12px;
- --surface-shadow:0 3px 0 #0002,0 5px 0 -1px #647d9660;
- --error:#ffbac1;
+:root[data-aesthetic=oceania] {
+  --a-package: oceania;
+  --bg: #171c32;
+  --panel: #262d47;
+  --raised: #313c58;
+  --text: #f5eee1;
+  --muted: #c5c7dc;
+  --line: #4d5a7a;
+  --accent: #a8e0d7;
+  --selected: #354c65;
+  --focus: #f5dba9;
+  --button-ink: #182a38;
+  --frame: #21263f;
+  --frame-ink: #f3ebda;
+  --frame-hover: #364361;
+  --frame-accent: #9bd7cb;
+  --frame-focus: #f5dba9;
+  --frame-edge: 3px double #526589;
+  --heading-font: "Bookman Old Style", Georgia, "Liberation Serif", serif;
+  --body-font: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --control-font: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+  --heading-tracking: -.025em;
+  --card-radius: 7px 7px 7px 2px;
+  --card-padding: clamp(12px, 4vw, 19px);
+  --card-margin: 15px;
+  --control-radius: 5px;
+  --dialog-radius: 8px;
+  --thumb-radius: 4px;
+  --tile-padding: 6px;
+  --history-padding: 13px 16px;
+  --history-gap: 14px;
+  --surface-shadow: 0 3px #0003, 0 5px 0 -1px #667ba259;
+  --surface-hover: 0 7px 18px #0005;
+  --error: #ffc1c9;
 }
-:root[data-aesthetic=oceania][data-theme=light]{
- --bg:#e9eff3;--panel:#fff;--raised:#edf2f6;--text:#263646;
- --muted:#50667c;--line:#c0cdd9;--accent:#244f7b;--selected:#dce8f3;--focus:#244f7b;
- --button-ink:#fff;--error:#912939;
- --surface-shadow:0 3px 0 #cdd8e3,0 5px 0 -1px #becddb;
+:root[data-aesthetic=oceania][data-theme=light] {
+  --bg: #edf0f4;
+  --panel: #fdfbf6;
+  --raised: #e5eaf2;
+  --text: #252e48;
+  --muted: #505b73;
+  --line: #c4cce1;
+  --accent: #235e68;
+  --selected: #dcece9;
+  --focus: #295d79;
+  --button-ink: #fffdf5;
+  --error: #932940;
+  --surface-shadow: 0 3px #dfe4ee, 0 5px 0 -1px #c3cde3;
+  --surface-hover: 0 6px 16px #23334d2b;
 }
-:root[data-aesthetic=oceania] .brand-tile{
- color:#f4ebd8;background:#35465c;border-radius:5px;
- font-family:"Bookman Old Style",Georgia,Cambria,serif;
-}
-:root[data-aesthetic=oceania] .remotes-intro{
- border-block-end:3px double var(--line);padding-block:4px 16px;
-}
-:root[data-aesthetic=oceania] :is(.card,.history-row) h2{
- font-size:18px;border-block-end:1px solid var(--line);padding-block-end:8px;
-}
-:root[data-aesthetic=oceania] #files th{
- box-shadow:inset 0 -2px var(--line);
+:root[data-aesthetic=oceania] {
+  & #shell:not([data-view=explorer]) > main {
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--text) 3%, transparent) 4px 5px);
+  }
+  & .app-header {
+    background: linear-gradient(110deg, var(--frame), #2b4260);
+  }
+  & .brand-tile {
+    color: #f4ebd8;
+    background: #35465c;
+    border-radius: 5px;
+  }
+  & .remotes-intro {
+    border-block-end: 3px double var(--line);
+    padding-block: 7px 16px;
+  }
+  & .remotes-intro .remotes-headline {
+    max-inline-size: 23ch;
+    font-style: italic;
+    font-size: clamp(23px, 7.4cqi, 44px);
+  }
+  & :is(.card, .history-row) {
+    border-inline-start: 3px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  }
+  & .card > h2 {
+    font-size: 18px;
+    border-block-end: 1px solid var(--line);
+    padding-block-end: 8px;
+  }
+  & :is(.history-headline, .history-line strong) {
+    font-family: var(--heading-font);
+  }
+  & :is(.history-line time, .history-status) {
+    border-radius: 3px;
+    background: var(--raised);
+    padding: 3px 6px;
+    color: var(--text);
+  }
+  & .history-preview img {
+    padding: 4px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+  & :is(#files th, #explorer-commands, .dialog-head) {
+    background: var(--raised);
+    box-shadow: inset 0 -1px var(--line);
+  }
+  & #tree .children {
+    border-inline-start-style: dotted;
+  }
 }

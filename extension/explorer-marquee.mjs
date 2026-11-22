@@ -23,8 +23,8 @@ export function installExplorerMarquee(pane,{readRows,readLayout,readSelection,s
   frame=0;
   if(!drag?.active)return;
   const {rows,start,point,mode,baseline}=drag;
-  const {columns,rowHeight,header}=readLayout();
-  if(!available()||rows!==readRows()||columns!==drag.columns||header!==drag.header){finish(true);return;}
+  const {columns,rowHeight,header,masonry}=readLayout();
+  if(!available()||rows!==readRows()||columns!==drag.columns||header!==drag.header||Boolean(masonry)!==drag.masonry){finish(true);return;}
   const rect=pane.getBoundingClientRect(),viewTop=rect.top+header;
   const edge=24,above=viewTop+edge-point.y,below=point.y-(rect.bottom-edge);
   const velocity=above>0?-Math.min(28,Math.ceil(above/2)):below>0?Math.min(28,Math.ceil(below/2)):0;
@@ -35,41 +35,51 @@ export function installExplorerMarquee(pane,{readRows,readLayout,readSelection,s
   const left=Math.min(start.x,x),right=Math.max(start.x,x);
   const top=Math.min(start.y,y),bottom=Math.max(start.y,y);
   const columnWidth=(columns===1?pane.scrollWidth:pane.clientWidth)/columns;
-  const next={
+  const next=masonry?new Set(masonry.visible(top,bottom,left,right)):{
    top:clamp(Math.floor(top/rowHeight),0,Math.ceil(rows.length/columns)),
    bottom:clamp(Math.floor(bottom/rowHeight)+1,0,Math.ceil(rows.length/columns)),
    left:clamp(Math.floor(left/columnWidth),0,columns),
    right:clamp(Math.floor(right/columnWidth)+1,0,columns)
   };
   const selection=readSelection();
+  function applyEntry(entry,inside){
+   const selected=mode==='toggle'?inside!==baseline.has(entry.key):inside||baseline.has(entry.key);
+   if(selected)selection.add(entry.key);else selection.delete(entry.key);
+  }
   function apply(box,inside){
    for(let row=box.top;row<box.bottom;row++){
     for(let col=box.left;col<box.right;col++){
      const entry=rows[row*columns+col];
      if(!entry)break;
-     const selected=mode==='toggle'?inside!==baseline.has(entry.key):inside||baseline.has(entry.key);
-     if(selected)selection.add(entry.key);else selection.delete(entry.key);
+     applyEntry(entry,inside);
     }
    }
   }
   const previous=drag.box;
-  visitMarqueeDifference(previous,next,box=>apply(box,false));
-  visitMarqueeDifference(next,previous,box=>apply(box,true));
+  let changed;
+  if(masonry){
+   for(const index of previous??[])if(!next.has(index)){applyEntry(rows[index],false);changed=true;}
+   for(const index of next)if(!previous?.has(index)){applyEntry(rows[index],true);changed=true;}
+  }else{
+   visitMarqueeDifference(previous,next,box=>apply(box,false));
+   visitMarqueeDifference(next,previous,box=>apply(box,true));
+   changed=!previous||Object.keys(next).some(key=>next[key]!==previous[key]);
+  }
   drag.box=next;
   const x0=clamp(rect.left+left-pane.scrollLeft,rect.left,rect.left+pane.clientWidth);
   const x1=clamp(rect.left+right-pane.scrollLeft,rect.left,rect.left+pane.clientWidth);
   const y0=clamp(viewTop+top-pane.scrollTop,viewTop,rect.top+pane.clientHeight);
   const y1=clamp(viewTop+bottom-pane.scrollTop,viewTop,rect.top+pane.clientHeight);
   Object.assign(overlay.style,{left:x0+'px',top:y0+'px',width:(x1-x0)+'px',height:(y1-y0)+'px'});
-  if(!previous||Object.keys(next).some(key=>next[key]!==previous[key]))onChange();
+  if(changed)onChange();
   if(velocity&&pane.scrollTop!==before)queue();
  }
  function pointerDown(event){
   if(drag||!available()||!event.isPrimary||event.button!==0||event.pointerType==='touch'||
      event.target.closest('[data-file-drag],.file-cell-text,.row-spacer,thead,button,input,select,a,[contenteditable]'))return;
-  const rect=pane.getBoundingClientRect(),{header,columns}=readLayout();
+  const rect=pane.getBoundingClientRect(),{header,columns,masonry}=readLayout();
   if(event.clientX>=rect.left+pane.clientWidth||event.clientY>=rect.top+pane.clientHeight)return;
-  drag={id:event.pointerId,clientX:event.clientX,clientY:event.clientY,rows:readRows(),header,columns,
+  drag={id:event.pointerId,clientX:event.clientX,clientY:event.clientY,rows:readRows(),header,columns,masonry:Boolean(masonry),
    start:{x:event.clientX-rect.left+pane.scrollLeft,y:event.clientY-rect.top+pane.scrollTop-header},
    mode:event.ctrlKey||event.metaKey?'toggle':event.shiftKey?'add':'replace'};
   window.addEventListener('pointermove',pointerMove);
