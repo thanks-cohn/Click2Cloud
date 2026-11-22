@@ -55,7 +55,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     sourceAccess.hidden = false;
   }
   function paint(card, status) {
-    card.connect.textContent = status.connected ? 'Reconnect / Approve' : 'Sign In';
+    card.connect.textContent = status.connected ? 'Reconnect' : 'Sign In';
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
     card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
       [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';

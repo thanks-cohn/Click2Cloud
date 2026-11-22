@@ -71,9 +71,9 @@ await palette.getByRole('radio',{name:'Ocean Blue'}).check();
 await page.getByRole('button',{name:'Remotes',exact:true}).click();
 const provider=page.getByRole('region',{name:'Google Drive'});
 await provider.getByRole('button',{name:'Sign In'}).click();
-await provider.getByRole('button',{name:'Reconnect / Approve'}).waitFor();
+await provider.getByRole('button',{name:'Reconnect',exact:true}).waitFor();
 await provider.getByRole('button',{name:'GO TO Google Drive'}).click();
-assert.equal(await provider.locator('[data-readiness]').textContent(),'Ready to Save');
+assert.equal(await provider.locator('[data-readiness]').textContent(),'Authorized for this provider.');
 await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
  id:'fixture-source',provider:'google',state:'FAILED',code:'SOURCE_UNAVAILABLE',sourceOrigin:'https://images.example:8443'
 }}));

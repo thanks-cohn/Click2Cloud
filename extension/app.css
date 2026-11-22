@@ -142,32 +142,32 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 
 /* Three independent More controls: application navigation, History row, Explorer. */
 .app-header{
- --header-gap:clamp(6px,1.8vw,16px);
- --header-padding:clamp(8px,2.4vw,18px);
+ --header-gap:clamp(5px,1.5vw,16px);
+ --header-padding:clamp(6px,2vw,18px);
  --header-height:56px;
  --theme-size:36px;
  position:relative;z-index:5;display:grid;grid-template-columns:auto minmax(0,1fr) var(--theme-size);
  align-items:center;flex:none;gap:var(--header-gap);min-height:var(--header-height);padding:5px var(--header-padding);
  border-bottom:1px solid var(--line);background:var(--panel);
 }
-.brand-lockup{display:flex;align-items:center;gap:7px;min-inline-size:0;color:inherit;font:750 12px/1 var(--control-font);letter-spacing:.09em}
-.brand-lockup img{display:block;flex:none;border-radius:4px}
+.brand-lockup img{display:block}
 .app-header nav{display:flex;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px)}
 .app-header nav button{min-block-size:36px;padding:5px clamp(5px,1.2vw,10px);border:none}
-.app-header nav>button{min-inline-size:0;overflow-wrap:anywhere}
+.app-header nav>button{flex:none;min-inline-size:34px;white-space:nowrap}
 #theme{display:grid;place-items:center;inline-size:var(--theme-size);block-size:var(--theme-size);padding:0;font-size:20px}
 :root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,.header-more-icon,.explorer-compact-label{display:none}
-@media(max-width:520px){
- .app-header{--header-height:88px;grid-template-columns:minmax(0,1fr) var(--theme-size);row-gap:4px}
- .app-header nav{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:stretch}
- .app-header nav>button{padding-inline:3px;font-size:12px}
- #theme{grid-column:2;grid-row:1}
-}
-@media(max-width:360px){
+@media(max-width:460px){
+ .app-header nav{gap:3px}
+ .app-header nav>button{padding-inline:4px;font-size:clamp(11px,3.4vw,13px)}
+ .app-header :is(nav>button,#header-more,#theme):focus-visible{outline-offset:-2px}
  .header-more-label{display:none}
  .header-more-icon{display:inline;font-size:18px;line-height:1}
  .explorer-label{display:none}
  .explorer-compact-label{display:inline}
+}
+@media(max-width:320px){
+ .app-header{--header-gap:3px;--header-padding:5px}
+ .app-header nav>button{padding-inline:2px}
 }
 .header-more{flex:none;margin-inline-start:auto}
 #header-more{min-inline-size:36px}
