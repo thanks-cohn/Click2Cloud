@@ -32,6 +32,8 @@
 
 ## New owner cross-browser evidence — Chrome FIRST, Edge secondary
 
+**NON-NEGOTIABLE OWNER DIRECTIVE: REDOWN needs to be primarily Chrome-oriented. Design, implement, and validate primarily for official Google Chrome on Windows. Edge compatibility is welcome but is secondary and never a substitute for Chrome correctness.**
+
 The owner reports that the same REDOWN 0.3.24 functionality **works well in Microsoft Edge**, but **fails in Google Chrome even in a new Chrome profile**. This is important new evidence, not proof of a specific root cause. **Chrome is the primary product and release acceptance target; Edge is a compatibility target, not the implementation baseline.** Never optimize a fix for Edge at Chrome's expense or report Chrome ready based on Edge tests.
 
 - Reproduce the exact failure(s) in **official Google Chrome on Windows** (including a fresh profile) using the same compiled extension package, extension ID, command bindings, permission state and test page wherever possible. Check both Alt+Q screenshot capture and the user-configured Ctrl+Shift+F Files/search action. Contrast with Edge using a **controlled, equivalent** set of settings and grants.
