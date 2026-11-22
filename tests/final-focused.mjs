@@ -84,6 +84,7 @@ import './get-url.test.mjs';
 import './shelf-history-toggle.test.mjs';
 import './daily-badge.test.mjs';
 import './aesthetic.test.mjs';
+import './shelf-notifications.test.mjs';
 
 import './basic-auth.test.mjs';
 import './basic-providers.test.mjs';

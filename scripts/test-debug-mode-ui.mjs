@@ -27,7 +27,8 @@ try{
  const beforeGrant=await page.evaluate(async()=>{const {createDebugHost}=await import('/src/chrome/debug-host.mjs');window.fixtureDebugHost=createDebugHost({runtime:chrome.runtime});return window.fixtureDebugHost.request({version:1,method:'inspectCanonicalMenu'},{id:'fixture',url:chrome.runtime.getURL('extension/mirror.html'),documentId:'unchanged-ui-document'});});assert.equal(beforeGrant.code,'DEBUG_AUTHORIZATION_REQUIRED');
  for(let n=0;n<3;n++){
   await page.evaluate(()=>window.emitDebugFixture({channel:'depth-click-outcome',state:'pending',code:'DEPTH_CLICK_STARTED',message:'Depth: save outcome not confirmed (DEPTH_CLICK_STARTED).'}));await page.waitForTimeout(20);assert.equal(await page.locator('#status').isVisible(),false);
-  await page.evaluate(()=>window.emitDebugFixture({channel:'depth-click-outcome',state:'uncertain',code:'WRITE_UNCONFIRMED',message:'Depth: save outcome not confirmed (WRITE_UNCONFIRMED). Open Save results for details.'}));await page.waitForTimeout(20);assert.equal(await page.locator('#status').isVisible(),false);assert.match(await page.locator('#action-feedback').innerText(),/not confirmed/);await hiddenResults();
+  await page.evaluate(operationId=>window.emitDebugFixture({channel:'depth-click-outcome',operationId,state:'uncertain',code:'WRITE_UNCONFIRMED',message:'Depth: save outcome not confirmed (WRITE_UNCONFIRMED). Open Save results for details.'}),`fixture-sequence-${n}`);await page.waitForTimeout(20);assert.equal(await page.locator('#status').isVisible(),false);assert.match(await page.locator('#action-feedback').innerText(),/not confirmed/);await hiddenResults();
+  await page.getByRole('button',{name:'Dismiss notification'}).press('Enter');
   await page.evaluate(()=>window.emitDebugFixture({channel:'depth-click-outcome',state:'completed',code:'DEPTH_CLICK_COMPLETED',message:'Depth save completed; inspect its verified remote receipt.'}));await page.waitForTimeout(20);assert.equal(await page.locator('#status').isVisible(),false);assert.equal(await page.locator('#action-feedback').isVisible(),false);
  }
  result.checks.push('Default OFF including delayed preference boot and three simulated pending/uncertain/completed lifecycle sequences: floating status never visible; uncertainty remains quietly actionable');
@@ -48,8 +49,52 @@ try{
  await page.setViewportSize({width:320,height:800});await page.evaluate(()=>window.emitDebugFixture({channel:'depth-click-outcome',state:'completed',code:'DEPTH_CLICK_COMPLETED',message:'Depth save completed; inspect its verified remote receipt.'}));
  const layout=()=>page.evaluate(()=>{const rect=id=>{const r=document.querySelector(id).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,feedback:rect('#action-feedback'),manage:rect('#manage')};});result.narrowLayout={baseline:await layout(),scenarios:[]};
  assert.equal(await page.locator('body > footer').count(),0);
- for(const [state,code,message] of [['blocked','WORKER_SETUP_REQUIRED','WORKER_SETUP_REQUIRED'],['uncertain','WRITE_UNCONFIRMED','Depth: save outcome not confirmed (WRITE_UNCONFIRMED). Open Save results for details.']]){await page.evaluate(({state,code,message})=>window.emitDebugFixture({channel:'depth-click-outcome',state,code,message}),{state,code,message});await page.locator('#action-feedback').waitFor();await hiddenResults();const measured=await layout();result.narrowLayout.scenarios.push({state,...measured});await page.locator('#manage').focus();assert.equal(await page.evaluate(()=>document.activeElement.id),'manage');}
+ for(const [state,code,message] of [['blocked','WORKER_SETUP_REQUIRED','WORKER_SETUP_REQUIRED'],['uncertain','WRITE_UNCONFIRMED','Depth: save outcome not confirmed (WRITE_UNCONFIRMED). Open Save results for details.']]){await page.evaluate(({state,code,message})=>window.emitDebugFixture({channel:'depth-click-outcome',operationId:'narrow-'+state,state,code,message}),{state,code,message});await page.locator('#action-feedback').waitFor();await hiddenResults();const measured=await layout();result.narrowLayout.scenarios.push({state,...measured});await page.locator('#manage').focus();assert.equal(await page.evaluate(()=>document.activeElement.id),'manage');}
  await page.screenshot({path:resolve(out,'debug-off-320px-feedback.png')});for(const measured of result.narrowLayout.scenarios){for(const name of ['feedback','manage']){assert(measured[name].left>=0&&measured[name].right<=320,'320px '+name+' must fit viewport: '+JSON.stringify(measured));assert(measured[name].top>=0&&measured[name].bottom<=800);}assert(measured.documentWidth<=320&&measured.bodyWidth<=320,'320px body/document horizontal overflow: '+JSON.stringify(measured));}result.checks.push('320px blocked and uncertain feedback fits and Manage Destinations is focusable');
- const after=await page.evaluate(async()=>{const s=await window.productFixture.current.read();return {config:JSON.stringify({configs:s.configs,product:s.product}),violations:window.debugFixture.offVisibilityViolations,samples:window.debugFixture.visibilitySamples,calls:window.debugFixture.calls};});assert.equal(after.config,config);assert.deepEqual(after.violations,[]);assert(!after.calls.some(c=>['commitConfigChange','loginBegin','initializeCloudflare','approveCloudflareSetup','repairCloudflareDestination','prepareDepthDestination'].includes(c.method)));assert.deepEqual(await other.evaluate(()=>window.debugFixture.offVisibilityViolations),[]);result.visibilitySamples=after.samples+await other.evaluate(()=>window.debugFixture.visibilitySamples);result.checks.push('No off-mode visible frames/mutations; no CURRENT/config/credentials/provisioning change from Debug preference');await page.screenshot({path:resolve(out,'debug-off-inline-feedback.png')});await context.close();assert.deepEqual(result.pageErrors??[],[]);result.result='PASS';
+ const after=await page.evaluate(async()=>{const s=await window.productFixture.current.read();return {config:JSON.stringify({configs:s.configs,product:s.product}),violations:window.debugFixture.offVisibilityViolations,samples:window.debugFixture.visibilitySamples,calls:window.debugFixture.calls};});assert.equal(after.config,config);assert.deepEqual(after.violations,[]);assert(!after.calls.some(c=>['commitConfigChange','loginBegin','initializeCloudflare','approveCloudflareSetup','repairCloudflareDestination','prepareDepthDestination'].includes(c.method)));assert.deepEqual(await other.evaluate(()=>window.debugFixture.offVisibilityViolations),[]);result.visibilitySamples=after.samples+await other.evaluate(()=>window.debugFixture.visibilitySamples);result.checks.push('No off-mode visible frames/mutations; no CURRENT/config/credentials/provisioning change from Debug preference');await page.screenshot({path:resolve(out,'debug-off-inline-feedback.png')});
+
+ const noticePage=await open();
+ await noticePage.setViewportSize({width:310,height:720});
+ await noticePage.clock.install();
+ const emit=operationId=>noticePage.evaluate(operationId=>window.emitDebugFixture({
+  channel:'depth-click-outcome',operationId,state:'failed',code:'TEST_FAILURE',message:'TEST_FAILURE'
+ }),operationId);
+ const banner=noticePage.locator('#action-feedback');
+ await emit('repeat');
+ await noticePage.getByText('Review the current panel or History for details.',{exact:true}).filter({visible:true}).first().waitFor();
+ await noticePage.clock.fastForward(5000);
+ await emit('repeat');
+ await noticePage.clock.fastForward(4001);
+ assert(await banner.isHidden());
+ await noticePage.clock.fastForward(7200000);
+ await emit('repeat');
+ assert(await banner.isHidden());
+ await emit('hover');
+ await banner.hover();
+ assert(await banner.isHidden());
+ await emit('hover');
+ assert(await banner.isHidden());
+ await noticePage.reload();
+ await noticePage.waitForFunction(()=>window.productFixture);
+ await emit('hover');
+ assert(await banner.isHidden());
+
+ await noticePage.evaluate(async()=>{
+  const {current,target}=window.productFixture;
+  await current.setHistoryPreferences({range:'all',previews:'closed',timezone:'America/Chicago'});
+  for(let i=0;i<26;i++)await current.recordRemoteResult({kind:'save',state:'failed',operationId:'notice-history-'+i,destination:target,code:'SOURCE_UNAVAILABLE'});
+ });
+ await noticePage.getByRole('button',{name:'History',exact:true}).click();
+ await noticePage.locator('#history-next').waitFor();
+ await emit('history');
+ assert(await banner.isVisible());
+ await noticePage.locator('#history-next').scrollIntoViewIfNeeded();
+ assert((await noticePage.locator('#history-next').boundingBox()).y < (await banner.boundingBox()).y);
+ await noticePage.locator('#history-next').click();
+ await noticePage.getByText('Page 2 of 2',{exact:true}).waitFor();
+ await noticePage.getByRole('button',{name:'Remotes',exact:true}).press('Enter');
+ assert(await banner.isHidden());
+ result.checks.push('Notifications expire without extension on repeat, 2-hour fast-forward, immediate hover and keyboard dismissal, replay suppression after reload, and unobstructed History pagination');
+ await context.close();assert.deepEqual(result.pageErrors??[],[]);result.result='PASS';
 }catch(error){result.result='FAIL';result.error=error.stack;process.exitCode=1;}
 finally{await browser?.close();await new Promise(r=>server.close(r));await writeFile(resolve(out,'results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));}

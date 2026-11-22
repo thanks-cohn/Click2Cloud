@@ -291,7 +291,7 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
       }
     }
     let authorization;
-    try { authorization = await (depthAuthorization??getAuthorization)?.(depthAuthorization?rowForDepth().target:info, tab); }
+    try { authorization = await (depthAuthorization??getAuthorization)?.(depthAuthorization?row.target:info, tab); }
     catch { authorization = null; }
     if (!authorization || !Array.isArray(authorization.authorizedTargets)) {
       const row=acknowledged?.rows.find(r=>r.id===String(info.menuItemId)&&(r.setupProvider==='cloudflare'||r.role==='save'&&r.target?.provider==='cloudflare'));

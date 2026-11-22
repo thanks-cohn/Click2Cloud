@@ -80,12 +80,16 @@ body.resizing{user-select:none}
 #toolbar-overflow,#filename-search-popout{position:fixed;z-index:80;inset:auto;margin:0;color:var(--text);width:min(280px,calc(100vw - 24px));max-height:65vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:8px;box-shadow:0 8px 24px #0005}
 #toolbar-overflow>*,#filename-search-popout>*{display:block;width:100%;margin:4px 0}
 [hidden]{display:none!important}
-#feedback-stack{position:fixed;z-index:6;inset-inline-end:8px;inset-block-end:54px;max-inline-size:min(360px,calc(100% - 16px));display:grid;justify-items:end;gap:6px;pointer-events:none}
-#status,#action-feedback{padding:8px 12px;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:6px;background:var(--panel);box-shadow:0 3px 12px #0003}
-#status{max-height:25vh;overflow:auto;font-size:13px;color:var(--text);pointer-events:auto}
-/* Default-off before JS or storage resolves: no one-frame floating diagnostics. */
+/* Feedback reserves space below the Shelf scrollports. */
+#feedback-stack{flex:none;display:grid;grid-template-columns:minmax(0,560px);justify-content:center;gap:4px}
+#feedback-stack:has(> :not([hidden])){padding:4px 8px}
+#status,#action-feedback{padding:5px 8px;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:var(--control-radius,6px);background:var(--panel)}
+#status{max-height:20dvh;overflow:auto;font-size:13px;color:var(--text)}
+/* Default-off before JS or storage resolves. */
 html:not([data-debug-mode="on"]) #status{display:none!important}
-#action-feedback{max-width:320px;font-size:12px}
+#action-feedback{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;line-height:1.35}
+#action-feedback.notice-error{border-inline-start:3px solid var(--error,var(--accent))}
+#dismiss-action-feedback{font-size:16px;line-height:1;min-inline-size:28px;min-block-size:28px;padding:0}
 #oauth-redirect-uri,.wrap-text,#dest-list .dest-row{min-width:0;overflow-wrap:anywhere}
 .remote-diagnostic-actions{display:flex;flex-wrap:wrap;gap:8px}
 .dialog-body .between:has(#hierarchy-toggle),.dialog-body .tabs:has(#select-all){flex-wrap:wrap}
@@ -193,7 +197,6 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 #dialog-title{min-width:0;overflow-wrap:anywhere}
 #dialog-title input{max-width:100%}
 .preview-rename-status{display:block;font-size:12px;color:var(--muted)}
-.explorer-mini-toast{position:fixed;inset:auto 12px 12px auto;z-index:10;max-width:calc(100vw - 24px);pointer-events:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0003;font-size:12px}
 .explorer-busy-cursor{display:none;position:fixed;z-index:11;width:14px;height:14px;pointer-events:none;color:var(--accent);filter:drop-shadow(0 0 1px var(--bg))}
 :root[data-operation-busy]:not(:is([data-busy-cursor=hourglass],[data-busy-cursor=ring],[data-busy-cursor=arrow-busy],[data-busy-cursor=redown-pulse])) :is(#shell,#dialog,#shell *,#dialog *){cursor:progress}
 :root[data-busy-cursor=hourglass] .explorer-busy-cursor:not([hidden]){display:block;background:currentColor;clip-path:polygon(12% 0,88% 0,85% 23%,62% 49%,85% 76%,88% 100%,12% 100%,15% 76%,38% 49%,15% 23%)}

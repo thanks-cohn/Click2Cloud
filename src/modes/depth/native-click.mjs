@@ -68,5 +68,5 @@ export function createDepthFeedback(chrome,refreshBadge=async()=>{}){return asyn
  if(!routine){
   try{await refreshBadge();}catch{}
  }
- try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
+ try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',operationId:outcome.operationId,message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
 };}

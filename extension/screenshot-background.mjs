@@ -39,7 +39,7 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
   },
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},
   transient:outcome=>send({channel:'screenshot-result',transient:true,...outcome}),
-  progress:job=>send({channel:'screenshot-result',state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
+  progress:job=>send({channel:'screenshot-result',operationId:job.plan.operationId,state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
   async notify(job,{recorded}){
    const confirmed=job.outputs.filter(output=>output.state==='confirmed').length;
    const retryable=job.outputs.filter(output=>job.cachedAt&&!job.originalUnavailable&&output.state!=='confirmed'&&output.recoverable).length;
@@ -50,7 +50,7 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
     catch{}
    }
    const code=job.code??(confirmed?undefined:job.outputs.find(output=>output.code)?.code);
-   await send({channel:'screenshot-result',windowId:job.plan.context?.windowId,confirmed,total:job.outputs.length,state:job.state,code,recorded,retryable});
+   await send({channel:'screenshot-result',operationId:job.plan.operationId,windowId:job.plan.context?.windowId,confirmed,total:job.outputs.length,state:job.state,code,recorded,retryable});
   }
  });
  async function historyOutput(params){

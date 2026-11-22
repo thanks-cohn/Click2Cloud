@@ -7,14 +7,12 @@ const wording={
  mkdir:['Creating folder…','Created!','Folder creation was not completed.']
 };
 
-export function createExplorerOperationFeedback(document){
+export function createExplorerOperationFeedback(document,notifications){
  const root=document.documentElement;
- const toast=document.createElement('div'),cursor=document.createElement('div');
- toast.className='explorer-mini-toast';
- toast.setAttribute('role','status');
+ const cursor=document.createElement('div');
  cursor.className='explorer-busy-cursor';
  cursor.setAttribute('aria-hidden','true');
- let pending=0,sequence=0,timer,point;
+ let pending=0,sequence=0,clearNotice,point;
  function follow(event){
   if(event.pointerType==='touch')return;
   const host=document.querySelector('#dialog[open]')??document.body;
@@ -24,18 +22,9 @@ export function createExplorerOperationFeedback(document){
   cursor.hidden=false;
   point=true;
  }
- function clear(){
-  clearTimeout(timer);
-  toast.remove();
- }
- function paint(message,{hold=false}={}){
-  clear();
-  if(document.hidden)return;
-  const dialog=document.querySelector('#dialog[open]');
-  const gallery=dialog?.querySelector('[data-gallery]');
-  ((hold||gallery)&&dialog?dialog:document.body).append(toast);
-  toast.textContent=message;
-  if(!hold)timer=setTimeout(clear,1800);
+ function paint(message,error=false){
+  clearNotice?.();
+  clearNotice=notifications.show(message,{error,explorer:true,key:null});
  }
  function start(kind){
   const id=++sequence,messages=wording[kind];
@@ -48,7 +37,7 @@ export function createExplorerOperationFeedback(document){
   const dialog=document.querySelector('#dialog[open]');
   (dialog??document.body).append(cursor);
   cursor.hidden=!point;
-  paint(messages[0],{hold:true});
+  paint(messages[0]);
   let finished=false;
   return (ok,message)=>{
    if(finished)return;
@@ -60,10 +49,10 @@ export function createExplorerOperationFeedback(document){
     cursor.remove();
    }
    if(id===sequence){
-    if(message===null)clear();
-    else paint(message??messages[ok?1:2]);
+    if(message===null)clearNotice?.();
+    else paint(message??messages[ok?1:2],!ok);
    }
   };
  }
- return {start,notify:message=>{if(!pending)paint(message);},clear};
+ return {start,notify:message=>{if(!pending)paint(message);}};
 }

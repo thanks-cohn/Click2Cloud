@@ -42,10 +42,12 @@ import {createListingOrder,createListingReader,rowWindow,gridWindow,masonryLayou
 import {ancestors,scopeKey,targetKey} from '../src/core/menu-identity.mjs';
 import {createDebugPreference} from '../src/chrome/debug-preference.mjs';
 import {createExplorerOperationFeedback} from './explorer-operation-feedback.mjs';
+import {createShelfNotifications} from './shelf-notifications.mjs';
 import {createExplorerImageClipboard} from './explorer-image-clipboard.mjs';
 import {installExplorerMarquee} from './explorer-marquee.mjs';
 import {installDetailsColumns} from './explorer-details-columns.mjs';
-const operationFeedback=createExplorerOperationFeedback(document);
+const notifications=createShelfNotifications(document);
+const operationFeedback=createExplorerOperationFeedback(document,notifications);
 const copyImageToClipboard=createExplorerImageClipboard(params=>api('readFileChunk',params,{quiet:true}));
 const readinessNames={CLOUDFLARE_READY:'Ready to save',READY:'Ready to save',NOT_ACTIVATED:'R2 is unavailable. Correct it manually with Cloudflare, then Check again.',RECONNECT_REQUIRED:'Log in to reconnect Cloudflare.',INSUFFICIENT_PERMISSION:'Cloudflare did not grant the required access. Reconnect with the necessary permissions.',NETWORK_UNAVAILABLE:'Cloudflare could not be reached. Try again when the connection is available.',ACCOUNT_AMBIGUOUS:'Choose the Cloudflare account to use.',UNKNOWN:'R2 readiness is not confirmed. Retry Check R2 or review account permissions.',REPAIR_REQUIRED:'This destination needs its private save connection prepared or repaired.',SETUP_RESUME_REQUIRED:'Setup approval is saved. Resume the existing initialization when ready.',SETUP_APPROVAL_REQUIRED:'Approve initial setup to make Cloudflare saving ready.',CHOOSE_DESTINATION:'Choose a folder in Explorer and make it your default.',DESTINATION_UNAVAILABLE:'The selected destination is unavailable. Reconnect or choose another.'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -83,21 +85,19 @@ function applyDebugMode(enabled){
  }else if(diagnosticDialog)$('#header-more').focus({preventScroll:true});
 }
 debugPreference.subscribe(applyDebugMode);applyDebugMode(false);void debugPreference.ready.then(applyDebugMode);
-function quietFeedback(value,attention){
- const feedback=$('#action-feedback');if(!feedback)return;
+function quietFeedback(value,attention,noticeKey){
  const required=attention??(/^[A-Z][A-Z0-9_]+$/.test(value)&&!['READY','CLOUDFLARE_READY'].includes(value)||/could not|cannot|failed|not confirmed|not ready|not saved|uncertain|blocked|unavailable|required|denied|reconnect|needs attention|incomplete|conflict|missing|corrupt|not authorized|not prepared/i.test(value));
  if(required){
   const actionable=/uncertain|not confirmed|unconfirmed|mismatch|interrupted/i.test(value)?'Save not confirmed. Check History before retrying.':
     /auth|token|reconnect|log in|sign.in|permission|scope/i.test(value)?'Reconnect Cloudflare or review access in Remotes.':
     /worker|setup|prepare|not ready/i.test(value)?'Prepare this destination in Remotes before saving.':
     /configuration|revision|generation|storage|current_/i.test(value)?'Configuration needs attention. Review the current panel before retrying.':null;
-  feedback.textContent=actionable??names[value]??'Review the current panel or History for details.';
-  feedback.hidden=!feedback.textContent;
+  notifications.show(actionable??names[value]??'Review the current panel or History for details.',{error:true,key:noticeKey});
  }
- else if(/^Saving remotely/i.test(value)){feedback.textContent='Saving remotely…';feedback.hidden=false;}
- else if(!value||/saved|verified|ready to save|connected\.|cancelled/i.test(value)){feedback.hidden=true;feedback.textContent='';}
+ else if(/^Saving remotely/i.test(value))notifications.show('Saving remotely…',{key:noticeKey});
+ else if(value==='Saved and independently verified.')notifications.show(value,{key:noticeKey});
 }
-const status=(s,{attention}={})=>{const el=$('#status'),value=String(s??'');el.dataset.diagnostic='';el.dataset.code='';if(/^\d+ items|^Ready ·|^Saved \d+/.test(value)){el.hidden=true;el.textContent='';return;}const raw=/^[A-Z][A-Z0-9_]+$/.test(value);if(raw){el.dataset.code=value;el.dataset.diagnostic=value;}if(value.startsWith('Click2Cloud could not start'))el.dataset.diagnostic=value;el.textContent=raw?(names[value]??'The operation could not be completed. Inspect the relevant panel for details.'):value.startsWith('Click2Cloud could not start')?'Click2Cloud could not start. Your saved data was kept. Use Retry or inspect engine diagnostics.':value==='OK'?'The operation could not be confirmed.':value;el.hidden=!debugMode||!value;quietFeedback(value,attention);};
+const status=(s,{attention,noticeKey}={})=>{const el=$('#status'),value=String(s??'');el.dataset.diagnostic='';el.dataset.code='';if(/^\d+ items|^Ready ·|^Saved \d+/.test(value)){el.hidden=true;el.textContent='';return;}const raw=/^[A-Z][A-Z0-9_]+$/.test(value);if(raw){el.dataset.code=value;el.dataset.diagnostic=value;}if(value.startsWith('Click2Cloud could not start'))el.dataset.diagnostic=value;el.textContent=raw?(names[value]??'The operation could not be completed. Inspect the relevant panel for details.'):value.startsWith('Click2Cloud could not start')?'Click2Cloud could not start. Your saved data was kept. Use Retry or inspect engine diagnostics.':value==='OK'?'The operation could not be confirmed.':value;el.hidden=!debugMode||!value;quietFeedback(value,attention,noticeKey);};
 const names={DEFAULT_DESTINATION_UNAVAILABLE:'This location cannot be used as the default. Check access and menu visibility.',SAVED_DESTINATIONS_RESTORED:'Saved destinations restored',PROVENANCE_TOO_LARGE:'The selected menu snapshot and filenames exceed R2’s 2 KiB metadata limit. Shorten the menu titles or path; nothing was written.',PROVENANCE_INVALID:'The saved object’s menu metadata could not be validated. The save is not verified.',PROVENANCE_TARGET_MISMATCH:'The menu snapshot does not match the authorized destination. The save was stopped.',OBJECT_CHANGED:'The object changed while it was being read. Refresh and try again.',RANGE_RESPONSE_INVALID:'The object changed or its byte range could not be verified.',OBJECT_IDENTITY_UNAVAILABLE:'Cloudflare did not return a usable strong object identity. The read was stopped safely.',DOWNLOAD_WRITE_UNCONFIRMED:'The local file size did not match the R2 object. Download completion could not be verified.',R2_STATUS_UNKNOWN:'Cloudflare R2 access is not confirmed. Review the HTTP status and provider codes below, check selected-account R2 access, then log in again.',R2_CONFIRMED_INACTIVE:'Enable R2 for the selected account in Cloudflare, then log in again. No bucket or Worker was created.',INSUFFICIENT_SCOPE:'Cloudflare did not grant the required access. Update Cloudflare permissions and log in again; saved destinations remain.',NATIVE_APPLY_INCOMPLETE:'Cloudflare is prepared, but Chrome did not acknowledge the menu. Reload the existing extension and log in again; saved destinations remain.',ACCOUNT_AMBIGUOUS:'Use Review save setup in Remotes to choose the authorized Cloudflare account.',PROFILE_COPY_INVALID:'Choose the complete private profile copy produced by the local preservation tool.',PROFILE_COPY_MISMATCH:'The private copy no longer matches its verified manifest. No configuration was changed.',PROFILE_COPY_INCOMPLETE:'The selected copy is missing required extension storage evidence.',RECOVERY_PRESERVATION_REQUIRED:'Verify and attach your private profile copy before rebuilding.',REBUILD_REQUIRES_ABSENT_CONFIGURATION:'Surviving configuration needs validated recovery or review; it will not be replaced.',OWNER_CHOICES_REQUIRED:'Choose the new destination, mode and options explicitly.',PREVIOUS_BACKUP_REQUIRES_REVIEW:'The existing recovery folder was kept. Review it before changing the preservation location.',TRANSIENT_API_FAILURE:'Cloudflare could not be reached. Your saved connection and destinations were kept. Try Log in again when the network is available.',OAUTH_IDENTITY_UNVERIFIED:'Cloudflare account identity has not been verified. Use Check account authorization.',PROVIDER_AUTH_POLICY_DENIED:'Cloudflare denied sign-in. Review access for this account, then try Log in again.',OAUTH_CALLBACK_REJECTED:'The sign-in callback did not match the pending request. Start Log in again.',LOGIN_IN_PROGRESS:'A sign-in is already pending. Complete or cancel that provider window.',OAUTH_CANCELLED:'Sign-in cancelled. Your saved data was kept.',REAUTH_REQUIRED:'Cloudflare needs you to sign in again. Saved destinations and setup approval are kept.',TOKEN_EXPIRED:'Cloudflare needs you to sign in again. Saved destinations and setup approval are kept.',ENGINE_NO_RESPONSE:'The local service did not answer. Reopen the Shelf or inspect extension service-worker diagnostics; saved data was not changed.',ENGINE_RECEIVER_MISSING:'Chrome has not started the extension service yet. Try the control again.',ENGINE_RESPONSE_CHANNEL_CLOSED:'Chrome interrupted the local connection. Try the control again; no configuration was replaced.',ENGINE_MESSAGE_SEND_FAILED:'The local extension connection failed. Try the control again.',ENGINE_READ_TIMEOUT:'The local service is taking too long. Other independent controls remain available.',STORAGE_ACCESS_UNAVAILABLE:'Chrome credential storage is unavailable. Reopen the extension after checking browser storage policy; saved data was not replaced.',STORAGE_UNAVAILABLE:'Saved local configuration could not be read. Authentication is independent; do not clear extension storage.',CURRENT_READ_UNAVAILABLE:'Saved local configuration could not be read. Nothing was replaced. Inspect local storage diagnostics.',HTTP_401:'Your session needs to reconnect before this object can be read.',HTTP_403:'This object read was denied. Check the account and object-read permissions.',HTTP_404:'This object no longer exists at this location. Refresh the folder.',HTTP_429:'The provider is busy. Wait and retry the read.',WORKER_DESTINATION_SCOPE_REQUIRED:'The existing Worker is scoped to a different folder. Review bucket access in Remotes. Cloudflare resources are unchanged.',CONFIGURATION_CONFLICT:'Conflicting saved configuration versions require validated recovery. Setup stopped without replacing them.',CONFIGURATION_RECORD_MISSING:'Saved configuration records are missing. Stop setup and use validated recovery; existing data was not overwritten.',CONFIGURATION_CORRUPT:'Saved configuration could not be validated. Stop setup and use validated recovery.',SETUP_APPROVAL_RECORD_MISSING:'Previous setup is recorded, but its approval ledger is missing. Inspect or recover local setup records before approving new work.',WORKER_UPGRADE_APPROVAL_REQUIRED:'Update this existing destination’s Worker to match this Click2Cloud version and enable verified save metadata. Your session, bucket and saved choices are kept.',WORKER_FILE_API_REPAIR_REQUIRED:'Update this existing destination’s Worker to enable file actions. No file action was started.',OAUTH_REGISTERED_SCOPES_REJECTED:'Cloudflare rejected the nine registered permissions. Have the client owner confirm the saved registration; your existing connection and destinations were kept.',WORKER_CREATE_PERMISSION_REQUIRED:'Reauthorize Cloudflare with Workers Admin to create the pending Worker. Existing resources and setup approval were kept.',AUTHORIZATION_DENIED:'This save is not authorized. Check the destination and public HTTPS source.',SOURCE_DENIED:'This source is not eligible public HTTPS.',SOURCE_ADDRESS_DENIED:'The source resolves to a private or special-use network address.',SOURCE_EGRESS_UNAVAILABLE:'The source could not be read through Cloudflare’s HTTPS fetch. Inspect its source-stage diagnostic; no verified save was reported.',SOURCE_STALLED:'The source stopped making progress.',RESOURCE_BUSY:'Remote capacity is busy. No write was attempted; try a fresh click later.',R2_SINGLE_PUT_LIMIT:'This file exceeds the current conditional R2 upload service limit. Safe multipart completion is not verified.',OPERATION_INTERRUPTED:'This remote operation was interrupted. Inspect it before any new save.',SOURCE_UNAVAILABLE:'The remote source could not be read. No verified save was reported.',SIZE_LIMIT:'The source exceeds the supported remote-transfer limit.',BUFFER_LIMIT:'This source needs more buffering than the supported limit.',WRITE_UNCONFIRMED:'The write is uncertain. Inspect the destination before retrying.',RECONCILE_READ_ONLY:'The transfer result is uncertain. Inspect the receipt before retrying.',OPERATION_ALREADY_CLAIMED:'This operation was already submitted. Inspect its receipt; it was not replayed.',VERIFICATION_MISMATCH:'Destination verification did not match. Inspect before retrying.',TRANSPORT_UNAVAILABLE:'The private save connection could not be reached. Check Cloudflare setup/status.',PROVIDER_NOT_IMPLEMENTED:'This provider is not available yet. No file was saved.',REMOTE_SOURCE_REQUIRED:'Cloudflare saves require an eligible public HTTPS source; local file bytes are not uploaded.',REMOTE_EXPLORER_SOURCE_UNAVAILABLE:'This Explorer file has no authorized remote-fetch source. Cloudflare cannot stage it through the browser.',WORKER_SETUP_REQUIRED:'Prepare Cloudflare in Remotes before saving.',AUTH_REQUIRED:'Log in to browse this connection.',OAUTH_CANCELLED_OR_UNAVAILABLE:'Sign-in cancelled or unavailable. Retry when ready.',OAUTH_REDIRECT_SETUP_REQUIRED:'Connection setup required. The registered callback does not match this installation.',AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE:'Saving needs an authenticated Click2Cloud Worker transport. No bytes were uploaded.',EXTERNAL_RECOVERY_UNAVAILABLE:'Choose and authorize an external backup folder first.',REVISION_CONFLICT:'Configuration changed. Refresh and try again.',SCOPE_UNAUTHORIZED:'This account is not authorized.',PROVIDER_READ_FAILED:'The provider could not list this location. Retry Refresh.'};
 let configurationIssue=null;
 let state,connection={state:'UNKNOWN',accounts:[]},view='remotes',source=null,entries=[],selected=new Set(),history=[],historyAt=-1,cursor='',loading=false,sort={key:'displayName',direction:1},anchor=0,listingEpoch=0;
@@ -368,7 +368,7 @@ async function focusShelf({live=false}={}){
   try{const readiness=await api('checkCloudflareR2',{accountId:request.target.accountId,target:request.target},{quiet:true}),native=readiness.state==='READY'?await api('inspectNativeACK',{}, {quiet:true}):null;if(shelfRequest!==request)return false;const ready=selectedSetupReady(request.target,readiness,native);cloudflareState={...readiness,target:request.target,accountId:request.target.accountId,selectedReady:ready,code:ready?'CLOUDFLARE_READY':selectedSetupCode(readiness,request.code)};}
   catch(error){if(shelfRequest===request)cloudflareState={state:'PROVISIONING_BLOCKED',code:error.code,diagnostic:error.diagnostic,target:request.target,accountId:request.target.accountId};}
  }
- if(view==='remotes'&&$('#remotes-connection')){renderRemotes();if(request)status(cloudflareState?.selectedReady?'Prepared and verified · the original click did not save. Make a new right-click for the selected destination.':'Not saved · '+(cloudflareState?.code??request.code??'ATTENTION_REQUIRED')+' · '+(names[cloudflareState?.code??request.code]??readinessNames[cloudflareState?.code??request.code]??'Inspect or prepare the selected destination below.'));}return false;
+ if(view==='remotes'&&$('#remotes-connection')){renderRemotes();if(live&&request)status(cloudflareState?.selectedReady?'Prepared and verified · the original click did not save. Make a new right-click for the selected destination.':'Not saved · '+(cloudflareState?.code??request.code??'ATTENTION_REQUIRED')+' · '+(names[cloudflareState?.code??request.code]??readinessNames[cloudflareState?.code??request.code]??'Inspect or prepare the selected destination below.'));}return false;
 }
 async function loadTree(initial=null){
   const ticket=++treeEpoch;$('#tree').textContent='Loading accounts…';bucketTargets.length=0;treeNodes.clear();
@@ -512,7 +512,7 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
-async function show(next){if(next==='downloads'&&!debugMode)return;if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view)notifications.clear();if(next!=='history')historyUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
 }if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header nav [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
@@ -1741,7 +1741,6 @@ async function downloadEntry(entry){
  }catch(error){try{await writer?.abort();}catch{}throw error;}
 }
 
-let screenshotFeedbackTimer;
 chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(sender?.id!==chrome.runtime.id)return;
  if(['shelf-history-show','shelf-explorer-search'].includes(message?.channel)){
@@ -1757,9 +1756,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  }
  if(message?.channel==='shelf-history-feedback'){
   void shelfWindow.then(id=>{if(id===message.windowId){
-   const feedback=$('#action-feedback');
-   feedback.textContent=message.code==='SHELF_CLOSE_UNAVAILABLE'?'Use the Shelf close button in this version of Chrome.':'Chrome could not change the Shelf. Try the shortcut again.';
-   feedback.hidden=false;
+   notifications.show(message.code==='SHELF_CLOSE_UNAVAILABLE'?'Use the Shelf close button in this version of Chrome.':'Chrome could not change the Shelf. Try the shortcut again.',{error:true});
   }}).catch(()=>{});
   return;
  }
@@ -1767,19 +1764,24 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(message?.channel==='screenshot-result'){
   void shelfWindow.then(id=>{
    if(message.windowId!=null&&id!==message.windowId)return;
-   const feedback=$('#action-feedback');
-   const text=screenshotFeedback(message);
-   clearTimeout(screenshotFeedbackTimer);
-   feedback.textContent=text;
-   feedback.hidden=false;
-   if(message.state!=='uploading')screenshotFeedbackTimer=setTimeout(()=>{
-    if(feedback.textContent===text){feedback.textContent='';feedback.hidden=true;}
-   },6000);
+   notifications.show(screenshotFeedback(message),{
+    error:message.state!=='uploading'&&(!message.confirmed||message.retryable>0||message.recorded===false),
+    key:message.operationId?`screenshot:${message.operationId}:${message.state}:${message.confirmed}`:undefined
+   });
   }).catch(()=>{});
   return;
  }
- if(message?.channel==='depth-click-outcome'){status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state)});return;}
- if(message?.channel==='redown-basic-attempt'){basicCards.onAttempt(message.attempt);return;}
+ if(message?.channel==='depth-click-outcome'){
+  status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state),
+   noticeKey:message.operationId?`depth:${message.operationId}:${message.state}`:undefined});
+  return;
+ }
+ if(message?.channel==='redown-basic-attempt'){
+  const attempt=message.attempt;
+  basicCards.onAttempt(attempt);
+  if(attempt?.state==='SAVED')notifications.show('Provider save verified.',{key:`basic:${attempt.id}`});
+  return;
+ }
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}
  if(message?.channel==='shelf-attention'){void focusShelf({live:true}).catch(e=>status(e.message));return;}
  if(message?.channel==='connection-changed'){void (async()=>{const before=JSON.stringify([connection?.state,connection?.accounts]);listingReader.invalidate();await connections();if(view==='explorer'&&connection.state==='CONNECTED'&&before===JSON.stringify([connection.state,connection.accounts])&&source)await reloadCurrentDirectory();if(view==='remotes'&&$('#remotes-connection'))renderRemotes();})().catch(e=>status(e.message));return;}
@@ -1792,14 +1794,15 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(message?.channel!=='remote-result')return;
  const affectsDirectory=d=>d&&source&&view==='explorer'&&source.connectionId===d.connectionId&&source.accountId===d.accountId&&source.bucketName===d.bucketName&&(d.prefix?d.prefix+'/':'').startsWith(source.prefix);
  void (async()=>{const result=message.result;if(result.kind==='readiness')return;historyUI.invalidate(result.operationId);reconnectAfter(result.code);
+  const noticeKey=result.operationId?`save:${result.operationId}:${result.state}`:undefined;
   if(affectsDirectory(result.destination))markCurrentSearchStale();
   if(result.state==='verified'){
    if(view==='history')return;
    const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status(current.reconciliation?.code??current.code??'Save verification is pending. Inspect the receipt before retrying.');return;}
    imageReader.clear();clearThumbnails();listingReader.invalidate();const d=current.receipt?.destination??current.destination;
-   if(affectsDirectory(d))await reloadCurrentDirectory();status('Saved and independently verified.');
-  }else if(view==='remotes'&&result.code==='SOURCE_UNAVAILABLE')status('Save source unavailable. See History for details.',{attention:true});
-  else status(result.state==='pending'?'Saving remotely · '+(result.stage??'accepted'):names[result.code]??result.code??result.state,{attention:result.state!=='pending'});
+   if(affectsDirectory(d))await reloadCurrentDirectory();status('Saved and independently verified.',{noticeKey});
+  }else if(view==='remotes'&&result.code==='SOURCE_UNAVAILABLE')status('Save source unavailable. See History for details.',{attention:true,noticeKey});
+  else status(result.state==='pending'?'Saving remotely · '+(result.stage??'accepted'):names[result.code]??result.code??result.state,{attention:result.state!=='pending',noticeKey});
  })().catch(e=>status(e.message));
 });
 window.addEventListener('focus',()=>{focusPendingSearch();void connections().then(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}).catch(e=>status(e.message));});
