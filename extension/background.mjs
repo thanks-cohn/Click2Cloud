@@ -58,7 +58,15 @@ const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
 }});
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference,onOpened:shelfHistory.opened,notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
-let inventory={revision:0,scopes:[]},engine,revoking=false;
+let inventory={revision:0,scopes:[]},inventoryHydrated=false,engine,revoking=false;
+async function loadCloudInventory(signal){
+ if(inventoryHydrated)return;
+ const saved=await chrome.storage.local.get('discoveredInventory');
+ signal?.throwIfAborted();
+ if(inventoryHydrated)return;
+ inventory=saved.discoveredInventory??inventory;
+ inventoryHydrated=true;
+}
 function assertConnected(){if(revoking)throw Object.assign(Error(),{code:'AUTHORIZATION_REVOKED'});}
 const setupOauth={...oauth,
  authority:()=>{assertConnected();return oauth.authority();},
@@ -79,7 +87,7 @@ async function checkSelectedBucket(target,auth){
 }
 const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,compatibleCodeDigests:previousWorkerDigests,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
-async function remoteReady(target){const a=await oauth.status();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
+async function remoteReady(target,signal){const a=await oauth.status();signal?.throwIfAborted();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);signal?.throwIfAborted();snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
 async function prepared(target){
  return preparedDestination(await provisioner.lookup(target),target,BUILD_INFO.workerCodeDigest,previousWorkerDigests);
 }
@@ -116,6 +124,7 @@ const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabiliti
   return result;
 }}),{authority:oauth.authority});
 async function observeListing(source,result){
+ try{await loadCloudInventory();}catch{return;}
  const t=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+source.accountId,...source,prefix:''});
  let s=inventory.scopes.find(x=>scopeKey(x.target)===scopeKey(t)),changed=false;
  if(!s){s={target:t,authorized:true,workerReady:false,folders:[],complete:false};inventory.scopes.push(s);changed=true;}
@@ -133,14 +142,26 @@ const fileApi=Object.freeze({...filenameApi,async listDirectory(input,options){
 // Menu inspection/boot projects saved observations without a full-cloud network
 // sweep. Destination Save refreshes its exact new targets; every actual save
 // independently rechecks current authority and scoped Worker capability.
-async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false,depthBudget,preparedTargets=[],saveSelection,localOnly=false}={}) {
-  const status=await oauth.status().catch(error=>{if(!localOnly)throw error;return {state:'DISCONNECTED',accounts:[]};});
-  const state=await current.read(),policy=state.product.recovery;
-  if(!localOnly)for(const b of policy.buckets.filter(b=>b.enabled))try{const index=await recoveryCrawl.inspect(b.target);let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}scope.folders=[...new Set([...scope.folders,...index.folders])];}catch{}
-  attentionPreference=state.product.autoOpenAttention;const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
+async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDepthReadiness=false,depthBudget,preparedTargets=[],saveSelection,localOnly=false,currentState,signal}={}) {
+  let cloudflareInventory;
+  const [status,state,{depthInventory=[],depthRefreshPending=[]}]=await Promise.all([
+    oauth.status().catch(error=>{if(!localOnly)throw error;cloudflareInventory={state:'pending',code:'CLOUDFLARE_STATUS_UNAVAILABLE'};return {state:'DISCONNECTED',accounts:[]};}),
+    currentState??current.read(),
+    chrome.storage.local.get(['depthInventory','depthRefreshPending']),
+    loadCloudInventory(signal)
+  ]);
+  signal?.throwIfAborted();
+  if(!localOnly)for(const b of state.product.recovery.buckets.filter(b=>b.enabled)){
+    let index;
+    try{index=await recoveryCrawl.inspect(b.target);}catch{continue;}
+    signal?.throwIfAborted();
+    let scope=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(b.target));
+    if(!scope){scope={target:{...b.target,prefix:''},folders:[],complete:false};inventory.scopes.push(scope);}
+    scope.folders=[...new Set([...scope.folders,...index.folders])];
+  }
+  const savedTargets=[state.product.defaultTarget,...Object.values(state.configs).flatMap(c=>(c.destinations??c.scopes??[]).map(d=>d.target))].filter(Boolean);
   // Keep the bounded Depth snapshot separate from Explorer and recovery observations.
   // A failed crawl leaves the previous snapshot intact.
-  const {depthInventory=[],depthRefreshPending=[]}=await chrome.storage.local.get(['depthInventory','depthRefreshPending']);
   const depthSnapshots=new Map(depthInventory.map(s=>[scopeKey(s.target),s]));
   const pendingScopes=new Set(depthRefreshPending);
   const refreshSelections=refreshDepthScopes.filter(s=>!s.hidden);
@@ -148,13 +169,16 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
   if(refreshSelections.length)await chrome.storage.local.set({depthRefreshPending:[...pendingScopes]});
   const discovered=[],depthFailures=[];
   for(const selection of refreshSelections){
+    signal?.throwIfAborted();
     try{
       if(status.state!=='CONNECTED'||!status.accounts.some(a=>a.id===selection.target.accountId))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
-      const result=await discoverDepthScope(baseFileApi,selection,depthBudget);
+      const result=await discoverDepthScope(baseFileApi,selection,{...depthBudget,signal:signal??depthBudget?.signal});
+      signal?.throwIfAborted();
       depthSnapshots.set(result.scopeKey,result);
       pendingScopes.delete(result.scopeKey);
       discovered.push(result.target,...result.folders.map(prefix=>({...result.target,prefix})));
     }catch(error){
+      signal?.throwIfAborted();
       if(!saveSelection)throw error;
       const code=error?.code;
       depthFailures.push({target:selection.target,code:/^[A-Z0-9_]+$/.test(code??'')?code:'DEPTH_DISCOVERY_REQUIRED'});
@@ -191,8 +215,9 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
   if(refreshTargets.length||discovered.length)for(const t of [...refreshTargets,...discovered])snapshots.delete(targetKey(t));
   let readinessIndex=0;
   await Promise.all(Array.from({length:Math.min(4,readinessTargets.length)},async()=>{
-    while(readinessIndex<readinessTargets.length)await remoteReady(readinessTargets[readinessIndex++]);
+    while(readinessIndex<readinessTargets.length){signal?.throwIfAborted();await remoteReady(readinessTargets[readinessIndex++],signal);}
   }));
+  signal?.throwIfAborted();
   for(const saved of [...savedTargets,...narrowTargets]){let found=inventory.scopes.find(s=>scopeKey(s.target)===scopeKey(saved));if(!found){found={target:{...saved,prefix:''},folders:[],complete:false};inventory.scopes.push(found);}if(!found.folders.includes(saved.prefix))found.folders.push(saved.prefix);}
   const plans=new Map();
   for(const {target} of [...inventory.scopes,...depthScopes]){
@@ -211,7 +236,7 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
     workerReady:projectReady(s.target),
     folders:s.folders.map(p=>{const prefix=typeof p==='string'?p:p.prefix;return {prefix,workerReady:projectReady({...s.target,prefix})};})});
   return {...inventory,scopes:inventory.scopes.map(projectScope),depthScopes:depthScopes.map(projectScope),
-    depthCoverageComplete:depthScopes.every(s=>!s.stale),depthFailures};
+    depthCoverageComplete:depthScopes.every(s=>!s.stale),depthFailures,cloudflareInventory};
 }
 const getAuthorization=async selection=>{
  if(revoking)return null;
@@ -298,21 +323,35 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
     const delivered=native.desired?.rows.find(r=>r.id===itemId);
     // Basic uses its own authorization. The registrar still checks current
     // native acknowledgement, visibility and click context before dispatch.
-    if(delivered?.role==='provider-action'&&basicMenuProvider(delivered.providerAction)&&
-      !native.pending&&native.acknowledgedGeneration===native.desired.generation)return;
-    if(revoking)throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
+    if(delivered?.role==='provider-action'&&basicMenuProvider(delivered.providerAction)&&!native.pending){
+      const state=await readCurrent();
+      if(native.desired.generation===state.generation.desired&&engine.matchesCurrent(native.desired,state))return;
+    }
     const retained=native.lastAcknowledged?null:await readNativeRegistration();
     const previous=native.lastAcknowledged??(retained?.state==='acknowledged'?retained.desired:null);
-    const prior=previous?.rows.find(r=>r.id===itemId)??(delivered?.role==='provider-action'?delivered:null);
+    const priorBasic=retained?.desired?.rows.find(r=>r.id===itemId&&basicMenuProvider(r.providerAction));
+    const prior=previous?.rows.find(r=>r.id===itemId)??(delivered?.role==='provider-action'?delivered:priorBasic);
+    if(revoking&&!basicMenuProvider(prior?.providerAction))throw Object.assign(Error(),{code:'AUTH_REQUIRED'});
     await nativeReady();
     const next=registrar.inspect().desired?.rows.find(r=>r.id===itemId);
     if(!prior||!next||prior.role!==next.role||prior.actionId!==next.actionId)
       throw Object.assign(Error(),{code:'STALE_GENERATION'});
-  },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,dispatchOwnsAuthorization:true,
+  },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,dispatchOwnsAuthorization:true,isIndependentProvider:basicMenuProvider,
   dispatchAttention:(provider,info)=>invokeProviderAction({provider,emptyAssignment:provider==='cloudflare',attentionContext:attention.context(info)}),
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
     const provider=basicMenuProvider(action.providerAction);
-    if(provider)return basic.click(provider,info,tab);
+    if(provider){
+      const result=await basic.click(provider,info,tab);
+      if(result.state==='failed'&&/^(?:AUTH_|OAUTH_CONFIG_REQUIRED$)/.test(result.code)){
+        // Basic owns the click-time authorization and the failed save outcome.
+        // Some Chrome versions reject sidePanel.open after the async check.
+        try{
+          const opening=await attention.attend(action.providerAction,undefined,{code:result.code,context:attention.context(info)});
+          if(opening.state==='blocked')await chrome.tabs.create({url:chrome.runtime.getURL('extension/app.html')});
+        }catch{/* The original provider failure remains available in the Shelf. */}
+      }
+      return result;
+    }
     let source;try{source={...sourceFromClick(info),historyContext:captureHistoryContext(info,tab)};}catch(error){if(!action.providerAction&&action.actionKind!=='attention')return {state:'blocked',code:error.code??'SOURCE_INVALID'};}
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{
@@ -433,7 +472,7 @@ void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catc
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{await screenshotHost().prune();}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
 // Fresh validation on every state-dependent request; failures do not poison auth
 // or future read attempts. Never reinterpret an established missing CURRENT as empty.
-async function readCurrent(context){await trustedStorage();const saved=await current.read(context),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING',origin:'BACKGROUND_NATIVE_FENCE',subreason:'NATIVE_GENERATION_WITH_ZERO_CURRENT'});inventory=(await chrome.storage.local.get('discoveredInventory')).discoveredInventory??inventory;return saved;}
+async function readCurrent(context){await trustedStorage();const saved=await current.read(context),prior=(await chrome.storage.local.get('nativeRegistration')).nativeRegistration;if(prior?.desired?.generation>0&&saved.generation.desired===0)throw Object.assign(Error(),{code:'CONFIGURATION_RECORD_MISSING',origin:'BACKGROUND_NATIVE_FENCE',subreason:'NATIVE_GENERATION_WITH_ZERO_CURRENT'});attentionPreference=saved.product.autoOpenAttention;return saved;}
 let nativeAttempt, nextNativeReason;
 function startNative(reason){
  const operationId=operationIdentity();

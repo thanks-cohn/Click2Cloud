@@ -124,5 +124,9 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       card.outcome.animate([{opacity: 1}, {opacity: .55}, {opacity: 1}], {duration: 360, iterations: 2});
     }
   }
-  return {mount, onAttempt};
+  function showRecovery(provider) {
+    const card = cards.get(provider === 'google-drive' ? 'google' : provider);
+    card?.connect.closest('.remote-provider').scrollIntoView({block: 'nearest'});
+  }
+  return {mount, onAttempt, showRecovery};
 }

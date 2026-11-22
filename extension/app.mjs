@@ -353,8 +353,13 @@ function renderRemotes(){
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
 }
-async function focusShelf(){
+async function focusShelf({live=false}={}){
  const request=await api('inspectShelfAttention',{}, {quiet:true});shelfRequest=request;
+ if(['google-drive','onedrive','dropbox'].includes(request?.provider)){
+  if(live&&view!=='remotes'&&request.opening?.state==='opened')await show('remotes');
+  if(view==='remotes'&&request.opening?.state!=='badge-only')basicCards.showRecovery(request.provider);
+  return false;
+ }
  if(request?.provider==='cloudflare'&&request.target){
   try{const readiness=await api('checkCloudflareR2',{accountId:request.target.accountId,target:request.target},{quiet:true}),native=readiness.state==='READY'?await api('inspectNativeACK',{}, {quiet:true}):null;if(shelfRequest!==request)return false;const ready=selectedSetupReady(request.target,readiness,native);cloudflareState={...readiness,target:request.target,accountId:request.target.accountId,selectedReady:ready,code:ready?'CLOUDFLARE_READY':selectedSetupCode(readiness,request.code)};}
   catch(error){if(shelfRequest===request)cloudflareState={state:'PROVISIONING_BLOCKED',code:error.code,diagnostic:error.diagnostic,target:request.target,accountId:request.target.accountId};}
@@ -1709,7 +1714,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(message?.channel==='depth-click-outcome'){status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state)});return;}
  if(message?.channel==='redown-basic-attempt'){basicCards.onAttempt(message.attempt);return;}
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}
- if(message?.channel==='shelf-attention'){void focusShelf().catch(e=>status(e.message));return;}
+ if(message?.channel==='shelf-attention'){void focusShelf({live:true}).catch(e=>status(e.message));return;}
  if(message?.channel==='connection-changed'){void (async()=>{const before=JSON.stringify([connection?.state,connection?.accounts]);listingReader.invalidate();await connections();if(view==='explorer'&&connection.state==='CONNECTED'&&before===JSON.stringify([connection.state,connection.accounts])&&source)await reloadCurrentDirectory();if(view==='remotes'&&$('#remotes-connection'))renderRemotes();})().catch(e=>status(e.message));return;}
  if(message?.channel==='engine-navigation'&&message.target){if(view!=='explorer')return;void navigate(message.target,true,true).catch(e=>status(e.message));return;}
  if(message?.channel==='filename-inventory-changed'){

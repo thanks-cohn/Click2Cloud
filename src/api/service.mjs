@@ -121,31 +121,77 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
   }
   async function loadCurrent(context){try{return await readState(context);}catch(error){const candidate=error.code??error.message,code=typeof candidate==='string'&&/^[A-Z][A-Z0-9_]{1,79}$/.test(candidate)?candidate:'STORAGE_UNAVAILABLE';throw Object.assign(Error(code),{code,diagnostic:{stage:'current-read',...(['CURRENT_STORE','BACKGROUND_NATIVE_FENCE'].includes(error.origin)?{origin:error.origin}:{}),...(['ESTABLISHED_BOUNDARY_MISSING','HISTORICAL_EVIDENCE_WITHOUT_CONFIGURATION','REQUIRED_RECORD_MISSING','GENERATION_RECORD_MISSING','NATIVE_GENERATION_WITH_ZERO_CURRENT'].includes(error.subreason)?{subreason:error.subreason}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error.name)?{causeName:error.name}:{})}});}}
   const compile=async state=>engine.compile({mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory:await getInventory()});
+  // 3+1.1 reconcileNativeMenu / commitConfigChange. Boot and provider visibility
+  // use local observations. Only explicit Cloudflare refreshes get a live budget.
+  async function nativeInventory(options,timeoutMs){
+    const controller=new AbortController();
+    let timer;
+    try{
+      return await Promise.race([
+        getInventory({...options,signal:controller.signal}),
+        new Promise((_,reject)=>{timer=setTimeout(()=>{
+          const error=Object.assign(Error(),{code:'CLOUDFLARE_INVENTORY_TIMEOUT'});
+          reject(error);controller.abort(error);
+        },timeoutMs);})
+      ]);
+    }finally{clearTimeout(timer);}
+  }
   async function buildAndApply({refreshTargets=[],refreshDepth=false,refreshDepthReadiness=false,depthTarget,depthBudget,preparedTargets=[],saveSelection,lifecycle=false}={}){
     try{
-      const state=await (lifecycle?loadCurrent():current.read());
+      const state=await loadCurrent();
       const selectedDepthKeys=saveSelection&&new Set(saveSelection.filter(s=>s.mode==='depth').map(s=>scopeKey(s.target)));
-      const emptyAssignment=lifecycle&&!state.product.defaultTarget&&Object.values(state.configs).every(config=>!(config.destinations??config.scopes).length);
-      // The verified empty projection needs only CURRENT and Chrome. Existing
-      // configurations use local readiness and Depth observations on wake.
-      const inventory=lifecycle&&emptyAssignment?{scopes:[]}:await getInventory({refreshTargets,refreshDepthReadiness,depthBudget,preparedTargets,saveSelection,localOnly:lifecycle,
-        refreshDepthScopes:refreshDepth&&state.product.show.depth&&state.product.providerVisibility.cloudflare
-          ?state.configs.depth.scopes.filter(s=>(!depthTarget||scopeKey(s.target)===scopeKey(depthTarget))&&(!selectedDepthKeys||selectedDepthKeys.has(scopeKey(s.target)))):[]});
-      const options={mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory};
-      let spec;
-      if(lifecycle&&state.generation.desired>0){
-        const generation=state.generation.desired;
-        const cached=engine.getMenu(generation)??(await readNative().catch(()=>null))?.desired;
-        if(cached?.generation===generation){
-          const candidate=await engine.compile({...options,generation});
-          // A persisted spec is only a comparison baseline. Never dispatch
-          // from it without compiling the same routes from validated CURRENT.
-          const signature=({mode,modeRevision,rows})=>JSON.stringify({mode,modeRevision,rows});
-          if(signature(candidate)===signature(cached))spec=engine.getMenu(generation)??candidate;
+      const hasCloudflareRoutes=state.product.providerVisibility.cloudflare&&
+        (state.product.defaultTarget||Object.values(state.configs).some(config=>(config.destinations??config.scopes).length));
+      const refreshDepthScopes=refreshDepth&&state.product.show.depth
+        ?state.configs.depth.scopes.filter(s=>(!depthTarget||scopeKey(s.target)===scopeKey(depthTarget))&&(!selectedDepthKeys||selectedDepthKeys.has(scopeKey(s.target)))):[];
+      const live=hasCloudflareRoutes&&!lifecycle&&(refreshTargets.length>0||refreshDepthReadiness||refreshDepthScopes.length>0);
+      const local={currentState:state,preparedTargets,saveSelection,localOnly:true};
+      const evidence=engine.getEvidence?.();
+      const currentAck=!evidence?.pending&&evidence?.lastOutcome?.state==='completed'&&
+        evidence.acknowledgedGeneration===state.generation.desired&&engine.matchesCurrent(evidence.desired,state)
+        ?evidence.lastOutcome:null;
+      const pending=error=>({state:'pending',code:/^[A-Z][A-Z0-9_]+$/.test(error?.code??'')?error.code:'CLOUDFLARE_INVENTORY_UNAVAILABLE'});
+      async function applyInventory(inventory,generation){
+        const options={mode:'composite',configs:state.configs,product:state.product,defaultTarget:state.product.defaultTarget,inventory};
+        let spec;
+        if(generation>0){
+          const retained=engine.getMenu(generation);
+          const cached=retained??(await readNative().catch(()=>null))?.desired;
+          if(cached?.generation===generation){
+            const candidate=await engine.compile({...options,generation});
+            // Persisted ACKs are comparisons only. Recompile against CURRENT
+            // and obtain a real Chrome ACK before using a cold plan.
+            const signature=({mode,modeRevision,rows})=>JSON.stringify({mode,modeRevision,rows});
+            if(signature(candidate)===signature(cached))spec=retained??candidate;
+          }
+        }
+        return engine.apply(spec??await engine.compile(options));
+      }
+      let inventory,localNative,cloudflareInventory;
+      if(!live||!currentAck){
+        if(hasCloudflareRoutes)try{inventory=await nativeInventory(local,1500);}catch(error){cloudflareInventory=pending(error);}
+        // Keep an already acknowledged, current plan when the cache itself
+        // cannot be read. A cold worker still needs a fresh canonical apply.
+        localNative=cloudflareInventory&&currentAck
+          ?{...currentAck,retained:true}:await applyInventory(inventory??{scopes:[]},lifecycle?state.generation.desired:undefined);
+      }
+      if(live){
+        // Chrome has already seen the local plan. A slow Cloudflare refresh
+        // can hold up its own result without invalidating Basic's native ACKs.
+        if(localNative&&!['completed','partial'].includes(localNative.state))return localNative;
+        try{inventory=await nativeInventory({...local,localOnly:false,refreshTargets,refreshDepthReadiness,refreshDepthScopes,depthBudget},25000);}
+        catch(error){
+          const native=localNative??{...currentAck,retained:true};
+          cloudflareInventory=pending(error);
+          return {...native,cloudflareInventory,...(native.state==='completed'?{state:'partial',code:cloudflareInventory.code}:{})};
         }
       }
-      spec??=await engine.compile(options);
-      const native=await engine.apply(spec);
+      inventory??={scopes:[]};
+      cloudflareInventory=live?inventory.cloudflareInventory:cloudflareInventory??inventory.cloudflareInventory;
+      const native=live?await applyInventory(inventory,localNative?.appliedGeneration??state.generation.desired):localNative;
+      if(cloudflareInventory){
+        return {...native,cloudflareInventory,...(live&&native.state==='completed'?{state:'partial',code:cloudflareInventory.code}:{})};
+      }
       const selectedDepth=depthTarget&&inventory.depthScopes?.filter(s=>scopeKey(s.target)===scopeKey(depthTarget));
       const configuredDepth=depthTarget&&state.configs.depth?.scopes.some(s=>scopeKey(s.target)===scopeKey(depthTarget));
       const coverage=selectedDepthKeys

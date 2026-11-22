@@ -6,6 +6,8 @@ import {productState} from '../src/api/config.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createRemoteTransport} from '../src/cloudflare/transport.mjs';
 import {createEngine} from '../src/core/engine.mjs';
+import {stableId} from '../src/core/menu-identity.mjs';
+import {basicMenuProvider} from '../src/basic/host.mjs';
 
 const request = {version:'3+1.1', method:'loginBegin', params:{}};
 const target = {provider:'cloudflare', connectionId:'cloudflare:test', accountId:'test', bucketName:'saved', prefix:'chosen/'};
@@ -123,6 +125,79 @@ test('P0 first login and reconnect schedule the canonical menu even when setup f
  assert.equal(scheduled,2);
  assert.deepEqual(state.generation,{desired:1,applied:1});
  assert.deepEqual(state.configs,{simple:{destinations:[]},nested:{destinations:[]},depth:{scopes:[]}});
+});
+
+test('configured Cloudflare cannot gate independent native leaves on startup, live refresh, or Chrome row failure',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ const f=chromeFixture(), product=productState(), clicked=[];
+ const state={product,configs:{simple:{destinations:[{id:'saved',target,label:'Saved'}]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:null}};
+ let valid=true, phase='reject', liveSignal, localSignal, receipt;
+ let readLive,readLocal;
+ const current={read:async()=>{
+  if(!valid)throw Object.assign(Error(),{code:'CONFIGURATION_CORRUPT'});
+  return structuredClone(state);
+ },setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;}};
+ const registrar=createChromeRegistrar({chrome:f.chrome,isIndependentProvider:basicMenuProvider,dispatchOwnsAuthorization:true,
+  beforeClick:current.read,readRegistration:async()=>receipt,persist:async value=>{receipt=structuredClone(value);},
+  dispatch:async action=>{clicked.push(action.providerAction);return {state:'failed',code:'AUTH_REQUIRED'};}
+ });
+ const engine=createEngine({current,registrar,providerSetupActions:true,getAuthorization:async()=>assert.fail('Basic must not check Cloudflare authority')});
+ const api=createEngineApi({engine,current,authorize:async()=>true,getInventory:async({localOnly,signal})=>{
+  if(phase==='reject')throw Error('offline cache');
+  if(phase==='hang-local'&&localOnly){localSignal=signal;readLocal();return new Promise(()=>{});}
+  if(phase==='hang-live'&&!localOnly){liveSignal=signal;readLive();return new Promise(()=>{});}
+  return {scopes:[{target,authorized:phase==='connected',workerReady:phase==='connected',folders:['chosen/']}]};
+ }});
+ const basic=['google-drive','onedrive','dropbox'];
+ const nativeId=id=>stableId('provider-entry',id);
+ const click=provider=>registrar.handleClick({menuItemId:nativeId(provider),linkUrl:'https://example.org/file'});
+ const assertBasic=async expected=>{
+  for(const id of expected){
+   assert(f.rows.has(nativeId(id)),id);
+   assert.equal((await click(id)).code,'AUTH_REQUIRED');
+  }
+  assert.deepEqual(clicked.splice(0),expected);
+ };
+
+ assert.equal((await api.reconcile({lifecycle:true})).cloudflareInventory.code,'CLOUDFLARE_INVENTORY_UNAVAILABLE');
+ await assertBasic(basic);
+ phase='hang-local';
+ const readingLocal=new Promise(resolve=>{readLocal=resolve;});
+ const restart=api.reconcile({lifecycle:true});
+ await readingLocal;
+ t.mock.timers.tick(1500);
+ assert.equal((await restart).cloudflareInventory.code,'CLOUDFLARE_INVENTORY_TIMEOUT');
+ assert(localSignal.aborted);
+
+ phase='hang-live';
+ const readingLive=new Promise(resolve=>{readLive=resolve;});
+ const refreshing=api.reconcile();
+ await readingLive;
+ await assertBasic(basic);
+ t.mock.timers.tick(25000);
+ assert.equal((await refreshing).code,'CLOUDFLARE_INVENTORY_TIMEOUT');
+ assert(liveSignal.aborted);
+
+ // Simulate an installed row needing a Chrome update on reconnect. Its peers
+ // may continue to dispatch after their own ACKs while the tree stays partial.
+ phase='connected';
+ const cloud=nativeId('cloudflare');
+ f.controls.fault=(_method,id)=>id===cloud?'reject':null;
+ assert.equal((await api.reconcile({lifecycle:true})).code,'NATIVE_APPLY_INCOMPLETE');
+ assert.equal(registrar.inspect().acknowledgedGeneration,null);
+ await assertBasic(basic);
+ assert.equal((await click('cloudflare')).state,'blocked');
+ assert(!f.calls.some(([method])=>method==='removeAll'));
+ f.controls.fault=()=>null;
+ assert.equal((await api.reconcile({lifecycle:true})).state,'completed');
+ assert.deepEqual(registrar.inspect().desired.rows.find(row=>row.id===cloud).target,target);
+
+ valid=false;
+ const mutations=f.calls.length;
+ assert.equal((await api.reconcile({lifecycle:true})).code,'CONFIGURATION_CORRUPT');
+ assert.equal((await click('dropbox')).code,'CURRENT_AUTHORIZATION_REQUIRED');
+ assert.equal(f.calls.length,mutations);
+ assert.deepEqual(clicked,[]);
 });
 
 test('P0 100, 500 and 1000 native clicks keep exact targets, unique operations and an unchanged registration',async(t)=>{

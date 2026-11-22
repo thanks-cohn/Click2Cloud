@@ -5,12 +5,18 @@
 `extension/background.mjs:scheduleNative` joins startup, installation, worker
 evaluation, and successful `3+1.1` `loginBegin` or disconnect with the existing
 `reconcileNativeMenu` implementation. Lifecycle work validates durable CURRENT
-before compilation. A confirmed empty assignment compiles the standard provider
-actions from saved visibility alone. Established assignments use local inventory
-and retained Depth observations. Login schedules this work as soon as OAuth
-reports `CONNECTED`, independently of setup or cloud availability. Passive work
-does not provision anything. Settings and explicit `reconcileNativeMenu` retain
-their configure scope, expected generation, and fresh verification paths.
+before compilation. With Cloudflare hidden or no assigned routes, compilation
+uses saved visibility without reading Cloudflare inventory. Established routes use
+local OAuth status and retained inventory and Depth observations. When a local
+read fails or exceeds 1.5 seconds, a matching current ACK can be retained. A cold
+worker compiles from validated CURRENT with unconfirmed Cloudflare routes requiring
+attention. Login schedules local reconciliation as soon as OAuth reports
+`CONNECTED`. Passive reconciliation makes no provider requests or provisioning writes.
+Settings and explicit `reconcileNativeMenu` retain their configure scope and
+expected generation. When an explicit Cloudflare check is needed, an existing
+current ACK or a fresh local apply makes Basic available before the live read.
+Live refresh has a 25-second deadline. A failed refresh reports Cloudflare inventory
+as pending, and the registrar keeps the local ACKs.
 The screenshot host initializes on demand outside the native registration path.
 
 `src/chrome/registrar.mjs:apply` validates the parent-first plan before touching
@@ -24,11 +30,14 @@ Missing or corrupt CURRENT blocks mutation, and transient API failures preserve
 healthy rows for a subsequent reconciliation.
 
 `inspectNativeACK` reports confirmed and partial Chrome operations independently
-of visible rendering. A partially acknowledged generation cannot authorize a
-save. A confirmed provider-only action still reaches the existing attention
-entrypoint when CURRENT binds that ID and action. Normal native saves remain
-owned by `dispatchSave` and revalidate the current generation, action, provider
-account, bucket and prefix. Regression coverage lives in
+of visible rendering. Cloudflare saves require a fully acknowledged generation and
+`dispatchSave` revalidates the generation, action, account, bucket and prefix. A
+targetless Google Drive, OneDrive or Dropbox action with an individual Chrome ACK
+can dispatch during a partial apply after the worker validates CURRENT and the
+registrar validates the visible row and click context. Basic's `saves.start` checks
+the selected provider's authorization before acquisition. An authorization failure
+opens that provider's existing Shelf recovery when automatic attention is enabled.
+Regression coverage lives in
 `tests/native-menu-lifecycle.test.mjs`. Installed browser acceptance is tracked
 in the release evidence separately.
 

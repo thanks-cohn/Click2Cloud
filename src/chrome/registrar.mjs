@@ -42,7 +42,7 @@ export function generateChromePlan(spec) {
   return freeze({ schemaVersion: 1, generation: spec.generation, rows: freeze(plan), evidenceClass: 'generated' });
 }
 
-export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, readRegistration, retiredRoots = [], epoch = 1, dispatch, dispatchAttention, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, dispatchOwnsAuthorization=false } = {}) {
+export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist, readRegistration, retiredRoots = [], epoch = 1, dispatch, dispatchAttention, isIndependentProvider=()=>false, getAuthorization, onOutcome, nextOperationId, beforeClick=async()=>{},beforeApply=async()=>{},onGesture, observeClick, depthClick, readDepthClickRow, dispatchOwnsAuthorization=false } = {}) {
   if (owners.has(chrome)) throw issue('REGISTRAR_ALREADY_OWNED');
   if (!chrome?.contextMenus?.create) throw issue('CHROME_UNAVAILABLE');
   if (!Number.isFinite(timeoutMs) || timeoutMs < 1) throw issue('INVALID_ACK_TIMEOUT');
@@ -250,20 +250,27 @@ export function createChromeRegistrar({ chrome, timeoutMs = 3000, sink, persist,
   }
   async function handleClickBase(info = {}, tab, depthAuthorization, observation) {
     try{await beforeClick(info);}catch(error){const out=freeze({state:'blocked',code:error.code==='STALE_GENERATION'?'STALE_GENERATION':'CURRENT_AUTHORIZATION_REQUIRED'});try{onOutcome?.(out);}catch{}return out;}
+    const itemId=String(info.menuItemId), row=desired?.rows.find(r=>r.id===itemId);
+    const context=['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page';
+    // Only targetless independent actions may use an individual Chrome ACK.
+    // The owner's beforeClick validates CURRENT; the Basic API checks its own OAuth.
+    const independent=!pending&&lastOutcome?.generation===desired?.generation&&
+      lastOutcome?.code==='NATIVE_APPLY_INCOMPLETE'&&lastOutcome.persistence==='saved'&&
+      row?.role==='provider-action'&&!row.target&&isIndependentProvider(row.providerAction)&&installed.has(row.id);
+    const providerPlan=independent?desired:acknowledged;
     // Passive identity join after cold-start hydration; never authorizes a route.
-    passiveObservation(observation,{stage:'native.identity',row:acknowledged?.rows.find(r=>r.id===String(info.menuItemId)),menuGeneration:acknowledged?.generation});
-    if(acknowledged?.rows.some(r=>r.id===String(info.menuItemId)&&r.role==='provider-action')){
-      const r=resolveClick({itemId:String(info.menuItemId),generation:acknowledged.generation,context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',authorizedTargets:[]});
+    passiveObservation(observation,{stage:'native.identity',row:providerPlan?.rows.find(r=>r.id===itemId),menuGeneration:providerPlan?.generation});
+    if(providerPlan?.rows.some(r=>r.id===itemId&&r.role==='provider-action')){
+      const selection={itemId,generation:providerPlan.generation,context,authorizedTargets:[]};
+      const r=independent?resolveMenuAction(providerPlan,{...selection,acknowledgedGeneration:providerPlan.generation}):resolveClick(selection);
       if(r.state!=='completed'||!dispatch)return r;
       try{const out=await dispatch(r.action,{info,tab,observation,...(depthAuthorization?{depthAuthorization}:{}),generation:r.generation});onOutcome?.(out);return out;}catch{return {state:'failed',code:'PROVIDER_ACTION_FAILED'};}
     }
-    const rowForDepth=()=>desired?.rows.find(r=>r.id===String(info.menuItemId));
-    const row=rowForDepth(), context=['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page';
     // If only part of Chrome's tree acknowledged, a confirmed provider-only
     // row can still open attention. This path never supplies a save source.
     if(dispatchAttention&&!pending&&lastOutcome?.generation===desired?.generation&&
       lastOutcome?.code==='NATIVE_APPLY_INCOMPLETE'&&row?.role==='provider-action'&&
-      row.enabled&&row.visible&&row.contexts.includes(context)&&installed.has(row.id)){
+      !isIndependentProvider(row.providerAction)&&row.enabled&&row.visible&&row.contexts.includes(context)&&installed.has(row.id)){
       let result;
       try{result=await dispatchAttention(row.providerAction,info);}
       catch{result=freeze({state:'failed',code:'PROVIDER_ACTION_FAILED'});}
