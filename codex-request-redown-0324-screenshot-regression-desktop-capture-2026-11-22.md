@@ -1,6 +1,8 @@
-# CODEX P0/P1 — Repair 0.3.24 Chrome shortcut regressions and investigate URL-independent desktop capture
+# CODEX P0/P1 — REDOWN 0.3.25: Repair 0.3.24 Chrome shortcut regressions and investigate URL-independent desktop capture
 
 **User report:** Alt+Q screenshots worked perfectly before updating to REDOWN 0.3.24. After the update, Alt+Q reports: **"Chrome did not grant permission to capture this tab."** Investigate and fix this P0 regression **before** attempting the separately scoped URL-independent desktop/application screenshot feature. The owner also requires missing URL fields in History to display **N/A**, not a fabricated value or a broken expandable field.
+
+**Required deliverable version: `0.3.25`.** Treat `0.3.24` as the regression baseline and `0.3.25` as the target new release. Update package manifest, lockfile, extension manifest, generated build metadata, and any applicable displayed version identifiers consistently according to repository conventions. Verify the packaged output reports `0.3.25`, retains the established extension ID, and preserves existing user data. Do not claim `0.3.25` has been released or installed merely because the source version is changed.
 
 ## Authorized scope and preservation
 - Sole writable repository: `thanks-cohn/Click2Cloud`
@@ -84,5 +86,7 @@ Chrome may restrict some shortcut combinations or impose shortcut limits. Keep t
 - P0 must pass on ordinary real Chrome tabs AND Ctrl+Shift+F must open Files and focus search before calling the combined shortcut regression fixed. Test desktop mode separately, don't conflate it with the P0 repair.
 - Distinguish mocks/fixtures from real installed Windows Chrome and real desktop capture; if the managed Chromium environment rejects installation, do not claim live PASS.
 - Commit and push safe, tested checkpoints **only** on the authorized branch. Report exact commit, tests, cause, Windows verification steps, new desktop-capture capability or blockers, and remaining risks. Never label unverified capture flows successful.
+
+**Version acceptance gate:** The resulting source and packaged REDOWN extension must consistently identify as **0.3.25**, with build, API documentation, extension ID and upgrade behavior checked. Do not release a build still labeled 0.3.24.
 
 **Acceptance goal:** Alt+Q works again as before for Chrome pages. Desktop/window screenshots, when implemented with proper user consent, do not require a webpage URL; their History URLs are shown as **N/A**. No regressions to REDOWN 0.3.24 saving, UI, safety or account data.
