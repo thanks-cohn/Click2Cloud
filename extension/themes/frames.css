@@ -31,6 +31,13 @@
     max-inline-size: 26ch;
     font-size: clamp(22px, 6.8cqi, 40px);
   }
+  & .remote-interlude {
+    border-block: 1px solid var(--line);
+  }
+  & .remote-interlude span:first-child {
+    font-family: var(--control-font);
+    letter-spacing: .065em;
+  }
   & .history-row {
     border-inline-start: 3px solid var(--line);
   }

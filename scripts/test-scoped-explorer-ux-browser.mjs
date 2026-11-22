@@ -194,7 +194,7 @@ async function debugMatrix() {
     assert.match(await page.locator('#action-feedback').innerText(), /not confirmed|unconfirmed|uncertain/i);
     for (const selector of ['#cloudflare-setup', '#remote-history', '#show-save-results']) await noKeyboardFocus(selector);
     await nav('history');
-    await page.getByRole('heading', {name:'History', exact:true}).waitFor();
+    await page.getByRole('heading', {name:'The Rest is History', exact:true}).waitFor();
     await settings();
     await debug(true);
     await nav('remotes');
@@ -205,7 +205,7 @@ async function debugMatrix() {
     const [a,b] = buttons;
     assert(a.x+a.width <= b.x || a.y+a.height <= b.y, 'Remotes Debug buttons overlap');
     await page.locator('#remote-history').click();
-    await page.getByRole('heading', {name:'History', exact:true}).waitFor();
+    await page.getByRole('heading', {name:'The Rest is History', exact:true}).waitFor();
     await nav('remotes');
     await page.locator('#cloudflare-setup').click();
     await page.getByRole('heading', {name:'Cloudflare R2', exact:true}).waitFor();
@@ -220,7 +220,7 @@ async function debugMatrix() {
     await debug(true);
     await page.locator('#show-save-results').waitFor();
     await page.locator('#show-save-results').click();
-    await page.getByRole('heading', {name:'History', exact:true}).waitFor();
+    await page.getByRole('heading', {name:'The Rest is History', exact:true}).waitFor();
     await settings();
     await debug(false);
     await noKeyboardFocus('#show-save-results');
@@ -285,9 +285,8 @@ async function shortcuts() {
   await page.keyboard.press('Escape');
   assert(await page.locator('#toolbar-more').evaluate(el => el === document.activeElement));
   await page.setViewportSize({width:280,height:760});
-  await page.locator('#header-more').press('ArrowDown');
-  await page.getByRole('menuitem', {name:'History', exact:true}).click();
-  await page.getByRole('heading', {name:'History', exact:true}).waitFor();
+  await page.getByRole('button', {name:'History', exact:true}).press('Enter');
+  await page.getByRole('heading', {name:'The Rest is History', exact:true}).waitFor();
   await page.setViewportSize({width:1100,height:760});
   await nav('explorer');
 }

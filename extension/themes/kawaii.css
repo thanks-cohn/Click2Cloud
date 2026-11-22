@@ -18,10 +18,6 @@
  --frame-edge:3px solid #e58bc8;--error:#8e1b5a;
  --surface-shadow:3px 3px 0 #dcc7f5;
 }
-:root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] .brand-tile{
- color:#3c174d;background:#ff4fa9;border-radius:9px;
- font-family:var(--heading-font);font-weight:900;
-}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=kawaii] :is(.remotes-intro,.history-page) h1{
  text-shadow:2px 2px var(--line);
 }

@@ -55,11 +55,6 @@
   & .app-header {
     background: linear-gradient(110deg, var(--frame), #2b4260);
   }
-  & .brand-tile {
-    color: #f4ebd8;
-    background: #35465c;
-    border-radius: 5px;
-  }
   & .remotes-intro {
     border-block-end: 3px double var(--line);
     padding-block: 7px 16px;
@@ -68,6 +63,16 @@
     max-inline-size: 23ch;
     font-style: italic;
     font-size: clamp(23px, 7.4cqi, 44px);
+  }
+  & .remote-interlude {
+    font-style: italic;
+    color: var(--accent);
+  }
+  & .remote-interlude::after {
+    content: "";
+    inline-size: min(120px, 38%);
+    border-block-end: 3px double var(--line);
+    margin-block-start: 8px;
   }
   & :is(.card, .history-row) {
     border-inline-start: 3px solid color-mix(in srgb, var(--accent) 55%, var(--line));

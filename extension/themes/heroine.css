@@ -19,11 +19,6 @@
  --button-ink:#fff;--error:#921b4e;
  --surface-shadow:3px 3px 0 #e4b59074;
 }
-:root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .brand-tile{
- color:#3b1629;background:#ffc979;border-radius:2px 9px;
- box-shadow:inset 0 0 0 1px #6c264a,inset 0 0 0 3px #ffdcab;
- font-family:var(--heading-font);font-weight:900;font-style:italic;
-}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro{position:relative;padding-block-end:14px}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=heroine] .remotes-intro::after{
  content:"";display:block;width:84px;height:8px;margin-block-start:14px;

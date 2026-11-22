@@ -660,7 +660,7 @@ try{
   const {createAestheticHost}=await import(chrome.runtime.getURL('src/aesthetic/host.mjs'));
   const root=document.documentElement,theme=root.dataset.theme;
   const aesthetics=createAestheticHost({root,storage:{set:async()=>{}}});
-  const tile=document.querySelector('.brand-tile'),canvas=document.createElement('canvas');
+  const lockup=document.querySelector('.brand-lockup'),icon=lockup.querySelector('img'),canvas=document.createElement('canvas');
   canvas.width=canvas.height=1;
   const pixel=canvas.getContext('2d');
   const luminance=color=>{
@@ -675,8 +675,8 @@ try{
     if(id==='minimal')await aesthetics.applyPalette(palette);
     for(const mode of ['light','dark']){
      root.dataset.theme=mode;
-     const style=getComputedStyle(tile),a=luminance(style.color),b=luminance(style.backgroundColor);
-     measurements.push({palette,mode,ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),width:tile.offsetWidth,height:tile.offsetHeight});
+     const a=luminance(getComputedStyle(lockup).color),b=luminance(getComputedStyle(lockup.closest('header')).backgroundColor);
+     measurements.push({palette,mode,ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),width:icon.offsetWidth,height:icon.offsetHeight});
     }
    }
   }
@@ -684,7 +684,7 @@ try{
   return measurements;
  });
  assert(contrast.every(result=>result.ratio>=4.5&&result.width===result.height));
- checks.push('R tile met 4.5:1 in all 12 palette and color-mode combinations, minimum '+Math.min(...contrast.map(result=>result.ratio)).toFixed(2)+':1');
+ checks.push('REDOWN wordmark met 4.5:1 in all 12 palette and color-mode combinations, minimum '+Math.min(...contrast.map(result=>result.ratio)).toFixed(2)+':1');
 
  await service.evaluate(()=>chrome.storage.local.remove('click2cloudOAuth'));
  await browser.setOffline(true);
@@ -697,7 +697,7 @@ try{
  await app.getByRole('heading',{name:'Divider Cycle',exact:true}).waitFor();
  await app.getByRole('heading',{name:'Gallery Loading Visual',exact:true}).waitFor();
  await app.locator('#aesthetic-palette input[value=amethyst]').check();
- assert(await app.locator('.brand-tile').isVisible());
+ assert(await app.locator('.brand-lockup img').isVisible());
  await app.getByRole('button',{name:'File Explorer',exact:true}).click();
  await app.locator('#login').waitFor();
  assert(!await app.locator('#files').isVisible());

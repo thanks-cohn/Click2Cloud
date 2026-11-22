@@ -68,7 +68,7 @@ try{
   },{png});
   const origin='http://127.0.0.1:'+server.address().port;
   await page.goto(origin+'/extension/app.html?fixtureImages=1&fixtureRelease0320=1');
-  await page.getByRole('heading',{name:'From the Web to your Cloud.'}).waitFor();
+  await page.getByRole('heading',{name:'All Your Clouds. One Place.'}).waitFor();
   assert.equal(await page.getByText('☁ Cloudflare',{exact:true}).count(),0);
   await page.waitForFunction(()=>window.productFixture);
   await page.evaluate(png=>{

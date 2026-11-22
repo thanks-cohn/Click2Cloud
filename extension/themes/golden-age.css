@@ -43,11 +43,6 @@
   --surface-hover: 0 9px 22px #693c2528;
 }
 :root[data-aesthetic=golden-age] {
-  & .brand-tile {
-    color: #fff;
-    background: #e60023;
-    border-radius: 9px;
-  }
   & .remotes-intro {
     margin-block: clamp(10px, 3vw, 28px) 23px;
     text-align: center;
@@ -56,6 +51,15 @@
     margin-inline: auto;
     max-inline-size: 19ch;
     font-size: clamp(24px, 8.2cqi, 47px);
+  }
+  & .remote-providers {
+    --remote-gap: 12px;
+  }
+  & .remote-interlude {
+    margin-block: clamp(19px, 5vw, 46px);
+  }
+  & .remote-interlude span:last-child {
+    color: var(--accent);
   }
   & .page > h1 {
     font-size: clamp(25px, 6vw, 38px);

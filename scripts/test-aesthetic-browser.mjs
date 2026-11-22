@@ -120,7 +120,7 @@ for(const mode of ['standard','minimal','frames'])for(const theme of ['dark','li
  for(const view of ['Remotes','History','File Explorer']){
   await page.getByRole('button',{name:view,exact:true}).click();await page.waitForTimeout(80);await shot(tag+'-'+view.replaceAll(' ','-'));
   if(view==='Remotes'){
-   await page.getByRole('heading',{name:'From the Web to your Cloud.',exact:true}).waitFor();
+   await page.getByRole('heading',{name:'All Your Clouds. One Place.',exact:true}).waitFor();
    const cards=await page.locator('#main .card').evaluateAll(elements=>elements.slice(0,4).map(card=>{
     const rect=card.getBoundingClientRect();
     return {label:card.querySelector('h2').textContent,x:rect.x,y:rect.y,bottom:rect.bottom,width:rect.width};

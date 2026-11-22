@@ -28,7 +28,7 @@
   box-shadow:inset 0 -2px var(--frame-accent,var(--accent));
  }
  & .app-header :focus-visible{outline-color:var(--frame-focus,var(--focus))}
- & :is(button,input,select,textarea):not(.gallery-arrow,.brand-tile){
+ & :is(button,input,select,textarea):not(.gallery-arrow){
   border-radius:var(--control-radius);
  }
  & :is(input:not([type=range],[type=checkbox],[type=radio]),select,textarea){

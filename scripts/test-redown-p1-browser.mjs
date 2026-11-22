@@ -23,11 +23,8 @@ const url=`http://127.0.0.1:${server.address().port}/extension/app.html?fixtureI
 const cases=[
  {theme:'minimal',palette:'emerald-forest'},{theme:'minimal',palette:'original-rose'},
  {theme:'minimal',palette:'ocean-blue'},{theme:'minimal',palette:'amethyst'},{theme:'minimal',palette:'sunset-amber'},
- {theme:'standard'},{theme:'golden-age',tile:['rgb(230, 0, 35)','rgb(255, 255, 255)']},
- {theme:'oceania',tile:['rgb(53, 70, 92)','rgb(244, 235, 216)']},
- {theme:'nostalgia',style:'kawaii',tile:['rgb(255, 79, 169)','rgb(60, 23, 77)']},
- {theme:'nostalgia',style:'dungeon-master',tile:['rgb(8, 9, 11)','rgb(255, 255, 255)']},
- {theme:'nostalgia',style:'heroine',tile:['rgb(255, 201, 121)','rgb(59, 22, 41)']}
+ {theme:'standard'},{theme:'frames'},{theme:'golden-age'},{theme:'oceania'},
+ {theme:'nostalgia',style:'kawaii'},{theme:'nostalgia',style:'dungeon-master'},{theme:'nostalgia',style:'heroine'}
 ];
 let browser;
 const results=[],errors=[];
@@ -82,17 +79,24 @@ try{
  const active=()=>page.locator('html').getAttribute('data-aesthetic');
  const headerGeometry=()=>page.evaluate(()=>{
   const bounds=selector=>document.querySelector(selector).getBoundingClientRect().toJSON();
-  const top=bounds('#header-more'),theme=bounds('#theme'),menu=bounds('#header-menu'),tile=bounds('.brand-tile');
+  const top=bounds('#header-more'),theme=bounds('#theme'),menu=bounds('#header-menu'),icon=bounds('.brand-lockup img');
   const hit=(box,selector)=>document.elementFromPoint(box.left+box.width/2,box.top+box.height/2)?.closest(selector)!=null;
-  return {top,theme,menu,tile,width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
-   moreHit:hit(top,'#header-more'),themeHit:hit(theme,'#theme')};
+  const tabs=['remotes','explorer','history'].map(view=>'.app-header nav>[data-view='+view+']');
+  return {top,theme,menu,icon,width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
+   tabsHit:tabs.every(selector=>hit(bounds(selector),selector)),moreHit:hit(top,'#header-more'),themeHit:hit(theme,'#theme')};
  });
- const geometryOK=({top,theme,menu,tile,width,scrollWidth,moreHit,themeHit})=>{
-  assert(top.right<theme.left&&theme.width===36&&theme.height===36);
-  assert(tile.width===30&&tile.height===30);
-  assert(moreHit&&themeHit&&scrollWidth<=width);
+ const geometryOK=({top,theme,menu,icon,width,scrollWidth,tabsHit,moreHit,themeHit})=>{
+  assert(top.right<=theme.left||top.top>=theme.bottom);
+  assert(theme.width===36&&theme.height===36);
+  assert(icon.width===20&&icon.height===20);
+  assert(tabsHit&&moreHit&&themeHit&&scrollWidth<=width);
   if(menu.width)assert(menu.left>=0&&menu.right<=width&&menu.top>=theme.bottom);
  };
+ const pyramid=()=>page.locator('.remote-interlude').evaluate(element=>{
+  const rows=[...element.children].map(child=>({text:child.textContent,size:parseFloat(getComputedStyle(child).fontSize),rect:child.getBoundingClientRect().toJSON(),scrollWidth:child.scrollWidth}));
+  const parent=element.getBoundingClientRect();
+  return {rows,center:(parent.left+parent.right)/2,width:parent.width};
+ });
  const configure=await page.evaluate(async()=>{
   const {api,current,target}=window.productFixture,state=await current.read();
   return api.invoke({version:'3+1.1',method:'commitConfigChange',params:{changes:[{type:'createDestination',mode:'simple',target},{type:'setView',view:'details'}],
@@ -111,12 +115,12 @@ try{
      {code:'CLOUDFLARE_RETRY_NEEDED'})});
   }
  });
- for(const {theme,palette,style,tile} of cases){
+ for(const {theme,palette,style} of cases){
   await page.setViewportSize({width:900,height:760});
   await settings();
   assert.deepEqual(await page.locator('#appearance option').allTextContents(),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
   await page.locator('#appearance').selectOption(theme);
-  assert.equal(await page.locator('#aesthetic-palette').isVisible(),theme==='minimal');
+  assert.equal(await page.locator('#aesthetic-palette').isVisible(),['minimal','frames'].includes(theme));
   assert.equal(await page.locator('#nostalgia-style-row').isVisible(),theme==='nostalgia');
   if(palette)await page.locator(`input[value="${palette}"]`).check();
   if(style)await page.locator('#nostalgia-style').selectOption(style);
@@ -126,9 +130,7 @@ try{
    await page.locator('#setting-theme').selectOption(mode);
    await page.waitForFunction(mode=>document.documentElement.dataset.theme===mode,mode);
    const tag=`${id}-${mode}`;
-   if(tile)assert.deepEqual(await page.locator('.brand-tile').evaluate(element=>{
-    const {backgroundColor,color}=getComputedStyle(element);return [backgroundColor,color];
-   }),tile);
+   assert(await page.locator('.brand-lockup img').evaluate(image=>image.naturalWidth===32&&image.nextElementSibling.textContent==='REDOWN'));
    if(!palette||palette==='emerald-forest')await shot(tag+'-settings');
    await page.locator('#header-more').focus();
    await page.keyboard.press('ArrowDown');
@@ -137,7 +139,6 @@ try{
     geometryOK(await headerGeometry());
     assert.equal(await page.locator('#header-more').getAttribute('aria-expanded'),'true');
     assert.equal(await page.locator('header [data-view=history]:visible').count(),1);
-    assert.equal(await page.locator('#header-compact-history').isVisible(),width<=329);
     if(width===260&&id==='emerald-forest')await shot(tag+'-narrow-menu');
    }
    await page.keyboard.press('Escape');
@@ -151,6 +152,20 @@ try{
    await page.waitForFunction(mode=>document.documentElement.dataset.theme===mode,mode);
 
    await clickView('remotes');
+   assert.deepEqual(await page.locator('#main h1').allTextContents(),['All Your Clouds. One Place.']);
+   assert.deepEqual(await page.locator('.remote-provider h2').allTextContents(),['Google Drive','OneDrive','Dropbox']);
+   assert(await page.locator('.remote-providers + .remote-interlude + .remote-cloudflare').isVisible());
+   for(const width of [260,900]){
+    await page.setViewportSize({width,height:760});
+    const {rows:[first,second],center,width:available}=await pyramid();
+    assert.equal(first.text,'The Future is NOW.');assert.equal(second.text,'True Remote is Here.');
+    assert(second.size>=first.size*1.45&&second.rect.width>first.rect.width&&second.rect.top>=first.rect.bottom);
+    for(const row of [first,second]){
+     assert(Math.abs((row.rect.left+row.rect.right)/2-center)<1);
+     assert(row.scrollWidth<=available+1);
+    }
+    if(width===260&&['frames','golden-age','oceania'].includes(theme))await shot(tag+'-narrow-remotes');
+   }
    if(!palette||palette==='original-rose')await shot(tag+'-remotes');
    await clickView('explorer');
    const row=name=>list().getByRole('row').filter({hasText:name});
@@ -185,6 +200,7 @@ try{
    }
    await clickView('history');
    await page.locator('.history-row').first().waitFor();
+   assert.deepEqual(await page.locator('#main h1').allTextContents(),['The Rest is History']);
    if(!palette||palette==='original-rose')await shot(tag+'-history');
    await settings();
   }
@@ -193,7 +209,7 @@ try{
  assert.deepEqual(await nativeMenu(),menuBefore);
 
  // Serve the same production app without each stylesheet, with persisted selection.
- for(const {theme,style} of [{theme:'golden-age'},{theme:'oceania'},{theme:'nostalgia'},...cases.filter(row=>row.style)]){
+ for(const {theme,style} of [{theme:'frames'},{theme:'golden-age'},{theme:'oceania'},{theme:'nostalgia'},...cases.filter(row=>row.style)]){
   const names=style?[style]:theme==='nostalgia'?['kawaii','dungeon-master','heroine']:[theme];
   const blockedCss=url=>names.some(name=>url.pathname.endsWith('/themes/'+name+'.css'));
   const route=locator=>locator.abort();

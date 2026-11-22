@@ -346,7 +346,7 @@ async function explorerEssentials(){
      const range=document.createRange();range.selectNodeContents(el);
      return {text:el.textContent,fits:range.getBoundingClientRect().right<=el.getBoundingClientRect().right+1};
     });
-    assert.deepEqual(headline,{text:'From the Web to your Cloud.',fits:true});
+    assert.deepEqual(headline,{text:'All Your Clouds. One Place.',fits:true});
     headlineChecks++;
    }
    await page.setViewportSize({width:360,height:740});

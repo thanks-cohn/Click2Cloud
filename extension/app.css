@@ -138,43 +138,40 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 
 /* Three independent More controls: application navigation, History row, Explorer. */
 .app-header{
- --header-gap:clamp(6px,2vw,16px);
- --header-padding:clamp(8px,2vw,16px);
+ --header-gap:clamp(6px,1.8vw,16px);
+ --header-padding:clamp(8px,2.4vw,18px);
+ --header-height:56px;
  --theme-size:36px;
- position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) var(--theme-size);
- align-items:center;flex:none;gap:var(--header-gap);height:56px;padding:0 var(--header-padding);
+ position:relative;z-index:5;display:grid;grid-template-columns:auto minmax(0,1fr) var(--theme-size);
+ align-items:center;flex:none;gap:var(--header-gap);min-height:var(--header-height);padding:5px var(--header-padding);
  border-bottom:1px solid var(--line);background:var(--panel);
 }
-.app-header nav{display:flex;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px);white-space:nowrap}
-.app-header nav button{min-block-size:34px;padding:6px clamp(5px,1.2vw,10px);border:none}
-.app-header nav>button{min-inline-size:0;overflow:hidden;text-overflow:ellipsis}
+.brand-lockup{display:flex;align-items:center;gap:7px;min-inline-size:0;color:inherit;font:750 12px/1 var(--control-font);letter-spacing:.09em}
+.brand-lockup img{display:block;flex:none;border-radius:4px}
+.app-header nav{display:flex;min-inline-size:0;align-items:center;gap:clamp(2px,1vw,6px)}
+.app-header nav button{min-block-size:36px;padding:5px clamp(5px,1.2vw,10px);border:none}
+.app-header nav>button{min-inline-size:0;overflow-wrap:anywhere}
 #theme{display:grid;place-items:center;inline-size:var(--theme-size);block-size:var(--theme-size);padding:0;font-size:20px}
 :root:not([data-theme=light]) .theme-moon,:root[data-theme=light] .theme-sun,.header-more-icon,.explorer-compact-label{display:none}
-@media(max-width:480px){
- .app-header nav button{font-size:12px}
+@media(max-width:520px){
+ .app-header{--header-height:88px;grid-template-columns:minmax(0,1fr) var(--theme-size);row-gap:4px}
+ .app-header nav{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:stretch}
+ .app-header nav>button{padding-inline:3px;font-size:12px}
+ #theme{grid-column:2;grid-row:1}
 }
-@media(max-width:374px){
- .app-header nav{gap:2px}
- .app-header nav>button{padding-inline:4px}
+@media(max-width:360px){
  .header-more-label{display:none}
  .header-more-icon{display:inline;font-size:18px;line-height:1}
-}
-#header-menu #header-compact-history{display:none}
-@media(max-width:329px){
- .app-header nav>[data-view=history]{display:none}
- #header-menu #header-compact-history{display:block}
-}
-@media(max-width:279px){
  .explorer-label{display:none}
  .explorer-compact-label{display:inline}
 }
 .header-more{flex:none;margin-inline-start:auto}
-#header-more{min-inline-size:34px}
+#header-more{min-inline-size:36px}
 #header-menu{
  position:absolute;z-index:60;inset-block-start:100%;
- inset-inline-end:calc(var(--theme-size) + var(--header-gap) + var(--header-padding));
- inline-size:min(182px,calc(100% - var(--theme-size) - var(--header-gap) - 2 * var(--header-padding)));
- max-block-size:calc(100dvh - 56px);overflow:auto;
+ inset-inline-end:var(--header-padding);
+ inline-size:min(190px,calc(100% - 2 * var(--header-padding)));
+ max-block-size:calc(100dvh - var(--header-height));overflow:auto;
  background:var(--panel);border:1px solid var(--line);padding:6px;
 }
 #header-menu button{display:block;inline-size:100%;text-align:start;white-space:normal;overflow-wrap:anywhere}
@@ -351,13 +348,6 @@ button.screenshot-card-body{display:grid;text-align:start;overflow-wrap:anywhere
 #files.details :is(th,td):nth-child(2){display:table-cell}
 @container (width < 515px){
  #files.details :is(th,td):nth-child(2){display:none}
-}
-
-.app-header>.brand-tile{
- display:grid;place-items:center;inline-size:30px;block-size:30px;
- padding:0;border-radius:8px;color:var(--bg);
- background:color-mix(in srgb,var(--text) 92%,var(--accent));
- font:700 20px/1 Georgia,serif;
 }
 
 dialog:has([data-gallery]){border-radius:18px;background:var(--panel)}

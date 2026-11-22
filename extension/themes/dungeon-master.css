@@ -20,11 +20,6 @@
  --button-ink:#fff;--error:#8e2830;
  --surface-shadow:inset 0 1px #fff9,2px 2px #53627a3d;
 }
-:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .brand-tile{
- color:#fff;background:#08090b;border-radius:4px;
- box-shadow:inset 0 0 0 1px #8290a3,inset 0 2px #c6d8ef55;
- font-family:"Segoe UI",Arial,sans-serif;font-weight:900;
-}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .remotes-intro{
  border-block-end:3px double var(--line);padding-block:6px 14px;
 }

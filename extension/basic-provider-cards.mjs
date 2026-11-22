@@ -1,4 +1,8 @@
-const providers = [['google', 'Google Drive'], ['onedrive', 'OneDrive'], ['dropbox', 'Dropbox']];
+const providers = [
+  ['google', 'Google Drive', 'google-drive.png'],
+  ['onedrive', 'OneDrive', 'onedrive.png'],
+  ['dropbox', 'Dropbox', 'dropbox.png'],
+];
 const outcomes = {SAVED: 'Save verified', FAILED: 'Save failed', UNCERTAIN: 'Save could not be verified'};
 
 export function createBasicProviderCards({runtime, document, permissions}) {
@@ -11,10 +15,14 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     return reply.value;
   }
   function recent(id, result) {
-    const {outcome, sourceAccess} = cards.get(id) ?? {};
+    const {outcome, saveDetails, saveSummary, saveReason, sourceAccess} = cards.get(id) ?? {};
     if (!outcome || !outcomes[result?.state]) return;
     outcome.textContent = [outcomes[result.state], result.message, result.nextAction].filter(Boolean).join(' · ');
     outcome.dataset.saveState = result.state;
+    saveDetails.hidden = result.state === 'SAVED';
+    if (saveDetails.hidden) saveDetails.open = false;
+    saveSummary.textContent = outcomes[result.state];
+    saveReason.textContent = [result.message, result.nextAction].filter(Boolean).join(' ');
     sourceAccess.hidden = true;
     delete sourceAccess.dataset.origin;
     if (!permissions?.request || typeof result.sourceOrigin !== 'string') return;
@@ -27,30 +35,37 @@ export function createBasicProviderCards({runtime, document, permissions}) {
   function paint(card, status) {
     card.connect.textContent = status.connected ? 'Reconnect / Approve' : 'Sign In';
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
-    card.readiness.textContent = status.ready ? 'Ready to Save' : status.authorized
-      ? 'Authorized · refresh required' : status.connected ? 'Connected · approval required' : 'Not connected';
-    card.reason.textContent = status.ready ? 'Each save is verified separately.' :
-      [status.message, status.nextAction].filter(Boolean).join(' · ') || 'Sign in to authorize saves.';
+    card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
+      [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
+    card.availability.textContent = status.connected && !status.ready ? card.readiness.textContent : '';
   }
-  for (const [id, label] of providers) {
+  for (const [id, label, icon] of providers) {
     const section = document.createElement('section');
     section.className = 'card remote-provider';
     section.setAttribute('aria-labelledby', 'remote-provider-' + id);
-    section.innerHTML = `<h2 id="remote-provider-${id}">${label}</h2>
-      <div role="status"><strong data-readiness>Checking authorization…</strong><p class="muted" data-reason></p></div>
+    section.innerHTML = `<div class="remote-provider-heading">
+        <img src="icons/${icon}" width="24" height="24" alt="">
+        <h2 id="remote-provider-${id}">${label}</h2>
+      </div>
+      <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
       <div class="remote-provider-actions">
-        <button type="button" class="primary" data-connect>Sign In</button>
+        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
         <button type="button" data-refresh>Refresh</button>
         <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
       </div>
+      <p class="muted" data-availability></p>
       <p class="muted" role="status" data-feedback></p>
       <p class="muted" role="status" data-navigation></p>
-      <p class="muted" role="status" data-outcome>No recent save attempt</p>
-      <button type="button" data-source-access hidden></button>`;
+      <p class="sr-only" role="status" data-outcome></p>
+      <details class="remote-provider-details" data-save-details hidden>
+        <summary data-save-summary></summary><p class="muted" data-save-reason></p>
+        <button type="button" data-source-access hidden></button>
+      </details>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
       connect: get('connect'), refresh: get('refresh'), readiness: get('readiness'),
-      reason: get('reason'), outcome: get('outcome'), sourceAccess: get('source-access'),
+      availability: get('availability'), outcome: get('outcome'), sourceAccess: get('source-access'),
+      saveDetails: get('save-details'), saveSummary: get('save-summary'), saveReason: get('save-reason'),
       operation: 'auth.connect', revision: 0,
     };
     cards.set(id, card);
@@ -107,8 +122,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
         if (revision === card.revision) paint(card, status);
       }, error => {
         if (revision !== card.revision) return;
-        card.readiness.textContent = 'Status unavailable';
-        card.reason.textContent = error.message;
+        card.readiness.textContent = error.message;
       });
       void call('history.latestOutcome', id).then(result => {
         if (!card.outcome.dataset.saveState) recent(id, result);
@@ -117,16 +131,12 @@ export function createBasicProviderCards({runtime, document, permissions}) {
   }
   function onAttempt(attempt) {
     recent(attempt?.provider, attempt);
-    const card = cards.get(attempt?.provider);
-    if (!card || !['SAVED', 'FAILED'].includes(attempt.state)) return;
-    card.outcome.getAnimations().forEach(animation => animation.cancel());
-    if (!document.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      card.outcome.animate([{opacity: 1}, {opacity: .55}, {opacity: 1}], {duration: 360, iterations: 2});
-    }
   }
   function showRecovery(provider) {
     const card = cards.get(provider === 'google-drive' ? 'google' : provider);
-    card?.connect.closest('.remote-provider').scrollIntoView({block: 'nearest'});
+    if (!card) return;
+    if (!card.saveDetails.hidden) card.saveDetails.open = true;
+    card.connect.closest('.remote-provider').scrollIntoView({block: 'nearest'});
   }
   return {mount, onAttempt, showRecovery};
 }
