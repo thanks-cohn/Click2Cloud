@@ -3,19 +3,38 @@
 Date: 2026-11-21
 Status: OWNER-APPROVED **SCOPED FUTURE IMPLEMENTATION BRIEF** — documenting work only; this commit does not implement or release product code.
 
+> **CODEX: READ THIS FILE FIRST AND TREAT IT AS THE SOLE CONTROLLING TASK LIST.** This document is complete and self-contained. Do **not** treat any older file named `codex-request-*`, `NEXT_CODEX_*`, `NEXT_CODEX_PREMIUM_*`, historical branch request, README checklist, or legacy P0/P1 milestone as authorization to add work. Use the specifically named past files **only as non-controlling evidence for the visual design**, and use source code/tests only as implementation references. When in doubt, use THIS file; do not synthesize a larger scope.
+
+## 0. Absolute task precedence and owner-approved text (read BEFORE other docs)
+
+1. **FIRST:** This exact file is the complete authorized next-run specification: `codex-request-redown-aesthetic-polish-cloudflare-independent-menus-2026-11-21.md` on the locked branch below. It overrides **all** contradictory/extra instructions in previous Codex requests, including other files from **2026-11-21**.
+2. **SECOND, VISUAL REFERENCES ONLY:** `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md` (read **only** overall quality, Frames, Golden Age, Oceania, Remotes card layout, hover and notification aesthetics) and `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md` (read **only** P0-D/P0-D1/P0-E presentation parts). **Do not execute** their broader requirements: History engines/exports, recorder overhaul, badge counters, source transport, OAuth repair, longevity refactors or other P0/P1. The complete allowed visual instructions have already been restated below in section B.
+3. **THIRD, ENGINEERING REFERENCES ONLY:** existing `src/`, `extension/`, and relevant tests in the destination branch; REDOWN `main` read-only solely for local-first native menu behavior. Existing test descriptions do not independently authorize feature expansion.
+4. **No autonomous scope expansion:** If an old requirement conflicts, is ambiguous, or would require changing otherwise protected Cloudflare machinery, **skip that extra feature and report the conflict**. Do not silently choose the old instruction or implement it “for completeness.”
+5. **Three workstreams, period:** (B) Aesthetic/visual presentation; (C) Cloudflare-independent native right-click actions; (D) one Basic RAW diagnostics export button. Section E contains the exact tests and exclusions. Nothing else.
+
+**Immutable Remotes interlude — owner-final visual requirement (NOT optional):**
+
+```text
+              The Future is NOW.
+          True Remote is Here.
+```
+
+Both lines **CENTERED on the same vertical axis**. **SECOND line visually LARGER** than the first, creating a **pyramid / perspective silhouette** with a broad, emphatic base. The text above is schematic only; Codex must implement typographic size hierarchy, not infer font sizes from character width or Markdown rendering. Use these **exact strings**, capitalization and punctuation—no comma, ellipsis, copy rewrite, line inversion, or side alignment. This block appears **between Dropbox and the original Cloudflare R2 card**, never inside either card. It must remain elegantly centered and legible at narrow Chrome and Edge panel widths, across Frames, Golden Age and Oceania. **Acceptance screenshots must show the smaller top line and larger bottom line.** This direct instruction overrides any old two-line guidance that leaves size or centering unspecified.
+
 ## A. Exact working boundaries and supersession
 
 - **Destination repository:** `thanks-cohn/Click2Cloud`
 - **ONLY writable branch:** `codex/redown-basic-api-integration-0323-alpha-base-2026-11-21`
 - **READ-ONLY reference:** `thanks-cohn/REDOWN` / `main`. `thanks-cohn/redown-basic` / `main` is also READ-ONLY if consultation is necessary.
 - Do not switch/create branches, merge, deploy, release, change the Chrome extension ID/manifest key, OAuth redirects, Cloudflare account/workers/buckets, or modify unrelated repositories.
-- **THIS is the controlling scope for the next run.** The earlier, comprehensive `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md` and `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md` remain design/reference documents, but their History engineering, two History exports, multi-engine diagnostics overhaul, large ZIP streaming, recorder fixes, universal badge/counter, broad provider-source transport changes, and general resilience refactors **ARE NOT AUTHORIZED IN THIS RUN**. When conflicting, this narrowed owner scope takes precedence.
+- **THIS is the only controlling scope for the next run.** Follow the section 0 priority order even if older documents are headed `CODEX IMPLEMENTATION REQUEST`, `NEXT CODEX RUN`, `REQUIRED`, `CONTROLLING`, `P0` or `P1`. Older references are NOT a second task queue. The earlier, comprehensive `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md` and `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md` remain non-controlling visual/reference material only; their History engineering, History exports, diagnostics overhaul, large ZIP streaming, recorder fixes, universal badge/counter, provider-source transport changes and general resilience refactors **ARE NOT AUTHORIZED IN THIS RUN**.
 - Exactly **three deliverables**: (1) high-quality **aesthetic/visual UX** ported from the previous request; (2) **Cloudflare-independent Basic native right-click menus**; (3) **one Settings button** invoking already implemented Basic `diagnostics.exportZip`. No extra features. Implement in independently testable/reversible commits, not a sweeping rewrite.
 - Keep the existing one native context-menu owner, one MV3 worker, `CURRENT` integrity fence, receipt verification, original Cloudflare R2 engine, Explorer, History record machinery, screenshot pipeline, and existing provider OAuth behavior. No invasive restructuring in the name of appearance.
 
 ## B. Workstream 1 — Bring forward ALL approved aesthetics and visual-polish requests from the preceding brief
 
-**Exact reference:** `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md`, specifically its overall quality bar; Frames, Golden Age and Oceania identities; Remotes provider-card presentation; responsive hover/microinteraction; notifications; and the associated visual constraints. Also bring over `### P0-D`, `### P0-D1` and `### P0-E` from `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md` **only insofar as they concern presentation**. This section spells out the controlling details so Codex does not import unrelated P0 functional work.
+**Exact historical design references (NOT additional implementation instructions):** `docs/integration/NEXT_CODEX_PREMIUM_VISUAL_DIRECTION_2026-11-21.md` for its overall visual quality, three theme identities, Remotes card layout, hover and notification aesthetics; and only the **presentation portions** of P0-D/P0-D1/P0-E in `codex-request-redown-alpha-cloudflare-first-graceful-degradation-2026-11-21.md`. **Do not execute anything in those documents that is not explicitly authorized by sections B–E below.** The section B copy—including the centered pyramid-size interlude—is the final owner-approved version and supersedes text/size ambiguity in those references.
 
 ### B1. Distinct complete premium identities, not three accent recolors
 
@@ -96,7 +115,7 @@ Order **must** be:
 - Real or simulated Cloudflare R2 success, login, exactly targeted Simple/Narrow/Depth menus and preserved GO TO, History and Explorer; **never claim live proof where only mock tests ran**.
 - Real-browser Chrome/Edge checks where available for Cloudflare-free right click with working Basic provider, known provider with Cloudflare connected, browser restart, negative Cloudflare inventory, original icon location and responsive themes.
 - Visual before/after screenshots using the same representative data in all three premium themes and light/dark at narrow/wide widths and 100/125% zoom; test pointer/keyboard/reduced-motion/contrast.
-- Notification timing, no overlays over History paging or controls, original Basic card buttons, exact owner-approved copy, one History H1.
+- Notification timing, no overlays over History paging or controls, original Basic card buttons, exact owner-approved copy, **visually centered pyramid interlude with noticeably smaller `The Future is NOW.` above larger `True Remote is Here.`** in each of the three themes at narrow and wide widths, one History H1.
 - Diagnostics API invoked exactly once per click, respected old size limit, no Cloudflare interaction.
 - Preserve established extension identity, native ID ownership, canonical CURRENT, verified R2 receipts, original History storage, provider OAuth and screenshot code. Report PASS / FAIL / UNVERIFIED with exact tests and changed files; stop before merge/deploy.
 
