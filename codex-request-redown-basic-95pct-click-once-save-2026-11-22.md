@@ -85,13 +85,14 @@ Required proof:
 
 Retain the existing Shelf top-header styling and the functional behavior of all three destinations and the three-dot menu. Test normal and narrow Shelf widths. Scope these navigation placement adjustments to the intended Shelf header without unrelated redesign.
 
-**Nostalgia–Heroine theme ONLY:**
-- Display the existing slogan as exactly two lines, retaining words and styling:
-  \`All Your Clouds.\`
-  \`One Place.\`
-  Each sentence must remain on its own line at normal and narrow widths.
-- Remove **only in this theme** the decorative cheetah-print-like strip between the slogan and provider cards, and any unnecessary gap it leaves. Do not remove this decoration from any other theme or remove unrelated decorative elements.
-- Other themes' slogan presentation/decorations must remain unchanged. Do not alter provider card design or Shelf header aesthetics beyond the specified changes.
+**Slogan — GLOBAL, ALL themes:** Display the existing slogan as exactly two lines, retaining its words and each theme's own typography and styling:
+- `All Your Clouds.`
+- `One Place.`
+Each sentence must remain on its own horizontal line at normal and narrow Shelf widths. Apply this to every theme, including Nostalgia–Heroine; no theme may render it as one continuous line.
+
+**Nostalgia–Heroine theme ONLY:** Remove the decorative cheetah-print-like strip between the slogan and provider cards, including any unnecessary space it leaves. Do not remove that decoration from other themes or remove unrelated decorative elements. Preserve all themes' other aesthetic choices, and do not alter provider card design or Shelf header aesthetics beyond the specified changes.
+
+**Navigation layout — GLOBAL, ALL themes:** Keep `Files`, `Remotes`, `History`, and the three-dot menu on precisely **ONE non-wrapping horizontal row** at all supported Shelf widths. `Files` immediately precedes `Remotes` on the left; `History` immediately precedes the three-dot menu on the right, with flexible space separating the two pairs. Never stack `Files` above `Remotes`. Preserve all destinations and their click actions.
 
 ### Mandatory forward-looking safety audit — additive, not a rewrite
 
@@ -108,4 +109,4 @@ Before modifying each risky component, identify *foreseeable* failure modes, inc
 7. Verify actual provider files in intended accounts/folders where installed-Chrome access exists. Report fixture/mocked tests separately. Mark any unavailable live-browser/provider checks **UNVERIFIED**, not PASS; do not claim alpha readiness without critical live evidence.
 8. Commit and PUSH tested checkpoints to **only** the authorized destination branch, confirm the remote SHA and report changes, test evidence, remaining risk register items, OAuth console actions if any, and blockers. No destructive storage reset, unrelated design refactor, Cloudflare rewrite, new branch, or release deployment.
 
-**Owner's 0.3.24 success condition:** After initial Chrome/provider authorization, one right-click on an accessible file → one verified cloud object in the correct destination → one durable History receipt → original global counter +1, without repeated per-site prompts or redundant failure paragraphs beneath cards. The navigation remains \`Files | Remotes | History | ⋯\`; the two-line slogan and decorative-strip removal apply only to Nostalgia–Heroine.
+**Owner's 0.3.24 success condition:** After initial Chrome/provider authorization, one right-click on an accessible file → one verified cloud object in the correct destination → one durable History receipt → original global counter +1, without repeated per-site prompts or redundant failure paragraphs beneath cards. The navigation remains \`Files | Remotes | History | ⋯\`; the two-line slogan applies to EVERY theme; only decorative-strip removal is Nostalgia–Heroine-specific.
