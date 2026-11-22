@@ -45,9 +45,7 @@
     "https://content.dropboxapi.com/*",
     "https://api.cloudflare.com/*",
     "https://dash.cloudflare.com/*",
-    "https://*.workers.dev/*"
-  ],
-  "optional_host_permissions": [
+    "https://*.workers.dev/*",
     "https://*/*",
     "http://*/*"
   ],

@@ -341,7 +341,7 @@ function ordinarySetupReview(){
  return ['SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','WORKER_SETUP_REQUIRED','ACCOUNT_AMBIGUOUS','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','NOT_ACTIVATED','R2_CONFIRMED_INACTIVE'].includes(code)
   ?'<button id="review-selected">Review save setup</button>':'';
 }
-const basicCards=createBasicProviderCards({runtime:chrome.runtime,permissions:chrome.permissions,document});
+const basicCards=createBasicProviderCards({runtime:chrome.runtime,document});
 const basicDiagnostics=createBasicDiagnosticsExport({runtime:chrome.runtime,confirm:message=>window.confirm(message)});
 function renderRemotes(){
   if(view!=='remotes')return;
@@ -1781,8 +1781,9 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  if(message?.channel==='redown-basic-status'){basicCards.onStatus(message.status);return;}
  if(message?.channel==='redown-basic-attempt'){
   const attempt=message.attempt;
-  basicCards.onAttempt(attempt);
   if(attempt?.state==='SAVED')notifications.show('Provider save verified.',{key:`basic:${attempt.id}`});
+  if(['FAILED','UNCERTAIN'].includes(attempt?.state))
+   notifications.show([attempt.message,attempt.nextAction].filter(Boolean).join(' ')||'Provider save did not complete.',{key:`basic:${attempt.id}`,error:true});
   return;
  }
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}

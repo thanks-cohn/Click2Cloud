@@ -2,6 +2,7 @@ import {createApi} from './lib/api.js';
 import {createAuth} from './lib/auth.js';
 import {createCoordinator} from './lib/coordinator.js';
 import {openStore} from './lib/store.js';
+import {acquireSource, browserSourceAccess} from './lib/source.js';
 import {fail, projectOutcome, safeError} from './lib/common.js';
 import {createAdapters} from './providers/index.js';
 
@@ -48,6 +49,7 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
         signal.throwIfAborted();
         const coordinator = createCoordinator({
           store, auth, adapters: createAdapters({}),
+          acquire: input => acquireSource(input, {hasAccess: browserSourceAccess(chrome.permissions)}),
           notify: attempt => chrome.runtime.sendMessage({
             channel: 'redown-basic-attempt',
             attempt: {id: attempt.id, provider: attempt.provider, ...projectOutcome(attempt)},

@@ -62,6 +62,40 @@ test("real source bytes and filename, MIME, unknown length bounded strategy", as
   assert.equal(sanitizeFilename("../a#%.png"), "_a__.png");
   assert.equal(sanitizeFilename("a".repeat(200) + ".jpg").length, 150);
 });
+test("source access is checked at each inspectable redirect without credentials or prompts", async () => {
+  const checked = [], loaded = [];
+  const source = await acquireSource(input, {
+    hasAccess: async url => {checked.push(url.origin);return true;},
+    fetch: async (url, options) => {
+      loaded.push(url);
+      assert.equal(options.credentials, "omit");
+      assert.equal(options.redirect, "manual");
+      if (loaded.length === 1) return new Response(null, {status: 302, headers: {Location: "https://cdn.example/image.png"}});
+      return new Response(new Uint8Array([1, 2, 3]), {headers: {"content-type": "image/png"}});
+    },
+  });
+  assert.equal(source.filename, "image.png");
+  assert.deepEqual(checked, ["https://example.test", "https://cdn.example"]);
+  assert.equal(loaded.length, 2);
+});
+test("withheld permission, network failure, private redirect and opaque redirect have separate outcomes", async () => {
+  await assert.rejects(acquireSource(input, {hasAccess: async () => false, fetch: () => assert.fail()}),
+    {code: "SOURCE_PERMISSION_REQUIRED"});
+  await assert.rejects(acquireSource(input, {fetch: async () => {throw TypeError("private fetch detail");}}),
+    error => error.code === "SOURCE_UNAVAILABLE" && !error.message.includes("private"));
+  let followed = 0;
+  await assert.rejects(acquireSource(input, {fetch: async () => {
+    followed++;
+    return new Response(null, {status: 302, headers: {Location: "http://127.0.0.1/a"}});
+  }}), {code: "SOURCE_REDIRECT_UNAVAILABLE"});
+  await assert.rejects(acquireSource(input, {fetch: async () => {
+    followed++;
+    return new Response(null, {status: 302, headers: {Location: "https://[::1]/a"}});
+  }}), {code: "SOURCE_PRIVATE_ADDRESS"});
+  assert.equal(followed, 2);
+  await assert.rejects(acquireSource(input, {fetch: async () => ({type: "opaqueredirect", status: 0})}),
+    {code: "SOURCE_REDIRECT_UNAVAILABLE"});
+});
 for (const [label, response, code] of [
   [
     "HTML MIME",

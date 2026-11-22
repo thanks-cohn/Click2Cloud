@@ -205,7 +205,7 @@ test('Basic routes the exact supported provider IDs and preserves the clicked so
     'https://docs.example/link');
 });
 
-test('Only a failed source read surfaces the concrete site for optional access', async () => {
+test('A transport failure never suggests missing Chrome access or reveals a source URL', async () => {
   const indexedDB = new IDBFactory();
   const store = await openStore(indexedDB);
   const id = 'source-read-failed';
@@ -213,7 +213,8 @@ test('Only a failed source read surfaces the concrete site for optional access',
     sourceUrl: 'https://media.example:8443/private/file?signature=hidden'});
   await store.finish(id, {state: 'FAILED', code: 'SOURCE_UNAVAILABLE'});
   const outcome = await store.latestOutcome('google');
-  assert.equal(outcome.sourceOrigin, 'https://media.example:8443');
+  assert.equal(outcome.code, 'SOURCE_UNAVAILABLE');
+  assert(!Object.hasOwn(outcome, 'sourceOrigin'));
   assert(!JSON.stringify(outcome).includes('private'));
   assert(!JSON.stringify(outcome).includes('signature'));
   store.close();

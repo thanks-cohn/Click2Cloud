@@ -68,13 +68,7 @@ export function safeError(error) {
   };
 }
 
-// Offer source-site access only for a failed source read. Keep URL paths and
-// query strings out of the Shelf's recent-outcome projection.
-export function projectOutcome({state, code, message, nextAction, sourceUrl}) {
-  const projected = {state, code, message, nextAction};
-  if (state === "FAILED" && code === "SOURCE_UNAVAILABLE" && sourceUrl) {
-    const safe = safeUrl(sourceUrl);
-    if (safe) projected.sourceOrigin = new URL(safe).origin;
-  }
-  return projected;
+// Keep source URLs and receipt identifiers out of broadcast messages.
+export function projectOutcome({state, code, message, nextAction}) {
+  return {state, code, message, nextAction};
 }

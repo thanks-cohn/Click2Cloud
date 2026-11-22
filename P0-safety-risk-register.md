@@ -1,0 +1,34 @@
+# REDOWN 0.3.24 P0 safety risk register
+
+Baseline: `2b0c37fb0ff991ffd9bbc267236c656babc54b7d` on the authorized Click2Cloud integration
+branch. Primary comparison: REDOWN `653ad9b5fdd59532df571514fc60053d8a7b13bb`.
+Use an isolated profile and synthetic records for fault injection. The installed-browser
+probe returned `UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR`. The owner's Chrome profile,
+Bing source and November 22 Dropbox ZIP were unavailable for inspection.
+
+| Location | Risk and evidence | Impact | Mitigation and regression proof | Status before changes |
+| --- | --- | --- | --- | --- |
+| Manifest, Basic source loader | **Observed, high likelihood.** Optional web access and the generic transport failure produce a per-site action even when access is granted. | High. Repeated dialogs and dropped save intent. | Declare required web access, preserve browser approval and withheld-site controls. Check each permitted origin before source work. Test denied, revoked, login/HTML and network cases separately. | Observed |
+| Basic source URL and redirect handling | **Source-confirmed, high severity.** Existing credentialed follow fetch lacks explicit private-address and per-hop guards. | High. Widening access exposes private endpoints and credentials. | Use credentialless acquisition, validate targets before fetching, bound redirects/bytes/time, reject uninspectable redirects and private/literal targets, and keep provider requests byte-only. Test restricted origins and cleanup under cancellation. | Safety gate |
+| Basic coordinator and DB recovery | **Source-confirmed, high likelihood.** Native AUTH_REQUIRED/website denial ends the gesture. Worker death after a final write can leave an ambiguous result. | Critical. Lost intent, wrong target, duplicate cloud object or false success. | Keep the canonical attempt ID and same coordinator. Fence provider account/root, bound waiting intents, distinguish pre-write interruption from an uncertain remote write, retain existing DB and enforce idempotent receipt commit. Test same-click resumption, interruption, duplicates and lost acknowledgments. | Safety gate |
+| Browser OAuth and trusted storage | **Reported, exact installed cause unknown.** Google silently returns or rejects, OneDrive callback can close without completion. | High. Auth outage or loss of a valid grant. | Retain registrations, staged grants and independent provider lanes. Classify browser, policy, callback, token, identity and storage failures. Test expiry, revoked grants, cancellation, concurrent sign-in and account mismatch. | Installed phase unverified |
+| Dropbox adapter and confirmation receipt | **Reported.** User cannot locate apparently saved objects. Existing adapter reads back object, name and bytes. | High. Verified write may be in a different account or app folder. | Trace actual verified destination metadata with privacy guards, preserve upload path unless a defect reproduces, and expose evidence in local History/diagnostics. Test exact readback and wrong-root failure. | Owner ZIP and live proof unavailable |
+| Native menu dispatch and worker startup | **Known historical failure, medium likelihood.** Awaiting initialization, popup loops or repeated background work can lose native gestures or destabilize 4 GB systems. | Critical. Shelf and all provider menus may stop working. | Keep synchronous listeners and one registrar/worker. Conserve active-save and memory limits, run existing cold-start and browser fixture gates, and fail closed when storage is unhealthy. | Installed cold start unverified |
+| Global toolbar accounting | **Source-confirmed, high likelihood.** The existing badge only reads host History and local download totals. Basic receipts never join the projection. | High. Undercounts, migration double counts, replay or quota corrupts totals. | Base totals on durable proof, join Basic accounting by verified operation, keep historical baseline and guard concurrent/restarted/replayed receipts. Test old stores, deleted History, rollover and failures. | Observed |
+| Toolbar icon/badge success sequence | **Foreseeable.** Concurrent saves, late Chrome calls and worker interruption can overlap or strand green states. | Medium. False or stuck success indication and excess CPU. | Serialize bounded alternating stages using static artwork, reset on start/failure, coalesce overflow, and derive success solely from newly committed verified receipts. Test timings, mutual exclusion and restart restoration. | Safety gate |
+| Shelf layout, API and version metadata | **Foreseeable.** Theme breakpoints, changed contracts or version drift can break navigation/render/upgrade. | High. Inaccessible tabs or failed install. | Reuse Aesthetic tokens; test the theme and width matrix, keep Basic v1 and stored preferences compatible, and verify the packaged manifest/extension ID. | Pending |
+| Actual Windows memory, disk and provider verification | **Known evidence gap.** Managed Chromium runs fixture workflows only. | Critical for alpha. | Measure bounded fixture resource use and quota failure, keep live acceptance open, and specify owner-console and installed profile checks. | Unverified |
+
+## Source permission checkpoint
+
+- Packaged host permissions use required HTTP/HTTPS site access and Chrome's approval flow.
+  Controlled reads report declined access, HTTP errors, actual unavailable transport, HTML and
+  redirect rejection distinctly. Provider requests continue to receive only bytes and metadata.
+- Opaque redirects remain a release risk. A Chromium loopback test returned
+  `opaqueredirect`, status 0 and no Location for a manual redirect. The direct target received
+  no request. Inspectable public hops pass independent per-hop access and address validation.
+  Sources whose next hop is hidden need a direct file link. Installed extension redirect/CDN
+  behavior and Chrome Local Network Access policy remain unverified.
+- 162 targeted tests, packaged build, and the Aesthetic fixture passed. The baseline packaged
+  lifecycle fixture passed. Baseline suites reported 686 focused passes and 777 full passes
+  with one archived Depth digest failure.

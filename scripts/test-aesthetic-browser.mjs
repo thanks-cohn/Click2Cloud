@@ -75,18 +75,13 @@ await provider.getByRole('button',{name:'Reconnect',exact:true}).waitFor();
 await provider.getByRole('button',{name:'GO TO Google Drive'}).click();
 assert.equal(await provider.locator('[data-readiness]').textContent(),'Authorized for this provider.');
 await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
- id:'fixture-source',provider:'google',state:'FAILED',code:'SOURCE_UNAVAILABLE',sourceOrigin:'https://images.example:8443'
+ id:'fixture-source',provider:'google',state:'FAILED',code:'SOURCE_UNAVAILABLE',message:'The browser could not read the resource.'
 }}));
-await provider.locator('[data-save-summary]').click();
-await provider.getByRole('button',{name:'Allow access to images.example'}).click();
-assert.deepEqual(await page.evaluate(()=>window.requestedSourceOrigins),['https://images.example/*']);
-await provider.getByText('Access granted. Right-click the source again to save.').waitFor();
-await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
- id:'fixture-uncertain',provider:'google',state:'UNCERTAIN'
-}}));
-await provider.locator('[data-save-summary]').filter({hasText:'Save could not be verified'}).waitFor();
-assert.equal(await provider.getByRole('button',{name:'Allow access to images.example'}).isVisible(),false);
-results.push({gate:'independent-provider-actions-and-explicit-source-access-without-save-replay',state:'PASS'});
+await page.locator('#action-feedback-text').filter({hasText:'The browser could not read the resource.'}).waitFor();
+assert.equal(await provider.getByText('Save failed',{exact:true}).count(),0);
+assert.equal(await provider.getByRole('button',{name:/Allow access to/}).count(),0);
+assert.equal(await page.evaluate(()=>window.requestedSourceOrigins),undefined);
+results.push({gate:'independent-provider-actions-and-transient-source-failure',state:'PASS'});
 for(const width of [360,1100]){
  await page.setViewportSize({width,height:850});
  const cases=await page.evaluate(async()=>{
