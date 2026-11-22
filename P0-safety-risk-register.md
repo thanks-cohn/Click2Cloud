@@ -79,3 +79,17 @@ Bing source and November 22 Dropbox ZIP were unavailable for inspection.
   failed save produced a temporary notification outside the provider cards.
 - The package, manifest and source build metadata report 0.3.24. The packaged extension ID,
   default icon, registered client, commands and single worker entry point match the baseline.
+
+## Final verification status
+
+- 701 focused tests passed. The full run passed 792 tests and reproduced the same archived
+  Depth composition digest failure as 0.3.23. The build and API documentation checks passed.
+- The repeatable paired Chromium fixture retained one Basic database handle and no idle timers.
+  Twenty idle card mounts used 4 Basic transactions instead of 61. Median forced-collection
+  renderer heap was about 27 KB higher and median task time was 4 ms higher. Windows memory,
+  disk pressure and live service-worker behavior remain unverified.
+- The unpacked 0.3.24 package was blocked before worker startup by the managed Chromium policy.
+  Live OAuth, provider object and installed toolbar acceptance remain open. The observed
+  opaque redirect restriction is recorded as a source compatibility blocker.
+
+[0.3.24 implementation and verification report](docs/integration/REDOWN_0324_P0_VERIFICATION.md)

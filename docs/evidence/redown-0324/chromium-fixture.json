@@ -1,0 +1,472 @@
+{
+  "scope": "Packaged modules and real Chromium IndexedDB with mocked Chrome APIs and provider HTTP",
+  "chromium": "156.0.8078.79",
+  "reproduce": "C2C_BASELINE_BUILD=/path/to/baseline C2C_BASIC_EVIDENCE=/path/to/results node scripts/test-basic-reliability-browser.mjs",
+  "measurements": [
+    {
+      "/candidate": {
+        "revision": "132260f00a9dc6703d848391b31570866d28ad4a",
+        "cycles": 20,
+        "firstMountMs": 45,
+        "elapsedMs": 401,
+        "medianReopenMs": 7,
+        "rendererTaskMs": 192,
+        "rendererJsHeapAfterBytes": 4403504,
+        "rendererJsHeapAfterGCBytes": 2690832,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 4,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 11,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      },
+      "/baseline": {
+        "revision": "2b0c37fb0ff991ffd9bbc267236c656babc54b7d",
+        "cycles": 20,
+        "firstMountMs": 40,
+        "elapsedMs": 417,
+        "medianReopenMs": 6,
+        "rendererTaskMs": 175,
+        "rendererJsHeapAfterBytes": 4374372,
+        "rendererJsHeapAfterGCBytes": 2665480,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 61,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 11,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      }
+    },
+    {
+      "/candidate": {
+        "revision": "132260f00a9dc6703d848391b31570866d28ad4a",
+        "cycles": 20,
+        "firstMountMs": 43,
+        "elapsedMs": 385,
+        "medianReopenMs": 5,
+        "rendererTaskMs": 166,
+        "rendererJsHeapAfterBytes": 4404116,
+        "rendererJsHeapAfterGCBytes": 2690740,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 4,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 11,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      },
+      "/baseline": {
+        "revision": "2b0c37fb0ff991ffd9bbc267236c656babc54b7d",
+        "cycles": 20,
+        "firstMountMs": 38,
+        "elapsedMs": 356,
+        "medianReopenMs": 6,
+        "rendererTaskMs": 162,
+        "rendererJsHeapAfterBytes": 4382768,
+        "rendererJsHeapAfterGCBytes": 2661948,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 61,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 13,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      }
+    },
+    {
+      "/candidate": {
+        "revision": "132260f00a9dc6703d848391b31570866d28ad4a",
+        "cycles": 20,
+        "firstMountMs": 40,
+        "elapsedMs": 374,
+        "medianReopenMs": 5,
+        "rendererTaskMs": 148,
+        "rendererJsHeapAfterBytes": 4414216,
+        "rendererJsHeapAfterGCBytes": 2692208,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 4,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 14,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      },
+      "/baseline": {
+        "revision": "2b0c37fb0ff991ffd9bbc267236c656babc54b7d",
+        "cycles": 20,
+        "firstMountMs": 41,
+        "elapsedMs": 369,
+        "medianReopenMs": 6,
+        "rendererTaskMs": 161,
+        "rendererJsHeapAfterBytes": 4424904,
+        "rendererJsHeapAfterGCBytes": 2664180,
+        "acl": 2,
+        "localReads": 22,
+        "localWrites": 6,
+        "credentialWrites": 1,
+        "sessionWrites": 0,
+        "basicOpens": 1,
+        "basicTransactions": 61,
+        "maxBasicHandles": 1,
+        "providerReads": 5,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 134,
+        "maxTimers": 11,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 2,
+        "activeTimers": 0,
+        "openBasicHandles": 1,
+        "configuredMenuItems": 4
+      }
+    }
+  ],
+  "checks": [
+    {
+      "gate": "blocked-open-isolation-and-upgrade-ledger-zip",
+      "result": {
+        "go": {
+          "ok": true,
+          "value": {
+            "opened": true
+          }
+        },
+        "failure": "STORAGE_UNAVAILABLE",
+        "save": "STORAGE_UNAVAILABLE",
+        "denied": "CALLER_DENIED",
+        "blockedOpens": 1,
+        "ready": [
+          true,
+          true,
+          true
+        ],
+        "count": 1,
+        "total": 4,
+        "attempts": [
+          {
+            "id": "uploading-before-restart",
+            "state": "UNCERTAIN",
+            "createdAt": "2026-11-01T03:00:00.000Z",
+            "updatedAt": "2026-11-22T20:08:51.212Z",
+            "code": "WORKER_INTERRUPTED"
+          },
+          {
+            "id": "uncertain-before-upgrade",
+            "state": "UNCERTAIN",
+            "createdAt": "2026-11-01T02:00:00.000Z",
+            "updatedAt": "2026-11-22T20:08:50.930Z"
+          },
+          {
+            "id": "failed-before-upgrade",
+            "state": "FAILED",
+            "createdAt": "2026-11-01T01:00:00.000Z",
+            "updatedAt": "2026-11-22T20:08:50.926Z"
+          },
+          {
+            "id": "saved-before-upgrade",
+            "state": "SAVED",
+            "createdAt": "2026-11-01T00:00:00.000Z",
+            "updatedAt": "2026-11-22T20:08:50.922Z"
+          }
+        ],
+        "settings": {
+          "pageSize": 20,
+          "diagnosticsEnabled": false,
+          "diagnosticsCap": 123
+        },
+        "preferences": {
+          "range": "all",
+          "previews": "all",
+          "timezone": "UTC",
+          "expandScreenshotHostURL": false
+        },
+        "zip": 7,
+        "ids": [
+          "saved-before-upgrade",
+          "failed-before-upgrade",
+          "uncertain-before-upgrade",
+          "uploading-before-restart"
+        ],
+        "cloudflareUntouched": true,
+        "networkWrites": 0,
+        "opens": 2,
+        "handles": 1
+      }
+    },
+    {
+      "gate": "cold-native-menu-dispatch-and-independent-provider-failure",
+      "result": {
+        "readiness": [
+          "AUTH_NETWORK",
+          "READY",
+          "READY"
+        ],
+        "acl": 2,
+        "localReads": 9,
+        "localWrites": 0,
+        "credentialWrites": 0,
+        "sessionWrites": 0,
+        "basicOpens": 0,
+        "basicTransactions": 0,
+        "maxBasicHandles": 0,
+        "providerReads": 3,
+        "providerWrites": 0,
+        "popups": 0,
+        "tabOpens": 0,
+        "timersCreated": 5,
+        "maxTimers": 5,
+        "listeners": {
+          "message": 1,
+          "installed": 1,
+          "startup": 1,
+          "storage": 1,
+          "command": 1,
+          "menu.click": 1,
+          "action": 1,
+          "alarm": 2,
+          "window.removed": 1,
+          "panel.opened": 1,
+          "panel.closed": 1
+        },
+        "alarms": 1,
+        "activeTimers": 2,
+        "openBasicHandles": 0,
+        "configuredMenuItems": 4
+      }
+    },
+    {
+      "gate": "new-install-only-shortcut-offer",
+      "result": {
+        "onUpdate": null,
+        "onInstall": true,
+        "afterDismissal": false,
+        "listeners": 1
+      }
+    },
+    {
+      "gate": "card-message-timeout-rejection-and-missing-response-recover-controls",
+      "result": "PASS"
+    },
+    {
+      "gate": "native-onedrive-oauth-withheld-source-continuation-verified-readback",
+      "result": {
+        "attemptId": "d5681000-cc89-43f9-8def-b1f868796035",
+        "account": "fixture-account",
+        "root": "fixture-root",
+        "objectId": "fixture-onedrive-object",
+        "name": "one-click.txt",
+        "bytes": 23,
+        "basicCounter": 1,
+        "popups": 1,
+        "writes": 2,
+        "restartReceiptCount": 1,
+        "restartGlobalBadge": 1,
+        "chase": [
+          {
+            "state": "icon",
+            "elapsedMs": 0
+          },
+          {
+            "state": "idle",
+            "elapsedMs": 140,
+            "previousStateMs": 140
+          },
+          {
+            "state": "badge",
+            "elapsedMs": 165,
+            "previousStateMs": 24
+          },
+          {
+            "state": "idle",
+            "elapsedMs": 305,
+            "previousStateMs": 140
+          },
+          {
+            "state": "icon",
+            "elapsedMs": 329,
+            "previousStateMs": 24
+          },
+          {
+            "state": "idle",
+            "elapsedMs": 470,
+            "previousStateMs": 140
+          },
+          {
+            "state": "badge",
+            "elapsedMs": 494,
+            "previousStateMs": 24
+          },
+          {
+            "state": "idle",
+            "elapsedMs": 634,
+            "previousStateMs": 140
+          }
+        ]
+      }
+    },
+    {
+      "gate": "already-authorized-native-onedrive-completes-with-one-click",
+      "result": {
+        "count": 2,
+        "objectId": "fixture-onedrive-next",
+        "name": "one-click (1).txt",
+        "writes": 2,
+        "popups": 0,
+        "tabs": 0
+      }
+    }
+  ],
+  "additionalToolbarElapsedMs": [
+    635,
+    634
+  ],
+  "shelf": {
+    "result": "PASS",
+    "matrixCases": 192,
+    "providerFeedback": "PASS",
+    "shortcuts": "PASS"
+  },
+  "screenshotHistory": {
+    "result": "PASS",
+    "matrixCases": 64
+  },
+  "aesthetic": {
+    "passed": 29,
+    "errors": []
+  }
+}
