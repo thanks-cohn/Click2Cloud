@@ -54,7 +54,14 @@ try{
   window.p1Calls=[];
   const fixture=import('/tests/product-browser-host.mjs');
   globalThis.chrome={storage:{local,onChanged:{addListener:fn=>changes.add(fn)}},runtime:{id:'fixture',
-   onMessage:{addListener:fn=>listeners.add(fn)},sendMessage:async({version,method,params})=>{
+   onMessage:{addListener:fn=>listeners.add(fn)},sendMessage:async({channel,op,input,version,method,params})=>{
+    if(channel==='redown-basic-v1'){
+     if(op==='providers.getStatus'){
+      const connected=input.provider!=='onedrive';
+      return {ok:true,value:{connected,ready:connected,authorized:connected}};
+     }
+     return {ok:true,value:null};
+    }
     window.p1Calls.push(method);
     return (await fixture).invoke({version,method,params});
    }}};
@@ -159,8 +166,8 @@ try{
    assert.deepEqual(await page.locator('#main h1').allTextContents(),['All Your Clouds. One Place.']);
    assert.deepEqual(await page.locator('.remote-provider h2').allTextContents(),['Google Drive','OneDrive','Dropbox']);
    assert(await page.locator('.remote-providers + .remote-interlude + .remote-cloudflare').isVisible());
-   for(const width of [260,900]){
-    await page.setViewportSize({width,height:760});
+   for(const [width,height] of [[260,660],[900,760]]){
+    await page.setViewportSize({width,height});
     const {rows:[first,second],center,width:available,footerTop}=await pyramid();
     assert.equal(first.text,'The Future is NOW.');assert.equal(second.text,'True Remote is Here.');
     assert(second.size>=first.size*1.45&&second.rect.width>first.rect.width&&second.rect.top>=first.rect.bottom);

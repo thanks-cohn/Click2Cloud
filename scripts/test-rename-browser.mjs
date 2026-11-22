@@ -136,7 +136,7 @@ async function explorerEssentials(){
   await page.locator('#appearance').waitFor();
  };
  const explorer=()=>page.getByRole('button',{name:'File Explorer',exact:true}).click();
- const toast=message=>page.locator('.explorer-mini-toast').filter({hasText:message});
+ const toast=message=>page.locator('.explorer-mini-toast #action-feedback-text').filter({hasText:message});
  const pane=()=>page.locator('#files');
  const splitter=()=>page.locator('#pane-splitter');
  async function layout(view){
@@ -193,8 +193,8 @@ async function explorerEssentials(){
   };
  });
  await row(original).press('Control+c');
- await page.waitForFunction(()=>/Copied!|clipboard unavailable/.test(document.querySelector('.explorer-mini-toast')?.textContent??''));
- const clipboardToast=await page.locator('.explorer-mini-toast').textContent();
+ await page.waitForFunction(()=>/Copied!|clipboard unavailable/.test(document.querySelector('.explorer-mini-toast #action-feedback-text')?.textContent??''));
+ const clipboardToast=await page.locator('.explorer-mini-toast #action-feedback-text').textContent();
  assert.equal(clipboardToast,'Copied! Cloud and image clipboard.',JSON.stringify(await page.evaluate(()=>window.clipboardFailure)));
  const receiver=await context.newPage();
  await receiver.setContent('<textarea aria-label="Receiving app"></textarea>');

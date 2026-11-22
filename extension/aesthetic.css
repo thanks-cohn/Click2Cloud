@@ -44,6 +44,11 @@
 .remote-provider-details summary{cursor:pointer;font-weight:600;font-size:12px}
 .remote-provider-details[open] > p{margin-block:4px 8px}
 .remote-provider-details:not([hidden]){border-block-start:1px solid var(--line);padding-block-start:8px}
+@media(max-width:420px){
+ .remote-provider{gap:8px;padding-block:10px}
+ .remote-provider-actions{gap:4px}
+ .remote-provider-actions button{padding-inline:6px;font-size:11px;line-height:1.16}
+}
 @media(min-width:560px){
  .remote-provider{grid-template-columns:minmax(0,1fr) auto;align-items:center}
  .remote-provider > :is(p,details){grid-column:1/-1}
