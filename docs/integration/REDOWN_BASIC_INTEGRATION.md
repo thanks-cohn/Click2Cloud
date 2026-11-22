@@ -1,5 +1,8 @@
 # REDOWN Basic in REDOWN Remote
 
+See the [provider reliability verification](REDOWN_PROVIDER_RELIABILITY_2026-11-22.md)
+for the November 22 storage, OAuth, Shelf and local acceptance updates.
+
 The integration branch builds on the REDOWN 0.3.23 alpha base
 `400c0509a36e76c2c5bd5ef5c5426fa5d5709db9`. The read-only source is
 [REDOWN Basic main at `75a738803e61cf7fa62c50328aa6ca5cc2cd70dc`](https://github.com/thanks-cohn/redown-basic/tree/75a738803e61cf7fa62c50328aa6ca5cc2cd70dc).
@@ -8,11 +11,11 @@ and the existing `/cloudflare` callback.
 
 | Basic source | Host location and ownership |
 | --- | --- |
-| `extension/lib/api.js` | `src/basic/lib/api.js` validates Basic API v1. `src/basic/host.mjs` authorizes the Shelf sender and initializes the subsystem. |
+| `extension/lib/api.js` | `src/basic/lib/api.js` validates Basic API v1 and authorizes the Shelf sender. `src/basic/host.mjs` initializes durable storage for saves, History and diagnostics separately from provider status, auth and navigation. |
 | `extension/lib/auth.js`, `extension/providers/index.js` | `src/basic/lib/auth.js` and `src/basic/providers/index.js` handle independent provider grants, uploads and readback. Public clients are in the host manifest and `src/basic/config.js`. |
 | `extension/lib/{coordinator,source,store,common,zip}.js` | `src/basic/lib/` owns source fetching, durable attempts and ledger, local history and diagnostic events/ZIP. The Basic IndexedDB and credential keys use a REDOWN Remote Basic namespace. |
 | `extension/vendor/fflate.js` | `src/basic/vendor/` preserves the Basic copy of fflate 0.8.2 and its MIT license. REDOWN's source license accompanies the transplant. |
-| `extension/shelf.js` card actions | `extension/basic-provider-cards.mjs` retains Sign In, Reconnect / Approve, Refresh, GO TO and recent outcome feedback inside the host Remotes page. Host CSS owns the appearance. |
+| `extension/shelf.js` card actions | `extension/basic-provider-cards.mjs` provides Sign In, Reconnect, Refresh, GO TO and recent outcome feedback inside the host Remotes page. Host CSS owns the appearance. |
 | `extension/background.js` source selection | Existing `extension/background.mjs` dispatches the three canonical provider actions to the Basic coordinator after native acknowledgement and context resolution. Existing visibility settings still apply. |
 
 ## Internal Shelf API

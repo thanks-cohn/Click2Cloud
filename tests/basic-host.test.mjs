@@ -140,6 +140,43 @@ test('Basic aborts a queued recovery transaction without admitting writes before
   }
 });
 
+test('Corrupt Basic recovery metadata blocks saves without changing existing records', async () => {
+  const indexedDB = new IDBFactory(), name = 'redown-remote-basic-v1';
+  const retained = {id: 'keep-corrupt-fixture', provider: 'google', state: 'UNCERTAIN'};
+  const requestDb = () => new Promise((resolve, reject) => {
+    const opening = indexedDB.open(name, 1);
+    opening.onupgradeneeded = () => {
+      const store = opening.result.createObjectStore('attempts', {keyPath: 'id'});
+      store.put(retained);
+      // Missing the existing state index deterministically fails recovery.
+    };
+    opening.onsuccess = () => resolve(opening.result);
+    opening.onerror = () => reject(opening.error);
+  });
+  (await requestDb()).close();
+  const host = createBasicHost({
+    indexedDB, trustedStorage: async () => {},
+    chrome: {runtime, storage: {local: {get: async () => ({})}}, tabs: {create: async () => {}}},
+  });
+  const send = (op, input) => host.request(request(op, input), shelf);
+  const history = await send('history.list');
+  assert.equal(history.error.code, 'STORAGE_UNAVAILABLE');
+  assert.match(history.error.message, /recovering interrupted attempts/);
+  assert.equal((await send('saves.start', {provider: 'google', sourceUrl: 'https://fixture.test/img'})).error.code,
+    'STORAGE_UNAVAILABLE');
+  assert.equal((await send('providers.getStatus', {provider: 'dropbox'})).value.phase, 'disconnected');
+  assert.equal((await send('providers.goTo', {provider: 'google'})).ok, true);
+  const inspector = await requestDb();
+  try {
+    const contents = await new Promise(resolve => {
+      const query = inspector.transaction('attempts').objectStore('attempts').getAll();
+      query.onsuccess = () => resolve(query.result);
+    });
+    assert.deepEqual(contents, [retained]);
+    assert.equal(inspector.version, 1);
+  } finally { inspector.close(); }
+});
+
 test('Basic recovery marks interrupted writes uncertain without replay or a positive counter', async () => {
   const indexedDB = new IDBFactory();
   const store = await openStore(indexedDB);

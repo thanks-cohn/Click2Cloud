@@ -1068,9 +1068,9 @@ await invoke('openRemoteResult', {"operationId":"fixture-operation"});
 
 <!-- method-contract {"name":"getHistoryPreferences","scope":"inspect","effectful":false,"status":"implemented","input":"ff1b2d8857c8e4a2cd87b566a798c5d1cd937fe8a13363e59a51231b4b328939","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
-Reads the existing History range, preview option and timezone. Use it before painting History settings or resolving a day boundary.
+Reads the existing History range, image preview option, timezone and screenshot Host URL expansion preference. Use it before painting History settings or resolving a day boundary.
 
-Returns the persisted validated options or the existing defaults. No History entry is created.
+Returns the persisted options with `expandScreenshotHostURL` defaulting to `false` for fresh and older profiles.
 
 **Access and status** · `inspect` · registry effectful `false` · implemented.
 
@@ -1082,18 +1082,18 @@ await invoke('getHistoryPreferences', {});
 
 ### setHistoryPreferences
 
-<!-- method-contract {"name":"setHistoryPreferences","scope":"configure","effectful":true,"status":"implemented","input":"67b01247a2fa4e50d8d8b66732a8e274787dd9fbfbd627ca6849b6b5e777663c","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+<!-- method-contract {"name":"setHistoryPreferences","scope":"configure","effectful":true,"status":"implemented","input":"94e56a2e3426dca734c9bc938565684389ebf2baa38a7bea2233c4f1d15d9457","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
-Persists the History range, preview behavior and IANA timezone as one validated update. The daily toolbar badge recomputes after a successful change.
+Persists the History display options and IANA timezone as one validated update. An omitted screenshot Host URL preference retains the stored value. The daily toolbar badge recomputes after a successful change.
 
-Returns the saved options. This changes preferences without rewriting prior operation records.
+Returns the saved options. Prior operation records and export options retain their existing values.
 
 **Access and status** · `configure` · registry effectful `true` · implemented.
 
-**Input** · `range` ("all" or "daily" or "weekly"), `previews` ("all" or "first" or "closed"), `timezone` (string). A trailing `?` marks an optional field.
+**Input** · `range` ("all" or "daily" or "weekly"), `previews` ("all" or "first" or "closed"), `timezone` (string), `expandScreenshotHostURL?` (boolean). A trailing `?` marks an optional field.
 
 ```js
-await invoke('setHistoryPreferences', {"range":"daily","previews":"first","timezone":"America/Chicago"});
+await invoke('setHistoryPreferences', {"range":"daily","previews":"first","timezone":"America/Chicago","expandScreenshotHostURL":false});
 ```
 
 ## Backup, recovery and outlines

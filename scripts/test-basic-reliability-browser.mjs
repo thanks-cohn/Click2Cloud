@@ -168,6 +168,7 @@ try {
     assert.equal(result.cloudflareUntouched, true);
     assert.deepEqual(result.settings, {pageSize: 20, diagnosticsEnabled: false, diagnosticsCap: 123});
     assert.equal(result.preferences.timezone, 'UTC');
+    assert.equal(result.preferences.expandScreenshotHostURL, false);
     assert.deepEqual(result.ids, old.map(row => row.id).reverse());
     for (const [index, attempt] of result.attempts.entries()) {
       assert.equal(attempt.id, old[index].id);

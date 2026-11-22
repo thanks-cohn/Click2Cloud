@@ -77,13 +77,14 @@ assert.equal(await provider.locator('[data-readiness]').textContent(),'Authorize
 await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
  id:'fixture-source',provider:'google',state:'FAILED',code:'SOURCE_UNAVAILABLE',sourceOrigin:'https://images.example:8443'
 }}));
+await provider.locator('[data-save-summary]').click();
 await provider.getByRole('button',{name:'Allow access to images.example'}).click();
 assert.deepEqual(await page.evaluate(()=>window.requestedSourceOrigins),['https://images.example/*']);
 await provider.getByText('Access granted. Right-click the source again to save.').waitFor();
 await page.evaluate(()=>window.fixtureNotify({channel:'redown-basic-attempt',attempt:{
  id:'fixture-uncertain',provider:'google',state:'UNCERTAIN'
 }}));
-await provider.getByText('Save could not be verified').waitFor();
+await provider.locator('[data-save-summary]').filter({hasText:'Save could not be verified'}).waitFor();
 assert.equal(await provider.getByRole('button',{name:'Allow access to images.example'}).isVisible(),false);
 results.push({gate:'independent-provider-actions-and-explicit-source-access-without-save-replay',state:'PASS'});
 for(const width of [360,1100]){

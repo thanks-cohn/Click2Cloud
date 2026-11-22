@@ -32,14 +32,14 @@ export type Change =
 export interface Identity {provider:string;connectionId:string;accountId:string}
 export interface ShortcutCommand {commandId:string;label:string;category:string;context:string;defaultChord:string|null;shortcutEligible:boolean;requires?:string;effects:string;parameterBindings?:Record<string,string>;kind?:'api'|'ui';method?:keyof Methods;permission?:Tool['scope']}
 export interface ManifestDraftAction {draftId:string;previewToken:string;expectedRevision:number;idempotencyKey:string}
-export interface HistoryPreferences {range:'all'|'daily'|'weekly';previews:'all'|'first'|'closed';timezone:string}
+export interface HistoryPreferences {range:'all'|'daily'|'weekly';previews:'all'|'first'|'closed';timezone:string;expandScreenshotHostURL:boolean}
 export interface ExportObject {key:string;bucket:string;provider:string;size:number|null;contentType:string|null;etag:string|null;version:string|null;lastModified:string|null;missing:string[];redacted:string[]}
 export interface ExportUrl {url:string;domain:string;status:'verified-domain';provenance:'cloudflare-r2-active-custom-domain'|'cloudflare-r2-enabled-managed-domain'}
 export interface Methods {
  exportMenuManifest:{};getMenuManifestDraft:{};previewMenuManifest:{json:string};discardMenuManifest:{draftId:string};
  inspectManifestBindings:{draftId:string;mapping?:Record<string,{accountId:string;connectionId:string}>;options?:{policy:'skip-identical'|'add-alongside'|'replace-selected';replaceIds?:string[];applyPreferences?:boolean}};
  commitMenuManifest:ManifestDraftAction&{partial:boolean};provisionMenuManifest:ManifestDraftAction;undoMenuManifest:{expectedRevision:number;idempotencyKey:string};
- getHistoryPreferences:{};setHistoryPreferences:HistoryPreferences;
+ getHistoryPreferences:{};setHistoryPreferences:Omit<HistoryPreferences,'expandScreenshotHostURL'>&{expandScreenshotHostURL?:boolean};
  recoverCloudflareDestination:{target:Target;expectedRevision?:number;idempotencyKey?:string;authorizeSetup?:boolean;screenshotUpgrade?:boolean};
  listDirectoryObjects:{source:Target;cursor?:string;immediate?:boolean};getPublicUrls:{source:Target;key?:string;domains?:string[]};enableBucketPublicAccess:{source:Target;key?:string;confirmed:true};getExportObjectMetadata:{source:Target;key:string};
  listCommands:{};getShortcutBindings:{};setShortcutBinding:{commandId:string;chord:string|null};resetShortcutBindings:{};

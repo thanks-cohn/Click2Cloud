@@ -273,6 +273,8 @@ test("A hung Google token request releases callers without stacking requests or 
   assert.equal((await f.auth.refresh("google")).reason, "AUTH_CHECK_TIMEOUT");
   assert.equal(f.native.length, 1);
   f.releaseToken();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal((await f.auth.refresh("google")).ready, true);
 });
 
 test("Passive Google status and Refresh never request a browser grant before recorded Sign In", async () => {
