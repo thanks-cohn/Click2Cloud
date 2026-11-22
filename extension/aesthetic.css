@@ -35,8 +35,9 @@
 .remote-provider-heading{display:flex;align-items:center;gap:10px;min-inline-size:0}
 .remote-provider-heading img{display:block;flex:none}
 .remote-provider-heading h2{font-size:16px;margin:0}
-.remote-provider-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
-.remote-provider button{min-block-size:36px;max-inline-size:100%;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+.remote-provider-actions{display:grid;grid-template-columns:minmax(0,max-content) max-content max-content;align-items:center;gap:6px}
+.remote-provider button{min-block-size:36px;max-inline-size:100%;padding-inline:8px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+.remote-provider-actions :is([data-refresh],[data-go]){white-space:nowrap}
 .remote-provider-actions button[aria-disabled=true]{opacity:.58;cursor:progress}
 .remote-provider :is([data-feedback],[data-availability],[data-navigation]):empty{display:none}
 .remote-provider p{margin:0;font-size:12px}
@@ -46,7 +47,7 @@
 @media(min-width:560px){
  .remote-provider{grid-template-columns:minmax(0,1fr) auto;align-items:center}
  .remote-provider > :is(p,details){grid-column:1/-1}
- .remote-provider-actions{justify-content:end}
+ .remote-provider-actions{display:flex;flex-wrap:wrap;justify-content:end}
 }
 .remote-interlude{
  display:grid;justify-items:center;gap:3px;container-type:inline-size;

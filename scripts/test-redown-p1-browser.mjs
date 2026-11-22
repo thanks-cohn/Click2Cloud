@@ -95,7 +95,7 @@ try{
  const pyramid=()=>page.locator('.remote-interlude').evaluate(element=>{
   const rows=[...element.children].map(child=>({text:child.textContent,size:parseFloat(getComputedStyle(child).fontSize),rect:child.getBoundingClientRect().toJSON(),scrollWidth:child.scrollWidth}));
   const parent=element.getBoundingClientRect();
-  return {rows,center:(parent.left+parent.right)/2,width:parent.width};
+  return {rows,center:(parent.left+parent.right)/2,width:parent.width,footerTop:document.querySelector('#manage-slot').getBoundingClientRect().top};
  });
  const configure=await page.evaluate(async()=>{
   const {api,current,target}=window.productFixture,state=await current.read();
@@ -161,9 +161,10 @@ try{
    assert(await page.locator('.remote-providers + .remote-interlude + .remote-cloudflare').isVisible());
    for(const width of [260,900]){
     await page.setViewportSize({width,height:760});
-    const {rows:[first,second],center,width:available}=await pyramid();
+    const {rows:[first,second],center,width:available,footerTop}=await pyramid();
     assert.equal(first.text,'The Future is NOW.');assert.equal(second.text,'True Remote is Here.');
     assert(second.size>=first.size*1.45&&second.rect.width>first.rect.width&&second.rect.top>=first.rect.bottom);
+    assert(second.rect.bottom<footerTop,'The interlude must clear the action footer');
     for(const row of [first,second]){
      assert(Math.abs((row.rect.left+row.rect.right)/2-center)<1);
      assert(row.scrollWidth<=available+1);

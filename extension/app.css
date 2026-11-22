@@ -30,6 +30,7 @@
 #shell{position:relative;overflow:hidden;--tree-split:50%}
 #shell>aside{flex:0 0 var(--tree-split);width:var(--tree-split);min-width:0;max-width:none;resize:none;min-height:0}
 #shell>main{min-width:0;flex:1;overflow:hidden}
+#shell:not([data-view=explorer]){display:grid;grid-template-rows:minmax(0,1fr) auto}
 #shell:not([data-view=explorer])>aside,#shell:not([data-view=explorer])>#pane-splitter{display:none}
 #shell:not([data-view=explorer])>main{overflow:auto}
 #shell[data-collapsed=tree]>aside{padding:0;border:0;visibility:hidden}
@@ -40,8 +41,7 @@
 #manage svg{flex:none}
 #manage-slot #sign-out{flex:none;min-block-size:36px;font-size:12px;white-space:nowrap;pointer-events:auto}
 #shell[data-view=explorer]:not([data-manage-in-toolbar])>aside{padding-block-end:56px}
-#shell:not([data-view=explorer])>#manage-slot{inline-size:184px}
-#shell:not([data-view=explorer])>main{padding-block-end:52px}
+#shell:not([data-view=explorer])>#manage-slot{position:static;inline-size:auto;padding-block:5px;border-block-start:1px solid var(--line);background:var(--panel)}
 #shell[data-view=explorer][data-manage-in-toolbar]:has(#sign-out){--manage-toolbar-width:118px}
 #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{inset-inline-start:calc(var(--tree-split) + 8px);inset-block:8px auto;inline-size:var(--manage-toolbar-width,36px);padding:0}
 #shell[data-view=explorer][data-manage-in-toolbar] #explorer-commands{padding-inline-start:calc(var(--manage-toolbar-width,36px) + 14px)}
