@@ -9,7 +9,32 @@ The owner reports: in newly integrated REDOWN Remote/Click2Cloud, Google Drive S
 
 **Mission:** Study **everything useful and demonstrably relevant** in original REDOWN's more mature three-provider authentication, connectivity, reconnect/refresh, startup recovery, queued-attempt durability, event handling, and resource discipline. Selectively *transplant and adapt* those behaviors into the **existing** REDOWN Remote Google Drive, OneDrive, and Dropbox cards, while **preserving REDOWN Basic's API v1, durable save engine, History, confirmation ledger, counters, diagnostics, and ZIP export intact**. Maximize practical reliability and minimize Chrome MV3 startup, CPU, storage I/O, RAM, and message pressure. **Do not assume** prior REDOWN was crash-free or that any single architectural cause has already been proven.
 
-**No redesign:** Keep the existing three cards in their present Remotes location, existing Aesthetic API, themes, all original actions and Cloudflare R2 card, and the currently chosen Shelf/header/panel layout. No R/wordmark redesign, tab reshuffle, panel sizing changes, Bad Boy theme, licensing/paywall features, new history UI or general visual overhaul. This run is **provider reliability**, not a second aesthetics workstream.
+**No general redesign:** Keep the existing three cards in their present Remotes location, existing Aesthetic API, themes, all original actions and Cloudflare R2 card, and the current Shelf/header/panel layout. The **only explicitly authorized visual change** is the narrow in-Shelf branding correction in section 0A below. No tab reshuffle, panel sizing changes, Bad Boy theme, licensing/paywall features, new History UI or broader visual overhaul. This run is **provider reliability plus that one exact header correction**, not a second aesthetics workstream.
+
+
+## 0A. Owner-approved surgical header branding correction — ONE change inside the Shelf
+
+**The owner's screenshot shows TWO distinct branding regions. Do not confuse them.** The owner explicitly clarified: **"the top most [branding] preserved but the bottom one actually inside the shelf [should] simply become an iconic R"**.
+
+**What must remain untouched (TOPMOST / browser-controlled title row):** In the Chrome/Edge side panel, the **very top row outside the dark application content** currently displays the small red R browser/extension icon followed by the text **REDOWN**, plus the browser's own panel controls. **Preserve this entire topmost title row exactly as displayed.** Do not modify `extension/manifest.json` name/title/icons, `<title>REDOWN</title>`, extension ID/key, browser-owned title UI, toolbar branding, or the browser's panel controls to accomplish this task. This is the **ONE** location where visible **REDOWN** text should remain in the two branding rows.
+
+**What must change (SECOND row / dark in-app Shelf header):** The current application-owned header in `extension/app.html` has:
+
+```html
+<header class="app-header">
+  <div class="brand-lockup"><img src="icons/redown-32.png" width="20" height="20" alt=""><strong>REDOWN</strong></div>
+  <nav aria-label="Application"> ...existing Remotes / Files / History navigation... </nav>
+  ...existing theme control...
+</header>
+```
+
+Replace **only the in-app `.brand-lockup` icon+visible wordmark** with a **single larger copy of the existing red R asset** (the same graphic identity; do NOT replace it with plain letter R typography or import an old `.brand-tile` or invent a new logo). **Remove only this lower visible `<strong>REDOWN</strong>`**, not the topmost browser title text. Aim for **approximately 32–40 CSS pixels**, ideally ~36px if it fits naturally; choose appropriate asset resolution (`icons/redown-32.png`, `icons/redown-48.png`, or existing higher resolution from the current icon family), preserve aspect ratio and sharp edges. Do not stretch or distort the image, change its colors, redraw it, or make it lopsided. Preserve accessible branding: a suitable `alt="REDOWN"` / accessible name for the solitary application-logo image, without restoring visible wordmark text.
+
+**Exact layout intent:** ONE coherent horizontal **application** header row: **[big R] [Remotes | Files | History | existing More if present] [theme button]**. Existing tab/navigation spacing and panel controls stay polished and responsive; the R is top-left of that row, not a separate band above it. No additional header rows, no new blank space, no new vertical margins. Preserve current header height/position (~existing 56px desktop baseline) except minimal alignment adjustment necessary for an undistorted 32–40px R. Keep the Remotes/Explorer panels below as high as the now-compact header allows; **never shift the two content panels downward or leave a vacant wordmark row**. Preserve the existing lower panel, splitter, bottom Manage Destinations area, interactions and responsive nav/More behavior. This specific request is **NOT** an instruction to move the browser's REDOWN title, remove a different icon, or redo the Shelf.
+
+**Targeted proof:** Compare before/after at the user's compact side-panel width and wider widths, light and dark themes. Verify: browser title row still has its small R + REDOWN; application header has **only one larger R with NO visible REDOWN beside it**; navigation and theme remain alongside it in one well-spaced row; panels occupy the space immediately below; no cropped icon/overflow, broken nav buttons or side-panel height regression. Add narrow markup/CSS regression tests. If browser-owned top row cannot be changed programmatically, **do not try**—this request specifically preserves it.
+
+**Scope precedence:** Section 0A explicitly overrides any later sentence in this request saying "no R/wordmark styling" or "no unrelated Shelf visuals" **only for this one exact change**. Every other visual/layout change remains prohibited. This branding correction is small and must not distract from the provider-reliability P0 investigation.
 
 ## 1. STRICT authorized repository and precedence
 
@@ -115,8 +140,9 @@ Implement focused deterministic tests plus real-browser tests **where the enviro
 2. A concise **transplant matrix** with source revisions/paths and what was **adopted vs rejected** (especially crash-risk/high-overhead features).
 3. Test report: `PASS / FAIL / UNVERIFIED` per **each provider** and per **Chrome vs Edge**, simulated vs actual provider receipt, plus memory/CPU/storage observations. If live OAuth console access or provider credentials unavailable, report exact blocker without requesting secrets or pretending completion.
 4. History/diagnostics integrity report with existing record counts/sample IDs before-and-after in test fixtures, zero data loss/duplicate success, verified export ZIP. No production credential dumps.
-5. **Focused commits and a normal git push** to the same existing branch. Verify GitHub remote contains all commits; report SHA(s). No branch creation, merge, force push, production deployment or Web Store publication.
+5. **The surgical header branding change** in section 0A, with before/after verification that the topmost browser title remains untouched and the in-app row displays only the larger red R. Preserve every other appearance detail.
+6. **Focused commits and a normal git push** to the same existing branch. Verify GitHub remote contains all commits; report SHA(s). No branch creation, merge, force push, production deployment or Web Store publication.
 
 **Completion standard:** The three Basic cards remain usable after cold start, during unrelated provider failure, and after overnight restarts; original REDOWN's worthwhile low-overhead behavior is recovered **without replacing or damaging Basic's History, diagnostics, verified ledger or counters**. If browser/live-cloud confirmation is blocked, say **UNVERIFIED** and do not claim the P0 is closed.
 
-**Avoid overreach:** Do not fix unrelated Shelf visuals, R/wordmark styling, pyramid copy, API licensing, payment systems, Bad Boy aesthetic, Cloudflare onboarding, history redesign or other older Codex requests. Do not recreate original REDOWN's full background/queue architecture inside this integrated host.
+**Avoid overreach:** Except for the single precise branding correction authorized in **section 0A**, do not fix unrelated Shelf visuals, other R/wordmark styling, pyramid copy, API licensing, payment systems, Bad Boy aesthetic, Cloudflare onboarding, History redesign or other older Codex requests. Do not recreate original REDOWN's full background/queue architecture inside this integrated host.
