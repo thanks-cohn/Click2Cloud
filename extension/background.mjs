@@ -344,7 +344,7 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
     const provider=basicMenuProvider(action.providerAction);
     if(provider){
       const result=await basic.click(provider,info,tab);
-      if(result.state==='failed'&&/^(?:AUTH_|OAUTH_CONFIG_REQUIRED$)/.test(result.code)){
+      if(result.state==='pending'||result.state==='failed'&&/^(?:AUTH_|OAUTH_CONFIG_REQUIRED$)/.test(result.code)){
         // Basic owns the click-time authorization and the failed save outcome.
         // Some Chrome versions reject sidePanel.open after the async check.
         try{
@@ -358,7 +358,7 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
     return engine.save({observation,depthAuthorization,itemId:String(info.menuItemId),generation:generation??registrar.inspect().acknowledgedGeneration,attentionContext:attention.context(info),context:['video','audio'].includes(info.mediaType)?info.mediaType:info.srcUrl?'image':info.linkUrl?'link':'page',source});
   },onOutcome:result=>{
     if(result.code==='RESOURCE_BUSY'&&!showSaveBusy())return;
-    void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});
+    void chrome.storage.local.set({lastSave:{state:result.state,code:result.code??'OK',operationId:result.remoteOperationId??result.operationId??result.attemptId,completion:result.completion??null,requiredAction:result.requiredAction??null}}).catch(()=>{});
   }
 });
 let lastSaveBusy=0;

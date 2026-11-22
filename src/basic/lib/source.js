@@ -1,10 +1,9 @@
 import { fail, sourceUrl } from "./common.js";
 import { publicAddress } from "../../../right2cloud-module/src/public-address.mjs";
 export const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
-export const WEB_SOURCE_PERMISSIONS = Object.freeze(["https://*/*", "http://*/*"]);
 const redirectStatus = new Set([301, 302, 303, 307, 308]);
 
-function publicSource(value) {
+export function publicSource(value) {
   const url = new URL(sourceUrl(value));
   const host = url.hostname.replace(/^\[|\]$/g, "");
   const literal = host.includes(":") || /^\d+(?:\.\d+)*$/.test(host);
@@ -153,7 +152,8 @@ export async function acquireSource(
     // Allocate the source once. A growable backing store avoids retaining
     // chunk arrays and a second full copy when a length is unknown.
     const length = !response.headers.get("content-encoding") ? declared : null;
-    const grow = length === null && typeof ArrayBuffer.prototype.resize === "function";
+    const grow = length === null && typeof ArrayBuffer.prototype.resize === "function" &&
+      typeof ArrayBuffer.prototype.transferToFixedLength === "function";
     const buffer = grow ? new ArrayBuffer(0, {maxByteLength: maxBytes}) : new ArrayBuffer(length ?? maxBytes);
     const reader = response.body.getReader();
     let size = 0;
@@ -178,7 +178,9 @@ export async function acquireSource(
       void reader.cancel().catch(() => {});
     }
     if (!size) throw fail("SOURCE_EMPTY", "The resource is empty.");
-    const bytes = new Uint8Array(buffer, 0, size);
+    // Chrome's Web IDL rejects resizable backing buffers in TextDecoder,
+    // Web Crypto and request bodies. Transfer detaches the growable buffer.
+    const bytes = new Uint8Array(grow ? buffer.transferToFixedLength(size) : buffer, 0, size);
     const encoding=bytes[0]===0xff&&bytes[1]===0xfe?'utf-16le':bytes[0]===0xfe&&bytes[1]===0xff?'utf-16be':'utf-8';
     const prefix = new TextDecoder(encoding)
       .decode(bytes.subarray(0, 4096))

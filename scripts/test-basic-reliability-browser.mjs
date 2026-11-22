@@ -226,7 +226,7 @@ try {
     await page.evaluate(async () => {
       const f = basicLifecycle;
       f.messageOverride = async ({op, input}) => {
-        if (op === 'history.latestOutcome') return {ok: true, value: null};
+        if (op === 'history.latestOutcome' || op === 'saves.pending') return {ok: true, value: null};
         if (op === 'providers.getStatus') return {ok: true, value: {ready: false, connected: false, reason: 'AUTH_REQUIRED'}};
         if (op === 'providers.goTo') return {ok: true, value: {opened: true}};
         if (input.provider === 'google') return new Promise(() => {});
@@ -246,6 +246,61 @@ try {
     }
     evidence.checks.push({gate: 'card-message-timeout-rejection-and-missing-response-recover-controls', result: 'PASS'});
   } finally { await context.close(); }
+  const nativeContext = await browser.newContext();
+  try {
+    let page = await fixturePage(nativeContext);
+    await start(page, '/candidate');
+    await page.waitForFunction(() => click2cloud.registrar.inspect().acknowledgedGeneration !== null);
+    await page.evaluate(() => {
+      const f = basicLifecycle;
+      f.oneDrive = f.withholdSource = true;
+      const row = click2cloud.registrar.inspect().desired.rows.find(row => row.providerAction === 'onedrive');
+      f.emit('menu.click', {menuItemId: row.id, srcUrl: 'https://files.example/one-click.txt?signature=synthetic-private',
+        pageUrl: 'https://page.example/'}, {id: 3, windowId: 1});
+    });
+    await page.waitForFunction(() => basicLifecycle.read('local').lastSave?.code === 'SOURCE_PERMISSION_REQUIRED');
+    const pending = await page.evaluate(async () => ({
+      last: basicLifecycle.read('local').lastSave,
+      attempt: (await basicLifecycle.call('saves.pending', {provider: 'onedrive'})).value,
+      ...basicLifecycle.snapshot(),
+    }));
+    assert.equal(pending.attempt.id, pending.last.operationId);
+    assert.equal(pending.attempt.state, 'AWAITING_SOURCE');
+    assert.equal(pending.popups, 1);
+    assert.equal(pending.tokenExchanges, 1);
+    assert.equal(pending.providerWrites, 0);
+    await page.close();
+    page = await fixturePage(nativeContext);
+    await start(page, '/candidate');
+    const result = await page.evaluate(async id => {
+      const f = basicLifecycle, provider = 'onedrive';
+      f.oneDrive = true;
+      const resumed = await f.call('saves.resume', {provider, id});
+      const replay = await f.call('saves.resume', {provider, id});
+      const history = await f.call('history.list');
+      const count = await f.call('counter.get');
+      return {resumed, replay, history, count: count.value.count, popups: f.counts.popups, writes: f.counts.providerWrites};
+    }, pending.attempt.id);
+    assert.equal(result.resumed.value?.state, 'SAVED', JSON.stringify(result.resumed));
+    assert.equal(result.replay.error.code, 'PENDING_SAVE_NOT_FOUND');
+    assert.equal(result.history.value.total, 1);
+    const [receipt] = result.history.value.items;
+    assert.deepEqual({id: receipt.id, name: receipt.filename, root: receipt.destination.rootId, object: receipt.objectId},
+      {id: pending.attempt.id, name: 'one-click.txt', root: 'fixture-root', object: 'fixture-onedrive-object'});
+    assert.equal(result.count, 1);
+    assert.equal(result.writes, 2);
+    assert.equal(result.popups, 0);
+    assert.doesNotMatch(JSON.stringify(result), /synthetic-private/);
+    await page.close();
+    page = await fixturePage(nativeContext);
+    await start(page, '/candidate');
+    assert.equal((await page.evaluate(() => basicLifecycle.call('counter.get'))).value.count, 1);
+    evidence.checks.push({gate: 'native-onedrive-oauth-withheld-source-continuation-verified-readback', result: {
+      attemptId: receipt.id, account: receipt.destination.accountId, root: receipt.destination.rootId,
+      objectId: receipt.objectId, name: receipt.filename, bytes: receipt.size, basicCounter: result.count,
+      popups: pending.popups, writes: result.writes, restartReceiptCount: 1,
+    }});
+  } finally { await nativeContext.close(); }
   assert.deepEqual(evidence.errors ?? [], []);
 } catch (error) {
   evidence.failure = error.stack;

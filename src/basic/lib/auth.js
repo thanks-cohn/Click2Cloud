@@ -43,20 +43,29 @@ function browserAuthFailure(error) {
     return fail("AUTH_BROWSER_UNSUPPORTED", "This browser does not support the extension's configured sign-in flow.");
   if (/invalid.client|bad client|redirect.mismatch|oauth2.*not declared/i.test(detail))
     return fail("OAUTH_CONFIG_REQUIRED", "The browser could not use the registered OAuth client.");
+  if (/administrat|enterprise|blocked by policy/i.test(detail))
+    return fail("AUTH_POLICY_BLOCKED", "Browser or account policy prevented extension sign-in.",
+      "Check the browser profile and extension sign-in policy.");
+  if (/user gesture|user activation/i.test(detail))
+    return fail("AUTH_GESTURE_REQUIRED", "Chrome requires a direct action to open sign-in.",
+      "Continue the pending save from the Shelf.");
   if (/user did not approve|user rejected|closed by (?:the )?user|user (?:closed|denied|cancel[le]+d)|access_denied|\bcancell?ed\b/i.test(detail))
     return fail("AUTH_CANCELLED", "Authorization was cancelled or declined.");
-  if (/not signed in|no (?:chrome )?account|interaction required|not granted or revoked|user interaction/i.test(detail))
-    return fail("AUTH_REQUIRED", "Sign in to the browser and authorize this extension.");
+  if (/not signed in|no (?:chrome )?account|browser sign.in.*disabled/i.test(detail))
+    return fail("AUTH_PROFILE_REQUIRED", "The browser profile has no eligible signed-in account.",
+      "Sign in to the Google Chrome profile before retrying Drive authorization.");
+  if (/interaction required|not granted or revoked|user interaction/i.test(detail))
+    return fail("AUTH_REQUIRED", "Authorize this extension before saving.");
   if (/network|connection|temporarily unavailable|page could not be loaded/i.test(detail))
     return fail("AUTH_NETWORK", "The browser could not reach the authorization provider.", "Check connectivity and try again.");
   return fail("AUTH_BROWSER_FAILED", "The browser could not complete authorization.",
     "Check browser sign-in and the extension's OAuth registration, then try again.");
 }
 
-function identityMatches(id, previous, actual) {
+export function identityMatches(id, previous, actual) {
   // Older Dropbox credentials stored only the account ID. Bind the home root
   // when that same account is next verified. Uploads still use the default root.
-  return Array.isArray(previous) && previous.every((part, index) => part === actual[index]) &&
+  return Array.isArray(previous) && Array.isArray(actual) && previous.every((part, index) => part === actual[index]) &&
     (previous.length === actual.length || (id === "dropbox" && previous.length === 1));
 }
 
@@ -389,7 +398,7 @@ export function createAuth({
     }
     if (identity.length !== record.identity.length)
       await save(id, {...record, identity}, ticket, signal);
-    return record.accessToken;
+    return {accessToken:record.accessToken, identity};
   }
 
   function flight(slot, name, ms, timeoutError, work) {
@@ -412,6 +421,7 @@ export function createAuth({
 
   function rememberRecord(id, record) {
     slots[id].connected = Boolean(record?.connected);
+    slots[id].binding = Array.isArray(record?.identity) ? record.identity : null;
   }
   function ready(id) {
     return {provider: id, connected: true, authorized: true, ready: true, phase: "ready",
@@ -435,7 +445,7 @@ export function createAuth({
     try { onStatus(status); } catch {}
     return status;
   }
-  function token(id) {
+  function authorization(id) {
     valid(id);
     const slot = slots[id];
     if (slot.login) return Promise.reject(connecting());
@@ -459,12 +469,12 @@ export function createAuth({
         throw fail("AUTH_SCOPE_REQUIRED", "Required upload permissions are missing.");
       if (!Array.isArray(record.identity) || !record.identity.length)
         throw fail("AUTH_REQUIRED", "Reconnect to verify the saved account.");
-      const accessToken = id === "google"
-        ? (await googleToken(false, record.identity, ticket, signal)).accessToken
+      const {accessToken, identity} = id === "google"
+        ? await googleToken(false, record.identity, ticket, signal)
         : await oauthToken(id, record, ticket, signal);
       signal.throwIfAborted();
       if (slot.epoch !== ticket || slot.login) throw changed();
-      return accessToken;
+      return {accessToken, identity};
     });
   }
   async function status(id, broadcast = false) {
@@ -472,7 +482,7 @@ export function createAuth({
     const slot = slots[id], ticket = slot.epoch;
     let result;
     try {
-      await token(id);
+      await authorization(id);
       result = ready(id);
     } catch (error) {
       result = unavailable(id, error);
@@ -517,7 +527,10 @@ export function createAuth({
     const request = () => browserCall("launchWebAuthFlow", {url: authorize.href, interactive: true});
     const response = await interactive(id, signal, request);
     const callback = URL.parse(response);
-    if (!callback || callback.origin + callback.pathname !== redirect ||
+    if (!callback)
+      throw fail("AUTH_CALLBACK_MISSING", "The browser closed sign-in without returning an authorization callback.",
+        "Check the registered extension redirect, then retry sign-in.");
+    if (callback.origin + callback.pathname !== redirect ||
         callback.hash || callback.username || callback.password ||
         callback.searchParams.getAll("state").length !== 1 ||
         callback.searchParams.get("state") !== nonce)
@@ -577,6 +590,8 @@ export function createAuth({
       return publish(result);
     });
   }
-  return {status, snapshot, connect, reconnect: connect, token,
+  return {status, snapshot, connect, reconnect: connect, authorization,
+    token: async id => (await authorization(id)).accessToken,
+    binding: id => slots[id]?.binding ?? null,
     refresh: id => status(id, true)};
 }

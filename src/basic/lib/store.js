@@ -1,4 +1,5 @@
-import { fail, TERMINAL, projectOutcome } from "./common.js";
+import { fail, TERMINAL, WAITING, projectOutcome } from "./common.js";
+import { pendingExpired } from "./intent.js";
 export const DEFAULTS = Object.freeze({
   pageSize: 40,
   diagnosticsEnabled: true,
@@ -378,6 +379,7 @@ export async function openStore(
           "SOURCE_CHECK",
           "UPLOADING",
           "CONFIRMING",
+          ...WAITING,
         ]) {
           await new Promise((resolve, reject) => {
             const r = index.openCursor(IDBKeyRange.only(state));
@@ -385,6 +387,14 @@ export async function openStore(
             r.onsuccess = () => {
               const c = r.result;
               if (!c) return resolve();
+              if (WAITING.has(state)) {
+                if (pendingExpired({expiresAt: c.value.resumeUntil}, Date.now()))
+                  c.update({...c.value, state: "FAILED", code: "PENDING_SAVE_EXPIRED", resumeUntil: undefined,
+                    message: "The pending save expired before any cloud write.",
+                    nextAction: "Start a fresh save from the original item.", updatedAt: new Date().toISOString()});
+                c.continue();
+                return;
+              }
               c.update({
                 ...c.value,
                 state: "UNCERTAIN",

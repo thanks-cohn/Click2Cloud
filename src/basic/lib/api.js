@@ -18,6 +18,8 @@ export const CONTRACTS = Object.freeze({
     requestId: "string?",
   },
   "saves.getAttempt": { id: "string" },
+  "saves.pending": { provider: "provider" },
+  "saves.resume": { provider: "provider", id: "string" },
   "history.list": { page: "integer?", pageSize: "integer?" },
   "history.latestOutcome": { provider: "provider" },
   "history.get": { id: "string" },
@@ -78,13 +80,13 @@ export function validateBasicRequest(message) {
   validate(message.op, input);
   return input;
 }
-export function createApi({auth, chrome, durable}) {
+export function createApi({auth, chrome, durable, afterAuth}) {
   const describe = status => ({
     ...PROVIDERS.find(p => p.id === providerId(status.provider)),
     ...status,
   });
   const status = async provider => describe(await auth.snapshot(provider));
-  async function invoke(op, input = {}) {
+  async function invoke(op, input = {}, saveOptions) {
     validate(op, input);
     switch (op) {
       case "api.describe":
@@ -106,16 +108,22 @@ export function createApi({auth, chrome, durable}) {
         });
         return { opened: true };
       case "auth.connect":
-        return describe(await auth.connect(input.provider));
-      case "auth.reconnect":
-        return describe(await auth.reconnect(input.provider));
+      case "auth.reconnect": {
+        const result = await auth[op === "auth.connect" ? "connect" : "reconnect"](input.provider);
+        if (result.ready) afterAuth?.(input.provider);
+        return describe(result);
+      }
       case "auth.refresh":
         return describe(await auth.refresh(input.provider));
     }
     const {store: data, coordinator: saves} = await durable();
     switch (op) {
       case "saves.start":
-        return saves.start(input);
+        return saves.start(input, saveOptions);
+      case "saves.pending":
+        return saves.pending(input.provider);
+      case "saves.resume":
+        return saves.resume(input.provider, input.id);
       case "history.latestOutcome":
         return data.latestOutcome(input.provider);
       case "saves.getAttempt":

@@ -444,9 +444,11 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
       size: object.size,
       confirmed: true,
       requestedName: filename,
+      ...(typeof object.path_display === "string" && object.path_display.startsWith("/") &&
+        object.path_display.length <= 4096 ? {path: object.path_display} : {}),
     };
   }
-  async function onedrive({ bytes, filename, token, onConfirming }) {
+  async function onedrive({ bytes, filename, token, expectedRoot, onConfirming }) {
     const root = await json(
       GRAPH + "me/drive/root?$select=id",
       { headers: headers(token) },
@@ -458,6 +460,8 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         "ONEDRIVE_ROOT_INVALID",
         "OneDrive did not identify the upload root.",
       );
+    if (expectedRoot && root.id !== expectedRoot)
+      throw fail("AUTH_ACCOUNT_CHANGED", "The verified OneDrive upload root changed.");
     const session = await json(
       GRAPH +
         `me/drive/items/${encodeURIComponent(root.id)}:/${encodeURIComponent(filename)}:/createUploadSession`,

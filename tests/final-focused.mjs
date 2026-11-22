@@ -91,3 +91,5 @@ import './basic-providers.test.mjs';
 import './basic-host.test.mjs';
 import './basic-core.test.mjs';
 import './basic-diagnostics-export.test.mjs';
+
+import './basic-intent.test.mjs';

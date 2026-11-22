@@ -56,7 +56,7 @@ export async function basicLifecycleFixture({build, manifest}) {
     });
   }
   const fixture = window.basicLifecycle = {
-    send, emit, read, write, counts, transient: null, rejectGoogle: false,
+    send, emit, read, write, counts, transient: null, rejectGoogle: false, withholdSource: false,
     call: (op, input = {}) => send({channel: 'redown-basic-v1', api: 1, op, input}),
     snapshot: () => ({
       ...counts, listeners: Object.fromEntries([...events].map(([k, v]) => [k, v.size])),
@@ -74,7 +74,8 @@ export async function basicLifecycleFixture({build, manifest}) {
       remove(id, cb) { return acknowledge(id, null, cb, 'remove'); },
       removeAll(cb) { counts.removedAll = (counts.removedAll ?? 0) + 1; write('menus', {}); cb(); },
     },
-    action: {onClicked: event('action'), setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}},
+    action: {onClicked: event('action'), setBadgeText: async ({text}) => { fixture.badge = text; },
+      setBadgeBackgroundColor: async () => {}, setIcon: async () => {}},
     alarms: {onAlarm: event('alarm'), create: async name => { alarms.add(name); }},
     windows: {getCurrent: async () => ({id: 1}), onRemoved: event('window.removed')},
     sidePanel: {setOptions: async () => {}, onOpened: event('panel.opened'), onClosed: event('panel.closed')},
@@ -85,9 +86,19 @@ export async function basicLifecycleFixture({build, manifest}) {
         if (fixture.rejectGoogle) throw Error('Browser provider connection failed. Private details.');
         return {token: 'synthetic-google', grantedScopes: scopes};
       },
-      launchWebAuthFlow: async () => { counts.popups++; throw Error('Unexpected fixture consent'); },
+      launchWebAuthFlow: async options => {
+        counts.popups++;
+        const url = new URL(options.url);
+        if (!fixture.oneDrive || !options.interactive || url.hostname !== 'login.microsoftonline.com' ||
+            url.searchParams.get('code_challenge_method') !== 'S256') throw Error('Unexpected fixture consent');
+        const callback = new URL(url.searchParams.get('redirect_uri'));
+        if (callback.href !== 'https://' + id + '.chromiumapp.org/onedrive') throw Error('Unexpected fixture callback');
+        callback.searchParams.set('state', url.searchParams.get('state'));
+        callback.searchParams.set('code', 'fixture-code');
+        return callback.href;
+      },
     },
-    permissions: {contains: async () => true},
+    permissions: {contains: async ({origins}) => !(fixture.withholdSource && origins.includes('https://files.example/*'))},
     downloads: {download: async options => { fixture.zip = options; return 7; }},
     tabs: {create: async () => { counts.tabOpens++; return {id: 2}; }, get: async id => ({id, windowId: 1})},
   }});
@@ -159,6 +170,36 @@ export async function basicLifecycleFixture({build, manifest}) {
     if (url.hostname === 'graph.microsoft.com' && /^\/v1\.0\/me(?:\/drive\/root)?$/.test(url.pathname)) {
       counts.providerReads++;
       return Response.json({id: url.pathname.endsWith('root') ? 'fixture-root' : 'fixture-account'});
+    }
+    if (fixture.oneDrive) {
+      const name = 'one-click.txt', objectId = 'fixture-onedrive-object';
+      const bytes = new TextEncoder().encode('Fixture OneDrive object');
+      if (url.hostname === 'login.microsoftonline.com' && url.pathname.endsWith('/token')) {
+        const form = new URLSearchParams(options.body);
+        if (form.get('code') !== 'fixture-code' || !form.get('code_verifier')) throw Error('Unexpected token exchange');
+        counts.tokenExchanges = (counts.tokenExchanges ?? 0) + 1;
+        return Response.json({access_token: 'synthetic-onedrive', refresh_token: 'synthetic-refresh', expires_in: 3600,
+          scope: 'Files.ReadWrite User.Read offline_access'});
+      }
+      if (url.hostname === 'files.example' && url.pathname === '/' + name && options.credentials === 'omit')
+        return new Response(bytes, {headers: {'Content-Type': 'text/plain'}});
+      if (url.hostname === 'graph.microsoft.com' && url.pathname.endsWith(`/fixture-root:/${name}:/createUploadSession`)) {
+        counts.providerWrites++;
+        return Response.json({uploadUrl: 'https://fixture.1drv.com/upload'});
+      }
+      if (url.hostname === 'fixture.1drv.com' && options.method === 'PUT') {
+        if (new Headers(options.headers).has('authorization') || String(options.body) !== String(bytes))
+          throw Error('Unexpected fixture upload data');
+        counts.providerWrites++;
+        return Response.json({id: objectId, name}, {status: 201});
+      }
+      if (url.hostname === 'graph.microsoft.com' && url.pathname.endsWith('/items/' + objectId)) {
+        counts.providerReads++;
+        if (counts.providerWrites !== 2) throw Error('Attempted readback without a write');
+        const hash = await crypto.subtle.digest('SHA-256', bytes);
+        const sha256Hash = [...new Uint8Array(hash)].map(n => n.toString(16).padStart(2, '0')).join('');
+        return Response.json({id: objectId, name, size: bytes.length, parentReference: {id: 'fixture-root'}, file: {hashes: {sha256Hash}}});
+      }
     }
     if (options?.method && !['GET', 'HEAD'].includes(options.method)) counts.providerWrites++;
     throw Error('FIXTURE_NETWORK_DISALLOWED');

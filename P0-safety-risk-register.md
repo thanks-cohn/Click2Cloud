@@ -32,3 +32,23 @@ Bing source and November 22 Dropbox ZIP were unavailable for inspection.
 - 162 targeted tests, packaged build, and the Aesthetic fixture passed. The baseline packaged
   lifecycle fixture passed. Baseline suites reported 686 focused passes and 777 full passes
   with one archived Depth digest failure.
+
+## Pending save and provider evidence checkpoint
+
+- Tested with 169 Basic and source audit checks. The packaged Chromium fixture delivered one
+  native OneDrive menu click, ran the staged OAuth callback and exchange, held the granted
+  account and root while source access was withheld, then resumed the same ID after recreating
+  the worker fixture. The mock Graph readback matched the object ID, root, filename, length and
+  checksum. IndexedDB retained one History receipt and one Basic lifetime increment after a
+  further restart. Concurrent resume and canceled consent tests recorded no duplicate upload.
+- The browser fixture exposed a real Chromium incompatibility with resizable source buffers.
+  The source reader now detaches its growable buffer into fixed-length bytes before decoding,
+  hashing or upload. The unknown-length browser case passed after the fix. Older engines use
+  a single fixed buffer capped at 32 MiB.
+- Pending URLs live in trusted Chrome session storage for at most the ten-minute authorization
+  window. Only the attempt ID, stage and sanitized History fields survive browser exit. A missing
+  or expired session cannot replay a write. Account/root mismatches stop before upload.
+- Google readiness and consent errors, OneDrive callback phases, and Dropbox receipt destination
+  fields are distinguishable in local evidence. Installed registration, account access and the
+  owner's Dropbox object locations remain unverified. The Cloudflare grant and API paths were
+  exercised for isolation in the fixture. Real token refresh and R2 access remain unverified.

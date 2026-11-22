@@ -3,6 +3,7 @@ import {createAuth} from './lib/auth.js';
 import {createCoordinator} from './lib/coordinator.js';
 import {openStore} from './lib/store.js';
 import {acquireSource, browserSourceAccess} from './lib/source.js';
+import {createSaveIntents} from './lib/intent.js';
 import {fail, projectOutcome, safeError} from './lib/common.js';
 import {createAdapters} from './providers/index.js';
 
@@ -19,7 +20,8 @@ export function basicSourceFromClick(provider, {srcUrl, linkUrl, pageUrl}, tab) 
 const storageFailure = detail => fail('STORAGE_UNAVAILABLE', detail,
   'Retry when Basic storage is available. Check the provider before retrying any interrupted save.');
 
-export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000}) {
+export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000, onVerified}) {
+  const intents = createSaveIntents(chrome, trustedStorage);
   const auth = createAuth({chrome, trustedStorage, onStatus: status => {
     void chrome.runtime.sendMessage?.({channel: 'redown-basic-status', status}).catch(() => {});
   }});
@@ -48,7 +50,7 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
         await store.recover(signal);
         signal.throwIfAborted();
         const coordinator = createCoordinator({
-          store, auth, adapters: createAdapters({}),
+          store, auth, intents, onVerified, adapters: createAdapters({}),
           acquire: input => acquireSource(input, {hasAccess: browserSourceAccess(chrome.permissions)}),
           notify: attempt => chrome.runtime.sendMessage({
             channel: 'redown-basic-attempt',
@@ -67,12 +69,19 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
     opening = Promise.race([work, aborted]).finally(() => clearTimeout(timeout));
     return opening;
   }
-  const api = createApi({auth, chrome, durable});
+  const api = createApi({auth, chrome, durable, afterAuth(provider) {
+    void (async () => {
+      if (!await intents.get(provider)) return;
+      const {coordinator} = await durable();
+      await coordinator.afterLogin(provider);
+    })().catch(() => {});
+  }});
   async function click(provider, info, tab) {
     try {
-      const attempt = await api.invoke('saves.start', basicSourceFromClick(provider, info, tab));
-      return {state: {SAVED: 'completed', FAILED: 'failed', UNCERTAIN: 'uncertain'}[attempt.state] ?? 'uncertain',
-        code: attempt.code ?? attempt.state};
+      const attempt = await api.invoke('saves.start', basicSourceFromClick(provider, info, tab), {native:true});
+      return {state: {SAVED: 'completed', FAILED: 'failed', UNCERTAIN: 'uncertain',
+        AWAITING_AUTH: 'pending', AWAITING_SOURCE: 'pending'}[attempt.state] ?? 'uncertain',
+        code: attempt.code ?? attempt.state, attemptId: attempt.id};
     } catch (error) {
       const {code} = safeError(error);
       if (code === 'STORAGE_UNAVAILABLE') return {state: 'failed', code: 'BASIC_STORAGE_UNAVAILABLE'};

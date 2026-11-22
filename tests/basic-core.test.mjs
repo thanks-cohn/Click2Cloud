@@ -56,6 +56,7 @@ test("real source bytes and filename, MIME, unknown length bounded strategy", as
     },
   );
   assert.deepEqual(source.bytes, new Uint8Array([1, 2, 3]));
+  assert.notEqual(source.bytes.buffer.resizable, true);
   assert.equal(source.filename, "hello world.png");
   assert.equal(source.preview, "data:image/png;base64,AQID");
   assert.equal(sanitizeFilename("CON.pdf"), "_CON.pdf");
