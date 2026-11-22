@@ -19,7 +19,9 @@ const storageFailure = detail => fail('STORAGE_UNAVAILABLE', detail,
   'Retry when Basic storage is available. Check the provider before retrying any interrupted save.');
 
 export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000}) {
-  const auth = createAuth({chrome, trustedStorage});
+  const auth = createAuth({chrome, trustedStorage, onStatus: status => {
+    void chrome.runtime.sendMessage?.({channel: 'redown-basic-status', status}).catch(() => {});
+  }});
   let ready, opening;
   function durable() {
     if (ready) return ready;

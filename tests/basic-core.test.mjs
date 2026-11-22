@@ -193,11 +193,12 @@ test("readiness false creates failure and meaningful History; never source or up
   const store = await fresh();
   const c = coordinator(store, {
     auth: {
-      status: async () => ({
-        ready: false,
-        reason: "AUTH_SCOPE_REQUIRED",
-        nextAction: "Reconnect/Approve.",
-      }),
+      token: async () => {
+        throw Object.assign(Error("Required upload permissions are missing."), {
+          code: "AUTH_SCOPE_REQUIRED",
+          nextAction: "Reconnect/Approve.",
+        });
+      },
     },
     acquire: async () => assert.fail("must not fetch"),
   });

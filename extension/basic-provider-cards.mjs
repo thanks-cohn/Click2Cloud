@@ -60,7 +60,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
       [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
     card.readiness.dataset.reason = status.reason ?? '';
-    card.availability.textContent = !status.ready && status.reason && status.reason !== 'AUTH_REQUIRED'
+    card.availability.textContent = !status.ready && status.reason && (status.connected || status.reason !== 'AUTH_REQUIRED')
       ? card.readiness.textContent : '';
   }
   for (const [id, label, icon] of providers) {
@@ -96,6 +96,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     async function action(button, op, changesStatus = true) {
       if (button.getAttribute('aria-disabled') === 'true') return;
       if (changesStatus) card.revision++;
+      const revision = card.revision;
       const buttons = changesStatus ? [card.connect, card.refresh] : [button];
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
@@ -103,7 +104,7 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       feedback.textContent = changesStatus ? 'Checking authorization…' : 'Opening provider…';
       try {
         const result = await call(op, id);
-        if (changesStatus) paint(card, result);
+        if (changesStatus && revision === card.revision) paint(card, result);
         feedback.textContent = '';
       } catch (error) {
         feedback.textContent = error.message;
@@ -159,11 +160,17 @@ export function createBasicProviderCards({runtime, document, permissions}) {
   function onAttempt(attempt) {
     recent(attempt?.provider, attempt);
   }
+  function onStatus(status) {
+    const card = cards.get(status?.provider);
+    if (!card || typeof status.ready !== 'boolean' || typeof status.connected !== 'boolean') return;
+    card.revision++;
+    paint(card, status);
+  }
   function showRecovery(provider) {
     const card = cards.get(provider === 'google-drive' ? 'google' : provider);
     if (!card) return;
     if (!card.saveDetails.hidden) card.saveDetails.open = true;
     card.connect.closest('.remote-provider').scrollIntoView({block: 'nearest'});
   }
-  return {mount, onAttempt, showRecovery};
+  return {mount, onAttempt, onStatus, showRecovery};
 }

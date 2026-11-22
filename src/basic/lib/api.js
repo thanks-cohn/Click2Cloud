@@ -78,11 +78,12 @@ export function validateBasicRequest(message) {
   validate(message.op, input);
   return input;
 }
-export function createApi({ store, auth, coordinator, chrome, durable = () => ({store, coordinator}) }) {
-  const status = async (provider) => ({
-    ...PROVIDERS.find((p) => p.id === providerId(provider)),
-    ...(await auth.status(provider)),
+export function createApi({auth, chrome, durable}) {
+  const describe = status => ({
+    ...PROVIDERS.find(p => p.id === providerId(status.provider)),
+    ...status,
   });
+  const status = async provider => describe(await auth.snapshot(provider));
   async function invoke(op, input = {}) {
     validate(op, input);
     switch (op) {
@@ -96,22 +97,20 @@ export function createApi({ store, auth, coordinator, chrome, durable = () => ({
       case "providers.list":
         return Promise.all(PROVIDERS.map((p) => status(p.id)));
       case "providers.getStatus":
-      case "providers.checkSaveReadiness":
         return status(input.provider);
+      case "providers.checkSaveReadiness":
+        return describe(await auth.status(input.provider));
       case "providers.goTo":
         await chrome.tabs.create({
           url: PROVIDERS.find((p) => p.id === input.provider).website,
         });
         return { opened: true };
       case "auth.connect":
-        await auth.connect(input.provider);
-        return status(input.provider);
+        return describe(await auth.connect(input.provider));
       case "auth.reconnect":
-        await auth.reconnect(input.provider);
-        return status(input.provider);
+        return describe(await auth.reconnect(input.provider));
       case "auth.refresh":
-        await auth.refresh(input.provider);
-        return status(input.provider);
+        return describe(await auth.refresh(input.provider));
     }
     const {store: data, coordinator: saves} = await durable();
     switch (op) {

@@ -65,14 +65,8 @@ export function createCoordinator({
     try {
       a = await store.patch(id, { state: "AUTH_CHECK" });
       await event(a, "AUTH_CHECK");
-      const status = await auth.status(provider);
-      if (!status.ready)
-        throw fail(
-          status.reason || "AUTH_NOT_READY",
-          "The extension is not ready to save to this provider.",
-          status.nextAction ||
-            "Sign in or reconnect from Providers, then explicitly retry this save.",
-        );
+      // Obtain a live, account-verified token once. Shelf status is only a
+      // projection and cannot authorize a durable save.
       const token = await auth.token(provider);
       a = await store.patch(id, { state: "SOURCE_CHECK" });
       await event(a, "SOURCE_CHECK");

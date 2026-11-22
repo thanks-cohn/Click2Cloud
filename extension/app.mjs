@@ -1778,6 +1778,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
    noticeKey:message.operationId?`depth:${message.operationId}:${message.state}`:undefined});
   return;
  }
+ if(message?.channel==='redown-basic-status'){basicCards.onStatus(message.status);return;}
  if(message?.channel==='redown-basic-attempt'){
   const attempt=message.attempt;
   basicCards.onAttempt(attempt);
