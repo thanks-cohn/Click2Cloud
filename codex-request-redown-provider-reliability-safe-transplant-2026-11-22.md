@@ -9,7 +9,7 @@ The owner reports: in newly integrated REDOWN Remote/Click2Cloud, Google Drive S
 
 **Mission:** Study **everything useful and demonstrably relevant** in original REDOWN's more mature three-provider authentication, connectivity, reconnect/refresh, startup recovery, queued-attempt durability, event handling, and resource discipline. Selectively *transplant and adapt* those behaviors into the **existing** REDOWN Remote Google Drive, OneDrive, and Dropbox cards, while **preserving REDOWN Basic's API v1, durable save engine, History, confirmation ledger, counters, diagnostics, and ZIP export intact**. Maximize practical reliability and minimize Chrome MV3 startup, CPU, storage I/O, RAM, and message pressure. **Do not assume** prior REDOWN was crash-free or that any single architectural cause has already been proven.
 
-**No general redesign:** Keep the existing three cards in their present Remotes location, existing Aesthetic API, themes, all original actions and Cloudflare R2 card, and the current Shelf/header/panel layout. The **only explicitly authorized visual changes** are the narrow in-Shelf branding correction in section 0A and the connected-provider button label correction in section 0B below. No tab reshuffle, panel sizing changes, Bad Boy theme, licensing/paywall features, new History UI or broader visual overhaul. This run is **provider reliability plus these two narrowly scoped UI corrections**, not a second aesthetics workstream.
+**No general redesign:** Keep the existing three cards in their present Remotes location, existing Aesthetic API, themes, all original actions and Cloudflare R2 card, and the current Shelf/header/panel layout. The **only explicitly authorized UI changes beyond provider reliability** are the in-Shelf branding correction (section 0A), the connected-provider button label correction (section 0B), and the screenshot History Host URL disclosure plus its expansion preference (section 0C). No tab reshuffle, panel sizing changes, Bad Boy theme, licensing/paywall features, new History UI or broader visual overhaul. This run is **provider reliability plus these three narrowly scoped UI refinements**, not a broad aesthetics or History-redesign workstream.
 
 
 ## 0A. Owner-approved surgical header branding correction — ONE change inside the Shelf
@@ -54,6 +54,40 @@ CONTENT immediately below:    All Your Clouds. One Place. / provider cards / Exp
 For each existing REDOWN Basic provider card (**Google Drive, OneDrive, Dropbox**) in Remotes, replace the **visible** connected-state action label `Reconnect / Approve` or `Reconnect/Approve` with **exactly `Reconnect`**. When disconnected, keep the label **`Sign In`**. Keep **`Refresh`** and **`GO TO`** unchanged. This is a **presentation-only text correction**: preserve the existing underlying `auth.reconnect` API operation, OAuth scope/consent and approval behavior, security boundaries, click handlers, recovery, and accurate readiness/errors. Do not rename the operation, skip permissions, remove approval where required, or change unrelated Cloudflare R2 labels.
 
 Verify all three cards at connected and disconnected states, including after a service-worker restart and after reauthorization. Assert that visible button text is **never** `Reconnect / Approve` and remains **`Reconnect`** whenever the button performs reconnect. Do not add an extra row, enlarge cards, change other buttons, or compromise the responsive layout. The existing `must-do.11.22.2026.md` may be consulted for background, but do **not** import its separate TRUE REMOTE subtitle work into this run.
+
+## 0C. Screenshot History: standalone expandable Host URL BELOW the image + Settings preference
+
+**Exact owner request:** Every screenshot's History preview should show the captured page's Host URL in **its own small expandable "Host URL" row directly beneath the actual screenshot image**, not inside the existing destination `URLs` section, not as a copyable card and not as another History entry.
+
+```text
+[ Screenshot image preview ]
+▸ Host URL
+```
+
+Expanded:
+
+```text
+[ Screenshot image preview ]
+▾ Host URL
+    https://example.com/the-page-where-the-screenshot-was-taken
+```
+
+**Separate from cloud links:** The existing destination-specific `URLs` disclosure/card describes the uploaded object and must stay intact, in its current position and with its current behavior. The new **Host URL** is the original webpage **at screenshot capture time**, not a blob/image/R2/public-object URL or the page currently open in the browser. Display this under **the image itself** within its preview area, before destination cards. A screenshot saved to several destinations has **one** Host URL disclosure, not a duplicate for each destination. Do not insert it inside `URLs` or add any "Copy" button/card.
+
+**Use existing records, no new capture system:** `extension/screenshot-background.mjs` already records `historyContext:captureHistoryContext({pageUrl:job.plan.context?.url})`. `src/history/model.mjs` already projects `historyRecord().hostPageURL`. `extension/history-page.mjs` currently has the screenshot preview plus Capture details with an existing Page link. Reuse `r.hostPageURL` in a lightweight `<details><summary>Host URL</summary>...</details>` immediately after the screenshot image preview, preserving lazy loading and current screenshot card functionality. Show the existing stored URL in plain readable text (or a simple ordinary link); **do not** reuse the destination public-URL copyable-card component. For missing older host URLs, simply show "Host URL not captured"; do not invent or fetch a value. Avoid unnecessary duplicate Page URL presentation in Capture details without removing its canonical data.
+
+**NEW HISTORY SETTING — default is NO / collapsed:**
+- Add a small yes/no checkbox to **Settings → History**, labeled **"Expand screenshot Host URL by default"**. Initial/default state: **unchecked (No)**.
+- **Unchecked:** each screenshot's Host URL disclosure starts **collapsed**; the user can click it open individually.
+- **Checked:** each screenshot's Host URL disclosure starts **expanded** when History screenshot previews are rendered; the user can still collapse or re-expand any individual row manually. It is a default, **not** a forced-open lock.
+- Persist this single boolean preference using the **existing History preferences mechanism** (`getHistoryPreferences` / `setHistoryPreferences`, associated storage) where compatible. Missing/older preferences default to `false`. Keep the existing History display-range, image-preview expansion, timezone and export settings unchanged. The user's manual per-row toggle should not immediately reset during unrelated async image-load/status updates; when genuinely reinitializing the view, follow the stored default.
+- This setting affects **display only**, not which URL is recorded or exported, and it is **not** another privacy setting, permission or confirmation prompt. No new History database, indexer, background job, or polling loop.
+
+**No new URL-privacy system:** The owner does **not** want any additional privacy toggles, domain-hiding, opt-in prompts, filtering layers or security machinery for this disclosure. Use the **already stored Host URL** exposed by the existing History model and **leave the current URL-handling/export behavior as it is**. Do not change the current browser permissions or provider upload metadata. Do not transmit page/source URLs to cloud providers merely to display them in local History.
+
+**History export:** The Host URL must be exported as the already-existing `hostPageURL` property associated with the screenshot's operation ID when the user exports History **with screenshots included**, in **JSON, JSONL and CSV**. The current `src/history/model.mjs` `exportHistory()` already includes that field for normal History exports; verify it and fix any actual omission with minimal code. Do not create a separate exporter, duplicate field, new diagnostic events, or change Basic History/diagnostics. Keep the **existing** History export selection/behavior, including its existing privacy checkbox, unchanged; the new default-expansion checkbox has no effect on export contents.
+
+**Required tests:** Host URL appears directly below screenshot image (never under destination `URLs`); no copyable URL card; default unchecked/collapsed; checked/expanded; manual per-record toggle works in both modes; setting persists across History navigation, panel close/reopen and browser restart; no flicker/reset on async preview load; no duplicate disclosure for multi-destination screenshots; missing legacy URLs show honest fallback; all themes and narrow widths remain usable; JSON/JSONL/CSV exported screenshot records retain the correct captured `hostPageURL` and operation ID; screenshots-excluded exports still exclude screenshots; previously retained records, diagnostics and screenshot verification remain unchanged. Report actual browser vs fixture results honestly.
 
 ## 1. STRICT authorized repository and precedence
 
@@ -159,9 +193,9 @@ Implement focused deterministic tests plus real-browser tests **where the enviro
 2. A concise **transplant matrix** with source revisions/paths and what was **adopted vs rejected** (especially crash-risk/high-overhead features).
 3. Test report: `PASS / FAIL / UNVERIFIED` per **each provider** and per **Chrome vs Edge**, simulated vs actual provider receipt, plus memory/CPU/storage observations. If live OAuth console access or provider credentials unavailable, report exact blocker without requesting secrets or pretending completion.
 4. History/diagnostics integrity report with existing record counts/sample IDs before-and-after in test fixtures, zero data loss/duplicate success, verified export ZIP. No production credential dumps.
-5. **The two surgical UI changes**: header branding in section 0A (preserve browser title, inner row shows only larger red R, all controls aligned on one row across all themes) and connected provider-card label in section 0B (exactly `Reconnect` with `Sign In` / `Refresh` / `GO TO` preserved). Preserve every other appearance detail.
+5. **The three surgical UI changes**: header branding in section 0A; provider-card label in section 0B (exactly `Reconnect`); and screenshot History Host URL disclosure **beneath the image**, plus the **unchecked-by-default Settings checkbox** and existing History-export coverage in section 0C. Preserve every other appearance detail.
 6. **Focused commits and a normal git push** to the same existing branch. Verify GitHub remote contains all commits; report SHA(s). No branch creation, merge, force push, production deployment or Web Store publication.
 
 **Completion standard:** The three Basic cards remain usable after cold start, during unrelated provider failure, and after overnight restarts; original REDOWN's worthwhile low-overhead behavior is recovered **without replacing or damaging Basic's History, diagnostics, verified ledger or counters**. If browser/live-cloud confirmation is blocked, say **UNVERIFIED** and do not claim the P0 is closed.
 
-**Avoid overreach:** Except for the two precise UI corrections authorized in **sections 0A and 0B**, do not fix unrelated Shelf visuals, other R/wordmark styling, pyramid copy, API licensing, payment systems, Bad Boy aesthetic, Cloudflare onboarding, History redesign or other older Codex requests. Do not recreate original REDOWN's full background/queue architecture inside this integrated host.
+**Avoid overreach:** Except for the three precise UI corrections authorized in **sections 0A, 0B and 0C**, do not fix unrelated Shelf visuals, other R/wordmark styling, pyramid copy, API licensing, payment systems, Bad Boy aesthetic, Cloudflare onboarding, History redesign or other older Codex requests. Do not recreate original REDOWN's full background/queue architecture inside this integrated host.
