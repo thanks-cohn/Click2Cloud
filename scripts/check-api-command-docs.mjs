@@ -5,7 +5,9 @@ import {toolRegistry,validate} from '../src/api/service.mjs';
 import {listCommands} from '../src/api/shortcuts.mjs';
 import {validateManifest} from '../src/manifest/schema.mjs';
 
-const read = path => readFileSync(new URL(path,import.meta.url),'utf8');
+// Git for Windows may check out Markdown and .d.ts files with CRLF endings.
+// Compare their logical lines consistently without modifying source files on disk.
+const read = path => readFileSync(new URL(path,import.meta.url),'utf8').replace(/\r\n?/g,'\n');
 const doc = read('../docs/api/API-COMMAND-REFERENCE.md');
 const hash = schema => createHash('sha256').update(JSON.stringify(schema)).digest('hex');
 const entries = [...doc.matchAll(/^### (\w+)\n\n<!-- method-contract (.+) -->\n([\s\S]*?)(?=^#{2,3} |\s*$)/gm)];
