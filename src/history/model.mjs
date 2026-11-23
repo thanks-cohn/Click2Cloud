@@ -2,6 +2,7 @@ import {screenshotReceipt} from '../recorder/schema.mjs';
 // Customer projections of canonical remote-result records. Never infer remote proof,
 // public URLs, upload metadata, or page titles from unrelated diagnostics.
 export const HISTORY_PAGE_SIZE=25;
+export const historyURLUnavailable='N/A';
 export const historyDefaults=Object.freeze({range:'all',previews:'all',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',expandScreenshotHostURL:false});
 export function safeHistoryURL(raw){
  try{const u=new URL(raw);if(!['https:','http:'].includes(u.protocol)||u.username||u.password)return null;
@@ -68,7 +69,7 @@ export function historyRecord(row,{privacy=false}={}){
   unknown:['uncertain',screenshot.captured?'Upload unconfirmed':'Capture not confirmed'],
   failed:['failed',screenshot.captured?'Delivery failed':'Capture failed'],blocked:['failed','Delivery blocked']
  })[screenshot.state];
- return {operationId:row.operationId,timestamp:Number.isFinite(new Date(row.at).getTime())?new Date(row.at).toISOString():null,status:screenshotState?.[0]??(row.state==='pending'?'pending':verified?'verified':['failed','blocked','cancelled'].includes(row.state)?'failed':'uncertain'),statusLabel:screenshotState?.[1]??(row.state==='pending'?'Saving…':verified?'Saved and verified':['failed','blocked','cancelled'].includes(row.state)?'Not saved':'Not confirmed'),filename,originalFilename:provenance?.originalFilename??row.attemptedFilename??null,hostPageTitle:privacy?null:c.hostPageTitle??null,hostname:privacy?null:c.hostname??(links.hostPageURL?new URL(links.hostPageURL).hostname:null),...links,publicObjectURLs:[],provider:d.provider??null,accountReference:d.accountId??null,connectionId:d.connectionId??null,bucket:d.bucketName??null,prefix:objectKey?objectKey.slice(0,objectKey.lastIndexOf('/')+1):d.prefix??null,objectKey,saveMode:row.saveMode??(provenance?.presentation?.placement==='quick'?'quick':provenance?.mode)??null,proofKind:row.proofKind??null,error:verified?null:row.code??null,savedFileMetadata:metadata,metadataRedacted:metadata?JSON.stringify(metadata)!==JSON.stringify({httpMetadata:r.savedFileMetadata.httpMetadata??{},customMetadata:r.savedFileMetadata.customMetadata??{}}):false,metadataAvailability:metadata?(r.savedFileMetadataOrigin==='current-remote'?'Current remote metadata; historical upload snapshot unavailable':'Historical upload metadata snapshot'):'Not captured for this operation',availability:{hostPageTitle:privacy?'Omitted for privacy':c.hostPageTitle?'Captured':'Not captured',publicObjectURLs:'No verified public URL recorded',savedFileMetadata:metadata?'Captured at save':'Not captured'},canGoTo:!!r&&typeof r.key==='string'&&row.state==='verified',...(screenshot?{screenshot}:{})};
+ return {operationId:row.operationId,timestamp:Number.isFinite(new Date(row.at).getTime())?new Date(row.at).toISOString():null,status:screenshotState?.[0]??(row.state==='pending'?'pending':verified?'verified':['failed','blocked','cancelled'].includes(row.state)?'failed':'uncertain'),statusLabel:screenshotState?.[1]??(row.state==='pending'?'Saving…':verified?'Saved and verified':['failed','blocked','cancelled'].includes(row.state)?'Not saved':'Not confirmed'),filename,originalFilename:provenance?.originalFilename??row.attemptedFilename??null,hostPageTitle:privacy?null:c.hostPageTitle??null,hostname:privacy?null:c.hostname??(links.hostPageURL?new URL(links.hostPageURL).hostname:null),...links,publicObjectURLs:[],provider:d.provider??null,accountReference:d.accountId??null,connectionId:d.connectionId??null,bucket:d.bucketName??null,prefix:objectKey?objectKey.slice(0,objectKey.lastIndexOf('/')+1):d.prefix??null,objectKey,saveMode:row.saveMode??(provenance?.presentation?.placement==='quick'?'quick':provenance?.mode)??null,proofKind:row.proofKind??null,error:verified?null:row.code??null,savedFileMetadata:metadata,metadataRedacted:metadata?JSON.stringify(metadata)!==JSON.stringify({httpMetadata:r.savedFileMetadata.httpMetadata??{},customMetadata:r.savedFileMetadata.customMetadata??{}}):false,metadataAvailability:metadata?(r.savedFileMetadataOrigin==='current-remote'?'Current remote metadata; historical upload snapshot unavailable':'Historical upload metadata snapshot'):'Not captured for this operation',availability:{hostPageTitle:privacy?'Omitted for privacy':c.hostPageTitle?'Captured':'Not captured',publicObjectURLs:historyURLUnavailable,savedFileMetadata:metadata?'Captured at save':'Not captured'},canGoTo:!!r&&typeof r.key==='string'&&row.state==='verified',...(screenshot?{screenshot}:{})};
 }
 export function customerRows(rows,options={}){return rows.filter(r=>r.kind!=='readiness'&&(r.kind!=='depth-click'||!r.cause||!rows.some(s=>s.operationId===r.cause))).map(r=>historyRecord(r,options));}
 export function historyPage(rows,{page=1,...range}={}){const filtered=rows.filter(r=>inHistoryRange(r.timestamp,range)),pages=Math.max(1,Math.ceil(filtered.length/25)),current=Math.min(pages,Math.max(1,page));return {items:filtered.slice((current-1)*25,current*25),page:current,pages,total:filtered.length};}
@@ -85,7 +86,15 @@ export async function* exportHistory(pages,{format='json',privacy=false,includeS
  if(format==='csv'){yield fields.map(csv).join(',')+'\r\n';yield fields.map(k=>csv(k==='recordType'?'export':k==='exportSelection'?meta:null)).join(',')+'\r\n';}
  let first=true,operations=0,screenshots=0;const seen=new Set();
  for await(const page of pages){for(const item of page){if(item.operationId&&seen.has(item.operationId))throw Error('HISTORY_CHANGED_DURING_EXPORT');seen.add(item.operationId);}
- for(const row of customerRows(includeScreenshots?page:page.filter(item=>item.kind!=='screenshot-to-cloud'),{privacy})){if(!inHistoryRange(row.timestamp,selection))continue;const value=privacy?{...row,hostPageTitle:null,hostname:null,hostPageURL:null,sourceURL:null}:row;delete value.canGoTo;
+ for(const row of customerRows(includeScreenshots?page:page.filter(item=>item.kind!=='screenshot-to-cloud'),{privacy})){
+ if(!inHistoryRange(row.timestamp,selection))continue;
+ const {canGoTo,...value}=row;
+ value.hostPageURL??=historyURLUnavailable;
+ value.sourceURL??=historyURLUnavailable;
+ if(value.screenshot?.source){
+  value.screenshot={...value.screenshot,source:{...value.screenshot.source,
+   url:safeHistoryURL(value.screenshot.source.url)??historyURLUnavailable}};
+ }
  if(format==='json'){yield (first?'':',')+JSON.stringify(value);}
  else if(format==='jsonl')yield JSON.stringify(value)+'\n';
  else {yield fields.map(k=>csv(k==='recordType'?'operation':k==='exportSelection'?null:value[k])).join(',')+'\r\n';}first=false;operations++;if(row.screenshot)screenshots++;

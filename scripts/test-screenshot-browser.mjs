@@ -292,9 +292,11 @@ try{
  checks.push('History Retry verified only the originally denied output with the same capture ID, output ID, key and PNG; SECURE trace has no gaps or URLs');
  await cards.nth(2).getByText(/Verified · R2 GET/).waitFor();
  assert.equal(await cards.count(),3);
- const locationBox=await cards.first().locator('.history-destination-line').boundingBox();
- const urlBox=await cards.first().getByText('URLs',{exact:true}).boundingBox();
- assert(locationBox&&urlBox&&urlBox.y>=locationBox.y+locationBox.height);
+ await wait(async()=>{
+  const locationBox=await cards.first().locator('.history-destination-line').boundingBox();
+  const urlBox=await cards.first().getByText('URLs',{exact:true}).boundingBox();
+  return locationBox&&urlBox&&urlBox.y>=locationBox.y+locationBox.height;
+ },'History destination and URL rows after retry refresh');
  assert.equal(await partialRow.locator('[data-preview]').count(),1);
  const qaUrls=cards.nth(2).locator('[data-output-urls]');
  const qaKey=retried.plan.outputs[2].key,publicPath=qaKey.split('/').map(encodeURIComponent).join('/');
@@ -317,6 +319,9 @@ try{
  app.once('dialog',prompt=>prompt.accept());await enable.click();
  await qaUrls.getByText(`https://${qaDomain}/${publicPath}`,{exact:true}).waitFor();
  assert.deepEqual([...publicBuckets],['qa-screenshots']);
+ await app.bringToFront();
+ input('focus');
+ await wait(()=>app.evaluate(()=>document.hasFocus()),'History owns clipboard focus');
  await qaUrls.getByRole('button',{name:/Development URL https/}).click();
  await qaUrls.getByText('URL copied.',{exact:true}).waitFor();
  const domainInput=qaUrls.getByRole('textbox',{name:'Custom domain'});
@@ -434,24 +439,17 @@ try{
  const shortcutPage=await browser.newPage();await shortcutPage.goto('chrome://extensions/shortcuts');
  const searchCommand=shortcutPage.locator('.command-entry').filter({hasText:'Open File Explorer and focus filename search'});
  const chromeBinding=()=>service.evaluate(async()=>(await chrome.commands.getAll()).find(command=>command.name==='shelf.explorer.search')?.shortcut);
+ assert.equal(await chromeBinding(),'Alt+Shift+F');
  await searchCommand.getByRole('button',{name:/edit/i}).click();
- await shortcutPage.keyboard.press('Control+Shift+F7');
- await pause(200);
- const f7Assignable=await chromeBinding()==='Ctrl+Shift+F7';
- if(await chromeBinding()!=='Alt+Shift+F'){
-  await shortcutPage.keyboard.press('Escape');
-  await searchCommand.getByRole('button',{name:/edit/i}).click();
-  await shortcutPage.keyboard.press('Alt+Shift+F');
- }
- await wait(async()=>await chromeBinding()==='Alt+Shift+F','configured Chrome shortcut');
+ await shortcutPage.keyboard.press('Control+Shift+F');
+ await wait(async()=>await chromeBinding()==='Ctrl+Shift+F','owner-configured Chrome shortcut');
  await shortcutPage.close();
- checks.push('Chrome shortcut settings '+(f7Assignable?'accepted':'did not accept')+' Ctrl+Shift+F7 as a browser-wide shortcut');
  for(const host of searchHosts){
   await page.goto('https://'+host+'/');
   await page.bringToFront();input('focus');input('click','420','400');
-  input('key','Alt_L','Shift_L','f');
+  input('key','Control_L','Shift_L','f');
   const shelf=await inspectShelf();
-  const searchFocused="!!document.querySelector('#filename-search-popout:not([hidden]) #filename-search:focus')";
+  const searchFocused="document.hasFocus()&&!!document.querySelector('#filename-search-popout:not([hidden]) #filename-search:focus')";
   await wait(()=>shelf.evaluate(searchFocused),'Explorer pop-out search focused');
   input('key','x');
   await wait(()=>shelf.evaluate("document.querySelector('#filename-search')?.value==='x'"),'real typed filename query');
@@ -463,8 +461,10 @@ try{
    for(const view of ['remotes','history','settings','explorer']){
     await shelf.evaluate(`document.querySelector('header [data-view=${view}]').click()`);
     await wait(()=>shelf.evaluate(`document.querySelector('#shell').dataset.view==='${view}'`),view+' Shelf view');
-    input('key','Alt_L','Shift_L','f');input('key','Alt_L','Shift_L','f');
-    await wait(()=>shelf.evaluate(searchFocused),'Explorer search comes forward from '+view);
+    const hadFocus=await shelf.evaluate('document.hasFocus()');
+    input('key','Control_L','Shift_L','f');
+    const searchVisible="document.querySelector('#shell').dataset.view==='explorer'&&!document.querySelector('#filename-search-popout').hidden";
+    await wait(()=>shelf.evaluate(hadFocus?searchFocused:searchVisible),'Explorer search comes forward from '+view+(hadFocus?' with keyboard focus':''));
    }
    await shelf.evaluate("document.querySelector('#hide-filename-search').click()");
    await wait(()=>shelf.evaluate("document.querySelector('#filename-search-popout').hidden"),'X dismisses Search');
@@ -472,12 +472,20 @@ try{
    input('key','Control_L','Shift_L','F7');
    await wait(()=>shelf.evaluate("document.activeElement?.id==='filename-search'"),'Shelf-local Ctrl+Shift+F7 focuses filename Search');
    input('key','Escape');
-
+   await shelf.evaluate("document.querySelector('header [data-view=remotes]').click()");
+   await wait(()=>shelf.evaluate("document.querySelector('#shell').dataset.view==='remotes'"),'open Shelf on Remotes');
+   input('click','420','400');
+   await wait(()=>page.evaluate(()=>document.hasFocus()),'webpage owns keyboard focus with Shelf visible');
+   input('key','Control_L','Shift_L','f');
+   await wait(()=>shelf.evaluate("document.querySelector('#shell').dataset.view==='explorer'&&!document.querySelector('#filename-search-popout').hidden"),'one shortcut routes visible Shelf and reveals search');
+   const nativeFocus=await shelf.evaluate(searchFocused);
+   checks.push(nativeFocus?'Chrome moved native focus to the already-visible Shelf search.'
+    :'Chrome retained webpage focus with the Shelf already visible. The shortcut routed Files and revealed search.');
   }
   await shelf.detach();
   await closeShelf();
  }
- checks.push('Chrome Alt+Shift+F was assigned through Chrome shortcut settings and opened focused Explorer search from three fixture HTTPS origins; Enter stayed open and Escape dismissed it');
+ checks.push('One Ctrl+Shift+F with the owner binding opened focused Explorer search on three fixture HTTPS origins. Enter stayed open and Escape dismissed it.');
 
  const fixtureSessionData=await service.evaluate(async()=>{
   const {click2cloudOAuth}=await chrome.storage.local.get('click2cloudOAuth');
@@ -486,7 +494,7 @@ try{
   return click2cloudOAuth;
  });
  await app.locator('#login').waitFor();
- await page.bringToFront();input('focus');input('key','Alt_L','Shift_L','f');
+ await page.bringToFront();input('focus');input('key','Control_L','Shift_L','f');
  const loggedOutShelf=await inspectShelf();
  try{
   await wait(()=>loggedOutShelf.evaluate("document.querySelector('#shell').dataset.view==='explorer'&&document.querySelector('#login')?.textContent==='Log In'"),'Chrome search opens a truthful disconnected Explorer');

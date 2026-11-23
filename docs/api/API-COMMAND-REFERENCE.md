@@ -1,10 +1,10 @@
 # Click2Cloud V3+1.1 API command reference
 
-Click2Cloud 0.3.20 runs a trusted local API in the Chrome extension service worker. The Shelf uses the same operation registry and domain owners as host-authorized clients. The extension exposes no public HTTP listener, external messaging endpoint or desktop-control service.
+REDOWN 0.3.25 runs the trusted Click2Cloud V3+1.1 API in the Chrome extension service worker. The Shelf uses the same operation registry and domain owners as host-authorized clients. The extension exposes no public HTTP listener, external messaging endpoint or desktop-control service.
 
 ## Quick start
 
-Call `describeCapabilities` to discover the live tool registry and each method’s complete JSON input and output schemas. The release build also includes `api-tools.json`. TypeScript clients can import contracts from [service.d.ts](../../src/api/service.d.ts).
+Call `describeCapabilities` to discover the live tool registry and each method’s complete JSON input and output schemas. Its `build.extensionVersion` identifies the installed REDOWN build, and `version` identifies the API protocol. The release build also includes `api-tools.json`. TypeScript clients can import contracts from [service.d.ts](../../src/api/service.d.ts).
 
 Trusted extension code can send the following request from the expected Shelf document. The service checks the Chrome sender identity and document URL. Websites, content scripts and arbitrarily modified Shelf URLs cannot use this transport. [Trusted sender implementation](../../src/chrome/trusted-sender.mjs)
 

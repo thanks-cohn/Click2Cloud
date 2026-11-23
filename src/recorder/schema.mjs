@@ -37,11 +37,11 @@ export function rawFields(input){const out=Object.fromEntries(RAW_FIELDS.map(k=>
 const uuid=v=>/^[a-f0-9-]{36}$/i.test(v??'')?v:null;
 const instant=v=>typeof v==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(v)?v:null;
 const screenshotStages=['COMMAND_RECEIVED','TAB_RESOLVED','PAGE_ELIGIBLE','RULES_MATCHED','CAPTURE_REQUESTED',
- 'PNG_CAPTURED','R2_PUT_SENT','R2_RESPONSE','R2_READBACK','VERIFIED','PENDING','FAILED'];
+ 'PNG_CAPTURED','R2_PUT_SENT','R2_RESPONSE','R2_READBACK','VERIFIED','PENDING','FAILED','WINDOW_RESOLVED','DOCUMENT_VERIFIED'];
 const captureStages=['window-observation','tab-observation','page-eligibility','rule-matching','capture-preparation',
  'capture-api','png-validation','r2-upload'];
 const browserErrors=['chrome-window-error','chrome-tabs-query-error','chrome-frame-error','chrome-rate-limit',
- 'chrome-permission-denied','chrome-capture-error'];
+ 'chrome-permission-denied','chrome-tab-grant-required','chrome-capture-page-access','chrome-capture-policy','chrome-capture-error'];
 const screenshotMethod=value=>value==='direct-r2-object-api'?value:null;
 const screenshotHttpStatus=value=>Number.isInteger(value)&&value>=100&&value<=599?value:null;
 const screenshotProviderCodes=value=>(Array.isArray(value)?value:[]).filter(item=>Number.isSafeInteger(item)||typeof item==='string'&&/^\d{1,16}$/.test(item)).slice(0,16);

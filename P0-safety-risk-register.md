@@ -1,4 +1,4 @@
-# REDOWN 0.3.24 P0 safety risk register
+# REDOWN P0 safety risk register
 
 Baseline: `2b0c37fb0ff991ffd9bbc267236c656babc54b7d` on the authorized Click2Cloud integration
 branch. Primary comparison: REDOWN `653ad9b5fdd59532df571514fc60053d8a7b13bb`.
@@ -93,3 +93,22 @@ Bing source and November 22 Dropbox ZIP were unavailable for inspection.
   opaque redirect restriction is recorded as a source compatibility blocker.
 
 [0.3.24 implementation and verification report](docs/integration/REDOWN_0324_P0_VERIFICATION.md)
+
+## 0.3.25 Chrome shortcut repair
+
+The working behavioral baseline is `5e1cb5f`. The regression comparison is `cd4c8dd3`.
+Browser approval and verified receipt behavior are separate from native command delivery.
+Official Chrome for Windows is the primary acceptance environment. [Regression investigation](docs/integration/REDOWN_0324_SCREENSHOT_REGRESSION.md)
+
+| Risk | Impact and safeguard | Evidence and remaining gate |
+| --- | --- | --- |
+| Web source grant and screenshot grant diverge | An HTTP(S) host grant can expose the URL while Chrome still denies `captureVisibleTab`. Keep existing source approval and check the command's tab/window. Report missing capture grant and browser page-access errors separately in bounded diagnostics. | Reproduced on official Linux Chrome with 0.3.24 Alt+Q set to Global. The owner's Windows grant state and command scope remain unverified. |
+| Global shortcut or missing tab/window | Guessing the last active tab risks capturing an unrelated page. A tabless command must resolve one active document in a focused normal window. Chrome supplies or denies the capture grant. Focus or document changes abort before upload. Browser settings retain effective user bindings. | Targeted tests cover authorized tabless recovery, missing grants, unfocused and mismatched windows, and changed tabs/documents. Windows behavior remains open. |
+| Navigation, focus and capture policy | A foreground change, browser page, protected page, withheld grant or rate limit may interrupt capture. Existing tab/window/document checks protect pixel and URL correspondence. Native failures publish allowlisted categories without raw URLs, tokens or error text. | Targeted tests cover moved tabs, unsupported pages, policy, grants, quota and malformed PNG. Windows policy behavior remains open. |
+| Shelf open, routing and focus | Gesture rejection, unavailable API, missing window, cold session read and rapid shortcut presses can prevent routing or leave stale state. Use Chrome's native callback to retain the gesture for the tabless command, preserve the last real view on failure, and acknowledge focus only when the Shelf can receive keys. | Global tabless rejection and callback repair verified on official Linux Chrome. Its already-visible panel can retain webpage keyboard focus. Windows panel routing, focus and native close remain release gates. |
+| Interrupted worker, oversized image or rapid presses | Keep existing two-capture admission bound, byte limit, observer cleanup and expiring retry bytes. Incomplete or invalid captures leave no verified receipt or positive count. | Screenshot, restart, duplicate, frozen-byte retry and badge fixtures exercise retained safeguards. Windows MV3 interruption remains open. |
+| Cloud credentials and duplicate verified receipts | Keep screenshot bytes on the existing authorized R2 path. Provider metadata and diagnostics retain existing redaction. Readback verifies the exact keys and bytes, retries preserve confirmed outputs, and badge increments derive from durable proof. | Screenshot and Basic fixtures passed. Live provider and Windows toolbar verification for this build remain open. |
+| Missing History URLs | Preserve stored data and URL safety checks. Render an absent URL as `N/A`, without a link. Keep privacy-enabled exports from disclosing browsing provenance. | History rendering/export tests cover absent values, retained URLs and privacy mode. |
+| Future screen/window capture | Cancelled consent, blank/protected windows, leaked tracks, misleading History URLs or duplicate saves could expose private content or miscount. The feature remains gated on Windows P0. A future implementation needs an explicit browser picker, one selected source, bounded frame memory, cleanup on all exits and the existing verified receipt path. | Desktop picker, OS permission, native companion and global capture are unverified. |
+
+The owner’s independent Windows recorder delivered 17 commands without a Tab and resolved an active HTTPS tab all 17 times. Missing callback context, Chrome capture permission, Shelf activation and final UI acknowledgement are separate proof boundaries. The existing Chrome-local breadcrumb store records bounded correlated steps with privacy-filtered RAW and SECURE export. A missing receiver, missing acknowledgement, worker interruption or quota failure can leave an incomplete trace. Exact native messages are limited to recognized patterns. Keyboard-layout changes may affect delivery before Chrome. The measured 17 events still reached Chrome, and there is no evidence that layout explained the subsequent Shelf failures. [Causal audit](docs/integration/REDOWN_0324_SHORTCUT_CAUSAL_AUDIT_0325_REPAIR.md)

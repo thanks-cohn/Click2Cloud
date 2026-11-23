@@ -146,7 +146,7 @@ try {
   assert.equal(await page.title(), 'REDOWN');
   assert.equal(await page.locator('.brand-lockup img[alt=REDOWN]').count(), 1);
   assert.equal(await page.locator('.brand-lockup strong').count(), 0);
-  assert.equal(buildManifest.version, '0.3.24');
+  assert.equal(buildManifest.version, '0.3.25');
   if (baseline) {
     const before = JSON.parse(await readFile(join(baseline, 'manifest.json'), 'utf8'));
     for (const key of ['action', 'key', 'oauth2', 'commands', 'background']) assert.deepEqual(buildManifest[key], before[key], key);
@@ -329,6 +329,22 @@ try {
   await openScreenshots();
   await verifyLabels(['Alt+Q — Assigned', 'Ctrl+Shift+Y — Unassigned']);
   assert(await prompt.isHidden());
+
+  const commandIds = [...ids, 'shelf.explorer.search', 'shelf.history.toggle'];
+  assert.deepEqual(Object.keys(buildManifest.commands), commandIds);
+  const assigned = ['Alt+Q', 'Ctrl+Shift+Y', 'Ctrl+Shift+F', ''];
+  await page.evaluate(commands => shortcutFixture.assign(commands),
+    commandIds.map((name, index) => ({name, shortcut: assigned[index]})));
+  await page.getByRole('button', {name: 'More', exact: true}).click();
+  await page.getByRole('menuitem', {name: 'Settings', exact: true}).click();
+  const keyboard = page.locator('section.card').filter({has: page.getByRole('heading', {name: 'Keyboard Shortcuts'})});
+  await keyboard.getByRole('heading', {name: 'Chrome commands'}).waitFor();
+  await keyboard.getByRole('heading', {name: 'File Explorer only'}).waitFor();
+  await keyboard.getByText(/select In Chrome in Chrome shortcut settings/i).waitFor();
+  await keyboard.getByText('Ctrl+Shift+F', {exact: true}).waitFor();
+  const commands = keyboard.locator('[data-chrome-key]');
+  assert.deepEqual(await commands.evaluateAll(keys => keys.map(key => [key.dataset.chromeKey, key.textContent])),
+    commandIds.map((name, index) => [name, assigned[index] || 'Unassigned']));
   report.shortcuts = 'PASS';
   assert.deepEqual(report.errors, []);
   report.result = 'PASS';

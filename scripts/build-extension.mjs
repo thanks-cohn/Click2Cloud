@@ -5,8 +5,16 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {WORKER_MODULES} from '../src/cloudflare/deployment.mjs';
 import {toolRegistry} from '../src/api/service.mjs';
+import {BUILD_INFO} from '../src/build-info.mjs';
 import {writeFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url),output=new URL('../dist/click2cloud/',import.meta.url);
+const readJson=async path=>JSON.parse(await readFile(new URL(path,root),'utf8'));
+const [sourceManifest,packageInfo,lockfile]=await Promise.all([
+ readJson('extension/manifest.json'),readJson('package.json'),readJson('package-lock.json')
+]);
+const version=sourceManifest.version;
+if(![packageInfo.version,lockfile.version,lockfile.packages?.['']?.version,BUILD_INFO.extensionVersion].every(value=>value===version))
+ throw Error('REDOWN_BUILD_VERSION_MISMATCH');
 await assertWorkerImports({root:fileURLToPath(root)});
 await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});
 for(const dir of ['src','extension'])await cp(new URL(dir,root),new URL(dir,output),{recursive:true});
@@ -20,9 +28,10 @@ async function walk(path){const entries=await readdir(new URL(path+'/',root),{wi
 const files=(await Promise.all(['src','extension','right2cloud-module/src'].map(walk))).flat().filter(p=>p!=='src/build-info.mjs').sort();
 const hash=createHash('sha256');for(const path of files){hash.update(path);hash.update(await readFile(new URL(path,root)));}
 const workerCodeDigest=createHash('sha256').update(JSON.stringify(await Promise.all(WORKER_MODULES.map(async p=>[p,await readFile(new URL(p,root),'utf8')])))).digest('base64url');
-const buildInfo={workerCodeDigest,extensionVersion:JSON.parse(await readFile(new URL('extension/manifest.json',root),'utf8')).version,revision,sourceDigest:hash.digest('hex'),apiVersion:'3+1.1',remoteProtocol:'click2cloud-remote-2'};
+const buildInfo={...BUILD_INFO,extensionVersion:version,workerCodeDigest,revision,sourceDigest:hash.digest('hex')};
 await writeFile(new URL('src/build-info.mjs',output),'export const BUILD_INFO=Object.freeze('+JSON.stringify(buildInfo)+');\n');
 const manifest=JSON.parse(await readFile(new URL('manifest.json',output),'utf8'));
+if(manifest.version!==version)throw Error('REDOWN_BUILD_VERSION_MISMATCH');
 for(const size of [16,32,48,128]){
  const path=manifest.icons?.[size];
  if(!path||manifest.action?.default_icon?.[size]!==path)throw Error('REDOWN_ICON_REFERENCE_INVALID');
@@ -35,5 +44,5 @@ for(const size of [16,32,48,128]){
 }
 const id=createHash('sha256').update(Buffer.from(manifest.key,'base64')).digest('hex').slice(0,32).replace(/[0-9a-f]/g,x=>String.fromCharCode(97+parseInt(x,16)));
 if(id!=='ajppphdiamdobknpamcheohmdbdbeoal')throw Error('OAUTH_EXTENSION_ID_MISMATCH');
-await writeFile(new URL('api-tools.json',output),JSON.stringify({version:'3+1.1',tools:toolRegistry},null,2)+'\n');
+await writeFile(new URL('api-tools.json',output),JSON.stringify({version:buildInfo.apiVersion,tools:toolRegistry},null,2)+'\n');
 console.log(JSON.stringify({extension:fileURLToPath(output),extensionId:id,oauthRedirect:'https://'+id+'.chromiumapp.org/cloudflare'}));

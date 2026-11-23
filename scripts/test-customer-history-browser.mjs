@@ -116,6 +116,12 @@ await page.evaluate(async()=>{await window.seedLiveHistory('closed-save','save',
 await page.getByRole('button',{name:'History',exact:true}).click();
 await page.locator('[data-operation="closed-save"]').getByText('Not saved',{exact:true}).waitFor();
 await page.locator('[data-operation="closed-shot"]').getByText('Delivery blocked',{exact:true}).waitFor();
+const missingLinks=page.locator('[data-operation="closed-save"]');
+await missingLinks.getByText('More',{exact:true}).click();
+await missingLinks.getByText('Source & Links',{exact:true}).click();
+for(const label of ['Host page URL','Original source URL','Public object URL'])
+ await missingLinks.getByText(label+': N/A',{exact:true}).waitFor();
+assert.equal(await missingLinks.locator('a').count(),0);
 results.push({gate:'B06-closed-History-reconciles-both-operation-types-on-reopen',state:'PASS'});
 assert.deepEqual(errors,[]);
 }catch(e){try{const p=context.pages().at(-1);await writeFile(join(out,'failure-dom.html'),await p.content());await writeFile(join(out,'failure-debug.json'),JSON.stringify(await p.evaluate(()=>({previews:[...document.querySelectorAll('[data-preview]')].map(el=>({text:el.textContent,rect:el.getBoundingClientRect().toJSON()})),calls:window.productFixture?.calls,settings:document.querySelector('.history-page')?.innerText})),null,2));}catch{}results.push({gate:'browser-acceptance',state:'FAIL',message:e.message,stack:e.stack});process.exitCode=1;}finally{await context?.close();if(server)await new Promise(r=>server.close(r));await rm(profile,{recursive:true,force:true});await writeFile(join(out,'results.json'),JSON.stringify({evidenceClass:'REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE',results,errors},null,2));console.log(JSON.stringify(results,null,2));}

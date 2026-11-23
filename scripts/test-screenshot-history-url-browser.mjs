@@ -125,7 +125,9 @@ try {
   assert.equal(await disclosure(captured).evaluate(el => el.open), true);
   assert.equal(await row(captured).getByText(hostPageURL, {exact: true}).count(), 1);
   await toggle(legacy);
-  assert.equal(await disclosure(legacy).locator('p').innerText(), 'Host URL not captured');
+  assert.equal(await disclosure(legacy).locator('p').innerText(), 'N/A');
+  assert.equal(await disclosure(legacy).locator('a').count(), 0);
+  await row(legacy).getByText('Saved and verified', {exact: true}).waitFor();
   await page.evaluate(async id => {
     window.oldHostDisclosure = document.querySelector('[data-history-host-url="' + id + '"]');
     const row = await productFixture.current.readRemoteResult(id);
@@ -203,13 +205,23 @@ try {
     await page.getByRole('button', {name: 'Export History', exact: true}).click();
     await page.getByText('History exported · 2 operations.', {exact: true}).waitFor();
     const data = await page.evaluate(() => window.fixtureExportParts.join(''));
-    if (format === 'json') assert.equal(JSON.parse(data).operations.find(item => item.operationId === captured).hostPageURL, hostPageURL);
-    if (format === 'jsonl') assert.equal(data.trim().split('\n').map(JSON.parse).find(item => item.operationId === captured).hostPageURL, hostPageURL);
+    if (format !== 'csv') {
+      const records = format === 'json' ? JSON.parse(data).operations : data.trim().split('\n').map(JSON.parse);
+      const existing = records.find(item => item.operationId === captured);
+      const missing = records.find(item => item.operationId === legacy);
+      assert.equal(existing.hostPageURL, hostPageURL);
+      assert.equal(missing.hostPageURL, 'N/A');
+      assert.equal(missing.sourceURL, 'N/A');
+      assert.equal(missing.screenshot.source.url, 'N/A');
+    }
     if (format === 'csv') {
       const cells = line => line.match(/"(?:[^"]|"")*"/g);
       const [labels, ...records] = data.trim().split('\r\n').map(cells);
       const match = records.find(record => record[labels.indexOf('"operationId"')] === '"' + captured + '"');
+      const missing = records.find(record => record[labels.indexOf('"operationId"')] === '"' + legacy + '"');
       assert.equal(match[labels.indexOf('"hostPageURL"')], '"' + hostPageURL + '"');
+      assert.equal(missing[labels.indexOf('"hostPageURL"')], '"N/A"');
+      assert.equal(missing[labels.indexOf('"sourceURL"')], '"N/A"');
     }
   }
   await page.getByLabel('Include Screenshots').uncheck();
@@ -219,7 +231,7 @@ try {
   await page.getByText('History exported · 0 operations.', {exact: true}).waitFor();
   assert.deepEqual(await page.evaluate(() => JSON.parse(window.fixtureExportParts.join('')).operations), []);
   assert.deepEqual(evidence.errors, []);
-  evidence.checks.push('existing-JSON-JSONL-CSV-exports-keep-host-and-operation-and-respect-exclusion');
+  evidence.checks.push('JSON-JSONL-CSV-exports-keep-real-host-and-operation-represent-missing-URLs-and-respect-exclusion');
   evidence.result = 'PASS';
 } catch (error) {
   evidence.failure = error.stack;

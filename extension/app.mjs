@@ -432,23 +432,53 @@ const historyUI=createHistoryPage({api,screenshotRequest,retryScreenshot:operati
  else if(outputId&&!listingError)$('#listing-state').textContent=result.code==='RESULT_NOT_FOUND'?'The recorded file no longer exists. Opened its folder.':
   result.code==='RESULT_CHANGED'?'The file at this key has changed. Opened its folder.':'Opened the destination folder. The screenshot file is unverified.';
 }});
-let viewEpoch=0,pendingSearchFocus=null,lastSearchSequence=-1;
+let viewEpoch=0,pendingSearchFocus=null,lastSearchSequence=-1,lastHistorySequence=-1,reportedPendingFocus=null;
 function focusPendingSearch(){
- if(pendingSearchFocus===null||view!=='explorer'||!document.hasFocus()||!source||connection.state!=='CONNECTED'||!explorerLayoutUI?.focusSearch(true))return;
- finishSearchIntent();
+ if(pendingSearchFocus===null||view!=='explorer'||!explorerLayoutUI)return;
+ const inputFocused=explorerLayoutUI.focusSearch(true,{allowOffline:true});
+ // Chrome can keep keyboard focus on the webpage when the Shelf was already
+ // visible. Reveal search now and acknowledge only after the Shelf has focus.
+ if(!inputFocused||!document.hasFocus()){
+  if(reportedPendingFocus!==pendingSearchFocus){
+   reportedPendingFocus=pendingSearchFocus;
+   void shelfView('search-focus-pending',undefined,pendingSearchFocus).catch(()=>{});
+   status('Click the filename search field to type.');
+  }
+  return;
+ }
+ finishSearchIntent('search-complete');
 }
-function finishSearchIntent(){
+function finishSearchIntent(method='search-cancel'){
  const sequence=pendingSearchFocus;
  pendingSearchFocus=null;
- if(sequence!==null)void shelfView('search-complete',undefined,sequence).catch(()=>{});
+ if(sequence!==null)void shelfView(method,undefined,sequence).catch(()=>{});
 }
 async function useShelfIntent(intent){
- if(intent?.view==='history'){closeDialog();await show('history');return;}
+ if(intent?.view==='history'){
+  if(Number.isSafeInteger(intent.sequence)){
+   if(intent.sequence<=lastHistorySequence)return;
+   lastHistorySequence=intent.sequence;
+  }
+  closeDialog();
+  try{
+   await show('history');
+   if(view==='history'&&$('#main .history-page')?.getClientRects().length)
+    await shelfView('history-complete',undefined,intent.sequence);
+  }catch{
+   await shelfView('action-failed',undefined,intent.sequence).catch(()=>{});
+   if(view==='history')status('History could not load. Open History again to retry.',{attention:true});
+  }
+  return;
+ }
  if(intent?.view!=='explorer'||!intent.focusSearch||intent.sequence<=lastSearchSequence)return;
  lastSearchSequence=intent.sequence;
  closeDialog();pendingSearchFocus=intent.sequence;
  if(view==='explorer'&&explorerLayoutUI)focusPendingSearch();
  else await show('explorer');
+ if(view==='explorer'&&configurationIssue&&pendingSearchFocus===intent.sequence){
+  finishSearchIntent('action-failed');
+  status('Files search is unavailable until saved configuration can be read.',{attention:true});
+ }
 }
 const displayedEntries=()=>filenameSearch?.entries??entries;
 function resetFilenameSearch(){
@@ -566,6 +596,7 @@ function renderExplorer(){
   listen('#more','click',()=>filenameSearch?searchDirectoryNames(filenameSearch.query,{more:true}):loadListing(true));
   listen('#filename-search-form','submit',event=>{
    event.preventDefault();const query=$('#filename-search').value;
+   if(!source||connection.state!=='CONNECTED'){status('Open a connected folder to search.',{attention:true});return;}
    return searchDirectoryNames(query,{keepPrevious:true});
   });
   listen('#clear-search','click',()=>{
@@ -1750,7 +1781,8 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   void shelfWindow.then(async id=>{
    if(id!==message.windowId)return;
    const intent=await shelfView('intent');
-   if(message.channel==='shelf-history-show'&&(requestedAt!==viewEpoch||intent?.view!=='history'))return;
+   if(message.channel==='shelf-history-show'&&(requestedAt!==viewEpoch||intent?.view!=='history'||
+    Number.isSafeInteger(intent.sequence)&&intent.sequence!==message.sequence))return;
    if(message.channel==='shelf-explorer-search'&&(intent?.view!=='explorer'||intent.sequence!==message.sequence))return;
    await useShelfIntent(intent);
   }).catch(error=>status(error.message));
@@ -1758,7 +1790,14 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  }
  if(message?.channel==='shelf-history-feedback'){
   void shelfWindow.then(id=>{if(id===message.windowId){
-   notifications.show(message.code==='SHELF_CLOSE_UNAVAILABLE'?'Use the Shelf close button in this version of Chrome.':'Chrome could not change the Shelf. Try the shortcut again.',{error:true});
+   const messages={
+    SIDE_PANEL_GESTURE_REQUIRED:'Chrome requires a user gesture to open the Shelf. Try the shortcut in Chrome or click the REDOWN toolbar icon.',
+    SIDE_PANEL_DISABLED:'Chrome has no active REDOWN Shelf for this window. Try the REDOWN toolbar icon in a regular Chrome window.',
+    SIDE_PANEL_WINDOW_UNAVAILABLE:'Focus a regular Chrome window and try the Shelf shortcut again.',
+    SIDE_PANEL_UNAVAILABLE:'The Shelf shortcut requires a version of Chrome that supports extension side panels.',
+    SHELF_CLOSE_UNAVAILABLE:'Use the Shelf close button in this version of Chrome.'
+   };
+   notifications.show(messages[message.code]??'Chrome could not change the Shelf. Try the shortcut again.',{error:true});
   }}).catch(()=>{});
   return;
  }

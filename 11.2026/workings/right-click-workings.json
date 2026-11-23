@@ -9208,8 +9208,8 @@
       "extension/aesthetic.css": "e6351371cf7a0b394e1d5c7a3c652c7c429929bc965a2704dfc48c0bfffa9d34",
       "extension/app.css": "6ffbfbcd5a605817a0642870729cb009a17c49363f05a624bbbfc3ca7a6c8d4f",
       "extension/app.html": "b7e3da6b1cffb8a6e3de020032fb5bdd303dd10c5464d3695ae9424b50f26388",
-      "extension/app.mjs": "4841db6b0b318e076a936dcaa62f1112851622749b57624b707287d136452fee",
-      "extension/background.mjs": "4680dfe92d9349f58e14ac867bc9adae8a97647d6933c781c2a1f99a8cf5cee0",
+      "extension/app.mjs": "06190a04d23c9f22fd9bae793ae49a104a4e22f430131e0c133960c19003b909",
+      "extension/background.mjs": "292a3065a973be591038cb128df74ed8061bddffc45894808710c971dc37bfda",
       "extension/basic-provider-cards.mjs": "c291d4d9034fa3bd6bb9f2edfbbdb578fd0d40fe8e45cbcd811567b0a24166ad",
       "extension/cloudflare-labels.mjs": "d8150c3c6da73c9c74acf993c9980795a0d0243039c442377aa5100c47f7f257",
       "extension/cloudflare-setup-view.mjs": "aa8386ccc6c8cb4e13d34b3598c0d7c301dfaa2f16eb2f83e2c469ee7a8bae71",
@@ -9217,11 +9217,11 @@
       "extension/explorer-details-columns.mjs": "b4a0a3a6cf8c7cd73558ca5454bd4deaa34165fd6a8c6a4d0da04329ee81b7b5",
       "extension/explorer-exports.mjs": "a36be11eb4d9cc915f8a7861352715e541a69e0c88ec7ece5f5fe70310403f0e",
       "extension/explorer-image-clipboard.mjs": "2497a264d874ac9f23b4073fd397ed03af7e316e006c3d068af60cee450d6d7c",
-      "extension/explorer-layout.mjs": "e6431f89e37aac9e48c7b56d51cad8445ca27d6b811391bef49b3384643df4e2",
+      "extension/explorer-layout.mjs": "a95caf25ca989583b65c98e57fd86a1f772996fc245c4f2e2329239094532766",
       "extension/explorer-marquee.mjs": "07a317d925a4afd91abfbf0629c75fed6f41b143d76c7e6cbe124655b73d8329",
       "extension/explorer-operation-feedback.mjs": "3feacf3eb555e53fc340ed62d1b05bb628aba1b9499548cedaf6878ff2b72253",
       "extension/history-destination-urls.mjs": "c8cab337805a2baafa44c62ce6950b3d5a39da16ac81681cb677bd87e3df397c",
-      "extension/history-page.mjs": "fdbcf6c5ce6d3b9f96fec20ae8b7ddcd9e3cf0b360d70d25b35491133e840f5d",
+      "extension/history-page.mjs": "ee75ffb332071c51820dfb2e34fc04467f707ec3aef5764dccb6df8003e91cb8",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/icons/redown-128.png": "4e7e2a436979c76f2122326a906c6047886bf1c4912dc431a9207afb2127997b",
       "extension/icons/redown-16.png": "4cb27e124297d4389aeef27b0b03b6349bb6733f33257fcc60b27dcb69fdd451",
@@ -9233,15 +9233,15 @@
       "extension/icons/redown-success-16.png": "798a02de050164b0a8be5ccf59ae03bada0de9feebc7717935e77851e708231c",
       "extension/icons/redown-success-32.png": "b0c013e341bf7699e07a3e3267b8e4389f450dd102958658403b83dabdcffb5d",
       "extension/icons/redown-success-48.png": "c4f2c6aeae721a6b3323d428d07e6dd91f1d72f22b2810a9772f45fc34ce7f28",
-      "extension/manifest.json": "1fe805157aff3812048008b330b459f636357faf310b7f69730e0871d015a241",
+      "extension/manifest.json": "d9469073f48ea3d2c11fc31c1327e84b7452229f71895263b10171c651c81947",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
       "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
-      "extension/recorder-panel.mjs": "a55ca4fe9f8e3b740166460899459a374c63e4620bb20231c687345360980eb0",
-      "extension/screenshot-background.mjs": "ba061a02df604f19bc5d145c5bb8179611c11f95ee36a182f5ee8c585b247acc",
-      "extension/screenshot-page.mjs": "6bdd2ea4fa7a2809046de2e2ee84c1caee6fa8daaa06ba3628d509da57701dad",
-      "extension/shortcut-settings.mjs": "04f6f7930d8ae3bbdf61e38e88d2209fed497e2e7e31f5217c5a02631b293b2e",
+      "extension/recorder-panel.mjs": "b068c328402f969c6db6ae35e3c48be57401a9e04b0a4f64223d37c02e661e0e",
+      "extension/screenshot-background.mjs": "b7cba9182823a4e44bc92ad7a6c0dafd4aefe62fbfcea21d393eeabf29859459",
+      "extension/screenshot-page.mjs": "a7b5d98759975b088d883d0fb2cb8fab01c39795cbd336d84bb913bd81530478",
+      "extension/shortcut-settings.mjs": "6abbf4efa088cf1bcf84201046f5a67463ee34f88f90e18355f2ce91199317b9",
       "extension/themes/components.css": "1c9846c44d01ea5cf40f9bae6ba5ee91133696dc8c204198a5d9c5fe5f2027df",
       "extension/themes/dungeon-master.css": "f86933e42bfabeae24537e2347b46fff6ca106230954664d23e099b1056d7454",
       "extension/themes/frames.css": "180eb6eb4131df645b71cc498b87377d7ba237b01866a7903bc2d234ca1c6a53",
@@ -9282,17 +9282,17 @@
       "src/basic/lib/zip.js": "98be5eef6e07f99357cf28d1966aa299b9a00f6bdbeafff0ab677ecb4059dac9",
       "src/basic/providers/index.js": "fac68775a2170e22a7ad9c65678512f4a7197abc4e65b80e3a0575b2dd4543d2",
       "src/basic/vendor/fflate.js": "8cc1f687e0159e977addb6b85e274dbd11e622cf151f4fcb7b85d49622ea43e7",
-      "src/build-info.mjs": "05f1ef0012afe352e69ec15097413bf49e655b12df21c59f19208c3532749f9f",
+      "src/build-info.mjs": "ec682acdacd7a7413c0badf56985c73145db84a04209db4d54fc825bc063627e",
       "src/chrome/command-bindings.mjs": "aa19442d7508b30e27c3363ca0affaefbf6890e99192fcdcc114736d87f7dfa5",
       "src/chrome/daily-badge.mjs": "4736e9f2ceed3f6e8c8f44b9599d3fb5f2a1647cbbf8861f46215af70eff9cff",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/debug-preference.mjs": "06a0137bdb32692495182a25580188e6bb3fe8d2c025b9eaf542c9acc5bf3990",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
-      "src/chrome/provider-panel.mjs": "f8dee4664dc9eda087802fbb7d0f8e5e0eccda228fe410461a31bc32a97c8d1a",
+      "src/chrome/provider-panel.mjs": "51ba3d4eea1418b359ae091c37a04faead060af4b3b0ece507fef01405e290ca",
       "src/chrome/registrar.mjs": "5439ead09e28f0f90774eddc00400eb16feb8a1741d59dae017a5dfc37885317",
       "src/chrome/screenshot-menu.mjs": "a0a7a5b749721def90387ddc52ef6cbd3f2e30fa9cf41a98cc6eb4048026ee21",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
-      "src/chrome/visible-tab-screenshot.mjs": "e991f22723f02fd367e5669d33cc50e742c2dde2c155675872e45750a20c1ecb",
+      "src/chrome/visible-tab-screenshot.mjs": "2a8984ca5dc616c4eaa41d8dcb4c36397fe9799ca9d07f23e51b53f4aff27178",
       "src/cloudflare/deployment.mjs": "c29bfc8bab9e1f0e3c5cde7d82deafc7f7deb86b0519b6fe771a79f81260c942",
       "src/cloudflare/file-transport.mjs": "69922c6f6ea8098ab9cfa6dcd03326fe774d2cfb3d37c463f55de98ea588c1e6",
       "src/cloudflare/files.mjs": "c4ae42b72be96a04c89f6c7d57cfb17e28a19fd8347b2d92ceefc6ce040122b2",
@@ -9348,12 +9348,12 @@
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
-      "src/glaciaring/breadcrumbs.mjs": "8bc0402ab039f1f4dbc202a32f6d9c2be1612b746220ba42cdfee358ab083f4b",
+      "src/glaciaring/breadcrumbs.mjs": "0ea9f8f5852ce43ff4e91e5a095c360ad7ea71da4b11c33a32df3cf5266b69fe",
       "src/glaciaring/catalog.mjs": "fd82c90ad5e57e30ee0a73403027fca525fa13959e1391148cae0ceb7dca5dee",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "4cb85bec8ea3b1ce664c436648756f868a179d3fd2709f78e801dcfba784e032",
       "src/glaciaring/support-report.mjs": "89ddf6b76469492630b2978dbdd4ea590fbb47b43bdfb3a4d9e5d6ccbc207443",
-      "src/history/model.mjs": "1f7d5390fcb8459cc145731c96f46ed5eb9756560065df4d7a7171a6999a91ac",
+      "src/history/model.mjs": "6a36b6d21effdff0235b4f5954d787b961d6b12968704a048e069f6dbd5b382e",
       "src/history/navigation.mjs": "26012ae774c3c0c53c5899822b2f4dd1472b82e3aa32b67ca2a0fc7d50c76104",
       "src/history/screenshot-output.mjs": "a91e3b60e3e1e506728f98d356c93c38a0dc7c099142fc31c3c63ebf09c7ba24",
       "src/history/verified-save.mjs": "527831725c4c8abf737d1873a569f6b4e5316879ae7d0fce5e0540406b679a89",
@@ -9375,16 +9375,17 @@
       "src/persistence/recovery-crawl.mjs": "2ad891b938025149c1c19b19b22a72203d68ab6f50e6c1c565acd5f06453afdb",
       "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
       "src/recorder/archive-stream.mjs": "4dd534f0563cfb5b6f6e06713ae723fe1b493ba8d1e87a276dc4315797d7f739",
-      "src/recorder/export.mjs": "3f4d178e7476294674e3f3b97734494c2b09f67df46c98486ef30a82f652f327",
-      "src/recorder/host.mjs": "321734f82439f1f4cd40adbc7036f03ad8e075e983b9d51ac5264b83a08af8a2",
+      "src/recorder/export.mjs": "68da8f3423f1de6650b254efeb83eb82b03cb2e284f7147ac11716603a1a7399",
+      "src/recorder/host.mjs": "dc0b968c987ffee7143cbebc12e0ea5f8be6e84b06d4c7e95a37530932a7321b",
       "src/recorder/provider-observation.mjs": "6742a3baa498377baa0c05723510970a0145c261371ad128223219a119162f4a",
       "src/recorder/recorder.mjs": "912cc977a2065bd8823cd350c582d84f30ca2179549a50e0959f24d867b4c4bb",
-      "src/recorder/schema.mjs": "f18a9e9c9a114fae1772fd876f71d35d43732bcb1fb1c45657c7e715e652fbce",
+      "src/recorder/schema.mjs": "8551c1a273c98df0f39d6f03272b8a5450069fff8a2a8037ef119a1aed4dddf0",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
-      "src/screenshot/capture.mjs": "03002bd218022d22ae0d45c474658ed3237579014dad3ae36bd6711685466eac",
+      "src/screenshot/capture.mjs": "fbd9338d0ba52bd66eabcf61d2a00aa2251cf7500a8700f237aa347c43c960ed",
       "src/screenshot/retry-cache.mjs": "7e7f2fdfd7321039e6c6f0c734c4e9ce1d8a02c8e5c1567aeab252a2f0402ee6",
-      "src/screenshot/rules.mjs": "c30da758a2b2dd635d0ff507ef03cd1101cb0e4a4a073e0b16f748c63931e9c9"
+      "src/screenshot/rules.mjs": "be5494d22af56d4239b836033aef23c53476510f8b17f9e4237ddbe12038dcc2",
+      "src/glaciaring/shortcut-trace.mjs": "bf3dd4167f1244f01e002d3fafb12287884ad587f68084b4ab615711c771547c"
     },
     "entrypoints": [
       "ENTRY_REGISTER",
@@ -12483,9 +12484,9 @@
       },
       {
         "id": "SCREENSHOT_SIGNAL",
-        "preconditions": "A delivered Chrome command with a matching active rule or a native one-off to an authorized exact destination.",
-        "trigger": "Alt+Q and Ctrl+Shift+Y capture the visible webpage. Explorer Screenshot2Here edits screenshot rules.",
-        "guard": "Check the active tab, focused window, primary document, canonical R2 target and OAuth session and account.",
+        "preconditions": "The command supplies an exact Chrome tab and window, with a matching active rule or an authorized one-off destination.",
+        "trigger": "The two screenshot Chrome commands capture the visible webpage. Explorer Screenshot2Here edits screenshot rules.",
+        "guard": "Check the command tab against the active tab, focused window and primary document. Check the canonical R2 target, OAuth session and account.",
         "actual": "Freeze matching rules, targets, dedup and keys. Capture one viewport. Send an authenticated direct R2 PUT per output with bounded concurrency. Confirm only after exact-key GET matches byte length and SHA-256.",
         "apiMethods": [
           "listAccounts",
@@ -12501,7 +12502,9 @@
         "persistence": "Existing rules and dedup in Chrome storage, a default-card initialization or dismissal marker, existing History results and the bounded original-PNG retry cache.",
         "errors": [
           "TAB_URL_UNAVAILABLE",
+          "SCREENSHOT_COMMAND_TAB_REQUIRED",
           "CHROME_CAPTURE_PERMISSION_DENIED",
+          "SCREENSHOT_CAPTURE_POLICY_BLOCKED",
           "SCREENSHOT_PAGE_CHANGED",
           "SCREENSHOT_NO_MATCHING_RULES",
           "R2_BUCKET_ACCESS_DENIED",
@@ -12519,7 +12522,7 @@
           {
             "path": "src/chrome/visible-tab-screenshot.mjs",
             "symbol": "export async function openVisibleTabSource",
-            "line": 7
+            "line": 10
           },
           {
             "path": "src/cloudflare/screenshot-direct-upload.mjs",
@@ -12546,20 +12549,24 @@
       },
       {
         "id": "SHELF_HISTORY_COMMAND",
-        "preconditions": "Chrome supplies a window context and an assigned shortcut.",
-        "trigger": "shelf.history.toggle",
-        "guard": "Exact window, verified side-panel lifecycle, and Chrome API capabilities.",
-        "actual": "Open or switch the same Shelf to History. Close it on the next press from History.",
+        "preconditions": "Chrome supplies an assigned shortcut and a window context or a focused Chrome window can be resolved.",
+        "trigger": "shelf.history.toggle and shelf.explorer.search",
+        "guard": "Use the exact Chrome window, browser gesture, side-panel lifecycle and API capabilities.",
+        "actual": "Open or switch the same Shelf to History. A subsequent History press closes it when Chrome supports programmatic closure. Files/search routes to Explorer, reveals filename search and acknowledges focus when the Shelf owns keyboard input.",
         "apiMethods": [
           "inspectRemoteHistory"
         ],
         "identity": "Chrome window and the existing Shelf document.",
-        "nextState": "History shown or Shelf closed.",
+        "nextState": "History shown, Shelf closed, or Explorer search pending or focused.",
         "uiEffect": "Displays the actual assignment and opens Chrome shortcut settings for changes.",
         "externalResourceEffect": "None.",
         "persistence": "Session storage retains per-window state across MV3 worker restarts.",
         "errors": [
-          "SHELF_OPEN_FAILED",
+          "SIDE_PANEL_GESTURE_REQUIRED",
+          "SIDE_PANEL_DISABLED",
+          "SIDE_PANEL_WINDOW_UNAVAILABLE",
+          "SIDE_PANEL_UNAVAILABLE",
+          "SIDE_PANEL_OPEN_FAILED",
           "SHELF_CLOSE_FAILED",
           "SHELF_CLOSE_UNAVAILABLE"
         ],
@@ -12568,12 +12575,12 @@
           {
             "path": "src/chrome/provider-panel.mjs",
             "symbol": "function createShelfHistoryToggle",
-            "line": 34
+            "line": 43
           },
           {
             "path": "extension/app.mjs",
-            "symbol": "shelf-history-show",
-            "line": 1202
+            "symbol": "function focusPendingSearch",
+            "line": 436
           }
         ],
         "verification": {
@@ -13462,7 +13469,7 @@
         "installedWindows": "NOT_VERIFIED"
       }
     },
-    "sourceState": "Working source with exact hashes on the 0.3.21 screenshot repair branch",
+    "sourceState": "REDOWN 0.3.25 repair source with exact file hashes",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -15559,6 +15566,23 @@
         "globalHistory": "Existing save History authority",
         "gates": "URL and optional metadata download actions default off. Object metadata mutation unavailable."
       }
+    },
+    "redown0325": {
+      "request": "codex-request-redown-0325-chrome-first-shortcuts-desktop-capture-2026-11-22.md",
+      "workingBaseline": "5e1cb5faeb2c629ad5d66f62507a39b574847531",
+      "regressionComparison": "cd4c8dd3bc11700376d30da050d6050a0eb1edb9",
+      "extensionVersion": "0.3.25",
+      "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+      "apiVersion": "3+1.1",
+      "buildGuard": "Packaging requires agreement between the npm package, both lockfile root versions, the extension manifest and source build metadata.",
+      "chromeCommands": [
+        "screenshot.capture.alt-q",
+        "screenshot.capture.ctrl-shift-y",
+        "shelf.explorer.search",
+        "shelf.history.toggle"
+      ],
+      "historyURLs": "Missing source and host page URLs render and export as N/A. The customer projection leaves stored provenance intact.",
+      "runtimeEvidence": "docs/integration/REDOWN_0324_SCREENSHOT_REGRESSION.md"
     }
   },
   "changeLog": [

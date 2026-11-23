@@ -15,10 +15,10 @@ const fixedExplorerKeys=[
  ['Left / Right in preview','Previous / next image'],['+ / − in immersive view','Zoom image']
 ];
 const chromeShortcuts=[
- [shelfHistoryCommand,'Shelf ↔ History'],
- [shelfExplorerSearchCommand,'Open File Explorer Search'],
  [screenshotCommands[0],'Capture screenshot to cloud'],
- [screenshotCommands[1],'Capture screenshot to cloud (second shortcut)']
+ [screenshotCommands[1],'Capture screenshot to cloud (second shortcut)'],
+ [shelfExplorerSearchCommand,'Open File Explorer Search'],
+ [shelfHistoryCommand,'Shelf ↔ History']
 ];
 
 export function installShortcuts({invoke, context, runUI, runAPI, updateReferences}) {
@@ -58,7 +58,13 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
     mount(parent) {
       const card = document.createElement('section');
       card.className = 'card';
-      card.innerHTML = '<h2>Keyboard Shortcuts</h2><h3>Chrome-wide</h3><div class="chrome-shortcut-rows"></div><p data-chrome-shortcut-status role="status"></p><h3>File Explorer only</h3><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p><div class="fixed-shortcut-rows"></div>';
+      card.innerHTML = `<h2>Keyboard Shortcuts</h2>
+        <h3>Chrome commands</h3>
+        <p>Chrome manages these bindings and their scope. Select In Chrome in Chrome shortcut settings and keep Chrome focused for screenshots and Shelf actions.</p>
+        <div class="chrome-shortcut-rows"></div><p data-chrome-shortcut-status role="status"></p>
+        <h3>File Explorer only</h3><div class="shortcut-rows"></div>
+        <button type="button" class="shortcut-reset">Restore defaults</button>
+        <p role="status" class="shortcut-feedback"></p><div class="fixed-shortcut-rows"></div>`;
       parent.append(card);
       const chromeRows=card.querySelector('.chrome-shortcut-rows'),chromeStatus=card.querySelector('[data-chrome-shortcut-status]');
       for(const [id,text] of chromeShortcuts){

@@ -10,7 +10,12 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  const searchPanel=document.createElement('div');
  searchPanel.id='filename-search-popout';searchPanel.setAttribute('popover','manual');
  searchPanel.hidden=true;document.body.append(searchPanel);
- let returnFocus,pinned=false,dismissed=false,revealed=false,nextExtreme=0;
+ let returnFocus,pinned=false,dismissed=false,revealed=false,nextExtreme=0,searchAvailable=false,offlineSearch=false;
+ function syncSearchAvailability(){
+  opener.disabled=!searchAvailable;
+  input.disabled=!searchAvailable&&!offlineSearch;
+  input.placeholder=searchAvailable?'Search filenames…':'Open a connected folder to search';
+ }
  // Escape both clipping ancestors and their stacking contexts. The native
  // popover top layer also stays above splitters; body portal is the fallback.
  document.body.append(overflow);overflow.setAttribute('popover','manual');
@@ -38,16 +43,18 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  function dismissSearch(){
   if(dismissed||(!pinned&&!search.getClientRects().length))return false;
   pinned=false;dismissed=true;revealed=false;hideSearchPanel();closeMore();layout();
+  offlineSearch=false;syncSearchAvailability();
   restoreSearchFocus(opener,more);
   returnFocus=null;
   return true;
  }
- function focusSearch(forcePopout=false){
+ function focusSearch(forcePopout=false,{allowOffline=false}={}){
+  if(allowOffline){offlineSearch=true;syncSearchAvailability();}
   if(input.disabled||drag)return false;
   const current=document.activeElement;
   if(canReturnTo(current))returnFocus=overflow.contains(current)?more:current;
   if(dismissed){dismissed=false;layout();}
-  if((forcePopout||!commands.contains(search))&&!pinned){
+  if((forcePopout||!commands.contains(search))&&(!pinned||searchPanel.hidden)){
    closeMore();pinned=true;searchPanel.append(search);
    searchPanel.hidden=false;searchPanel.showPopover?.();positionPanel(searchPanel);
    layout();
@@ -157,8 +164,8 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  document.addEventListener('focusin',e=>{if(!toolbar.contains(e.target)&&!overflow.contains(e.target))closeMore();});
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.addEventListener('scroll',positionMore,true);
  const observer=new ResizeObserver(schedule);observer.observe(toolbar);observer.observe(shell);layout();
- return {refresh(){if(!drag&&!saving&&!queued)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
-  setSearchAvailable(available){opener.disabled=input.disabled=!available;},
+ return {refresh(){if(!drag&&!saving&&!queued)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();offlineSearch=false;syncSearchAvailability();},dismissSearch,focusSearch,
+  setSearchAvailable(available){searchAvailable=available;syncSearchAvailability();},
   setShortcuts(bindings){
    for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',input]]){
     const chord=bindings[id];if(chord)el.setAttribute('aria-keyshortcuts',chord.replace(/^Ctrl/, 'Control'));else el.removeAttribute('aria-keyshortcuts');

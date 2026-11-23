@@ -1,0 +1,312 @@
+{
+  "browser": {
+    "product": "Google Chrome",
+    "version": "158.0.8127.36",
+    "channel": "Stable",
+    "platform": "Debian Linux x86-64"
+  },
+  "method": "Installed unpacked production sources in disposable visible Chrome profiles with native X11 keypresses. Provider traffic and byte readback used local HTTPS fixtures.",
+  "windowsChrome": "UNVERIFIED",
+  "edge": "UNVERIFIED",
+  "providerLive": "UNVERIFIED",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "extensionVersion": "0.3.25",
+  "sourceDigest": "c71dcf1f24a220fe0fefac25444859b52f8407c8167d912a09c32c968f18b430",
+  "revisionAtBuild": "b19176e1dd0d9cef79bb87ce2748667f92ef8c30",
+  "checks": [
+    {
+      "name": "Alt+Q",
+      "status": "PASS",
+      "state": "confirmed",
+      "pngBytes": 6282,
+      "digestMatches": true,
+      "verification": "direct-r2-get-sha256",
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Ctrl+Shift+Y",
+      "status": "PASS",
+      "state": "confirmed",
+      "pngBytes": 6282,
+      "digestMatches": true,
+      "verification": "direct-r2-get-sha256",
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Files custom Ctrl+Shift+F",
+      "status": "PASS",
+      "panel": true,
+      "focused": true,
+      "typed": true,
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": [
+        "resolved"
+      ]
+    },
+    {
+      "name": "History open, route, close",
+      "status": "PASS",
+      "history": true,
+      "closed": true,
+      "callbackTab": [
+        true,
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Browser host access On click, fresh ordinary HTTPS tab",
+      "before": "ON_ALL_SITES",
+      "current": "ON_CLICK",
+      "knownPermission": false,
+      "receipt": {
+        "state": "unknown",
+        "pngBytes": 6282
+      },
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Cloudflare-only site grant, website withheld",
+      "scope": "ON_SPECIFIC_SITES",
+      "permissions": {
+        "webpage": false,
+        "provider": true
+      },
+      "receipt": {
+        "state": "confirmed",
+        "pngBytes": 6282,
+        "verification": "direct-r2-get-sha256"
+      },
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Chrome internal page capture",
+      "receipt": {
+        "state": "failed",
+        "code": "TAB_URL_UNAVAILABLE",
+        "stage": "tab-observation"
+      },
+      "uploads": 0,
+      "callbackTab": [
+        true
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Files Global scope, Chrome focused",
+      "scope": "Global",
+      "panel": true,
+      "focused": true,
+      "callbackTab": [
+        false
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": [
+        "resolved"
+      ]
+    },
+    {
+      "name": "Alt+Q Global scope, Chrome focused",
+      "scope": "Global",
+      "receipt": {
+        "state": "failed",
+        "code": "CHROME_CAPTURE_PERMISSION_DENIED",
+        "stage": "capture-api"
+      },
+      "callbackTab": [
+        false
+      ],
+      "captureErrors": [
+        "Either the '<all_urls>' or 'activeTab' permission is required."
+      ],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Alt+Q Global scope after a retained Chrome tab grant",
+      "granted": {
+        "state": "confirmed",
+        "pngBytes": 5389,
+        "verification": "direct-r2-get-sha256"
+      },
+      "receipt": {
+        "state": "confirmed",
+        "pngBytes": 5389,
+        "verification": "direct-r2-get-sha256"
+      },
+      "callbackTab": [
+        true,
+        false
+      ],
+      "captureErrors": [],
+      "sidePanelOpenResults": []
+    },
+    {
+      "name": "Ctrl+Shift+Y Global scope after a retained Chrome tab grant",
+      "granted": {
+        "state": "confirmed",
+        "pngBytes": 5450,
+        "verification": "direct-r2-get-sha256"
+      },
+      "receipt": {
+        "state": "confirmed",
+        "pngBytes": 5389,
+        "verification": "direct-r2-get-sha256"
+      },
+      "callbackTab": [
+        true,
+        false
+      ]
+    },
+    {
+      "name": "History Global scope, Chrome focused",
+      "status": "PASS",
+      "historyRendered": true,
+      "documentFocused": true,
+      "closedOnSecondKey": true
+    }
+  ],
+  "externalNativeWindow": {
+    "name": "Global shortcuts while a native window owns focus",
+    "focusPreserved": true,
+    "uploaded": 0,
+    "opened": false,
+    "unfocusedCaptureFailures": 1,
+    "events": [
+      {
+        "label": "onCommand",
+        "command": "screenshot.capture.alt-q",
+        "callbackTab": false
+      },
+      {
+        "label": "feedback",
+        "code": "SCREENSHOT_WINDOW_UNAVAILABLE"
+      },
+      {
+        "label": "onCommand",
+        "command": "shelf.explorer.search",
+        "callbackTab": false
+      },
+      {
+        "label": "feedback",
+        "code": "SIDE_PANEL_WINDOW_UNAVAILABLE"
+      }
+    ]
+  },
+  "diagnostics": {
+    "durableAttempts": 12,
+    "verifiedShelfAttempts": 4,
+    "verifiedUploadAttempts": 5,
+    "observedFailureCodes": [
+      "TAB_URL_UNAVAILABLE",
+      "CHROME_CAPTURE_PERMISSION_DENIED"
+    ]
+  },
+  "integratedChecks": [
+    "Alt+Q with Shelf closed captured the HTTPS viewport and saved the exact PNG to the fresh redown/screenshots/ card",
+    "Three folder selections across three buckets and one Save produced one rule and zero uploads; Escape discarded the editor draft",
+    "Ctrl+Shift+Y with Shelf closed sent the same PNG to all three exact keys, including a bucket with a stale Worker record. Fixture HTTP 403 left two verified and one retryable",
+    "The partial receipt navigates to two exact verified files and opens the unconfirmed destination folder without selecting a file",
+    "Screenshot success, partial result and retry leave no screenshot desktop notifications",
+    "History Retry verified only the originally denied output with the same capture ID, output ID, key and PNG; SECURE trace has no gaps or URLs",
+    "History gives each output its own URL disclosure, preserves custom-only URLs, and publishes or attaches only the selected bucket after consent",
+    "After the retry image cache is deleted and the app reloads, History reads one R2 thumbnail and all three GO TO buttons select their own recorded file",
+    "A retained test capture with a GIF at an extensionless key has one thumbnail; all 100 destination cards and 100 domain links are reachable",
+    "Real Chrome History command opens its Side Panel, routes to History, then closes the same panel",
+    "Chrome retained webpage focus with the Shelf already visible. The shortcut routed Files and revealed search.",
+    "One Ctrl+Shift+F with the owner binding opened focused Explorer search on three fixture HTTPS origins. Enter stayed open and Escape dismissed it.",
+    "Installed Shelf divider converges under 50 native key taps and 200/1000 synthetic taps: [{\"mode\":\"alternate\",\"count\":50,\"realKeys\":true,\"commits\":1,\"split\":100},{\"mode\":\"left\",\"count\":200,\"realKeys\":false,\"commits\":1,\"split\":0},{\"mode\":\"right\",\"count\":1000,\"realKeys\":false,\"commits\":1,\"split\":100}]",
+    "A browser shortcut opened Explorer while disconnected and focused the pending search when the fixture account returned",
+    "Explorer Screenshot2Here configured the exact folder and survived reload; the next matching shortcut saved and verified the image there",
+    "Chrome internal page produced a capture failure with zero uploads",
+    "An open History page picked up a new verified screenshot receipt without reopening or refreshing",
+    "REDOWN wordmark met 4.5:1 in all 12 palette and color-mode combinations, minimum 13.49:1",
+    "Installed Shelf booted offline with packaged appearance, separate Settings cards and blank unauthenticated listing"
+  ],
+  "samePathReload": [
+    {
+      "browser": "158.0.8127.36",
+      "previous": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.23",
+        "files": "Ctrl+Shift+F"
+      },
+      "updated": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.24",
+        "files": "Ctrl+Shift+F"
+      },
+      "sameUnpackedPath": true,
+      "sameProfile": true,
+      "reload": "Chrome Extensions native Reload button",
+      "storageSentinelPreserved": true,
+      "existingConfirmedHistoryPreserved": true,
+      "altQBefore": true,
+      "secondaryHotkeyAfter": true,
+      "newReceiptDistinct": true
+    },
+    {
+      "browser": "158.0.8127.36",
+      "previous": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.23",
+        "files": "Ctrl+Shift+F"
+      },
+      "updated": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.25",
+        "files": "Ctrl+Shift+F"
+      },
+      "sameUnpackedPath": true,
+      "sameProfile": true,
+      "reload": "Chrome Extensions native Reload button",
+      "storageSentinelPreserved": true,
+      "existingConfirmedHistoryPreserved": true,
+      "altQBefore": true,
+      "secondaryHotkeyAfter": true,
+      "newReceiptDistinct": true
+    },
+    {
+      "browser": "158.0.8127.36",
+      "previous": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.24",
+        "files": "Ctrl+Shift+F"
+      },
+      "updated": {
+        "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+        "version": "0.3.25",
+        "files": "Ctrl+Shift+F"
+      },
+      "sameUnpackedPath": true,
+      "sameProfile": true,
+      "reload": "Chrome Extensions native Reload button",
+      "storageSentinelPreserved": true,
+      "existingConfirmedHistoryPreserved": true,
+      "altQBefore": true,
+      "secondaryHotkeyAfter": true,
+      "newReceiptDistinct": true
+    }
+  ],
+  "nativeMenuIntegratedChecks": 22
+}

@@ -112,8 +112,7 @@ export function createScreenshotRules({storage,authorizeTarget,discoverDefault=a
  return {read,change};
 }
 
-export function screenshotIds(commandId){
- const operationId=crypto.randomUUID();
+export function screenshotIds(commandId,operationId=crypto.randomUUID()){
  return {commandId,signal:screenshotSignal,signalId:crypto.randomUUID(),captureId:crypto.randomUUID(),operationId,jobId:operationId};
 }
 export function capturePlan({ids,config,context,oneOff,startedAt}){

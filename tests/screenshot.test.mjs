@@ -34,8 +34,9 @@ const event=()=>{
 };
 function browserFixture(hook=()=>{}){
  let captures=0;
- const tab={id:context.tabId,windowId:context.windowId,url:context.url};
- const chrome={windows:{getLastFocused:async()=>({id:context.windowId,type:'normal',focused:true}),onFocusChanged:event()},
+ const tab={id:context.tabId,windowId:context.windowId,url:context.url,active:true};
+ const chrome={windows:{get:async id=>{assert.equal(id,context.windowId);return {id,type:'normal',focused:true};},
+  getLastFocused:async()=>({id:context.windowId,type:'normal',focused:true,tabs:[tab]}),onFocusChanged:event()},
   tabs:{query:async()=>[tab],onActivated:event(),onUpdated:event(),onRemoved:event(),onReplaced:event(),
    captureVisibleTab:async(id,options)=>{assert.equal(id,context.windowId);assert.equal(options.format,'png');captures++;await hook(chrome);return dataUrl;}},
   webNavigation:{getFrame:async()=>({documentId:context.documentId,url:tab.url,documentLifecycle:'active'}),onCommitted:event(),onHistoryStateUpdated:event()}};
@@ -325,16 +326,59 @@ test('Screenshot completion and retry send Shelf and History results without des
  assert.deepEqual(notices,[]);
 });
 function directRunner(fixture,targetRules,options={}){
- const {browser=browserFixture(),receipts=store(),cache=cacheFixture(),dedup=true,record}=options;
+ const {browser=browserFixture(),receipts=store(),cache=cacheFixture(),dedup=true,record,transient}=options;
  const runner=createScreenshotCapture({chrome:browser.chrome,rules:{change:async()=>({revision:1,dedup,rules:targetRules})},
-  uploader:fixture.uploader,retryCache:cache,...receipts,...(record?{record}:{})});
- return {runner,browser,receipts,cache};
+  uploader:fixture.uploader,retryCache:cache,...receipts,...(record?{record}:{}),transient});
+ return {runner,browser,receipts,cache,start:command=>runner.start(command,browser.tab)};
 }
+test('A tabless screenshot binds to a stable foreground tab and still needs the native grant',async()=>{
+ const denied=Error("Either the '<all_urls>' or 'activeTab' permission is required.");
+ for(const mode of ['allowed','native-denied','unfocused','switched','different-active-tab','url-withheld','changed-document']){
+  const browser=browserFixture(()=>{if(mode==='native-denied')throw denied;}),fixture=directFixture(),events=[];
+  const {windows,tabs,webNavigation}=browser.chrome;
+  const observeWindow=windows.getLastFocused;
+  windows.getLastFocused=async options=>{
+   assert.deepEqual(options,{populate:true,windowTypes:['normal']});
+   if(mode==='switched')windows.onFocusChanged.emit(7);
+   const window=await observeWindow();
+   return {...window,focused:mode!=='unfocused'};
+  };
+  if(mode==='different-active-tab')tabs.query=async()=>[{...browser.tab,id:99}];
+  if(mode==='url-withheld')delete browser.tab.url;
+  if(mode==='changed-document'){
+   const originalFrame=webNavigation.getFrame;
+   let frameReads=0;
+   webNavigation.getFrame=async()=>({...await originalFrame(),documentId:++frameReads===1?'before':'after'});
+  }
+  const {runner,receipts,cache}=directRunner(fixture,[rule([folder('screenshots/')])],{browser});
+  const correlationId=crypto.randomUUID();
+  const result=await runner.start(screenshotCommands[0],undefined,{
+   correlationId,observeShortcut:(phase,outcome,details)=>events.push({phase,outcome,...details})});
+  assert.equal(result.plan.operationId,correlationId,mode);
+  assert.equal(receipts.kept.size,1,mode);
+  if(mode==='allowed'){
+   assert.equal(result.state,'confirmed');
+   assert.equal(browser.captures(),1);
+   assert(events.some(step=>step.phase==='VERIFIED_RECEIPT'));
+   assert(events.some(step=>step.phase==='TAB_RESOLVED'&&step.commandTab===false));
+  }else{
+   assert.equal(result.state,'failed',mode);
+   assert.equal(browser.captures(),mode==='native-denied'?1:0,mode);
+   assert.equal(fixture.calls.length,0,mode);
+   assert.equal(cache.files.size,0,mode);
+   assert(!events.some(step=>step.phase==='VERIFIED_RECEIPT'),mode);
+  }
+  if(mode==='native-denied'){
+   assert.equal(events.find(step=>step.phase==='FAILED').chromeMessage,denied.message);
+   assert(!JSON.stringify(result).includes(denied.message));
+  }
+ }
+});
 test('Direct R2 makes exact encoded PUT and GET for PNG, with item grants and without any Worker record',async()=>{
  const fixture=directFixture();
  const target={...folder("Screenshots/日 #! stray..dots/"),bucketName:'redown'};
  const {runner,browser}=directRunner(fixture,[rule([target])]);
- const job=await runner.start(screenshotCommands[0],undefined);
+ const job=await runner.start(screenshotCommands[0],browser.tab);
  assert.equal(browser.captures(),1);
  assert.equal(job.state,'confirmed');
  const output=job.outputs[0];
@@ -346,17 +390,17 @@ test('Direct R2 makes exact encoded PUT and GET for PNG, with item grants and wi
  assert.equal(fixture.calls[0].key,job.plan.outputs[0].key);
  assert.deepEqual([...fixture.objects.values()],[png]);
  const limited=directFixture(undefined,{scopes:[itemGrants[0]]});
- const blocked=await directRunner(limited,[rule([target])]).runner.start(screenshotCommands[0]);
+ const blocked=await directRunner(limited,[rule([target])]).start(screenshotCommands[0]);
  assert.equal(blocked.outputs[0].code,'INSUFFICIENT_SCOPE');
  assert.equal(limited.calls.length,0);
  const inferred=directFixture(undefined,{scopes:[],scopeEvidence:'oauth-default-requested'});
- const accepted=await directRunner(inferred,[rule([target])]).runner.start(screenshotCommands[0]);
+ const accepted=await directRunner(inferred,[rule([target])]).start(screenshotCommands[0]);
  assert.equal(accepted.state,'confirmed');
 });
 test('Direct R2 updates expired OAuth using the existing wrapper and GET after a rejected PUT',async()=>{
  const fixture=directFixture(({call})=>call.token==='Bearer test-token'?
   Response.json({success:false,errors:[{code:10000,message:'Token has expired'}]},{status:401}):null,{refreshToken:'test-refresh'});
- const job=await directRunner(fixture,[rule([folder('screenshots/')])]).runner.start(screenshotCommands[0]);
+ const job=await directRunner(fixture,[rule([folder('screenshots/')])]).start(screenshotCommands[0]);
  assert.equal(job.state,'confirmed');
  assert.deepEqual(fixture.calls.map(({method,token})=>[method,token]),[
   ['PUT','Bearer test-token'],['GET','Bearer new-test-token'],['PUT','Bearer new-test-token'],['GET','Bearer new-test-token']
@@ -390,8 +434,8 @@ test('Direct R2 multi-target across accounts and buckets keeps confirmed results
 test('Direct R2 dedup is per capture and off produces a unique PNG for each matching rule',async()=>{
  const fixture=directFixture(),browser=browserFixture();
  const targetRules=[rule([folder('same/')]),rule([folder('same/')])];
- const a=await directRunner(fixture,targetRules,{browser}).runner.start(screenshotCommands[0]);
- const b=await directRunner(fixture,targetRules,{browser,dedup:false}).runner.start(screenshotCommands[1]);
+ const a=await directRunner(fixture,targetRules,{browser}).start(screenshotCommands[0]);
+ const b=await directRunner(fixture,targetRules,{browser,dedup:false}).start(screenshotCommands[1]);
  assert.equal(a.state,'confirmed');assert.equal(b.state,'confirmed');
  assert.notEqual(a.plan.captureId,b.plan.captureId);
  assert.equal(a.plan.outputs.length,1);assert.equal(a.plan.outputs[0].ruleIds.length,2);
@@ -412,7 +456,7 @@ test('Direct R2 lost PUT response reconciles equal bytes, retries absence once a
     throw Error('response lost');
    }
   });
-  const job=await directRunner(fixture,[rule([folder('screenshots/')])]).runner.start(screenshotCommands[0]);
+  const job=await directRunner(fixture,[rule([folder('screenshots/')])]).start(screenshotCommands[0]);
   assert.deepEqual(fixture.calls.map(call=>call.method),mode==='absent'?['PUT','GET','PUT','GET']:['PUT','GET']);
   assert.equal(new Set(fixture.calls.map(call=>call.path)).size,1);
   assert.equal(job.state,mode==='conflict'?'failed':'confirmed');
@@ -431,7 +475,7 @@ test('Direct R2 rejects accepted PUT with absent bytes, wrong key, wrong size, w
     return Response.json({success:mode!=='envelope',result:{key:mode==='key'?'wrong.png':call.key,size:png.length}});
    }
   });
-  const job=await directRunner(fixture,[rule([folder('screenshots/')])]).runner.start(screenshotCommands[0]);
+  const job=await directRunner(fixture,[rule([folder('screenshots/')])]).start(screenshotCommands[0]);
   assert.notEqual(job.state,'confirmed',mode);
   if(job.state==='failed')assert.equal(historyRecord({kind:'screenshot-to-cloud',screenshot:job}).statusLabel,'Delivery failed');
   assert.equal(job.outputs[0].code,({absent:'R2_OBJECT_UNCONFIRMED',key:'R2_UPLOAD_METADATA_MISMATCH',
@@ -447,7 +491,7 @@ test('Direct R2 retries frozen bytes only, expires the real cache policy and tol
  })},()=>clock);
  const fixture=directFixture(({call})=>call.method==='PUT'?new Response(null,{status:503}):null);
  const {runner,browser}=directRunner(fixture,[rule([folder('retry/')])],{cache});
- const first=await runner.start(screenshotCommands[0]);
+ const first=await runner.start(screenshotCommands[0],browser.tab);
  assert.equal(first.outputs[0].state,'pending');
  assert.equal(first.outputs[0].recoverable,true);
  assert.equal(fixture.calls.filter(call=>call.method==='PUT').length,2);
@@ -459,14 +503,14 @@ test('Direct R2 retries frozen bytes only, expires the real cache policy and tol
  assert.equal(browser.captures(),1);
  assert.equal(fixture.calls.filter(call=>call.method==='PUT').length,2);
  const logged=directRunner(directFixture(),[rule([folder('ok/')])],{record:async()=>{throw Error('recorder quota');}});
- assert.equal((await logged.runner.start(screenshotCommands[0])).state,'confirmed');
+ assert.equal((await logged.start(screenshotCommands[0])).state,'confirmed');
 });
 test('Direct R2 does not silently follow a changed Cloudflare session during readback or retry',async()=>{
  const fixture=directFixture(({call,state})=>{
   if(call.method==='PUT')state.click2cloudOAuth.sessionId='different-session';
  });
- const {runner}=directRunner(fixture,[rule([folder('screenshots/')])]);
- const job=await runner.start(screenshotCommands[0]);
+ const {runner,start}=directRunner(fixture,[rule([folder('screenshots/')])]);
+ const job=await start(screenshotCommands[0]);
  assert.equal(job.outputs[0].code,'AUTH_SESSION_CHANGED');
  assert.deepEqual(fixture.calls.map(call=>call.method),['PUT']);
  fixture.state.click2cloudOAuth.accounts=[{id:'other'}];
@@ -479,6 +523,9 @@ test('Chrome capture failures have distinct stage/code classifications and no R2
   ['url','TAB_URL_UNAVAILABLE','tab-observation',null],
   ['unsupported','SCREENSHOT_PAGE_UNSUPPORTED','page-eligibility',null],
   ['permission','CHROME_CAPTURE_PERMISSION_DENIED','capture-api','chrome-permission-denied'],
+  ['grant','CHROME_CAPTURE_PERMISSION_DENIED','capture-api','chrome-tab-grant-required'],
+  ['page-access','CHROME_CAPTURE_PERMISSION_DENIED','capture-api','chrome-capture-page-access'],
+  ['policy','SCREENSHOT_CAPTURE_POLICY_BLOCKED','capture-api','chrome-capture-policy'],
   ['rate','SCREENSHOT_CAPTURE_RATE_LIMIT','capture-api','chrome-rate-limit'],
   ['race','SCREENSHOT_PAGE_CHANGED','tab-observation',null],
   ['png','SCREENSHOT_PNG_INVALID','png-validation',null]
@@ -486,6 +533,9 @@ test('Chrome capture failures have distinct stage/code classifications and no R2
   const fixture=directFixture();
   const browser=browserFixture(chrome=>{
    if(mode==='permission')throw Error('The activeTab permission was denied: https://private.example?token=secret');
+   if(mode==='grant')throw Error("Either the '<all_urls>' or 'activeTab' permission is required.");
+   if(mode==='page-access')throw Error('Cannot access contents of url "https://private.example?token=secret". Extension manifest must request permission to access this host.');
+   if(mode==='policy')throw Error('Taking screenshots has been disabled.');
    if(mode==='rate')throw Error('MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND');
    if(mode==='race')chrome.tabs.onActivated.emit({windowId:context.windowId,tabId:999});
   });
@@ -540,7 +590,7 @@ test('Screenshot W08 scoped RAW and SECURE ZIP receipts preserve IDs and redact 
  const plan=makePlan([rule([folder('private-folder/')])],true,{...context,url:browser.tab.url});
  const job={plan,captured:{bytes:png.length,sha256:bytesHash},state:'confirmed',attempts:[],
   outputs:[{state:'confirmed',bytes:png.length,verification:'independent-r2-head-sha256',comparison:'match',checksum:bytesHash}]};
- const direct=await directRunner(directFixture(),[rule([folder('private-folder/')])],{browser}).runner.start(screenshotCommands[0]);
+ const direct=await directRunner(directFixture(),[rule([folder('private-folder/')])],{browser}).start(screenshotCommands[0]);
  const interrupted=structuredClone(direct);
  interrupted.trace=interrupted.trace.filter(event=>event.stage!=='R2_RESPONSE');
  assert.deepEqual(screenshotReceipt(interrupted,{secure:true}).traceGaps,[{stage:'R2_RESPONSE',outputId:direct.outputs[0].outputId}]);

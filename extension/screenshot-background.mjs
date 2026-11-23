@@ -82,7 +82,10 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
  }
  return {
   request,
-  onCommand(command,tab){if(screenshotCommands.includes(command))void runner.start(command,tab).catch(()=>{});},
+  onCommand(command,tab,observeShortcut=()=>{},correlationId){
+   if(screenshotCommands.includes(command))void runner.start(command,tab,{observeShortcut,correlationId})
+    .catch(()=>observeShortcut('FAILED','failed',{code:'SCREENSHOT_HANDLER_FAILED'}));
+  },
   prune:()=>retryCache.prune().catch(()=>{})
  };
 }

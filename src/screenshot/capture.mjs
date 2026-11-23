@@ -25,9 +25,10 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
   try{await record(structuredClone(job));return true;}
   catch{return false;}
  }
- async function finish(job){
+ async function finish(job,observeShortcut=()=>{}){
   job.finishedAt=now();
   const recorded=await checkpoint(job);
+  observeShortcut('HISTORY_RECORDED',recorded?'ok':'failed',recorded?{}:{code:'SCREENSHOT_HISTORY_UNAVAILABLE'});
   try{await notify(job,{recorded});}catch{}
   return job;
  }
@@ -90,13 +91,20 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
   }
   return outcome;
  }
- async function start(commandId,tab,{oneOff,expectedContext}={}){
-  if(active.size>=maxActiveScreenshots)return admissionFailure('SCREENSHOT_BUSY',tab?.windowId);
-  const ids=screenshotIds(commandId),startedAt=now();
+ async function start(commandId,tab,{oneOff,expectedContext,observeShortcut=()=>{},correlationId}={}){
+  observeShortcut('HANDLER_ENTERED','ok');
+  if(active.size>=maxActiveScreenshots){
+   observeShortcut('FAILED','blocked',{code:'SCREENSHOT_BUSY'});
+   return admissionFailure('SCREENSHOT_BUSY',tab?.windowId);
+  }
+  const ids=screenshotIds(commandId,correlationId),startedAt=now();
   const job={schemaVersion:2,method:directScreenshotMethod,plan:{...ids,startedAt,context:null,outputs:[],matchedRuleIds:[]},
    outputs:[],attempts:[],trace:[],state:'pending'};
-  const observe=(stage,outcome,details)=>trace(job,stage,outcome,details);
-  observe('COMMAND_RECEIVED','ok',{commandId});
+  const observe=(stage,outcome,{chromeMessage,...details}={})=>{
+   trace(job,stage,outcome,details);
+   observeShortcut(stage,outcome,{...details,chromeMessage});
+  };
+  trace(job,'COMMAND_RECEIVED','ok',{commandId});
   active.add(ids.operationId);
   let source;
   try{
@@ -108,7 +116,11 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
    ]);
    if(tabObservation.status==='fulfilled')source=tabObservation.value;
    const sessionId=authority.value?.sessionId;
-   if(!sessionId)return admissionFailure(observedCode(authority.reason,'AUTH_REQUIRED'),source?.context.windowId??tab?.windowId);
+   if(!sessionId){
+    const code=observedCode(authority.reason,'AUTH_REQUIRED');
+    observeShortcut('FAILED','blocked',{code});
+    return admissionFailure(code,source?.context.windowId??tab?.windowId);
+   }
    await checkpoint(job);
    try{
     if(!source)throw tabObservation.reason;
@@ -132,15 +144,19 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
      await retryCache.store(ids.operationId,image);
      job.cachedAt=now();job.retryExpiresAt=new Date(Date.now()+screenshotRetryLifetime).toISOString();
     }catch{job.originalUnavailable=true;}
+    observeShortcut('CLOUD_SAVE','started');
     await deliver(job,image,{sessionId});
+    const verified=job.outputs.some(output=>output.state==='confirmed');
+    observeShortcut('CLOUD_SAVE',job.state,{code:job.outputs.find(output=>output.code)?.code});
+    if(verified)observeShortcut('VERIFIED_RECEIPT',job.state);
     }catch(error){
     job.code=observedCode(error,'SCREENSHOT_CAPTURE_FAILED');
     job.state=job.captured?'unknown':'failed';
     job.failureStage=error?.stage??(job.captured?'r2-upload':'capture-preparation');
-    observe('FAILED',job.state,{code:job.code,failureStage:job.failureStage,browserError:error?.browserError});
+    observe('FAILED',job.state,{code:job.code,failureStage:job.failureStage,browserError:error?.browserError,chromeMessage:error?.chromeMessage});
     job.outputs=job.outputs.map(output=>output.state==='confirmed'?output:{...output,state:job.state,code:job.code});
    }
-   return await finish(job);
+   return await finish(job,observeShortcut);
   }finally{source?.close();active.delete(ids.operationId);}
  }
  async function retry(operationId){

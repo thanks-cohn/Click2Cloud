@@ -83,10 +83,18 @@ export async function exportComplete({snapshot,getPage,privacy,consent=false,sig
    transferCount=page.transfersNext;pages++;progress('reading');
   }
  }
+ if(snapshot.shortcuts){
+  const page=await readPage({privacy,consent});
+  if(!Array.isArray(page.shortcuts)||page.shortcuts.length!==snapshot.shortcuts.count)throw Error('EXPORT_SHORTCUT_SNAPSHOT_INVALID');
+  archive.write('chrome-shortcuts.jsonl',page.shortcuts.map(steps=>JSON.stringify({steps})).join('\n')+'\n');
+ }
  signal?.throwIfAborted();
  if(snapshot.rich&&richAfter<snapshot.rich.highWater)missingRanges.push({start:richAfter+1,end:snapshot.rich.highWater,reason:'missing_tail'});
  if(snapshot.rich&&richCount===snapshot.rich.committed&&priorHash!==snapshot.rich.head)throw Error('ARCHIVE_HEAD_MISMATCH');
  const issues=[];if(snapshot.coverage?.startupGapsLowerBound)issues.push({reason:'startup_observation_gaps',count:snapshot.coverage.startupGapsLowerBound});
+ for(const [field,reason] of [['shortcutDropped','shortcut_evidence_dropped'],['shortcutPending','shortcut_evidence_pending'],['shortcutWriteFailures','shortcut_write_failures']]){
+  if(snapshot.coverage?.[field])issues.push({reason,count:snapshot.coverage[field]});
+ }
  if(basicCount!==snapshot.basic.count)issues.push({reason:'basic_count_mismatch',expected:snapshot.basic.count,exported:basicCount});
  if(snapshot.basic.available===false)issues.push({reason:'basic_unavailable'});
  if(snapshot.rich&&richCount!==snapshot.rich.committed)issues.push({reason:'rich_count_mismatch',expected:snapshot.rich.committed,exported:richCount});

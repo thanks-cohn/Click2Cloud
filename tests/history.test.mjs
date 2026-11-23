@@ -18,6 +18,32 @@ test('groups retain ISO chronology with each operation in exactly one day',()=>{
 test('metadata privacy redacts secrets without fabricating other fields or changing raw receipt',()=>{const r=saved();r.receipt.savedFileMetadata.customMetadata.accessToken='secret';r.receipt.savedFileMetadata.customMetadata.click2cloud=JSON.stringify({sourceUrl:'https://source.test/file?token=secret&width=100',mode:'simple'});const projected=historyRecord(r);assert(projected.metadataRedacted);assert.equal(projected.savedFileMetadata.customMetadata.accessToken,'[redacted]');assert(!JSON.stringify(projected).includes('token=secret'));assert.equal(r.receipt.savedFileMetadata.customMetadata.accessToken,'secret');});
 test('unknown historical timestamp is labelled, never replaced with today',()=>{const r=historyRecord({operationId:'legacy'});assert.equal(r.timestamp,null);assert.equal(historyPage([r],{range:'all'}).items.length,1);assert.equal(historyPage([r],{range:'daily'}).items.length,0);assert.equal([...historyGroups([r],'UTC').keys()][0],'Year not captured');});
 test('privacy exports omit legacy browsing provenance nested inside actual metadata',async()=>{const r=saved();r.receipt.savedFileMetadata.customMetadata.click2cloud=JSON.stringify({sourceUrl:'https://private-browsing.test/source',mode:'simple'});const text=await collect(exportHistory(chunks([r]),{format:'json',privacy:true}));assert(!text.includes('private-browsing.test'));assert(text.includes('omitted for privacy'));});
+test('History export presents missing URL fields while retaining source data and honoring export privacy',async()=>{
+ const absent=saved(),present=saved(1),invalid=saved(2);
+ present.historyContext={hostPageURL:'https://example.test/from?token=secret',sourceURL:'https://example.test/source',hostPageTitle:'Private title'};
+ invalid.historyContext={hostPageURL:'file:///path',sourceURL:'chrome://settings'};
+ const rows=[absent,present,invalid];
+ const before=structuredClone(rows);
+ assert.equal(historyRecord(absent).hostPageURL,null);
+ assert.equal(historyRecord(absent).sourceURL,null);
+ for(const format of ['json','jsonl','csv']){
+  const exportRows=async privacy=>{
+   const text=await collect(exportHistory(chunks(rows),{format,privacy}));
+   assert(!text.includes('token=secret')&&!text.includes('file:///')&&!text.includes('chrome://'));
+   if(format==='json')return JSON.parse(text).operations;
+   if(format==='jsonl')return text.trim().split('\n').map(JSON.parse).filter(row=>row.operationId);
+   const [columns,,...lines]=text.trim().split('\r\n');
+   const keys=columns.split(',').map(JSON.parse),cells=line=>line.match(/"(?:[^"]|"")*"/g);
+   return lines.slice(0,rows.length).map(line=>Object.fromEntries(['hostPageURL','sourceURL','hostPageTitle'].map(key=>[key,JSON.parse(cells(line)[keys.indexOf(key)])])));
+  };
+  const links=record=>[record.hostPageURL,record.sourceURL];
+  assert.deepEqual((await exportRows(false)).map(links),[['N/A','N/A'],['https://example.test/from','https://example.test/source'],['N/A','N/A']]);
+  const privateRows=await exportRows(true);
+  assert.deepEqual(privateRows.map(links),[['N/A','N/A'],['N/A','N/A'],['N/A','N/A']]);
+  assert.notEqual(privateRows[1].hostPageTitle,'Private title');
+ }
+ assert.deepEqual(rows,before);
+});
 test('GO TO refuses conflicting saved account/bucket identity before any provider read',async()=>{const s=saved();s.receipt.destination={...s.destination,accountId:'different-account'};let calls=0;await assert.rejects(locateSavedResult(s,{run:async()=>{calls++;}}),/RESULT_LOOKUP_FAILED/);assert.equal(calls,0);});
 test('structured export date ranges include whole local day/week and custom endpoints across pages',async()=>{const times=['2026-11-15T05:30:00Z','2026-11-15T06:30:00Z','2026-11-16T05:30:00Z','2026-11-16T06:30:00Z'];const rows=times.map((t,i)=>({...saved(i),at:Date.parse(t)}));for(const [range,extra,count] of [['daily',{},2],['weekly',{},3],['custom',{start:'2026-11-15',end:'2026-11-15'},2]]){const json=JSON.parse(await collect(exportHistory(chunks(rows),{format:'json',range,timezone:'America/Chicago',now:Date.parse('2026-11-15T12:00:00Z'),...extra})));assert.equal(json.operations.length,count);assert.equal(json.export.selection.timezone,'America/Chicago');}});
 test('same filename in another bucket never changes GO TO recorded identity',async()=>{const a=saved(),b=structuredClone(a);b.destination.bucketName='another-bucket';b.receipt.destination.bucketName='another-bucket';const r=await locateSavedResult(b,{run:async(_m,p)=>{assert.equal(p.source.bucketName,'another-bucket');return {state:'completed',data:{object:{key:a.receipt.key,size:3,etag:'etag-0'}}};}});assert.equal(r.target.bucketName,'another-bucket');});

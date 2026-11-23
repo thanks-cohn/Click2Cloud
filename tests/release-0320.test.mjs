@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {createEngineApi,toolRegistry,validate} from '../src/api/service.mjs';
 import {createAgentClient} from '../src/api/client.mjs';
 import {createAgentGateway} from '../src/api/gateway.mjs';
@@ -38,6 +39,23 @@ function createFixture(readManagedDomain) {
   const gateway=createAgentGateway({api}), handle=gateway.grant({actor:'fixture',methods:toolRegistry.map(tool=>tool.name),expiresAt:Date.now()+60000});
   return {calls,client:createAgentClient({gateway,handle,authenticatedActor:'fixture'}),enable:()=>{options={urls:true,tags:true,metadata:true};}};
 }
+test('Chrome reserves four ordered commands and keeps customizable Explorer commands local', async()=>{
+  const manifest=JSON.parse(await readFile(new URL('../extension/manifest.json',import.meta.url),'utf8'));
+  const chromeCommands=Object.entries(manifest.commands);
+  assert.deepEqual(chromeCommands.map(([id,command])=>[id,command.suggested_key.default,command.global??false]),[
+    ['screenshot.capture.alt-q','Alt+Q',false],
+    ['screenshot.capture.ctrl-shift-y','Ctrl+Shift+Y',false],
+    ['shelf.explorer.search','Alt+Shift+F',false],
+    ['shelf.history.toggle','Alt+Shift+H',false]
+  ]);
+  for(const permission of ['activeTab','sidePanel','webNavigation'])assert(manifest.permissions.includes(permission));
+  const commands=listCommands(toolRegistry);
+  assert.deepEqual(commands.map(({commandId,context,defaultChord})=>[commandId,context,defaultChord]),[
+    ['explorer.resetPanelSplit','explorer','Ctrl+Shift+F9'],
+    ['explorer.focusSearch','explorer','Ctrl+Shift+F7'],
+    ['file.refreshExplorer','explorer',null]
+  ]);
+});
 test('canonical shortcut methods advertise UI and API commands and reject invalid or collided keys', async()=>{
   const {client}=createFixture(), invoke=client.invoke;
   const commands=(await invoke('listCommands')).data.commands;

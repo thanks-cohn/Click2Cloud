@@ -1,11 +1,11 @@
 import {screenshotMessage} from './screenshot-page.mjs';
 import {mountLoadingVisual} from '../src/explorer/loading-visual.mjs';
-import {customerRows,historyPage,historyGroups,historyDefaults,exportHistory} from '../src/history/model.mjs';
+import {customerRows,historyPage,historyGroups,historyDefaults,exportHistory,historyURLUnavailable} from '../src/history/model.mjs';
 import {isImage,createImageReader} from '../src/explorer/image-preview.mjs';
 import {screenshotDigest} from '../src/cloudflare/screenshot-wire.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const link=(url,label)=>url?`<p>${esc(label)}: <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a></p>`:`<p>${esc(label)}: Not captured</p>`;
+const link=(url,label)=>url?`<p>${esc(label)}: <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a></p>`:`<p>${esc(label)}: ${historyURLUnavailable}</p>`;
 const screenshotFile=receipt=>receipt.outputs.find(output=>output.state==='confirmed'&&output.outputId&&output.destination&&output.key);
 const screenshotName=receipt=>(screenshotFile(receipt)??receipt.outputs.find(output=>output.key))?.key.split('/').at(-1)??'Screenshot';
 const previewLimit=4*1024*1024,screenshotPreviewLimit=12*1024*1024;
@@ -101,7 +101,7 @@ export function createHistoryPage({api,goTo,screenshotRequest,retryScreenshot,lo
    <details data-history-more="${esc(r.operationId)}" ${expanded(r.operationId)?'open':''}><summary>Screenshot Preview</summary>
     ${screenshotFile(receipt)?'<div class="history-preview" data-preview="'+esc(r.operationId)+'"><p>Image preview loads when visible.</p></div>':'<p>Screenshot preview unavailable.</p>'}
     <details data-history-host-url="${esc(r.operationId)}" ${hostOpen?'open':''}><summary>Host URL</summary>
-     <p>${esc(r.hostPageURL??'Host URL not captured')}</p></details>
+     <p>${esc(r.hostPageURL??historyURLUnavailable)}</p></details>
    </details>
    ${receipt.outputs.map(destinationCard).join('')}
    <details><summary>${receipt.outputs.length?`${confirmed} of ${receipt.outputs.length} files verified`:'Capture details'}</summary>

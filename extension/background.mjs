@@ -7,6 +7,8 @@ import {createRecorderHost} from '../src/recorder/host.mjs';
 import {createDepthNativeClick,createDepthFeedback} from '../src/modes/depth/native-click.mjs';
 import {discoverDepthScope} from '../src/explorer/depth-inventory.mjs';
 import {createBreadcrumbs} from '../src/glaciaring/breadcrumbs.mjs';
+import {shortcutIdentity} from '../src/glaciaring/shortcut-trace.mjs';
+import {screenshotCommands} from '../src/screenshot/rules.mjs';
 import {verifyProfileCopy} from '../src/persistence/profile-preservation.mjs';
 import {BUILD_INFO} from '../src/build-info.mjs';
 import {coalesceFileReads} from '../src/explorer/read-coalescer.mjs';
@@ -55,8 +57,11 @@ const dailyBadge=createDailyBadge({chrome,
  countHistory:current.countRemoteResults,countBasic:range=>basic.verifiedCount(range),
  readPreferences:()=>current.readHistoryPreferences()});
 const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt)});
-const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
- void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
+const shelfHistory=createShelfHistoryToggle({chrome,observeShortcut:breadcrumbs.observeShortcut,feedback:(windowId,code,identity)=>{
+ console.warn('REDOWN Shelf shortcut',code);
+ void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(error=>{
+  if(identity)breadcrumbs.observeShortcut(identity,'FEEDBACK','pending',{code:'SHELF_FEEDBACK_UNAVAILABLE',chromeMessage:error?.message});
+ });
 }});
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference,onOpened:shelfHistory.opened,notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
@@ -296,7 +301,8 @@ function observeDeliveredClick(delivery){
   return event=>{if(pending.forward){pending.forward(event);return;}if(pending.events.length>=32){bootstrapDropped++;return;}const r=event.result;if(event.stage==='provider.verification')bootstrapDropped++;pending.events.push({monotonicMs:event.monotonicMs??performance.now(),timestampUtc:event.timestampUtc??new Date().toISOString(),stage:event.stage,outcome:event.outcome,code:event.code,...(event.stage==='native.identity'?{identity:{providerId:event.row?.target?.provider??event.row?.providerAction??event.row?.origin?.provider,mode:event.row?.origin?.mode,menuGeneration:event.menuGeneration}}:{}),...(r?{result:{state:r.state,code:r.code,completion:r.completion,proofKind:r.proofKind,receipt:{size:r.receipt?.size}}}:{})});};
 }
 void Promise.resolve().then(async()=>{
-  recorder=await createRecorderHost({chrome,build:BUILD_INFO,startupGaps:()=>bootstrapDropped,readScreenshotReceipts:current.readScreenshotReceipts});
+  recorder=await createRecorderHost({chrome,build:BUILD_INFO,startupGaps:()=>bootstrapDropped,readScreenshotReceipts:current.readScreenshotReceipts,
+   readShortcuts:async()=>{await breadcrumbs.flush();return breadcrumbs.inspect({raw:true});}});
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
@@ -314,9 +320,15 @@ const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:
  return result.data;
 }});
 chrome.commands?.onCommand?.addListener((command,tab)=>{
- if(command===shelfHistoryCommand)shelfHistory.command(tab);
- else if(command===shelfExplorerSearchCommand)shelfHistory.search(tab);
- else try{screenshotHost().onCommand(command,tab);}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}
+ if(command!==shelfHistoryCommand&&command!==shelfExplorerSearchCommand&&!screenshotCommands.includes(command))return;
+ const identity=shortcutIdentity(command);
+ const observe=(phase,outcome,details)=>breadcrumbs.observeShortcut(identity,phase,outcome,details);
+ observe('COMMAND_RECEIVED','started',{commandTab:Number.isInteger(tab?.id)&&tab.id>=0});
+ try{
+  if(command===shelfHistoryCommand)shelfHistory.command(tab,'history',identity);
+  else if(command===shelfExplorerSearchCommand)shelfHistory.search(tab,identity);
+  else screenshotHost().onCommand(command,tab,observe,identity.correlationId);
+ }catch{observe('FAILED','failed',{code:'SHORTCUT_HANDLER_FAILED'});lifecycle('OBSERVATION_WORKER_EXCEPTION');}
 });
 const readNativeRegistration=async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null;
 const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration:readNativeRegistration,retiredRoots:['click2cloud-screenshot'],observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await readNativeRegistration())?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:!basicMenuProvider(provider)&&(row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED')});

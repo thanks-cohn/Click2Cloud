@@ -4,11 +4,13 @@ import {readFileSync} from 'node:fs';
 import {toolRegistry,validate} from '../src/api/service.mjs';
 import {listCommands} from '../src/api/shortcuts.mjs';
 import {validateManifest} from '../src/manifest/schema.mjs';
+import {BUILD_INFO} from '../src/build-info.mjs';
 
 // Git for Windows may check out Markdown and .d.ts files with CRLF endings.
 // Compare their logical lines consistently without modifying source files on disk.
 const read = path => readFileSync(new URL(path,import.meta.url),'utf8').replace(/\r\n?/g,'\n');
 const doc = read('../docs/api/API-COMMAND-REFERENCE.md');
+assert(doc.includes(`REDOWN ${BUILD_INFO.extensionVersion} runs`),'API reference names a stale REDOWN version');
 const hash = schema => createHash('sha256').update(JSON.stringify(schema)).digest('hex');
 const entries = [...doc.matchAll(/^### (\w+)\n\n<!-- method-contract (.+) -->\n([\s\S]*?)(?=^#{2,3} |\s*$)/gm)];
 const contracts = [...doc.matchAll(/^<!-- method-contract (.+) -->$/gm)].map(([,line])=>JSON.parse(line));

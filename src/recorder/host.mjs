@@ -2,10 +2,11 @@ import {secureBasic,secureEvent,screenshotReceipt} from './schema.mjs';
 import {sha256} from './storage.mjs';
 import {providerObservation} from './provider-observation.mjs';
 import {createRecorder} from './recorder.mjs';
+import {shortcutRecord} from '../glaciaring/shortcut-trace.mjs';
 // Dedicated local versioned channel, accepted only after appSenderDecision in the
 // existing message owner. No agent/debug grant implies RAW collection authority.
-export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorder:providedRecorder,readScreenshotReceipts}){
- const recorder=providedRecorder??createRecorder({build});let debug=false,screenshotSnapshot;const snapshots=new Map();
+export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorder:providedRecorder,readScreenshotReceipts,readShortcuts}){
+ const recorder=providedRecorder??createRecorder({build});let debug=false,screenshotSnapshot,shortcutSnapshot;const snapshots=new Map();
  // No await of recorder DB readiness in bootstrap or on a delivered gesture.
  try{debug=(await chrome.storage.local.get('uiDebugMode')).uiDebugMode===true;}catch{}
  void recorder.setDebug(debug).catch(()=>{});
@@ -36,6 +37,14 @@ export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorde
       data={id:crypto.randomUUID(),scope,transfers:{count:receipts.length},
        basic:{available:true,count:0,control:{sequence:0}},coverage:{}};
       screenshotSnapshot={id:data.id,receipts};
+     }else if(scope==='shortcuts'){
+      if(!readShortcuts)throw Error('RECORDER_UNAVAILABLE');
+      const trace=await readShortcuts();
+      if(trace.code)throw Error(trace.code);
+      const attempts=trace.events.filter(event=>event.shortcut).map(event=>event.shortcut);
+      data={id:crypto.randomUUID(),scope,shortcuts:{count:attempts.length},basic:{available:true,count:0,control:{sequence:0}},
+       coverage:{shortcutDropped:trace.dropped,shortcutPending:trace.pending,shortcutWriteFailures:trace.writeFailures}};
+      shortcutSnapshot={id:data.id,attempts};
      }else if(scope==='right-click-save'){
       data=await recorder.snapshot(p.runId);
       data.scope=scope;data.coverage.startupGapsLowerBound=startupGaps();
@@ -50,6 +59,9 @@ export async function createRecorderHost({chrome,build,startupGaps=()=>0,recorde
       const start=p.transfersAfter??0;
       const transfers=screenshotSnapshot.receipts.slice(start,start+5).map(job=>screenshotReceipt(job,{secure:p.privacy==='SECURE'}));
       data={transfers,transfersNext:start+transfers.length};
+     }else if(shortcutSnapshot?.id===p.snapshotId){
+      const raw=p.privacy==='RAW';
+      data={shortcuts:shortcutSnapshot.attempts.map(attempt=>attempt.map(step=>shortcutRecord(step,{raw})).filter(Boolean))};
      }else{
       const snap=snapshots.get(p.snapshotId);if(!snap)throw Error('SNAPSHOT_NOT_OPEN');
       data=await recorder.page(snap,p);

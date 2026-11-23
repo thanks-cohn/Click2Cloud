@@ -1,0 +1,526 @@
+{
+  "browser": {
+    "product": "Google Chrome",
+    "version": "158.0.8127.36",
+    "channel": "Stable",
+    "platform": "Debian 13 Linux x86-64"
+  },
+  "evidence": {
+    "mode": "Headed official Chrome with X11 key events on Xvfb; fresh disposable browser profile for each build",
+    "installation": "Production unpacked build loaded through Chrome DevTools Extensions.loadUnpacked",
+    "launch": {
+      "disableDefaultApps": true,
+      "enableAutomation": true,
+      "noSandbox": true,
+      "localHttpsFixture": true,
+      "ignoreCertificateErrorsForFixture": true
+    },
+    "probe": "Native Chrome listeners, Side Panel, and returned PNG; read-only or forwarding DevTools observation of browser APIs. Shelf focus was checked in the actual panel DOM.",
+    "provider": "Isolated local HTTPS stand-in using a disposable fixture account and no real provider writes. Confirmed receipts include exact PNG SHA-256 readback.",
+    "limitations": [
+      "Google Chrome on Windows and Microsoft Edge were unavailable",
+      "The owner’s actual Windows command scope and profile grants remain unverified",
+      "A packaged Web Store upgrade and live provider acceptance remain unverified"
+    ]
+  },
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "effectiveDefaultCommands": {
+    "screenshot.capture.alt-q": "Alt+Q",
+    "screenshot.capture.ctrl-shift-y": "Ctrl+Shift+Y",
+    "shelf.explorer.search": "Alt+Shift+F",
+    "shelf.history.toggle": "Alt+Shift+H"
+  },
+  "customFilesBinding": "Ctrl+Shift+F",
+  "versions": {
+    "0.3.23": {
+      "sourceRevisionAtBuild": "5e1cb5faeb2c629ad5d66f62507a39b574847531",
+      "sourceDigest": "bf5e78123b4eae8bad0a162bda815b24a488c0e1d4cd8bda094b75b03adba984",
+      "effectiveOriginPermissions": [
+        "https://*.1drv.com/*",
+        "https://*.my.microsoftpersonalcontent.com/*",
+        "https://*.onedrive.com/*",
+        "https://*.sharepoint-df.com/*",
+        "https://*.sharepoint.com/*",
+        "https://*.workers.dev/*",
+        "https://api.cloudflare.com/*",
+        "https://api.dropboxapi.com/*",
+        "https://content.dropboxapi.com/*",
+        "https://dash.cloudflare.com/*",
+        "https://graph.microsoft.com/*",
+        "https://login.microsoftonline.com/*",
+        "https://www.googleapis.com/*"
+      ],
+      "defaultScopes": "In Chrome",
+      "findings": [
+        {
+          "name": "Alt+Q",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Ctrl+Shift+Y",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Files custom Ctrl+Shift+F",
+          "status": "PASS",
+          "panel": true,
+          "focused": true,
+          "typed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelOpen": "resolved"
+          }
+        },
+        {
+          "name": "History open, route, close",
+          "status": "PASS",
+          "history": true,
+          "closed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelClose": "resolved"
+          }
+        },
+        {
+          "name": "Browser host access On click, fresh ordinary HTTPS tab",
+          "before": "ON_ALL_SITES",
+          "current": "ON_CLICK",
+          "knownPermission": false,
+          "receipt": {
+            "state": "unknown",
+            "pngBytes": 6282
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG",
+            "feedbackCode": "TRANSIENT_API_FAILURE"
+          },
+          "capture": "PASS",
+          "provider": "BLOCKED"
+        },
+        {
+          "name": "Cloudflare-only site grant, website withheld",
+          "scope": "ON_SPECIFIC_SITES",
+          "permissions": {
+            "webpage": false,
+            "provider": true
+          },
+          "receipt": {
+            "state": "confirmed",
+            "pngBytes": 6282,
+            "verification": "direct-r2-get-sha256"
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Chrome internal page capture",
+          "receipt": {
+            "state": "failed",
+            "code": "TAB_URL_UNAVAILABLE",
+            "stage": "tab-observation"
+          },
+          "uploads": 0,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": false,
+            "feedbackCode": "TAB_URL_UNAVAILABLE"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Files Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "panel": false,
+          "native": {
+            "tabDelivered": false,
+            "sidePanelOpen": "`sidePanel.open()` may only be called in response to a user gesture.",
+            "feedbackCode": "SHELF_OPEN_FAILED"
+          },
+          "status": "FAIL"
+        },
+        {
+          "name": "Alt+Q Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "receipt": {
+            "state": "failed",
+            "code": "TAB_URL_UNAVAILABLE",
+            "stage": "tab-observation"
+          },
+          "native": {
+            "tabDelivered": false,
+            "feedbackCode": "TAB_URL_UNAVAILABLE"
+          },
+          "status": "BLOCKED"
+        }
+      ]
+    },
+    "0.3.24": {
+      "sourceRevisionAtBuild": "cd4c8dd3bc11700376d30da050d6050a0eb1edb9",
+      "sourceDigest": "8f15d4550bb0c84e92593c069b6ab8ae4d8fb001066f7c4f457de37d2a99139a",
+      "effectiveOriginPermissions": [
+        "http://*/*",
+        "https://*.1drv.com/*",
+        "https://*.my.microsoftpersonalcontent.com/*",
+        "https://*.onedrive.com/*",
+        "https://*.sharepoint-df.com/*",
+        "https://*.sharepoint.com/*",
+        "https://*.workers.dev/*",
+        "https://*/*",
+        "https://api.cloudflare.com/*",
+        "https://api.dropboxapi.com/*",
+        "https://content.dropboxapi.com/*",
+        "https://dash.cloudflare.com/*",
+        "https://graph.microsoft.com/*",
+        "https://login.microsoftonline.com/*",
+        "https://www.googleapis.com/*"
+      ],
+      "defaultScopes": "In Chrome",
+      "findings": [
+        {
+          "name": "Alt+Q",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Ctrl+Shift+Y",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Files custom Ctrl+Shift+F",
+          "status": "PASS",
+          "panel": true,
+          "focused": true,
+          "typed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelOpen": "resolved"
+          }
+        },
+        {
+          "name": "History open, route, close",
+          "status": "PASS",
+          "history": true,
+          "closed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelClose": "resolved"
+          }
+        },
+        {
+          "name": "Browser host access On click, fresh ordinary HTTPS tab",
+          "before": "ON_ALL_SITES",
+          "current": "ON_CLICK",
+          "knownPermission": false,
+          "receipt": {
+            "state": "unknown",
+            "pngBytes": 6282
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG",
+            "feedbackCode": "TRANSIENT_API_FAILURE"
+          },
+          "capture": "PASS",
+          "provider": "BLOCKED"
+        },
+        {
+          "name": "Cloudflare-only site grant, website withheld",
+          "scope": "ON_SPECIFIC_SITES",
+          "permissions": {
+            "webpage": false,
+            "provider": true
+          },
+          "receipt": {
+            "state": "confirmed",
+            "pngBytes": 6282,
+            "verification": "direct-r2-get-sha256"
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Chrome internal page capture",
+          "receipt": {
+            "state": "failed",
+            "code": "TAB_URL_UNAVAILABLE",
+            "stage": "tab-observation"
+          },
+          "uploads": 0,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": false,
+            "feedbackCode": "TAB_URL_UNAVAILABLE"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Files Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "panel": false,
+          "native": {
+            "tabDelivered": false,
+            "sidePanelOpen": "`sidePanel.open()` may only be called in response to a user gesture.",
+            "feedbackCode": "SHELF_OPEN_FAILED"
+          },
+          "status": "FAIL"
+        },
+        {
+          "name": "Alt+Q Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "receipt": {
+            "state": "failed",
+            "code": "CHROME_CAPTURE_PERMISSION_DENIED",
+            "stage": "capture-api"
+          },
+          "native": {
+            "tabDelivered": false,
+            "captureVisibleTab": "Either the '<all_urls>' or 'activeTab' permission is required.",
+            "feedbackCode": "CHROME_CAPTURE_PERMISSION_DENIED"
+          },
+          "status": "BLOCKED"
+        }
+      ]
+    },
+    "0.3.25": {
+      "sourceRevisionAtBuild": "aab87770dd129833d2b9cfebd058b0d9b2c88e6d",
+      "sourceDigest": "d57ec9c51b5ccc580fd7a5a3048b352d8398e84676cc4e8d42bc06b060958f2b",
+      "effectiveOriginPermissions": [
+        "http://*/*",
+        "https://*.1drv.com/*",
+        "https://*.my.microsoftpersonalcontent.com/*",
+        "https://*.onedrive.com/*",
+        "https://*.sharepoint-df.com/*",
+        "https://*.sharepoint.com/*",
+        "https://*.workers.dev/*",
+        "https://*/*",
+        "https://api.cloudflare.com/*",
+        "https://api.dropboxapi.com/*",
+        "https://content.dropboxapi.com/*",
+        "https://dash.cloudflare.com/*",
+        "https://graph.microsoft.com/*",
+        "https://login.microsoftonline.com/*",
+        "https://www.googleapis.com/*"
+      ],
+      "defaultScopes": "In Chrome",
+      "findings": [
+        {
+          "name": "Alt+Q",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Ctrl+Shift+Y",
+          "status": "PASS",
+          "state": "confirmed",
+          "pngBytes": 6282,
+          "digestMatches": true,
+          "verification": "direct-r2-get-sha256",
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          }
+        },
+        {
+          "name": "Files custom Ctrl+Shift+F",
+          "status": "PASS",
+          "panel": true,
+          "focused": true,
+          "typed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelOpen": "resolved"
+          }
+        },
+        {
+          "name": "History open, route, close",
+          "status": "PASS",
+          "history": true,
+          "closed": true,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "sidePanelClose": "resolved"
+          }
+        },
+        {
+          "name": "Browser host access On click, fresh ordinary HTTPS tab",
+          "before": "ON_ALL_SITES",
+          "current": "ON_CLICK",
+          "knownPermission": false,
+          "receipt": {
+            "state": "unknown",
+            "pngBytes": 6282
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG",
+            "feedbackCode": "TRANSIENT_API_FAILURE"
+          },
+          "capture": "PASS",
+          "provider": "BLOCKED"
+        },
+        {
+          "name": "Cloudflare-only site grant, website withheld",
+          "scope": "ON_SPECIFIC_SITES",
+          "permissions": {
+            "webpage": false,
+            "provider": true
+          },
+          "receipt": {
+            "state": "confirmed",
+            "pngBytes": 6282,
+            "verification": "direct-r2-get-sha256"
+          },
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": true,
+            "captureVisibleTab": "returned PNG"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Chrome internal page capture",
+          "receipt": {
+            "state": "failed",
+            "code": "TAB_URL_UNAVAILABLE",
+            "stage": "tab-observation"
+          },
+          "uploads": 0,
+          "native": {
+            "tabDelivered": true,
+            "tabUrlPresent": false,
+            "feedbackCode": "TAB_URL_UNAVAILABLE"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Files Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "panel": true,
+          "focused": true,
+          "native": {
+            "tabDelivered": false,
+            "sidePanelOpen": "resolved"
+          },
+          "status": "PASS"
+        },
+        {
+          "name": "Alt+Q Global scope, Chrome focused",
+          "options": [
+            "In Chrome",
+            "Global"
+          ],
+          "scope": "Global",
+          "receipt": null,
+          "native": {
+            "tabDelivered": false,
+            "feedbackCode": "SCREENSHOT_COMMAND_TAB_REQUIRED"
+          },
+          "status": "BLOCKED"
+        }
+      ]
+    }
+  },
+  "samePathReload": {
+    "browser": "158.0.8127.36",
+    "previous": {
+      "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+      "version": "0.3.24",
+      "files": "Ctrl+Shift+F"
+    },
+    "updated": {
+      "id": "ajppphdiamdobknpamcheohmdbdbeoal",
+      "version": "0.3.25",
+      "files": "Ctrl+Shift+F"
+    },
+    "sameUnpackedPath": true,
+    "sameProfile": true,
+    "reload": "Chrome Extensions native Reload button",
+    "storageSentinelPreserved": true,
+    "existingConfirmedHistoryPreserved": true,
+    "altQBefore": true,
+    "secondaryHotkeyAfter": true,
+    "newReceiptDistinct": true
+  }
+}
