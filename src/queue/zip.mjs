@@ -38,7 +38,9 @@ export async function withHistoryDownload(filename, write, {signal, download} = 
       await writer.close();
       const file = await handle.getFile();
       if (receipt.bytes !== file.size) throw Error('HISTORY_DOWNLOAD_SIZE_MISMATCH');
-      url = URL.createObjectURL(file);
+      // An untyped OPFS File is treated as text by Chromium and can have its
+      // requested suffix rewritten. A typed slice retains the file-backed bytes.
+      url = URL.createObjectURL(file.slice(0,file.size,'application/octet-stream'));
       if (download) await download(url, filename);
       else await saveDownload(url, filename, signal);
       return receipt;

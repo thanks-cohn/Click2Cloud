@@ -14,6 +14,12 @@ import {cloudPath} from '../src/explorer/location-view.mjs';
 // isolated HTTPS fixture. No credentials or live buckets are used.
 const out=resolve(process.env.C2C_SCREENSHOT_EVIDENCE??'work/screenshot-browser'),profile=await mkdtemp(join(tmpdir(),'c2c-screenshot-chrome-'));
 await mkdir(out,{recursive:true});
+const downloadDirectory=join(out,'named-download');
+await mkdir(downloadDirectory,{recursive:true});
+await mkdir(join(profile,'Default'));
+await writeFile(join(profile,'Default','Preferences'),JSON.stringify({
+ download:{default_directory:downloadDirectory,prompt_for_download:false,directory_upgrade:true}
+}));
 const executablePath=process.env.C2C_CHROME_EXECUTABLE;
 const siteHost='screenshot.example.test',extension=resolve('dist/click2cloud');
 const searchHosts=['search-one.example','search-two.test','search-three.invalid'];
@@ -280,10 +286,9 @@ try{
  const selectedOutput=retried.plan.outputs[1];
  const resultCard=app.locator('.queue-history-card').filter({hasText:selectedOutput.target.bucketName+' / '+selectedOutput.key});
  const downloadFile=resultCard.getByRole('button',{name:'Download '+selectedOutput.key.split('/').at(-1)});
- const downloadDirectory=join(out,'named-download');
- await mkdir(downloadDirectory,{recursive:true});
  const downloadSession=await browser.browser().newBrowserCDPSession();
- await downloadSession.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloadDirectory,eventsEnabled:true});
+ await downloadSession.send('Browser.setDownloadBehavior',{behavior:'default'});
+
  const requestedFilename=selectedOutput.key.split('/').at(-1);
  await downloadFile.click();
  await resultCard.getByRole('status').filter({hasText:'Download complete.'}).waitFor();
