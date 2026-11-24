@@ -16,56 +16,44 @@ This is a current, approved work-order amendment, not future/deferred scope. The
 - Perform an automatic build assertion: `require('./package.json').version === '0.3.26'`, `require('./package-lock.json').version === '0.3.26'`, root lock package's version `=== '0.3.26'`, `require('./extension/manifest.json').version === '0.3.26'`, and generated `dist/click2cloud/manifest.json` version `=== '0.3.26'`. Validate final installed Chrome extensions card where browser access is possible.
 - Do NOT start from the separate 0.3.25 repair branch or failed Queue V2 0.3.23 branch. Their code must not be copied. The version 0.3.26 is a **label for new work descended from 0.3.24**, not permission to merge intermediate versions.
 
-## 2. Settings — three-way tab placement: Main tab / More menu / Gone
+## 2. Settings — Main tab / More menu / Gone, with Settings protected
 
-**LATEST OWNER DECISION, CONTROLLING OVER ALL EARLIER TWO-WAY / ON-OFF INSTRUCTIONS.**
+**LATEST OWNER DECISION — controlling over older two-way toggle and unrestricted three-way language.** The More menu is the **THREE-DOT `⋯` BUTTON** in the top navigation. Do not replace it with an unrelated hamburger icon or textual "More" tab.
 
-In **Settings → Customize Navigation**, give each eligible navigation section one mutually exclusive **three-way selection** (segmented control, radio group, or dropdown) labeled EXACTLY:
+Implement **Settings → Customize Navigation** with these mutually exclusive placement options:
 
-1. **Main tab** — show the tab in the top navigation bar.
-2. **More menu** — list the tab inside the `⋯` three-dot menu only.
-3. **Gone** — hide this section's navigation entry from BOTH top bar and the `⋯` menu.
+| Actual eligible section | Allowed placement options | Default |
+| --- | --- | --- |
+| Files | Main tab / More menu / Gone | **Main tab** |
+| Remotes | Main tab / More menu / Gone | **Main tab** |
+| Queue | Main tab / More menu / Gone | **Main tab** |
+| History (legacy during alpha) | Main tab / More menu / Gone | **More menu** |
+| **Settings** | **Main tab / More menu ONLY — Gone forbidden** | **More menu** |
+| Every other eligible existing section, except the excluded Downloads entry | Main tab / More menu / Gone | **More menu** |
 
-**"Gone" changes navigation visibility only, NOT the feature's implementation or data.** It must not delete History, change cloud credentials, pause uploads, disable saves, remove services/APIs, or destroy settings. Do not replace this selector with an on/off toggle.
+These are placements, **not on/off or feature activation settings**. Use per-section segmented controls, radio groups or an accessible dropdown. Show the user-facing names **"Main tab"**, **"More menu"**, **"Gone"**. For Settings, show only the first two options. The app must reject attempts to set Settings to `gone` through restored configuration, import, malformed stored settings or direct internal calls, correcting legacy invalid values to `more` safely.
 
-### Default tab placement — owner-locked
+**Default TOP BAR:** **Files | Remotes | Queue | ⋯** and NOTHING ELSE. Settings, History and every other eligible section appear inside `⋯` initially, except Downloads: it NEVER appears in `⋯`, even in Debug Mode. Do not invent a Downloads tab or delete the existing download/file API; every History V2 card keeps its approved file Download action.
 
-| Section | Default placement |
-| --- | --- |
-| **Files** | **Main tab** |
-| **Remotes** | **Main tab** |
-| **Queue** | **Main tab** |
-| **Settings** | **More menu** |
-| **History** (legacy during alpha) | **More menu** |
-| **Every other eligible, existing app section** | **More menu** |
+### Placement behavior
 
-**Default top navigation:** **Files | Remotes | Queue | ⋯**. *Only* these three content tabs belong in the initial main bar. **All other eligible sections go inside the three-dot More menu by default, including Settings and History.** Do NOT add Settings to the default main bar. The user's per-section choice may later move any eligible section into Main tab, More menu, or Gone.
+- **Main tab:** exactly one top-row entry. **More menu:** exactly one entry in the three-dot dropdown. **Gone:** no entry in either; underlying service/data remain available and operational, with no account/file/history changes.
+- **Settings cannot be removed from navigation.** It can only move between **Main tab** and **More menu**. `⋯` must remain discoverable even with all other eligible tabs Gone. No special escape hatch is needed when Settings is Gone because that state MUST BE IMPOSSIBLE.
+- Save placement values by stable section ID through existing preferences. Each change updates the UI immediately and persists through Shelf reopening, Chrome restart, and theme switching. A section can be temporarily overflowed on narrow screens without changing saved placement.
+- Never duplicate a tab across top and `⋯`; hiding a tab cannot stop its background work or delete information. Maintain consistent keyboard navigation, focus, ARIA names, touch targets and responsive layout.
+- Include **Reset to Defaults** restoring Files/Remotes/Queue to Main tab and Settings/History/all other eligible sections to More menu (excluding Downloads); do not reset other settings, cloud connections, history or files.
 
-**Downloads exception:** The previously approved rule remains: an old standalone **Downloads** navigation entry must NEVER be put inside More, including in default configuration, Debug Mode, narrow layouts or reset. Do not resurrect or invent that entry merely because "everything else" starts in More. Existing file-download APIs and every History V2 card's Download action are retained.
+### Mandatory acceptance
 
-### Placement behavior, persistence and recovery
+1. Initial main navigation shows exactly **Files | Remotes | Queue | ⋯**, where `⋯` is a three-dot control. Settings and History are inside `⋯`, not on top.
+2. For History, Queue, Files and Remotes, exercise **Main tab → More menu → Gone** and back, proving locations, durable preferences and no data loss.
+3. Settings presents only **Main tab / More menu**. Try to supply `gone` through persisted or test API state; reject/repair it and keep Settings accessible.
+4. `⋯` remains reachable and correctly sized in all themes, narrow windows and with other sections Gone. Never show duplicate routes.
+5. Reload extension/restart Chrome; placements remain. Reset restores exact defaults without affecting accounts/History.
+6. No Downloads menu entry in Debug Mode ON/OFF, responsiveness or reset. Existing per-card file Download continues to function.
+7. Report actual installed Chrome interaction evidence separately from simulated tests.
 
-- Store one stable-ID placement value per eligible navigation section, one of `main`, `more`, `gone`. Never give one section duplicate entries or confuse hidden with disabled functionality.
-- **Main tab:** user sees and can select the section in the top row. **More menu:** section only appears within the three-dot menu. **Gone:** section does not appear in either; backing data/engines remain intact.
-- Moving a tab among all three choices takes effect immediately and persists across extension/Shelf reload, Chrome restart and theme changes. Responsive overflow may temporarily put main tabs in More but must not overwrite saved placement.
-- The `⋯` three-dot button remains available in all configurations, including when every eligible tab is Gone.
-- **Recovery when Settings is Gone:** expose a stable **Customize Navigation** recovery action in the three-dot menu separate from the optional Settings navigation entry. This opens the placement controls, even when Settings itself is Gone. Keep this recovery action available in all navigation states; it is not an additional Settings tab. If needed, also provide an accessible keyboard fallback, but do not rely on an undocumented keyboard-only route.
-- **Reset to Defaults** restores only the navigation values shown above; preserve unrelated settings, authorizations, remote locations, Queue jobs, and History records.
-- Keep state stable and actions accessible across Remote V1, Bit o' Polish, Frames and actual supported themes, including narrow windows, high zoom, and keyboard/screen-reader usage.
-
-### Mandatory acceptance tests
-
-1. Fresh start: **Files | Remotes | Queue | ⋯** is the visible top navigation. **Settings, History, every other eligible tab are in More**, except forbidden Downloads; no duplicate tabs.
-2. From Settings → Customize Navigation, change **History** among **Main tab → More menu → Gone → Main tab**; verify placement after each and that History data is unchanged.
-3. Move **Queue** to More menu and Gone, then Main tab again; Live Jobs and V2 records remain in place without losing data or interrupting saves.
-4. Set **Settings** to Gone; it disappears from top AND More. Open the dedicated **Customize Navigation** recovery action from More and restore Settings.
-5. Move **Files** and **Remotes** to More menu or Gone and back without mutating provider connection, authorization, files, or save destinations.
-6. Change several placements together, check keyboard usability and responsive overflow, and verify no inaccessible or duplicate navigation.
-7. Reload/restart and change themes; all placements persist. Reset to Defaults restores **only** Files/Remotes/Queue to Main tab and all other eligible sections to More menu (Downloads exception), preserving unrelated state.
-8. Debug Mode ON/OFF and all layout fallbacks: Downloads never appears in More; actual History V2 Download buttons continue functioning.
-9. Use the real installed Chrome extension when available; distinguish genuine browser proof from simulated fixtures.
-
-**FAIL / P0 blocker:** A two-way control, an On/Off toggle, a static top bar, an unavailable Gone choice, Settings becoming irretrievable, unavailable More menu, lost user data, or Settings shown in the DEFAULT top bar violates this order.
+**P0 FAIL:** binary ON/OFF control, allowing Settings = Gone, a hidden/inaccessible Settings route, misrepresenting the three-dot More control, Settings in the DEFAULT top bar, lost state, or a fixed noncustomizable header.
 
 ## 3. Scope and unchanged preservation rules
 
