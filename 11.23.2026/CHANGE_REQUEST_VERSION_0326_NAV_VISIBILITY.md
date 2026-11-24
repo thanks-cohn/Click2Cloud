@@ -16,33 +16,44 @@ This is a current, approved work-order amendment, not future/deferred scope. The
 - Perform an automatic build assertion: `require('./package.json').version === '0.3.26'`, `require('./package-lock.json').version === '0.3.26'`, root lock package's version `=== '0.3.26'`, `require('./extension/manifest.json').version === '0.3.26'`, and generated `dist/click2cloud/manifest.json` version `=== '0.3.26'`. Validate final installed Chrome extensions card where browser access is possible.
 - Do NOT start from the separate 0.3.25 repair branch or failed Queue V2 0.3.23 branch. Their code must not be copied. The version 0.3.26 is a **label for new work descended from 0.3.24**, not permission to merge intermediate versions.
 
-## 2. Settings MUST let the USER customize TOP TAB VISIBILITY
+## 2. Settings — choose a TAB LOCATION, not an ON/OFF state
 
-This feature was ALWAYS required. **It is not an optional fixed default or an admin-only/test-only toggle.** Implement a clearly discoverable, functional **Settings → Customize Navigation** card.
+**Owner terminology correction:** The user does NOT want tabs "enabled/disabled", "on/off", "shown/hidden", or a binary switch labeled "Show in Top Bar." The user wants exactly two mutually exclusive **PLACEMENT CHOICES for each eligible navigation tab**:
 
-- Show one independent, accessible, persisted **Show in Top Bar** / pinned visibility control for **each eligible application section/tab** present in the actual 0.3.24-derived navigation registry (e.g. Files, Remotes, Queue, History, Settings and other actually supported navigable sections). Do not invent new sections or falsely omit eligible ones.
-- The user can decide which eligible tabs appear directly across the **TOP navigation strip** and which move to **⋯ More**. A section unpinned from the top **MUST NOT become inaccessible**: it appears in ⋯ More instead, subject to the separate Downloads exclusion.
-- **Default top strip:** `Files | Remotes | Queue | Settings | ⋯`; History is in More initially. The user must be able to pin History to the top, unpin Queue, or unpin Settings and still reach all sections, including Settings itself through More.
-- Keep **⋯ More** discoverable and operational even when few tabs are pinned. Respect narrow layouts: temporarily overflowing pinned tabs to More is okay, but it must NOT silently rewrite the user's saved visibility preferences or cause duplicate routes.
-- Provide **Reset to Defaults** that restores the original default visible-top sections and default More membership, without resetting unrelated settings, credentials, destinations, History, or files.
-- Save preferences durably using existing safe settings storage; restore identically after Shelf closure, extension reload, Chrome restart, theme changes, and navigation. Use stable section identifiers, not fragile text labels, indexes, DOM positions or hardcoded one-off History behavior.
-- The top-bar toggle governs **presentation/placement only**: it does not disable a section's APIs, data, event handling, save engine, operations or diagnostics. Tabs and pending work stay available regardless of pinning.
-- **Never display `Downloads` in ⋯ More** (including Debug Mode ON, responsive fallback and Reset); do not erase existing actual download/file APIs. Existing Download buttons in History V2 remain supported.
-- Enforce compact high-quality design across Remote V1, Bit o' Polish, Frames, and any other actual supported theme, with clear focus/ARIA semantics and a usable small-width layout.
+**Settings → Customize Navigation**
+
+| Section | Placement (one choice) |
+| --- | --- |
+| Files | **Visible** / More menu |
+| Remotes | **Visible** / More menu |
+| Queue | **Visible** / More menu |
+| History | Visible / **More menu** |
+| Settings | **Visible** / More menu |
+
+Use a clearly labeled two-option segmented control, radio group, or dropdown for each section. The values must be user-facing **"Visible"** and **"More menu"** (not "ON", "OFF", "Hidden", "Disabled", "Enable", or "Pin"). "Visible" means a tab appears in the TOP BAR; "More menu" means the tab is accessible within the `⋯` menu. Both choices keep the feature **enabled and fully functional**.
+
+- The default TOP BAR is **Files | Remotes | Queue | Settings | ⋯**. **History** defaults to **More menu**. This is only a configurable default, never a hard-coded rule.
+- Every actual eligible app section gets an independent, persistent **location** value of **Visible** or **More menu**. Include eligible sections discovered from existing navigation, without inventing unsupported screens. Never place the existing **Downloads** navigation entry in More (including Debug Mode or responsive fallback); its underlying backend and History V2 Download buttons still work.
+- Selecting **Visible** for History immediately puts History in the top bar and removes its listing from More. Selecting **More menu** for Queue relocates Queue into the menu; Live Jobs and History V2 are not deleted or disabled.
+- Selecting **More menu** for Settings keeps Settings accessible through `⋯`, including Customize Navigation, so the user can move Settings back to **Visible**. The `⋯` menu remains accessible at all times.
+- Respect narrow layouts by rendering overflow within More, but treat overflow as **temporary presentation** that does not rewrite the user's persisted location preferences.
+- No section appears twice. Store stable section IDs and one location choice each. Persist across close/reopen, reload, Chrome restart, theme change, account reconnect and normal navigation without losing current route/data.
+- **Reset to Defaults** restores the placement choices shown above and does not reset unrelated preferences, destinations, auth, History or files.
+- Apply to Remote V1, Bit o' Polish, Frames and all supported visual themes; ensure keyboard access and screen-reader labels. No unsupported third state, no removal of functionality.
 
 ### Non-negotiable behavior tests
 
-1. Fresh/default state: top navigation is **Files | Remotes | Queue | Settings | ⋯** and History lives inside More.
-2. Toggle **History → Show in Top Bar ON** in Settings: History appears on top immediately; it does not appear twice in More. Toggle OFF: it disappears from top and returns to More.
-3. Toggle **Queue OFF**, verify it moves into More without losing Live Jobs or History V2 data; turn it back ON, state is preserved.
-4. Toggle **Settings OFF**: Settings remains accessible from More, so user can reopen Customize Navigation and re-pin it. Never strand the user.
-5. Toggle eligible sections individually, test many pinned sections and responsive overflow, focus/keyboard operation and one route per section.
-6. Reload Shelf, restart extension, switch themes and verify saved pin choices are unchanged.
-7. Click **Reset to Defaults** and confirm exactly the default top and More groupings, with unrelated state untouched.
-8. With Debug Mode ON and OFF, downloads backend stays functional but a `Downloads` nav entry never appears in More.
-9. Real installed Chrome UI interactions where available; distinguish synthetic fixtures from actual browser evidence.
+1. Default after fresh install: Files / Remotes / Queue / Settings each read **Visible**, History reads **More menu**; corresponding top/menu placements match exactly.
+2. Change **History → Visible**: immediate top-bar display, absent from More; then change **History → More menu** and verify the reverse.
+3. Change **Queue → More menu**, then **Visible**: it relocates without losing Queue jobs, History V2 contents or current state.
+4. Change **Settings → More menu**: Settings remains reachable from More, including the Customize Navigation card; change it back to **Visible**.
+5. Verify independent choices, keyboard accessibility, no duplicate routes, and responsive overflow under varied window widths.
+6. Reload Shelf, restart Chrome/extension, change themes: chosen placement values remain intact.
+7. Reset to Defaults restores the declared Visible/More menu preferences, preserving unrelated settings.
+8. With Debug Mode ON/OFF, a Downloads menu route never appears in More, while individual saved-file downloads still work.
+9. Execute real installed Chrome UI tests where possible; separate actual browser evidence from fixture tests.
 
-**Release blocker:** A fixed set of header tabs with no user-visible Settings controls, toggles that fail to persist, unpinned tabs that become inaccessible, or Settings that becomes impossible to reopen is a failed implementation.
+**P0 failure:** Any On/Off toggle, permanently fixed top bar, "Hidden/Disabled" option that actually disables a section, unpersisted choices, inaccessible Settings, or lost app state fails acceptance.
 
 ## 3. Scope and unchanged preservation rules
 
