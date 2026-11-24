@@ -76,7 +76,7 @@ Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` and implement it in
 - [ ] Every collapsed Full/Compact History V2 card visibly offers Download or an explained disabled state, keyboard accessible and responsive.
 - [ ] Real supported provider download route verified; missing/auth/permission/404/stale receipt scenarios do not invent success.
 - [ ] Screenshot multi-destination results select the exact intended file, never arbitrarily; download failure does not block saving.
-- [ ] ZIP export, Downloads menu exclusion, old History and Diagnostics unchanged; no new History record from downloading.
+- [ ] **Settings → Queue** always shows Export Complete History ZIP, distinct from per-card file Download, even when automatic cleanup is ON; full export integrity verified. No Downloads menu entry; old History/Diagnostics remain intact.
 
 ---
 
@@ -84,13 +84,19 @@ Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` and implement it in
 
 This work branch **already sets REDOWN version 0.3.26** in its source manifest, package, lockfile and source build-info. The original immutable Git base is still 0.3.24 at `cd4c8dd3`. **These two facts must not be conflated.** Preserve the source version bump; build and test that the generated extension manifest and actual Chrome extension entry report version **0.3.26**. See the full owner override `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md`.
 
-**LATEST OWNER NAVIGATION ACCEPTANCE:** Exactly **Main tab / More menu / Gone** per tab in Settings → Customize Navigation. Default **Files | Remotes | Queue | ⋯** on main, **Settings, History and every other eligible section** in More (excluding Downloads per standing rule). Gone hides the navigation entry from both without disabling engines or deleting data. Recovery Customize Navigation action stays in More even if Settings Gone. Persist, Reset to Defaults, responsive/theme handling and real Chrome evidence mandatory.
-- [ ] THREE explicit placement options, not a two-way ON/OFF switch, for every eligible tab.
+**FINAL OWNER RULE:** The **More menu is the actual three-dot `⋯` button**. Settings → Customize Navigation offers **Main tab / More menu / Gone** for eligible sections **other than Settings**, which has ONLY **Main tab / More menu**; **Settings can never be Gone**. Reject or normalize invalid persisted `settings=gone` to `more`. Default main **Files | Remotes | Queue | ⋯**; Settings, History and other eligible sections initially in More, excluding Downloads. Gone only hides navigation, not data. Save preferences and preserve access to Settings. The always-visible **Export Complete History ZIP** belongs inside **Settings → Queue**, regardless of the 15-minute history Hide/Delete/OFF state. A History V2 toolbar shortcut is optional and must reuse the same ZIP exporter; the detailed `Export Queue History` subsection remains conditional on cleanup OFF.
+- [ ] Each eligible section except Settings offers Main tab / More menu / Gone; Settings offers **Main tab / More menu only** and cannot be removed.
 - [ ] Only Files, Remotes, Queue are default main tabs; Settings/History default to More; no Downloads in More.
-- [ ] Gone hides navigation from both; underlying state and work preserved; recovery Customize Navigation action always available.
+- [ ] Gone hides eligible non-Settings navigation without deleting data or stopping work; Settings always remains reachable in Main or the three-dot More menu.
 
 
 - [ ] Current source, generated manifest, package and actual installed Chrome extension identify **REDOWN 0.3.26** (when browser access exists).
 - [ ] Settings → Customize Navigation has per-tab Main tab / More menu / Gone selector, durable choices, recovery access and Reset to Defaults.
-- [ ] History can be promoted to top, Queue/Settings unpinned to More without loss of access, and choices survive restart/theme/narrow layout.
+- [ ] History can be Main / More / Gone, while Settings can only be Main / More; all choices persist across restart, theme and narrow widths.
 - [ ] Original immutable 0.3.24 ancestry and all existing four Remotes cards preserved; no 0.3.25 source merge.
+
+## FINAL ACCEPTANCE CLARIFICATION — SETTINGS PROTECTED / ZIP HOME / AGENT-NATIVE
+
+**FINAL OWNER RULE:** The **More menu is the actual three-dot `⋯` button**. Settings → Customize Navigation offers **Main tab / More menu / Gone** for eligible sections **other than Settings**, which has ONLY **Main tab / More menu**; **Settings can never be Gone**. Reject or normalize invalid persisted `settings=gone` to `more`. Default main **Files | Remotes | Queue | ⋯**; Settings, History and other eligible sections initially in More, excluding Downloads. Gone only hides navigation, not data. Save preferences and preserve access to Settings. The always-visible **Export Complete History ZIP** belongs inside **Settings → Queue**, regardless of the 15-minute history Hide/Delete/OFF state. A History V2 toolbar shortcut is optional and must reuse the same ZIP exporter; the detailed `Export Queue History` subsection remains conditional on cleanup OFF.
+
+**GUIDING AGENT-NATIVE PHILOSOPHY:** Human simplicity outside; machine-operable, observable and verifiable shared internal operations inside, **where practical and safe**. Prefer UI and agents exercising the same production contract. Synthetic evidence may cover 100,000 History records, 10,000 simulated queued jobs, expirations, provider outages, corrupt state, restarts and interruptions, but do not simulate real cloud uploads at impossible concurrency or claim mocks are provider proof. Keep simulation/integration/real-provider evidence distinct; preserve permissions, APIs, save engines and architecture without public privileged test endpoints.
