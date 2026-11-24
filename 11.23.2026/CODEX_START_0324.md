@@ -22,6 +22,7 @@ READ IN FULL AND IN ORDER:
 5. `11.23.2026/queue-final.md` (canonical Queue/History V2 spec, subject to the 0.3.24 foundation override)
 6. `11.23.2026/FINAL_CONSISTENCY_AUDIT.md`
 7. `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md`
+8. `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md`
 
 **TASK:** Build complete, modular Queue V2 + chronology-first, full-parity History V2 and only approved UX. BEFORE coding, audit 0.3.24 baseline features, create a preservation matrix, then work in reviewable checkpoints.
 
@@ -54,3 +55,7 @@ Read `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md` **in full as a c
 **LATEST OWNER REMOTES CARD PLACEMENT (REQUIRED):** On applicable Remotes cards, show **Login OR Reconnect in the padded TOP-RIGHT** (according to actual auth state), and place **GO TO followed by Refresh together at the BOTTOM-LEFT**, **left-aligned** in that order. Do not position these two buttons bottom-right. Preserve existing handlers, card contents, all four providers, themes and responsive layout. The bottom-left GO TO → Refresh order supersedes any earlier Refresh → GO TO instruction.
 
 **FINAL OWNER ORDER — REMOTES CARD BUTTONS:** In the **BOTTOM-LEFT** action row, display **GO TO first (left)** and **Refresh second (right)**, left-aligned, with existing functionality intact. **Login or Reconnect remains TOP-RIGHT**. This supersedes all prior reverse-order instructions. Do not move the pair to bottom-right.
+
+## LATEST OWNER 0.3.26 POST-IMPLEMENTATION VISUAL REPAIR — MANDATORY
+
+**LATEST OWNER UX OVERRIDE (POST-0.3.26 ALPHA):** Read `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md` before modifying UI. **Sign In OR Reconnect bottom-left** of each applicable Remotes card; **GO TO followed by Refresh bottom-right**, right-aligned (auth action is NOT top-right). Cloudflare Sign In/Reconnect restores the original wide horizontal appearance, not a squeezed button. The application navigation **three-dot `⋯` is ALWAYS the far-right header control** (including narrow/custom tab configurations); preserve theme access. **File Explorer must regain its original full visual length/extent from 0.3.24**, with before/after viewport-matched browser proof. This overrides all older contradictory layout directions. Preserve 0.3.26 functionality, providers and engine behavior; implement as focused layout repair, not a redesign.
