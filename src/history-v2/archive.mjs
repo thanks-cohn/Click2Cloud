@@ -8,6 +8,7 @@ const defaultState={...archiveDefaults,revision:0,clearing:false};
 const stores=['records','exclusions','settings'];
 const order=record=>[record.orderAt,record.recordId];
 const stateOf=async settings=>(await read(settings.get('archive')))??defaultState;
+const recordCount=(records,state)=>state.count??read(records.count());
 const keyRange=({from,to}={})=>from==null?(to==null?null:IDBKeyRange.upperBound([to],true)):
   to==null?IDBKeyRange.lowerBound([from]):IDBKeyRange.bound([from],[to],false,true);
 const validLimit=limit=>limit===null||Number.isSafeInteger(limit)&&limit>0;
@@ -47,7 +48,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
     for(;;) {
       const more=await transact(stores,'readwrite',async (records,exclusions,settings)=>{
         const state=await stateOf(settings);
-        const count=await read(records.count());
+        const count=await recordCount(records,state);
         let removed=0;
         if(state.clearing||state.limit!==null&&count>state.limit) {
           removed+=await removeOldest(records,exclusions,null,Math.min(archiveBatch,state.clearing?count:count-state.limit));
@@ -56,7 +57,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
         if(timer&&!state.clearing&&state.cleanup==='delete'&&cutoff>state.deleteFrom&&removed<archiveBatch) {
           removed+=await removeOldest(records,exclusions,keyRange({from:state.deleteFrom,to:cutoff}),archiveBatch-removed);
         }
-        if(removed||state.clearing)settings.put({...state,revision:state.revision+1,clearing:state.clearing&&count>removed},'archive');
+        if(removed||state.clearing)settings.put({...state,count:count-removed,revision:state.revision+1,clearing:state.clearing&&count>removed},'archive');
         return removed===archiveBatch;
       });
       if(!more)return;
@@ -73,31 +74,39 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
     records.forEach(prepare);
     return exclusive(async ()=>{
       // A previous clear must finish before accepting new evidence; source receipts stay independent.
-      if((await status()).clearing)await maintain();
+      if((await transact(['settings'],'readonly',stateOf)).clearing)await maintain();
       return transact(stores,'readwrite',async (archive,exclusions,settings)=>{
         const state=await stateOf(settings);
+        const count=await recordCount(archive,state);
         let inserted=0,changed=false;
+        const ids=[...new Set(records.map(record=>record.recordId))];
+        const lookups=await Promise.all(ids.map(async id=>{
+          const [excluded,previous]=await Promise.all([read(exclusions.getKey(id)),read(archive.get(id))]);
+          return [id,{excluded,previous}];
+        }));
+        const existing=new Map(lookups);
         for(const record of records) {
-          if(await read(exclusions.getKey(record.recordId))!==undefined)continue;
-          const previous=await read(archive.get(record.recordId));
-          if(previous&&(previous.observedAt>record.observedAt||previous.status==='verified'&&record.status!=='verified'))continue;
+          const prior=existing.get(record.recordId),previous=prior.previous;
+          if(prior.excluded!==undefined||previous&&(previous.observedAt>record.observedAt||previous.status==='verified'&&record.status!=='verified'))continue;
           const orderAt=previous?.orderAt??record.orderAt;
           const next={...record, orderAt,terminalAt:previous?.terminalAt??record.terminalAt,
             ordinaryAt:record.kind==='screenshot-save'?undefined:orderAt};
           if(previous&&JSON.stringify(previous)===JSON.stringify(next))continue;
           archive.put(next);
+          prior.previous=next;
           changed=true;
           if(!previous)inserted++;
         }
-        if(inserted&&state.limit!==null) {
-          const count=await read(archive.count());
-          await removeOldest(archive,exclusions,null,Math.max(0,Math.min(inserted,count-state.limit)));
-        }
-        if(changed)settings.put({...state,revision:state.revision+1},'archive');
+        const overflow=state.limit===null?0:Math.max(0,Math.min(inserted,count+inserted-state.limit));
+        const evicted=await removeOldest(archive,exclusions,null,overflow);
+        if(changed)settings.put({...state,count:count+inserted-evicted,revision:state.revision+1},'archive');
       });
     });
   }
-  const status=()=>transact(['records','settings'],'readonly',async (records,settings)=>({...await stateOf(settings),count:await read(records.count())}));
+  const status=()=>transact(['records','settings'],'readonly',async (records,settings)=>{
+    const state=await stateOf(settings);
+    return {...state,count:await recordCount(records,state)};
+  });
   function setPolicy({cleanup,limit,approved=false,expectedCount}={}) {
     if(cleanup!==undefined&&!['off','hide','delete'].includes(cleanup)||limit!==undefined&&!validLimit(limit))throw Error('HISTORY_V2_INVALID_POLICY');
     return exclusive(async ()=>{
@@ -107,7 +116,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
         const enablingDelete=cleanup==='delete'&&state.cleanup!=='delete';
         if(enablingDelete&&!approved)throw Error('HISTORY_V2_CONFIRM_DELETE');
         if(limit!=null&&(state.limit===null||limit<state.limit)) {
-          const count=await read(records.count());
+          const count=await recordCount(records,state);
           if(!approved)throw Error('HISTORY_V2_CONFIRM_CAP');
           if(count>limit&&count!==expectedCount)throw Error('HISTORY_V2_COUNT_CHANGED');
         }
@@ -124,7 +133,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
       await transact(stores,'readwrite',async (records,_exclusions,settings)=>{
         const state=await stateOf(settings);
         if(state.clearing)return;
-        if(await read(records.count())!==expectedCount)throw Error('HISTORY_V2_COUNT_CHANGED');
+        if(await recordCount(records,state)!==expectedCount)throw Error('HISTORY_V2_COUNT_CHANGED');
         settings.put({...state,clearing:true,revision:state.revision+1},'archive');
       });
       await maintain();
@@ -140,7 +149,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
       const index=records.index('chronology');
       if(from!==null&&to!==null&&from>=to)return {page:1,pages:1,count:0,items:[],revision:state.revision};
       const range=keyRange({from,to});
-      const count=await read(index.count(range));
+      const count=range?await read(index.count(range)):await recordCount(records,state);
       const pages=Math.max(1,Math.ceil(count/size)), current=Math.min(page,pages);
       const skip=(current-1)*size, take=Math.min(size,count-skip), tail=count-skip-take;
       const reverse=tail<skip;
@@ -157,7 +166,7 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
       const {revision,count}=await transact(['records','settings'],'readonly',async (records,settings)=>{
         const state=await stateOf(settings);
         if(state.clearing)throw Error('HISTORY_V2_CLEAR_IN_PROGRESS');
-        return {revision:state.revision,count:empty?0:await read(records.index(indexName).count(range))};
+        return {revision:state.revision,count:empty?0:!range&&indexName==='chronology'?await recordCount(records,state):await read(records.index(indexName).count(range))};
       });
       async function* records() {
         let last=null;
