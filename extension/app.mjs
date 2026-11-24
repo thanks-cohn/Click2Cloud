@@ -1457,7 +1457,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  void (async()=>{const result=message.result;if(result.kind==='readiness')return;historyUI.invalidate(result.operationId);queueWorkspace?.notify(result.operationId);reconnectAfter(result.code);
   if(affectsDirectory(result.destination))markCurrentSearchStale();
   if(result.state==='verified'){
-   if(view==='history')return;
+   if(view==='history'||view==='queue')return;
    const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status(current.reconciliation?.code??current.code??'Save verification is pending. Inspect the receipt before retrying.');return;}
    imageReader.clear();clearThumbnails();listingReader.invalidate();const d=current.receipt?.destination??current.destination;
    if(affectsDirectory(d))await reloadCurrentDirectory();status('Saved and independently verified.');

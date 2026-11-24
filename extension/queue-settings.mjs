@@ -104,7 +104,13 @@ export async function mountQueueSettings(parent,service) {
     const {count,revision}=await service.archive.status();
     if(!await confirmRemoval('Clear All History V2',`Permanently clear ${count.toLocaleString()} locally retained History V2 records and indexes. Cloud files, provider accounts, Live Jobs, legacy History and Diagnostics are kept. Export first or continue without an export.`,'Permanently clear V2 History'))return;
     setStatus(feedback,'Clearing History V2…');
-    await service.clear({approved:true,expectedCount:count,expectedRevision:revision});setStatus(feedback,'History V2 cleared.');
+    const progress=setInterval(()=>{
+      void service.archive.status().then(state=>{
+        if(state.clearing)setStatus(feedback,`Clearing History V2 · ${state.count.toLocaleString()} of ${count.toLocaleString()} records remaining.`);
+      }).catch(()=>{});
+    },500);
+    try{await service.clear({approved:true,expectedCount:count,expectedRevision:revision});setStatus(feedback,'History V2 cleared.');}
+    finally{clearInterval(progress);}
   });
   exportForm.elements.range.onchange=()=>{$('[data-dates]').hidden=exportForm.elements.range.value!=='custom';};
   const cancel=$('[data-cancel-export]');cancel.onclick=()=>currentExport?.abort();
