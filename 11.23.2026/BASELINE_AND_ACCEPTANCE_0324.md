@@ -35,7 +35,7 @@ On entry to Remotes, preserve the existing architecture and order:
 3. `The Future is NOW.` / `True Remote is Here.` heading.
 4. Separate `Cloudflare R2` card with original auth, setup, readiness, saved location and recovery behavior.
 
-Place an existing Sign In/Login or Reconnect control top-right when applicable. Place GO TO then Refresh at bottom-left where those actions exist; no invented controls. Honor themes, palettes, a11y and responsive sizing. Never substitute placeholders for the three Basic providers.
+Place an existing Sign In/Login or Reconnect control bottom-left when applicable, preserving the original wide Cloudflare auth control. Place GO TO then Refresh together bottom-right where supported; no invented controls. Preserve themes, palettes, accessibility and responsive fit; do not replace working provider controls.
 
 ## Screenshot shortcut owner change (approved)
 
@@ -101,9 +101,9 @@ This work branch **already sets REDOWN version 0.3.26** in its source manifest, 
 
 **GUIDING AGENT-NATIVE PHILOSOPHY:** Human simplicity outside; machine-operable, observable and verifiable shared internal operations inside, **where practical and safe**. Prefer UI and agents exercising the same production contract. Synthetic evidence may cover 100,000 History records, 10,000 simulated queued jobs, expirations, provider outages, corrupt state, restarts and interruptions, but do not simulate real cloud uploads at impossible concurrency or claim mocks are provider proof. Keep simulation/integration/real-provider evidence distinct; preserve permissions, APIs, save engines and architecture without public privileged test endpoints.
 
-**OWNER UX PLACEMENT OVERRIDE — 2026-11-24:** In each applicable Remotes card, keep **Login or Reconnect in the padded TOP-RIGHT** based on provider state. Put **GO TO** then **Refresh** together at the **BOTTOM-LEFT**, **LEFT-ALIGNED**, with the same spacing and functional handlers. Never put GO TO/Refresh at bottom-right. Maintain responsive fit, accurate status and all supported themes; this is a layout-only request.
+**OWNER UX CORRECTION (CURRENT):** Sign In or Reconnect belongs at the **BOTTOM-LEFT** (Cloudflare's auth button stays wide); **GO TO first, Refresh second** belong at the **BOTTOM-RIGHT**, right-aligned. The three-dot `⋯` More control must always be the rightmost header control, and File Explorer must retain its original 0.3.24 visual extent. Follow `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md`.
 
-**FINAL OWNER ORDER — REMOTES CARD BUTTONS:** In the **BOTTOM-LEFT** action row, display **GO TO first (left)** and **Refresh second (right)**, left-aligned, with existing functionality intact. **Login or Reconnect remains TOP-RIGHT**. This supersedes all prior reverse-order instructions. Do not move the pair to bottom-right.
+**OWNER UX CORRECTION (CURRENT):** Sign In or Reconnect belongs at the **BOTTOM-LEFT** (Cloudflare's auth button stays wide); **GO TO first, Refresh second** belong at the **BOTTOM-RIGHT**, right-aligned. The three-dot `⋯` More control must always be the rightmost header control, and File Explorer must retain its original 0.3.24 visual extent. Follow `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md`.
 
 ## LATEST OWNER 0.3.26 POST-IMPLEMENTATION VISUAL REPAIR — MANDATORY
 
