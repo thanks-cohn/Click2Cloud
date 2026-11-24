@@ -158,3 +158,9 @@ Read `11.23.2026/BASELINE_AND_ACCEPTANCE_0324.md` first, then `AGENTS.md`, `CODE
 ## OWNER P0 RECONFIRMATION — 2026-11-24
 
 This revised document is hosted on branch `codex/queue-history-v2-0324-verified-2026-11-24`, based on exact REDOWN 0.3.24 commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. Documentation was copied from `1c1e6ea23f0f062740463d923fb53a8efdbbd544` without importing its application source. Previous `codex/queue-history-v2-2026-11-24` is forbidden and must be ignored entirely for implementation. The new Screenshots rule shortcut defaults to Alt+Q while **None remains selectable**, with all existing values preserved. For conflicts, the controlling P0 override and `BASELINE_AND_ACCEPTANCE_0324.md` govern.
+
+---
+
+## OWNER-APPROVED IN-SCOPE CHANGE — HISTORY V2 INLINE DOWNLOAD
+
+**Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` in full and implement it as part of this Queue/History V2 run.** Each History V2 save-result card must expose an **always-visible, clearly labeled Download button without expanding the card**. Use the actual existing 0.3.24 provider/file API to retrieve the saved file to the device when supported. Do not hide the action in a kebab menu, details pane, lightbox or standalone Downloads section. For unavailable/unverified capabilities retain the visible disabled control and an accessible meaningful reason; never fake support or provider verification. Handle screenshot records with distinct saved outputs without downloading an arbitrary destination. Preserve responsive compact/full cards, all themes, keyboard behavior, existing History/Diagnostics, cloud-save independence and bounded-memory downloads. This is separate from the always-available full History ZIP export and does not create new History save events. Browser and provider acceptance evidence required; blocked cases must be reported. The 0.3.24 foundation and previous Queue branch prohibition remain unchanged.
