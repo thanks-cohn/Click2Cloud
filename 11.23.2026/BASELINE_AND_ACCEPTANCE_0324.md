@@ -67,3 +67,13 @@ In Screenshots → `Screenshot Shortcut` dropdown **when creating a NEW rule**, 
 - [ ] No source imports or code copied from `codex/queue-history-v2-2026-11-24`.
 - [ ] Only owner-approved scope changed; clear checkpoint hashes and regressions included.
 
+---
+
+## OWNER-APPROVED HISTORY V2 PER-CARD DOWNLOAD (2026-11-24)
+
+Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` and implement it in this run, on this 0.3.24-derived branch ONLY. Every History V2 result card must show a text-labeled **Download** action in the collapsed visible action row, in Full and Compact presets, without expansion or More/menu/preview. Active downloads retrieve the real cloud file using pre-existing authorized provider/file capabilities. For unavailable capabilities retain a visible disabled, explained control; screenshots with multiple output destinations must identify the selected output. Reuse existing download services; never rewrite save engines/auth, generate a fake file, create a new save event or conflate with the complete History ZIP. Bounded resources and all themes required.
+
+- [ ] Every collapsed Full/Compact History V2 card visibly offers Download or an explained disabled state, keyboard accessible and responsive.
+- [ ] Real supported provider download route verified; missing/auth/permission/404/stale receipt scenarios do not invent success.
+- [ ] Screenshot multi-destination results select the exact intended file, never arbitrarily; download failure does not block saving.
+- [ ] ZIP export, Downloads menu exclusion, old History and Diagnostics unchanged; no new History record from downloading.
