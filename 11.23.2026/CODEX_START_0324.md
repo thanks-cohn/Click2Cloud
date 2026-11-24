@@ -32,3 +32,7 @@ READ IN FULL AND IN ORDER:
 **GATES:** Read-only baseline first, source contract evidence, four-card visual/functional parity, screenshot dropdown tests, repeat regression checks at every checkpoint, honest real Chrome evidence separate from mocks, accurate ZIP completeness/CRC/memory measurements. Any failure of pre-existing provider or Remotes parity is a BLOCKER, not success.
 
 Commit ONLY on `codex/queue-history-v2-0324-verified-2026-11-24`; provide actual commit SHA(s), changed files, precise tests/evidence and unresolved blockers. No claim of installation readiness until every preservation gate is satisfied.
+
+---
+
+**NEW OWNER-APPROVED HISTORY V2 FEATURE — ALWAYS-VISIBLE CARD DOWNLOAD:** Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` in full before implementation. Every collapsed History V2 save-result card MUST have a readily visible, text-labeled **Download** button on its normal action row; users MUST NOT expand the card, use Details/More, or open the preview to download the actual saved cloud file. Use existing authorized provider APIs where supported, truthful visible disabled/unavailable states otherwise; include screenshot output differentiation; preserve compact/full themes, accessibility, safe resource usage, ZIP export and independent save engines. This is REQUIRED acceptance scope, not deferred.
