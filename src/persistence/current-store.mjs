@@ -321,6 +321,31 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       }
       return row;
     },
+    // Read-only V2 source feed. Stable key seeks avoid the legacy chronological full scan per page.
+    readQueueReceiptPage:(cursor=null)=>transact('readonly',async ({state})=>{
+      const limit=64,items=[];
+      if(!cursor||typeof cursor.legacyOffset==='number'){
+        const legacy=(await request(state.get('remoteResults')))?.value??[];
+        const offset=cursor?.legacyOffset??0,end=Math.min(legacy.length,offset+limit);
+        for(let i=offset;i<end;i++){
+          const row=legacy[i];
+          if(row?.operationId&&!await request(state.getKey('remote-result:'+row.operationId)))items.push(row);
+        }
+        return {items,cursor:end<legacy.length?{legacyOffset:end}:{key:null}};
+      }
+      return new Promise((resolve,reject)=>{
+        const range=IDBKeyRange.bound(cursor.key??'remote-result:','remote-result:\uffff',!!cursor.key);
+        const open=state.openCursor(range);
+        open.onerror=()=>reject(open.error);
+        open.onsuccess=()=>{
+          const item=open.result;
+          if(!item){resolve({items,cursor:null});return;}
+          items.push(item.value.value);
+          if(items.length===limit)resolve({items,cursor:{key:item.key}});
+          else item.continue();
+        };
+      });
+    }),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResultsById:ids=>transact('readonly',async s=>{
       const results=await Promise.all(ids.map(id=>request(s.state.get('remote-result:'+id))));
