@@ -35,7 +35,7 @@ On entry to Remotes, preserve the existing architecture and order:
 3. `The Future is NOW.` / `True Remote is Here.` heading.
 4. Separate `Cloudflare R2` card with original auth, setup, readiness, saved location and recovery behavior.
 
-Place an existing Sign In/Login or Reconnect control top-right when applicable. Place Refresh then GO TO at bottom-right where those actions exist; no invented controls. Honor themes, palettes, a11y and responsive sizing. Never substitute placeholders for the three Basic providers.
+Place an existing Sign In/Login or Reconnect control top-right when applicable. Place Refresh then GO TO at bottom-left where those actions exist; no invented controls. Honor themes, palettes, a11y and responsive sizing. Never substitute placeholders for the three Basic providers.
 
 ## Screenshot shortcut owner change (approved)
 
@@ -100,3 +100,5 @@ This work branch **already sets REDOWN version 0.3.26** in its source manifest, 
 **FINAL OWNER RULE:** The **More menu is the actual three-dot `⋯` button**. Settings → Customize Navigation offers **Main tab / More menu / Gone** for eligible sections **other than Settings**, which has ONLY **Main tab / More menu**; **Settings can never be Gone**. Reject or normalize invalid persisted `settings=gone` to `more`. Default main **Files | Remotes | Queue | ⋯**; Settings, History and other eligible sections initially in More, excluding Downloads. Gone only hides navigation, not data. Save preferences and preserve access to Settings. The always-visible **Export Complete History ZIP** belongs inside **Settings → Queue**, regardless of the 15-minute history Hide/Delete/OFF state. A History V2 toolbar shortcut is optional and must reuse the same ZIP exporter; the detailed `Export Queue History` subsection remains conditional on cleanup OFF.
 
 **GUIDING AGENT-NATIVE PHILOSOPHY:** Human simplicity outside; machine-operable, observable and verifiable shared internal operations inside, **where practical and safe**. Prefer UI and agents exercising the same production contract. Synthetic evidence may cover 100,000 History records, 10,000 simulated queued jobs, expirations, provider outages, corrupt state, restarts and interruptions, but do not simulate real cloud uploads at impossible concurrency or claim mocks are provider proof. Keep simulation/integration/real-provider evidence distinct; preserve permissions, APIs, save engines and architecture without public privileged test endpoints.
+
+**OWNER UX PLACEMENT OVERRIDE — 2026-11-24:** In each applicable Remotes card, keep **Login or Reconnect in the padded TOP-RIGHT** based on provider state. Put **Refresh** then **GO TO** together at the **BOTTOM-LEFT**, **LEFT-ALIGNED**, with the same spacing and functional handlers. Never put Refresh/GO TO at bottom-right. Maintain responsive fit, accurate status and all supported themes; this is a layout-only request.
