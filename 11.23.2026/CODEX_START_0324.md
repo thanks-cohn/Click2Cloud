@@ -16,10 +16,12 @@ git branch --show-current && git rev-parse HEAD && git merge-base HEAD cd4c8dd3b
 
 READ IN FULL AND IN ORDER:
 1. `11.23.2026/BASELINE_AND_ACCEPTANCE_0324.md`
-2. `AGENTS.md`
-3. `11.23.2026/CODEX_REQUEST_QUEUE_AND_UX.md`
-4. `11.23.2026/queue-final.md` (canonical Queue/History V2 spec, subject to the 0.3.24 foundation override)
-5. `11.23.2026/FINAL_CONSISTENCY_AUDIT.md`
+2. `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md`
+3. `AGENTS.md`
+4. `11.23.2026/CODEX_REQUEST_QUEUE_AND_UX.md`
+5. `11.23.2026/queue-final.md` (canonical Queue/History V2 spec, subject to the 0.3.24 foundation override)
+6. `11.23.2026/FINAL_CONSISTENCY_AUDIT.md`
+7. `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md`
 
 **TASK:** Build complete, modular Queue V2 + chronology-first, full-parity History V2 and only approved UX. BEFORE coding, audit 0.3.24 baseline features, create a preservation matrix, then work in reviewable checkpoints.
 
@@ -36,3 +38,11 @@ Commit ONLY on `codex/queue-history-v2-0324-verified-2026-11-24`; provide actual
 ---
 
 **NEW OWNER-APPROVED HISTORY V2 FEATURE — ALWAYS-VISIBLE CARD DOWNLOAD:** Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` in full before implementation. Every collapsed History V2 save-result card MUST have a readily visible, text-labeled **Download** button on its normal action row; users MUST NOT expand the card, use Details/More, or open the preview to download the actual saved cloud file. Use existing authorized provider APIs where supported, truthful visible disabled/unavailable states otherwise; include screenshot output differentiation; preserve compact/full themes, accessibility, safe resource usage, ZIP export and independent save engines. This is REQUIRED acceptance scope, not deferred.
+
+---
+
+## MANDATORY RELEASE VERSION + USER NAVIGATION VISIBILITY (OWNER OVERRIDE)
+
+Read `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md` **in full as a current instruction**, not deferred scope. The base remains exact 0.3.24 commit `cd4c8dd3`, but the CURRENT approved branch has intentionally been bumped to **0.3.26**: preserve that bump; final generated `dist/click2cloud/manifest.json`, packaged build metadata and Chrome `chrome://extensions` must present **REDOWN 0.3.26**. Do not revert current branch version to 0.3.24 merely because the baseline is 0.3.24.
+
+**User-customizable TOP TABS ARE MANDATORY:** Settings must contain a fully working **Customize Navigation** card with a per-eligible-tab persisted **Show in Top Bar** toggle. OFF moves that tab into `⋯ More`, not out of the application; ON pins it on top. Default top = **Files | Remotes | Queue | Settings | ⋯**; History initially in More; user can independently choose to show History on top and hide/unpin Queue or Settings from top. Keep Settings reachable via More, `⋯` always available, no duplicate routes, reset defaults, responsive overflow and saved state surviving restart/theme changes. **Downloads never appears in More** but existing Downloads functionality remains. Test in real Chrome where available, and record exact evidence. A hardcoded, unmodifiable top navigation FAILS acceptance.
