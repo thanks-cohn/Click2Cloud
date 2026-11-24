@@ -28,7 +28,20 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
  // Fresh OAuth, plan, prefix and verifyAuthority checks still run before each use.
  const readyProofs=new WeakMap();
  const maxActiveSaves=32;
- let activeSaves=0;
+ const activeSaves=new Map();
+ async function requestRemoteCancel(target,operationId){
+  const c=await cap(target,{use:'cancel',operationId,live:false});
+  return post(c,'/cancel',{});
+ }
+ function requestJobCancel(job,operationId){
+  if(job.finished)return {state:'finished'};
+  if(job.cancelRequested)return {state:'cancelling'};
+  job.cancelRequested=true;
+  job.onCancelling();
+  if(!job.submitted)job.controller.abort();
+  else job.sendCancel();
+  return {state:'cancelling'};
+ }
  const planIdentity=plan=>digest([plan.state,plan.accountId,plan.bucketName,plan.protocol,plan.url,plan.secret,plan.prefixScope??'',plan.codeDigest,plan.verifiedTargets]);
  async function cap(target,{use='status',operationId,source,provenance,fileIntent,screenshotIntent,screenshotAction,sourceBucket,live=true}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
@@ -143,8 +156,11 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,onAccepted,dispatchPreparationMs,readinessMs}){
    // A transfer can retain polling and network state while the remote Worker
    // runs. Reject excess work immediately; there is no URL or promise queue.
-   if(activeSaves>=maxActiveSaves)return {state:'blocked',code:'RESOURCE_BUSY',operationId};
-   activeSaves++;
+   if(activeSaves.has(operationId)||activeSaves.size>=maxActiveSaves)return {state:'blocked',code:'RESOURCE_BUSY',operationId};
+   const controller=new AbortController();
+   signal=signal?AbortSignal.any([signal,controller.signal]):controller.signal;
+   const job={target,controller,submitted:false,cancelRequested:false,finished:false,settled:false,cancelAcknowledged:false};
+   activeSaves.set(operationId,job);
    try{
     const timings={pollCount:0,...(Number.isFinite(dispatchPreparationMs)?{dispatchPreparationMs}:{}),...(Number.isFinite(readinessMs)?{readinessMs}:{})};const timed=async(name,stage,fn)=>{const started=performance.now();try{try{onBoundary?.(stage,'started','REMOTE_STAGE_STARTED');}catch{}const result=await fn();try{onBoundary?.(stage,result===false?'blocked':result==null?'uncertain':['blocked','failed','uncertain'].includes(result?.state)?result.state:'ok',result===false?'REMOTE_STAGE_DENIED':result==null?'REMOTE_STAGE_UNVERIFIED':'REMOTE_STAGE_COMPLETE');}catch{}return result;}catch(e){try{onBoundary?.(stage,'failed','REMOTE_STAGE_FAILED');}catch{}throw e;}finally{timings[name]=(timings[name]??0)+Math.round(performance.now()-started);}};
     const historyContext=source?.historyContext,attemptedFilename=source?.filename,saveMode=provenance?.presentation?.placement==='quick'?'quick':provenance?.mode;
@@ -159,42 +175,65 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
      recordingProgress=true;
      void Promise.resolve().then(()=>recordOperation(value)).catch(()=>{}).finally(()=>{recordingProgress=false;});
     };
-    recordProgress({state:'pending',code:'REMOTE_PREPARING',operationId,destination});
+    const progress=value=>recordProgress(job.cancelRequested?{...value,code:'CANCELLATION_REQUESTED_INSPECT'}:value);
+    job.onCancelling=()=>void recordOperation({state:'pending',code:'CANCELLATION_REQUESTED_INSPECT',operationId,destination}).catch(()=>{});
+    job.sendCancel=()=>{
+     if(job.cancelling||job.cancelAcknowledged)return job.cancelling;
+     job.cancelling=requestRemoteCancel(target,operationId).then(result=>{
+      job.cancelAcknowledged=result.code==='CANCELLATION_REQUESTED_INSPECT';
+     }).catch(()=>{}).finally(()=>{job.cancelling=null;});
+     return job.cancelling;
+    };
+    progress({state:'pending',code:'REMOTE_PREPARING',operationId,destination});
     // An instance lasts one operation; imported module URL/promise retention ends here.
     const saver=createRemoteSaver({authorize:()=>timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)),
      getPreparedWorkerCapability:()=>timed('capabilityMs','worker.capability',()=>cap(target,{use:'save',operationId,source,provenance,live:false})),
      recheckAuthorization:(_i,c)=>timed('authorizationRecheckMs','auth.check',async()=>await recheck(c,target,{matchPlan:true,reportDenial:!dispatched})&&await authorize()),
      authenticatedRequest:(c,intent,o)=>timed('workerRequestMs','transfer.upload',async()=>{
-      dispatched=true;
+      o.signal?.throwIfAborted();
+      dispatched=job.submitted=true;
       const submittedAt=performance.now();
       let result=await post(c,'/remote-save',intent,o.signal,onObservation),lastLease=clock(),statusCap;
       if(result.operationId===operationId&&(result.state==='pending'&&result.code==='REMOTE_ACCEPTED'||result.state==='written'&&result.receipt))passiveObservation(onAccepted);
+      if(job.cancelRequested&&result.state==='pending'){
+       // The initial stop can reach the Worker before it claims the operation.
+       void Promise.resolve(job.cancelling).then(()=>job.sendCancel());
+      }
       const hinted=result.state==='pending'&&Number.isFinite(result.retryAfterMs);
       if(hinted)await pollDelay(Math.min(pollIntervalMs,Math.max(50,Math.min(300,result.retryAfterMs))),o.signal);
       while(result.state==='pending'){
        if(!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST'};
-       if(clock()-lastLease>=30000){const renewed=await cap(target,{use:'save',operationId,source,provenance});if(renewed.sessionId!==c.sessionId)return {state:'uncertain',code:'AUTHORIZATION_LOST'};Object.assign(c,renewed);const lease=await post(c,'/lease',{},o.signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED'};lastLease=clock();statusCap=null;}
+       if(!job.cancelRequested&&clock()-lastLease>=30000){const renewed=await cap(target,{use:'save',operationId,source,provenance});if(renewed.sessionId!==c.sessionId)return {state:'uncertain',code:'AUTHORIZATION_LOST'};Object.assign(c,renewed);const lease=await post(c,'/lease',{},o.signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED'};lastLease=clock();statusCap=null;}
        // Status grants are read-only. Keep them invocation-local and invalidate
        // on OAuth session change; lease renewal and verification stay live.
        statusCap??=await cap(target,{operationId,live:false});
        if(statusCap.sessionId!==c.sessionId||!await recheck(statusCap,target,{live:false}))return {state:'uncertain',code:'AUTHORIZATION_LOST'};
        result=await post(statusCap,'/operation',{operationId,receiptOnly:true},o.signal);
        timings.pollCount++;if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
-       if(result.state==='verified')return {state:'written',receipt:result.receipt};
+       if(result.state==='verified'){job.settled=true;return {state:'written',receipt:result.receipt};}
        if(result.state==='pending'){
-        recordProgress({state:'pending',code:result.code,operationId,destination,stage:result.stage,bytes:result.bytes});
+        progress({state:'pending',code:result.code,operationId,destination,stage:result.stage,bytes:result.bytes});
         // Account for the Worker hold and first poll against the original
         // cadence. Slow responses do not add the hold to every save.
         await pollDelay(hinted&&timings.pollCount===1?Math.max(0,pollIntervalMs-(performance.now()-submittedAt)):pollIntervalMs,o.signal);
        }
       }
+      job.settled=true;
       if(result.workerTimings)for(const [key,value] of Object.entries(result.workerTimings))if(Number.isFinite(value)&&value>=0)timings['worker.'+key]=value;
       return result;
      }),
      verifyObject:(c,receipt,o)=>timed('verificationMs','transfer.verify',async()=>{const r=await post(c,'/verify',receipt,o.signal);if(r.state==='completed')passiveObservation(onObservation,{stage:'provider.verification',providerOperationId:operationId,receipt,proof:r.proof});return r.state==='completed'?r.proof:null;})});
-    const result=await saver({operationId,source,destination,provenance,signal});
-    const final={...result,timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
-   }finally{activeSaves--;}
+    let result=await saver({operationId,source,destination,provenance,signal});
+    job.finished=true;
+    if(job.cancelRequested){
+     if(!job.submitted||job.cancelAcknowledged&&result.state==='blocked'&&
+        ['AUTHORIZATION_REVOKED','SOURCE_CANCELLED','INTERRUPTED','REMOTE_STAGE_FAILED'].includes(result.code))
+      result={...result,state:'cancelled',code:'SAVE_CANCELLED',destination};
+     else if(result.state!=='verified')
+      result={...result,state:'uncertain',code:'CANCELLATION_REQUESTED_INSPECT',destination};
+    }
+    const final={...result,...(result.state==='uncertain'&&job.submitted&&!job.settled?{remotePending:true}:{}),timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
+   }finally{activeSaves.delete(operationId);}
   },
   async files({target,intent,signal,sourceBucket}){
    const operationId=intent.operationId;let dispatched=false;
@@ -226,7 +265,12 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   },
   async probe({target,operationId=crypto.randomUUID(),authorize=async()=>true}){if(!await authorize())return {state:'blocked',code:'AUTHORIZATION_DENIED'};const c=await cap(target,{use:'probe',operationId});let result;try{result=await post(c,'/probe',{});}catch{return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId,destination:remoteDestination(target)};}if(!await recheck(c,target)||!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
   async probeStatus(target,operationId){const c=await cap(target),result=await post(c,'/probe-status',{operationId});if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
-  async cancel(target,operationId){const c=await cap(target,{use:'cancel',operationId});return post(c,'/cancel',{});},
+  async cancel(target,operationId){
+   const job=activeSaves.get(operationId);
+   if(job&&equal(remoteDestination(job.target),remoteDestination(target)))return requestJobCancel(job,operationId);
+   return requestRemoteCancel(target,operationId);
+  },
+  cancelActive(){return [...activeSaves].map(([id,job])=>({id,...requestJobCancel(job,id)}));},
   async inspectOperation(target,operationId){const c=await cap(target);const r=await post(c,'/operation',{operationId});if(!await recheck(c,target))fail('AUTHORIZATION_REVOKED');return r;},
   async inspect(target,receipt){const c=await cap(target,{use:'save',operationId:receipt.operationId,source:{}});return post(c,'/verify',receipt);},
   async revoke(target,sourceBucket){const c=await cap(target,{use:'revoke',sourceBucket});return post(c,'/revoke',{});}

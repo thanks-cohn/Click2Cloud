@@ -3,7 +3,7 @@ export const PROVIDERS = Object.freeze([
   { id: "dropbox", label: "Dropbox", website: "https://www.dropbox.com/home" },
   { id: "onedrive", label: "OneDrive", website: "https://onedrive.live.com/" },
 ]);
-export const TERMINAL = new Set(["SAVED", "FAILED", "UNCERTAIN"]);
+export const TERMINAL = new Set(["SAVED", "FAILED", "UNCERTAIN", "CANCELLED"]);
 export {WAITING} from '../save-protocol.mjs';
 export function fail(
   code,

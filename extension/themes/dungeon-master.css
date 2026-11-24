@@ -26,6 +26,7 @@
 :root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] :is(.card,.history-row){
  border-inline-start:3px double var(--line);
 }
+:root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .queue-archive{border-inline-end-width:3px}
 :root[data-aesthetic=nostalgia][data-nostalgia-style=dungeon-master] .card>h2{
  font-size:16px;text-transform:uppercase;
 }

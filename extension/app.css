@@ -89,7 +89,6 @@ body.resizing{user-select:none}
 html:not([data-debug-mode="on"]) #status{display:none!important}
 #action-feedback{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;line-height:1.35}
 #action-feedback.notice-error{border-inline-start:3px solid var(--error,var(--accent))}
-#dismiss-action-feedback{font-size:16px;line-height:1;min-inline-size:28px;min-block-size:28px;padding:0}
 #oauth-redirect-uri,.wrap-text,#dest-list .dest-row{min-width:0;overflow-wrap:anywhere}
 .remote-diagnostic-actions{display:flex;flex-wrap:wrap;gap:8px}
 .dialog-body .between:has(#hierarchy-toggle),.dialog-body .tabs:has(#select-all){flex-wrap:wrap}
@@ -181,7 +180,8 @@ dialog:has([data-gallery]) #download-stream{flex:none;align-self:flex-start}
 .history-preview{position:relative;max-width:240px;min-height:48px}.history-preview[data-loading]{height:180px;overflow:hidden;background:var(--bg);border-radius:5px}.history-preview[data-loading]>p{position:absolute;inset:auto 8px 0;text-align:center;font-size:12px}
 
 .remotes-intro{margin-block-end:22px}
-.remotes-intro{container-type:inline-size}
+.remotes-intro{container-type:inline-size;text-align:center}
+.remotes-headline span + span{margin-block-start:1.16em}
 .remotes-intro .remotes-headline{font-size:clamp(14px,8.2cqi,42px);line-height:1.16;margin:0}
 .remotes-headline span{display:block;white-space:nowrap}
 .history-page .history-headline{font-size:clamp(20px,5vw,36px);line-height:1.15}
@@ -364,7 +364,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 #url-export-form .url-export-modes>label{display:flex;align-items:center;gap:6px;font-size:clamp(11px,3.1vw,14px)}
 #url-export-form .url-export-modes input{flex:none;width:auto;margin:0}
 
-:is(#dialog,.queue-image-dialog):not([data-immersive]) :is(#exit-immersive,.immersive-controls){display:none}
+:is(#dialog,.queue-image-dialog):not([data-immersive]) :is(#exit-immersive,[data-exit-immersive],.immersive-controls){display:none}
 :is(#dialog,.queue-image-dialog)[data-immersive]{
  --panel:#000;--bg:#000;--text:#f4f4f4;--line:#555;
  position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;
@@ -386,7 +386,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 }
 :is(#dialog,.queue-image-dialog)[data-immersive] .image-frame img.preview[hidden]{display:none}
 :is(#dialog,.queue-image-dialog)[data-immersive] .image-frame[data-zoomed] img.preview{cursor:zoom-out}
-#exit-immersive{position:absolute;inset:4px 8px auto auto;z-index:1;min-width:28px;padding:2px 6px}
+:is(#exit-immersive,[data-exit-immersive]){position:absolute;inset:4px 8px auto auto;z-index:1;min-width:28px;padding:2px 6px}
 .immersive-controls{
  flex:none;display:flex;align-items:center;gap:12px;justify-content:center;
  padding:8px 12px;border-top:1px solid #262626;font-size:13px;
@@ -410,7 +410,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-job>div:first-child{flex:1;min-inline-size:0}
 .queue-job :is(strong,small){display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .queue-job progress{display:block;max-inline-size:72px;height:6px}
-.queue-job button{padding:4px;font-size:.78rem}
+.queue-job button{padding:4px;font-size:.78rem;line-height:1.1}
 .queue-badge{display:inline-block;border:1px solid var(--line);background:var(--raised);border-radius:5px;padding:2px 6px;font-size:.8rem}
 .queue-badge[data-outcome=verified]{border-color:var(--success,var(--line))}
 .queue-history-card{overflow-wrap:anywhere;margin:8px 0}
@@ -445,8 +445,22 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-settings dialog .card{margin:0}
 .queue-settings .queue-actions{margin-block:12px}
 
-.queue-image-dialog .image-frame{min-height:min(55dvh,520px)}
+.queue-image-dialog:not([data-immersive]) .image-frame{min-height:min(55dvh,520px)}
+.queue-image-dialog[data-immersive][open]{display:flex;flex-direction:column}
+.queue-image-dialog[data-immersive] .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.queue-image-dialog:not([data-immersive]) [role=status]:empty{display:none}
+.queue-job>.queue-actions{flex:none;gap:4px;flex-wrap:nowrap}
+.queue-job>div:nth-child(2){min-inline-size:0;max-inline-size:34%}
+.queue-job .queue-badge{overflow-wrap:anywhere}
+.queue-job .queue-dismiss{min-inline-size:28px;min-block-size:28px}
 .queue-image-dialog[data-retained-preview]:not([data-immersive]) .image-frame img.preview{object-fit:scale-down}
 .queue-history-card .history-preview img{display:block;max-inline-size:100%;max-block-size:180px;object-fit:contain}
-.queue-image-dialog[data-immersive] .dialog-body{height:calc(100dvh - 120px);display:flex;flex-direction:column}
+.queue-image-dialog[data-immersive] [role=status]:empty{display:none}
 .queue-image-dialog[data-immersive] .image-frame{min-height:0}
+
+.history-thumbnail,.history-filename{padding:0;border:0;background:transparent;text-align:start;overflow-wrap:anywhere}
+.history-filename:hover{text-decoration:underline}
+.queue-image-dialog [data-preview-title]{min-inline-size:0;overflow-wrap:anywhere}
+.queue-image-dialog[data-immersive] [data-close]{display:none}
+
+.remotes-page > [role=status]:empty{display:none}

@@ -1,5 +1,32 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
+## 0.3.28 consent, save control, and provider markers
+
+The Cloudflare Remotes card uses the existing sign-in and reconnect path.
+Review save setup opens the existing scoped setup flow. The user sees the
+Worker and verification-file cost disclosure at approval. The existing
+`approveCloudflareSetup` and `recoverCloudflareDestination` methods still validate
+the account and target, use recorded approval where applicable, and require
+native ACK and provider verification before the destination is ready.
+
+Queue cancellation uses the same authorized Cloudflare transport as
+`cancelRemoteOperation`. Before dispatch, the extension aborts locally. Once
+submitted, it sends the existing signed stop request and continues receipt
+verification. If the Worker reports a bound pre-write interruption, the result
+can be cancelled. A verified write wins the race. An ambiguous write remains
+inspectable through `inspectRemoteReceipt`. For Basic saves, the existing
+coordinator can abort source reads and upload preparation until an adapter
+starts its final write. Basic retry revalidates the exact provider account or
+root and consumes a short-lived descriptor before starting a linked attempt.
+Neither controlling Queue rows nor changing Queue retention removes receipts.
+
+`setFavorite`, inside `commitConfigChange` and `previewConfigChange`, accepts
+`provider:google-drive`, `provider:onedrive`, `provider:dropbox` and
+`provider:cloudflare` as presentation markers without a provider session.
+Existing connection-specific identifiers remain valid with the existing
+authorization check. Favorites do not participate in native routing or
+invalidate an acknowledged menu.
+
 ## 0.3.27 save feedback
 
 The native listener retains the tab, frame and delivery time for the optional

@@ -373,7 +373,11 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    const target=explicitTarget??(d?{provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''}:null);
    if(!target)return {state:'blocked',code:'OPERATION_UNKNOWN'};
    const reconciliation=saved?.kind==='readiness'?await transport.inspect(target,saved.receipt):await transport.inspectOperation(target,operationId);
-   if(reconciliation.state==='verified'&&saved?.state!=='verified'){const resolved={...saved,...reconciliation,operationId,destination:reconciliation.receipt?.destination??d};await record(resolved);return {...resolved,reconciliation};}
+   const terminalCodes=['OPERATION_INTERRUPTED','WRITE_UNCONFIRMED','VERIFICATION_MISMATCH','AUTHORIZATION_REVOKED',
+    'REMOTE_STAGE_FAILED','SOURCE_CANCELLED','INTERRUPTED','CONFLICT'];
+   const resolvedFailure=(saved?.state==='pending'||saved?.remotePending)&&
+    (['failed','cancelled'].includes(reconciliation.state)||terminalCodes.includes(reconciliation.code));
+   if(reconciliation.state==='verified'&&saved?.state!=='verified'||resolvedFailure){const resolved={...saved,...reconciliation,remotePending:false,operationId,destination:reconciliation.receipt?.destination??d};await record(resolved);return {...resolved,reconciliation};}
    return {...saved,reconciliation};
   }
 

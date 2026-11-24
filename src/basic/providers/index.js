@@ -258,11 +258,12 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
       reader.releaseLock();
     }
   }
-  async function google({ bytes, filename, mime, token, onConfirming }) {
+  async function google({ bytes, filename, mime, token, onConfirming, onCommitting, signal }) {
     const begin = await request(
       "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id",
       {
         method: "POST",
+        signal,
         headers: {
           ...headers(token),
           "Content-Type": "application/json",
@@ -301,6 +302,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         "UPLOAD_ENDPOINT_INVALID",
         "Google returned an untrusted upload session.",
       );
+    onCommitting?.();
     const receipt = await json(
       endpoint.href,
       {
@@ -363,7 +365,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
       requestedName: filename,
     };
   }
-  async function dropbox({ bytes, filename, token, onConfirming }) {
+  async function dropbox({ bytes, filename, token, onConfirming, onCommitting, signal }) {
     const call = (
       path,
       body,
@@ -376,6 +378,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         `https://${binary ? "content" : "api"}.dropboxapi.com/2/${path}`,
         {
           method: "POST",
+          ...(path==='files/upload_session/start'?{signal}:{}),
           headers: {
             ...headers(token),
             "Content-Type": binary
@@ -423,6 +426,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
             }),
           },
           body: bytes.subarray(offset, offset + DROPBOX_CHUNK),
+          signal,
         },
       );
       if (!append.ok)
@@ -434,6 +438,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         );
       offset += DROPBOX_CHUNK;
     }
+    onCommitting?.();
     const receipt = await call(
       "files/upload_session/finish",
       bytes.subarray(offset),
@@ -497,10 +502,10 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         object.path_display.length <= 4096 ? {path: object.path_display} : {}),
     };
   }
-  async function onedrive({ bytes, filename, token, expectedRoot, onConfirming }) {
+  async function onedrive({ bytes, filename, token, expectedRoot, onConfirming, onCommitting, signal }) {
     const root = await json(
       GRAPH + "me/drive/root?$select=id",
-      { headers: headers(token) },
+      { headers: headers(token), signal },
       false,
       true,
     );
@@ -516,6 +521,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
         `me/drive/items/${encodeURIComponent(root.id)}:/${encodeURIComponent(filename)}:/createUploadSession`,
       {
         method: "POST",
+        signal,
         headers: { ...headers(token), "Content-Type": "application/json" },
         body: JSON.stringify({
           item: {
@@ -528,68 +534,76 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
     const endpoint = microsoftUploadURL(session.uploadUrl);
     let offset = 0,
       receipt;
-    while (offset < bytes.length) {
-      const end = Math.min(offset + ONEDRIVE_CHUNK, bytes.length),
-        last = end === bytes.length;
-      // Opaque session URL is already authorized: NEVER send the access token.
-      const response = await request(
-        endpoint,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/octet-stream",
-            "Content-Range": `bytes ${offset}-${end - 1}/${bytes.length}`,
+    try {
+      while (offset < bytes.length) {
+        const end = Math.min(offset + ONEDRIVE_CHUNK, bytes.length),
+          last = end === bytes.length;
+        if(last)onCommitting?.();
+        // Opaque session URL is already authorized: NEVER send the access token.
+        const response = await request(
+          endpoint,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Content-Range": `bytes ${offset}-${end - 1}/${bytes.length}`,
+            },
+            body: bytes.subarray(offset, end),
+            ...(!last?{signal}:{}),
           },
-          body: bytes.subarray(offset, end),
-        },
-        last,
-      );
-      if (last) {
-        if (![200, 201].includes(response.status))
-          throw fail(
-            "ONEDRIVE_COMMIT_UNCERTAIN",
-            `OneDrive did not confirm finalization (HTTP ${response.status}).`,
-            true,
-            response.status,
-          );
-        try {
-          receipt = await response.json();
-        } catch {
-          throw fail(
-            "ONEDRIVE_RECEIPT_UNCERTAIN",
-            "OneDrive finalization response was invalid.",
-            true,
-          );
+          last,
+        );
+        if (last) {
+          if (![200, 201].includes(response.status))
+            throw fail(
+              "ONEDRIVE_COMMIT_UNCERTAIN",
+              `OneDrive did not confirm finalization (HTTP ${response.status}).`,
+              true,
+              response.status,
+            );
+          try {
+            receipt = await response.json();
+          } catch {
+            throw fail(
+              "ONEDRIVE_RECEIPT_UNCERTAIN",
+              "OneDrive finalization response was invalid.",
+              true,
+            );
+          }
+        } else {
+          if (response.status !== 202)
+            throw fail(
+              "ONEDRIVE_RANGE_UNCERTAIN",
+              `OneDrive did not confirm the uploaded range (HTTP ${response.status}).`,
+              true,
+              response.status,
+            );
+          let progress;
+          try {
+            progress = await response.json();
+          } catch {
+            throw fail(
+              "ONEDRIVE_RANGE_UNCERTAIN",
+              "OneDrive progress response was invalid.",
+              true,
+            );
+          }
+          if (
+            progress.nextExpectedRanges?.length !== 1 ||
+            !String(progress.nextExpectedRanges[0]).startsWith(`${end}-`)
+          )
+            throw fail(
+              "ONEDRIVE_RANGE_UNCERTAIN",
+              "OneDrive reported an unexpected upload offset.",
+              true,
+            );
         }
-      } else {
-        if (response.status !== 202)
-          throw fail(
-            "ONEDRIVE_RANGE_UNCERTAIN",
-            `OneDrive did not confirm the uploaded range (HTTP ${response.status}).`,
-            true,
-            response.status,
-          );
-        let progress;
-        try {
-          progress = await response.json();
-        } catch {
-          throw fail(
-            "ONEDRIVE_RANGE_UNCERTAIN",
-            "OneDrive progress response was invalid.",
-            true,
-          );
-        }
-        if (
-          progress.nextExpectedRanges?.length !== 1 ||
-          !String(progress.nextExpectedRanges[0]).startsWith(`${end}-`)
-        )
-          throw fail(
-            "ONEDRIVE_RANGE_UNCERTAIN",
-            "OneDrive reported an unexpected upload offset.",
-            true,
-          );
+        offset = end;
       }
-      offset = end;
+    }catch(error){
+      if(signal?.aborted)void request(endpoint,{method:'DELETE',signal:AbortSignal.timeout(5000)})
+        .then(response=>response.body?.cancel()).catch(()=>{});
+      throw error;
     }
     if (!receipt?.id)
       throw fail(

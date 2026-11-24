@@ -1,4 +1,4 @@
-import {createHistoryStore,HISTORY_CLEANUP_ALARM} from '../src/queue/store.mjs';
+import {createHistoryStore,HISTORY_CLEANUP_ALARM,QUEUE_CLEANUP_ALARM} from '../src/queue/store.mjs';
 import {basicReceipt,currentReceipt} from '../src/queue/receipts.mjs';
 import {BASIC_CHANNEL, basicMenuProvider, createBasicHost} from '../src/basic/host.mjs';
 import {createScreenshotBackground} from './screenshot-background.mjs';
@@ -477,6 +477,53 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));
     return true;
   }
+  if(message?.channel==='queue-control'){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false});return false;}
+    const {action,recordId}=message;
+    const run=async()=>{
+      if(action==='cancel-all'){
+        const remoteJobs=remote.cancelActive();
+        const basicJobs=basic.cancelAll();
+        const known=new Set(remoteJobs.map(job=>job.id));
+        const retained=await queueHistory.activeJobs(Date.now()-120_000);
+        // A previous extension worker may have stopped while its remote save was running.
+        const unfinished=retained.filter(job=>job.sourceApi==='r2'&&!known.has(job.sourceRecordId));
+        const interrupted=await Promise.allSettled(unfinished.map(job=>{
+          const {account,connection,bucket,folder}=job.destination;
+          return remote.cancel({provider:'cloudflare',accountId:account,connectionId:connection,bucketName:bucket,prefix:folder??''},job.sourceRecordId);
+        }));
+        return {results:[...remoteJobs,...await basicJobs,...interrupted.map(result=>result.value??{state:'unsupported'})]};
+      }
+      if(action==='clear')return queueHistory.clearJobs();
+      if(!['cancel','retry','dismiss'].includes(action)||typeof recordId!=='string'||recordId.length>2200)
+        throw Error('QUEUE_INVALID_REQUEST');
+      const job=await queueHistory.job(recordId);
+      if(!job||job.acknowledged)throw Error('QUEUE_JOB_UNAVAILABLE');
+      if(action==='dismiss')return queueHistory.acknowledge(recordId);
+      if(action==='retry'){
+        if(!job.terminal||!['cancelled','failed'].includes(job.status)||job.retryExpiresAt<=Date.now())
+          throw Error('QUEUE_RETRY_UNAVAILABLE');
+        if(job.kind==='screenshot'&&job.recoverable&&job.retryExpiresAt>Date.now())
+          return screenshotHost().request('retry',{operationId:job.sourceRecordId});
+        if(job.sourceApi?.startsWith('basic:')&&job.retryable&&job.retryExpiresAt>Date.now())
+          return basic.retry(job.provider,job.sourceRecordId);
+        throw Error('QUEUE_RETRY_UNAVAILABLE');
+      }
+      if(job.terminal||!job.cancellable)throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
+      if(job.sourceApi?.startsWith('basic:'))return basic.cancel(job.provider,job.sourceRecordId);
+      if(job.sourceApi==='r2'&&job.destination){
+        const {account,connection,bucket,folder}=job.destination;
+        const target={provider:'cloudflare',connectionId:connection,accountId:account,bucketName:bucket,prefix:folder??''};
+        return remote.cancel(target,job.sourceRecordId);
+      }
+      throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
+    };
+    run().then(data=>{
+      void chrome.runtime.sendMessage({channel:'queue-history-changed'}).catch(()=>{});
+      respond({ok:true,data});
+    },error=>respond({ok:false,code:error.code??error.message}));
+    return true;
+  }
   if(message?.channel==='queue-history-scan'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false});return false;}
     const {source,cursor}=message;
@@ -533,10 +580,19 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
 chrome.alarms.onAlarm.addListener(alarm=>{
+ if(alarm.name===QUEUE_CLEANUP_ALARM)void Promise.all([queueHistory.maintainJobs(),basic.expirePending()]).then(()=>
+  chrome.runtime.sendMessage({channel:'queue-history-changed'})).catch(()=>{});
  if(alarm.name===HISTORY_CLEANUP_ALARM)void queueHistory.maintain().catch(()=>{
   void chrome.runtime.sendMessage({channel:'queue-history-accounting-pending'}).catch(()=>{});
  });
 });
+async function scheduleQueueCleanup(){
+ const policy=await queueHistory.queuePolicy();
+ if(policy.normalMinutes===null&&policy.keepErrors)return chrome.alarms.clear(QUEUE_CLEANUP_ALARM);
+ if(!await chrome.alarms.get(QUEUE_CLEANUP_ALARM))
+  await chrome.alarms.create(QUEUE_CLEANUP_ALARM,{periodInMinutes:1});
+}
+void scheduleQueueCleanup().catch(()=>{});
 chrome.runtime.onStartup.addListener(()=>{
  void queueHistory.policy().then(policy=>{
   if(policy.deleteSince)return chrome.alarms.create(HISTORY_CLEANUP_ALARM,{periodInMinutes:1});

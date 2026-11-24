@@ -1,3 +1,4 @@
+import {dividerModes} from '../src/explorer/layout.mjs';
 import {shelfHistoryCommand,shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
 import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
 import {eventChord, defaultBindings, shortcutStorageKey, uiCommands} from '../src/api/shortcuts.mjs';
@@ -55,22 +56,29 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
   });
   return {
     attachReferences: () => updateReferences(bindings),
-    mount(parent) {
+    mount(parent,{dividerMode,setDividerMode} = {}) {
       const card = document.createElement('section');
       card.className = 'card';
-      card.innerHTML = '<h2>Keyboard Shortcuts</h2><h3>Chrome-wide</h3><div class="chrome-shortcut-rows"></div><p data-chrome-shortcut-status role="status"></p><h3>File Explorer only</h3><div class="shortcut-rows"></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p><div class="fixed-shortcut-rows"></div>';
+      card.innerHTML = '<h2>Keyboard Shortcuts</h2><h3>Chrome-wide</h3><div class="chrome-shortcut-rows"></div><button type="button" id="open-chrome-shortcuts">Open Chrome shortcut settings</button><p class="muted">Chrome manages these bindings and limits which keys extensions can use.</p><p data-chrome-shortcut-status role="status"></p><h3>File Explorer only</h3><div class="shortcut-rows"></div><div class="settings-row"><label for="divider-cycle">Divider Cycle</label><select id="divider-cycle"></select></div><button type="button" class="shortcut-reset">Restore defaults</button><p role="status" class="shortcut-feedback"></p><details><summary>Built-in shortcuts</summary><div class="fixed-shortcut-rows"></div></details>';
       parent.append(card);
       const chromeRows=card.querySelector('.chrome-shortcut-rows'),chromeStatus=card.querySelector('[data-chrome-shortcut-status]');
       for(const [id,text] of chromeShortcuts){
         const row=document.createElement('div');
         row.className='settings-row shortcut-row';
-        const label=document.createElement('span'),key=document.createElement('kbd'),change=document.createElement('button');
+        const label=document.createElement('span'),key=document.createElement('kbd');
         label.textContent=text;key.dataset.chromeKey=id;key.textContent='Checking Chrome…';
-        if(id===shelfHistoryCommand){key.dataset.historyKey='';change.dataset.changeHistory='';}
-        change.type='button';change.textContent='Change shortcut';change.setAttribute('aria-label','Change Chrome shortcut for '+text);
-        change.onclick=()=>void openChromeShortcuts(chrome).catch(()=>{chromeStatus.textContent='Open chrome://extensions/shortcuts in Chrome.';});
-        row.append(label,key,change);chromeRows.append(row);
+        if(id===shelfHistoryCommand)key.dataset.historyKey='';
+        row.append(label,key);chromeRows.append(row);
       }
+      card.querySelector('#open-chrome-shortcuts').onclick=()=>void openChromeShortcuts(chrome)
+        .catch(()=>{chromeStatus.textContent='Open chrome://extensions/shortcuts in Chrome.';});
+      const divider=card.querySelector('#divider-cycle');
+      for(const [value,label] of Object.entries(dividerModes))divider.add(new Option(label,value));
+      divider.value=dividerMode;
+      divider.onchange=async()=>{
+        try{await setDividerMode(divider.value);dividerMode=divider.value;}
+        catch{divider.value=dividerMode;feedback.textContent='Could not save Divider Cycle.';}
+      };
       async function readChromeKeys(){
         let bindings;
         try{bindings=await chromeCommandBindings(chrome);}catch{/* Chrome did not provide bindings. */}
@@ -104,6 +112,7 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
           const row = document.createElement('div'), label = document.createElement('span'), key = document.createElement('kbd');
           row.className = 'settings-row shortcut-row';
           label.textContent = item.label;
+          if(item.commandId === 'file.refreshExplorer') label.textContent += ' (additional to F5)';
           key.textContent = bindings[item.commandId] ?? 'Unassigned';
           const change = button('Change', () => begin(item, row), 'Change shortcut for ' + item.label);
           row.append(label, key, change);

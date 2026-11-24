@@ -596,7 +596,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
               if(listed.state!=='completed'||t.prefix&&!listed.data?.entries?.some(e=>e.key.startsWith(t.prefix)))fail('TARGET_NOT_DISCOVERED');
             }
           }
-          for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
+          for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite&&!/^provider:(google-drive|onedrive|dropbox|cloudflare)$/.test(c.connectionId)){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}
           const readySave=params.prepareModes!==undefined;
           const unchanged=readySave&&!params.changes.length;
           if(unchanged&&params.expectedRevision!==state.product.revision)fail('REVISION_CONFLICT');
@@ -623,7 +623,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             const refreshDepth=readySave?selected.some(s=>s.mode==='depth'):params.changes.some(c=>c.type==='setDepthDisplayBuckets'||c.type==='setShowInChrome'&&c.show.depth);
             const visibilityOnly=params.changes.every(c=>c.type==='setProviderMenuVisibility');
             const changesBasicVisibility=params.changes.some(c=>c.type==='setProviderMenuVisibility'&&c.provider!=='cloudflare');
-            const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout'].includes(c.type)),evidence=engine.getEvidence?.();
+            const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout','setFavorite'].includes(c.type)),evidence=engine.getEvidence?.();
             const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
             const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
             const preparedTargets=selected.filter(s=>prepared.get(targetKey(s.target))?.state==='completed').map(s=>s.target);

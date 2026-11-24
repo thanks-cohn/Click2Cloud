@@ -77,6 +77,9 @@
   & :is(.card, .history-row) {
     border-inline-start: 3px solid color-mix(in srgb, var(--accent) 55%, var(--line));
   }
+  & .queue-archive {
+    border-inline-end-width: 3px;
+  }
   & .card > h2 {
     font-size: 18px;
     border-block-end: 1px solid var(--line);

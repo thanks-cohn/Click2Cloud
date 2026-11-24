@@ -378,6 +378,11 @@ test('Direct R2 multi-target across accounts and buckets keeps confirmed results
  assert.deepEqual(job.outputs[1].providerCodes,[10000]);
  assert.equal(fixture.calls.filter(call=>call.method==='PUT').length,3);
  assert.deepEqual(new Set(fixture.calls.map(call=>call.account)),new Set([fixtureTarget.accountId,'other']));
+ const beforeCheck=fixture.calls.length;
+ const checked=await create().retry(job.plan.operationId,{readOnly:true});
+ assert.equal(checked.state,'partial');
+ assert(checked.outputs[1].recoverable);
+ assert.deepEqual(fixture.calls.slice(beforeCheck).map(call=>call.method),['GET']);
  denied=false;
  const retried=await create().retry(job.plan.operationId);
  assert.equal(retried.state,'confirmed');

@@ -52,7 +52,7 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
         signal.throwIfAborted();
         const coordinator = createCoordinator({
           store, auth, intents, onVerified, observe:observeAttempt, adapters,
-          acquire: input => acquireSource(input, {hasAccess: browserSourceAccess(chrome.permissions)}),
+          acquire: (input,signal) => acquireSource(input, {signal,hasAccess: browserSourceAccess(chrome.permissions)}),
           notify: attempt => chrome.runtime.sendMessage({
             channel: 'redown-basic-attempt',
             attempt: {id: attempt.id, provider: attempt.provider, ...projectOutcome(attempt),
@@ -82,7 +82,7 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
     try {
       const attempt = await api.invoke('saves.start', basicSourceFromClick(provider, info, tab), {native:true,onAccepted});
       return {state: {SAVED: 'completed', FAILED: 'failed', UNCERTAIN: 'uncertain',
-        AWAITING_AUTH: 'pending', AWAITING_SOURCE: 'pending'}[attempt.state] ?? 'uncertain',
+        AWAITING_AUTH: 'pending', AWAITING_SOURCE: 'pending', CANCELLED:'cancelled'}[attempt.state] ?? 'uncertain',
         code: attempt.code ?? attempt.state, attemptId: attempt.id};
     } catch (error) {
       const {code} = safeError(error);
@@ -97,5 +97,10 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
       return {count:0, complete:true};
     return (await durable()).store.verifiedCount(range);
   }
-  return {request: api.message, click, verifiedCount, historySource: async cursor => (await durable()).store.historySource(cursor)};
+  return {request:api.message,click,verifiedCount,
+    cancel:async (provider,id)=>(await durable()).coordinator.cancel(provider,id),
+    cancelAll:async ()=>(await durable()).coordinator.cancelAll(),
+    expirePending:()=>ready?.coordinator.expirePending(),
+    retry:async (provider,id)=>(await durable()).coordinator.retry(provider,id),
+    historySource: async cursor => (await durable()).store.historySource(cursor)};
 }

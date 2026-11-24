@@ -51,6 +51,7 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
  const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',plugins:[{name:'explicit-source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:fileURLToPath(new URL('./fixtures/public-egress.mjs',import.meta.url))}));}}]})).outputFiles[0].text;
  const mock=createFetchMock();mock.disableNetConnect();
  mock.get('https://raw.githubusercontent.com').intercept({path:'/approved.bin'}).reply(200,'abc', {headers:{'content-length':'3','content-type':'application/octet-stream'}}).persist();
+ mock.get('https://raw.githubusercontent.com').intercept({path:'/slow-cancel.bin'}).reply(200,'abc', {headers:{'content-length':'3'}}).delay(4000);
  const storage=await mkdtemp(join(tmpdir(),'c2c-claims-'));
  mock.get('https://raw.githubusercontent.com').intercept({path:'/metadata.bin'}).reply(200,'abc',{headers:{'content-length':'3','content-type':'application/octet-stream; source=https://private.source/path'}}).persist();
  mock.get('https://raw.githubusercontent.com').intercept({path:'/oversized.bin'}).reply(200,'too large',{headers:{'content-length':'123','content-type':'application/octet-stream'}}).persist();
@@ -96,6 +97,13 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
   }
   const replay=await transport.save({target,operationId,source});assert.equal(replay.state,'uncertain');assert.equal(replay.code,'OPERATION_ALREADY_CLAIMED');assert.equal((await transport.inspectOperation(target,operationId)).state,'verified');await mf.dispose();mf=new Miniflare(options);await mf.ready;assert.equal((await transport.save({target,operationId,source})).code,'OPERATION_ALREADY_CLAIMED');
   const second=await transport.save({target,source});assert.equal(second.state,'verified');assert.match(second.receipt.key,/^exact\/雪-[a-f0-9-]+\.bin$/);
+  const admission=Promise.withResolvers(),cancelId=crypto.randomUUID();
+  const stopping=transport.save({target,operationId:cancelId,
+   source:{url:'https://raw.githubusercontent.com/slow-cancel.bin',filename:'slow-cancel.bin'},onAccepted:admission.resolve});
+  await Promise.race([admission.promise,stopping.then(value=>assert.fail('Stopped before acceptance '+JSON.stringify(value)))]);
+  assert.equal((await transport.cancel(target,cancelId)).state,'cancelling');
+  assert.equal((await stopping).state,'cancelled');
+  assert.equal(await (await mf.getR2Bucket('STORAGE')).head('exact/slow-cancel.bin'),null);
   const truncated=await transport.save({target,source:{url:'https://raw.githubusercontent.com/oversized.bin',filename:'oversized.bin'}});assert.notEqual(truncated.state,'verified');assert.equal(await (await mf.getR2Bucket('STORAGE')).head('exact/oversized.bin'),null);
   const raced=await Promise.all([0,1,2].map(()=>transport.save({target,source:{...source,filename:'collision.bin'}})));assert(raced.every(r=>r.state==='verified'||r.state==='failed'&&r.code==='CONFLICT'));assert(raced.some(r=>r.state==='verified'));assert.equal(new Set(raced.filter(r=>r.state==='verified').map(r=>r.receipt.key)).size,raced.filter(r=>r.state==='verified').length);
   const metadata=await transport.save({target,source:{url:'https://raw.githubusercontent.com/metadata.bin',filename:'metadata.bin'}});assert.equal(metadata.state,'verified');const metadataObject=await (await mf.getR2Bucket('STORAGE')).head(metadata.receipt.key);assert.equal(metadataObject.httpMetadata.contentType,'application/octet-stream');assert.equal(metadataObject.customMetadata.sourceUrl,undefined);assert(!JSON.stringify(metadataObject.customMetadata).includes('private.source'));

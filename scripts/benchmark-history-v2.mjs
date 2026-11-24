@@ -49,7 +49,7 @@ try {
     await page.goto(`chrome-extension://${id}/extension/app.html`);
   }
   report.browser=context.browser().version();
-  assert.equal(report.version,'0.3.27');
+  assert.equal(report.version,'0.3.28');
   const download=retention?null:page.waitForEvent('download',{timeout:600_000});
   void download?.catch(()=>{});
   let savedDownload;

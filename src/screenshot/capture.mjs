@@ -31,12 +31,12 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
   try{await notify(job,{recorded});}catch{}
   return job;
  }
- async function deliver(job,image,{retry=false,sessionId}={}){
+ async function deliver(job,image,{retry=false,sessionId,readOnly=false}={}){
   const {plan,captured}=job;
   job.method=directScreenshotMethod;
   const indexes=plan.outputs.flatMap((_,index)=>{
    const output=job.outputs[index];
-   return output.state==='confirmed'||output.recoverable===false?[]:[index];
+   return output.state==='confirmed'||!readOnly&&output.recoverable===false?[]:[index];
   });
   if(!indexes.length)return;
   const attempt={startedAt:now(),requestedBytes:image?.size??0,method:directScreenshotMethod,
@@ -66,7 +66,7 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
      const code=observedCode(error,'SCREENSHOT_R2_UPLOAD_FAILED'),{httpStatus,providerCodes}=error?.diagnostic??{};
      result={outputId:output.outputId,state:'pending',code,httpStatus,providerCodes,recoverable:!!image,method:directScreenshotMethod};
     }
-    job.outputs[index]={comparison:'not_checked',...result,at:now()};
+    if(!readOnly||result.state==='confirmed')job.outputs[index]={comparison:'not_checked',...result,at:now()};
     const stage=result.state==='confirmed'?'VERIFIED':(['pending','unknown'].includes(result.state)?'PENDING':'FAILED');
     observe(stage,result.state,{code:result.code,httpStatus:result.httpStatus,recoverable:result.recoverable});
     // Preserve confirmed and terminal transitions while avoiding one full
@@ -143,7 +143,7 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
    return await finish(job);
   }finally{source?.close();active.delete(ids.operationId);}
  }
- async function retry(operationId){
+ async function retry(operationId,{readOnly=false}={}){
   if(active.has(operationId))throw screenshotError('SCREENSHOT_IN_PROGRESS');
   if(active.size>=maxActiveScreenshots)throw screenshotError('SCREENSHOT_BUSY');
   active.add(operationId);
@@ -151,17 +151,17 @@ export function createScreenshotCapture({chrome,rules,uploader,retryCache,record
    const {sessionId}=await uploader.authority();
    if(!sessionId)throw screenshotError('AUTH_REQUIRED');
    const job=await read(operationId);
-   if(!job?.captured||job.state==='confirmed'||job.outputs.every(output=>output.state==='confirmed'||output.recoverable===false))
+   if(!job?.captured||job.state==='confirmed'||job.outputs.every(output=>output.state==='confirmed'||!readOnly&&output.recoverable===false))
     throw screenshotError('SCREENSHOT_RETRY_UNAVAILABLE');
    job.trace??=[];
    job.schemaVersion=2;
    delete job.code;
    delete job.failureStage;
    let image;
-   try{image=await retryCache.read(operationId);}catch{}
+   if(!readOnly)try{image=await retryCache.read(operationId);}catch{}
    if(image&&(image.size!==job.captured.bytes||await screenshotDigest(await image.arrayBuffer())!==job.captured.sha256))image=null;
-   if(!image)job.originalUnavailable=true;
-   await deliver(job,image,{retry:true,sessionId});
+   if(!image&&!readOnly)job.originalUnavailable=true;
+   await deliver(job,image,{retry:true,sessionId,readOnly});
    return await finish(job);
   }finally{active.delete(operationId);}
  }

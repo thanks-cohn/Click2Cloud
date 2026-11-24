@@ -13,7 +13,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
   if(!Number.isSafeInteger(maxSnapshots)||maxSnapshots<1||maxSnapshots>256)throw TypeError('Invalid menu retention budget');
   const sink=typeof diagnostics==='function'?diagnostics:diagnostics?.emit;
   const menus=new Map(),compiledIntent=new WeakMap();
-  const menuIntent=state=>JSON.stringify({configs:state.configs,...Object.fromEntries(['show','defaultTarget','providerVisibility','placement','favorites','menuCustomized'].map(k=>[k,state.product?.[k]]))});
+  const menuIntent=state=>JSON.stringify({configs:state.configs,...Object.fromEntries(['show','defaultTarget','providerVisibility','placement','menuCustomized'].map(k=>[k,state.product?.[k]]))});
   let evictedGenerations=0;
   const trustedExplorerSources=new WeakSet();
   const expectedSave=['auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history'];

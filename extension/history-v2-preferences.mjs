@@ -32,8 +32,8 @@ export function createHistoryV2Preference(storage) {
 
 export function mountHistoryV2Settings(parent, preference) {
   const section = document.createElement('section');
-  section.className = 'card history-v2-settings';
-  section.innerHTML = `<h2>History V2</h2>
+  section.className = 'history-v2-settings';
+  section.innerHTML = `
     <label class="settings-row">Hide N/A fields<input type="checkbox" data-hide-na></label>
     <details><summary>Advanced</summary>${Object.entries(historyV2ProviderFields).map(([provider,fields]) => `
       <details data-history-provider="${provider}"><summary>${historyV2Providers[provider]}</summary>
@@ -54,7 +54,7 @@ export function mountHistoryV2Settings(parent, preference) {
     try {
       await preference.update(change);
       feedback.textContent = '';
-    } catch { feedback.textContent = 'History V2 preference could not be saved.'; }
+    } catch { feedback.textContent = 'History preference could not be saved.'; }
     paint();
   }
   hideNA.onchange = () => { const checked = hideNA.checked; void save(value => ({...value,hideNA:checked})); };

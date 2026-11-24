@@ -72,7 +72,8 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
   if(method==='read')return rules.change('initialize-default');
   if(method==='suggest-default')return discoverDefault();
   if(['save','toggle','delete','dedup','save-default','dismiss-default'].includes(method))return rules.change(method,params);
-  if(method==='retry'&&captureUuid(params.operationId))return runner.retry(params.operationId);
+  if(['retry','reconcile'].includes(method)&&captureUuid(params.operationId))
+   return runner.retry(params.operationId,{readOnly:method==='reconcile'});
   if(method==='history-output')return historyOutput(params);
   if(['history-public-urls','history-enable-public-urls','history-connect-domain'].includes(method)){
    const output=await historyOutput(params);

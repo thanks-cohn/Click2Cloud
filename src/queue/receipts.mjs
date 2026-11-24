@@ -23,10 +23,10 @@ function base(source, id, fields) {
 export function basicReceipt(row) {
   if (!row?.id || !['google','onedrive','dropbox'].includes(row.provider)) return [];
   const verified = row.state === 'SAVED' && row.confirmed === true && !!row.objectId;
-  const terminal = ['SAVED','FAILED','UNCERTAIN'].includes(row.state);
+  const terminal = ['SAVED','FAILED','UNCERTAIN','CANCELLED'].includes(row.state);
   const waiting = ['AWAITING_AUTH','AWAITING_SOURCE'].includes(row.state);
-  const status = verified ? 'verified' : terminal ? row.state==='FAILED'?'failed':'uncertain' :
-    row.state==='CONFIRMING'?'verifying':row.state==='UPLOADING'?'uploading':
+  const status = verified ? 'verified' : terminal ? row.state==='CANCELLED'?'cancelled':row.state==='FAILED'?'failed':'uncertain' :
+    (row.cancelRequested||row.state==='CANCELLING')?'cancelling':row.state==='CONFIRMING'?'verifying':row.state==='UPLOADING'?'uploading':
     row.state==='AWAITING_AUTH'?'needs-login':waiting?'waiting':'working';
   const updatedAt = time(row.updatedAt), requestedAt = time(row.createdAt);
   return [base('basic:'+row.provider,row.id,{
@@ -35,7 +35,10 @@ export function basicReceipt(row) {
     proofLevel:verified?'provider-confirmed-object':null, providerObjectId:text(row.objectId),
     filename:text(row.filename),sourceUrl:safeHistoryURL(row.sourceUrl),hostUrl:safeHistoryURL(row.hostUrl),
     bytes:number(row.bytes),mime:text(row.mime),destination:location(row.destination),code:code(row.code),
-    durationMs:number(row.durationMs),...(verified?{}:{rank:terminal||status==='needs-login'?1:waiting?2:0})
+    durationMs:number(row.durationMs),parentAttemptId:text(row.parentAttemptId),
+    cancellable:!terminal&&!row.cancelRequested&&!['CONFIRMING','CANCELLING'].includes(row.state)&&(row.state!=='UPLOADING'||row.cancellable===true),
+    retryable:row.retryable===true&&!row.retryAttemptId,retryExpiresAt:time(row.retryExpiresAt),
+    rank:verified||status==='cancelled'?3:waiting?2:terminal?1:0
   })];
 }
 
@@ -47,7 +50,7 @@ export function currentReceipt(row, {interrupted = false} = {}) {
   const updatedAt = time(row.updatedAt) ?? time(row.at), requestedAt = time(row.at);
   const verified = hasVerifiedSave(row);
   const terminal = row.state !== 'pending';
-  const status = verified ? 'verified' : interrupted ? 'uncertain' : !terminal ? (/VERIFY|HEAD/.test(row.code ?? '')?'verifying':'working') :
+  const status = verified ? 'verified' : interrupted ? 'uncertain' : !terminal ? (row.code==='CANCELLATION_REQUESTED_INSPECT'?'cancelling':/VERIFY|HEAD/.test(row.code ?? '')?'verifying':'working') :
     ['failed','blocked','cancelled'].includes(row.state)?row.state:row.state==='uploaded'?'uploaded':'uncertain';
   return [base('r2',row.operationId,{
     provider:'cloudflare',status,terminal,updatedAt,requestedAt,terminalAt:terminal?updatedAt:null,
@@ -60,7 +63,9 @@ export function currentReceipt(row, {interrupted = false} = {}) {
     destination:location(receipt?.destination ?? row.destination,receipt?.key),providerObjectId:text(receipt?.key),
     etag:text(receipt?.etag),version:text(receipt?.version),durationMs:number(row.durationMs),
     code:interrupted?'SAVE_OUTCOME_UNCERTAIN':code(row.code),
-    ...(verified||status==='uploaded'?{}:{rank:terminal||interrupted?1:0})
+    ...(row.remotePending?{queueTerminal:false}:{}),
+    cancellable:(!terminal||row.remotePending===true)&&status!=='cancelling'&&!!row.destination,
+    rank:verified||status==='cancelled'?3:terminal||interrupted?1:0
   })];
 }
 
@@ -97,7 +102,7 @@ function screenshotReceipts(row, interrupted) {
       etag:text(output.etag),version:text(output.version),code:code(output.code),
       checksum:/^[0-9a-f]{64}$/.test(output.checksum??record.captured?.sha256??'')?output.checksum??record.captured.sha256:null,
       recoverable:output.recoverable===true,httpStatus:number(output.httpStatus),
-      ...(verified?{}:{rank:terminal||interrupted?1:0})
+      rank:verified?3:terminal||interrupted?1:0
     });
   })];
 }

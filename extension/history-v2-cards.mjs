@@ -13,7 +13,7 @@ export const historyPreset = Object.freeze({
 });
 export const providerName = value => Object.hasOwn(historyV2Providers,value) ? historyV2Providers[value] : 'N/A';
 export const queueStatus = value => ({
-  working:'Working',waiting:'Waiting',uploading:'Uploading',verifying:'Verifying',verified:'Verified',
+  working:'Working',waiting:'Pending',uploading:'Uploading',verifying:'Verifying',verified:'Verified',cancelling:'Cancelling',
   uploaded:'Uploaded · verification unavailable',failed:'Failed',blocked:'Blocked',uncertain:'Outcome uncertain',
   'needs-login':'Needs login',cancelled:'Cancelled'
 })[value] ?? 'N/A';
@@ -73,8 +73,8 @@ const filename = name => {
   return safe || 'saved-file';
 };
 
-export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility}) {
-  const rows = [], previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
+export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility,rename,renameError,onGalleryClosed}) {
+  const rows = [], names = new Map(), thumbnails = new WeakMap(), previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
   const reader = createImageReader(read,{maxBytes:12*1024*1024,maxEntries:2});
   const flags = historyPreset[preferences.preset] ?? historyPreset.full;
   let view = visibility ?? normalizeHistoryV2View();
@@ -84,6 +84,11 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
   }
   async function locate(record,signal) {
     const operationId = record.sourceRecordId;
+    if(record.renamed){
+      const {account,connection,bucket,key}=record.destination;
+      return {source:{provider:'cloudflare',accountId:account,connectionId:connection,bucketName:bucket,
+        prefix:key.slice(0,key.lastIndexOf('/')+1)},key,size:record.bytes,etag:record.etag,checksum:record.checksum};
+    }
     if (record.kind === 'screenshot') {
       const result = await screenshotRequest('history-output',{operationId,outputId:record.deliveryId});
       if (!result.object) throw Error(result.code ?? 'RESULT_LOOKUP_FAILED');
@@ -94,7 +99,6 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
   }
   function downloadReason(record) {
     if (record.status!=='verified')return 'No verified downloadable file recorded.';
-    if (record.provider!=='cloudflare')return 'This provider does not expose a file download through REDOWN.';
     if (!record.destination?.key)return 'No exact file location was recorded.';
     if(!record.etag&&!(record.kind==='screenshot'&&record.checksum))return 'The receipt has no stable file version for download.';
     if (canRead(record) === false) return 'Reconnect the saved account in Remotes to download.';
@@ -128,7 +132,64 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     },{signal});
   }
 
+  const editable=record=>rename&&record.provider==='cloudflare'&&record.kind!=='screenshot'&&record.status==='verified'&&
+    !!record.destination?.key&&!!record.etag&&canRead(record);
+  const editing=new Set(), unconfirmed=new Set();
+  function nameControl(holding,record,feedback){
+    holding.replaceChildren();
+    if(!editable(record)||unconfirmed.has(record.recordId)){
+      holding.textContent=record.filename??'N/A';
+      return;
+    }
+    const label=action(record.filename??'N/A',()=>{
+      if(editing.has(record.recordId))return;
+      const input=node('input');
+      input.type='text';input.value=record.filename;input.setAttribute('aria-label','Filename');
+      holding.replaceChildren(input);
+      input.focus();
+      input.select();
+      input.onkeydown=async event=>{
+        if(event.isComposing||!['Escape','Enter'].includes(event.key))return;
+        event.preventDefault();event.stopPropagation();
+        if(editing.has(record.recordId))return;
+        if(event.key==='Escape'){holding.replaceChildren(label);label.focus();return;}
+        editing.add(record.recordId);input.readOnly=true;
+        try{
+          Object.assign(record,await rename(record,input.value));
+          if(record.renamed){
+            const card=names.get(record.recordId)?.[0].closest('article');
+            if(card){
+              const object=card.querySelector('[data-provider-object]');
+              if(object)object.textContent=record.providerObjectId;
+              const thumbnail=card.querySelector('.history-preview img');
+              if(thumbnail)thumbnail.alt=record.filename;
+              card.querySelector('[data-download]')?.setAttribute('aria-label','Download '+record.filename);
+            }
+            for(const update of metadata)update();
+          }
+          if(names.has(record.recordId))nameControl(...names.get(record.recordId));
+          if(previewDialog&&rows[imageIndex]===record){
+            nameControl(previewDialog.querySelector('h2'),record,previewDialog.querySelector('[role=status]'));
+            previewDialog.querySelector('img').alt=record.filename;
+          }
+          feedback.textContent='';
+        }catch(error){
+          if(error.outcome==='uncertain'||error.code==='FILE_RENAME_UNCONFIRMED')unconfirmed.add(record.recordId);
+          feedback.textContent=renameError?.(error)??'Could not rename this file. Check access and try again.';
+        }finally{
+          editing.delete(record.recordId);
+          if(holding.contains(input))nameControl(holding,record,feedback);
+          holding.querySelector('button')?.focus();
+        }
+      };
+    });
+    label.className='history-filename';
+    label.title='Rename '+record.filename;
+    holding.append(label);
+  }
+
   function closeGallery() {
+    const wasOpen=!!previewDialog;
     previewAbort?.abort();
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = undefined;
@@ -138,9 +199,12 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     previewDialog = undefined;
     originalFocus?.focus({preventScroll:true});
     originalFocus = undefined;
-    if (!signal.aborted) pump();
+    if (!signal.aborted){
+      pump();
+      if(wasOpen)onGalleryClosed?.();
+    }
   }
-  async function showImage(index) {
+  async function showImage(index,thumbnail) {
     const record = rows[index];
     if (!previewDialog || !record) return;
     imageIndex=index;
@@ -154,12 +218,13 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     image.removeAttribute('src');
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl=undefined;
-    dialog.querySelector('h2').textContent=record.filename;
+    nameControl(dialog.querySelector('h2'),record,feedback);
+    dialog.querySelectorAll('[data-enter-immersive],.immersive-controls input,.immersive-controls button').forEach(control=>{control.disabled=true;});
     dialog.querySelector('[data-prev]').disabled=index===0;
     dialog.querySelector('[data-next]').disabled=index===rows.length-1;
     feedback.textContent='Loading image…';
     try {
-      const loaded=await loadPreview(record,12*1024*1024,local,2);
+      const loaded=thumbnail??await loadPreview(record,12*1024*1024,local,2);
       local.throwIfAborted();
       const url=URL.createObjectURL(loaded.blob);
       previewUrl=url;
@@ -168,7 +233,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       image.onload=()=>{
         if(local.aborted)return;
         image.hidden=false;immersive.ready();
-        feedback.textContent=loaded.retained ? `${loaded.label} · ${image.naturalWidth} × ${image.naturalHeight}` : loaded.label ?? '';
+        feedback.textContent=loaded.retained ? '' : loaded.label ?? '';
       };
       image.onerror=()=>{if(!local.aborted){URL.revokeObjectURL(url);previewUrl=undefined;feedback.textContent='Image decode failed.';}};
       image.src=url;
@@ -183,11 +248,12 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const dialog=node('dialog');
     dialog.className='queue-image-dialog';
     dialog.setAttribute('aria-label','History image preview');
-    dialog.innerHTML='<div class="dialog-head"><h2></h2><button type="button" data-close>Close</button></div>'+
-      '<div class="dialog-body"><p role="status"></p><div class="image-frame"><img class="preview" alt="" hidden></div></div>'+
-      '<div class="dialog-foot"><button type="button" data-prev aria-label="Previous image">←</button><button type="button" data-next aria-label="Next image">→</button>'+
-      '<button type="button" id="immersive-view" disabled>Zoom view</button><button type="button" id="exit-immersive">Exit zoom view</button>'+
-      '<div class="immersive-controls"><label>Zoom <input type="range" min="100" max="400" value="100" disabled></label><output>100%</output><button type="button" disabled>Fit</button></div></div>';
+    dialog.innerHTML='<div class="dialog-head"><h2 data-preview-title></h2><button type="button" data-close>Close</button></div>'+
+      '<div class="dialog-body gallery-body"><p role="status"></p><div class="image-frame"><img class="preview" alt="" hidden></div>'+
+      '<div class="gallery-controls"><button type="button" data-prev aria-label="Previous image">←</button><button type="button" data-next aria-label="Next image">→</button></div></div>'+
+      '<div class="dialog-foot gallery-actions"><button type="button" data-enter-immersive disabled>Immersive View</button></div>'+
+      '<button type="button" data-exit-immersive aria-label="Exit Immersive View">×</button>'+
+      '<div class="immersive-controls"><label>Zoom <input type="range" min="100" max="400" value="100" disabled></label><output>100%</output><button type="button" disabled>Fit</button></div>';
     document.body.append(dialog);
     previewDialog=dialog;
     immersive=wireImmersiveView(dialog);
@@ -196,6 +262,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     dialog.querySelector('[data-next]').onclick=()=>void showImage(imageIndex+1);
     dialog.oncancel=event=>{event.preventDefault();if(!immersive.escape())closeGallery();};
     dialog.onkeydown=event=>{
+      if(event.target instanceof HTMLInputElement&&event.target.type!=='range')return;
       if(immersive.handleKey(event)){event.preventDefault();return;}
       if(event.target instanceof HTMLInputElement)return;
       if(['ArrowLeft','ArrowRight'].includes(event.key)){
@@ -203,7 +270,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       }
     };
     dialog.showModal();
-    void showImage(rows.indexOf(record));
+    void showImage(rows.indexOf(record),thumbnails.get(record));
   }
   function releasePreview(slot) {
     pending.get(slot)?.abort();
@@ -211,6 +278,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     if (image) {
       image.onload = image.onerror = null;
       URL.revokeObjectURL(image.src);
+      thumbnails.delete(previews.get(slot));
       slot.replaceChildren();
     }
   }
@@ -244,7 +312,13 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
             releasePreview(slot);
             slot.dataset.failed='true';slot.textContent='Image decode failed.';
           };
-          slot.replaceChildren(image,...(result.label?[node('p',result.label,'muted')]:[]));
+          if(record.provider==='cloudflare')slot.replaceChildren(image);
+          else{
+            const open=action('',()=>gallery(record,open));
+            open.className='history-thumbnail';open.setAttribute('aria-label','Preview '+record.filename);
+            open.append(image);slot.replaceChildren(open);
+          }
+          thumbnails.set(record,result);
           image.src=URL.createObjectURL(result.blob);
         }catch(error){
           if(!ctrl.signal.aborted){slot.textContent=previewMessage(error);slot.dataset.failed='true';}
@@ -273,15 +347,17 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const summary=node('div',null,'queue-card-summary');
     const timestamp=date(record.terminalAt ?? record.requestedAt,preferences.timezone);
     const when=node('time',timestamp ?? 'N/A');
+    const basic=record.provider!=='cloudflare', compact=basic&&preferences.preset==='compact';
     summary.append(heading,when);
     const label=node('span',queueStatus(record.status),'queue-badge');
     label.dataset.outcome=record.status;
     top.append(summary,label);
     const location=node('p',null,'queue-location');
-    const provider=providerName(record.provider),path=savedLocation(record.destination);
+    const provider=providerName(record.provider);
     const updateSummary=()=>{
-      when.hidden=view.hideNA&&!timestamp;
-      location.textContent=path||!view.hideNA ? `${provider} · ${path||'N/A'}` : provider;
+      when.hidden=compact||view.hideNA&&!timestamp;
+      const path=savedLocation(record.destination);
+      location.textContent=!compact&&(path||!view.hideNA) ? `${provider} · ${path||'N/A'}` : provider;
     };
     metadata.push(updateSummary);
     updateSummary();
@@ -289,6 +365,8 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const actions=node('div',null,'queue-actions');
     const feedback=node('p',null,'queue-feedback');
     feedback.setAttribute('role','status');
+    names.set(record.recordId,[heading,record,feedback]);nameControl(heading,record,feedback);
+    if(!basic){
     const unavailable=downloadReason(record), downloadFile=action('Download',()=>{
       const controller=new AbortController();
       downloadFile.disabled=true;
@@ -299,6 +377,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         error=>{feedback.textContent=errorMessage(error,'Download failed. Check the connection and saved file.');})
         .finally(()=>{downloadFile.disabled=false;cancel.remove();});
     });
+    downloadFile.dataset.download='';
     downloadFile.setAttribute('aria-label','Download '+(record.filename ?? 'saved file'));
     downloadFile.disabled=!!unavailable;
     if(unavailable){
@@ -309,6 +388,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       feedback.textContent=unavailable;
     }
     actions.append(downloadFile);
+    }
     if(record.status==='verified'&&record.provider==='cloudflare'&&record.destination?.key) {
       const go=action('GO TO',async()=>{
         go.disabled=true;
@@ -318,29 +398,57 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       go.disabled=canRead(record)===false;
       actions.append(go);
     }
+    if(record.kind==='screenshot'&&record.deliveryId&&record.status!=='verified'){
+      const check=action('Check receipt',async()=>{
+        check.disabled=true;
+        try{
+          const result=await screenshotRequest('reconcile',{operationId:record.sourceRecordId});
+          feedback.textContent=result.state==='confirmed'?'Screenshot files verified.':'Some screenshot files remain unconfirmed.';
+        }catch(error){feedback.textContent=errorMessage(error,'Could not verify the screenshot. Check Remotes.');}
+        finally{check.disabled=false;}
+      });
+      actions.append(check);
+    }
     const previewable=record.status==='verified'&&(record.provider==='cloudflare'
       ? isImage({key:record.destination?.key ?? record.filename ?? ''}) : !!basicImageMime(record));
     if(previewable) {
       rows.push(record);
-      const trigger=action('Preview',()=>gallery(record,trigger));
-      actions.append(trigger);
+      if(!basic){const trigger=action('Preview',()=>gallery(record,trigger));actions.append(trigger);}
     }
-    article.append(actions,feedback);
+    if(actions.childElementCount)article.append(actions);
+    article.append(feedback);
     const details=node('details');
-    if(flags.showAdvancedDetails||previewable) {
-      details.append(node('summary',flags.showAdvancedDetails?'Details':'Image preview'));
-      if(previewable) {
-        details.open=preferences.previews==='all'||preferences.previews==='first'&&isFirstPage;
-        const slot=node('div',null,'history-preview');
-        previews.set(slot,record);
-        details.append(slot);observer.observe(slot);
-        details.addEventListener('toggle',()=>{
-          if(details.open){delete slot.dataset.failed;pump();}
-          else releasePreview(slot);
-        });
+    const disclosure=(title,open)=>{
+      const detail=node('details');detail.open=open;detail.append(node('summary',title));
+      return detail;
+    };
+    function thumbnail(container){
+      const slot=node('div',null,'history-preview');
+      previews.set(slot,record);
+      container.append(slot);observer.observe(slot);
+      container.addEventListener('toggle',()=>{
+        if(container.open){delete slot.dataset.failed;pump();}
+        else releasePreview(slot);
+      });
+    }
+    if(basic){
+      const imagePref=preferences.basicPreviews??'all';
+      if(previewable){
+        const image=disclosure('Image',imagePref==='all'||imagePref==='first'&&isFirstPage);
+        thumbnail(image);article.append(image);
       }
-      if(flags.showAdvancedDetails){
+      const host=safeHistoryURL(record.hostUrl);
+      if(host)article.append(node('p',new URL(host).hostname,'queue-location'));
+    }
+    if(basic||flags.showAdvancedDetails||previewable) {
+      details.append(node('summary',flags.showAdvancedDetails||basic?'Details':'Image preview'));
+      if(previewable&&!basic){
+        details.open=preferences.previews==='all'||preferences.previews==='first'&&isFirstPage;
+        thumbnail(details);
+      }
+      if(basic||flags.showAdvancedDetails){
         const list=node('dl',null,'queue-record-fields');
+        let fieldList=list;
         const tracked = [];
         function track(field,available,...elements) {
           tracked.push({field,available,elements});
@@ -348,27 +456,39 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         function field(key,value,url=false,label=historyV2FieldLabels[key]){
           const term=node('dt',label);
           const item=node('dd');
+          if(key==='objectId')item.dataset.providerObject='';
           const href=url ? safeHistoryURL(value) : null;
           if(href){
             const link=node('a',href);
             link.href=href;link.target='_blank';link.rel='noreferrer noopener';item.append(link);
           }else item.textContent=(url?null:value) ?? 'N/A';
-          list.append(term,item);
+          fieldList.append(term,item);
           track(key,url ? !!href : hasHistoryV2Value(value),term,item);
         }
-        field('originalFilename',record.originalFilename);
+        let urls, urlFields;
+        if(basic){
+          urls=disclosure('URL',preferences.expandBasicURL===true);
+          urlFields=node('dl',null,'queue-record-fields');urls.append(urlFields);
+          fieldList=urlFields;
+          field('sourceUrl',record.sourceUrl,true);
+          field('hostUrl',record.hostUrl,true);
+          fieldList=list;
+          article.append(urls);
+        }else field('originalFilename',record.originalFilename);
         field('requested',date(record.requestedAt,preferences.timezone));
         field('completed',date(record.terminalAt,preferences.timezone));
         field('mime',record.mime);
-        if(flags.showFileSize)field('bytes',record.bytes);
-        if(flags.showVerification)field('proof',record.proofLevel);
+        if(basic||flags.showFileSize)field('bytes',record.bytes);
+        if(basic||flags.showVerification)field('proof',record.proofLevel);
         field('objectId',record.providerObjectId);
-        field('saveMethod',record.method ?? record.saveMode);
+        if(!basic){
+          field('saveMethod',record.method ?? record.saveMode);
+          field('hostTitle',record.hostTitle);
+          if(flags.showSourceUrl){field('sourceUrl',record.sourceUrl,true);field('originalUrl',record.originalUrl,true);}
+          if(flags.showHostUrl&&record.kind!=='screenshot')field('hostUrl',record.hostUrl,true);
+          if(flags.showRemoteUrl){field('remoteUrl',record.remoteUrl,true,'Remote URL');field('publicUrl',record.publicUrl,true,'Public URL');}
+        }
         field('error',record.code,false,'Error');
-        field('hostTitle',record.hostTitle);
-        if(flags.showSourceUrl){field('sourceUrl',record.sourceUrl,true);field('originalUrl',record.originalUrl,true);}
-        if(flags.showHostUrl&&record.kind!=='screenshot')field('hostUrl',record.hostUrl,true);
-        if(flags.showRemoteUrl){field('remoteUrl',record.remoteUrl,true,'Remote URL');field('publicUrl',record.publicUrl,true,'Public URL');}
         details.append(list);
         if(record.kind==='screenshot'){
           const host=node('details');host.open=preferences.expandScreenshotHostURL;
@@ -398,6 +518,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
             for (const element of elements) element.hidden = !visible;
           }
           list.hidden = !list.querySelector('dt:not([hidden])');
+          if(urls)urls.hidden=!urlFields.querySelector('dt:not([hidden])');
         };
         metadata.push(update);
         update();
@@ -407,5 +528,5 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     if (!flags.showAdvancedDetails && record.code && record.status!=='verified') article.append(node('p',record.code,'queue-feedback'));
     return article;
   }
-  return {render,setVisibility};
+  return {render,setVisibility,get previewOpen(){return !!previewDialog;}};
 }

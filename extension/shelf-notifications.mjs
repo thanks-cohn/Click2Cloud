@@ -9,7 +9,7 @@ export function createTransientNotice({paint, seen = new Set(), remember = () =>
     current = null;
     paint(null);
   }
-  function show(text, {error = false, key = text, explorer = false} = {}) {
+  function show(text, {error = false, key = null, explorer = false} = {}) {
     if (!text || (key !== null && seen.has(key))) return;
     if (key !== null) {
       seen.add(key);
@@ -39,9 +39,8 @@ export function createShelfNotifications(document) {
   const banner = document.getElementById('action-feedback');
   const message = document.getElementById('action-feedback-text');
   const live = document.getElementById('action-feedback-live');
-  const dismiss = document.getElementById('dismiss-action-feedback');
   const window = document.defaultView;
-  let seen = new Set(), previousFocus;
+  let seen = new Set();
   try {
     const stored = JSON.parse(window.sessionStorage.getItem(SESSION_KEY));
     if (Array.isArray(stored)) seen = new Set(stored.slice(-LIMIT).filter(id => /^[a-z0-9]{1,7}$/.test(id)));
@@ -51,21 +50,17 @@ export function createShelfNotifications(document) {
       try { window.sessionStorage.setItem(SESSION_KEY, JSON.stringify([...keys])); } catch {}
     },
     paint(notice) {
-      const restore = !notice && document.activeElement === dismiss && previousFocus?.isConnected;
       banner.classList.toggle('explorer-mini-toast', notice?.explorer === true);
       banner.classList.toggle('notice-error', notice?.error === true);
       banner.hidden = !notice;
       message.textContent = live.textContent = notice?.text ?? '';
-      if (restore) previousFocus.focus({preventScroll: true});
     },
   });
-  dismiss.addEventListener('focus', event => { previousFocus = event.relatedTarget; });
-  dismiss.addEventListener('click', notices.clear);
   banner.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') notices.clear(); });
   window.addEventListener('pagehide', notices.clear);
   document.addEventListener('visibilitychange', () => { if (document.hidden) notices.clear(); });
   return {
-    show(text, {key = text, ...options} = {}) {
+    show(text, {key = null, ...options} = {}) {
       if (text && !document.hidden) return notices.show(text, {...options, key: key === null ? null : noticeId(key)});
     },
     clear: notices.clear,

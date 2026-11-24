@@ -38,7 +38,9 @@
 .remote-provider-activity{align-self:center;text-align:end;white-space:nowrap;color:var(--muted)}
 .remote-provider-activity[data-success]{color:#83e8ae;font-weight:700}
 :root[data-theme=light] .remote-provider-activity[data-success]{color:#087a35}
-.remote-provider-info{grid-column:1/-1;block-size:3.4em;overflow:auto;font-size:12px;overscroll-behavior:contain;scrollbar-width:thin}
+.remote-provider-info{grid-column:1/-1;font-size:12px;text-align:end}
+.remote-provider-info:not(:has([data-availability]:not(:empty),[data-feedback]:not(:empty),[data-navigation]:not(:empty))){display:none}
+.remote-provider-info p{text-align:start}
 .remote-provider-actions{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .remote-provider-actions [data-connect]{margin-inline-end:auto}
 .remote-provider>[data-continue]{grid-column:1/-1;justify-self:start}

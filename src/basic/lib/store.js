@@ -282,6 +282,13 @@ export async function openStore(
         await req(s.put(next));
         return next;
       }),
+    disableRetry: (id,retryAttemptId)=>run(["attempts"],"readwrite",async tx=>{
+      const store=tx.objectStore("attempts"),row=await req(store.get(id));
+      if(!row||!["CANCELLED","FAILED"].includes(row.state))return row;
+      const next={...row,retryable:false,...(retryAttemptId?{retryAttemptId}:{})};
+      await req(store.put(next));
+      return next;
+    }),
     finish: async (id, patch, onVerified) => {
       const {attempt, firstVerified} = await run(["attempts", "ledger", "meta"], "readwrite", async (tx) => {
         const s = tx.objectStore("attempts"),

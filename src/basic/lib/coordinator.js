@@ -1,8 +1,10 @@
-import { fail, providerId, safeUrl, safeError, WAITING } from "./common.js";
+import {wait} from '../../../right2cloud-module/src/common.mjs';
+import { fail, providerId, safeUrl, safeError, WAITING, PROVIDERS } from "./common.js";
 import { acquireSource, publicSource } from "./source.js";
 import { identityMatches } from "./auth.js";
 import { CONTINUE_WINDOW_MS, pendingExpired } from "./intent.js";
 import {passiveObservation} from '../../core/boundary-observation.mjs';
+const stopped=()=>fail('SAVE_CANCELLED','Save cancelled before the provider committed the file.');
 const MAX_ACTIVE_SAVES = 2;
 const authorizeOnClick = new Set(["AUTH_REQUIRED", "AUTH_REVOKED", "AUTH_SCOPE_REQUIRED"]);
 const awaitGesture = new Set(["AUTH_CONNECTING", "AUTH_GESTURE_REQUIRED"]);
@@ -20,7 +22,8 @@ export function createCoordinator({
   now = () => Date.now(),
 }) {
   const running = new Map(),
-    warnings = new Set();
+    warnings = new Set(), cancelling = new Set(), retrying = new Set();
+  let stopping=false;
   async function event(a, stage, outcome = "Uncertain", extra = {}) {
     try { void Promise.resolve(observe(a)).catch(() => {}); } catch { /* History is optional. */ }
     try {
@@ -43,12 +46,21 @@ export function createCoordinator({
       }
     }
   }
+  async function keepRetry(provider,descriptor){
+    const evicted=await intents.keepRetry(provider,descriptor,now());
+    for(const id of evicted??[]){
+      const row=await store.disableRetry?.(id).catch(()=>null);
+      if(row)try{void Promise.resolve(observe(row)).catch(()=>{});}catch{}
+    }
+  }
   async function publish(attempt) {
     try { await notify(attempt); } catch {}
     return attempt;
   }
-  async function execute(input, id, {native = false, resume, interactive = native, onAccepted} = {}) {
+  async function execute(input, id, {native = false, resume, interactive = native, onAccepted, retry}, job) {
     const {provider} = input;
+    const {signal}=job.controller;
+    const waitFor=promise=>wait(promise,signal);
     const createdAt = new Date().toISOString();
     const identity = JSON.stringify([
       provider,
@@ -73,6 +85,7 @@ export function createCoordinator({
       createdAt,
       updatedAt: createdAt,
       state: "RECEIVED",
+      ...(retry?{parentAttemptId:retry.id}:{})
     };
     if (resume) {
       a = await store.getAttempt(id);
@@ -84,11 +97,12 @@ export function createCoordinator({
       await event(a, "RECEIVED");
     }
     const canWait = native && !!intents;
-    let retained = resume, keepWaiting = false;
+    let retained = resume, keepWaiting = false, binding=resume?.identity??retry?.identity;
     async function park(state, error, identity) {
       const intent = {id, input, identity,
         expiresAt: retained?.expiresAt ?? now() + CONTINUE_WINDOW_MS};
       if (pendingExpired(intent, now())) throw expired();
+      signal.throwIfAborted();
       await intents.keep(provider, intent, now());
       retained = intent;
       const info = safeError(error);
@@ -104,6 +118,7 @@ export function createCoordinator({
     };
     let uploadStarted = false;
     try {
+      signal.throwIfAborted();
       publicSource(input.sourceUrl);
       if (resume && pendingExpired(resume, now())) throw expired();
       await setStage("AUTH_CHECK");
@@ -111,31 +126,39 @@ export function createCoordinator({
       // projection and cannot authorize a durable save.
       let grant;
       try {
-        grant = await verify();
+        grant = await waitFor(verify());
       } catch (error) {
+        signal.throwIfAborted();
         if (!canWait || !interactive || !(authorizeOnClick.has(error.code) || awaitGesture.has(error.code))) throw error;
         await park("AWAITING_AUTH", error, retained?.identity ?? auth.binding?.(provider));
-        try { await auth.connect(provider); }
+        try { await waitFor(auth.connect(provider)); }
         catch (loginError) {
+          signal.throwIfAborted();
           if (!awaitGesture.has(loginError.code)) throw loginError;
           a = await store.patch(id, safeError(loginError));
           keepWaiting = true;
           return await publish(a);
         }
-        grant = await verify();
+        grant = await waitFor(verify());
       }
-      if (retained?.identity && !identityMatches(provider, retained.identity, grant.identity))
+      if (binding && !identityMatches(provider, binding, grant.identity))
         throw fail("AUTH_ACCOUNT_CHANGED", "This pending save belongs to the original account or root.");
       if (retained && pendingExpired(retained, now())) throw expired();
+      binding=grant.identity;
       await setStage("SOURCE_CHECK");
       let source;
-      try { source = await acquire(input); }
+      try {
+        source = await acquire(input,signal);
+        signal.throwIfAborted();
+        if(retry?.filename)source.filename=retry.filename;
+      }
       catch (error) {
         if (!canWait || error.code !== "SOURCE_PERMISSION_REQUIRED") throw error;
         await park("AWAITING_SOURCE", error, grant.identity);
         keepWaiting = true;
         return await publish(a);
       }
+      signal.throwIfAborted();
       if (retained && pendingExpired(retained, now())) throw expired();
       a = await store.patch(id, {
         filename: source.filename,
@@ -143,13 +166,23 @@ export function createCoordinator({
         bytes: source.bytes.byteLength,
         preview: source.preview,
         state: "UPLOADING",
+        cancellable:true,
       });
       if (native && !resume) passiveObservation(onAccepted);
       await event(a, "UPLOADING");
       const began = now();
+      signal.throwIfAborted();
       uploadStarted = true;
       const receipt = await adapters[provider].upload({
         bytes: source.bytes,
+        signal,
+        onCommitting:()=>{
+          signal.throwIfAborted();
+          job.committing=true;
+          void store.patch(id,{cancellable:false}).then(row=>{
+            try{void Promise.resolve(observe(row)).catch(()=>{});}catch{}
+          }).catch(()=>{});
+        },
         filename: source.filename,
         mime: source.mime,
         token: grant.accessToken,
@@ -213,21 +246,32 @@ export function createCoordinator({
           durationMs > 0 ? Math.round((a.bytes * 1000) / durationMs) : null,
       });
     } catch (e) {
-      const error = safeError(e);
-      const state =
-        e.uncertain || (uploadStarted && !e.definitive)
-          ? "UNCERTAIN"
-          : "FAILED";
+      const cancelled=signal.aborted&&!job.committing;
+      const error=safeError(cancelled?stopped():e);
+      const state=cancelled?'CANCELLED':e.uncertain||(uploadStarted&&!e.definitive)?'UNCERTAIN':'FAILED';
+      let expiresAt;
+      const until=retained?.expiresAt??retry?.expiresAt??now()+CONTINUE_WINDOW_MS;
+      if(state!=='UNCERTAIN'&&!job.committing&&binding?.[0]&&intents?.keepRetry&&
+          !pendingExpired({expiresAt:until},now())&&!['AUTH_ACCOUNT_CHANGED','PENDING_SAVE_EXISTS'].includes(error.code)){
+        try{
+          await keepRetry(provider,{id,input,identity:binding,
+            ...(uploadStarted?{filename:a.filename}:{}),expiresAt:until});
+          expiresAt=until;
+        }catch{/* Retry is optional. */}
+      }
       // If durable finalization fails, never show SAVED or increment in a separate transaction.
       a = await store.finish(id, {
         state,
         resumeUntil: undefined,
+        preview: undefined,
+        retryable: expiresAt!==undefined,
+        retryExpiresAt: expiresAt,
         ...error,
         ...(warnings.has(id)
           ? { diagnosticsWarning: "DIAGNOSTICS_STORAGE_UNAVAILABLE" }
           : {}),
       });
-      await event(a, state, state === "FAILED" ? "Failure" : "Uncertain", {
+      await event(a, state, state === "FAILED" ? "Failure" : state === "CANCELLED" ? "Cancelled" : "Uncertain", {
         code: error.code,
         cause: error.message,
         ...(Number.isInteger(e.httpStatus) ? { httpStatus: e.httpStatus } : {}),
@@ -253,6 +297,7 @@ export function createCoordinator({
         input.hostUrl || "",
         input.filename || "",
       ]);
+      if(cancelling.has(id)||stopping&&(options.resume||options.retry))throw stopped();
       if (running.has(id)) {
         const existing = running.get(id);
         if (existing.identity !== identity)
@@ -265,11 +310,13 @@ export function createCoordinator({
       }
       if (running.size >= MAX_ACTIVE_SAVES)
         throw fail("RESOURCE_BUSY", "Two provider saves are already running.", "Wait for a save to finish, then try again.");
-      const promise = execute(input, id, options).finally(() => {
+      const job={identity,provider:input.provider,controller:new AbortController(),committing:false};
+      const promise = execute(input, id, options,job).finally(() => {
         running.delete(id);
         warnings.delete(id);
       });
-      running.set(id, { identity, promise });
+      job.promise=promise;
+      running.set(id, job);
       return promise;
   }
   async function pending(provider) {
@@ -286,8 +333,90 @@ export function createCoordinator({
       throw fail("PENDING_SAVE_NOT_FOUND", "The pending save is no longer available in this browser session.");
     return start({...intent.input, requestId: id}, {native: true, resume: intent, interactive});
   }
+  async function cancel(provider,id){
+    const live=running.get(id);
+    if(live?.provider===provider){
+      if(live.committing)return {state:'unsupported',code:'PROVIDER_COMMIT_IN_PROGRESS'};
+      if(!live.controller.signal.aborted){
+        live.controller.abort(stopped());
+        void store.patch(id,{cancelRequested:true}).then(row=>{
+          try{void Promise.resolve(observe(row)).catch(()=>{});}catch{}
+        }).catch(()=>{});
+      }
+      return {state:'cancelling'};
+    }
+    if(cancelling.has(id))return {state:'cancelling'};
+    cancelling.add(id);
+    try{
+      const intent=await intents?.get(provider);
+      const row=await store.getAttempt(id);
+      if(!row||row.provider!==provider||!WAITING.has(row.state))return {state:'unsupported',code:'SAVE_NOT_CANCELLABLE'};
+      let expiresAt;
+      if(intent?.id===id&&intent.identity?.[0]&&!pendingExpired(intent,now())&&intents.keepRetry){
+        try{await keepRetry(provider,intent);expiresAt=intent.expiresAt;}catch{}
+      }
+      const result=await store.finish(id,{state:'CANCELLED',...safeError(stopped()),resumeUntil:undefined,
+        retryable:expiresAt!==undefined,retryExpiresAt:expiresAt});
+      await intents?.remove(provider,id).catch(()=>{});
+      await event(result,'CANCELLED','Cancelled');
+      await publish(result);
+      return {state:result.state==='CANCELLED'?'cancelled':'finished'};
+    }finally{cancelling.delete(id);}
+  }
+  async function cancelAll(){
+    if(stopping)return [];
+    stopping=true;
+    try{
+      const live=[...running].map(([id,job])=>cancel(job.provider,id));
+      const waiting=PROVIDERS.map(async({id:provider})=>{
+        const intent=await intents?.get(provider);
+        return intent&&!running.has(intent.id)?cancel(provider,intent.id):null;
+      });
+      return (await Promise.allSettled([...live,...waiting]))
+        .map(result=>result.status==='fulfilled'?result.value:{state:'unsupported'}).filter(Boolean);
+    }finally{stopping=false;}
+  }
+  async function expirePending(){
+    for(const {id:provider} of PROVIDERS){
+      const intent=await intents?.get(provider);
+      if(!intent||running.has(intent.id)||cancelling.has(intent.id)||!pendingExpired(intent,now()))continue;
+      cancelling.add(intent.id);
+      try{
+        const row=await store.getAttempt(intent.id);
+        if(row?.provider===provider&&WAITING.has(row.state)){
+          const result=await store.finish(row.id,{state:'FAILED',...safeError(expired()),resumeUntil:undefined});
+          await event(result,'FAILED','Failure',{code:result.code});
+          await publish(result);
+        }
+        await intents.remove(provider,intent.id);
+      }finally{cancelling.delete(intent.id);}
+    }
+  }
+  async function retry(provider,id){
+    providerId(provider);
+    if(retrying.has(id))throw fail('SAVE_RETRY_IN_PROGRESS','This save is already being retried.');
+    retrying.add(id);
+    try{
+      const row=await store.getAttempt(id);
+      if(row?.provider!==provider||!row.retryable||row.retryAttemptId||!['FAILED','CANCELLED'].includes(row.state))
+        throw fail('SAVE_RETRY_UNAVAILABLE','The original save cannot be safely retried.');
+      const intent=await intents?.getRetry?.(provider,id);
+      if(intent?.id!==id||!intent.identity?.[0]||pendingExpired(intent,now()))throw expired();
+      const grant=await auth.authorization(provider);
+      if(!identityMatches(provider,intent.identity,grant.identity))
+        throw fail('AUTH_ACCOUNT_CHANGED','Reconnect the original account to retry this save.');
+      if(stopping||running.size>=MAX_ACTIVE_SAVES)throw fail('RESOURCE_BUSY','Wait for an active save to finish.');
+      if(!await intents.takeRetry(provider,id))throw expired();
+      const result=await start({...intent.input,requestId:crypto.randomUUID()},{retry:intent});
+      if(store.disableRetry){
+        const updated=await store.disableRetry(id,result.id);
+        try{void Promise.resolve(observe(updated)).catch(()=>{});}catch{}
+      }
+      return result;
+    }finally{retrying.delete(id);}
+  }
   return {
-    start, pending, resume,
+    start, pending, resume, cancel, cancelAll, expirePending, retry,
     async afterLogin(provider) {
       const waiting = await pending(provider);
       if (waiting?.state === "AWAITING_AUTH") return resume(provider, waiting.id, false);

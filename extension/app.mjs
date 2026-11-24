@@ -1,9 +1,9 @@
 import {createQueueService} from './queue-service.mjs';
-import {createQueuePage} from './queue-page.mjs';
-import {mountQueueSettings} from './queue-settings.mjs';
+import {createQueuePage,createHistoryArchive} from './queue-page.mjs';
+import {mountHistorySettings,mountQueueSettings} from './queue-settings.mjs';
 import {installNavigation} from './navigation.mjs';
 import {mountVisualFeedbackSettings} from './visual-feedback-settings.mjs';
-import {createHistoryV2Preference,mountHistoryV2Settings} from './history-v2-preferences.mjs';
+import {createHistoryV2Preference} from './history-v2-preferences.mjs';
 import {createVisualFeedbackPreference,feedbackAccentKey} from '../src/aesthetic/visual-feedback.mjs';
 import {createBasicProviderCards} from './basic-provider-cards.mjs';
 import {createBasicDiagnosticsExport} from './basic-diagnostics-export.mjs';
@@ -20,16 +20,13 @@ function rememberFeedbackAccent(){
  feedbackAccent=color;
  void chrome.storage.local.set({[feedbackAccentKey]:color}).catch(()=>{if(feedbackAccent===color)feedbackAccent=undefined;});
 }
-import {createHistoryPage} from './history-page.mjs';
 import {manifestCard,mountManifestPanel} from './manifest-panel.mjs';
 import {mountLoadingVisual} from '../src/explorer/loading-visual.mjs';
 import {loadingMedia,LOADING_MEDIA_MAX_BYTES} from '../src/explorer/loading-visual-config.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
 import {isImage,galleryStep,createImageReader,readPreviewBytes} from '../src/explorer/image-preview.mjs';
 import {installExplorerLayout} from './explorer-layout.mjs';
-import {dividerCycleKey,dividerModes,normalizeDividerMode} from '../src/explorer/layout.mjs';
-import {chromeCommandBindings,openChromeShortcuts} from '../src/chrome/command-bindings.mjs';
-import {shelfExplorerSearchCommand} from '../src/chrome/provider-panel.mjs';
+import {dividerCycleKey,normalizeDividerMode} from '../src/explorer/layout.mjs';
 import {installShortcuts} from './shortcut-settings.mjs';
 import {createExplorerExports,noteDownload} from './explorer-exports.mjs';
 import {downloadJob} from '../src/explorer/download-archive.mjs';
@@ -101,6 +98,10 @@ function applyDebugMode(enabled){
  }else if(diagnosticDialog)$('#header-more').focus({preventScroll:true});
 }
 debugPreference.subscribe(applyDebugMode);applyDebugMode(false);void debugPreference.ready.then(applyDebugMode);
+function saveNoticeKey(operationId,state){
+ if(!operationId)return null;
+ return 'save:'+operationId+':'+({completed:'verified',SAVED:'verified',FAILED:'failed',UNCERTAIN:'uncertain',partial:'uncertain'}[state]??state);
+}
 function quietFeedback(value,attention,noticeKey){
  const required=attention??(/^[A-Z][A-Z0-9_]+$/.test(value)&&!['READY','CLOUDFLARE_READY'].includes(value)||/could not|cannot|failed|not confirmed|not ready|not saved|uncertain|blocked|unavailable|required|denied|reconnect|needs attention|incomplete|conflict|missing|corrupt|not authorized|not prepared/i.test(value));
  if(required){
@@ -296,7 +297,7 @@ function renderConnection(){
     connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':
     connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':
     connection.state==='UNKNOWN'?'' : `<button id="login" ${reconnectNeeded?'class="reconnect-needed"':''}>${inExplorer?'Log In':reconnectNeeded?'Reconnect':'Log in'}</button>`;
-  connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}<p class="muted">${caption}</p>${connection.diagnostic?.code?
+  connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}${!inExplorer&&connection.state==='DISCONNECTED'?'':`<p class="muted">${caption}</p>`}${connection.diagnostic?.code?
     '<details><summary>Connection Details</summary><p>'+esc(names[connection.diagnostic.code]??connection.diagnostic.code)+'</p></details>':''}${controls}`;
   listen('#connection #sign-out','click',signOut);listen('#reauthorize','click',()=>login('#reauthorize'));
   listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());
@@ -317,18 +318,12 @@ function workerFailureMarkup(d){
  return `<div class="card"><p role="alert">${esc(action)}</p><p>${esc(d.method)} ${esc(d.endpoint)} · HTTP ${esc(d.httpStatus??'not received')} · Cloudflare codes ${esc(d.providerCodes.join(', ')||'not returned')}</p><details class="worker-diagnostics"><summary>Safe Cloudflare Diagnostics</summary><pre id="cf-worker-diagnostics">${esc(JSON.stringify(d,null,2))}</pre></details>${!upgraded&&(d.missingScopes?.includes('workers-scripts.admin')||d.workerIntent==='create'&&!d.sessionScopes.includes('workers-scripts.admin'))?'<button id="reauthorize-worker">Reauthorize Cloudflare</button>':''}<button id="resume-worker">Resume existing setup after correction</button></div>`;
 }
 async function resumeWorkerSetup(){
- const button=$('#resume-worker')??$('#cf-authorize')??$('#prepare-selected');if(button)button.disabled=true;
+ const button=$('#resume-worker')??$('#cf-authorize');if(button)button.disabled=true;
  const target=selectedCloudflareTarget();
  try{const out=target?await api('recoverCloudflareDestination',{target,authorizeSetup:false}):await api('initializeCloudflare',{resume:true});await finishCloudflareSetup(out,target);}
  catch(e){cloudflareState={state:'PROVISIONING_BLOCKED',code:e.code,diagnostic:e.diagnostic,...(target?{target,accountId:target.accountId}:{})};renderRemotes();status('Not saved · '+(e.code??'SETUP_FAILED')+' · '+e.message);}
 }
 function selectedCloudflareTarget(){return shelfRequest?.provider==='cloudflare'&&shelfRequest.target?shelfRequest.target:cloudflareState?.target??null;}
-function selectedSetupMarkup(){
- const target=shelfRequest?.provider==='cloudflare'&&shelfRequest.target;if(!target)return '';
- const code=cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target)?cloudflareState.code??cloudflareState.worker?.code??cloudflareState.state:shelfRequest.code;
- const verified=cloudflareState?.selectedReady===true&&cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target),approval=['SETUP_APPROVAL_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(code),label=selectedSetupLabel(target,connection?.accounts);
- return `<div class="card" id="selected-save-setup"><h2>Selected Save Destination</h2><p>${esc(label)}</p><p role="status">${verified?'<span class="remote-v1-copy">Prepared and verified · make a new right-click to save.</span>':'<span>Not saved · '+esc(code??'WORKER_SETUP_REQUIRED')+' · '+esc(names[code]??readinessNames[code]??'Prepare this selected destination, then make a new right-click.')+'</span>'}</p>${code==='WORKER_DESTINATION_SCOPE_REQUIRED'?'<button id="authorize-selected">Authorize bucket access</button>':verified?'':`<p>Preparation uses this exact bucket and folder. Cloudflare may charge for Worker/R2 usage and a small retained verification file. The original source is not replayed.</p><button id="prepare-selected">Inspect / prepare selected destination</button>${approval?'<button id="authorize-selected">Authorize selected destination</button>':''}`}</div>`;
-}
 // recover/approve owns remote changes. Re-read the exact scoped transport and
 // native ACK afterward; never turn an outer completed response into UI READY.
 async function finishCloudflareSetup(out,requestedTarget){
@@ -354,7 +349,7 @@ function workerUpdateMarkup(readiness){
  return readiness?.target&&['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH'].includes(code)?'<p>Update code in the existing Worker and verify readback. Keep this bucket, destination and saved setup approval. Cloudflare usage may be billed.</p><button id="update-worker">Update existing Worker</button>':'';
 }
 function ordinarySetupReview(){
- if(connection?.state!=='CONNECTED')return '';
+ if(connection?.state!=='CONNECTED'||reconnectCodes.has(cloudflareState?.code??shelfRequest?.code))return '';
  if(shelfRequest?.target)return cloudflareState?.selectedReady?'':'<button id="review-selected">Review save setup</button>';
  const code=cloudflareState?.code??cloudflareState?.state??shelfRequest?.code;
  return ['SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','WORKER_SETUP_REQUIRED','ACCOUNT_AMBIGUOUS','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','NOT_ACTIVATED','R2_CONFIRMED_INACTIVE'].includes(code)
@@ -369,14 +364,14 @@ function renderRemotes(){
   connectionElement.remove();
   const focusedProvider=document.activeElement?.closest('.remote-provider')?document.activeElement:null;
   $('#main').innerHTML=`<section class="page remotes-page">
-    <div class="remotes-intro"><h1 class="remotes-headline"><span>All Your Clouds.</span> <span>One Place.</span></h1></div>
+    <div class="remotes-intro"><h1 class="remotes-headline"><span>All your clouds</span> <span>One Place</span></h1></div>
     <div id="basic-provider-slot"></div>
-    <h2 class="remote-interlude"><span>The Future is NOW.</span><span>True Remote is Here.</span></h2>
-    <div class="card remote-cloudflare"><h2>☁ Cloudflare R2</h2>${connection?.state==='CONNECTED'&&!connection.permissions?.needsReconsent||['CONNECTING','VERIFYING'].includes(connection?.state)?'':'<p class="muted">Login or updating access may prepare or reuse a private save Worker and write a small verification file. Cloudflare may charge for this usage.</p>'}<div id="remotes-connection"></div></div>${selectedSetupMarkup()}<p role="status" ${cloudflareState?.selectedReady&&cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?'class="remote-v1-copy"':''}>${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup"><span class="remote-v1-copy">Cloudflare status</span><span class="remote-modern-copy">Review Cloudflare setup</span></button><button id="remote-history">Save results</button></div>${configurationIssue?recoveryCard():''}</section>`;
+    <h2 class="remote-interlude"><span>The Future is NOW</span><span>True Remote is Here</span></h2>
+    <div class="card remote-cloudflare"><h2>☁ Cloudflare R2</h2><div id="remotes-connection"></div></div><p role="status" ${cloudflareState?.selectedReady&&cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?'class="remote-v1-copy"':''}>${esc(cloudflareState?.state==='completed'&&cloudflareState?.code==='CLOUDFLARE_READY'?(cloudflareState.selectedReady?'Prepared and verified · make a new right-click to save.':'Cloudflare setup completed; inspect the selected destination before saving.'):reconnectCodes.has(cloudflareState?.code)?'':names[cloudflareState?.code]??cloudflareState?.code??'')}</p>${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<div class="remote-diagnostic-actions" data-debug-only hidden><button id="cloudflare-setup"><span class="remote-v1-copy">Cloudflare status</span><span class="remote-modern-copy">Review Cloudflare setup</span></button><button id="remote-history">Save results</button></div>${configurationIssue?recoveryCard():''}</section>`;
   basicCards.mount($('#basic-provider-slot'));
   focusedProvider?.focus({preventScroll:true});
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
-  listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#prepare-selected','click',resumeWorkerSetup);listen('#review-selected','click',cloudflarePanel);listen('#authorize-selected','click',()=>authorizeCloudflare(selectedCloudflareTarget()?.accountId,selectedCloudflareTarget()));listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);
+  listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#review-selected','click',cloudflarePanel);listen('#cloudflare-setup','click',()=>{if(debugMode)return cloudflarePanel();});listen('#remote-history','click',()=>{if(debugMode)return show('history');});applyDebugMode(debugMode);
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
 }
@@ -439,35 +434,26 @@ async function revealListedFile(key,target){
  selected=new Set([key]);ordered();focusIndex=listingOrder.index(key);updateSelection();focusRow(focusIndex);
 }
 const screenshotUI=createScreenshotPage({api,dialog,closeDialog,esc,connectedAccounts:()=>connection.accounts??[]});
-let historyNavigation=0;
-const historyUI=createHistoryPage({api,screenshotRequest,retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),loadingSelection:getGalleryVisualSelection,goTo:async (operationId,outputId)=>{
- const ticket=++historyNavigation,previousView=viewEpoch;
- const result=outputId?await screenshotRequest('history-output',{operationId,outputId}):await api('openRemoteResult',{operationId},{quiet:true});
- if(ticket!==historyNavigation||previousView!==viewEpoch||view!=='history')return;
- historyUI.stop();selected.clear();
- const navigation=navigationEpoch+1;
- await navigate(result.target);
- if(navigation!==navigationEpoch||view!=='explorer')return;
- const file=outputId?result.object?.key:result.highlightKey;
- if(file)await revealListedFile(file,result.target);
- else if(outputId&&!listingError)$('#listing-state').textContent=result.code==='RESULT_NOT_FOUND'?'The recorded file no longer exists. Opened its folder.':
-  result.code==='RESULT_CHANGED'?'The file at this key has changed. Opened its folder.':'Opened the destination folder. The screenshot file is unverified.';
-}});
-const queueService=createQueueService();
+const queueService=createQueueService({readLegacy:()=>api('getHistoryPreferences',{}, {quiet:true}),
+ writeLegacy:params=>api('setHistoryPreferences',params,{quiet:true})});
 const historyV2Preference=createHistoryV2Preference(chrome.storage);
-const queuePage=createQueuePage({service:queueService,metadataPreference:historyV2Preference,api,screenshotRequest,openRemotes:()=>show('remotes'),
+const queuePage=createQueuePage({service:queueService,screenshotRequest,openRemotes:()=>show('remotes'),
  retryScreenshot:operationId=>screenshotRequest('retry',{operationId}),
  inspectReceipt:operationId=>api('inspectRemoteReceipt',{operationId},{quiet:true,reconnect:false,readTimeout:25000}),
+});
+const historyUI=createHistoryArchive({service:queueService,metadataPreference:historyV2Preference,api,screenshotRequest,
+ rename:renameHistoryRecord, renameError:error=>fileError('Rename',error),
  canRead:record=>record.provider==='cloudflare'&&connection?.state==='CONNECTED'&&
    connection.accounts?.some(account=>account.id===record.destination?.account),
  goTo:async record=>{
    const before=viewEpoch;
    const operationId=record.sourceRecordId;
-   const result=record.kind==='screenshot'?await screenshotRequest('history-output',{operationId,outputId:record.deliveryId}):
+   const result=record.renamed?{target:historyFileTarget(record),highlightKey:record.destination.key}:record.kind==='screenshot'?await screenshotRequest('history-output',{operationId,outputId:record.deliveryId}):
      await api('openRemoteResult',{operationId},{quiet:true,reconnect:false});
    if(before!==viewEpoch)return;
    const key=result.highlightKey??result.object?.key;
    if(!key)throw Error(result.code??'RESULT_LOOKUP_FAILED');
+   historyUI.stop();
    await navigate(result.target);
    if(view==='explorer')await revealListedFile(key,result.target);
  }});
@@ -559,7 +545,7 @@ async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==vie
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
-});if(next==='remotes'){renderRemotes();return;}renderConnection();if(next==='history'){$('#main').innerHTML='<section class="page history-page"><h1 class="history-headline">The Rest is History</h1><p role="status">Loading History…</p></section>';await historyUI.load();return;}if(next==='queue'){queuePage.mount($('#main'));return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();if(next==='settings'){navigationPlacement.mount($('#main .page'));mountQueueSettings($('#main .page'),queueService);mountHistoryV2Settings($('#main .page'),historyV2Preference);}}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
+});if(next==='remotes'){renderRemotes();return;}renderConnection();if(next==='history'){historyUI.mount($('#main'));return;}if(next==='queue'){queuePage.mount($('#main'));return;}if(next==='screenshot'){await screenshotUI.mount($('#main'));return;}if(next==='downloads'){explorerExports.mountJobs($('#main'));return;}if(!state||configurationIssue){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1><p role="status">Reading saved configuration…</p></section>';try{await refreshState({quiet:true,readTimeout:5000});}catch(error){configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};if(ticket===viewEpoch){$('#main').innerHTML='<section class="page"><h1>'+ (next==='explorer'?'File Explorer':'Settings')+'</h1>'+recoveryCard()+'<p>Navigation and configuration changes are blocked until validated recovery. Remotes and sign-in remain available.</p></section>';bindRecovery();if(next==='settings'){navigationPlacement.mount($('#main .page'));mountQueueSettings($('#main .page'),queueService);mountHistoryV2Settings($('#main .page'),historyV2Preference);}}return;}}if(ticket!==viewEpoch)return;if(next==='explorer'){renderExplorer();if(!source||!$('#tree').childElementCount)await enterExplorer();else if(browseNeedsRefresh&&!filenameSearch)await loadListing();}else await renderSettings();}
 /** Stable presentation of enterExplorer/navigateExplorer and setView. Local
  * feedback precedes IPC; all persisted changes remain commitConfigChange. */
 function saveExplorerLayout(value){
@@ -950,11 +936,48 @@ function selectBasename(input){
  input.focus();
  input.setSelectionRange(0,input.value.length-renameExtension(input.value).length);
 }
-async function renameFile(entry,target,draft){
- const original=fileLeaf(entry),extension=renameExtension(original);
+function checkedFileName(original,draft){
+ const extension=renameExtension(original);
  if(!draft||draft!==draft.trim()||draft==='.'||draft==='..'||/[\\/\x00-\x1f\x7f]/.test(draft))
   throw Object.assign(Error(),{code:'FILENAME_INVALID'});
- const name=extension&&!renameExtension(draft)?draft+extension:draft;
+ return extension&&!renameExtension(draft)?draft+extension:draft;
+}
+function historyFileTarget(record){
+ const {account,connection,bucket,key}=record.destination;
+ return {provider:'cloudflare',accountId:account,connectionId:connection,bucketName:bucket,
+  prefix:key.slice(0,key.lastIndexOf('/')+1)};
+}
+async function renameHistoryRecord(record,draft){
+ return navigator.locks.request('redown-history-rename:'+record.recordId,async()=>{
+  const current=await queueService.store.get(record.recordId);
+  if(!current||current.destination?.key!==record.destination?.key||current.etag!==record.etag)
+   throw Object.assign(Error(),{code:'FILE_RENAME_UNCONFIRMED'});
+  const target=historyFileTarget(current), name=checkedFileName(fileLeaf(current.destination),draft);
+  if(name===current.filename)return current;
+  if(!current.renamed){
+   const method=current.kind==='screenshot'?'history-output':'openRemoteResult';
+   const result=current.kind==='screenshot'?await screenshotRequest(method,{operationId:current.sourceRecordId,outputId:current.deliveryId}):
+     await api(method,{operationId:current.sourceRecordId},{quiet:true,reconnect:false});
+   if((result.highlightKey??result.object?.key)!==current.destination.key)
+    throw Object.assign(Error(),{code:'FILE_NOT_FOUND'});
+  }else{
+   const lookup=await api('readFileChunk',{source:target,key:current.destination.key,offset:0,length:1,etag:current.etag},{quiet:true,reconnect:false});
+   if(lookup?.state!=='completed')throw Object.assign(Error(),{code:lookup?.code??'FILE_NOT_FOUND'});
+  }
+  const result=await api('fileAction',{action:'rename',source:target,entry:{key:current.destination.key,folder:false},
+   name,conflict:'skip',idempotencyKey:crypto.randomUUID()},{quiet:true,reconnect:false});
+  const receipt=result.data?.receipt??result.receipt;
+  if(receipt?.key!==target.prefix+name||!receipt.etag)
+   throw Object.assign(Error(),{code:'FILE_RENAME_UNCONFIRMED'});
+  const renamed={filename:name,providerObjectId:receipt.key,etag:receipt.etag,version:receipt.version,
+   bytes:receipt.size,destination:{...current.destination,key:receipt.key}};
+  await queueService.store.rememberRename(current.recordId,renamed);
+  listingReader.invalidate();imageReader.clear();
+  return {...current,...renamed,renamed:true};
+ });
+}
+async function renameFile(entry,target,draft){
+ const original=fileLeaf(entry),name=checkedFileName(original,draft);
  if(name===original)return entry;
  const navigation=navigationEpoch;
  const key=entry.key.slice(0,entry.key.lastIndexOf('/')+1)+name;
@@ -1586,15 +1609,16 @@ async function suggestion(){if(!$('#suggestion')||!suggestionDue)return;try{cons
 async function renderSettings(){
   await Promise.all([aestheticReady,dividerReady]);
   const [recovery,visual]=await Promise.all([api('inspectBackupRoots'),api('getGalleryLoadingVisual')]);if(view!=='settings')return;const policy=state.product.recovery;
+  const favoriteProviders=[['google-drive','Google Drive'],['onedrive','OneDrive'],['dropbox','Dropbox'],['cloudflare','Cloudflare R2']];
   const providerMenuOptions=[['google-drive','Google Drive'],['dropbox','Dropbox'],['onedrive','OneDrive'],['cloudflare','Cloudflare']];
-  $('#main').innerHTML=`<section class="page"><h1>Settings</h1><div class="card"><h2>Aesthetic</h2><div class="settings-row"><label for="appearance">Theme</label><select id="appearance">${aesthetic.list().map(theme=>'<option value="'+esc(theme.id)+'">'+esc(theme.name)+'</option>').join('')}</select></div><fieldset id="aesthetic-palette" class="palette-settings"><legend>Color and Typography</legend><div class="palette-options">${aesthetic.listPalettes().map(({id,name,preview})=>`<label class="palette-choice"><input type="radio" name="aesthetic-palette" value="${esc(id)}"><span class="palette-swatch" aria-hidden="true" style="--swatch-light:${preview.light};--swatch-dark:${preview.dark}"></span><span>${esc(name)}</span></label>`).join('')}</div><div data-palette-preview aria-label="Palette preview"><h3 id="palette-preview-name"></h3><p>Folder names and descriptions</p><button type="button" disabled>Example control</button></div></fieldset><div class="settings-row" id="nostalgia-style-row" hidden><label for="nostalgia-style">Nostalgia Style</label><select id="nostalgia-style">${aesthetic.listNostalgiaStyles().map(({id,name})=>'<option value="'+esc(id)+'">'+esc(name)+'</option>').join('')}</select></div><p id="aesthetic-status" role="status"></p><div class="settings-row"><label for="setting-theme">Color mode</label><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option></select></div></div><div class="card"><h2>Gallery Loading Visual</h2><label for="loading-visual-mode">Loading visual</label><select id="loading-visual-mode"><option value="math">Mathematical geometry</option><option value="media">My local media</option><option value="plain">Plain placeholder</option></select><label>Choose local loading media <input id="loading-visual-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4"></label><p class="muted">${esc(visual.warning?'Custom media is unavailable; choose a replacement or remove it.':visual.media?.name??'No custom media selected')}. One local visual, up to 8 MiB; never uploaded. Reduced motion uses a still frame.</p><button id="loading-visual-remove" ${!visual.media&&!visual.warning?'disabled':''}>Remove local media</button><p id="loading-visual-result" role="status"></p></div><div class="card"><h2>Right-Click Menu</h2><p class="muted">Choose which cloud providers appear in Chrome's right-click menu. Turning one off keeps its account, files and saved destinations.</p>${providerMenuOptions.map(([provider,name])=>`<label class="settings-row"><span>${name}</span><input type="checkbox" data-provider-visible="${provider}" ${state.product.providerVisibility?.[provider]!==false?'checked':''} aria-label="Show ${name} in Chrome right-click menu"></label>`).join('')}</div>${manifestCard}<div class="card"><h2>Favorite Cloud</h2><p class="muted">A personal marker for future use. It does not change saves or menus.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-favorite="${i}" ${state.product.favorites.includes('cloudflare:'+a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')||'<p class="muted">Connect an account to mark a favorite.</p>'}</div><div id="settings-recovery" class="card"><h2>Recovery Mode</h2><p class="muted">External storage: ${esc(recovery.state)}. Automatic Windows known-folder storage requires a native companion.</p><label>Cadence <select id="cadence"><option value="weekly">Weekly · Monday</option><option value="daily">Daily</option></select></label><label><input type="checkbox" id="simple-recovery" ${policy.simple?'checked':''}> Simple Recovery</label><label><input type="checkbox" id="narrow-recovery" ${policy.nested?'checked':''}> Narrow Recovery</label><details><summary>Bucket Recovery Crawl</summary><p class="muted">Recovery depth is independent of Chrome display depth. Expand accounts in File Explorer to discover buckets.</p>${bucketTargets.map((b,i)=>{const policy=state.product.recovery.buckets.find(p=>p.target.accountId===b.accountId&&p.target.bucketName===b.bucketName);return `<label><input data-recovery="${i}" type="checkbox" ${policy?.enabled?'checked':''}> ${esc(b.bucketName)} <input type="number" min="1" data-crawl-depth="${i}" aria-label="Recovery depth for ${esc(b.bucketName)}" value="${policy?.depth??10}"></label>`;}).join('')}</details><label>Windows Backup Location <select id="backup-location"><option value="automatic">Automatic · Local AppData</option><option value="documents">Documents</option></select></label><p class="muted">Windows locations are unavailable without a native companion. A user-authorized external folder can be attached separately.</p><button id="choose-backup">Choose external backup folder</button><button id="backup-now">Back up now</button><button id="restore">Restore My Right-Click Menu</button></div><div id="settings-whole-cloud" class="card"><h2>Save Whole Cloud</h2><p class="muted">Read-only bucket/key outline. Starts only when explicitly enabled and external storage is authorized. Lost authorization quietly pauses the job.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-whole="${i}"> Cloudflare · ${esc(a.name)}</label>`).join('')||'<p class="muted">No connected supported accounts.</p>'}<button id="enable-whole">Enable selected accounts</button><button id="stop-whole">Stop selected accounts</button><button id="whole-status">Inspect jobs</button><pre id="jobs"></pre></div><div id="settings-connection" class="card" data-debug-only hidden><h2>Connection</h2><p id="oauth-redirect-uri" class="muted wrap-text">${esc(connection?.redirectUri??'')}</p><button id="disconnect" ${!connection?.authenticated&&connection?.state!=='CONNECTED'?'disabled':''}>Disconnect Cloudflare</button></div><div class="card"><h2>Programmatic Access</h2><p class="muted">The V3+1 API powers these controls. Agent execution requires a separate local grant scoped to methods, accounts, and expiry. No public endpoint or active MCP connection.</p><button id="capabilities">Inspect API capabilities</button><pre id="api-info"></pre></div></section>`;
+  $('#main').innerHTML=`<section class="page"><h1>Settings</h1><div class="card"><h2>Aesthetic</h2><div class="settings-row"><label for="appearance">Theme</label><select id="appearance">${aesthetic.list().map(theme=>'<option value="'+esc(theme.id)+'">'+esc(theme.name)+'</option>').join('')}</select></div><fieldset id="aesthetic-palette" class="palette-settings"><legend>Color and Typography</legend><div class="palette-options">${aesthetic.listPalettes().map(({id,name,preview})=>`<label class="palette-choice"><input type="radio" name="aesthetic-palette" value="${esc(id)}"><span class="palette-swatch" aria-hidden="true" style="--swatch-light:${preview.light};--swatch-dark:${preview.dark}"></span><span>${esc(name)}</span></label>`).join('')}</div><div data-palette-preview aria-label="Palette preview"><h3 id="palette-preview-name"></h3><p>Folder names and descriptions</p><button type="button" disabled>Example control</button></div></fieldset><div class="settings-row" id="nostalgia-style-row" hidden><label for="nostalgia-style">Nostalgia Style</label><select id="nostalgia-style">${aesthetic.listNostalgiaStyles().map(({id,name})=>'<option value="'+esc(id)+'">'+esc(name)+'</option>').join('')}</select></div><p id="aesthetic-status" role="status"></p><div class="settings-row"><label for="setting-theme">Color mode</label><select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option></select></div></div><div class="card"><h2>Gallery Loading Visual</h2><label for="loading-visual-mode">Loading visual</label><select id="loading-visual-mode"><option value="math">Mathematical geometry</option><option value="media">My local media</option><option value="plain">Plain placeholder</option></select><label>Choose local loading media <input id="loading-visual-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4"></label><p class="muted">${esc(visual.warning?'Custom media is unavailable; choose a replacement or remove it.':visual.media?.name??'No custom media selected')}. One local visual, up to 8 MiB; never uploaded. Reduced motion uses a still frame.</p><button id="loading-visual-remove" ${!visual.media&&!visual.warning?'disabled':''}>Remove local media</button><p id="loading-visual-result" role="status"></p></div><div class="card"><h2>Right-Click Menu</h2><p class="muted">Choose which cloud providers appear in Chrome's right-click menu. Turning one off keeps its account, files and saved destinations.</p>${providerMenuOptions.map(([provider,name])=>`<label class="settings-row"><span>${name}</span><input type="checkbox" data-provider-visible="${provider}" ${state.product.providerVisibility?.[provider]!==false?'checked':''} aria-label="Show ${name} in Chrome right-click menu"></label>`).join('')}</div>${manifestCard}<div class="card"><h2>Favorite Cloud</h2><p class="muted">A personal marker for future use. It does not change saves or menus.</p>${favoriteProviders.map(([provider,name])=>`<label><input type="checkbox" data-favorite="${provider}" ${state.product.favorites.some(id=>id==='provider:'+provider||provider==='cloudflare'&&id.startsWith('cloudflare:'))?'checked':''}> ${name}</label>`).join('')}</div><div id="settings-recovery" class="card"><h2>Recovery Mode</h2><p class="muted">External storage: ${esc(recovery.state)}. Automatic Windows known-folder storage requires a native companion.</p><label>Cadence <select id="cadence"><option value="weekly">Weekly · Monday</option><option value="daily">Daily</option></select></label><label><input type="checkbox" id="simple-recovery" ${policy.simple?'checked':''}> Simple Recovery</label><label><input type="checkbox" id="narrow-recovery" ${policy.nested?'checked':''}> Narrow Recovery</label><details><summary>Bucket Recovery Crawl</summary><p class="muted">Recovery depth is independent of Chrome display depth. Expand accounts in File Explorer to discover buckets.</p>${bucketTargets.map((b,i)=>{const policy=state.product.recovery.buckets.find(p=>p.target.accountId===b.accountId&&p.target.bucketName===b.bucketName);return `<label><input data-recovery="${i}" type="checkbox" ${policy?.enabled?'checked':''}> ${esc(b.bucketName)} <input type="number" min="1" data-crawl-depth="${i}" aria-label="Recovery depth for ${esc(b.bucketName)}" value="${policy?.depth??10}"></label>`;}).join('')}</details><label>Windows Backup Location <select id="backup-location"><option value="automatic">Automatic · Local AppData</option><option value="documents">Documents</option></select></label><p class="muted">Windows locations are unavailable without a native companion. A user-authorized external folder can be attached separately.</p><button id="choose-backup">Choose external backup folder</button><button id="backup-now">Back up now</button><button id="restore">Restore My Right-Click Menu</button></div><div id="settings-whole-cloud" class="card"><h2>Save Whole Cloud</h2><p class="muted">Read-only bucket/key outline. Starts only when explicitly enabled and external storage is authorized. Lost authorization quietly pauses the job.</p>${(connection?.accounts??[]).map((a,i)=>`<label><input type="checkbox" data-whole="${i}"> Cloudflare · ${esc(a.name)}</label>`).join('')||'<p class="muted">No connected supported accounts.</p>'}<button id="enable-whole">Enable selected accounts</button><button id="stop-whole">Stop selected accounts</button><button id="whole-status">Inspect jobs</button><pre id="jobs"></pre></div><div id="settings-connection" class="card" data-debug-only hidden><h2>Connection</h2><p id="oauth-redirect-uri" class="muted wrap-text">${esc(connection?.redirectUri??'')}</p><button id="disconnect" ${!connection?.authenticated&&connection?.state!=='CONNECTED'?'disabled':''}>Disconnect Cloudflare</button></div><div class="card"><h2>Programmatic Access</h2><p class="muted">The V3+1 API powers these controls. Agent execution requires a separate local grant scoped to methods, accounts, and expiry. No public endpoint or active MCP connection.</p><button id="capabilities">Inspect API capabilities</button><pre id="api-info"></pre></div></section>`;
   navigationPlacement.mount($('#main .page'));
   mountQueueSettings($('#main .page'),queueService);
-  mountHistoryV2Settings($('#main .page'),historyV2Preference);
+  mountHistorySettings($('#main .page'),queueService,historyV2Preference);
   mountManifestPanel($('#portable-menu-manifests'),{api:(method,params)=>api(method,params,{quiet:true}),accounts:()=>connection?.accounts??[],getRevision:()=>state.product.revision,onApplied:async()=>{await refreshState();}});
   const debugCard=document.createElement('div');debugCard.className='card';debugCard.innerHTML='<h2>Debug</h2><label><input id="debug-mode" type="checkbox"> Debug Mode</label><p class="muted">Show diagnostic status and inspect safe local details. This does not grant additional access or change saving.</p><div id="basic-diagnostics"></div><div id="debug-details" data-debug-only hidden><button id="show-save-results">Review save results</button><button id="debug-health">Inspect safe diagnostics</button><pre id="debug-health-output"></pre><div id="recorder-panel"></div></div><p id="debug-preference-result" role="status"></p>';$('#main .page').append(debugCard);basicDiagnostics.mount($('#basic-diagnostics'));applyDebugMode(debugMode);
   void import('./recorder-panel.mjs').then(m=>m.mountRecorderPanel(document.querySelector('#recorder-panel'))).catch(()=>{});
-  const historySettings=document.createElement('div');historySettings.className='card';$('#main .page').append(historySettings);
+  const settingsPage=$('#main .page');
   listen('#debug-mode','change',async event=>{const enabled=event.target.checked,feedback=$('#debug-preference-result');try{if(!enabled&&!confirm('Turn Debug Mode off and stop any expansive forensic recording? Basic diagnostics stays on.')){event.target.checked=true;return;}if(!enabled){let deadline;try{await Promise.race([chrome.runtime.sendMessage({channel:'recorder',version:2,method:'stop',params:{}}),new Promise(resolve=>{deadline=setTimeout(resolve,2000);})]);}catch{}finally{clearTimeout(deadline);}}await debugPreference.set(enabled);applyDebugMode(enabled);if(feedback.isConnected)feedback.textContent='';}catch{applyDebugMode(debugPreference.enabled);if(feedback.isConnected)feedback.textContent='Debug Mode is OFF for this window; the preference could not be saved. Try again.';}});
   listen('#show-save-results','click',()=>{if(debugMode)return show('history');});
   listen('#debug-health','click',async()=>{const output=$('#debug-health-output');output.textContent='Reading local diagnostics…';try{const report=await api('getEngineHealth',{view:'support'},{quiet:true});if(output.isConnected)output.textContent=JSON.stringify(report,null,2);}catch{if(output.isConnected)output.textContent='Diagnostics are unavailable. Your saved data was kept.';}});
@@ -1658,7 +1682,16 @@ async function renderSettings(){
   $('#setting-theme').value=state.product.theme;$('#cadence').value=policy.cadence;$('#backup-location').value=policy.location;
   listen('#setting-theme','change',e=>change({type:'setTheme',theme:e.target.value}));
   $$('[data-provider-visible]').forEach(input=>input.onchange=async()=>{try{await change({type:'setProviderMenuVisibility',provider:input.dataset.providerVisible,visible:input.checked});}catch(e){input.checked=!input.checked;status(e.message);}});
-  $$('[data-favorite]').forEach(input=>input.onchange=()=>change({type:'setFavorite',connectionId:'cloudflare:'+connection.accounts[input.dataset.favorite].id,favorite:input.checked}).catch(e=>status(e.message)));
+  $$('[data-favorite]').forEach(input=>input.onchange=async()=>{
+    const favorite=input.checked, provider=input.dataset.favorite;
+    const changes=[{type:'setFavorite',connectionId:'provider:'+provider,favorite}];
+    if(!favorite&&provider==='cloudflare')for(const id of state.product.favorites)
+      if(id.startsWith('cloudflare:'))changes.push({type:'setFavorite',connectionId:id,favorite:false});
+    input.disabled=true;
+    try{await change(changes);}
+    catch(error){input.checked=!favorite;status(error.message);}
+    finally{input.disabled=false;}
+  });
   $('#loading-visual-mode').value=visual.mode;
   const saveVisual=async params=>{const result=await api('setGalleryLoadingVisual',{expectedRevision:visual.revision,...params});cachedGalleryVisual=null;await renderSettings();$('#loading-visual-result').textContent='Loading visual saved locally.';return result;};
   listen('#loading-visual-mode','change',async e=>{try{await saveVisual({mode:e.target.value});}catch(error){e.target.value=visual.mode;$('#loading-visual-result').textContent=error.code??error.message;}});
@@ -1678,29 +1711,15 @@ async function renderSettings(){
   listen('#stop-whole','click',async()=>{for(const identity of selectedClouds())await api('disableWholeCloudJob',{identity});status('Selected jobs stopped.');});
   listen('#whole-status','click',async()=>{$('#jobs').textContent=JSON.stringify(await api('inspectWholeCloudJobs'),null,2);});listen('#disconnect','click',async()=>{await api('disconnect');await connections();await renderSettings();status('Cloudflare disconnected. Saved destinations remain.');});
   listen('#capabilities','click',async()=>{const c=await api('describeCapabilities');$('#api-info').textContent=JSON.stringify({version:c.version,tools:c.tools.map(t=>({name:t.name,scope:t.scope})),publicEndpoint:c.publicEndpoint},null,2);});
-  await historyUI.settings(historySettings);
-  if(historySettings.isConnected){
-    explorerExports.mountSettings(historySettings.parentElement);
-    const page=historySettings.parentElement;
+  if(settingsPage.isConnected){
+    explorerExports.mountSettings(settingsPage);
+    const page=settingsPage;
     await screenshotUI.settings(page);
     if(!page.isConnected)return;
-    shortcuts.mount(page);
-    const divider=document.createElement('section');
-    divider.className='card';
-    divider.innerHTML='<h2>Divider Cycle</h2><label><span>Ctrl+Shift+F9 divider cycle</span> <select id="divider-cycle">'+Object.entries(dividerModes).map(([value,label])=>`<option value="${value}">${label}</option>`).join('')+'</select></label>';
-    page.append(divider);
-    const select=divider.querySelector('select');select.value=dividerMode;
-    listen('#divider-cycle','change',async()=>{try{await chrome.storage.local.set({[dividerCycleKey]:select.value});dividerMode=select.value;}
-      catch(error){select.value=dividerMode;throw error;}});
-    const chromeSearch=document.createElement('section');chromeSearch.className='card';
-    chromeSearch.innerHTML='<h2>Chrome-Wide Explorer Search</h2><p id="chrome-explorer-binding" role="status">Checking shortcut…</p><p>Set a Chrome shortcut for “Open File Explorer and focus filename search”, such as Alt+Shift+F. Chrome does not support F7 in extension command suggestions. Ctrl+Shift+F7 is available inside File Explorer.</p><button id="open-chrome-shortcuts" type="button">Open Chrome shortcut settings</button>';
-    page.append(chromeSearch);
-    const binding=chromeSearch.querySelector('#chrome-explorer-binding');
-    const refreshBinding=async()=>{try{binding.textContent=(await chromeCommandBindings(chrome)).get(shelfExplorerSearchCommand)??'Unassigned in Chrome';}
-      catch{binding.textContent='Chrome shortcut status unavailable';}};
-    listen('#open-chrome-shortcuts','click',()=>openChromeShortcuts(chrome));
-    window.addEventListener('focus',()=>{if(binding.isConnected)void refreshBinding();},{once:true});
-    void refreshBinding();
+    shortcuts.mount(page,{dividerMode, async setDividerMode(value){
+      await chrome.storage.local.set({[dividerCycleKey]:value});
+      dividerMode=value;
+    }});
     if(state.product.defaultTarget){
       const section=document.createElement('section');section.className='card';
       section.innerHTML='<h2>Default Location</h2><button id="clear-default">Remove Default Location</button>';
@@ -1742,8 +1761,9 @@ void bootstrap();
 async function authorizeCloudflare(accountId,target){
  target=target??(shelfRequest?.provider==='cloudflare'?shelfRequest.target:null);
  const code=cloudflareState?.code??cloudflareState?.worker?.code,renewal=['CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(code);
+ if(!target&&!confirm('Authorize Cloudflare R2 setup? This may prepare a private save Worker, create or reuse redown if no destinations exist, and store a small verification file. Cloudflare may charge for usage.'))return;
  if(target&&!confirm('Authorize preparation for '+selectedSetupLabel(target,connection?.accounts)+'? '+(renewal?'Click2Cloud will renew the shared signing key for this bucket’s private save Worker; all its folder saves use that renewed connection. ':'Click2Cloud may create or repair its private save Worker for all paths in this bucket. ')+'It will retain a small R2 verification file. Cloudflare may charge for usage. Existing cloud objects and saved destinations are kept. This does not retry the original source.'))return;
- const button=$('#authorize-selected')??$('#authorize-setup')??$('#cf-authorize')??$('#update-worker');if(button)button.disabled=true;
+ const button=$('#authorize-setup')??$('#cf-authorize')??$('#update-worker');if(button)button.disabled=true;
  try{await refreshState();const out=await api(target?'recoverCloudflareDestination':'approveCloudflareSetup',{...(target?{target,authorizeSetup:true}:{accountId}),expectedRevision:state.product.revision,idempotencyKey:crypto.randomUUID()});return await finishCloudflareSetup(out,target);}
  catch(e){cloudflareState={state:'PROVISIONING_BLOCKED',code:e.code,diagnostic:e.diagnostic,...(target?{target,accountId:target.accountId}:{accountId})};if(shelfRequest)shelfRequest={...shelfRequest,code:e.code};renderRemotes();status('Not saved · '+(e.code??'SETUP_FAILED')+' · '+e.message);}
 }
@@ -1757,7 +1777,7 @@ async function cloudflarePanel(){
  cloudflareState={...readiness,code,selectedReady:ready,...(target?{target,accountId}:{} )};
  const needsApproval=['SETUP_APPROVAL_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(code);
  const setupNeeded=accountId&&!readiness.diagnostic&&['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED'].includes(readiness.state)&&!['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH','CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED','WORKER_DESTINATION_SCOPE_REQUIRED'].includes(code);
- $('#main').innerHTML=`<section class="page"><h1>Cloudflare R2</h1>${target?'<h2>Selected Save Destination</h2><p>'+esc(selectedSetupLabel(target,accounts))+'</p>':''}<p role="status">${esc(ready?'Prepared and verified · make a new right-click to save.':(target?'Not saved · '+code+' · ':'')+(names[code]??readinessNames[readiness.state]??code))}</p>${!shelfRequest?.target&&accounts.length>1?'<label>Authorized account<select id="cf-account"><option value="">Choose an account</option>'+accounts.map(a=>'<option value="'+esc(a.id)+'" '+(a.id===accountId?'selected':'')+'>'+esc(accountLabel(a))+'</option>').join('')+'</select></label>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(readiness.diagnostic)}${setupNeeded?'<p>'+(target?'Prepare this exact bucket and folder using saved approval, or authorize preparation once if needed. No original source is replayed. Cloudflare may charge for Worker/R2 usage and a small retained verification file.':result.onboarding.setupAuthorized?'Setup approval is already saved. Resume the same interrupted operation after correcting Cloudflare access.':'Authorize automatic setup for this account: create/reuse redown only when no destinations or default exist, prepare saved destinations, and verify a small retained readiness file. Cloudflare may charge for usage. Cloud files are never deleted.')+'</p><button id="cf-authorize">'+(target?(!needsApproval&&result.onboarding.setupAuthorized?'Inspect / prepare selected destination':'Authorize selected destination'):(result.onboarding.setupAuthorized?'Inspect / resume existing setup':'Authorize automatic setup'))+'</button>':''}<button id="cf-remotes">Back to Remotes</button><details><summary>Advanced Diagnostics</summary><pre>${esc(JSON.stringify({state:readiness.state,code,worker:readiness.worker?.code,target:target?destinationPath(target):undefined},null,2))}</pre><button id="cf-refresh">Refresh status</button></details></section>`;
+ $('#main').innerHTML=`<section class="page"><h1>Cloudflare R2</h1>${target?'<h2>Save setup</h2><p>'+esc(selectedSetupLabel(target,accounts))+'</p>':''}<p role="status">${esc(ready?'Prepared and verified · make a new right-click to save.':(target?'Not saved · '+code+' · ':'')+(names[code]??readinessNames[readiness.state]??code))}</p>${!shelfRequest?.target&&accounts.length>1?'<label>Authorized account<select id="cf-account"><option value="">Choose an account</option>'+accounts.map(a=>'<option value="'+esc(a.id)+'" '+(a.id===accountId?'selected':'')+'>'+esc(accountLabel(a))+'</option>').join('')+'</select></label>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(readiness.diagnostic)}${setupNeeded?'<p>'+(target?'Prepare this exact bucket and folder using saved approval, or authorize preparation once if needed. No original source is replayed. Cloudflare may charge for Worker/R2 usage and a small retained verification file.':result.onboarding.setupAuthorized?'Setup approval is already saved. Resume the same interrupted operation after correcting Cloudflare access.':'Authorize automatic setup for this account: create/reuse redown only when no destinations or default exist, prepare saved destinations, and verify a small retained readiness file. Cloudflare may charge for usage. Cloud files are never deleted.')+'</p><button id="cf-authorize">'+(target?(!needsApproval&&result.onboarding.setupAuthorized?'Resume setup':'Authorize selected destination'):(result.onboarding.setupAuthorized?'Inspect / resume existing setup':'Authorize automatic setup'))+'</button>':''}<button id="cf-remotes">Back to Remotes</button><details><summary>Advanced Diagnostics</summary><pre>${esc(JSON.stringify({state:readiness.state,code,worker:readiness.worker?.code,target:target?destinationPath(target):undefined},null,2))}</pre><button id="cf-refresh">Refresh status</button></details></section>`;
  listen('#update-worker','click',()=>authorizeCloudflare(accountId,target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#cf-account','change',async e=>{if(!e.target.value)return;await api('selectCloudflareAccount',{accountId:e.target.value});cloudflareState=await api('checkCloudflareR2',{accountId:e.target.value});await refreshState();await cloudflarePanel();});
  listen('#cf-authorize','click',async()=>{if(needsApproval||!result.onboarding.setupAuthorized)return authorizeCloudflare(accountId,target);return resumeWorkerSetup();});
  listen('#cf-refresh','click',cloudflarePanel);listen('#cf-remotes','click',()=>show('remotes'));
@@ -1809,7 +1829,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   }}).catch(()=>{});
   return;
  }
- if(message?.channel==='screenshot-history-changed'){historyUI.invalidate(message.operationId);return;}
+ if(message?.channel==='screenshot-history-changed')return;
  if(message?.channel==='screenshot-result'){
   void shelfWindow.then(id=>{
    if(message.windowId!=null&&id!==message.windowId)return;
@@ -1822,16 +1842,16 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  }
  if(message?.channel==='depth-click-outcome'){
   status(message.message,{attention:message.state===undefined?undefined:!['completed','pending'].includes(message.state),
-   noticeKey:message.operationId?`depth:${message.operationId}:${message.state}`:undefined});
+   noticeKey:saveNoticeKey(message.remoteOperationId??message.operationId,message.state)});
   return;
  }
  if(message?.channel==='redown-basic-status'){basicCards.onStatus(message.status);return;}
  if(message?.channel==='redown-basic-attempt'){
   const attempt=message.attempt;
   basicCards.onAttempt(attempt);
-  if(attempt?.state==='SAVED')notifications.show('Provider save verified.',{key:`basic:${attempt.id}`});
+  if(attempt?.state==='SAVED')notifications.show('Provider save verified.',{key:saveNoticeKey(attempt.id,attempt.state)});
   if(['FAILED','UNCERTAIN'].includes(attempt?.state))
-   notifications.show([attempt.message,attempt.nextAction].filter(Boolean).join(' ')||'Provider save did not complete.',{key:`basic:${attempt.id}`,error:true});
+   notifications.show([attempt.message,attempt.nextAction].filter(Boolean).join(' ')||'Provider save did not complete.',{key:saveNoticeKey(attempt.id,attempt.state),error:true});
   return;
  }
  if(message?.channel==='shelf-opened'){const intent=viewEpoch;void shelfWindow.then(id=>{if(id!==null&&id===message.windowId&&intent===viewEpoch){closeDialog();return show('remotes');}}).catch(e=>status(e.message));return;}
@@ -1845,11 +1865,10 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
  }
  if(message?.channel!=='remote-result')return;
  const affectsDirectory=d=>d&&source&&view==='explorer'&&source.connectionId===d.connectionId&&source.accountId===d.accountId&&source.bucketName===d.bucketName&&(d.prefix?d.prefix+'/':'').startsWith(source.prefix);
- void (async()=>{const result=message.result;if(result.kind==='readiness')return;historyUI.invalidate(result.operationId);reconnectAfter(result.code);
-  const noticeKey=result.operationId?`save:${result.operationId}:${result.state}`:undefined;
+ void (async()=>{const result=message.result;if(result.kind==='readiness')return;reconnectAfter(result.code);
+  const noticeKey=saveNoticeKey(result.operationId,result.state);
   if(affectsDirectory(result.destination))markCurrentSearchStale();
   if(result.state==='verified'){
-   if(view==='history')return;
    const current=await api('inspectRemoteReceipt',{operationId:result.operationId});if(current.reconciliation?.state!=='verified'){status(current.reconciliation?.code??current.code??'Save verification is pending. Inspect the receipt before retrying.');return;}
    imageReader.clear();clearThumbnails();listingReader.invalidate();const d=current.receipt?.destination??current.destination;
    if(affectsDirectory(d))await reloadCurrentDirectory();status('Saved and independently verified.',{noticeKey});

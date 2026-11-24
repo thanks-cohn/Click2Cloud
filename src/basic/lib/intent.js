@@ -24,6 +24,11 @@ export function createSaveIntents(chrome, trustedStorage) {
         'Review Chrome extension storage before making another save.');
     }
   };
+  const retryKey = provider => key(provider)+':retry';
+  const readRetries=async provider=>{
+    const saved=(await session.get(retryKey(provider)))[retryKey(provider)];
+    return Array.isArray(saved)?saved:[];
+  };
   const read = async provider => (await session.get(key(provider)))[key(provider)];
   const serial = (provider, work) => {
     const result = (lanes.get(provider) ?? Promise.resolve()).catch(() => {}).then(() => protectedCall(work));
@@ -33,6 +38,23 @@ export function createSaveIntents(chrome, trustedStorage) {
     return result;
   };
   return {
+    getRetry: (provider,id) => protectedCall(async()=>(await readRetries(provider)).find(retry=>retry.id===id)),
+    keepRetry: (provider,intent,now) => serial(provider,async()=>{
+      const prior=await readRetries(provider);
+      const fresh=prior.filter(retry=>retry.id!==intent.id&&!pendingExpired(retry,now));
+      const next=[...fresh,intent].slice(-4);
+      await session.set({[retryKey(provider)]:next});
+      return prior.filter(retry=>!next.some(item=>item.id===retry.id)).map(retry=>retry.id);
+    }),
+    takeRetry: (provider,id) => serial(provider,async()=>{
+      const prior=await readRetries(provider);
+      const retry=prior.find(item=>item.id===id);
+      if(!retry)return null;
+      const next=prior.filter(item=>item.id!==id);
+      if(next.length)await session.set({[retryKey(provider)]:next});
+      else await session.remove(retryKey(provider));
+      return retry;
+    }),
     get: provider => protectedCall(() => read(provider)),
     keep: (provider, intent, now) => serial(provider, async () => {
       const prior = await read(provider);

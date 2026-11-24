@@ -309,7 +309,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         const row={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',
           operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,
           ...(safeRemoteDiagnostic(value.diagnostic)?{diagnostic:safeRemoteDiagnostic(value.diagnostic)}:{}),
-          destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,
+          destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,remotePending:value.remotePending===true||undefined,
           timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,
           attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,
           ...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??updatedAt,updatedAt};

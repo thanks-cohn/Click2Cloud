@@ -3,8 +3,8 @@ import {historyDefaults} from '../src/history/model.mjs';
 
 const key = 'queueHistoryViewV1';
 export const queueDefaults = Object.freeze({
-  timer:'hide', preset:'full', range:'all', previews:'closed', timezone:historyDefaults.timezone,
-  expandScreenshotHostURL:false
+  timer:'off', preset:'full', range:'all', previews:'closed', timezone:historyDefaults.timezone,
+  expandScreenshotHostURL:false,basicPreviews:'all',expandBasicURL:false
 });
 function normalize(value) {
   const next = {...queueDefaults};
@@ -18,19 +18,31 @@ function normalize(value) {
       next.timezone = value.timezone;
     }
   } catch {}
+  if(!value?.timerExplicit&&next.timer==='hide')next.timer='off';
+  if(['all','first','closed'].includes(value?.basicPreviews))next.basicPreviews=value.basicPreviews;
+  else if(value?.previews==='first')next.basicPreviews='first';
+  next.expandBasicURL=value?.expandBasicURL===true;
+  next.timerExplicit=value?.timerExplicit===true;
   next.expandScreenshotHostURL = value?.expandScreenshotHostURL === true;
   return next;
 }
 
-export function createQueueService() {
+export function createQueueService({readLegacy,writeLegacy} = {}) {
   const store = createHistoryStore();
   let preferences = queueDefaults, sync, accountingPending = false, coverage = [];
-  const ready = chrome.storage.local.get(key).then(saved=>{preferences = normalize(saved[key]);}).catch(()=>{});
+  const ready = chrome.storage.local.get(key).then(async saved=>{
+    const legacy=saved[key]?null:await readLegacy?.().catch(()=>null);
+    const policy=await store.policy().catch(()=>({}));
+    preferences=normalize({...legacy,...(legacy?.previews==='all'?{previews:queueDefaults.previews}:{}),...saved[key],...(policy.deleteSince?{timer:'delete'}:{})});
+  }).catch(()=>{});
   async function update(patch) {
     await ready;
     return navigator.locks.request(key,async()=>{
       const saved = await chrome.storage.local.get(key);
-      const next = normalize({...normalize(saved[key]),...patch});
+      const next = normalize({...(saved[key]?normalize(saved[key]):preferences),...patch});
+      const {range,previews,timezone,expandScreenshotHostURL}=next;
+      if(writeLegacy&&['range','previews','timezone','expandScreenshotHostURL'].some(field=>Object.hasOwn(patch,field)))
+        await writeLegacy({range,previews,timezone,expandScreenshotHostURL});
       await chrome.storage.local.set({[key]:next});
       preferences = next;
       return next;
@@ -54,8 +66,9 @@ export function createQueueService() {
     return malformed;
   }
 
-  function refresh() {
+  function refresh({force=false} = {}) {
     if (sync) return sync;
+    if(!force&&coverage.length&&!accountingPending)return Promise.resolve(coverage);
     sync = Promise.allSettled(['current','basic'].map(source=>navigator.locks.request('redown-history-backfill:'+source,()=>scan(source)))).then(results=>{
       coverage=results.map((result,index)=>({
         source:['current','basic'][index], state:result.status==='rejected'?'unavailable':result.value?'partial':'retained-source-scanned',
@@ -74,6 +87,11 @@ export function createQueueService() {
     if (sender?.id!==chrome.runtime.id) return;
     if (message?.channel==='queue-history-accounting-pending') accountingPending = true;
   });
-  return {store,ready,update,refresh,get preferences(){return preferences;},
+  async function control(action,job){
+    const reply=await chrome.runtime.sendMessage({channel:'queue-control',action,recordId:job?.recordId});
+    if(!reply?.ok)throw Error(reply?.code??'QUEUE_CONTROL_UNAVAILABLE');
+    return reply.data;
+  }
+  return {store,ready,update,refresh,control,get preferences(){return preferences;},
     get accountingPending(){return accountingPending;},get coverage(){return coverage;}};
 }

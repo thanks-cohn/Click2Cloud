@@ -3,7 +3,7 @@ const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,
 // Uses the gallery's existing image and URL. Only its displayed size changes.
 export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
  const frame=dialog.querySelector('.image-frame'),image=frame.querySelector('img');
- const enter=dialog.querySelector('#immersive-view'),exitButton=dialog.querySelector('#exit-immersive');
+ const enter=dialog.querySelector('#immersive-view,[data-enter-immersive]'),exitButton=dialog.querySelector('#exit-immersive,[data-exit-immersive]');
  const controls=dialog.querySelector('.immersive-controls'),slider=controls.querySelector('input');
  const percent=controls.querySelector('output'),fit=controls.querySelector('button');
  let observer;

@@ -107,13 +107,15 @@ export async function acquireSource(
     maxBytes = MAX_SOURCE_BYTES,
     timeoutMs = 45000,
     hasAccess = async () => true,
+    signal,
   } = {},
 ) {
   const initial = publicSource(input.sourceUrl);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const readSignal=signal?AbortSignal.any([signal,controller.signal]):controller.signal;
   try {
-    const {response, url} = await readSource(initial, fetch, hasAccess, controller.signal);
+    const {response, url} = await readSource(initial, fetch, hasAccess, readSignal);
     if (!response.ok)
       throw Object.assign(fail(
         "SOURCE_HTTP_ERROR",
@@ -160,6 +162,7 @@ export async function acquireSource(
     let size = 0;
     try {
       while (true) {
+        readSignal.throwIfAborted();
         const { done, value } = await reader.read();
         if (done) break;
         const end = size + value.byteLength;
@@ -224,6 +227,7 @@ export async function acquireSource(
     if (size <= retainedPreviewLimit && /^image\/(png|jpeg|gif|webp|avif)$/.test(mime)) preview = encodePreview(bytes,mime);
     return { bytes, filename, mime, preview };
   } catch (e) {
+    signal?.throwIfAborted();
     if (typeof e.code === "string") throw e;
     throw fail(
       controller.signal.aborted ? "SOURCE_TIMEOUT" : "SOURCE_UNAVAILABLE",

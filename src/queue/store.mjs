@@ -23,6 +23,22 @@ function cursors(source, range, direction, visit) {
   });
 }
 const capValid = value => Number.isSafeInteger(value) && value > 0;
+export const QUEUE_CLEANUP_ALARM = 'redown-queue-cleanup';
+export const queueRetentionDefaults = Object.freeze({normalMinutes:15,errorMinutes:60,keepErrors:false});
+const minute = 60_000;
+const expiryClass = job => !(job.queueTerminal??job.terminal) || !Number.isSafeInteger(job.terminalAt) ? undefined :
+  ['verified','cancelled'].includes(job.status) ? 'normal' : 'error';
+const deadlines = (policy, now) => ({
+  normal:policy.normalMinutes===null?null:now-policy.normalMinutes*minute,
+  error:policy.keepErrors?null:now-policy.errorMinutes*minute
+});
+const jobFields = ['recordId','sourceRecordId','sourceApi','attemptId','actionId','deliveryId','provider','kind','destination',
+  'status','terminal','requestedAt','terminalAt','updatedAt','filename','code','progress','bytes','recoverable',
+  'retryExpiresAt','retryable','cancellable','parentAttemptId'];
+function projectJob(record,rank,jobAt){
+  return {...Object.fromEntries(jobFields.map(field=>[field,record[field]])),rank,jobAt,
+    terminal:record.queueTerminal??record.terminal,queueClass:expiryClass(record)};
+}
 function searchKeys(record){
   const values=[record.filename,record.provider,record.destination?.bucket,record.destination?.key,
     record.destination?.folder,record.destination?.path,
@@ -43,19 +59,33 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
   const lock = work => locks ? locks.request(database + ':archive', work) : work();
   function open() {
     return opening ??= new Promise((resolve, reject) => {
-      const r = indexedDB.open(database, 1);
+      const r = indexedDB.open(database, 2);
       let blocked = false;
       r.onblocked = () => { blocked = true; reject(Error('HISTORY_STORAGE_BLOCKED')); };
       r.onerror = () => reject(r.error);
-      r.onupgradeneeded = () => {
+      r.onupgradeneeded = event => {
         const db = r.result;
-        const records=db.createObjectStore('records', {keyPath:'recordId'});
-        records.createIndex('chronology', ['sortAt','recordId']);
-        records.createIndex('kind', ['kind','sortAt','recordId']);
-        records.createIndex('search','searchKeys',{multiEntry:true});
-        db.createObjectStore('jobs', {keyPath:'recordId'}).createIndex('order', ['rank','jobAt','recordId']);
-        db.createObjectStore('excluded');
-        db.createObjectStore('state');
+        if(event.oldVersion===0){
+          const records=db.createObjectStore('records',{keyPath:'recordId'});
+          records.createIndex('chronology',['sortAt','recordId']);
+          records.createIndex('kind',['kind','sortAt','recordId']);
+          records.createIndex('search','searchKeys',{multiEntry:true});
+          db.createObjectStore('jobs',{keyPath:'recordId'}).createIndex('order',['rank','jobAt','recordId']);
+          db.createObjectStore('excluded');
+          db.createObjectStore('state');
+        }
+        const jobs=r.transaction.objectStore('jobs');
+        jobs.createIndex('expiry',['queueClass','terminalAt']);
+        if(event.oldVersion===1){
+          const cursor=jobs.openCursor();
+          cursor.onsuccess=()=>{
+            const row=cursor.result;
+            if(!row)return;
+            const job=row.value;
+            row.update({...projectJob(job,job.acknowledged?4:job.rank,job.jobAt),acknowledged:job.acknowledged});
+            row.continue();
+          };
+        }
       };
       r.onsuccess = () => {
         if (blocked) r.result.close();
@@ -111,12 +141,47 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
     }
     if (policy.cap) await prune(s, null, (await request(s.records.count()))-policy.cap);
   }
+  const queuePolicy=async s=>({...queueRetentionDefaults,...await request(s.state.get('queue-policy'))});
+  async function pruneJobs(s,policy){
+    const before=deadlines(policy,clock());
+    const watermark=await request(s.state.get('queue-expired'))??{};
+    for(const [group,end] of Object.entries(before)){
+      if(end===null||end<0)continue;
+      await cursors(s.jobs.index('expiry'),IDBKeyRange.bound([group,0],[group,end+1],false,true),'next',cursor=>{
+        cursor.delete();
+      });
+      watermark[group]=Math.max(watermark[group]??-1,end);
+    }
+    await request(s.state.put(watermark,'queue-expired'));
+  }
+  function dismiss(s,job){
+    if(job?.terminal&&job.rank<4)s.jobs.put({...job,acknowledged:true,rank:4});
+  }
   return {
     snapshot: lock,
     async close() { if (opening) (await opening).close(); opening = undefined; },
     sourceCheckpoint: (source,cursor) => cursor===undefined?
       run(['state'],'readonly',s=>request(s.state.get('source:'+source))):
       run(['state'],'readwrite',s=>request(s.state.put(cursor,'source:'+source))),
+    get: recordId=>run(['records'],'readonly',s=>request(s.records.get(recordId))),
+    rememberRename: (recordId,changes)=>lock(()=>run(['records'],'readwrite',async s=>{
+      const record=await request(s.records.get(recordId));
+
+      if(record){
+        const value={...record,...changes,renamed:true};
+        await request(s.records.put({...value,searchKeys:searchKeys(value)}));
+      }
+    })),
+    queuePolicy: ()=>run(['state'],'readonly',queuePolicy),
+    setQueuePolicy: patch=>lock(()=>run(['jobs','state'],'readwrite',async s=>{
+      const policy={...await queuePolicy(s),...patch};
+      if(policy.normalMinutes!==null&&!capValid(policy.normalMinutes)||!capValid(policy.errorMinutes)||
+        typeof policy.keepErrors!=='boolean')throw Error('QUEUE_INVALID_RETENTION');
+      await request(s.state.put(policy,'queue-policy'));
+      await pruneJobs(s,policy);
+      return policy;
+    })),
+    maintainJobs: ()=>lock(()=>run(['jobs','state'],'readwrite',async s=>pruneJobs(s,await queuePolicy(s)))),
     policy: () => run(['state'], 'readonly', async s => await request(s.state.get('policy')) ?? {}),
     async setPolicy(policy, {confirmed = false} = {}) {
       return lock(() => run(stores, 'readwrite', async s => {
@@ -133,10 +198,12 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
     reconcile(records) {
       if (!Array.isArray(records) || records.length > 512) throw Error('HISTORY_INVALID_BATCH');
       return lock(() => run(stores, 'readwrite', async s => {
+        const policy=await queuePolicy(s), before=deadlines(policy,clock());
+        const watermark=await request(s.state.get('queue-expired'))??{};
         for (const record of records) {
           if (record.schemaVersion !== 1 || typeof record.recordId !== 'string' || !record.recordId ||
               !Number.isSafeInteger(record.sortAt) || record.sortAt < 0) throw Error('HISTORY_INVALID_RECORD');
-          const {recordId, rank, jobAt, removeJob, ...metadata} = record;
+          const {recordId, rank, jobAt, removeJob, queueTerminal, ...metadata} = record;
           if(removeJob){
             s.jobs.delete(recordId);
             s.state.put(record.updatedAt??0,'retired-job:'+recordId);
@@ -149,15 +216,22 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
           const [old, job, excluded] = await Promise.all([request(s.records.get(recordId)),
             request(s.jobs.get(recordId)), request(s.excluded.get(recordId))]);
           const latest = [old, job].filter(Boolean).sort((a,b) => (b.updatedAt ?? 0)-(a.updatedAt ?? 0))[0];
-          if ((latest?.updatedAt ?? 0) > (record.updatedAt ?? 0)) continue;
+          if((latest?.updatedAt??0)>(record.updatedAt??0)||old?.status==='verified'&&record.status!=='verified')continue;
           if (latest && latest.updatedAt === record.updatedAt && latest.status === record.status &&
-              latest.code === record.code && (record.terminal ? !!old || excluded : !!job)) continue;
-          if (rank !== undefined && !(old && rank !== 1 && old.status === 'verified')) {
-            const acknowledged = job?.acknowledged === true && job.status === record.status && job.code === record.code;
-            s.jobs.put({...record, acknowledged, rank:acknowledged ? 3 : rank, jobAt:jobAt ?? record.requestedAt ?? record.sortAt});
-          } else s.jobs.delete(recordId);
+              latest.code === record.code && latest.retryable===record.retryable && latest.cancellable===record.cancellable &&
+              latest.bytes===record.bytes && (record.terminal ? (!!old || excluded) && (rank===undefined||!!job) : !!job)) continue;
+          const group=expiryClass(record);
+          const expired=group&&record.terminalAt<=Math.max(before[group]??-1,watermark[group]??-1);
+          if (rank!==undefined&&!expired) {
+            const acknowledged=job?.acknowledged===true&&job.status===record.status&&job.code===record.code&&
+              job.updatedAt===record.updatedAt;
+            const entry=projectJob(record,acknowledged?4:rank,jobAt??record.requestedAt??record.sortAt);
+            s.jobs.put({...entry,acknowledged});
+          }else if(!job?.acknowledged)s.jobs.delete(recordId);
           if (record.terminal && !excluded) {
-            const value={recordId,...metadata,sortAt:old?.sortAt??record.sortAt,terminalAt:old?.terminalAt??record.terminalAt};
+            const rename=old?.renamed?Object.fromEntries(
+              ['renamed','filename','providerObjectId','etag','version','bytes','destination'].map(field=>[field,old[field]])):null;
+            const value={recordId,...metadata,...rename,sortAt:old?.sortAt??record.sortAt,terminalAt:old?.terminalAt??record.terminalAt};
             s.records.put({...value,searchKeys:searchKeys(value)});
           }
         }
@@ -218,22 +292,32 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
     jobs({offset = 0, limit = 10} = {}) {
       return run(['jobs'], 'readonly', async s => {
         const index = s.jobs.index('order');
-        const counts = await Promise.all([0,1,2].map(rank =>
+        const counts = await Promise.all([0,1,2,3].map(rank =>
           request(index.count(IDBKeyRange.bound([rank],[rank+1],false,true)))));
         const items = [];
         let skip = offset;
-        await cursors(index, IDBKeyRange.upperBound([3],true), 'next', cursor => {
+        await cursors(index, IDBKeyRange.upperBound([4],true), 'next', cursor => {
           if (skip) { const count = skip; skip = 0; return count; }
           items.push(cursor.value);
           return items.length < limit;
         });
-        return {items,working:counts[0],attention:counts[1],waiting:counts[2],
+        return {items,working:counts[0],attention:counts[1],waiting:counts[2],finished:counts[3],
           total:counts.reduce((sum,count)=>sum+count,0)};
       });
     },
+    job: recordId=>run(['jobs'],'readonly',s=>request(s.jobs.get(recordId))),
+    activeJobs: (updatedSince=0)=>run(['jobs'],'readonly',async s=>{
+      const items=[];
+      await cursors(s.jobs.index('order'),IDBKeyRange.upperBound([3],true),'next',cursor=>{
+        const job=cursor.value;
+        if(job.cancellable&&!job.terminal&&(job.updatedAt??0)>=updatedSince)items.push(job);
+      });
+      return items;
+    }),
+    clearJobs: ()=>lock(()=>run(['jobs'],'readwrite',s=>
+      cursors(s.jobs,null,'next',cursor=>dismiss(s,cursor.value)))),
     acknowledge: recordId => lock(() => run(['jobs'], 'readwrite', async s => {
-      const job = await request(s.jobs.get(recordId));
-      if (job?.rank === 1) await request(s.jobs.put({...job, acknowledged:true,rank:3}));
+      dismiss(s,await request(s.jobs.get(recordId)));
     }))
   };
 }

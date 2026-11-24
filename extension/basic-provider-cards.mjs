@@ -19,7 +19,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
   stack.className = 'remote-providers';
   const cards = new Map();
   function paintActivity(card) {
-    card.activity.textContent = card.timer ? 'Success!' : card.active ? 'Working…' : '';
+    card.activity.textContent = card.timer ? 'Success!' : card.active ? 'Working…' :
+      card.problem ? 'Needs attention' : card.isReady ? '' : card.readiness.dataset.reason ? 'Not connected' : '';
     card.activity.toggleAttribute('data-success', !!card.timer);
   }
   function clearSuccess(card) {
@@ -77,10 +78,11 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     card.isReady = status.ready === true && status.connected === true;
     card.connect.textContent = status.connected ? 'Reconnect' : 'Sign In';
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
-    card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
+    card.readiness.textContent = status.ready ? '' :
       [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
-    card.readiness.dataset.reason = status.reason ?? '';
+    card.readiness.dataset.reason = status.reason ?? (status.ready ? '' : 'DISCONNECTED');
     card.availability.textContent = card.readiness.textContent;
+    paintActivity(card);
   }
   for (const [id, label, icon] of providers) {
     const section = document.createElement('section');
@@ -91,12 +93,12 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         <h2 id="remote-provider-${id}">${label}</h2>
       </div>
       <p role="status" class="remote-provider-activity" data-activity></p>
-      <div class="remote-provider-info" tabindex="0" role="region" aria-label="${label} connection details">
+      <details class="remote-provider-info" aria-label="${label} connection details"><summary>Connection details</summary>
         <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
         <p class="muted" role="status" data-feedback></p>
         <p class="muted" role="status" data-navigation></p>
-        <p class="muted" data-availability>Checking authorization…</p>
-      </div>
+        <p class="muted" data-availability></p>
+      </details>
       <div class="remote-provider-actions">
         <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
         <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
@@ -118,6 +120,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
       delete feedback.dataset.code;
+      card.problem=false;
       feedback.textContent = '';
       card.active++;
       clearSuccess(card);
@@ -127,6 +130,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         if (changesStatus && revision === card.revision) paint(card, result);
         completed = changesStatus ? result.ready === true && result.connected === true && card.isReady : result.opened === true;
       } catch (error) {
+        card.problem=true;
         feedback.textContent = error.message;
         feedback.dataset.code = error.code;
       } finally {
@@ -167,6 +171,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         confirmed = result.state === 'SAVED' && result.confirmed === true;
       } catch (error) {
         if (error.code === 'PENDING_SAVE_NOT_FOUND' && card.pending?.id === item.id) paintPending(card, null);
+        card.problem=true;
         feedback.textContent = error.message;
       } finally {
         card.continueSave.disabled = false;
@@ -191,6 +196,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         card.readiness.textContent = error.message;
         card.readiness.dataset.reason = error.code;
         card.availability.textContent = error.message;
+        card.problem=true;
+        paintActivity(card);
       });
       const attempt = card.attemptRevision;
       void call('saves.pending', id).then(item => {

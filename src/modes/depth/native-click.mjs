@@ -53,7 +53,7 @@ export function createDepthNativeClick({current,oauth,transport,lookup,inspect,a
   const outcome={...result,target:row.target,depthClickId:operationId};
   try{await record(result.state,code,result.remoteOperationId??result.operationId);}catch{recordFailed=true;}
   if(recordFailed)outcome.depthRecordCode='DEPTH_CLICK_RECORD_FAILED';
-  try{await feedback({state:result.state,code,reason,operationId,recordCode:outcome.depthRecordCode},tab);}catch{/* A failed notification never changes remote truth. */}
+  try{await feedback({state:result.state,code,reason,operationId,remoteOperationId:result.remoteOperationId??result.operationId,recordCode:outcome.depthRecordCode},tab);}catch{/* A failed notification never changes remote truth. */}
   return outcome;
  };
 }
@@ -68,5 +68,5 @@ export function createDepthFeedback(chrome,refreshBadge=async()=>{}){return asyn
  if(!routine){
   try{await refreshBadge();}catch{}
  }
- try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',operationId:outcome.operationId,message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
+ try{await chrome.runtime.sendMessage({channel:'depth-click-outcome',operationId:outcome.operationId,remoteOperationId:outcome.remoteOperationId,message,state:outcome.state,code:safeCode(outcome.code)});}catch{}
 };}

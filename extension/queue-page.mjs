@@ -5,10 +5,10 @@ import {createHistoryCards,historyLocation,providerName,queueStatus} from './his
 const rowHeight=72, jobBatch=10;
 const element=(tag,text)=>Object.assign(document.createElement(tag),text==null?{}:{textContent:text});
 
-export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspectReceipt,signal}) {
+export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screenshotRequest,signal}) {
   const root=element('section');
   root.className='card queue-jobs';
-  root.innerHTML='<h2>Live Jobs</h2><p data-job-counts role="status"></p><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry History sync</button>'+
+  root.innerHTML='<div class="queue-actions"><button type="button" data-cancel-all>Cancel All</button><button type="button" data-clear-all>Clear All</button></div><p data-job-counts role="status"></p><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry receipt sync</button>'+
     '<div class="queue-job-window" tabindex="0" aria-label="Live jobs"><div data-job-padding-top></div><div data-job-items></div><div data-job-padding-bottom></div></div>';
   parent.append(root);
   const counts=root.querySelector('[data-job-counts]'),warning=root.querySelector('[data-job-warning]');
@@ -17,9 +17,29 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
   const resync=root.querySelector('[data-job-resync]');
   resync.onclick=async()=>{
     resync.disabled=true;
-    try{await service.refresh();await refresh();}
+    try{await service.refresh({force:true});await refresh();}
     finally{resync.disabled=false;}
   };
+  const cancelAll=root.querySelector('[data-cancel-all]'),clearAll=root.querySelector('[data-clear-all]');
+  async function control(button,action,job){
+    if(button.disabled)return;
+    button.disabled=true;
+    try{
+      const data=await service.control(action,job);
+      warning.textContent=action==='cancel-all'?(data?.results?.length?'Stop requested for cancellable saves. Final writes and captures may still complete.':
+        'No cancellable saves found. Final writes and captures may still complete.'):
+        data?.state==='unsupported'?'This save is past its cancellation point. Wait for verification.':
+        action==='cancel'?'Cancellation requested.':'';
+    }catch{
+      warning.textContent=action==='retry'?'Retry unavailable. Check the original source and account in Remotes.':
+        'Could not complete this Queue action. Check the job before trying again.';
+    }finally{
+      button.disabled=false;
+      await refresh();
+    }
+  }
+  cancelAll.onclick=()=>void control(cancelAll,'cancel-all');
+  clearAll.onclick=()=>void control(clearAll,'clear');
   let revision=0;
   const rendered=new Map();
   async function refresh(){
@@ -27,9 +47,13 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
     try{
       const result=await service.store.jobs({offset,limit:offset===0&&scroll.scrollTop<rowHeight*3?jobBatch:jobBatch*3});
       if(signal.aborted||ticket!==revision)return;
+      if(offset>=result.total&&scroll.scrollTop>0){
+        scroll.scrollTop=0;
+        return void refresh();
+      }
       resync.hidden=!service.accountingPending;
-      warning.textContent=service.accountingPending?'History sync needed. Saved outcomes can be reconciled from available receipts.':'';
-      counts.textContent=result.total?`Working ${result.working} · Waiting ${result.waiting} · Needs attention ${result.attention}`:'No active jobs';
+
+      counts.textContent=result.total?`Working ${result.working} · Waiting ${result.waiting} · Needs attention ${result.attention} · Finished ${result.finished}`:'No jobs';
       scroll.hidden=!result.total;
       top.style.height=(offset*rowHeight)+'px';
       bottom.style.height=(Math.max(0,result.total-offset-result.items.length)*rowHeight)+'px';
@@ -37,11 +61,13 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
       for(const [id,node] of rendered)if(!current.has(id)){node.remove();rendered.delete(id);}
       for(const [index,job] of result.items.entries()){
         let row=rendered.get(job.recordId);
-        const version=JSON.stringify([job.updatedAt,job.status,job.filename,job.code,job.progress]);
-        if(!row||row.dataset.version!==version&&!row.contains(document.activeElement)){
+        const version=JSON.stringify([job.updatedAt,job.status,job.filename,job.code,job.progress,job.bytes,job.cancellable,job.retryable,job.retryExpiresAt>Date.now()]);
+        if(!row||row.dataset.version!==version){
+          const focus=row?.contains(document.activeElement)?document.activeElement.className:null;
           const next=renderJob(job);
           next.dataset.version=version;
           row?.replaceWith(next);
+          if(focus==='queue-dismiss')next.querySelector('.queue-dismiss:not(:disabled)')?.focus({preventScroll:true});
           row=next;
           rendered.set(job.recordId,row);
         }
@@ -56,36 +82,52 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
     const description=element('div'), title=element('strong',job.filename??'N/A');
     title.title=job.filename??'';
     description.append(title,element('small',providerName(job.provider)+' · '+historyLocation(job.destination)));
-    const state=element('div'), status=element('span',queueStatus(job.status));
+    const state=element('div'), status=element('span',job.status==='verified'?'Completed':queueStatus(job.status));
     status.className='queue-badge';status.dataset.outcome=job.status;
     const time=job.requestedAt?new Date(job.requestedAt).toLocaleTimeString():'N/A';
     status.title=job.code??'';
     state.append(status,element('small',time));
     row.append(description,state);
-    if(job.rank===0){
+    if(job.rank===0&&job.status!=='cancelling'){
       const progress=element('progress');progress.max=100;
       if(Number.isFinite(job.progress)&&job.progress>=0&&job.progress<=100)progress.value=job.progress;
       progress.setAttribute('aria-label',job.filename??'Save progress');
       state.append(progress);
-    }else{
-      const actions=element('div');actions.className='queue-actions';
-      const button=(label,click)=>{
-        const b=element('button',label);b.onclick=()=>void Promise.resolve().then(click)
-          .catch(()=>{warning.textContent='This action is unavailable. Review the save in Remotes or History.';});actions.append(b);
-      };
-      if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
-        const result=await inspectReceipt(job.sourceRecordId);
-        warning.textContent=result.reconciliation?.state==='verified'?'Saved file verified.':'Save still unconfirmed. Check Remotes before starting another save.';
-        if(result.reconciliation?.state==='verified')await service.refresh();
-      });
-      if(job.status==='needs-login'||job.rank===2)button('Remotes',openRemotes);
-      if(job.kind==='screenshot'&&job.recoverable)button('Review retry',async()=>{
-        if(confirm('Use the existing screenshot recovery to check unconfirmed files and retry available outputs?'))
-          await retryScreenshot(job.sourceRecordId);
-      });
-      if(job.rank===1)button('Acknowledge',async()=>{await service.store.acknowledge(job.recordId);await refresh();});
-      row.append(actions);
+      if(job.bytes>0)state.append(element('small',job.bytes.toLocaleString()+' bytes'));
     }
+    const actions=element('div');actions.className='queue-actions';
+    const button=(label,click)=>{
+      const b=element('button',label);
+      b.type='button';
+      b.onclick=()=>void Promise.resolve().then(()=>click(b)).catch(()=>{
+        warning.textContent='This action is unavailable. Review the save in Remotes or History.';
+      });
+      actions.append(b);
+      return b;
+    };
+    if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
+      const result=await inspectReceipt(job.sourceRecordId);
+      warning.textContent=result.reconciliation?.state==='verified'?'Saved file verified.':'Save still unconfirmed. Check Remotes before starting another save.';
+      if(result.reconciliation?.state==='verified')await service.refresh({force:true});
+    });
+    if(job.kind==='screenshot'&&job.deliveryId&&job.status==='uncertain')button('Check receipt',async b=>{
+      b.disabled=true;
+      try{
+        const result=await screenshotRequest('reconcile',{operationId:job.sourceRecordId});
+        warning.textContent=result.state==='confirmed'?'Screenshot files verified.':'Some screenshot files remain unconfirmed.';
+      }finally{b.disabled=false;}
+    });
+    if(['needs-login','waiting'].includes(job.status))button('Remotes',openRemotes);
+    if(job.terminal&&['cancelled','failed'].includes(job.status)&&job.retryExpiresAt>Date.now()&&
+        (job.retryable||job.kind==='screenshot'&&job.recoverable))
+      button('Retry',b=>control(b,'retry',job));
+    const close=button('×',b=>control(b,job.terminal?'dismiss':'cancel',job));
+    close.className='queue-dismiss';
+    close.disabled=!job.terminal&&!job.cancellable;
+    close.title=job.terminal?'Dismiss job':job.status==='cancelling'?'Cancelling…':
+      job.cancellable?'Cancel job':'Cancellation unavailable at this stage';
+    close.setAttribute('aria-label',close.title+' '+(job.filename??'save'));
+    row.append(actions);
     return row;
   }
   let frame;
@@ -98,13 +140,13 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
   return {refresh};
 }
 
-export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,state={page:1}}) {
+export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,rename,renameError,state={page:1}}) {
   const root=element('section');
   root.className='card queue-archive';
-  root.innerHTML='<h2>History V2</h2><label class="queue-search">Find saved files<input data-history-find type="search" placeholder="Filename, provider or a word"></label>'+
+  root.innerHTML='<label class="queue-search">Find saved files<input data-history-find type="search" placeholder="Filename, provider or a word"></label>'+
     '<p role="status" data-history-notice></p><div data-history-records></div>'+
     '<p class="queue-single-page" hidden>Page 1 of 1</p>'+
-    '<form class="queue-pager" aria-label="History V2 pages" hidden><button type="button" data-first aria-label="First page" title="First page">«</button>'+
+    '<form class="queue-pager" aria-label="History pages" hidden><button type="button" data-first aria-label="First page" title="First page">«</button>'+
     '<button type="button" data-prev aria-label="Previous page" title="Previous page">‹</button><label><span>Page</span><input type="number" min="1" step="1" required inputmode="numeric"></label>'+
     '<span data-pages></span><button type="button" data-next aria-label="Next page" title="Next page">›</button>'+
     '<button type="button" data-last aria-label="Last page" title="Last page">»</button><button type="submit" class="sr-only">Go to page</button></form>';
@@ -114,17 +156,21 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   const singlePage=root.querySelector('.queue-single-page');
   let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, editingPage=false;
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
-  const groupState=new Map();
+  const groupState=new Map(), cardDisclosures=new Map();
   find.value=state.query??'';
   function render(items,prefs){
     for(const group of list.querySelectorAll('[data-calendar-group]')){
       groupState.set(group.dataset.calendarGroup,group.open);
       if(groupState.size>200)groupState.delete(groupState.keys().next().value);
     }
+    for(const row of list.querySelectorAll('[data-record-id]')){
+      cardDisclosures.set(row.dataset.recordId,[...row.querySelectorAll('details')].map(detail=>detail.open));
+      if(cardDisclosures.size>200)cardDisclosures.delete(cardDisclosures.keys().next().value);
+    }
     cardScope?.abort();
     cardScope=new AbortController();
     cards=createHistoryCards({api,screenshotRequest,goTo,canRead,signal:cardScope.signal,
-      preferences:prefs,isFirstPage:page===1,visibility:metadataPreference?.value});
+      preferences:prefs,isFirstPage:page===1,visibility:metadataPreference?.value,rename,renameError,onGalleryClosed:()=>void refresh({force:true})});
     const groups=new Map(), contents=document.createDocumentFragment();
     for(const row of items){
       let parent=contents;
@@ -141,12 +187,17 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         }
         parent=group;
       }
-      parent.append(cards.render(row));
+      const card=cards.render(row), previous=cardDisclosures.get(row.recordId);
+      if(previous)[...card.querySelectorAll('details')].forEach((detail,index)=>{
+        if(previous[index]!==undefined)detail.open=previous[index];
+      });
+      parent.append(card);
     }
     list.replaceChildren(contents);
   }
   async function refresh({force=false}={}){
-    if(!force&&(list.contains(document.activeElement)||find===document.activeElement||input===document.activeElement))return;
+    if(cards?.previewOpen||list.querySelector('input:not([type=range]):focus'))return;
+    if(!force&&(find===document.activeElement||input===document.activeElement))return;
     const ticket=++generation;
     try{
       await service.ready;
@@ -156,7 +207,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       const range=historyInterval(prefs);
       if(prefs.timer!=='off')range.from=Math.max(range.from??0,Date.now()-VISIBILITY_MS);
       const result=await service.store.page({page,...range,query});
-      if(signal.aborted||ticket!==generation)return;
+      if(signal.aborted||ticket!==generation||cards?.previewOpen||list.querySelector('input:not([type=range]):focus'))return;
       page=state.page=result.page;pages=result.pages;state.query=find.value;
       const text=result.total?result.total.toLocaleString()+(result.total===1?' result':' results'):'No saves in this display range.';
       const timer=prefs.timer==='off'?'':' · 15-minute '+(prefs.timer==='delete'?'Delete':'Hide');
@@ -174,7 +225,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         lastSignature=signature;
       }
     }catch{
-      if(!signal.aborted)notice.textContent='History V2 is unavailable. Live Jobs and saving can continue.';
+      if(!signal.aborted)notice.textContent='History is unavailable. Live Jobs and saving can continue.';
     }
   }
   const select=newPage=>{editingPage=false;page=newPage;void refresh({force:true});};
@@ -194,7 +245,6 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
 
 export function createQueuePage(options) {
   let scope;
-  const state={page:1};
   function stop(){scope?.abort();}
   function mount(main){
     stop();
@@ -203,23 +253,57 @@ export function createQueuePage(options) {
     const page=element('section');page.className='page queue-page';page.append(element('h1','Queue'));
     main.replaceChildren(page);
     const jobs=mountLiveJobs(page,{...options,signal});
-    const history=mountHistoryV2(page,{...options,signal,state});
+
     let update;
     const refresh=()=>{
       if(signal.aborted)return;
       clearTimeout(update);
-      update=setTimeout(()=>{void jobs.refresh();void history.refresh();},120);
+      update=setTimeout(()=>{void jobs.refresh();},120);
     };
     const onMessage=(message,sender)=>{
       if(sender?.id===chrome.runtime.id&&['queue-history-changed','queue-history-accounting-pending','connection-changed'].includes(message?.channel))refresh();
     };
     chrome.runtime.onMessage.addListener(onMessage);
-    const tick=setInterval(refresh,10000);
+    const tick=setInterval(refresh,15000);
     signal.addEventListener('abort',()=>{
       chrome.runtime.onMessage.removeListener(onMessage);
       clearTimeout(update);clearInterval(tick);
     },{once:true});
+    void options.service.store.maintainJobs().then(refresh).catch(()=>{});
     void options.service.refresh().then(refresh);
+  }
+  return {mount,stop};
+}
+
+export function createHistoryArchive(options) {
+  let scope;
+  const state={page:1};
+  function stop(){scope?.abort();}
+  function mount(main){
+    stop();
+    scope=new AbortController();
+    const {signal}=scope;
+    const page=element('section');
+    page.className='page queue-page';
+    page.append(element('h1','History'));
+    main.replaceChildren(page);
+    const history=mountHistoryV2(page,{...options,signal,state});
+    let pending;
+    const schedule=()=>{
+      clearTimeout(pending);
+      pending=setTimeout(()=>void history.refresh(),120);
+    };
+    const onMessage=(message,sender)=>{
+      if(sender?.id===chrome.runtime.id&&['queue-history-changed','queue-history-accounting-pending','connection-changed'].includes(message?.channel))schedule();
+    };
+    chrome.runtime.onMessage.addListener(onMessage);
+    const tick=setInterval(()=>{if(options.service.preferences.timer!=='off')schedule();},15000);
+    signal.addEventListener('abort',()=>{
+      chrome.runtime.onMessage.removeListener(onMessage);
+      clearInterval(tick);
+      clearTimeout(pending);
+    },{once:true});
+    void options.service.refresh().then(schedule);
   }
   return {mount,stop};
 }

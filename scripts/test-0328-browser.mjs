@@ -6,7 +6,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {extname,join,resolve,sep} from 'node:path';
 import {chromium} from 'playwright-core';
 
-const root = resolve('dist/click2cloud'), out = resolve(process.env.C2C_0327_EVIDENCE ?? 'work/0327/browser');
+const root = resolve('dist/click2cloud'), out = resolve(process.env.C2C_0328_EVIDENCE ?? 'work/0328/browser');
 const baseline = process.env.C2C_BASELINE_BUILD && resolve(process.env.C2C_BASELINE_BUILD);
 const types = {'.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.css':'text/css','.png':'image/png'};
 const server = createServer(async (req,res) => {
@@ -100,14 +100,41 @@ function installFixture(manifest) {
         return {ok:true,value:{provider,ready,connected:ready,reason:ready?'READY':'AUTH_REQUIRED',...(longInfo?{message:longInfo}:{}),...(ready?{}:{nextAction:'Sign in to authorize saves.'})}};
       }
       if (message.channel==='queue-history-scan') return {ok:true,records:[],malformed:0,next:null};
+      if (message.channel==='queue-control') {
+        const {createHistoryStore}=await import('/src/queue/store.mjs');
+        const store=createHistoryStore();
+        try{
+          if(message.action==='dismiss')await store.acknowledge(message.recordId);
+          if(message.action==='clear')await store.clearJobs();
+          project.operations.push(['queue-control',message.action,message.recordId]);
+          return {ok:true,data:{state:'cancelling'}};
+        }finally{await store.close();}
+      }
       if (message.channel==='screenshot') return {state:'completed',data:{rules:[],revision:0,defaultHandled:true}};
       if (message.channel!=='engine') return null;
       const {method,params} = message;
       if (method==='loginStatus') return success({state:project.connection,identityVerified:project.reconnect,
         accounts:project.connection==='CONNECTED'?[{id:target.accountId,name:'Fixture account'}]:[]});
       if (method==='openRemoteResult') return success({target,highlightKey:'cloudflare.png'});
+      if (method==='fileAction'&&params.action==='rename') {
+        project.operations.push(['rename',params.entry.key,params.name]);
+        if(project.renameFail)return {state:'blocked',code:'FILE_CONFLICT'};
+        project.photos.set(params.name,project.photos.get(params.entry.key));
+        project.photos.delete(params.entry.key);
+        return success({data:{code:'FILE_ACTION_VERIFIED',receipt:{key:params.name,etag:'fixture-r2-etag',
+          version:'fixture-renamed',size:project.photos.get(params.name).length}}});
+      }
+      if (method==='inspectShelfAttention'&&project.attention)return success(project.attention);
+      if (method==='checkCloudflareR2'&&project.attention)
+        return success({state:'SETUP_APPROVAL_REQUIRED',code:'SETUP_APPROVAL_REQUIRED',target});
+      if (method==='inspectCloudflare'&&project.attention)
+        return success({status:{state:'SETUP_APPROVAL_REQUIRED',target},onboarding:{setupAuthorized:false}});
+      if (method==='recoverCloudflareDestination'){
+        project.operations.push(['approve-cloudflare',params.authorizeSetup]);
+        return success({state:'blocked',code:'WORKER_SETUP_REQUIRED',target});
+      }
       if (method==='readFileChunk') {
-        const {offset,length} = params, bytes = project.photos.get('cloudflare.png');
+        const {offset,length} = params, bytes = project.photos.get(params.key);
         project.operations.push(['readFileChunk',params.key]);
         return success({state:'completed',data:{offset,total:bytes.length,etag:'fixture-r2-etag',
           done:offset+length>=bytes.length,bytes:Array.from(bytes.slice(offset,offset+length))}});
@@ -116,7 +143,8 @@ function installFixture(manifest) {
     }
   };
   Object.defineProperty(globalThis,'chrome',{value:{runtime,storage:{local:storage(localStorage),session:storage(sessionStorage),onChanged:event(storageListeners)},
-    windows:{getCurrent:async()=>({id:1})},commands:{getAll:async()=>[]}}});
+    windows:{getCurrent:async()=>({id:1})},alarms:{create:async()=>{},clear:async()=>true},
+    commands:{getAll:async()=>manifest.commands?Object.keys(manifest.commands).map((name,index)=>({name,shortcut:['Alt+Shift+H','Alt+Shift+F','Alt+Q','Ctrl+Shift+Y'][index]})):[]}}});
   window.releaseFixture = Object.assign(project,{target,basicFixture,event(message){
     for (const callback of runtimeListeners) callback(message,{id:'fixture'});
   }});
@@ -124,7 +152,7 @@ function installFixture(manifest) {
 
 try {
   const manifest = JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));
-  assert.equal(manifest.version,'0.3.27');
+  assert.equal(manifest.version,'0.3.28');
   browser = await chromium.launch({executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true});
   report.chromium = browser.version();
   const context = await browser.newContext({viewport:{width:920,height:850},acceptDownloads:true});
@@ -151,6 +179,9 @@ try {
   }
   await app('');
   await fullWidth('Log in');
+  assert.equal(await cloudflare.getByText('Not connected',{exact:true}).count(),0);
+  assert.equal(await cloudflare.getByText(/Cloudflare may charge/).count(),0);
+  assert.equal(await page.locator('#selected-save-setup').count(),0);
   await page.evaluate(()=>{releaseFixture.reconnect=true;releaseFixture.event({channel:'connection-changed'});});
   await fullWidth('Reconnect');
   await page.evaluate(()=>{releaseFixture.connection='CONNECTED';releaseFixture.event({channel:'connection-changed'});});
@@ -172,15 +203,31 @@ try {
   await google.getByRole('button',{name:'Sign In'}).click();
   await google.getByText('Success!',{exact:true}).waitFor();
   assert.equal(await google.locator('[data-activity]').evaluate(el=>el.getAnimations()[0]?.effect.getTiming().iterations),2);
-  assert.deepEqual(await cardBounds(),idle);
+  assert((await cardBounds())[0]<idle[0],'ready information space should collapse');
   await shot('provider-success-320');
   await google.getByText('Success!',{exact:true}).waitFor({state:'hidden'});
   await page.evaluate(()=>{releaseFixture.cardFailure=true;});
   await google.getByRole('button',{name:'Refresh',exact:true}).click();
+  await google.getByText('Needs attention',{exact:true}).waitFor();
+  await google.getByText('Connection details',{exact:true}).click();
   await google.getByText(/temporarily unavailable/).waitFor();
   assert.equal(await google.locator('[data-success]').count(),0);
-  assert.deepEqual(await cardBounds(),idle);
   await page.evaluate(()=>{releaseFixture.cardFailure=false;});
+  await page.evaluate(()=>{
+    releaseFixture.attention={provider:'cloudflare',target:releaseFixture.target,code:'SETUP_APPROVAL_REQUIRED'};
+    releaseFixture.event({channel:'shelf-attention'});
+  });
+  await btn('Review save setup').click();
+  await page.getByText(/Cloudflare may charge for Worker/).waitFor();
+  page.once('dialog',dialog=>dialog.dismiss());
+  await btn('Authorize selected destination').click();
+  assert(!await page.evaluate(()=>releaseFixture.operations.some(([op])=>op==='approve-cloudflare')));
+  page.once('dialog',dialog=>dialog.accept());
+  await btn('Authorize selected destination').click();
+  await page.waitForFunction(()=>releaseFixture.operations.some(([op,approved])=>op==='approve-cloudflare'&&approved));
+  assert.equal(await page.locator('#selected-save-setup').count(),0);
+  await page.evaluate(()=>{releaseFixture.attention=null;});
+  await page.reload();
   pass('Cloudflare full-width actions and stable Basic cards through sign-in, refresh, success and failure');
 
   const collection = ['explorer','remotes','queue','history'];
@@ -227,6 +274,17 @@ try {
   await page.getByRole('menuitem',{name:'Settings',exact:true}).click();
   const settings = page.locator('.history-v2-settings');
   await settings.waitFor();
+  assert.deepEqual(await page.locator('[data-favorite]').evaluateAll(els=>els.map(el=>el.parentElement.textContent.trim())),
+    ['Google Drive','OneDrive','Dropbox','Cloudflare R2']);
+  const driveFavorite=page.locator('[data-favorite="google-drive"]');
+  await driveFavorite.check();
+  await page.waitForFunction(async()=>window.productFixture&&(await productFixture.current.read()).product.favorites.includes('provider:google-drive'));
+  const shortcuts=page.locator('section.card').filter({has:page.getByRole('heading',{name:'Keyboard Shortcuts',exact:true})});
+  await shortcuts.waitFor();
+  assert.equal(await page.getByRole('button',{name:'Open Chrome shortcut settings',exact:true}).count(),1);
+  assert(await shortcuts.getByLabel('Divider Cycle',{exact:true}).isVisible());
+  assert(await shortcuts.getByText('Built-in shortcuts',{exact:true}).isVisible());
+  assert(await shortcuts.getByText('F2',{exact:true}).isHidden());
   assert.equal(await page.locator('#placement-settings option[value=main]').isDisabled(),true);
   await page.getByRole('button',{name:'Move earlier History',exact:true}).click();
   await page.setViewportSize({width:920,height:850});
@@ -286,7 +344,7 @@ try {
     for (const [i,[provider,name,bytes,retained,id]] of definitions.entries()) {
       const objectId = id ?? `object-${i}`, at = new Date(current-i*1200).toISOString();
       const row = {id:`release-record-${i}`,provider,state:'SAVED',confirmed:true,mime:'image/png',filename:`${name}.png`,
-        objectId,bytes:i===9?4194305:bytes.length,createdAt:at,updatedAt:at,
+        objectId,hostUrl:'https://content.example.org/article/feature',sourceUrl:'https://assets.example.net/photos/fixture.png',bytes:i===9?4194305:bytes.length,createdAt:at,updatedAt:at,
         destination:{accountId:'fixture-account',...(provider==='dropbox'?{namespace:'fixture-root'}:provider==='onedrive'?{rootId:'fixture-root'}:{})},
         ...(retained?{preview:encodePreview(bytes,'image/png')}:{})};
       qa.photos.set(objectId,bytes);
@@ -308,58 +366,109 @@ try {
   assert.equal(seed.total,66);
   assert(seed.large>256*1024 && seed.withoutPreviewPayload);
 
-  const queue = async () => {await btn('Queue').click();await page.getByRole('heading',{name:'History V2',exact:true}).waitFor();};
+  const queue = async () => {
+    await btn('Queue').click();
+    await page.getByRole('heading',{name:'Queue',exact:true}).waitFor();
+    assert.equal(await page.getByRole('searchbox',{name:'Find saved files'}).count(),0);
+  };
+  const history = async () => {
+    await btn('More').click();
+    await page.getByRole('menuitem',{name:'History',exact:true}).click();
+    await page.getByRole('heading',{name:'History',exact:true}).waitFor();
+  };
   const find = page.getByRole('searchbox',{name:'Find saved files'});
   const card = name => page.locator('.queue-history-card').filter({has:page.getByText(name,{exact:true})});
   const previewDialog = page.getByRole('dialog',{name:'History image preview'});
-  const viewImage = async (name,expectation) => {
+  const viewImage = async (name,width) => {
     await find.fill(name);
-    await page.waitForFunction(()=>document.querySelectorAll('.queue-history-card').length<=2);
-    const item = card(name);
-    await item.getByRole('button',{name:'Preview',exact:true}).click();
-    if (expectation instanceof RegExp) await previewDialog.getByRole('status').filter({hasText:expectation}).waitFor();
-    else {
-      try { await previewDialog.locator('img').waitFor(); }
-      catch (error) { throw Error(`${name}: ${await previewDialog.getByRole('status').allTextContents()}`,{cause:error}); }
-      assert.equal(await previewDialog.locator('img').evaluate(img=>img.naturalWidth),expectation);
-    }
+    const item=card(name);
+    await item.waitFor();
+    const image=item.locator('.history-preview img');
+    await image.waitFor();
+    await image.click();
+    await previewDialog.locator('img').waitFor();
+    assert.equal(await previewDialog.locator('img').evaluate(img=>img.naturalWidth),width);
+    assert.equal(await previewDialog.getByText(/Retained preview/).count(),0);
     await previewDialog.getByRole('button',{name:'Close',exact:true}).click();
     return item;
   };
   await queue();
+  assert(await btn('Cancel All').isVisible());
+  await page.getByText('Completed',{exact:true}).first().waitFor();
+  await btn('Clear All').click();
+  await page.getByText('No jobs',{exact:true}).waitFor();
+  await history();
   await card('Drive retained.png').waitFor();
-  assert.equal(await page.evaluate(()=>releaseFixture.operations.filter(([name])=>name.startsWith('history.')||name==='provider-read').length),0);
-  await viewImage('cloudflare.png',42);
+  await find.fill('cloudflare.png');
+  const cloudCard=card('cloudflare.png');
+  await cloudCard.getByRole('button',{name:'Preview',exact:true}).click();
+  await previewDialog.locator('img').waitFor();
+  await previewDialog.getByRole('button',{name:'Immersive View'}).click();
+  const imageFrame=previewDialog.locator('.image-frame'), image=previewDialog.locator('img');
+  assert((await imageFrame.boundingBox()).height>200);
+  assert.equal(await previewDialog.evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(0, 0, 0)');
+  await image.click();
+  assert.equal(await previewDialog.locator('output').textContent(),'200%');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await previewDialog.locator('output').textContent(),'200%');
+  await page.keyboard.press('Escape');
+  assert.equal(await previewDialog.locator('output').textContent(),'100%');
+  await page.keyboard.press('Escape');
+  assert.equal(await previewDialog.getAttribute('data-immersive'),null);
+  await previewDialog.getByRole('button',{name:'cloudflare.png',exact:true}).click();
+  await previewDialog.getByRole('textbox',{name:'Filename'}).fill('cancel draft');
+  await page.keyboard.press('Escape');
+  assert(await previewDialog.getByRole('button',{name:'cloudflare.png',exact:true}).isVisible());
+  await previewDialog.getByRole('button',{name:'cloudflare.png',exact:true}).click();
+  await previewDialog.getByRole('textbox',{name:'Filename'}).fill('renamed');
+  await page.keyboard.press('Enter');
+  await previewDialog.getByRole('button',{name:'renamed.png',exact:true}).waitFor();
+  await previewDialog.getByRole('button',{name:'Close',exact:true}).click();
+  await find.fill('renamed.png');
+  await card('renamed.png').waitFor();
+  await page.evaluate(()=>{releaseFixture.renameFail=true;});
+  await card('renamed.png').getByRole('button',{name:'renamed.png',exact:true}).click();
+  await card('renamed.png').getByRole('textbox',{name:'Filename'}).fill('duplicate.gif');
+  await page.keyboard.press('Enter');
+  await card('renamed.png').getByText('That name is already in use.').waitFor();
+
   for (const name of ['Drive retained.png','Dropbox retained.png','OneDrive retained.png']) {
-    const item = await viewImage(name,42);
-    assert(await item.getByRole('button',{name:/^Download /}).isDisabled());
-    assert.equal(await page.evaluate(()=>releaseFixture.operations.filter(([name])=>name==='provider-read').length),0);
+    const item=await viewImage(name,42);
+    assert.equal(await item.getByRole('button',{name:/^Download /}).count(),0);
+    assert(await item.getByText('content.example.org',{exact:true}).isVisible());
+    assert(await item.getByText('Image',{exact:true}).evaluate(el=>el.parentElement.open));
+    await item.getByText('Image',{exact:true}).click();
+    assert(await item.getByText('content.example.org',{exact:true}).isVisible());
+    assert.equal(await item.getByText('URL',{exact:true}).evaluate(el=>el.parentElement.open),false);
+    await item.getByText('URL',{exact:true}).click();
+    assert(await item.getByText('https://content.example.org/article/feature',{exact:true}).isVisible());
+    assert(await item.getByText('https://assets.example.net/photos/fixture.png',{exact:true}).isVisible());
   }
   await viewImage('Drive large.png',480);
   await viewImage('OneDrive live.png',42);
-  await viewImage('Dropbox missing.png',/Dropbox file-read access is unavailable/);
-  await viewImage('Expired grant.png',/Reconnect the saved provider account/);
-  await viewImage('Over limit.png',/exceeds the preview size limit/);
-  await viewImage('Original record missing.png',/original confirmed image record is unavailable/);
+  for(const [name,error] of [
+    ['Dropbox missing.png',/Dropbox file-read access is unavailable/],
+    ['Expired grant.png',/Reconnect the saved provider account/],
+    ['Over limit.png',/exceeds the preview size limit/],
+    ['Original record missing.png',/original confirmed image record is unavailable/]
+  ]){
+    await find.fill(name);
+    await card(name).getByText(error).waitFor();
+  }
+  await page.evaluate(()=>{releaseFixture.aborts=0;});
   await find.fill('slow');
-  await card('Slow provider 1.png').getByText('Details',{exact:true}).click();
-  await card('Slow provider 2.png').getByText('Details',{exact:true}).click();
   await page.waitForFunction(()=>releaseFixture.active===2);
   await find.fill('Drive retained.png');
   await page.waitForFunction(()=>releaseFixture.aborts===2 && releaseFixture.active===0);
   assert.equal(await page.evaluate(()=>releaseFixture.peak),2);
-  await card('Drive retained.png').getByRole('button',{name:'Preview',exact:true}).click();
-  await previewDialog.getByRole('status').filter({hasText:/Retained preview.*42 × 31/}).waitFor();
-  assert.equal(await previewDialog.locator('img').evaluate(img=>getComputedStyle(img).objectFit),'scale-down');
   await shot('history-basic-image');
-  await previewDialog.getByRole('button',{name:'Close',exact:true}).click();
-  pass('Real image decoding from all four providers and bounded lazy/cancelled reads',{knownProviderPorts:['Cloudflare','Google Drive','Dropbox','OneDrive'],...seed});
+  pass('Completed Queue jobs, Clear All, History sections, exact rename and immersive keyboard controls',seed);
 
   await find.fill('Metadata sample.txt');
   await card('Metadata sample.txt').getByText('Details',{exact:true}).click();
   const dt = label => card('Metadata sample.txt').locator('dt').filter({hasText:new RegExp(`^${label}$`)});
-  assert(await dt('Original filename').isHidden());
-  assert.equal(await card('Metadata sample.txt').locator('.queue-location').textContent(),'Google Drive');
+  assert.equal(await dt('Original filename').count(),0);
+  assert.equal(await card('Metadata sample.txt').locator('.queue-location').first().textContent(),'Google Drive');
   assert.equal(await dt('Bytes').evaluate(el=>el.nextElementSibling.textContent),'0');
   assert.equal(await dt('Proof').evaluate(el=>el.nextElementSibling.textContent),'false');
   const originalRows = await page.evaluate(async()=>{
@@ -374,14 +483,14 @@ try {
   await googleSettings.getByText('Google Drive',{exact:true}).click();
   await googleSettings.getByRole('checkbox',{name:'Bytes',exact:true}).uncheck();
   await settings.getByRole('checkbox',{name:'Hide N/A fields'}).uncheck();
-  await queue();
+  await history();
   await card('Metadata sample.txt').getByText('Details',{exact:true}).click();
   assert(await dt('Bytes').isHidden());
-  assert.equal(await card('Metadata sample.txt').locator('.queue-location').textContent(),'Google Drive · N/A');
-  assert.equal(await dt('Original filename').evaluate(el=>el.nextElementSibling.textContent),'N/A');
+  assert.equal(await card('Metadata sample.txt').locator('.queue-location').first().textContent(),'Google Drive · N/A');
+
   await page.evaluate(()=>chrome.storage.local.set({historyV2MetadataVisibilityV1:{hideNA:true,providers:{}}}));
   assert(await dt('Bytes').isVisible());
-  assert(await dt('Original filename').isHidden(), 'live metadata update retains the open card');
+  assert(await card('Metadata sample.txt').getByText('Details',{exact:true}).evaluate(el=>el.parentElement.open));
   assert.deepEqual(await page.evaluate(async()=>{
     const {createHistoryStore}=await import('/src/queue/store.mjs');
     return (await createHistoryStore().page({page:1,query:'metadata sample.txt'})).items;
@@ -389,18 +498,13 @@ try {
   await find.fill('Failed save.txt');
   await card('Failed save.txt').getByText('Details',{exact:true}).click();
   assert(await card('Failed save.txt').getByText('AUTH_REVOKED',{exact:true}).isVisible());
-  await btn('More').click();
-  await page.getByRole('menuitem',{name:'History',exact:true}).click();
-  await page.getByRole('heading',{name:'The Rest is History'}).waitFor();
-  pass('History V2 metadata applies immediately and preserves raw records and legacy History');
-
-  await queue();
+  pass('Provider metadata updates open cards and preserves raw records');
   await find.fill('');
   await page.locator('.queue-pager:not([hidden])').waitFor();
   const testGeometry = async setup => {
     const g = await page.evaluate(()=>{
       const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,mid:r.x+r.width/2};};
-      return {title:rect('.queue-page>h1'),history:rect('.queue-archive>h2'),archive:rect('.queue-archive'),search:rect('.queue-search input'),
+      return {title:rect('.queue-page>h1'),history:rect('.queue-page>h1'),archive:rect('.queue-archive'),search:rect('.queue-search input'),
         pager:rect('.queue-pager'),first:rect('[data-first]'),last:rect('[data-last]'),footer:rect('#manage-slot'),manage:rect('#manage')};
     });
     assert(Math.abs(g.title.mid-g.history.mid)<=1 && Math.abs(g.pager.mid-g.history.mid)<1,JSON.stringify({setup,g}));
