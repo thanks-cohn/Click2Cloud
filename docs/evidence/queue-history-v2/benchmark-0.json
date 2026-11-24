@@ -1,0 +1,117 @@
+{
+  "result": "PASS",
+  "build": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.26",
+    "revision": "74dcc8a571e05ac9be2f62d2cfcb8c59ebc8bdaa",
+    "sourceDigest": "a75b181337fab0a062637fd2b902b49e4826f4493fdbbbfa85d53e9b20347c56",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "platform": "linux",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "proof": "UNPACKED_CHROMIUM_WITH_SYNTHETIC_INDEXEDDB_DATA",
+  "count": 0,
+  "retention": false,
+  "browser": "143.0.7499.4",
+  "version": "0.3.26",
+  "metrics": {
+    "bytes": 1040,
+    "total": 0,
+    "peakBatchRecords": 0,
+    "peakTextBytes": 0,
+    "peakChunkBytes": 0,
+    "manifest": {
+      "schema": "redown.history-export/1",
+      "exporterVersion": 1,
+      "createdAt": "2026-11-24T17:25:10.387Z",
+      "selection": {
+        "from": 0,
+        "end": 9007199254740991,
+        "timezone": "UTC",
+        "includeScreenshots": true,
+        "privacy": false
+      },
+      "snapshot": "Archive locked for duration of indexed read",
+      "sort": [
+        "sortAt DESC",
+        "recordId DESC"
+      ],
+      "expectedRecords": 0,
+      "writtenRecords": 0,
+      "providers": {},
+      "outcomes": {},
+      "proofLevels": {},
+      "sourceCoverage": [],
+      "urlPolicy": "Only HTTP(S) origins are included. Credential-bearing URLs and arbitrary provider metadata are excluded.",
+      "files": [
+        {
+          "name": "history.jsonl",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    "seedMs": 0,
+    "storage": {
+      "quota": 40551921254,
+      "usage": 1072450,
+      "usageDetails": {
+        "indexedDB": 37987,
+        "serviceWorkerRegistrations": 1034463
+      }
+    },
+    "timings": [
+      {
+        "page": 1,
+        "ms": 12
+      },
+      {
+        "page": 1,
+        "ms": 0.2999999998137355
+      },
+      {
+        "page": 1,
+        "ms": 1.5
+      },
+      {
+        "page": 1,
+        "ms": 0.8999999999068677
+      },
+      {
+        "page": 1,
+        "ms": 2
+      },
+      {
+        "page": 1,
+        "ms": 0.5
+      },
+      {
+        "page": 1,
+        "ms": 0.6000000000931323
+      },
+      {
+        "page": 1,
+        "ms": 6.399999999906868
+      },
+      {
+        "page": 1,
+        "ms": 0.6000000000931323
+      },
+      {
+        "page": 1,
+        "ms": 0.30000000004656613
+      }
+    ],
+    "p95Ms": 12,
+    "exportMs": 183.69999999995343,
+    "heapBefore": 2892387,
+    "heapPeak": 2892387,
+    "concurrentWriteExcluded": false
+  },
+  "integrity": {
+    "crc": "PASS",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "orderedIdentities": 0
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "platform": "linux",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "scenarios": [
+    {
+      "scenario": "first-install",
+      "context": "page",
+      "status": "PASS",
+      "proof": "OS-rendered flat native action",
+      "selected": "Cloudflare"
+    },
+    {
+      "scenario": "first-install",
+      "context": "image",
+      "status": "PASS",
+      "proof": "OS-rendered native menu",
+      "selected": null
+    },
+    {
+      "scenario": "first-install",
+      "context": "link",
+      "status": "PASS",
+      "proof": "OS-rendered native menu",
+      "selected": null
+    },
+    {
+      "scenario": "logged-out native click",
+      "status": "PASS",
+      "proof": "Chrome onClicked and production outcome",
+      "code": "LOGIN_REQUIRED"
+    },
+    {
+      "scenario": "worker wake ACK",
+      "status": "PASS",
+      "proof": "Chrome service-worker stop and current registrar ACK",
+      "generation": 2
+    },
+    {
+      "scenario": "worker-wake-after-lost-row",
+      "context": "page",
+      "status": "PASS",
+      "proof": "OS-rendered flat native action",
+      "selected": null
+    },
+    {
+      "scenario": "extension reload",
+      "status": "FAIL",
+      "error": "Timed out waiting for unpacked extension reload"
+    }
+  ],
+  "browser": "143.0.7499.4",
+  "version": "0.3.26",
+  "rows": [
+    {
+      "id": "c2c:provider-entry:ddb2a5cd46965023",
+      "label": "Google Drive",
+      "role": "provider-action",
+      "actionId": "c2c:provider-action:ddb2a5cd46965023"
+    },
+    {
+      "id": "c2c:provider-entry:0251fec64383f085",
+      "label": "Dropbox",
+      "role": "provider-action",
+      "actionId": "c2c:provider-action:0251fec64383f085"
+    },
+    {
+      "id": "c2c:provider-entry:2fd331323c9add35",
+      "label": "OneDrive",
+      "role": "provider-action",
+      "actionId": "c2c:provider-action:2fd331323c9add35"
+    },
+    {
+      "id": "c2c:provider-entry:89a372375b51a98e",
+      "label": "Cloudflare",
+      "role": "provider-action",
+      "actionId": "c2c:provider-action:89a372375b51a98e"
+    }
+  ],
+  "result": "FAIL",
+  "error": "Timed out waiting for a current Chrome ACK"
+}

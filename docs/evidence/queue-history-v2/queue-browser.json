@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "proof": "REAL_UNPACKED_CHROMIUM_DISCONNECTED_WITH_LOCAL_RECEIPT_FIXTURES",
+  "checks": [
+    {
+      "check": "chrome-extensions-card-0326",
+      "state": "PASS"
+    },
+    {
+      "check": "four-real-provider-cards-and-bottom-left-actions",
+      "state": "PASS"
+    },
+    {
+      "check": "theme-visibility-and-downloads-exclusion-with-debug-on",
+      "state": "PASS"
+    },
+    {
+      "check": "three-way-navigation-protected-settings-restart-reset-and-new-rule-default",
+      "state": "PASS"
+    },
+    {
+      "check": "receipt-reconciliation-interrupted-job-lazy-scroll-indexed-search-and-navigation",
+      "state": "PASS"
+    },
+    {
+      "check": "settings-zip-download-while-cleanup-on",
+      "state": "PASS"
+    },
+    {
+      "check": "compact-card-text-download-and-legacy-history-access",
+      "state": "PASS"
+    }
+  ],
+  "browser": "143.0.7499.4"
+}

@@ -1,0 +1,73 @@
+{
+  "version": "0.3.26",
+  "branch": "codex/queue-history-v2-0324-verified-2026-11-24",
+  "foundation": "cd4c8dd3bc11700376d30da050d6050a0eb1edb9",
+  "authorizedTip": "7ef0921a7626e4a064479a2424bc1a5b012055d9",
+  "verifiedApplicationRevision": "ccc78b919464ebfc8cf5580273d585d994c9c93a",
+  "state": "ALPHA_IMPLEMENTED_RELEASE_ACCEPTANCE_OPEN",
+  "regression": {
+    "command": "npm test",
+    "exitCode": 1,
+    "baseline": {
+      "total": 793,
+      "passed": 790,
+      "failed": 3
+    },
+    "release": {
+      "total": 802,
+      "passed": 800,
+      "failed": 2
+    },
+    "remainingBaselineFailures": [
+      "Non-Narrow/non-Depth composition byte-equivalence fixture",
+      "Reliability ratchet ownership artifact identifies release 0.3.24"
+    ],
+    "resolvedBaselineFailure": "CURRENT source-hash audit refreshed for 0.3.26"
+  },
+  "simulation": {
+    "state": "PASS",
+    "queueJobs": 10000,
+    "tests": "tests/queue-history-v2.test.mjs",
+    "faults": [
+      "late and duplicate receipts",
+      "interrupted receipts",
+      "export sink quota",
+      "cancelled export",
+      "archive deletion replay protection"
+    ]
+  },
+  "installedBrowser": {
+    "state": "PASS",
+    "browser": "143.0.7499.4",
+    "ui": "queue-browser.json",
+    "screenshotFixture": "screenshot-browser.json",
+    "theme": "theme-regression.json"
+  },
+  "native": {
+    "state": "PARTIAL",
+    "baseline": "native-baseline.json",
+    "release": "native-browser.json"
+  },
+  "archive": {
+    "state": "PASS",
+    "records": 100000,
+    "archiveBytes": 49076401,
+    "exportMs": 11952.100000000093,
+    "p95Ms": 577.3000000002794,
+    "independentIntegrity": {
+      "crc": "PASS",
+      "sha256": "fda7da49c517c3f5df7bbb922e1a289508ff27e140b76e00c42efaa9828b0714",
+      "orderedIdentities": 100000
+    },
+    "benchmark": "benchmark-100000.json",
+    "cappedRollover": "retention-200000.json"
+  },
+  "liveProviders": {
+    "state": "UNVERIFIED",
+    "coverage": [
+      "OAuth and reconnect",
+      "authorized file download and readback",
+      "signed-in native Simple, Narrow and Depth saves"
+    ]
+  }
+}

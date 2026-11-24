@@ -1,0 +1,84 @@
+{
+  "proof": "INSTALLED_UNPACKED_CHROME_SHELF_TAB_DISCONNECTED",
+  "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+  "views": [
+    {
+      "theme": "minimal",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "minimal",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "standard",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "standard",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "golden-age",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "golden-age",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "oceania",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "oceania",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "kawaii",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "kawaii",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "dungeon-master",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "dungeon-master",
+      "mode": "dark",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "heroine",
+      "mode": "light",
+      "result": "PASS"
+    },
+    {
+      "theme": "nostalgia",
+      "style": "heroine",
+      "mode": "dark",
+      "result": "PASS"
+    }
+  ],
+  "browser": "143.0.7499.4",
+  "result": "PASS"
+}

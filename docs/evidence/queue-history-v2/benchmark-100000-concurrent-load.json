@@ -1,0 +1,131 @@
+{
+  "result": "PASS",
+  "build": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.26",
+    "revision": "a7b63e602dd0271e70252bdc0af26db139a80096",
+    "sourceDigest": "099d840827c593133b09536910f0bb5ce1c66c27e8845f1e357a5e0f73535b99",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "platform": "linux",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "proof": "UNPACKED_CHROMIUM_WITH_SYNTHETIC_INDEXEDDB_DATA",
+  "count": 100000,
+  "retention": false,
+  "browser": "143.0.7499.4",
+  "version": "0.3.26",
+  "metrics": {
+    "bytes": 49076401,
+    "total": 100000,
+    "peakBatchRecords": 100,
+    "peakTextBytes": 196392,
+    "peakChunkBytes": 49098,
+    "manifest": {
+      "schema": "redown.history-export/1",
+      "exporterVersion": 1,
+      "createdAt": "2026-11-24T17:33:48.454Z",
+      "selection": {
+        "from": 0,
+        "end": 9007199254740991,
+        "timezone": "UTC",
+        "includeScreenshots": true,
+        "privacy": false
+      },
+      "snapshot": "Archive locked for duration of indexed read",
+      "sort": [
+        "sortAt DESC",
+        "recordId DESC"
+      ],
+      "expectedRecords": 100000,
+      "writtenRecords": 100000,
+      "providers": {
+        "dropbox": 21428,
+        "onedrive": 21429,
+        "google": 21429,
+        "cloudflare": 35714
+      },
+      "outcomes": {
+        "blocked": 20000,
+        "uncertain": 20000,
+        "failed": 20000,
+        "uploaded": 20000,
+        "verified": 20000
+      },
+      "proofLevels": {
+        "unavailable": 80000,
+        "provider-object-receipt": 20000
+      },
+      "sourceCoverage": [],
+      "urlPolicy": "Only HTTP(S) origins are included. Credential-bearing URLs and arbitrary provider metadata are excluded.",
+      "files": [
+        {
+          "name": "history.jsonl",
+          "bytes": 49075070,
+          "sha256": "fda7da49c517c3f5df7bbb922e1a289508ff27e140b76e00c42efaa9828b0714"
+        }
+      ]
+    },
+    "seedMs": 167024.80000000028,
+    "storage": {
+      "quota": 40551921254,
+      "usage": 65847383,
+      "usageDetails": {
+        "indexedDB": 64812837,
+        "serviceWorkerRegistrations": 1034546
+      }
+    },
+    "timings": [
+      {
+        "page": 1,
+        "ms": 453.29999999981374
+      },
+      {
+        "page": 2000,
+        "ms": 1208
+      },
+      {
+        "page": 4000,
+        "ms": 330.5
+      },
+      {
+        "page": 1,
+        "ms": 382.5
+      },
+      {
+        "page": 4000,
+        "ms": 306.60000000009313
+      },
+      {
+        "page": 2000,
+        "ms": 1092
+      },
+      {
+        "page": 2000,
+        "ms": 1133.1000000000931
+      },
+      {
+        "page": 2000,
+        "ms": 1162.6000000000931
+      },
+      {
+        "page": 2000,
+        "ms": 1204
+      },
+      {
+        "page": 2000,
+        "ms": 1144.5
+      }
+    ],
+    "p95Ms": 1208,
+    "exportMs": 36972.299999999814,
+    "heapBefore": 2709133,
+    "heapPeak": 32832088,
+    "concurrentWriteExcluded": true
+  },
+  "integrity": {
+    "crc": "PASS",
+    "sha256": "fda7da49c517c3f5df7bbb922e1a289508ff27e140b76e00c42efaa9828b0714",
+    "orderedIdentities": 100000
+  }
+}

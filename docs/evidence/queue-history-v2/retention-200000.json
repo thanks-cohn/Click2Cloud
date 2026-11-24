@@ -1,0 +1,33 @@
+{
+  "result": "PASS",
+  "build": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.26",
+    "revision": "a7b63e602dd0271e70252bdc0af26db139a80096",
+    "sourceDigest": "099d840827c593133b09536910f0bb5ce1c66c27e8845f1e357a5e0f73535b99",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "platform": "linux",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "proof": "UNPACKED_CHROMIUM_WITH_SYNTHETIC_INDEXEDDB_DATA",
+  "count": 200000,
+  "retention": true,
+  "browser": "143.0.7499.4",
+  "version": "0.3.26",
+  "metrics": {
+    "seedMs": 280374.50000000023,
+    "storage": {
+      "quota": 40551921254,
+      "usage": 128875136,
+      "usageDetails": {
+        "indexedDB": 127840590,
+        "serviceWorkerRegistrations": 1034546
+      }
+    },
+    "rolloverMs": 964.6000000000931,
+    "clearMs": 57901.299999999814,
+    "cleared": 200000,
+    "postClearFresh": 1
+  }
+}

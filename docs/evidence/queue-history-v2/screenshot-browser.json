@@ -1,0 +1,23 @@
+{
+  "result": "PASS",
+  "proof": "HEADED_CHROMIUM_NATIVE_CAPTURE_WITH_LOCAL_R2_FIXTURE",
+  "browser": "143.0.7499.4",
+  "manifestVersion": "0.3.26",
+  "checks": [
+    "Alt+Q with Shelf closed captured the HTTPS viewport and saved the exact PNG to the fresh redown/screenshots/ card",
+    "Three folder selections across three buckets and one Save produced one rule and zero uploads; Escape discarded the editor draft",
+    "Ctrl+Shift+Y with Shelf closed sent the same PNG to all three exact keys, including a bucket with a stale Worker record. Fixture HTTP 403 left two verified and one retryable",
+    "The partial receipt navigates to two exact verified files and opens the unconfirmed destination folder without selecting a file",
+    "Screenshot success, partial result and retry leave no screenshot desktop notifications",
+    "History V2 downloaded the selected screenshot output from the local R2 fixture and matched the captured PNG SHA-256",
+    "History V2 rejected changed screenshot bytes without starting a save or reporting a completed download",
+    "History V2 preview and keyboard zoom used the existing R2 file access and immersive controller",
+    "Chrome kept the .zip filename and an independent ZIP parser verified all four screenshot output records"
+  ],
+  "download": {
+    "filename": "Screenshot-97720b25-1e4f-49bf-844a-fcbecea7bb45-2.png",
+    "bytes": 6609,
+    "sha256": "0004d07286c2234bc57893fa1e16b6b04f838b21e83585a804aefffe5cee5e4c"
+  },
+  "providerWrites": 5
+}

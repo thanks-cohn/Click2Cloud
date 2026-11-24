@@ -155,7 +155,7 @@ try{
   await first.getByText('This provider does not expose a file download through REDOWN.',{exact:true}).waitFor();
   assert(await first.getByRole('button',{name:'Download basic-fixture.txt',exact:true}).isDisabled());
   await page.getByRole('searchbox',{name:'Find saved files'}).fill('fixture-21.txt');
-  await first.getByText('fixture-21.txt',{exact:true}).waitFor();
+  await first.locator('.queue-card-summary strong').filter({hasText:'fixture-21.txt'}).waitFor();
   pass('receipt-reconciliation-interrupted-job-lazy-scroll-indexed-search-and-navigation');
   await more('Settings');
   await queue.locator('[data-preset]').selectOption('compact');
