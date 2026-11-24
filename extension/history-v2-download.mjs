@@ -22,6 +22,7 @@ async function downloadFile(file, filename, downloads, signal) {
       const [item] = await downloads.search({id});
       if(item?.state==='complete') return id;
       if(item?.state!=='in_progress') throw Error('HISTORY_DOWNLOAD_INTERRUPTED');
+      if(signal?.aborted)continue;
       await changed;
     }
   } finally {
@@ -32,25 +33,29 @@ async function downloadFile(file, filename, downloads, signal) {
 }
 
 // FileSystemFileHandle.getFile returns a disk-backed File. There is no ZIP-sized JS Blob.
-export async function downloadHistoryZip(records, metadata, options = {}) {
-  const {signal,onProgress,downloads=chrome.downloads} = options;
+export function downloadHistoryZip(records, metadata, options={}) {
+  return deliverHistoryFile('zip',writer=>writeHistoryZip(writer,records,metadata,options),options);
+}
+
+export async function deliverHistoryFile(format, write, {signal,downloads=chrome.downloads}={}) {
+  if(!['zip','json','jsonl','csv'].includes(format))throw Error('HISTORY_FORMAT_INVALID');
   return navigator.locks.request('click2cloud-history-v2-zip', {signal}, async () => {
     const root = await navigator.storage.getDirectory();
     const directory = await root.getDirectoryHandle('history-v2-export-staging',{create:true});
     // A closed Shelf can leave staging files. The origin lock proves no live writer owns these.
-    for await(const [name] of directory.entries()) if(name.endsWith('.zip')) await directory.removeEntry(name);
-    const name = `${crypto.randomUUID()}.zip`;
+    for await(const [name] of directory.entries()) if(/\.(zip|jsonl?|csv)$/.test(name)) await directory.removeEntry(name);
+    const name = `${crypto.randomUUID()}.${format}`;
     const handle = await directory.getFileHandle(name,{create:true});
     let writer;
     try {
       writer = await handle.createWritable();
-      const result = await writeHistoryZip(writer,records,metadata,{signal,onProgress});
+      const result = await write(writer);
       signal?.throwIfAborted();
       await writer.close();
       writer = null;
       const file = await handle.getFile();
       if(file.size!==result.archiveBytes) throw Error('HISTORY_ZIP_FILE_MISMATCH');
-      const downloadId = await downloadFile(file,'click2cloud-history-v2.zip',downloads,signal);
+      const downloadId = await downloadFile(file,'click2cloud-history-v2.'+format,downloads,signal);
       return {...result,downloadId};
     } finally {
       await writer?.abort().catch(()=>{});

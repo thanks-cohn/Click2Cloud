@@ -29,7 +29,7 @@ export function readOwnerAttempt(row) {
     originalUrl:null,remoteUrl:null,publicUrl:null,previewUrl:null};
   function make({output,plan,proof,state,receipt,target,key}) {
     const active=pending.includes(state)&&(!shot||(!row.screenshot?.finishedAt||pending.includes(row.state))&&!output?.at);
-    const status=active?(state==='queued'?'waiting':'working'):proof?'verified':state==='confirmed'||state==='verified'?'uploaded':results[state]??'uncertain';
+    const status=active?(state==='queued'?'waiting':'working'):proof?'verified':state==='confirmed'||state==='verified'?'uploaded':Object.hasOwn(results,state)?results[state]:'uncertain';
     const terminalAt=active?null:safeTime(output?.at)??safeTime(shot?row.screenshot?.finishedAt:null)??safeTime(row.updatedAt)??requestedAt;
     const outputId=text(output?.outputId??plan?.outputId,128);
     const name=text(key?.split('/').at(-1)??legacy.filename);
@@ -40,7 +40,7 @@ export function readOwnerAttempt(row) {
       status,orderAt:terminalAt??requestedAt??-1,terminalAt,startedAt:safeTime(row.startedAt)??safeTime(row.screenshot?.attempts?.[0]?.startedAt),
       verifiedAt:proof?(safeTime(output?.at)??safeTime(row.badgeVerifiedAt)??terminalAt):null,
       verification:proof?{level:proof,checksum:text(output?.checksum??receipt?.checksum),etag:text(output?.etag??receipt?.etag)}:null,
-      errorCode:code(output?.code??row.code),destination:destination(target,key),progress:knownProgress,stage:code(row.stage),
+      errorCode:code(output?.code??row.code),destination:destination(target,key),progress:knownProgress,stage:text(row.stage,96),
       capabilities:{open:shot?!!outputId&&!!target:status==='verified'&&!!key,preview:status==='verified'&&!!key,
         retry:shot&&!!outputId&&output?.recoverable===true&&!!row.screenshot?.cachedAt&&!row.screenshot.originalUnavailable},
       savedFileMetadata:shot?null:legacy.savedFileMetadata,
@@ -48,7 +48,7 @@ export function readOwnerAttempt(row) {
   }
   if(!shot) {
     const {receipt}=row;
-    return [make({proof:hasVerifiedSave(row)?row.proofKind:null,state:row.state,receipt,target:receipt?.destination??row.destination,key:receipt?.key})];
+    return [make({proof:hasVerifiedSave(row)?text(row.proofKind,100):null,state:row.state,receipt,target:receipt?.destination??row.destination,key:receipt?.key})];
   }
   const job=row.screenshot;
   const outputs=Array.isArray(job?.outputs)?job.outputs:[],plans=Array.isArray(job?.plan?.outputs)?job.plan.outputs:[];
