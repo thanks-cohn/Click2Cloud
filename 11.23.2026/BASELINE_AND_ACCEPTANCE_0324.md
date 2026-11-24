@@ -49,7 +49,7 @@ In Screenshots → `Screenshot Shortcut` dropdown **when creating a NEW rule**, 
 - No reduction in pre-existing features, no storage wipes or forced migrations, no fake confirmation or status.
 - Retention defaults Unlimited; optional capped retention user-edited, no 100k hard cap; Live Jobs != archive. Clear All requires explicit separate confirmation.
 - Large-history queries and ZIP streaming must remain memory-bounded. ZIP complete downloadable path must be tested in actual extension Chrome where available; report blocked/unverified evidence accurately.
-- Default nav: `Files | Remotes | Queue | Settings | ⋯`; History in More during alpha, Downloads NEVER in More. Remote V1 keeps its legacy Settings cards. New UI themes must preserve feature access even where a settings card is intentionally hidden by owner instructions.
+- Default nav: `Files | Remotes | Queue | ⋯`; Settings, History, and other eligible tabs in More during alpha (Downloads NEVER in More). Remote V1 keeps its legacy Settings cards. New UI themes must preserve feature access even where a settings card is intentionally hidden by owner instructions.
 - Preserve old History during alpha; Queue contains Live Jobs and independently mountable complete History V2. Permanent History replacement is deferred.
 
 ## Acceptance checklist
@@ -84,9 +84,13 @@ Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` and implement it in
 
 This work branch **already sets REDOWN version 0.3.26** in its source manifest, package, lockfile and source build-info. The original immutable Git base is still 0.3.24 at `cd4c8dd3`. **These two facts must not be conflated.** Preserve the source version bump; build and test that the generated extension manifest and actual Chrome extension entry report version **0.3.26**. See the full owner override `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md`.
 
-**Settings → Customize Navigation** must have independent user-operable per-tab top-bar visibility toggles: pinned ON => top; OFF => in `⋯ More`; never inaccessible. Default top **Files | Remotes | Queue | Settings | ⋯** and History in More. User can promote History, move Queue/Settings into More, restore choices, and Reset to Defaults. Persist choices across reload and all supported themes; responsive overflow must not erase stored preferences. Keep Settings reachable even if unpinned. Do not ever place Downloads in More. **Not just a fixed visual default: user configuration is required.**
+**LATEST OWNER NAVIGATION ACCEPTANCE:** Exactly **Main tab / More menu / Gone** per tab in Settings → Customize Navigation. Default **Files | Remotes | Queue | ⋯** on main, **Settings, History and every other eligible section** in More (excluding Downloads per standing rule). Gone hides the navigation entry from both without disabling engines or deleting data. Recovery Customize Navigation action stays in More even if Settings Gone. Persist, Reset to Defaults, responsive/theme handling and real Chrome evidence mandatory.
+- [ ] THREE explicit placement options, not a two-way ON/OFF switch, for every eligible tab.
+- [ ] Only Files, Remotes, Queue are default main tabs; Settings/History default to More; no Downloads in More.
+- [ ] Gone hides navigation from both; underlying state and work preserved; recovery Customize Navigation action always available.
+
 
 - [ ] Current source, generated manifest, package and actual installed Chrome extension identify **REDOWN 0.3.26** (when browser access exists).
-- [ ] Settings has **Customize Navigation**, per-tab Show in Top Bar toggles, durable pin/More membership and Reset to Defaults.
+- [ ] Settings → Customize Navigation has per-tab Main tab / More menu / Gone selector, durable choices, recovery access and Reset to Defaults.
 - [ ] History can be promoted to top, Queue/Settings unpinned to More without loss of access, and choices survive restart/theme/narrow layout.
 - [ ] Original immutable 0.3.24 ancestry and all existing four Remotes cards preserved; no 0.3.25 source merge.
