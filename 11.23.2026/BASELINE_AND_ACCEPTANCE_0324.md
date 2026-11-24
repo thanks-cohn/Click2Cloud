@@ -77,3 +77,16 @@ Read `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` and implement it in
 - [ ] Real supported provider download route verified; missing/auth/permission/404/stale receipt scenarios do not invent success.
 - [ ] Screenshot multi-destination results select the exact intended file, never arbitrarily; download failure does not block saving.
 - [ ] ZIP export, Downloads menu exclusion, old History and Diagnostics unchanged; no new History record from downloading.
+
+---
+
+## OWNER-APPROVED 0.3.26 RELEASE IDENTITY + NAVIGATION VISIBILITY
+
+This work branch **already sets REDOWN version 0.3.26** in its source manifest, package, lockfile and source build-info. The original immutable Git base is still 0.3.24 at `cd4c8dd3`. **These two facts must not be conflated.** Preserve the source version bump; build and test that the generated extension manifest and actual Chrome extension entry report version **0.3.26**. See the full owner override `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md`.
+
+**Settings → Customize Navigation** must have independent user-operable per-tab top-bar visibility toggles: pinned ON => top; OFF => in `⋯ More`; never inaccessible. Default top **Files | Remotes | Queue | Settings | ⋯** and History in More. User can promote History, move Queue/Settings into More, restore choices, and Reset to Defaults. Persist choices across reload and all supported themes; responsive overflow must not erase stored preferences. Keep Settings reachable even if unpinned. Do not ever place Downloads in More. **Not just a fixed visual default: user configuration is required.**
+
+- [ ] Current source, generated manifest, package and actual installed Chrome extension identify **REDOWN 0.3.26** (when browser access exists).
+- [ ] Settings has **Customize Navigation**, per-tab Show in Top Bar toggles, durable pin/More membership and Reset to Defaults.
+- [ ] History can be promoted to top, Queue/Settings unpinned to More without loss of access, and choices survive restart/theme/narrow layout.
+- [ ] Original immutable 0.3.24 ancestry and all existing four Remotes cards preserved; no 0.3.25 source merge.
