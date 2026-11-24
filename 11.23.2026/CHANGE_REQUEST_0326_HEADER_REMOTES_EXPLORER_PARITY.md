@@ -69,6 +69,37 @@ On **each applicable Remotes provider card** (Google Drive, OneDrive, Dropbox, C
 
 **P0 UX acceptance criterion:** The screenshot's two-row orphaned **Next/Last** footer must not exist in the delivered 0.3.26 repair.
 
+## F. Queue heading and History V2 search hierarchy — owner screenshot correction
+
+**Owner screenshot evidence (2026-11-24):** On the actual narrow Shelf, the main page heading **Queue** is an unstyled-looking left-aligned word near the top. The History V2 section places **History V2** at the left of the same row as the **Find saved files** label and a cramped search input on the right. The owner wants a deliberately composed visual hierarchy, not a horizontal squeeze.
+
+### Required visual order
+
+1. **Queue** is the main **centered** page heading at the top of the Queue view, with intentional whitespace above/below, readable type scale, and palette-appropriate typography/contrast. Center the title within the actual Queue content column, not within the entire browser window or sidebar.
+2. Keep the existing **Live Jobs** card underneath the Queue heading; do not move or rename it.
+3. Inside the **History V2** card, put **History V2 centered on its OWN TOP ROW**, with balanced vertical margins.
+4. On a **SECOND ROW BELOW** that heading, place **Find saved files** and its search input, **left-aligned** in the card's usable content width. Prefer a comfortable, readable search field that can fill the available width at narrow Shelf sizes, never a cramped tiny right-hand search box. Use the existing control, label, placeholder, events and search/filter behavior; no functionality changes.
+5. Below the search row, keep results count, date sections, History V2 cards, and the separately approved refined pagination footer. Maintain consistent spacing between these levels.
+6. Centering does NOT mean centering the search field or its label. The owner specifically allows/requests the **search to stay left-aligned** under the centered History V2 heading.
+
+### Source details and implementation guardrails
+
+- In `extension/queue-page.mjs`, the Queue page currently appends `element('h1','Queue')` without a dedicated heading class. Give it a scoped layout class or equivalent and center just this heading.
+- `mountHistoryV2` currently constructs a single `<div class="queue-heading"><h2>History V2</h2><label>Find saved files <input ...></label></div>`. Separate the title and search into **two deliberate block rows**, retaining proper semantic heading and label/input association.
+- In `extension/app.css`, the broad `.queue-heading,.queue-card-header{justify-content:space-between}` rule is causing title/search to share one row. Add isolated History V2 heading/search rules rather than changing unrelated headers, Queue actions, Live Jobs or Settings.
+- Preserve the actual current input query, debounce, focus and accessible names. Preserve real pagination, indexed querying, scroll behavior, active jobs and all currently working 0.3.26 features. No functional engine rewrite.
+- The design must feel purposeful and high-end in Remote V1, Bit o' Polish, Frames and all supported palettes. Avoid giant empty space, oversized title text, broken contrast, wrapping against the card border, and sideways scrolling.
+
+### Mandatory visual and functional acceptance
+
+1. At the same **narrow Shelf width shown in the owner's screenshot**, the page displays a centered **Queue** heading, then the Live Jobs card.
+2. The History card displays centered **History V2** on its own row, with **Find saved files** and a comfortably sized **left-aligned search box below**.
+3. With a populated History archive and with empty/zero results, the title/search/card/pagination hierarchy remains polished.
+4. Test searching by filename/provider/text, typing/deleting/query debounce, focus, keyboard accessibility and results update. Search performance and 100,000-record indexed paging must not regress.
+5. Capture real-browser screenshots at narrow, standard, and wider Shelf widths with several themes; assert distinct title and search rows and correct horizontal alignment.
+
+**Owner acceptance:** Do not leave the Queue page title casually left-aligned or place History V2 and Find saved files side-by-side in the finished repair.
+
 ## Required proof and regression gates
 
 1. **Visual baseline comparison:** screenshots of 0.3.24 versus the corrected 0.3.26 at matching Chrome viewport/zoom/theme, showing Cloudflare wide Sign In and full-length File Explorer. Record actual dimensions if relevant.
