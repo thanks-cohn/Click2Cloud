@@ -9198,7 +9198,7 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "fbb0a2514b1ccbe45ed49abecb4b5e541fb7ae09",
+    "sourceCommit": "2e23e983e34ac196904caf32c91c0428408f2eb6",
     "sourceFiles": {
       "extension/aesthetic.css": "303f19b8f59e562fa17c14439ed887acfe2b6632ee65bdaff7b06469a8a0f7c2",
       "extension/app.css": "22348ca30613896f108c89fc925f201bde99c7a7c613fd58f138a3d12fb1fdb3",
