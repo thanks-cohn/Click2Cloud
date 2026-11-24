@@ -541,3 +541,13 @@ Deliver:
 ## OWNER P0 RECONFIRMATION — 2026-11-24
 
 This revised document is hosted on branch `codex/queue-history-v2-0324-verified-2026-11-24`, based on exact REDOWN 0.3.24 commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. Documentation was copied from `1c1e6ea23f0f062740463d923fb53a8efdbbd544` without importing its application source. Previous `codex/queue-history-v2-2026-11-24` is forbidden and must be ignored entirely for implementation. The new Screenshots rule shortcut defaults to Alt+Q while **None remains selectable**, with all existing values preserved. For conflicts, the controlling P0 override and `BASELINE_AND_ACCEPTANCE_0324.md` govern.
+
+---
+
+## OWNER-APPROVED ADDENDUM — INLINE DOWNLOAD ON EVERY HISTORY V2 CARD
+
+**Mandatory, in this current alpha implementation:** Every History V2 save-result card, whether rendered in the Queue History region now or in the independently reusable History V2 component later, must have an **always-visible textual Download control** in its collapsed/header action area. **No expansion, More/Details submenu, preview/lightbox or separate Downloads tab** is necessary to download an actual supported saved file. This overrides any earlier card layout example that places Download only inside expanded details. Apply to both Compact and Full presets and all themes, with narrow-layout wrapping, keyboard and screen reader access.
+
+**Semantics:** Download the remote saved object using existing authorized provider-owning file/download APIs from the 0.3.24 foundation; do NOT download the History record or ZIP, initiate another cloud save, mutate provider state, or create a new save-history event. Use source receipt/capability checks; if the object/provider cannot currently download, retain the visible disabled button with honest explanatory state rather than promise success. Multi-destination screenshot results require explicit matching to the chosen output, not arbitrary selection. Avoid fetching/buffering bytes until clicked; ensure bounded streaming/memory and no effect on other jobs/History. Keep **Export Complete History ZIP** separate and unchanged, and continue excluding the Downloads navigation entry from More.
+
+**Acceptance:** The dedicated `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md` is the owner-approved test and implementation contract; include collapsed-card visuals, real provider readback where available, unsupported/expired-permission/missing-object scenarios, unchanged source receipts, accessibility and regression proof. Stop and report any unverified provider rather than assuming downloads work.
