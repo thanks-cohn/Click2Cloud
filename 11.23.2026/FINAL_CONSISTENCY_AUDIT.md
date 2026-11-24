@@ -80,3 +80,9 @@ Read `11.23.2026/BASELINE_AND_ACCEPTANCE_0324.md` first, then `AGENTS.md`, `CODE
 ## OWNER P0 RECONFIRMATION — 2026-11-24
 
 This revised document is hosted on branch `codex/queue-history-v2-0324-verified-2026-11-24`, based on exact REDOWN 0.3.24 commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. Documentation was copied from `1c1e6ea23f0f062740463d923fb53a8efdbbd544` without importing its application source. Previous `codex/queue-history-v2-2026-11-24` is forbidden and must be ignored entirely for implementation. The new Screenshots rule shortcut defaults to Alt+Q while **None remains selectable**, with all existing values preserved. For conflicts, the controlling P0 override and `BASELINE_AND_ACCEPTANCE_0324.md` govern.
+
+---
+
+## OWNER-APPROVED ADDENDUM AUDIT — HISTORY V2 CARD DOWNLOAD (2026-11-24)
+
+Current run includes one additional explicit UX + functional parity requirement: **every History V2 collapsed save-result card has a readily visible, text-labeled Download button; no expansion required.** This must work in Compact and Full layouts, all themes, with truthful disabled/unavailable states for provider capabilities not verified in the 0.3.24 source. Retrieve the actual saved cloud object using existing authorized APIs and distinguish multiple screenshot destinations. The per-file button is separate from the archive-wide ZIP export and does not add a Downloads navigation entry, a new save attempt, or a provider-engine rewrite. Source of truth and detailed regression gate: `11.23.2026/CHANGE_REQUEST_HISTORY_V2_CARD_DOWNLOAD.md`. Test real provider/download viability, bounded memory and error handling; mocks alone cannot certify working download. The underlying 0.3.24 source base and old Queue branch prohibition do not change.
