@@ -14,6 +14,15 @@ export const historyCardPresets=Object.freeze({
   full:Object.freeze({...Object.fromEntries(Object.keys(fields).map(flag=>[flag,true])),showImagePreview:true,showMetadata:true}),
   compact:Object.freeze({...Object.fromEntries(Object.keys(fields).map(flag=>[flag,false])),showImagePreview:true,showMetadata:false})
 });
+export function historyCardFlags(layout,overrides={}) {
+  if(!Object.hasOwn(historyCardPresets,layout))throw Error('HISTORY_CARD_PRESET_INVALID');
+  const flags={...historyCardPresets[layout]};
+  for(const [key,value] of Object.entries(overrides)) {
+    if(!Object.hasOwn(flags,key)||typeof value!=='boolean')throw Error('HISTORY_CARD_FLAG_INVALID');
+    flags[key]=value;
+  }
+  return flags;
+}
 const outcome={verified:'Saved and verified',uploaded:'Uploaded · independent verification unavailable',failed:'Failed',blocked:'Blocked',canceled:'Canceled',uncertain:'Outcome uncertain'};
 const element=(tag,value)=>{
   const node=document.createElement(tag);
@@ -117,7 +126,7 @@ export function mountHistoryV2(parent,{archive,subscribe,preferences,exportHisto
     }
   }
   function card(row,pref,page) {
-    const flags={...historyCardPresets[pref.layout],...cardFlags};
+    const flags=historyCardFlags(pref.layout,cardFlags);
     const article=element('article');article.dataset.recordId=row.recordId;article.className='history-v2-record';
     const title=element('strong',row.filename??'N/A'),time=element('time',formatTime(row.terminalAt??row.requestedAt,pref.timezone));
     const summary=element('div');summary.className='history-v2-record-line';summary.append(title,time,element('span',location(row)));

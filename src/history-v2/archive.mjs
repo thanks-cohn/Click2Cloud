@@ -58,17 +58,27 @@ export function createHistoryArchive({indexedDB,locks=globalThis.navigator?.lock
   }
   async function removeOldest(records, exclusions, range, limit, changes) {
     if(!limit)return 0;
+    const index=records.index('chronology');
+    const remove=row=>{
+      exclusions.put(1,row.primaryKey);
+      records.delete(row.primaryKey);
+      if(changes)dayDelta(changes,row.key[0],-1);
+    };
+    if(typeof index.getAllRecords==='function') {
+      // Chrome can return this bounded slice in one request. Older browsers use key cursors.
+      const rows=await read(index.getAllRecords({query:range??undefined,count:limit}));
+      rows.forEach(remove);
+      return rows.length;
+    }
     return new Promise((resolve,reject)=>{
-      const request=records.index('chronology').openKeyCursor(range);
+      const request=index.openKeyCursor(range);
       let removed=0;
       request.onerror=()=>reject(request.error);
       request.onsuccess=()=>{
         const row=request.result;
         if(!row){resolve(removed);return;}
         try {
-          exclusions.put(1,row.primaryKey);
-          records.delete(row.primaryKey);
-          if(changes)dayDelta(changes,row.key[0],-1);
+          remove(row);
           if(++removed===limit)resolve(removed);
           else row.continue();
         } catch(error) {reject(error);}
