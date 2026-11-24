@@ -63,17 +63,17 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
         <h2 id="remote-provider-${id}">${label}</h2>
+        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
       </div>
       <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
-      <div class="remote-provider-actions">
-        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
-        <button type="button" data-refresh>Refresh</button>
-        <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
-        <button type="button" data-continue hidden>Continue save</button>
-      </div>
       <p class="muted" data-availability></p>
       <p class="muted" role="status" data-feedback></p>
-      <p class="muted" role="status" data-navigation></p>`;
+      <p class="muted" role="status" data-navigation></p>
+      <div class="remote-provider-actions">
+        <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
+        <button type="button" data-refresh>Refresh</button>
+        <button type="button" data-continue hidden>Continue save</button>
+      </div>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
       connect: get('connect'), refresh: get('refresh'), readiness: get('readiness'),

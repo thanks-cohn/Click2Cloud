@@ -20,7 +20,7 @@ export function basicSourceFromClick(provider, {srcUrl, linkUrl, pageUrl}, tab) 
 const storageFailure = detail => fail('STORAGE_UNAVAILABLE', detail,
   'Retry when Basic storage is available. Check the provider before retrying any interrupted save.');
 
-export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000, onVerified}) {
+export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000, onVerified, observeAttempt}) {
   const intents = createSaveIntents(chrome, trustedStorage);
   const auth = createAuth({chrome, trustedStorage, onStatus: status => {
     void chrome.runtime.sendMessage?.({channel: 'redown-basic-status', status}).catch(() => {});
@@ -50,7 +50,7 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
         await store.recover(signal);
         signal.throwIfAborted();
         const coordinator = createCoordinator({
-          store, auth, intents, onVerified, adapters: createAdapters({}),
+          store, auth, intents, onVerified, observe:observeAttempt, adapters: createAdapters({}),
           acquire: input => acquireSource(input, {hasAccess: browserSourceAccess(chrome.permissions)}),
           notify: attempt => chrome.runtime.sendMessage({
             channel: 'redown-basic-attempt',
@@ -95,5 +95,5 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
       return {count:0, complete:true};
     return (await durable()).store.verifiedCount(range);
   }
-  return {request: api.message, click, verifiedCount};
+  return {request: api.message, click, verifiedCount, historySource: async cursor => (await durable()).store.historySource(cursor)};
 }

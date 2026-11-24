@@ -211,7 +211,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
  function shortcutField(form,value,bindings){
   const label=element('label','Screenshot Shortcut ');
   const select=element('select');
-  select.append(new Option('',''),...screenshotCommands.map(id=>new Option(shortcutLabel(id,bindings),id)));
+  select.append(new Option('None',''),...screenshotCommands.map(id=>new Option(shortcutLabel(id,bindings),id)));
   select.value=value??'';label.append(select);
   form.querySelector('button[type=submit],button.primary').before(label);
   return select;
@@ -276,7 +276,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
   const readSites=sites(form.querySelector('[data-websites]'),[{kind:'all'}]);
   const readTargets=directories(form.querySelector('[data-directories]'),[],null,{multiple:true});
   let config,pageIndex=0,bindings=null;
-  const shortcut=shortcutField(form,null,bindings);
+  const shortcut=shortcutField(form,screenshotCommands[0],bindings);
   function render(next,focusId){
    if(!page.isConnected)return;
    config=next;

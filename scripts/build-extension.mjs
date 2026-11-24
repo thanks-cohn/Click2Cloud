@@ -23,6 +23,11 @@ const workerCodeDigest=createHash('sha256').update(JSON.stringify(await Promise.
 const buildInfo={workerCodeDigest,extensionVersion:JSON.parse(await readFile(new URL('extension/manifest.json',root),'utf8')).version,revision,sourceDigest:hash.digest('hex'),apiVersion:'3+1.1',remoteProtocol:'click2cloud-remote-2'};
 await writeFile(new URL('src/build-info.mjs',output),'export const BUILD_INFO=Object.freeze('+JSON.stringify(buildInfo)+');\n');
 const manifest=JSON.parse(await readFile(new URL('manifest.json',output),'utf8'));
+const packageInfo=JSON.parse(await readFile(new URL('package.json',root),'utf8'));
+const lockInfo=JSON.parse(await readFile(new URL('package-lock.json',root),'utf8'));
+if([packageInfo.version,lockInfo.version,lockInfo.packages[''].version,buildInfo.extensionVersion].some(value=>value!==manifest.version))
+ throw Error('EXTENSION_VERSION_MISMATCH');
+
 for(const size of [16,32,48,128]){
  const path=manifest.icons?.[size];
  if(!path||manifest.action?.default_icon?.[size]!==path)throw Error('REDOWN_ICON_REFERENCE_INVALID');

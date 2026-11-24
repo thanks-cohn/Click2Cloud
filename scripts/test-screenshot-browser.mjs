@@ -123,6 +123,7 @@ const resource=https({key:await readFile(keys),cert:await readFile(cert)},async 
 await new Promise((ok,no)=>{resource.once('error',no);resource.listen(0,'127.0.0.1',ok);});
 let browser;
 try{
+ journey: {
  browser=await chromium.launchPersistentContext(profile,{headless:false,executablePath,timeout:25000,viewport:null,
   args:['--no-sandbox','--disable-gpu','--no-proxy-server','--ignore-certificate-errors','--enable-unsafe-extension-debugging','--window-position=0,0','--window-size=1280,900',
    '--lang=en-US',`--host-resolver-rules=${[siteHost,...searchHosts,'api.cloudflare.com'].map(host=>`MAP ${host} 127.0.0.1:${resource.address().port}`).join(', ')}`],ignoreDefaultArgs:['--disable-extensions']});
@@ -153,9 +154,12 @@ try{
  async function openScreenshot(){
   await app.locator('#header-more').click();
   const visible=await app.locator('#header-menu > button:visible:not([data-debug-only])').allTextContents();
-  const compact=await app.locator('header nav > [data-view=history]').isHidden();
-  assert.deepEqual(visible,compact?['Screenshots','Settings','History']:['Screenshots','Settings']);
+  assert.deepEqual(visible,['History','Screenshots','Settings']);
   await app.getByRole('menuitem',{name:'Screenshots',exact:true}).click();
+ }
+ async function openLegacyHistory(){
+  await app.locator('#header-more').click();
+  await app.getByRole('menuitem',{name:'History',exact:true}).click();
  }
  await openScreenshot();
  const defaultCard=app.locator('.screenshot-card').filter({hasText:'Default Screenshots'});
@@ -205,6 +209,9 @@ try{
  await form.getByRole('checkbox',{name:'Three',exact:true}).check();
  await form.getByText('3 selected',{exact:true}).waitFor();
  assert.equal(await form.getByText('Use this directory',{exact:true}).count(),0);
+ const newShortcut=form.getByLabel('Screenshot Shortcut');
+ assert.equal(await newShortcut.inputValue(),'screenshot.capture.alt-q');
+ await newShortcut.selectOption('');
  await form.getByRole('button',{name:'Save',exact:true}).click();
  const card=app.locator('.screenshot-card');
  await card.waitFor();
@@ -212,6 +219,7 @@ try{
  assert.match(await card.innerText(),/redown\/One\/.*other-screenshots\/Two\/.*qa-screenshots\/Three\//s);
  assert.equal(uploads.length,1);
  await card.locator('[data-rule-edit]').click();
+ assert.equal(await app.locator('#screenshot-editor').getByLabel('Screenshot Shortcut').inputValue(),'');
  await app.locator('#screenshot-editor').getByRole('button',{name:/Remove redown\/One/}).click();
  await app.keyboard.press('Escape');
  await app.locator('#dialog').waitFor({state:'hidden'});
@@ -235,7 +243,7 @@ try{
  checks.push('Ctrl+Shift+Y with Shelf closed sent the same PNG to all three exact keys, including a bucket with a stale Worker record. Fixture HTTP 403 left two verified and one retryable');
  denied=false;
  await app.bringToFront();
- await app.locator('button[data-view="history"]:visible').click();
+ await openLegacyHistory();
  const partialRow=app.locator('[data-operation="'+partial.plan.operationId+'"]');
  const cards=partialRow.locator('.history-destination-card');
  async function goToFile(row,output,{stay=false}={}){
@@ -245,14 +253,14 @@ try{
   await file.waitFor();
   assert.equal(await file.count(),1);
   assert.equal(await app.locator('#location').inputValue(),cloudPath(output.target,output.key).replace(fixtureTarget.accountId,'account-1'));
-  if(!stay)await app.getByRole('button',{name:'History',exact:true}).click();
+  if(!stay)await openLegacyHistory();
  }
  for(let index=0;index<2;index++)await goToFile(cards.nth(index),partial.plan.outputs[index]);
  await cards.nth(2).locator('[data-screenshot-goto]').click();
  await app.getByText('Opened the destination folder. The screenshot file is unverified.',{exact:true}).waitFor();
  assert.equal(await app.locator('#location').inputValue(),cloudPath(partial.plan.outputs[2].target).replace(fixtureTarget.accountId,'account-1'));
  assert.equal(await app.locator('#files [aria-selected=true]').count(),0);
- await app.getByRole('button',{name:'History',exact:true}).click();
+ await openLegacyHistory();
  checks.push('The partial receipt navigates to two exact verified files and opens the unconfirmed destination folder without selecting a file');
  await partialRow.getByText('2 of 3 files verified',{exact:true}).click();
  await partialRow.getByRole('button',{name:'Retry unconfirmed files'}).click();
@@ -268,6 +276,21 @@ try{
  }
  await assertQuiet();
  checks.push('Screenshot success, partial result and retry leave no screenshot desktop notifications');
+ await app.getByRole('button',{name:'Queue',exact:true}).click();
+ const selectedOutput=retried.plan.outputs[1];
+ const resultCard=app.locator('.queue-history-card').filter({hasText:selectedOutput.target.bucketName+' / '+selectedOutput.key});
+ const downloadFile=resultCard.getByRole('button',{name:'Download '+selectedOutput.key.split('/').at(-1)});
+ const downloading=app.waitForEvent('download',{timeout:12000});
+ void downloading.catch(()=>{});
+ await downloadFile.click();
+ const transfer=await downloading;
+ const downloaded=await readFile(await transfer.path());
+ assert.equal(createHash('sha256').update(downloaded).digest('hex'),retried.captured.sha256);
+ assert.equal(uploads.length,5);
+ checks.push('History V2 downloaded the selected screenshot output from the local R2 fixture and matched the captured PNG SHA-256');
+ if(process.env.C2C_SCREENSHOT_QUEUE_ONLY==='1')break journey;
+ await openLegacyHistory();
+
  const diagnostics=await app.evaluate(async operationId=>{
   const call=async(method,params)=>{
    const response=await chrome.runtime.sendMessage({channel:'recorder',version:2,method,params});
@@ -340,7 +363,7 @@ try{
  await app.evaluate(()=>caches.delete('click2cloud-screenshot-retry-v1'));
  await app.reload();
  const previewReads=requests.length;
- await app.getByRole('button',{name:'History',exact:true}).click();
+ await openLegacyHistory();
  const thumbnail=partialRow.locator('[data-preview] img');
  await thumbnail.waitFor();
  assert(await thumbnail.evaluate(image=>image.naturalWidth>0&&image.naturalHeight>0));
@@ -363,7 +386,7 @@ try{
  }
  await service.evaluate(screenshot=>click2cloud.current.recordRemoteResult({kind:'screenshot-to-cloud',operationId:screenshot.plan.operationId,
   state:'confirmed',code:'SCREENSHOT_SAVED',screenshot}),populated);
- await app.getByRole('button',{name:'History',exact:true}).click();
+ await openLegacyHistory();
  const long=app.locator(`[data-operation="${historicalId}"]`),longCards=long.locator('.history-destination-card');
  await long.locator('.history-preview img').waitFor();
  assert.equal(await long.locator('img').count(),1);
@@ -585,7 +608,7 @@ try{
    assert.doesNotMatch(text,/screenshot|choose folder/i);
   }
   checks.push('Chrome Reload removed the native Screenshot submenu from webpage, link and image menus and retained ordinary Cloudflare Save, screenshot rules, Cloudflare connection and shortcut settings');
-  await app.getByRole('button',{name:'History',exact:true}).click();
+  await openLegacyHistory();
   const singleRow=app.locator(`[data-operation="${single.plan.operationId}"]`);
   await singleRow.locator('[data-preview]').scrollIntoViewIfNeeded();
   await singleRow.locator('[data-preview] img').waitFor();
@@ -645,7 +668,7 @@ try{
  checks.push('Chrome internal page produced a capture failure with zero uploads');
 
  await app.bringToFront();
- await app.getByRole('button',{name:'History',exact:true}).click();
+ await openLegacyHistory();
  await app.locator('.history-page').waitFor();
  await page.goto('https://'+siteHost+'/');await page.bringToFront();input('focus');input('click','420','400');
  const known=new Set((await receipts()).map(job=>job.plan.operationId));
@@ -710,6 +733,7 @@ try{
   checks,contrast,uploads:uploads.map(({bucket,key,png})=>({bucket,key,bytes:png.length})),requests};
  console.log(JSON.stringify(evidence,null,2));
  await writeFile(join(out,'results.json'),JSON.stringify(evidence,null,2));
+ }
 }catch(error){
  console.error(error,JSON.stringify({checks,requests,uploads:uploads.length}));
  try{const visible=browser?.pages().find(page=>page.url().endsWith('/extension/app.html'));

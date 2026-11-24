@@ -22,7 +22,7 @@ function record(length, fields) {
 }
 // ZIP32 STORE, UTF-8 names, and streamed data descriptors. Only the directory
 // records stay resident; awaiting every write propagates the sink's backpressure.
-function zipWriter(write, signal) {
+export function zipWriter(write, signal) {
   const central = [], names = new Set();
   let offset = 0;
   async function writeBytes(bytes) {

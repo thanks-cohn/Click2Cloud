@@ -30,7 +30,7 @@ export function createShelfAttention({chrome,preference=()=>true,notify=async()=
 export const shelfHistoryCommand='shelf.history.toggle';
 export const shelfExplorerSearchCommand='shelf.explorer.search';
 const shelfStateKey=windowId=>'shelf-view:'+windowId;
-const views=new Set(['remotes','explorer','history','settings','screenshot','downloads']);
+const views=new Set(['remotes','explorer','history','queue','settings','screenshot','downloads']);
 
 export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
  const windows=new Map(),early=new Map(),panel=chrome.sidePanel,session=chrome.storage.session;

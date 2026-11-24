@@ -327,6 +327,31 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       }
       return row;
     },
+    readQueueHistorySource: ({key,legacyOffset}={})=>transact('readonly',async s=>{
+      const prefix='remote-result:';
+      if(!key){
+        const legacy=(await request(s.state.get('remoteResults')))?.value??[];
+        const offset=legacyOffset??0;
+        if(offset<legacy.length){
+          const rows=[];
+          for(const row of legacy.slice(offset,offset+100)){
+            if(!await request(s.state.get(prefix+row.operationId)))rows.push(row);
+          }
+          return {rows,next:{legacyOffset:offset+100}};
+        }
+      }
+      return new Promise((resolve,reject)=>{
+        const rows=[];
+        const r=s.state.openCursor(IDBKeyRange.bound(key??prefix,prefix+'\uffff',!!key));
+        r.onerror=()=>reject(r.error);
+        r.onsuccess=()=>{
+          const item=r.result;
+          if(!item||rows.length===100)return resolve({rows,next:item?{key:prefix+rows.at(-1).operationId}:null});
+          rows.push(item.value.value);
+          item.continue();
+        };
+      });
+    }),
     readRemoteResult:operationId=>transact('readonly',async s=>(await request(s.state.get('remote-result:'+operationId)))?.value??((await request(s.state.get('remoteResults')))?.value??[]).find(r=>r.operationId===operationId)??null),
     readRemoteResultsById:ids=>transact('readonly',async s=>{
       const results=await Promise.all(ids.map(id=>request(s.state.get('remote-result:'+id))));

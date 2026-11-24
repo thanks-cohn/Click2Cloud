@@ -71,19 +71,28 @@ async function nativeMenu(page, scenario, contextName, {click=false}={}){
  // The extension tab and the side-panel title can both read REDOWN.
  // Find the label next to the context gesture, below Chrome's tab strip.
  const group=top.find(row=>/^REDOWN$/i.test(row[11])&&Number(row[7])>=offset.top&&Math.abs(Number(row[6])-x)<280);
- assert(group,'Chrome native REDOWN group missing: '+top.map(row=>row[11]).join(' '));
  const point=row=>[String(Number(row[6])+Math.floor(Number(row[8])/2)),String(Number(row[7])+Math.floor(Number(row[9])/2))];
+ if(!group&&contextName==='page'){
+  // Chromium can render a single eligible extension action directly.
+  const flat=top.filter(row=>/^Cloudflare$/i.test(row[11])&&Number(row[7])>=offset.top&&Math.abs(Number(row[6])-x)<280);
+  assert.equal(flat.length,1,'Chrome native page menu must have one Cloudflare action');
+  if(click)input('click',...point(flat[0]));else input('key','Escape');
+  report.scenarios.push({scenario,context:contextName,status:'PASS',proof:'OS-rendered flat native action',selected:click?'Cloudflare':null});
+  return;
+ }
+ assert(group,'Chrome native REDOWN group missing: '+top.map(row=>row[11]).join(' '));
  // Select the actual parent row. Hover alone can leave a Chrome Views
  // submenu shut when the context menu opens under a stationary pointer.
  input('click',...point(group));
+ const menuCloudflare=row=>/^Cloudflare$/i.test(row[11])&&Math.abs(Number(row[6])-Number(group[6]))<600;
  let children,cloud;
  for(let attempt=0;attempt<8&&!cloud;attempt++){
   await sleep(175);
   children=readScreen(base+'-providers.png');
-  cloud=children.find(row=>/^Cloudflare$/i.test(row[11]));
+  cloud=children.find(menuCloudflare);
  }
  assert(cloud,'Chrome native Cloudflare action missing: '+children.map(row=>row[11]).join(' '));
- assert.equal(children.filter(row=>/^Cloudflare$/i.test(row[11])).length,1);
+ assert.equal(children.filter(menuCloudflare).length,1);
  if(click)input('click',...point(cloud));else{input('key','Escape');input('key','Escape');}
  report.scenarios.push({scenario,context:contextName,status:'PASS',proof:'OS-rendered native menu',selected:click?'Cloudflare':null});
 }
@@ -105,7 +114,7 @@ try{
  // Lose one actual Chrome row and stop the real service worker. A trusted
  // query wakes it without touching any native command. Warm clicks cannot
  // hide a bootstrap failure by doing the work themselves.
- const app=await context.newPage();await app.goto(appUrl);
+ let app=await context.newPage();await app.goto(appUrl);
  const cdp=await context.newCDPSession(app);
  const lifecycle=[];
  cdp.on('ServiceWorker.workerVersionUpdated',({versions})=>{
@@ -143,6 +152,7 @@ try{
  await app.evaluate(()=>chrome.runtime.reload()).catch(error=>{
   if(!/closed|destroyed/i.test(error.message))throw error;
  });
+ app=await context.newPage();
  await waitFor(()=>app.goto(appUrl).catch(()=>null),'unpacked extension reload');
  await readyFromShelf('extension reload');
  await nativeMenu(page,'extension-reload','page');

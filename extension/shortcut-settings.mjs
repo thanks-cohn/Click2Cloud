@@ -85,7 +85,7 @@ export function installShortcuts({invoke, context, runUI, runAPI, updateReferenc
         const row=document.createElement('div');
         row.className='settings-row shortcut-row';
         const label=document.createElement('span'),key=document.createElement('kbd'),status=document.createElement('small');
-        label.textContent=text;key.textContent=chord;status.textContent='Fixed / Not customizable';
+        label.textContent=text;key.textContent=chord;status.textContent='🔒';status.title='Fixed shortcut';status.setAttribute('aria-label','Fixed shortcut');
         row.append(label,key,status);fixed.append(row);
       }
       const rows = card.querySelector('.shortcut-rows'), feedback = card.querySelector('.shortcut-feedback');

@@ -5,7 +5,7 @@ import {captureHistoryContext,safeHistoryURL} from '../src/history/model.mjs';
 import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-upload.mjs';
 import {retainedScreenshotOutput,matchScreenshotObject} from '../src/history/screenshot-output.mjs';
 
-export function createScreenshotBackground({chrome,oauth,current,fileApi,historyUrls,onVerified,retryCache=createScreenshotRetryCache()}){
+export function createScreenshotBackground({chrome,oauth,current,fileApi,historyUrls,onVerified,observeResult,retryCache=createScreenshotRetryCache()}){
  const storage=chrome.storage.local;
  const uploader=createDirectScreenshotUpload(oauth);
  const send=message=>chrome.runtime.sendMessage(message).catch(()=>{});
@@ -29,12 +29,13 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
  const rules=createScreenshotRules({storage,authorizeTarget,discoverDefault});
  const runner=createScreenshotCapture({chrome,rules,uploader,retryCache,
   async record(job){
-   await current.recordRemoteResult({
+   const saved=await current.recordRemoteResult({
    operationId:job.plan.operationId,kind:'screenshot-to-cloud',state:job.state,code:job.code,
    attemptedFilename:'Screenshot',bytes:job.captured?.bytes,historyContext:captureHistoryContext({pageUrl:job.plan.context?.url}),
    screenshot:{...job,plan:{...job.plan,context:job.plan.context?
     {...job.plan.context,url:safeHistoryURL(job.plan.context.url)}:null}}
    },{onVerified});
+   try{void Promise.resolve(observeResult?.(saved)).catch(()=>{});}catch{}
    void send({channel:'screenshot-history-changed',operationId:job.plan.operationId});
   },
   read:async id=>{const row=await current.readRemoteResult(id);return row?.kind==='screenshot-to-cloud'?row.screenshot:null;},

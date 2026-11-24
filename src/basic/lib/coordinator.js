@@ -13,6 +13,7 @@ export function createCoordinator({
   adapters,
   acquire = acquireSource,
   notify = () => {},
+  observe = () => {},
   intents,
   onVerified = () => {},
   now = () => Date.now(),
@@ -20,6 +21,7 @@ export function createCoordinator({
   const running = new Map(),
     warnings = new Set();
   async function event(a, stage, outcome = "Uncertain", extra = {}) {
+    try { void Promise.resolve(observe(a)).catch(() => {}); } catch { /* History is optional. */ }
     try {
       await store.event({
         timestamp: new Date().toISOString(),

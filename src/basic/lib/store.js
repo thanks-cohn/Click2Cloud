@@ -353,6 +353,17 @@ export async function openStore(
       const totals = await run(["meta"], "readonly", tx => req(tx.objectStore("meta").getAll(range)));
       return {count:totals.reduce((sum, value) => sum + value, 0), complete};
     },
+    historySource: cursor => run(["attempts"], "readonly", tx => new Promise((resolve, reject) => {
+      const rows = [];
+      const read = tx.objectStore("attempts").openCursor(cursor ? IDBKeyRange.lowerBound(cursor,true) : null);
+      read.onerror = () => reject(read.error);
+      read.onsuccess = () => {
+        const item = read.result;
+        if (!item || rows.length === 100) return resolve({rows,next:item ? rows.at(-1).id : null});
+        rows.push(item.value);
+        item.continue();
+      };
+    })),
     historyList: async (input) =>
       list("attempts", {
         pageSize: (await settings()).pageSize,

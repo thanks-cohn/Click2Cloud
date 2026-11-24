@@ -1,3 +1,5 @@
+import {createHistoryStore,HISTORY_CLEANUP_ALARM} from '../src/queue/store.mjs';
+import {basicReceipt,currentReceipt} from '../src/queue/receipts.mjs';
 import {BASIC_CHANNEL, basicMenuProvider, createBasicHost} from '../src/basic/host.mjs';
 import {createScreenshotBackground} from './screenshot-background.mjs';
 import {exportOptions,exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
@@ -54,7 +56,22 @@ let connectionObservation=null,attentionPreference=null;
 const dailyBadge=createDailyBadge({chrome,
  countHistory:current.countRemoteResults,countBasic:range=>basic.verifiedCount(range),
  readPreferences:()=>current.readHistoryPreferences()});
-const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt)});
+const queueHistory=createHistoryStore();
+const observedQueueOperations=new Set();
+async function accountQueueReceipt(project,row){
+ if(project===currentReceipt){
+  if(row.kind==='screenshot-to-cloud'?!row.screenshot?.finishedAt:row.state==='pending')observedQueueOperations.add(row.operationId);
+  else observedQueueOperations.delete(row.operationId);
+ }
+ try{
+  const records=project(row);
+  if(records.length)await queueHistory.reconcile(records);
+  void chrome.runtime.sendMessage({channel:'queue-history-changed'}).catch(()=>{});
+ }catch{
+  void chrome.runtime.sendMessage({channel:'queue-history-accounting-pending'}).catch(()=>{});
+ }
+}
+const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt),observeAttempt:row=>accountQueueReceipt(basicReceipt,row)});
 const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
  void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
 }});
@@ -97,6 +114,7 @@ const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBuc
 
 async function recordRemote(value){
  const saved=await current.recordRemoteResult(value,{onVerified:dailyBadge.recordVerified});
+ void accountQueueReceipt(currentReceipt,saved);
  try{void chrome.runtime.sendMessage({channel:'remote-result',result:{operationId:saved.operationId,state:saved.state,code:saved.code,kind:saved.kind,destination:saved.destination,key:saved.receipt?.key,stage:saved.stage,bytes:saved.bytes}}).catch(()=>{});}catch{/* No open app is normal; durable results remain inspectable. */}
  try{void Promise.resolve(fileApi.noteRemoteWrite(saved)).catch(()=>{});}catch{}
  return saved;
@@ -301,7 +319,7 @@ void Promise.resolve().then(async()=>{
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
 let screenshots;
-const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:dailyBadge.recordVerified,historyUrls:async(method,output,params)=>{
+const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:dailyBadge.recordVerified,observeResult:row=>accountQueueReceipt(currentReceipt,row),historyUrls:async(method,output,params)=>{
  if(method==='history-connect-domain'){
   if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
   if(typeof params.domain!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
@@ -442,6 +460,29 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));
     return true;
   }
+  if(message?.channel==='queue-history-scan'){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false});return false;}
+    const {source,cursor}=message;
+    const validBasic=source==='basic'&&(cursor==null||typeof cursor==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(cursor));
+    const validCurrent=source==='current'&&(cursor==null||typeof cursor==='object'&&
+      (typeof cursor.key==='string'&&cursor.key.startsWith('remote-result:')&&cursor.key.length<1024||
+      Number.isSafeInteger(cursor.legacyOffset)&&cursor.legacyOffset>=0));
+    if(!validBasic&&!validCurrent){respond({ok:false});return false;}
+    const scan=validBasic?basic.historySource(cursor):current.readQueueHistorySource(cursor??{});
+    scan.then(({rows,next})=>{
+      let malformed=0;
+      const records=rows.flatMap(row=>{
+        try{
+          if(validBasic)return basicReceipt(row);
+          const interrupted=(row.kind==='screenshot-to-cloud'?!row.screenshot?.finishedAt:row.state==='pending')&&
+            !observedQueueOperations.has(row.operationId);
+          return currentReceipt(row,{interrupted});
+        }catch{malformed++;return [];}
+      });
+      respond({ok:true,records,next,malformed});
+    },()=>respond({ok:false}));
+    return true;
+  }
   if(message?.channel==='shelf-history'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond(null);return false;}
     shelfHistory.request(message.method,message.windowId,message.view,sender,message.sequence).then(respond,()=>respond(null));
@@ -474,6 +515,16 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
 });
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});
+chrome.alarms.onAlarm.addListener(alarm=>{
+ if(alarm.name===HISTORY_CLEANUP_ALARM)void queueHistory.maintain().catch(()=>{
+  void chrome.runtime.sendMessage({channel:'queue-history-accounting-pending'}).catch(()=>{});
+ });
+});
+chrome.runtime.onStartup.addListener(()=>{
+ void queueHistory.policy().then(policy=>{
+  if(policy.deleteSince)return chrome.alarms.create(HISTORY_CLEANUP_ALARM,{periodInMinutes:1});
+ }).catch(()=>{});
+});
 chrome.alarms.onAlarm.addListener(a=>{if(a.name==='whole-cloud')void (async()=>{try{await screenshotHost().prune();}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}try{for(const i of await wholeCloud.list())try{await wholeCloud.tick(i);}catch{}}catch{}const policy=(await current.read()).product.recovery;for(const b of policy.buckets.filter(b=>b.enabled))try{await recoveryCrawl.tick(b,{cadence:policy.cadence});}catch{}})().catch(()=>{});});
 // Fresh validation on every state-dependent request; failures do not poison auth
 // or future read attempts. Never reinterpret an established missing CURRENT as empty.
