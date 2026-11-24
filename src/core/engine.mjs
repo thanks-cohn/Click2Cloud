@@ -41,7 +41,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     }
     return result;
   }
-  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization,observation}={}) {
+  async function save({itemId,generation,context='image',source,signal,attentionContext,depthAuthorization,observation,onAccepted}={}) {
     passiveObservation(observation,{stage:'dispatch.enter'});
     const dispatchStarted=performance.now(),operationId=operationIdentity(),scope={operationId,generation};
     let priorBoundary=0;
@@ -72,7 +72,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         const native=registrar.inspect(),resolved=resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:!native.pending&&native.desired?.generation===generation?native.acknowledgedGeneration:null,authorizedTargets:[]});
         if(resolved.state!=='completed')return finish(resolved);
         if(!onProviderAction)return finish({state:'blocked',code:'PROVIDER_SETUP_UNAVAILABLE'});
-        return finish(await onProviderAction({provider:resolved.action.providerAction,attentionContext,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
+        return finish(await onProviderAction({provider:resolved.action.providerAction,attentionContext,emptyAssignment:resolved.action.providerAction==='cloudflare',source,signal,generation,...(onAccepted?{onAccepted}:{}),dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),authorize:async()=>{const n=registrar.inspect();return !n.pending&&n.desired?.generation===generation&&n.acknowledgedGeneration===generation;}}));
       }
       let auth;
       try{auth=await authorizeTarget(spec?.rows.find(r=>r.id===itemId)?.target);}
@@ -98,7 +98,7 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
         const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await authorizeTarget(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
-        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onObservation:observation,onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
+        const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,...(onAccepted?{onAccepted}:{}),dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onObservation:observation,onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});observe(saveSink,'completion.history','started','REMOTE_COMPLETION_STARTED',scope);try{await onVerifiedCompletion?.(out);}catch{observe(saveSink,'completion.history','failed','REMOTE_COMPLETION_PENDING',scope);return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);
       }

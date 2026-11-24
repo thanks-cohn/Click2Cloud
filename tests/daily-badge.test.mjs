@@ -48,7 +48,7 @@ function badgeFixture(){
    setBadgeBackgroundColor:async({color})=>{badgeGreen=color==='#087a35';readLights();}},
   alarms:{onAlarm:{addListener:fn=>{alarmListener=fn;}},create:async(name,value)=>{alarm={name,...value};}}
  };
- const make=()=>createDailyBadge({chrome,clock:()=>nowTime,readPreferences:async()=>{
+ const make=options=>createDailyBadge({chrome,clock:()=>nowTime,readPreferences:async()=>{
   if(error)throw error;
   return {timezone};
  },countHistory:async match=>{scanCount++;await tick();for(const row of stored.values())match(row);},
@@ -56,7 +56,7 @@ function badgeFixture(){
  wait:(duration,signal)=>new Promise(resolve=>{
   waits.push({duration,resolve});
   signal.addEventListener('abort',resolve,{once:true});
- })});
+ }),...options});
  return {make,states,texts,waits,basic,basicReads:()=>basicReads,scans:()=>scanCount,store:row=>stored.set(row.operationId,row),
   fail:()=>{error=Error('unavailable');},failIcon:()=>{iconError=Error('unavailable');},
   restore:()=>{error=undefined;},rollover:()=>{nowTime=alarm.when;alarmListener(alarm);}};
@@ -70,22 +70,22 @@ test('Concurrent receipts coalesce overflow but count without rescanning each wr
  await tick();
  assert.equal(f.texts.at(-1),'100');
  assert.equal(f.scans(),1);
- assert.deepEqual(f.waits.map(w=>w.duration),[140]);
+ assert.deepEqual(f.waits.map(w=>w.duration),[180]);
  const partial=screenshot('capture','partial',[one]);
  await feed(partial);
  await feed({...partial,screenshot:{...partial.screenshot,outputs:[one,two]}});
  assert.equal(f.texts.at(-1),'101');
- for(let i=0;i<f.waits.length;i++){f.waits[i].resolve();await tick();assert(i<21);}
- const durations=[140,24,140,24,140,24,140];
+ for(let i=0;i<f.waits.length;i++){f.waits[i].resolve();await tick();assert(i<15);}
+ const durations=[180,100,180,100,180];
  assert.deepEqual(f.waits.map(w=>w.duration),[...durations,...durations,...durations]);
- for(let i=0;i<3;i++) assert.deepEqual(f.states.slice(2+i*8,10+i*8),['icon','idle','badge','idle','icon','idle','badge','idle']);
+ for(let i=0;i<3;i++) assert.deepEqual(f.states.slice(2+i*6,8+i*6),['icon','idle','badge','idle','icon','idle']);
  assert.equal(f.scans(),1);
 
  const workerWake=f.make();
  await workerWake.refresh();
  assert.equal(f.texts.at(-1),'101');
  assert.equal(f.states.at(-1),'idle');
- assert.equal(f.waits.length,21);
+ assert.equal(f.waits.length,15);
  f.rollover();
  await workerWake.refresh();
  assert.equal(f.texts.at(-1),'0');
@@ -105,11 +105,25 @@ test('badge failures abort a live flash and restore normal before a retry',async
  await tick();
  assert.equal(f.texts.at(-1),'!');
  assert.equal(f.states.at(-1),'idle');
- assert.deepEqual(f.waits.map(w=>w.duration),[140]);
+ assert.deepEqual(f.waits.map(w=>w.duration),[180]);
  f.restore();
  await badge.refresh();
  assert.equal(f.texts.at(-1),'1');
  assert.equal(f.states.at(-1),'idle');
+});
+
+test('Turning off transmission stops active pulses and keeps the verified count',async()=>{
+ const f=badgeFixture();let enabled=true;
+ const badge=f.make({transmissionEnabled:()=>enabled});
+ await badge.refresh();
+ const first=verified('before-opt-out'),later=verified('after-opt-out');
+ f.store(first);await badge.recordVerified(first);await tick();
+ assert.equal(f.states.at(-1),'icon');
+ enabled=false;badge.cancelTransmission();
+ f.store(later);await badge.recordVerified(later);await tick();
+ assert.equal(f.texts.at(-1),'2');
+ assert.equal(f.states.at(-1),'idle');
+ assert.equal(f.waits.length,1);
 });
 
 test('Basic receipt projection joins legacy host receipts and reads again only on a new commit',async()=>{

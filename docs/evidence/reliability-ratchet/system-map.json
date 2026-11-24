@@ -8,7 +8,7 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.24",
+      "extensionVersion": "0.3.27",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {

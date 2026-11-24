@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
+import {createServer} from 'node:http';
 import {cpus,tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {join,resolve,sep} from 'node:path';
 import {chromium} from 'playwright-core';
 
 const extension = resolve('dist/click2cloud');
@@ -11,29 +12,53 @@ const profile = await mkdtemp(join(tmpdir(),'redown-history-benchmark-'));
 const id = 'ajppphdiamdobknpamcheohmdbdbeoal';
 const count = Number(process.env.C2C_HISTORY_V2_COUNT ?? 100_000);
 const retention=process.env.C2C_HISTORY_V2_RETENTION==='1';
-let context;
+const fixture=process.env.C2C_HISTORY_V2_FIXTURE==='1';
+let context,browser,server,page;
 const {BUILD_INFO}=await import('../dist/click2cloud/src/build-info.mjs');
-const report = {result:'FAIL',build:BUILD_INFO,platform:process.platform,cpu:cpus()[0]?.model, proof:'UNPACKED_CHROMIUM_WITH_SYNTHETIC_INDEXEDDB_DATA', count,retention};
+const report = {result:'FAIL',build:BUILD_INFO,platform:process.platform,cpu:cpus()[0]?.model, proof:fixture?'CHROMIUM_INDEXEDDB_OPFS_WITH_WEB_DOWNLOAD_FIXTURE':'UNPACKED_CHROMIUM_WITH_SYNTHETIC_INDEXEDDB_DATA', count,retention};
 await mkdir(out,{recursive:true});
 try {
-  context = await chromium.launchPersistentContext(profile,{
-    executablePath:process.env.C2C_CHROME_EXECUTABLE ?? '/usr/bin/chromium',headless:true,acceptDownloads:true,
-    ignoreDefaultArgs:['--disable-extensions'],args:['--no-sandbox','--enable-unsafe-extension-debugging',
-      `--disable-extensions-except=${extension}`,`--load-extension=${extension}`]
-  });
+  if(fixture){
+    server=createServer(async(req,res)=>{
+      try{
+        if(req.url==='/')return res.setHeader('Content-Type','text/html').end('<!doctype html><title>History benchmark</title>');
+        const path=resolve(extension,'.'+new URL(req.url,'http://fixture').pathname);
+        if(!path.startsWith(extension+sep))return res.writeHead(404).end();
+        res.setHeader('Content-Type','text/javascript').end(await readFile(path));
+      }catch{res.writeHead(404).end();}
+    });
+    await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+    browser=await chromium.launch({executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true,args:['--enable-precise-memory-info']});
+    context=await browser.newContext({acceptDownloads:true});
+    page=await context.newPage();
+    await page.goto('http://127.0.0.1:'+server.address().port+'/');
+    report.version=BUILD_INFO.extensionVersion;
+  }else{
+    context = await chromium.launchPersistentContext(profile,{
+      executablePath:process.env.C2C_CHROME_EXECUTABLE ?? '/usr/bin/chromium',headless:true,acceptDownloads:true,
+      ignoreDefaultArgs:['--disable-extensions'],args:['--no-sandbox','--enable-unsafe-extension-debugging',
+        `--disable-extensions-except=${extension}`,`--load-extension=${extension}`]
+    });
+    const browserSession = await context.browser().newBrowserCDPSession();
+    const extensions = await context.newPage();
+    await extensions.goto('chrome://extensions/');
+    if (!await extensions.locator('extensions-item#'+id).count()) await browserSession.send('Extensions.loadUnpacked',{path:extension});
+    await extensions.locator('extensions-item#'+id).waitFor();
+    report.version = await extensions.locator('extensions-item#'+id).evaluate(node=>node.data.version);
+    page=await context.newPage();
+    await page.goto(`chrome-extension://${id}/extension/app.html`);
+  }
   report.browser=context.browser().version();
-  const browserSession = await context.browser().newBrowserCDPSession();
-  const extensions = await context.newPage();
-  await extensions.goto('chrome://extensions/');
-  if (!await extensions.locator('extensions-item#'+id).count()) await browserSession.send('Extensions.loadUnpacked',{path:extension});
-  await extensions.locator('extensions-item#'+id).waitFor();
-  report.version = await extensions.locator('extensions-item#'+id).evaluate(node=>node.data.version);
-  assert.equal(report.version,'0.3.26');
-  const page=await context.newPage();
-  await page.goto(`chrome-extension://${id}/extension/app.html`);
+  assert.equal(report.version,'0.3.27');
   const download=retention?null:page.waitForEvent('download',{timeout:600_000});
   void download?.catch(()=>{});
-  report.metrics = await page.evaluate(async ({count,retention})=>{
+  let savedDownload;
+  if(fixture && download){
+    savedDownload=download.then(file=>file.saveAs(join(out,`history-${count}.zip`)));
+    void savedDownload.catch(()=>{});
+    await page.exposeFunction('archiveSaved',()=>savedDownload);
+  }
+  report.metrics = await page.evaluate(async ({count,retention,fixture})=>{
     const {createHistoryStore}=await import('/src/queue/store.mjs');
     const {downloadHistoryExport}=await import('/src/queue/export.mjs');
     const store=createHistoryStore({database:'history-benchmark'});
@@ -82,7 +107,12 @@ try {
     }
     const before=performance.now(),heapBefore=performance.memory?.usedJSHeapSize;
     let heapPeak=heapBefore,concurrent;
-    const result=await downloadHistoryExport(store,{onProgress(){
+    const fixtureDownload=async (url,filename)=>{
+      const link=Object.assign(document.createElement('a'),{href:url,download:filename});
+      link.click();
+      await window.archiveSaved();
+    };
+    const result=await downloadHistoryExport(store,{...(fixture?{download:fixtureDownload}:{}),onProgress(){
       heapPeak=Math.max(heapPeak,performance.memory?.usedJSHeapSize);
       concurrent??=store.reconcile([{schemaVersion:1,recordId:'arrived-during-export',terminal:true,
         sortAt:1700000000000+count*60000,kind:'save'}]);
@@ -93,10 +123,11 @@ try {
     const sorted=timings.map(timing=>timing.ms).sort((a,b)=>a-b);
     return {...result,seedMs,storage,timings,p95Ms:sorted[Math.ceil(sorted.length*.95)-1],
       exportMs:performance.now()-before,heapBefore,heapPeak,concurrentWriteExcluded:count>0};
-  },{count,retention});
+  },{count,retention,fixture});
   if(!retention){
     const zip=join(out,`history-${count}.zip`);
-    await (await download).saveAs(zip);
+    if(fixture)await savedDownload;
+    else await (await download).saveAs(zip);
     report.integrity=JSON.parse(execFileSync('python3',['scripts/verify-history-v2-zip.py',zip,String(count)],{encoding:'utf8'}));
     assert.equal(report.metrics.total,count);
   }
@@ -106,6 +137,8 @@ try {
   process.exitCode=1;
 } finally {
   await context?.close();
+  await browser?.close();
+  if(server)await new Promise(resolve=>server.close(resolve));
   await rm(profile,{recursive:true,force:true});
   await writeFile(join(out,'benchmark-'+count+'.json'),JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));

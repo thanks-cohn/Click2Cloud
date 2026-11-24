@@ -1,3 +1,5 @@
+import {encodePreview, livePreviewLimit, previewError, validatePreviewImage} from '../lib/preview.mjs';
+
 // Byte-only provider adapters. URLs of the source/page never enter this layer.
 const GOOGLE = "https://www.googleapis.com/drive/v3/";
 const GRAPH = "https://graph.microsoft.com/v1.0/";
@@ -107,9 +109,10 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
           credentials: "omit",
           redirect: options.redirect || "error",
           referrerPolicy: "no-referrer",
-          signal: AbortSignal.timeout(90000),
+          signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000),
         });
       } catch {
+        options.signal?.throwIfAborted();
         throw fail(
           "PROVIDER_NETWORK",
           "Provider request was interrupted.",
@@ -161,6 +164,52 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
     return data;
   }
   const headers = (token) => ({ Authorization: `Bearer ${token}` });
+  async function readImage(provider, {id, size, mime, token, signal}) {
+    if (!Number.isSafeInteger(size) || size < 1) throw previewError('PREVIEW_SIZE_UNKNOWN');
+    if (size > livePreviewLimit) throw previewError('PREVIEW_SIZE_LIMIT');
+    const item = encodeURIComponent(id);
+    const urls = {
+      google: GOOGLE+`files/${item}?alt=media`,
+      onedrive: GRAPH+`me/drive/items/${item}/content`,
+      dropbox: 'https://content.dropboxapi.com/2/files/download'
+    };
+    const options = {headers:headers(token),signal,redirect:'follow'};
+    if (provider === 'dropbox') {
+      options.method = 'POST';
+      options.redirect = 'error';
+      options.headers['Dropbox-API-Arg'] = JSON.stringify({path:id});
+    }
+    const response = await request(urls[provider],options);
+    if (!response.ok || !response.body) {
+      await response.body?.cancel().catch(()=>{});
+      throw previewError(({401:'PROVIDER_AUTH_REVOKED',403:'PROVIDER_PERMISSION',404:'RESULT_NOT_FOUND',
+        ...(provider === 'dropbox' ? {409:'RESULT_NOT_FOUND'} : {})})[response.status] ?? 'PREVIEW_PROVIDER_UNAVAILABLE');
+    }
+    const reader = response.body.getReader();
+    try {
+      if (provider === 'dropbox') {
+        let metadata;
+        try { metadata = JSON.parse(response.headers.get('Dropbox-API-Result')); } catch {}
+        if (metadata?.id !== id || metadata?.size !== size) throw previewError('RESULT_CHANGED');
+      }
+      const bytes = new Uint8Array(size);
+      let offset = 0;
+      for (;;) {
+        signal.throwIfAborted();
+        const {value,done} = await reader.read();
+        if (done) break;
+        if (offset + value.length > size) throw previewError('RESULT_CHANGED');
+        bytes.set(value,offset);
+        offset += value.length;
+      }
+      if (offset !== size) throw previewError('RESULT_CHANGED');
+      validatePreviewImage(bytes,mime);
+      return encodePreview(bytes,mime);
+    } finally {
+      await reader.cancel().catch(()=>{});
+      reader.releaseLock();
+    }
+  }
   async function proveContent(url, token, bytes) {
     const r = await request(
       url,
@@ -599,6 +648,7 @@ export function createAdapters({ fetch = globalThis.fetch } = {}) {
     Object.entries(adapters).map(([id, upload]) => [
       id,
       {
+        readImage: input => readImage(id,input),
         async upload(input) {
           if (
             !(input.bytes instanceof Uint8Array) ||

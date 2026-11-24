@@ -1,5 +1,27 @@
 # Click2Cloud Right-Click Engine and Menu Configuration — Source ↔ API Documentation
 
+## 0.3.27 save feedback
+
+The native listener retains the tab, frame and delivery time for the optional
+energy projectile. The existing `3+1.1` `dispatchSave` and
+`invokeProviderAction` paths and Basic `saves.start` continue to own routing and
+authorization. The effect receives only the native callback. Cloudflare invokes
+it after a matching Worker `REMOTE_ACCEPTED` or synchronous `written` response.
+Basic invokes it after committing the original native attempt’s `UPLOADING`
+state with account authorization and source bytes in hand. Replayed attempts,
+permission prompts, setup-only actions and rejected dispatches do not invoke it.
+The target frame uses its recent trusted context-menu coordinates and animates
+inside the webpage. The callbacks have no write or decision authority and their
+failures do not propagate into saving.
+
+The durable first-verification callbacks still own badge counting. Optional
+toolbar feedback uses the Chrome action icon and badge background in R → badge
+→ R order. A coalesced desktop notice uses the same confirmed save completion
+and checks for a live Chrome `SIDE_PANEL` context. Partial screenshot delivery
+retains the existing count for a verified output. The settings for these effects
+are local presentation preferences. Test coverage and installed-browser limits
+are recorded in the [0.3.27 verification report](../../11.24.2026/REDOWN_0327_VERIFICATION.md).
+
 ## 0.3.23 native menu lifecycle
 
 `extension/background.mjs:scheduleNative` joins startup, installation, worker

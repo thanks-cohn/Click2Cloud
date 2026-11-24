@@ -4,22 +4,23 @@ import {withHistoryDownload} from '../src/queue/zip.mjs';
 import {safeHistoryURL} from '../src/history/model.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
 import {wireImmersiveView} from './immersive-view.mjs';
+import {basicImageMime,loadBasicHistoryImage} from './basic-history-preview.mjs';
+import {hasHistoryV2Value,historyV2FieldLabels,historyV2FieldVisible,historyV2Providers,normalizeHistoryV2View} from './history-v2-preferences.mjs';
 
 export const historyPreset = Object.freeze({
   full:Object.freeze({showSourceUrl:true,showHostUrl:true,showRemoteUrl:true,showFileSize:true,showVerification:true,showAdvancedDetails:true}),
   compact:Object.freeze({showSourceUrl:false,showHostUrl:false,showRemoteUrl:false,showFileSize:false,showVerification:false,showAdvancedDetails:false})
 });
-export const providerName = value => ({
-  cloudflare:'Cloudflare R2',google:'Google Drive',onedrive:'OneDrive',dropbox:'Dropbox'
-})[value] ?? 'N/A';
+export const providerName = value => Object.hasOwn(historyV2Providers,value) ? historyV2Providers[value] : 'N/A';
 export const queueStatus = value => ({
   working:'Working',waiting:'Waiting',uploading:'Uploading',verifying:'Verifying',verified:'Verified',
   uploaded:'Uploaded · verification unavailable',failed:'Failed',blocked:'Blocked',uncertain:'Outcome uncertain',
   'needs-login':'Needs login',cancelled:'Cancelled'
 })[value] ?? 'N/A';
-export const historyLocation = destination => [
+const savedLocation = destination => [
   destination?.bucket, destination?.key ?? destination?.path ?? destination?.folder
-].filter(Boolean).join(' / ') || 'N/A';
+].filter(Boolean).join(' / ');
+export const historyLocation = destination => savedLocation(destination) || 'N/A';
 
 const node = (tag,text,className) => {
   const value = document.createElement(tag);
@@ -33,7 +34,7 @@ function action(label, run) {
   button.onclick = run;
   return button;
 }
-const date = (at,timezone) => at ? new Date(at).toLocaleString(undefined,{timeZone:timezone}) : 'N/A';
+const date = (at,timezone) => Number.isFinite(at) ? new Date(at).toLocaleString(undefined,{timeZone:timezone}) : null;
 const errorMessage = (error, fallback) => ({
   RESULT_NOT_FOUND:'The saved file no longer exists at this location.',
   RESULT_CHANGED:'The file at this location has changed.',
@@ -46,31 +47,52 @@ const errorMessage = (error, fallback) => ({
   INSUFFICIENT_PERMISSION:'This account does not have permission to read the file.',
   HISTORY_DOWNLOAD_INTERRUPTED:'Chrome interrupted the file download.'
 })[error.code ?? error.message] ?? (error.name==='AbortError'?'Cancelled.':fallback);
+const previewMessage = error => ({
+  AUTH_REQUIRED:'Sign in to the saved provider account in Remotes to preview this file.',
+  AUTH_ACCOUNT_CHANGED:'The saved file belongs to another account or drive.',
+  AUTH_CHANGED:'The provider connection changed. Open the preview again.',
+  AUTH_REVOKED:'Reconnect the saved provider account in Remotes.',
+  AUTH_SCOPE_REQUIRED:'The saved provider authorization lacks the necessary file access.',
+  PROVIDER_AUTH_REVOKED:'Reconnect the saved provider account in Remotes.',
+  PROVIDER_PERMISSION:'The saved provider account cannot read this image.',
+  PREVIEW_READ_SCOPE_MISSING:'Dropbox file-read access is unavailable. This save has no usable retained image.',
+  PREVIEW_RECORD_UNAVAILABLE:'The original confirmed image record is unavailable.',
+  PREVIEW_ACCOUNT_UNAVAILABLE:'No verified account binding is available for a live preview.',
+  PREVIEW_FILE_UNAVAILABLE:'The receipt does not identify an exact image and version.',
+  PREVIEW_SIZE_UNKNOWN:'The saved image size is unavailable.',
+  PREVIEW_SIZE_LIMIT:'This image exceeds the preview size limit.',
+  PREVIEW_DIMENSIONS_LIMIT:'This image exceeds the preview dimension limit.',
+  IMAGE_BYTES_INVALID:'The image bytes could not be validated.',
+  IMAGE_HEADER_UNAVAILABLE:'The image dimensions could not be read safely.',
+  PREVIEW_TIMEOUT:'The preview took too long. Try opening it again.',
+  PREVIEW_BUSY:'Other images are loading. Try opening this preview again.'
+})[error.code ?? error.message] ?? errorMessage(error,'Preview unavailable. The history record is retained.');
 const filename = name => {
   let safe = String(name ?? '').replace(/[<>:"/\\|?*\x00-\x1f\x7f]/g,'_').replace(/^[.\s]+|[.\s]+$/g,'').slice(0,180);
   if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(safe)) safe = '_'+safe;
   return safe || 'saved-file';
 };
 
-export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage}) {
-  const rows = [], previews = new Map(), pending = new Map();
+export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility}) {
+  const rows = [], previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
   const reader = createImageReader(read,{maxBytes:12*1024*1024,maxEntries:2});
   const flags = historyPreset[preferences.preset] ?? historyPreset.full;
+  let view = visibility ?? normalizeHistoryV2View();
   let previewDialog, previewAbort, previewUrl, immersive, imageIndex, originalFocus;
-  async function read(params) {
-    return api('readFileChunk',params,{quiet:true,reconnect:false,readTimeout:25000});
+  async function read(params,signal) {
+    return api('readFileChunk',params,{quiet:true,reconnect:false,readTimeout:25000,signal});
   }
-  async function locate(record) {
+  async function locate(record,signal) {
     const operationId = record.sourceRecordId;
     if (record.kind === 'screenshot') {
       const result = await screenshotRequest('history-output',{operationId,outputId:record.deliveryId});
       if (!result.object) throw Error(result.code ?? 'RESULT_LOOKUP_FAILED');
       return {source:result.target,key:result.object.key,size:result.object.size,etag:result.object.etag,checksum:result.checksum};
     }
-    const result = await api('openRemoteResult',{operationId},{quiet:true,reconnect:false,readTimeout:20000});
+    const result = await api('openRemoteResult',{operationId},{quiet:true,reconnect:false,readTimeout:20000,signal});
     return {source:result.target,key:result.highlightKey,size:record.bytes,etag:record.etag};
   }
-  function reason(record) {
+  function downloadReason(record) {
     if (record.status!=='verified')return 'No verified downloadable file recorded.';
     if (record.provider!=='cloudflare')return 'This provider does not expose a file download through REDOWN.';
     if (!record.destination?.key)return 'No exact file location was recorded.';
@@ -78,8 +100,21 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     if (canRead(record) === false) return 'Reconnect the saved account in Remotes to download.';
     return '';
   }
+  async function loadPreview(record,limit,signal,concurrency) {
+    if (record.provider !== 'cloudflare') return loadBasicHistoryImage(record,signal);
+    if (!record.destination?.key || (!record.etag && !(record.kind === 'screenshot' && record.checksum))) {
+      throw Error('PREVIEW_FILE_UNAVAILABLE');
+    }
+    if (canRead(record) === false) throw Error('RECONNECT_REQUIRED');
+    const object = await locate(record,signal);
+    signal.throwIfAborted();
+    if (!object.key) throw Error('RESULT_LOOKUP_FAILED');
+    const result = await reader.load(object.source,object,{limit,signal,concurrency});
+    if (object.checksum && await hashBlob(result.blob,signal) !== object.checksum) throw Error('RESULT_CHANGED');
+    return result;
+  }
   async function download(record,signal) {
-    const object = await locate(record);
+    const object = await locate(record,signal);
     signal.throwIfAborted();
     if ((!object.etag&&!object.checksum)||!Number.isSafeInteger(object.size)) throw Error('RESULT_LOOKUP_FAILED');
     return withHistoryDownload(filename(record.filename),async write => {
@@ -102,6 +137,8 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     previewDialog?.remove();
     previewDialog = undefined;
     originalFocus?.focus({preventScroll:true});
+    originalFocus = undefined;
+    if (!signal.aborted) pump();
   }
   async function showImage(index) {
     const record = rows[index];
@@ -112,6 +149,8 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const local = previewAbort.signal, dialog = previewDialog;
     const image = dialog.querySelector('img'), feedback = dialog.querySelector('[role=status]');
     image.hidden=true;
+    dialog.removeAttribute('data-retained-preview');
+    image.onload=image.onerror=null;
     image.removeAttribute('src');
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl=undefined;
@@ -120,22 +159,26 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     dialog.querySelector('[data-next]').disabled=index===rows.length-1;
     feedback.textContent='Loading image…';
     try {
-      const object=await locate(record);
-      const loaded=await reader.load(object.source,object,{limit:12*1024*1024,signal:local});
-      if(object.checksum&&await hashBlob(loaded.blob,local)!==object.checksum)throw Error('RESULT_CHANGED');
+      const loaded=await loadPreview(record,12*1024*1024,local,2);
       local.throwIfAborted();
       const url=URL.createObjectURL(loaded.blob);
       previewUrl=url;
+      dialog.toggleAttribute('data-retained-preview',loaded.retained===true);
       image.alt=record.filename;
-      image.onload=()=>{if(local.aborted)return;image.hidden=false;immersive.ready();feedback.textContent='';};
-      image.onerror=()=>{if(!local.aborted)feedback.textContent='Image decode failed.';};
+      image.onload=()=>{
+        if(local.aborted)return;
+        image.hidden=false;immersive.ready();
+        feedback.textContent=loaded.retained ? `${loaded.label} · ${image.naturalWidth} × ${image.naturalHeight}` : loaded.label ?? '';
+      };
+      image.onerror=()=>{if(!local.aborted){URL.revokeObjectURL(url);previewUrl=undefined;feedback.textContent='Image decode failed.';}};
       image.src=url;
     } catch(error) {
-      if(!local.aborted) feedback.textContent=errorMessage(error,'Preview unavailable. The history record is retained.');
+      if(!local.aborted) feedback.textContent=previewMessage(error);
     }
   }
   function gallery(record,trigger) {
-    closeGallery();
+    if (previewDialog) closeGallery();
+    for (const controller of pending.values()) controller.abort();
     originalFocus=trigger;
     const dialog=node('dialog');
     dialog.className='queue-image-dialog';
@@ -162,48 +205,65 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     dialog.showModal();
     void showImage(rows.indexOf(record));
   }
+  function releasePreview(slot) {
+    pending.get(slot)?.abort();
+    const image = slot.querySelector('img');
+    if (image) {
+      image.onload = image.onerror = null;
+      URL.revokeObjectURL(image.src);
+      slot.replaceChildren();
+    }
+  }
   const observer = new IntersectionObserver(entries=>{
     for(const entry of entries){
       const slot=entry.target;
-      if(!entry.isIntersecting) {
-        pending.get(slot)?.abort();
-        const image=slot.querySelector('img');
-        if(image){URL.revokeObjectURL(image.src);image.remove();}
+      if(entry.isIntersecting) visible.add(slot);
+      else {
+        visible.delete(slot);
+        releasePreview(slot);
       }
     }
     pump();
   });
   function pump() {
-    for(const [slot,record] of previews){
+    if (signal.aborted || previewDialog) return;
+    for(const slot of visible){
       if(pending.size>=2)break;
-      if(slot.dataset.failed || slot.querySelector('img') || pending.has(slot) ||
-          !slot.getClientRects().length)continue;
-      const viewport=slot.getBoundingClientRect();
-      if(viewport.bottom<0||viewport.top>innerHeight)continue;
+      if(slot.dataset.failed || slot.querySelector('img') || pending.has(slot) || !slot.parentElement.open)continue;
+      const record=previews.get(slot);
       const ctrl=new AbortController();
       pending.set(slot,ctrl);
       void (async()=>{
         try{
-          const object=await locate(record);
-          const result=await reader.load(object.source,object,{limit:4*1024*1024,signal:ctrl.signal});
-          if(object.checksum&&await hashBlob(result.blob,ctrl.signal)!==object.checksum)throw Error('RESULT_CHANGED');
+          const result=await loadPreview(record,4*1024*1024,ctrl.signal,1);
           ctrl.signal.throwIfAborted();
           const image=new Image();
-          image.alt=record.filename;image.src=URL.createObjectURL(result.blob);
-          slot.replaceChildren(image);
+          image.alt=record.filename;
+          image.decoding='async';
+          image.onerror=()=>{
+            releasePreview(slot);
+            slot.dataset.failed='true';slot.textContent='Image decode failed.';
+          };
+          slot.replaceChildren(image,...(result.label?[node('p',result.label,'muted')]:[]));
+          image.src=URL.createObjectURL(result.blob);
         }catch(error){
-          if(!ctrl.signal.aborted){slot.textContent=errorMessage(error,'Preview unavailable.');slot.dataset.failed='true';}
+          if(!ctrl.signal.aborted){slot.textContent=previewMessage(error);slot.dataset.failed='true';}
         }finally{pending.delete(slot);if(!signal.aborted)pump();}
       })();
     }
   }
   signal.addEventListener('abort',()=>{
     observer.disconnect();
-    for(const ctrl of pending.values())ctrl.abort();
-    for(const slot of previews.keys())for(const img of slot.querySelectorAll('img'))URL.revokeObjectURL(img.src);
+    for(const slot of previews.keys())releasePreview(slot);
+    visible.clear();
     reader.clear();
     closeGallery();
   },{once:true});
+
+  function setVisibility(next) {
+    view = next;
+    for (const update of metadata) update();
+  }
 
   function render(record) {
     const article=node('article',null,'card queue-history-card');
@@ -211,16 +271,25 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const top=node('div',null,'queue-card-header');
     const heading=node('strong',record.filename ?? 'N/A');
     const summary=node('div',null,'queue-card-summary');
-    const when=node('time',date(record.terminalAt ?? record.requestedAt,preferences.timezone));
+    const timestamp=date(record.terminalAt ?? record.requestedAt,preferences.timezone);
+    const when=node('time',timestamp ?? 'N/A');
     summary.append(heading,when);
     const label=node('span',queueStatus(record.status),'queue-badge');
     label.dataset.outcome=record.status;
     top.append(summary,label);
-    article.append(top,node('p',providerName(record.provider)+' · '+historyLocation(record.destination),'queue-location'));
+    const location=node('p',null,'queue-location');
+    const provider=providerName(record.provider),path=savedLocation(record.destination);
+    const updateSummary=()=>{
+      when.hidden=view.hideNA&&!timestamp;
+      location.textContent=path||!view.hideNA ? `${provider} · ${path||'N/A'}` : provider;
+    };
+    metadata.push(updateSummary);
+    updateSummary();
+    article.append(top,location);
     const actions=node('div',null,'queue-actions');
     const feedback=node('p',null,'queue-feedback');
     feedback.setAttribute('role','status');
-    const unavailable=reason(record), downloadFile=action('Download',()=>{
+    const unavailable=downloadReason(record), downloadFile=action('Download',()=>{
       const controller=new AbortController();
       downloadFile.disabled=true;
       feedback.textContent='Downloading saved file…';
@@ -249,7 +318,8 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       go.disabled=canRead(record)===false;
       actions.append(go);
     }
-    const previewable=!unavailable&&isImage({key:record.destination?.key ?? ''});
+    const previewable=record.status==='verified'&&(record.provider==='cloudflare'
+      ? isImage({key:record.destination?.key ?? record.filename ?? ''}) : !!basicImageMime(record));
     if(previewable) {
       rows.push(record);
       const trigger=action('Preview',()=>gallery(record,trigger));
@@ -266,56 +336,76 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         details.append(slot);observer.observe(slot);
         details.addEventListener('toggle',()=>{
           if(details.open){delete slot.dataset.failed;pump();}
-          else{
-            pending.get(slot)?.abort();
-            for(const img of slot.querySelectorAll('img')){URL.revokeObjectURL(img.src);img.remove();}
-          }
+          else releasePreview(slot);
         });
       }
       if(flags.showAdvancedDetails){
         const list=node('dl',null,'queue-record-fields');
-        function field(label,value,url=false){
+        const tracked = [];
+        function track(field,available,...elements) {
+          tracked.push({field,available,elements});
+        }
+        function field(key,value,url=false,label=historyV2FieldLabels[key]){
+          const term=node('dt',label);
           const item=node('dd');
-          const href=url&&safeHistoryURL(value);
+          const href=url ? safeHistoryURL(value) : null;
           if(href){
             const link=node('a',href);
             link.href=href;link.target='_blank';link.rel='noreferrer noopener';item.append(link);
-          }else item.textContent=value??'N/A';
-          list.append(node('dt',label),item);
+          }else item.textContent=(url?null:value) ?? 'N/A';
+          list.append(term,item);
+          track(key,url ? !!href : hasHistoryV2Value(value),term,item);
         }
-        field('Original filename',record.originalFilename);
-        field('Requested',date(record.requestedAt,preferences.timezone));
-        field('Completed',date(record.terminalAt,preferences.timezone));
-        field('File type',record.mime);
-        if(flags.showFileSize)field('Bytes',record.bytes);
-        if(flags.showVerification)field('Proof',record.proofLevel);
-        field('Provider object',record.providerObjectId);
-        field('Save method',record.method ?? record.saveMode);
-        field('Error',record.code);
-        field('Host page',record.hostTitle);
-        if(flags.showSourceUrl){field('Source URL',record.sourceUrl,true);field('Original URL',record.originalUrl,true);}
-        if(flags.showHostUrl&&record.kind!=='screenshot')field('Host URL',record.hostUrl,true);
-        if(flags.showRemoteUrl){field('Remote URL',record.remoteUrl,true);field('Public URL',record.publicUrl,true);}
+        field('originalFilename',record.originalFilename);
+        field('requested',date(record.requestedAt,preferences.timezone));
+        field('completed',date(record.terminalAt,preferences.timezone));
+        field('mime',record.mime);
+        if(flags.showFileSize)field('bytes',record.bytes);
+        if(flags.showVerification)field('proof',record.proofLevel);
+        field('objectId',record.providerObjectId);
+        field('saveMethod',record.method ?? record.saveMode);
+        field('error',record.code,false,'Error');
+        field('hostTitle',record.hostTitle);
+        if(flags.showSourceUrl){field('sourceUrl',record.sourceUrl,true);field('originalUrl',record.originalUrl,true);}
+        if(flags.showHostUrl&&record.kind!=='screenshot')field('hostUrl',record.hostUrl,true);
+        if(flags.showRemoteUrl){field('remoteUrl',record.remoteUrl,true,'Remote URL');field('publicUrl',record.publicUrl,true,'Public URL');}
         details.append(list);
         if(record.kind==='screenshot'){
           const host=node('details');host.open=preferences.expandScreenshotHostURL;
-          host.append(node('summary','Host URL'),node('p',safeHistoryURL(record.hostUrl)??'N/A'));
+          const hostURL=safeHistoryURL(record.hostUrl);
+          host.append(node('summary','Host URL'),node('p',hostURL??'N/A'));
           details.append(host);
+          track('hostUrl',!!hostURL,host);
           if(record.deliveryId&&record.destination?.bucket){
             const urls=node('details');
             const holder=node('div');holder.dataset.destinationUrls='';
             urls.append(node('summary','Public URLs'),holder);
             details.append(urls);
+            track('publicUrl',true,urls);
             wireHistoryDestinationUrls(urls,{request:screenshotRequest,
               params:{operationId:record.sourceRecordId,outputId:record.deliveryId},
               location:{bucketName:record.destination.bucket},confirmed:record.status==='verified'});
           }
         }
-        if(record.metadata)details.append(node('pre',JSON.stringify(record.metadata,null,2)));
+        if(record.metadata){
+          const data=node('pre',JSON.stringify(record.metadata,null,2));
+          details.append(data);
+          track('metadata',true,data);
+        }
+        const update = () => {
+          for (const {field,available,elements} of tracked) {
+            const visible = historyV2FieldVisible(view,record.provider,field,available);
+            for (const element of elements) element.hidden = !visible;
+          }
+          list.hidden = !list.querySelector('dt:not([hidden])');
+        };
+        metadata.push(update);
+        update();
       }
       article.append(details);
     }
+    if (!flags.showAdvancedDetails && record.code && record.status!=='verified') article.append(node('p',record.code,'queue-feedback'));
     return article;
   }
-  return {render};
+  return {render,setVisibility};
 }

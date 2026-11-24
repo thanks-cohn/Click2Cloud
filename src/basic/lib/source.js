@@ -1,4 +1,5 @@
 import { fail, sourceUrl } from "./common.js";
+import {encodePreview, retainedPreviewLimit} from './preview.mjs';
 import { publicAddress } from "../../../right2cloud-module/src/public-address.mjs";
 export const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const redirectStatus = new Set([301, 302, 303, 307, 308]);
@@ -220,12 +221,7 @@ export async function acquireSource(
       mime,
     );
     let preview;
-    if (size <= 256 * 1024 && /^image\/(png|jpeg|gif|webp|avif)$/.test(mime)) {
-      let binary = "";
-      for (let i = 0; i < bytes.length; i += 8192)
-        binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-      preview = `data:${mime};base64,${btoa(binary)}`;
-    }
+    if (size <= retainedPreviewLimit && /^image\/(png|jpeg|gif|webp|avif)$/.test(mime)) preview = encodePreview(bytes,mime);
     return { bytes, filename, mime, preview };
   } catch (e) {
     if (typeof e.code === "string") throw e;

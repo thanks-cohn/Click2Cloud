@@ -197,9 +197,10 @@ try {
       return {readiness: statuses.map(r => r.value.reason), ...f.snapshot()};
     }, menu);
     await page.waitForFunction(() => basicLifecycle.read('local').lastSave?.code === 'AUTH_NETWORK');
-    for (const name of ['message', 'installed', 'startup', 'command', 'menu.click'])
+    for (const name of ['message', 'installed', 'command', 'menu.click'])
       assert.equal(startup.listeners[name], 1);
-    assert.equal(startup.listeners.alarm, 2);
+    assert.equal(startup.listeners.startup, 2); // Native startup and Queue retention.
+    assert.equal(startup.listeners.alarm, 3); // Daily badge, Queue retention and recovery.
     assert.deepEqual(startup.readiness, ['AUTH_NETWORK', 'READY', 'READY']);
     assert.equal(startup.popups, 0);
     assert.deepEqual((await page.evaluate(() => basicLifecycle.call('counter.get'))).value, {count: 1});
@@ -292,9 +293,9 @@ try {
     assert.equal(result.popups, 0);
     assert.doesNotMatch(JSON.stringify(result), /synthetic-private/);
     await page.waitForFunction(() => basicLifecycle.badge === '1' &&
-      basicLifecycle.toolbar.filter(entry => entry.state === 'badge').length === 2 && basicLifecycle.toolbar.at(-1).state === 'idle');
+      basicLifecycle.toolbar.filter(entry => entry.state === 'icon').length === 2 && basicLifecycle.toolbar.at(-1).state === 'idle');
     const chase = await page.evaluate(() => basicLifecycle.toolbar.slice(basicLifecycle.toolbar.findIndex(row => row.state === 'icon')));
-    assert.deepEqual(chase.map(row => row.state), ['icon', 'idle', 'badge', 'idle', 'icon', 'idle', 'badge', 'idle']);
+    assert.deepEqual(chase.map(row => row.state), ['icon', 'idle', 'badge', 'idle', 'icon', 'idle']);
     await page.close();
     page = await fixturePage(nativeContext);
     await start(page, '/candidate');

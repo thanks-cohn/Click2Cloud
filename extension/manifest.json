@@ -3,7 +3,7 @@
   "icons": {"16": "extension/icons/redown-16.png", "32": "extension/icons/redown-32.png", "48": "extension/icons/redown-48.png", "128": "extension/icons/redown-128.png"},
   "name": "REDOWN",
   "short_name": "REDOWN",
-  "version": "0.3.26",
+  "version": "0.3.27",
   "description": "REDOWN \u2014 cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",
@@ -69,5 +69,11 @@
   },
   "side_panel": {
     "default_path": "extension/app.html"
-  }
+  },
+  "content_scripts": [{
+    "matches": ["https://*/*", "http://*/*"],
+    "js": ["extension/projectile.js"],
+    "run_at": "document_start",
+    "all_frames": true
+  }]
 }

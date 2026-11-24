@@ -81,6 +81,22 @@ for (const provider of ['google','dropbox','onedrive'])
     } finally {f.store.close();}
   });
 
+test('Native Basic acknowledgment follows admission and cannot change the outcome or fire on replay',async()=>{
+  const f = await fixture('google');
+  const writesAtAcceptance = [];
+  const onAccepted = () => {
+    writesAtAcceptance.push(f.counts().writes);
+    throw Error('Optional animation failed');
+  };
+  try {
+    const result = await f.coordinator.start(f.input,{native:true,onAccepted});
+    assert.equal(result.state,'SAVED');
+    assert.deepEqual(writesAtAcceptance,[0]);
+    assert.equal((await f.coordinator.start(f.input,{native:true,onAccepted})).state,'SAVED');
+    assert.deepEqual(writesAtAcceptance,[0]);
+  } finally { f.store.close(); }
+});
+
 test('A withheld host leaves one intent and the same worker-restarted gesture resumes once',async()=>{
   const f = await fixture('onedrive',{access:false});
   const waiting = await f.coordinator.start(f.input,{native:true});

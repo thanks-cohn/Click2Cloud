@@ -1,0 +1,32 @@
+{
+  "result": "PASS",
+  "build": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.27",
+    "revision": "29b439eab42b65f9a4c520555a47c9c3ff6efcf0",
+    "sourceDigest": "2e3aa5ac7d388f0aabebf05ba8f1ec78a077bcf668d84b39658e35d555500c47",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "platform": "linux",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "proof": "CHROMIUM_INDEXEDDB_OPFS_WITH_WEB_DOWNLOAD_FIXTURE",
+  "count": 200000,
+  "retention": true,
+  "version": "0.3.27",
+  "browser": "155.0.8059.79",
+  "metrics": {
+    "seedMs": 103602.19999999972,
+    "storage": {
+      "quota": 11203252224,
+      "usage": 465833984,
+      "usageDetails": {
+        "indexedDB": 465833984
+      }
+    },
+    "rolloverMs": 19.399999999906868,
+    "clearMs": 8958.700000000186,
+    "cleared": 200000,
+    "postClearFresh": 1
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "result": "PASS",
+  "proof": "PACKAGED_UI_IN_CHROMIUM_WITH_SYNTHETIC_CHROME_AND_PROVIDER_PORTS",
+  "checks": [
+    {
+      "name": "Cloudflare full-width actions and stable Basic cards through sign-in, refresh, success and failure"
+    },
+    {
+      "name": "One through four left-packed tabs, deterministic overflow and keyboard-accessible ordering persist"
+    },
+    {
+      "name": "Independent visual feedback settings survive reload and track the active palette and color mode"
+    },
+    {
+      "name": "Real image decoding from all four providers and bounded lazy/cancelled reads",
+      "knownProviderPorts": [
+        "Cloudflare",
+        "Google Drive",
+        "Dropbox",
+        "OneDrive"
+      ],
+      "total": 66,
+      "large": 793409,
+      "withoutPreviewPayload": true
+    },
+    {
+      "name": "History V2 metadata applies immediately and preserves raw records and legacy History"
+    },
+    {
+      "name": "Single-row header, right-aligned footer, centered Queue/History and pagination",
+      "appearanceModes": 32,
+      "widths": [
+        320,
+        920
+      ]
+    },
+    {
+      "name": "Trusted browser coordinates, fixed webpage endpoints, frame offsets, reduced motion and burst cleanup"
+    }
+  ],
+  "screenshots": [
+    "baseline-remotes-920.png",
+    "remotes-920.png",
+    "provider-success-320.png",
+    "history-basic-image.png",
+    "history-pagination-320.png",
+    "projectile-webpage.png"
+  ],
+  "errors": [],
+  "chromium": "155.0.8059.79"
+}

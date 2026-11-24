@@ -133,6 +133,7 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
  }
  paint();setCursor(systemCursor.id);
  return Object.freeze({apply,getActive,list:()=>[...themes.values()].map(({id,name})=>({id,name})),
+  feedbackAccent:()=>root?.ownerDocument?.defaultView?.getComputedStyle(root).getPropertyValue('--accent').trim(),
   listPalettes:()=>palettes.map(({id,name,colors})=>({id,name,preview:{light:colors.accent[0],dark:colors.accent[1]}})),
   getPalette:()=>palette,applyPalette,restore,
   listNostalgiaStyles:()=>styles.map(({id,name})=>({id,name})),

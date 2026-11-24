@@ -1,6 +1,7 @@
 import {trustedAppSender} from '../../chrome/trusted-sender.mjs';
 import { PROVIDERS, providerId, fail, safeError } from "./common.js";
 import { exportDiagnostics, zipDataUrl } from "./zip.js";
+import {createHistoryPreviewReader} from './history-preview.js';
 export const CONTRACTS = Object.freeze({
   "api.describe": {},
   "providers.list": {},
@@ -23,6 +24,8 @@ export const CONTRACTS = Object.freeze({
   "history.list": { page: "integer?", pageSize: "integer?" },
   "history.latestOutcome": { provider: "provider" },
   "history.get": { id: "string" },
+  "history.readImagePreview": {id:"string",provider:"provider",accountId:"string",objectId:"string",requestId:"string"},
+  "history.cancelImagePreview": {requestId:"string"},
   "history.delete": { id: "string" },
   "history.clear": {},
   "counter.get": {},
@@ -80,13 +83,15 @@ export function validateBasicRequest(message) {
   validate(message.op, input);
   return input;
 }
-export function createApi({auth, chrome, durable, afterAuth}) {
+export function createApi({auth, chrome, durable, afterAuth, previewAdapters}) {
+  const previews = createHistoryPreviewReader({auth,adapters:previewAdapters,
+    readAttempt:async id => (await durable()).store.getAttempt(id)});
   const describe = status => ({
     ...PROVIDERS.find(p => p.id === providerId(status.provider)),
     ...status,
   });
   const status = async provider => describe(await auth.snapshot(provider));
-  async function invoke(op, input = {}, saveOptions) {
+  async function invoke(op, input = {}, saveOptions, owner) {
     validate(op, input);
     switch (op) {
       case "api.describe":
@@ -115,6 +120,10 @@ export function createApi({auth, chrome, durable, afterAuth}) {
       }
       case "auth.refresh":
         return describe(await auth.refresh(input.provider));
+      case "history.readImagePreview":
+        return previews.read(input,owner);
+      case "history.cancelImagePreview":
+        return previews.cancel(input.requestId,owner);
     }
     const {store: data, coordinator: saves} = await durable();
     switch (op) {
@@ -173,7 +182,7 @@ export function createApi({auth, chrome, durable, afterAuth}) {
           },
         };
       try {
-        return {ok: true, value: await invoke(message.op, validateBasicRequest(message))};
+        return {ok: true, value: await invoke(message.op, validateBasicRequest(message),undefined,sender.documentId ?? sender.url)};
       } catch (e) {
         return { ok: false, error: safeError(e) };
       }

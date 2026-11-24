@@ -398,7 +398,7 @@ export function createAuth({
     }
     if (identity.length !== record.identity.length)
       await save(id, {...record, identity}, ticket, signal);
-    return {accessToken:record.accessToken, identity};
+    return {accessToken:record.accessToken, identity, scopes:record.scopes};
   }
 
   function flight(slot, name, ms, timeoutError, work) {
@@ -469,12 +469,12 @@ export function createAuth({
         throw fail("AUTH_SCOPE_REQUIRED", "Required upload permissions are missing.");
       if (!Array.isArray(record.identity) || !record.identity.length)
         throw fail("AUTH_REQUIRED", "Reconnect to verify the saved account.");
-      const {accessToken, identity} = id === "google"
+      const {accessToken, identity, scopes} = id === "google"
         ? await googleToken(false, record.identity, ticket, signal)
         : await oauthToken(id, record, ticket, signal);
       signal.throwIfAborted();
       if (slot.epoch !== ticket || slot.login) throw changed();
-      return {accessToken, identity};
+      return {accessToken, identity, scopes, isCurrent:()=>slot.epoch===ticket&&!slot.login};
     });
   }
   async function status(id, broadcast = false) {

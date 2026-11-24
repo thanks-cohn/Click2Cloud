@@ -14,10 +14,36 @@ const actionTimeout = {
 };
 const failure = (code, message) => Object.assign(Error(message), {code});
 
-export function createBasicProviderCards({runtime, document, permissions}) {
+export function createBasicProviderCards({runtime, document, permissions, pulseEnabled = () => true}) {
   const stack = document.createElement('div');
   stack.className = 'remote-providers';
   const cards = new Map();
+  function paintActivity(card) {
+    card.activity.textContent = card.timer ? 'Success!' : card.active ? 'Working…' : '';
+    card.activity.toggleAttribute('data-success', !!card.timer);
+  }
+  function clearSuccess(card) {
+    clearTimeout(card.timer);
+    card.timer = null;
+    card.animation?.cancel();
+    card.animation = null;
+    paintActivity(card);
+  }
+  function success(card, id) {
+    if (id && card.lastSuccess === id) return;
+    if (id) card.lastSuccess = id;
+    if (!pulseEnabled() || !stack.isConnected || document.hidden || card.active) return;
+    clearSuccess(card);
+    card.timer = setTimeout(() => clearSuccess(card), 920);
+    paintActivity(card);
+    if (!document.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      card.animation = card.activity.animate([
+        {opacity:.72,transform:'translateY(0)'},
+        {opacity:1,transform:'translateY(-2px)',offset:.38},
+        {opacity:.72,transform:'translateY(0)'}
+      ],{duration:460,iterations:2,easing:'ease-in-out'});
+    }
+  }
   async function call(op, provider, extra) {
     const response = Promise.resolve().then(() =>
       runtime.sendMessage({channel: 'redown-basic-v1', api: 1, op, input: {provider, ...extra}})).catch(() => {
@@ -48,13 +74,13 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     card.continueSave.title = needsAccess ? 'Chrome may ask to grant REDOWN access to HTTP and HTTPS sites.' : '';
   }
   function paint(card, status) {
+    card.isReady = status.ready === true && status.connected === true;
     card.connect.textContent = status.connected ? 'Reconnect' : 'Sign In';
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
     card.readiness.textContent = status.ready ? 'Authorized for this provider.' :
       [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
     card.readiness.dataset.reason = status.reason ?? '';
-    card.availability.textContent = !status.ready && status.reason && (status.connected || status.reason !== 'AUTH_REQUIRED')
-      ? card.readiness.textContent : '';
+    card.availability.textContent = card.readiness.textContent;
   }
   for (const [id, label, icon] of providers) {
     const section = document.createElement('section');
@@ -63,22 +89,25 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
         <h2 id="remote-provider-${id}">${label}</h2>
-        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
       </div>
-      <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
-      <p class="muted" data-availability></p>
-      <p class="muted" role="status" data-feedback></p>
-      <p class="muted" role="status" data-navigation></p>
+      <p role="status" class="remote-provider-activity" data-activity></p>
+      <div class="remote-provider-info" tabindex="0" role="region" aria-label="${label} connection details">
+        <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
+        <p class="muted" role="status" data-feedback></p>
+        <p class="muted" role="status" data-navigation></p>
+        <p class="muted" data-availability>Checking authorization…</p>
+      </div>
       <div class="remote-provider-actions">
+        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
         <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
         <button type="button" data-refresh>Refresh</button>
-        <button type="button" data-continue hidden>Continue save</button>
-      </div>`;
+      </div>
+      <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
       connect: get('connect'), refresh: get('refresh'), readiness: get('readiness'),
-      availability: get('availability'), continueSave: get('continue'),
-      operation: 'auth.connect', revision: 0, attemptRevision: 0,
+      availability: get('availability'), continueSave: get('continue'), activity: get('activity'),
+      operation: 'auth.connect', revision: 0, attemptRevision: 0, active: 0,
     };
     cards.set(id, card);
     async function action(button, op, changesStatus = true) {
@@ -89,17 +118,23 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
       delete feedback.dataset.code;
-      feedback.textContent = changesStatus ? 'Checking authorization…' : 'Opening provider…';
+      feedback.textContent = '';
+      card.active++;
+      clearSuccess(card);
+      let completed = false;
       try {
         const result = await call(op, id);
         if (changesStatus && revision === card.revision) paint(card, result);
-        feedback.textContent = '';
+        completed = changesStatus ? result.ready === true && result.connected === true && card.isReady : result.opened === true;
       } catch (error) {
         feedback.textContent = error.message;
         feedback.dataset.code = error.code;
       } finally {
         for (const control of buttons) control.removeAttribute('aria-disabled');
+        card.active--;
+        paintActivity(card);
       }
+      if (completed) success(card);
     }
     card.connect.onclick = () => action(card.connect, card.operation);
     card.refresh.onclick = () => action(card.refresh, 'auth.refresh');
@@ -109,6 +144,9 @@ export function createBasicProviderCards({runtime, document, permissions}) {
       const item = card.pending, feedback = get('feedback');
       if (!item || card.continueSave.disabled) return;
       card.continueSave.disabled = true;
+      card.active++;
+      clearSuccess(card);
+      let confirmed = false;
       try {
         if (item.state === 'AWAITING_SOURCE' && card.offered !== item.id) {
           card.offered = item.id;
@@ -126,12 +164,16 @@ export function createBasicProviderCards({runtime, document, permissions}) {
         const result = await call('saves.resume', id, {id:item.id});
         if (card.pending?.id === item.id) paintPending(card, WAITING.has(result.state) ? result : null);
         feedback.textContent = WAITING.has(result.state) ? result.message ?? '' : '';
+        confirmed = result.state === 'SAVED' && result.confirmed === true;
       } catch (error) {
         if (error.code === 'PENDING_SAVE_NOT_FOUND' && card.pending?.id === item.id) paintPending(card, null);
         feedback.textContent = error.message;
       } finally {
         card.continueSave.disabled = false;
+        card.active--;
+        paintActivity(card);
       }
+      if (confirmed) success(card,item.id);
     };
     stack.append(section);
   }
@@ -168,11 +210,12 @@ export function createBasicProviderCards({runtime, document, permissions}) {
     card.attemptRevision++;
     if (WAITING.has(item.state)) paintPending(card, item);
     else if (card.pending?.id === item.id) paintPending(card, null);
+    if (item.state === 'SAVED' && item.confirmed === true && !card.active) success(card,item.id);
   }
   function showRecovery(provider) {
     const card = cards.get(provider === 'google-drive' ? 'google' : provider);
     if (!card) return;
     card.connect.closest('.remote-provider').scrollIntoView({block: 'nearest'});
   }
-  return {mount, onStatus, onAttempt, showRecovery};
+  return {mount, onStatus, onAttempt, showRecovery, clearSuccesses(){for (const card of cards.values()) clearSuccess(card);}};
 }

@@ -36,7 +36,7 @@ try{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const installed=await context.newPage();await installed.goto('chrome://extensions');
   const card=installed.locator('extensions-item#'+id);await card.waitFor();
-  assert.deepEqual(await card.evaluate(node=>[node.data.name,node.data.version]),['REDOWN','0.3.26']);
+  assert.deepEqual(await card.evaluate(node=>[node.data.name,node.data.version]),['REDOWN','0.3.27']);
   pass('chrome-extensions-card-0326');await installed.close();
   const checkDefault=async()=>assert.deepEqual((await mainButtons()).map(text=>text.trim()),['Files','Remotes','Queue']);
   await checkDefault();

@@ -31,17 +31,19 @@
 /* Remotes uses the same type, surfaces and controls as the rest of the Shelf. */
 .remotes-page{max-inline-size:740px;margin-inline:auto}
 .remote-providers{display:grid;gap:var(--remote-gap,10px);min-inline-size:0}
-.remote-provider{display:grid;gap:10px;min-inline-size:0;margin:0;overflow-wrap:anywhere}
+.remote-provider{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem;gap:7px 6px;min-inline-size:0;margin:0;overflow-wrap:anywhere}
 .remote-provider-heading{display:flex;align-items:center;gap:10px;min-inline-size:0}
 .remote-provider-heading img{display:block;flex:none}
 .remote-provider-heading h2{font-size:16px;margin:0}
-.remote-provider-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:6px}
-.remote-provider-heading [data-connect]{margin-inline-start:auto}
-.remote-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.remote-card-top h2{min-width:0;overflow-wrap:anywhere}
-#remotes-access:empty,#remotes-file-actions:empty{display:none}
+.remote-provider-activity{align-self:center;text-align:end;white-space:nowrap;color:var(--muted)}
+.remote-provider-activity[data-success]{color:#83e8ae;font-weight:700}
+:root[data-theme=light] .remote-provider-activity[data-success]{color:#087a35}
+.remote-provider-info{grid-column:1/-1;block-size:3.4em;overflow:auto;font-size:12px;overscroll-behavior:contain;scrollbar-width:thin}
+.remote-provider-actions{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.remote-provider-actions [data-connect]{margin-inline-end:auto}
+.remote-provider>[data-continue]{grid-column:1/-1;justify-self:start}
 .remote-provider button{min-block-size:36px;max-inline-size:100%;padding-inline:8px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
-.remote-provider-actions :is([data-refresh],[data-go]){white-space:nowrap}
+.remote-provider-actions :is([data-refresh],[data-go],[data-connect]){white-space:nowrap}
 .remote-provider-actions button[aria-disabled=true]{opacity:.58;cursor:progress}
 .remote-provider :is([data-feedback],[data-availability],[data-navigation]):empty{display:none}
 .remote-provider p{margin:0;font-size:12px}
@@ -49,7 +51,7 @@
 .remote-provider-details[open] > p{margin-block:4px 8px}
 .remote-provider-details:not([hidden]){border-block-start:1px solid var(--line);padding-block-start:8px}
 @media(max-width:420px){
- .remote-provider{gap:8px;padding-block:10px}
+ .remote-provider{padding-block:10px}
  .remote-provider-actions{gap:4px}
  .remote-provider-actions button{padding-inline:6px;font-size:11px;line-height:1.16}
 }

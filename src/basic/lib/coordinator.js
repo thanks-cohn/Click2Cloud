@@ -2,6 +2,7 @@ import { fail, providerId, safeUrl, safeError, WAITING } from "./common.js";
 import { acquireSource, publicSource } from "./source.js";
 import { identityMatches } from "./auth.js";
 import { CONTINUE_WINDOW_MS, pendingExpired } from "./intent.js";
+import {passiveObservation} from '../../core/boundary-observation.mjs';
 const MAX_ACTIVE_SAVES = 2;
 const authorizeOnClick = new Set(["AUTH_REQUIRED", "AUTH_REVOKED", "AUTH_SCOPE_REQUIRED"]);
 const awaitGesture = new Set(["AUTH_CONNECTING", "AUTH_GESTURE_REQUIRED"]);
@@ -46,7 +47,7 @@ export function createCoordinator({
     try { await notify(attempt); } catch {}
     return attempt;
   }
-  async function execute(input, id, {native = false, resume, interactive = native} = {}) {
+  async function execute(input, id, {native = false, resume, interactive = native, onAccepted} = {}) {
     const {provider} = input;
     const createdAt = new Date().toISOString();
     const identity = JSON.stringify([
@@ -143,6 +144,7 @@ export function createCoordinator({
         preview: source.preview,
         state: "UPLOADING",
       });
+      if (native && !resume) passiveObservation(onAccepted);
       await event(a, "UPLOADING");
       const began = now();
       uploadStarted = true;

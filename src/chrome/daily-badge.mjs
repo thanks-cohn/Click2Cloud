@@ -5,7 +5,7 @@ const localTotalsKey = 'verifiedLocalDownloadTotals';
 const rolloverAlarm = 'click2cloud-daily-badge';
 const normal = '#253b70', green = '#087a35';
 const displayLimit = 1000;
-const pulseMs = 140, handoffMs = 24, queueLimit = 3;
+const pulseMs = 180, handoffMs = 100, queueLimit = 3;
 const iconPaths = suffix => Object.fromEntries([16, 32, 48, 128].map(size => [size, `extension/icons/redown${suffix}-${size}.png`]));
 const idleIcon = iconPaths(''), successIcon = iconPaths('-success');
 
@@ -42,7 +42,7 @@ function waitForPulse(ms,signal) {
   });
 }
 
-export function createDailyBadge({chrome, readHistory, countHistory, countBasic, readPreferences, clock = Date.now, wait = waitForPulse}) {
+export function createDailyBadge({chrome, readHistory, countHistory, countBasic, readPreferences, transmissionEnabled = () => true, clock = Date.now, wait = waitForPulse}) {
   let tail = Promise.resolve();
   let refreshing, requested = false, day, flash, idleReady = false, basicRevision = 0;
   const successes = [];
@@ -82,12 +82,16 @@ export function createDailyBadge({chrome, readHistory, countHistory, countBasic,
     return projection;
   }
   function queueSuccess(at) {
-    if (successes.length + Number(!!flash) < queueLimit) successes.push(at);
+    if (transmissionEnabled() && successes.length + Number(!!flash) < queueLimit) successes.push(at);
   }
-  function recordVerified(row) {
+  function cancelTransmission() {
+    successes.length = 0;
+    flash?.controller.abort();
+  }
+  function recordVerified(row,{transmission=true}={}) {
     const at=verifiedSaveTime(row);
     if(!row.operationId||!Number.isFinite(at))return;
-    if (remember(row,day)) queueSuccess(at);
+    if (remember(row,day) && transmission) queueSuccess(at);
     return refresh();
   }
   function recordBasicVerified(at) {
@@ -114,8 +118,7 @@ export function createDailyBadge({chrome, readHistory, countHistory, countBasic,
       const steps = [
         [() => icon(successIcon), pulseMs], [() => icon(idleIcon), handoffMs],
         [() => color(green), pulseMs], [() => color(normal), handoffMs],
-        [() => icon(successIcon), pulseMs], [() => icon(idleIcon), handoffMs],
-        [() => color(green), pulseMs], [() => color(normal), 0],
+        [() => icon(successIcon), pulseMs], [() => icon(idleIcon), 0],
       ];
       for (const [apply, duration] of steps) {
         if (signal.aborted) return;
@@ -151,9 +154,8 @@ export function createDailyBadge({chrome, readHistory, countHistory, countBasic,
       Promise.resolve().then(() => chrome.action.setBadgeText({text})),
       Promise.resolve().then(() => chrome.alarms.create(rolloverAlarm, {when}))
     ]);
-    if(text==='!'||text==='0'||badge.status==='rejected') {
-      successes.length = 0;
-      flash?.controller.abort();
+    if(text==='!'||text==='0'||badge.status==='rejected'||!transmissionEnabled()) {
+      cancelTransmission();
     } else if (day) {
       if (flash && !inDay(flash.at, day)) flash.controller.abort();
       if (!flash && idleReady) {
@@ -181,5 +183,5 @@ export function createDailyBadge({chrome, readHistory, countHistory, countBasic,
     return mutation.then(refresh);
   }
   chrome.alarms.onAlarm.addListener(alarm => { if (alarm.name === rolloverAlarm) void refresh(); });
-  return Object.freeze({refresh,recordLocal,recordVerified,recordBasicVerified});
+  return Object.freeze({refresh,recordLocal,recordVerified,recordBasicVerified,cancelTransmission});
 }

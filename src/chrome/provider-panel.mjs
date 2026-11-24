@@ -164,5 +164,12 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   }
   return null;
  }
- return {command,search:tab=>command(tab,'search'),opened,request};
+ async function isClosed(){
+  // A normal app tab is not a Shelf. Ask Chrome for live side-panel contexts
+  // instead of treating restored shortcut intent as a visibility observation.
+  if(typeof chrome.runtime.getContexts!=='function')return false;
+  try{return (await chrome.runtime.getContexts({contextTypes:['SIDE_PANEL']})).length===0;}
+  catch{return false;}
+ }
+ return {command,search:tab=>command(tab,'search'),opened,request,isClosed};
 }

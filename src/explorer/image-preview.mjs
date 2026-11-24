@@ -26,7 +26,7 @@ export async function readPreviewBytes(read,{source,key,etag:known,size:knownSiz
  const chunks=[];let offset=0,total,etag=known===undefined?undefined:objectETag(known);
  while(total===undefined||offset<Math.min(total,limit)){
   signal?.throwIfAborted();const positions=Array.from({length:total===undefined?1:Math.max(1,Math.min(3,concurrency))},(_,i)=>offset+i*65536).filter(p=>total===undefined||p<Math.min(total,limit));
-  const parts=await Promise.all(positions.map(async position=>{signal?.throwIfAborted();return {position,part:await read({source,key,offset:position,length:Math.min(65536,limit-position),...(etag?{etag}:{})})};}));signal?.throwIfAborted();
+  const parts=await Promise.all(positions.map(async position=>{signal?.throwIfAborted();return {position,part:await read({source,key,offset:position,length:Math.min(65536,limit-position),...(etag?{etag}:{})},signal)};}));signal?.throwIfAborted();
   for(const {position,part} of parts){
    if(part?.state!=='completed'){const code=part?.code??part?.error;fail(/^[A-Z][A-Z0-9_]+$/.test(code??'')&&code!=='OK'?code:'FILE_READ_FAILED');}
    const d=part.data&&{...part.data,...(part.data.etag!==undefined?{etag:objectETag(part.data.etag)}:{})};if(etag&&d?.etag&&etag!==d.etag||Number.isSafeInteger(knownSize)&&d?.total!==knownSize)fail('OBJECT_CHANGED');

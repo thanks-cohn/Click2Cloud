@@ -98,19 +98,22 @@ export function mountLiveJobs(parent,{service,openRemotes,retryScreenshot,inspec
   return {refresh};
 }
 
-export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,state={page:1}}) {
+export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,state={page:1}}) {
   const root=element('section');
   root.className='card queue-archive';
-  root.innerHTML='<div class="queue-heading"><h2>History V2</h2><label>Find saved files <input data-history-find type="search" placeholder="Filename, provider or a word"></label></div>'+
+  root.innerHTML='<h2>History V2</h2><label class="queue-search">Find saved files<input data-history-find type="search" placeholder="Filename, provider or a word"></label>'+
     '<p role="status" data-history-notice></p><div data-history-records></div>'+
-    '<form class="queue-pager" aria-label="History V2 pages"><button type="button" data-first aria-label="First page">⏮ First</button>'+
-    '<button type="button" data-prev aria-label="Previous page">◀ Previous</button><label>Page <input type="number" min="1" step="1" required inputmode="numeric"></label>'+
-    '<span data-pages></span><button type="button" data-next aria-label="Next page">Next ▶</button>'+
-    '<button type="button" data-last aria-label="Last page">Last ⏭</button><button type="submit" class="sr-only">Go to page</button></form>';
+    '<p class="queue-single-page" hidden>Page 1 of 1</p>'+
+    '<form class="queue-pager" aria-label="History V2 pages" hidden><button type="button" data-first aria-label="First page" title="First page">«</button>'+
+    '<button type="button" data-prev aria-label="Previous page" title="Previous page">‹</button><label><span>Page</span><input type="number" min="1" step="1" required inputmode="numeric"></label>'+
+    '<span data-pages></span><button type="button" data-next aria-label="Next page" title="Next page">›</button>'+
+    '<button type="button" data-last aria-label="Last page" title="Last page">»</button><button type="submit" class="sr-only">Go to page</button></form>';
   parent.append(root);
   const list=root.querySelector('[data-history-records]'),notice=root.querySelector('[data-history-notice]');
   const form=root.querySelector('form'),input=form.querySelector('input'),find=root.querySelector('[data-history-find]');
-  let page=state.page??1, pages=1, generation=0, cardScope, lastSignature, debounce, editingPage=false;
+  const singlePage=root.querySelector('.queue-single-page');
+  let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, editingPage=false;
+  const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
   const groupState=new Map();
   find.value=state.query??'';
   function render(items,prefs){
@@ -120,8 +123,8 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
     }
     cardScope?.abort();
     cardScope=new AbortController();
-    const cards=createHistoryCards({api,screenshotRequest,goTo,canRead,signal:cardScope.signal,
-      preferences:prefs,isFirstPage:page===1});
+    cards=createHistoryCards({api,screenshotRequest,goTo,canRead,signal:cardScope.signal,
+      preferences:prefs,isFirstPage:page===1,visibility:metadataPreference?.value});
     const groups=new Map(), contents=document.createDocumentFragment();
     for(const row of items){
       let parent=contents;
@@ -147,6 +150,8 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
     const ticket=++generation;
     try{
       await service.ready;
+      await metadataPreference?.ready;
+      if(signal.aborted||ticket!==generation)return;
       const prefs=service.preferences, query=find.value.trim().toLowerCase();
       const range=historyInterval(prefs);
       if(prefs.timer!=='off')range.from=Math.max(range.from??0,Date.now()-VISIBILITY_MS);
@@ -156,6 +161,8 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       const text=result.total?result.total.toLocaleString()+(result.total===1?' result':' results'):'No saves in this display range.';
       const timer=prefs.timer==='off'?'':' · 15-minute '+(prefs.timer==='delete'?'Delete':'Hide');
       notice.textContent=text+timer+(service.accountingPending?' · Some receipts are awaiting reconciliation.':'');
+      form.hidden=pages<=1;
+      singlePage.hidden=pages>1 || !result.total;
       input.max=String(pages);
       if(!editingPage)input.value=String(page);
       form.querySelector('[data-pages]').textContent='/ '+pages.toLocaleString();
@@ -180,7 +187,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   form.querySelector('[data-next]').onclick=()=>select(page+1);
   form.querySelector('[data-last]').onclick=()=>select(pages);
   find.oninput=()=>{clearTimeout(debounce);debounce=setTimeout(()=>select(1),300);};
-  signal.addEventListener('abort',()=>{cardScope?.abort();clearTimeout(debounce);},{once:true});
+  signal.addEventListener('abort',()=>{unsubscribe?.();cardScope?.abort();clearTimeout(debounce);},{once:true});
   void refresh({force:true});
   return {refresh};
 }

@@ -140,7 +140,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   // plus a same-code verified write in THIS bucket is reusable for new folders.
   // The Worker still rejects prefix escape before returning capabilities.
   const exact=plan.verifiedTargets?.[c.destination.prefix],proof=(exact?.codeDigest===plan.codeDigest?exact:null)??Object.values(plan.verifiedTargets??{}).find(p=>p.codeDigest===plan.codeDigest),ready=!!proof&&!!plan.codeDigest&&proof.codeDigest===plan.codeDigest;const result={state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,destination:target,sourcePolicy:r.sourcePolicy,transfer:r.transfer,multipartConditionalCompletion:r.multipartConditionalCompletion,checkedAt:clock()};if(ready&&await planIdentity(plan)===c.planIdentity)readyProofs.set(result,{at:clock(),sessionId:c.sessionId,destination:c.destination,planIdentity:c.planIdentity});return result;}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},
-  async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,dispatchPreparationMs,readinessMs}){
+  async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,onAccepted,dispatchPreparationMs,readinessMs}){
    // A transfer can retain polling and network state while the remote Worker
    // runs. Reject excess work immediately; there is no URL or promise queue.
    if(activeSaves>=maxActiveSaves)return {state:'blocked',code:'RESOURCE_BUSY',operationId};
@@ -168,6 +168,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
       dispatched=true;
       const submittedAt=performance.now();
       let result=await post(c,'/remote-save',intent,o.signal,onObservation),lastLease=clock(),statusCap;
+      if(result.operationId===operationId&&(result.state==='pending'&&result.code==='REMOTE_ACCEPTED'||result.state==='written'&&result.receipt))passiveObservation(onAccepted);
       const hinted=result.state==='pending'&&Number.isFinite(result.retryAfterMs);
       if(hinted)await pollDelay(Math.min(pollIntervalMs,Math.max(50,Math.min(300,result.retryAfterMs))),o.signal);
       while(result.state==='pending'){

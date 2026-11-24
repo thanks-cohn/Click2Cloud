@@ -22,6 +22,7 @@ const storageFailure = detail => fail('STORAGE_UNAVAILABLE', detail,
 
 export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.indexedDB, storageTimeoutMs = 8000, onVerified, observeAttempt}) {
   const intents = createSaveIntents(chrome, trustedStorage);
+  const adapters = createAdapters({});
   const auth = createAuth({chrome, trustedStorage, onStatus: status => {
     void chrome.runtime.sendMessage?.({channel: 'redown-basic-status', status}).catch(() => {});
   }});
@@ -50,11 +51,12 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
         await store.recover(signal);
         signal.throwIfAborted();
         const coordinator = createCoordinator({
-          store, auth, intents, onVerified, observe:observeAttempt, adapters: createAdapters({}),
+          store, auth, intents, onVerified, observe:observeAttempt, adapters,
           acquire: input => acquireSource(input, {hasAccess: browserSourceAccess(chrome.permissions)}),
           notify: attempt => chrome.runtime.sendMessage({
             channel: 'redown-basic-attempt',
-            attempt: {id: attempt.id, provider: attempt.provider, ...projectOutcome(attempt)},
+            attempt: {id: attempt.id, provider: attempt.provider, ...projectOutcome(attempt),
+              ...(attempt.state === 'SAVED' && attempt.confirmed === true ? {confirmed:true} : {})},
           }).catch(() => {}),
         });
         ready = {store, coordinator};
@@ -69,16 +71,16 @@ export function createBasicHost({chrome, trustedStorage, indexedDB = globalThis.
     opening = Promise.race([work, aborted]).finally(() => clearTimeout(timeout));
     return opening;
   }
-  const api = createApi({auth, chrome, durable, afterAuth(provider) {
+  const api = createApi({auth, chrome, durable, previewAdapters:adapters, afterAuth(provider) {
     void (async () => {
       if (!await intents.get(provider)) return;
       const {coordinator} = await durable();
       await coordinator.afterLogin(provider);
     })().catch(() => {});
   }});
-  async function click(provider, info, tab) {
+  async function click(provider, info, tab, onAccepted) {
     try {
-      const attempt = await api.invoke('saves.start', basicSourceFromClick(provider, info, tab), {native:true});
+      const attempt = await api.invoke('saves.start', basicSourceFromClick(provider, info, tab), {native:true,onAccepted});
       return {state: {SAVED: 'completed', FAILED: 'failed', UNCERTAIN: 'uncertain',
         AWAITING_AUTH: 'pending', AWAITING_SOURCE: 'pending'}[attempt.state] ?? 'uncertain',
         code: attempt.code ?? attempt.state, attemptId: attempt.id};

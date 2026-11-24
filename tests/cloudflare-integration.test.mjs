@@ -69,7 +69,12 @@ test('real workerd runtime: R2 conditional writes, independent HEAD, durable cla
   const streamingEvidence=[];
   const operationId=crypto.randomUUID(),source={url:'https://raw.githubusercontent.com/approved.bin',filename:'雪.bin'};
   const selectedProvenance=menuProvenance({mode:'simple',entryId:'native-test-route',target,title:'Exact',menuPath:['Cloudflare','Exact'],presentationId:'selected-simple',destinationConfig:{label:'Exact'}});
-  const result=await transport.save({target,operationId,source,provenance:selectedProvenance});assert.equal(result.state,'verified',JSON.stringify(result));assert.equal(result.receipt.key,'exact/雪.bin');
+  const boundaries=[];
+  const result=await transport.save({target,operationId,source,provenance:selectedProvenance,
+    onAccepted:()=>{boundaries.push('accepted');throw Error('Optional animation failed');},
+    onObservation:event=>{if(event.stage==='provider.verification')boundaries.push('verified');}});
+  assert.deepEqual(boundaries,['accepted','verified']);
+  assert.equal(result.state,'verified',JSON.stringify(result));assert.equal(result.receipt.key,'exact/雪.bin');
   const bucket=await mf.getR2Bucket('STORAGE'),object=await bucket.get(result.receipt.key);assert.equal(await object.text(),'abc');const storedMetadata={...object.customMetadata};assert.equal(storedMetadata.operationId,operationId);assert.equal(storedMetadata.sourceUrl,undefined);const actualProvenance=JSON.parse(storedMetadata.click2cloud);assert.equal(actualProvenance.entryId,'native-test-route');assert.equal(actualProvenance.originalFilename,'雪.bin');assert.equal(actualProvenance.storedFilename,'雪.bin');assert.deepEqual(result.receipt.provenance,actualProvenance);
   {
   // One canonical API -> real workerd/R2/DO -> File API -> History/GO TO.

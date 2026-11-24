@@ -351,7 +351,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    if((await transport.status(target)).state!=='READY')fail('WORKER_NOT_READY');
   });
  }
- async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs,attentionContext}){
+ async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs,attentionContext,onAccepted}){
   if(provider!=='cloudflare'){await openShelf(provider,undefined,{code:'PROVIDER_NOT_IMPLEMENTED',context:attentionContext});return {state:'blocked',code:'PROVIDER_NOT_IMPLEMENTED',provider};}
   const status=await oauth.status();
   if(status.state==='DISCONNECTED'){await openShelf('cloudflare',requestedTarget,{code:'LOGIN_REQUIRED',context:attentionContext});return {state:'blocked',code:'LOGIN_REQUIRED'};}
@@ -361,7 +361,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});else if(['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED','INSUFFICIENT_PERMISSION','UNKNOWN','NETWORK_UNAVAILABLE'].includes(readiness.state))await openShelf('cloudflare',requestedTarget,{code:readiness.code??readiness.worker?.code??readiness.state,context:attentionContext});return {state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
   if(setupOnly)return {state:'blocked',code:'FRESH_CLICK_REQUIRED',target:requestedTarget};
   if(!source?.url||source.bytes)return {state:'blocked',code:'REMOTE_SOURCE_REQUIRED'};
-  const target=readiness.target,out=await transport.save({target,source,signal,dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&savedTargets(await current.read()).some(t=>targetKey(t)===targetKey(target))});
+  const target=readiness.target,out=await transport.save({target,source,signal,...(onAccepted?{onAccepted}:{}),dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&savedTargets(await current.read()).some(t=>targetKey(t)===targetKey(target))});
   try{await record(out);}catch{return {...out,state:out.state==='verified'?'partial':out.state,code:'COMPLETION_PENDING'};}return out.state==='verified'?{...out,state:'completed',completion:'verified'}:out;
  }
  return Object.freeze({check,setup,initialize,recoverDestination,ensureFileWorker,invoke,history,async manage(){await openShelf('manage-destinations');return {state:'completed'};},cancel:({target,operationId})=>transport.cancel(target,operationId),setupStatus:({accountId,idempotencyKey})=>current.readSetupOperation?.(accountId+':'+idempotencyKey),
