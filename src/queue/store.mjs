@@ -7,9 +7,9 @@ const request = r => new Promise((resolve, reject) => {
   r.onsuccess = () => resolve(r.result);
   r.onerror = () => reject(r.error);
 });
-function cursors(source, range, direction, visit, keysOnly = false) {
+function cursors(source, range, direction, visit) {
   return new Promise((resolve, reject) => {
-    const r = keysOnly ? source.openKeyCursor(range, direction) : source.openCursor(range, direction);
+    const r = source.openCursor(range, direction);
     r.onerror = () => reject(r.error);
     r.onsuccess = () => {
       const cursor = r.result;
@@ -168,11 +168,14 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
     clear: ({confirmed = false} = {}) => {
       if (!confirmed) throw Error('HISTORY_CONFIRMATION_REQUIRED');
       return lock(() => run(['records','excluded'],'readwrite',async s=>{
-        let removed=0;
-        await cursors(s.records,null,'next',cursor=>{
-          s.excluded.put(1,cursor.primaryKey);
-          removed++;
-        },true);
+        let removed=0,range=null;
+        while(true){
+          const keys=await request(s.records.getAllKeys(range,512));
+          for(const key of keys)s.excluded.put(1,key);
+          removed+=keys.length;
+          if(keys.length<512)break;
+          range=IDBKeyRange.lowerBound(keys.at(-1),true);
+        }
         await request(s.records.clear());
         return removed;
       }));

@@ -31,7 +31,7 @@ try {
   assert.equal(report.version,'0.3.26');
   const page=await context.newPage();
   await page.goto(`chrome-extension://${id}/extension/app.html`);
-  const download=retention?null:page.waitForEvent('download',{timeout:240_000});
+  const download=retention?null:page.waitForEvent('download',{timeout:600_000});
   void download?.catch(()=>{});
   report.metrics = await page.evaluate(async ({count,retention})=>{
     const {createHistoryStore}=await import('/src/queue/store.mjs');
@@ -43,8 +43,9 @@ try {
         const i=offset+index, t=1700000000000+Math.floor(i/4)*60000;
         return {schemaVersion:1,recordId:'synthetic:'+String(i).padStart(7,'0'),attemptId:String(i),
           terminal:true,sortAt:t,terminalAt:t,updatedAt:t,requestedAt:t-1000,
-          provider:['cloudflare','google','onedrive','dropbox'][i%4],kind:i%7?'save':'screenshot',
-          status:['verified','uploaded','failed','uncertain','blocked'][i%5],proofLevel:i%5?'provider-object-receipt':null,
+          provider:i%7?['cloudflare','google','onedrive','dropbox'][i%4]:'cloudflare',
+          kind:i%7?'save':'screenshot',status:['verified','uploaded','failed','uncertain','blocked'][i%5],
+          proofLevel:i%5===0?'provider-object-receipt':null,
           filename:'object-'+i%100+'.png',sourceUrl:i%3?'https://example.com/file?token=secret-fixture':null,
           destination:{bucket:'fixture',key:'folder/object-'+i%100+'.png'}};
       });

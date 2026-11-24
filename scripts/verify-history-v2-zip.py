@@ -1,4 +1,5 @@
 """Independently validate the generated ZIP using Python's standard library."""
+from collections import Counter
 import hashlib
 import json
 import sys
@@ -14,6 +15,7 @@ with ZipFile(file) as archive:
     assert manifest["expectedRecords"] == count == manifest["writtenRecords"]
     digest = hashlib.sha256()
     seen = 0
+    providers, outcomes, proofs = Counter(), Counter(), Counter()
     with archive.open("history.jsonl") as rows:
         for index, line in enumerate(rows):
             digest.update(line)
@@ -22,7 +24,14 @@ with ZipFile(file) as archive:
             assert row["recordId"] == f"synthetic:{expected:07}"
             assert row["sortAt"] == 1700000000000 + (expected // 4) * 60000
             assert "secret-fixture" not in line.decode()
+            providers[row["provider"]] += 1
+            outcomes[row["status"]] += 1
+            proofs[row["proofLevel"] or "unavailable"] += 1
             seen += 1
     assert seen == count
+    assert manifest["providers"] == providers
+    assert manifest["outcomes"] == outcomes
+    assert manifest["proofLevels"] == proofs
     assert manifest["files"][0]["sha256"] == digest.hexdigest()
+    assert manifest["files"][0]["bytes"] == archive.getinfo("history.jsonl").file_size
     print(json.dumps({"crc":"PASS","sha256":digest.hexdigest(),"orderedIdentities":seen}))

@@ -149,19 +149,24 @@ try{
  const ack=await readyFromShelf('worker wake');
  report.scenarios.push({scenario:'worker wake ACK',status:'PASS',proof:'Chrome service-worker stop and current registrar ACK',generation:ack.acknowledgedGeneration});
  await nativeMenu(page,'worker-wake-after-lost-row','page');
- await app.evaluate(()=>chrome.runtime.reload()).catch(error=>{
-  if(!/closed|destroyed/i.test(error.message))throw error;
- });
- app=await context.newPage();
- await waitFor(()=>app.goto(appUrl).catch(()=>null),'unpacked extension reload');
- await readyFromShelf('extension reload');
- await nativeMenu(page,'extension-reload','page');
+ try{
+  await app.evaluate(()=>chrome.runtime.reload()).catch(error=>{
+   if(!/closed|destroyed/i.test(error.message))throw error;
+  });
+  app=await context.newPage();
+  await waitFor(()=>app.goto(appUrl).catch(()=>null),'unpacked extension reload');
+  await readyFromShelf('extension reload');
+  await nativeMenu(page,'extension-reload','page');
 
+ }catch(error){
+  report.scenarios.push({scenario:'extension reload',status:'FAIL',error:error.message});
+ }
  await context.close();
  context=await openChrome();page=await normalPage();
  await readyWorker();
  await nativeMenu(page,'browser-restart','page');
- report.result='PASS';
+ report.result=report.scenarios.some(item=>item.status==='FAIL')?'FAIL':'PASS';
+ if(report.result==='FAIL')process.exitCode=1;
 }catch(error){
  report.result='FAIL';report.error=error.message;process.exitCode=1;
 }finally{

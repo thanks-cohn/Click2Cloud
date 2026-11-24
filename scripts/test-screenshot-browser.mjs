@@ -280,15 +280,45 @@ try{
  const selectedOutput=retried.plan.outputs[1];
  const resultCard=app.locator('.queue-history-card').filter({hasText:selectedOutput.target.bucketName+' / '+selectedOutput.key});
  const downloadFile=resultCard.getByRole('button',{name:'Download '+selectedOutput.key.split('/').at(-1)});
- const downloading=app.waitForEvent('download',{timeout:12000});
- void downloading.catch(()=>{});
+ const downloadDirectory=join(out,'named-download');
+ await mkdir(downloadDirectory,{recursive:true});
+ const downloadSession=await browser.browser().newBrowserCDPSession();
+ await downloadSession.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloadDirectory,eventsEnabled:true});
+ const requestedFilename=selectedOutput.key.split('/').at(-1);
  await downloadFile.click();
- const transfer=await downloading;
- const downloaded=await readFile(await transfer.path());
+ await resultCard.getByRole('status').filter({hasText:'Download complete.'}).waitFor();
+ const downloaded=await readFile(join(downloadDirectory,requestedFilename));
  assert.equal(createHash('sha256').update(downloaded).digest('hex'),retried.captured.sha256);
  assert.equal(uploads.length,5);
  checks.push('History V2 downloaded the selected screenshot output from the local R2 fixture and matched the captured PNG SHA-256');
- if(process.env.C2C_SCREENSHOT_QUEUE_ONLY==='1')break journey;
+ const fixtureKey=selectedOutput.target.bucketName+'/'+selectedOutput.key;
+ const original=objects.get(fixtureKey),changed=Buffer.from(original);
+ changed[changed.length-1]^=1;
+ objects.set(fixtureKey,changed);
+ await downloadFile.click();
+ await resultCard.getByRole('status').filter({hasText:'file at this location has changed'}).waitFor();
+ objects.set(fixtureKey,original);
+ assert.equal(uploads.length,5);
+ checks.push('History V2 rejected changed screenshot bytes without starting a save or reporting a completed download');
+ await resultCard.getByRole('button',{name:'Preview',exact:true}).click();
+ const viewer=app.getByRole('dialog',{name:'History image preview'});
+ await viewer.locator('img').waitFor({state:'visible'});
+ await viewer.getByRole('button',{name:'Zoom view',exact:true}).click();
+ await viewer.getByRole('slider',{name:'Zoom',exact:true}).press('ArrowRight');
+ assert(await viewer.getByRole('button',{name:'Exit zoom view',exact:true}).isVisible());
+ await viewer.getByRole('button',{name:'Exit zoom view',exact:true}).click();
+ await viewer.getByRole('button',{name:'Close',exact:true}).click();
+ checks.push('History V2 preview and keyboard zoom used the existing R2 file access and immersive controller');
+
+ if(process.env.C2C_SCREENSHOT_QUEUE_ONLY==='1'){
+  const proof={result:'PASS',proof:'HEADED_CHROMIUM_NATIVE_CAPTURE_WITH_LOCAL_R2_FIXTURE',
+   browser:browser.browser().version(),manifestVersion:manifest.version,checks,
+   download:{filename:requestedFilename,bytes:downloaded.length,sha256:retried.captured.sha256},
+   providerWrites:uploads.length};
+  await writeFile(join(out,'results.json'),JSON.stringify(proof,null,2)+'\n');
+  console.log(JSON.stringify(proof,null,2));
+  break journey;
+ }
  await openLegacyHistory();
 
  const diagnostics=await app.evaluate(async operationId=>{
