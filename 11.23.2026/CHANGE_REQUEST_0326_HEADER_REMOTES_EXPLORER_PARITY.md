@@ -43,6 +43,32 @@ On **each applicable Remotes provider card** (Google Drive, OneDrive, Dropbox, C
 - If the shortened element is specifically the top "Files / File Explorer" tab, restore its old generous hit target/length without sacrificing `⋯` far-right placement. If the shortened element is the Explorer pane, restore its baseline full usable span. **Do not replace one problem by shrinking the other**.
 - Support all actual supported themes and responsive sizes. This request is layout parity, not a new File Explorer feature.
 
+## E. History V2 pagination footer — eliminate ugly orphaned controls (owner screenshot regression)
+
+**Owner screenshot evidence, 2026-11-24:** In the actual narrow REDOWN Shelf, the History V2 footer renders the first row as **"⏮ First | ◀ Previous | Page [1] / 1"** and then leaves **"Next ▶ | Last ⏭"** stranded on a second row. The inconsistent disabled-button sizes, mixed text lengths and gaps make the bottom of the card visually unfinished. This is an explicitly requested **0.3.26 UX repair**; NOT an excuse to remove pagination.
+
+**Root cause confirmed in the existing source:** `extension/queue-page.mjs` outputs five inline elements plus four buttons with full-word labels, while `extension/app.css` combines `.queue-pager` into `.queue-heading,.queue-card-header,.queue-actions,.queue-pager{display:flex;align-items:center;flex-wrap:wrap;gap:8px}`. This allows arbitrary wrap boundaries at Shelf width. Repair **this** isolated Queue/History footer, not all action rows globally.
+
+### Required finished design
+
+- Use a clean, compact, **visually centered, symmetrical single-row** pagination control at standard REDOWN Shelf widths, with four consistent-size icon buttons, a small editable page-number input, and a readable total-page indicator.
+- Left to right: **First | Previous | Page [editable number] / total pages | Next | Last**. In narrow Shelf widths, prefer **icons without redundant word labels** for the buttons; retain accessible `aria-label` values: First page, Previous page, Next page, Last page. Keep sufficient hit targets (target around 32–36px where achievable), deliberate margins, theme-consistent outlines and disabled states.
+- **Do not let only Next/Last wrap into an ugly orphan second row.** For unusually narrow widths/high zoom, use an intentional adaptive compact variant (e.g. smaller icon targets with accessible labels, a constrained horizontal scroll area, or two *balanced* centered groups if genuinely necessary), never accidental ragged wrapping or clipping.
+- **At totalPages === 1:** present a polished, restrained **"Page 1 of 1"** single-page footer rather than four giant disabled buttons, if this can be implemented cleanly without breaking keyboard/focus. With multiple pages, all four controls must be present and work. The single-page presentation is optional if a consistently attractive and accessible disabled icon row is better across all themes.
+- The page-number input **must remain editable** and support Enter submit, validated/clamped page indices and stable focus. Preserve First/Previous/Next/Last, accurate counts, async querying, indexed deep jumps, 100,000-record benchmark and chronology. Do not preload records or recalculate the entire archive to restyle pagination.
+- The footer must not collide with the History card border, overflow the Shelf, create a second horizontal app scrollbar, or move the bottom Manage Destinations bar. Fit standard Shelf height/width, including 200–400px usable content region.
+- Respect Remote V1 and all modern Aesthetic API palettes, dark/light themes, browser zoom and RTL where possible. Never globally shrink all buttons to solve a problem specific to pagination.
+
+### Mandatory browser verification
+
+1. Screenshot of a **single-page** History V2 result with no dangling navigation row.
+2. Screenshot of **2, 10 and 100+ pages** at actual Shelf width; check all 4 controls, direct page input and live counts.
+3. Browser-width/zoom stress and every supported theme; keep alignment, border containment, focus and accessible labels.
+4. Verify actual clicks + keyboard Enter at first/middle/last page, disabled boundary states, and persistence of current record selection and scroll.
+5. Regression check the **100,000-record** history paging/ZIP tests and the separate screenshot-rule pagination. Do not alter the underlying History service or introduce an unrelated list UI rewrite.
+
+**P0 UX acceptance criterion:** The screenshot's two-row orphaned **Next/Last** footer must not exist in the delivered 0.3.26 repair.
+
 ## Required proof and regression gates
 
 1. **Visual baseline comparison:** screenshots of 0.3.24 versus the corrected 0.3.26 at matching Chrome viewport/zoom/theme, showing Cloudflare wide Sign In and full-length File Explorer. Record actual dimensions if relevant.
