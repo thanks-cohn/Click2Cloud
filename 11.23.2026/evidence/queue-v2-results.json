@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "reportDate": "2026-11-24",
+  "baseRevision": "1c1e6ea23f0f062740463d923fb53a8efdbbd544",
+  "branch": "codex/queue-history-v2-2026-11-24",
+  "sourceBuild": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.23",
+    "revision": "9d7c6f9112536f1a417f4d8f55b1b80732270927",
+    "sourceDigest": "f52d5ccba4739e198d1adcbe337d8c21b60d18a62def4558334549ec3cdfc38e",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "alphaReadiness": "BLOCKED",
+  "environment": {
+    "platform": "Linux Debian 13",
+    "browser": "Chromium 156.0.8078.79",
+    "node": "v24.22.1",
+    "provider": "Fixture unless explicitly indicated"
+  },
+  "lanes": {
+    "isolatedBaseline": {
+      "command": "npm test at unmodified 1c1e6ea in separate worktree",
+      "result": "PASS",
+      "exitCode": 0,
+      "tests": 612,
+      "pass": 612,
+      "fail": 0,
+      "skipped": 0
+    },
+    "fullSuite": {
+      "command": "npm test",
+      "result": "PASS",
+      "exitCode": 0,
+      "tests": 620,
+      "pass": 620,
+      "fail": 0,
+      "skipped": 0
+    },
+    "fastContracts": {
+      "command": "node --test tests/queue-v2.test.mjs tests/workings.test.mjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "tests": 13
+    },
+    "build": {
+      "command": "npm run build:extension",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    "chromiumContracts": {
+      "command": "node scripts/test-queue-v2-browser.mjs --contracts",
+      "exitCode": 0,
+      "result": "PASS",
+      "mode": "--contracts",
+      "evidence": "Chromium IndexedDB with deterministic metadata",
+      "browser": "156.0.8078.79",
+      "count": 27,
+      "status": {
+        "limit": 3,
+        "cleanup": "delete",
+        "deleteFrom": 1795564800000,
+        "revision": 9,
+        "clearing": false,
+        "dayCounts": true,
+        "count": 3
+      },
+      "checks": [
+        "snapshot date and screenshot filters",
+        "interrupted purge, rollback and restart",
+        "quota and restart recovery",
+        "hide and off",
+        "nonretroactive Delete",
+        "cap lowering",
+        "delete replay",
+        "cross-instance export lock"
+      ]
+    },
+    "chromiumUi": {
+      "command": "node scripts/test-queue-v2-browser.mjs ui",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidence": "Chromium UI and real IndexedDB; simulated Chrome extension and provider transport",
+      "browser": "156.0.8078.79",
+      "checks": [
+        "default navigation and padded top-right Log in",
+        "durable owner backfill, counts, 10 initial jobs, virtual scroll, numeric jumps and First/Last",
+        "Settings persistence, separate pin controls, reset, all themes and narrow Debug More exclusion",
+        "Compact hides details, authorized image reader, viewer zoom, keyboard gallery and focus return",
+        "guarded Clear cancellation, explicit confirmation, independent mounts and legacy preservation",
+        "calendar groups refresh across local midnight without archive changes"
+      ]
+    },
+    "legacyHistory": {
+      "command": "node scripts/test-customer-history-browser.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "evidenceClass": "REAL_CHROMIUM_APP_API_IDB_WITH_FIXTURE_PROVIDER_NOT_LIVE",
+      "results": [
+        {
+          "gate": "101-operation-history-first-page-25",
+          "state": "PASS"
+        },
+        {
+          "gate": "separate-safe-links-exact-upload-metadata-no-technical-panel",
+          "state": "PASS"
+        },
+        {
+          "gate": "history-25-page-boundaries-last-page-one",
+          "state": "PASS"
+        },
+        {
+          "gate": "persistent-history-settings",
+          "state": "PASS"
+        },
+        {
+          "gate": "settings-export-101-operations-independent-of-visible-page-all-three-formats",
+          "state": "PASS"
+        },
+        {
+          "gate": "production-GO-TO-selects-png-pdf-docx-txt-zip-bin-video-audio",
+          "state": "PASS"
+        },
+        {
+          "gate": "missing-object-does-not-highlight-unrelated-file",
+          "state": "PASS"
+        },
+        {
+          "gate": "preview-all-first-closed-on-first-and-second-page-bounded-reads",
+          "state": "PASS"
+        },
+        {
+          "gate": "collapsed-date-group-no-new-preview-reads",
+          "state": "PASS"
+        },
+        {
+          "gate": "condensed-explorer-navigation-search-and-go-to-path-overflow",
+          "state": "PASS"
+        },
+        {
+          "gate": "expanded-toolbar-retains-search-and-second-row-right-click",
+          "state": "PASS"
+        },
+        {
+          "gate": "B05/B07-open-History-burst-with-2301-prior-rows",
+          "state": "PASS",
+          "batches": [
+            64,
+            64,
+            4
+          ],
+          "fixtureElapsedMs": 777
+        },
+        {
+          "gate": "B06-closed-History-reconciles-both-operation-types-on-reopen",
+          "state": "PASS"
+        }
+      ],
+      "errors": []
+    },
+    "pageBenchmark": {
+      "command": "node scripts/test-queue-v2-browser.mjs --benchmark",
+      "exitCode": 0,
+      "fixtureSeed": "1795564800000 epoch ms, deterministic index sequence",
+      "byteMeasure": "Serialized returned page, not process or heap measurement",
+      "result": "PASS",
+      "mode": "--benchmark",
+      "evidence": "Chromium IndexedDB with deterministic metadata",
+      "browser": "156.0.8078.79",
+      "count": 100000,
+      "seedMs": 27970.700000000186,
+      "databaseEstimate": 25381364,
+      "binaryBytes": 10559,
+      "seekMs": [
+        6,
+        3.900000000372529,
+        14.399999999441206,
+        19.200000000186265,
+        21.299999999813735,
+        33.5,
+        10.200000000186265,
+        2.199999999254942,
+        1.7000000001862645,
+        1.7000000001862645,
+        1.5,
+        10,
+        8.700000000186265
+      ],
+      "p95Ms": 33.5,
+      "scannedSnapshot": 100000,
+      "spanDays": 1389
+    },
+    "rolloverAndClear": {
+      "command": "node scripts/test-queue-v2-browser.mjs --retention-scale",
+      "exitCode": 0,
+      "result": "PASS",
+      "mode": "--retention-scale",
+      "evidence": "Chromium IndexedDB with deterministic metadata",
+      "browser": "156.0.8078.79",
+      "count": 200000,
+      "seedMs": 57026.40000000037,
+      "databaseEstimate": 37487339,
+      "rolloverOldest": "fixture:1",
+      "clearMs": 155701.49999999953
+    },
+    "zipDiskStaging": {
+      "command": "C2C_QUEUE_ZIP_RECORDS=<0|1|50|100000> node scripts/test-history-v2-zip-browser.mjs --fixture",
+      "exitCode": 0,
+      "runs": [
+        {
+          "result": "PASS",
+          "transport": "Chromium OPFS and web download with simulated extension receipt",
+          "browser": "156.0.8078.79",
+          "fixture": "index sequence 0 through n-1",
+          "writtenRecords": 0,
+          "archiveBytes": 781,
+          "writerBufferBytes": 262176,
+          "state": "complete",
+          "seedMs": 0,
+          "exportMs": 374.39999999990687,
+          "maxBatch": 0,
+          "batchBytes": 0,
+          "estimatedOriginUsage": 1413,
+          "verification": {
+            "records": 0,
+            "dataBytes": 0,
+            "sha256Chain": "0000000000000000000000000000000000000000000000000000000000000000",
+            "crc32": "00000000"
+          }
+        },
+        {
+          "result": "PASS",
+          "transport": "Chromium OPFS and web download with simulated extension receipt",
+          "browser": "156.0.8078.79",
+          "fixture": "index sequence 0 through n-1",
+          "writtenRecords": 1,
+          "archiveBytes": 1201,
+          "writerBufferBytes": 262176,
+          "state": "complete",
+          "seedMs": 1.5,
+          "exportMs": 176.70000000018626,
+          "maxBatch": 1,
+          "batchBytes": 381,
+          "estimatedOriginUsage": 2114,
+          "verification": {
+            "records": 1,
+            "dataBytes": 380,
+            "sha256Chain": "dc553bf5dfc8c8cf7f84381e0f470133155e9475a5b7922035c98cce9acd4c3b",
+            "crc32": "2b98d1d2"
+          }
+        },
+        {
+          "result": "PASS",
+          "transport": "Chromium OPFS and web download with simulated extension receipt",
+          "browser": "156.0.8078.79",
+          "fixture": "index sequence 0 through n-1",
+          "writtenRecords": 50,
+          "archiveBytes": 19461,
+          "writerBufferBytes": 262176,
+          "state": "complete",
+          "seedMs": 17.100000000093132,
+          "exportMs": 269.79999999981374,
+          "maxBatch": 50,
+          "batchBytes": 18525,
+          "estimatedOriginUsage": 30704,
+          "verification": {
+            "records": 50,
+            "dataBytes": 18524,
+            "sha256Chain": "40bda2d1454cdecb4cc6dbb5ff0895c46c4a39421af5628e796b09f792b99e1d",
+            "crc32": "a0a771e1"
+          }
+        },
+        {
+          "result": "PASS",
+          "transport": "Chromium OPFS and web download with simulated extension receipt",
+          "browser": "156.0.8078.79",
+          "fixture": "index sequence 0 through n-1",
+          "writtenRecords": 100000,
+          "archiveBytes": 38156687,
+          "writerBufferBytes": 262176,
+          "faultChecks": [
+            "cancelled ZIP left no successful download",
+            "quota rejection and staging cleanup"
+          ],
+          "state": "complete",
+          "seedMs": 9549.100000000093,
+          "exportMs": 6190.600000000093,
+          "maxBatch": 128,
+          "batchBytes": 48937,
+          "estimatedOriginUsage": 16924958,
+          "verification": {
+            "records": 100000,
+            "dataBytes": 38155706,
+            "sha256Chain": "848d4363928528dd39174b6f601978bbcbe62363d258d2527353c82c49c340a4",
+            "crc32": "98039b9c"
+          }
+        }
+      ]
+    },
+    "unpackedZip": {
+      "command": "node scripts/test-history-v2-zip-browser.mjs",
+      "exitCode": 2,
+      "result": "BLOCKED",
+      "browser": "156.0.8078.79",
+      "error": "cdpSession.send: Protocol error (Extensions.loadUnpacked): Loading of unpacked extensions is disabled by the administrator."
+    },
+    "installedShelf": {
+      "command": "C2C_HEADLESS=1 npm run test:shelf:extension",
+      "exitCode": 2,
+      "result": "BLOCKED",
+      "reason": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR"
+    },
+    "liveProvidersAndNative": {
+      "result": "UNVERIFIED",
+      "reason": "No authorized live destinations or unmanaged installed Chrome acceptance environment in this run"
+    },
+    "basicIntegration": {
+      "result": "BLOCKED",
+      "reason": "The authorized 0.3.23 baseline has no Basic provider save/job/receipt owners"
+    }
+  },
+  "changedFiles": [
+    "11.2026/workings/right-click-workings.json",
+    "11.23.2026/QUEUE_V2_IMPLEMENTATION.md",
+    "11.23.2026/evidence/queue-v2-results.json",
+    "extension/app.css",
+    "extension/app.html",
+    "extension/app.mjs",
+    "extension/history-v2-download.mjs",
+    "extension/history-v2-view.mjs",
+    "extension/live-jobs-view.mjs",
+    "extension/navigation.mjs",
+    "extension/queue-settings.mjs",
+    "extension/queue-workspace.mjs",
+    "scripts/test-customer-history-browser.mjs",
+    "scripts/test-history-v2-zip-browser.mjs",
+    "scripts/test-queue-v2-browser.mjs",
+    "scripts/verify-history-v2-zip.py",
+    "src/chrome/provider-panel.mjs",
+    "src/history-v2/archive.mjs",
+    "src/history-v2/calendar.mjs",
+    "src/history-v2/coordinator.mjs",
+    "src/history-v2/export-text.mjs",
+    "src/history-v2/idb.mjs",
+    "src/history-v2/jobs.mjs",
+    "src/history-v2/records.mjs",
+    "src/history-v2/zip.mjs",
+    "src/persistence/current-store.mjs",
+    "tests/queue-v2.test.mjs"
+  ],
+  "intermediateRevisions": [
+    "9d7c6f9112536f1a417f4d8f55b1b80732270927 Refresh History calendar groups across local midnight",
+    "76f807451ea15aefcf0010d6d971832b261bf00f Batch archive eviction and validate reusable History card presets",
+    "e8d2ad27b721fc2ce60847df336b224ad5ff64c8 Keep Queue receipt handling passive and report purge progress",
+    "ed83417638723b380f4e6b55cd76b17f69e4ce4b Mount independent Queue views and apply approved Shelf UX",
+    "9f8750366decc385db480fcaa118d9f1f0edb6ea Keep archive counts transactional for faster deep page navigation",
+    "1c8d0db1e64ce0d2f3ddc60a3f6060575450e73d Reconcile durable save receipts into indexed History V2 and Live Jobs",
+    "93db521bf503a176fdabb92b71a854d8b7b2ec82 Add bounded History ZIP writer and browser feasibility test"
+  ]
+}

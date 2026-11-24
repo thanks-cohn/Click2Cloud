@@ -26,7 +26,7 @@ try {
     let resolveDownload;
     const downloadCompleted=new Promise(resolve=>{resolveDownload=resolve;});
     cdp.on('Browser.downloadProgress',event=>{if(event.state!=='inProgress')resolveDownload(event.state);});
-    await page.exposeFunction('fixtureDownloadCompleted',()=>Promise.race([downloadCompleted,new Promise(resolve=>setTimeout(()=>resolve('timed out'),12000))]));
+    await page.exposeFunction('fixtureDownloadCompleted',()=>Promise.race([downloadCompleted,new Promise(resolve=>setTimeout(()=>resolve('timed out'),12000).unref())]));
     server=createServer(async(request,response)=>{
       const path=new URL(request.url,'http://localhost').pathname;
       if(path==='/')return response.end('<!doctype html><title>History ZIP fixture</title>');
@@ -83,7 +83,23 @@ try {
     }:chrome.downloads;
     const result = await downloadHistoryZip(snapshot(),{expectedRecords:count,createdAt:new Date().toISOString(),selection:{range:'all',timezone:'UTC'},sourceCoverage:{fixture:'deterministic'}},{downloads});
     const [download] = await downloads.search({id:result.downloadId});
-    return {...result,path:download.filename,state:download.state,seedMs,exportMs:performance.now()-started,
+    const faultChecks=[];
+    const rejected=async (run,name)=>{
+      try{await run();}catch(error){if(error.name===name)return;throw error;}
+      throw Error('Expected '+name);
+    };
+    const controller=new AbortController();
+    async function* interrupted() {yield {recordId:'interrupt-fixture'};controller.abort();yield {recordId:'unwritten'};}
+    await rejected(()=>downloadHistoryZip(interrupted(),{expectedRecords:2},{downloads,signal:controller.signal}),'AbortError');
+    faultChecks.push('cancelled ZIP left no successful download');
+    const original=FileSystemWritableFileStream.prototype.write;
+    FileSystemWritableFileStream.prototype.write=async ()=>{throw new DOMException('Injected staging quota','QuotaExceededError');};
+    try {await rejected(()=>downloadHistoryZip([],{expectedRecords:0},{downloads}),'QuotaExceededError');}
+    finally{FileSystemWritableFileStream.prototype.write=original;}
+    const directory=await (await navigator.storage.getDirectory()).getDirectoryHandle('history-v2-export-staging');
+    for await(const item of directory.values())throw Error('Unexpected staging file: '+item.kind);
+    faultChecks.push('quota rejection and staging cleanup');
+    return {...result,faultChecks,path:download.filename,state:download.state,seedMs,exportMs:performance.now()-started,
       maxBatch,batchBytes,estimatedOriginUsage:usage.usage};
   },{count,fixtureTransport});
   assert.equal(result.state,'complete');
