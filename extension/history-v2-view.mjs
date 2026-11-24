@@ -1,4 +1,5 @@
 import {calendarPath,selectHistoryRange} from '../src/history-v2/calendar.mjs';
+import {dayKey} from '../src/history/model.mjs';
 import {createImageReader,isImage} from '../src/explorer/image-preview.mjs';
 import {screenshotDigest} from '../src/cloudflare/screenshot-wire.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
@@ -176,7 +177,7 @@ export function mountHistoryV2(parent,{archive,subscribe,preferences,exportHisto
     previewObserver?.disconnect();for(const slot of previewSlots.keys())releaseThumbnail(slot);previewSlots.clear();
     reader.clear();
   }
-  function render(items,pref,page) {
+  function render(items,pref,page,now) {
     const focus=document.activeElement, previous=focus?.closest('[data-record-id]'), focusId=previous?.dataset.recordId;
     const controls=previous?[...previous.querySelectorAll('button,summary,a')]:[];
     const index=controls.indexOf(focus),groups=new Map(),fragment=document.createDocumentFragment();
@@ -189,7 +190,7 @@ export function mountHistoryV2(parent,{archive,subscribe,preferences,exportHisto
     });
     for(const row of items) {
       let container=fragment;
-      for(const group of calendarPath(row.terminalAt??row.requestedAt,pref.timezone)) {
+      for(const group of calendarPath(row.terminalAt??row.requestedAt,pref.timezone,now)) {
         if(!groups.has(group.id)){
           const details=element('details');details.className='history-v2-group';details.open=opened.get(group.id)??true;
           details.append(element('summary',group.name));details.ontoggle=()=>groupState(group.id,details.open);container.append(details);groups.set(group.id,details);
@@ -206,7 +207,7 @@ export function mountHistoryV2(parent,{archive,subscribe,preferences,exportHisto
   async function refresh(request=currentPage) {
     const id=++ticket;
     try {
-      const pref=preferences(),range=selectHistoryRange(pref);
+      const pref=preferences(),now=Date.now(),range=selectHistoryRange({...pref,now});
       const page=await archive.page({...range,page:request,queue});
       if(id!==ticket||!section.isConnected)return;
       currentPage=page.page;pageCount=page.pages;visible=page.items;
@@ -215,8 +216,8 @@ export function mountHistoryV2(parent,{archive,subscribe,preferences,exportHisto
       $('[data-pages]').textContent='/ '+pageCount;
       message.textContent=`${page.count.toLocaleString()} ${page.count===1?'save':'saves'} in this view`;
       for(const key of ['first','previous','next','last'])$(`[data-page="${key}"]`).disabled=['first','previous'].includes(key)?currentPage===1:currentPage===pageCount;
-      const signature=JSON.stringify([pref,page.page,page.items.map(item=>[item.recordId,item.observedAt,item.status])]);
-      if(signature!==visibleSignature){visibleSignature=signature;render(page.items,pref,page.page);}
+      const signature=JSON.stringify([pref,dayKey(now,pref.timezone),page.page,page.items.map(item=>[item.recordId,item.observedAt,item.status])]);
+      if(signature!==visibleSignature){visibleSignature=signature;render(page.items,pref,page.page,now);}
     } catch(error) {if(id===ticket)message.textContent=error.message==='HISTORY_V2_CLEAR_IN_PROGRESS'?'Clearing History V2…':'History V2 is temporarily unavailable.';}
   }
   form.onsubmit=event=>{
