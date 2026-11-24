@@ -103,9 +103,9 @@ Read `11.23.2026/CHANGE_REQUEST_VERSION_0326_NAV_VISIBILITY.md` for implementati
 
 A working Settings removal option, missing three-dot More button, or an Export Complete History ZIP action available **only** through History V2 instead of Settings → Queue is a **P0 acceptance failure**. The user-facing navigation and export locations are mandatory; agent-native exposure is a scoped guiding philosophy, not an excuse to rewrite working systems.
 
-**OWNER UX PLACEMENT OVERRIDE — 2026-11-24:** In each applicable Remotes card, keep **Login or Reconnect in the padded TOP-RIGHT** based on provider state. Put **GO TO** then **Refresh** together at the **BOTTOM-LEFT**, **LEFT-ALIGNED**, with the same spacing and functional handlers. Never put GO TO/Refresh at bottom-right. Maintain responsive fit, accurate status and all supported themes; this is a layout-only request.
+**OWNER UX CORRECTION (CURRENT):** Sign In or Reconnect belongs at the **BOTTOM-LEFT** (Cloudflare's auth button stays wide); **GO TO first, Refresh second** belong at the **BOTTOM-RIGHT**, right-aligned. The three-dot `⋯` More control must always be the rightmost header control, and File Explorer must retain its original 0.3.24 visual extent. Follow `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md`.
 
-**FINAL OWNER ORDER — REMOTES CARD BUTTONS:** In the **BOTTOM-LEFT** action row, display **GO TO first (left)** and **Refresh second (right)**, left-aligned, with existing functionality intact. **Login or Reconnect remains TOP-RIGHT**. This supersedes all prior reverse-order instructions. Do not move the pair to bottom-right.
+**OWNER UX CORRECTION (CURRENT):** Sign In or Reconnect belongs at the **BOTTOM-LEFT** (Cloudflare's auth button stays wide); **GO TO first, Refresh second** belong at the **BOTTOM-RIGHT**, right-aligned. The three-dot `⋯` More control must always be the rightmost header control, and File Explorer must retain its original 0.3.24 visual extent. Follow `11.23.2026/CHANGE_REQUEST_0326_HEADER_REMOTES_EXPLORER_PARITY.md`.
 
 ## LATEST OWNER 0.3.26 POST-IMPLEMENTATION VISUAL REPAIR — MANDATORY
 
