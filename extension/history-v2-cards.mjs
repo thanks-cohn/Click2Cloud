@@ -71,8 +71,9 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     return {source:result.target,key:result.highlightKey,size:record.bytes,etag:record.etag};
   }
   function reason(record) {
-    if (record.status !== 'verified' || !record.destination?.key) return 'No verified downloadable file recorded.';
-    if (record.provider !== 'cloudflare') return 'This provider does not expose a file download through REDOWN.';
+    if (record.status!=='verified')return 'No verified downloadable file recorded.';
+    if (record.provider!=='cloudflare')return 'This provider does not expose a file download through REDOWN.';
+    if (!record.destination?.key)return 'No exact file location was recorded.';
     if(!record.etag&&!(record.kind==='screenshot'&&record.checksum))return 'The receipt has no stable file version for download.';
     if (canRead(record) === false) return 'Reconnect the saved account in Remotes to download.';
     return '';

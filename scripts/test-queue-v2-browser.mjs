@@ -151,6 +151,11 @@ try{
   await waitForText(page.locator('[data-history-notice]'),'1 result');
   assert.equal(await page.locator('.queue-history-card').count(),1);
   await page.screenshot({path:join(out,'queue-narrow.png')});
+  await page.getByRole('searchbox',{name:'Find saved files'}).fill('basic-fixture.txt');
+  await first.getByText('This provider does not expose a file download through REDOWN.',{exact:true}).waitFor();
+  assert(await first.getByRole('button',{name:'Download basic-fixture.txt',exact:true}).isDisabled());
+  await page.getByRole('searchbox',{name:'Find saved files'}).fill('fixture-21.txt');
+  await first.getByText('fixture-21.txt',{exact:true}).waitFor();
   pass('receipt-reconciliation-interrupted-job-lazy-scroll-indexed-search-and-navigation');
   await more('Settings');
   await queue.locator('[data-preset]').selectOption('compact');

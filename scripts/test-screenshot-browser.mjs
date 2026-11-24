@@ -14,6 +14,7 @@ import {cloudPath} from '../src/explorer/location-view.mjs';
 // isolated HTTPS fixture. No credentials or live buckets are used.
 const out=resolve(process.env.C2C_SCREENSHOT_EVIDENCE??'work/screenshot-browser'),profile=await mkdtemp(join(tmpdir(),'c2c-screenshot-chrome-'));
 await mkdir(out,{recursive:true});
+const queueOnly=process.env.C2C_SCREENSHOT_QUEUE_ONLY==='1';
 const downloadDirectory=join(out,'named-download');
 await mkdir(downloadDirectory,{recursive:true});
 await mkdir(join(profile,'Default'));
@@ -286,13 +287,18 @@ try{
  const selectedOutput=retried.plan.outputs[1];
  const resultCard=app.locator('.queue-history-card').filter({hasText:selectedOutput.target.bucketName+' / '+selectedOutput.key});
  const downloadFile=resultCard.getByRole('button',{name:'Download '+selectedOutput.key.split('/').at(-1)});
- const downloadSession=await browser.browser().newBrowserCDPSession();
- await downloadSession.send('Browser.setDownloadBehavior',{behavior:'default'});
-
  const requestedFilename=selectedOutput.key.split('/').at(-1);
+ let pendingDownload;
+ if(queueOnly){
+  const downloadSession=await browser.browser().newBrowserCDPSession();
+  await downloadSession.send('Browser.setDownloadBehavior',{behavior:'default'});
+ }else{
+  pendingDownload=app.waitForEvent('download',{timeout:12000});
+  void pendingDownload.catch(()=>{});
+ }
  await downloadFile.click();
  await resultCard.getByRole('status').filter({hasText:'Download complete.'}).waitFor();
- const downloaded=await readFile(join(downloadDirectory,requestedFilename));
+ const downloaded=await readFile(queueOnly?join(downloadDirectory,requestedFilename):await (await pendingDownload).path());
  assert.equal(createHash('sha256').update(downloaded).digest('hex'),retried.captured.sha256);
  assert.equal(uploads.length,5);
  checks.push('History V2 downloaded the selected screenshot output from the local R2 fixture and matched the captured PNG SHA-256');
@@ -315,7 +321,18 @@ try{
  await viewer.getByRole('button',{name:'Close',exact:true}).click();
  checks.push('History V2 preview and keyboard zoom used the existing R2 file access and immersive controller');
 
- if(process.env.C2C_SCREENSHOT_QUEUE_ONLY==='1'){
+ if(queueOnly){
+  await app.locator('#header-more').click();
+  await app.getByRole('menuitem',{name:'Settings',exact:true}).click();
+  const settings=app.locator('.queue-settings');
+  await settings.getByRole('button',{name:'Export Complete History ZIP',exact:true}).click();
+  await settings.getByRole('status').filter({hasText:'Export complete'}).waitFor();
+  const archivePath=join(downloadDirectory,'redown-history.zip');
+  const count=Number(execFileSync('python3',['-c',
+   'import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; print(json.loads(z.read("manifest.json"))["writtenRecords"])',
+   archivePath],{encoding:'utf8'}));
+  assert.equal(count,4);
+  checks.push('Chrome kept the .zip filename and an independent ZIP parser verified all four screenshot output records');
   const proof={result:'PASS',proof:'HEADED_CHROMIUM_NATIVE_CAPTURE_WITH_LOCAL_R2_FIXTURE',
    browser:browser.browser().version(),manifestVersion:manifest.version,checks,
    download:{filename:requestedFilename,bytes:downloaded.length,sha256:retried.captured.sha256},

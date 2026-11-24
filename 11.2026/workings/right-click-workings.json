@@ -9385,7 +9385,7 @@
       "src/screenshot/capture.mjs": "03002bd218022d22ae0d45c474658ed3237579014dad3ae36bd6711685466eac",
       "src/screenshot/retry-cache.mjs": "7e7f2fdfd7321039e6c6f0c734c4e9ce1d8a02c8e5c1567aeab252a2f0402ee6",
       "src/screenshot/rules.mjs": "c30da758a2b2dd635d0ff507ef03cd1101cb0e4a4a073e0b16f748c63931e9c9",
-      "extension/history-v2-cards.mjs": "dba64f8621e2fb6dadf5a9f62b2e5639fa32cbd1462eb674b74ab3762a2378ef",
+      "extension/history-v2-cards.mjs": "5341d1a5dee7c7e5afd18a758ef1807ba663468868000a26fe89df82ed28c09e",
       "extension/navigation.mjs": "9a9d1f24503f5f2dad39e3420dd94caa5ed451e01a8e515f41218c4147e1772c",
       "extension/queue-page.mjs": "da98c435b9a78a6753a1a542f55a0a8af0c63d4fcb3d986f35b659a5ec8f2eb8",
       "extension/queue-service.mjs": "8c6b2960bb37f75e9c90a389dd5b944c607bcf59bce85c14c1b44267f05ed3a4",
