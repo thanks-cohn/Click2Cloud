@@ -1,0 +1,82 @@
+# OWNER P0 OVERRIDE — 0.3.24-ONLY QUEUE / UX RESTART (2026-11-24)
+
+> **CONTROLLING RULE: This header supersedes every contradictory baseline, branch, screenshot-shortcut default, implementation, and test claim in the original document below.** This branch contains revised documentation, not an implemented Queue V2.
+
+## Immutable starting point
+
+- **AUTHORIZED SOURCE FOUNDATION:** REDOWN **0.3.24**, exact Git commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`, exact tag `redown-0.3.24-KNOWN-GOOD-FOUNDATION-2026-11-23`.
+- **ONLY AUTHORIZED WORK BRANCH:** `codex/queue-history-v2-0324-verified-2026-11-24`. This branch was created directly from `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`; maintain that ancestry throughout the run.
+- **Documentation-only donor:** `1c1e6ea23f0f062740463d923fb53a8efdbbd544` contains the original Queue request/spec/audit. Copy its **three Markdown documents only**. Its application source, `main` head, and package version are NOT authorized starting points.
+- **BLACKLIST / IGNORE:** `codex/queue-history-v2-2026-11-24`, `queue-v2-review`, and any Queue V2 implementation based on 0.3.23. NEVER merge/rebase/cherry-pick/copy/port its source as implementation, even to accelerate work. Do not use 0.3.25 as the baseline. Do not switch back to `main` to implement. Treat previous Queue test claims as nontransferable to 0.3.24.
+- **STOP BEFORE CODING** if `git merge-base HEAD cd4c8dd3bc11700376d30da050d6050a0eb1edb9` does not equal `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`, if working on a different branch, if `package.json` or `extension/manifest.json` did not start at 0.3.24, or if the original four Remotes cards are missing. Print the mismatch and do not "fix" it by switching to another older branch.
+- Begin with read-only baseline and parity inventory; then checkpoint-driven implementation ONLY in this branch. No destructive resets, no Chrome storage clearing, no cloud mutations merely to exercise UI.
+
+## Mandatory preservation / regression gates
+
+- Preserve the **FOUR stacked Remotes cards** from 0.3.24: **Google Drive, OneDrive, Dropbox, Cloudflare R2**; preserve `extension/basic-provider-cards.mjs`, all Basic API auth/status/pending-save/Continue save behaviors, Cloudflare onboarding, icons, button actions, existing data, and per-provider readiness logic.
+- Preserve the **existing Remotes identity**: `All Your Clouds. / One Place.`; three Basic provider cards; `The Future is NOW. / True Remote is Here.`; separate Cloudflare R2 card. Apply ONLY authorized action-button layout cleanup. NO card deletion, consolidation, fake placeholders, `PROVIDER_NOT_IMPLEMENTED` fallback, or redesign that hides providers.
+- Preserve File Explorer, screenshots, context menus (Depth, Narrow, Simple), connection/auth, current-store recovery and diagnostics, existing History, existing themes incl. Frames and Remote V1, keyboard shortcuts, right-click save, and cold boot. Queue/History observers must not block saving.
+- **Screenshots form dropdown, NEW rules only:** in the **Screenshot Shortcut** select, show **Alt+Q preselected by default** when creating a rule. The existing blank/**None** option MUST REMAIN selectable, as must every other supported command. Do not automatically register/change Chrome shortcuts, create a screenshot rule, capture a screenshot, or overwrite existing rule selections. Editing an existing rule must keep its saved shortcut (including None); only the initial new-rule form selection changes. If Alt+Q is unassigned in Chrome, show the truthful actual status; do not fake a binding. Verify new rule Alt+Q, switch to None and save, edit existing None/other, reload and verify persistence.
+- Queue V2 + History V2 must consume actual 0.3.24 provider/screenshot receipt and API contracts. Build truthful source-adapter coverage matrix. Do not use old Queue mocks or passing tests as provider integration evidence. Existing History continues working throughout alpha; no cutover without later owner approval.
+- **Required gates before claiming success:** original 0.3.24 baseline inventory; four card UI and basic-provider service proof; screenshot form default/None/edit proof; side-by-side preserve/regress matrix; unit/integration/browser tests with explicit limitations; 100,000-record benchmark; full ZIP integrity/export proof; real Chrome and signed-in-provider checks separately labeled VERIFIED or UNVERIFIED. A failing preservation gate is a failed run irrespective of passing Queue tests.
+- Never claim an extension installation or verified Chrome-profile state from unit tests. Never delete/replace a user's Chrome extension or storage.
+
+Read `11.23.2026/BASELINE_AND_ACCEPTANCE_0324.md` first, then `AGENTS.md`, `CODEX_REQUEST_QUEUE_AND_UX.md`, `queue-final.md`, and `FINAL_CONSISTENCY_AUDIT.md`. `queue-final.md` is authoritative for Queue/History V2 functionality **subject to this immutable foundation/preservation override**. Superseded `queue.md` remains historical only.
+
+---
+
+# Final Codex consistency audit — Queue/UX + History V2
+
+**Audit date:** 2026-11-24  
+**Audited current files:** `11.23.2026/queue-final.md`, `11.23.2026/CODEX_REQUEST_QUEUE_AND_UX.md`, and the reference-only `11.23.2026/DEFERRED_CODEX_REQUESTS.md`. `queue.md` is an untouched archived predecessor, not an implementation instruction.  
+**Scope:** document consistency and architectural failure modes, not proof of implementation or live provider acceptance.
+
+## Decisions locked and aligned
+
+1. **Single execution entry point:** active work order directs Codex to the sole authoritative `queue-final.md`; deferred document is not permission to implement it; no final History-tab cutover in current run.
+2. **Future product state:** standalone professional Live Jobs Queue + complete History V2 in History, fully retiring legacy History after separately authorized parity/rollback review. During alpha, the new sections are stacked in Queue and legacy History stays available.
+3. **Identity and chronology:** one destination-specific record/card per actual save attempt, no separate rename/move/delete events; stable IDs prevent replay duplicates, chronology orders cards, calendar hierarchy and pagination work from indexed queries.
+4. **Three independent lifecycles:** live job status, temporary 15-minute Queue History visibility, and durable V2 archive retention. Archive defaults to non-destructive Unlimited; Capped is explicit opt-in with user-editable suggested 200,000; 100,000 records is the synthetic benchmark only; Clear All is separately confirmed.
+5. **Single ZIP availability from alpha:** History V2 always exposes one full ZIP download action, including hidden-but-retained records; detailed Settings `Export Queue History` controls remain conditional on timer OFF, per owner decision. The ZIP includes source metadata, proof levels, correlation IDs and integrity evidence; does **not** alter Diagnostics or independently re-verify remote objects.
+6. **Strict UX-only additions:** modular nav, permanent Downloads exclusion from More even with Debug Mode, full Remote V1 preservation, specified modern-theme hiding, keyboard shortcuts overflow correction, Remotes Login/Reconnect top-right and Refresh/GO TO bottom-right.
+
+## Genuine engineering risks that the request requires Codex to prove (not assumed solved)
+
+| Risk / unresolved platform reality | Severity | Required release evidence / behavior |
+| --- | --- | --- |
+| Durable source receipts → V2 archive race (worker interruption, storage failure) | P0 | Idempotent destination-scoped upsert, recoverable accounting pending, zero blind reuploads, no false `VERIFIED` |
+| Old Queue/compatibility list truncation | P0 | V2 indexed archive queries recover entire retained corpus; no relying on 50/100 recent projection as source of truth |
+| **100k ZIP streaming in actual extension Chrome APIs** | **P0** | **Early Chrome feasibility gate:** independently verify one complete downloadable 100,000-record ZIP with bounded app-managed RAM before building full UI. Batch reads followed by a giant Blob are insufficient. If the full ZIP fails, mandatory alpha export is **BLOCKED/incomplete**; no silent partial archive. Beyond verified capacity, fail clearly rather than promise infinity. |
+| Consistent export while incoming saves, cap evictions or clear run | P0 | Document snapshot/high-watermark and maintenance concurrency; no duplicate/missing IDs, uncertain output is not marked complete |
+| Safe cap rollover / Clear All vs historic receipt reimport | P0 | Controlled source checkpoints/exclusions do not resurrect old data or silently suppress legitimate late saves; if unproven, disable destructive control, report BLOCKED |
+| Timer/Delete conflicts with cap rollover | P1 | One scoped archive policy engine or explicitly ordered independent policies; no accidental multi-prune; 15-minute Hide never deletes; live jobs never affected |
+| 403/auth and evidence quality | P0 | Actual provider-specific classification, no false success, real-browser/provider testing separately from mocks; no OAuth rewrite in this scope |
+| Cross-provider sensitive source/host URLs in export | P1 | Secure/redacted default ZIP; preserve joinable correlation keys with Diagnostics, never include tokens/signed secrets; document limits of raw metadata |
+| Deep arbitrary numeric page jump vs O(page) cursor paging | P1 | Indexed paging + measured page-anchor/seek or bounded fallback; avoid unsubstantiated constant-time direct jump claim |
+| Day/week/month/year grouping across midnight/DST and large groups | P1 | Indexed bounded group queries, tests for time-zone and pagination boundary; no whole-day hydration |
+| UI update and multiple-window IndexedDB migration | P1 | Incremental updates preserve focus and scroll, schema upgrade blocked/versionchange handling, independent module mount tests |
+| Non-retroactive Delete vs full Clear & historical export UI | P1 | Exact confirmation and effective-from semantics; export-first from Clear regardless of Settings visibility; records already deleted cannot be exported |
+| Future History cutover vs current legacy state | P1 | Do not retire legacy History now; complete field/action export parity, rollback and user approval before replacement |
+
+## Residual product trade-offs — not contradictions, but must be documented
+
+- **A History ZIP contains extension observations/evidence, not an automatic live cloud audit.** Status and verification claims reflect the provider's actual retained proof level; diagnostic comparison is a separate future analysis step. ZIP creation does not re-upload, re-fetch or probe remote cloud files.
+- **Unlimited archive retention is bounded by the device/browser quota.** Likewise, `100,000` is a benchmark and `200,000` is a suggested capped-mode value, not an upper bound.
+- **Permanent deletion and capped rollover can conflict with delayed source receipts.** Exclusion/watermark design needs rigorous tests and may be BLOCKED; don't silently substitute hiding for real deletion.
+- **The two export UI paths intentionally differ:** the compact always-accessible History ZIP action versus the conditional detailed Settings export subsection. This preserves the previously approved minimal Settings while meeting alpha export availability.
+- **ZIP files can contain sensitive URLs and destination names even with credentials removed.** Secure export is default and raw details require an informed user choice if that mode is supported. The original Diagnostics system is explicitly outside scope.
+- **No guarantee of alpha certification:** real Chrome, native context menus, logged-in cloud-provider cases and authorization/403 classification must be evidenced, not inferred from mocks or the spec.
+
+## Acceptance of document audit
+
+- All three documents use the same canonical source, same temporary/long-term tab boundaries, same Unlimited/Capped defaults, same 15-minute policy, same current-vs-deferred feature scope, same ZIP availability and unchanged Diagnostics boundary.
+- Active Codex request and final spec both demand a single-ZIP exporter from the first implementation and independent ZIP integrity tests.
+- Legacy `queue.md` is preserved as an archive and is not an execution input.
+
+**Recommendation:** Keep the scoped Work Order 01 but require a read-only source/parity audit as the first checkpoint. Do not authorize a massive blind implementation or claim a 'one-shot' guarantee. The highest-risk acceptance gate is the intersection of **durable reconciliation, safe destructive retention, and memory-bounded ZIP streaming**.
+
+---
+
+## OWNER P0 RECONFIRMATION — 2026-11-24
+
+This revised document is hosted on branch `codex/queue-history-v2-0324-verified-2026-11-24`, based on exact REDOWN 0.3.24 commit `cd4c8dd3bc11700376d30da050d6050a0eb1edb9`. Documentation was copied from `1c1e6ea23f0f062740463d923fb53a8efdbbd544` without importing its application source. Previous `codex/queue-history-v2-2026-11-24` is forbidden and must be ignored entirely for implementation. The new Screenshots rule shortcut defaults to Alt+Q while **None remains selectable**, with all existing values preserved. For conflicts, the controlling P0 override and `BASELINE_AND_ACCEPTANCE_0324.md` govern.
