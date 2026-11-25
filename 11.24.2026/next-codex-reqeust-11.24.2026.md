@@ -64,3 +64,8 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Remove the transient notification text “Review the current panel or History for details.” wherever emitted in the Shelf notification UI. If it is a standalone notification, suppress that notification entirely; if appended to a meaningful outcome, remove only the redundant sentence.
 - Do not replace it with another generic instruction or empty notification. Preserve concise truthful success, failure and progress feedback, existing actionable recovery, History records, receipts and diagnostics.
 - Audit actual notification emitters and shared formatting before changing them. Preserve deduplication and dismissal behavior; do not suppress genuine errors or unrelated notifications.
+
+## Notifications — Simplify saved acknowledgment
+
+- Replace the visible transient notification “Saved · Chrome menu acknowledged · External backup unavailable” with “Saved · Chrome menu acknowledged”.
+- Remove the external-backup suffix from this successful-save notification only. Preserve actual backup status in diagnostics and relevant backup-specific status/recovery UI. Do not change backup behavior, receipt evidence, or success classification, and do not hide genuine save failures.
