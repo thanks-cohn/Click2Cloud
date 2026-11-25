@@ -32,10 +32,10 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 
 ## Cloudflare History cards — Media layout and actions
 
-- Place the existing provider/destination path line (e.g. Cloudflare R2 · redown / screenshots/Screenshot-75023fbd-d456-440e-a531-3bddc59a46cc-1.png) directly beneath the filename and before Media. Move it out of Details; avoid redundant visible copies. Preserve actual path data and wrap long names/paths without overflow.
+- Keep the existing provider/destination path line (e.g. Cloudflare R2 · redown / screenshots/Screenshot-75023fbd.png) inside the expandable Details section. Do not move it beneath the filename or duplicate it outside Details. Preserve actual path data and wrap long paths without overflow. Place Media directly beneath the filename/header area.
 - Keep Media expanded by default according to the Cloudflare image preview preference. Clicking the image opens the existing regular Preview. Remove the separate Preview button; preserve accessible keyboard activation.
 - Place Download and GO TO directly underneath the image in one action row, Download aligned far left, GO TO far right, flexible space between. Reuse existing actions and eligibility; do not fabricate support or duplicate buttons. Preserve responsiveness and theme compatibility.
-- Public URLs and Details remain independent sections; Details stays below Public URLs. Media expansion must not expand Details.
+- Public URLs and Details remain independent sections; Details stays below Public URLs and is collapsed by default. Media expansion must not expand Details or expose its destination path.
 - Error is an independent expandable section when applicable, collapsed by default. Preserve truthful failure/status indication and actionable error details; do not expand Error automatically as a side effect of image expansion. Do not show empty Error sections for successful entries.
 - Preserve existing provider functionality, retained images, verification, receipts, navigation, lazy loading and memory safeguards. Audit actual card layout before editing.
 
