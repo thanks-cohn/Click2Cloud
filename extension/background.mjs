@@ -473,7 +473,7 @@ const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:
  current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
 });
 const batchReceiptPorts=new Map();
-const observeUploadEffect=(code,operationId)=>diagnostics.emit({stage:'chrome.local-upload',outcome:'failed',code,operationId});
+const observeUploadEffect=code=>diagnostics.emit({stage:'chrome.local-upload',outcome:'failed',code,operationId:operationIdentity()});
 async function requestUploadReceipt(receipt,gate){
  const result=await downloadUploadReceipt(chrome,receipt,gate,batchReceiptPorts.get(receipt.batchId));
  if(result?.state==='download-requested'&&chrome.downloads.onChanged){
@@ -481,7 +481,7 @@ async function requestUploadReceipt(receipt,gate){
    if(delta.id!==result.id||!['complete','interrupted'].includes(delta.state?.current))return;
    chrome.downloads.onChanged.removeListener(changed);
    clearTimeout(timer);
-   if(delta.state.current==='interrupted')observeUploadEffect('UPLOAD_RECEIPT_DOWNLOAD_FAILED',receipt.batchId);
+   if(delta.state.current==='interrupted')observeUploadEffect('UPLOAD_RECEIPT_DOWNLOAD_FAILED');
   }
   const timer=setTimeout(()=>chrome.downloads.onChanged.removeListener(changed),30_000);
   chrome.downloads.onChanged.addListener(changed);
