@@ -84,3 +84,10 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Treat this footer message as transient, scoped to the Files/Explorer browsing context that produced it. Dismiss within 10 seconds or immediately on leaving that context, whichever comes first. Do not resurrect it when switching tabs, themes, rerendering or reopening Shelf. Do not continually regenerate it merely because authentication remains disconnected.
 - Preserve the actual disconnected state, existing Log In/Reconnect controls, saved locations and actionable authentication recovery in the relevant view. Do not remove necessary recovery or mask failures. Distinguish persistent contextual state from transient footer messages.
 - Audit shared footer emitters for equivalent stale cross-tab messages. Apply scope and expiry to transient messages without clearing genuine live progress or required contextual recovery controls. Keep no-X design and remove notification-only reserved space when dismissed. Test navigation, reconnect, logout, first use, repeated renders and new genuine browsing attempts.
+
+## Shelf footer — Restore compact manual dismissal (latest override)
+
+- Restore a small, discreet, theme-aware X at the far right of each visible transient footer notification, including saved acknowledgments and reconnect notices. This supersedes earlier no-X requirements for these footer notifications only; do not change Queue entry X controls or unrelated floating toast layouts.
+- Clicking X immediately dismisses that notification and clears its reserved space. A dismissed notification must not reappear because of rerendering, tab changes, theme changes or stale events. A genuinely new notification remains eligible to appear.
+- Retain automatic 10-second expiry and contextual dismissal on tab changes; manual dismissal is an additional safeguard, not a replacement.
+- Keep the X vertically centered, compact, accessible by keyboard with an appropriate accessible label and sufficient hit area, and prevent message text from overlapping it. Use existing Aesthetic API styling and preserve underlying status, receipts and recovery controls.
