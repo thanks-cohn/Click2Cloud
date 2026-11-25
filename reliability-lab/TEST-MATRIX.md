@@ -1,6 +1,6 @@
 # Reference only on UX branch: bulk matrix belongs to Reliability Lab
 
-Use focused acceptance only; final NOTIFICATION-PREFERENCES.md and VISUAL-AND-HISTORY-FOLLOWUP.md override earlier visual and notification expectations. No global font overhaul; Liquid Black permanently dark; Large is baseline notification size.
+Use focused acceptance only; final NOTIFICATION-PREFERENCES.md and VISUAL-AND-HISTORY-FOLLOWUP.md override earlier visual and notification expectations. No global font overhaul; Chrome has working Liquid Black dark and Pure Chrome light appearances; Large is baseline notification size.
 
 # Realistic usage test matrix
 
@@ -72,4 +72,6 @@ For every supported destination-creation entry point, fresh Simple/Narrow/Depth 
 
 ### Final owner clarification — 0.3.30
 A brand-new user after ordinary authorized login must be able to create and persist a valid Simple or Narrow destination and immediately perform a verified remote save, without prior Depth configuration, manual worker activation, separate bucket preparation, restart, or Repair Me interaction. This is a P0 release gate across every supported creation entry point; independently test clean Simple-first and Narrow-first states. Depth remains independently functional. Repair Me is the final approved label for the compact contextual last-resort control (all prior visibility, behavior and placement requirements remain unchanged).
-Existing Frames skins and all existing Nostalgia themes/skins must retain their exact existing colors, typography, artwork and aesthetic styling from 0.3.29. Oceania typography remains protected exactly. Scope new Frames aesthetic/typography to Liquid Black only. Functional improvements remain applicable across themes; do not leak shared typography or aesthetic overrides into protected skins. Verify computed styles and visual regressions against baseline.
+Existing Frames skins and all existing Nostalgia themes/skins must retain their exact existing colors, typography, artwork and aesthetic styling from 0.3.29. Oceania typography remains protected exactly. Scope new Frames aesthetic/typography to Chrome only. Functional improvements remain applicable across themes; do not leak shared typography or aesthetic overrides into protected skins. Verify computed styles and visual regressions against baseline.
+
+Final UX acceptance references: Remote V1 retains Review Cloudflare setup; other themes omit it. Connected/Reconnect/Connect reflect actual auth state. Basic Refresh is contextual immediately left of fixed GO TO, keyboard/touch accessible, no layout shift. Golden Age faithful Pinterest styling. Notification open-Shelf defaults Yes, mandatory Center/Bottom-right closed-Shelf, optional open-Shelf Center, intentional native fallback retained. See authoritative specs for focused acceptance.
