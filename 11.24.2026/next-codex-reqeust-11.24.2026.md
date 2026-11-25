@@ -44,3 +44,10 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - When navigating between images in regular Preview, the Immersive View button must remain visually stable. Eliminate the dull-to-bright flash between images, including rapid previous/next keyboard navigation.
 - Preserve its appearance, position, dimensions, opacity and theme styling during normal image-to-image transitions. Audit transient disabled/loading state and unnecessary DOM replacement before choosing a fix; keep genuine availability and accessibility semantics intact. Prevent activation against stale or unavailable image data without introducing visual flicker during ordinary transitions.
 - Reuse the existing shared Immersive View implementation; preserve image loading, navigation, zoom and error handling. Test cached and uncached images, rapid navigation, all themes and genuinely unavailable previews.
+
+## Remotes — Review Cloudflare setup button
+
+- Hide the “Review Cloudflare setup” button from the Remotes tab in all themes except Remote V1. Remote V1 must retain the existing button and behavior.
+- Remove the hidden button's reserved layout space; do not replace it with another permanent setup prompt.
+- Use existing theme/Aesthetic API state and ensure visibility updates correctly when switching themes. Preserve underlying Cloudflare setup, recovery, verification and necessary approval flows; do not disable required setup functionality merely by hiding this shortcut.
+- Verify Remote V1 retains the button and other themes do not display it, including after theme changes and restarts.
