@@ -29,7 +29,9 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
       warning.textContent=action==='cancel-all'?(data?.results?.length?'Stop requested for cancellable saves. Final writes and captures may still complete.':
         'No cancellable saves found. Final writes and captures may still complete.'):
         data?.state==='unsupported'?'This save is past its cancellation point. Wait for verification.':
-        action==='cancel'?'Cancellation requested.':'';
+        action==='cancel'?'Cancellation requested.':
+        action==='reconcile-upload'?(data?.state==='verified'?'Uploaded file verified.':
+          'Upload still unconfirmed. Check its destination before selecting the file again.') : '';
     }catch{
       warning.textContent=action==='retry'?'Retry unavailable. Check the original source and account in Remotes.':
         'Could not complete this Queue action. Check the job before trying again.';
@@ -109,7 +111,8 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
       parent.append(b);
       return b;
     };
-    if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
+    if(job.status==='uncertain'&&job.saveMode==='local-upload')button('Check receipt',b=>control(b,'reconcile-upload',job));
+    else if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
       const result=await inspectReceipt(job.sourceRecordId);
       warning.textContent=result.reconciliation?.state==='verified'?'Saved file verified.':'Save still unconfirmed. Check Remotes before starting another save.';
       if(result.reconciliation?.state==='verified')await service.refresh({force:true});

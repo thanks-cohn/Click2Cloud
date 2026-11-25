@@ -207,9 +207,9 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       if(!['skip','keep','replace'].includes(conflict))throw Error('Choose a conflict policy.');
       // A unique temporary key keeps the original untouched until the proven
       // Worker conditionally commits the final destination. Never replay PUT.
-      if(conflict==='skip' && (await stat({source:l,key:k},options)).object)return {state:'partial',conflicts:[{destinationKey:k,status:'conflict'}]};
+      if(conflict==='skip' && (await stat({source:l,key:k},options)).object)return {state:'partial',code:'FILE_CONFLICT',conflicts:[{destinationKey:k,status:'conflict'}]};
       const parent=k.slice(0,k.lastIndexOf('/')+1),leaf=name(k.slice(parent.length));
-      const stagingDirectory=prefix(stagingPrefix)+crypto.randomUUID()+'/';
+      const stagingDirectory=prefix(stagingPrefix)+(options.operationId??crypto.randomUUID())+'/';
       const staging=key(stagingDirectory+leaf);
       let attempted=false;
       try {

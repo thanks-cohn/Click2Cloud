@@ -97,3 +97,72 @@ test('Make Default leaves the existing destination untouched if exact readiness 
  assert.equal(reply.code,'INSUFFICIENT_SCOPE');
  assert.deepEqual((await current.read()).product.defaultTarget,target);
 });
+
+test('local files and nested folder uploads use production signed commits and independently preserve R2 inventory and bytes',async()=>{
+ const {localUploadKey,planLocalUpload}=await import('../src/chrome/local-upload-plan.mjs');
+ const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser'})).outputFiles[0].text;
+ const secret='synthetic-local-uploads-only';
+ const mf=new Miniflare({modules:true,script:code,compatibilityDate:'2026-01-01',r2Buckets:['STORAGE'],
+  durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},
+  bindings:{SIGNING_KEY:secret,ACCOUNT_ID:'a',BUCKET_NAME:'bucket',PREFIX_SCOPE:'root'}});
+ try{
+  const url=(await mf.ready).origin,bucket=await mf.getR2Bucket('STORAGE');
+  const destination={...target,prefix:'root/Chosen target/'};
+  const oauth={authority:async()=>({sessionId:'upload-session',accounts:[{id:'a'}]})};
+  let putCount=0,interruptCommit=false;
+  const remote=createRemoteTransport({oauth,lookup:async()=>({state:'ready',protocol:PROTOCOL,accountId:'a',bucketName:'bucket',
+   url:'https://uploads.fixture.workers.dev',secret}),fetch:(u,o)=>mf.dispatchFetch(url+new URL(u).pathname,o),pollIntervalMs:5});
+  const execute=createFileTransport({remote});
+  const api=createClick2CloudFileApi({send:async(...args)=>{
+   const result=await execute(...args);
+   if(interruptCommit)throw Error('Fixture dropped final response after remote commit');
+   return result;
+  },http:{boundedFetch:fetch,request:async(path,options={})=>{
+   const request=new URL(path,'https://r2.fixture.invalid'), encoded=request.pathname.split('/objects/')[1];
+   if(options.method==='PUT'){
+    assert(options.body instanceof File);
+    putCount++;await bucket.put(decodeURIComponent(encoded),await options.body.arrayBuffer());return Response.json({success:true});
+   }
+   if(encoded){
+    const object=await bucket.get(decodeURIComponent(encoded));
+    return new Response(object?.body,{status:object?200:404});
+   }
+   const {objects}=await bucket.list({prefix:request.searchParams.get('prefix')??''});
+   return Response.json({success:true,result:{objects}});
+  }}});
+  function file(name,bytes,relative){
+   return Object.defineProperty(new File([bytes],name),'webkitRelativePath',{value:relative});
+  }
+  const bytes=new Uint8Array(2*1024*1024);for(let i=0;i<bytes.length;i++)bytes[i]=i%251;
+  const files=[file('readme.txt','fixture file',''),file('empty.txt','','旅行/empty.txt'),
+   file('file.bin',bytes,'旅行/A/file.bin'),file('file.bin','distinct','旅行/B/file.bin')];
+  await planLocalUpload({source:destination,files:files.slice(1),mode:'folder'});
+  const expected=new Map([['root/Chosen target/readme.txt',Buffer.from('fixture file')],
+   ['root/Chosen target/旅行/empty.txt',Buffer.alloc(0)],['root/Chosen target/旅行/A/file.bin',Buffer.from(bytes)],
+   ['root/Chosen target/旅行/B/file.bin',Buffer.from('distinct')]]);
+  let index=0;
+  for(const [key] of expected){
+   const item=files[index++],mode=item.webkitRelativePath?'folder':'files';
+   assert.equal(localUploadKey(destination,item,item.webkitRelativePath||item.name,mode),key);
+   const operationId=crypto.randomUUID(),result=await api.run('upload',{source:destination,file:item,key,
+    stagingPrefix:'root/.redown-beta-uploads/',conflict:mode==='folder'?'skip':'keep'},{operationId});
+   assert.equal(result.state,'completed',JSON.stringify(result));
+   assert.equal(result.data.receipt.operationId,operationId);
+   assert.equal(result.data.receipt.key,key);
+  }
+  assert.equal((await api.run('upload',{source:destination,file:files[2],key:'root/Chosen target/旅行/A/file.bin',
+   stagingPrefix:'root/.redown-beta-uploads/',conflict:'skip'})).state,'partial');
+  assert.equal(putCount,4);
+  interruptCommit=true;
+  const operationId=crypto.randomUUID(),key='root/Chosen target/recovered.txt',original=file('recovered.txt','recovered','');
+  const interrupted=await api.run('upload',{source:destination,file:original,key,stagingPrefix:'root/.redown-beta-uploads/'},{operationId});
+  assert.equal(interrupted.state,'uncertain');
+  const observed=await remote.inspectOperation(target,operationId);
+  assert.equal(observed.receipt.key,key);
+  assert.equal(observed.receipt.operationId,operationId);
+  expected.set(key,Buffer.from('recovered'));
+  assert.equal(putCount,5);
+  assert.deepEqual((await bucket.list()).objects.map(object=>object.key).sort(),[...expected.keys()].sort());
+  for(const [key,wanted] of expected)assert.deepEqual(Buffer.from(await (await bucket.get(key)).arrayBuffer()),wanted);
+ }finally{await mf.dispose();}
+});

@@ -20,7 +20,7 @@ import {createVisualFeedbackPreference} from '../src/aesthetic/visual-feedback.m
 import {createProjectileFeedback} from '../src/aesthetic/projectile.mjs';
 import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
-import {localUploadPort,takeLocalUpload} from '../src/chrome/local-upload-files.mjs';
+import {claimLocalUpload,localUploadPort,releaseLocalUpload,takeLocalUpload} from '../src/chrome/local-upload-files.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {operationIdentity} from '../src/core/boundary-observation.mjs';
@@ -31,7 +31,7 @@ import {createShortcutStore,listCommands} from '../src/api/shortcuts.mjs';
 import {createPermissions} from '../src/api/permissions.mjs';
 import {createAgentGateway} from '../src/api/gateway.mjs';
 import {createCloudflareOAuth,diagnoseCloudflare} from '../src/auth/cloudflare-oauth.mjs';
-import {createClick2CloudFileApi,name as objectName} from '../src/explorer/index.mjs';
+import {createClick2CloudFileApi} from '../src/explorer/index.mjs';
 import {createExternalRecovery,directoryFiles,copyRecoveryDirectory} from '../src/persistence/external-recovery.mjs';
 import {createRecoveryCrawl} from '../src/persistence/recovery-crawl.mjs';
 import {createWholeCloudJobs} from '../src/api/whole-cloud.mjs';
@@ -40,12 +40,14 @@ import {createAgentDebugApi} from '../src/glaciaring/agent-api.mjs';
 import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createVerifiedBucket} from '../src/cloudflare/inventory.mjs';
-import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
+import {createFileTransport,fileOperationTarget} from '../src/cloudflare/file-transport.mjs';
 import {createR2PublicDomains} from '../src/cloudflare/r2-public-domains.mjs';
 import {createRemoteTransport,preparedDestination,previousWorkerDigests} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
+import {localUploadKey,maximumUploadFiles,uploadError,uploadId} from '../src/chrome/local-upload-plan.mjs';
+import {remoteDestination} from '../src/cloudflare/wire.mjs';
 import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-identity.mjs';
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
 let storageReady;
@@ -155,7 +157,6 @@ async function send(message) {
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
 const uploadScopes=['workers-r2.read','workers-r2.write','workers-r2-bucket-item.read','workers-r2-bucket-item.write'];
-const uploadError=(code,message)=>Object.assign(Error(message),{code});
 async function checkUploadDestination(source,signal){
  const target=normalizeTarget(source);
  assertConnected();
@@ -177,17 +178,25 @@ async function checkUploadDestination(source,signal){
   throw uploadError(live.code,'Cloudflare could not verify write access to this folder.');
  return {target,sessionId:auth.sessionId,stagingPrefix:(plan.prefixScope?plan.prefixScope+'/':'')+'.redown-beta-uploads/'};
 }
-async function runLocalUpload({source,file},options){
- const {target,sessionId,stagingPrefix}=await checkUploadDestination(source,options.signal);
- const key=target.prefix+objectName(file.name);
+async function runLocalUpload({source,file,key,uploadMode='files',localBinding},options){
+ const {target,sessionId,stagingPrefix}=localBinding??await checkUploadDestination(source,options.signal);
+ const relativePath=key?.slice(target.prefix.length)??file.name;
+ if(key!==undefined&&!key.startsWith(target.prefix))throw uploadError('UPLOAD_PATH_INVALID','The upload path is outside its selected folder.');
+ const destinationKey=localUploadKey(target,file,relativePath,uploadMode);
+ options.signal?.throwIfAborted();
  const uploader=createClick2CloudFileApi({
-  send:(message,{signal})=>{assertConnected();return executeFileMessage(message,{signal,expectedSession:sessionId});},
+  send:async(message,{signal})=>{
+   signal?.throwIfAborted();assertConnected();
+   await localBinding?.beforeCommit?.();
+   signal?.throwIfAborted();assertConnected();
+   return executeFileMessage(message,{signal,expectedSession:sessionId});
+  },
   http:{request:(path,request)=>{
    assertConnected();
    return oauth.request(path,{...request,expectedSession:sessionId,requiredScopes:uploadScopes});
   },boundedFetch:fetch}
  });
- return uploader.run('upload',{source:target,key,file,stagingPrefix},options);
+ return uploader.run('upload',{source:target,key:destinationKey,file,stagingPrefix,conflict:uploadMode==='folder'?'skip':'keep'},options);
 }
 const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket','upload'].includes(op)),async run(operation,input={},options={}) {
   if(operation==='upload')return runLocalUpload(input,options);
@@ -496,38 +505,147 @@ const api=createEngineApi({engine,current,shortcutStore,onHistoryPreferenceChang
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
-// Local-only File transport for the trusted Shelf. The File API owns upload,
-// verification and the signed commit. No File bytes travel over runtime IPC.
+// Local File tickets and recovery metadata are available only to the trusted Shelf.
+const activeLocalUploads = new Map();
+const uploadReadTransient = new Set(['TRANSPORT_UNAVAILABLE','NETWORK_ERROR','WORKER_UNREACHABLE','WORKER_UNAVAILABLE','RESOURCE_BUSY']);
+const localUploadClaimKey = (source,key) => JSON.stringify([targetKey({...source,prefix:''}),key]);
+const uploadCode = (value, fallback) => /^[A-Z][A-Z0-9_]{1,79}$/.test(value??'') ? value : fallback;
+async function recordLocalUpload(job,state,code,receipt){
+ const destination=remoteDestination(job.source);
+ const row=await current.recordRemoteResult({kind:'save',operationId:job.id,saveMode:'local-upload',
+  state,code,destination,bytes:job.size,attemptedFilename:job.key.split('/').at(-1),
+  localUpload:job,receipt,proofKind:receipt?'staging-byte-readback-and-final-r2-head':undefined},{onVerified:onVerifiedCurrent});
+ void accountQueueReceipt(currentReceipt,row);
+ return row;
+}
+function uploadReceipt(job,result){
+ const receipt=result?.receipt;
+ if(result?.state!=='completed'||result.completed!==1||receipt?.operationId!==job.id||
+    receipt.size!==job.size||!receipt.etag||!receipt.version||typeof receipt.key!=='string')return null;
+ const parent=job.key.slice(0,job.key.lastIndexOf('/')+1),leaf=job.key.slice(parent.length),dot=leaf.lastIndexOf('.');
+ const alternate=parent+(dot>0?leaf.slice(0,dot):leaf)+'-'+job.id+(dot>0?leaf.slice(dot):'');
+ if(receipt.key!==job.key&&(job.mode!=='files'||receipt.key!==alternate))return null;
+ const expected=remoteDestination({...job.source,prefix:parent});
+ const actual=receipt.destination;
+ if(!actual||Object.keys(expected).some(field=>expected[field]!==actual[field]))return null;
+ return receipt;
+}
+async function reconcileLocalUpload(job,claimKey){
+ const saved=await current.readRemoteResult(job.id);
+ if(saved?.state==='verified'&&saved.receipt){
+  await releaseLocalUpload(claimKey,job.id);
+  return saved.receipt;
+ }
+ if(saved&&['failed','blocked','cancelled'].includes(saved.state)){
+  await releaseLocalUpload(claimKey,job.id);
+  return null;
+ }
+ if(saved?.localUpload?.commitRequested===false){
+  await recordLocalUpload(job,'failed','LOCAL_UPLOAD_RESELECT_REQUIRED');
+  await releaseLocalUpload(claimKey,job.id);
+  return null;
+ }
+ const result=await remote.inspectOperation(job.workerTarget,job.id);
+ const receipt=uploadReceipt(job,result);
+ if(receipt){
+  await recordLocalUpload(job,'verified','LOCAL_UPLOAD_RECONCILED',receipt);
+  await releaseLocalUpload(claimKey,job.id);
+ }
+ return receipt;
+}
+async function dispatchLocalUpload({ticket,batchId,index,source},batch,controller,onProgress){
+ const {signal}=controller;
+ if(!batch||batch.id!==batchId||targetKey(batch.target)!==targetKey(normalizeTarget(source))||
+   !Number.isSafeInteger(index)||index!==batch.next||index>=maximumUploadFiles||!uploadId(ticket))
+  throw uploadError('UPLOAD_BATCH_INVALID','Choose the local files again in the intended folder.');
+ if(activeLocalUploads.size>=2)
+  throw uploadError('RESOURCE_BUSY','Two local uploads are already running. Wait for one to finish.');
+ activeLocalUploads.set(ticket,{controller,batchId});
+ try{
+  const staged=await takeLocalUpload(ticket), binding=staged?.binding;
+  signal.throwIfAborted();
+  if(!binding||binding.batchId!==batchId||binding.index!==index||targetKey(binding.source)!==targetKey(batch.target))
+   throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose the local file again.');
+  assertConnected();
+  const auth=await oauth.authority();
+  if(auth.sessionId!==batch.sessionId||!auth.accounts.some(account=>account.id===batch.target.accountId)||
+    !uploadScopes.every(scope=>auth.scopes?.includes(scope)))
+   throw uploadError('AUTH_SESSION_CHANGED','Cloudflare authorization changed. Reconnect and select the remaining files again.');
+  signal.throwIfAborted();
+  const key=localUploadKey(batch.target,staged.file,binding.relativePath,binding.mode);
+  const parent=key.slice(0,key.lastIndexOf('/')+1),staging=batch.stagingPrefix+ticket+'/';
+  const job={id:ticket,batchId,index,source:batch.target,key,mode:binding.mode,size:staged.file.size,commitRequested:false,
+   workerTarget:fileOperationTarget({...batch.target,prefix:staging},{...batch.target,prefix:parent})};
+  const claimKey=localUploadClaimKey(batch.target,key);
+  const previous=await claimLocalUpload(claimKey,job);
+  if(previous){
+   const receipt=activeLocalUploads.has(previous.id)?null:await reconcileLocalUpload(previous,claimKey).catch(()=>null);
+   return {state:'uncertain',error:receipt?
+    'An earlier upload was verified. Review its saved object before selecting a replacement. This selection was not uploaded.':
+    'An earlier upload to this path may have committed. Inspect the destination before retrying.'};
+  }
+  let outcome,recorded=false;
+  try{
+   await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
+   recorded=true;
+   batch.next++;
+   const beforeCommit=async()=>{
+    const checkpoint={...job,commitRequested:true};
+    await recordLocalUpload(checkpoint,'pending','LOCAL_UPLOAD_VERIFY_COMMIT');
+    job.commitRequested=true;
+   };
+   outcome=await fileApi.run('upload',{source:batch.target,file:staged.file,key,uploadMode:binding.mode,
+    localBinding:{...batch,beforeCommit}},{signal,onProgress,operationId:ticket});
+   const receipt=uploadReceipt(job,outcome.data);
+   if(receipt){
+    await recordLocalUpload(job,'verified','LOCAL_UPLOAD_VERIFIED',receipt);
+    await releaseLocalUpload(claimKey,ticket);
+    return {state:'completed',key:receipt.key};
+   }
+   const conflict=['FILE_CONFLICT','FILES_SKIPPED'].includes(outcome.data?.code);
+   const state=conflict?'failed':!job.commitRequested?(signal.aborted?'cancelled':'failed'):
+    ['uncertain','partial','completed','cancelled'].includes(outcome.state)?'uncertain':'failed';
+   const code=uploadCode(outcome.code??outcome.data?.code,state==='cancelled'?'LOCAL_UPLOAD_CANCELLED':'LOCAL_UPLOAD_'+state.toUpperCase());
+   await recordLocalUpload(job,state,code);
+   if(state!=='uncertain')await releaseLocalUpload(claimKey,ticket);
+   return {state,code,continue:conflict,error:conflict?'An existing Cloudflare object was left untouched.':
+    state==='cancelled'?'Upload cancelled.':outcome.error??(state==='uncertain'?'Cloudflare did not confirm the committed object. Inspect the destination before retrying.':undefined)};
+  }catch(error){
+   if(!recorded){await releaseLocalUpload(claimKey,ticket).catch(()=>{});throw error;}
+   return {state:'uncertain',error:'Cloudflare upload accounting was interrupted. Inspect the destination before retrying.'};
+  }
+ }finally{activeLocalUploads.delete(ticket);}
+}
 chrome.runtime.onConnect?.addListener(port=>{
  if(port.name!==localUploadPort)return;
  if(!appSenderDecision(chrome.runtime,port.sender).accepted){port.disconnect();return;}
- let active;
- const reply=value=>{try{port.postMessage(value);}catch{/* The Shelf closed. */}};
+ let active,batch;
  port.onDisconnect.addListener(()=>active?.abort());
  port.onMessage.addListener(message=>{
   if(message?.ping===true)return;
   if(message?.cancel===true){active?.abort();return;}
-  if(active)return;
+  if(!uploadId(message?.requestId))return;
+  const reply=value=>{try{port.postMessage({requestId:message.requestId,...value});}catch{/* Shelf closed. */}};
+  if(active){reply({state:'blocked',code:'RESOURCE_BUSY'});return;}
   const controller=new AbortController(),{signal}=controller;
   active=controller;
   void (async()=>{
    await trustedStorage();
-   if(message?.check===true){await checkUploadDestination(message.source,signal);return {state:'completed'};}
-   if(typeof message?.ticket!=='string'||!/^[a-f\d-]{36}$/.test(message.ticket))
-    throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose a local file again.');
-   const file=await takeLocalUpload(message.ticket);
-   signal.throwIfAborted();
-   if(!file)throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose a local file again.');
-   // The existing write wrapper invalidates Explorer listings and filename search.
-   const source=normalizeTarget(message.source);
-   return fileApi.run('upload',{source,file,key:source.prefix+objectName(file.name)},
-    {signal,onProgress:progress=>reply({progress})});
-  })().then(result=>reply({
-   state:result.state,
-   ...(result.state!=='completed'?{error:result.error??(result.data?.recoveryKey?
-    'Upload not committed. Inspect the temporary object at '+result.data.recoveryKey+'.':undefined)}:{})
-  }),error=>reply({state:signal.aborted?'cancelled':'blocked',
-   error:signal.aborted?'Upload cancelled.':error.message})).finally(()=>{active=undefined;});
+   if(message.check===true||message.begin===true&&uploadId(message.batchId)&&!batch){
+    const checked=await checkUploadDestination(message.source,signal);
+    if(message.begin===true)batch={...checked,id:message.batchId,next:0};
+    return {state:'completed'};
+   }
+   return dispatchLocalUpload(message,batch,controller,progress=>reply({progress}));
+  })().then(result=>{
+   active=undefined;
+   reply(result);
+  },error=>{
+   active=undefined;
+   const code=uploadCode(error.code,'LOCAL_UPLOAD_UNAVAILABLE');
+   reply({state:signal.aborted?'cancelled':'blocked',code,retryable:message.check===true&&
+    (uploadReadTransient.has(code)||error instanceof TypeError),error:signal.aborted?'Upload cancelled.':error.message});
+  });
  });
 });
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
@@ -556,24 +674,33 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     const {action,recordId}=message;
     const run=async()=>{
       if(action==='cancel-all'){
+        const localJobs=[...activeLocalUploads.values()].map(job=>{job.controller.abort();return {state:'cancellation-requested'};});
         const remoteJobs=remote.cancelActive();
         const basicJobs=basic.cancelAll();
         const known=new Set(remoteJobs.map(job=>job.id));
         const retained=await queueHistory.activeJobs(Date.now()-120_000);
         // A previous extension worker may have stopped while its remote save was running.
-        const unfinished=retained.filter(job=>job.sourceApi==='r2'&&!known.has(job.sourceRecordId));
+        const unfinished=retained.filter(job=>job.sourceApi==='r2'&&job.saveMode!=='local-upload'&&!known.has(job.sourceRecordId));
         const interrupted=await Promise.allSettled(unfinished.map(job=>{
           const {account,connection,bucket,folder}=job.destination;
           return remote.cancel({provider:'cloudflare',accountId:account,connectionId:connection,bucketName:bucket,prefix:folder??''},job.sourceRecordId);
         }));
-        return {results:[...remoteJobs,...await basicJobs,...interrupted.map(result=>result.value??{state:'unsupported'})]};
+        return {results:[...localJobs,...remoteJobs,...await basicJobs,...interrupted.map(result=>result.value??{state:'unsupported'})]};
       }
       if(action==='clear')return queueHistory.clearJobs();
-      if(!['cancel','retry','dismiss'].includes(action)||typeof recordId!=='string'||recordId.length>2200)
+      if(!['cancel','retry','dismiss','reconcile-upload'].includes(action)||typeof recordId!=='string'||recordId.length>2200)
         throw Error('QUEUE_INVALID_REQUEST');
       const job=await queueHistory.job(recordId);
       if(!job||job.acknowledged)throw Error('QUEUE_JOB_UNAVAILABLE');
       if(action==='dismiss')return queueHistory.acknowledge(recordId);
+      if(action==='reconcile-upload'){
+        if(job.saveMode!=='local-upload'||activeLocalUploads.has(job.sourceRecordId))throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
+        const stored=await current.readRemoteResult(job.sourceRecordId);
+        if(!stored?.localUpload)throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
+        const upload=stored.localUpload;
+        const receipt=await reconcileLocalUpload(upload,localUploadClaimKey(upload.source,upload.key));
+        return {state:receipt?'verified':'uncertain'};
+      }
       if(action==='retry'){
         if(!job.terminal||!['cancelled','failed'].includes(job.status)||job.retryExpiresAt<=Date.now())
           throw Error('QUEUE_RETRY_UNAVAILABLE');
@@ -585,6 +712,9 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
       }
       if(job.terminal||!job.cancellable)throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
       if(job.sourceApi?.startsWith('basic:'))return basic.cancel(job.provider,job.sourceRecordId);
+      const local=activeLocalUploads.get(job.sourceRecordId);
+      if(local){local.controller.abort();return {state:'cancellation-requested'};}
+      if(job.saveMode==='local-upload')throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
       if(job.sourceApi==='r2'&&job.destination){
         const {account,connection,bucket,folder}=job.destination;
         const target={provider:'cloudflare',connectionId:connection,accountId:account,bucketName:bucket,prefix:folder??''};

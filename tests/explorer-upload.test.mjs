@@ -64,3 +64,37 @@ test('skipped conflicts and pre-dispatch cancellation perform no write',async()=
   assert.equal(await objects.get(key).text(),'original');
   assert.deepEqual(requests,[]);
 });
+
+test('local selection planning preserves Unicode paths, duplicate basenames, zero-byte files and bounds',async()=>{
+  const {localUploadKey,planLocalUpload,maximumUploadFiles}=await import('../src/chrome/local-upload-plan.mjs');
+  const file=(path,value='')=>Object.defineProperty(new File([value],path.split('/').at(-1)),'webkitRelativePath',{value:path});
+  const files=[file('旅行 2026/one/report.txt','one'),file('旅行 2026/two/report.txt')];
+  const plan=await planLocalUpload({source,files,mode:'folder'});
+  assert.equal(plan.total,2);
+  assert.deepEqual(files.map(item=>localUploadKey(source,item,item.webkitRelativePath,'folder')),
+    ['projects/旅行 2026/one/report.txt','projects/旅行 2026/two/report.txt']);
+  assert.equal(localUploadKey(source,new File([],'one file.txt')),'projects/one file.txt');
+  for(const path of ['../outside.txt','chosen//name.txt','/absolute.txt','chosen/.redown/../bad.txt','root/back\\slash.txt','root/'+ '旅'.repeat(343)+'.bin'])
+    await assert.rejects(planLocalUpload({source,files:[file(path)],mode:'folder'}),{code:'UPLOAD_PATH_INVALID'});
+  await assert.rejects(planLocalUpload({source,files:[files[0],files[0]],mode:'folder'}),{code:'UPLOAD_DUPLICATE_PATH'});
+  await assert.rejects(planLocalUpload({source,files:{length:maximumUploadFiles+1},mode:'folder'}),{code:'UPLOAD_BATCH_LIMIT'});
+  const many=Array.from({length:400},(_,index)=>file('chosen/sub/'+index));
+  let yields=0;
+  await planLocalUpload({source,files:many,mode:'folder',yieldBatch:async()=>{yields++;}});
+  assert.equal(yields,3);
+  await assert.rejects(planLocalUpload({source,files:many,mode:'folder',signal:AbortSignal.abort()}),{name:'AbortError'});
+  assert.equal((await planLocalUpload({source,files:[],mode:'folder'})).total,0);
+});
+
+test('an interrupted local claim fences the exact path across requests and can only be released by its owner',async()=>{
+  await import('fake-indexeddb/auto');
+  const {claimLocalUpload,releaseLocalUpload}=await import('../src/chrome/local-upload-files.mjs');
+  const [first,second]=await Promise.all([claimLocalUpload('path',{id:'owner'}),claimLocalUpload('path',{id:'other'})]);
+  assert.equal(first,undefined);
+  assert.deepEqual(second,{id:'owner'});
+  await releaseLocalUpload('path','other');
+  assert.deepEqual(await claimLocalUpload('path',{id:'other'}),{id:'owner'});
+  await releaseLocalUpload('path','owner');
+  assert.equal(await claimLocalUpload('path',{id:'other'}),undefined);
+  await releaseLocalUpload('path','other');
+});

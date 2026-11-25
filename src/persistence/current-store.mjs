@@ -312,6 +312,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
           destination:value.destination,receipt:value.receipt,proofKind:value.proofKind,durationMs:value.durationMs,remotePending:value.remotePending===true||undefined,
           timings:value.timings,stage:value.stage,bytes:value.bytes,historyContext:value.historyContext??previous?.historyContext,
           attemptedFilename:value.attemptedFilename??previous?.attemptedFilename,saveMode:value.saveMode??previous?.saveMode,
+          ...((value.localUpload??previous?.localUpload)?{localUpload:value.localUpload??previous.localUpload}:{}),
           ...(value.kind==='screenshot-to-cloud'?{screenshot:value.screenshot}:{}),at:previous?.at??updatedAt,updatedAt};
         let priorTime=verifiedSaveTime(previous);
         const verified=hasVerifiedSave(row);
