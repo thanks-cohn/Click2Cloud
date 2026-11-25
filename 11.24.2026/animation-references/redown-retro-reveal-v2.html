@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>002 — ReDown Retro Reveal v2</title>
+<style>
+body{background:#171319;color:#eee;font:16px system-ui;max-width:650px;margin:60px auto;padding:20px}a{color:#c58aff}p{color:#bbb}
+.stage{background:#080808;border-radius:12px;height:215px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:16px}
+#reward{width:100%;max-width:390px;position:relative;perspective:650px}
+#close{position:absolute;right:0;top:-10px;background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;z-index:5}
+.controls{display:flex;justify-content:center;gap:10px;padding:12px;flex-wrap:wrap}
+select,button{background:transparent;color:inherit;border:1px solid #888;border-radius:8px;padding:8px}option{background:#171319;color:#eee}button{cursor:pointer}
+</style></head><body>
+<a href="../">← ani-lab</a><h1>002 — ReDown Retro Reveal: Console Era</h1><p>Approved Console Era v2 · flat SUCCESS! · 10-second console-inspired reveal.</p>
+<div class="stage"><div id="reward">
+<button id="close" aria-label="Dismiss">×</button>
+<svg viewBox="0 0 365 112" width="100%" style="overflow:visible" role="img" aria-label="ReDown SUCCESS!">
+<g id="logo">
+<path d="M8 24 L65 6 L87 21 L30 39Z" fill="#ffd600"/>
+<path d="M8 24 L30 39 V107 L8 93Z" fill="#0800b8"/>
+<path d="M50 74 L76 102 L55 94 L39 73Z" fill="#0800b8"/>
+<path d="M30 39 L87 21 L99 32 V52 L78 73 L99 96 L76 103 L50 74 V101 L30 107Z M50 49 L72 42 L80 49 V60 L50 70Z" fill="#f50912" fill-rule="evenodd"/>
+<path d="M72 42 L80 49 V60 L65 51 V44Z" fill="#0800b8"/>
+<path d="M50 58 L65 51 L80 60 L50 70Z" fill="#ffd600"/>
+</g>
+<g transform="translate(112,15)"><text id="success" x="0" y="42" textLength="235" lengthAdjust="spacingAndGlyphs" font-family="Arial Black, Impact, Arial, sans-serif" font-weight="1000" font-size="43" fill="#ffe097">SUCCESS!</text></g>
+<g id="providerTag"><rect id="highlight" x="112" y="77" width="91" height="25" rx="2" fill="#ffe097"/><text id="name" x="157.5" y="94" fill="#171717" font-size="13" font-weight="bold" text-anchor="middle">Dropbox</text></g>
+</svg>
+<div style="height:2px;background:#343434;margin-top:8px"><div id="timer" style="height:2px;background:#ffe097;transform-origin:left"></div></div>
+</div></div>
+<div class="controls"><select id="provider" aria-label="Provider"><option>Dropbox</option><option>Google Drive</option><option>OneDrive</option><option>Cloudflare R2</option></select><button id="replay">↻ Replay startup</button></div>
+<script>
+const reward=document.getElementById('reward'),logo=document.getElementById('logo'),word=document.getElementById('success'),tag=document.getElementById('providerTag'),name=document.getElementById('name'),provider=document.getElementById('provider'),highlight=document.getElementById('highlight'),timer=document.getElementById('timer');
+let animations=[];
+function anim(el,frames,opts){const a=el.animate(frames,opts);animations.push(a);return a}
+function play(){
+animations.forEach(a=>a.cancel());animations=[];
+reward.style.visibility='visible';
+const palettes={'Dropbox':['#ffe097',91],'Google Drive':['#b9ee71',115],'OneDrive':['#71caff',85],'Cloudflare R2':['#ffb85d',125]};
+const [color,width]=palettes[provider.value];
+name.textContent=provider.value;name.setAttribute('x',112+width/2);highlight.setAttribute('width',width);highlight.setAttribute('fill',color);
+logo.style.transformBox='fill-box';logo.style.transformOrigin='center';
+word.style.transformBox='fill-box';word.style.transformOrigin='center';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+tag.style.transformBox='fill-box';tag.style.transformOrigin='left center';
+if(!reduced){
+anim(logo,[{opacity:0,transform:'perspective(500px) rotateY(-85deg) rotateZ(-28deg) scale(.3)'},{opacity:1,transform:'perspective(500px) rotateY(-55deg) rotateZ(-12deg) scale(.8)',offset:.35},{opacity:1,transform:'perspective(500px) rotateY(8deg) rotateZ(2deg) scale(1.06)',offset:.85},{opacity:1,transform:'perspective(500px) rotateY(0deg) rotateZ(0deg) scale(1)'}],{duration:900,fill:'both',easing:'cubic-bezier(.2,.65,.25,1)'});
+anim(word,[{opacity:0,transform:'scale(.82)',letterSpacing:'3px'},{opacity:.4,transform:'scale(.94)',letterSpacing:'1px',offset:.35},{opacity:1,transform:'scale(1)',letterSpacing:'0px'}],{delay:650,duration:650,fill:'both',easing:'ease-out'});
+anim(tag,[{opacity:0,clipPath:'inset(0 100% 0 0)'},{opacity:1,clipPath:'inset(0 0 0 0)'}],{delay:1250,duration:240,fill:'both'});
+}
+anim(timer,[{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:10000,fill:'forwards'});
+const end=anim(reward,[{opacity:1},{opacity:0}],{delay:reduced?10000:9200,duration:reduced?0:800,fill:'forwards',easing:'ease-in-out'});
+end.onfinish=()=>reward.style.visibility='hidden';
+}
+document.getElementById('close').onclick=()=>{animations.forEach(a=>a.cancel());reward.style.visibility='hidden'};
+document.getElementById('replay').onclick=play;provider.onchange=play;play();
+</script></body></html>
