@@ -1,6 +1,6 @@
-# Next Codex request — November 24, 2026
+# REDOWN 0.3.29 — Visual Refinement & Default Experience
 
-Follow-up requirements, separate from the authoritative 0.3.28 implementation specification.
+Authoritative follow-up specification for 0.3.29. Work exclusively on codex/redown-0329-visual-refinement, branched from codex/redown-0328-history-consolidation at 6556f59e13928ef9ddb1b0b5c2376645804ff37d. Read repository instructions first. Preserve 0.3.28 functionality and implement only these follow-up requirements. Keep Default Screenshots card untouched.
 
 ## Remotes — Clean first-time experience
 
@@ -32,10 +32,10 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 
 ## Cloudflare History cards — Media layout and actions
 
-- Keep the existing provider/destination path line (e.g. Cloudflare R2 · redown / screenshots/Screenshot-75023fbd.png) inside the expandable Details section. Do not move it beneath the filename or duplicate it outside Details. Preserve actual path data and wrap long paths without overflow. Place Media directly beneath the filename/header area.
+- Move the existing provider/destination path line directly beneath the filename, outside Details, on the left. Preserve actual path data; wrap long paths without overflow. Media follows the compact header.
 - Keep Media expanded by default according to the Cloudflare image preview preference. Clicking the image opens the existing regular Preview. Remove the separate Preview button; preserve accessible keyboard activation.
 - Place Download and GO TO directly underneath the image in one action row, Download aligned far left, GO TO far right, flexible space between. Reuse existing actions and eligibility; do not fabricate support or duplicate buttons. Preserve responsiveness and theme compatibility.
-- Public URLs and Details remain independent sections; Details stays below Public URLs and is collapsed by default. Media expansion must not expand Details or expose its destination path.
+- Public URLs and Details remain independent sections; Details stays below Public URLs and is collapsed by default. Media expansion must not expand Details; Location remains independently visible in the header.
 - Error is an independent expandable section when applicable, collapsed by default. Preserve truthful failure/status indication and actionable error details; do not expand Error automatically as a side effect of image expansion. Do not show empty Error sections for successful entries.
 - Preserve existing provider functionality, retained images, verification, receipts, navigation, lazy loading and memory safeguards. Audit actual card layout before editing.
 
@@ -74,7 +74,7 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 
 - Automatically dismiss the successful-save footer notification after 10 seconds, including the old “Saved · Chrome menu acknowledged · External backup unavailable” message and its approved shortened replacement “Saved · Chrome menu acknowledged”. User reports the old message remained visible for 30 minutes with no dismissal control.
 - Audit the actual footer/status rendering path as well as the toast engine. Do not assume footer messages already use the toast expiry mechanism. Clear the text and any notification-specific reserved space, preserving normal footer controls.
-- No X button or manual dismissal required. Ensure expiry survives rerenders, navigation, hover, focus changes, theme switches and Shelf reopening; use an absolute expiry timestamp or equivalent robust mechanism. Do not resurrect expired notifications or let stale timers dismiss a newer notification. Avoid unnecessary timers and clean them up on disposal.
+- Include a small far-right X for immediate manual dismissal. Ensure expiry survives rerenders, navigation, hover, focus changes, theme switches and Shelf reopening; use an absolute expiry timestamp or equivalent robust mechanism. Do not resurrect expired notifications or let stale timers dismiss a newer notification. Avoid unnecessary timers and clean them up on disposal.
 - Preserve genuine save status, receipts, backup diagnostics and actionable recovery information. Do not clear live job progress or persistent configuration errors as though they were transient success notifications.
 - Test ordinary success, rapid consecutive saves, duplicate events, background/foreground transitions, navigation and restart/reopen behavior. Verify no successful-save footer notification remains visible past its 10-second lifetime under normal active rendering.
 
@@ -83,7 +83,7 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Fix the persistent footer message “Reconnect to browse. Saved locations are preserved.” reported to follow the user across tabs with no way to dismiss it.
 - Treat this footer message as transient, scoped to the Files/Explorer browsing context that produced it. Dismiss within 10 seconds or immediately on leaving that context, whichever comes first. Do not resurrect it when switching tabs, themes, rerendering or reopening Shelf. Do not continually regenerate it merely because authentication remains disconnected.
 - Preserve the actual disconnected state, existing Log In/Reconnect controls, saved locations and actionable authentication recovery in the relevant view. Do not remove necessary recovery or mask failures. Distinguish persistent contextual state from transient footer messages.
-- Audit shared footer emitters for equivalent stale cross-tab messages. Apply scope and expiry to transient messages without clearing genuine live progress or required contextual recovery controls. Keep no-X design and remove notification-only reserved space when dismissed. Test navigation, reconnect, logout, first use, repeated renders and new genuine browsing attempts.
+- Audit shared footer emitters for equivalent stale cross-tab messages. Apply scope and expiry to transient messages without clearing genuine live progress or required contextual recovery controls. Keep compact manual X and remove notification-only reserved space when dismissed. Test navigation, reconnect, logout, first use, repeated renders and new genuine browsing attempts.
 
 ## Shelf footer — Restore compact manual dismissal (latest override)
 
@@ -96,12 +96,12 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Authoritative runnable visual reference: `11.24.2026/animation-references/redown-retro-reveal-v2.html` (also preserved in thanks-cohn/ani-lab at redown-retro-reveal-v2/index.html, commit bb512813259e785b9b48df1054dcc277e059a771). Preserve v1 separately; v2 is the approved motion.
 - Use a standalone floating geometric 3D R at left, no enclosing icon square. Flat bold golden SUCCESS! at right, no extrusion, bevel, wave or shadow. Provider name directly beneath in tightly fitted contrasting highlight; no “at” or Chrome heading. Preserve reference layout and provider palette.
 - Timing: R emerges and rotates/settles over 900 ms; SUCCESS! fades/scales in starting 650 ms for 650 ms; provider reveal begins at 1250 ms for 240 ms; hold stationary; fade entire achievement from 9200 to 10000 ms. Thin 10-second countdown and small far-right X; immediate dismissal, no resurrection. Support reduced motion.
-- Reference currently contains an SVG approximation of the approved R; use the owner's final transparent artwork when supplied. Keep it locally bundled, preserve proportions and alpha. Do not require an external URL or replace it with a different design. If artwork not supplied, retain reference approximation and report this limitation.
+- Reference HTML contains an SVG approximation; replace it in production with the uploaded final artwork at the exact path below. Keep it locally bundled, preserve proportions and alpha. Do not require an external URL or replace it with a different design. If artwork not supplied, retain reference approximation and report this limitation.
 - Reuse existing success event identity and notification lifecycle, only show for genuinely successful saves (never falsely upgrade uncertain/failed saves), dedupe, handle concurrent saves, avoid stale timers. Scope custom in-browser rendering to supported surfaces with existing permissions, no broad new permissions merely for decoration. Chrome native notification heading cannot be redesigned; retain suitable fallback on unsupported pages or unavailable surfaces. Do not double-notify. Preserve existing footer message cleanup, X and timer requirements independently. No external libraries/fonts, WebGL, audio, or saving-engine rewrite. Treat this as a visual integration; test actual Chrome surfaces, reduced motion, all providers, narrow viewports, dismissal and expiry.
 
 ### Final approved R artwork (supersedes placeholder selection)
 - Owner supplied final transparent RGBA PNG: `redown-console-r.png`, 1261 × 1247, original 989488 bytes, SHA-256 `0e10d0bea5f3513892256c240374b29301f6dcc0be2c9bf8e62e2e4a5ad2401d`. Red front, deep blue side and inner wall, yellow top and inner shelf. No enclosing square.
-- Intended reference asset path: `11.24.2026/animation-references/redown-console-r.png`; ani-lab counterpart `redown-retro-reveal-v2/redown-console-r.png`. Original PNG has been prepared for upload, but binary GitHub upload remains outstanding. Do not claim it is already in the repository. Once present, use the exact artwork instead of the SVG approximation; preserve the approved v2 animation timing and flat SUCCESS! lettering. A locally bundled optimized derivative may be used for production if visually faithful and alpha is preserved; keep the original reference unchanged.
+- Final artwork is uploaded in this branch at `11.24.2026/animation-references/approved-artwork/redown-console-r.png`. Use this exact PNG instead of the SVG approximation; preserve approved v2 animation timing and flat SUCCESS! lettering. A locally bundled optimized derivative may be used for production if visually faithful and alpha is preserved; keep original reference unchanged.
 
 ## History — Text search regression
 
@@ -109,3 +109,9 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Make case-insensitive text and numeric searches work for existing supported searchable fields, including filename, provider, destination path and available website/source metadata. Support partial filename/word matches and mixed alphanumeric queries without requiring a number. Preserve existing date/range/provider filters and searchable metadata/privacy boundaries.
 - Search the entire retained archive within active filters, not merely the currently rendered page. Clearing search restores the unfiltered results within those filters. Preserve responsive full-width field, virtualization, bounded memory and existing search responsiveness; avoid network requests or loading image payloads merely to search.
 - Add regression tests for alphabetic, numeric, mixed, case-insensitive, partial and no-match queries across Cloudflare and Basic entries, old records and newly reconciled records. Do not modify saving engines or delete/rebuild historical data destructively.
+
+- Exact owner-reported reproduction: History → Find saved files → type `screen` → UI displays `No saves in this display range.` despite expected screenshot matches. Test `screen`, `Screenshot`, `screenshot-75` and numeric controls against known retained screenshot records in the same display range. Distinguish no matching search results from an actually empty display range; preserve real range filtering. Root cause unverified.
+
+## Release verification
+- Failed status occupies the same right-aligned header position beneath timestamp as Verified; Error appears at bottom only when applicable, collapsed by default. Media if retained and eligible; hide unavailable cloud actions. Public URLs and Details remain collapsed independently by default.
+- Audit relevant implementations before edits. Keep saving engines, right-click, authentication, receipts, historical records, screenshots, shortcuts, all themes and Aesthetic API intact. Run focused and existing regression tests; distinguish real Chrome tests from fixtures. Update version to 0.3.29, build, commit and push only this branch. Report actual test results and limitations.
