@@ -42,6 +42,8 @@ are `google`, `onedrive`, and `dropbox`.
 - `saves.start`, `saves.getAttempt`
 - `history.list`, `history.get`, `history.latestOutcome`, `history.delete`,
   `history.clear`, `counter.get`
+- `history.readImagePreview` and `history.cancelImagePreview` for bounded,
+  receipt-bound reads from the saved provider
 - `settings.get`, `settings.update` for History page size and diagnostics retention
 - `diagnostics.list`, `diagnostics.getForAttempt`, `diagnostics.clear`,
   `diagnostics.exportZip`
@@ -51,6 +53,14 @@ The host's File API 3+1.1, tabs and Cloudflare History keep their existing
 ownership. A previously installed standalone Basic extension keeps its own
 storage. Diagnostics exports are local and capped at 16 MiB. Review them
 before sharing because sanitized URLs can still include private paths.
+
+Dropbox's History repair uses the optional `previewId` in
+`auth.reconnect` only after a user chooses **Allow Dropbox image previews**.
+The confirmed receipt binds the OAuth request to its saved account and
+namespace. The existing save scopes stay in the request and the flow adds
+the registration's `files.content.read` scope. The new grant is committed
+only after identity and scope verification. The action leaves pending
+saves alone and retries only the selected preview.
 
 A native click uses the selected image, media, or link URL. Chrome's existing
 site access and the source server's CORS policy determine whether the extension

@@ -1108,3 +1108,22 @@ Closing the connection or choosing Cancel requests abort. Ambiguous writes keep
 their recovery key and are never replayed. `tests/explorer-upload.test.mjs`
 calls the existing File API directly, and the release browser fixture exercises
 the picker, cancellation, and refresh through the toolbar.
+
+## REDOWN 0.3.30 destination discovery and recovery
+
+The existing `commitConfigChange` and `previewConfigChange` validate the
+requested cloud target against the menu inventory. If the inventory lacks an
+authorized Cloudflare entry, the exact connected account, bucket and prefix
+are checked through the existing R2 File API. A nonroot prefix needs a
+matching object or folder marker. This read does not prepare a Worker or
+write configuration.
+
+A confirmed editor Save uses the existing `prepareModes` contract. The
+canonical revision and idempotency checks precede configuration persistence.
+For visible changed targets, existing provisioning authorization and
+`recoverCloudflareDestination` govern scoped readiness and verification.
+The registrar acknowledgement and route verification determine whether a
+destination is ready. A new right-click is still required to save a file.
+An exhausted recoverable Worker failure can reveal **Repair Me**, which
+uses the existing authorized recovery and native reconciliation path.
+Evidence is recorded in the [0.3.30 verification report](../../11.25.2026/REDOWN_0330_VERIFICATION.md).
