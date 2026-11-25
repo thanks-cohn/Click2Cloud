@@ -5,6 +5,12 @@ export function previewType(objectKey){
   const types={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',avif:'image/avif',mp4:'video/mp4',webm:'video/webm',mp3:'audio/mpeg',ogg:'audio/ogg',wav:'audio/wav',pdf:'application/pdf',txt:'text/plain',json:'text/plain',md:'text/plain',csv:'text/plain'};
   return types[ext]||(['markdown','xml','html','htm','js','mjs','ts','tsx','jsx','css','yaml','yml','py','rs','go','java','c','cpp','h','sh','bat','ps1','log'].includes(ext)?'text/plain':ext==='svg'?'image/svg+xml':null);
 }
+const textNames=new Set(['.env','.gitignore','.gitattributes','.editorconfig','.npmrc','dockerfile','makefile','readme','license']);
+export function isTextPreview(objectKey){
+  const leaf=objectKey.split('/').at(-1).toLowerCase();
+  return textNames.has(leaf)||previewType(leaf)==='text/plain'||
+    /\.(svg|jsonl|ndjson|toml|ini|cfg|conf|properties|sql|tsv|rst|rb|php|cs|kt|lua|fish|zsh|bash|diff|patch|cmd|env)$/.test(leaf);
+}
 export function createR2Adapter({send=message=>chrome.runtime.sendMessage(message),http=globalThis.RedownCloudflareApi}={}) {
   async function message(type,input={},options={}) {
     options.signal?.throwIfAborted();
@@ -269,15 +275,44 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         return {bytes:Array.from(bytes),offset,etag:currentEtag,total:Number(range[3]),done:offset+count===Number(range[3])};
       }finally{if(!response.body?.locked)await response.body?.cancel();}
     },
-    async readStream({source,key:k},{signal,onChunk,requestTimeoutMs}={}) {
+    async readStream({source,key:k,maxBytes,etag,expectedSize},{signal,onChunk,requestTimeoutMs}={}) {
       if(typeof onChunk!=='function')throw Error('A streaming sink is required.');
-      const response=await http.request(base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs});
-      if(!response.ok||!response.body){await response.body?.cancel();throw Object.assign(Error('Object read failed (HTTP '+response.status+').'),{code:'HTTP_'+response.status});}
-      const reader=response.body.getReader();let size=0;
-      try{while(true){signal?.throwIfAborted();const part=await reader.read();if(part.done)break;await onChunk(part.value);size+=part.value.length;}}finally{await reader.cancel();}
-      // Initialize the sink for empty objects too.
-      if(size===0)await onChunk(new Uint8Array());
-      return {size,status:response.status};
+      const capped=maxBytes!==undefined;
+      if(capped&&(!Number.isSafeInteger(maxBytes)||maxBytes<1))throw readError('INVALID_RANGE');
+      const wanted=etag===undefined?null:objectETag(etag);
+      const response=await http.request(base(location(source))+'/'+key(k).split('/').map(encodeURIComponent).join('/'),{
+        signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,
+        ...(wanted?{headers:{'If-Match':'"'+wanted+'"'}}:{})
+      });
+      if(!response.ok||!response.body){
+        await response.body?.cancel();
+        throw readError(response.status===412?'OBJECT_CHANGED':'HTTP_'+response.status);
+      }
+      const reader=response.body.getReader();
+      let size=0, ended=false, extra=false;
+      try{
+        if(wanted&&objectETag(response.headers.get('etag'))!==wanted)throw readError('OBJECT_CHANGED');
+        const contentLength=response.headers.get('content-length');
+        const declared=contentLength!==null&&/^\d+$/.test(contentLength)?Number(contentLength):null;
+        if(expectedSize!==undefined&&declared!==null&&declared!==expectedSize)throw readError('OBJECT_CHANGED');
+        while(!capped||size<maxBytes){
+          signal?.throwIfAborted();
+          const part=await reader.read();
+          signal?.throwIfAborted();
+          if(part.done){ended=true;break;}
+          const value=capped?part.value.subarray(0,maxBytes-size):part.value;
+          extra=part.value.length>value.length;
+          await onChunk(value);
+          size+=value.length;
+        }
+        if(ended&&expectedSize!==undefined&&size!==expectedSize)throw readError('OBJECT_CHANGED');
+        if(size===0)await onChunk(new Uint8Array());
+        if(!capped)return {size,status:response.status};
+        const total=expectedSize??declared;
+        if(total!==null&&(size>total||extra&&size>=total))throw readError('OBJECT_CHANGED');
+        const truncated=extra||(total===null?!ended:total>size);
+        return {size,status:response.status,truncated};
+      }finally{await reader.cancel().catch(()=>{});}
     },
     async preview({source,entry:e},options={}) {
       if(e.folder)throw Error('Choose a file to preview.');

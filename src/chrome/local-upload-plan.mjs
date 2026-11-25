@@ -7,15 +7,18 @@ export const uploadId = value => typeof value === 'string' && /^[a-f\d]{8}(?:-[a
 export const uploadError = (code, message) => Object.assign(Error(message), {code});
 
 export function localUploadKey(source, file, relativePath = file.name, mode = 'files') {
-  const target = normalizeTarget(source);
+  return validateKey(normalizeTarget(source),file,relativePath,mode);
+}
+function validateKey(target, file, relativePath, mode) {
   if (target.provider !== 'cloudflare' || target.connectionId !== 'cloudflare:' + target.accountId)
     throw uploadError('SCOPE_UNAUTHORIZED', 'Select an authorized Cloudflare R2 folder.');
   if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > maximumObjectBytes)
     throw uploadError('UPLOAD_FILE_SIZE', 'Each upload must fit the Cloudflare single-file limit.');
   const parts = typeof relativePath === 'string' ? relativePath.split('/') : [];
-  if (!['files','folder'].includes(mode) || (mode==='folder' ? parts.length<2 : parts.length!==1) ||
+  if (!['files','folder','mixed'].includes(mode) || !parts.length ||
+    (mode==='folder' && parts.length<2) || (mode==='files' && parts.length!==1) ||
     parts.at(-1)!==file.name || relativePath.isWellFormed?.()===false ||
-    /[\u0000-\u001f\u007f]/.test(relativePath) || parts[0]==='.redown-beta-uploads')
+    /[\u0000-\u001f\u007f]/.test(relativePath) || parts.includes('.redown-beta-uploads'))
     throw uploadError('UPLOAD_PATH_INVALID', 'Upload contains a local path this Cloudflare connection cannot preserve.');
   try {
     for (const part of parts) name(part);
@@ -27,18 +30,20 @@ export function localUploadKey(source, file, relativePath = file.name, mode = 'f
 
 export async function planLocalUpload({source, files, mode, signal, yieldBatch = () => new Promise(resolve=>setTimeout(resolve,0))}) {
   const target = normalizeTarget(source);
-  if (files.length > maximumUploadFiles)
+  if (!Number.isSafeInteger(files?.length) || files.length<0 || files.length > maximumUploadFiles)
     throw uploadError('UPLOAD_BATCH_LIMIT', 'Select up to 10,000 files per upload.');
-  const paths = new Set();
+  const paths = new Set(), items = [];
   for (let index = 0; index < files.length; index++) {
     signal?.throwIfAborted();
     const file = files[index];
-    const path = localUploadKey(target,file,mode==='folder'?file.webkitRelativePath:file.name,mode);
+    const relativePath = file.relativePath ?? (mode==='folder'?file.webkitRelativePath:file.name);
+    const path = validateKey(target,file,relativePath,mode);
     if (paths.has(path))
       throw uploadError('UPLOAD_DUPLICATE_PATH', 'More than one selected file has the same destination path. No files were uploaded.');
     paths.add(path);
+    items.push({relativePath, name:file.name, size:file.size, key:path});
     if ((index+1)%128===0) await yieldBatch();
   }
   signal?.throwIfAborted();
-  return {target, mode, total:files.length};
+  return {target, mode, total:files.length, items};
 }

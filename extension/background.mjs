@@ -20,7 +20,7 @@ import {createVisualFeedbackPreference} from '../src/aesthetic/visual-feedback.m
 import {createProjectileFeedback} from '../src/aesthetic/projectile.mjs';
 import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
-import {claimLocalUpload,localUploadPort,releaseLocalUpload,takeLocalUpload} from '../src/chrome/local-upload-files.mjs';
+import {localUploadPort,uploadBatchJournal} from '../src/chrome/local-upload-files.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {operationIdentity} from '../src/core/boundary-observation.mjs';
@@ -40,14 +40,16 @@ import {createAgentDebugApi} from '../src/glaciaring/agent-api.mjs';
 import {createDebugHost} from '../src/chrome/debug-host.mjs';
 import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createVerifiedBucket} from '../src/cloudflare/inventory.mjs';
-import {createFileTransport,fileOperationTarget} from '../src/cloudflare/file-transport.mjs';
+import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
 import {createR2PublicDomains} from '../src/cloudflare/r2-public-domains.mjs';
 import {createRemoteTransport,preparedDestination,previousWorkerDigests} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
-import {localUploadKey,maximumUploadFiles,uploadError,uploadId} from '../src/chrome/local-upload-plan.mjs';
-import {remoteDestination} from '../src/cloudflare/wire.mjs';
+import {uploadError,uploadId} from '../src/chrome/local-upload-plan.mjs';
+import {createLocalUploadService,uploadCode} from '../src/chrome/local-upload-service.mjs';
+import {createLocalUploadBatches} from '../src/chrome/local-upload-batch.mjs';
+import {downloadUploadReceipt,uploadReceiptGate} from '../src/chrome/local-upload-receipt-download.mjs';
 import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-identity.mjs';
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
 let storageReady;
@@ -129,7 +131,7 @@ const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBuc
 
 function onVerifiedCurrent(row){
  const transmission=row.kind!=='screenshot-to-cloud'||row.state==='confirmed';
- if(row.kind!=='screenshot-to-cloud')saveNotice.saved('cloudflare','cloudflare:'+row.operationId);
+ if(row.kind!=='screenshot-to-cloud'&&row.saveMode!=='local-upload')saveNotice.saved('cloudflare','cloudflare:'+row.operationId);
  return dailyBadge.recordVerified(row,{transmission});
 }
 async function recordRemote(value){
@@ -156,50 +158,8 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const uploadScopes=['workers-r2.read','workers-r2.write','workers-r2-bucket-item.read','workers-r2-bucket-item.write'];
-async function checkUploadDestination(source,signal){
- const target=normalizeTarget(source);
- assertConnected();
- const auth=await oauth.authority();
- signal?.throwIfAborted();
- if(target.provider!=='cloudflare'||target.connectionId!=='cloudflare:'+target.accountId||
-    !auth.accounts.some(account=>account.id===target.accountId))
-  throw uploadError('SCOPE_UNAUTHORIZED','Select an authorized Cloudflare R2 folder.');
- if(!uploadScopes.every(scope=>auth.scopes?.includes(scope)))
-  throw uploadError('INSUFFICIENT_SCOPE','Reconnect Cloudflare with R2 read and write access.');
- const plan=await provisioner.lookup(target);
- const readiness=preparedDestination(plan,target,BUILD_INFO.workerCodeDigest,previousWorkerDigests);
- if(!['READY','PREPARED'].includes(readiness.state))
-  throw uploadError(readiness.code,'This folder needs an authorized Cloudflare file connection.');
- const live=await remote.status(target);
- signal?.throwIfAborted();
- assertConnected();
- if(!['READY','PREPARED'].includes(live.state))
-  throw uploadError(live.code,'Cloudflare could not verify write access to this folder.');
- return {target,sessionId:auth.sessionId,stagingPrefix:(plan.prefixScope?plan.prefixScope+'/':'')+'.redown-beta-uploads/'};
-}
-async function runLocalUpload({source,file,key,uploadMode='files',localBinding},options){
- const {target,sessionId,stagingPrefix}=localBinding??await checkUploadDestination(source,options.signal);
- const relativePath=key?.slice(target.prefix.length)??file.name;
- if(key!==undefined&&!key.startsWith(target.prefix))throw uploadError('UPLOAD_PATH_INVALID','The upload path is outside its selected folder.');
- const destinationKey=localUploadKey(target,file,relativePath,uploadMode);
- options.signal?.throwIfAborted();
- const uploader=createClick2CloudFileApi({
-  send:async(message,{signal})=>{
-   signal?.throwIfAborted();assertConnected();
-   await localBinding?.beforeCommit?.();
-   signal?.throwIfAborted();assertConnected();
-   return executeFileMessage(message,{signal,expectedSession:sessionId});
-  },
-  http:{request:(path,request)=>{
-   assertConnected();
-   return oauth.request(path,{...request,expectedSession:sessionId,requiredScopes:uploadScopes});
-  },boundedFetch:fetch}
- });
- return uploader.run('upload',{source:target,key:destinationKey,file,stagingPrefix,conflict:uploadMode==='folder'?'skip':'keep'},options);
-}
 const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket','upload'].includes(op)),async run(operation,input={},options={}) {
-  if(operation==='upload')return runLocalUpload(input,options);
+  if(operation==='upload')return localUploadService.run(input,options);
   // Unconfigured Worker transport is blocked before staging any object bytes.
   if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
@@ -506,137 +466,101 @@ const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
 // Local File tickets and recovery metadata are available only to the trusted Shelf.
-const activeLocalUploads = new Map();
 const uploadReadTransient = new Set(['TRANSPORT_UNAVAILABLE','NETWORK_ERROR','WORKER_UNREACHABLE','WORKER_UNAVAILABLE','RESOURCE_BUSY']);
-const localUploadClaimKey = (source,key) => JSON.stringify([targetKey({...source,prefix:''}),key]);
-const uploadCode = (value, fallback) => /^[A-Z][A-Z0-9_]{1,79}$/.test(value??'') ? value : fallback;
-async function recordLocalUpload(job,state,code,receipt){
- const destination=remoteDestination(job.source);
- const row=await current.recordRemoteResult({kind:'save',operationId:job.id,saveMode:'local-upload',
-  state,code,destination,bytes:job.size,attemptedFilename:job.key.split('/').at(-1),
-  localUpload:job,receipt,proofKind:receipt?'staging-byte-readback-and-final-r2-head':undefined},{onVerified:onVerifiedCurrent});
- void accountQueueReceipt(currentReceipt,row);
- return row;
-}
-function uploadReceipt(job,result){
- const receipt=result?.receipt;
- if(result?.state!=='completed'||result.completed!==1||receipt?.operationId!==job.id||
-    receipt.size!==job.size||!receipt.etag||!receipt.version||typeof receipt.key!=='string')return null;
- const parent=job.key.slice(0,job.key.lastIndexOf('/')+1),leaf=job.key.slice(parent.length),dot=leaf.lastIndexOf('.');
- const alternate=parent+(dot>0?leaf.slice(0,dot):leaf)+'-'+job.id+(dot>0?leaf.slice(dot):'');
- if(receipt.key!==job.key&&(job.mode!=='files'||receipt.key!==alternate))return null;
- const expected=remoteDestination({...job.source,prefix:parent});
- const actual=receipt.destination;
- if(!actual||Object.keys(expected).some(field=>expected[field]!==actual[field]))return null;
- return receipt;
-}
-async function reconcileLocalUpload(job,claimKey){
- const saved=await current.readRemoteResult(job.id);
- if(saved?.state==='verified'&&saved.receipt){
-  await releaseLocalUpload(claimKey,job.id);
-  return saved.receipt;
- }
- if(saved&&['failed','blocked','cancelled'].includes(saved.state)){
-  await releaseLocalUpload(claimKey,job.id);
-  return null;
- }
- if(saved?.localUpload?.commitRequested===false){
-  await recordLocalUpload(job,'failed','LOCAL_UPLOAD_RESELECT_REQUIRED');
-  await releaseLocalUpload(claimKey,job.id);
-  return null;
- }
- const result=await remote.inspectOperation(job.workerTarget,job.id);
- const receipt=uploadReceipt(job,result);
- if(receipt){
-  await recordLocalUpload(job,'verified','LOCAL_UPLOAD_RECONCILED',receipt);
-  await releaseLocalUpload(claimKey,job.id);
- }
- return receipt;
-}
-async function dispatchLocalUpload({ticket,batchId,index,source},batch,controller,onProgress){
- const {signal}=controller;
- if(!batch||batch.id!==batchId||targetKey(batch.target)!==targetKey(normalizeTarget(source))||
-   !Number.isSafeInteger(index)||index!==batch.next||index>=maximumUploadFiles||!uploadId(ticket))
-  throw uploadError('UPLOAD_BATCH_INVALID','Choose the local files again in the intended folder.');
- if(activeLocalUploads.size>=2)
-  throw uploadError('RESOURCE_BUSY','Two local uploads are already running. Wait for one to finish.');
- activeLocalUploads.set(ticket,{controller,batchId});
- try{
-  const staged=await takeLocalUpload(ticket), binding=staged?.binding;
-  signal.throwIfAborted();
-  if(!binding||binding.batchId!==batchId||binding.index!==index||targetKey(binding.source)!==targetKey(batch.target))
-   throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose the local file again.');
-  assertConnected();
-  const auth=await oauth.authority();
-  if(auth.sessionId!==batch.sessionId||!auth.accounts.some(account=>account.id===batch.target.accountId)||
-    !uploadScopes.every(scope=>auth.scopes?.includes(scope)))
-   throw uploadError('AUTH_SESSION_CHANGED','Cloudflare authorization changed. Reconnect and select the remaining files again.');
-  signal.throwIfAborted();
-  const key=localUploadKey(batch.target,staged.file,binding.relativePath,binding.mode);
-  const parent=key.slice(0,key.lastIndexOf('/')+1),staging=batch.stagingPrefix+ticket+'/';
-  const job={id:ticket,batchId,index,source:batch.target,key,mode:binding.mode,size:staged.file.size,commitRequested:false,
-   workerTarget:fileOperationTarget({...batch.target,prefix:staging},{...batch.target,prefix:parent})};
-  const claimKey=localUploadClaimKey(batch.target,key);
-  const previous=await claimLocalUpload(claimKey,job);
-  if(previous){
-   const receipt=activeLocalUploads.has(previous.id)?null:await reconcileLocalUpload(previous,claimKey).catch(()=>null);
-   return {state:'uncertain',error:receipt?
-    'An earlier upload was verified. Review its saved object before selecting a replacement. This selection was not uploaded.':
-    'An earlier upload to this path may have committed. Inspect the destination before retrying.'};
+const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:provisioner.lookup,
+ checkPrepared:(plan,target)=>preparedDestination(plan,target,BUILD_INFO.workerCodeDigest,previousWorkerDigests),
+ remote,executeFileMessage,runFileUpload:(input,options)=>fileApi.run('upload',input,options),
+ current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
+});
+const batchReceiptPorts=new Map();
+const observeUploadEffect=(code,operationId)=>diagnostics.emit({stage:'chrome.local-upload',outcome:'failed',code,operationId});
+async function requestUploadReceipt(receipt,gate){
+ const result=await downloadUploadReceipt(chrome,receipt,gate,batchReceiptPorts.get(receipt.batchId));
+ if(result?.state==='download-requested'&&chrome.downloads.onChanged){
+  function changed(delta){
+   if(delta.id!==result.id||!['complete','interrupted'].includes(delta.state?.current))return;
+   chrome.downloads.onChanged.removeListener(changed);
+   clearTimeout(timer);
+   if(delta.state.current==='interrupted')observeUploadEffect('UPLOAD_RECEIPT_DOWNLOAD_FAILED',receipt.batchId);
   }
-  let outcome,recorded=false;
-  try{
-   await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
-   recorded=true;
-   batch.next++;
-   const beforeCommit=async()=>{
-    const checkpoint={...job,commitRequested:true};
-    await recordLocalUpload(checkpoint,'pending','LOCAL_UPLOAD_VERIFY_COMMIT');
-    job.commitRequested=true;
-   };
-   outcome=await fileApi.run('upload',{source:batch.target,file:staged.file,key,uploadMode:binding.mode,
-    localBinding:{...batch,beforeCommit}},{signal,onProgress,operationId:ticket});
-   const receipt=uploadReceipt(job,outcome.data);
-   if(receipt){
-    await recordLocalUpload(job,'verified','LOCAL_UPLOAD_VERIFIED',receipt);
-    await releaseLocalUpload(claimKey,ticket);
-    return {state:'completed',key:receipt.key};
-   }
-   const conflict=['FILE_CONFLICT','FILES_SKIPPED'].includes(outcome.data?.code);
-   const state=conflict?'failed':!job.commitRequested?(signal.aborted?'cancelled':'failed'):
-    ['uncertain','partial','completed','cancelled'].includes(outcome.state)?'uncertain':'failed';
-   const code=uploadCode(outcome.code??outcome.data?.code,state==='cancelled'?'LOCAL_UPLOAD_CANCELLED':'LOCAL_UPLOAD_'+state.toUpperCase());
-   await recordLocalUpload(job,state,code);
-   if(state!=='uncertain')await releaseLocalUpload(claimKey,ticket);
-   return {state,code,continue:conflict,error:conflict?'An existing Cloudflare object was left untouched.':
-    state==='cancelled'?'Upload cancelled.':outcome.error??(state==='uncertain'?'Cloudflare did not confirm the committed object. Inspect the destination before retrying.':undefined)};
-  }catch(error){
-   if(!recorded){await releaseLocalUpload(claimKey,ticket).catch(()=>{});throw error;}
-   return {state:'uncertain',error:'Cloudflare upload accounting was interrupted. Inspect the destination before retrying.'};
-  }
- }finally{activeLocalUploads.delete(ticket);}
+  const timer=setTimeout(()=>chrome.downloads.onChanged.removeListener(changed),30_000);
+  chrome.downloads.onChanged.addListener(changed);
+ }
+ return result;
 }
+const localUploadBatches=createLocalUploadBatches({
+ journal:uploadBatchJournal,checkDestination:localUploadService.checkDestination,
+ validatePlan:localUploadService.validatePlan,dispatch:localUploadService.dispatch,
+ reconcile:localUploadService.reconcile,notify:saveNotice.savedBatch,receiptEnabled:()=>uploadReceiptGate(chrome.storage.local),downloadReceipt:requestUploadReceipt,
+ observe:observeUploadEffect,
+ version:BUILD_INFO.extensionVersion
+});
 chrome.runtime.onConnect?.addListener(port=>{
  if(port.name!==localUploadPort)return;
  if(!appSenderDecision(chrome.runtime,port.sender).accepted){port.disconnect();return;}
- let active,batch;
- port.onDisconnect.addListener(()=>active?.abort());
+ const lease={};
+ let active,batchId,disconnected=false,receiptRequest,receiptBatch;
+ const sendLargeReceipt=payload=>new Promise((resolve,reject)=>{
+  const id=crypto.randomUUID();
+  const timer=setTimeout(()=>finish(Error('UPLOAD_RECEIPT_DOWNLOAD_UNACKNOWLEDGED')),25_000);
+  function finish(error,value){
+   clearTimeout(timer);
+   receiptRequest=undefined;
+   if(error)reject(error);else resolve(value);
+  }
+  receiptRequest={id,finish};
+  try{port.postMessage({receiptDownload:{...payload,id}});}catch(error){finish(error);}
+ });
+ function registerReceiptPort(id){
+  if(receiptBatch!==id&&batchReceiptPorts.get(receiptBatch)===sendLargeReceipt)batchReceiptPorts.delete(receiptBatch);
+  receiptBatch=id;
+  if(!batchReceiptPorts.has(id))batchReceiptPorts.set(id,sendLargeReceipt);
+ }
+ port.onDisconnect.addListener(()=>{
+  disconnected=true;
+  if(batchReceiptPorts.get(receiptBatch)===sendLargeReceipt)batchReceiptPorts.delete(receiptBatch);
+  receiptRequest?.finish(Error('UPLOAD_RECEIPT_SHELF_UNAVAILABLE'));
+  if(batchId)void localUploadBatches.stop(batchId,{detached:true},lease).catch(()=>{});
+  else active?.abort();
+ });
  port.onMessage.addListener(message=>{
+  if(message?.receiptAck){
+   const pending=receiptRequest;
+   if(message.receiptAck!==pending?.id)return;
+   if(message.state==='disabled')pending.finish(null,'disabled');
+   else if(message.state==='download-requested'&&Number.isInteger(message.downloadId))
+    pending.finish(null,{state:'download-requested',id:message.downloadId});
+   else pending.finish(Error('UPLOAD_RECEIPT_DOWNLOAD_FAILED'));
+   return;
+  }
   if(message?.ping===true)return;
   if(message?.cancel===true){active?.abort();return;}
   if(!uploadId(message?.requestId))return;
-  const reply=value=>{try{port.postMessage({requestId:message.requestId,...value});}catch{/* Shelf closed. */}};
+  const reply=value=>{if(!disconnected)try{port.postMessage({requestId:message.requestId,...value});}catch{}};
   if(active){reply({state:'blocked',code:'RESOURCE_BUSY'});return;}
   const controller=new AbortController(),{signal}=controller;
   active=controller;
   void (async()=>{
    await trustedStorage();
-   if(message.check===true||message.begin===true&&uploadId(message.batchId)&&!batch){
-    const checked=await checkUploadDestination(message.source,signal);
-    if(message.begin===true)batch={...checked,id:message.batchId,next:0};
-    return {state:'completed'};
+   if(message.check===true)return localUploadBatches.check(message.source,signal);
+   if(message.inspect===true)return localUploadBatches.inspect(message,signal);
+   if(message.reconcile===true&&uploadId(message.batchId)){
+    registerReceiptPort(message.batchId);
+    return localUploadBatches.reconcile(message,signal);
    }
-   return dispatchLocalUpload(message,batch,controller,progress=>reply({progress}));
+   if((message.begin===true||message.resume===true)&&!batchId&&!disconnected&&uploadId(message.batchId)){
+    batchId=message.batchId;
+    registerReceiptPort(batchId);
+    const windowId=port.sender.tab?.windowId??message.windowId;
+    return localUploadBatches[message.resume===true?'resume':'begin']({...message,origin:{windowId}},signal,lease);
+   }
+   if(!batchId||batchId!==message.batchId)
+    throw uploadError('UPLOAD_BATCH_INVALID','Choose the local files again in the intended folder.');
+   if(message.stop===true){
+    const batch=await localUploadBatches.stop(batchId,{code:message.code},lease);
+    return {state:'completed',batch};
+   }
+   return localUploadBatches.step(message,controller,progress=>reply({progress}),lease);
   })().then(result=>{
    active=undefined;
    reply(result);
@@ -648,6 +572,7 @@ chrome.runtime.onConnect?.addListener(port=>{
   });
  });
 });
+const activeTextReads=new Map();
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel===BASIC_CHANNEL){
@@ -674,7 +599,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     const {action,recordId}=message;
     const run=async()=>{
       if(action==='cancel-all'){
-        const localJobs=[...activeLocalUploads.values()].map(job=>{job.controller.abort();return {state:'cancellation-requested'};});
+        const localJobs=localUploadService.cancelAll();
         const remoteJobs=remote.cancelActive();
         const basicJobs=basic.cancelAll();
         const known=new Set(remoteJobs.map(job=>job.id));
@@ -694,11 +619,11 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
       if(!job||job.acknowledged)throw Error('QUEUE_JOB_UNAVAILABLE');
       if(action==='dismiss')return queueHistory.acknowledge(recordId);
       if(action==='reconcile-upload'){
-        if(job.saveMode!=='local-upload'||activeLocalUploads.has(job.sourceRecordId))throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
+        if(localUploadService.isActive(job.sourceRecordId))throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
         const stored=await current.readRemoteResult(job.sourceRecordId);
-        if(!stored?.localUpload)throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
+        if(stored?.saveMode!=='local-upload'||!stored.localUpload)throw Error('QUEUE_RECONCILIATION_UNAVAILABLE');
         const upload=stored.localUpload;
-        const receipt=await reconcileLocalUpload(upload,localUploadClaimKey(upload.source,upload.key));
+        const receipt=await localUploadService.reconcileFile(upload);
         return {state:receipt?'verified':'uncertain'};
       }
       if(action==='retry'){
@@ -712,8 +637,8 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
       }
       if(job.terminal||!job.cancellable)throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
       if(job.sourceApi?.startsWith('basic:'))return basic.cancel(job.provider,job.sourceRecordId);
-      const local=activeLocalUploads.get(job.sourceRecordId);
-      if(local){local.controller.abort();return {state:'cancellation-requested'};}
+      const local=localUploadService.cancel(job.sourceRecordId);
+      if(local)return local;
       if(job.saveMode==='local-upload')throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
       if(job.sourceApi==='r2'&&job.destination){
         const {account,connection,bucket,folder}=job.destination;
@@ -771,15 +696,31 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(message?.channel!=='engine')return false;
   const senderDecision=appSenderDecision(chrome.runtime,sender);
   if(!senderDecision.accepted){respond({version:'3+1.1',state:'blocked',code:'UNTRUSTED_APP_SENDER',diagnostic:{stage:'sender-validation',reason:senderDecision.reason}});return false;}
+  const readOwner=sender.documentId??sender.tab?.id??sender.url;
+  if(uploadId(message.cancelReadId)){
+    activeTextReads.get(JSON.stringify([readOwner,message.cancelReadId]))?.abort();
+    respond(null);
+    return false;
+  }
+  let readKey,readController;
+  if(message.method==='readFile'&&message.params?.textPreview&&uploadId(message.readId)){
+    readKey=JSON.stringify([readOwner,message.readId]);
+    if(activeTextReads.size>=4||activeTextReads.has(readKey)){
+      respond({version:'3+1.1',state:'blocked',code:'RESOURCE_BUSY'});
+      return false;
+    }
+    readController=new AbortController();
+    activeTextReads.set(readKey,readController);
+  }
   // Returning literal true keeps Chrome's response channel alive across startup
   // and async API work. Every accepted request settles through this one owner.
   const failed=(code,stage,error)=>{const cause=error?.code??error?.message;return {version:'3+1.1',state:'failed',code,diagnostic:{stage,...(/^[A-Z][A-Z0-9_]{2,79}$/.test(cause??'')?{causeCode:cause}:{}),...(['AbortError','InvalidStateError','QuotaExceededError','SecurityError','VersionError','UnknownError'].includes(error?.name)?{causeName:error.name}:{})}};};
   // The API owns each operation's dependencies. Auth needs only trusted Chrome
   // credential storage; data operations still validate CURRENT through readCurrent.
   trustedStorage().then(async()=>{
-    try{const result=await api.invoke({version:message.version,method:message.method,params:message.params},'gui');return result&&typeof result==='object'&&typeof result.state==='string'?result:failed('ENGINE_RESPONSE_INVALID','invoke');}
+    try{const result=await api.invoke({version:message.version,method:message.method,params:message.params},'gui',{signal:readController?.signal});return result&&typeof result==='object'&&typeof result.state==='string'?result:failed('ENGINE_RESPONSE_INVALID','invoke');}
     catch(error){return failed('ENGINE_INVOCATION_FAILED','invoke',error);}
-  },error=>failed('STORAGE_ACCESS_UNAVAILABLE','credential-storage',error)).then(respond);return true;
+  },error=>failed('STORAGE_ACCESS_UNAVAILABLE','credential-storage',error)).then(respond).finally(()=>{if(readKey)activeTextReads.delete(readKey);});return true;
 });
 chrome.action.onClicked.addListener(tab=>{void attention.manual(tab);});
 void chrome.sidePanel?.setOptions({path:'extension/app.html',enabled:true}).catch(()=>{});

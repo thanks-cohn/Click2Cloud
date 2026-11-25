@@ -36,7 +36,7 @@
     return imageReady;
   }
 
-  function reveal({id,provider,token,position,size,hover}) {
+  function reveal({id,provider,token,position,size,hover,windowId}) {
     current?.();
     const [name,color,width] = providers[provider];
     const noticeWidth = {small:253,standard:338,large:422}[size] ?? 422;
@@ -95,15 +95,19 @@
     dispose.id = id;
     dispose.token = token;
     const expiry = setTimeout(dispose,duration);
-    close.onclick = event => {event.stopPropagation();dispose();};
+    function dismiss(){
+      dispose();
+      void chrome.runtime.sendMessage({channel,dismiss:true,token,windowId}).catch(()=>{});
+    }
+    close.onclick = event => {event.stopPropagation();dismiss();};
     close.onkeydown = event => {
-      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dispose();}
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dismiss();}
     };
     if(hover!==false&&matchMedia('(any-hover: hover)').matches){
       // Layout may dispatch pointerenter when the notice appears under a
       // stationary pointer. Dismiss on actual pointer movement over the notice.
       reward.addEventListener('pointermove',event=>{
-        if(event.isTrusted&&event.pointerType!=='touch'&&(event.movementX||event.movementY))dispose();
+        if(event.isTrusted&&event.pointerType!=='touch'&&(event.movementX||event.movementY))dismiss();
       });
     }
     document.addEventListener('visibilitychange',checkExpiry);

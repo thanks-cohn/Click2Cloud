@@ -1,3 +1,5 @@
+import {uploadId} from '../src/chrome/local-upload-plan.mjs';
+import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
 import {createQueueService} from './queue-service.mjs';
 import {createQueuePage,createHistoryArchive} from './queue-page.mjs';
 import {mountHistorySettings,mountQueueSettings} from './queue-settings.mjs';
@@ -54,7 +56,7 @@ import {applyConfigChanges} from '../src/api/config.mjs';
 import {providerDefaults} from '../src/explorer/configuration.mjs';
 import {createListingOrder,createListingReader,rowWindow,gridWindow,masonryLayout} from '../src/explorer/listing-view.mjs';
 import {ancestors,scopeKey,targetKey} from '../src/core/menu-identity.mjs';
-import {createDebugPreference} from '../src/chrome/debug-preference.mjs';
+import {createDebugPreference,uploadReceiptPreferenceKey} from '../src/chrome/debug-preference.mjs';
 import {createExplorerOperationFeedback} from './explorer-operation-feedback.mjs';
 import {createShelfNotifications,shelfNoticeText} from './shelf-notifications.mjs';
 import {createExplorerImageClipboard} from './explorer-image-clipboard.mjs';
@@ -86,6 +88,8 @@ const debugPreference=createDebugPreference(chrome);let debugMode=false;
 function applyDebugMode(enabled){
  debugMode=enabled===true;document.documentElement.dataset.debugMode=debugMode?'on':'off';
  const active=document.activeElement,focusedPanel=active?.closest('[data-debug-only]'),debugControl=$('#debug-mode');
+ const receiptControl=$('#automatic-upload-receipts');
+ if(receiptControl){receiptControl.disabled=!debugMode;if(!debugMode)receiptControl.checked=false;}
  for(const panel of $$('[data-debug-only]'))panel.hidden=!debugMode;
  if(debugControl)debugControl.checked=debugMode;
  $('#status').hidden=!debugMode||!$('#status').textContent;
@@ -176,11 +180,15 @@ const listingReader=createListingReader(async(t,cursor,signal,fresh)=>{
 async function api(method,params={}, {quiet=false,readTimeout=0,signal,reconnect=true}={}) {
   signal?.throwIfAborted();
   let result,timer,abort;
+  const readId=signal&&method==='readFile'&&params.textPreview?crypto.randomUUID():undefined;
   try{
-   const sent=chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method,params});
+   const sent=chrome.runtime.sendMessage({channel:'engine',version:'3+1.1',method,params,...(readId?{readId}:{})});
    const pending=[sent];
    if(readTimeout)pending.push(new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error(),{code:'ENGINE_READ_TIMEOUT'})),readTimeout);}));
-   if(signal)pending.push(new Promise((_,reject)=>{abort=()=>reject(signal.reason);signal.addEventListener('abort',abort,{once:true});if(signal.aborted)abort();}));
+   if(signal)pending.push(new Promise((_,reject)=>{abort=()=>{
+     if(readId)try{void chrome.runtime.sendMessage({channel:'engine',cancelReadId:readId}).catch(()=>{});}catch{}
+     reject(signal.reason);
+    };signal.addEventListener('abort',abort,{once:true});if(signal.aborted)abort();}));
    result=pending.length>1?await Promise.race(pending):await sent;
   }
   catch(error){signal?.throwIfAborted();const message=String(error?.message??''),code=error?.code==='ENGINE_READ_TIMEOUT'?'ENGINE_READ_TIMEOUT':/receiving end does not exist|could not establish connection/i.test(message)?'ENGINE_RECEIVER_MISSING':/message port closed|channel closed|before a response/i.test(message)?'ENGINE_RESPONSE_CHANNEL_CLOSED':'ENGINE_MESSAGE_SEND_FAILED';const err=Object.assign(Error(code),{code,method,stage:'transport'});if(!quiet)status(code+' · '+method,{attention:true});throw err;}finally{clearTimeout(timer);if(abort)signal.removeEventListener('abort',abort);}
@@ -660,7 +668,7 @@ function saveExplorerLayout(value){
 }
 function renderExplorer(){
  restoreConnection();
- if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button><div id="explorer-upload-control"><button type="button" id="explorer-upload" aria-expanded="false" aria-controls="explorer-upload-choices" disabled>Upload</button><div id="explorer-upload-choices" role="group" aria-label="Upload options" hidden><button type="button" data-upload-kind="files" title="Existing files are kept; an uploaded copy may have a different name">Upload files</button><button type="button" data-upload-kind="folder" title="Empty folders are omitted and existing objects are skipped">Upload folder</button></div></div></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button><span id="explorer-upload-status" role="status"></span><button type="button" id="cancel-explorer-upload" hidden>Cancel upload</button></div><input id="explorer-upload-picker" type="file" multiple hidden><input id="explorer-upload-folder" type="file" webkitdirectory multiple hidden>`;
+ if(!explorerShell){explorerShell=document.createElement('section');explorerShell.className='explorer-shell';explorerShell.innerHTML=`<div id="explorer-commands" class="toolbar" aria-label="Explorer toolbar"><div id="command-items"><button id="back" aria-label="Back">←</button><button id="forward" aria-label="Forward">→</button><button id="up" aria-label="Up">↑</button><button id="refresh" aria-label="Refresh">⟳</button><form id="filename-search-form" role="search" aria-label="Current folder filenames"><input type="text" id="filename-search" aria-label="Search filenames" placeholder="Search filenames…" spellcheck="false" autocomplete="off" maxlength="1024"><button type="button" id="hide-filename-search" aria-label="Hide search">×</button></form><button id="open-filename-search" type="button" aria-label="Search filenames">Search</button><select id="view-switch" aria-label="View"><option value="details">Details</option><option value="list">List</option><option value="grid">Grid</option></select><button id="add-location">+ Right Click</button></div><button id="toolbar-more" aria-label="More Explorer actions" aria-expanded="false" aria-controls="toolbar-overflow" hidden>More</button><div id="toolbar-overflow" role="group" aria-label="More Explorer actions" hidden></div><div id="explorer-more-actions" hidden><label id="go-to-path" for="location">Go to path<span class="address"><input id="location" aria-label="Address" spellcheck="false"><span id="location-display" aria-hidden="true"></span></span></label><button id="create-bucket">Create Bucket</button><div id="explorer-upload-control"><button type="button" id="explorer-upload" aria-describedby="explorer-upload-availability" aria-expanded="false" aria-controls="explorer-upload-choices" disabled>Upload</button><div id="explorer-upload-choices" role="group" aria-label="Upload options" hidden><button type="button" data-upload-kind="files" title="Existing files are kept; an uploaded copy may have a different name">Upload files</button><button type="button" data-upload-kind="folder" title="Empty folders are omitted and existing objects are skipped">Upload folders</button></div><span id="explorer-upload-availability" class="muted" role="status" hidden></span></div></div></div><div id="toolbar-splitter" role="separator" aria-label="Explorer toolbar height" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" tabindex="0"></div><div id="suggestion"></div><div id="files" class="file-scroll" tabindex="0"></div><div class="toolbar"><span id="item-count" class="muted"></span><button id="more" hidden>Load more</button><span class="muted" id="listing-state" role="status"></span><button id="clear-search" hidden>Clear search</button><span id="explorer-upload-status" role="status"></span><progress id="explorer-upload-progress" aria-label="Verified upload files" hidden></progress><button type="button" id="add-upload-folder" hidden>Add another folder</button><button type="button" id="start-upload-folders" hidden>Start upload</button><button type="button" id="reconcile-upload-batch" hidden>Check upload receipt</button><button type="button" id="resume-upload-batch" hidden>Reselect for upload</button><button type="button" id="cancel-explorer-upload" hidden>Cancel upload</button></div><input id="explorer-upload-picker" type="file" multiple hidden><input id="explorer-upload-folder" type="file" webkitdirectory multiple hidden>`;
   $('#main').replaceChildren(explorerShell);
   listen('#back','click',async()=>{if(historyAt>0)await navigate(history[--historyAt],false);});listen('#forward','click',async()=>{if(historyAt<history.length-1)await navigate(history[++historyAt],false);});
   listen('#up','click',navigateParent);listen('#refresh','click',refreshExplorerFolder);
@@ -712,11 +720,14 @@ function renderExplorer(){
    if(key){await revealListedFile(key,target);}
    else if(view==='explorer')$('#files').focus({preventScroll:true});
   });
-  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:saveExplorerLayout,onResize:scheduleWindow,readCycleMode:()=>dividerMode,onMoreOpened:()=>void explorerUpload.check()});
+  const resize=new ResizeObserver(rows=>{for(const row of rows){if(row.target.id==='files'){viewportWidth=row.contentRect.width;viewportHeight=row.contentRect.height;scheduleWindow();}if(row.target.classList.contains('address')){addressWidth=row.contentRect.width;renderAddress();}}});resize.observe($('#files'));resize.observe($('.address'));explorerLayoutUI=installExplorerLayout({read:()=>layoutIntent??state.product.explorerLayout,save:saveExplorerLayout,onResize:scheduleWindow,readCycleMode:()=>dividerMode,onMoreOpened:()=>{void explorerUpload.check();void explorerUpload.inspect();}});
   explorerUpload=wireExplorerUpload({
    runtime:chrome.runtime,button:$('#explorer-upload'),choices:$('#explorer-upload-choices'),
+   availability:$('#explorer-upload-availability'),
    picker:$('#explorer-upload-picker'),folderPicker:$('#explorer-upload-folder'),
-   status:$('#explorer-upload-status'),cancel:$('#cancel-explorer-upload'),
+   status:$('#explorer-upload-status'),bar:$('#explorer-upload-progress'),cancel:$('#cancel-explorer-upload'),
+   addFolder:$('#add-upload-folder'),startFolders:$('#start-upload-folders'),
+   reconcileButton:$('#reconcile-upload-batch'),resumeButton:$('#resume-upload-batch'),windowId:shelfWindow,
    readTarget:()=>view==='explorer'&&source?.provider==='cloudflare'&&connection.state==='CONNECTED'&&
      connection.accounts?.some(account=>account.id===source.accountId)?source:null,
    closeMenu:()=>explorerLayoutUI.dismissMore(),
@@ -764,7 +775,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same)$('#files').scrollTop=0;paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1018,7 +1029,7 @@ function moveGallery(direction){if(!gallery)return;const next=galleryStep(ordere
 async function openEntry(e){
  if(e.folder)return navigate({...source,prefix:e.key});
  const continuing=!!(isImage(e)&&immersiveView&&$('#dialog').open&&$('[data-gallery]'));
- stopGalleryVisual();previewAbort?.abort();const controller=new AbortController();previewAbort=controller;const ticket=++previewEpoch,captured=structuredClone(source),started=performance.now(),image=isImage(e),text=/\.(txt|md|json|csv|log)$/i.test(e.key);
+ stopGalleryVisual();previewAbort?.abort();const controller=new AbortController();previewAbort=controller;const ticket=++previewEpoch,captured=structuredClone(source),started=performance.now(),image=isImage(e),text=isTextPreview(e.key);
  if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
  if(image){galleryReturnKey??=e.key;gallery={key:e.key,target:captured};selected=new Set([e.key]);focusIndex=listingOrder.index(e.key)??0;updateSelection();}else{gallery=null;galleryReturnKey=null;}
  const body=image?`<section data-gallery>${galleryControls(e)}<div class="image-frame"><p id="preview-state" role="status">Loading image…</p><img class="preview" alt="File preview" hidden><p id="preview-error" role="alert" hidden></p></div></section>`:'<p id="preview-state" role="status">Loading preview…</p>';
@@ -1045,10 +1056,24 @@ async function openEntry(e){
  if(image){bindInlineRename(e,captured,ticket);void startGalleryVisual($('.image-frame'),ticket,controller.signal);}
  if(!image&&!text){$('#preview-state').textContent='Inline preview unavailable for this type.';return;}
  try{
-  const result=image?await imageReader.load(captured,e,{limit:providerDefaults.previewMaxBytes,signal:controller.signal}):await readPreviewBytes(p=>api('readFileChunk',p,{quiet:true}),{source:captured,key:e.key},{limit:providerDefaults.textPreviewMaxBytes,signal:controller.signal,truncate:true});
+  const result=image?await imageReader.load(captured,e,{limit:providerDefaults.previewMaxBytes,signal:controller.signal}):await api('readFile',{source:captured,entry:{key:e.key,folder:false},textPreview:{
+   ...(e.etag?{etag:e.etag}:{}),...(Number.isSafeInteger(e.size)?{size:e.size}:{})
+  }},{quiet:true,signal:controller.signal});
   if(ticket!==previewEpoch||targetKey(captured)!==targetKey(source)||controller.signal.aborted)return;
   if(image){const url=URL.createObjectURL(result.blob);previewUrl=url;const img=$('img.preview');img.src=url;try{await img.decode();if(!img.naturalWidth||!img.naturalHeight)throw Error();}catch{throw Object.assign(Error(),{code:'IMAGE_DECODE_FAILED'});}if(ticket!==previewEpoch||controller.signal.aborted)return;stopGalleryVisual();img.hidden=false;$('#preview-state').hidden=true;immersiveView?.ready();}
-  else{$('#preview-state').outerHTML='<pre id="preview-text">'+esc(await result.blob.text())+'</pre>'+(!result.done?'<p>Showing the first 512 KiB. Download the full file for all contents.</p>':'');}
+  else{
+   if(result.state!=='completed'||!Array.isArray(result.data?.bytes))throw Object.assign(Error(),{code:result.code});
+   const preview=document.createElement('pre');
+   preview.id='preview-text';preview.tabIndex=0;
+   preview.setAttribute('aria-label','Text preview');
+   preview.textContent=new TextDecoder().decode(Uint8Array.from(result.data.bytes));
+   $('#preview-state').replaceWith(preview);
+   if(result.data.truncated){
+    const note=document.createElement('p');
+    note.textContent='Showing the first 512 KiB. Download the full file for all contents.';
+    preview.after(note);
+   }
+  }
   paintTrace('preview-ready',started);
  }catch(error){if(ticket!==previewEpoch||controller.signal.aborted)return;if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}stopGalleryVisual();const message=imageMessage(error.code);if(image){immersiveView.unavailable();$('#preview-state').hidden=true;const alert=$('#preview-error');alert.hidden=false;alert.textContent=message;alert.dataset.code=error.code??'FILE_READ_FAILED';$('img.preview').hidden=true;}else{$('#preview-state').textContent=message;$('#preview-state').setAttribute('role','alert');}}
 }
@@ -1742,10 +1767,27 @@ async function renderSettings(){
   mountQueueSettings($('#main .page'),queueService);
   mountHistorySettings($('#main .page'),queueService,historyV2Preference);
   mountManifestPanel($('#portable-menu-manifests'),{api:(method,params)=>api(method,params,{quiet:true}),accounts:()=>connection?.accounts??[],getRevision:()=>state.product.revision,onApplied:async()=>{await refreshState();}});
-  const debugCard=document.createElement('div');debugCard.className='card';debugCard.innerHTML='<h2>Debug</h2><label><input id="debug-mode" type="checkbox"> Debug Mode</label><p class="muted">Show diagnostic status and inspect safe local details. This does not grant additional access or change saving.</p><div id="basic-diagnostics"></div><div id="debug-details" data-debug-only hidden><button id="show-save-results">Review save results</button><button id="debug-health">Inspect safe diagnostics</button><pre id="debug-health-output"></pre><div id="recorder-panel"></div></div><p id="debug-preference-result" role="status"></p>';$('#main .page').append(debugCard);basicDiagnostics.mount($('#basic-diagnostics'));applyDebugMode(debugMode);
+  const debugCard=document.createElement('div');debugCard.className='card';debugCard.innerHTML='<h2>Debug</h2><label><input id="debug-mode" type="checkbox"> Debug Mode</label><p class="muted">Show diagnostic status and inspect safe local details. This does not grant additional access or change saving.</p><div id="basic-diagnostics"></div><div id="debug-details" data-debug-only hidden><label><input id="automatic-upload-receipts" type="checkbox"> Produce and download receipts after uploads automatically</label><button id="show-save-results">Review save results</button><button id="debug-health">Inspect safe diagnostics</button><pre id="debug-health-output"></pre><div id="recorder-panel"></div></div><p id="debug-preference-result" role="status"></p>';$('#main .page').append(debugCard);basicDiagnostics.mount($('#basic-diagnostics'));applyDebugMode(debugMode);
   void import('./recorder-panel.mjs').then(m=>m.mountRecorderPanel(document.querySelector('#recorder-panel'))).catch(()=>{});
   const settingsPage=$('#main .page');
-  listen('#debug-mode','change',async event=>{const enabled=event.target.checked,feedback=$('#debug-preference-result');try{if(!enabled&&!confirm('Turn Debug Mode off and stop any expansive forensic recording? Basic diagnostics stays on.')){event.target.checked=true;return;}if(!enabled){let deadline;try{await Promise.race([chrome.runtime.sendMessage({channel:'recorder',version:2,method:'stop',params:{}}),new Promise(resolve=>{deadline=setTimeout(resolve,2000);})]);}catch{}finally{clearTimeout(deadline);}}await debugPreference.set(enabled);applyDebugMode(enabled);if(feedback.isConnected)feedback.textContent='';}catch{applyDebugMode(debugPreference.enabled);if(feedback.isConnected)feedback.textContent='Debug Mode is OFF for this window; the preference could not be saved. Try again.';}});
+  listen('#debug-mode','change',async event=>{const enabled=event.target.checked,feedback=$('#debug-preference-result');try{if(!enabled&&!confirm('Turn Debug Mode off and stop any expansive forensic recording? Basic diagnostics stays on.')){event.target.checked=true;return;}await debugPreference.set(enabled);applyDebugMode(enabled);if(!enabled){let deadline;try{await Promise.race([chrome.runtime.sendMessage({channel:'recorder',version:2,method:'stop',params:{}}),new Promise(resolve=>{deadline=setTimeout(resolve,2000);})]);}catch{}finally{clearTimeout(deadline);}}if(feedback.isConnected)feedback.textContent='';}catch{applyDebugMode(debugPreference.enabled);if(feedback.isConnected)feedback.textContent='Debug Mode is OFF for this window; the preference could not be saved. Try again.';}});
+  const receiptOption=$('#automatic-upload-receipts');
+  async function loadUploadReceiptPreference(){
+   const preferences=await chrome.storage.local.get(['uiDebugMode',uploadReceiptPreferenceKey]);
+   if(receiptOption.isConnected)receiptOption.checked=preferences.uiDebugMode===true&&uploadId(preferences[uploadReceiptPreferenceKey]);
+  }
+  void loadUploadReceiptPreference().catch(()=>{});
+  listen('#automatic-upload-receipts','change',async()=>{
+   const enabled=receiptOption.checked;
+   try{
+    const {uiDebugMode}=await chrome.storage.local.get('uiDebugMode');
+    if(uiDebugMode===true&&debugMode)await chrome.storage.local.set({[uploadReceiptPreferenceKey]:enabled?crypto.randomUUID():false});
+    await loadUploadReceiptPreference();
+   }catch{
+    receiptOption.checked=false;
+    if(receiptOption.isConnected)$('#debug-preference-result').textContent='Could not save the upload receipt preference.';
+   }
+  });
   listen('#show-save-results','click',()=>{if(debugMode)return show('history');});
   listen('#debug-health','click',async()=>{const output=$('#debug-health-output');output.textContent='Reading local diagnostics…';try{const report=await api('getEngineHealth',{view:'support'},{quiet:true});if(output.isConnected)output.textContent=JSON.stringify(report,null,2);}catch{if(output.isConnected)output.textContent='Diagnostics are unavailable. Your saved data was kept.';}});
   const deleteSetting=document.createElement('section');

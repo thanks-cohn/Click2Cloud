@@ -52,7 +52,7 @@ export interface Methods {
  loginBegin:{verifyOnly?:boolean};loginStatus:{};loginCancel:{};disconnect:{};
  listAccounts:{};listAuthorizedBuckets:{accountId:string;cursor?:string};listFolders:{source:Target;cursor?:string};
  searchDirectoryNames:{source:Target;query:string;pageToken?:string;pageSize?:number;refresh?:boolean};
- fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false}};
+ fileMetadata:{source:Target;key:string};readFile:{source:Target;entry:{key:string;folder:false};textPreview?:{etag?:string;size?:number}};
  listDestinations:{mode?:Mode|'depth';cursor?:string;limit?:number};inspectMenuTree:{generation:number;cursor?:string;limit?:number;parentId?:string;recursive?:boolean;includeOmissions?:boolean};previewNativeMenu:{};inspectNativeACK:{};getOrganizationSuggestion:{};
  previewConfigChange:{changes:Change[];expectedRevision:number};
  commitConfigChange:{changes:Change[];expectedRevision:number;idempotencyKey:string;prepareModes?:('simple'|'nested'|'depth')[]};

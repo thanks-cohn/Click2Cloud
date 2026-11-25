@@ -21,6 +21,7 @@ const definitions = [
   ['chrome.plan','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
   ['chrome.apply','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
   ['chrome.ack','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
+  ['chrome.local-upload','src/chrome/local-upload-batch.mjs','tests/explorer-upload.test.mjs','partial'],
   ['chrome.save-notice','src/chrome/save-notice.mjs','tests/release-0327.test.mjs','partial'],
   ['chrome.recovery','src/chrome/registrar.mjs','tests/chrome-registrar.test.mjs','partial'],
   ['resolver','src/core/action-resolver.mjs','tests/canonical-menu.test.mjs','partial'],
@@ -36,6 +37,9 @@ const definitions = [
   ['lifecycle','src/glaciaring/index.mjs','tests/glaciaring.test.mjs','partial']
 ];
 export const REASON_CODES = Object.freeze([...new Set([
+  'TEXT_PREVIEW_TYPE_UNSUPPORTED','CUSTOM_NOTICE_OUTCOME_UNAVAILABLE','UPLOAD_RECEIPT_DOWNLOAD_FAILED','UPLOAD_RECEIPT_PREFERENCE_UNAVAILABLE',
+  'LOCAL_UPLOAD_FAILED','LOCAL_UPLOAD_SKIPPED','LOCAL_UPLOAD_CANCELLED','LOCAL_UPLOAD_UNCONFIRMED',
+  'LOCAL_UPLOAD_BATCH_VERIFIED','LOCAL_UPLOAD_BATCH_CANCELLED','LOCAL_UPLOAD_BATCH_PARTIAL','LOCAL_UPLOAD_COMMIT_UNCONFIRMED','LOCAL_UPLOAD_RESELECT_REQUIRED','LOCAL_UPLOAD_UNAVAILABLE','LOCAL_UPLOAD_VERIFIED','UPLOAD_BATCH_INVALID','UPLOAD_RESELECT_MISMATCH','UPLOAD_SELECTION_EMPTY','RESOURCE_BUSY',
   'CUSTOM_NOTICE_RENDERED','CUSTOM_NOTICE_ACK_UNCONFIRMED','CUSTOM_NOTICE_SURFACE_UNAVAILABLE','CUSTOM_NOTICE_DELIVERY_FAILED',
   'OBSERVATION_SHELF_STARTED','OBSERVATION_SHELF_EXCEPTION','OBSERVATION_WORKER_STARTED','OBSERVATION_WORKER_EXCEPTION','OBSERVATION_DIVIDER_WRITE_FAILED',
   'SCREENSHOT_RECEIPT_EXPORT_TOO_LARGE','SCREENSHOT_WORKER_UPDATE_REQUIRED','SUPPLEMENTAL_MENU_UNAVAILABLE',

@@ -654,15 +654,15 @@ await invoke('readFileChunk', {"source":{"provider":"cloudflare","connectionId":
 
 ### readFile
 
-<!-- method-contract {"name":"readFile","scope":"inspect","effectful":false,"status":"implemented","input":"27b19a859caea4ff7ffdc320e4b0b39bb73e58fcdfd58e17beeae1840ce78376","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
+<!-- method-contract {"name":"readFile","scope":"inspect","effectful":false,"status":"implemented","input":"260f6397858a6a00bd91c1ee8b03110996465198a5becd1120216e17c18fd95a","output":"ab798735d15fe9391d3805665933d0e4638aa9aa17d91e9585c7345041947d79"} -->
 
 Reads a small file into a byte array for in-process consumers. Large or streaming callers should use readFileChunk instead.
 
-Returns exact-key bytes in the file result. The resident payload is limited to 8 MiB.
+Returns exact-key bytes in the file result. Ordinary reads are limited to 8 MiB. With `textPreview`, the stream stops at 512 KiB and the result includes `truncated`. Optional `etag` and `size` bind the read to the listed object. The Shelf displays the result as inert text.
 
 **Access and status** · `inspect` · registry effectful `false` · implemented.
 
-**Input** · `source` (object), `entry` (object). A trailing `?` marks an optional field.
+**Input** · `source` (object), `entry` (object), `textPreview?` (object). A trailing `?` marks an optional field.
 
 ```js
 await invoke('readFile', {"source":{"provider":"cloudflare","connectionId":"cloudflare:fixture","accountId":"fixture","bucketName":"test-bucket","prefix":"images/"},"entry":{"key":"images/example.png","folder":false}});

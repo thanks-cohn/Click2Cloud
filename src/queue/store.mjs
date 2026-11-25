@@ -34,7 +34,7 @@ const deadlines = (policy, now) => ({
 });
 const jobFields = ['recordId','sourceRecordId','sourceApi','attemptId','actionId','deliveryId','provider','kind','destination',
   'status','terminal','requestedAt','terminalAt','updatedAt','filename','code','progress','bytes','recoverable',
-  'retryExpiresAt','retryable','cancellable','parentAttemptId'];
+  'retryExpiresAt','retryable','cancellable','parentAttemptId','saveMode'];
 function projectJob(record,rank,jobAt){
   return {...Object.fromEntries(jobFields.map(field=>[field,record[field]])),rank,jobAt,
     terminal:record.queueTerminal??record.terminal,queueClass:expiryClass(record)};
@@ -229,7 +229,7 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
           if((latest?.updatedAt??0)>(record.updatedAt??0)||old?.status==='verified'&&record.status!=='verified')continue;
           if (latest && latest.updatedAt === record.updatedAt && latest.status === record.status &&
               latest.code === record.code && latest.retryable===record.retryable && latest.cancellable===record.cancellable &&
-              latest.bytes===record.bytes && (record.terminal ? (!!old || excluded) && (rank===undefined||!!job) : !!job)) continue;
+              latest.bytes===record.bytes && job?.saveMode===record.saveMode && (record.terminal ? (!!old || excluded) && (rank===undefined||!!job) : !!job)) continue;
           const group=expiryClass(record);
           const expired=group&&record.terminalAt<=Math.max(before[group]??-1,watermark[group]??-1);
           if (rank!==undefined&&!expired) {

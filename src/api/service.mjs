@@ -1,3 +1,5 @@
+import {isTextPreview} from '../explorer/r2-adapter.mjs';
+import {providerDefaults} from '../explorer/configuration.mjs';
 import {objectUrls,objectTags,safeObjectMetadata,verifiedDomains,verifiedDevelopmentDomain,metadataBudget,TAG_KEY} from '../explorer/object-exports.mjs';
 import {apiShortcutMetadata,listCommands} from './shortcuts.mjs';
 import {locateSavedResult} from '../history/navigation.mjs';
@@ -55,7 +57,7 @@ const definitions={
   fileAction:['execute',obj({action:{enum:['mkdir','copy','move','rename','delete','createBucket']},authorizeSetup:bool,source:target,destination:target,entry:obj({key:str,folder:bool,displayName:str},['key','folder']),name:str,conflict:{enum:['keep','skip','replace']},idempotencyKey:str},['action','source','idempotencyKey'])],
   listAccounts:['inspect',obj()],listAuthorizedBuckets:['inspect',obj({accountId:str,cursor:str},['accountId'])],
   listFolders:['inspect',obj({source:target,cursor:str},['source'])],fileMetadata:['inspect',obj({source:target,key:str},['source','key'])],
-  readFile:['inspect',obj({source:target,entry:obj({key:str,folder:bool},['key','folder'])},['source','entry'])],
+  readFile:['inspect',obj({source:target,entry:obj({key:str,folder:bool},['key','folder']),textPreview:obj({etag:str,size:num})},['source','entry'])],
   listDestinations:['inspect',obj({mode:{enum:['simple','nested','narrow','depth']},cursor:str,limit:{type:'integer',minimum:1,maximum:20}})],
   inspectMenuTree:['inspect',obj({generation:num,cursor:str,limit:{type:'integer',minimum:1,maximum:1000},parentId:str,recursive:bool,includeOmissions:bool},['generation'])],previewNativeMenu:['inspect',obj()],inspectNativeACK:['inspect',obj()],getOrganizationSuggestion:['inspect',obj()],
   previewConfigChange:['configure',obj({changes:arr(change),expectedRevision:num},['changes','expectedRevision'])],
@@ -316,7 +318,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
     if(native.state!=='completed')return {...data,native,state:'partial',code:'NATIVE_APPLY_INCOMPLETE'};
     const readiness=nativeReadiness({state:'READY',target:data.target});return {...data,native,...(readiness.state!=='READY'?{state:'blocked',code:readiness.code}:{})};
   }
-  async function invoke(request,actor,{screenshotHistory=false}={}) {
+  async function invoke(request,actor,{screenshotHistory=false,signal}={}) {
     const operationId=crypto.randomUUID(),traceId=operationIdentity(),requestStarted=performance.now(),inspectOnly=['getEngineHealth','describeCapabilities','requestRestorePreview'].includes(request?.method);const traceMethodIndex=toolRegistry.findIndex(t=>t.name===request?.method)+1;const startSignal=inspectOnly?0:observe(diagnostics?.emit,'api.invoke','started','API_INVOKE_STARTED',{operationId:traceId},[],traceMethodIndex);
     try {
       if(request?.version!=='3+1.1'||Object.keys(request).some(k=>!['version','method','params'].includes(k))||!Object.hasOwn(definitions,request.method))fail('VERSION_OR_METHOD_UNSUPPORTED');
@@ -324,7 +326,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
       if(await authorize({actor,scope,method,params})!==true)fail('PERMISSION_DENIED');
       const work=async()=>{
         // Authentication and introspection do not depend on menu/configuration storage.
-        const independent=['listDirectoryObjects','getPublicUrls','enableBucketPublicAccess','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
+        const independent=['readFile','listDirectoryObjects','getPublicUrls','enableBucketPublicAccess','getExportObjectMetadata','listCommands','getShortcutBindings','setShortcutBinding','resetShortcutBindings','fileAction','getHistoryPreferences','setHistoryPreferences','inspectRemoteHistory','getGalleryLoadingVisual','setGalleryLoadingVisual','loginBegin','loginStatus','loginCancel','disconnect','getProviderConnections','describeCapabilities','inspectShelfAttention','getEngineHealth','requestRestorePreview','restoreRightClickMenu','inspectBackupRoots','chooseBackupLocation',...Object.keys(manifestDefinitions).filter(m=>m!=='exportMenuManifest')].includes(method);
         let state=independent?null:await loadCurrent({operationId:traceId,requires:startSignal?[startSignal]:[]}),data,receipt;
         // Resolve IDs against the current authoritative state before account scoping.
         const bindings=[];
@@ -561,10 +563,19 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           if((method==='readFile'&&(params.entry.folder||!params.entry.key.startsWith(s.prefix)))||(method==='readFileChunk'&&!params.key.startsWith(s.prefix)))fail('SOURCE_SCOPE_MISMATCH');
           if(method==='readFileChunk')data=await fileApi.run('readChunk',params);
           else if(method==='readFile') {
+            const preview=params.textPreview;
+            if(preview)signal?.throwIfAborted();
+            if(preview&&!isTextPreview(params.entry.key))fail('TEXT_PREVIEW_TYPE_UNSUPPORTED');
+            const limit=preview?providerDefaults.textPreviewMaxBytes:8*1024*1024;
             const chunks=[];let size=0;
-            const result=await fileApi.run('readStream',{source:s,key:params.entry.key},{onChunk:chunk=>{size+=chunk.length;if(size>8*1024*1024)fail('PREVIEW_SIZE_LIMIT');chunks.push(chunk);}});
+            const result=await fileApi.run('readStream',{source:s,key:params.entry.key,
+              ...(preview?{maxBytes:limit,etag:preview.etag,expectedSize:preview.size}:{})
+            },{...(preview?{signal:AbortSignal.any([AbortSignal.timeout(providerDefaults.requestTimeoutMs),...(signal?[signal]:[])])}:{}),onChunk:chunk=>{
+              size+=chunk.length;if(size>limit)fail('PREVIEW_SIZE_LIMIT');chunks.push(chunk);
+            }});
             const bytes=new Uint8Array(size);let offset=0;for(const c of chunks){bytes.set(c,offset);offset+=c.length;}
-            data=result.state==='completed'?{state:'completed',data:{bytes:Array.from(bytes),key:params.entry.key}}:result;
+            data=result.state==='completed'?{state:'completed',data:{bytes:Array.from(bytes),key:params.entry.key,
+              ...(preview?{truncated:result.data.truncated===true}:{})}}:result;
           } else if(method!=='fileMetadata'&&fileApi.listDirectory)data=await fileApi.listDirectory(params,{fresh:method==='refreshExplorer'});
           else data=await fileApi.run({listFolders:'list',refreshExplorer:'list',fileMetadata:'stat'}[method],params);
         }
@@ -748,7 +759,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
         return {version:'3+1.1',state:['failed','blocked','partial','uncertain','cancelled'].includes(status)?status:'completed',code:inspection?'OK':status==='partial'&&data?.native?data.native.code??'NATIVE_APPLY_INCOMPLETE':data?.code??'OK',data,...(safeWorkerDiagnostic(data?.diagnostic)?{diagnostic:safeWorkerDiagnostic(data.diagnostic)}:{}),receipt:{operationId,traceId,durationMs:Math.round(performance.now()-requestStarted),method,before:receipt?.before??state?.product.revision??null,after:receipt?.after??state?.product.revision??null,replayed:receipt?.replayed??false}};
       };
       // Auth must remain cancellable while a provider sign-in window is pending.
-      if(scope==='inspect'||['enableBucketPublicAccess','initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFileChunk','refreshExplorer','navigateExplorer','fileAction','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
+      if(scope==='inspect'||['enableBucketPublicAccess','initializeCloudflare','loginBegin','loginCancel','disconnect','loginStatus','inspectCloudflare','checkCloudflareR2','inspectRemoteHistory','inspectRemoteReceipt','inspectCloudflareSetup','openRemoteResult','readFile','readFileChunk','refreshExplorer','navigateExplorer','fileAction','dispatchSave','dispatchExplorerSave','invokeProviderAction','cancelRemoteOperation'].includes(request.method))return await work();
       const task=queue.then(work,work);queue=task.catch(()=>{});return await task;
     } catch(error){if(!inspectOnly)observe(diagnostics?.emit,'api.invoke','failed',REASON_CODES.includes(error?.code)?error.code:'API_INVOKE_FAILED',{operationId:traceId},startSignal?[startSignal]:[],traceMethodIndex);const code=/^[A-Z][A-Z0-9_]+$/.test(error?.code??error?.message)?error.code??error.message:'OPERATION_FAILED';return {version:'3+1.1',state:['PERMISSION_DENIED','AUTH_REQUIRED','HUMAN_INTERACTION_REQUIRED','EXTERNAL_RECOVERY_UNAVAILABLE'].includes(code)?'blocked':'failed',code,...(safeWorkerDiagnostic(error?.diagnostic)?{diagnostic:safeWorkerDiagnostic(error.diagnostic)}:error?.diagnostic?.stage==='current-read'?{diagnostic:error.diagnostic}:{}),receipt:{operationId,traceId,method:request?.method??null}};}
   }

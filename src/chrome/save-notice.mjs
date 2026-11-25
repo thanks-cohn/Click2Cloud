@@ -32,6 +32,7 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
     if (!notice || notice.slot.active !== notice) return;
     notice.slot.active = undefined;
     clearTimeout(notice.expiry);
+    notice.released?.();
     // An unloading old renderer must never hold up the next verified save.
     void sendCustom(notice,{stop:true}).catch(()=>{});
   }
@@ -78,16 +79,29 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
     }
   });
 
+  function addressed(notice,message,sender){
+    if(!notice||notice.token!==message.token)return false;
+    return notice.surface==='page'
+      ? sender.tab?.id===notice.tabId&&sender.tab?.windowId===notice.windowId&&sender.frameId===0
+      : sender.url===chrome.runtime.getURL('extension/app.html')&&
+        (notice.surface==='app'?sender.tab?.id===notice.tabId:!sender.tab);
+  }
   // Claim precedes rendering. A late reply from a renderer that already
   // claimed delivery cannot cause a second notice on another surface.
   chrome.runtime.onMessage?.addListener((message,sender,respond)=>{
-    if (sender.id!==chrome.runtime.id || message?.channel!==channel || message.claim!==true) return;
-    const candidate = windows.get(message.windowId ?? sender.tab?.windowId)?.offer;
-    if (!candidate || candidate.token!==message.token || candidate.claimed ||
-        (candidate.surface==='page'
-          ? sender.tab?.id!==candidate.tabId || sender.tab?.windowId!==candidate.windowId || sender.frameId!==0
-          : sender.url!==chrome.runtime.getURL('extension/app.html') ||
-            (candidate.surface==='app' ? sender.tab?.id!==candidate.tabId : !!sender.tab))) {
+    if(sender.id!==chrome.runtime.id||message?.channel!==channel)return;
+    const slot=windows.get(message.windowId??sender.tab?.windowId);
+    if(message.dismiss===true){
+      const shown=slot?.active??slot?.offer;
+      if(addressed(shown,message,sender)){
+        shown.dismissed=true;
+        clear(shown);
+      }
+      return;
+    }
+    if(message.claim!==true)return;
+    const candidate=slot?.offer;
+    if(!addressed(candidate,message,sender)||candidate.claimed){
       respond(false);
       return;
     }
@@ -101,6 +115,7 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
 
   async function custom(event, surface) {
     const slot = windows.get(event.windowId);
+    if(!slot)return null;
     const notice = {event,slot,surface,tabId:event.tabId,windowId:event.windowId,token:crypto.randomUUID(),deliverBy:Date.now()+650};
     slot.offer = notice;
     let timer, result;
@@ -115,24 +130,30 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
       clearTimeout(timer);
       if (slot.offer===notice) slot.offer=undefined;
     }
-    if (result===false || !notice.claimed && result!==true) return false;
+    if (result===false || !notice.claimed && result!==true) return null;
     if (!await eligible(event)) {
       void sendCustom(notice,{stop:true}).catch(()=>{});
-      return true;
+      return {state:'suppressed'};
+    }
+    if(notice.dismissed){
+      observe('CUSTOM_NOTICE_RENDERED');
+      return {state:'rendered',surface,observedAt:Date.now()};
     }
     clear(slot.active);
     slot.active = notice;
+    notice.release = new Promise(resolve=>{notice.released=resolve;});
     notice.expiry = setTimeout(()=>clear(notice),10000);
     observe(result===true?'CUSTOM_NOTICE_RENDERED':'CUSTOM_NOTICE_ACK_UNCONFIRMED');
-    return true;
+    return {state:result===true?'rendered':'ack-unconfirmed',surface,observedAt:Date.now()};
   }
 
   async function deliver(event) {
     await preferences.ready;
-    if (!master() || event.version!==version || event.cancelled || !windows.has(event.windowId)) return;
+    if (!master() || event.version!==version || event.cancelled || !windows.has(event.windowId)) return {state:'suppressed'};
 
     const attempted = new Set();
     let state;
+    if(event.distinct)await windows.get(event.windowId)?.active?.release;
     while ((state = await eligible(event))) {
       const extensionSurface = state.closed?'app':'shelf';
       const surface = event.id&&Number.isInteger(event.windowId)&&chrome.runtime.sendMessage&&!attempted.has(extensionSurface)
@@ -140,35 +161,51 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
         : state.closed&&event.id&&Number.isInteger(event.tabId)&&chrome.tabs.sendMessage&&!attempted.has('page')?'page':null;
       if (!surface) break;
       attempted.add(surface);
-      if (await custom(event,surface)) return;
+      const outcome=await custom(event,surface);
+      if(outcome)return outcome;
     }
     if (state) observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE');
+    return {state:state?'surface-unavailable':'suppressed'};
   }
 
-  function saved(provider,id) {
-    if (!Object.hasOwn(providers,provider)||typeof id!=='string'||!id||seen.has(id)) return;
+  function submit(provider,id,distinct,origin) {
+    if (!Object.hasOwn(providers,provider)||typeof id!=='string'||!id||seen.has(id))
+      return Promise.resolve({state:'duplicate'});
     seen.add(id);
     if (seen.size>128) seen.delete(seen.values().next().value);
-    if (!master()) return;
-    const event = {provider,id,version,openAllowed:openAllowed(),sequence:++sequence};
-    void Promise.resolve(chrome.tabs?.query?.({active:true,lastFocusedWindow:true})).then(tabs=>{
-      if (!master()||event.version!==version) return;
-      const tab = tabs?.[0];
-      if (!Number.isInteger(tab?.windowId)) { observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE'); return; }
-      event.tabId = tab.id;
-      event.windowId = tab.windowId;
-      const slot = windows.get(tab.windowId) ?? {updates:Promise.resolve()};
+    const event = {provider,id,version,openAllowed:openAllowed(),sequence:++sequence,distinct};
+    return (async()=>{
+      if(distinct)await preferences.ready;
+      if (!master()||event.version!==version) return {state:'suppressed'};
+      const query=Number.isInteger(origin?.windowId)?{active:true,windowId:origin.windowId}:{active:true,lastFocusedWindow:true};
+      const tab=(await chrome.tabs?.query?.(query))?.[0];
+      if (!Number.isInteger(tab?.windowId)) {
+        observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE');
+        return {state:'surface-unavailable'};
+      }
+      event.tabId=tab.id;
+      event.windowId=tab.windowId;
+      const slot=windows.get(tab.windowId)??{updates:Promise.resolve()};
       windows.set(tab.windowId,slot);
-      if (event.sequence < (slot.sequence ?? 0)) return;
-      slot.sequence = event.sequence;
-      slot.next = event;
-      if (slot.pending) return;
-      slot.pending = setTimeout(()=>{
-        const queued = slot.next;
-        slot.next = slot.pending = undefined;
+      if(distinct){
+        const work=slot.updates.then(()=>deliver(event));
+        slot.updates=work.catch(()=>{});
+        return work;
+      }
+      if(event.sequence<(slot.sequence??0))return;
+      slot.sequence=event.sequence;
+      slot.next=event;
+      if(slot.pending)return;
+      slot.pending=setTimeout(()=>{
+        const queued=slot.next;
+        slot.next=slot.pending=undefined;
         queue(slot,()=>deliver(queued));
       },140);
-    },()=>observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE'));
+    })().catch(()=>{
+      observe('CUSTOM_NOTICE_DELIVERY_FAILED');
+      return {state:'failed'};
+    });
   }
-  return {saved,shelfOpened};
+  return {saved(provider,id){void submit(provider,id,false);},
+    savedBatch(id,origin){return submit('cloudflare','cloudflare-upload:'+id,true,origin);},shelfOpened};
 }

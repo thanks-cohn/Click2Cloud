@@ -498,3 +498,5 @@ dialog[data-file-preview]:not([data-immersive]) .dialog-head button {flex:none;m
 #explorer-upload-choices > button {display:block;margin-block-start:4px}
 .history-record-url {display:block;max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 :root:not([data-aesthetic=standard]) #programmatic-access {display:none}
+#explorer-upload-progress{inline-size:clamp(64px,15vw,120px);block-size:8px;accent-color:var(--accent)}
+#preview-text{max-inline-size:100%;max-block-size:min(55vh,480px);overflow:auto;white-space:pre;overscroll-behavior:contain}
