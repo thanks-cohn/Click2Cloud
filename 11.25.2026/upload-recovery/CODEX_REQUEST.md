@@ -21,3 +21,6 @@ Restore scrollable read-only text previews (YAML/YML, JSON, source code, config,
 
 ## Delivery
 Run focused/existing regressions, API docs checks and build, report actual results and blockers, push only assigned branch. No Part 1 completion claim until P0 acceptance passes and owner approves. Workload plan is a scaffold, not evidence of executed tests.
+
+## Mandatory follow-up reference and API-first doctrine
+Read `API_FIRST_LAB_ADDENDUM.md` before implementation. Both historical laboratories must be studied. The larger reference is under `comprehensive-lab-reference/`; the existing workload plan remains the initial scaffold, supplemented by the addendum.
