@@ -6,6 +6,12 @@ export function basicImageMime(record) {
   return previewMime(record.mime,record.filename);
 }
 
+export async function authorizeDropboxHistoryPreview(record,runtime=chrome.runtime){
+  const out=await runtime.sendMessage({channel:'redown-basic-v1',api:1,op:'auth.reconnect',
+    input:{provider:'dropbox',previewId:record.sourceRecordId}});
+  if(out?.ok!==true)throw previewError(out?.error?.code??'PREVIEW_PROVIDER_UNAVAILABLE');
+}
+
 export async function loadBasicHistoryImage(record, signal, runtime = chrome.runtime) {
   const mime = basicImageMime(record);
   if (!mime) throw previewError('PREVIEW_RECORD_UNAVAILABLE');

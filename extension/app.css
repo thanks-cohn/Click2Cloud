@@ -407,10 +407,10 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-search{display:grid;gap:4px;min-width:0;font-size:.88rem}
 .queue-search input{inline-size:100%;margin:0}
 .queue-job-window{max-height:360px;overflow:auto}
-.queue-job{height:72px;display:flex;align-items:center;gap:8px;border-block-start:1px solid var(--line);padding:6px 2px}
-.queue-job>div:first-child{flex:1;min-inline-size:0}
+.queue-job{display:grid;gap:3px;border-block-start:1px solid var(--line);padding:4px 2px 6px}
+.queue-job-heading,.queue-job-state{display:flex;align-items:center;justify-content:space-between;gap:6px;min-inline-size:0}
 .queue-job :is(strong,small){display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.queue-job progress{display:block;max-inline-size:72px;height:6px}
+.queue-job progress{display:block;inline-size:min(50%,120px);height:6px}
 .queue-job button{padding:4px;font-size:.78rem;line-height:1.1}
 .queue-badge{display:inline-block;border:1px solid var(--line);background:var(--raised);border-radius:5px;padding:2px 6px;font-size:.8rem}
 .queue-badge[data-outcome=verified]{border-color:var(--success,var(--line))}
@@ -459,10 +459,14 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-image-dialog:not([data-immersive]) .dialog-head{flex:0 0 64px;gap:8px}
 .queue-image-dialog:not([data-immersive]) [data-preview-title]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .queue-image-dialog:not([data-immersive]) [role=status]:empty{display:none}
-.queue-job>.queue-actions{flex:none;gap:4px;flex-wrap:nowrap}
-.queue-job>div:nth-child(2){min-inline-size:0;max-inline-size:34%}
-.queue-job .queue-badge{overflow-wrap:anywhere}
+.queue-job>.queue-actions{justify-content:flex-end;gap:6px}
+.queue-job .queue-badge{min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.queue-job .queue-job-state small,.queue-job .queue-dismiss{flex:none}
 .queue-job .queue-dismiss{min-inline-size:28px;min-block-size:28px}
+.history-cloudflare-location{display:flex;min-inline-size:0;overflow:hidden;white-space:pre}
+.history-cloudflare-location>.history-path-start{min-inline-size:min(38%,8ch);overflow:hidden;text-overflow:ellipsis}
+.history-cloudflare-location>.history-path-end{min-inline-size:0;display:flex;justify-content:flex-end;overflow:hidden}
+.history-path-end>span{flex:none}
 .queue-image-dialog[data-retained-preview]:not([data-immersive]) .image-frame img.preview{object-fit:scale-down}
 .queue-history-card .history-preview img{display:block;max-inline-size:100%;max-block-size:180px;object-fit:contain}
 .queue-image-dialog[data-immersive] [role=status]:empty{display:none}

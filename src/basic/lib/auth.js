@@ -6,6 +6,7 @@ export const AUTH_SCOPES = Object.freeze({
   dropbox: ["account_info.read", "files.metadata.read", "files.content.write"],
   onedrive: ["Files.ReadWrite", "User.Read", "offline_access"],
 });
+export const DROPBOX_PREVIEW_SCOPE = 'files.content.read';
 const ENDPOINTS = {
   dropbox: {
     authorize: "https://www.dropbox.com/oauth2/authorize",
@@ -504,7 +505,7 @@ export function createAuth({
     return status(id);
   }
 
-  async function pkce(id, clientId, signal) {
+  async function pkce(id, clientId, signal, scopes=AUTH_SCOPES[id]) {
     if (typeof chrome.identity?.getRedirectURL !== "function")
       throw fail("AUTH_BROWSER_UNSUPPORTED", "This browser does not support provider redirects.");
     const redirect = chrome.identity.getRedirectURL(id);
@@ -521,7 +522,7 @@ export function createAuth({
       code_challenge: challenge,
       code_challenge_method: "S256",
       state: nonce,
-      scope: AUTH_SCOPES[id].join(" "),
+      scope: scopes.join(" "),
       ...(id === "dropbox" ? {token_access_type: "offline"} : {response_mode: "query"}),
     });
     const request = () => browserCall("launchWebAuthFlow", {url: authorize.href, interactive: true});
@@ -553,9 +554,10 @@ export function createAuth({
       ...(id === "onedrive" ? {scope: AUTH_SCOPES[id].join(" ")} : {}),
     }, undefined, signal);
   }
-  async function connect(id) {
+  async function connect(id, previewIdentity) {
     valid(id);
     const slot = slots[id];
+    if(previewIdentity&&slot.login)throw connecting();
     return flight(slot, "login", OAUTH_WINDOW_MS, () => fail(
       "AUTH_WINDOW_TIMEOUT", "The sign-in window could not complete in time.",
       "Close the authorization window and try again.",
@@ -570,6 +572,8 @@ export function createAuth({
       const previous = await load(id);
       rememberRecord(id, previous);
       const expected = previous?.identity;
+      if(previewIdentity&&(id!=='dropbox'||!identityMatches(id,expected,previewIdentity)))
+        throw fail('AUTH_ACCOUNT_CHANGED','This image belongs to a different Dropbox account or root.');
       let record;
       if (id === "google") {
         // Chrome owns Google's token cache. Keep existing consent intact and
@@ -577,10 +581,14 @@ export function createAuth({
         const {scopes, identity} = await googleToken(true, expected, ticket, signal);
         record = {connected: true, scopes, identity};
       } else {
-        const candidate = await pkce(id, clientId, signal);
+        const previewScope=id==='dropbox'&&(previewIdentity||previous?.scopes?.includes(DROPBOX_PREVIEW_SCOPE));
+        const candidate = await pkce(id, clientId, signal,
+          previewScope?[...AUTH_SCOPES[id],DROPBOX_PREVIEW_SCOPE]:AUTH_SCOPES[id]);
+        if(previewIdentity&&!candidate.scopes.includes(DROPBOX_PREVIEW_SCOPE))
+          throw fail('PREVIEW_READ_SCOPE_MISSING','Dropbox did not grant image read access.');
         if (!candidate.refreshToken)
           throw fail("AUTH_OFFLINE_REQUIRED", "Offline authorization was not granted.");
-        const identity = await probe(id, candidate.accessToken, expected, signal, true);
+        const identity = await probe(id, candidate.accessToken, previewIdentity??expected, signal, true);
         record = {...candidate, identity, connected: true};
       }
       await save(id, record, ticket, signal, true);

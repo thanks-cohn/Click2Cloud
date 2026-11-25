@@ -2,7 +2,7 @@ import {VISIBILITY_MS} from '../src/queue/store.mjs';
 import {historyCalendar,historyInterval} from '../src/queue/calendar.mjs';
 import {createHistoryCards,historyLocation,providerName,queueStatus} from './history-v2-cards.mjs';
 
-const rowHeight=72, jobBatch=10;
+const rowHeight=82, jobBatch=10;
 const element=(tag,text)=>Object.assign(document.createElement(tag),text==null?{}:{textContent:text});
 
 export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screenshotRequest,signal}) {
@@ -79,30 +79,34 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
   }
   function renderJob(job){
     const row=element('article');row.className='queue-job';
-    const description=element('div'), title=element('strong',job.filename??'N/A');
+    const heading=element('div'), title=element('strong',job.filename??'N/A');
+    heading.className='queue-job-heading';
     title.title=job.filename??'';
-    description.append(title,element('small',providerName(job.provider)+' · '+historyLocation(job.destination)));
+    heading.append(title);
+    const location=element('small',providerName(job.provider)+' · '+historyLocation(job.destination));
+    location.title=location.textContent;
     const state=element('div'), status=element('span',job.status==='verified'?'Completed':queueStatus(job.status));
+    state.className='queue-job-state';
     status.className='queue-badge';status.dataset.outcome=job.status;
     const time=job.requestedAt?new Date(job.requestedAt).toLocaleTimeString():'N/A';
     status.title=job.code??'';
     state.append(status,element('small',time));
-    row.append(description,state);
+    row.append(heading,location,state);
+    const actions=element('div');actions.className='queue-actions';
     if(job.rank===0&&job.status!=='cancelling'){
       const progress=element('progress');progress.max=100;
       if(Number.isFinite(job.progress)&&job.progress>=0&&job.progress<=100)progress.value=job.progress;
       progress.setAttribute('aria-label',job.filename??'Save progress');
-      state.append(progress);
-      if(job.bytes>0)state.append(element('small',job.bytes.toLocaleString()+' bytes'));
+      actions.append(progress);
+      if(job.bytes>0)actions.append(element('small',job.bytes.toLocaleString()+' bytes'));
     }
-    const actions=element('div');actions.className='queue-actions';
-    const button=(label,click)=>{
+    const button=(label,click,parent=actions)=>{
       const b=element('button',label);
       b.type='button';
       b.onclick=()=>void Promise.resolve().then(()=>click(b)).catch(()=>{
         warning.textContent='This action is unavailable. Review the save in Remotes or History.';
       });
-      actions.append(b);
+      parent.append(b);
       return b;
     };
     if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
@@ -121,13 +125,13 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
     if(job.terminal&&['cancelled','failed'].includes(job.status)&&job.retryExpiresAt>Date.now()&&
         (job.retryable||job.kind==='screenshot'&&job.recoverable))
       button('Retry',b=>control(b,'retry',job));
-    const close=button('×',b=>control(b,job.terminal?'dismiss':'cancel',job));
+    const close=button('×',b=>control(b,job.terminal?'dismiss':'cancel',job),heading);
     close.className='queue-dismiss';
     close.disabled=!job.terminal&&!job.cancellable;
     close.title=job.terminal?'Dismiss job':job.status==='cancelling'?'Cancelling…':
       job.cancellable?'Cancel job':'Cancellation unavailable at this stage';
     close.setAttribute('aria-label',close.title+' '+(job.filename??'save'));
-    row.append(actions);
+    if(actions.childElementCount)row.append(actions);
     return row;
   }
   let frame;

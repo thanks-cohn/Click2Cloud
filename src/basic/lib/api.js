@@ -2,6 +2,7 @@ import {trustedAppSender} from '../../chrome/trusted-sender.mjs';
 import { PROVIDERS, providerId, fail, safeError } from "./common.js";
 import { exportDiagnostics, zipDataUrl } from "./zip.js";
 import {createHistoryPreviewReader} from './history-preview.js';
+import {livePreviewLimit,previewMime} from './preview.mjs';
 export const CONTRACTS = Object.freeze({
   "api.describe": {},
   "providers.list": {},
@@ -9,7 +10,7 @@ export const CONTRACTS = Object.freeze({
   "providers.checkSaveReadiness": { provider: "provider" },
   "providers.goTo": { provider: "provider" },
   "auth.connect": { provider: "provider" },
-  "auth.reconnect": { provider: "provider" },
+  "auth.reconnect": { provider: "provider", previewId: "string?" },
   "auth.refresh": { provider: "provider" },
   "saves.start": {
     provider: "provider",
@@ -114,8 +115,18 @@ export function createApi({auth, chrome, durable, afterAuth, previewAdapters}) {
         return { opened: true };
       case "auth.connect":
       case "auth.reconnect": {
-        const result = await auth[op === "auth.connect" ? "connect" : "reconnect"](input.provider);
-        if (result.ready) afterAuth?.(input.provider);
+        let previewIdentity;
+        if(input.previewId!==undefined){
+          if(input.provider!=='dropbox')throw fail('INVALID_INPUT','Image read consent applies to Dropbox.');
+          const row=await (await durable()).store.getAttempt(input.previewId);
+          if(row?.id!==input.previewId||row.provider!=='dropbox'||row.state!=='SAVED'||row.confirmed!==true||
+            !row.objectId||!row.destination?.accountId||!row.destination.namespace||
+            !previewMime(row.mime,row.filename)||!Number.isSafeInteger(row.bytes)||row.bytes<1||row.bytes>livePreviewLimit)
+            throw fail('PREVIEW_RECORD_UNAVAILABLE','The confirmed Dropbox image record is unavailable.');
+          previewIdentity=[row.destination.accountId,row.destination.namespace];
+        }
+        const result = await auth[op === "auth.connect" ? "connect" : "reconnect"](input.provider,previewIdentity);
+        if (result.ready&&!previewIdentity) afterAuth?.(input.provider);
         return describe(result);
       }
       case "auth.refresh":

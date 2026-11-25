@@ -4,7 +4,7 @@ import {withHistoryDownload} from '../src/queue/zip.mjs';
 import {safeHistoryURL} from '../src/history/model.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
 import {wireImmersiveView} from './immersive-view.mjs';
-import {basicImageMime,loadBasicHistoryImage} from './basic-history-preview.mjs';
+import {authorizeDropboxHistoryPreview,basicImageMime,loadBasicHistoryImage} from './basic-history-preview.mjs';
 import {createScreenshotRetryCache} from '../src/screenshot/retry-cache.mjs';
 import {hasHistoryV2Value,historyV2FieldLabels,historyV2FieldVisible,historyV2Providers,normalizeHistoryV2View} from './history-v2-preferences.mjs';
 
@@ -52,11 +52,12 @@ const previewMessage = error => ({
   AUTH_REQUIRED:'Sign in to the saved provider account in Remotes to preview this file.',
   AUTH_ACCOUNT_CHANGED:'The saved file belongs to another account or drive.',
   AUTH_CHANGED:'The provider connection changed. Open the preview again.',
+  AUTH_CANCELLED:'Dropbox authorization was cancelled.',
   AUTH_REVOKED:'Reconnect the saved provider account in Remotes.',
   AUTH_SCOPE_REQUIRED:'The saved provider authorization lacks the necessary file access.',
   PROVIDER_AUTH_REVOKED:'Reconnect the saved provider account in Remotes.',
   PROVIDER_PERMISSION:'The saved provider account cannot read this image.',
-  PREVIEW_READ_SCOPE_MISSING:'Dropbox file-read access is unavailable. This save has no usable retained image.',
+  PREVIEW_READ_SCOPE_MISSING:'Allow Dropbox file-read access to preview this saved image.',
   PREVIEW_RECORD_UNAVAILABLE:'The original confirmed image record is unavailable.',
   PREVIEW_ACCOUNT_UNAVAILABLE:'No verified account binding is available for a live preview.',
   PREVIEW_FILE_UNAVAILABLE:'The receipt does not identify an exact image and version.',
@@ -76,6 +77,38 @@ const filename = name => {
 const retainedScreenshot = record => record.kind==='screenshot'&&record.status!=='verified'&&
   record.retryExpiresAt>Date.now()&&/^[a-f\d]{64}$/.test(record.checksum??'')&&
   /^[a-f\d-]{36}$/i.test(record.sourceRecordId);
+const graphemes=new Intl.Segmenter(undefined,{granularity:'grapheme'});
+function paintCloudflareLocation(location,full,file){
+  location.title=full;
+  location.tabIndex=0;
+  location.setAttribute('role','group');
+  location.setAttribute('aria-label',full);
+  const end=Array.from(graphemes.segment(file??''),part=>part.segment).slice(-20).join('');
+  if(!end||!full.endsWith(end)){
+    location.textContent=full;
+    location.classList.remove('history-cloudflare-location');
+    return;
+  }
+  location.classList.add('history-cloudflare-location');
+  const start=node('span',full.slice(0,-end.length),'history-path-start');
+  const tail=node('span',null,'history-path-end');
+  start.setAttribute('aria-hidden','true');tail.setAttribute('aria-hidden','true');
+  tail.append(node('span',end));location.replaceChildren(start,tail);
+}
+function previewRetry(record,error,feedback,retry,isCurrent){
+  const consent=record.provider==='dropbox'&&error.code==='PREVIEW_READ_SCOPE_MISSING';
+  if(!consent&&!['PREVIEW_BUSY','PREVIEW_TIMEOUT','AUTH_CHANGED'].includes(error.code))return null;
+  const button=action(consent?'Allow Dropbox image previews':'Retry preview',async()=>{
+    if(button.disabled||!isCurrent())return;
+    button.disabled=true;
+    try{
+      if(consent)await authorizeDropboxHistoryPreview(record);
+      if(isCurrent())retry();
+    }catch(error){if(isCurrent())feedback.textContent=previewMessage(error);}
+    finally{button.disabled=false;}
+  });
+  return button;
+}
 
 export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility,rename,renameError,onGalleryClosed}) {
   const rows = [], names = new Map(), thumbnails = new WeakMap(), previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
@@ -227,6 +260,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     previewAbort = new AbortController();
     const local = previewAbort.signal, dialog = previewDialog;
     const image = dialog.querySelector('img'), feedback = dialog.querySelector('[role=status]');
+    dialog.querySelector('[data-gallery-preview-retry]')?.remove();
     image.hidden=true;
     dialog.removeAttribute('data-retained-preview');
     image.onload=image.onerror=null;
@@ -253,7 +287,11 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       image.onerror=()=>{if(!local.aborted){URL.revokeObjectURL(url);previewUrl=undefined;immersive.unavailable();feedback.textContent='Image decode failed.';}};
       image.src=url;
     } catch(error) {
-      if(!local.aborted){immersive.unavailable();feedback.textContent=previewMessage(error);}
+      if(!local.aborted){
+        immersive.unavailable();feedback.textContent=previewMessage(error);
+        const retry=previewRetry(record,error,feedback,()=>void showImage(index),()=>!local.aborted);
+        if(retry){retry.dataset.galleryPreviewRetry='';dialog.querySelector('.gallery-actions').prepend(retry);}
+      }
     }
   }
   function gallery(record,trigger) {
@@ -335,7 +373,16 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         }catch(error){
           if(!ctrl.signal.aborted){
             const message=previewMessage(error);
-            if(!record.destination?.key||error.message!=='PREVIEW_SIZE_LIMIT')slot.textContent=message;
+            if(!record.destination?.key||error.message!=='PREVIEW_SIZE_LIMIT'){
+              const feedback=node('span',message);
+              const retry=previewRetry(record,error,feedback,()=>{
+                delete slot.dataset.failed;
+                slot.replaceChildren();
+                pump();
+              },()=>!signal.aborted&&slot.isConnected);
+              slot.replaceChildren(feedback);
+              if(retry)slot.append(retry);
+            }
             else{
               const open=action(message,()=>gallery(record,open));
               open.className='history-thumbnail';
@@ -388,7 +435,9 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const updateSummary=()=>{
       when.hidden=compact||view.hideNA&&!timestamp;
       const path=savedLocation(record.destination);
-      location.textContent=!compact&&(path||!view.hideNA) ? `${provider} · ${path||'N/A'}` : provider;
+      const full=!compact&&(path||!view.hideNA) ? `${provider} · ${path||'N/A'}` : provider;
+      if(basic)location.textContent=full;
+      else paintCloudflareLocation(location,full,(record.destination?.key??record.destination?.folder)?.split('/').filter(Boolean).at(-1));
     };
     metadata.push(updateSummary);
     updateSummary();

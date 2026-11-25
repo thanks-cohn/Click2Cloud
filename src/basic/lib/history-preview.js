@@ -1,4 +1,4 @@
-import {identityMatches} from './auth.js';
+import {DROPBOX_PREVIEW_SCOPE,identityMatches} from './auth.js';
 import {livePreviewLimit, previewError, previewMime} from './preview.mjs';
 
 function abortable(promise, signal) {
@@ -37,7 +37,7 @@ export function createHistoryPreviewReader({auth,adapters,readAttempt}) {
       }
       const grant = await abortable(auth.authorization(provider),signal);
       if (!identityMatches(provider,identity,grant.identity)) throw previewError('AUTH_ACCOUNT_CHANGED');
-      if (provider === 'dropbox' && !grant.scopes?.includes('files.content.read')) throw previewError('PREVIEW_READ_SCOPE_MISSING');
+      if (provider === 'dropbox' && !grant.scopes?.includes(DROPBOX_PREVIEW_SCOPE)) throw previewError('PREVIEW_READ_SCOPE_MISSING');
       signal.throwIfAborted();
       const preview = await adapters[provider].readImage({id:objectId,size:row.bytes,mime,token:grant.accessToken,signal});
       signal.throwIfAborted();

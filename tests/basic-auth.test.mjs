@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createAuth, AUTH_SCOPES } from "../src/basic/lib/auth.js";
+import { createAuth, AUTH_SCOPES, DROPBOX_PREVIEW_SCOPE } from "../src/basic/lib/auth.js";
 const NOW = 1700000000000;
 const json = (value, status = 200) =>
   new Response(JSON.stringify(value), { status });
@@ -22,6 +22,7 @@ function setup({
   browserError,
   staleGoogle = false,
   badNamespace = false,
+  dropboxPreviewGranted = false,
   badRoot = false,
   distinctRotations = false,
   failProbeAfterExchange = false,
@@ -133,7 +134,9 @@ function setup({
         refresh_token: distinctRotations ? "rotation-" + exchange : "rotated-refresh",
         expires_in: 3600,
         ...(!noScopeResponse
-          ? { scope: missingScope ? "User.Read" : AUTH_SCOPES[url.includes("dropboxapi") ? "dropbox" : "onedrive"].join(" ") }
+          ? { scope: missingScope ? "User.Read" : url.includes("dropboxapi")&&dropboxPreviewGranted
+            ? [...AUTH_SCOPES.dropbox,DROPBOX_PREVIEW_SCOPE].join(" ")
+            : AUTH_SCOPES[url.includes("dropboxapi") ? "dropbox" : "onedrive"].join(" ") }
           : {}),
       });
     }
@@ -299,6 +302,31 @@ test("Dropbox preserves legacy account binding, verifies today's root, and rejec
   await assert.rejects(moved.auth.token("dropbox"), {code: "AUTH_ACCOUNT_CHANGED"});
   await assert.rejects(moved.auth.reconnect("dropbox"), {code: "AUTH_ACCOUNT_CHANGED"});
   assert.deepEqual(moved.store["redownRemoteBasicV1:auth:dropbox"].identity, ["account", "1001"]);
+});
+
+test('Dropbox History consent requests only the optional read scope and keeps the save grant on denial or account change',async()=>{
+  const record='redownRemoteBasicV1:auth:dropbox';
+  const expected=['account','1001'];
+  const f=setup({initial:true,dropboxPreviewGranted:true});
+  await f.auth.status('dropbox');
+  assert.equal(f.popups.length,0);
+  await f.auth.reconnect('dropbox',expected);
+  const requested=new URL(f.popups[0].url).searchParams.get('scope').split(' ');
+  assert.deepEqual(requested,[...AUTH_SCOPES.dropbox,DROPBOX_PREVIEW_SCOPE]);
+  assert(f.store[record].scopes.includes(DROPBOX_PREVIEW_SCOPE));
+  assert.deepEqual(f.store[record].identity,expected);
+  for(const [options,code] of [
+    [{},'PREVIEW_READ_SCOPE_MISSING'],
+    [{cancelled:true},'AUTH_CANCELLED'],
+    [{dropboxPreviewGranted:true,badNamespace:true},'AUTH_ACCOUNT_CHANGED']
+  ]){
+    const attempt=setup({initial:true,...options}),before=structuredClone(attempt.store);
+    await assert.rejects(attempt.auth.reconnect('dropbox',expected),{code});
+    assert.deepEqual(attempt.store,before);
+  }
+  const other=setup({initial:true});
+  await assert.rejects(other.auth.reconnect('dropbox',['other','1001']),{code:'AUTH_ACCOUNT_CHANGED'});
+  assert.equal(other.popups.length,0);
 });
 
 test("OneDrive refuses a changed root for both a save and interactive replacement", async () => {
