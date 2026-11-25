@@ -1,0 +1,132 @@
+:root[data-aesthetic=chrome] {
+  --a-package: chrome;
+  --bg: #0a0a0a;
+  --panel: #212121;
+  --raised: #383838;
+  --text: #f4f4f4;
+  --muted: #c7c7c7;
+  --line: #686868;
+  --accent: #ff5371;
+  --selected: #4d1422;
+  --focus: #ff8da1;
+  --primary-text: #1a1a1a;
+  --body-font: Roboto, "Segoe UI", Arial, sans-serif;
+  --heading-font: var(--body-font);
+  --control-font: var(--body-font);
+  --heading-weight: 700;
+  --control-weight: 500;
+  --card-radius: 10px;
+  --card-margin: 12px;
+  --dialog-radius: 10px;
+  --chrome-liquid:
+    radial-gradient(ellipse at 106% 16%, #a0a0a048, transparent 49%),
+    radial-gradient(ellipse at -15% 84%, #5656564d, transparent 51%),
+    linear-gradient(145deg, #070707 8%, #363636 27%, #101010 43%, #060606 60%, #303030 83%, #080808);
+  --chrome-edge: linear-gradient(145deg, #c5c5c5, #777 20%, #303030 48%, #080808 76%, #777);
+  --chrome-crimson: linear-gradient(145deg, #ff5974, #dd0029 25%, #790019 70%, #d80028);
+  --chrome-panel: linear-gradient(155deg, #424242, #292929 25%, #151515 65%, #242424);
+  --chrome-bar: linear-gradient(#424242, #171717);
+  --chrome-button: linear-gradient(#484848, #292929 47%, #1a1a1a);
+  --chrome-silver: linear-gradient(#fafafa, #e0e0e0 46%, #b8b8b8 51%, #e0e0e0);
+  --chrome-depth: inset 0 1px #ffffff20, 0 3px #040506, 0 6px 10px #0005;
+  --chrome-moon: url("../icons/chrome-moon-dark.svg");
+}
+:root[data-aesthetic=chrome][data-theme=light] {
+  --bg: #f3f3f3;
+  --panel: #f9f9f9;
+  --raised: #e3e3e3;
+  --text: #212121;
+  --muted: #484848;
+  --line: #888;
+  --accent: #a00022;
+  --selected: #fbe4e8;
+  --focus: #9d001f;
+  --chrome-liquid:
+    radial-gradient(ellipse at -15% 40%, white, transparent 46%),
+    linear-gradient(132deg, white 3%, #c0c0c0 19%, #f9f9f9 31%, white 43%, #b8b8b8 58%, #ededed 69%, white 82%, #bcbcbc 95%);
+  --chrome-edge: linear-gradient(140deg, white, #aaa 30%, #777 58%, #eee 88%, #999);
+  --chrome-crimson: linear-gradient(140deg, #ff8b9e, #da0029 25%, #97001b 58%, #f54261 85%, #a10020);
+  --chrome-panel: linear-gradient(153deg, white, #e7e7e7 23%, #fdfdfd 45%, #d5d5d5 78%, #f6f6f6);
+  --chrome-bar: linear-gradient(#fafafa, #d3d3d3 46%, #ededed 50%, #bbb);
+  --chrome-button: linear-gradient(white, #dedede 48%, #c6c6c6 51%, #f1f1f1);
+  --chrome-depth: inset 0 1px white, 0 3px 5px #0004;
+  --chrome-moon: url("../icons/chrome-moon-light.svg");
+}
+:root[data-aesthetic=chrome] {
+  & #shell {background: var(--chrome-liquid);}
+  & #shell::before {
+    content:"";
+    position:absolute;
+    z-index:1;
+    inset:0;
+    border:3px solid transparent;
+    border-image:var(--chrome-edge) 1;
+    pointer-events:none;
+  }
+  & :is(.app-header,#shell:not([data-view=explorer])>#manage-slot) {
+    background:var(--chrome-bar);
+  }
+  & :where(.card,dialog:not([data-immersive]),#header-menu,#context,#toolbar-overflow) {
+    background:var(--chrome-panel) padding-box,var(--chrome-edge) border-box;
+    border:2px solid transparent;
+    box-shadow:var(--chrome-depth);
+  }
+  & :is(.remote-provider,.remote-cloudflare) {border-width:3px;}
+  & .remote-provider:focus-within, & .remote-cloudflare:focus-within {
+    background:var(--chrome-panel) padding-box,var(--chrome-crimson) border-box;
+    border-color:transparent;
+  }
+  & .remote-interlude {color:var(--text);}
+  & .remote-interlude span {color:inherit;}
+  & :is(.toolbar,#explorer-commands,#shell>aside,.dialog-head,.dialog-foot) {
+    background:var(--chrome-panel);
+  }
+  & button:where(:not(.gallery-arrow,#theme,#repair-me)) {
+    background:var(--chrome-button);
+    box-shadow:inset 0 1px #ffffff36,inset 0 -2px #0003;
+    border-radius:6px;
+  }
+  & button:where(:not(.gallery-arrow,#theme,#repair-me)):active:not(:disabled) {
+    box-shadow:inset 0 2px 3px #0006;
+  }
+  & button.primary, & .remote-provider-actions [data-connect] {
+    background:var(--chrome-silver);
+    border-color:#bcbcbc;
+    color:#171717;
+  }
+  & .remote-provider-actions [data-connect][data-authenticated] {border-color:#57966a;}
+  & .app-header nav>button:is(.active,[aria-current=page]),
+  & .tabs button.active, & button[aria-pressed=true]:not(#theme) {
+    color:white;
+    background:linear-gradient(#d71936,#96001c);
+    border-color:#ff526b;
+    box-shadow:inset 0 1px #ff879880,inset 0 -2px #660016;
+  }
+  & .remote-cloudflare button.cf-connection-primary {
+    display:block;
+    margin:6px 0;
+    inline-size:100%;
+    min-block-size:36px;
+    color:#291304;
+    background:linear-gradient(#ffc18c,#f78e37 48%,#e47b26);
+    border-color:#ffad60;
+    box-shadow:inset 0 1px #ffdfbe,inset 0 -2px #9a410c,0 3px 5px #0004;
+  }
+  & .remote-cloudflare button.cf-connection-primary[data-authenticated] {
+    border-color:#39744a;
+    outline:1px solid #66a676;
+  }
+  & .cf-legacy-mark {display:none;}
+  & .cf-chrome-mark {display:inline-block;inline-size:25px;block-size:16px;vertical-align:-3px;}
+  & #theme {background:none;}
+  & #theme :is(.theme-sun,.theme-moon) {display:none;}
+  & .chrome-appearance-icon {
+    display:block;
+    inline-size:100%;
+    block-size:100%;
+    background:var(--chrome-moon) center/contain no-repeat;
+  }
+}
+:root[data-aesthetic=chrome][data-theme=dark] #theme:is(:hover,:focus-visible) .chrome-appearance-icon {
+  background-image:url("../icons/chrome-sun.svg");
+}

@@ -77,8 +77,16 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
   }
   function paint(card, status) {
     card.isReady = status.ready === true && status.connected === true;
-    card.connect.textContent = status.connected ? 'Reconnect' : 'Sign In';
-    card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
+    const authenticated = card.isReady && status.authorized !== false;
+    const reconnect = status.phase === 'reconnect-needed';
+    const disconnected = !status.connected && [undefined,'disconnected'].includes(status.phase);
+    card.connect.textContent = authenticated ? 'Connected' : reconnect ? 'Reconnect' :
+      disconnected ? 'Connect' : status.phase === 'connecting' ? 'Connecting…' : 'Check connection';
+    card.connect.toggleAttribute('data-authenticated',authenticated);
+    card.connect.title = authenticated ? 'Reconnect ' + card.label : '';
+    if(authenticated)card.connect.setAttribute('aria-description',card.connect.title);
+    else card.connect.removeAttribute('aria-description');
+    card.operation = authenticated || reconnect ? 'auth.reconnect' : disconnected ? 'auth.connect' : 'auth.refresh';
     card.availability.textContent = status.ready || !status.connected && ['AUTH_REQUIRED','DISCONNECTED',undefined].includes(status.reason)
       ? '' : [status.message, status.nextAction].filter(Boolean).join(' ');
     paintActivity(card);
@@ -98,14 +106,14 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         <p class="muted" data-availability></p>
       </div>
       <div class="remote-provider-actions">
-        <button type="button" class="primary" data-connect>Sign In</button>
+        <button type="button" class="primary" data-connect>Connect</button>
+        <button type="button" data-refresh aria-label="Refresh ${label}" title="Refresh ${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M5.5 8a7.5 7.5 0 0 1 12.4-2L20 9M4 15l2.1 3a7.5 7.5 0 0 0 12.4-2"/></svg></button>
         <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
-        <button type="button" data-refresh>Refresh</button>
       </div>
       <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
-      connect: get('connect'), refresh: get('refresh'),
+      label, connect: get('connect'), refresh: get('refresh'),
       availability: get('availability'), continueSave: get('continue'), activity: get('activity'),
       operation: 'auth.connect', revision: 0, attemptRevision: 0, active: 0,
     };
@@ -116,6 +124,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       const revision = card.revision;
       const buttons = changesStatus ? [card.connect, card.refresh] : [button];
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
+      if(changesStatus)card.refresh.setAttribute('aria-busy','true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
       delete feedback.dataset.code;
       card.problem=false;
@@ -133,6 +142,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         feedback.dataset.code = error.code;
       } finally {
         for (const control of buttons) control.removeAttribute('aria-disabled');
+        if(changesStatus)card.refresh.removeAttribute('aria-busy');
         card.active--;
         paintActivity(card);
       }

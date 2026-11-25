@@ -41,11 +41,22 @@
 .remote-provider-info{grid-column:1/-1;font-size:12px;text-align:end}
 .remote-provider-info:not(:has([data-availability]:not(:empty),[data-feedback]:not(:empty),[data-navigation]:not(:empty))){display:none}
 .remote-provider-info p{text-align:start}
-.remote-provider-actions{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.remote-provider-actions{grid-column:1/-1;display:flex;align-items:center;gap:6px}
 .remote-provider-actions [data-connect]{margin-inline-end:auto}
 .remote-provider>[data-continue]{grid-column:1/-1;justify-self:start}
 .remote-provider button{min-block-size:36px;max-inline-size:100%;padding-inline:8px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
 .remote-provider-actions :is([data-refresh],[data-go],[data-connect]){white-space:nowrap}
+.remote-provider-actions [data-refresh]{display:grid;place-items:center;flex:none;inline-size:36px;block-size:36px;padding:0}
+.remote-provider-actions [data-refresh] svg{inline-size:17px;block-size:17px}
+.remote-provider-actions [data-go]{flex:none}
+.remote-provider-actions [data-connect]{min-inline-size:0;overflow:hidden;text-overflow:ellipsis}
+.remote-provider button[data-authenticated],.remote-cloudflare button[data-authenticated]{border-color:#629b70}
+@media(hover:hover) and (pointer:fine){
+ .remote-provider-actions [data-refresh]{opacity:0;pointer-events:none;transition:opacity .24s ease .55s}
+ .remote-provider:is(:hover,:focus-within) [data-refresh],.remote-provider-actions [data-refresh][aria-busy=true]{
+  opacity:1;pointer-events:auto;transition-delay:0s
+ }
+}
 .remote-provider-actions button[aria-disabled=true]{opacity:.58;cursor:progress}
 .remote-provider :is([data-feedback],[data-availability],[data-navigation]):empty{display:none}
 .remote-provider p{margin:0;font-size:12px}
@@ -80,3 +91,13 @@
 #basic-diagnostics-status:empty{margin:0}
 
 :root:not([data-aesthetic=standard]) :is(#settings-recovery,#settings-whole-cloud,.remote-v1-copy){display:none}
+#shell[data-view=remotes]>#manage-slot{justify-content:space-between}
+#shell:not([data-view=remotes]) #repair-me{display:none}
+#repair-me{
+ flex:none;min-block-size:36px;padding:5px 10px;pointer-events:auto;
+ color:#c8ffdb;background:#142d1c;border-color:#65bc83;box-shadow:0 0 7px #61e98750;
+}
+#repair-me:hover{background:#1b3a25}
+#repair-me:not(:disabled){animation:repair-outline 2.6s ease-in-out infinite}
+@keyframes repair-outline{50%{border-color:#c7ffda;box-shadow:0 0 9px #61e98775}}
+.chrome-appearance-icon,.cf-chrome-mark{display:none}

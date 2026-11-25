@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="themes/oceania.css">
 <link rel="stylesheet" href="themes/kawaii.css">
 <link rel="stylesheet" href="themes/dungeon-master.css">
-<link rel="stylesheet" href="themes/heroine.css"><link rel="stylesheet" href="themes/frames.css"></head>
+<link rel="stylesheet" href="themes/heroine.css"><link rel="stylesheet" href="themes/frames.css"><link rel="stylesheet" href="themes/chrome.css"></head>
 <body><header class="app-header">
   <div class="brand-lockup"><img src="icons/redown-48.png" width="35" height="35" alt="REDOWN"></div>
   <nav aria-label="Application">
@@ -17,11 +17,11 @@
     <div class="header-more"><button id="header-more" aria-haspopup="menu" aria-expanded="false" aria-controls="header-menu" aria-label="More"><span aria-hidden="true">⋯</span></button>
       <div id="header-menu" role="menu" hidden><button role="menuitem" disabled data-view="history">History</button><button role="menuitem" disabled data-view="screenshot">Screenshots</button><button role="menuitem" disabled data-view="settings">Settings</button><button role="menuitem" id="help-diagnose" data-debug-only hidden>Help · Diagnose</button></div>
     </div>
-    <button disabled id="theme" aria-label="Switch Light or Dark theme"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">◐</span></button>
+    <button disabled id="theme" aria-label="Switch Light or Dark theme"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">◐</span><span class="chrome-appearance-icon" aria-hidden="true"></span></button>
   </div>
 </header>
 <div id="shell" data-view="remotes"><aside aria-label="Cloud navigation"><div id="connection"></div><div id="tree" role="tree" aria-label="Cloud folders"></div></aside><div id="pane-splitter" role="separator" aria-label="Folder tree and files width" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0"></div><main id="main" tabindex="-1"><section class="page remotes-page"><div class="remotes-intro"><h1 class="remotes-headline"><span>All Your Clouds</span> <span>One Place</span></h1></div></section></main>
-  <div id="manage-slot"><button disabled id="manage" aria-label="Manage Destinations" title="Manage Destinations"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 6h7l2 2h9v12H3z"/><path d="M12 11v6m-3-3h6"/></svg><span>Manage Destinations</span></button></div>
+  <div id="manage-slot"><button disabled id="manage" aria-label="Manage Destinations" title="Manage Destinations"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 6h7l2 2h9v12H3z"/><path d="M12 11v6m-3-3h6"/></svg><span>Manage Destinations</span></button><button type="button" id="repair-me" hidden>Repair Me</button></div>
 </div>
 <div id="feedback-stack">
   <div id="status" role="status" aria-live="polite" hidden></div>

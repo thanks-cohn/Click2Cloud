@@ -18,11 +18,11 @@ test('Built-in palettes are complete and reject geometry, visibility, remote fon
   {fonts:{...original.fonts,heading:['url(https://example.org)',700]}},{fonts:{...original.fonts,heading:['Georgia',1000]}}])assert.equal(validatePalette({...original,...patch}),false);
 });
 test('Minimal is the default, old choices restore deterministically and unrelated preferences survive',async()=>{
- for(const [saved,expected] of [[undefined,'minimal'],[pref('high-polish'),'minimal'],[pref('minimal'),'minimal'],[pref('standard'),'standard'],[pref('missing'),'minimal'],[{schemaVersion:2,id:'standard'},'minimal']]){
+ for(const [saved,expected] of [[undefined,'minimal'],[pref('high-polish'),'minimal'],[pref('minimal'),'minimal'],[pref('standard'),'standard'],[pref('chrome'),'chrome'],[pref('missing'),'minimal'],[{schemaVersion:2,id:'standard'},'minimal']]){
   const values={[AESTHETIC_PREFERENCE_KEY]:saved,[PALETTE_PREFERENCE_KEY]:pref('emerald-forest'),fontPreference:'ignored',screenshotRules:{fixtures:true}};
   const {host,writes,root}=fixture(values);
   await host.restore();
-  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames']);
+  assert.deepEqual(host.list().map(theme=>theme.name),['Minimal','Remote V1','Golden Age','Oceania','Nostalgia','Frames','Chrome']);
   assert.equal(root.dataset.aesthetic,expected);
   assert.equal(root.dataset.aestheticHide,undefined);
   assert.equal(host.getPalette(),'emerald-forest');

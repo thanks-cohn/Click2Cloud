@@ -255,6 +255,12 @@ async function change(changes,{confirmed=false,expectedRevision=state.product.re
   const r=await api('commitConfigChange',{changes,expectedRevision,idempotencyKey,...(prepareModes?{prepareModes}:{})});
   if(r.configuration.product.revision>=state.product.revision)state=r.configuration;applyColorMode(state.product.theme);
   if(changes.some(c=>['createDestination','updateDestination','deleteDestinationConfig','setProviderPlacement','setProviderMenuVisibility','setShowInChrome'].includes(c.type))){suggestionDue=true;if(view==='explorer')void suggestion();}
+  for(const entry of r.destinationReadiness??[]){
+    const key=targetKey(entry.target);
+    if(repairableReadiness.has(entry.code))repairTargets.set(key,entry.target);
+    else if(entry.code!=='NATIVE_APPLY_INCOMPLETE')repairTargets.delete(key);
+  }
+  renderRepair();
   const blocked=r.destinationReadiness?.find(d=>d.state!=='READY');
   if(blocked){cloudflareState={state:'REPAIR_REQUIRED',...blocked,accountId:blocked.target.accountId};status('Configuration saved · Destination unavailable · '+(names[blocked.code]??blocked.code)+'');}
  else if(!r.native?.retained&&r.backup?.code!=='IDEMPOTENT_REPLAY')
@@ -300,7 +306,7 @@ async function connections() {
 }
 async function signOut(event){
   const button=event.currentTarget;button.disabled=true;
-  try{await api('disconnect');cloudflareState=null;await connections();if(view==='remotes')renderRemotes();status('Signed out. Saved destinations remain.');}
+  try{await api('disconnect');cloudflareState=null;reconnectNeeded=false;await connections();if(view==='remotes')renderRemotes();status('Signed out. Saved destinations remain.');}
   finally{button.disabled=false;}
 }
 function renderConnection(){
@@ -314,17 +320,19 @@ function renderConnection(){
   const caption={CONNECTED:'Connected',CONNECTING:'Signing in…',VERIFYING:'Authorization received. Checking account access…',
     DISCONNECTED:'Not connected',UNKNOWN:'Checking connection…'}[connection.state]??'Connection status unavailable';
   const updatePermissions=connection.permissions?.needsReconsent?'<button id="reauthorize">Update Cloudflare permissions</button>':'';
-  const controls=connected?(inExplorer?'':'<button id="browse">Open File Explorer</button><button id="sign-out">Sign out</button>')+updatePermissions:
+  const controls=connected?(inExplorer?'':'<button id="browse" class="cf-connection-primary" data-authenticated title="Open File Explorer" aria-label="Connected · Open File Explorer">Connected</button><button id="sign-out">Sign out</button>')+updatePermissions:
     connection.state==='CONNECTING'?'<button id="cancel-login">Cancel sign-in</button>':
     connection.state==='VERIFYING'?'<button id="verify-login">Check account authorization</button>':
-    connection.state==='UNKNOWN'?'' : `<button id="login" ${reconnectNeeded?'class="reconnect-needed"':''}>${inExplorer?'Log In':reconnectNeeded?'Reconnect':'Log in'}</button>`;
-  const showCaption=inExplorer||!['DISCONNECTED','UNKNOWN'].includes(connection.state);
+    connection.state==='DISCONNECTED'? `<button id="login" class="${inExplorer?'':'cf-connection-primary'} ${reconnectNeeded?'reconnect-needed':''}">${reconnectNeeded?'Reconnect':inExplorer?'Log In':'Connect to Cloudflare'}</button>`:
+    connection.state==='UNKNOWN'?'':'<button id="check-connection">Check connection</button>';
+  const showCaption=inExplorer||!['DISCONNECTED','CONNECTED'].includes(connection.state);
   const connectionIssue=names[connection.diagnostic?.code];
   connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}${showCaption?`<p class="muted">${caption}</p>`:''}${connectionIssue?
     '<p class="muted" role="status">'+esc(connectionIssue)+'</p>':''}${controls}`;
   listen('#connection #sign-out','click',signOut);listen('#reauthorize','click',()=>login('#reauthorize'));
   listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());
   listen('#cancel-login','click',async()=>{await api('loginCancel');await connections();});listen('#browse','click',()=>show('explorer'));
+  listen('#check-connection','click',connections);
 }
 async function login(selector='#login',params={}) {
   const intent=viewEpoch;
@@ -379,11 +387,57 @@ function setupStatusMarkup(){
 }
 function ordinarySetupReview(){
  if(connection?.state!=='CONNECTED'||reconnectCodes.has(cloudflareState?.code??shelfRequest?.code))return '';
+ if(eligibleRepairTargets().length)return '';
  if(shelfRequest?.target)return cloudflareState?.selectedReady?'':'<button id="review-selected">Review save setup</button>';
  const code=cloudflareState?.code??cloudflareState?.state??shelfRequest?.code;
  return ['SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','WORKER_SETUP_REQUIRED','ACCOUNT_AMBIGUOUS','CHOOSE_DESTINATION','DESTINATION_UNAVAILABLE','NOT_ACTIVATED','R2_CONFIRMED_INACTIVE'].includes(code)
   ?'<button id="review-selected">Review save setup</button>':'';
 }
+const repairableReadiness=new Set(['WORKER_SETUP_REQUIRED','WORKER_NOT_READY','WRITE_PROOF_REQUIRED','TRANSPORT_UNAVAILABLE','RESPONSE_INVALID','WORKER_RECOVERY_FAILED','PROVISION_RECONCILE_REQUIRED']);
+const repairTargets=new Map();
+let repairing=false;
+function eligibleRepairTargets(){
+ if(connection?.state!=='CONNECTED'||!state?.product.providerVisibility.cloudflare)return [];
+ const configured=Object.entries(state.configs).flatMap(([mode,config])=>state.product.show[mode]?
+   (config.destinations??config.scopes).filter(row=>!row.hidden).map(row=>targetKey(row.target)):[]);
+ if(state.product.defaultTarget)configured.push(targetKey(state.product.defaultTarget));
+ return [...repairTargets.values()].filter(target=>configured.includes(targetKey(target))&&connection.accounts.some(account=>account.id===target.accountId));
+}
+function renderRepair(){
+ const button=$('#repair-me');
+ button.hidden=view!=='remotes'||!eligibleRepairTargets().length;
+ button.disabled=repairing;
+ button.setAttribute('aria-busy',String(repairing));
+}
+async function repairDestinations(){
+ if(repairing)return;
+ const targets=eligibleRepairTargets();
+ if(!targets.length)return;
+ repairing=true;renderRepair();
+ let failure, recovered=0;
+ try{
+  status('Checking the affected Cloudflare destinations…');
+  for(const target of targets){
+   if(!eligibleRepairTargets().includes(target))continue;
+   try{
+    const result=await api('recoverCloudflareDestination',{target,expectedRevision:state.product.revision},{quiet:true});
+    if(result.state==='completed'&&result.native?.state==='completed'&&result.readiness?.state==='READY'){
+     recovered++;
+     repairTargets.delete(targetKey(target));
+     if(cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target))cloudflareState=null;
+    }else{
+     failure=result.code??'WORKER_RECOVERY_FAILED';
+     if(failure&&cloudflareState?.target&&targetKey(cloudflareState.target)===targetKey(target))
+      cloudflareState={...result,target,accountId:target.accountId};
+     if(result.requiredAction||reconnectCodes.has(failure))repairTargets.delete(targetKey(target));
+    }
+   }catch(error){failure=error.code??'WORKER_RECOVERY_FAILED';if(reconnectCodes.has(failure))repairTargets.delete(targetKey(target));}
+  }
+  if(failure)status('Destination recovery is incomplete · '+(names[failure]??readinessNames[failure]??failure));
+  else if(recovered)status('Cloudflare destinations verified · Chrome menu updated');
+ }finally{repairing=false;renderRepair();if(view==='remotes')renderRemotes();}
+}
+listen('#repair-me','click',repairDestinations);
 const basicCards=createBasicProviderCards({runtime:chrome.runtime,document,permissions:chrome.permissions,
  pulseEnabled:()=>visualFeedback.value.cardPulse});
 visualFeedback.subscribe(value=>{if(!value.cardPulse)basicCards.clearSuccesses();});
@@ -395,14 +449,16 @@ function renderRemotes(){
   $('#main').innerHTML=`<section class="page remotes-page">
     <div class="remotes-intro"><h1 class="remotes-headline"><span>All Your Clouds</span> <span>One Place</span></h1></div>
     <div id="basic-provider-slot"></div>
-    <h2 class="remote-interlude"><span>The Future is NOW</span><span>True Remote is Here</span></h2>
-    <div class="card remote-cloudflare"><h2>☁ Cloudflare R2</h2><div id="remotes-connection"></div></div>${setupStatusMarkup()}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<button id="cloudflare-setup" class="remote-v1-copy">Review Cloudflare setup</button>${configurationIssue?recoveryCard():''}</section>`;
+    <h2 class="remote-interlude"><span>The Future Is NOW</span><span>True Remote Is Here</span></h2>
+    <div class="card remote-cloudflare"><h2><span class="cf-legacy-mark">☁</span><svg class="cf-chrome-mark" viewBox="0 0 48 32" aria-hidden="true"><path fill="#f48120" d="M4 25a8 8 0 0 1 9-9 13 13 0 0 1 25 2l-3 7Z"/><path fill="#faae40" d="M37 17a7 7 0 1 1 3 12H34Z"/><path fill="#f48120" d="M3 27h30v3H3Z"/></svg> Cloudflare R2</h2><div id="remotes-connection"></div></div>${setupStatusMarkup()}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<button id="cloudflare-setup" class="remote-v1-copy">Review Cloudflare setup</button>${configurationIssue?recoveryCard():''}</section>`;
+  if(aesthetic.getActive().id!=='standard')$('#cloudflare-setup')?.remove();
   basicCards.mount($('#basic-provider-slot'));
   focusedProvider?.focus({preventScroll:true});
   $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#review-selected','click',cloudflarePanel);listen('#cloudflare-setup','click',cloudflarePanel);applyDebugMode(debugMode);
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
+  renderRepair();
 }
 async function focusShelf({live=false}={}){
  const request=await api('inspectShelfAttention',{}, {quiet:true});shelfRequest=request;
@@ -414,6 +470,11 @@ async function focusShelf({live=false}={}){
  if(request?.provider==='cloudflare'&&request.target){
   try{const readiness=await api('checkCloudflareR2',{accountId:request.target.accountId,target:request.target},{quiet:true}),native=readiness.state==='READY'?await api('inspectNativeACK',{}, {quiet:true}):null;if(shelfRequest!==request)return false;const ready=selectedSetupReady(request.target,readiness,native);cloudflareState={...readiness,target:request.target,accountId:request.target.accountId,selectedReady:ready,code:ready?'CLOUDFLARE_READY':selectedSetupCode(readiness,request.code)};}
   catch(error){if(shelfRequest===request)cloudflareState={state:'PROVISIONING_BLOCKED',code:error.code,diagnostic:error.diagnostic,target:request.target,accountId:request.target.accountId};}
+  if(shelfRequest===request){
+   const key=targetKey(request.target);
+   if(cloudflareState?.selectedReady)repairTargets.delete(key);
+   else if(repairableReadiness.has(request.code)&&repairableReadiness.has(cloudflareState?.code))repairTargets.set(key,request.target);
+  }
  }
  if(view==='remotes'&&$('#remotes-connection')){renderRemotes();if(live&&request)status(cloudflareState?.selectedReady?'Prepared and verified · the original click did not save. Make a new right-click for the selected destination.':'Not saved · '+(cloudflareState?.code??request.code??'ATTENTION_REQUIRED')+' · '+(names[cloudflareState?.code??request.code]??readinessNames[cloudflareState?.code??request.code]??'Inspect or prepare the selected destination below.'));}return false;
 }
@@ -1800,7 +1861,7 @@ headerMenu.addEventListener('keydown',e=>{if(e.defaultPrevented||e.isComposing)r
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 const navigationPlacement=installNavigation({header:document.querySelector('header nav'),menu:headerMenu,more:headerMore,open:next=>show(next).catch(e=>status(e.message))});
-void aestheticReady.then(navigationPlacement.fit);
+void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();});
 listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
 document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open)e.preventDefault();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
 $('#dialog').addEventListener('cancel',event=>{

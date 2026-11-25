@@ -12,7 +12,8 @@ export const nostalgia={
  ]
 };
 export const frames={id:'frames',name:'Frames',version:'1.0.0',stylesheet:'frames'};
-export const themePackages=[goldenAge,oceania,nostalgia,frames];
+export const chrome={id:'chrome',name:'Chrome',version:'1.0.0',stylesheet:'chrome'};
+export const themePackages=[goldenAge,oceania,nostalgia,frames,chrome];
 export const busyCursorPackages=Object.freeze([
  {id:'system',name:'System Default'},
  {id:'hourglass',name:'Classic Hourglass'},
