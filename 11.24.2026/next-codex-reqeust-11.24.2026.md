@@ -115,3 +115,9 @@ Authoritative follow-up specification for 0.3.29. Work exclusively on codex/redo
 ## Release verification
 - Failed status occupies the same right-aligned header position beneath timestamp as Verified; Error appears at bottom only when applicable, collapsed by default. Media if retained and eligible; hide unavailable cloud actions. Public URLs and Details remain collapsed independently by default.
 - Audit relevant implementations before edits. Keep saving engines, right-click, authentication, receipts, historical records, screenshots, shortcuts, all themes and Aesthetic API intact. Run focused and existing regression tests; distinguish real Chrome tests from fixtures. Update version to 0.3.29, build, commit and push only this branch. Report actual test results and limitations.
+
+## Remotes — Remove Cloudflare ready/setup results presentation
+
+- Remove the visible `CLOUDFLARE_READY` internal status label and `Save results` control/section from the Remotes tab. Remove their associated empty space and redundant wrapper if no other needed content remains.
+- Hide `Review Cloudflare setup` in all themes except Remote V1, which retains it as previously explicitly requested. Do not introduce replacement setup prompts or internal status codes in the normal Remotes presentation.
+- Preserve actual readiness state, provider authentication, setup and approval flows, saved results/receipts and diagnostics in their appropriate existing contexts. Do not delete underlying data or disable saving, verification or recovery. Verify connected and disconnected states and theme switching.
