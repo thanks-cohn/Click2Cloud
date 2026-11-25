@@ -4,11 +4,11 @@ Work exclusively on `codex/redown-0329-ux-design-repair`. Baseline: completed 0.
 
 ## Ordered implementation
 1. Capture baseline build and existing tests; see 11.24.2026/REDOWN_0329_VERIFICATION.md for prior evidence and known baseline menu snapshot failure. Distinguish baseline defects from candidate regressions.
-2. P0: reproduce and repair cold Simple/Narrow destination creation and actual save; trace existing prepareModes/discovery/readiness/native ACK, preserve Depth. Automatic authorized preparation and contextual Repair Me; remove obsolete Review Cloudflare setup only after preserving consent/recovery paths.
+2. P0: reproduce and repair cold Simple/Narrow destination creation and actual save; trace existing prepareModes/discovery/readiness/native ACK, preserve Depth. Automatic authorized preparation and contextual Repair Me; hide Review Cloudflare setup outside Remote V1 only, preserving its Remote V1 functionality and consent/recovery paths.
 3. P1: reproduce Dropbox History preview regression; narrow fix preserving identity, authorization and bounds.
-4. Implement success-notification settings using existing engine, including open-Shelf eligibility and Large baseline dimensions; no changes to verified-save processing.
-5. Queue, icon-only Refresh, History middle ellipsis, exact slogans and footer changes.
-6. Liquid Black permanently dark with neutral silver/chrome and crimson; Golden Age Pinterest refinement using existing masonry. No general Roboto overhaul. Preserve all other existing typography and protected theme identities.
+4. Implement success-notification settings using existing engine, including default Yes open-Shelf eligibility, closed-Shelf position, hover, Large baseline dimensions and intentional native fallback preservation; no changes to verified-save processing.
+5. Queue, Connected/Reconnect/Connect states, Basic contextual icon-only Refresh left of fixed far-right GO TO, History middle ellipsis, exact slogans and footer changes.
+6. Frames Chrome with Liquid Black dark and Pure Chrome light, approved crescent icons and normal appearance toggle; Golden Age faithful Pinterest palette, typography and interface using existing masonry. No general Roboto overhaul. Preserve all other existing typography and protected theme identities.
 7. Focused tests for each change, existing suites, packaged build/version checks and evidence. Separate commits by functional area. Preserve extension identity, stored settings/destinations/history, authorization, APIs and Aesthetic API. No broad rewrites.
 
 ## Safety and cost controls
