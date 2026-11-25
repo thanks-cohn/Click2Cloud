@@ -253,11 +253,13 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
   }
   async function prepareSelected(selected,revision,verifiedDefault){
     const results=new Map();
+    const needsScopedProjection=new Set(selected.filter(({mode})=>mode!=='simple').map(({target})=>scopeKey(target)));
     if(verifiedDefault)results.set(targetKey(verifiedDefault),{state:'completed'});
     for(const {target} of selected){
       const key=targetKey(target);
       if(results.has(key))continue;
-      try{results.set(key,await cloudflare.recoverDestination({target,expectedRevision:revision,authorizeSetup:true}));}
+      try{results.set(key,await cloudflare.recoverDestination({target,expectedRevision:revision,authorizeSetup:true,
+        preserveReadyScope:!needsScopedProjection.has(scopeKey(target))}));}
       catch(error){const code=error?.code??error?.message;results.set(key,{state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(code??'')?code:'WORKER_RECOVERY_FAILED'});}
     }
     return results;
@@ -589,11 +591,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
           for(const c of replay?[]:params.changes)if(['createDestination','makeDefault'].includes(c.type)) {
             const t=normalizeTarget(c.target),inv=await getInventory(),scope=inv.scopes.find(s=>scopeKey(s.target??s)===scopeKey(t));
             if(!scope?.authorized||!['',...(scope.folders??[]).map(f=>typeof f==='string'?f:f.prefix??f.target?.prefix)].includes(t.prefix)){
-              if(c.type!=='makeDefault'||!c.ensureSimple)fail('TARGET_NOT_DISCOVERED');
+              // Explorer can select a bucket before its object listing has
+              // reached the menu inventory. Verify the exact location through
+              // the authorized R2 File API, which needs no prepared Worker.
+              if(t.provider!=='cloudflare'||!fileApi||c.type==='makeDefault'&&!c.ensureSimple&&params.prepareModes===undefined)fail('TARGET_NOT_DISCOVERED');
               const authority=await oauth.status();
-              if(t.provider!=='cloudflare'||t.connectionId!=='cloudflare:'+t.accountId||authority.state!=='CONNECTED'||!authority.accounts?.some(a=>a.id===t.accountId))fail('AUTH_REQUIRED');
+              if(t.connectionId!=='cloudflare:'+t.accountId||authority.state!=='CONNECTED'||!authority.accounts?.some(a=>a.id===t.accountId))fail('AUTH_REQUIRED');
               const listed=await fileApi.run('listRaw',{source:t});
-              if(listed.state!=='completed'||t.prefix&&!listed.data?.entries?.some(e=>e.key.startsWith(t.prefix)))fail('TARGET_NOT_DISCOVERED');
+              if(listed.state!=='completed')fail(listed.code??'TARGET_NOT_DISCOVERED');
+              if(!Array.isArray(listed.data?.entries)||t.prefix&&!listed.data.entries.some(e=>e.key.startsWith(t.prefix)))fail('TARGET_NOT_DISCOVERED');
             }
           }
           for(const c of replay?[]:params.changes)if(c.type==='setFavorite'&&c.favorite&&!/^provider:(google-drive|onedrive|dropbox|cloudflare)$/.test(c.connectionId)){const connection=await oauth.status();if(!connection.connections?.some(x=>x.connectionId===c.connectionId))fail('CONNECTION_UNKNOWN');}

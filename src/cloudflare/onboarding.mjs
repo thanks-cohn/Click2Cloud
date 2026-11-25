@@ -165,7 +165,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  // A verified probe is resumed by operation ID; an uncertain probe is never
  // replayed. A completed ledger is not current readiness evidence.
  function recoverDestination(options){const target=normalizeTarget(options.target);remoteDestination(target);return withSetupLock(target.accountId,()=>recoverDestinationLocked({...options,target}));}
- async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false,screenshotUpgrade=false}){
+ async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false,screenshotUpgrade=false,preserveReadyScope=false}){
   const accountId=target.accountId,auth=await account(accountId),s=await current.read();
   const blocked=(code,extra={})=>({state:'blocked',code,accountId,target,...extra});
   if(expectedRevision!==undefined&&s.product.revision!==expectedRevision)return blocked('REVISION_CONFLICT');
@@ -179,8 +179,13 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(screenshotUpgrade&&(!authorizeSetup||!screenshotScope))return blocked('SCREENSHOT_WORKER_UPDATE_REQUIRED');
   const bucketKey=await digest([accountId,target.bucketName]),approvalKey='approval:destination:'+bucketKey;
   const retainApproval=()=>current.writeSetupOperation?.(approvalKey,{accountId,bucketName:target.bucketName,approved:true});
-  const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope;
-  const observed=await transport.status(target);
+  let observed=await transport.status(target);
+  for(let attempt=0;attempt<2&&['TRANSPORT_UNAVAILABLE','RESPONSE_INVALID'].includes(observed.code);attempt++){
+   await new Promise(resolve=>setTimeout(resolve,150*2**attempt));
+   if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
+   observed=await transport.status(target);
+  }
+  const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope&&!(preserveReadyScope&&observed.state==='READY');
   const update=screenshotUpgrade&&!transport.screenshotWorkerCurrent(plan);
   const initialStatus=expandScope?{state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'}:
    update?{state:'blocked',code:'WORKER_UPGRADE_APPROVAL_REQUIRED'}:observed;

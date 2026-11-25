@@ -96,7 +96,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
   const outside={...b,accountId:'foreign',connectionId:'cloudflare:foreign'};await assert.rejects(domain.recoverDestination({target:outside,idempotencyKey:'foreign'}),{code:'WRONG_ACCOUNT'});assert.equal(deployments.length,beforeDeployments);
 
   await t.test('Destinations Save prepares and acknowledges Simple, Narrow and nested Depth before the first click',async()=>{
-   const retries=new Map(),folders=['Parent/','Parent/Leaf/'];
+   const retries=new Map(),folders=['Parent/','Parent/Leaf/'],directReads=[];
    current.findRetry=async key=>retries.get(key);
    current.commitProduct=async ({product,configs,expectedRevision,idempotencyKey,fingerprint,destinationSelection})=>{
     if(retries.has(idempotencyKey))return {...retries.get(idempotencyKey),replayed:true};
@@ -130,6 +130,8 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     for(const target of fresh){
      const plan=await provisioner.lookup(target);
      const ready=prefix=>preparedDestination(plan,{...target,prefix},expectedCodeDigest).state==='READY';
+     const selected=Object.values(state.configs).some(config=>(config.destinations??config.scopes).some(row=>row.target.bucketName===target.bucketName));
+     if(!selected)continue; // Explorer selected a location before menu discovery observed it.
      scopes.push({target,authorized:signedIn,complete:true,workerReady:ready(''),folders:folders.map(prefix=>({prefix,workerReady:ready(prefix)}))});
     }
     return {scopes,depthScopes:scopes.map(scope=>({...scope,stale:false}))};
@@ -151,7 +153,16 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     registrar=createChromeRegistrar({chrome,dispatchOwnsAuthorization:true,
      dispatch:(_row,{info,generation})=>engine.save({itemId:info.menuItemId,generation,context:'link',source:sourceFromClick(info)})});
     engine=createEngine({current,registrar,getAuthorization:authorize,providerSetupActions:true,remoteSave:input=>transport.save(input)});
-    api=createEngineApi({engine,current,oauth:localOauth,cloudflare,getInventory,authorize:async()=>true,confirm:async()=>true});
+    const fileApi={run:async(operation,{source})=>{
+     assert.equal(operation,'listRaw');
+     assert.equal(source.accountId,'fixture');
+     assert.equal(source.connectionId,'cloudflare:fixture');
+     directReads.push(source);
+     const known=fresh.some(target=>target.bucketName===source.bucketName);
+     return known?{state:'completed',data:{entries:folders.includes(source.prefix)?[{key:source.prefix+'fixture.txt'}]:[]}}:
+      {state:'blocked',code:'SELECTED_BUCKET_MISSING'};
+    }};
+    api=createEngineApi({engine,current,oauth:localOauth,cloudflare,getInventory,fileApi,authorize:async()=>true,confirm:async()=>true});
    }
    function commit(changes,id,prepareModes=[]){
     return {version:'3+1.1',method:'commitConfigChange',params:{changes,prepareModes,expectedRevision:state.product.revision,idempotencyKey:id}};
@@ -175,6 +186,10 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     }else assert.equal(count.upload,from.upload);
    };
    const before=deployments.length;
+   const invalid=await api.invoke(commit([{type:'createDestination',mode:'simple',target:{...fresh[0],prefix:'missing/'}}],'not-a-folder'),'gui');
+   assert.equal(invalid.code,'TARGET_NOT_DISCOVERED');
+   assert.equal(deployments.length,before);
+   assert.equal(retries.size,0);
    for(const [i,mode] of ['simple','nested','depth'].entries()){
     const root=fresh[i],target={...root,prefix:'Parent/Leaf/'};
     const changes=mode==='depth'?[{type:'setDepthDisplayBuckets',scopes:[...state.configs.depth.scopes,{target:root,maxDepth:2}]}]
@@ -196,6 +211,9 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     if(mode==='depth'||mode==='nested')for(const prefix of ['','Parent/'])await click(mode,{...root,prefix});
    }
    assert.equal(deployments.length-before,3);
+   assert.deepEqual(directReads.map(target=>[target.bucketName,target.prefix]),[
+    [fresh[0].bucketName,'missing/'],[fresh[0].bucketName,'Parent/Leaf/'],[fresh[1].bucketName,'Parent/Leaf/']
+   ]);
    for(const target of fresh){
     const worker=workers.get((await provisioner.lookup(target)).name);
     assert.equal((await (await worker.mf.getR2Bucket('STORAGE')).list()).objects.filter(o=>o.key.includes('.click2cloud-readiness/')).length,1);
