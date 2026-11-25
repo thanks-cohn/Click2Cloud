@@ -69,3 +69,11 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 
 - Replace the visible transient notification “Saved · Chrome menu acknowledged · External backup unavailable” with “Saved · Chrome menu acknowledged”.
 - Remove the external-backup suffix from this successful-save notification only. Preserve actual backup status in diagnostics and relevant backup-specific status/recovery UI. Do not change backup behavior, receipt evidence, or success classification, and do not hide genuine save failures.
+
+## Shelf footer — Mandatory notification expiry
+
+- Automatically dismiss the successful-save footer notification after 10 seconds, including the old “Saved · Chrome menu acknowledged · External backup unavailable” message and its approved shortened replacement “Saved · Chrome menu acknowledged”. User reports the old message remained visible for 30 minutes with no dismissal control.
+- Audit the actual footer/status rendering path as well as the toast engine. Do not assume footer messages already use the toast expiry mechanism. Clear the text and any notification-specific reserved space, preserving normal footer controls.
+- No X button or manual dismissal required. Ensure expiry survives rerenders, navigation, hover, focus changes, theme switches and Shelf reopening; use an absolute expiry timestamp or equivalent robust mechanism. Do not resurrect expired notifications or let stale timers dismiss a newer notification. Avoid unnecessary timers and clean them up on disposal.
+- Preserve genuine save status, receipts, backup diagnostics and actionable recovery information. Do not clear live job progress or persistent configuration errors as though they were transient success notifications.
+- Test ordinary success, rapid consecutive saves, duplicate events, background/foreground transitions, navigation and restart/reopen behavior. Verify no successful-save footer notification remains visible past its 10-second lifetime under normal active rendering.
