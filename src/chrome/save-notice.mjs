@@ -2,11 +2,15 @@ const notificationId = 'redown-verified-save';
 const channel = 'redown-console-save';
 const providers = Object.freeze({cloudflare:'Cloudflare R2',google:'Google Drive',dropbox:'Dropbox',onedrive:'OneDrive'});
 
-export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
+export function createClosedShelfSaveNotice({chrome, preferences, isClosed, observe = () => {}}) {
   const seen = new Set(), openedWhileSuppressed = new Map();
-  let next, pending, expiry, version = 0, sequence = 0, active, offer;
-  let updates = Promise.resolve();
-  function queue(work) { updates = updates.then(work).catch(()=>{}); }
+  let version = 0, sequence = 0;
+  const windows = new Map();
+  const clearStaleNative = () => void chrome.notifications?.clear?.(notificationId).catch(()=>{});
+  clearStaleNative();
+  function queue(slot, work) {
+    slot.updates = slot.updates.then(work).catch(()=>observe('CUSTOM_NOTICE_DELIVERY_FAILED'));
+  }
   const master = () => preferences.value.notifications !== false;
   const openAllowed = () => preferences.value.notificationsWhileOpen !== false;
 
@@ -24,38 +28,52 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
       ? chrome.tabs.sendMessage(notice.tabId,payload,{frameId:0})
       : chrome.runtime.sendMessage(payload);
   }
-  async function clear(notice) {
-    if (!notice || active !== notice) return;
-    active = undefined;
-    clearTimeout(expiry);
-    if (notice.surface==='native') await chrome.notifications?.clear?.(notificationId).catch(()=>{});
-    else await sendCustom(notice,{stop:true}).catch(()=>{});
+  function clear(notice) {
+    if (!notice || notice.slot.active !== notice) return;
+    notice.slot.active = undefined;
+    clearTimeout(notice.expiry);
+    // An unloading old renderer must never hold up the next verified save.
+    void sendCustom(notice,{stop:true}).catch(()=>{});
   }
   function suppress(notice) {
     if (!notice) return;
     notice.event.cancelled = true;
-    if (notice === offer) void sendCustom(notice,{stop:true}).catch(()=>{});
-    if (notice === active) queue(()=>clear(notice));
+    if (notice === notice.slot.offer) void sendCustom(notice,{stop:true}).catch(()=>{});
+    clear(notice);
   }
   function shelfOpened(windowId) {
     if (openAllowed()) return;
     openedWhileSuppressed.set(windowId,++sequence);
-    if (offer?.windowId===windowId) suppress(offer);
-    if (active?.windowId===windowId) suppress(active);
+    const slot = windows.get(windowId);
+    suppress(slot?.offer);
+    suppress(slot?.active);
   }
-  chrome.windows?.onRemoved?.addListener(windowId=>openedWhileSuppressed.delete(windowId));
+  chrome.windows?.onRemoved?.addListener(windowId=>{
+    const slot = windows.get(windowId);
+    if (slot) {
+      if (slot.next) slot.next.cancelled = true;
+      clearTimeout(slot.pending);
+      suppress(slot.offer);
+      suppress(slot.active);
+      windows.delete(windowId);
+    }
+    openedWhileSuppressed.delete(windowId);
+  });
   preferences.subscribe(() => {
     if (!master()) {
       version++;
-      clearTimeout(pending);
-      next = pending = undefined;
-      suppress(offer);
-      suppress(active);
+      clearStaleNative();
+      for (const slot of windows.values()) {
+        clearTimeout(slot.pending);
+        slot.next = slot.pending = undefined;
+        suppress(slot.offer);
+        suppress(slot.active);
+      }
     } else if (!openAllowed()) {
-      for (const notice of new Set([offer,active])) if (notice) {
-        void isClosed(notice.windowId).then(closed=>{
-          if (!closed&&!openAllowed()) shelfOpened(notice.windowId);
-        });
+      for (const windowId of windows.keys()) {
+        void isClosed(windowId).then(closed=>{
+          if (!closed&&!openAllowed()) shelfOpened(windowId);
+        },()=>{});
       }
     }
   });
@@ -64,27 +82,27 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
   // claimed delivery cannot cause a second notice on another surface.
   chrome.runtime.onMessage?.addListener((message,sender,respond)=>{
     if (sender.id!==chrome.runtime.id || message?.channel!==channel || message.claim!==true) return;
-    const candidate = offer;
+    const candidate = windows.get(message.windowId ?? sender.tab?.windowId)?.offer;
     if (!candidate || candidate.token!==message.token || candidate.claimed ||
         (candidate.surface==='page'
-          ? sender.tab?.id!==candidate.tabId || sender.frameId!==0
+          ? sender.tab?.id!==candidate.tabId || sender.tab?.windowId!==candidate.windowId || sender.frameId!==0
           : sender.url!==chrome.runtime.getURL('extension/app.html') ||
             (candidate.surface==='app' ? sender.tab?.id!==candidate.tabId : !!sender.tab))) {
       respond(false);
       return;
     }
-    void eligible(candidate.event).then(result=>{
-      const accepted = offer===candidate && !candidate.claimed && result &&
-        result.closed===(candidate.surface!=='shelf') && Date.now()<candidate.deliverBy;
-      if (accepted) candidate.claimed = true;
-      respond(!!accepted);
-    },()=>respond(false));
-    return true;
+    // The background chose the surface immediately before sending the offer.
+    // Do not put a second Chrome context lookup on the renderer's claim path.
+    const accepted = master() && candidate.event.version===version && !candidate.event.cancelled &&
+      (candidate.surface!=='shelf'||openAllowed()) && Date.now()<candidate.deliverBy;
+    if (accepted) candidate.claimed = true;
+    respond(accepted);
   });
 
   async function custom(event, surface) {
-    const notice = {event,surface,tabId:event.tabId,windowId:event.windowId,token:crypto.randomUUID(),deliverBy:Date.now()+650};
-    offer = notice;
+    const slot = windows.get(event.windowId);
+    const notice = {event,slot,surface,tabId:event.tabId,windowId:event.windowId,token:crypto.randomUUID(),deliverBy:Date.now()+650};
+    slot.offer = notice;
     let timer, result;
     try {
       result = await Promise.race([
@@ -95,29 +113,24 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
       ]);
     } finally {
       clearTimeout(timer);
-      if (offer===notice) offer=undefined;
+      if (slot.offer===notice) slot.offer=undefined;
     }
-    if (result!==true && !(notice.claimed&&result!==false)) return false;
+    if (result===false || !notice.claimed && result!==true) return false;
     if (!await eligible(event)) {
-      await sendCustom(notice,{stop:true}).catch(()=>{});
+      void sendCustom(notice,{stop:true}).catch(()=>{});
       return true;
     }
-    await clear(active);
-    if (!await eligible(event)) {
-      await sendCustom(notice,{stop:true}).catch(()=>{});
-      return true;
-    }
-    active = notice;
-    expiry = setTimeout(()=>queue(()=>clear(notice)),10000);
+    clear(slot.active);
+    slot.active = notice;
+    notice.expiry = setTimeout(()=>clear(notice),10000);
+    observe(result===true?'CUSTOM_NOTICE_RENDERED':'CUSTOM_NOTICE_ACK_UNCONFIRMED');
     return true;
   }
 
   async function deliver(event) {
     await preferences.ready;
-    if (!master() || event.version!==version) return;
-    const [tab] = await event.tabs;
-    event.tabId = tab?.id;
-    event.windowId = tab?.windowId;
+    if (!master() || event.version!==version || event.cancelled || !windows.has(event.windowId)) return;
+
     const attempted = new Set();
     let state;
     while ((state = await eligible(event))) {
@@ -129,37 +142,33 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
       attempted.add(surface);
       if (await custom(event,surface)) return;
     }
-    if (!chrome.notifications?.create || !state || !state.closed&&!event.id) return;
-    await clear(active);
-    if (!await eligible(event)) return;
-    const notice = {event,surface:'native',windowId:event.windowId};
-    await chrome.notifications.create(notificationId,{
-      type:'basic',iconUrl:chrome.runtime.getURL('extension/icons/redown-128.png'),
-      title:'Saved!',message:providers[event.provider],requireInteraction:false,silent:true
-    });
-    active = notice;
-    if (!await eligible(event)) await clear(notice);
-    else expiry = setTimeout(()=>queue(()=>clear(notice)),10000);
+    if (state) observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE');
   }
 
   function saved(provider,id) {
-    if (!Object.hasOwn(providers,provider)||seen.has(id)) return;
-    if (id) {
-      seen.add(id);
-      if (seen.size>128) seen.delete(seen.values().next().value);
-    }
+    if (!Object.hasOwn(providers,provider)||typeof id!=='string'||!id||seen.has(id)) return;
+    seen.add(id);
+    if (seen.size>128) seen.delete(seen.values().next().value);
     if (!master()) return;
-    const tabs = chrome.tabs?.query?.({active:true,lastFocusedWindow:true}).catch(()=>[]) ?? Promise.resolve([]);
-    next = {provider,id,tabs,version,openAllowed:openAllowed(),sequence:++sequence};
-    if (pending) return;
-    pending = setTimeout(()=>{
-      const event = next;
-      next = pending = undefined;
-      queue(()=>deliver(event));
-    },140);
+    const event = {provider,id,version,openAllowed:openAllowed(),sequence:++sequence};
+    void Promise.resolve(chrome.tabs?.query?.({active:true,lastFocusedWindow:true})).then(tabs=>{
+      if (!master()||event.version!==version) return;
+      const tab = tabs?.[0];
+      if (!Number.isInteger(tab?.windowId)) { observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE'); return; }
+      event.tabId = tab.id;
+      event.windowId = tab.windowId;
+      const slot = windows.get(tab.windowId) ?? {updates:Promise.resolve()};
+      windows.set(tab.windowId,slot);
+      if (event.sequence < (slot.sequence ?? 0)) return;
+      slot.sequence = event.sequence;
+      slot.next = event;
+      if (slot.pending) return;
+      slot.pending = setTimeout(()=>{
+        const queued = slot.next;
+        slot.next = slot.pending = undefined;
+        queue(slot,()=>deliver(queued));
+      },140);
+    },()=>observe('CUSTOM_NOTICE_SURFACE_UNAVAILABLE'));
   }
-  return {saved,shelfOpened,clearNative(){
-    const notice=active;
-    if(notice?.surface==='native')queue(()=>clear(notice));
-  }};
+  return {saved,shelfOpened};
 }

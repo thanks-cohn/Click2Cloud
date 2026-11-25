@@ -81,7 +81,8 @@ async function accountQueueReceipt(project,row){
 const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
  void chrome.runtime.sendMessage({channel:'shelf-history-feedback',windowId,code}).catch(()=>{});
 }});
-const saveNotice=createClosedShelfSaveNotice({chrome,preferences:visualFeedback,isClosed:shelfHistory.isClosed});
+const saveNotice=createClosedShelfSaveNotice({chrome,preferences:visualFeedback,isClosed:shelfHistory.isClosed,
+ observe:code=>diagnostics.emit({stage:'chrome.save-notice',outcome:code==='CUSTOM_NOTICE_RENDERED'?'ok':'failed',code,operationId:operationIdentity()})});
 const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>{
  saveNotice.saved(receipt.provider,'basic:'+receipt.id);
  return dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt);

@@ -223,38 +223,35 @@ test('Projectile speeds have distinct bounded distributions and burst intensity 
   const sent=calls.length;accept()();await tick();assert.equal(calls.length,sent);
 });
 
-test('Closed-Shelf notices coalesce single verified outcomes and clear on opt-out',async()=>{
+test('Closed-Shelf notices coalesce verified outcomes and clear only the stale REDOWN success ID',async()=>{
   const preferences = createVisualFeedbackPreference(memoryStorage());
-  let closed = false;
-  const created = [], cleared = [];
-  const chrome = {runtime:{getURL:path=>path},notifications:{create:async(...args)=>created.push(args),clear:async id=>cleared.push(id)}};
-  const notice = createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed});
+  const delivered = [], cleared = [];
+  const chrome = {runtime:{getURL:path=>path,sendMessage:async()=>false},
+    tabs:{query:async()=>[{id:9,windowId:1}],sendMessage:async(_,message)=>{delivered.push(message);return true;}},
+    notifications:{create:async()=>assert.fail('native success notice'),clear:async id=>cleared.push(id)}};
+  const notice = createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>true});
   notice.saved('google');
-  await delay(165);
-  assert.equal(created.length,0);
-  closed=true;
-  notice.saved('google');notice.saved('onedrive');
-  await delay(165);
-  assert.equal(created.length,1);
-  const [[id,shown]] = created;
-  assert.deepEqual([shown.title,shown.message,shown.requireInteraction],['Saved!','OneDrive',false]);
+  notice.saved('google','first');notice.saved('onedrive','last');
+  await delay(175);
+  assert.deepEqual(delivered.map(event=>event.provider),['onedrive']);
   await preferences.update(value=>({...value,notifications:false}));
   await tick();
-  assert.deepEqual(cleared,[id]);
-  notice.saved('dropbox');
+  assert(delivered.at(-1).stop);
+  assert.deepEqual(cleared,['redown-verified-save','redown-verified-save']);
+  notice.saved('dropbox','muted');
   await delay(165);
-  assert.equal(created.length,1);
+  assert.equal(delivered.length,2);
 });
 
-test('Verified save notices select one surface and use native fallback only if custom display is unavailable',async()=>{
+test('Verified save notices select one surface and report an unavailable custom renderer',async()=>{
   const preferences=createVisualFeedbackPreference(memoryStorage());
-  const deliveries=[],native=[];
+  const deliveries=[],native=[],observations=[];
   let closed=false,pageAvailable=true;
   const chrome={runtime:{getURL:path=>path,sendMessage:async message=>{deliveries.push(message);return !closed;}},
     tabs:{query:async()=>[{id:17,windowId:18}],sendMessage:async (tab,message)=>{
       assert.equal(tab,17);deliveries.push(message);return pageAvailable;
     }},notifications:{create:async (_,notification)=>native.push(notification.message),clear:async()=>{}}};
-  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed});
+  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed,observe:code=>observations.push(code)});
   notice.saved('cloudflare','r2:1');
   await delay(165);
   assert.deepEqual(deliveries.map(message=>message.surface),['shelf']);
@@ -270,8 +267,9 @@ test('Verified save notices select one surface and use native fallback only if c
   pageAvailable=false;
   notice.saved('google','basic:3');
   await delay(165);
-  assert.deepEqual(native,['Google Drive']);
-  notice.clearNative();
+  assert.deepEqual(native,[]);
+  assert.equal(observations.at(-1),'CUSTOM_NOTICE_SURFACE_UNAVAILABLE');
+  await preferences.update(value=>({...value,notifications:false}));
 });
 
 test('Success preferences gate every surface and preserve saved subordinate values',async()=>{
@@ -292,7 +290,7 @@ test('Success preferences gate every surface and preserve saved subordinate valu
     notice.saved('google','open');
     await delay(180);
     assert.deepEqual(sent.map(x=>x.surface),notifications&&notificationsWhileOpen?['shelf']:[]);
-    assert.equal(fallback.length,notifications&&notificationsWhileOpen?1:0);
+    assert.equal(fallback.length,0);
     closed=true;
     notice.saved('dropbox','closed');
     await delay(180);
@@ -311,7 +309,7 @@ test('A claimed renderer with a lost acknowledgement never duplicates delivery a
     tabs:{query:async()=>[{id:windowId+10,windowId}],sendMessage:async(tab,message)=>{
       if(message.stop){shown.push({stop:message.windowId});return false;}
       const granted=await new Promise(resolve=>listener({channel:message.channel,token:message.token,claim:true},
-        {id:'fixture',tab:{id:tab},frameId:0},resolve));
+        {id:'fixture',tab:{id:tab,windowId:message.windowId},frameId:0},resolve));
       if(!granted)return false;
       shown.push({id:message.id,window:message.windowId});
       return new Promise(resolve=>{late=resolve;});
@@ -339,7 +337,7 @@ test('A claimed renderer with a lost acknowledgement never duplicates delivery a
   assert.equal(fallback.length,0);
 });
 
-test('The delivery engine follows a Shelf opening before choosing native fallback',async()=>{
+test('The delivery engine follows a Shelf opening to the custom Shelf surface',async()=>{
   const preferences=createVisualFeedbackPreference(memoryStorage());
   let closed=true;
   const surfaces=[];
@@ -354,5 +352,29 @@ test('The delivery engine follows a Shelf opening before choosing native fallbac
   notice.saved('dropbox','surface-change');
   await delay(185);
   assert.deepEqual(surfaces,['app','shelf']);
+  await preferences.update(value=>({...value,notifications:false}));
+});
+
+test('each window claims its own custom notice, and an unrelated window cannot claim it',async()=>{
+  const preferences=createVisualFeedbackPreference(memoryStorage()), rendered=[];
+  let listener,focusedWindow=1;
+  const chrome={runtime:{id:'fixture',getURL:path=>path,onMessage:{addListener:value=>listener=value},
+    sendMessage:async()=>false},tabs:{query:async()=>[{id:focusedWindow+10,windowId:focusedWindow}],
+    sendMessage:async(tab,message)=>{
+      if(message.stop)return true;
+      const claim={channel:message.channel,token:message.token,windowId:message.windowId,claim:true};
+      const ask=(windowId,frameId)=>new Promise(resolve=>listener(claim,{id:'fixture',tab:{id:tab,windowId},frameId},resolve));
+      assert.equal(await ask(message.windowId+1,0),false);
+      assert.equal(await ask(message.windowId,1),false);
+      assert.equal(await ask(message.windowId,0),true);
+      rendered.push([message.windowId,message.id]);
+      return true;
+    }},notifications:{create:async()=>assert.fail('native success notice')}};
+  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>true});
+  notice.saved('google','window-one');
+  focusedWindow=2;
+  notice.saved('dropbox','window-two');
+  await delay(200);
+  assert.deepEqual(rendered.sort(),[[1,'window-one'],[2,'window-two']]);
   await preferences.update(value=>({...value,notifications:false}));
 });

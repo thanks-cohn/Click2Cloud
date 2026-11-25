@@ -12,10 +12,11 @@
   const seen = new Set(), stopped = new Set();
   const asset = chrome.runtime.getURL('extension/icons/redown-console-r.png');
   const isApp = location.protocol === 'chrome-extension:' && location.pathname === '/extension/app.html';
-  let appTarget, imageReady, current;
-  if(isApp)void Promise.all([chrome.windows.getCurrent(),chrome.tabs.getCurrent()]).then(([window,tab])=>{
-    appTarget={windowId:window.id,tabId:tab?.id,surface:tab?'app':'shelf'};
-  }).catch(()=>{});
+  let imageReady, current;
+  let appTarget;
+  const target = isApp ? Promise.all([chrome.windows.getCurrent(),chrome.tabs.getCurrent()])
+    .then(([window,tab])=>appTarget={windowId:tab?.windowId??window.id,tabId:tab?.id,surface:tab?'app':'shelf'})
+    .catch(()=>null) : null;
 
   function loadArtwork() {
     if (imageReady) return imageReady;
@@ -135,22 +136,29 @@
     if (message.stop && typeof message.token==='string') {
       stopped.add(message.token);
       if(stopped.size>128)stopped.delete(stopped.values().next().value);
-      if(current&&(current.token===message.token||current.id===message.id))current();
+      if(current?.token===message.token)current();
       return;
     }
     const {id,provider,deliverBy,token} = message;
     if (typeof id !== 'string' || !id || !Object.hasOwn(providers,provider) ||
         typeof token!=='string'||!token||!Number.isFinite(deliverBy) || Date.now() >= deliverBy || document.hidden) return;
-    if(isApp ? !appTarget || message.surface!==appTarget.surface || message.windowId!==appTarget.windowId ||
-      (appTarget.tabId!==undefined&&message.tabId!==appTarget.tabId) :
-      message.surface!=='page'||document.fullscreenElement||document.querySelector(':modal'))return;
+    if(!isApp&&(message.surface!=='page'||document.fullscreenElement||document.querySelector(':modal')))return;
+    const matches = appTarget => appTarget && message.surface===appTarget.surface &&
+      message.windowId===appTarget.windowId&&(appTarget.tabId===undefined||message.tabId===appTarget.tabId);
+    if (isApp && appTarget && !matches(appTarget)) return;
     void (async () => {
+      // A newly opened app can receive its first offer while Chrome is still
+      // resolving its tab/window identity. A non-target document never ACKs.
+      if (isApp && !matches(await target)) return;
+
+      if (stopped.has(token)||document.hidden||Date.now()>=deliverBy) return false;
       if (seen.has(id)) return true;
-      if (!await loadArtwork() || stopped.has(token)||document.hidden || Date.now() >= deliverBy) return false;
-      if(!await chrome.runtime.sendMessage({channel,claim:true,token}))return false;
-      if(stopped.has(token)||document.hidden||Date.now()>=deliverBy)return false;
+      // Claim while the addressed document is ready to receive the offer.
+      // Artwork decoding and painting are acknowledged separately.
+      if(!await chrome.runtime.sendMessage({channel,claim:true,token,windowId:message.windowId}))return false;
+      if(stopped.has(token)||document.hidden||!await loadArtwork()||stopped.has(token)||document.hidden)return false;
       return seen.has(id) || reveal(message);
-    })().then(respond,()=>respond(false));
+    })().then(result=>{if(result!==undefined)respond(result);},()=>respond(false));
     return true;
   });
   window.addEventListener('pagehide',()=>current?.());
