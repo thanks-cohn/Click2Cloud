@@ -1,3 +1,8 @@
+# REDOWN 0.3.30 — UX, design and known functional repairs
+
+## AUTHORITATIVE SPLIT SCOPE
+Work exclusively on `codex/redown-0329-ux-design-repair`. Implement known P0 cold onboarding and P1 Dropbox preview fixes, automatic readiness and contextual Repair Me, Queue, notification preferences, all approved typography/theme changes, Golden Age and Liquid Black, Remotes controls. Read VISUAL-AND-HISTORY-FOLLOWUP.md and NOTIFICATION-PREFERENCES.md and the mockup. Run baseline, focused regression and visual/functional acceptance tests needed to prove these changes. Do not build the permanent Reliability Lab, bulk stress matrix, scenario generator or long soak infrastructure; those belong to `codex/redown-0329-reliability-lab`. TEST-MATRIX.md and other inherited lab documents remain reference for acceptance/safety, not a second implementation assignment. This scope supersedes conflicting older instructions below. Push only this branch; target 0.3.30 candidate, not final release until integrated lab gates pass.
+
 # REDOWN Reliability Lab — Codex implementation request
 
 ## Branch and baseline
