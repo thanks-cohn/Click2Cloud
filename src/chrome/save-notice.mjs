@@ -118,17 +118,17 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed}) {
     const [tab] = await event.tabs;
     event.tabId = tab?.id;
     event.windowId = tab?.windowId;
-    let state = await eligible(event);
-    if (!state) return;
-    if (event.id&&Number.isInteger(event.windowId)&&chrome.runtime.sendMessage) {
-      if (await custom(event,state.closed?'app':'shelf')) return;
+    const attempted = new Set();
+    let state;
+    while ((state = await eligible(event))) {
+      const extensionSurface = state.closed?'app':'shelf';
+      const surface = event.id&&Number.isInteger(event.windowId)&&chrome.runtime.sendMessage&&!attempted.has(extensionSurface)
+        ? extensionSurface
+        : state.closed&&event.id&&Number.isInteger(event.tabId)&&chrome.tabs.sendMessage&&!attempted.has('page')?'page':null;
+      if (!surface) break;
+      attempted.add(surface);
+      if (await custom(event,surface)) return;
     }
-    state = await eligible(event);
-    if (!state) return;
-    if (state.closed&&event.id&&Number.isInteger(event.tabId)&&chrome.tabs.sendMessage) {
-      if (await custom(event,'page')) return;
-    }
-    state = await eligible(event);
     if (!chrome.notifications?.create || !state || !state.closed&&!event.id) return;
     await clear(active);
     if (!await eligible(event)) return;

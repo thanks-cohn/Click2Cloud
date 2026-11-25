@@ -338,3 +338,21 @@ test('A claimed renderer with a lost acknowledgement never duplicates delivery a
   assert.equal(shown.length,2);
   assert.equal(fallback.length,0);
 });
+
+test('The delivery engine follows a Shelf opening before choosing native fallback',async()=>{
+  const preferences=createVisualFeedbackPreference(memoryStorage());
+  let closed=true;
+  const surfaces=[];
+  const chrome={runtime:{getURL:path=>path,sendMessage:async message=>{
+    if(message.stop)return false;
+    surfaces.push(message.surface);
+    if(message.surface==='app'){closed=false;return false;}
+    return message.surface==='shelf';
+  }},tabs:{query:async()=>[{id:1,windowId:2}]},
+  notifications:{create:async()=>surfaces.push('native')}};
+  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed});
+  notice.saved('dropbox','surface-change');
+  await delay(185);
+  assert.deepEqual(surfaces,['app','shelf']);
+  await preferences.update(value=>({...value,notifications:false}));
+});
