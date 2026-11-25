@@ -1,0 +1,2407 @@
+{
+  "schema": "redown.upload-lab.integration",
+  "version": 1,
+  "extensionVersion": "0.3.32",
+  "scenario": "success",
+  "seed": 20261125,
+  "runId": "e98c4e2a76b74767905c981cd6333fd0",
+  "layer": "local-workerd-r2",
+  "startedAt": 1795650243524,
+  "checks": [
+    {
+      "name": "batch 1 phase",
+      "expected": "verified",
+      "actual": "verified",
+      "verdict": "PASS"
+    },
+    {
+      "name": "custom notification count 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "custom notification after durable final verification 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "automatic aggregate receipt count 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "uploaded and verified progress are distinct 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "no custom notification during file progress 1",
+      "expected": false,
+      "actual": false,
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart has same batch result 1",
+      "expected": "verified",
+      "actual": "verified",
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart does not repeat custom notification 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart does not repeat automatic download 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "per-file CURRENT and History projections 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "exact independent R2 inventory and SHA-256",
+      "expected": [
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "540306a25f1cf7c0760fa804995ca5a9bba29e77d889f9e04ea31b9d30595767"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d1430f68fc6d53e44c2bb422252bdae7af9d5ae89d5cfa2d5be7dd6cf21797de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00003/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "a9ab26618796d249154d042e52edc376ad123d33b528709a49f67e3d0c24f036"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00004/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "6d38e7945ff8fedbd1201820f584e1a4e7ad18497a79e6b61e19e83109b5c69d"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00005/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "32b36a63664927299661750a66028a8abaa7dda3a6da5677fb55ffbc566a45f4"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00006/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "955f1397e9ac3c570b1629eb1d6e3a9ba58ca3f06100cbdfecf4e707aa210391"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00007/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c80c60a2a308ee885b29116e5f38bb011f8fca83feeb2173c6d08fa96899f30e"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00008/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ccb370f372ec7d23b8544765893cbb5e998eac859b79e77f971f817eda5334d8"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00009/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "709775f5f986cfae2de660721d5e43693c043b545a258ecd25204f286e87eed8"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00010/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3a5ed2b8e83ba1894b98a8bce4e0d969ef7679b33e6fbde040cb6e7e33922666"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00011/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "a12631f15a0e62a83ff5c364ab715f7c4a2cddcbe6187bf209e6c249c12c7eea"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00012/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "cdb741b3d53831a53ae765ec2876eb571dcfa674d6491b7ccbd0ac91664220c6"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00013/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "42fc32fd426c397fe79e75157b55e82cdad6cfa5a1016bac023fe5eed5669824"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00014/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "f732dd1f2c64ed64f4258e41f32c876c5e1f8fe4c109efc3a4b765d65677e9de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00015/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3052ac113c77065136140f78899960e5eac6efd23778a90d15087276a1de05de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00016/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "88e54143cf77969fa4882906f76bf41a9b2bcbd301a8ff7cf0ba1087a160218f"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00017/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "5bcd48ecb35e8ab11c26bf8e352613096489ee33c02cd3fbc6c656968860d519"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00018/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3626c585082f0bd26ee0a32f4335b1f84a9d5538e07e04f5e57959458b5fe8d0"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00019/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ab33a57c6c06eede99cf94bf36980b8ec7fddde2a632e5e26a54e2e97ba91772"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00020/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3e65ef6da501c94114adbcc556e7c8400086136afdbe49fcd667164f660a58eb"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00021/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "280cb0fa7448088813042705c1b1bd36a3fc2d9b65905027ea033a92b779f1ac"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00022/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "21fb249ea3b73fcef3d9008cd6c2c8387ff95ae671b07d7b01ed680d46bf6b63"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00023/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "dbbd770ce97468d2494a974e6643b7e438b3dd812e29e7dbead92ca0b3f2f9f1"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00024/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e2ed7ec16c99cf45da49651f9331d441f52d95013ecf434f1490171f188b7595"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00025/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "915b6ee3639ee27eb301b5bb48f134dbfde197c440cdc1e570b10b02e44db153"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00026/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "370ad12c484eb82a01c5845790156c7cfffd2283edcffe14adda8827b25f0a7f"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00027/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "13ae6019f9e6d9b5ee474f3d0577d3ed8145d9761b8c387324eaa10b42f8200a"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00028/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "390789be47ba64fc585625480725615155e504ed4c29540844046aa3d9f32336"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00029/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c3df2b837d56df99eda28ada6bcbb8afd6bf2730081570581bf9ec1077845825"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00030/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "30fdb39b8b15e43d8cb98e13246bb964928443822d87116e7d3d4a7a53ba1af7"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00031/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "db3279783be577e9be203e1fe51d2ce86fcc63313ca5793b0fb8b8d9a872053c"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00032/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c728c63e334f9c55228eec1e22f9f429e1ba6e3c5c5544fde16e4d6501673349"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00033/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d9690c7f13ac233ca982960f09cb8ce5bb821658d29e17e5e683c2be651bbb24"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "f5913aacf090ae7f313c45d360e5b2768cc88bb7d92b7078d9c8f617522a6f46"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "5cd0e9de8a0a640d58085396fc28a2561910b9a65eae9250697498951539c2fb"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "885c1784b028e45b0005c503d4cadc223799e9f8addb4a5c4ed4d6d1a1bf08a5"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00003/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "674c3d2b6433464a8c0d3596015a62302885e1374f06169871298e3b19074c36"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00004/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ea28d4799843ef1ed927e8710bae350732df05ac8cd86ed56ef8e4bf753a0920"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00005/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "63dea1bb48797461456e22fd9a0173ede3808babc603c536b3c5467a13698c13"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00006/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "1c39b8da2c0c7fe1939b3a52bb606d42a90595f219a6e211f2a86c7f612bf7e2"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00007/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d3feb3a898acf11a1a092dd30008cfa5a70ddd60c52d8e481de61047438306b0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00008/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e4c79b335f9a700a6409eff61a0057a0d0ba4e954a606d4381ab49cded7a7683"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00009/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2378a3ec7389482ffe4f58b313262bc9b33bceed11256e82d6f05f32631c3f9e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00010/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "41f98126fd04148afd2e7f7463f9ace52c31e184568d31941743df684d625c17"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00011/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "b48c30186396fae6b191094689a4bc4cf551eb115cab21c45e4a6180d4bcd07e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00012/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "66f9e97979ac70efe2e755a60fa734c4a9c6f1ac404713f332880ae87336667e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00013/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "276679e20192c559a8dbca67db1bdf6aafdbb5f5eef287663ffbde059ae4c29c"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00014/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "86ff0a2224d2a3b018778d6fb3496978b5ab3437ba70ae5bbb9db261c9351553"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00015/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "7295550db05107a215a7ce5629f6af1dfa436e180a824bc271eec20d50ac96cd"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00016/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "73da15733781a20371e4a77b626bb467badc2d6fad2ab93e63ccdcf4c3304e13"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00017/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e2315236b7c954c95af7fd0b520b02c14a42d582543522217351576ce1c729d4"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00018/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "7024a4ce38fbebdb9a2dc269495ce263af740df19ed80fd16f19ed364b54109d"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00019/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2be52e57828a01f916a4c99a65ee43b515505dc84f55da6f4b29802a43672941"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00020/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "f833630b2e30cd0cdbe360cb499328ac9912c79b27f924c5fb99fb3414bb2d1b"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00021/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "9db302f717f3ead46c2deba7ab25622394d8225afe87d6c537f3ec844da77a8d"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00022/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "86739494e0a392d941d7d9c022710e3c177c211bec195f0485914690e7fb82c0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00023/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "62beb836ef1ed3ef268e5f10321c203fee9e619a07d501cfe7a4f6f08351a49f"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00024/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "573effaba78eb7626cfcfe21415290160caf60a04a62b066fcbf08f48164de77"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00025/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "126e0dfeec803a7bf97bdad28f8e63b2eba4f7e68801b217af6732ed9b25c5b0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00026/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2a30c755f98bfff5eb234afc5a06040b2f9fa1e629d8927eef6be4925878ecea"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00027/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "cb14e020eb21461e26a61ca7e942ca69ef96032c94620305af6688f4fdf508ea"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00028/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "0d05327e34d772a58189589e8fa41480ec935b1ea7c060d52f99b81c76a328ba"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00029/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "68391406f3b8b0065d70f2ab050ef696cc2125f7dc9d5b4e12657c1a4dcfec00"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00030/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2cd3ab3eab8037e370d5bbabd78d5565e4837a76e09fb5d4b2470db856bdd14a"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00031/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "b10b8a8c4d6d373ae197cc4b2c85b1ea013bc8ea5f5869e1623d10f98990fd7e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00032/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ea1dad0b2c80f8da407db941e0a57a90730702a56aaac0d35109b08ba8fb6f69"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00033/Nested 1/report.bin",
+          "bytes": 235295,
+          "sha256": "e8cd699bdedf9ed2c2569626540f81f51c129a714f64a8eb1bec473495465dc4"
+        }
+      ],
+      "actual": [
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "540306a25f1cf7c0760fa804995ca5a9bba29e77d889f9e04ea31b9d30595767"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d1430f68fc6d53e44c2bb422252bdae7af9d5ae89d5cfa2d5be7dd6cf21797de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00003/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "a9ab26618796d249154d042e52edc376ad123d33b528709a49f67e3d0c24f036"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00004/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "6d38e7945ff8fedbd1201820f584e1a4e7ad18497a79e6b61e19e83109b5c69d"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00005/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "32b36a63664927299661750a66028a8abaa7dda3a6da5677fb55ffbc566a45f4"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00006/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "955f1397e9ac3c570b1629eb1d6e3a9ba58ca3f06100cbdfecf4e707aa210391"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00007/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c80c60a2a308ee885b29116e5f38bb011f8fca83feeb2173c6d08fa96899f30e"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00008/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ccb370f372ec7d23b8544765893cbb5e998eac859b79e77f971f817eda5334d8"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00009/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "709775f5f986cfae2de660721d5e43693c043b545a258ecd25204f286e87eed8"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00010/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3a5ed2b8e83ba1894b98a8bce4e0d969ef7679b33e6fbde040cb6e7e33922666"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00011/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "a12631f15a0e62a83ff5c364ab715f7c4a2cddcbe6187bf209e6c249c12c7eea"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00012/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "cdb741b3d53831a53ae765ec2876eb571dcfa674d6491b7ccbd0ac91664220c6"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00013/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "42fc32fd426c397fe79e75157b55e82cdad6cfa5a1016bac023fe5eed5669824"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00014/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "f732dd1f2c64ed64f4258e41f32c876c5e1f8fe4c109efc3a4b765d65677e9de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00015/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3052ac113c77065136140f78899960e5eac6efd23778a90d15087276a1de05de"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00016/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "88e54143cf77969fa4882906f76bf41a9b2bcbd301a8ff7cf0ba1087a160218f"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00017/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "5bcd48ecb35e8ab11c26bf8e352613096489ee33c02cd3fbc6c656968860d519"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00018/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3626c585082f0bd26ee0a32f4335b1f84a9d5538e07e04f5e57959458b5fe8d0"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00019/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ab33a57c6c06eede99cf94bf36980b8ec7fddde2a632e5e26a54e2e97ba91772"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00020/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "3e65ef6da501c94114adbcc556e7c8400086136afdbe49fcd667164f660a58eb"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00021/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "280cb0fa7448088813042705c1b1bd36a3fc2d9b65905027ea033a92b779f1ac"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00022/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "21fb249ea3b73fcef3d9008cd6c2c8387ff95ae671b07d7b01ed680d46bf6b63"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00023/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "dbbd770ce97468d2494a974e6643b7e438b3dd812e29e7dbead92ca0b3f2f9f1"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00024/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e2ed7ec16c99cf45da49651f9331d441f52d95013ecf434f1490171f188b7595"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00025/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "915b6ee3639ee27eb301b5bb48f134dbfde197c440cdc1e570b10b02e44db153"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00026/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "370ad12c484eb82a01c5845790156c7cfffd2283edcffe14adda8827b25f0a7f"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00027/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "13ae6019f9e6d9b5ee474f3d0577d3ed8145d9761b8c387324eaa10b42f8200a"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00028/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "390789be47ba64fc585625480725615155e504ed4c29540844046aa3d9f32336"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00029/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c3df2b837d56df99eda28ada6bcbb8afd6bf2730081570581bf9ec1077845825"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00030/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "30fdb39b8b15e43d8cb98e13246bb964928443822d87116e7d3d4a7a53ba1af7"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00031/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "db3279783be577e9be203e1fe51d2ce86fcc63313ca5793b0fb8b8d9a872053c"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00032/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "c728c63e334f9c55228eec1e22f9f429e1ba6e3c5c5544fde16e4d6501673349"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00033/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d9690c7f13ac233ca982960f09cb8ce5bb821658d29e17e5e683c2be651bbb24"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "f5913aacf090ae7f313c45d360e5b2768cc88bb7d92b7078d9c8f617522a6f46"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 117648,
+          "sha256": "5cd0e9de8a0a640d58085396fc28a2561910b9a65eae9250697498951539c2fb"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "885c1784b028e45b0005c503d4cadc223799e9f8addb4a5c4ed4d6d1a1bf08a5"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00003/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "674c3d2b6433464a8c0d3596015a62302885e1374f06169871298e3b19074c36"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00004/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ea28d4799843ef1ed927e8710bae350732df05ac8cd86ed56ef8e4bf753a0920"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00005/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "63dea1bb48797461456e22fd9a0173ede3808babc603c536b3c5467a13698c13"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00006/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "1c39b8da2c0c7fe1939b3a52bb606d42a90595f219a6e211f2a86c7f612bf7e2"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00007/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "d3feb3a898acf11a1a092dd30008cfa5a70ddd60c52d8e481de61047438306b0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00008/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e4c79b335f9a700a6409eff61a0057a0d0ba4e954a606d4381ab49cded7a7683"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00009/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2378a3ec7389482ffe4f58b313262bc9b33bceed11256e82d6f05f32631c3f9e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00010/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "41f98126fd04148afd2e7f7463f9ace52c31e184568d31941743df684d625c17"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00011/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "b48c30186396fae6b191094689a4bc4cf551eb115cab21c45e4a6180d4bcd07e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00012/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "66f9e97979ac70efe2e755a60fa734c4a9c6f1ac404713f332880ae87336667e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00013/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "276679e20192c559a8dbca67db1bdf6aafdbb5f5eef287663ffbde059ae4c29c"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00014/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "86ff0a2224d2a3b018778d6fb3496978b5ab3437ba70ae5bbb9db261c9351553"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00015/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "7295550db05107a215a7ce5629f6af1dfa436e180a824bc271eec20d50ac96cd"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00016/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "73da15733781a20371e4a77b626bb467badc2d6fad2ab93e63ccdcf4c3304e13"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00017/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "e2315236b7c954c95af7fd0b520b02c14a42d582543522217351576ce1c729d4"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00018/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "7024a4ce38fbebdb9a2dc269495ce263af740df19ed80fd16f19ed364b54109d"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00019/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2be52e57828a01f916a4c99a65ee43b515505dc84f55da6f4b29802a43672941"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00020/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "f833630b2e30cd0cdbe360cb499328ac9912c79b27f924c5fb99fb3414bb2d1b"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00021/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "9db302f717f3ead46c2deba7ab25622394d8225afe87d6c537f3ec844da77a8d"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00022/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "86739494e0a392d941d7d9c022710e3c177c211bec195f0485914690e7fb82c0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00023/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "62beb836ef1ed3ef268e5f10321c203fee9e619a07d501cfe7a4f6f08351a49f"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00024/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "573effaba78eb7626cfcfe21415290160caf60a04a62b066fcbf08f48164de77"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00025/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "126e0dfeec803a7bf97bdad28f8e63b2eba4f7e68801b217af6732ed9b25c5b0"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00026/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2a30c755f98bfff5eb234afc5a06040b2f9fa1e629d8927eef6be4925878ecea"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00027/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "cb14e020eb21461e26a61ca7e942ca69ef96032c94620305af6688f4fdf508ea"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00028/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "0d05327e34d772a58189589e8fa41480ec935b1ea7c060d52f99b81c76a328ba"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00029/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "68391406f3b8b0065d70f2ab050ef696cc2125f7dc9d5b4e12657c1a4dcfec00"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00030/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "2cd3ab3eab8037e370d5bbabd78d5565e4837a76e09fb5d4b2470db856bdd14a"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00031/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "b10b8a8c4d6d373ae197cc4b2c85b1ea013bc8ea5f5869e1623d10f98990fd7e"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00032/Nested 1/report.bin",
+          "bytes": 117647,
+          "sha256": "ea1dad0b2c80f8da407db941e0a57a90730702a56aaac0d35109b08ba8fb6f69"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00033/Nested 1/report.bin",
+          "bytes": 235295,
+          "sha256": "e8cd699bdedf9ed2c2569626540f81f51c129a714f64a8eb1bec473495465dc4"
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "name": "one staging PUT per committed test object",
+      "expected": 68,
+      "actual": 68,
+      "verdict": "PASS"
+    },
+    {
+      "name": "one signed commit per committed test object",
+      "expected": 68,
+      "actual": 68,
+      "verdict": "PASS"
+    },
+    {
+      "name": "native success creation",
+      "expected": 0,
+      "actual": 0,
+      "verdict": "PASS"
+    }
+  ],
+  "batches": [
+    {
+      "schema": "redown.upload-batch",
+      "version": 1,
+      "extensionVersion": "0.3.32",
+      "batchId": "1b40e630-5d38-4506-b2b1-3c5fd4940b2d",
+      "startedAt": 1795650245799,
+      "finishedAt": 1795650262040,
+      "updatedAt": 1795650262050,
+      "destination": {
+        "provider": "cloudflare",
+        "connectionId": "cloudflare:fixture",
+        "accountId": "fixture",
+        "bucketName": "fixture",
+        "prefix": "isolated/run/"
+      },
+      "mode": "folder",
+      "status": "verified",
+      "code": "LOCAL_UPLOAD_BATCH_VERIFIED",
+      "expectedCount": 68,
+      "observedCount": 68,
+      "counts": {
+        "verified": 68,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "unconfirmed": 0,
+        "unprocessed": 0
+      },
+      "uploadedCount": 68,
+      "notification": {
+        "eligible": true,
+        "state": "rendered",
+        "surface": "app",
+        "observedAt": 1795650262044
+      },
+      "receiptDownload": "download-requested",
+      "files": [
+        {
+          "index": 0,
+          "operationId": "b4fa6f1a-c529-4c3a-a33f-8602c93f297f",
+          "relativePath": "Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "intendedSize": 0,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "observedSize": 0,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "d41d8cd98f00b204e9800998ecf8427e",
+            "version": "44586f526ccedc05ab9a3a973121b10e",
+            "sha256": null
+          },
+          "finishedAt": 1795650246825
+        },
+        {
+          "index": 1,
+          "operationId": "ef1bd11a-2155-48fa-a261-1c1d142f7bd9",
+          "relativePath": "Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "intendedSize": 117648,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "observedSize": 117648,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "e173d7c8c1dd661872153e5216710a84",
+            "version": "3aa2d79f9adf7300a7e8ab690fae3032",
+            "sha256": null
+          },
+          "finishedAt": 1795650247371
+        },
+        {
+          "index": 2,
+          "operationId": "756abdb2-4b6e-4f11-aba3-7aebb1828aef",
+          "relativePath": "Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "intendedSize": 117648,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "observedSize": 117648,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "192cb5c5d562b2b83ae7a126d1a32a2e",
+            "version": "bdb735396ea7bc30d349c702e944a8e6",
+            "sha256": null
+          },
+          "finishedAt": 1795650248027
+        },
+        {
+          "index": 3,
+          "operationId": "276af270-875b-4822-96c9-76c0b3c13ec1",
+          "relativePath": "Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "intendedSize": 117648,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "observedSize": 117648,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "641cb9982bd73d72aab31c046fea28e7",
+            "version": "7d075b8b0380e1c94b06abdb350cc54a",
+            "sha256": null
+          },
+          "finishedAt": 1795650248608
+        },
+        {
+          "index": 4,
+          "operationId": "457edd62-170b-4b62-a534-541b1d265aec",
+          "relativePath": "Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "a55f637485791e01d12166112b12e387",
+            "version": "aa481ad45b5b286f245205d87f4473f7",
+            "sha256": null
+          },
+          "finishedAt": 1795650249109
+        },
+        {
+          "index": 5,
+          "operationId": "13159e9d-b8bd-49b9-964c-c11f7abcf189",
+          "relativePath": "Folder 2 旅行/Group 00002/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00002/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00002/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "9cebd97b2d621f6d103976d2c8e94609",
+            "version": "5d00629320ef12aef3f7a412175bd3f8",
+            "sha256": null
+          },
+          "finishedAt": 1795650249607
+        },
+        {
+          "index": 6,
+          "operationId": "88a0c07d-1e89-487a-88a3-a83e06953371",
+          "relativePath": "Folder 1 旅行/Group 00003/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00003/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00003/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "7cafe2a9c012da02e2fecb5aae2d827c",
+            "version": "6842cd0db6934f1732fcfcfb79d6e93d",
+            "sha256": null
+          },
+          "finishedAt": 1795650249967
+        },
+        {
+          "index": 7,
+          "operationId": "abd09724-64d0-48d0-acdc-cd049a52f683",
+          "relativePath": "Folder 2 旅行/Group 00003/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00003/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00003/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "6cbc68e4816625bd80b54c831b21f7c6",
+            "version": "f728147fcb4b94392bcd23c6f95c6cd4",
+            "sha256": null
+          },
+          "finishedAt": 1795650250306
+        },
+        {
+          "index": 8,
+          "operationId": "c521814d-4ea5-4d3f-9430-7ad40b9a10cc",
+          "relativePath": "Folder 1 旅行/Group 00004/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00004/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00004/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "c3d0f5bd07761d606bb74f97aaf3303d",
+            "version": "96b5d31906b4a428cb0d526038b87f77",
+            "sha256": null
+          },
+          "finishedAt": 1795650250603
+        },
+        {
+          "index": 9,
+          "operationId": "81fb043a-36f7-424c-ad2f-140df18992b5",
+          "relativePath": "Folder 2 旅行/Group 00004/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00004/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00004/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "9a02901b42c03873f9ea99cc8bc5a639",
+            "version": "d716f4521855a2c985cf02c9c3665c05",
+            "sha256": null
+          },
+          "finishedAt": 1795650250751
+        },
+        {
+          "index": 10,
+          "operationId": "21dbdb23-60dd-43b4-80eb-db5e5985d28e",
+          "relativePath": "Folder 1 旅行/Group 00005/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00005/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00005/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "baee12b783902399bc432a3d76fe16e1",
+            "version": "eea517b127a3a9861e627a9ba8f46947",
+            "sha256": null
+          },
+          "finishedAt": 1795650250945
+        },
+        {
+          "index": 11,
+          "operationId": "e47fd444-cbd7-4e64-ac4a-84e92eab2cf7",
+          "relativePath": "Folder 2 旅行/Group 00005/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00005/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00005/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "beeb0796ace709553d42ac2815b650f0",
+            "version": "b859ba824512c68f586d937c37aa0759",
+            "sha256": null
+          },
+          "finishedAt": 1795650251112
+        },
+        {
+          "index": 12,
+          "operationId": "ff5cc2e1-fd6b-4590-b88e-6daf70e352e6",
+          "relativePath": "Folder 1 旅行/Group 00006/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00006/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00006/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "ffe5990fc665fa2ffb4af5d5fb2e14dc",
+            "version": "8b6a2ab265f1c7961d98b04efdb1460d",
+            "sha256": null
+          },
+          "finishedAt": 1795650251275
+        },
+        {
+          "index": 13,
+          "operationId": "0dedb6dd-d5a1-4895-8ab1-99a4e6146a98",
+          "relativePath": "Folder 2 旅行/Group 00006/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00006/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00006/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "cf7fcc2f06366bc85d9b0c046a1c1ec1",
+            "version": "b61fa755a709f634ac23ad1e227f0088",
+            "sha256": null
+          },
+          "finishedAt": 1795650251436
+        },
+        {
+          "index": 14,
+          "operationId": "9da4ab09-07f5-4a90-842b-f7a334ba1a9a",
+          "relativePath": "Folder 1 旅行/Group 00007/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00007/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00007/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "a5316bac91c6bcfcdcce3d228bf182b5",
+            "version": "af35dd4a7defc485fa24d4200eeb999f",
+            "sha256": null
+          },
+          "finishedAt": 1795650251622
+        },
+        {
+          "index": 15,
+          "operationId": "fbbf0e9e-ba5e-4560-a438-8b7e1fa70c0f",
+          "relativePath": "Folder 2 旅行/Group 00007/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00007/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00007/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "b6c8334eb93c6b4a4433becc2c04e930",
+            "version": "4e5e86564c54ae23c01e3bfdff75e52d",
+            "sha256": null
+          },
+          "finishedAt": 1795650251800
+        },
+        {
+          "index": 16,
+          "operationId": "cf6a25f7-7eae-46a6-8171-b347e8042f6d",
+          "relativePath": "Folder 1 旅行/Group 00008/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00008/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00008/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "ab93ed01aaec5f54d38b0e051935442a",
+            "version": "cfa193cb3696a50de1c59ece6ffb5ded",
+            "sha256": null
+          },
+          "finishedAt": 1795650251975
+        },
+        {
+          "index": 17,
+          "operationId": "adb44650-e85f-494c-8d65-4942ae4624bd",
+          "relativePath": "Folder 2 旅行/Group 00008/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00008/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00008/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "641be72abfacfaa1d80590158d65f53c",
+            "version": "6a7ef8f0e6e2e7871ef62d64b1f53102",
+            "sha256": null
+          },
+          "finishedAt": 1795650252142
+        },
+        {
+          "index": 18,
+          "operationId": "e10e99a5-43f6-4478-84b8-dfbd9d461dd1",
+          "relativePath": "Folder 1 旅行/Group 00009/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00009/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00009/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "5cf2b4f79cd15cb20b0e07a6cc6fd7fe",
+            "version": "269de98df524e31e39c2cf8a109f27b5",
+            "sha256": null
+          },
+          "finishedAt": 1795650252317
+        },
+        {
+          "index": 19,
+          "operationId": "ba400ae1-4fd3-48cf-a836-def962961b5b",
+          "relativePath": "Folder 2 旅行/Group 00009/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00009/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00009/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "2f449fb792f0e985fc3594597d449520",
+            "version": "f11193770a018c75018951ecbbc4495c",
+            "sha256": null
+          },
+          "finishedAt": 1795650252504
+        },
+        {
+          "index": 20,
+          "operationId": "92b05d99-d0ca-40c6-9bdf-3951a98cbe44",
+          "relativePath": "Folder 1 旅行/Group 00010/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00010/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00010/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "3b5e0ee4e92369b5fce65cbdbf07bd7e",
+            "version": "0f4ec8d7e545b42e9ae9938b769a1fa8",
+            "sha256": null
+          },
+          "finishedAt": 1795650252665
+        },
+        {
+          "index": 21,
+          "operationId": "c7642d62-d2b7-4533-9f3a-594745bcfcd4",
+          "relativePath": "Folder 2 旅行/Group 00010/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00010/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00010/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "8ea47d9c6d3183eafccba5aa74705177",
+            "version": "b1d9b9ca7f9fd25a4e920ec125405363",
+            "sha256": null
+          },
+          "finishedAt": 1795650252793
+        },
+        {
+          "index": 22,
+          "operationId": "7d3cc467-8396-4160-9615-a49e5de63dee",
+          "relativePath": "Folder 1 旅行/Group 00011/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00011/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00011/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "30d90fa73d196ec19b466a31199ba2a2",
+            "version": "92a118d7a7b3c773a2da8178409385f9",
+            "sha256": null
+          },
+          "finishedAt": 1795650252912
+        },
+        {
+          "index": 23,
+          "operationId": "3283e25b-c50b-4a02-af6c-625da723de80",
+          "relativePath": "Folder 2 旅行/Group 00011/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00011/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00011/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "7e5ca8a9f11c23e6b4c3a8bf35ef805e",
+            "version": "e21127393a57a27d168be62998b63911",
+            "sha256": null
+          },
+          "finishedAt": 1795650253028
+        },
+        {
+          "index": 24,
+          "operationId": "9ff6688c-70ac-4afb-97a8-9f9bbcc8a71f",
+          "relativePath": "Folder 1 旅行/Group 00012/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00012/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00012/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "09e16854579302de2f2a84259b4df755",
+            "version": "ca4deaf686c77f1d58ff4d319788de2a",
+            "sha256": null
+          },
+          "finishedAt": 1795650253158
+        },
+        {
+          "index": 25,
+          "operationId": "db8e8454-e7c8-4ca1-b975-bedaa525e3ce",
+          "relativePath": "Folder 2 旅行/Group 00012/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00012/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00012/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4154605fe1064ef2d71398ed9440a24a",
+            "version": "ec5a956bb21fe1f5b1a583b057dea1d1",
+            "sha256": null
+          },
+          "finishedAt": 1795650253318
+        },
+        {
+          "index": 26,
+          "operationId": "04742b44-cd75-42ed-8f07-170cb556eade",
+          "relativePath": "Folder 1 旅行/Group 00013/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00013/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00013/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "b09e8bfd68e953e54c637765e98c3754",
+            "version": "cd4d2dc635b386612f31174f3d87a199",
+            "sha256": null
+          },
+          "finishedAt": 1795650253472
+        },
+        {
+          "index": 27,
+          "operationId": "a1a6b584-5f71-464f-92f0-5f3a132aa8b3",
+          "relativePath": "Folder 2 旅行/Group 00013/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00013/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00013/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "7a5553c5af460d68a88aa91e36d17fad",
+            "version": "b48b4dafc30b44ac8278ea833bd1b751",
+            "sha256": null
+          },
+          "finishedAt": 1795650253726
+        },
+        {
+          "index": 28,
+          "operationId": "83ceb378-580b-4d82-813a-56cbe43e3cbe",
+          "relativePath": "Folder 1 旅行/Group 00014/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00014/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00014/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4a3c395a7b1a5b8fd78e31d5eee24f10",
+            "version": "294cf799e23ba0c9a53fa9ea42e571e1",
+            "sha256": null
+          },
+          "finishedAt": 1795650254024
+        },
+        {
+          "index": 29,
+          "operationId": "109d5cdb-1347-4add-b6de-63b124025285",
+          "relativePath": "Folder 2 旅行/Group 00014/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00014/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00014/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "6d3dc1d740b96634a023d58d3eca223e",
+            "version": "f1cd85e3d3986174318461de7d56bba7",
+            "sha256": null
+          },
+          "finishedAt": 1795650254331
+        },
+        {
+          "index": 30,
+          "operationId": "9925cbcb-bdf1-41d2-8a19-eff04353088b",
+          "relativePath": "Folder 1 旅行/Group 00015/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00015/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00015/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "d387570763a99ff21899faac17a1ebe1",
+            "version": "247275850babe36af5490ce204de1a7d",
+            "sha256": null
+          },
+          "finishedAt": 1795650254588
+        },
+        {
+          "index": 31,
+          "operationId": "aa380351-4114-477e-943f-77cb595c50a5",
+          "relativePath": "Folder 2 旅行/Group 00015/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00015/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00015/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "8b683db9bf8ca3ef80aff43cab8ee686",
+            "version": "a97b192209e8ef68dd719fb65d52b116",
+            "sha256": null
+          },
+          "finishedAt": 1795650254830
+        },
+        {
+          "index": 32,
+          "operationId": "8b65fac9-dbe3-41da-b5f1-896d988ee0ba",
+          "relativePath": "Folder 1 旅行/Group 00016/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00016/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00016/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "edacb9ac7f5ec7856217a674c44a7fd1",
+            "version": "20091eeb611972418623ad728db531e6",
+            "sha256": null
+          },
+          "finishedAt": 1795650255027
+        },
+        {
+          "index": 33,
+          "operationId": "fc8221e1-7c4c-4f9a-b419-c89b0a832ad3",
+          "relativePath": "Folder 2 旅行/Group 00016/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00016/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00016/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "02e25dd60a81ffb35b0eeb195bc91ebd",
+            "version": "131ae9cafb9a03030ea33bacaa328549",
+            "sha256": null
+          },
+          "finishedAt": 1795650255207
+        },
+        {
+          "index": 34,
+          "operationId": "50bd4aa3-2d23-4ad6-94c6-a8792a2b1cef",
+          "relativePath": "Folder 1 旅行/Group 00017/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00017/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00017/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "f78774f4e6210fc463aaf8a8fb78bb1e",
+            "version": "0bd914abdabd3fb019443de423743642",
+            "sha256": null
+          },
+          "finishedAt": 1795650255403
+        },
+        {
+          "index": 35,
+          "operationId": "46ce8a84-4fe7-45c6-aa8d-efd9e19e60e5",
+          "relativePath": "Folder 2 旅行/Group 00017/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00017/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00017/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "3ce0e4ea6c3c3b12eb80be23dbeea00e",
+            "version": "81399128ed1e862aa648d83b5854f179",
+            "sha256": null
+          },
+          "finishedAt": 1795650255623
+        },
+        {
+          "index": 36,
+          "operationId": "be52adb8-110c-4026-b519-5c4ad3d17722",
+          "relativePath": "Folder 1 旅行/Group 00018/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00018/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00018/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "db238c34a9ff3a3c96323b5774436e46",
+            "version": "dd3f2f844d2f7ca5460a613d2be365b6",
+            "sha256": null
+          },
+          "finishedAt": 1795650255914
+        },
+        {
+          "index": 37,
+          "operationId": "2f64fcd2-6c28-41d4-ba88-cecc318887d6",
+          "relativePath": "Folder 2 旅行/Group 00018/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00018/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00018/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "7042033880245915c1ed01386cf3d9be",
+            "version": "ed1431dbb949360532011c76175da878",
+            "sha256": null
+          },
+          "finishedAt": 1795650256132
+        },
+        {
+          "index": 38,
+          "operationId": "1def2889-fa7b-40f5-8a44-dd186d2405d2",
+          "relativePath": "Folder 1 旅行/Group 00019/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00019/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00019/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "c20815120b62cf9edd6d728fc6329fd9",
+            "version": "6d8b074c45a24cfe4f6bf5dfeb71003c",
+            "sha256": null
+          },
+          "finishedAt": 1795650256404
+        },
+        {
+          "index": 39,
+          "operationId": "67586cd0-3a98-442a-9d3d-7d5df2edc445",
+          "relativePath": "Folder 2 旅行/Group 00019/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00019/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00019/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "17c7a164852542e92aba86ce4a10fc52",
+            "version": "9dfd59a7465c58a528250da55cad9140",
+            "sha256": null
+          },
+          "finishedAt": 1795650256613
+        },
+        {
+          "index": 40,
+          "operationId": "7c36815f-1bff-49a9-9f68-ffde255ef4f3",
+          "relativePath": "Folder 1 旅行/Group 00020/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00020/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00020/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "abffc1a3a006ed0abbd98e109f9e1de9",
+            "version": "9bbe84c82248d0cdee6472743110964b",
+            "sha256": null
+          },
+          "finishedAt": 1795650256967
+        },
+        {
+          "index": 41,
+          "operationId": "454c8806-d417-46ee-b8da-4317da403d94",
+          "relativePath": "Folder 2 旅行/Group 00020/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00020/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00020/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "2422a2f70bead97529a0207774c5de92",
+            "version": "05df2dbf80c6697df072a54e3ffc1398",
+            "sha256": null
+          },
+          "finishedAt": 1795650257295
+        },
+        {
+          "index": 42,
+          "operationId": "8df12dd4-bd18-48cd-a41b-339bbe1d8460",
+          "relativePath": "Folder 1 旅行/Group 00021/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00021/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00021/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "cc908c6c82195575dce43e55c6055658",
+            "version": "bece42a1cc51f21f4d0869069348d52a",
+            "sha256": null
+          },
+          "finishedAt": 1795650257544
+        },
+        {
+          "index": 43,
+          "operationId": "c93dc8ab-7da5-44bc-9221-9184cca20fee",
+          "relativePath": "Folder 2 旅行/Group 00021/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00021/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00021/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "f829a444bb525a84fc935e735d6af574",
+            "version": "bdd26373220b0b1899fc43c3005cef93",
+            "sha256": null
+          },
+          "finishedAt": 1795650257799
+        },
+        {
+          "index": 44,
+          "operationId": "6a7846b4-8ea5-4bc4-b4df-b331d8d5a3a6",
+          "relativePath": "Folder 1 旅行/Group 00022/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00022/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00022/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "d9f0d832eaefb4d1cbbfe0845f25c684",
+            "version": "06fa5bd5ee08ab8bab3d64e3f5913158",
+            "sha256": null
+          },
+          "finishedAt": 1795650257980
+        },
+        {
+          "index": 45,
+          "operationId": "4e195e1f-32aa-48e9-9795-b187672c5684",
+          "relativePath": "Folder 2 旅行/Group 00022/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00022/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00022/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4117eedbea4c4ca5aa3fafbddc85d6e9",
+            "version": "455f220286ee0c239ef7519cc2314d78",
+            "sha256": null
+          },
+          "finishedAt": 1795650258221
+        },
+        {
+          "index": 46,
+          "operationId": "53805bfb-40ef-4278-b530-43c2878e9549",
+          "relativePath": "Folder 1 旅行/Group 00023/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00023/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00023/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "c9fbf1547774bcf6970b00565ecb91b3",
+            "version": "e9e878fbcc0d0a5e1b83d5d498acf6b6",
+            "sha256": null
+          },
+          "finishedAt": 1795650258364
+        },
+        {
+          "index": 47,
+          "operationId": "32fd7110-41a5-49b7-8145-2adc48ca8229",
+          "relativePath": "Folder 2 旅行/Group 00023/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00023/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00023/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "f717f6e4582f969dd45a3546eb3bc5e9",
+            "version": "282fa18bdfac8ac84accf6178058407d",
+            "sha256": null
+          },
+          "finishedAt": 1795650258668
+        },
+        {
+          "index": 48,
+          "operationId": "a4f5fadb-c574-4a93-8675-a0ec37bf3ebf",
+          "relativePath": "Folder 1 旅行/Group 00024/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00024/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00024/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "28d89768d531ca12055928b1ffc86b83",
+            "version": "979872b689ca11f505b6d8f3cb1daebb",
+            "sha256": null
+          },
+          "finishedAt": 1795650258973
+        },
+        {
+          "index": 49,
+          "operationId": "e5a04aa4-da5d-405c-ac91-5766dcac5a2c",
+          "relativePath": "Folder 2 旅行/Group 00024/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00024/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00024/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4af4bda5a7052cba3fa499867312d1e0",
+            "version": "6b2d3d1e9a3caeb983c15f01b9776f28",
+            "sha256": null
+          },
+          "finishedAt": 1795650259217
+        },
+        {
+          "index": 50,
+          "operationId": "c7ce98e8-9798-4a1d-a97a-f42ebf797ccd",
+          "relativePath": "Folder 1 旅行/Group 00025/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00025/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00025/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "e791f6a5f4c1b84e99db5845f8c26866",
+            "version": "1b2c57a4637c5d1621c8bce392c8ebef",
+            "sha256": null
+          },
+          "finishedAt": 1795650259467
+        },
+        {
+          "index": 51,
+          "operationId": "988d777e-6dc4-446c-b59d-7616ba4c1b0b",
+          "relativePath": "Folder 2 旅行/Group 00025/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00025/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00025/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "9021ec00c53f9374ad04c6b59520a91a",
+            "version": "078dc0be7854a656fbf07bcf3e206a0a",
+            "sha256": null
+          },
+          "finishedAt": 1795650259625
+        },
+        {
+          "index": 52,
+          "operationId": "4f1ea6bd-8ec0-458f-9977-032b30431623",
+          "relativePath": "Folder 1 旅行/Group 00026/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00026/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00026/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "9c61c10c93886519871c19d08f403348",
+            "version": "d7900720106767ccea8a6c45b8bdbaf5",
+            "sha256": null
+          },
+          "finishedAt": 1795650259766
+        },
+        {
+          "index": 53,
+          "operationId": "b150809e-997d-4ed3-bd2b-b716458db0ad",
+          "relativePath": "Folder 2 旅行/Group 00026/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00026/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00026/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "1d337531bf37f413fa206e208f10ee06",
+            "version": "8539b61600cebbfcad8b8596e6d6d6f1",
+            "sha256": null
+          },
+          "finishedAt": 1795650259926
+        },
+        {
+          "index": 54,
+          "operationId": "62587d42-305a-4eb1-8db1-732ee6c1fbf4",
+          "relativePath": "Folder 1 旅行/Group 00027/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00027/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00027/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4045ebb573f8f145cfa95089f5b0a72c",
+            "version": "cdf7239ec268b8d738242c5946c4f33f",
+            "sha256": null
+          },
+          "finishedAt": 1795650260097
+        },
+        {
+          "index": 55,
+          "operationId": "6eb597a0-1bb4-46cb-911e-f0828f2a5453",
+          "relativePath": "Folder 2 旅行/Group 00027/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00027/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00027/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "75a4c19e36bcbcc9c8716dff0475124b",
+            "version": "2bda6d700f94ad795e44408f199bf277",
+            "sha256": null
+          },
+          "finishedAt": 1795650260218
+        },
+        {
+          "index": 56,
+          "operationId": "9c3d6c33-04ef-4197-a6fe-139105d4d6d7",
+          "relativePath": "Folder 1 旅行/Group 00028/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00028/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00028/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "22083aaebde32c8b80f8cd8d42d00176",
+            "version": "c1df5b9484c4a1cdc4cf21145ac415a4",
+            "sha256": null
+          },
+          "finishedAt": 1795650260355
+        },
+        {
+          "index": 57,
+          "operationId": "9060e5ed-6051-479c-835a-a8855380b3e8",
+          "relativePath": "Folder 2 旅行/Group 00028/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00028/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00028/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "5468fc064d443aee12bd1b14819db573",
+            "version": "17a5b1096d4ccb260f069d2f8ab6936d",
+            "sha256": null
+          },
+          "finishedAt": 1795650260506
+        },
+        {
+          "index": 58,
+          "operationId": "8d51dfe5-6134-4f55-868d-bc00f53105fe",
+          "relativePath": "Folder 1 旅行/Group 00029/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00029/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00029/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "99ed6889412035de5ab9ac44dca9ab0b",
+            "version": "e1235be3f5559a9a097626e73148fc32",
+            "sha256": null
+          },
+          "finishedAt": 1795650260654
+        },
+        {
+          "index": 59,
+          "operationId": "546a87f2-b92d-4890-9170-59d920694d26",
+          "relativePath": "Folder 2 旅行/Group 00029/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00029/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00029/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "ebe5b55d21ddf116988ab16093b1c278",
+            "version": "f3aab7e9f54a75b1ce2a3dc604d6dbe6",
+            "sha256": null
+          },
+          "finishedAt": 1795650260811
+        },
+        {
+          "index": 60,
+          "operationId": "e82909a1-9620-4337-88bd-029919fb06ba",
+          "relativePath": "Folder 1 旅行/Group 00030/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00030/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00030/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "85e86e6ee52b1dc459e05aafb8f2b533",
+            "version": "da1f80a448db6ff88ff02189ab155a84",
+            "sha256": null
+          },
+          "finishedAt": 1795650260966
+        },
+        {
+          "index": 61,
+          "operationId": "2c68992f-bdbc-4355-ad0b-5eeb576a57b6",
+          "relativePath": "Folder 2 旅行/Group 00030/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00030/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00030/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "59c72c02fdcac234c90b0ffe266f2120",
+            "version": "e1fe6b82c86ce2aef7213fb0b8084c7e",
+            "sha256": null
+          },
+          "finishedAt": 1795650261105
+        },
+        {
+          "index": 62,
+          "operationId": "68b54e3e-f3e1-4851-a233-4a22e7ce731f",
+          "relativePath": "Folder 1 旅行/Group 00031/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00031/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00031/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "52f043cbd978f8e277f9bfc5afa9932d",
+            "version": "6bc6cae69bc41e25219c711cceb92830",
+            "sha256": null
+          },
+          "finishedAt": 1795650261245
+        },
+        {
+          "index": 63,
+          "operationId": "7a804a08-d698-4d10-8bc1-8e50bf7a5ebe",
+          "relativePath": "Folder 2 旅行/Group 00031/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00031/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00031/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "457fbce5b6ca5271ae4371e324a7a41f",
+            "version": "85d456cc0033c28ec3d64ce30f72cb8a",
+            "sha256": null
+          },
+          "finishedAt": 1795650261385
+        },
+        {
+          "index": 64,
+          "operationId": "971a13dc-4126-4ec5-9077-b7f65d40cd14",
+          "relativePath": "Folder 1 旅行/Group 00032/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00032/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00032/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "961aa9bbb6f412f23805739db29ba7d8",
+            "version": "1deb6b2146df6b18aed3e311dd545b9d",
+            "sha256": null
+          },
+          "finishedAt": 1795650261528
+        },
+        {
+          "index": 65,
+          "operationId": "b2e18751-b783-4fce-a428-518af6eaa7d5",
+          "relativePath": "Folder 2 旅行/Group 00032/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00032/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00032/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "998199a5adb2ec0223c6744268b90942",
+            "version": "60ce7a16e17615adb393c0cbefae5001",
+            "sha256": null
+          },
+          "finishedAt": 1795650261742
+        },
+        {
+          "index": 66,
+          "operationId": "d3d4e2d4-189a-45b2-a0da-042f8d5605b4",
+          "relativePath": "Folder 1 旅行/Group 00033/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00033/Nested 1/report.bin",
+          "intendedSize": 117647,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00033/Nested 1/report.bin",
+          "observedSize": 117647,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "4993b91cc2b1dd722055e03cc8639c91",
+            "version": "c7e83b4f84beff9007646f16d82ef2ce",
+            "sha256": null
+          },
+          "finishedAt": 1795650261892
+        },
+        {
+          "index": 67,
+          "operationId": "745e2fd5-5b46-4669-880a-d7532e644ee5",
+          "relativePath": "Folder 2 旅行/Group 00033/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00033/Nested 1/report.bin",
+          "intendedSize": 235295,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00033/Nested 1/report.bin",
+          "observedSize": 235295,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "bb26cd011a47e78b50ac76ffc500b412",
+            "version": "3161ce2a98d86ac1d92e616620020c3a",
+            "sha256": null
+          },
+          "finishedAt": 1795650262040
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "cloudflare-upload:1b40e630-5d38-4506-b2b1-3c5fd4940b2d",
+      "claimedAt": 1795650262043,
+      "surface": "app"
+    }
+  ],
+  "downloads": [
+    {
+      "id": "1b40e630-5d38-4506-b2b1-3c5fd4940b2d",
+      "at": 1795650262049,
+      "status": "verified"
+    }
+  ],
+  "inventory": [
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+      "bytes": 117648,
+      "sha256": "540306a25f1cf7c0760fa804995ca5a9bba29e77d889f9e04ea31b9d30595767"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "d1430f68fc6d53e44c2bb422252bdae7af9d5ae89d5cfa2d5be7dd6cf21797de"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00003/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "a9ab26618796d249154d042e52edc376ad123d33b528709a49f67e3d0c24f036"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00004/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "6d38e7945ff8fedbd1201820f584e1a4e7ad18497a79e6b61e19e83109b5c69d"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00005/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "32b36a63664927299661750a66028a8abaa7dda3a6da5677fb55ffbc566a45f4"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00006/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "955f1397e9ac3c570b1629eb1d6e3a9ba58ca3f06100cbdfecf4e707aa210391"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00007/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "c80c60a2a308ee885b29116e5f38bb011f8fca83feeb2173c6d08fa96899f30e"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00008/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "ccb370f372ec7d23b8544765893cbb5e998eac859b79e77f971f817eda5334d8"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00009/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "709775f5f986cfae2de660721d5e43693c043b545a258ecd25204f286e87eed8"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00010/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "3a5ed2b8e83ba1894b98a8bce4e0d969ef7679b33e6fbde040cb6e7e33922666"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00011/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "a12631f15a0e62a83ff5c364ab715f7c4a2cddcbe6187bf209e6c249c12c7eea"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00012/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "cdb741b3d53831a53ae765ec2876eb571dcfa674d6491b7ccbd0ac91664220c6"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00013/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "42fc32fd426c397fe79e75157b55e82cdad6cfa5a1016bac023fe5eed5669824"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00014/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "f732dd1f2c64ed64f4258e41f32c876c5e1f8fe4c109efc3a4b765d65677e9de"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00015/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "3052ac113c77065136140f78899960e5eac6efd23778a90d15087276a1de05de"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00016/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "88e54143cf77969fa4882906f76bf41a9b2bcbd301a8ff7cf0ba1087a160218f"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00017/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "5bcd48ecb35e8ab11c26bf8e352613096489ee33c02cd3fbc6c656968860d519"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00018/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "3626c585082f0bd26ee0a32f4335b1f84a9d5538e07e04f5e57959458b5fe8d0"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00019/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "ab33a57c6c06eede99cf94bf36980b8ec7fddde2a632e5e26a54e2e97ba91772"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00020/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "3e65ef6da501c94114adbcc556e7c8400086136afdbe49fcd667164f660a58eb"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00021/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "280cb0fa7448088813042705c1b1bd36a3fc2d9b65905027ea033a92b779f1ac"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00022/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "21fb249ea3b73fcef3d9008cd6c2c8387ff95ae671b07d7b01ed680d46bf6b63"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00023/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "dbbd770ce97468d2494a974e6643b7e438b3dd812e29e7dbead92ca0b3f2f9f1"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00024/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "e2ed7ec16c99cf45da49651f9331d441f52d95013ecf434f1490171f188b7595"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00025/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "915b6ee3639ee27eb301b5bb48f134dbfde197c440cdc1e570b10b02e44db153"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00026/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "370ad12c484eb82a01c5845790156c7cfffd2283edcffe14adda8827b25f0a7f"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00027/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "13ae6019f9e6d9b5ee474f3d0577d3ed8145d9761b8c387324eaa10b42f8200a"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00028/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "390789be47ba64fc585625480725615155e504ed4c29540844046aa3d9f32336"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00029/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "c3df2b837d56df99eda28ada6bcbb8afd6bf2730081570581bf9ec1077845825"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00030/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "30fdb39b8b15e43d8cb98e13246bb964928443822d87116e7d3d4a7a53ba1af7"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00031/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "db3279783be577e9be203e1fe51d2ce86fcc63313ca5793b0fb8b8d9a872053c"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00032/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "c728c63e334f9c55228eec1e22f9f429e1ba6e3c5c5544fde16e4d6501673349"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00033/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "d9690c7f13ac233ca982960f09cb8ce5bb821658d29e17e5e683c2be651bbb24"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+      "bytes": 117648,
+      "sha256": "f5913aacf090ae7f313c45d360e5b2768cc88bb7d92b7078d9c8f617522a6f46"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+      "bytes": 117648,
+      "sha256": "5cd0e9de8a0a640d58085396fc28a2561910b9a65eae9250697498951539c2fb"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00002/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "885c1784b028e45b0005c503d4cadc223799e9f8addb4a5c4ed4d6d1a1bf08a5"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00003/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "674c3d2b6433464a8c0d3596015a62302885e1374f06169871298e3b19074c36"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00004/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "ea28d4799843ef1ed927e8710bae350732df05ac8cd86ed56ef8e4bf753a0920"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00005/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "63dea1bb48797461456e22fd9a0173ede3808babc603c536b3c5467a13698c13"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00006/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "1c39b8da2c0c7fe1939b3a52bb606d42a90595f219a6e211f2a86c7f612bf7e2"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00007/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "d3feb3a898acf11a1a092dd30008cfa5a70ddd60c52d8e481de61047438306b0"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00008/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "e4c79b335f9a700a6409eff61a0057a0d0ba4e954a606d4381ab49cded7a7683"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00009/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "2378a3ec7389482ffe4f58b313262bc9b33bceed11256e82d6f05f32631c3f9e"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00010/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "41f98126fd04148afd2e7f7463f9ace52c31e184568d31941743df684d625c17"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00011/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "b48c30186396fae6b191094689a4bc4cf551eb115cab21c45e4a6180d4bcd07e"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00012/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "66f9e97979ac70efe2e755a60fa734c4a9c6f1ac404713f332880ae87336667e"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00013/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "276679e20192c559a8dbca67db1bdf6aafdbb5f5eef287663ffbde059ae4c29c"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00014/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "86ff0a2224d2a3b018778d6fb3496978b5ab3437ba70ae5bbb9db261c9351553"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00015/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "7295550db05107a215a7ce5629f6af1dfa436e180a824bc271eec20d50ac96cd"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00016/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "73da15733781a20371e4a77b626bb467badc2d6fad2ab93e63ccdcf4c3304e13"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00017/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "e2315236b7c954c95af7fd0b520b02c14a42d582543522217351576ce1c729d4"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00018/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "7024a4ce38fbebdb9a2dc269495ce263af740df19ed80fd16f19ed364b54109d"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00019/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "2be52e57828a01f916a4c99a65ee43b515505dc84f55da6f4b29802a43672941"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00020/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "f833630b2e30cd0cdbe360cb499328ac9912c79b27f924c5fb99fb3414bb2d1b"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00021/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "9db302f717f3ead46c2deba7ab25622394d8225afe87d6c537f3ec844da77a8d"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00022/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "86739494e0a392d941d7d9c022710e3c177c211bec195f0485914690e7fb82c0"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00023/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "62beb836ef1ed3ef268e5f10321c203fee9e619a07d501cfe7a4f6f08351a49f"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00024/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "573effaba78eb7626cfcfe21415290160caf60a04a62b066fcbf08f48164de77"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00025/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "126e0dfeec803a7bf97bdad28f8e63b2eba4f7e68801b217af6732ed9b25c5b0"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00026/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "2a30c755f98bfff5eb234afc5a06040b2f9fa1e629d8927eef6be4925878ecea"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00027/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "cb14e020eb21461e26a61ca7e942ca69ef96032c94620305af6688f4fdf508ea"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00028/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "0d05327e34d772a58189589e8fa41480ec935b1ea7c060d52f99b81c76a328ba"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00029/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "68391406f3b8b0065d70f2ab050ef696cc2125f7dc9d5b4e12657c1a4dcfec00"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00030/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "2cd3ab3eab8037e370d5bbabd78d5565e4837a76e09fb5d4b2470db856bdd14a"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00031/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "b10b8a8c4d6d373ae197cc4b2c85b1ea013bc8ea5f5869e1623d10f98990fd7e"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00032/Nested 1/report.bin",
+      "bytes": 117647,
+      "sha256": "ea1dad0b2c80f8da407db941e0a57a90730702a56aaac0d35109b08ba8fb6f69"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00033/Nested 1/report.bin",
+      "bytes": 235295,
+      "sha256": "e8cd699bdedf9ed2c2569626540f81f51c129a714f64a8eb1bec473495465dc4"
+    }
+  ],
+  "verdict": "PASS",
+  "resources": {
+    "stagingPuts": 68,
+    "signedCommits": 68,
+    "peakStagedBytes": 235295,
+    "peakNodeRss": 307208192
+  },
+  "elapsedMs": 20115
+}

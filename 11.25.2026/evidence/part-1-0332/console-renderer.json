@@ -1,0 +1,7 @@
+{
+  "result": "PASS",
+  "evidenceClass": "PACKAGED_RENDERER_IN_CHROMIUM_WITH_SYNTHETIC_EXTENSION_MESSAGES",
+  "referenceRevision": "31cce6680b5a3d76eb6b4e6bd1b7e4d82c5ebe69",
+  "checkOutput": "PASS: palettes, approved timings, narrow viewport, both positions, three sizes, baseline Large geometry, hover, keyboard dismissal, reduced motion, deduplication and expiry in Chromium.",
+  "artSha256": "409cf9242887d1c132a9790b84942111f9f46d8a669dfc2e109456ef687fbe52"
+}

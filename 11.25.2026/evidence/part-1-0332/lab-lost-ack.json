@@ -1,0 +1,327 @@
+{
+  "schema": "redown.upload-lab.integration",
+  "version": 1,
+  "extensionVersion": "0.3.32",
+  "scenario": "lost-ack",
+  "seed": 20261125,
+  "runId": "90f91924abb441ceb360eab8110d30be",
+  "layer": "local-workerd-r2",
+  "startedAt": 1795650259290,
+  "checks": [
+    {
+      "name": "lost ACK reconciles exact committed key",
+      "expected": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+      "actual": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+      "verdict": "PASS"
+    },
+    {
+      "name": "reconciliation never replays write",
+      "expected": 5,
+      "actual": 5,
+      "verdict": "PASS"
+    },
+    {
+      "name": "batch 1 phase",
+      "expected": "unconfirmed",
+      "actual": "unconfirmed",
+      "verdict": "PASS"
+    },
+    {
+      "name": "custom notification count 1",
+      "expected": 0,
+      "actual": 0,
+      "verdict": "PASS"
+    },
+    {
+      "name": "custom notification after durable final verification 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "automatic aggregate receipt count 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "uploaded and verified progress are distinct 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "no custom notification during file progress 1",
+      "expected": false,
+      "actual": false,
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart has same batch result 1",
+      "expected": "unconfirmed",
+      "actual": "unconfirmed",
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart does not repeat custom notification 1",
+      "expected": 0,
+      "actual": 0,
+      "verdict": "PASS"
+    },
+    {
+      "name": "restart does not repeat automatic download 1",
+      "expected": 1,
+      "actual": 1,
+      "verdict": "PASS"
+    },
+    {
+      "name": "per-file CURRENT and History projections 1",
+      "expected": true,
+      "actual": true,
+      "verdict": "PASS"
+    },
+    {
+      "name": "exact independent R2 inventory and SHA-256",
+      "expected": [
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "3eede0a6f1c5aafe1790154adf3b84023967ac0f450591002ddf85c447558e56"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 2048,
+          "sha256": "59c40e871a32d9b776f6cd111de624dfde58322d72957f36997573665d2730e1"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "cf1cea25a098ffd92366f7caae088962b3ed9774bdb06a9aaa4738b08e038bb8"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "c174a32c6371d9dee34cf9c03a8f7ad4058f119dd955ce3bdde11ca289f3e4f8"
+        }
+      ],
+      "actual": [
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "3eede0a6f1c5aafe1790154adf3b84023967ac0f450591002ddf85c447558e56"
+        },
+        {
+          "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "bytes": 2048,
+          "sha256": "59c40e871a32d9b776f6cd111de624dfde58322d72957f36997573665d2730e1"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "cf1cea25a098ffd92366f7caae088962b3ed9774bdb06a9aaa4738b08e038bb8"
+        },
+        {
+          "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "bytes": 1024,
+          "sha256": "c174a32c6371d9dee34cf9c03a8f7ad4058f119dd955ce3bdde11ca289f3e4f8"
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "name": "one staging PUT per committed test object",
+      "expected": 5,
+      "actual": 5,
+      "verdict": "PASS"
+    },
+    {
+      "name": "one signed commit per committed test object",
+      "expected": 5,
+      "actual": 5,
+      "verdict": "PASS"
+    },
+    {
+      "name": "native success creation",
+      "expected": 0,
+      "actual": 0,
+      "verdict": "PASS"
+    }
+  ],
+  "batches": [
+    {
+      "schema": "redown.upload-batch",
+      "version": 1,
+      "extensionVersion": "0.3.32",
+      "batchId": "a9449785-03d2-4a68-94eb-d0f2512fe1eb",
+      "startedAt": 1795650263073,
+      "finishedAt": 1795650264370,
+      "updatedAt": 1795650264374,
+      "destination": {
+        "provider": "cloudflare",
+        "connectionId": "cloudflare:fixture",
+        "accountId": "fixture",
+        "bucketName": "fixture",
+        "prefix": "isolated/run/"
+      },
+      "mode": "folder",
+      "status": "unconfirmed",
+      "code": "LOCAL_UPLOAD_UNCERTAIN",
+      "expectedCount": 5,
+      "observedCount": 5,
+      "counts": {
+        "verified": 4,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "unconfirmed": 1,
+        "unprocessed": 0
+      },
+      "uploadedCount": 5,
+      "notification": {
+        "eligible": false,
+        "state": "ineligible"
+      },
+      "receiptDownload": "download-requested",
+      "files": [
+        {
+          "index": 0,
+          "operationId": "5913568e-2cb0-4841-bbee-edc847b3f3f3",
+          "relativePath": "Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "intendedSize": 0,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+          "observedSize": 0,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "d41d8cd98f00b204e9800998ecf8427e",
+            "version": "5c58a8fbd0d60e960ff4b8539ff516e3",
+            "sha256": null
+          },
+          "finishedAt": 1795650263613
+        },
+        {
+          "index": 1,
+          "operationId": "b93eb15a-b402-46c3-b704-b87c7ecc10f5",
+          "relativePath": "Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "intendedSize": 1024,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+          "observedSize": 1024,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "d320e592444a261314113f4db895b30d",
+            "version": "8de35fad25b02160e6b5ce60ae1bbf11",
+            "sha256": null
+          },
+          "finishedAt": 1795650263858
+        },
+        {
+          "index": 2,
+          "operationId": "2f449ce9-2e89-413f-9af0-f03cebc2f1f3",
+          "relativePath": "Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "intendedSize": 1024,
+          "observedKey": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+          "observedSize": 1024,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "3ce7a77366c020940eb2e7b4b85772fb",
+            "version": "23eda548d731a3e3f61c37765b1eed79",
+            "sha256": null
+          },
+          "finishedAt": 1795650264043
+        },
+        {
+          "index": 3,
+          "operationId": "5a1bcd58-93f5-4c77-a6ae-7a6f2359c97c",
+          "relativePath": "Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "intendedSize": 1024,
+          "observedKey": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+          "observedSize": 1024,
+          "status": "verified",
+          "code": "LOCAL_UPLOAD_VERIFIED",
+          "evidence": {
+            "kind": "staging-byte-readback-and-final-r2-head",
+            "etag": "fc51fa86a9ced9b0eba81f59071d6f7b",
+            "version": "69884b02fb576f8767d4b1c7804750ad",
+            "sha256": null
+          },
+          "finishedAt": 1795650264212
+        },
+        {
+          "index": 4,
+          "operationId": "9b194bff-e58d-43ac-9a6a-9fcbe903a302",
+          "relativePath": "Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "intendedKey": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+          "intendedSize": 2048,
+          "observedKey": null,
+          "observedSize": null,
+          "status": "unconfirmed",
+          "code": "LOCAL_UPLOAD_UNCERTAIN",
+          "evidence": null,
+          "finishedAt": 1795650264369
+        }
+      ]
+    }
+  ],
+  "notifications": [],
+  "downloads": [
+    {
+      "id": "a9449785-03d2-4a68-94eb-d0f2512fe1eb",
+      "at": 1795650264371,
+      "status": "unconfirmed"
+    }
+  ],
+  "inventory": [
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00000/Nested 1/report.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00001/Nested 1/report.bin",
+      "bytes": 1024,
+      "sha256": "3eede0a6f1c5aafe1790154adf3b84023967ac0f450591002ddf85c447558e56"
+    },
+    {
+      "key": "isolated/run/Folder 1 旅行/Group 00002/Nested 1/report.bin",
+      "bytes": 2048,
+      "sha256": "59c40e871a32d9b776f6cd111de624dfde58322d72957f36997573665d2730e1"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00000/Nested 1/report.bin",
+      "bytes": 1024,
+      "sha256": "cf1cea25a098ffd92366f7caae088962b3ed9774bdb06a9aaa4738b08e038bb8"
+    },
+    {
+      "key": "isolated/run/Folder 2 旅行/Group 00001/Nested 1/report.bin",
+      "bytes": 1024,
+      "sha256": "c174a32c6371d9dee34cf9c03a8f7ad4058f119dd955ce3bdde11ca289f3e4f8"
+    }
+  ],
+  "verdict": "PASS",
+  "resources": {
+    "stagingPuts": 5,
+    "signedCommits": 5,
+    "peakStagedBytes": 2048,
+    "peakNodeRss": 188133376
+  },
+  "elapsedMs": 5206
+}

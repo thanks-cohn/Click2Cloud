@@ -1,0 +1,344 @@
+{
+  "result": "PASS",
+  "proof": "PACKAGED_UI_IN_CHROMIUM_WITH_SYNTHETIC_CHROME_AND_PROVIDER_PORTS",
+  "checks": [
+    {
+      "name": "Protected Chrome frame and Screenshots controls match 0.3.30 computed styles",
+      "before": {
+        "dark": {
+          "shell": [
+            "radial-gradient(at 106% 16%, rgba(160, 160, 160, 0.282), rgba(0, 0, 0, 0) 49%), radial-gradient(at -15% 84%, rgba(86, 86, 86, 0.3), rgba(0, 0, 0, 0) 51%), linear-gradient(145deg, rgb(7, 7, 7) 8%, rgb(54, 54, 54) 27%, rgb(16, 16, 16) 43%, rgb(6, 6, 6) 60%, rgb(48, 48, 48) 83%, rgb(8, 8, 8))",
+            "rgba(0, 0, 0, 0)",
+            "0px",
+            "none",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(244, 244, 244)"
+          ],
+          "frame": [
+            "none",
+            "rgba(0, 0, 0, 0)",
+            "3px",
+            "linear-gradient(145deg, rgb(197, 197, 197), rgb(119, 119, 119) 20%, rgb(48, 48, 48) 48%, rgb(8, 8, 8) 76%, rgb(119, 119, 119)) 1 / 1 / 0 stretch",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(244, 244, 244)"
+          ],
+          "content": [
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "24px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "linear-gradient(rgb(250, 250, 250), rgb(224, 224, 224) 46%, rgb(184, 184, 184) 51%, rgb(224, 224, 224))",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "rgba(255, 255, 255, 0.21) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 0px 0px inset",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(23, 23, 23)"
+            ]
+          ]
+        },
+        "light": {
+          "shell": [
+            "radial-gradient(at -15% 40%, rgb(255, 255, 255), rgba(0, 0, 0, 0) 46%), linear-gradient(132deg, rgb(255, 255, 255) 3%, rgb(192, 192, 192) 19%, rgb(249, 249, 249) 31%, rgb(255, 255, 255) 43%, rgb(184, 184, 184) 58%, rgb(237, 237, 237) 69%, rgb(255, 255, 255) 82%, rgb(188, 188, 188) 95%)",
+            "rgba(0, 0, 0, 0)",
+            "0px",
+            "none",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(33, 33, 33)"
+          ],
+          "frame": [
+            "none",
+            "rgba(0, 0, 0, 0)",
+            "3px",
+            "linear-gradient(140deg, rgb(255, 255, 255), rgb(170, 170, 170) 30%, rgb(119, 119, 119) 58%, rgb(238, 238, 238) 88%, rgb(153, 153, 153)) 1 / 1 / 0 stretch",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(33, 33, 33)"
+          ],
+          "content": [
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "24px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "linear-gradient(rgb(250, 250, 250), rgb(224, 224, 224) 46%, rgb(184, 184, 184) 51%, rgb(224, 224, 224))",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "rgba(255, 255, 255, 0.21) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 0px 0px inset",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(23, 23, 23)"
+            ]
+          ]
+        }
+      },
+      "after": {
+        "dark": {
+          "shell": [
+            "radial-gradient(at 106% 16%, rgba(160, 160, 160, 0.282), rgba(0, 0, 0, 0) 49%), radial-gradient(at -15% 84%, rgba(86, 86, 86, 0.3), rgba(0, 0, 0, 0) 51%), linear-gradient(145deg, rgb(7, 7, 7) 8%, rgb(54, 54, 54) 27%, rgb(16, 16, 16) 43%, rgb(6, 6, 6) 60%, rgb(48, 48, 48) 83%, rgb(8, 8, 8))",
+            "rgba(0, 0, 0, 0)",
+            "0px",
+            "none",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(244, 244, 244)"
+          ],
+          "frame": [
+            "none",
+            "rgba(0, 0, 0, 0)",
+            "3px",
+            "linear-gradient(145deg, rgb(197, 197, 197), rgb(119, 119, 119) 20%, rgb(48, 48, 48) 48%, rgb(8, 8, 8) 76%, rgb(119, 119, 119)) 1 / 1 / 0 stretch",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(244, 244, 244)"
+          ],
+          "content": [
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "24px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(244, 244, 244)"
+            ],
+            [
+              "linear-gradient(rgb(250, 250, 250), rgb(224, 224, 224) 46%, rgb(184, 184, 184) 51%, rgb(224, 224, 224))",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "rgba(255, 255, 255, 0.21) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 0px 0px inset",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(23, 23, 23)"
+            ]
+          ]
+        },
+        "light": {
+          "shell": [
+            "radial-gradient(at -15% 40%, rgb(255, 255, 255), rgba(0, 0, 0, 0) 46%), linear-gradient(132deg, rgb(255, 255, 255) 3%, rgb(192, 192, 192) 19%, rgb(249, 249, 249) 31%, rgb(255, 255, 255) 43%, rgb(184, 184, 184) 58%, rgb(237, 237, 237) 69%, rgb(255, 255, 255) 82%, rgb(188, 188, 188) 95%)",
+            "rgba(0, 0, 0, 0)",
+            "0px",
+            "none",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(33, 33, 33)"
+          ],
+          "frame": [
+            "none",
+            "rgba(0, 0, 0, 0)",
+            "3px",
+            "linear-gradient(140deg, rgb(255, 255, 255), rgb(170, 170, 170) 30%, rgb(119, 119, 119) 58%, rgb(238, 238, 238) 88%, rgb(153, 153, 153)) 1 / 1 / 0 stretch",
+            "none",
+            "Roboto, \"Segoe UI\", Arial, sans-serif",
+            "14px",
+            "rgb(33, 33, 33)"
+          ],
+          "content": [
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "0px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "24px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "none",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "none",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(33, 33, 33)"
+            ],
+            [
+              "linear-gradient(rgb(250, 250, 250), rgb(224, 224, 224) 46%, rgb(184, 184, 184) 51%, rgb(224, 224, 224))",
+              "rgba(0, 0, 0, 0)",
+              "1px",
+              "none",
+              "rgba(255, 255, 255, 0.21) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px -2px 0px 0px inset",
+              "Roboto, \"Segoe UI\", Arial, sans-serif",
+              "14px",
+              "rgb(23, 23, 23)"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "Cloudflare full-width actions and stable Basic cards through sign-in, refresh, success and failure"
+    },
+    {
+      "name": "Reconnect footer dismisses and stays scoped to the Files browsing attempt"
+    },
+    {
+      "name": "Cloudflare toolbar Upload is last, checks write access, opens file and nested-folder pickers, keeps readiness after selection, cancels, and refreshes the exact folder"
+    },
+    {
+      "name": "Saved acknowledgments expire, handle consecutive saves and hover, and stay dismissed after reopening"
+    },
+    {
+      "name": "One through four left-packed tabs, deterministic overflow and keyboard-accessible ordering persist"
+    },
+    {
+      "name": "The automatic JSON option defaults off, appears only in Debug Mode and resets when Debug turns off"
+    },
+    {
+      "name": "Get URL and independent History expansion defaults, explicit choices, restart, and reset"
+    },
+    {
+      "name": "Independent visual feedback settings survive reload and track the active palette and color mode"
+    },
+    {
+      "name": "Cloudflare card geometry and case-insensitive screenshot lookup across the retained archive"
+    },
+    {
+      "name": "Rapid Preview navigation keeps Immersive View stable and guards pending or unavailable images"
+    },
+    {
+      "name": "Completed Queue jobs, Clear All, History sections, exact rename and immersive keyboard controls",
+      "total": 73,
+      "large": 793409,
+      "withoutPreviewPayload": true
+    },
+    {
+      "name": "Provider metadata updates open cards and preserves raw records"
+    },
+    {
+      "name": "Single-row header, right-aligned footer, centered Queue/History and pagination",
+      "appearanceModes": 34,
+      "widths": [
+        320,
+        920
+      ]
+    },
+    {
+      "name": "Protected packages match baseline computed typography and surface colors",
+      "comparisons": 60
+    },
+    {
+      "name": "Chrome metallic appearances and Golden Age palette with live appearance switching and restart"
+    },
+    {
+      "name": "Trusted browser coordinates, fixed webpage endpoints, frame offsets, reduced motion and burst cleanup"
+    }
+  ],
+  "screenshots": [
+    "baseline-remotes-920.png",
+    "baseline-screenshots-dark-365.png",
+    "baseline-screenshots-light-365.png",
+    "candidate-screenshots-dark-365.png",
+    "candidate-screenshots-light-365.png",
+    "remotes-920.png",
+    "provider-success-320.png",
+    "history-basic-image.png",
+    "history-pagination-320.png",
+    "chrome-dark-365.png",
+    "chrome-light-365.png",
+    "golden-age-dark-365.png",
+    "golden-age-light-365.png",
+    "projectile-webpage.png"
+  ],
+  "errors": [],
+  "chromium": "156.0.8078.79"
+}
