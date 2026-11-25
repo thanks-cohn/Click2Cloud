@@ -37,7 +37,7 @@ export function mountHistoryV2Settings(parent, preference) {
     <label class="settings-row">Hide N/A fields<input type="checkbox" data-hide-na></label>
     <details><summary>Advanced</summary>${Object.entries(historyV2ProviderFields).map(([provider,fields]) => `
       <details data-history-provider="${provider}"><summary>${historyV2Providers[provider]}</summary>
-        ${fields.map(field => `<label class="settings-row">${historyV2FieldLabels[field]}<input type="checkbox" data-field="${field}"></label>`).join('')}
+        ${fields.filter(field=>field!=='hostUrl'&&field!=='sourceUrl').map(field => `<label class="settings-row">${historyV2FieldLabels[field]}<input type="checkbox" data-field="${field}"></label>`).join('')}
         <button type="button">Restore defaults</button>
       </details>`).join('')}</details><p role="status"></p>`;
   const hideNA = section.querySelector('[data-hide-na]'), feedback = section.querySelector('[role=status]');

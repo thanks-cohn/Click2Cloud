@@ -4,6 +4,7 @@
   "name": "REDOWN",
   "short_name": "REDOWN",
   "version": "0.3.30",
+  "version_name": "0.3.31 Part 1 candidate",
   "description": "REDOWN \u2014 cloud Explorer and secure V3+1 native save destinations.",
   "permissions": [
     "contextMenus",

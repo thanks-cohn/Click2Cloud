@@ -94,3 +94,19 @@
   box-shadow:inset 0 0 0 1px var(--line);
  }
 }
+
+
+/* Menu options share the active palette. The dropdown keeps its own frame. */
+.app-header #header-menu button[role=menuitem] {
+  background:none;
+  border:0;
+  box-shadow:none;
+  outline:none;
+}
+.app-header #header-menu button[role=menuitem]:hover:not(:disabled) {
+  background:var(--frame-hover,var(--selected));
+}
+.app-header #header-menu button[role=menuitem]:focus-visible {
+  outline:2px solid var(--focus);
+  outline-offset:-2px;
+}

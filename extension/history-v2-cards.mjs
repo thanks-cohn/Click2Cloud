@@ -300,6 +300,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     originalFocus=trigger;
     const dialog=node('dialog');
     dialog.className='queue-image-dialog';
+    dialog.dataset.filePreview='';
     dialog.setAttribute('aria-label','History image preview');
     dialog.innerHTML='<div class="dialog-head"><h2 data-preview-title></h2><button type="button" data-close>Close</button></div>'+
       '<div class="dialog-body gallery-body"><p role="status"></p><div class="image-frame"><img class="preview" alt="" hidden></div>'+
@@ -535,11 +536,25 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         article.append(publicURLs);
       }
     }
+    for(const [field,label,preferred] of [
+      ['hostUrl','Host URL',preferences.hostUrlDefault],
+      ['sourceUrl','Source URL',preferences.sourceUrlDefault]
+    ]){
+      const href=safeHistoryURL(record[field]);
+      const section=disclosure(label,preferred==='expanded');
+      section.dataset.historyUrl=field;
+      if(href){
+        const link=node('a',href,'history-record-url');
+        link.href=href;link.title=href;link.target='_blank';link.rel='noopener noreferrer';
+        link.addEventListener('click',event=>event.stopPropagation());
+        section.append(link);
+      }else section.append(node('p','N/A'));
+      article.append(section);
+    }
     if(basic||flags.showAdvancedDetails) {
       details.append(node('summary','Details'));
       if(basic||flags.showAdvancedDetails){
         const list=node('dl',null,'queue-record-fields');
-        let fieldList=list;
         const tracked = [];
         function track(field,available,...elements) {
           tracked.push({field,available,elements});
@@ -553,19 +568,10 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
             const link=node('a',href);
             link.href=href;link.target='_blank';link.rel='noreferrer noopener';item.append(link);
           }else item.textContent=(url?null:value) ?? 'N/A';
-          fieldList.append(term,item);
+          list.append(term,item);
           track(key,url ? !!href : hasHistoryV2Value(value),term,item);
         }
-        let urls, urlFields;
-        if(basic){
-          urls=disclosure('URL',preferences.expandBasicURL===true);
-          urlFields=node('dl',null,'queue-record-fields');urls.append(urlFields);
-          fieldList=urlFields;
-          field('sourceUrl',record.sourceUrl,true);
-          field('hostUrl',record.hostUrl,true);
-          fieldList=list;
-          article.append(urls);
-        }else field('originalFilename',record.originalFilename);
+        if(!basic)field('originalFilename',record.originalFilename);
         field('requested',date(record.requestedAt,preferences.timezone));
         field('completed',date(record.terminalAt,preferences.timezone));
         field('mime',record.mime);
@@ -575,19 +581,11 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         if(!basic){
           field('saveMethod',record.method ?? record.saveMode);
           field('hostTitle',record.hostTitle);
-          if(flags.showSourceUrl){field('sourceUrl',record.sourceUrl,true);field('originalUrl',record.originalUrl,true);}
-          if(flags.showHostUrl&&record.kind!=='screenshot')field('hostUrl',record.hostUrl,true);
+          if(flags.showSourceUrl)field('originalUrl',record.originalUrl,true);
           if(flags.showRemoteUrl)field('remoteUrl',record.remoteUrl,true,'Remote URL');
         }
         if(basic)field('error',record.code,false,'Error');
         details.append(list);
-        if(record.kind==='screenshot'){
-          const host=node('details');host.open=preferences.expandScreenshotHostURL;
-          const hostURL=safeHistoryURL(record.hostUrl);
-          host.append(node('summary','Host URL'),node('p',hostURL??'N/A'));
-          details.append(host);
-          track('hostUrl',!!hostURL,host);
-        }
         if(record.metadata){
           const data=node('pre',JSON.stringify(record.metadata,null,2));
           details.append(data);
@@ -599,7 +597,6 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
             for (const element of elements) element.hidden = !visible;
           }
           list.hidden = !list.querySelector('dt:not([hidden])');
-          if(urls)urls.hidden=!urlFields.querySelector('dt:not([hidden])');
         };
         metadata.push(update);
         update();

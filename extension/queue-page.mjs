@@ -164,6 +164,17 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, reading, editingPage=false;
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
   const groupState=new Map(), cardDisclosures=new Map();
+  const urlDisclosures=state.urlDisclosures??=new Map();
+  list.addEventListener('click',event=>{
+    const summary=event.target.closest('summary');
+    const detail=summary?.parentElement, field=detail?.dataset.historyUrl;
+    if(!field||event.defaultPrevented)return;
+    const id=detail.closest('[data-record-id]').dataset.recordId;
+    const remembered=urlDisclosures.get(id)??{};
+    urlDisclosures.delete(id);
+    urlDisclosures.set(id,{...remembered,[field]:!detail.open});
+    if(urlDisclosures.size>200)urlDisclosures.delete(urlDisclosures.keys().next().value);
+  });
   find.value=state.query??'';
   function render(items,prefs){
     for(const group of list.querySelectorAll('[data-calendar-group]')){
@@ -171,7 +182,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       if(groupState.size>200)groupState.delete(groupState.keys().next().value);
     }
     for(const row of list.querySelectorAll('[data-record-id]')){
-      cardDisclosures.set(row.dataset.recordId,new Map([...row.querySelectorAll('details')].map(detail=>[detail.querySelector('summary')?.textContent,detail.open])));
+      cardDisclosures.set(row.dataset.recordId,new Map([...row.querySelectorAll('details:not([data-history-url])')].map(detail=>[detail.querySelector('summary')?.textContent,detail.open])));
       if(cardDisclosures.size>200)cardDisclosures.delete(cardDisclosures.keys().next().value);
     }
     cardScope?.abort();
@@ -199,6 +210,11 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         const title=detail.querySelector('summary')?.textContent;
         if(previous.has(title))detail.open=previous.get(title);
       });
+      const urls=urlDisclosures.get(row.recordId);
+      if(urls)for(const detail of card.querySelectorAll('[data-history-url]')){
+        const open=urls[detail.dataset.historyUrl];
+        if(open!==undefined)detail.open=open;
+      }
       parent.append(card);
     }
     list.replaceChildren(contents);

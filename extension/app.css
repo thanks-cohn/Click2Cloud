@@ -103,7 +103,7 @@ img.preview{display:block;width:100%;height:auto;max-width:100%;max-height:60vh;
 dialog:has([data-gallery]){width:min(1000px,calc(100vw - 24px));height:min(760px,calc(100dvh - 32px));max-height:none}
 dialog:has([data-gallery]) #dialog-content{height:100%;max-height:none}
 dialog:has([data-gallery]) .dialog-head{flex:0 0 64px;min-width:0;gap:12px}
-dialog:has([data-gallery]) #dialog-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog:has([data-gallery]) #dialog-title{min-width:0;overflow-wrap:anywhere}
 dialog:has([data-gallery]) #close-dialog{flex:none}
 dialog:has([data-gallery]) .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
 [data-gallery]{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
@@ -457,7 +457,6 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-image-dialog[open]{display:flex;flex-direction:column}
 .queue-image-dialog .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column}
 .queue-image-dialog:not([data-immersive]) .dialog-head{flex:0 0 64px;gap:8px}
-.queue-image-dialog:not([data-immersive]) [data-preview-title]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .queue-image-dialog:not([data-immersive]) [role=status]:empty{display:none}
 .queue-job>.queue-actions{justify-content:flex-end;gap:6px}
 .queue-job .queue-badge{min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -481,3 +480,21 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 
 #explorer-upload-status{color:var(--muted);font-size:.85em;overflow-wrap:anywhere}
 #explorer-upload-status:empty{display:none}
+
+
+/* Keep the preview close control beside the first title line at any width. */
+dialog[data-file-preview]:not([data-immersive]) .dialog-head {
+  align-items:start;
+  flex:0 0 auto;
+  min-inline-size:0;
+}
+dialog[data-file-preview]:not([data-immersive]) .dialog-head h2 {
+  min-inline-size:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+dialog[data-file-preview]:not([data-immersive]) .dialog-head button {flex:none;margin-inline-start:auto}
+#explorer-upload-control > button,#explorer-upload-choices > button {inline-size:100%;text-align:start}
+#explorer-upload-choices > button {display:block;margin-block-start:4px}
+.history-record-url {display:block;max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root:not([data-aesthetic=standard]) #programmatic-access {display:none}

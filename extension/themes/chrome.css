@@ -127,6 +127,27 @@
     background:var(--chrome-moon) center/contain no-repeat;
   }
 }
-:root[data-aesthetic=chrome][data-theme=dark] #theme:is(:hover,:focus-visible) .chrome-appearance-icon {
-  background-image:url("../icons/chrome-sun.svg");
+:root[data-aesthetic=chrome] {
+  & .app-header nav>button,
+  & .app-header #header-more,
+  & .app-header #theme {
+    border:0;
+    background:none;
+    box-shadow:none;
+  }
+  & .app-header nav>button:is(.active,[aria-current=page]) {
+    background:linear-gradient(#d71936,#96001c);
+    box-shadow:none;
+  }
+  & .app-header #theme {border-radius:0}
+  & .chrome-appearance-icon {inline-size:24px;block-size:24px}
+
+  /* Screenshots owns the reference surface and the shell owns its metal frame. */
+  & #shell:not([data-view=screenshot]) #main :is(.card,.remote-provider,.remote-cloudflare) {
+    border-width:1px;
+    box-shadow:none;
+  }
+  & #shell:not([data-view=screenshot]) #main button {
+    box-shadow:none;
+  }
 }

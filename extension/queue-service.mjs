@@ -4,7 +4,8 @@ import {historyDefaults} from '../src/history/model.mjs';
 const key = 'queueHistoryViewV1';
 export const queueDefaults = Object.freeze({
   timer:'off', preset:'full', range:'all', previews:'all', timezone:historyDefaults.timezone,
-  expandScreenshotHostURL:false,basicPreviews:'all',expandBasicURL:false
+  expandScreenshotHostURL:false,basicPreviews:'all',expandBasicURL:false,
+  hostUrlDefault:'collapsed',sourceUrlDefault:'collapsed'
 });
 function normalize(value) {
   const next = {...queueDefaults};
@@ -21,6 +22,10 @@ function normalize(value) {
   if(!value?.timerExplicit&&next.timer==='hide')next.timer='off';
   if(['all','first','closed'].includes(value?.basicPreviews))next.basicPreviews=value.basicPreviews;
   next.expandBasicURL=value?.expandBasicURL===true;
+  if(next.expandBasicURL)next.hostUrlDefault=next.sourceUrlDefault='expanded';
+  if(value?.expandScreenshotHostURL===true)next.hostUrlDefault='expanded';
+  for(const field of ['hostUrlDefault','sourceUrlDefault'])
+    if(['expanded','collapsed'].includes(value?.[field]))next[field]=value[field];
   next.timerExplicit=value?.timerExplicit===true;
   next.expandScreenshotHostURL = value?.expandScreenshotHostURL === true;
   return next;

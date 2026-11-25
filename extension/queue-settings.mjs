@@ -22,8 +22,8 @@ export function mountHistorySettings(parent,service,metadataPreference){
     <label>Cloudflare image preview auto-expansion <select data-previews><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label>
     <button type="button" data-restore-previews>Restore image preview default</button>
     <label>Basic image auto-expansion <select data-basicPreviews><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label>
-    <label><input type="checkbox" data-basic-url> Expand Basic URLs by default</label>
-    <label><input type="checkbox" data-host> Expand screenshot Host URL by default</label>
+    <label>Default Host URL <select data-host-url-default><option value="collapsed">Collapsed</option><option value="expanded">Expanded</option></select></label>
+    <label>Default Source URL <select data-source-url-default><option value="collapsed">Collapsed</option><option value="expanded">Expanded</option></select></label>
     <label>Display / export timezone <input data-timezone></label>
     <div class="queue-actions"><button type="button" data-complete-export>Export Complete History ZIP</button>
       <button type="button" data-cancel-export hidden>Cancel export</button></div>
@@ -55,8 +55,8 @@ export function mountHistorySettings(parent,service,metadataPreference){
     $('[data-cap-row]').hidden=!policy.cap;
     $('[data-detailed]').hidden=timer.value!=='off';
     for(const id of ['preset','range','previews','basicPreviews','timezone'])$('[data-'+id+']').value=p[id];
-    $('[data-host]').checked=p.expandScreenshotHostURL;
-    $('[data-basic-url]').checked=p.expandBasicURL;
+    $('[data-host-url-default]').value=p.hostUrlDefault??'collapsed';
+    $('[data-source-url-default]').value=p.sourceUrlDefault??'collapsed';
   }
   async function busy(work){
     if(writing)return;
@@ -164,10 +164,11 @@ export function mountHistorySettings(parent,service,metadataPreference){
       if(revision===displayRevision)paint();
     }
   }
-  $('[data-basic-url]').onchange=event=>void saveDisplay({expandBasicURL:event.target.checked});
+  $('[data-host-url-default]').onchange=event=>void saveDisplay({hostUrlDefault:event.target.value});
+  $('[data-source-url-default]').onchange=event=>void saveDisplay({sourceUrlDefault:event.target.value});
   $('[data-restore-previews]').onclick=()=>void saveDisplay({previews:queueDefaults.previews},'Cloudflare image preview default restored.');
-  for(const id of ['preset','range','previews','basicPreviews','timezone','host'])$('[data-'+id+']').onchange=event=>{
-    void saveDisplay(id==='host'?{expandScreenshotHostURL:event.target.checked}:{[id]:event.target.value});
+  for(const id of ['preset','range','previews','basicPreviews','timezone'])$('[data-'+id+']').onchange=event=>{
+    void saveDisplay({[id]:event.target.value});
   };
   void Promise.all([service.ready,service.store.policy()]).then(([,value])=>{policy=value;paint();})
     .catch(()=>{feedback.textContent='History storage is unavailable.';});
