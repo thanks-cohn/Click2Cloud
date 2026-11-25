@@ -58,3 +58,9 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Keep the timestamp visible regardless of expandable section states. Preserve existing timestamp semantics, formatting and timezone preference; allow date/time wrapping if needed at narrow widths. Long filenames must wrap without overlapping the timestamp or overflowing the card.
 - Preserve existing verification status, Media and action placement, and independent Public URLs, Details and Error sections. This placement supersedes any earlier suggestion to put the timestamp below Location.
 - Position the existing verification/status indicator on the right directly beneath the upper-right timestamp, at the bottom of the card header (not at the bottom of the entire card). Right-align both; keep filename and Location on the left. Preserve truthful status and existing styling. Prevent overlap and overflow at narrow widths.
+
+## Shelf notifications — Remove generic review instruction
+
+- Remove the transient notification text “Review the current panel or History for details.” wherever emitted in the Shelf notification UI. If it is a standalone notification, suppress that notification entirely; if appended to a meaningful outcome, remove only the redundant sentence.
+- Do not replace it with another generic instruction or empty notification. Preserve concise truthful success, failure and progress feedback, existing actionable recovery, History records, receipts and diagnostics.
+- Audit actual notification emitters and shared formatting before changing them. Preserve deduplication and dismissal behavior; do not suppress genuine errors or unrelated notifications.
