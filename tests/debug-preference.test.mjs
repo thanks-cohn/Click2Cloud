@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createDebugPreference} from '../src/chrome/debug-preference.mjs';
+import {createDebugPreference,uploadReceiptPreferenceKey} from '../src/chrome/debug-preference.mjs';
 import {createDepthFeedback} from '../src/modes/depth/native-click.mjs';
 function fixture(initial){
  const f={value:initial,writes:[],listeners:new Set(),calls:[]};
@@ -15,10 +15,10 @@ for(const value of [undefined,null,false,0,1,'true',{},[]])test(`Debug preferenc
 test('Debug reads only the stored true boolean and restores it without writing credentials/configuration',async()=>{
  const f=fixture(true),pref=createDebugPreference(f.chrome);assert.equal(pref.enabled,false);assert.equal(await pref.ready,true);assert.equal(pref.enabled,true);assert.equal(f.writes.length,0);pref.close();
 });
-test('Debug setters persist exactly one presentation preference and notify subscribers without granting authority',async()=>{
+test('Debug setters reset the upload receipt opt-in and notify subscribers without granting authority',async()=>{
  const f=fixture(false),pref=createDebugPreference(f.chrome);await pref.ready;const observed=[];const unsubscribe=pref.subscribe(value=>observed.push(value));
  assert.equal(await pref.set(true),true);assert.equal(pref.enabled,true);assert.equal(await pref.set(false),false);assert.equal(pref.enabled,false);
- assert.deepEqual(f.writes,[{uiDebugMode:true},{uiDebugMode:false}]);assert.deepEqual(observed,[true,false]);unsubscribe();await pref.set(true);assert.deepEqual(observed,[true,false]);pref.close();
+ assert.deepEqual(f.writes,[{uiDebugMode:true,[uploadReceiptPreferenceKey]:false},{uiDebugMode:false,[uploadReceiptPreferenceKey]:false}]);assert.deepEqual(observed,[true,false]);unsubscribe();await pref.set(true);assert.deepEqual(observed,[true,false]);pref.close();
 });
 test('invalid Debug setter never writes an implicit truthy preference',async()=>{
  const f=fixture(false),pref=createDebugPreference(f.chrome);await pref.ready;

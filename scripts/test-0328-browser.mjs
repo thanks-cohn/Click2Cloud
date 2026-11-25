@@ -83,38 +83,67 @@ function installFixture(manifest) {
     return basic;
   }
   const success = data => ({state:'completed',version:'3+1.1',data});
+  const batchFixture=()=>project.batchFixture??=Promise.all([
+    import('/src/chrome/local-upload-batch.mjs'),import('/src/chrome/local-upload-files.mjs')
+  ]).then(([{createLocalUploadBatches},{uploadBatchJournal,takeLocalUpload}])=>createLocalUploadBatches({
+    journal:uploadBatchJournal,
+    async checkDestination(source){
+      if(!project.uploadWritable)throw Object.assign(Error('Fixture write access unavailable.'),{code:'WORKER_UNAVAILABLE'});
+      return {source};
+    },
+    async dispatch({ticket,source,item},_binding,{signal},onProgress){
+      const {file}=await takeLocalUpload(ticket);
+      project.operations.push(['upload-file',source,item.relativePath,await file.text()]);
+      onProgress({phase:'verifying'});
+      if(project.uploadWait)await new Promise(resolve=>setTimeout(resolve,500));
+      if(signal.aborted)return {state:'cancelled',code:'LOCAL_UPLOAD_CANCELLED',error:'Upload cancelled.'};
+      productFixture.r2Objects.set(source.bucketName+':'+item.key,
+        {bucketName:source.bucketName,key:item.key,size:file.size,displayName:file.name,folder:false});
+      return {state:'completed',receipt:{key:item.key,size:file.size,etag:'fixture-etag',version:'fixture-version'}};
+    },
+    reconcile:async()=>null,
+    notify:async id=>{project.operations.push(['batch-notice',id]);return {state:'surface-unavailable'};},
+    receiptEnabled:async()=>false,version:manifest.version
+  }));
   const runtime = {
     id:'fixture',getManifest:()=>manifest,getURL:path=>location.origin+'/'+path,
     onMessage:event(runtimeListeners),
     connect({name}){
       if(name!=='redown-local-upload')throw Error('Unknown fixture port');
       const listeners=new Set(),disconnect=new Set();
-      let cancelled=false;
-      const send=value=>{for(const listener of listeners)listener(value);};
+      let controller,batchId,closed=false;
+      const lease={};
+      const send=value=>{if(!closed)for(const listener of listeners)listener(value);};
       return {onMessage:event(listeners),onDisconnect:event(disconnect),
-        disconnect(){for(const listener of disconnect)listener();},
+        disconnect(){
+          closed=true;
+          if(batchId)void batchFixture().then(engine=>engine.stop(batchId,{detached:true},lease));
+          for(const listener of disconnect)listener();
+        },
         postMessage(message){
           if(message.ping)return;
-          if(message.cancel){cancelled=true;return;}
+          if(message.cancel){controller?.abort();return;}
           const reply=value=>send({requestId:message.requestId,...value});
-          if(message.check||message.begin){
-            project.operations.push([message.check?'upload-check':'upload-begin',message.source]);
-            queueMicrotask(()=>reply({state:project.uploadWritable?'completed':'blocked'}));
-            return;
-          }
+          controller=new AbortController();
+          const current=controller;
           void (async()=>{
-            const {takeLocalUpload}=await import('/src/chrome/local-upload-files.mjs');
-            const {file,binding}=await takeLocalUpload(message.ticket);
-            const {localUploadKey}=await import('/src/chrome/local-upload-plan.mjs');
-            const key=localUploadKey(message.source,file,binding.relativePath,binding.mode);
-            project.operations.push(['upload-file',message.source,binding.relativePath,await file.text()]);
-            reply({progress:{phase:'verifying'}});
-            if(project.uploadWait)await new Promise(resolve=>setTimeout(resolve,300));
-            if(cancelled){reply({state:'cancelled',error:'Upload cancelled.'});return;}
-            productFixture.r2Objects.set(message.source.bucketName+':'+key,
-              {bucketName:message.source.bucketName,key,size:file.size,displayName:file.name,folder:false});
-            reply({state:'completed',key});
-          })().catch(error=>reply({state:'failed',error:error.message}));
+            const engine=await batchFixture();
+            if(message.check){
+              project.operations.push(['upload-check',message.source]);
+              return engine.check(message.source,current.signal);
+            }
+            if(message.inspect)return engine.inspect(message,current.signal);
+            if(message.reconcile)return engine.reconcile(message,current.signal);
+            if(message.begin||message.resume){
+              batchId=message.batchId;
+              project.operations.push(['upload-begin',message.source]);
+              return engine[message.resume?'resume':'begin'](message,current.signal,lease);
+            }
+            if(message.stop)return {state:'completed',batch:await engine.stop(batchId,{code:message.code},lease)};
+            return engine.step(message,current,progress=>reply({progress}),lease);
+          })().then(reply,error=>reply({state:'blocked',code:error.code,error:error.message})).finally(()=>{
+            if(controller===current)controller=undefined;
+          });
         }
       };
     },
@@ -186,6 +215,12 @@ function installFixture(manifest) {
       if (method==='recoverCloudflareDestination'){
         project.operations.push(['approve-cloudflare',params.authorizeSetup]);
         return success({state:'blocked',code:'WORKER_SETUP_REQUIRED',target});
+      }
+      if(method==='readFile'&&params.textPreview){
+        const bytes=project.photos.get(params.entry.key);
+        if(!bytes)return {state:'failed',code:'HTTP_404'};
+        const limit=512*1024;
+        return success({state:'completed',data:{bytes:Array.from(bytes.slice(0,limit)),truncated:bytes.length>limit}});
       }
       if (method==='readFileChunk') {
         const {offset,length} = params, bytes = project.photos.get(params.key);
@@ -382,7 +417,7 @@ try {
     {name:'notes-75.txt',mimeType:'text/plain',buffer:Buffer.from('first')},
     {name:'notes-76.txt',mimeType:'text/plain',buffer:Buffer.from('second')}
   ]);
-  await page.getByText('2 of 2 files verified.',{exact:true}).waitFor();
+  await page.getByText(/2 of 2 files verified/).waitFor();
   await page.locator('#files').getByText('notes-76.txt',{exact:true}).waitFor();
   assert.deepEqual(await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-file').map(([,target,name,text])=>
     [target.bucketName,target.prefix,name,text])),[
@@ -392,29 +427,57 @@ try {
   for(let index=0;index<2;index++){
     await moreActions.click();assert(await upload.isEnabled());await moreActions.click();
   }
-  const folder=await mkdtemp(join(out,'fixture-folder-'));
+  const folder=await mkdtemp(join(out,'fixture-folder-')),other=await mkdtemp(join(out,'second-folder-'));
   try{
     await mkdir(join(folder,'旅行 A'));await mkdir(join(folder,'B'));
     await writeFile(join(folder,'旅行 A','same.txt'),'nested one');
     await writeFile(join(folder,'B','same.txt'),'nested two');
+    await writeFile(join(other,'same.txt'),'second folder');
     await moreActions.click();await upload.click();
-    const [folderChooser]=await Promise.all([page.waitForEvent('filechooser'),btn('Upload folder').click()]);
+    const [folderChooser]=await Promise.all([page.waitForEvent('filechooser'),btn('Upload folders').click()]);
     await folderChooser.setFiles(folder);
-    await page.getByText('2 of 2 files verified.',{exact:true}).waitFor();
-    const observations=await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-file').slice(-2));
+    await page.getByText(/1 folder · 2 files queued/).waitFor();
+    const [another]=await Promise.all([page.waitForEvent('filechooser'),btn('Add another folder').click()]);
+    await another.setFiles(other);
+    await page.getByText(/2 folders · 3 files queued/).waitFor();
+    await btn('Up').click();
+    await page.waitForFunction(()=>!document.querySelector('#location').value.includes('projects'));
+    assert.equal(await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-begin').length),1);
+    await btn('Start upload').click();
+    await page.getByText(/3 of 3 files verified/).waitFor();
+    await page.waitForFunction(()=>releaseFixture.operations.filter(([op])=>op==='batch-notice').length===2);
+    const observations=await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-file').slice(-3));
     assert.deepEqual(observations.map(([,target,path,bytes])=>[target.prefix,path,bytes]).sort(),
-      [['projects/',basename(folder)+'/B/same.txt','nested two'],['projects/',basename(folder)+'/旅行 A/same.txt','nested one']].sort());
+      [['projects/',basename(folder)+'/B/same.txt','nested two'],['projects/',basename(folder)+'/旅行 A/same.txt','nested one'],
+       ['projects/',basename(other)+'/same.txt','second folder']].sort());
     assert.equal(await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-check').length),2);
-  }finally{await rm(folder,{recursive:true,force:true});}
+    await page.locator('#files').getByText('projects',{exact:true}).dblclick();
+  }finally{await Promise.all([folder,other].map(path=>rm(path,{recursive:true,force:true})))}
   await page.evaluate(()=>{releaseFixture.uploadWait=true;});
   await moreActions.click();
   await upload.click();
   const [cancelledPicker]=await Promise.all([page.waitForEvent('filechooser'),btn('Upload files').click()]);
   await cancelledPicker.setFiles({name:'cancelled.txt',mimeType:'text/plain',buffer:Buffer.from('cancel me')});
-  await page.getByText(/Verifying 1 of 1/).waitFor();
+  await page.getByText(/Verifying 0\/1 · 1 uploaded/).waitFor();
   await btn('Cancel upload').click();
   await page.getByText(/Upload cancelled\./).waitFor();
   assert.equal(await page.locator('#files').getByText('cancelled.txt',{exact:true}).count(),0);
+  assert.equal(await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='batch-notice').length),2);
+  await page.evaluate(()=>{
+    const key='projects/preview.yml',text='<img src=x onerror="window.inertPreviewFailed=true">\n'+'key: '+ 'a'.repeat(4000)+'\n'.repeat(400);
+    const bytes=new TextEncoder().encode(text);
+    releaseFixture.photos.set(key,bytes);
+    productFixture.r2Objects.set('fixture-bucket:'+key,{bucketName:'fixture-bucket',key,size:bytes.length,etag:'fixture-etag',displayName:'preview.yml',folder:false});
+  });
+  await btn('Refresh').click();
+  await page.locator('#files').getByText('preview.yml',{exact:true}).dblclick();
+  const textPreview=page.locator('#preview-text');
+  await textPreview.waitFor();
+  assert.match(await textPreview.textContent(),/^<img/);
+  assert.equal(await textPreview.locator('img').count(),0);
+  assert(await textPreview.evaluate(el=>el.scrollWidth>el.clientWidth&&el.scrollHeight>el.clientHeight));
+  assert.equal(await page.evaluate(()=>window.inertPreviewFailed),undefined);
+  await page.locator('#dialog .dialog-head button').click();
   const longPreviewName='Unbroken'+ 'abcdefghij'.repeat(15)+'.bin';
   await page.evaluate(name=>{
     const key='projects/'+name;
@@ -536,6 +599,19 @@ try {
   pass('One through four left-packed tabs, deterministic overflow and keyboard-accessible ordering persist');
 
   await btn('Settings').click();
+  const receipts=page.getByLabel('Produce and download receipts after uploads automatically');
+  await receipts.waitFor({state:'attached'});
+  assert(await receipts.isHidden());
+  await page.getByLabel('Debug Mode',{exact:true}).check();
+  assert(await receipts.isVisible());
+  assert(!(await receipts.isChecked()));
+  await receipts.check();
+  await page.waitForFunction(async()=>typeof (await chrome.storage.local.get('automaticUploadReceiptsV1')).automaticUploadReceiptsV1==='string');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByLabel('Debug Mode',{exact:true}).uncheck();
+  await receipts.waitFor({state:'hidden'});
+  await page.waitForFunction(async()=>(await chrome.storage.local.get('automaticUploadReceiptsV1')).automaticUploadReceiptsV1===false);
+  pass('The automatic JSON option defaults off, appears only in Debug Mode and resets when Debug turns off');
   const getUrl=page.getByLabel('Show Get URL in right-click menu');
   const previews=page.getByLabel('Cloudflare image preview auto-expansion');
   const basicPreviews=page.getByLabel('Basic image auto-expansion');
