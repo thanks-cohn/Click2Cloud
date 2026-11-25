@@ -77,3 +77,10 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - No X button or manual dismissal required. Ensure expiry survives rerenders, navigation, hover, focus changes, theme switches and Shelf reopening; use an absolute expiry timestamp or equivalent robust mechanism. Do not resurrect expired notifications or let stale timers dismiss a newer notification. Avoid unnecessary timers and clean them up on disposal.
 - Preserve genuine save status, receipts, backup diagnostics and actionable recovery information. Do not clear live job progress or persistent configuration errors as though they were transient success notifications.
 - Test ordinary success, rapid consecutive saves, duplicate events, background/foreground transitions, navigation and restart/reopen behavior. Verify no successful-save footer notification remains visible past its 10-second lifetime under normal active rendering.
+
+## Shelf footer — Reconnect message scope and expiry
+
+- Fix the persistent footer message “Reconnect to browse. Saved locations are preserved.” reported to follow the user across tabs with no way to dismiss it.
+- Treat this footer message as transient, scoped to the Files/Explorer browsing context that produced it. Dismiss within 10 seconds or immediately on leaving that context, whichever comes first. Do not resurrect it when switching tabs, themes, rerendering or reopening Shelf. Do not continually regenerate it merely because authentication remains disconnected.
+- Preserve the actual disconnected state, existing Log In/Reconnect controls, saved locations and actionable authentication recovery in the relevant view. Do not remove necessary recovery or mask failures. Distinguish persistent contextual state from transient footer messages.
+- Audit shared footer emitters for equivalent stale cross-tab messages. Apply scope and expiry to transient messages without clearing genuine live progress or required contextual recovery controls. Keep no-X design and remove notification-only reserved space when dismissed. Test navigation, reconnect, logout, first use, repeated renders and new genuine browsing attempts.
