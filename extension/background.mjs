@@ -87,7 +87,7 @@ const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>{
  return dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt);
 },observeAttempt:row=>accountQueueReceipt(basicReceipt,row)});
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference,
- onOpened:info=>{saveNotice.clearNative();return shelfHistory.opened(info);},notify:()=>{void dailyBadge.refresh();}});
+ onOpened:info=>{saveNotice.shelfOpened(info.windowId);return shelfHistory.opened(info);},notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},inventoryHydrated=false,engine,revoking=false;
 async function loadCloudInventory(signal){

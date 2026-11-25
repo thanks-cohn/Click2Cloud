@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {setImmediate as tick, setTimeout as delay} from 'node:timers/promises';
 import {normalizeNavigation,navigationDefaults} from '../extension/navigation.mjs';
 import {normalizeHistoryV2View,historyV2FieldVisible,hasHistoryV2Value,createHistoryV2Preference,historyV2ViewKey} from '../extension/history-v2-preferences.mjs';
-import {loadBasicHistoryImage} from '../extension/basic-history-preview.mjs';
+import {authorizeDropboxHistoryPreview,loadBasicHistoryImage} from '../extension/basic-history-preview.mjs';
 import {createApi} from '../src/basic/lib/api.js';
 import {decodePreview,encodePreview,livePreviewLimit} from '../src/basic/lib/preview.mjs';
 import {createAdapters} from '../src/basic/providers/index.js';
@@ -83,12 +83,12 @@ test('All three Basic providers resolve retained previews through history.get wi
   assert.throws(()=>decodePreview('data:image/png;base64,PHN2Zy8+', 'image/png', 1024),{code:'IMAGE_BYTES_INVALID'});
 });
 
-function previewApi(row, {scopes=[], identity = Object.values(row.destination), fetch, authorization}={}) {
+function previewApi(row, {scopes=[], identity = Object.values(row.destination), fetch, authorization, reconnect, afterAuth}={}) {
   const calls = [];
   const runtime = {id:'fixture',getURL:path=>`chrome-extension://fixture/${path}`};
   const sender = {id:runtime.id,url:runtime.getURL('extension/app.html'),documentId:'shelf-one'};
   const api = createApi({chrome:{runtime},durable:async()=>({store:{getAttempt:async id=>id===row.id?row:null}}),
-    auth:{authorization:authorization ?? (async()=>({identity,scopes,accessToken:'fixture-read',isCurrent:()=>true}))},
+    afterAuth,auth:{reconnect,authorization:authorization ?? (async()=>({identity,scopes,accessToken:'fixture-read',isCurrent:()=>true}))},
     previewAdapters:createAdapters({fetch:async (url,options)=>{
       calls.push({url,options});
       return fetch ? fetch(url,options) : new Response(image,{headers:row.provider==='dropbox'?
@@ -160,6 +160,23 @@ test('Preview reads cap size and concurrent requests and can be cancelled only b
   await assert.rejects(loading,{name:'AbortError'});
   assert.deepEqual(calls.map(({op})=>op),['history.get','history.readImagePreview','history.cancelImagePreview']);
   assert.equal(calls[1].input.requestId,calls[2].input.requestId);
+});
+
+test('Dropbox missing-scope History can recover a confirmed image without resuming a save',async()=>{
+  const row={...attempt('dropbox'),preview:'unusable retained bytes'}, scopes=[], granted=[];
+  const fixture=previewApi(row,{scopes,reconnect:async(provider,identity)=>{
+    granted.push([provider,identity]);scopes.push('files.content.read');return {provider,ready:true};
+  },afterAuth:()=>assert.fail('History consent must not resume a save')});
+  const runtime={sendMessage:({op,input})=>fixture.message(op,input)};
+  const record=basicReceipt(row)[0],signal=new AbortController().signal;
+  await assert.rejects(loadBasicHistoryImage(record,signal,runtime),{code:'PREVIEW_READ_SCOPE_MISSING'});
+  assert.equal(fixture.calls.length,0);
+  await authorizeDropboxHistoryPreview(record,runtime);
+  assert.deepEqual(granted,[['dropbox',['fixture-account','root']]]);
+  assert.deepEqual(Buffer.from(await (await loadBasicHistoryImage(record,signal,runtime)).blob.arrayBuffer()),image);
+  const oversized=previewApi({...row,bytes:livePreviewLimit+1});
+  assert.equal((await oversized.message('auth.reconnect',{provider:'dropbox',previewId:row.id})).error.code,'PREVIEW_RECORD_UNAVAILABLE');
+  assert.equal((await fixture.message('auth.reconnect',{provider:'dropbox',previewId:'missing'})).error.code,'PREVIEW_RECORD_UNAVAILABLE');
 });
 
 test('Projectile speeds have distinct bounded distributions and burst intensity decays on accepted clicks only',async()=>{
@@ -246,7 +263,7 @@ test('Verified save notices select one surface and use native fallback only if c
   notice.saved('cloudflare','r2:1');
   notice.saved('dropbox','basic:2');
   await delay(165);
-  assert.deepEqual(deliveries.map(message=>[message.id,message.surface]),[
+  assert.deepEqual(deliveries.filter(message=>!message.stop).map(message=>[message.id,message.surface]),[
     ['r2:1','shelf'],['basic:2','app'],['basic:2','page']
   ]);
   assert.deepEqual(native,[]);
@@ -255,4 +272,69 @@ test('Verified save notices select one surface and use native fallback only if c
   await delay(165);
   assert.deepEqual(native,['Google Drive']);
   notice.clearNative();
+});
+
+test('Success preferences gate every surface and preserve saved subordinate values',async()=>{
+  assert.deepEqual(
+    ['notifications','notificationsWhileOpen','notificationHover','notificationPosition','notificationSize'].map(key=>normalizeVisualFeedback({})[key]),
+    [true,true,true,'bottom-right','large']
+  );
+  for(const notifications of [false,true])for(const notificationsWhileOpen of [false,true]){
+    const saved={notifications,notificationsWhileOpen,notificationHover:false,notificationPosition:'center',notificationSize:'small'};
+    const preferences=createVisualFeedbackPreference(memoryStorage({[visualFeedbackKey]:saved}));
+    await preferences.ready;
+    let closed=false;
+    const sent=[],fallback=[];
+    const chrome={runtime:{getURL:path=>path,sendMessage:async message=>{if(!message.stop)sent.push(message);return false;}},
+      tabs:{query:async()=>[{id:3,windowId:4}],sendMessage:async(_,message)=>{sent.push(message);return false;}},
+      notifications:{create:async()=>fallback.push(true),clear:async()=>{}}};
+    const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed});
+    notice.saved('google','open');
+    await delay(180);
+    assert.deepEqual(sent.map(x=>x.surface),notifications&&notificationsWhileOpen?['shelf']:[]);
+    assert.equal(fallback.length,notifications&&notificationsWhileOpen?1:0);
+    closed=true;
+    notice.saved('dropbox','closed');
+    await delay(180);
+    assert.deepEqual(sent.filter(x=>x.id==='closed').map(x=>x.surface),notifications?['app','page']:[]);
+    assert(sent.every(x=>x.position==='center'&&x.size==='small'&&x.hover===false));
+    await preferences.update(value=>({...value,notifications:false}));
+    assert.deepEqual(Object.fromEntries(Object.keys(saved).map(key=>[key,preferences.value[key]])),{...saved,notifications:false});
+  }
+});
+
+test('A claimed renderer with a lost acknowledgement never duplicates delivery and suppression is window scoped',async()=>{
+  const preferences=createVisualFeedbackPreference(memoryStorage());
+  let listener,closed=true,windowId=7,late;
+  const shown=[],fallback=[];
+  const chrome={runtime:{id:'fixture',getURL:path=>path,onMessage:{addListener:fn=>listener=fn},sendMessage:async()=>false},
+    tabs:{query:async()=>[{id:windowId+10,windowId}],sendMessage:async(tab,message)=>{
+      if(message.stop){shown.push({stop:message.windowId});return false;}
+      const granted=await new Promise(resolve=>listener({channel:message.channel,token:message.token,claim:true},
+        {id:'fixture',tab:{id:tab},frameId:0},resolve));
+      if(!granted)return false;
+      shown.push({id:message.id,window:message.windowId});
+      return new Promise(resolve=>{late=resolve;});
+    }},notifications:{create:async()=>fallback.push(true)}};
+  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async id=>id===7?closed:true});
+  notice.saved('dropbox','late');
+  await delay(850);
+  late(true);
+  assert.deepEqual(shown,[{id:'late',window:7}]);
+  assert.equal(fallback.length,0);
+  await preferences.update(value=>({...value,notificationsWhileOpen:false}));
+  notice.shelfOpened(8);
+  await tick();
+  assert.equal(shown.length,1);
+  closed=false;
+  notice.shelfOpened(7);
+  await tick();
+  assert.deepEqual(shown.at(-1),{stop:7});
+  windowId=8;
+  notice.saved('google','invalidated');
+  await preferences.update(value=>({...value,notifications:false}));
+  await preferences.update(value=>({...value,notifications:true}));
+  await delay(180);
+  assert.equal(shown.length,2);
+  assert.equal(fallback.length,0);
 });

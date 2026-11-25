@@ -8,7 +8,8 @@
     cloudflare:['Cloudflare R2','#ffb85d',125]
   };
   const duration = 10000;
-  const seen = new Set();
+  const channel = 'redown-console-save';
+  const seen = new Set(), stopped = new Set();
   const asset = chrome.runtime.getURL('extension/icons/redown-console-r.png');
   const isApp = location.protocol === 'chrome-extension:' && location.pathname === '/extension/app.html';
   let appTarget, imageReady, current;
@@ -34,14 +35,22 @@
     return imageReady;
   }
 
-  function reveal(id, provider) {
+  function reveal({id,provider,token,position,size,hover}) {
     current?.();
     const [name,color,width] = providers[provider];
+    const noticeWidth = {small:253,standard:338,large:422}[size] ?? 422;
+    const placement = position==='center'
+      ? 'inset:50% 0 auto!important;margin-inline:auto!important;transform:translateY(-50%)!important;'
+      : 'inset:auto 8px 12px auto!important;';
     const host = document.createElement('div');
-    host.style.cssText = 'all:initial!important;position:fixed!important;inset:auto 0 12px!important;margin-inline:auto!important;width:min(422px,calc(100vw - 16px))!important;z-index:2147483647!important;pointer-events:none!important;';
+    host.style.cssText = 'all:initial!important;position:fixed!important;'+placement+
+      'width:min('+noticeWidth+'px,calc(100vw - 16px))!important;z-index:2147483647!important;pointer-events:none!important;';
     const shadow = host.attachShadow({mode:'closed'});
     const reward = document.createElement('div');
     reward.style.cssText = 'position:relative;box-sizing:border-box;padding:16px 16px 12px;background:#080808;border-radius:12px;perspective:650px;color:#eee;font:16px system-ui;';
+    reward.style.pointerEvents = 'auto';
+    if(size==='small')reward.style.padding='10px 10px 7px';
+    if(size==='standard')reward.style.padding='13px 13px 10px';
     const close = document.createElement('button');
     close.type = 'button';
     close.setAttribute('aria-label','Dismiss save notification');
@@ -82,8 +91,20 @@
     }
     function checkExpiry(){if(Date.now()>=expiresAt)dispose();}
     current = dispose;
+    dispose.id = id;
+    dispose.token = token;
     const expiry = setTimeout(dispose,duration);
-    close.onclick = dispose;
+    close.onclick = event => {event.stopPropagation();dispose();};
+    close.onkeydown = event => {
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dispose();}
+    };
+    if(hover!==false&&matchMedia('(any-hover: hover)').matches){
+      // Layout may dispatch pointerenter when the notice appears under a
+      // stationary pointer. Dismiss on actual pointer movement over the notice.
+      reward.addEventListener('pointermove',event=>{
+        if(event.isTrusted&&event.pointerType!=='touch'&&(event.movementX||event.movementY))dispose();
+      });
+    }
     document.addEventListener('visibilitychange',checkExpiry);
     try {
       if (!reduced) {
@@ -110,18 +131,25 @@
   }
 
   chrome.runtime.onMessage.addListener((message,sender,respond) => {
-    if (message?.channel !== 'redown-console-save' || sender.id !== chrome.runtime.id) return;
-    if (message.stop) { current?.(); return; }
-    const {id,provider,deliverBy} = message;
+    if (message?.channel !== channel || sender.id !== chrome.runtime.id) return;
+    if (message.stop && typeof message.token==='string') {
+      stopped.add(message.token);
+      if(stopped.size>128)stopped.delete(stopped.values().next().value);
+      if(current&&(current.token===message.token||current.id===message.id))current();
+      return;
+    }
+    const {id,provider,deliverBy,token} = message;
     if (typeof id !== 'string' || !id || !Object.hasOwn(providers,provider) ||
-        !Number.isFinite(deliverBy) || Date.now() >= deliverBy || document.hidden) return;
+        typeof token!=='string'||!token||!Number.isFinite(deliverBy) || Date.now() >= deliverBy || document.hidden) return;
     if(isApp ? !appTarget || message.surface!==appTarget.surface || message.windowId!==appTarget.windowId ||
       (appTarget.tabId!==undefined&&message.tabId!==appTarget.tabId) :
       message.surface!=='page'||document.fullscreenElement||document.querySelector(':modal'))return;
     void (async () => {
       if (seen.has(id)) return true;
-      if (!await loadArtwork() || document.hidden || Date.now() >= deliverBy) return false;
-      return seen.has(id) || reveal(id,provider);
+      if (!await loadArtwork() || stopped.has(token)||document.hidden || Date.now() >= deliverBy) return false;
+      if(!await chrome.runtime.sendMessage({channel,claim:true,token}))return false;
+      if(stopped.has(token)||document.hidden||Date.now()>=deliverBy)return false;
+      return seen.has(id) || reveal(message);
     })().then(respond,()=>respond(false));
     return true;
   });
