@@ -1076,3 +1076,35 @@ independently. Grouped ZIP Download continues to use recursive inventory. The
 Destinations Manager groups its draft controls and status around the existing
 `commitConfigChange` Save. Its 20-row paging, confirmation and native ACK
 still use the same manager and registrar code.
+
+## REDOWN 0.3.29 Get URL visibility
+
+`inspectExplorerContextMenu` reads the same local Explorer export preference
+as the Shelf. A missing Get URL preference enables its menu item, and an
+explicit Off remains authoritative across restart. Reset to Defaults restores
+On. The existing context eligibility, account checks, and explicit consent for
+enabling a bucket’s public endpoint still apply. Reading or resetting this
+visibility preference performs no provider request or public access change.
+The release browser regressions exercise the default, persistence, reset, and
+public-URL confirmation flow.
+
+## Explorer local Upload in 0.3.29
+
+The Explorer toolbar uses the Universal File API's existing `upload`
+operation. The authenticated Shelf transports a short-lived, single-use file
+ticket because Chrome extension messages carry JSON. A browser File is
+structured-cloned through extension-local IndexedDB and is consumed when the
+background starts the operation. The ticket expires if the Shelf closes before
+dispatch. The Shelf checks write availability for the current account, bucket,
+and prefix. Upload rechecks OAuth and the existing Worker plan before sending
+bytes, and leaves provisioning to the existing setup flow.
+
+The R2 adapter streams its byte comparison from the temporary object and calls
+the existing signed file move using the requested filename. It accepts a
+verified final copy receipt for the same directory and retains the existing
+Keep conflict policy. The Shelf processes one file at a time, stops on an
+unconfirmed result, and refreshes the directory after confirmed uploads.
+Closing the connection or choosing Cancel requests abort. Ambiguous writes keep
+their recovery key and are never replayed. `tests/explorer-upload.test.mjs`
+calls the existing File API directly, and the release browser fixture exercises
+the picker, cancellation, and refresh through the toolbar.

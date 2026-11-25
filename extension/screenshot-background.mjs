@@ -5,7 +5,7 @@ import {captureHistoryContext,safeHistoryURL} from '../src/history/model.mjs';
 import {createDirectScreenshotUpload} from '../src/cloudflare/screenshot-direct-upload.mjs';
 import {retainedScreenshotOutput,matchScreenshotObject} from '../src/history/screenshot-output.mjs';
 
-export function createScreenshotBackground({chrome,oauth,current,fileApi,historyUrls,onVerified,observeResult,retryCache=createScreenshotRetryCache()}){
+export function createScreenshotBackground({chrome,oauth,current,fileApi,historyUrls,onVerified,onConfirmed,observeResult,retryCache=createScreenshotRetryCache()}){
  const storage=chrome.storage.local;
  const uploader=createDirectScreenshotUpload(oauth);
  const send=message=>chrome.runtime.sendMessage(message).catch(()=>{});
@@ -43,6 +43,7 @@ export function createScreenshotBackground({chrome,oauth,current,fileApi,history
   progress:job=>send({channel:'screenshot-result',operationId:job.plan.operationId,state:'uploading',windowId:job.plan.context?.windowId,total:job.outputs.length}),
   async notify(job,{recorded}){
    const confirmed=job.outputs.filter(output=>output.state==='confirmed').length;
+   if(recorded&&job.state==='confirmed'&&confirmed>0&&confirmed===job.outputs.length)onConfirmed?.(job.plan.operationId);
    const retryable=job.outputs.filter(output=>job.cachedAt&&!job.originalUnavailable&&output.state!=='confirmed'&&output.recoverable).length;
    const lastAttempt=job.attempts.at(-1);
    for(const [index,result] of job.outputs.entries())if(result.state==='confirmed'&&lastAttempt?.outputIds.includes(result.outputId)){

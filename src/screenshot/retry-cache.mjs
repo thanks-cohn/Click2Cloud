@@ -36,6 +36,15 @@ export function createScreenshotRetryCache(storage=globalThis.caches,clock=Date.
     'x-capture-expires':String(clock()+screenshotRetryLifetime),'x-capture-size':String(image.size)}}));
   }),
   read:id=>serial(async cache=>{await prune(cache);const response=await cache.match(key(id));return response?.blob()??null;}),
+  async preview(id,limit){
+   const response=await storage.match(key(id),{cacheName});
+   const expires=Number(response?.headers.get('x-capture-expires'));
+   const size=Number(response?.headers.get('x-capture-size'));
+   if(!response||!(expires>clock())||!Number.isSafeInteger(size)||size<8||size>SCREENSHOT_BYTES)return null;
+   if(size>limit)throw Error('PREVIEW_SIZE_LIMIT');
+   const image=await response.blob();
+   return image.size===size?image:null;
+  },
   remove:id=>serial(cache=>cache.delete(key(id))),
   prune:()=>serial(cache=>prune(cache))
  };

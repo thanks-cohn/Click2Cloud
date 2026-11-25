@@ -6,7 +6,7 @@ export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
  const enter=dialog.querySelector('#immersive-view,[data-enter-immersive]'),exitButton=dialog.querySelector('#exit-immersive,[data-exit-immersive]');
  const controls=dialog.querySelector('.immersive-controls'),slider=controls.querySelector('input');
  const percent=controls.querySelector('output'),fit=controls.querySelector('button');
- let observer;
+ let observer,loaded=false;
 
  function size(){
   if(!dialog.hasAttribute('data-immersive')||!image.naturalWidth||image.hidden)return;
@@ -81,11 +81,30 @@ export function wireImmersiveView(dialog,{initiallyImmersive=false}={}){
   return true;
  }
 
- enter.onclick=open;exitButton.onclick=exit;fit.onclick=()=>zoom(100);
+ enter.onclick=()=>{if(loaded)open();};exitButton.onclick=exit;fit.onclick=()=>zoom(100);
  slider.oninput=()=>zoom(Number(slider.value));
  image.onclick=event=>{
   if(dialog.hasAttribute('data-immersive'))zoom(Number(slider.value)===100?200:100,{x:event.clientX,y:event.clientY});
  };
  if(initiallyImmersive)open();
- return {escape,handleKey,dispose,ready(){enter.disabled=slider.disabled=fit.disabled=false;size();}};
+ return {escape,handleKey,dispose,
+  loading({resetZoom=false}={}){
+   loaded=false;
+   if(resetZoom&&dialog.hasAttribute('data-immersive'))zoom(100);
+   enter.disabled=false;
+   enter.setAttribute('aria-disabled','true');
+   slider.disabled=fit.disabled=true;
+  },
+  unavailable(){
+   loaded=false;
+   enter.removeAttribute('aria-disabled');
+   enter.disabled=slider.disabled=fit.disabled=true;
+  },
+  ready(){
+   loaded=true;
+   enter.removeAttribute('aria-disabled');
+   enter.disabled=slider.disabled=fit.disabled=false;
+   size();
+  }
+ };
 }

@@ -56,7 +56,7 @@ test('verified screenshot outputs preserve distinct destination IDs and stop the
   await store.close();
 });
 
-test('chronology tie order, first/last/direct jumps, indexed search and Hide are independent',async()=>{
+test('chronology tie order, first/last/direct jumps, search and Hide are independent',async()=>{
   const store=open();
   await store.reconcile(Array.from({length:63},(_,index)=>record(String(index).padStart(2,'0'),
     base+Math.floor(index/3),{filename:index===51?'house.png':'sunset.png'})));
@@ -68,6 +68,32 @@ test('chronology tie order, first/last/direct jumps, indexed search and Hide are
   assert.equal((await store.page({from:base+20})).total,3);
   assert.equal(await store.count(),63);
   await assert.rejects(async()=>store.page({page:0}),/HISTORY_INVALID_PAGE/);
+  await store.close();
+});
+
+test('History search finds old and reconciled records, with partial text, numbers, paths and safe source metadata',async()=>{
+  const store=open();
+  await store.reconcile([
+    record('old-75',base,{filename:'Screenshot-75.png',kind:'screenshot',destination:{bucket:'Gallery',key:'Travel/ScreenShot-75.png'}}),
+    record('failed-76',base+1,{filename:'Screenshot-76.png',kind:'screenshot',status:'failed'}),
+    ...basicReceipt({...basic('basic-75'),filename:'Screenshot-75 notes.png',hostUrl:'https://example.com/Archive?token=private',destination:{path:'/Jobs/75'}}),
+    ...Array.from({length:60},(_,i)=>record('new-'+i,base+100+i,{filename:'Fresh item '+i+'.png'}))
+  ]);
+  const ids=async(query,options)=>(await store.page({query,...options})).items.map(row=>row.recordId);
+  const screenshots=['basic:google:basic-75','failed-76','old-75'];
+  for(const query of ['screen','Screenshot','SCrEeN'])assert.deepEqual(await ids(query),screenshots);
+  for(const query of ['screenshot-75','75','SCREEn 75'])assert.deepEqual(await ids(query),[screenshots[0],screenshots[2]]);
+  assert.deepEqual(await ids('Cloudflare Travel'),['old-75']);
+  assert.deepEqual(await ids('google drive jobs/75'),[screenshots[0]]);
+  assert.deepEqual(await ids('EXAMPLE.COM/archive'),[screenshots[0]]);
+  assert.deepEqual(await ids('private'),[]);
+  assert.deepEqual(await ids('unmatched text'),[]);
+  assert.deepEqual(await ids('screen',{from:base+1,end:base+3,kind:'screenshot'}),['failed-76']);
+  assert.equal((await store.page({query:'fresh item',page:99})).items.length,10);
+  await store.reconcile([record('reconciled',base+4000,{filename:'New Screenshot-75.png'})]);
+  assert.deepEqual(await ids('screen'),['reconciled',...screenshots]);
+  assert.equal((await store.page({query:''})).total,64);
+  await assert.rejects(store.page({query:'screen',signal:AbortSignal.abort()}),{name:'AbortError'});
   await store.close();
 });
 

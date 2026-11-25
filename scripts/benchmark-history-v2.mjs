@@ -49,7 +49,7 @@ try {
     await page.goto(`chrome-extension://${id}/extension/app.html`);
   }
   report.browser=context.browser().version();
-  assert.equal(report.version,'0.3.28');
+  assert.equal(report.version,JSON.parse(await readFile('package.json','utf8')).version);
   const download=retention?null:page.waitForEvent('download',{timeout:600_000});
   void download?.catch(()=>{});
   let savedDownload;
@@ -105,6 +105,11 @@ try {
       }
       timings.push({page:input,ms:performance.now()-before});
     }
+    const searchStarted=performance.now();
+    const search=await store.page({query:'OBJect-75'});
+    const searchMs=performance.now()-searchStarted;
+    const expectedMatches=Math.max(0,Math.ceil((count-75)/100));
+    if(search.total!==expectedMatches||search.items.some(row=>!row.filename.includes('object-75')))throw Error('SEARCH_MISMATCH');
     const before=performance.now(),heapBefore=performance.memory?.usedJSHeapSize;
     let heapPeak=heapBefore,concurrent;
     const fixtureDownload=async (url,filename)=>{
@@ -121,7 +126,7 @@ try {
     if(await store.count()!==count+(count?1:0))throw Error('CONCURRENT_BOUNDARY_FAILED');
     await store.close();
     const sorted=timings.map(timing=>timing.ms).sort((a,b)=>a-b);
-    return {...result,seedMs,storage,timings,p95Ms:sorted[Math.ceil(sorted.length*.95)-1],
+    return {...result,seedMs,storage,timings,searchMs,searchMatches:search.total,p95Ms:sorted[Math.ceil(sorted.length*.95)-1],
       exportMs:performance.now()-before,heapBefore,heapPeak,concurrentWriteExcluded:count>0};
   },{count,retention,fixture});
   if(!retention){

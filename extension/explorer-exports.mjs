@@ -72,20 +72,25 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     const card=document.createElement('section');
     card.className='card';settingsCard=card;
     card.innerHTML='<h2>Explorer Downloads and Links</h2>'+Object.entries(settingLabels).map(([flag,label])=>
-      `<label><input type="checkbox" data-export-option="${flag}" ${options[flag]?'checked':''}> ${label}</label>`).join('')+'<p role="status"></p>';
+      `<label><input type="checkbox" data-export-option="${flag}" ${options[flag]?'checked':''}> ${label}</label>`).join('')+
+      '<button type="button" data-reset-exports>Reset to Defaults</button><p role="status"></p>';
     parent.append(card);
-    card.onchange=event=>{
-      const input=event.target, flag=input.dataset.exportOption;
-      if(!Object.hasOwn(exportDefaults,flag))return;
-      const checked=input.checked;
+    function write(patch){
       const save=async()=>{
         const stored=exportOptions((await chrome.storage.local.get(exportPreferenceKey))[exportPreferenceKey]);
-        const next={...stored,[flag]:checked};
+        const next={...stored,...patch};
         await chrome.storage.local.set({[exportPreferenceKey]:next});
         refreshOptions(next);card.querySelector('[role=status]').textContent='';
       };
-      update=update.catch(()=>{}).then(()=>navigator.locks?navigator.locks.request(exportPreferenceKey,save):save()).catch(()=>{input.checked=options[flag];card.querySelector('[role=status]').textContent='Could not save this setting.';});
+      update=update.catch(()=>{}).then(()=>navigator.locks?navigator.locks.request(exportPreferenceKey,save):save()).catch(()=>{
+        refreshOptions(options);card.querySelector('[role=status]').textContent='Could not save this setting.';
+      });
+    }
+    card.onchange=event=>{
+      const input=event.target, flag=input.dataset.exportOption;
+      if(Object.hasOwn(exportDefaults,flag))write({[flag]:input.checked});
     };
+    card.querySelector('[data-reset-exports]').onclick=()=>write(exportDefaults);
   }
   function metadata(source,key,signal){return api('getExportObjectMetadata',{source,key},{quiet:true,signal});}
   function collect(source,signal,onProgress,immediate=false){return listExportInventory((source,cursor)=>

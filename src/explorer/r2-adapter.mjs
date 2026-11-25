@@ -10,7 +10,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     options.signal?.throwIfAborted();
     let timer,abort,dispatched=false;const writes=['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfCreateBucket','cfProvision','cfExtractArchive'].includes(type);
     try {
-      const transport=Promise.resolve().then(()=>{options.signal?.throwIfAborted();dispatched=true;return send({type,...input,...(options.operationId?{operationId:options.operationId}:{}),...(['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfArchiveEntries','cfArchiveEntryUrl','cfExtractArchive'].includes(type)?{betaNoProvision:true}:{})});}).catch(error=>{if(writes&&dispatched)throw Object.assign(new Error('Connection lost before a final result. Refresh both locations before retrying.'),{uncertain:true,cause:error});throw error;});
+      const transport=Promise.resolve().then(()=>{options.signal?.throwIfAborted();dispatched=true;return send({type,...input,...(options.operationId?{operationId:options.operationId}:{}),...(['cfTransferObjects','cfRenameEntry','cfDeleteObjects','cfCreateFolder','ingest','cfArchiveEntries','cfArchiveEntryUrl','cfExtractArchive'].includes(type)?{betaNoProvision:true}:{})},options);}).catch(error=>{if(writes&&dispatched)throw Object.assign(new Error('Connection lost before a final result. Refresh both locations before retrying.'),{uncertain:true,cause:error});throw error;});
       const result=await Promise.race([transport,new Promise((_,reject)=>{
         if(!(writes&&options.operationId))timer=setTimeout(()=>reject(Object.assign(Error(writes?'No final response. Refresh both locations before retrying; the operation may have changed files.':'No final response. Refresh and try the read again.'),{uncertain:writes&&dispatched})),options.messageTimeoutMs??providerDefaults.messageTimeoutMs);
         abort=()=>reject(Object.assign(new Error(writes&&dispatched?'Cancellation requested after dispatch. The cloud operation may still complete; inspect before retrying.':'Operation cancelled.'),{name:'AbortError',uncertain:writes&&dispatched}));
@@ -208,7 +208,9 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       // A unique temporary key keeps the original untouched until the proven
       // Worker conditionally commits the final destination. Never replay PUT.
       if(conflict==='skip' && (await stat({source:l,key:k},options)).object)return {state:'partial',conflicts:[{destinationKey:k,status:'conflict'}]};
-      const staging=prefix(stagingPrefix)+crypto.randomUUID()+'/payload';
+      const parent=k.slice(0,k.lastIndexOf('/')+1),leaf=name(k.slice(parent.length));
+      const stagingDirectory=prefix(stagingPrefix)+crypto.randomUUID()+'/';
+      const staging=key(stagingDirectory+leaf);
       let attempted=false;
       try {
         signal?.throwIfAborted();onProgress?.({phase:'uploading',bytes:0,totalBytes:file.size});attempted=true;
@@ -220,10 +222,17 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         await verifyUpload(l,staging,file,options);
         signal?.throwIfAborted();onProgress?.({phase:'committing',bytes:file.size,totalBytes:file.size});
         // destinationKey is exact, so a folder upload retains every component.
-        const result=await message('cfTransferObjects',{operation:'move',source:l,destination:l,entries:[{key:staging,folder:false,destinationKey:k}],conflict},options);
+        const result=await message('cfTransferObjects',{operation:'move',source:{...l,prefix:stagingDirectory},destination:{...l,prefix:parent},entries:[{key:staging,folder:false,destinationKey:k}],conflict},options);
         if(result.errors?.length || result.conflicts?.length || result.partialMove)return {...result,recoveryKey:staging};
-        if(result.completed!==1 || result.results?.[0]?.size!==file.size)throw Error('Final upload destination was not confirmed.');
-        return {...result,key:result.results[0].destinationKey,verification:'byte-for-byte staging read-back and provider final copy receipt; not independent final SHA-256'};
+        const committed=result.receipt ?? result.results?.[0], finalKey=committed?.key??committed?.destinationKey;
+        const dot=leaf.lastIndexOf('.'),stem=dot>0?leaf.slice(0,dot):leaf,extension=dot>0?leaf.slice(dot):'';
+        const alternate=parent+stem+'-'+result.operationId+extension;
+        if(result.completed!==1||committed?.size!==file.size||typeof finalKey!=='string'||
+          finalKey.slice(0,finalKey.lastIndexOf('/')+1)!==parent||conflict!=='keep'&&finalKey!==k||
+          result.receipt&&(!committed.etag||!committed.version||!result.operationId||
+            committed.operationId!==result.operationId||finalKey!==k&&finalKey!==alternate))
+          throw Error('Final upload destination was not confirmed.');
+        return {...result,key:finalKey,verification:'byte-for-byte staging read-back and provider final copy receipt; not independent final SHA-256'};
       }catch(error){
         if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,cause:error});
         throw error;

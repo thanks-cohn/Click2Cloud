@@ -1,6 +1,6 @@
 import {splitAt,separatorKey,clamp,cycleDivider} from '../src/explorer/layout.mjs';
 // Presentation only: pointer frames never call the engine. Persist once per gesture.
-export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alternate'}){
+export function installExplorerLayout({read,save,onResize,onMoreOpened,readCycleMode=()=>'alternate'}){
  const shell=document.querySelector('#shell'),aside=shell.querySelector('aside'),split=document.querySelector('#pane-splitter'),toolbar=document.querySelector('#explorer-commands'),bar=document.querySelector('#toolbar-splitter'),overflow=document.querySelector('#toolbar-overflow'),more=document.querySelector('#toolbar-more'),commands=document.querySelector('#command-items'),nodes=[...commands.children],moreActions=[...document.querySelector('#explorer-more-actions')?.children??[]],widths=new Map();let preference={...read()},frame=0,drag=null,maxRows=7,saving=false,queued=null,saveTimer;
  const navigation=['back','forward','up','refresh'].map(id=>document.getElementById(id));
  const search=commands.querySelector('#filename-search-form'),opener=commands.querySelector('#open-filename-search');
@@ -72,7 +72,7 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  });
 
  function openMore(){
-  if(overflow.hidden){overflow.hidden=false;overflow.showPopover?.();}
+  if(overflow.hidden){overflow.hidden=false;overflow.showPopover?.();onMoreOpened?.();}
   more.setAttribute('aria-expanded','true');positionMore();
   const controls=[...overflow.querySelectorAll('input:not(:disabled),button:not(:disabled),select:not(:disabled),[tabindex="0"]')];
   (controls.find(control=>!search.contains(control))??controls[0])?.focus({preventScroll:true});
@@ -158,6 +158,7 @@ export function installExplorerLayout({read,save,onResize,readCycleMode=()=>'alt
  window.addEventListener('resize',schedule);window.visualViewport?.addEventListener('resize',schedule);document.addEventListener('scroll',positionMore,true);
  const observer=new ResizeObserver(schedule);observer.observe(toolbar);observer.observe(shell);layout();
  return {refresh(){if(!drag&&!saving&&!queued)preference={...read()};schedule();},hide(){finish();closeMore();hideSearchPanel();},dismissSearch,focusSearch,
+  dismissMore(){closeMore();more.focus({preventScroll:true});},
   setSearchAvailable(available){opener.disabled=input.disabled=!available;},
   setShortcuts(bindings){
    for(const [id,el] of [['explorer.resetPanelSplit',split],['explorer.focusSearch',input]]){

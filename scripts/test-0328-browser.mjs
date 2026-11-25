@@ -49,7 +49,7 @@ function installFixture(manifest) {
   });
   const event = listeners => ({addListener:listener=>listeners.add(listener),removeListener:listener=>listeners.delete(listener)});
   const target = {provider:'cloudflare',connectionId:'cloudflare:fixture-account',accountId:'fixture-account',bucketName:'fixture-bucket',prefix:''};
-  const project = {connection:'DISCONNECTED',ready:new Set(),photos:new Map(),operations:[],active:0,peak:0,aborts:0};
+  const project = {connection:'DISCONNECTED',ready:new Set(),photos:new Map(),r2Keys:new Map(),operations:[],active:0,peak:0,aborts:0,footerAcks:0};
   let basic;
   async function basicFixture() {
     if (basic) return basic;
@@ -80,6 +80,36 @@ function installFixture(manifest) {
   const runtime = {
     id:'fixture',getManifest:()=>manifest,getURL:path=>location.origin+'/'+path,
     onMessage:event(runtimeListeners),
+    connect({name}){
+      if(name!=='redown-local-upload')throw Error('Unknown fixture port');
+      const listeners=new Set(),disconnect=new Set();
+      let cancelled=false;
+      const send=value=>{for(const listener of listeners)listener(value);};
+      return {onMessage:event(listeners),onDisconnect:event(disconnect),
+        disconnect(){for(const listener of disconnect)listener();},
+        postMessage(message){
+          if(message.ping)return;
+          if(message.cancel){cancelled=true;return;}
+          if(message.check){
+            project.operations.push(['upload-check',message.source]);
+            queueMicrotask(()=>send({state:project.uploadWritable?'completed':'blocked'}));
+            return;
+          }
+          void (async()=>{
+            const {takeLocalUpload}=await import('/src/chrome/local-upload-files.mjs');
+            const file=await takeLocalUpload(message.ticket);
+            const key=message.source.prefix+file.name;
+            project.operations.push(['upload-file',message.source,file.name,await file.text()]);
+            send({progress:{phase:'verifying'}});
+            if(project.uploadWait)await new Promise(resolve=>setTimeout(resolve,300));
+            if(cancelled){send({state:'cancelled',error:'Upload cancelled.'});return;}
+            productFixture.r2Objects.set(message.source.bucketName+':'+key,
+              {bucketName:message.source.bucketName,key,size:file.size,displayName:file.name,folder:false});
+            send({state:'completed'});
+          })().catch(error=>send({state:'failed',error:error.message}));
+        }
+      };
+    },
     async sendMessage(message) {
       if (message.channel==='redown-basic-v1') {
         const {op,input} = message;
@@ -110,12 +140,28 @@ function installFixture(manifest) {
           return {ok:true,data:{state:'cancelling'}};
         }finally{await store.close();}
       }
-      if (message.channel==='screenshot') return {state:'completed',data:{rules:[],revision:0,defaultHandled:true}};
+      if (message.channel==='screenshot'){
+        if(message.method==='history-output'){
+          const key=project.r2Keys.get(message.params.operationId);
+          return {state:'completed',data:{target,object:{key,size:project.photos.get(key)?.length,etag:'fixture-r2-etag'}}};
+        }
+        if(message.method==='history-public-urls'){
+          project.operations.push(['history-public-urls',message.params.operationId]);
+          return {state:'completed',data:{domainCheckComplete:true,managedPublicAccess:'disabled',file:{urls:[]}}};
+        }
+        return {state:'completed',data:{rules:[],revision:0,defaultHandled:true}};
+      }
       if (message.channel!=='engine') return null;
       const {method,params} = message;
       if (method==='loginStatus') return success({state:project.connection,identityVerified:project.reconnect,
         accounts:project.connection==='CONNECTED'?[{id:target.accountId,name:'Fixture account'}]:[]});
-      if (method==='openRemoteResult') return success({target,highlightKey:'cloudflare.png'});
+      if (method==='enterExplorer'&&project.forceReconnect) return success({state:'RECONNECT_REQUIRED'});
+      if(method==='commitConfigChange'&&params.changes.every(change=>change.type==='setProviderMenuVisibility')){
+        const result=await (await import('/tests/product-browser-host.mjs')).invoke({version:message.version,method,params});
+        if(result.data?.configuration){project.footerAcks++;return success({...result.data,native:{state:'completed'},backup:{state:'BLOCKED'}});}
+        return result;
+      }
+      if (method==='openRemoteResult') return success({target,highlightKey:project.r2Keys.get(params.operationId)??'cloudflare.png'});
       if (method==='fileAction'&&params.action==='rename') {
         project.operations.push(['rename',params.entry.key,params.name]);
         if(project.renameFail)return {state:'blocked',code:'FILE_CONFLICT'};
@@ -136,6 +182,8 @@ function installFixture(manifest) {
       if (method==='readFileChunk') {
         const {offset,length} = params, bytes = project.photos.get(params.key);
         project.operations.push(['readFileChunk',params.key]);
+        if(params.key==='gallery-0329-2.png')await project.r2Gate;
+        if(!bytes)return {state:'failed',code:'HTTP_404'};
         return success({state:'completed',data:{offset,total:bytes.length,etag:'fixture-r2-etag',
           done:offset+length>=bytes.length,bytes:Array.from(bytes.slice(offset,offset+length))}});
       }
@@ -152,7 +200,7 @@ function installFixture(manifest) {
 
 try {
   const manifest = JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));
-  assert.equal(manifest.version,'0.3.28');
+  assert.equal(manifest.version,JSON.parse(await readFile('package.json','utf8')).version);
   browser = await chromium.launch({executablePath:process.env.C2C_CHROME_EXECUTABLE??'/usr/bin/chromium',headless:true});
   report.chromium = browser.version();
   const context = await browser.newContext({viewport:{width:920,height:850},acceptDownloads:true});
@@ -179,7 +227,22 @@ try {
   }
   await app('');
   await fullWidth('Log in');
-  assert.equal(await cloudflare.getByText('Not connected',{exact:true}).count(),0);
+  assert.equal(await page.getByText('Not connected',{exact:true}).count(),0);
+  assert.equal(await page.getByText(/Connection details/i).count(),0);
+  assert.equal(await btn('Save results').count(),0);
+  assert(!(await btn('Review Cloudflare setup').isVisible()));
+  await page.evaluate(async()=>{
+    const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
+    await createAestheticHost({root:document.documentElement,storage:chrome.storage.local}).apply({id:'standard'});
+  });
+  assert(await btn('Review Cloudflare setup').isVisible());
+  await page.reload();await fullWidth('Log in');
+  assert(await btn('Review Cloudflare setup').isVisible());
+  await page.evaluate(async()=>{
+    const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
+    await createAestheticHost({root:document.documentElement,storage:chrome.storage.local}).apply({id:'minimal'});
+  });
+  assert(!(await btn('Review Cloudflare setup').isVisible()));
   assert.equal(await cloudflare.getByText(/Cloudflare may charge/).count(),0);
   assert.equal(await page.locator('#selected-save-setup').count(),0);
   await page.evaluate(()=>{releaseFixture.reconnect=true;releaseFixture.event({channel:'connection-changed'});});
@@ -194,7 +257,7 @@ try {
       return {card:card.getBoundingClientRect().toJSON(),connect:box('[data-connect]'),go:box('[data-go]'),refresh:box('[data-refresh]'),
         heading:box('h2'),status:box('[data-activity]')};
     });
-    assert(geometry.heading.right<=geometry.status.left && geometry.connect.left<geometry.go.left && geometry.go.right<geometry.refresh.left);
+    assert((!geometry.status.width||geometry.heading.right<=geometry.status.left) && geometry.connect.left<geometry.go.left && geometry.go.right<geometry.refresh.left);
     assert(Math.abs(geometry.connect.y-geometry.refresh.y)<1);
     return [geometry.card.height,geometry.refresh.x,geometry.refresh.y-geometry.card.y,geometry.connect.x,geometry.connect.y-geometry.card.y].map(Math.round);
   };
@@ -203,13 +266,13 @@ try {
   await google.getByRole('button',{name:'Sign In'}).click();
   await google.getByText('Success!',{exact:true}).waitFor();
   assert.equal(await google.locator('[data-activity]').evaluate(el=>el.getAnimations()[0]?.effect.getTiming().iterations),2);
-  assert((await cardBounds())[0]<idle[0],'ready information space should collapse');
+  assert.equal((await cardBounds())[0],idle[0],'sign-in should keep the compact card height');
   await shot('provider-success-320');
   await google.getByText('Success!',{exact:true}).waitFor({state:'hidden'});
   await page.evaluate(()=>{releaseFixture.cardFailure=true;});
   await google.getByRole('button',{name:'Refresh',exact:true}).click();
   await google.getByText('Needs attention',{exact:true}).waitFor();
-  await google.getByText('Connection details',{exact:true}).click();
+  assert.equal(await google.getByText('Connection details',{exact:true}).count(),0);
   await google.getByText(/temporarily unavailable/).waitFor();
   assert.equal(await google.locator('[data-success]').count(),0);
   await page.evaluate(()=>{releaseFixture.cardFailure=false;});
@@ -229,6 +292,60 @@ try {
   await page.evaluate(()=>{releaseFixture.attention=null;});
   await page.reload();
   pass('Cloudflare full-width actions and stable Basic cards through sign-in, refresh, success and failure');
+  await page.evaluate(()=>{releaseFixture.forceReconnect=true;});
+  await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+  const footer=page.locator('#footer-notice');
+  const dismissFooter=footer.getByRole('button',{name:'Dismiss footer notification'});
+  await footer.getByText('Reconnect to browse. Saved locations are preserved.',{exact:true}).waitFor();
+  await dismissFooter.press('Enter');
+  assert(await footer.isHidden());
+  await btn('Remotes').click();
+  await page.getByRole('button',{name:'File Explorer',exact:true}).click();
+  await page.locator('#shell[data-view=explorer] #files').waitFor({state:'attached'});
+  assert(await footer.isHidden());
+  await page.getByRole('button',{name:'Refresh',exact:true}).click();
+  await footer.getByText('Reconnect to browse. Saved locations are preserved.',{exact:true}).waitFor();
+  await btn('Remotes').click();
+  assert(await footer.isHidden());
+  assert.equal(await footer.textContent(),'×');
+  await page.evaluate(()=>{releaseFixture.forceReconnect=false;});
+  pass('Reconnect footer dismisses and stays scoped to the Files browsing attempt');
+  await page.evaluate(()=>{releaseFixture.connection='CONNECTED';releaseFixture.event({channel:'connection-changed'});});
+  await fullWidth('Open File Explorer');
+  await btn('Open File Explorer').click();
+  await page.locator('#files').getByText('projects',{exact:true}).dblclick();
+  await page.waitForFunction(()=>document.querySelector('#location').value.includes('projects'));
+  const moreActions=page.getByRole('button',{name:'More Explorer actions'});
+  const upload=page.getByRole('button',{name:'Upload',exact:true});
+  await moreActions.click();
+  assert(await upload.isDisabled());
+  assert.equal(await page.locator('#toolbar-overflow').evaluate(el=>el.lastElementChild.id),'explorer-upload');
+  await moreActions.click();
+  await page.evaluate(()=>{releaseFixture.uploadWritable=true;});
+  await moreActions.click();
+  const [picker]=await Promise.all([page.waitForEvent('filechooser'),upload.click()]);
+  assert(picker.isMultiple());
+  assert.equal(await moreActions.getAttribute('aria-expanded'),'false');
+  await picker.setFiles([
+    {name:'notes-75.txt',mimeType:'text/plain',buffer:Buffer.from('first')},
+    {name:'notes-76.txt',mimeType:'text/plain',buffer:Buffer.from('second')}
+  ]);
+  await page.getByText('2 files uploaded.',{exact:true}).waitFor();
+  await page.locator('#files').getByText('notes-76.txt',{exact:true}).waitFor();
+  assert.deepEqual(await page.evaluate(()=>releaseFixture.operations.filter(([op])=>op==='upload-file').map(([,target,name,text])=>
+    [target.bucketName,target.prefix,name,text])),[
+    ['fixture-bucket','projects/','notes-75.txt','first'],['fixture-bucket','projects/','notes-76.txt','second']
+  ]);
+  await page.evaluate(()=>{releaseFixture.uploadWait=true;});
+  await moreActions.click();
+  const [cancelledPicker]=await Promise.all([page.waitForEvent('filechooser'),upload.click()]);
+  await cancelledPicker.setFiles({name:'cancelled.txt',mimeType:'text/plain',buffer:Buffer.from('cancel me')});
+  await page.getByText(/Verifying 1 of 1/).waitFor();
+  await btn('Cancel upload').click();
+  await page.getByText('Upload cancelled.',{exact:true}).waitFor();
+  assert.equal(await page.locator('#files').getByText('cancelled.txt',{exact:true}).count(),0);
+  await btn('Remotes').click();
+  pass('Cloudflare toolbar Upload is last, checks write access, opens a multi-file picker, cancels, and refreshes the exact folder');
 
   const collection = ['explorer','remotes','queue','history'];
   const header = async expected => {
@@ -274,6 +391,37 @@ try {
   await page.getByRole('menuitem',{name:'Settings',exact:true}).click();
   const settings = page.locator('.history-v2-settings');
   await settings.waitFor();
+  const now=Date.now();
+  await page.clock.install({time:now});
+  await page.clock.pauseAt(now+100);
+  const visibility=page.getByRole('checkbox',{name:'Show Google Drive in Chrome right-click menu'});
+  await visibility.evaluate(el=>{if(el.checked)el.click();});
+  await footer.getByText('Saved · Chrome menu acknowledged',{exact:true}).waitFor();
+  await page.clock.fastForward(6000);
+  await dismissFooter.dispatchEvent('pointerenter');
+  assert(await footer.isVisible());
+  await visibility.evaluate(el=>{if(!el.checked)el.click();});
+  await page.waitForFunction(()=>releaseFixture.footerAcks===2);
+  await footer.getByText('Saved · Chrome menu acknowledged',{exact:true}).waitFor();
+  await page.clock.fastForward(4001);
+  assert(await footer.isVisible());
+  await dismissFooter.evaluate(el=>el.click());
+  assert(await footer.isHidden());
+  await visibility.evaluate(el=>{if(el.checked)el.click();});
+  await footer.getByText('Saved · Chrome menu acknowledged',{exact:true}).waitFor();
+  await page.clock.fastForward(10001);
+  assert(await footer.isHidden());
+  assert.equal(await page.locator('#footer-notice-text').textContent(),'');
+  await visibility.evaluate(el=>{if(!el.checked)el.click();});
+  await footer.waitFor();
+  await page.clock.resume();
+  await page.reload();
+  await page.locator('#login').waitFor();
+  assert(await footer.isHidden());
+  await btn('More').click();
+  await page.getByRole('menuitem',{name:'Settings',exact:true}).click();
+  await settings.waitFor();
+  pass('Saved acknowledgments expire, handle consecutive saves and hover, and stay dismissed after reopening');
   assert.deepEqual(await page.locator('[data-favorite]').evaluateAll(els=>els.map(el=>el.parentElement.textContent.trim())),
     ['Google Drive','OneDrive','Dropbox','Cloudflare R2']);
   const driveFavorite=page.locator('[data-favorite="google-drive"]');
@@ -296,6 +444,34 @@ try {
   pass('One through four left-packed tabs, deterministic overflow and keyboard-accessible ordering persist');
 
   await btn('Settings').click();
+  const getUrl=page.getByLabel('Show Get URL in right-click menu');
+  const previews=page.getByLabel('Cloudflare image preview auto-expansion');
+  const basicPreviews=page.getByLabel('Basic image auto-expansion');
+  assert(await getUrl.isChecked());
+  assert.equal(await previews.inputValue(),'all');
+  await getUrl.uncheck();
+  await basicPreviews.selectOption('first');
+  await previews.selectOption('closed');
+  await page.waitForFunction(async()=>{
+    const {explorerExportOptions,queueHistoryViewV1}=await chrome.storage.local.get(['explorerExportOptions','queueHistoryViewV1']);
+    return explorerExportOptions?.urls===false&&queueHistoryViewV1?.previews==='closed';
+  });
+  await page.reload();
+  await page.locator('#theme:enabled').waitFor();
+  await btn('Settings').click();
+  await page.waitForFunction(()=>document.querySelector('[data-previews]')?.value==='closed');
+  assert(!(await getUrl.isChecked()));
+  assert.equal(await previews.inputValue(),'closed');
+  assert.equal(await basicPreviews.inputValue(),'first');
+  await page.locator('[data-reset-exports]').click();
+  await btn('Restore image preview default').click();
+  await page.waitForFunction(()=>document.querySelector('[data-previews]')?.value==='all');
+  await basicPreviews.selectOption('all');
+  await page.waitForFunction(async()=>{
+    const {explorerExportOptions,queueHistoryViewV1}=await chrome.storage.local.get(['explorerExportOptions','queueHistoryViewV1']);
+    return explorerExportOptions?.urls===true&&queueHistoryViewV1?.previews==='all'&&queueHistoryViewV1?.basicPreviews==='all';
+  });
+  pass('Get URL and independent History expansion defaults, explicit choices, restart, and reset');
   const feedback = page.locator('.visual-feedback-settings');
   await feedback.waitFor();
   assert.equal(await feedback.getByLabel('Average speed').inputValue(),'normal');
@@ -358,12 +534,32 @@ try {
     rows.push({...rows[0],recordId:'zero-and-false',filename:'Metadata sample.txt',mime:'text/plain',bytes:0,sourceUrl:null,proofLevel:false,sortAt:current+2000},
       {...rows[1],recordId:'error-row',filename:'Failed save.txt',status:'failed',code:'AUTH_REVOKED',sortAt:current+3000});
     rows.push(...Array.from({length:52},(_,i)=>({...rows[0],recordId:`padding-${i}`,filename:`Archive entry ${i}.txt`,mime:'text/plain',sortAt:current-20000-i})));
+    const cloud=rows.find(row=>row.sourceRecordId==='cloudflare-row');
+    const screenKey='screenshots/Screenshot-75.png';
+    qa.photos.set(screenKey,small);qa.r2Keys.set('screenshot-75',screenKey);
+    rows.push({...cloud,recordId:'screenshot-75',sourceRecordId:'screenshot-75',deliveryId:'output-75',kind:'screenshot',
+      filename:'Screenshot-75.png',destination:{...cloud.destination,key:screenKey},sortAt:current-30000},
+      {...rows[0],recordId:'basic-screen-75',filename:'Screenshot-75 notes.txt',mime:'text/plain',sortAt:current-31000});
+    const failedId='3180e90a-345f-4fd7-bd50-4d85cfc46533';
+    const {createScreenshotRetryCache}=await import('/src/screenshot/retry-cache.mjs');
+    const {hashBlob}=await import('/src/recorder/archive-stream.mjs');
+    const failedBlob=new Blob([small],{type:'image/png'});
+    await createScreenshotRetryCache().store(failedId,failedBlob);
+    rows.push({...cloud,recordId:'failed-capture',sourceRecordId:failedId,deliveryId:'failed-output',kind:'screenshot',
+      status:'failed',code:'SCREENSHOT_R2_UPLOAD_FAILED',filename:'Failed staged capture.png',retryExpiresAt:current+60000,
+      checksum:await hashBlob(failedBlob),sortAt:current-32000});
+    for(const i of [1,2,3]){
+      const filename='gallery-0329-'+i+'.png',id='gallery-'+i;
+      if(i!==3)qa.photos.set(filename,small);
+      qa.r2Keys.set(id,filename);
+      rows.push({...cloud,recordId:id,sourceRecordId:id,filename,destination:{...cloud.destination,key:filename},sortAt:current-32900-i});
+    }
     qa.connection = 'CONNECTED';qa.event({channel:'connection-changed'});
     await history.reconcile(rows);
     const result = await history.page({page:1});
     return {total:result.total,large:large.length,withoutPreviewPayload:!JSON.stringify(result.items).includes('base64,')};
   });
-  assert.equal(seed.total,66);
+  assert.equal(seed.total,72);
   assert(seed.large>256*1024 && seed.withoutPreviewPayload);
 
   const queue = async () => {
@@ -401,7 +597,49 @@ try {
   await card('Drive retained.png').waitFor();
   await find.fill('cloudflare.png');
   const cloudCard=card('cloudflare.png');
-  await cloudCard.getByRole('button',{name:'Preview',exact:true}).click();
+  await cloudCard.locator('.history-preview img').waitFor();
+  assert.equal(await cloudCard.getByText('Media',{exact:true}).evaluate(el=>el.parentElement.open),true);
+  assert.equal(await cloudCard.getByText('Details',{exact:true}).evaluate(el=>el.parentElement.open),false);
+  for(const width of [320,920]){
+    await page.setViewportSize({width,height:850});
+    const box=await cloudCard.evaluate(el=>{
+      const rect=selector=>el.querySelector(selector).getBoundingClientRect().toJSON();
+      return {heading:rect('.queue-card-summary strong'),time:rect('time'),badge:rect('.queue-badge'),
+        location:rect('.queue-location'),media:rect('.history-preview'),download:rect('[data-download]'),go:rect('[data-go]')};
+    });
+    assert(box.heading.right<=box.time.left && box.heading.y===box.time.y);
+    assert(box.location.top>=box.heading.bottom && box.badge.top>=box.time.bottom && box.badge.right<=box.time.right+.5);
+    assert(box.download.top>=box.media.bottom && box.go.left>=box.download.right);
+  }
+  for(const query of ['screen','Screenshot','screenshot-75','75']){
+    await find.fill(query);
+    await card('Screenshot-75.png').waitFor();
+    await card('Screenshot-75 notes.txt').waitFor();
+  }
+  const shotCard=card('Screenshot-75.png');
+  const sections=card=>card.locator(':scope > details > summary').allTextContents();
+  assert.deepEqual(await sections(shotCard),['Media','Public URLs','Details']);
+  assert.equal(await shotCard.getByText('Public URLs',{exact:true}).evaluate(el=>el.parentElement.open),false);
+  await shotCard.getByText('Public URLs',{exact:true}).click();
+  await page.waitForFunction(()=>releaseFixture.operations.some(([op])=>op==='history-public-urls'));
+  assert.equal(await shotCard.getByText('Details',{exact:true}).evaluate(el=>el.parentElement.open),false);
+  await find.fill('Failed staged capture');
+  const failed=card('Failed staged capture.png');
+  await failed.locator('.history-preview img').waitFor();
+  assert.deepEqual(await sections(failed),['Media','Public URLs','Details','Error']);
+  assert.equal(await failed.getByText('Error',{exact:true}).evaluate(el=>el.parentElement.open),false);
+  assert.equal(await failed.locator('[data-download],[data-go]').count(),0);
+  await failed.getByText('Error',{exact:true}).click();
+  assert(await failed.getByText('SCREENSHOT_R2_UPLOAD_FAILED',{exact:true}).isVisible());
+  await find.fill('no matches expected');
+  await page.getByText('No saved files match your search.',{exact:true}).waitFor();
+  await find.fill('');
+  await card('cloudflare.png').waitFor();
+  await find.fill('cloudflare.png');
+  await cloudCard.locator('.history-preview img').waitFor();
+  pass('Cloudflare card geometry and case-insensitive screenshot lookup across the retained archive');
+
+  await cloudCard.getByRole('button',{name:'Preview cloudflare.png',exact:true}).press('Enter');
   await previewDialog.locator('img').waitFor();
   await previewDialog.getByRole('button',{name:'Immersive View'}).click();
   const imageFrame=previewDialog.locator('.image-frame'), image=previewDialog.locator('img');
@@ -426,6 +664,34 @@ try {
   await previewDialog.getByRole('button',{name:'Close',exact:true}).click();
   await find.fill('renamed.png');
   await card('renamed.png').waitFor();
+  await page.evaluate(()=>{releaseFixture.r2Gate=new Promise(resolve=>{releaseFixture.releaseR2=resolve;});});
+  await find.fill('gallery-0329');
+  await card('gallery-0329-1.png').getByRole('button',{name:'Preview gallery-0329-1.png'}).click();
+  await previewDialog.locator('img').waitFor();
+  const immersive=previewDialog.getByRole('button',{name:'Immersive View'});
+  const original=await immersive.evaluate(button=>{
+    window.originalImmersive=button;
+    return [getComputedStyle(button).opacity,...['x','y','width','height'].map(key=>button.getBoundingClientRect()[key])];
+  });
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await immersive.getAttribute('aria-disabled'),'true');
+  assert.deepEqual(await immersive.evaluate(button=>{
+    if(button!==window.originalImmersive)throw Error('The Immersive View control was replaced');
+    return [getComputedStyle(button).opacity,...['x','y','width','height'].map(key=>button.getBoundingClientRect()[key])];
+  }),original);
+  await immersive.evaluate(button=>button.click());
+  assert.equal(await previewDialog.getAttribute('data-immersive'),null);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
+  await page.evaluate(()=>releaseFixture.releaseR2());
+  await previewDialog.locator('img').waitFor();
+  await page.keyboard.press('ArrowRight');
+  await previewDialog.getByText(/Preview unavailable|no longer exists/).waitFor();
+  assert(await immersive.isDisabled());
+  await previewDialog.getByRole('button',{name:'Close',exact:true}).click();
+  await find.fill('renamed.png');
+  await card('renamed.png').waitFor();
+  pass('Rapid Preview navigation keeps Immersive View stable and guards pending or unavailable images');
   await page.evaluate(()=>{releaseFixture.renameFail=true;});
   await card('renamed.png').getByRole('button',{name:'renamed.png',exact:true}).click();
   await card('renamed.png').getByRole('textbox',{name:'Filename'}).fill('duplicate.gif');
@@ -530,7 +796,11 @@ try {
     },{theme,mode});
     for (const width of [320,920]) {
       await page.setViewportSize({width,height:850});
-      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+      await page.waitForFunction(()=>{
+        const tabs=document.querySelectorAll('header nav>[data-view]:not([hidden])');
+        return !tabs.length||tabs[tabs.length-1].getBoundingClientRect().right<=document.querySelector('#header-more').getBoundingClientRect().left+.5;
+      },null,{timeout:2000}).catch(error=>{throw Error(JSON.stringify({theme,mode,width})+' '+error.message);});
       await header();await testGeometry({theme,mode,width});
     }
   }

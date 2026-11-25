@@ -164,11 +164,14 @@ export function createShelfHistoryToggle({chrome,feedback=()=>{}}){
   }
   return null;
  }
- async function isClosed(){
+ async function isClosed(windowId){
   // A normal app tab is not a Shelf. Ask Chrome for live side-panel contexts
   // instead of treating restored shortcut intent as a visibility observation.
   if(typeof chrome.runtime.getContexts!=='function')return false;
-  try{return (await chrome.runtime.getContexts({contextTypes:['SIDE_PANEL']})).length===0;}
+  try{
+   const contexts=await chrome.runtime.getContexts({contextTypes:['SIDE_PANEL']});
+   return !contexts.some(context=>windowId===undefined||context.windowId===-1||context.windowId===windowId);
+  }
   catch{return false;}
  }
  return {command,search:tab=>command(tab,'search'),opened,request,isClosed};

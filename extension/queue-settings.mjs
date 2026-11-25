@@ -2,6 +2,7 @@ import {mountHistoryV2Settings} from './history-v2-preferences.mjs';
 import {HISTORY_CLEANUP_ALARM,QUEUE_CLEANUP_ALARM} from '../src/queue/store.mjs';
 import {historyInterval} from '../src/queue/calendar.mjs';
 import {downloadHistoryExport} from '../src/queue/export.mjs';
+import {queueDefaults} from './queue-service.mjs';
 
 export function mountHistorySettings(parent,service,metadataPreference){
   const section=document.createElement('section');
@@ -19,6 +20,7 @@ export function mountHistorySettings(parent,service,metadataPreference){
     <label>History card layout <select data-preset><option value="full">Full</option><option value="compact">Compact</option></select></label>
     <label>History display range <select data-range><option value="all">All Time</option><option value="daily">Today / Daily</option><option value="weekly">This Week / Weekly</option></select></label>
     <label>Cloudflare image preview auto-expansion <select data-previews><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label>
+    <button type="button" data-restore-previews>Restore image preview default</button>
     <label>Basic image auto-expansion <select data-basicPreviews><option value="all">Expand all images</option><option value="first">Only first page</option><option value="closed">Close all</option></select></label>
     <label><input type="checkbox" data-basic-url> Expand Basic URLs by default</label>
     <label><input type="checkbox" data-host> Expand screenshot Host URL by default</label>
@@ -44,7 +46,7 @@ export function mountHistorySettings(parent,service,metadataPreference){
   const $=selector=>section.querySelector(selector),feedback=$('[data-queue-settings-status]');
   const timer=$('[data-timer]'),limit=$('[data-limit]'),cap=$('[data-cap]'),dialog=$('[data-confirm]');
   const complete=$('[data-complete-export]'),rangeButton=$('[data-range-export]'),cancel=$('[data-cancel-export]');
-  let policy={}, activeExport, writing=false;
+  let policy={}, activeExport, writing=false, displayRevision=0;
   function paint(){
     const p=service.preferences;
     timer.value=policy.deleteSince?'delete':p.timer;
@@ -52,8 +54,7 @@ export function mountHistorySettings(parent,service,metadataPreference){
     cap.value=String(policy.cap??200000);
     $('[data-cap-row]').hidden=!policy.cap;
     $('[data-detailed]').hidden=timer.value!=='off';
-    $('[data-basic-url]').onchange=event=>void busy(()=>service.update({expandBasicURL:event.target.checked}));
-  for(const id of ['preset','range','previews','basicPreviews','timezone'])$('[data-'+id+']').value=p[id];
+    for(const id of ['preset','range','previews','basicPreviews','timezone'])$('[data-'+id+']').value=p[id];
     $('[data-host]').checked=p.expandScreenshotHostURL;
     $('[data-basic-url]').checked=p.expandBasicURL;
   }
@@ -151,12 +152,23 @@ export function mountHistorySettings(parent,service,metadataPreference){
     await exportArchive();
     $('[data-scope]').textContent=feedback.textContent+' '+previous;
   };
-  for(const id of ['preset','range','previews','basicPreviews','timezone','host'])$('[data-'+id+']').onchange=event=>void busy(async()=>{
-    const value=event.target.value;
-    if(id==='timezone')new Intl.DateTimeFormat('en',{timeZone:value});
-    await service.update(id==='host'?{expandScreenshotHostURL:event.target.checked}:{[id]:value});
-    feedback.textContent='History display preferences saved.';
-  });
+  async function saveDisplay(patch,confirmation='History display preferences saved.'){
+    const revision=++displayRevision;
+    try{
+      if(Object.hasOwn(patch,'timezone'))new Intl.DateTimeFormat('en',{timeZone:patch.timezone});
+      await service.update(patch);
+      if(revision===displayRevision)feedback.textContent=confirmation;
+    }catch{
+      if(revision===displayRevision)feedback.textContent='History display preferences could not be saved.';
+    }finally{
+      if(revision===displayRevision)paint();
+    }
+  }
+  $('[data-basic-url]').onchange=event=>void saveDisplay({expandBasicURL:event.target.checked});
+  $('[data-restore-previews]').onclick=()=>void saveDisplay({previews:queueDefaults.previews},'Cloudflare image preview default restored.');
+  for(const id of ['preset','range','previews','basicPreviews','timezone','host'])$('[data-'+id+']').onchange=event=>{
+    void saveDisplay(id==='host'?{expandScreenshotHostURL:event.target.checked}:{[id]:event.target.value});
+  };
   void Promise.all([service.ready,service.store.policy()]).then(([,value])=>{policy=value;paint();})
     .catch(()=>{feedback.textContent='History storage is unavailable.';});
 }

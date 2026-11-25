@@ -35,7 +35,7 @@ export function installNavigation({header, menu, more, open, storage = chrome.st
     const main = mainTabs(placements).map(id => buttons.get(id));
     for (const [id,button] of buttons) button.hidden = placements[id] === 'gone';
     header.replaceChildren(...main);
-    const edge = header.getBoundingClientRect().right;
+    const edge = Math.min(header.getBoundingClientRect().right,more.getBoundingClientRect().left-3);
     const last = main.findIndex(button => button.getBoundingClientRect().right > edge + 0.5);
     const visible = new Set(last < 0 ? main : main.slice(0,last));
     const overflow = [];
@@ -57,6 +57,12 @@ export function installNavigation({header, menu, more, open, storage = chrome.st
   }
   fit();
   new ResizeObserver(fit).observe(header);
+  window.addEventListener('resize',fit);
+  // Theme and font changes can resize tabs while the grid track stays fixed.
+  new MutationObserver(fit).observe(document.documentElement,{
+    attributeFilter:['data-aesthetic','data-nostalgia-style','data-theme','style']
+  });
+  document.fonts?.addEventListener('loadingdone',fit);
   for (const [id,button] of buttons) button.onclick = () => open(id);
   const locked = work => globalThis.navigator?.locks ? navigator.locks.request(preference,work) : work();
   const needsRepair = saved => saved && (JSON.stringify(saved.order) !== JSON.stringify(placements.order) ||

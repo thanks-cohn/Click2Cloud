@@ -5,6 +5,7 @@ import {safeHistoryURL} from '../src/history/model.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
 import {wireImmersiveView} from './immersive-view.mjs';
 import {basicImageMime,loadBasicHistoryImage} from './basic-history-preview.mjs';
+import {createScreenshotRetryCache} from '../src/screenshot/retry-cache.mjs';
 import {hasHistoryV2Value,historyV2FieldLabels,historyV2FieldVisible,historyV2Providers,normalizeHistoryV2View} from './history-v2-preferences.mjs';
 
 export const historyPreset = Object.freeze({
@@ -72,10 +73,14 @@ const filename = name => {
   if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(safe)) safe = '_'+safe;
   return safe || 'saved-file';
 };
+const retainedScreenshot = record => record.kind==='screenshot'&&record.status!=='verified'&&
+  record.retryExpiresAt>Date.now()&&/^[a-f\d]{64}$/.test(record.checksum??'')&&
+  /^[a-f\d-]{36}$/i.test(record.sourceRecordId);
 
 export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility,rename,renameError,onGalleryClosed}) {
   const rows = [], names = new Map(), thumbnails = new WeakMap(), previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
   const reader = createImageReader(read,{maxBytes:12*1024*1024,maxEntries:2});
+  const retryCache=createScreenshotRetryCache();
   const flags = historyPreset[preferences.preset] ?? historyPreset.full;
   let view = visibility ?? normalizeHistoryV2View();
   let previewDialog, previewAbort, previewUrl, immersive, imageIndex, originalFocus;
@@ -106,6 +111,13 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
   }
   async function loadPreview(record,limit,signal,concurrency) {
     if (record.provider !== 'cloudflare') return loadBasicHistoryImage(record,signal);
+    if(retainedScreenshot(record)){
+      const blob=await retryCache.preview(record.sourceRecordId,limit);
+      signal.throwIfAborted();
+      if(!blob||await hashBlob(blob,signal)!==record.checksum)throw Error('PREVIEW_FILE_UNAVAILABLE');
+      return {blob,retained:true};
+    }
+    if(record.status!=='verified')throw Error('PREVIEW_FILE_UNAVAILABLE');
     if (!record.destination?.key || (!record.etag && !(record.kind === 'screenshot' && record.checksum))) {
       throw Error('PREVIEW_FILE_UNAVAILABLE');
     }
@@ -162,7 +174,10 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
               const object=card.querySelector('[data-provider-object]');
               if(object)object.textContent=record.providerObjectId;
               const thumbnail=card.querySelector('.history-preview img');
-              if(thumbnail)thumbnail.alt=record.filename;
+              if(thumbnail){
+                thumbnail.alt=record.filename;
+                thumbnail.closest('button')?.setAttribute('aria-label','Preview '+record.filename);
+              }
               card.querySelector('[data-download]')?.setAttribute('aria-label','Download '+record.filename);
             }
             for(const update of metadata)update();
@@ -219,7 +234,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl=undefined;
     nameControl(dialog.querySelector('h2'),record,feedback);
-    dialog.querySelectorAll('[data-enter-immersive],.immersive-controls input,.immersive-controls button').forEach(control=>{control.disabled=true;});
+    immersive.loading();
     dialog.querySelector('[data-prev]').disabled=index===0;
     dialog.querySelector('[data-next]').disabled=index===rows.length-1;
     feedback.textContent='Loading image…';
@@ -235,10 +250,10 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         image.hidden=false;immersive.ready();
         feedback.textContent=loaded.retained ? '' : loaded.label ?? '';
       };
-      image.onerror=()=>{if(!local.aborted){URL.revokeObjectURL(url);previewUrl=undefined;feedback.textContent='Image decode failed.';}};
+      image.onerror=()=>{if(!local.aborted){URL.revokeObjectURL(url);previewUrl=undefined;immersive.unavailable();feedback.textContent='Image decode failed.';}};
       image.src=url;
     } catch(error) {
-      if(!local.aborted) feedback.textContent=previewMessage(error);
+      if(!local.aborted){immersive.unavailable();feedback.textContent=previewMessage(error);}
     }
   }
   function gallery(record,trigger) {
@@ -312,16 +327,23 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
             releasePreview(slot);
             slot.dataset.failed='true';slot.textContent='Image decode failed.';
           };
-          if(record.provider==='cloudflare')slot.replaceChildren(image);
-          else{
-            const open=action('',()=>gallery(record,open));
-            open.className='history-thumbnail';open.setAttribute('aria-label','Preview '+record.filename);
-            open.append(image);slot.replaceChildren(open);
-          }
+          const open=action('',()=>gallery(record,open));
+          open.className='history-thumbnail';open.setAttribute('aria-label','Preview '+record.filename);
+          open.append(image);slot.replaceChildren(open);
           thumbnails.set(record,result);
           image.src=URL.createObjectURL(result.blob);
         }catch(error){
-          if(!ctrl.signal.aborted){slot.textContent=previewMessage(error);slot.dataset.failed='true';}
+          if(!ctrl.signal.aborted){
+            const message=previewMessage(error);
+            if(!record.destination?.key||error.message!=='PREVIEW_SIZE_LIMIT')slot.textContent=message;
+            else{
+              const open=action(message,()=>gallery(record,open));
+              open.className='history-thumbnail';
+              open.setAttribute('aria-label','Open image '+record.filename);
+              slot.replaceChildren(open);
+            }
+            slot.dataset.failed='true';
+          }
         }finally{pending.delete(slot);if(!signal.aborted)pump();}
       })();
     }
@@ -342,17 +364,26 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
   function render(record) {
     const article=node('article',null,'card queue-history-card');
     article.dataset.recordId=record.recordId;
+    article.dataset.provider=record.provider;
     const top=node('div',null,'queue-card-header');
     const heading=node('strong',record.filename ?? 'N/A');
     const summary=node('div',null,'queue-card-summary');
     const timestamp=date(record.terminalAt ?? record.requestedAt,preferences.timezone);
     const when=node('time',timestamp ?? 'N/A');
     const basic=record.provider!=='cloudflare', compact=basic&&preferences.preset==='compact';
-    summary.append(heading,when);
+    summary.append(heading);
     const label=node('span',queueStatus(record.status),'queue-badge');
     label.dataset.outcome=record.status;
-    top.append(summary,label);
     const location=node('p',null,'queue-location');
+    if(basic){
+      summary.append(when);
+      top.append(summary,label);
+    }else{
+      summary.append(location);
+      const status=node('div',null,'queue-card-status');
+      status.append(when,label);
+      top.append(summary,status);
+    }
     const provider=providerName(record.provider);
     const updateSummary=()=>{
       when.hidden=compact||view.hideNA&&!timestamp;
@@ -361,13 +392,15 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     };
     metadata.push(updateSummary);
     updateSummary();
-    article.append(top,location);
+    article.append(top);
+    if(basic)article.append(location);
     const actions=node('div',null,'queue-actions');
     const feedback=node('p',null,'queue-feedback');
     feedback.setAttribute('role','status');
     names.set(record.recordId,[heading,record,feedback]);nameControl(heading,record,feedback);
-    if(!basic){
-    const unavailable=downloadReason(record), downloadFile=action('Download',()=>{
+    const unavailable=basic?'':downloadReason(record);
+    if(!basic&&!unavailable){
+    const downloadFile=action('Download',()=>{
       const controller=new AbortController();
       downloadFile.disabled=true;
       feedback.textContent='Downloading saved file…';
@@ -379,23 +412,15 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     });
     downloadFile.dataset.download='';
     downloadFile.setAttribute('aria-label','Download '+(record.filename ?? 'saved file'));
-    downloadFile.disabled=!!unavailable;
-    if(unavailable){
-      const id='download-unavailable-'+crypto.randomUUID();
-      feedback.id=id;
-      downloadFile.title=unavailable;
-      downloadFile.setAttribute('aria-describedby',id);
-      feedback.textContent=unavailable;
-    }
     actions.append(downloadFile);
     }
-    if(record.status==='verified'&&record.provider==='cloudflare'&&record.destination?.key) {
+    if(record.status==='verified'&&!basic&&record.destination?.key&&canRead(record)!==false) {
       const go=action('GO TO',async()=>{
         go.disabled=true;
         try{await goTo(record);}catch(error){feedback.textContent=errorMessage(error,'Saved location is unavailable.');}
         finally{go.disabled=false;}
       });
-      go.disabled=canRead(record)===false;
+      go.dataset.go='';
       actions.append(go);
     }
     if(record.kind==='screenshot'&&record.deliveryId&&record.status!=='verified'){
@@ -409,14 +434,9 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       });
       actions.append(check);
     }
-    const previewable=record.status==='verified'&&(record.provider==='cloudflare'
-      ? isImage({key:record.destination?.key ?? record.filename ?? ''}) : !!basicImageMime(record));
-    if(previewable) {
-      rows.push(record);
-      if(!basic){const trigger=action('Preview',()=>gallery(record,trigger));actions.append(trigger);}
-    }
-    if(actions.childElementCount)article.append(actions);
-    article.append(feedback);
+    const previewable=basic ? record.status==='verified'&&!!basicImageMime(record) :
+      retainedScreenshot(record)||record.status==='verified'&&isImage({key:record.destination?.key ?? record.filename ?? ''});
+    if(previewable)rows.push(record);
     const details=node('details');
     const disclosure=(title,open)=>{
       const detail=node('details');detail.open=open;detail.append(node('summary',title));
@@ -431,6 +451,12 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         else releasePreview(slot);
       });
     }
+    if(!basic&&previewable){
+      const media=disclosure('Media',preferences.previews==='all'||preferences.previews==='first'&&isFirstPage);
+      thumbnail(media);article.append(media);
+    }
+    if(actions.childElementCount)article.append(actions);
+    article.append(feedback);
     if(basic){
       const imagePref=preferences.basicPreviews??'all';
       if(previewable){
@@ -440,12 +466,28 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       const host=safeHistoryURL(record.hostUrl);
       if(host)article.append(node('p',new URL(host).hostname,'queue-location'));
     }
-    if(basic||flags.showAdvancedDetails||previewable) {
-      details.append(node('summary',flags.showAdvancedDetails||basic?'Details':'Image preview'));
-      if(previewable&&!basic){
-        details.open=preferences.previews==='all'||preferences.previews==='first'&&isFirstPage;
-        thumbnail(details);
+    if(!basic){
+      const publicURL=safeHistoryURL(record.publicUrl);
+      const screenshotURLs=record.kind==='screenshot'&&record.deliveryId&&record.destination?.bucket;
+      if(screenshotURLs||publicURL){
+        const publicURLs=disclosure('Public URLs',false);
+        if(screenshotURLs){
+          const holder=node('div');holder.dataset.destinationUrls='';
+          publicURLs.append(holder);
+          wireHistoryDestinationUrls(publicURLs,{request:screenshotRequest,
+            params:{operationId:record.sourceRecordId,outputId:record.deliveryId},
+            location:{bucketName:record.destination.bucket},confirmed:record.status==='verified'});
+        }else{
+          const link=node('a',publicURL);
+          link.href=publicURL;link.target='_blank';link.rel='noreferrer noopener';publicURLs.append(link);
+        }
+        const update=()=>{publicURLs.hidden=!historyV2FieldVisible(view,record.provider,'publicUrl',true);};
+        metadata.push(update);update();
+        article.append(publicURLs);
       }
+    }
+    if(basic||flags.showAdvancedDetails) {
+      details.append(node('summary','Details'));
       if(basic||flags.showAdvancedDetails){
         const list=node('dl',null,'queue-record-fields');
         let fieldList=list;
@@ -486,9 +528,9 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
           field('hostTitle',record.hostTitle);
           if(flags.showSourceUrl){field('sourceUrl',record.sourceUrl,true);field('originalUrl',record.originalUrl,true);}
           if(flags.showHostUrl&&record.kind!=='screenshot')field('hostUrl',record.hostUrl,true);
-          if(flags.showRemoteUrl){field('remoteUrl',record.remoteUrl,true,'Remote URL');field('publicUrl',record.publicUrl,true,'Public URL');}
+          if(flags.showRemoteUrl)field('remoteUrl',record.remoteUrl,true,'Remote URL');
         }
-        field('error',record.code,false,'Error');
+        if(basic)field('error',record.code,false,'Error');
         details.append(list);
         if(record.kind==='screenshot'){
           const host=node('details');host.open=preferences.expandScreenshotHostURL;
@@ -496,16 +538,6 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
           host.append(node('summary','Host URL'),node('p',hostURL??'N/A'));
           details.append(host);
           track('hostUrl',!!hostURL,host);
-          if(record.deliveryId&&record.destination?.bucket){
-            const urls=node('details');
-            const holder=node('div');holder.dataset.destinationUrls='';
-            urls.append(node('summary','Public URLs'),holder);
-            details.append(urls);
-            track('publicUrl',true,urls);
-            wireHistoryDestinationUrls(urls,{request:screenshotRequest,
-              params:{operationId:record.sourceRecordId,outputId:record.deliveryId},
-              location:{bucketName:record.destination.bucket},confirmed:record.status==='verified'});
-          }
         }
         if(record.metadata){
           const data=node('pre',JSON.stringify(record.metadata,null,2));
@@ -525,7 +557,13 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       }
       article.append(details);
     }
-    if (!flags.showAdvancedDetails && record.code && record.status!=='verified') article.append(node('p',record.code,'queue-feedback'));
+    if(!basic&&!['verified','cancelled'].includes(record.status)){
+      const error=disclosure('Error',false);
+      if(record.code)error.append(node('p',record.code));
+      error.append(node('p',record.status==='uncertain'||record.status==='uploaded'?
+        'Check the receipt or the destination before retrying.':'Check the saved location and connection in Remotes before retrying.'));
+      article.append(error);
+    }
     return article;
   }
   return {render,setVisibility,get previewOpen(){return !!previewDialog;}};

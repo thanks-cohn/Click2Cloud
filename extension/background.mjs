@@ -20,6 +20,7 @@ import {createVisualFeedbackPreference} from '../src/aesthetic/visual-feedback.m
 import {createProjectileFeedback} from '../src/aesthetic/projectile.mjs';
 import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
+import {localUploadPort,takeLocalUpload} from '../src/chrome/local-upload-files.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {operationIdentity} from '../src/core/boundary-observation.mjs';
@@ -30,7 +31,7 @@ import {createShortcutStore,listCommands} from '../src/api/shortcuts.mjs';
 import {createPermissions} from '../src/api/permissions.mjs';
 import {createAgentGateway} from '../src/api/gateway.mjs';
 import {createCloudflareOAuth,diagnoseCloudflare} from '../src/auth/cloudflare-oauth.mjs';
-import {createClick2CloudFileApi} from '../src/explorer/index.mjs';
+import {createClick2CloudFileApi,name as objectName} from '../src/explorer/index.mjs';
 import {createExternalRecovery,directoryFiles,copyRecoveryDirectory} from '../src/persistence/external-recovery.mjs';
 import {createRecoveryCrawl} from '../src/persistence/recovery-crawl.mjs';
 import {createWholeCloudJobs} from '../src/api/whole-cloud.mjs';
@@ -82,11 +83,11 @@ const shelfHistory=createShelfHistoryToggle({chrome,feedback:(windowId,code)=>{
 }});
 const saveNotice=createClosedShelfSaveNotice({chrome,preferences:visualFeedback,isClosed:shelfHistory.isClosed});
 const basic=createBasicHost({chrome,trustedStorage,onVerified:receipt=>{
- saveNotice.saved(receipt.provider);
+ saveNotice.saved(receipt.provider,'basic:'+receipt.id);
  return dailyBadge.recordBasicVerified(receipt.badgeVerifiedAt);
 },observeAttempt:row=>accountQueueReceipt(basicReceipt,row)});
 const attention=createShelfAttention({chrome,preference:()=>attentionPreference,
- onOpened:info=>{saveNotice.dismiss();return shelfHistory.opened(info);},notify:()=>{void dailyBadge.refresh();}});
+ onOpened:info=>{saveNotice.clearNative();return shelfHistory.opened(info);},notify:()=>{void dailyBadge.refresh();}});
 const oauth=createCloudflareOAuth({chrome,onStatus:s=>{connectionObservation=s;},onConnected:async()=>{snapshots.clear();try{await chrome.runtime.sendMessage({channel:'connection-changed'});}catch{}}});
 let inventory={revision:0,scopes:[]},inventoryHydrated=false,engine,revoking=false;
 async function loadCloudInventory(signal){
@@ -125,7 +126,7 @@ const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBuc
 
 function onVerifiedCurrent(row){
  const transmission=row.kind!=='screenshot-to-cloud'||row.state==='confirmed';
- if(transmission)saveNotice.saved('cloudflare');
+ if(row.kind!=='screenshot-to-cloud')saveNotice.saved('cloudflare','cloudflare:'+row.operationId);
  return dailyBadge.recordVerified(row,{transmission});
 }
 async function recordRemote(value){
@@ -152,7 +153,43 @@ async function send(message) {
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
 }
 const baseFileApi=createClick2CloudFileApi({send,http:{request:oauth.request,boundedFetch:fetch}});
-const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(op)),async run(operation,input={},options={}) {
+const uploadScopes=['workers-r2.read','workers-r2.write','workers-r2-bucket-item.read','workers-r2-bucket-item.write'];
+const uploadError=(code,message)=>Object.assign(Error(message),{code});
+async function checkUploadDestination(source,signal){
+ const target=normalizeTarget(source);
+ assertConnected();
+ const auth=await oauth.authority();
+ signal?.throwIfAborted();
+ if(target.provider!=='cloudflare'||target.connectionId!=='cloudflare:'+target.accountId||
+    !auth.accounts.some(account=>account.id===target.accountId))
+  throw uploadError('SCOPE_UNAUTHORIZED','Select an authorized Cloudflare R2 folder.');
+ if(!uploadScopes.every(scope=>auth.scopes?.includes(scope)))
+  throw uploadError('INSUFFICIENT_SCOPE','Reconnect Cloudflare with R2 read and write access.');
+ const plan=await provisioner.lookup(target);
+ const readiness=preparedDestination(plan,target,BUILD_INFO.workerCodeDigest,previousWorkerDigests);
+ if(!['READY','PREPARED'].includes(readiness.state))
+  throw uploadError(readiness.code,'This folder needs an authorized Cloudflare file connection.');
+ const live=await remote.status(target);
+ signal?.throwIfAborted();
+ assertConnected();
+ if(!['READY','PREPARED'].includes(live.state))
+  throw uploadError(live.code,'Cloudflare could not verify write access to this folder.');
+ return {target,sessionId:auth.sessionId,stagingPrefix:(plan.prefixScope?plan.prefixScope+'/':'')+'.redown-beta-uploads/'};
+}
+async function runLocalUpload({source,file},options){
+ const {target,sessionId,stagingPrefix}=await checkUploadDestination(source,options.signal);
+ const key=target.prefix+objectName(file.name);
+ const uploader=createClick2CloudFileApi({
+  send:(message,{signal})=>{assertConnected();return executeFileMessage(message,{signal,expectedSession:sessionId});},
+  http:{request:(path,request)=>{
+   assertConnected();
+   return oauth.request(path,{...request,expectedSession:sessionId,requiredScopes:uploadScopes});
+  },boundedFetch:fetch}
+ });
+ return uploader.run('upload',{source:target,key,file,stagingPrefix},options);
+}
+const providerFileApi=coalesceFileReads(Object.freeze({...baseFileApi,capabilities:baseFileApi.capabilities.filter(op=>['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket','upload'].includes(op)),async run(operation,input={},options={}) {
+  if(operation==='upload')return runLocalUpload(input,options);
   // Unconfigured Worker transport is blocked before staging any object bytes.
   if(!['readChunk','accounts','buckets','list','listRaw','stat','preview','readStream','mkdir','copy','move','rename','delete','createBucket'].includes(operation))return {state:'blocked',code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'};
   const result=await baseFileApi.run(operation,input,options);
@@ -335,7 +372,9 @@ void Promise.resolve().then(async()=>{
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
 let screenshots;
-const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:onVerifiedCurrent,observeResult:row=>accountQueueReceipt(currentReceipt,row),historyUrls:async(method,output,params)=>{
+const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:onVerifiedCurrent,
+ onConfirmed:id=>saveNotice.saved('cloudflare','cloudflare:'+id),
+ observeResult:row=>accountQueueReceipt(currentReceipt,row),historyUrls:async(method,output,params)=>{
  if(method==='history-connect-domain'){
   if(params.confirmed!==true)throw Object.assign(Error('CONFIRMATION_REQUIRED'),{code:'CONFIRMATION_REQUIRED'});
   if(typeof params.domain!=='string')throw Object.assign(Error('CUSTOM_DOMAIN_INVALID'),{code:'CUSTOM_DOMAIN_INVALID'});
@@ -456,6 +495,40 @@ const api=createEngineApi({engine,current,shortcutStore,onHistoryPreferenceChang
 const gateway=createAgentGateway({api});
 const debugApi=createAgentDebugApi({diagnostics,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence,authorize:(_r,c)=>c?.grant??false});
 const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>engine.getMenu(g??registrar.inspect().desired?.generation),getEvidence:engine.getEvidence});
+// Local-only File transport for the trusted Shelf. The File API owns upload,
+// verification and the signed commit. No File bytes travel over runtime IPC.
+chrome.runtime.onConnect?.addListener(port=>{
+ if(port.name!==localUploadPort)return;
+ if(!appSenderDecision(chrome.runtime,port.sender).accepted){port.disconnect();return;}
+ let active;
+ const reply=value=>{try{port.postMessage(value);}catch{/* The Shelf closed. */}};
+ port.onDisconnect.addListener(()=>active?.abort());
+ port.onMessage.addListener(message=>{
+  if(message?.ping===true)return;
+  if(message?.cancel===true){active?.abort();return;}
+  if(active)return;
+  const controller=new AbortController(),{signal}=controller;
+  active=controller;
+  void (async()=>{
+   await trustedStorage();
+   if(message?.check===true){await checkUploadDestination(message.source,signal);return {state:'completed'};}
+   if(typeof message?.ticket!=='string'||!/^[a-f\d-]{36}$/.test(message.ticket))
+    throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose a local file again.');
+   const file=await takeLocalUpload(message.ticket);
+   signal.throwIfAborted();
+   if(!file)throw uploadError('UPLOAD_FILE_UNAVAILABLE','Choose a local file again.');
+   // The existing write wrapper invalidates Explorer listings and filename search.
+   const source=normalizeTarget(message.source);
+   return fileApi.run('upload',{source,file,key:source.prefix+objectName(file.name)},
+    {signal,onProgress:progress=>reply({progress})});
+  })().then(result=>reply({
+   state:result.state,
+   ...(result.state!=='completed'?{error:result.error??(result.data?.recoveryKey?
+    'Upload not committed. Inspect the temporary object at '+result.data.recoveryKey+'.':undefined)}:{})
+  }),error=>reply({state:signal.aborted?'cancelled':'blocked',
+   error:signal.aborted?'Upload cancelled.':error.message})).finally(()=>{active=undefined;});
+ });
+});
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel===BASIC_CHANNEL){

@@ -53,6 +53,16 @@ function searchKeys(record){
   return [...words].map(word=>[word,record.sortAt,record.recordId]);
 }
 
+export const normalizeHistoryQuery = value => value?.normalize('NFC').toLowerCase().trim().replace(/\s+/gu,' ') ?? '';
+function matchesHistory(record, terms){
+  const {filename,provider,destination,hostname,hostTitle,hostUrl,sourceUrl,originalUrl} = record;
+  const fields = [filename,provider,destination?.bucket,destination?.key,destination?.folder,destination?.path,
+    [destination?.bucket,destination?.key ?? destination?.folder].filter(Boolean).join(' / '),
+    {google:'Google Drive',cloudflare:'Cloudflare R2',dropbox:'Dropbox',onedrive:'OneDrive'}[provider],
+    hostname,hostTitle,hostUrl,sourceUrl,originalUrl].filter(value=>typeof value==='string').map(normalizeHistoryQuery);
+  return terms.every(term=>fields.some(field=>field.includes(term)));
+}
+
 export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = globalThis.navigator?.locks,
   database = HISTORY_DATABASE, clock = Date.now} = {}) {
   let opening;
@@ -113,8 +123,8 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
       throw error;
     }
   }
-  function selection({from = 0, end = Number.MAX_SAFE_INTEGER, before, query, kind} = {}) {
-    const prefix=query?[query]:kind?[kind]:[];
+  function selection({from = 0, end = Number.MAX_SAFE_INTEGER, before, kind} = {}) {
+    const prefix=kind?[kind]:[];
     const lower = [...prefix,from], upper = before ? [...prefix,...before] : [...prefix,end];
     if (indexedDB.cmp(lower, upper) >= 0) return false;
     return IDBKeyRange.bound(lower, upper, false, true);
@@ -255,12 +265,44 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
       }));
     },
     count: () => run(['records'], 'readonly', s => request(s.records.count())),
-    page({page = 1, from, end, query, kind} = {}) {
+    page({page = 1, from, end, query, kind, signal} = {}) {
       if (!capValid(page)) throw Error('HISTORY_INVALID_PAGE');
+      const normalized=normalizeHistoryQuery(query);
       return run(['records'], 'readonly', async s => {
-        const index=s.records.index(query?'search':kind?'kind':'chronology');
-        const range=selection({from,end,query,kind}),items=[];
-        const total=range?await request(!query&&!kind&&from===undefined&&end===undefined?s.records.count():index.count(range)):0;
+        signal?.throwIfAborted();
+        const index=s.records.index(kind?'kind':'chronology');
+        const range=selection({from,end,kind}),items=[];
+        if(normalized){
+          const terms=normalized.split(' '),last=[],offset=(page-1)*PAGE_SIZE;
+          let total=0,rangeEmpty=true;
+          // Scan retained metadata in display order. Legacy records need no index
+          // rebuild, and only the requested and final pages are kept in memory.
+          function visit(record){
+            signal?.throwIfAborted();
+            rangeEmpty=false;
+            if(!matchesHistory(record,terms))return;
+            const {searchKeys,...item}=record;
+            if(total%PAGE_SIZE===0)last.length=0;
+            last.push(item);
+            if(total>=offset&&total<offset+PAGE_SIZE)items.push(item);
+            total++;
+          }
+          // Modern Chromium can cross the IndexedDB boundary in small batches.
+          // Older browsers use the same scan and ordering through a cursor.
+          if(range&&typeof index.getAllRecords==='function'){
+            let batchRange=range;
+            while(true){
+              signal?.throwIfAborted();
+              const batch=await request(index.getAllRecords({query:batchRange,count:128,direction:'prev'}));
+              for(const entry of batch)visit(entry.value);
+              if(batch.length<128)break;
+              batchRange=IDBKeyRange.bound(range.lower,batch.at(-1).key,false,true);
+            }
+          }else if(range)await cursors(index,range,'prev',cursor=>visit(cursor.value));
+          const pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+          return {items:page>pages?last:items,total,pages,page:Math.min(page,pages),rangeEmpty};
+        }
+        const total=range?await request(!kind&&from===undefined&&end===undefined?s.records.count():index.count(range)):0;
         const pages=Math.max(1,Math.ceil(total/PAGE_SIZE)),current=Math.min(page,pages);
         const direction=current===pages&&pages>1?'next':'prev';
         let skip=direction==='next'?0:(current-1)*PAGE_SIZE;

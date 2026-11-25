@@ -220,11 +220,39 @@ test('Closed-Shelf notices coalesce single verified outcomes and clear on opt-ou
   await delay(165);
   assert.equal(created.length,1);
   const [[id,shown]] = created;
-  assert.deepEqual([shown.title,shown.message,shown.requireInteraction],['Saved!','at OneDrive',false]);
+  assert.deepEqual([shown.title,shown.message,shown.requireInteraction],['Saved!','OneDrive',false]);
   await preferences.update(value=>({...value,notifications:false}));
   await tick();
   assert.deepEqual(cleared,[id]);
   notice.saved('dropbox');
   await delay(165);
   assert.equal(created.length,1);
+});
+
+test('Verified save notices select one surface and use native fallback only if custom display is unavailable',async()=>{
+  const preferences=createVisualFeedbackPreference(memoryStorage());
+  const deliveries=[],native=[];
+  let closed=false,pageAvailable=true;
+  const chrome={runtime:{getURL:path=>path,sendMessage:async message=>{deliveries.push(message);return !closed;}},
+    tabs:{query:async()=>[{id:17,windowId:18}],sendMessage:async (tab,message)=>{
+      assert.equal(tab,17);deliveries.push(message);return pageAvailable;
+    }},notifications:{create:async (_,notification)=>native.push(notification.message),clear:async()=>{}}};
+  const notice=createClosedShelfSaveNotice({chrome,preferences,isClosed:async()=>closed});
+  notice.saved('cloudflare','r2:1');
+  await delay(165);
+  assert.deepEqual(deliveries.map(message=>message.surface),['shelf']);
+  assert.deepEqual(native,[]);
+  closed=true;
+  notice.saved('cloudflare','r2:1');
+  notice.saved('dropbox','basic:2');
+  await delay(165);
+  assert.deepEqual(deliveries.map(message=>[message.id,message.surface]),[
+    ['r2:1','shelf'],['basic:2','app'],['basic:2','page']
+  ]);
+  assert.deepEqual(native,[]);
+  pageAvailable=false;
+  notice.saved('google','basic:3');
+  await delay(165);
+  assert.deepEqual(native,['Google Drive']);
+  notice.clearNative();
 });

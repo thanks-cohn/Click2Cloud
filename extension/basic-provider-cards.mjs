@@ -20,7 +20,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
   const cards = new Map();
   function paintActivity(card) {
     card.activity.textContent = card.timer ? 'Success!' : card.active ? 'Working…' :
-      card.problem ? 'Needs attention' : card.isReady ? '' : card.readiness.dataset.reason ? 'Not connected' : '';
+      card.problem ? 'Needs attention' : '';
+    card.activity.hidden = !card.activity.textContent;
     card.activity.toggleAttribute('data-success', !!card.timer);
   }
   function clearSuccess(card) {
@@ -78,10 +79,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     card.isReady = status.ready === true && status.connected === true;
     card.connect.textContent = status.connected ? 'Reconnect' : 'Sign In';
     card.operation = status.connected ? 'auth.reconnect' : 'auth.connect';
-    card.readiness.textContent = status.ready ? '' :
-      [status.message, status.nextAction].filter(Boolean).join(' ') || 'Sign in to authorize saves.';
-    card.readiness.dataset.reason = status.reason ?? (status.ready ? '' : 'DISCONNECTED');
-    card.availability.textContent = card.readiness.textContent;
+    card.availability.textContent = status.ready || !status.connected && ['AUTH_REQUIRED','DISCONNECTED',undefined].includes(status.reason)
+      ? '' : [status.message, status.nextAction].filter(Boolean).join(' ');
     paintActivity(card);
   }
   for (const [id, label, icon] of providers) {
@@ -92,22 +91,21 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         <img src="icons/${icon}" width="24" height="24" alt="">
         <h2 id="remote-provider-${id}">${label}</h2>
       </div>
-      <p role="status" class="remote-provider-activity" data-activity></p>
-      <details class="remote-provider-info" aria-label="${label} connection details"><summary>Connection details</summary>
-        <p class="sr-only" data-readiness id="remote-readiness-${id}">Checking authorization…</p>
+      <p role="status" class="remote-provider-activity" data-activity hidden></p>
+      <div class="remote-provider-info">
         <p class="muted" role="status" data-feedback></p>
         <p class="muted" role="status" data-navigation></p>
         <p class="muted" data-availability></p>
-      </details>
+      </div>
       <div class="remote-provider-actions">
-        <button type="button" class="primary" data-connect aria-describedby="remote-readiness-${id}">Sign In</button>
+        <button type="button" class="primary" data-connect>Sign In</button>
         <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
         <button type="button" data-refresh>Refresh</button>
       </div>
       <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
-      connect: get('connect'), refresh: get('refresh'), readiness: get('readiness'),
+      connect: get('connect'), refresh: get('refresh'),
       availability: get('availability'), continueSave: get('continue'), activity: get('activity'),
       operation: 'auth.connect', revision: 0, attemptRevision: 0, active: 0,
     };
@@ -193,8 +191,6 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         if (revision === card.revision) paint(card, status);
       }, error => {
         if (revision !== card.revision) return;
-        card.readiness.textContent = error.message;
-        card.readiness.dataset.reason = error.code;
         card.availability.textContent = error.message;
         card.problem=true;
         paintActivity(card);

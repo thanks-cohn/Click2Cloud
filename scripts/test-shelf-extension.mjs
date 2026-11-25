@@ -34,7 +34,7 @@ try{
   await extensions.waitForFunction(({id,version})=>document.querySelector('extensions-manager')?.shadowRoot?.querySelector('extensions-item-list')?.shadowRoot?.querySelector('#'+id)?.data?.version===version,{id:expectedId,version:BUILD_INFO.extensionVersion});
   evidence.checks.push({name:'chrome-extensions-version-and-id',state:'PASS',version:BUILD_INFO.extensionVersion});
   await extensions.close();evidence.checks.push({name:'actual-service-worker-ready',state:'PASS'});
-  const opener=await context.newPage();await opener.goto(appUrl);await opener.getByRole('heading',{name:'All Your Clouds. One Place.'}).waitFor({timeout:15000});
+  const opener=await context.newPage();await opener.goto(appUrl);await opener.getByRole('heading',{name:'All Your Clouds One Place'}).waitFor({timeout:15000});
   const openerSession=await context.newCDPSession(opener),openerId=(await openerSession.send('Target.getTargetInfo')).targetInfo.targetId;
   // Automation supplies a real user gesture to Chrome's real sidePanel API.
   const opened=await openerSession.send('Runtime.evaluate',{expression:'(async()=>{await chrome.sidePanel.open({windowId:(await chrome.windows.getCurrent()).id});return true;})()',userGesture:true,awaitPromise:true,returnByValue:true});
@@ -53,7 +53,7 @@ try{
   evidence.checks.push({name:'genuine-Shelf-describeCapabilities',state:'PASS'});
   const malformed={...request,method:'notAnEngineMethod'};const rejection=await evaluate(`chrome.runtime.sendMessage(${JSON.stringify(malformed)})`);assert.equal(rejection?.code,'VERSION_OR_METHOD_UNSUPPORTED');evidence.checks.push({name:'accepted-invalid-request-structured-failure',state:'PASS',request:malformed,response:rejection});
   // Exercise the production app's own bootstrap, not only a console request.
-  await evaluate('location.reload();true');let ready=false;for(let n=0;n<50;n++){try{ready=await evaluate('document.querySelector("#status")?.textContent.startsWith("Ready ·") && !document.querySelector("header button").disabled');}catch{}if(ready)break;await new Promise(r=>setTimeout(r,100));}assert(ready,'Shelf production bootstrap did not become ready');
+  await evaluate('location.reload();true');let ready=false;for(let n=0;n<50;n++){try{ready=await evaluate('document.querySelector("#shell")?.dataset.view==="remotes" && !document.querySelector("header button").disabled');}catch{}if(ready)break;await new Promise(r=>setTimeout(r,100));}assert(ready,'Shelf production bootstrap did not become ready');
   evidence.checks.push({name:'genuine-Shelf-startup-and-reload',state:'PASS'});
   try{const shot=await command('Page.captureScreenshot',{format:'png'});await writeFile(join(output,'genuine-shelf.png'),Buffer.from(shot.data,'base64'));}catch{evidence.screenshot='UNAVAILABLE';}
   const untrusted=await context.newPage();await untrusted.goto(appUrl+'?untrusted=1');const denied=await untrusted.evaluate(r=>chrome.runtime.sendMessage(r),request);assert.equal(denied?.code,'UNTRUSTED_APP_SENDER');evidence.checks.push({name:'query-changed-app-denied',state:'PASS',response:denied});

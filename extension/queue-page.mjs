@@ -154,7 +154,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   const list=root.querySelector('[data-history-records]'),notice=root.querySelector('[data-history-notice]');
   const form=root.querySelector('form'),input=form.querySelector('input'),find=root.querySelector('[data-history-find]');
   const singlePage=root.querySelector('.queue-single-page');
-  let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, editingPage=false;
+  let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, reading, editingPage=false;
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
   const groupState=new Map(), cardDisclosures=new Map();
   find.value=state.query??'';
@@ -164,7 +164,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       if(groupState.size>200)groupState.delete(groupState.keys().next().value);
     }
     for(const row of list.querySelectorAll('[data-record-id]')){
-      cardDisclosures.set(row.dataset.recordId,[...row.querySelectorAll('details')].map(detail=>detail.open));
+      cardDisclosures.set(row.dataset.recordId,new Map([...row.querySelectorAll('details')].map(detail=>[detail.querySelector('summary')?.textContent,detail.open])));
       if(cardDisclosures.size>200)cardDisclosures.delete(cardDisclosures.keys().next().value);
     }
     cardScope?.abort();
@@ -188,8 +188,9 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         parent=group;
       }
       const card=cards.render(row), previous=cardDisclosures.get(row.recordId);
-      if(previous)[...card.querySelectorAll('details')].forEach((detail,index)=>{
-        if(previous[index]!==undefined)detail.open=previous[index];
+      if(previous)[...card.querySelectorAll('details')].forEach(detail=>{
+        const title=detail.querySelector('summary')?.textContent;
+        if(previous.has(title))detail.open=previous.get(title);
       });
       parent.append(card);
     }
@@ -197,8 +198,11 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   }
   async function refresh({force=false}={}){
     if(cards?.previewOpen||list.querySelector('input:not([type=range]):focus'))return;
-    if(!force&&(find===document.activeElement||input===document.activeElement))return;
+    if(!force&&(debounce||input===document.activeElement))return;
     const ticket=++generation;
+    reading?.abort();
+    reading=new AbortController();
+    const requestSignal=reading.signal;
     try{
       await service.ready;
       await metadataPreference?.ready;
@@ -206,10 +210,11 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       const prefs=service.preferences, query=find.value.trim().toLowerCase();
       const range=historyInterval(prefs);
       if(prefs.timer!=='off')range.from=Math.max(range.from??0,Date.now()-VISIBILITY_MS);
-      const result=await service.store.page({page,...range,query});
+      const result=await service.store.page({page,...range,query,signal:requestSignal});
       if(signal.aborted||ticket!==generation||cards?.previewOpen||list.querySelector('input:not([type=range]):focus'))return;
       page=state.page=result.page;pages=result.pages;state.query=find.value;
-      const text=result.total?result.total.toLocaleString()+(result.total===1?' result':' results'):'No saves in this display range.';
+      const text=result.total?result.total.toLocaleString()+(result.total===1?' result':' results'):
+        query&&!result.rangeEmpty?'No saved files match your search.':'No saves in this display range.';
       const timer=prefs.timer==='off'?'':' · 15-minute '+(prefs.timer==='delete'?'Delete':'Hide');
       notice.textContent=text+timer+(service.accountingPending?' · Some receipts are awaiting reconciliation.':'');
       form.hidden=pages<=1;
@@ -225,7 +230,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         lastSignature=signature;
       }
     }catch{
-      if(!signal.aborted)notice.textContent='History is unavailable. Live Jobs and saving can continue.';
+      if(!signal.aborted&&!requestSignal.aborted&&ticket===generation)notice.textContent='History is unavailable. Live Jobs and saving can continue.';
     }
   }
   const select=newPage=>{editingPage=false;page=newPage;void refresh({force:true});};
@@ -237,8 +242,12 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   form.querySelector('[data-prev]').onclick=()=>select(page-1);
   form.querySelector('[data-next]').onclick=()=>select(page+1);
   form.querySelector('[data-last]').onclick=()=>select(pages);
-  find.oninput=()=>{clearTimeout(debounce);debounce=setTimeout(()=>select(1),300);};
-  signal.addEventListener('abort',()=>{unsubscribe?.();cardScope?.abort();clearTimeout(debounce);},{once:true});
+  find.oninput=()=>{
+    state.query=find.value;state.page=1;
+    reading?.abort();generation++;
+    clearTimeout(debounce);debounce=setTimeout(()=>{debounce=undefined;select(1);},300);
+  };
+  signal.addEventListener('abort',()=>{unsubscribe?.();reading?.abort();cardScope?.abort();clearTimeout(debounce);},{once:true});
   void refresh({force:true});
   return {refresh};
 }

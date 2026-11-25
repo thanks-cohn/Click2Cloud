@@ -80,4 +80,3 @@
 #basic-diagnostics-status:empty{margin:0}
 
 :root:not([data-aesthetic=standard]) :is(#settings-recovery,#settings-whole-cloud,.remote-v1-copy){display:none}
-:root[data-aesthetic=standard] .remote-modern-copy{display:none}

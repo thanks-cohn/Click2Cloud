@@ -83,14 +83,15 @@ body.resizing{user-select:none}
 /* Feedback reserves space below the Shelf scrollports. */
 #feedback-stack{flex:none;display:grid;grid-template-columns:minmax(0,560px);justify-content:center;gap:4px}
 #feedback-stack:has(> :not([hidden])){padding:4px 8px}
-#status,#action-feedback{padding:5px 8px;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:var(--control-radius,6px);background:var(--panel)}
+#status,#action-feedback,#footer-notice{padding:5px 8px;overflow-wrap:anywhere;border:1px solid var(--line);border-radius:var(--control-radius,6px);background:var(--panel)}
 #status{max-height:20dvh;overflow:auto;font-size:13px;color:var(--text)}
 /* Default-off before JS or storage resolves. */
 html:not([data-debug-mode="on"]) #status{display:none!important}
-#action-feedback{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;line-height:1.35}
+#action-feedback,#footer-notice{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;line-height:1.35}
+#footer-notice button{min-inline-size:28px;min-block-size:28px;padding:0 4px;background:transparent;color:var(--muted)}
+#footer-notice button:hover{background:var(--raised);color:var(--text)}
 #action-feedback.notice-error{border-inline-start:3px solid var(--error,var(--accent))}
 #oauth-redirect-uri,.wrap-text,#dest-list .dest-row{min-width:0;overflow-wrap:anywhere}
-.remote-diagnostic-actions{display:flex;flex-wrap:wrap;gap:8px}
 .dialog-body .between:has(#hierarchy-toggle),.dialog-body .tabs:has(#select-all){flex-wrap:wrap}
 .thumbnail{display:block;width:100%;height:72px;object-fit:contain;pointer-events:none}
 .file-tile span{height:72px}.tile-label{margin-top:4px}
@@ -416,6 +417,13 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-history-card{overflow-wrap:anywhere;margin:8px 0}
 .queue-card-summary{display:grid;gap:3px;min-inline-size:0}
 .queue-card-summary time,.queue-location,.queue-feedback{font-size:.85rem;color:var(--muted)}
+.queue-history-card[data-provider=cloudflare] .queue-card-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);align-items:stretch}
+.queue-history-card[data-provider=cloudflare] .queue-card-summary{align-content:start}
+.queue-history-card[data-provider=cloudflare] .queue-location{margin:0}
+.queue-card-status{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:4px;text-align:end}
+.queue-card-status time{font-size:.85rem;color:var(--muted)}
+.queue-history-card[data-provider=cloudflare] .queue-actions{margin-block:6px}
+.queue-history-card .queue-actions [data-go]{margin-inline-start:auto}
 .queue-location,.queue-feedback{margin:6px 0}
 .queue-feedback:empty,.queue-settings [role=status]:empty{display:none}
 .queue-calendar{padding-inline-start:clamp(3px,1.5vw,10px)}
@@ -445,9 +453,11 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-settings dialog .card{margin:0}
 .queue-settings .queue-actions{margin-block:12px}
 
-.queue-image-dialog:not([data-immersive]) .image-frame{min-height:min(55dvh,520px)}
-.queue-image-dialog[data-immersive][open]{display:flex;flex-direction:column}
-.queue-image-dialog[data-immersive] .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.queue-image-dialog:not([data-immersive]){height:min(650px,calc(100dvh - 32px))}
+.queue-image-dialog[open]{display:flex;flex-direction:column}
+.queue-image-dialog .dialog-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.queue-image-dialog:not([data-immersive]) .dialog-head{flex:0 0 64px;gap:8px}
+.queue-image-dialog:not([data-immersive]) [data-preview-title]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .queue-image-dialog:not([data-immersive]) [role=status]:empty{display:none}
 .queue-job>.queue-actions{flex:none;gap:4px;flex-wrap:nowrap}
 .queue-job>div:nth-child(2){min-inline-size:0;max-inline-size:34%}
@@ -464,3 +474,6 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-image-dialog[data-immersive] [data-close]{display:none}
 
 .remotes-page > [role=status]:empty{display:none}
+
+#explorer-upload-status{color:var(--muted);font-size:.85em;overflow-wrap:anywhere}
+#explorer-upload-status:empty{display:none}

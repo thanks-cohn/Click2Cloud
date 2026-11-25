@@ -235,10 +235,11 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     const final={...result,...(result.state==='uncertain'&&job.submitted&&!job.settled?{remotePending:true}:{}),timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
    }finally{activeSaves.delete(operationId);}
   },
-  async files({target,intent,signal,sourceBucket}){
+  async files({target,intent,signal,sourceBucket,expectedSession}){
    const operationId=intent.operationId;let dispatched=false;
    try{
    const c=await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket});
+   if(expectedSession&&c.sessionId!==expectedSession)fail('AUTH_SESSION_CHANGED');
    const singleRename=intent.action==='rename'&&intent.entry?.folder===false;
    if(singleRename||!expectedCodeDigest||c.codeDigest!==expectedCodeDigest){
     const check=await cap(target,{sourceBucket,live:false}),features=await post(check,'/capabilities',{});
@@ -250,6 +251,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     }
     if(check.sessionId!==c.sessionId||!Array.isArray(features.fileOperations)||!features.fileOperations.includes(intent.action))fail('WORKER_FILE_API_REPAIR_REQUIRED');
    }
+   signal?.throwIfAborted();
    dispatched=true;
    let result=await post(c,'/files',intent,signal),lastLease=clock();
    while(result.state==='pending'){
