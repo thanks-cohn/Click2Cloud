@@ -1,3 +1,8 @@
+# REDOWN 0.3.30 — Reliability Lab and independent regression testing
+
+## AUTHORITATIVE SPLIT SCOPE
+Work exclusively on `codex/redown-0329-reliability-lab`. Build the permanent lab, test matrix, behavioral exploration, independent oracles, evidence/reporting and regression tests. The known onboarding/Dropbox repairs and UX/theme/notification/Repair Me implementation belong to `codex/redown-0329-ux-design-repair`; do not duplicate those product changes. Reproduce known failures against baseline, write independent regression tests and report results; validate integrated candidate after owner-approved integration. Fix newly discovered defects narrowly only when nonoverlapping with the other branch; report overlap for integration rather than competing edits. Read latest UX branch VISUAL-AND-HISTORY-FOLLOWUP.md for current acceptance including Remote V1 protection, Golden Age and silver/chrome/crimson Liquid Black. Preserve test safety limits. Do not claim tests passed against changes not present. Do not bump release version independently; final release requires integrated evidence. Push only this branch. This scope supersedes conflicting older instructions below.
+
 # REDOWN Reliability Lab — Codex implementation request
 
 ## Branch and baseline
