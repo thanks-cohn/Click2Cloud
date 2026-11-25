@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "default_mode": "local-emulation",
+  "live_provider_requires_explicit_owner_opt_in": true,
+  "seed": 20261125,
+  "stop_on_integrity_failure": true,
+  "stages": [
+    {
+      "id": "01-single",
+      "files": 1,
+      "total_bytes": 1024
+    },
+    {
+      "id": "02-small",
+      "files": 5,
+      "total_bytes": 5120
+    },
+    {
+      "id": "03-historical",
+      "files": 24,
+      "corpus": "historical-smoke-selection"
+    },
+    {
+      "id": "04-owner-regression",
+      "files": 68,
+      "total_bytes": 8000000,
+      "nested": true
+    },
+    {
+      "id": "05-full-corpus",
+      "files": 240,
+      "total_bytes": 388827943,
+      "corpus": "historical-lfs-inventory"
+    },
+    {
+      "id": "06-file-count",
+      "files": 1000,
+      "total_bytes": 8000000,
+      "nested": true
+    },
+    {
+      "id": "07-file-count",
+      "files": 2500,
+      "total_bytes": 8000000,
+      "nested": true
+    },
+    {
+      "id": "08-file-count",
+      "files": 5000,
+      "total_bytes": 8000000,
+      "nested": true
+    },
+    {
+      "id": "09-planner-ceiling",
+      "files": 10000,
+      "total_bytes": 8000000,
+      "nested": true
+    },
+    {
+      "id": "10-byte-growth",
+      "files": 68,
+      "total_bytes": 64000000
+    },
+    {
+      "id": "11-byte-growth",
+      "files": 68,
+      "total_bytes": 256000000
+    }
+  ],
+  "required_evidence": [
+    "expected_and_actual_inventory",
+    "independent_download_sha256",
+    "duplicate_committed_keys",
+    "per_file_and_batch_outcomes",
+    "notification_emissions_and_paints",
+    "peak_memory_and_staging_bytes",
+    "elapsed_time",
+    "shelf_and_worker_lifecycle",
+    "cleanup_ownership"
+  ],
+  "notes": "Proposed test manifest, not executable yet. No live operations by default. Run incrementally, stop at first failure, retain evidence; large tiers local only unless separately authorized. 8 MB approximates owner report."
+}
