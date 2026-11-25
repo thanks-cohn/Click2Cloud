@@ -1,3 +1,7 @@
+# Reference only on UX branch: bulk matrix belongs to Reliability Lab
+
+Use focused acceptance only; final NOTIFICATION-PREFERENCES.md and VISUAL-AND-HISTORY-FOLLOWUP.md override earlier visual and notification expectations. No global font overhaul; Liquid Black permanently dark; Large is baseline notification size.
+
 # Realistic usage test matrix
 
 All volumes below are proposed targets for Codex to parameterize, not completed tests. An operation is a user action or API invocation; HTTP calls, assertions, retries and committed files are separate counters. Scale fixture runs independently from browser and live runs. Use current supported menu depth/count limits; over-limit cases must produce truthful bounded behavior. No actual user files or unrestricted websites in fixtures.
