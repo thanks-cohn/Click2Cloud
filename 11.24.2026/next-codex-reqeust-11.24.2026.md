@@ -38,3 +38,9 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 - Public URLs and Details remain independent sections; Details stays below Public URLs. Media expansion must not expand Details.
 - Error is an independent expandable section when applicable, collapsed by default. Preserve truthful failure/status indication and actionable error details; do not expand Error automatically as a side effect of image expansion. Do not show empty Error sections for successful entries.
 - Preserve existing provider functionality, retained images, verification, receipts, navigation, lazy loading and memory safeguards. Audit actual card layout before editing.
+
+## Preview — Stable Immersive View button
+
+- When navigating between images in regular Preview, the Immersive View button must remain visually stable. Eliminate the dull-to-bright flash between images, including rapid previous/next keyboard navigation.
+- Preserve its appearance, position, dimensions, opacity and theme styling during normal image-to-image transitions. Audit transient disabled/loading state and unnecessary DOM replacement before choosing a fix; keep genuine availability and accessibility semantics intact. Prevent activation against stale or unavailable image data without introducing visual flicker during ordinary transitions.
+- Reuse the existing shared Immersive View implementation; preserve image loading, navigation, zoom and error handling. Test cached and uncached images, rapid navigation, all themes and genuinely unavailable previews.
