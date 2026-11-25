@@ -15,3 +15,9 @@ Follow-up requirements, separate from the authoritative 0.3.28 implementation sp
 
 - Change “All your clouds” to “All Your Clouds”.
 - Preserve the existing styling, centering, spacing and absence of a period. Keep “One Place” unchanged.
+
+## Settings — Get URL default
+
+- Enable “Show Get URL in right-click menu” by default for new installations and when no explicit preference exists.
+- Preserve explicitly saved user choices, including Off. Reset to Defaults should restore On.
+- Keep the setting adjustable and persistent. Preserve existing Get URL eligibility, menu registration, provider permissions and public-access consent; enabling menu visibility must not automatically make files or buckets public.
