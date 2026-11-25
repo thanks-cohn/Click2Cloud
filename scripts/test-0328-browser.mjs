@@ -8,7 +8,7 @@ import {chromium} from 'playwright-core';
 
 const root = resolve('dist/click2cloud'), out = resolve(process.env.C2C_0328_EVIDENCE ?? 'work/0328/browser');
 const baseline = process.env.C2C_BASELINE_BUILD && resolve(process.env.C2C_BASELINE_BUILD);
-const types = {'.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.css':'text/css','.png':'image/png'};
+const types = {'.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.css':'text/css','.png':'image/png','.svg':'image/svg+xml'};
 const server = createServer(async (req,res) => {
   try {
     const url = new URL(req.url,'http://fixture');
@@ -56,9 +56,15 @@ function installFixture(manifest) {
     basic = Promise.all([import('/src/basic/lib/api.js'),import('/src/basic/lib/store.js'),import('/src/basic/providers/index.js')]).then(async ([{createApi},{openStore},{createAdapters}])=>{
       const store = await openStore(indexedDB,'release-0327-basic-fixtures');
       const auth = {authorization:async provider=>({identity:provider==='google'?['fixture-account']:['fixture-account','fixture-root'],
-        accessToken:'fixture-read',isCurrent:()=>true,scopes:[]})};
+        accessToken:'fixture-read',isCurrent:()=>true,scopes:project.dropboxRead?['files.content.read']:[]}),
+        reconnect:async(provider,identity)=>{
+          if(provider!=='dropbox'||identity.join('/')!=='fixture-account/fixture-root')throw Error('Wrong preview identity');
+          project.dropboxRead=true;return {provider,ready:true};
+        }};
       const adapters = createAdapters({fetch:async (url,options)=>{
-        const id = /items\/([^/?]+)|files\/([^/?]+)/.exec(url)?.slice(1).find(Boolean);
+        const dropbox = url.startsWith('https://content.dropboxapi.com/');
+        const id = dropbox?JSON.parse(options.headers['Dropbox-API-Arg']).path:
+          /items\/([^/?]+)|files\/([^/?]+)/.exec(url)?.slice(1).find(Boolean);
         project.operations.push(['provider-read',id]);
         if (id==='expired-object') return new Response(null,{status:401});
         const bytes = project.photos.get(id);
@@ -69,7 +75,7 @@ function installFixture(manifest) {
             const timer = setTimeout(resolve,2500);
             options.signal.addEventListener('abort',()=>{clearTimeout(timer);project.aborts++;reject(options.signal.reason);},{once:true});
           });
-          return bytes ? new Response(bytes) : new Response(null,{status:404});
+          return bytes ? new Response(bytes,{headers:dropbox?{'Dropbox-API-Result':JSON.stringify({id,size:bytes.length})}:undefined}) : new Response(null,{status:404});
         } finally { project.active--; }
       }});
       return {store,api:createApi({auth,chrome,durable:async()=>({store}),previewAdapters:adapters})};
@@ -114,7 +120,7 @@ function installFixture(manifest) {
       if (message.channel==='redown-basic-v1') {
         const {op,input} = message;
         project.operations.push([op,input.provider ?? input.id]);
-        if (op.startsWith('history.')) {
+        if (op.startsWith('history.')||op==='auth.reconnect'&&input.previewId) {
           const {api} = await basicFixture();
           return api.message(message,{id:'fixture',url:runtime.getURL('extension/app.html'),documentId:'fixture-shelf'});
         }
@@ -226,7 +232,7 @@ try {
     await shot('baseline-remotes-920');
   }
   await app('');
-  await fullWidth('Log in');
+  await fullWidth('Connect to Cloudflare');
   assert.equal(await page.getByText('Not connected',{exact:true}).count(),0);
   assert.equal(await page.getByText(/Connection details/i).count(),0);
   assert.equal(await btn('Save results').count(),0);
@@ -235,20 +241,22 @@ try {
     const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
     await createAestheticHost({root:document.documentElement,storage:chrome.storage.local}).apply({id:'standard'});
   });
+  await page.reload();await fullWidth('Connect to Cloudflare');
   assert(await btn('Review Cloudflare setup').isVisible());
-  await page.reload();await fullWidth('Log in');
-  assert(await btn('Review Cloudflare setup').isVisible());
+  await btn('Review Cloudflare setup').click();
+  await btn('Back to Remotes').click();
   await page.evaluate(async()=>{
     const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
     await createAestheticHost({root:document.documentElement,storage:chrome.storage.local}).apply({id:'minimal'});
   });
-  assert(!(await btn('Review Cloudflare setup').isVisible()));
+  await page.reload();await fullWidth('Connect to Cloudflare');
+  assert.equal(await page.locator('#cloudflare-setup').count(),0);
   assert.equal(await cloudflare.getByText(/Cloudflare may charge/).count(),0);
   assert.equal(await page.locator('#selected-save-setup').count(),0);
   await page.evaluate(()=>{releaseFixture.reconnect=true;releaseFixture.event({channel:'connection-changed'});});
   await fullWidth('Reconnect');
   await page.evaluate(()=>{releaseFixture.connection='CONNECTED';releaseFixture.event({channel:'connection-changed'});});
-  await fullWidth('Open File Explorer');
+  await fullWidth('Connected');
   assert(await cloudflare.getByRole('button',{name:'Sign out',exact:true}).isVisible());
   await shot('remotes-920');
   const cardBounds = async () => {
@@ -257,20 +265,28 @@ try {
       return {card:card.getBoundingClientRect().toJSON(),connect:box('[data-connect]'),go:box('[data-go]'),refresh:box('[data-refresh]'),
         heading:box('h2'),status:box('[data-activity]')};
     });
-    assert((!geometry.status.width||geometry.heading.right<=geometry.status.left) && geometry.connect.left<geometry.go.left && geometry.go.right<geometry.refresh.left);
+    assert((!geometry.status.width||geometry.heading.right<=geometry.status.left) && geometry.connect.right<geometry.refresh.left && geometry.refresh.right<geometry.go.left);
+    assert.equal(geometry.refresh.width,geometry.refresh.height);
     assert(Math.abs(geometry.connect.y-geometry.refresh.y)<1);
     return [geometry.card.height,geometry.refresh.x,geometry.refresh.y-geometry.card.y,geometry.connect.x,geometry.connect.y-geometry.card.y].map(Math.round);
   };
   await page.setViewportSize({width:320,height:850});
   const idle = await cardBounds();
-  await google.getByRole('button',{name:'Sign In'}).click();
+  await page.mouse.move(3,3);
+  const refresh=google.getByRole('button',{name:'Refresh Google Drive',exact:true});
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('[data-refresh]')).opacity==='0');
+  await refresh.focus();
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('[data-refresh]')).opacity==='1');
+  assert.deepEqual(await cardBounds(),idle);
+  await google.getByRole('button',{name:'Connect',exact:true}).click();
   await google.getByText('Success!',{exact:true}).waitFor();
   assert.equal(await google.locator('[data-activity]').evaluate(el=>el.getAnimations()[0]?.effect.getTiming().iterations),2);
   assert.equal((await cardBounds())[0],idle[0],'sign-in should keep the compact card height');
+  assert(await google.getByRole('button',{name:'Connected',exact:true}).isVisible());
   await shot('provider-success-320');
   await google.getByText('Success!',{exact:true}).waitFor({state:'hidden'});
   await page.evaluate(()=>{releaseFixture.cardFailure=true;});
-  await google.getByRole('button',{name:'Refresh',exact:true}).click();
+  await refresh.click();
   await google.getByText('Needs attention',{exact:true}).waitFor();
   assert.equal(await google.getByText('Connection details',{exact:true}).count(),0);
   await google.getByText(/temporarily unavailable/).waitFor();
@@ -311,8 +327,8 @@ try {
   await page.evaluate(()=>{releaseFixture.forceReconnect=false;});
   pass('Reconnect footer dismisses and stays scoped to the Files browsing attempt');
   await page.evaluate(()=>{releaseFixture.connection='CONNECTED';releaseFixture.event({channel:'connection-changed'});});
-  await fullWidth('Open File Explorer');
-  await btn('Open File Explorer').click();
+  await fullWidth('Connected');
+  await btn('Connected · Open File Explorer').click();
   await page.locator('#files').getByText('projects',{exact:true}).dblclick();
   await page.waitForFunction(()=>document.querySelector('#location').value.includes('projects'));
   const moreActions=page.getByRole('button',{name:'More Explorer actions'});
@@ -480,7 +496,12 @@ try {
   await feedback.getByLabel('Colors').selectOption('theme');
   await feedback.getByLabel('Provider card success pulse').uncheck();
   await feedback.getByLabel('Toolbar transmission').uncheck();
-  await feedback.getByLabel('Save notifications when Shelf is closed').uncheck();
+  assert.equal(await feedback.getByLabel('Show while Shelf is open').inputValue(),'true');
+  await feedback.getByLabel('Position',{exact:true}).selectOption('center');
+  await feedback.getByLabel('Size',{exact:true}).selectOption('small');
+  await feedback.getByLabel('Dismiss on hover').selectOption('false');
+  await feedback.getByLabel('Show success notifications').selectOption('false');
+  assert(await feedback.getByLabel('Show while Shelf is open').isDisabled());
   await page.locator('#aesthetic-palette input[value=amethyst]').check();
   await page.waitForFunction(async()=>(await chrome.storage.local.get('aestheticFeedbackAccentV1')).aestheticFeedbackAccentV1==='#c4a1ff');
   await page.locator('#setting-theme').selectOption('light');
@@ -492,7 +513,10 @@ try {
   assert(await feedback.getByLabel('Rapid-click escalation').isChecked());
   assert(!(await feedback.getByLabel('Provider card success pulse').isChecked()));
   assert(!(await feedback.getByLabel('Toolbar transmission').isChecked()));
-  assert(!(await feedback.getByLabel('Save notifications when Shelf is closed').isChecked()));
+  assert.equal(await feedback.getByLabel('Show success notifications').inputValue(),'false');
+  assert.equal(await feedback.getByLabel('Position',{exact:true}).inputValue(),'center');
+  assert.equal(await feedback.getByLabel('Size',{exact:true}).inputValue(),'small');
+  assert.equal(await feedback.getByLabel('Dismiss on hover').inputValue(),'false');
   pass('Independent visual feedback settings survive reload and track the active palette and color mode');
 
   const seed = await page.evaluate(async()=>{
@@ -532,9 +556,13 @@ try {
       proofKind:'fixture-independent-head',receipt:{key:'cloudflare.png',etag:'fixture-r2-etag',size:small.length,
         destination:qa.target,savedFileMetadata:{httpMetadata:{contentType:'image/png'}}}}));
     rows.push({...rows[0],recordId:'zero-and-false',filename:'Metadata sample.txt',mime:'text/plain',bytes:0,sourceUrl:null,proofLevel:false,sortAt:current+2000},
-      {...rows[1],recordId:'error-row',filename:'Failed save.txt',status:'failed',code:'AUTH_REVOKED',sortAt:current+3000});
+      {...rows[1],recordId:'error-row',filename:'Failed save with a long descriptive filename.txt',status:'failed',code:'AUTH_REVOKED',
+        rank:1,retryable:true,retryExpiresAt:current+60000,sortAt:current+3000});
     rows.push(...Array.from({length:52},(_,i)=>({...rows[0],recordId:`padding-${i}`,filename:`Archive entry ${i}.txt`,mime:'text/plain',sortAt:current-20000-i})));
     const cloud=rows.find(row=>row.sourceRecordId==='cloudflare-row');
+    const longKey='screenshots/'+('Folder · café 研究/'.repeat(9))+'long-53e050ff143-1.png';
+    rows.push({...cloud,recordId:'long-history',sourceRecordId:'long-history',filename:'long-53e050ff143-1.png',
+      destination:{...cloud.destination,key:longKey},sortAt:current-35000});
     const screenKey='screenshots/Screenshot-75.png';
     qa.photos.set(screenKey,small);qa.r2Keys.set('screenshot-75',screenKey);
     rows.push({...cloud,recordId:'screenshot-75',sourceRecordId:'screenshot-75',deliveryId:'output-75',kind:'screenshot',
@@ -559,7 +587,7 @@ try {
     const result = await history.page({page:1});
     return {total:result.total,large:large.length,withoutPreviewPayload:!JSON.stringify(result.items).includes('base64,')};
   });
-  assert.equal(seed.total,72);
+  assert.equal(seed.total,73);
   assert(seed.large>256*1024 && seed.withoutPreviewPayload);
 
   const queue = async () => {
@@ -590,7 +618,19 @@ try {
   };
   await queue();
   assert(await btn('Cancel All').isVisible());
+  await page.setViewportSize({width:320,height:850});
+  const failedJob=page.locator('.queue-job').filter({hasText:'Failed save with a long'});
+  await failedJob.getByRole('button',{name:'Retry',exact:true}).waitFor();
+  const jobChecks=await failedJob.evaluate(row=>{
+    const rect=selector=>row.querySelector(selector).getBoundingClientRect().toJSON();
+    return {heading:rect('.queue-job-heading'),status:rect('.queue-job-state'),dismiss:rect('.queue-dismiss'),
+      filename:rect('strong'),retry:rect('.queue-actions button'),location:rect(':scope > small')};
+  });
+  assert(jobChecks.filename.right<jobChecks.dismiss.left&&jobChecks.location.y>=jobChecks.heading.bottom);
+  assert(jobChecks.retry.y>=jobChecks.status.bottom&&Math.abs(jobChecks.retry.right-jobChecks.dismiss.right)<1);
+  assert(jobChecks.retry.width<jobChecks.heading.width/2);
   await page.getByText('Completed',{exact:true}).first().waitFor();
+  assert.equal(await page.locator('.queue-job').filter({hasText:'Completed'}).first().locator(':scope > .queue-actions').count(),0);
   await btn('Clear All').click();
   await page.getByText('No jobs',{exact:true}).waitFor();
   await history();
@@ -611,6 +651,24 @@ try {
     assert(box.location.top>=box.heading.bottom && box.badge.top>=box.time.bottom && box.badge.right<=box.time.right+.5);
     assert(box.download.top>=box.media.bottom && box.go.left>=box.download.right);
   }
+  await find.fill('long-53e050ff143-1.png');
+  const longPath=card('long-53e050ff143-1.png').locator('.history-cloudflare-location');
+  await longPath.waitFor();
+  const pathSnapshot=()=>longPath.evaluate(element=>{
+    const [start,end]=element.children;
+    return {title:element.title,text:element.textContent,scope:element.clientWidth,visible:start.clientWidth,
+      needed:start.scrollWidth,end:end.textContent,ellipsis:getComputedStyle(start).textOverflow};
+  });
+  await page.setViewportSize({width:320,height:850});
+  await longPath.focus();
+  const narrowPath=await pathSnapshot();
+  assert.equal(narrowPath.text,narrowPath.title);
+  assert.equal(await longPath.getAttribute('aria-label'),narrowPath.title);
+  assert(narrowPath.title.startsWith('Cloudflare R2 · fixture-bucket / screenshots/'));
+  assert(narrowPath.end.endsWith('53e050ff143-1.png'));
+  assert(narrowPath.needed>narrowPath.visible&&narrowPath.ellipsis==='ellipsis');
+  await page.setViewportSize({width:920,height:850});
+  assert((await pathSnapshot()).visible>narrowPath.visible);
   for(const query of ['screen','Screenshot','screenshot-75','75']){
     await find.fill(query);
     await card('Screenshot-75.png').waitFor();
@@ -712,8 +770,10 @@ try {
   }
   await viewImage('Drive large.png',480);
   await viewImage('OneDrive live.png',42);
+  await find.fill('Dropbox missing.png');
+  await card('Dropbox missing.png').getByRole('button',{name:'Allow Dropbox image previews'}).click();
+  await viewImage('Dropbox missing.png',42);
   for(const [name,error] of [
-    ['Dropbox missing.png',/Dropbox file-read access is unavailable/],
     ['Expired grant.png',/Reconnect the saved provider account/],
     ['Over limit.png',/exceeds the preview size limit/],
     ['Original record missing.png',/original confirmed image record is unavailable/]
@@ -761,9 +821,9 @@ try {
     const {createHistoryStore}=await import('/src/queue/store.mjs');
     return (await createHistoryStore().page({page:1,query:'metadata sample.txt'})).items;
   }),originalRows);
-  await find.fill('Failed save.txt');
-  await card('Failed save.txt').getByText('Details',{exact:true}).click();
-  assert(await card('Failed save.txt').getByText('AUTH_REVOKED',{exact:true}).isVisible());
+  await find.fill('Failed save with a long descriptive filename.txt');
+  await card('Failed save with a long descriptive filename.txt').getByText('Details',{exact:true}).click();
+  assert(await card('Failed save with a long descriptive filename.txt').getByText('AUTH_REVOKED',{exact:true}).isVisible());
   pass('Provider metadata updates open cards and preserves raw records');
   await find.fill('');
   await page.locator('.queue-pager:not([hidden])').waitFor();
@@ -812,6 +872,85 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-last]').disabled);
   assert(await btn('Next page').isDisabled());
   pass('Single-row header, right-aligned footer, centered Queue/History and pagination',{appearanceModes:themes.length*2,widths:[320,920]});
+
+  // Compare existing packages on the same rendered Remotes controls.
+  if(baseline){
+    const other=await context.newPage();
+    await other.addInitScript(installFixture,manifest);
+    await other.goto(origin+'/baseline/extension/app.html?fixturePerformance=1');
+    await other.locator('#theme:enabled').waitFor();
+    await page.getByRole('button',{name:'Remotes',exact:true}).click();
+    const styles=(target,variation,mode)=>target.evaluate(async({variation,mode})=>{
+      const {createAestheticHost}=await import('/src/aesthetic/host.mjs');
+      const root=document.documentElement,host=createAestheticHost({root});
+      await host.apply({...variation,persist:false});
+      if(variation.palette)await host.applyPalette(variation.palette);
+      root.dataset.theme=mode;
+      await document.fonts.ready;
+      return ['body','.app-header','.remotes-headline','.remote-interlude span','.remote-provider','.remote-provider h2',
+        '[data-connect]','#manage'].map(selector=>{
+        const style=getComputedStyle(document.querySelector(selector));
+        return ['fontFamily','fontSize','fontWeight','fontStyle','lineHeight','letterSpacing','backgroundColor','color','borderRadius']
+          .map(key=>style[key]);
+      });
+    },{variation,mode});
+    const protectedThemes=themes.filter(theme=>!['chrome','golden-age'].includes(theme.id));
+    for(const theme of protectedThemes)for(const mode of ['light','dark'])for(const width of [320,920]){
+      await Promise.all([other,page].map(target=>target.setViewportSize({width,height:850})));
+      const [before,after]=await Promise.all([other,page].map(target=>styles(target,theme,mode)));
+      assert.deepEqual(after,before,JSON.stringify({theme,mode,width}));
+    }
+    await other.close();
+    pass('Protected packages match baseline computed typography and surface colors',{comparisons:protectedThemes.length*4});
+  }
+
+  const aestheticSettings=async()=>{
+    await btn('Settings').click();
+    await page.locator('#appearance').waitFor();
+  };
+  for(const appearance of ['chrome','golden-age']){
+    await aestheticSettings();
+    await page.locator('#appearance').selectOption(appearance);
+    await page.locator('#setting-theme').selectOption('dark');
+    await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+    await btn('Remotes').click();
+    assert.equal(await page.locator('#cloudflare-setup').count(),0);
+    assert.deepEqual(await page.locator('.remote-interlude span').allTextContents(),['The Future Is NOW','True Remote Is Here']);
+    assert.deepEqual(await page.locator('.remote-provider h2').allTextContents(),['Google Drive','OneDrive','Dropbox']);
+    for(const mode of ['dark','light']){
+      await page.setViewportSize({width:365,height:850});
+      await page.mouse.move(2,100);
+      const design=await page.evaluate(()=>({
+        mode:document.documentElement.dataset.theme,
+        moon:getComputedStyle(document.querySelector('.chrome-appearance-icon')).backgroundImage,
+        bevel:getComputedStyle(document.querySelector('.remote-provider')).borderTopWidth,
+        background:getComputedStyle(document.querySelector('#shell')).backgroundImage,
+        cloudflare:getComputedStyle(document.querySelector('.cf-connection-primary')).backgroundImage,
+        navigation:getComputedStyle(document.querySelector('nav [aria-current=page]')).backgroundImage,
+        basic:getComputedStyle(document.querySelector('.remote-provider-actions [data-connect]')).backgroundImage,
+        accent:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+        footer:[...document.querySelectorAll('#manage-slot button:not([hidden])')].map(button=>button.id)
+      }));
+      assert.equal(design.mode,mode);
+      assert.deepEqual(design.footer,['manage']);
+      if(appearance==='chrome'){
+        assert(design.moon.endsWith('chrome-moon-'+mode+'.svg")'));
+        assert.equal(design.bevel,'3px');
+        assert.match(design.background,/linear-gradient/);
+        assert.match(design.cloudflare,/rgb\(247, 142, 55\)/);
+        assert.match(design.navigation,/rgb\(215, 25, 54\)/);
+        assert.match(design.basic,/rgb\(250, 250, 250\)/);
+      }else assert.equal(design.accent,'#e60023');
+      await header();await shot(appearance+'-'+mode+'-365');
+      if(mode==='dark'){
+        await page.locator('#theme').click();
+        await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+      }
+    }
+    await page.reload();
+    await page.waitForFunction(id=>document.documentElement.dataset.theme==='light'&&document.documentElement.dataset.aesthetic===id,appearance);
+  }
+  pass('Chrome metallic appearances and Golden Age palette with live appearance switching and restart');
 
   const web = await context.newPage();
   await web.addInitScript(()=>{
