@@ -1,7 +1,7 @@
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const hyperspaceKey='headerHyperspaceV1';
-export const IDLE_MS=5000, SPLIT_MS=1800, WATER_IDLE_MS=2000;
+export const IDLE_MS=5000, SPLIT_MS=1800;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export function normalizeHyperspace(value){
@@ -78,35 +78,6 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
  return {left,right,leftFill:left+' L '+x(0)+' 0 L '+x(tip)+' 0 Z',rightFill:right+' L '+(w-x(0))+' 0 L '+(w-x(tip))+' 0 Z',gap};
 }
-// Only use the space already opened by Hyperspace. Never reserve more room.
-// Prefer a band below the glyph; if too shallow, use the lower central gap
-// between the persistent controls instead, without covering either control.
-export function hyperspaceWaterLayout(headerHeight,lift,moonBottom){
- const height=Math.max(0,headerHeight-lift);
- const preferred=Math.max(2,Math.ceil(moonBottom+2));
- const below=height-preferred>=10;
- const top=below?preferred:Math.max(1,Math.min(height-8,height*.30));
- return {top,height:Math.max(0,height-top),below};
-}
-// Varied-length horizontal and shallow skewed ripples in three shades.
-// Geometry is generated once; movement is a small CSS-only drift.
-export function hyperspaceWaterGeometry(width,height){
- const w=Math.max(1,width),h=Math.max(1,height);
- if(w<100||h<8)return [];
- const lines=[],span=w*.90,center=w/2;
- for(let row=0;row<5;row++){
-  const t=row/4,y=h*(.12+.76*t**1.2);
-  const count=row===0?2:3;
-  for(let i=0;i<count;i++){
-   const n=row*3+i,cell=span/count,phase=Math.sin((row+1)*2.13+i*2.47);
-   const len=cell*(.29+.37*t+.16*(phase+1));
-   const x=center-span/2+cell*(i+.5)+phase*cell*.045;
-   const skew=n%3===0?0:Math.sin(row*2.1+i*1.8)*Math.min(1.2,h*.045);
-   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,shade:n%3,opacity:.56+.12*t,delay:Math.round(n*125),drift:(n%2?1:-1)*(3+7*t),duration:8+(n%4)*2});
-  }
- }
- return lines;
-}
 export function mountHyperspaceSettings(parent,preference){
  const section=parent.ownerDocument.createElement('section');
  section.className='hyperspace-settings';
@@ -120,52 +91,13 @@ const svgNS='http://www.w3.org/2000/svg';
 export function installHyperspace({header,shell,preference,doc=header.ownerDocument,clock}){
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
- let timer,waterTimer,water,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
+ let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
  const main=shell.querySelector('main');
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
- function clearWater(){
-  if(waterTimer!==undefined){time.clear(waterTimer);waterTimer=undefined;}
-  water?.remove();water=undefined;
- }
- function armWater(){
-  if(waterTimer!==undefined||water||!overlay)return;
-  waterTimer=time.set(()=>{
-   waterTimer=undefined;
-   if(!overlay||current?.phase!=='open'||returning||!eligible())return;
-   const headerRect=header.getBoundingClientRect(),theme=header.querySelector('#theme');
-   const glyphs=[...(theme?.children??[])].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&win.getComputedStyle(el).visibility!=='hidden'&&win.getComputedStyle(el).display!=='none';});
-   const moonBottom=Math.max(0,...(glyphs.length?glyphs:theme?[theme]:[]).map(el=>el.getBoundingClientRect().bottom-headerRect.top));
-   const layout=hyperspaceWaterLayout(headerRect.height,baseLift,moonBottom);
-   const brand=header.querySelector('.brand-lockup')?.getBoundingClientRect();
-   const mode=theme?.getBoundingClientRect();
-   const left=layout.below?0:Math.max(8,(brand?.right??headerRect.left)-headerRect.left+8);
-   const right=layout.below?parts.width:Math.min(parts.width-8,(mode?.left??headerRect.right)-headerRect.left-8);
-   const width=Math.max(0,right-left);
-   const lines=hyperspaceWaterGeometry(width,layout.height);
-   if(!lines.length)return;
-   // A transparent SVG containing only ripples. No changes to shell, colors,
-   // header height, overlay clipping, or the position of any control.
-   water=doc.createElementNS(svgNS,'svg');
-   water.setAttribute('class','hyperspace-water');
-   water.setAttribute('viewBox','0 0 '+width+' '+layout.height);
-   water.setAttribute('aria-hidden','true');
-   water.style.cssText='left:'+left+'px;top:'+layout.top+'px;width:'+width+'px;height:'+layout.height+'px';
-   water.setAttribute('preserveAspectRatio','none');
-   for(const segment of lines){
-    const group=doc.createElementNS(svgNS,'g');group.setAttribute('class','hyperspace-ripple shade-'+segment.shade);
-    group.style.setProperty('--water-delay',segment.delay+'ms');group.style.setProperty('--water-drift',segment.drift+'px');group.style.setProperty('--water-period',segment.duration+'s');
-    group.style.setProperty('--water-cycle',(12+segment.duration*.7)+'s');
-    const line=doc.createElementNS(svgNS,'line');
-    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]));
-    group.append(line);water.append(group);
-   }
-   overlay.append(water);
-  },WATER_IDLE_MS);
- }
  const eligible=()=>!disposed&&preference.value.enabled&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
  // Keep per-frame style invalidation local, rather than inheriting changing
  // variables from body through every History card. Skip unchanged values.
@@ -191,7 +123,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
  }
  function clear(){
-  cancelFrame();clearWater();overlay?.remove();overlay=parts=current=returning=undefined;
+  cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');
   reserve(0);layer(false);lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up'])header.style.removeProperty(key);
@@ -231,7 +163,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    if(p>=1){clear();return;}
   }else{
    draw(hyperspaceFrame(Math.max(0,now-started),runSeconds));
-   if(current.done){armWater();return;} // one delayed static detail; no idle frame loop
+   if(current.done)return; // hold indefinitely; no idle frame loop
   }
   raf=time.frame(tick);
  }
@@ -265,7 +197,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   cancelTimer();if(!overlay)return;
   if(immediate||media.matches){clear();return;}
   if(returning)return;
-  clearWater();cancelFrame();returning={frame:{...current},start:time.now(),duration:Math.max(300,Math.round(880*Math.max(current.split,current.burst,.3)))};
+  cancelFrame();returning={frame:{...current},start:time.now(),duration:Math.max(300,Math.round(880*Math.max(current.split,current.burst,.3)))};
   raf=time.frame(tick);
  }
  function pointer(over){
