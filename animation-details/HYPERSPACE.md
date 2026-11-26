@@ -9,8 +9,8 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Phase | Timing | Behavior |
 | --- | --- | --- |
 | Idle | 5 seconds | Only uninterrupted absence of hover arms the effect. Initial launch may arm the idle timer; changing tabs never arms it. |
-| Split | 0.18 seconds | The line rapidly separates from the center; its tips climb to the top and create an 80 CSS-pixel opening (bounded on exceptionally narrow windows). Curves create a vanishing-point highway. |
-| Charge | 5 seconds by default | Light streaks begin near the bottom of both rails and travel upward toward the horizon, starting almost imperceptibly and accelerating continuously throughout the configured time. The colors remain separated at the curves. |
+| Split | 1.8 seconds | The line separates from the center; its tips climb to the top and create an 80 CSS-pixel opening (bounded on exceptionally narrow windows). Curves create a vanishing-point highway. |
+| Charge | 5 seconds by default | Light streaks begin near the bottom of both rails and travel upward toward the horizon, starting at two rail lengths per second and accelerating continuously throughout the configured time. The colors remain separated at the curves. |
 | Release | Energy-dependent | The rails and the header surfaces move outward together. Navigation text fades and lower content is pulled upward by the same release. |
 | Settle | Energy-dependent | A small, bounded upward overshoot settles into a constant final position. |
 | Open | Indefinite | The page color fills the header space and the page stays raised. No ongoing animation-frame loop. |
@@ -20,7 +20,7 @@ Settings → Aesthetic → Header Hyperspace offers an enable switch and a build
 
 ## Energy model
 
-For charge time c in seconds, the shimmer's travel (in rail lengths) is 0.015c + 0.008c² + 0.020c³. Velocity is its derivative, 0.015 + 0.016c + 0.060c². Travel is integrated instead of abruptly switching animation durations. Streak length and opacity increase within bounds; opacity never flashes the whole header.
+For charge time c in seconds, the shimmer's travel (in rail lengths) is 2c + 0.225c². Velocity is its derivative, 2 + 0.45c. Travel is integrated instead of abruptly switching animation durations. Streak length and opacity increase within bounds; opacity never flashes the whole header.
 
 Normalized release energy is the square root of buildup seconds / 5, bounded to 0.4–2. Energy shortens the release interval and increases the small upward overshoot. The rail translation and content lift are sampled from the same release clock. Both finish in the same layout for every configured duration. The page rises at most 28 CSS pixels at rest, additionally limited by the real header height so that the logo/theme controls retain room.
 
