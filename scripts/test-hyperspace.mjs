@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
 
 assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
@@ -10,6 +10,14 @@ assert(hyperspaceFrame(180,5).split<.01,'Preserve the original gentle split');
 assert.equal(hyperspaceFrame(SPLIT_MS,5).split,1);
 assert.equal(hyperspaceFrame(SPLIT_MS,5).speed,2,'Shimmer starts at two rail lengths per second');
 assert(hyperspaceFrame(SPLIT_MS+1000,5).travel>200,'Shimmer completes over two passes in the first second');
+assert.equal(hyperspaceTiming(5).release,440);
+assert(hyperspaceFrame(SPLIT_MS+5000+110,5).burst>.5,'The release travels more than half its distance in the first quarter');
+assert.deepEqual(hyperspaceLiftBounds(66,28,51,12),{rest:40,peak:48});
+const historyBounds=hyperspaceLiftBounds(66,20,51,10);
+assert(historyBounds.rest>26,'History can rise higher when heading clearance allows');
+assert(66+20-historyBounds.peak>=51-10+4,'Peak lift respects the persistent controls');
+const scrolled=hyperspaceLiftBounds(56,0,46,6);
+assert(scrolled.peak<=12,'Scrolled content retains clearance');
 const widths=[320,380,800,1200];
 for(const w of widths){
  const flat=hyperspaceGeometry(w,65,0,0);
