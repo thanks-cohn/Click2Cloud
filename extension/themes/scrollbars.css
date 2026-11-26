@@ -1,0 +1,33 @@
+/* Shared Shelf scrollbar treatment. Native scrolling, no extra scroll containers.
+   Apply colors at each element so local surface/skin overrides remain effective. */
+@media (forced-colors:none){
+ :root,:root *{
+  --shelf-scroll-thumb:color-mix(in srgb,var(--muted,#a0a0a0) 62%,var(--bg,#13171e));
+  --shelf-scroll-hover:color-mix(in srgb,var(--muted,#a0a0a0) 85%,var(--bg,#13171e));
+  scrollbar-width:thin;
+  scrollbar-color:var(--shelf-scroll-thumb) transparent;
+ }
+ @supports selector(::-webkit-scrollbar){
+  :root,:root *{scrollbar-width:auto;scrollbar-color:auto}
+  :root::-webkit-scrollbar,:root *::-webkit-scrollbar{width:9px;height:9px}
+  :root::-webkit-scrollbar-track,:root *::-webkit-scrollbar-track{background:transparent}
+  :root::-webkit-scrollbar-thumb,:root *::-webkit-scrollbar-thumb{
+   background:var(--shelf-scroll-thumb);
+   border:1px solid transparent;border-radius:999px;background-clip:padding-box;
+   min-height:28px;min-width:28px;
+  }
+  :root::-webkit-scrollbar-thumb:hover,:root *::-webkit-scrollbar-thumb:hover{background-color:var(--shelf-scroll-hover)}
+  :root::-webkit-scrollbar-thumb:active,:root *::-webkit-scrollbar-thumb:active{background-color:var(--muted,#a0a0a0)}
+  :root::-webkit-scrollbar-button,:root *::-webkit-scrollbar-button{display:none}
+  :root::-webkit-scrollbar-corner,:root *::-webkit-scrollbar-corner{background:transparent}
+ }
+}
+/* Forced colors and coarse pointers retain a larger, platform-native target. */
+@media (forced-colors:active),(pointer:coarse){
+ :root,:root *{scrollbar-width:auto;scrollbar-color:auto}
+}
+@media (pointer:coarse) and (forced-colors:none){
+ @supports selector(::-webkit-scrollbar){
+  :root::-webkit-scrollbar,:root *::-webkit-scrollbar{width:16px;height:16px}
+ }
+}

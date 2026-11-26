@@ -73,6 +73,32 @@ try{
  assert.equal(scrollbar.width,'9px');
  assert.equal(scrollbar.radius,'999px');
  assert.equal(scrollbar.track,'rgba(0, 0, 0, 0)');
+ // Shared scrollbars: all theme packages, Nostalgia styles and Onyx finishes.
+ // Use a real overflow element to verify native vertical/horizontal movement.
+ await page.evaluate(()=>{
+  const el=document.createElement('div');el.id='scrollbar-fixture';
+  el.style.cssText='position:fixed;top:0;left:0;width:100px;height:100px;overflow:scroll;pointer-events:none';
+  const content=document.createElement('div');content.style.cssText='width:300px;height:300px';el.append(content);
+  document.querySelector('#main').append(el);
+ });
+ const skins=[...['minimal','standard','golden-age','oceania','frames','chrome'].map(id=>({id})),
+  ...['kawaii','dungeon-master','heroine'].map(style=>({id:'nostalgia',style})),
+  ...['onyx','platinum','gunmetal','obsidian','azure'].map(finish=>({id:'onyx',finish}))];
+ for(const skin of skins)for(const mode of ['dark','light']){
+  await page.evaluate(async({skin,mode})=>{document.documentElement.dataset.theme=mode;await window.testHost.apply({...skin,persist:false});},{skin,mode});
+  for(const view of ['remotes','queue','history','explorer','settings','screenshot']){
+   await page.evaluate(view=>document.querySelector('#shell').dataset.view=view,view);
+   const metrics=await page.locator('#scrollbar-fixture').evaluate(el=>{
+    el.scrollTop=60;el.scrollLeft=60;
+    return {width:getComputedStyle(el,'::-webkit-scrollbar').width,height:getComputedStyle(el,'::-webkit-scrollbar').height,
+     thumb:getComputedStyle(el,'::-webkit-scrollbar-thumb').borderTopLeftRadius,
+     track:getComputedStyle(el,'::-webkit-scrollbar-track').backgroundColor,
+     top:el.scrollTop,left:el.scrollLeft};
+   });
+   assert.deepEqual(metrics,{width:'9px',height:'9px',thumb:'999px',track:'rgba(0, 0, 0, 0)',top:60,left:60},JSON.stringify({skin,mode,view}));
+  }
+ }
+ await page.evaluate(async()=>{document.querySelector('#scrollbar-fixture').remove();document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){

@@ -380,7 +380,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 :is(#dialog,.queue-image-dialog)[data-immersive] .dialog-body{padding:0;gap:0}
 :is(#dialog,.queue-image-dialog)[data-immersive] .image-frame{
  display:flex;overflow:auto;overflow-anchor:none;overscroll-behavior:contain;
- border:0;border-radius:0;scrollbar-color:#797979 #171717;
+ border:0;border-radius:0;--muted:#a0a0a0;
 }
 :is(#dialog,.queue-image-dialog)[data-immersive] .image-frame img.preview{
  position:static;flex:none;margin:auto;max-width:none;max-height:none;cursor:zoom-in;
