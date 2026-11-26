@@ -195,7 +195,7 @@ def validate(document):
         dependencies = array(phase['dependsOn'], 'dependsOn', False)
         if any(not isinstance(item, str) or item not in phases for item in dependencies) or len(set(dependencies)) != len(dependencies):
             raise LabError('INVALID_PHASE_DEPENDENCY', phase['id'])
-        if name_key(phase['id']) in {name_key(id_) for id_ in phases}:
+        if name_key(identifier(phase['id'], 'phase')) in {name_key(id_) for id_ in phases}:
             raise LabError('DUPLICATE_ID', phase['id'])
         distinct_id(phase['id'], phases, 'phase')
         relative_path(phase['id'])
@@ -212,7 +212,7 @@ def validate(document):
         for step in array(phase['steps'], 'steps'):
             shape(step, ('id', 'operation', 'fixtures', 'verify'),
                   ('directory', 'retain', 'expect', 'folder', 'maxPages', 'isolateCycles'))
-            if name_key(step['id']) in {name_key(id_) for id_ in steps}:
+            if name_key(identifier(step['id'], 'step')) in {name_key(id_) for id_ in steps}:
                 raise LabError('DUPLICATE_ID', step['id'])
             distinct_id(step['id'], steps, 'step')
             relative_path(step['id'])

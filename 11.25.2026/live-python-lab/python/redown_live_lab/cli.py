@@ -241,7 +241,9 @@ def main(argv=None):
         if args.command in ('corpus', 'plan', 'validate', 'run'):
             return workspace_pipeline(args, paths)
         if args.command == 'compare':
-            left, right = (ordinary_directory(under(paths['runs'], path)) for path in (args.before, args.after))
+            left, right = (under(paths['runs'], path) for path in (args.before, args.after))
+            for artifact in (left, right):
+                ordinary_directory(artifact.parent if artifact.is_file() else artifact)
             result = compare(left, right)
             if args.output:
                 destination = under(paths['runs'], args.output)

@@ -151,7 +151,38 @@ def scenario_signature(entry, manifest):
                    'budget': manifest['budget']})
 
 
+def compare_preflight(left, right):
+    def facts(path):
+        if path.is_dir():
+            run, frozen, _ = load_run(path)
+            return {'manifestDigest': frozen['manifestDigest'], 'state': projection(path)['state'],
+                    'evidenceClass': run['environment']['evidenceClass'], 'blockers': []}
+        report = read_json(path)
+        if report.get('cloudMutation') != 'NOT_SUBMITTED' or report.get('status') not in ('READY', 'BLOCKED'):
+            raise LabError('PREFLIGHT_RECEIPT_REQUIRED')
+        return {'manifestDigest': report['manifestDigest'], 'state': report['status'],
+                'evidenceClass': report['evidenceClass'], 'blockers': report['blockers']}
+
+    before, after = facts(left), facts(right)
+    changed = before['manifestDigest'] != after['manifestDigest']
+    classifications = Counter()
+    cases = []
+    for label, side in (('before', before), ('after', after)):
+        for blocker in side['blockers']:
+            category = ('UNSUPPORTED' if blocker['code'].endswith('_UNSUPPORTED') else 'BLOCKED')
+            classifications[category] += 1
+            cases.append({'side': label, 'classification': category, **blocker})
+    if changed:
+        classifications['WORKLOAD_CHANGED'] += 1
+    elif not cases:
+        classifications['INCONCLUSIVE'] += 1
+    return {'before': before, 'after': after, 'manifestChanged': changed,
+            'counts': dict(classifications), 'preflightComparisons': cases}
+
+
 def compare(left, right):
+    if left.is_file() or right.is_file():
+        return compare_preflight(left, right)
     old, baseline, old_manifest = load_run(left)
     new, candidate, new_manifest = load_run(right)
     before = projection(left, baseline['schedule'])

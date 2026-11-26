@@ -66,7 +66,7 @@ function cleanReceipt(receipt,key,size,id) {
 
 export function createPythonLab({runtime,storage,build,authority,buckets,checkBucket,workerPrefix,checkUpload,upload,
  fileApi,spoolDirectory=labSpoolDirectory,storageEstimate=estimateStorage,clock=Date.now}) {
- let grant=null,starting=false,generation=0,lastCode=null;
+ let grant=null,starting=false,generation=0,lastCode=null,draining=null;
  const status=()=>grant?{
   state:grant.client?'CONNECTED':grant.ticket?'PAIRED':grant.ready?'PAIRING':'STARTING',
   ready:grant.ready,scopeId:grant.id,bucketName:grant.target.bucketName,prefix:grant.target.prefix,
@@ -81,7 +81,13 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   clearTimeout(run.timer);
   run.controller.abort();
   const transfer=run.transfer;
-  if(transfer)void Promise.resolve(transfer.task).finally(()=>transfer.spool.close()).catch(()=>{});
+  if(transfer){
+   const previous=draining;
+   const cleanup=Promise.resolve(transfer.task).finally(()=>transfer.spool.close());
+   const pending=Promise.allSettled([previous,cleanup]);
+   draining=pending;
+   void pending.then(()=>{if(draining===pending)draining=null;});
+  }
  }
  function revoke(code='LAB_SESSION_ENDED') {
   generation++;
@@ -143,6 +149,9 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    const checked=mode==='read-write'?await checkUpload(target,AbortSignal.timeout(35_000)):null;
    if(checked&&checked.sessionId!==auth.sessionId)throw labError('AUTH_SESSION_CHANGED');
    // Scope is fixed before launching the relay. Opening the card never provisions a Worker.
+   // A prior client may have disconnected after dispatch. Let its local
+   // transfer and spool drain before opening the next grant.
+   await draining;
    const directory=await spoolDirectory();
    const estimate=await storageEstimate();
    const free=Number.isFinite(estimate?.quota)&&Number.isFinite(estimate?.usage)?Math.max(0,estimate.quota-estimate.usage):null;
@@ -206,6 +215,7 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   const {runId,mode,budget}=input;
   if(!uploadId(runId)||!['read','write'].includes(mode))throw labError('INVALID_INPUT');
   if(session.run)throw labError('LAB_RUN_BUSY');
+  if(draining)throw labError('LAB_TRANSFER_DRAINING');
   if(mode==='write'&&(session.mode!=='read-write'||session.usedRuns.has(runId)))throw labError('LAB_WRITE_SCOPE_DENIED');
   for(const [index,field] of budgetFields.entries()){
    const remaining=field==='diskBytes'?session.diskBytes:maximums[index]-(session.counters[field]??0);
@@ -224,7 +234,7 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    session.usedRuns.add(runId);
   }
   const controller=new AbortController(),duration=Math.min(budget.seconds*1000,session.expiresAt-clock());
-  const run={id:runId,mode,budget,used:{files:0,trafficBytes:0,providerRequests:0,operations:0},controller,
+  const run={id:runId,mode,budget,used:{files:0,trafficBytes:0,providerRequests:0,operations:0},controller,transferIds:new Set(),
    target:normalizeTarget({...session.target,prefix:session.target.prefix+runId+'/'}),transfer:null};
   run.timer=setTimeout(()=>{if(session.run===run)abortRun(session);},duration);
   run.timer.unref?.();
@@ -263,6 +273,7 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
  async function transferOpen(session,run,method,input) {
   requireKeys(input,method==='uploadOpen'?['id','path','size','sha256','timeout','contentType']:['id','path','size','etag','version','timeout']);
   uploadOptions(input);
+  if(run.transferIds.has(input.id))throw labError('TRANSFER_ID_REUSED');
   if(input.size>run.budget.diskBytes||run.transfer)throw labError('LAB_SPOOL_UNAVAILABLE');
   const key=targetKey(run,input.path,input.size);
   const write=method==='uploadOpen';
@@ -285,6 +296,7 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   const signal=AbortSignal.any([run.controller.signal,controller.signal,AbortSignal.timeout(input.timeout*1000)]);
   const transfer={key,spool,controller,signal,input,kind:write?'upload':'download',offset:0,
    state:write?'staging':'running',progress:{phase:write?'staging':'reading',bytes:0}};
+  run.transferIds.add(input.id);
   run.transfer=transfer;
   if(!write)launch(session,run,transfer,()=>download(session,run,transfer));
   return {id:input.id,chunkBytes};

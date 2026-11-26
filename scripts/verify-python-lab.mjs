@@ -228,13 +228,21 @@ try{
  assert.equal((await paired.next()).error.code,'INVALID_OBJECT_PATH');
  paired.send({method:'metadata',input:{path:'private.txt',bucketName:'unrelated'}});
  assert.equal((await paired.next()).error.code,'INVALID_INPUT');
- paired.send({method:'uploadOpen',input:{id:randomUUID(),path:'file.txt',size:5,sha256:'0'.repeat(64),
-  timeout:30,contentType:'text/plain'}});
+ const uploadId=randomUUID(),upload={id:uploadId,path:'file.txt',size:5,sha256:'0'.repeat(64),timeout:30,contentType:'text/plain'};
+ paired.send({method:'uploadOpen',input:upload});
  assert.equal((await paired.next()).error.code,'LAB_SPOOL_UNAVAILABLE');
+ paired.send({method:'uploadOpen',input:{...upload,size:0}});
+ assert.equal((await paired.next()).state,'available');
+ paired.send({method:'cancel',input:{id:uploadId}});
+ assert.equal((await paired.next()).data.cancellationRequested,true);
+ paired.send({method:'closeTransfer',input:{id:uploadId}});
+ assert.equal((await paired.next()).data.closed,true);
+ paired.send({method:'uploadOpen',input:{...upload,size:0}});
+ assert.equal((await paired.next()).error.code,'TRANSFER_ID_REUSED');
  paired.socket.destroy();
  await waitFor(async()=>(await lab.ui('status')).state==='PAIRED');
  assert.equal(r2Puts+workerWrites,0);
- receipt('scope escape, foreign bucket field and spool/request admission denied before mutation');
+ receipt('scope escape, foreign bucket, budgets, pre-dispatch cancellation and transfer ID reuse');
 
  const local=await cli(['init']);
  await mkdir(join(local.input,'Root A','旅行'),{recursive:true});
@@ -299,7 +307,7 @@ try{
  assert.equal(outcomes.LIST_EXPECTATIONS_PRESENT.length,1);
  assert.equal(outcomes.UPLOAD_SHA256_VERIFIED.length,19);
  assert.equal(outcomes.REMOTE_BYTES_OBSERVED.length,19);
- receipt('Comprehensive executes the same interpreter for 19 formats plus two preserved conflicts',
+ receipt('Comprehensive executes the same interpreter for 19 fixtures plus two preserved conflicts',
   {verifiedUploads:outcomes.UPLOAD_SHA256_VERIFIED.length,conflicts:outcomes.CONFLICT_PRESERVED.length,
    metadata:outcomes.METADATA_MATCH.length,listing:outcomes.LIST_EXPECTATIONS_PRESENT.length,
    independentDownloads:outcomes.REMOTE_BYTES_OBSERVED.length,receiptDirectory:comprehensive.evidencePath});

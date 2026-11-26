@@ -9315,7 +9315,7 @@
       "src/chrome/local-upload-service.mjs": "3a9249ef9842ef61c4715e3c7b23ea2885f4f9933b4a39e6924e3a2f27399603",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "4717e381c8503362164040b16e9e3bad45e978b18735b564f303e51346f7ea3a",
-      "src/chrome/python-lab/session.mjs": "1943f3552c160f0601dc9a916dd684e1a0476249cc5619115c39e9bcb26738b5",
+      "src/chrome/python-lab/session.mjs": "d6f0d1daf4c54acb8422387dbe6f983ed73711a1fc4844ae22227edde88673f4",
       "src/chrome/python-lab/spool.mjs": "e4d50b4325cb0a81094ded3e4dbc1d3ef80411e780ff13c597ce512028b720b5",
       "src/chrome/python-lab/vendor/sha256.mjs": "d1cc9098f317cf4c5c1652090f680cd4303a9854e345845199ccdae64269c79e",
       "src/chrome/registrar.mjs": "5439ead09e28f0f90774eddc00400eb16feb8a1741d59dae017a5dfc37885317",
