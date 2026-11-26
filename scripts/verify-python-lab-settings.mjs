@@ -40,7 +40,7 @@ const server=createServer(async(req,res)=>{
    return;
   }
   const types={'/extension/app.css':'text/css','/extension/python-lab-settings.mjs':'text/javascript',
-   '/src/chrome/python-lab/spool.mjs':'text/javascript','/src/chrome/python-lab/vendor/sha256.mjs':'text/javascript'};
+   '/src/chrome/python-lab/spool.mjs':'text/javascript','/src/chrome/python-lab/campaign-policy.mjs':'text/javascript','/src/chrome/python-lab/vendor/sha256.mjs':'text/javascript'};
   if(!Object.hasOwn(types,req.url)){res.writeHead(404).end();return;}
   res.setHeader('Content-Type',types[req.url]);res.end(await readFile('.'+req.url));
  }catch{res.writeHead(500).end();}
@@ -101,14 +101,16 @@ try{
  await card.getByRole('button',{name:'Start session'}).click();
  await card.getByText('Choose the QA target and approve access first.').waitFor();
  assert.deepEqual(await page.evaluate(()=>window.labFixture.grants),[]);
- await card.getByRole('checkbox',{name:/I approve this bucket/}).check();
+ await card.getByLabel('Session duration').fill('75');
+ await card.getByRole('checkbox',{name:/I approve this QA destination/}).check();
  await card.getByRole('button',{name:'Start session'}).click();
  assert.deepEqual(await page.evaluate(()=>window.labFixture.grants),[{permissions:['nativeMessaging']}]);
  const value=await card.getByLabel('Windows CMD from the repository root').inputValue();
  assert.equal(value,'lab-local\\.venv\\Scripts\\redown-lab.exe pair --code 0000111122223333');
  const actions=await page.evaluate(()=>window.labFixture.calls);
  assert.deepEqual(actions.find(item=>item.action==='start').input,
-  {accountId:'owned-account',bucketName:'existing-qa',mode:'read-write',minutes:30,scopeId:null});
+  {accountId:'owned-account',bucketName:'existing-qa',mode:'read-write',minutes:75,scopeId:null,campaignId:null,
+   ceilings:{files:2500,providerRequests:660000,operations:10000,trafficBytes:20*2**30,diskBytes:2**30,costMicros:7000000}});
  report.checks.push('explicit scoped approval and precise Windows pairing command');
  await page.evaluate(()=>window.labFixture.connect());
  await card.getByText('Connected to Python CLI',{exact:true}).waitFor();
@@ -127,7 +129,7 @@ try{
  await card.getByRole('button',{name:'Configure session'}).click();
  await bucket.selectOption('existing-qa');
  await page.evaluate(()=>window.labFixture.startError('NATIVE_API_UNAVAILABLE'));
- await card.getByRole('checkbox',{name:/I approve this bucket/}).check();
+ await card.getByRole('checkbox',{name:/I approve this QA destination/}).check();
  await card.getByRole('button',{name:'Start session'}).click();
  await card.locator('[data-lab-session-notice]').getByText(/reload REDOWN once from chrome:\/\/extensions/).waitFor();
  assert.equal(await card.getByRole('button',{name:'Copy CMD'}).isVisible(),false);

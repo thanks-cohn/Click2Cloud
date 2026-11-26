@@ -11,6 +11,7 @@ import {build} from 'esbuild';
 import 'fake-indexeddb/auto';
 import {Miniflare} from 'miniflare';
 import {createPythonLab,extensionId,limits} from '../src/chrome/python-lab/session.mjs';
+import {campaignDefaults} from '../src/chrome/python-lab/campaign-policy.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {createLocalUploadService,uploadReadScopes} from '../src/chrome/local-upload-service.mjs';
 import {createRemoteTransport,preparedDestination} from '../src/cloudflare/transport.mjs';
@@ -36,6 +37,7 @@ const childEnv={...process.env,REDOWN_LAB_STATE_DIR:stateRoot};
 const report={evidenceClass:'python-native-loopback-workerd-r2-fixture',sourceRevision:BUILD_INFO.revision,
  extensionVersion:BUILD_INFO.extensionVersion,remoteCloudflareWrites:0,checks:[]};
 const evidence=join(temp,'fixture-summary.json');
+const ownerCount=Number(process.env.REDOWN_OWNER_FIXTURE_FILES??0);
 const children=new Set();
 let worker,lab,executeFault=null,r2Puts=0,workerWrites=0,providerReads=0,current,history;
 await mkdir(stateRoot,{mode:0o700});
@@ -92,7 +94,8 @@ const runtime={id:extensionId,getURL:path=>origin+path,connectNative(){
   onDisconnect:{addListener:listener=>disconnect.add(listener),removeListener:listener=>disconnect.delete(listener)},
   postMessage(message){child.stdin.write(frame(message));},disconnect(){child.stdin.end();}};
 }};
-const memory={};const storage={async get(key){return {[key]:memory[key]};},async set(data){Object.assign(memory,data);}};
+const memory={};const storage={async get(keys){return Object.fromEntries([keys].flat().map(key=>[key,memory[key]]));},
+ async getKeys(){return Object.keys(memory);},async set(data){Object.assign(memory,data);}};
 const opfs=()=>({
  async getFileHandle(name){
   const path=join(spoolRoot,name);
@@ -111,8 +114,8 @@ const waitFor=async f=>{
  for(let attempt=0;attempt<120;attempt++){const value=await f();if(value)return value;await delay(30);}
  throw Error('Fixture wait timed out');
 };
-async function bind(mode='read-write',scopeId=null){
- await lab.ui('start',{accountId,bucketName,mode,scopeId,minutes:15});
+async function bind(mode='read-write',scopeId=null,extra={}){
+ await lab.ui('start',{accountId,bucketName,mode,scopeId,minutes:15,...extra});
  return waitFor(async()=>{const state=await lab.ui('status');return state.state==='PAIRING'&&state;});
 }
 async function rawHandshake(endpoint,key) {
@@ -167,7 +170,8 @@ try{
     return new Response(item.body,{headers:{etag:item.httpEtag,'content-length':String(item.size)}});
    }
    const result=await bucket.list({prefix:url.searchParams.get('prefix')??'',
-    cursor:url.searchParams.get('cursor')||undefined,delimiter:url.searchParams.get('delimiter')||undefined});
+    cursor:url.searchParams.get('cursor')||undefined,delimiter:url.searchParams.get('delimiter')||undefined,
+    limit:Number(url.searchParams.get('per_page')||1000)});
    return Response.json({success:true,result:{objects:result.objects.map((item)=>({
     key:item.key,size:item.size,etag:item.etag,version:item.version
    })),delimited:result.delimitedPrefixes,cursor:result.cursor??'',truncated:result.truncated}});
@@ -194,11 +198,107 @@ try{
   permission:async()=>true,opfsCapability:()=>true,
   authority:oauth.authority,buckets:async()=>({buckets:[{name:bucketName}],cursor:''}),
   checkBucket:async()=>true,workerPrefix:async()=>plan.prefixScope,checkUpload:service.checkDestination,
-  upload:service.dispatchLabFile,
+  upload:service.dispatchLabFile,readUploadOutcome:id=>current.readRemoteResult(id),reconcileUpload:service.reconcileFile,
   fileApi:(expectedSession,beforeRequest)=>createClick2CloudFileApi({send:async()=>{throw Error('Fixture write denied');},
    http:{boundedFetch:fetch,request(path,options){beforeRequest();return oauth.request(path,{...options,expectedSession});}}}),
   spoolDirectory:async()=>opfs()
  });
+ if(ownerCount){
+  assert(Number.isSafeInteger(ownerCount)&&ownerCount>0);
+  const initial=await bind('read-write',null,{ceilings:campaignDefaults,minutes:75});
+  await cli(['pair','--code',initial.pairCode]);
+  const local=await cli(['init']);
+  const profiles=[['Root A','旅行','txt'],['Root B','Long paths','unknown'],['Root C','café notes','bin']];
+  const sizes=[0,11,997,4096,16384,131072,131073];
+  let bytes=0;
+  for(let i=0;i<ownerCount;i++){
+   const [top,nested,ext]=profiles[i%profiles.length];
+   const parent=i%31===0?local.input:join(local.input,top,nested);
+   await mkdir(parent,{recursive:true});
+   const name=`${String(i).padStart(4,'0')} ${'界'.repeat(i%29===0?74:2)}.${ext}`;
+   const content=Buffer.alloc(sizes[i%sizes.length],i%256);
+   if(content.length>=4)content.writeUInt32LE(i);
+   bytes+=content.length;
+   await writeFile(join(parent,name),content);
+  }
+  const start=performance.now();
+  const budget=ownerCount===600?['--file-budget','600','--provider-requests','160000','--traffic-bytes','536870912',
+   '--temp-disk-bytes','268435456','--operation-budget','750','--audit-requests','24',
+   '--audit-operations','56','--audit-traffic-bytes','8388608']:[];
+  const run=await cli(['campaign','--input',local.input,'--output','owner-fixture','--operations','upload',
+   '--execution','completion','--benchmark-seconds','2400','--execution-seconds','3600',
+   '--inventory-seconds','1800','--transfer-seconds','300','--inactivity-seconds','120','--request-seconds','30',
+   '--upload-seconds','300','--verification-seconds','300','--authorization-minutes','75',
+   '--audit-seconds','300','--concurrency','1','--verification','production','--expect-files',String(ownerCount),
+   '--live','--approve-cost-usd',ownerCount===600?'2':'7',...budget]);
+  assert.equal(run.status,'PASS');assert.equal(run.productionConfirmedFiles,ownerCount);
+  assert.equal(run.productionConfirmedBytes,bytes);assert.equal(run.locationAudit.matchedCount,ownerCount);
+  assert.equal(run.locationAudit.observedUniqueCount,ownerCount);assert.equal(run.locationAudit.stagingBytes,0);
+  assert.equal(run.locationAudit.completeScopedListing,true);
+  assert.equal(r2Puts,ownerCount);assert.equal(workerWrites,ownerCount);assert.equal(providerReads,0);
+  const check=await cli(['check-location','--run',run.receiptBundle]);
+  assert.equal(check.status,'PASS');assert.equal(check.matchedFiles,ownerCount);
+  const ops=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
+  assert.equal(ops.filter(row=>row.event==='uploadAcknowledged').length,ownerCount);
+  assert.equal(ops.filter(row=>row.event==='result'&&row.state==='PASS'&&row.readback===null).length,ownerCount);
+  await Promise.all(accounting);
+  const queue=await history.jobs({limit:ownerCount});
+  assert.equal(queue.finished,ownerCount);
+  assert(queue.items.every(row=>row.status==='verified'));
+  assert.equal((await bucket.head('unrelated/private.txt')).size,12);
+  receipt('Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue',{
+   files:ownerCount,bytes,elapsedMs:Math.round(performance.now()-start),receiptSummary:run.benchmark,
+   publicationWrites:workerWrites,stagingPuts:r2Puts,independentContentGets:providerReads,
+   audit:run.locationAudit,usage:run.usage,receiptBundle:run.receiptBundle});
+  if(ownerCount<=24){
+   const download=await cli(['download-campaign','--run',run.receiptBundle,'--retain-downloads','--live','--approve-cost-usd','1']);
+   assert.equal(download.downloadStatesInWindow.PASS,ownerCount);
+   assert.equal(download.benchmark.independentSha256WithinWindow,ownerCount);
+   assert.equal(r2Puts,ownerCount);assert.equal(workerWrites,ownerCount);assert.equal(providerReads,ownerCount);
+   assert.equal((await cli(['check-location','--run',run.receiptBundle])).status,'PASS');
+   assert(download.share.every(path=>!path.includes('/downloads/')));
+   receipt('Download-only under a read-write grant verifies original keys with zero new PUT or publication calls',
+    {files:ownerCount,bytes,reads:providerReads,verified:download.benchmark.independentSha256WithinWindow});
+   const nextInput=join(temp,'deadline-input');
+   await mkdir(nextInput);
+   for(let i=0;i<12;i++)await writeFile(join(nextInput,`${i}.txt`),String(i));
+   const incomplete=await cli(['campaign','--input',nextInput,'--execution','timed','--benchmark-seconds','2',
+    '--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1'],3);
+   const initialWrites=incomplete.productionConfirmedFiles;
+   assert(initialWrites<12);assert(incomplete.continuationCommand.includes('continue-campaign'));
+   const final=await cli(['continue-campaign','--input',nextInput,'--run',incomplete.receiptBundle,
+    '--execution','completion','--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1']);
+   assert.equal(final.productionConfirmedFiles,12);assert.equal(final.target.prefix,incomplete.target.prefix);
+   assert.equal(workerWrites,ownerCount+12);
+   assert.equal(final.locationAudit.matchedCount,12);
+   receipt('Timed cutoff preserves pending work; read-write continuation keeps exact keys and does not replay publications',
+    {before:initialWrites,final:12,additionalPublicationWrites:12-initialWrites});
+   const lostInput=join(temp,'lost-ack-input');
+   await mkdir(lostInput);await writeFile(join(lostInput,'lost.txt'),'lost acknowledgement');
+   executeFault='lost-ack';
+   const lost=await cli(['campaign','--input',lostInput,'--execution-seconds','90','--audit-seconds','30',
+    '--live','--approve-cost-usd','1'],3);
+   executeFault=null;
+   assert.equal(lost.productionConfirmedFiles,0);
+   assert.equal(lost.statusCounts.UNCERTAIN,1);
+   const reconciled=await cli(['continue-campaign','--input',lostInput,'--run',lost.receiptBundle,
+    '--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1']);
+   assert.equal(reconciled.productionConfirmedFiles,1);
+   assert.equal(reconciled.locationAudit.matchedCount,1);
+   assert.equal(workerWrites,ownerCount+13);
+   receipt('A lost production acknowledgement is reconciled against the same Worker operation without replay',
+    {initialUncertain:1,recovered:1,additionalPublicationWrites:0});
+   await lab.ui('end');
+   const restored=await bind('read-only',run.target.scopeId,{campaignId:run.campaignId,ceilings:campaignDefaults,minutes:75});
+   await cli(['pair','--code',restored.pairCode]);
+   const audit=await cli(['audit-location','--run',run.receiptBundle,'--live','--approve-cost-usd','1']);
+   assert.equal(audit.locationAudit.matchedCount,ownerCount);assert.equal(workerWrites,ownerCount+13);
+   assert.equal((await cli(['check-location','--run',run.receiptBundle])).status,'PASS');
+   receipt('A freshly authorized read-only grant can independently audit the exact original campaign',
+    {matched:ownerCount,additionalPublicationWrites:0});
+  }
+  report.state='PASS';
+ }else{
  const initial=await bind();
  const endpoint=await getEndpoint();
  assert.equal(endpoint.host,'127.0.0.1');
@@ -352,6 +452,7 @@ try{
  assert.equal(await (await bucket.get('unrelated/private.txt')).text(),'out of scope');
  receipt('revocation removed native endpoint; unrelated object remained intact');
  report.state='PASS';
+ }
 }catch(error){
  report.state='FAIL';report.error=String(error.stack??error);
  process.exitCode=1;

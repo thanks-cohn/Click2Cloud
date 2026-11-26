@@ -20,7 +20,7 @@ ORIGIN = 'chrome-extension://' + EXTENSION_ID + '/'
 METHODS = frozenset((
     'pair', 'describe', 'admit', 'releaseRun', 'uploadOpen', 'uploadAppend',
     'uploadStart', 'readOpen', 'poll', 'pull', 'closeTransfer', 'cancel',
-    'metadata', 'list',
+    'metadata', 'list', 'admitCampaign', 'auditList', 'campaignUsage', 'campaignOutcome', 'drainCampaign', 'registerCampaignFiles',
 ))
 AUTHENTICATED_IDLE_TIMEOUT = 60 * 60
 PAIRING_TIMEOUT = 120
@@ -196,7 +196,7 @@ def main():
     server.relay = relay
     endpoint = directory / 'connection.json'
     record = {'version': 1, 'host': '127.0.0.1', 'port': server.server_address[1], 'key': relay.key,
-              'relayId': uuid.uuid4().hex, 'expiresAt': time.time() + 60 * 60 + 120}
+              'relayId': uuid.uuid4().hex, 'expiresAt': time.time() + 2_147_480 + 120}
     atomic_private_json(endpoint, record)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     relay.send({'type': 'ready'})

@@ -29,8 +29,9 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
   }
 
   const base=l=>`/accounts/${encodeURIComponent(l.accountId)}/r2/buckets/${encodeURIComponent(l.bucketName)}/objects`;
-  async function page(target,p='',cursor='',delimiter='/',options={}) {
-    const l=location(target),query=new URLSearchParams({per_page:'1000'});
+  async function page(target,p='',cursor='',delimiter='/',options={},perPage=1000) {
+    if(!Number.isSafeInteger(perPage)||perPage<1||perPage>1000)throw Error('Invalid listing page size.');
+    const l=location(target),query=new URLSearchParams({per_page:String(perPage)});
     if(p)query.set('prefix',p);
     if(cursor)query.set('cursor',cursor);
     if(delimiter)query.set('delimiter',delimiter);
@@ -172,8 +173,8 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     prepareBucket:({source},o)=>{const l=location(source);return message('cfProvision',{...l,profileName:l.bucketName,folders:{}},o).then(result=>({verification:result.verification,menuUpdated:result.menuUpdated,menuError:result.menuError}));},
     createBucket:({accountId,name:n},o)=>message('cfCreateBucket',{accountId,name:n},o),
     publicUrls:({source},o)=>message('cfPublicAddresses',location(source),o),
-    async listRaw({source,cursor='',immediate=false},options={}) {
-      const l=location(source),p=await page(l,l.prefix,cursor,immediate?'/':'',options);
+    async listRaw({source,cursor='',immediate=false,perPage=1000},options={}) {
+      const l=location(source),p=await page(l,l.prefix,cursor,immediate?'/':'',options,perPage);
       return {entries:p.objects.map(object=>({...object,key:String(object.key||object.name||''),folder:false})),cursor:p.cursor};
     },
     async list({source,cursor=''},options) {
@@ -222,7 +223,8 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         signal?.throwIfAborted();onProgress?.({phase:'uploading',bytes:0,totalBytes:file.size});attempted=true;
         const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{method:'PUT',headers:{'content-type':file.type||'application/octet-stream'},body:file,timeoutMs:options.uploadTimeoutMs,signal});
         const body=await response.json().catch(()=>null);
-        if(!response.ok || body?.success!==true)throw Error('Upload was not confirmed.');
+        if(!response.ok || body?.success!==true)throw Object.assign(Error('Upload was not confirmed.'),
+          {code:response.ok?'R2_STAGE_UNCONFIRMED':'HTTP_'+response.status});
         const uploaded=await stat({source:l,key:staging},options);
         if(Number(uploaded.object?.size)!==file.size)throw Error('Uploaded file size could not be verified.');
         await verifyUpload(l,staging,file,options);
@@ -275,7 +277,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         return {bytes:Array.from(bytes),offset,etag:currentEtag,total:Number(range[3]),done:offset+count===Number(range[3])};
       }finally{if(!response.body?.locked)await response.body?.cancel();}
     },
-    async readStream({source,key:k,maxBytes,etag,expectedSize},{signal,onChunk,requestTimeoutMs}={}) {
+    async readStream({source,key:k,maxBytes,etag,expectedSize,representationMetadata=false},{signal,onChunk,requestTimeoutMs}={}) {
       if(typeof onChunk!=='function')throw Error('A streaming sink is required.');
       const capped=maxBytes!==undefined;
       if(capped&&(!Number.isSafeInteger(maxBytes)||maxBytes<1))throw readError('INVALID_RANGE');
@@ -291,9 +293,16 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       const reader=response.body.getReader();
       let size=0, ended=false, extra=false;
       try{
-        if(wanted&&objectETag(response.headers.get('etag'))!==wanted)throw readError('OBJECT_CHANGED');
+        const encoding=response.headers.get('content-encoding');
+        const encoded=Boolean(encoding&&encoding.toLowerCase()!=='identity');
+        let tag;
+        try{tag=objectETag(response.headers.get('etag'));}
+        catch(error){if(wanted&&!representationMetadata)throw error;}
+        // A caller with pre/post object metadata can verify decoded bytes when
+        // the Object API supplies a weak or representation-specific wire tag.
+        if(wanted&&tag!==wanted&&(!representationMetadata||tag&&!encoded))throw readError('OBJECT_CHANGED');
         const contentLength=response.headers.get('content-length');
-        const declared=contentLength!==null&&/^\d+$/.test(contentLength)?Number(contentLength):null;
+        const declared=(!representationMetadata||!encoded)&&contentLength!==null&&/^\d+$/.test(contentLength)?Number(contentLength):null;
         if(expectedSize!==undefined&&declared!==null&&declared!==expectedSize)throw readError('OBJECT_CHANGED');
         while(!capped||size<maxBytes){
           signal?.throwIfAborted();

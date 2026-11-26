@@ -15,12 +15,15 @@ from .install_host import install, registration_status
 from .inventory import inventory, ordinary_directory, relative_path
 from .manifest import OFFLINE_CAPABILITIES, SCHEMA, build_plan, money, read_json, validate
 from .runner import reconcile, run
+from .owner_campaign import MAX_INT, MAX_TIMER_SECONDS, campaign, existing_campaign
+from .location_audit import check as check_location
 from .transport import ExtensionClient, connect
 
 DEFAULT_WORKSPACE = 'lab-local'
 MIB = 1024**2
 EXIT_CODES = {'PASS': 0, 'READY': 0, 'REGISTERED': 0, 'PAIRED': 0, 'NOT_NEEDED': 0,
-              'CANCELLATION_REQUESTED': 0, 'FAIL': 1, 'BLOCKED': 2, 'UNCERTAIN': 3, 'CANCELLED': 130}
+              'CANCELLATION_REQUESTED': 0, 'FAIL': 1, 'BLOCKED': 2, 'UNCERTAIN': 3, 'CANCELLED': 130,
+              'INCOMPLETE': 3, 'AUDIT_INCOMPLETE': 3}
 
 
 def output(data):
@@ -77,6 +80,53 @@ def execution_options(parser, *, manifest=True):
     parser.add_argument('--approve-cost-usd', type=float, help='Maximum modeled run cost in USD (required with --live).')
 
 
+def integer_flag(maximum=MAX_INT):
+    def parse_integer(raw):
+        value = int(raw)
+        if not 1 <= value <= maximum:
+            raise argparse.ArgumentTypeError(f'expected an integer between 1 and {maximum}')
+        return value
+    return parse_integer
+
+
+def campaign_options(command, *, transfer=False):
+    seconds = integer_flag(MAX_TIMER_SECONDS)
+    command.add_argument('--live', action='store_true', required=True, help='Explicitly use the paired cloud scope.')
+    command.add_argument('--approve-cost-usd', required=True, help='Maximum modeled cost in USD within the trusted session ceiling.')
+    command.add_argument('--authorization-minutes', type=integer_flag(MAX_TIMER_SECONDS // 60), default=75,
+                         help='Minimum total duration approved while pairing, minutes (default 75).')
+    command.add_argument('--benchmark-seconds', type=seconds, default=2400,
+                         help='Measurement window in seconds (default 2400).')
+    command.add_argument('--execution-seconds', type=seconds, default=3600,
+                         help='Execution ceiling from admission, including audit, seconds (default 3600).')
+    command.add_argument('--transfer-seconds', type=seconds, default=300,
+                         help='Absolute ceiling per file transfer, seconds (default 300).')
+    command.add_argument('--inactivity-seconds', type=seconds, default=120,
+                         help='Abort after this many seconds without reported phase or byte progress (default 120).')
+    command.add_argument('--request-seconds', type=integer_flag(30), default=30,
+                         help='Authenticated metadata/GET request timeout, seconds (1–30, default 30).')
+    command.add_argument('--upload-seconds', type=seconds, default=300,
+                         help='Temporary provider PUT timeout, seconds (default 300).')
+    command.add_argument('--verification-seconds', type=seconds, default=300,
+                         help='Production staging read-back phase timeout, seconds (default 300).')
+    command.add_argument('--audit-seconds', type=seconds, default=300,
+                         help='Time reserved for independent scoped metadata listing, seconds (default 300).')
+    for flag, units in (('audit-requests', 'provider requests'), ('audit-operations', 'relay operations'),
+                        ('audit-traffic-bytes', 'modeled bytes'), ('file-budget', 'upload file attempts'),
+                        ('provider-requests', 'provider requests'), ('operation-budget', 'operations'),
+                        ('traffic-bytes', 'modeled bytes'), ('temp-disk-bytes', 'temporary browser disk bytes')):
+        command.add_argument('--' + flag, type=integer_flag(), help=f'Campaign ceiling in {units} (default derived from plan).')
+    command.add_argument('--concurrency', type=integer_flag(), default=1,
+                         help='Concurrent file slots. This build supports one Laboratory slot.')
+    if transfer:
+        command.add_argument('--admit-partial', action='store_true', help='Leave work outside this grant budget pending.')
+        command.add_argument('--execution', choices=('completion', 'timed'), default='completion',
+                             help='Completion continues beyond the measured window within execution and grant deadlines.')
+    else:
+        command.set_defaults(execution='completion', admit_partial=False)
+    command.set_defaults(expect_files=None, retain_downloads=False)
+
+
 def parse(argv):
     parser = argparse.ArgumentParser(prog='redown-lab', description='REDOWN scoped manifest-driven Python Laboratory')
     parser.add_argument('--version', action='version', version=f'%(prog)s {__version__} (wire {PROTOCOL})')
@@ -119,11 +169,41 @@ def parse(argv):
                                    help='Observe uncertain uploads using the original, frozen scope and no replay.')
     recovery.add_argument('--run', required=True)
     recovery.add_argument('--expected-digest', help='Optional resolved digest from the original receipt.')
+    owner = commands.add_parser('campaign', help='Inventory, upload and independently audit one dropped folder tree.')
+    campaign_options(owner, transfer=True)
+    owner.add_argument('--input', help='Input container (default lab-local/input).')
+    owner.add_argument('--output', help='Group under lab-local/runs (default lab-local/runs).')
+    owner.add_argument('--inventory-seconds', type=integer_flag(MAX_TIMER_SECONDS), default=1800,
+                       help='Maximum source inventory time before admission, seconds (default 1800).')
+    owner.add_argument('--operations', choices=('upload', 'round-trip'), default='upload')
+    owner.add_argument('--verification', choices=('production', 'sha256'), default='production',
+                       help='Default production confirmation does not read final object content.')
+    owner.add_argument('--retain-downloads', action='store_true', help='Retain copies only for SHA-256 readback.')
+    owner.add_argument('--expect-files', type=integer_flag(), help='Expected selection count for acceptance.')
+    owner.add_argument('--new-run', action='store_true', help='Deliberately allocate a fresh prefix despite unfinished local evidence.')
+    continuation = commands.add_parser('continue-campaign', help='Continue an owner campaign in its exact approved prefix.')
+    campaign_options(continuation, transfer=True)
+    continuation.add_argument('--run', required=True)
+    continuation.add_argument('--input', help='Original input directory (default lab-local/input).')
+    continuation.add_argument('--clear-cancel', action='store_true', help='Continue after an explicit cancellation marker.')
+    audit = commands.add_parser('audit-location', help='Independently list the exact frozen QA prefix. Reads metadata only.')
+    campaign_options(audit)
+    audit.add_argument('--run', required=True)
+    download = commands.add_parser('download-campaign', help='Read and SHA-256 verify original published keys with no cloud writes.')
+    campaign_options(download, transfer=True)
+    download.add_argument('--run', required=True)
+    download.add_argument('--retain-downloads', action='store_true')
+    checker = commands.add_parser('check-location', help='Verify the frozen plan and observed keys from local receipts, offline.')
+    checker.add_argument('--run', required=True)
+    checker.add_argument('--audit', help='Specific location-audit.json under the run, defaults to its latest window.')
     comparison = commands.add_parser('compare', help='Compare stable scenarios and explain changed workloads and environments.')
     comparison.add_argument('--before', required=True)
     comparison.add_argument('--after', required=True)
     comparison.add_argument('--output', help='Optional new JSON filename inside lab-local/runs.')
     result = parser.parse_args(argv)
+    if result.command == 'campaign' and (result.operations == 'round-trip' and result.verification != 'sha256' or
+                                         result.retain_downloads and result.verification != 'sha256'):
+        parser.error('round-trip and retained downloads require --verification sha256.')
     if result.command in ('validate', 'plan') and result.live:
         parser.error('validate uses --dry-run or --session.')
     if getattr(result, 'live', False) and result.approve_cost_usd is None:
@@ -247,6 +327,7 @@ def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(encoding='utf-8', errors='backslashreplace')
+    started = time.monotonic()
     args = parse(argv)
     try:
         if args.command == 'install-host':
@@ -276,6 +357,36 @@ def main(argv=None):
         if args.command == 'init':
             output({name: str(path) for name, path in paths.items()})
             return 0
+        claims = paths['runs'].parent / '.campaign-claims'
+        if args.command == 'campaign':
+            source = ordinary_directory(args.input or paths['input'])
+            output_dir = under(paths['runs'], args.output)
+            if output_dir.is_relative_to(source) or source.is_relative_to(output_dir):
+                raise LabError('CORPUS_WORKSPACE_OVERLAP')
+            output_dir = under(paths['runs'], args.output, create=True)
+            outcome = campaign(args, source, output_dir, claims, started=started)
+            output(outcome)
+            return EXIT_CODES[outcome['status']]
+        if args.command in ('continue-campaign', 'audit-location', 'download-campaign', 'check-location'):
+            root = ordinary_directory(under(paths['runs'], args.run))
+            if args.command == 'check-location':
+                latest = read_json(root / 'summary.json') if not args.audit else {}
+                selector = args.audit or latest.get('latestLocationAudit')
+                if not selector and latest.get('locationAudit') and latest.get('windowPath'):
+                    selector = latest['windowPath'] + '/location-audit.json'
+                if not selector:
+                    raise LabError('LOCATION_AUDIT_NOT_AVAILABLE')
+                audit = root / selector
+                audit = Path(os.path.abspath(audit))
+                if not audit.is_relative_to(root):
+                    raise LabError('RECEIPT_PATH_OUTSIDE_CAMPAIGN')
+                outcome = check_location(root, audit)
+            else:
+                mode = {'continue-campaign': 'continue', 'audit-location': 'audit', 'download-campaign': 'download'}[args.command]
+                source = (args.input or paths['input']) if mode == 'continue' else None
+                outcome = existing_campaign(args, root, source, claims, mode, started=started)
+            output(outcome)
+            return EXIT_CODES[outcome['status']]
         if args.command in ('corpus', 'plan', 'validate', 'run'):
             return workspace_pipeline(args, paths)
         if args.command == 'compare':
@@ -291,6 +402,26 @@ def main(argv=None):
             return 1 if result['counts'].get('REGRESSION') else 0
 
         root = ordinary_directory(under(paths['runs'], args.run))
+        frozen_doc = read_json(root / 'resolved-manifest.json')
+        if frozen_doc.get('schema') == 'redown.owner-campaign/1':
+            if args.command == 'cancel':
+                try:
+                    exclusive(root / 'cancel.request', (stamp() + '\n').encode('utf-8'))
+                except FileExistsError:
+                    pass
+                output({'status': 'CANCELLATION_REQUESTED', 'run': str(root)})
+                return 0
+            if args.command in ('report', 'status'):
+                summary, checkpoint = root / 'summary.json', root / 'checkpoint.json'
+                data = read_json(summary) if summary.exists() else {'status': 'IN_PROGRESS_OR_INTERRUPTED'}
+                if args.command == 'status' and checkpoint.exists():
+                    live = read_json(checkpoint)
+                    if live['windowId'] != data.get('windowId'):
+                        data = live
+                output({**data,
+                        'receiptBundle': str(root), 'operationReceipts': str(root / 'operations.ndjson')})
+                return 0
+            raise LabError('USE_CONTINUE_CAMPAIGN_OR_AUDIT_LOCATION')
         _, frozen, _ = load_run(root)
         if args.command == 'status':
             output(projection(root, frozen['schedule']))

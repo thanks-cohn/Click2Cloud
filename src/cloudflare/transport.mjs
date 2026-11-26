@@ -284,7 +284,15 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    return requestRemoteCancel(target,operationId);
   },
   cancelActive(){return [...activeSaves].map(([id,job])=>({id,...requestJobCancel(job,id)}));},
-  async inspectOperation(target,operationId){const c=await cap(target);const r=await post(c,'/operation',{operationId});if(!await recheck(c,target))fail('AUTHORIZATION_REVOKED');return r;},
+  async inspectOperation(target,operationId,{signal,expectedSession,beforeRequest}={}){
+   signal?.throwIfAborted();
+   const c=await cap(target,{beforeRequest});
+   if(expectedSession!==undefined&&c.sessionId!==expectedSession)fail('AUTHORIZATION_REVOKED');
+   signal?.throwIfAborted();beforeRequest?.();
+   const result=await post(c,'/operation',{operationId},signal);
+   if(!await recheck(c,target,{beforeRequest}))fail('AUTHORIZATION_REVOKED');
+   return result;
+  },
   async inspect(target,receipt){const c=await cap(target,{use:'save',operationId:receipt.operationId,source:{}});return post(c,'/verify',receipt);},
   async revoke(target,sourceBucket){const c=await cap(target,{use:'revoke',sourceBucket});return post(c,'/revoke',{});}
  });

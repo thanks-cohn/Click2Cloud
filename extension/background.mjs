@@ -50,6 +50,7 @@ import {levelHidden} from '../src/modes/nested/index.mjs';
 import {uploadError,uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {createLocalUploadService,uploadCode} from '../src/chrome/local-upload-service.mjs';
 import {createLocalUploadBatches} from '../src/chrome/local-upload-batch.mjs';
+import {qualifyUploadReceipt,readUploadReceiptSettings} from '../src/chrome/upload-receipt-policy.mjs';
 import {downloadUploadReceipt,uploadReceiptGate} from '../src/chrome/local-upload-receipt-download.mjs';
 import {scopeKey,targetKey,normalizeTarget,ancestors} from '../src/core/menu-identity.mjs';
 // Coalesce trusted-storage access, but never retain a rejected startup attempt.
@@ -481,6 +482,7 @@ const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.l
  checkBucket:(target,auth,signal)=>checkSelectedBucket(target,auth,false,signal),
  workerPrefix:async target=>(await provisioner.lookup(target))?.prefixScope??'',
  checkUpload:localUploadService.checkDestination,upload:localUploadService.dispatchLabFile,
+ readUploadOutcome:id=>current.readRemoteResult(id),reconcileUpload:localUploadService.reconcileFile,
  // Use production R2 stat/list/stream with exact OAuth session and scope
  // fences. The relay never owns either OAuth or signed Worker credentials.
  fileApi:(expectedSession,beforeRequest)=>createClick2CloudFileApi({send,http:{
@@ -510,16 +512,29 @@ async function requestUploadReceipt(receipt,gate){
 }
 const localUploadBatches=createLocalUploadBatches({
  journal:uploadBatchJournal,checkDestination:localUploadService.checkDestination,
- validatePlan:localUploadService.validatePlan,dispatch:localUploadService.dispatch,
+ validatePlan:localUploadService.validatePlan,dispatch:localUploadService.dispatch,dispatchStored:localUploadService.dispatchStored,
  reconcile:localUploadService.reconcile,notify:saveNotice.savedBatch,receiptEnabled:()=>uploadReceiptGate(chrome.storage.local),downloadReceipt:requestUploadReceipt,
+ selectionReceiptPolicy:async (mode,items)=>qualifyUploadReceipt(await readUploadReceiptSettings(chrome.storage.local),mode,items),
  observe:observeUploadEffect,
  version:BUILD_INFO.extensionVersion
 });
+const durableUploadAlarm='redown-durable-local-upload';
+async function driveLocalUploads(){
+ await trustedStorage();
+ const pending=await uploadBatchJournal.runnable();
+ if(!pending.length){await chrome.alarms.clear(durableUploadAlarm).catch(()=>{});return;}
+ if(!await chrome.alarms.get(durableUploadAlarm))await chrome.alarms.create(durableUploadAlarm,{periodInMinutes:.5});
+ await Promise.allSettled(pending.map(batch=>localUploadBatches.driveDurable(batch)));
+}
+const wakeLocalUploads=()=>void driveLocalUploads().catch(()=>observeUploadEffect('LOCAL_UPLOAD_SCHEDULER_UNAVAILABLE'));
+chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name===durableUploadAlarm)wakeLocalUploads();});
+chrome.runtime.onStartup.addListener(wakeLocalUploads);
+wakeLocalUploads();
 chrome.runtime.onConnect?.addListener(port=>{
  if(port.name!==localUploadPort)return;
  if(!appSenderDecision(chrome.runtime,port.sender).accepted){port.disconnect();return;}
  const lease={};
- let active,batchId,disconnected=false,receiptRequest,receiptBatch;
+ let active,batchId,storedSelection=false,disconnected=false,receiptRequest,receiptBatch;
  const sendLargeReceipt=payload=>new Promise((resolve,reject)=>{
   const id=crypto.randomUUID();
   const timer=setTimeout(()=>finish(Error('UPLOAD_RECEIPT_DOWNLOAD_UNACKNOWLEDGED')),25_000);
@@ -540,8 +555,8 @@ chrome.runtime.onConnect?.addListener(port=>{
   disconnected=true;
   if(batchReceiptPorts.get(receiptBatch)===sendLargeReceipt)batchReceiptPorts.delete(receiptBatch);
   receiptRequest?.finish(Error('UPLOAD_RECEIPT_SHELF_UNAVAILABLE'));
-  if(batchId)void localUploadBatches.stop(batchId,{detached:true},lease).catch(()=>{});
-  else active?.abort();
+  if(batchId&&!storedSelection)void localUploadBatches.stop(batchId,{detached:true},lease).catch(()=>{});
+  else if(!batchId)active?.abort();
  });
  port.onMessage.addListener(message=>{
   if(message?.receiptAck){
@@ -554,7 +569,10 @@ chrome.runtime.onConnect?.addListener(port=>{
    return;
   }
   if(message?.ping===true)return;
-  if(message?.cancel===true){active?.abort();return;}
+  if(message?.cancel===true){
+   if(batchId&&storedSelection)void localUploadBatches.cancelDurable(batchId).catch(()=>{});
+   active?.abort();return;
+  }
   if(!uploadId(message?.requestId))return;
   const reply=value=>{if(!disconnected)try{port.postMessage({requestId:message.requestId,...value});}catch{}};
   if(active){reply({state:'blocked',code:'RESOURCE_BUSY'});return;}
@@ -566,13 +584,18 @@ chrome.runtime.onConnect?.addListener(port=>{
    if(message.inspect===true)return localUploadBatches.inspect(message,signal);
    if(message.reconcile===true&&uploadId(message.batchId)){
     registerReceiptPort(message.batchId);
-    return localUploadBatches.reconcile(message,signal);
+    const result=await localUploadBatches.reconcile(message,signal);
+    if(result.batch?.durableRunnable==='yes')wakeLocalUploads();
+    return result;
    }
    if((message.begin===true||message.resume===true)&&!batchId&&!disconnected&&uploadId(message.batchId)){
     batchId=message.batchId;
+    storedSelection=message.begin===true&&uploadId(message.selectionId);
     registerReceiptPort(batchId);
     const windowId=port.sender.tab?.windowId??message.windowId;
-    return localUploadBatches[message.resume===true?'resume':'begin']({...message,origin:{windowId}},signal,lease);
+    const result=await localUploadBatches[message.resume===true?'resume':'begin']({...message,origin:{windowId}},signal,lease);
+    if(result.batch?.durableRunnable==='yes')wakeLocalUploads();
+    return result;
    }
    if(!batchId||batchId!==message.batchId)
     throw uploadError('UPLOAD_BATCH_INVALID','Choose the local files again in the intended folder.');
@@ -624,6 +647,8 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     const {action,recordId}=message;
     const run=async()=>{
       if(action==='cancel-all'){
+        const pendingLocalJobs=await localUploadBatches.cancelDurableAll();
+        wakeLocalUploads();
         const localJobs=localUploadService.cancelAll();
         const remoteJobs=remote.cancelActive();
         const basicJobs=basic.cancelAll();
@@ -635,7 +660,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
           const {account,connection,bucket,folder}=job.destination;
           return remote.cancel({provider:'cloudflare',accountId:account,connectionId:connection,bucketName:bucket,prefix:folder??''},job.sourceRecordId);
         }));
-        return {results:[...localJobs,...remoteJobs,...await basicJobs,...interrupted.map(result=>result.value??{state:'unsupported'})]};
+        return {results:[...pendingLocalJobs,...localJobs,...remoteJobs,...await basicJobs,...interrupted.map(result=>result.value??{state:'unsupported'})]};
       }
       if(action==='clear')return queueHistory.clearJobs();
       if(!['cancel','retry','dismiss','reconcile-upload'].includes(action)||typeof recordId!=='string'||recordId.length>2200)

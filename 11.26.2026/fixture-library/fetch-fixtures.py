@@ -1,7 +1,15 @@
 """Pinned synthetic sample downloader. Offline plan by default; never executes or extracts."""
-import argparse, hashlib, json, shutil, time
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import tempfile
+import time
 from pathlib import Path, PurePosixPath
-from urllib.request import urlopen, Request
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 BASE = Path(__file__).resolve().parent
 MIB = 1024 * 1024
@@ -22,15 +30,72 @@ def destination(root, name):
         raise ValueError("path escapes fixture root")
     return target
 
+def approved_url(url):
+    parts = urlsplit(url)
+    return (parts.scheme == 'https' and parts.hostname == 'loremfile.dev' and
+            parts.port in (None, 443) and not parts.username and not parts.password and not parts.fragment)
+
+
+class FixtureRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not approved_url(newurl):
+            raise ValueError('unexpected fixture redirect')
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def fetch(row, target, partials, disk_reserve):
+    if row['url'] != 'https://loremfile.dev/' + row['path'] or not approved_url(row['url']):
+        raise ValueError('unexpected fixture URL')
+    opener = build_opener(FixtureRedirect())
+    for attempt in range(3):
+        if shutil.disk_usage(partials).free < row['bytes'] + disk_reserve:
+            raise OSError('insufficient disk space for the next pinned fixture')
+        fd, name = tempfile.mkstemp(prefix='redown-fixture-', suffix='.part', dir=partials)
+        temporary = Path(name)
+        hashed, size = hashlib.sha256(), 0
+        try:
+            with os.fdopen(fd, 'wb') as out, opener.open(Request(row['url'],headers={'Accept-Encoding':'identity'}),timeout=30) as response:
+                if not approved_url(response.geturl()):
+                    raise ValueError('unexpected fixture redirect')
+                while chunk := response.read(128*1024):
+                    size += len(chunk)
+                    if size > row['bytes']:
+                        raise ValueError('pinned fixture size exceeded')
+                    if shutil.disk_usage(partials).free < len(chunk) + disk_reserve:
+                        raise OSError('insufficient disk space while acquiring fixture')
+                    hashed.update(chunk)
+                    out.write(chunk)
+                out.flush()
+                os.fsync(out.fileno())
+            if size != row['bytes'] or hashed.hexdigest() != row['sha256']:
+                raise ValueError('fixture checksum or length mismatch')
+            try:
+                if os.name == 'nt':
+                    temporary.rename(target)  # Windows rename exclusive on destination.
+                else:
+                    os.link(temporary,target) # Atomic no-clobber publication on the same filesystem.
+            except FileExistsError:
+                if not target.is_file() or target.stat().st_size != size or digest(target) != row['sha256']:
+                    raise ValueError('a different file already occupies the fixture path') from None
+            return size
+        except (HTTPError, URLError, TimeoutError) as error:
+            if attempt == 2 or isinstance(error, HTTPError) and error.code not in (408,429,500,502,503,504):
+                raise
+            time.sleep(0.5*(2**attempt))
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--profile", choices=["smoke","small","normal","large","malformed","all"], default="smoke")
     p.add_argument("--max-total-mib", type=int, default=64)
+    p.add_argument("--disk-reserve-mib", type=int, default=0, help="Free space to retain during acquisition")
     p.add_argument("--download", action="store_true")
     a = p.parse_args()
-    if a.max_total_mib < 1:
-        p.error("positive byte budget required")
+    if a.max_total_mib < 1 or a.disk_reserve_mib < 0:
+        p.error("a positive byte budget and nonnegative disk reserve are required")
     rows = json.loads((BASE/"catalog.json").read_text(encoding="utf-8"))["fixtures"]
     if a.profile == "smoke":
         preferred = ["mp4/360p-5s.mp4","webm/720p-5s-vp9.webm","mp4/720p-5s.mp4","mp4/1080p-10s.mp4"]
@@ -64,35 +129,22 @@ def main():
                 raise SystemExit(f"Existing file mismatch; not overwriting {target}")
         else:
             pending.append(r)
-    required = sum(r["bytes"] for r in pending)
-    if shutil.disk_usage(root).free < required + 1024*MIB:
-        raise SystemExit("Insufficient free space; preserve at least 1 GiB for system operation")
-    for r in pending:
-        target = destination(root,r["path"])
+    partials = root.with_name(root.name + '.redown-fixture-partials')
+    partials.mkdir(mode=0o700, exist_ok=True)
+    if partials.is_symlink() or partials.resolve() != partials:
+        raise SystemExit('Choose a fixture destination without symlink or reparse-point staging paths')
+    disk_reserve = a.disk_reserve_mib*MIB
+    required = sum(r['bytes'] for r in pending)
+    abandoned = sum(path.stat().st_size for path in partials.glob('redown-fixture-*.part') if path.is_file() and not path.is_symlink())
+    if shutil.disk_usage(partials).free < required + disk_reserve:
+        raise SystemExit(f'Insufficient disk space; {required} pending bytes, {disk_reserve} reserved bytes, {abandoned} abandoned partial bytes')
+    if abandoned:
+        print(f'Abandoned partial bytes outside the input: {abandoned}',flush=True)
+    for row in pending:
+        target = destination(root,row['path'])
         target.parent.mkdir(parents=True,exist_ok=True)
-        tmp = target.with_name(target.name+".part")
-        h = hashlib.sha256()
-        size = 0
-        if r["url"] != "https://loremfile.dev/"+r["path"]:
-            raise SystemExit("Unexpected fixture URL")
-        try:
-            with urlopen(Request(r["url"],headers={"Accept-Encoding":"identity"}),timeout=30) as response, tmp.open("xb") as out:
-                if not response.geturl().startswith("https://loremfile.dev/"):
-                    raise ValueError("unexpected redirect")
-                while True:
-                    b = response.read(128*1024)
-                    if not b: break
-                    size += len(b)
-                    if size > r["bytes"]: raise ValueError("size exceeded")
-                    h.update(b); out.write(b)
-            if size != r["bytes"] or h.hexdigest()!=r["sha256"]:
-                raise ValueError("fixture checksum or length mismatch")
-            tmp.replace(target)
-        except Exception:
-            # Leave partial files visible for diagnosis; never promote them to fixtures.
-            raise
-        print("VERIFIED",r["path"],size,flush=True)
-        time.sleep(0.15)
+        size = fetch(row,target,partials,disk_reserve)
+        print('VERIFIED',row['path'],size,flush=True)
     print("Fixture acquisition complete; no cloud transfer was performed.")
 
 if __name__ == "__main__":

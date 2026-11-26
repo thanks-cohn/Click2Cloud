@@ -4,6 +4,7 @@ import os
 import platform
 import re
 import time
+import uuid
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,19 +43,47 @@ def environment(caps):
     }
 
 
+def atomic_document(path, data):
+    temporary = path.with_name('.' + path.name + '.' + str(uuid.uuid4()))
+    try:
+        document(temporary, data)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 class Journal:
-    def __init__(self, root):
+    def __init__(self, root, *, filename='operations.ndjson', start=None, fields=None):
         self.root = Path(root)
-        self.path = self.root / 'operations.ndjson'
-        self.start = time.monotonic()
+        self.path = self.root / filename
+        self.start = time.monotonic() if start is None else start
+        self.fields = fields or {}
 
     def append(self, event, **data):
-        row = {'event': event, 'at': stamp(), 'elapsedMs': round((time.monotonic() - self.start) * 1000), **data}
+        row = {'event': event, 'at': stamp(), 'elapsedMs': round((time.monotonic() - self.start) * 1000), **self.fields, **data}
         data = canonical(row) + b'\n'
         with self.path.open('ab') as stream:
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
+
+    def repair_tail(self):
+        # The caller holds the campaign claim. Preserve torn bytes separately
+        # and keep all previously fsynced complete records readable.
+        if not self.path.exists():
+            return
+        with self.path.open('r+b') as stream:
+            while True:
+                position = stream.tell()
+                line = stream.readline()
+                if not line:
+                    return
+                if not line.endswith(b'\n'):
+                    exclusive(self.root / ('.torn-journal-' + str(uuid.uuid4())), line)
+                    stream.truncate(position)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                    return
 
     def rows(self):
         if not self.path.exists():

@@ -166,14 +166,21 @@ def format_hint(signature):
     return 'unidentified'
 
 
+def source_identity(info):
+    # Share a binding digest, not machine-specific inode or volume values.
+    fields = FILE_ID + FILE_METADATA + (() if windows_source else ('st_ctime_ns',))
+    return hashlib.sha256(repr(tuple(getattr(info, field) for field in fields)).encode('ascii')).hexdigest()
+
+
 def inventory(directory, *, max_files, max_file_bytes, max_total_bytes, max_entries,
-              seconds, excluded=(), progress=lambda _: None):
+              seconds, excluded=(), progress=lambda _: None, issues=None, bind_identity=False):
     root = ordinary_directory(directory)
     for other in excluded:
         other = Path(os.path.abspath(other))
         if other.is_relative_to(root) or root.is_relative_to(other):
             raise LabError('CORPUS_WORKSPACE_OVERLAP', str(root))
     files, empty, seen_paths, pending = [], [], {}, [root]
+    collided = set()
     entries = total = 0
     deadline = time.monotonic() + seconds
 
@@ -181,46 +188,81 @@ def inventory(directory, *, max_files, max_file_bytes, max_total_bytes, max_entr
         if time.monotonic() >= deadline:
             raise LabError('INVENTORY_TIMEOUT')
 
+    def reject(path, error, kind):
+        if issues is None or path == root:
+            raise error
+        issues.append({'path': path.relative_to(root).as_posix().encode('utf-8', 'backslashreplace').decode('utf-8'),
+                       'state': 'FAIL', 'code': error.code if isinstance(error, LabError) else 'LOCAL_FILE_UNREADABLE',
+                       'kind': kind})
+
     while pending:
         directory = pending.pop()
-        ordinary_directory(directory)
         names = []
-        with os.scandir(directory) as listing:
-            for entry in listing:
-                stop()
-                entries += 1
-                if entries > max_entries:
-                    raise LabError('CORPUS_ENTRY_LIMIT', max_entries)
-                names.append(entry.name)
+        try:
+            ordinary_directory(directory)
+            with os.scandir(directory) as listing:
+                for entry in listing:
+                    stop()
+                    entries += 1
+                    if entries > max_entries:
+                        raise LabError('CORPUS_ENTRY_LIMIT', max_entries)
+                    names.append(entry.name)
+        except (OSError, LabError) as error:
+            if isinstance(error, LabError) and error.code in ('INVENTORY_TIMEOUT', 'CORPUS_ENTRY_LIMIT'):
+                raise
+            reject(directory, error, 'unscanned-directory')
+            continue
         if not names and directory != root:
             empty.append(directory.relative_to(root).as_posix())
         for basename in sorted(names):
             path = directory / basename
-            rel = relative_path(path.relative_to(root).as_posix())
-            folded = name_key(rel)
-            previous = seen_paths.setdefault(folded, rel)
-            if previous != rel:
-                raise LabError('CORPUS_PATH_COLLISION', [previous, rel])
+            kind = 'unknown-entry'
             try:
                 info = path.lstat()
-            except OSError as error:
-                raise source_error('LOCAL_FILE_UNREADABLE', 'inventory-metadata',
-                                   'READ_OR_INSPECTION_FAILED', error=error) from None
-            if linked(info):
-                raise LabError('LINK_OR_REPARSE_POINT', rel)
-            if stat.S_ISDIR(info.st_mode):
-                pending.append(path)
+                kind = 'unscanned-directory' if stat.S_ISDIR(info.st_mode) else 'file'
+                rel = relative_path(path.relative_to(root).as_posix())
+                folded = name_key(rel)
+                previous = seen_paths.setdefault(folded, rel)
+                if previous != rel:
+                    collided.add(folded)
+                    raise LabError('CORPUS_PATH_COLLISION', [previous, rel])
+                if linked(info):
+                    kind = 'unscanned-link' if stat.S_ISDIR(info.st_mode) or path.is_symlink() else 'file'
+                    raise LabError('LINK_OR_REPARSE_POINT', rel)
+                if stat.S_ISDIR(info.st_mode):
+                    pending.append(path)
+                    continue
+                if not stat.S_ISREG(info.st_mode):
+                    raise LabError('LINK_OR_NONREGULAR', rel)
+                size = info.st_size
+                if len(files) >= max_files or total + size > max_total_bytes:
+                    raise LabError('CORPUS_INVENTORY_BUDGET', rel)
+                if size > max_file_bytes:
+                    raise LabError('CORPUS_FILE_OR_BYTE_LIMIT', rel)
+                digest, signature = digest_file(path, size, stop, before=info)
+            except (OSError, LabError) as error:
+                if isinstance(error, LabError) and error.code in ('INVENTORY_TIMEOUT', 'CORPUS_INVENTORY_BUDGET'):
+                    if issues is None and error.code == 'CORPUS_INVENTORY_BUDGET':
+                        raise LabError('CORPUS_FILE_OR_BYTE_LIMIT', error.detail) from None
+                    raise
+                if issues is None and isinstance(error, OSError):
+                    raise source_error('LOCAL_FILE_UNREADABLE', 'inventory-metadata',
+                                       'READ_OR_INSPECTION_FAILED', error=error) from None
+                reject(path, error, kind)
                 continue
-            if not stat.S_ISREG(info.st_mode):
-                raise LabError('LINK_OR_NONREGULAR', rel)
-            size = info.st_size
-            if len(files) >= max_files or size > max_file_bytes or total + size > max_total_bytes:
-                raise LabError('CORPUS_FILE_OR_BYTE_LIMIT', rel)
-            digest, signature = digest_file(path, size, stop, before=info)
             total += size
-            files.append({'id': 'file-' + hashlib.sha256(rel.encode()).hexdigest()[:24],
-                          'kind': 'corpus', 'path': rel, 'format': extension_format(rel),
-                          'formatHint': format_hint(signature), 'sizeBytes': size, 'sha256': digest,
-                          'target': 'qa'})
+            row = {'id': 'file-' + hashlib.sha256(rel.encode()).hexdigest()[:24],
+                   'kind': 'corpus', 'path': rel, 'format': extension_format(rel),
+                   'formatHint': format_hint(signature), 'sizeBytes': size, 'sha256': digest, 'target': 'qa'}
+            if bind_identity:
+                row['sourceIdentity'] = source_identity(info)
+            files.append(row)
             progress({'files': len(files), 'bytes': total})
-    return sorted(files, key=lambda row: row['path']), sorted(empty)
+    eligible = []
+    for row in files:
+        parts = row['path'].split('/')
+        if any(name_key('/'.join(parts[:end])) in collided for end in range(1, len(parts)+1)):
+            reject(source_path(root, row['path']), LabError('CORPUS_PATH_COLLISION'), 'file')
+        else:
+            eligible.append(row)
+    return sorted(eligible, key=lambda row: row['path']), sorted(empty)

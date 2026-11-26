@@ -7,7 +7,7 @@ import {safeRemoteDiagnostic} from '../../right2cloud-module/src/common.mjs';
 // Chrome and cloud operations stay outside CURRENT; config never carries authorization.
 import {modeModules,validateModeConfig,validateBundle,validateGeneration,integer,BACKUP_FORMAT,MAX_RECORDS} from './schema.mjs';
 import {encodeBackup,decodeBackup} from './backup.mjs';
-import {normalizeTarget} from '../core/menu-identity.mjs';
+import {normalizeTarget,targetKey} from '../core/menu-identity.mjs';
 import {operationIdentity} from '../core/boundary-observation.mjs';
 import {productState,validateProduct,normalizeDefaultQuick,fail} from '../api/config.mjs';
 const request=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
@@ -304,7 +304,10 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         const legacy=async()=>((await request(s.state.get('remoteResults')))?.value??[])
           .find(receipt=>receipt.operationId===value.operationId);
         const previous=stored??(await legacy());
-        if(value.state==='pending'&&previous&&previous.state!=='pending')return {row:previous};
+        const retryPrecommit=value.localUpload?.retryPrecommit===true&&['cancelled','failed'].includes(previous?.state)&&
+          previous.localUpload?.commitRequested===false&&value.localUpload.batchId===previous.localUpload.batchId&&
+          value.localUpload.key===previous.localUpload.key&&targetKey(value.localUpload.source)===targetKey(previous.localUpload.source);
+        if(value.state==='pending'&&previous&&previous.state!=='pending'&&!retryPrecommit)return {row:previous};
         const updatedAt=clock();
         const row={...previous,kind:value.kind==='screenshot-to-cloud'?'screenshot-to-cloud':value.kind==='depth-click'?'depth-click':value.kind==='readiness'?'readiness':value.kind==='file-action'?'file-action':'save',
           operationId:value.operationId,state:value.state,code:value.code,cause:value.cause,

@@ -8,7 +8,7 @@ from pathlib import Path
 from .errors import LabError
 from .evidence import Journal, document, environment, load_run, projection, save_summary, snapshot
 from .fixtures import generate
-from .inventory import chunks, ordinary_directory, source_error, source_path
+from .inventory import chunks, ordinary_directory, source_error, source_identity, source_path
 from .manifest import build_plan, digest, resolve
 from .transport import CHUNK_BYTES
 
@@ -19,7 +19,11 @@ def operation_id(run_id, scenario, direction):
 
 def source_chunks(row, seed, source, stop):
     if row['kind'] == 'corpus':
-        data = chunks(source_path(source, row['path']), row['sizeBytes'], stop)
+        path = source_path(source, row['path'])
+        before = path.lstat() if 'sourceIdentity' in row else None
+        if before is not None and source_identity(before) != row['sourceIdentity']:
+            raise source_error('SOURCE_CHANGED', 'local-staging', 'FROZEN_IDENTITY_MISMATCH')
+        data = chunks(path, row['sizeBytes'], stop, before=before)
     else:
         content = generate(row['format'], row['sizeBytes'], seed, row['id'])
         data = (content[offset:offset + CHUNK_BYTES] for offset in range(0, len(content), CHUNK_BYTES))
@@ -72,6 +76,7 @@ class Scheduler:
         self.verified = {}
         self.plan = plan
         self.end = time.monotonic() + plan['effectiveBudget']['seconds']
+        self.production_only = plan.get('verification') == 'production'
         self.phase_end = self.end
 
     def stop(self):
@@ -106,6 +111,9 @@ class Scheduler:
                         ack = response['receipt']
                         acknowledged = True
                         self.journal.append('uploadAcknowledged', scenarioId=scenario, receipt=ack)
+                        if self.production_only:
+                            return self.finish(entry, {'state': 'PASS', 'code': 'PRODUCTION_UPLOAD_RECEIPT'},
+                                               start, ack, requested, acknowledged)
                     elif response['state'] != 'UNCERTAIN':
                         pending = False
                     if response['state'] == 'CONFLICT' and step.get('expect') == 'CONFLICT':
@@ -134,7 +142,8 @@ class Scheduler:
                 else:
                     result = {**verification, 'state': 'UNCERTAIN' if ack else verification['state']}
             elif op == 'download':
-                result = self.read(scenario, row, transfer_seconds, self.verified.get(row['remotePath']), step.get('retain'))
+                result = self.read(scenario, row, transfer_seconds, entry.get('expectedIdentity') or
+                                   self.verified.get(row['remotePath']), step.get('retain'))
             elif op == 'metadata':
                 observed = self.client.query('metadata', path=row['remotePath'])['object']
                 expected = self.verified.get(row['remotePath'])
@@ -169,6 +178,8 @@ class Scheduler:
     def finish(self, entry, result, start, ack, requested, acknowledged):
         row = entry.get('fixture')
         observed = result.get('readback') or (result if 'clientSha256' in result else None)
+        if observed and observed.get('savedCopy') and self.plan.get('verification'):
+            observed = {**observed, 'savedCopy': Path(observed['savedCopy']).relative_to(self.root).as_posix()}
         self.journal.append('result', scenarioId=entry['scenarioId'], action=entry['operation'],
                             phase=entry['phase'], fixtureId=row['id'] if row else None,
                             expected=entry['step'].get('expect', 'PASS'), state=result['state'], code=result['code'],
@@ -180,7 +191,7 @@ class Scheduler:
                             durationMs=round((time.monotonic() - start) * 1000))
         self.progress.finished += 1
         self.progress.bytes += observed['clientBytes'] if observed else 0
-        return result
+        return {**result,'productionConfirmed': acknowledged} if self.plan.get('verification') else result
 
     def read(self, scenario, row, timeout, receipt, retain):
         self.stop()

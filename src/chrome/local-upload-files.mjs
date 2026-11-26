@@ -6,14 +6,21 @@ let opening;
 
 function open() {
   return opening ??= new Promise((resolve,reject)=>{
-    const request=indexedDB.open('redown-local-upload-v1',3);
+    const request=indexedDB.open('redown-local-upload-v1',4);
     request.onupgradeneeded=event=>{
       if(event.oldVersion<1)request.result.createObjectStore('files',{keyPath:'ticket'}).createIndex('expiry','expires');
       if(event.oldVersion<2)request.result.createObjectStore('claims');
-      const batches=request.result.createObjectStore('batches',{keyPath:'id'});
-      batches.createIndex('updatedAt','updatedAt');
-      request.result.createObjectStore('manifests');
-      request.result.createObjectStore('outcomes');
+      if(event.oldVersion<3){
+        const batches=request.result.createObjectStore('batches',{keyPath:'id'});
+        batches.createIndex('updatedAt','updatedAt');
+        request.result.createObjectStore('manifests');
+        request.result.createObjectStore('outcomes');
+      }
+      if(event.oldVersion<4){
+        request.result.createObjectStore('selections',{keyPath:'id'}).createIndex('expiry','expires');
+        request.result.createObjectStore('sources');
+        request.transaction.objectStore('batches').createIndex('durableRunnable','durableRunnable');
+      }
     };
     request.onblocked=()=>reject(Error('Reload other open REDOWN Shelves before uploading.'));
     request.onsuccess=()=>{
@@ -78,25 +85,101 @@ async function batchTransaction(tables,mode,work) {
     guard(()=>work(tx,done,guard))();
   });
 }
+const jobRange=id=>IDBKeyRange.bound([id],[id,[]]);
+
+// A regular file picker yields File objects rather than reloadable handles.
+// Structured clone stores each file in the extension origin's durable quota
+// without reading the bytes into a JS array. The job owns the stored sources
+// only after provider preflight and a successful acceptance transaction.
+export async function persistUploadSelection(id,files,paths,signal){
+  const estimate=await globalThis.navigator?.storage?.estimate?.();
+  const bytes=files.reduce((sum,file)=>sum+file.size,0);
+  if(Number.isFinite(estimate?.quota)&&Number.isFinite(estimate?.usage)&&bytes>estimate.quota-estimate.usage)
+    throw Object.assign(Error('Chrome lacks storage to keep the selected files available after closing REDOWN.'),
+      {code:'LOCAL_UPLOAD_STAGING_QUOTA'});
+  await batchTransaction(['selections','sources'],'readwrite',tx=>{
+    const selections=tx.objectStore('selections'),sources=tx.objectStore('sources');
+    const expired=selections.index('expiry').openCursor(IDBKeyRange.upperBound(Date.now()));
+    let removed=0;
+    expired.onsuccess=()=>{
+      const cursor=expired.result;
+      if(!cursor||removed++>=24)return;
+      sources.delete(jobRange(cursor.primaryKey));cursor.delete();cursor.continue();
+    };
+    selections.add({id,count:0,bytes,expires:Date.now()+lifetime});
+  });
+  try{
+    for(let start=0;start<files.length;start+=32){
+      signal?.throwIfAborted();
+      const end=Math.min(files.length,start+32);
+      await batchTransaction(['selections','sources'],'readwrite',tx=>{
+        const sources=tx.objectStore('sources');
+        for(let index=start;index<end;index++){
+          const file=files[index];
+          sources.add({file,relativePath:paths[index],name:file.name,size:file.size,lastModified:file.lastModified},[id,index]);
+        }
+        tx.objectStore('selections').put({id,count:end,bytes,expires:Date.now()+lifetime});
+      });
+    }
+  }catch(error){await discardUploadSelection(id).catch(()=>{});throw error;}
+}
+export const discardUploadSelection=id=>batchTransaction(['selections','sources'],'readwrite',(tx,_done,guard)=>{
+  const selections=tx.objectStore('selections');
+  const request=selections.get(id);
+  request.onsuccess=guard(()=>{
+    if(!request.result||request.result.accepted)return;
+    tx.objectStore('sources').delete(jobRange(id));selections.delete(id);
+  });
+});
+
 export const uploadBatchJournal=Object.freeze({
   create(batch,items){
     return batchTransaction(['batches','manifests','outcomes'],'readwrite',(tx,done,guard)=>{
-      const batches=tx.objectStore('batches'), manifests=tx.objectStore('manifests'), outcomes=tx.objectStore('outcomes');
+      const batches=tx.objectStore('batches'), manifests=tx.objectStore('manifests');
       batches.add(batch);
       for(let index=0;index<items.length;index++)manifests.add(items[index],[batch.id,index]);
-      const stale=batches.index('updatedAt').openCursor(IDBKeyRange.upperBound(Date.now()-7*86400_000));
-      let removed=0,scanned=0;
-      stale.onsuccess=guard(()=>{
-        const cursor=stale.result;
-        if(!cursor||removed>=24||scanned++>=100)return;
-        const old=cursor.value;
-        if(!['preparing','ready','uploading','verifying'].includes(old.phase)){
-          cursor.delete();
-          manifests.delete(IDBKeyRange.bound([old.id,0],[old.id,10000]));
-          outcomes.delete(IDBKeyRange.bound([old.id,0],[old.id,10000]));
-          removed++;
-        }
-        cursor.continue();
+    });
+  },
+  accept(batch,id,count){
+    return batchTransaction(['batches','selections'],'readwrite',(tx,done,guard)=>{
+      const selections=tx.objectStore('selections'),request=selections.get(id);
+      request.onsuccess=guard(()=>{
+        const row=request.result;
+        if(!row||row.accepted||row.count!==count||row.expires<=Date.now())
+          throw Object.assign(Error('Select the original files again.'),{code:'UPLOAD_FILE_UNAVAILABLE'});
+        selections.put({id,count,rowBytes:row.bytes,accepted:true});
+        tx.objectStore('batches').put(batch);
+        done(batch);
+      });
+    });
+  },
+  source(selectionId,index){
+    return batchTransaction(['sources'],'readonly',(tx,done,guard)=>{
+      const request=tx.objectStore('sources').get([selectionId,index]);
+      request.onsuccess=guard(()=>done(request.result));
+    });
+  },
+  releaseSource(selectionId,index){
+    return batchTransaction(['selections','sources'],'readwrite',tx=>{
+      const sources=tx.objectStore('sources');
+      if(index===undefined){sources.delete(jobRange(selectionId));tx.objectStore('selections').delete(selectionId);}
+      else sources.delete([selectionId,index]);
+    });
+  },
+  runnable(limit=16){
+    return batchTransaction(['batches'],'readonly',(tx,done,guard)=>{
+      const request=tx.objectStore('batches').index('durableRunnable').getAll('yes',limit);
+      request.onsuccess=guard(()=>done(request.result));
+    });
+  },
+  requestCancel(id){
+    return batchTransaction(['batches'],'readwrite',(tx,done,guard)=>{
+      const batches=tx.objectStore('batches'),request=batches.get(id);
+      request.onsuccess=guard(()=>{
+        const batch=request.result;
+        if(batch?.durableRunnable!=='yes')return;
+        batch.cancelRequested=true;
+        batches.put(batch);done(batch);
       });
     });
   },
@@ -115,26 +198,37 @@ export const uploadBatchJournal=Object.freeze({
   latest(matches){
     return batchTransaction(['batches'],'readonly',(tx,done,guard)=>{
       const read=tx.objectStore('batches').index('updatedAt').openCursor(null,'prev');
-      let scanned=0;
       read.onsuccess=guard(()=>{
         const cursor=read.result;
-        if(!cursor||scanned++>=100)return;
+        if(!cursor)return;
         if(matches(cursor.value))done(cursor.value);
         else cursor.continue();
       });
     });
   },
   save(batch,outcome){
-    return batchTransaction(['batches','outcomes'],'readwrite',tx=>{
-      tx.objectStore('batches').put(batch);
-      if(outcome)tx.objectStore('outcomes').put(outcome,[batch.id,outcome.index]);
+    return batchTransaction(['batches','outcomes'],'readwrite',(tx,_done,guard)=>{
+      const batches=tx.objectStore('batches'),outcomes=tx.objectStore('outcomes');
+      const current=batches.get(batch.id);
+      current.onsuccess=guard(()=>{
+        const old=current.result;
+        if(old?.processed>batch.processed)return;
+        if(old?.cancelRequested)batch.cancelRequested=true;
+        if(!outcome){batches.put(batch);return;}
+        const key=[batch.id,outcome.index],existing=outcomes.get(key);
+        existing.onsuccess=guard(()=>{
+          if(existing.result)return;
+          outcomes.add(outcome,key);
+          batches.put(batch);
+        });
+      });
     });
   },
   detail(id){
     return batchTransaction(['batches','manifests','outcomes'],'readonly',(tx,done,guard)=>{
       const batch=tx.objectStore('batches').get(id);
-      const items=tx.objectStore('manifests').getAll(IDBKeyRange.bound([id,0],[id,10000]));
-      const outcomes=tx.objectStore('outcomes').getAll(IDBKeyRange.bound([id,0],[id,10000]));
+      const items=tx.objectStore('manifests').getAll(jobRange(id));
+      const outcomes=tx.objectStore('outcomes').getAll(jobRange(id));
       outcomes.onsuccess=guard(()=>done(batch.result&&{batch:batch.result,items:items.result,outcomes:outcomes.result}));
     });
   }

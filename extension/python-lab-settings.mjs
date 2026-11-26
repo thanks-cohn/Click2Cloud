@@ -1,4 +1,6 @@
 // The existing Shelf owns consent. Python sees only the narrow native protocol.
+import {campaignDefaults,maxSessionMinutes} from '../src/chrome/python-lab/campaign-policy.mjs';
+
 const channel='redown-python-laboratory';
 const command='lab-local\\.venv\\Scripts\\redown-lab.exe pair --code ';
 const messages={
@@ -53,14 +55,22 @@ export function mountPythonLabSettings(page) {
    <button type="button" data-lab-more hidden>More buckets</button>
    <label>Access <select data-lab-mode>
     <option value="read-write">Read and write a fresh QA prefix</option>
-    <option value="read-only">Read a previous QA prefix for recovery</option>
+    <option value="continue">Continue an existing campaign (read and write)</option>
+    <option value="read-only">Read a previous QA prefix for audit or recovery</option>
    </select></label>
    <label data-lab-recovery-row hidden>Previous QA scope <select data-lab-recovery></select></label>
-   <label>Session duration <select data-lab-duration>
-    <option>15</option><option selected>30</option><option>60</option>
-   </select> minutes</label>
-   <label><input type="checkbox" data-lab-approved> I approve this bucket for the selected QA access and its provider usage.</label>
-   <p class="muted" data-lab-limits>One transfer at a time, 8 MiB per file, up to 640 MiB of modeled provider traffic.</p>
+   <label>Session duration <input type="number" min="1" max="${maxSessionMinutes}" step="1" value="30" data-lab-duration> minutes</label>
+   <details data-lab-budgets>
+    <summary>Campaign resource ceilings</summary>
+    <label>Upload file attempts <input type="number" min="0" step="1" value="${campaignDefaults.files}" data-lab-files></label>
+    <label>Provider request units <input type="number" min="0" step="1" value="${campaignDefaults.providerRequests}" data-lab-requests></label>
+    <label>Operation units <input type="number" min="0" step="1" value="${campaignDefaults.operations}" data-lab-operations></label>
+    <label>Modeled traffic (MiB) <input type="number" min="0" step="1" value="${campaignDefaults.trafficBytes/2**20}" data-lab-traffic></label>
+    <label>Temporary browser disk (MiB) <input type="number" min="0" max="5119" step="1" value="${campaignDefaults.diskBytes/2**20}" data-lab-disk></label>
+    <label>Modeled cost (USD) <input type="number" min="0" step="0.01" value="${campaignDefaults.costMicros/1_000_000}" data-lab-cost></label>
+   </details>
+   <p class="muted" data-lab-limits></p>
+   <label><input type="checkbox" data-lab-approved> I approve this QA destination and the displayed resource ceilings for this session.</label>
    <button type="button" class="primary" data-lab-start>Start session</button>
   </div>
   <div data-lab-active hidden>
@@ -85,15 +95,16 @@ export function mountPythonLabSettings(page) {
  };
  async function recovery(){
   const epoch=++recoveryEpoch;
-  const readOnly=el('mode').value==='read-only';
-  el('recovery-row').hidden=!readOnly;
+  const mode=el('mode').value,previous=mode!=='read-write';
+  el('recovery-row').hidden=!previous;
   el('recovery').replaceChildren();option(el('recovery'),'','Choose previous QA scope');
   const accountId=el('account').value,bucketName=el('bucket').value;
-  if(!readOnly||!accountId||!bucketName)return;
-  const {scopes}=await request('recovery',{accountId,bucketName});
+  if(!previous||!accountId||!bucketName)return;
+  const {scopes,campaigns=[]}=await request('recovery',{accountId,bucketName});
   if(epoch!==recoveryEpoch||accountId!==el('account').value||bucketName!==el('bucket').value)return;
-  for(const row of scopes)option(el('recovery'),row.id,new Date(row.created).toLocaleString()+' · '+row.id);
-  if(!scopes.length)report(Error('No recovery scope is recorded for this bucket.'));
+  for(const row of campaigns)option(el('recovery'),row.scopeId+'/'+row.id,row.prefix);
+  if(mode==='read-only')for(const row of scopes)option(el('recovery'),row.id,'Earlier scope · '+row.prefix);
+  if(el('recovery').options.length===1)report(Error('No recovery scope is recorded for this bucket.'));
  }
  async function bucketPage(append){
   const epoch=++bucketEpoch;
@@ -138,7 +149,7 @@ export function mountPythonLabSettings(page) {
   el('active').hidden=!active;
   el('form').hidden=active||!form;
   el('scope').textContent=data.prefix?
-   `${data.mode==='read-write'?'Read and write':'Read only'} · ${data.bucketName}/${data.prefix} · Expires ${new Date(data.expiresAt).toLocaleTimeString()}`:'';
+   `${data.mode==='read-write'?'Read and write':'Read only'} · ${data.bucketName}/${data.prefix}${data.campaignId?data.campaignId+'/':''} · Expires ${new Date(data.expiresAt).toLocaleTimeString()}`:'';
   const valid=!!data.pairCode&&Date.now()<data.codeExpiresAt;
   const cmd=valid?command+data.pairCode:'';
   if(el('command').value!==cmd)el('command').value=cmd;
@@ -154,13 +165,26 @@ export function mountPythonLabSettings(page) {
   if(epoch===sessionEpoch)render(data);
   return data;
  };
+ const budgetControls=['files','requests','operations','traffic','disk','cost'];
+ const ceilings=()=>({files:Number(el('files').value),providerRequests:Number(el('requests').value),
+  operations:Number(el('operations').value),trafficBytes:Number(el('traffic').value)*2**20,
+  diskBytes:Number(el('disk').value)*2**20,costMicros:Math.round(Number(el('cost').value)*1_000_000)});
  const selection=()=>{
-  const accountId=el('account').value,bucketName=el('bucket').value,mode=el('mode').value;
-  return {accountId,bucketName,mode,scopeId:mode==='read-only'?el('recovery').value:null,
-   minutes:Number(el('duration').value)};
+  const accountId=el('account').value,bucketName=el('bucket').value,choice=el('mode').value;
+  const [scopeId,campaignId=null]=choice==='read-write'?[null]:el('recovery').value.split('/');
+  return {accountId,bucketName,mode:choice==='read-only'?'read-only':'read-write',scopeId,campaignId,
+   minutes:Number(el('duration').value),ceilings:ceilings()};
+ };
+ const showCeilings=()=>{
+  const limit=ceilings();
+  el('limits').textContent=`${limit.files.toLocaleString()} upload attempts, ${limit.providerRequests.toLocaleString()} request units, `+
+   `${limit.operations.toLocaleString()} operations, ${(limit.trafficBytes/2**20).toLocaleString()} MiB modeled traffic, `+
+   `${(limit.diskBytes/2**20).toLocaleString()} MiB temporary disk, $${(limit.costMicros/1_000_000).toFixed(2)} modeled cost.`;
  };
  const clearApproval=()=>{el('approved').checked=false;};
+ showCeilings();
  el('duration').onchange=clearApproval;
+ for(const field of budgetControls)el(field).oninput=()=>{clearApproval();showCeilings();};
  el('config').onclick=act(async()=>{
   form=true;el('form').hidden=false;
   el('account').replaceChildren();option(el('account'),'','Choose account');
@@ -177,6 +201,7 @@ export function mountPythonLabSettings(page) {
  el('start').onclick=act(async()=>{
   const input=selection();
   if(!input.accountId||!input.bucketName||!el('approved').checked||input.scopeId==='')throw Error('Choose the QA target and approve access first.');
+  if(['duration',...budgetControls].some(key=>!el(key).value||!el(key).checkValidity()))throw Error('Enter valid session duration and resource ceilings.');
   const epoch=++sessionEpoch;
   // permissions.request must run in the owner's direct Chrome click gesture.
   el('start').disabled=true;

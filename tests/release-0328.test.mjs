@@ -30,9 +30,12 @@ test('Queue expires normal and error results independently, preserving archive a
   assert.equal((await store.job('completed')).metadata,undefined);
   await store.acknowledge('pending');
   assert.equal((await store.jobs()).waiting,1);
-  now+=15*minute;
+  now+=40*minute;
   await store.maintainJobs();
-  assert.deepEqual((await store.jobs()).items.map(item=>item.recordId),['running','failed','pending']);
+  assert.equal((await store.jobs()).finished,1);
+  now+=20*minute;
+  await store.maintainJobs();
+  assert.deepEqual((await store.jobs()).items.map(item=>item.recordId),['running','pending']);
   await store.clearJobs();
   assert.equal(await store.count(),2);
   await store.close();

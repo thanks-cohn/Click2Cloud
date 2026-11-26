@@ -8,8 +8,11 @@ export async function uploadReceiptGate(storage){
 }
 export const uploadReceiptFilename=id=>'redown-upload-receipt-'+id+'.json';
 
+const savedSelection=(gate,id)=>['automatic','manual'].includes(gate?.mode)&&gate.batchId===id&&uploadId(id);
+const approved=async(chrome,gate,id)=>savedSelection(gate,id)||typeof gate==='string'&&await uploadReceiptGate(chrome.storage.local)===gate;
+
 async function requestDownload(chrome,url,id,gate){
-  if(await uploadReceiptGate(chrome.storage.local)!==gate)return 'disabled';
+  if(!await approved(chrome,gate,id))return 'disabled';
   const downloadId=await chrome.downloads.download({url,filename:uploadReceiptFilename(id),saveAs:false});
   if(!Number.isInteger(downloadId))throw Error('UPLOAD_RECEIPT_DOWNLOAD_UNACKNOWLEDGED');
   return {state:'download-requested',id:downloadId};
@@ -34,8 +37,8 @@ export async function downloadUploadReceipt(chrome,receipt,gate,largeReceipt){
   return requestDownload(chrome,'data:application/json;base64,'+base64,receipt.batchId,gate);
 }
 export async function downloadUploadReceiptBlob(chrome,{text,batchId,gate}){
-  if(!uploadId(batchId)||!uploadId(gate)||typeof text!=='string')throw Error('UPLOAD_RECEIPT_INVALID');
-  if(await uploadReceiptGate(chrome.storage.local)!==gate)return 'disabled';
+  if(!uploadId(batchId)||(!uploadId(gate)&&!savedSelection(gate,batchId))||typeof text!=='string')throw Error('UPLOAD_RECEIPT_INVALID');
+  if(!await approved(chrome,gate,batchId))return 'disabled';
   const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
   try{
     const result=await requestDownload(chrome,url,batchId,gate);

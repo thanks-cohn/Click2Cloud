@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "redown-live-lab"
-version = "0.3.32.3"
+version = "0.3.32.4"
 description = "The scoped REDOWN Python Laboratory CLI and native messaging relay"
 requires-python = ">=3.10"
 dependencies = []

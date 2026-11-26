@@ -1,5 +1,5 @@
 import {mountHistoryV2Settings} from './history-v2-preferences.mjs';
-import {HISTORY_CLEANUP_ALARM,QUEUE_CLEANUP_ALARM} from '../src/queue/store.mjs';
+import {HISTORY_CLEANUP_ALARM,QUEUE_CLEANUP_ALARM,queueRetentionDefaults} from '../src/queue/store.mjs';
 import {historyInterval} from '../src/queue/calendar.mjs';
 import {downloadHistoryExport} from '../src/queue/export.mjs';
 import {queueDefaults} from './queue-service.mjs';
@@ -180,7 +180,7 @@ export function mountQueueSettings(parent,service){
   section.className='card queue-settings';
   section.innerHTML=`<h2>Queue</h2>
     <label>Automatic job cleanup <select data-normal>
-      <option value="default">Delete jobs after 15 minutes</option>
+      <option value="default">Delete jobs after ${queueRetentionDefaults.normalMinutes} minutes</option>
       <option value="never">Never delete</option>
       <option value="custom">Delete after custom minutes</option>
     </select></label>
@@ -195,11 +195,11 @@ export function mountQueueSettings(parent,service){
     feedback=$('[role=status]');
   let policy;
   function paint(){
-    normal.value=policy.normalMinutes===null?'never':policy.normalMinutes===15?'default':'custom';
+    normal.value=policy.normalMinutes===null?'never':policy.normalMinutes===queueRetentionDefaults.normalMinutes?'default':'custom';
     errors.value=policy.keepErrors?'yes':'no';
     normalField.hidden=normal.value!=='custom';
     errorField.hidden=policy.keepErrors;
-    normalMinutes.value=policy.normalMinutes??15;
+    normalMinutes.value=policy.normalMinutes??queueRetentionDefaults.normalMinutes;
     errorMinutes.value=policy.errorMinutes;
   }
   async function save(){
@@ -207,7 +207,7 @@ export function mountQueueSettings(parent,service){
     if(custom&&!normalMinutes.reportValidity()||!keepErrors&&!errorMinutes.reportValidity())return;
     for(const field of [normal,errors,normalMinutes,errorMinutes])field.disabled=true;
     try{
-      policy=await service.store.setQueuePolicy({normalMinutes:normal.value==='never'?null:custom?normalMinutes.valueAsNumber:15,
+      policy=await service.store.setQueuePolicy({normalMinutes:normal.value==='never'?null:custom?normalMinutes.valueAsNumber:queueRetentionDefaults.normalMinutes,
         keepErrors,errorMinutes:errorMinutes.valueAsNumber});
       if(policy.normalMinutes===null&&policy.keepErrors)await chrome.alarms.clear(QUEUE_CLEANUP_ALARM);
       else await chrome.alarms.create(QUEUE_CLEANUP_ALARM,{periodInMinutes:1});

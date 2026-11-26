@@ -1,5 +1,5 @@
 import {downloadUploadReceiptBlob} from '../src/chrome/local-upload-receipt-download.mjs';
-import {discardLocalUpload,localUploadPort,stageLocalUpload} from '../src/chrome/local-upload-files.mjs';
+import {discardLocalUpload,discardUploadSelection,localUploadPort,persistUploadSelection,stageLocalUpload} from '../src/chrome/local-upload-files.mjs';
 import {maximumUploadFiles} from '../src/chrome/local-upload-plan.mjs';
 import {normalizeTarget,targetKey} from '../src/core/menu-identity.mjs';
 
@@ -60,8 +60,8 @@ const terminal=new Set(['verified','failed','cancelled','unconfirmed']);
 const targetLabel=target=>target.bucketName+'/'+target.prefix;
 const sameTarget=(a,b)=>!!a&&!!b&&targetKey(a)===targetKey(b);
 export function wireExplorerUpload({runtime,button,choices,availability,picker,folderPicker,status,bar,cancel,
-    addFolder,startFolders,reconcileButton,resumeButton,readTarget,windowId,closeMenu,refresh}){
-  let checked,checking,picking,collecting,active,recovered,restoreGeneration=0;
+    addFolder,startFolders,reconcileButton,resumeButton,receiptButton,readTarget,windowId,closeMenu,refresh}){
+  let checked,checking,picking,collecting,active,recovered,receiptBatch,inspectTimer,restoreGeneration=0;
   const current=target=>sameTarget(readTarget(),target);
   const fresh=()=>current(checked?.target)&&checked.expires>Date.now();
   function menu(show){
@@ -87,6 +87,8 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
     reconcileButton.hidden=phase!=='paused'||batch.activeIndex===null;
     resumeButton.hidden=phase!=='paused'||batch.activeIndex!==null;
     recovered=phase==='paused'?batch:null;
+    receiptBatch=terminal.has(phase)||phase==='paused'?batch:null;
+    receiptButton.hidden=!receiptBatch;
     const caption=phase==='verifying'?(`Verifying ${counts.verified}/${total} · ${uploaded} uploaded`):
       phase==='ready'||phase==='uploading'?(`Uploading ${processed}/${total} processed · ${counts.verified} verified`):
       phase==='preparing'?'Preparing upload…':`${counts.verified} of ${total} files verified.`;
@@ -96,7 +98,7 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
       counts.unconfirmed?`${counts.unconfirmed} unconfirmed.`:'',counts.cancelled?`${counts.cancelled} cancelled.`:'',
       total>processed?`${total-processed} not processed.`:'',
       phase==='cancelled'?'Upload cancelled.':'',
-      phase==='paused'?'Upload paused. The remaining local files must be selected again.':'',
+      phase==='paused'?(batch.activeIndex!==null?'Check the outstanding publication before continuing.':'Upload paused. Reselect the remaining local files to continue.'):'' ,
       batch.renamed?`${batch.renamed} saved with separate names to keep existing files.`:'']:null;
     status.textContent=[caption,`Destination ${targetLabel(batch.target)}.`,...(notes??[]),issue].filter(Boolean).join(' ');
   }
@@ -109,7 +111,12 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
       transport=uploadConnection(runtime);
       const result=await transport.request(reconcile?{reconcile:true,source,batchId:recovered.id}:{inspect:true,source});
       if(generation!==restoreGeneration||!current(source)||active||picking||collecting)return;
-      if(result.batch)showBatch(result.batch);
+      if(result.batch){
+        showBatch(result.batch);
+        if(result.batch.durableRunnable==='yes'){
+          clearTimeout(inspectTimer);inspectTimer=setTimeout(()=>void inspect(),750);
+        }
+      }
       else if(reconcile)status.textContent=result.error??'Cloudflare could not reconcile this upload.';
     }catch(error){
       if(reconcile&&generation===restoreGeneration)status.textContent=error.message;
@@ -117,14 +124,15 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
   }
   function invalidate(){
     const next=checking;
+    clearTimeout(inspectTimer);
     checking=checked=undefined;
     next?.connection?.close();
     menu(false);
     showReadiness('',false);
     if(!active&&!picking&&!collecting){
       restoreGeneration++;
-      recovered=null;
-      reconcileButton.hidden=resumeButton.hidden=true;
+      recovered=receiptBatch=null;
+      reconcileButton.hidden=resumeButton.hidden=receiptButton.hidden=true;
       status.textContent='';
       bar.hidden=true;
     }
@@ -159,9 +167,9 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
     })().finally(()=>{if(checking===check){checking=undefined;update();}});
     return check.result;
   }
-  function pick(mode,target,resumeId){
+  function pick(mode,target,resumeId,collect=false){
     const input=mode==='files'?picker:folderPicker;
-    picking={mode,target,input,resumeId};
+    picking={mode,target,input,resumeId,collect};
     menu(false);
     closeMenu();
     input.value='';
@@ -194,7 +202,7 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
     input.oncancel=()=>{if(picking?.input===input){picking=undefined;update();}};
     input.onchange=()=>{
       if(picking?.input!==input)return;
-      const {target,resumeId}=picking;
+      const {target,resumeId,collect}=picking;
       picking=undefined;
       const picked=input.files;
       if(picked.length+(collecting?.files.length??0)>maximumUploadFiles){
@@ -212,7 +220,7 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
         update();
         return;
       }
-      if(mode==='files'){void upload(target,mode,files,resumeId);return;}
+      if(mode==='files'||!collect){void upload(target,mode,files,resumeId);return;}
       collecting??={target,resumeId,files:[],roots:new Set()};
       const roots=new Set(files.map(file=>file.webkitRelativePath.split('/')[0]));
       if([...roots].some(root=>collecting.roots.has(root))){
@@ -227,7 +235,8 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
       update();
     };
   }
-  addFolder.onclick=()=>{if(collecting&&!picking)pick('folder',collecting.target);};
+  choices.querySelector('[data-upload-kind="collect"]').onclick=()=>{if(fresh())pick('folder',checked.target,undefined,true);};
+  addFolder.onclick=()=>{if(collecting&&!picking)pick('folder',collecting.target,undefined,true);};
   startFolders.onclick=()=>{
     if(!collecting||picking)return;
     const {target,files,resumeId}=collecting;
@@ -242,6 +251,19 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
   reconcileButton.onclick=async()=>{
     reconcileButton.disabled=true;
     try{await inspect({reconcile:true});}finally{reconcileButton.disabled=false;}
+  };
+  receiptButton.onclick=async()=>{
+    if(!receiptBatch)return;
+    const captured=receiptBatch,client=uploadConnection(runtime);
+    receiptButton.disabled=true;
+    try{
+      const {receipt}=await client.request({inspect:true,source:captured.target,batchId:captured.id,detail:true});
+      if(!receipt)throw Error('The receipt is unavailable.');
+      await downloadUploadReceiptBlob(chrome,{text:JSON.stringify(receipt,null,2)+'\n',batchId:captured.id,
+        gate:{mode:'manual',batchId:captured.id}});
+      status.textContent='Upload receipt download requested.';
+    }catch{status.textContent='Chrome could not download the receipt. The upload evidence remains available.';}
+    finally{client.close();receiptButton.disabled=false;}
   };
   cancel.onclick=()=>{
     if(collecting){
@@ -270,15 +292,30 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
     status.textContent=`Preparing upload to ${targetLabel(target)}…`;
     let state,issue='';
     const paths=files.map(file=>mode==='folder'?file.webkitRelativePath:file.name);
+    const selectionId=resumeId?null:crypto.randomUUID();
     try{
       const origin=await windowId;
       signal.throwIfAborted();
+      if(selectionId){
+        status.textContent='Preparing local upload sources. You can close REDOWN after the upload is accepted.';
+        await persistUploadSelection(selectionId,files,paths,signal);
+      }
+      signal.throwIfAborted();
       batch.connection=uploadConnection(runtime);
-      const result=await batch.connection.request({source:target,...(resumeId?{resume:true}:{begin:true}),batchId:id,mode,windowId:origin,
+      const result=await batch.connection.request({source:target,...(resumeId?{resume:true}:{begin:true}),batchId:id,mode,windowId:origin,...(selectionId?{selectionId}:{}),
         items:files.map((file,index)=>({name:file.name,size:file.size,relativePath:paths[index]}))},progress=>showBatch(progress));
       state=result.batch;
       if(!state||result.state!=='completed')throw Error(result.error??'Cloudflare write access is unavailable.');
       showBatch(state);
+      if(selectionId){
+        while(!terminal.has(state.phase)&&state.phase!=='paused'){
+          await new Promise(resolve=>setTimeout(resolve,750));
+          const answer=await batch.connection.request({inspect:true,source:target,batchId:id});
+          if(answer.batch)state=answer.batch;
+          showBatch(state);
+        }
+        return;
+      }
       const order=result.order??files.map((_,index)=>index);
       for(const selected of order){
         if(state.phase!=='ready')break;
@@ -300,13 +337,14 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
     }catch(error){
       issue=error.name==='QuotaExceededError'?'Local upload staging is full. Free disk space before selecting the remaining files.':
         signal.aborted?'Upload cancelled.':error.message;
-      if(state&&!terminal.has(state.phase)&&state.phase!=='paused'){
+      if(!selectionId&&state&&!terminal.has(state.phase)&&state.phase!=='paused'){
         const code=error.name==='QuotaExceededError'?'LOCAL_UPLOAD_STAGING_QUOTA':'LOCAL_UPLOAD_INTERRUPTED';
         const stop=await batch.connection?.request({source:target,batchId:id,stop:true,...(signal.aborted?{}:{code})}).catch(()=>null);
         state=stop?.batch??null;
       }
     }finally{
       batch.connection?.close();
+      if(selectionId)await discardUploadSelection(selectionId).catch(()=>{});
       if(state)showBatch(state,issue);
       else if(resumeId&&recovered)showBatch(recovered,issue);
       else{status.textContent=issue;bar.hidden=true;}
@@ -315,6 +353,6 @@ export function wireExplorerUpload({runtime,button,choices,availability,picker,f
       catch{status.textContent+=' Refresh the folder to see the uploaded files.';}
     }
   }
-  window.addEventListener('pagehide',()=>{checking?.connection?.close();active?.connection?.close();});
+  window.addEventListener('pagehide',()=>{clearTimeout(inspectTimer);checking?.connection?.close();active?.connection?.close();});
   return {check,update,invalidate,inspect};
 }

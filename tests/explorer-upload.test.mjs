@@ -196,3 +196,21 @@ test('text preview streams through the read-only API, caps ignored Range respons
   assert.equal(cancelled,true);
   assert(pulls<bodySize/65536);
 });
+
+
+test('ordinary upload receipt qualification is opt-in and uses strict independent thresholds',async()=>{
+  const {qualifyUploadReceipt}=await import('../src/chrome/upload-receipt-policy.mjs');
+  const selection=(count,bytes)=>[...Array.from({length:count-1},()=>({size:0})),{size:bytes}];
+  const policy={files:true,largeOnly:true};
+  assert.equal(qualifyUploadReceipt({},'files',selection(51,200_000_001)).qualifies,false);
+  assert.equal(qualifyUploadReceipt(policy,'files',selection(50,200_000_000)).qualifies,false);
+  assert.equal(qualifyUploadReceipt(policy,'files',selection(50,200_000_001)).reason,'size');
+  assert.equal(qualifyUploadReceipt(policy,'files',selection(51,200_000_000)).reason,'count');
+  assert.equal(qualifyUploadReceipt({...policy,combine:'and'},'files',selection(51,200_000_000)).qualifies,false);
+  assert.equal(qualifyUploadReceipt({...policy,combine:'and'},'files',selection(51,200_000_001)).reason,'size+count');
+  assert.equal(qualifyUploadReceipt({...policy,sizeEnabled:false,count:2},'files',selection(3,0)).reason,'count');
+  assert.equal(qualifyUploadReceipt({...policy,countEnabled:false,sizeBytes:9},'files',selection(1,10)).reason,'size');
+  assert.equal(qualifyUploadReceipt(policy,'folder',selection(51,200_000_001)).qualifies,false);
+  assert.equal(qualifyUploadReceipt({folders:true},'folder',selection(4_000,0)).reason,'category-enabled');
+  assert.throws(()=>qualifyUploadReceipt({...policy,countEnabled:false,sizeEnabled:false},'files',selection(3,10)));
+});

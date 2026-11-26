@@ -24,7 +24,7 @@ function cursors(source, range, direction, visit) {
 }
 const capValid = value => Number.isSafeInteger(value) && value > 0;
 export const QUEUE_CLEANUP_ALARM = 'redown-queue-cleanup';
-export const queueRetentionDefaults = Object.freeze({normalMinutes:15,errorMinutes:60,keepErrors:false});
+export const queueRetentionDefaults = Object.freeze({normalMinutes:60,errorMinutes:60,keepErrors:false});
 const minute = 60_000;
 const expiryClass = job => !(job.queueTerminal??job.terminal) || !Number.isSafeInteger(job.terminalAt) ? undefined :
   ['verified','cancelled'].includes(job.status) ? 'normal' : 'error';
