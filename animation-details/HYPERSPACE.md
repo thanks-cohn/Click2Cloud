@@ -2,7 +2,7 @@
 
 ## Visual intention
 
-A quiet interface becomes a perspective highway: the bottom dividing line splits at the center, curves toward the top, gathers momentum, and races outward. The background regions never dissolve independently. Each rail and its corresponding header-color surface use the same Bézier boundary. There are no circular masks, independently expanding blobs, full-screen flashes, or rotating rectangles. The ReDown logo and sun/moon stay in place. The original header layout remains available. The header paint retracts with the page lift, preventing the fixed hover region from hiding page headings.
+A quiet interface becomes a perspective highway: the bottom dividing line splits at the center, curves toward the top, gathers momentum, and races outward. The background regions never dissolve independently. Each rail and its corresponding header-color surface use the same Bézier boundary. There are no circular masks, independently expanding blobs, full-screen flashes, or rotating rectangles. The ReDown logo and sun/moon remain visible; they move upward by at most 12 CSS pixels during release to leave space for the rising content. The original header layout remains available. The header paint retracts with the page lift, preventing the fixed hover region from hiding page headings.
 
 ## Timeline and controls
 
@@ -12,7 +12,7 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Split | 1.8 seconds | The line separates from the center; its tips climb to the top and create an 80 CSS-pixel opening (bounded on exceptionally narrow windows). Curves create a vanishing-point highway. |
 | Charge | 5 seconds by default | Light streaks begin near the bottom of both rails and travel upward toward the horizon, starting at two rail lengths per second and accelerating continuously throughout the configured time. The colors remain separated at the curves. |
 | Release | Energy-dependent | The rails and the header surfaces move outward together. Navigation text fades and lower content is pulled upward by the same release. |
-| Settle | Energy-dependent | A small, bounded upward overshoot settles into a constant final position. |
+| Settle | Energy-dependent | A stronger, energy-dependent upward overshoot settles into a constant final position. |
 | Open | Indefinite | The page color fills the header space and the page stays raised. No ongoing animation-frame loop. |
 | Return | Up to about 0.88 seconds | Header hover reverses from the current state and restores the surfaces, navigation and content together. No restart from an unrelated frame. |
 
@@ -22,7 +22,7 @@ Settings → Aesthetic → Header Hyperspace offers an enable switch and a build
 
 For charge time c in seconds, the shimmer's travel (in rail lengths) is 2c + 0.225c². Velocity is its derivative, 2 + 0.45c. Travel is integrated instead of abruptly switching animation durations. Streak length and opacity increase within bounds; opacity never flashes the whole header.
 
-Normalized release energy is the square root of buildup seconds / 5, bounded to 0.4–2. Energy shortens the release interval and increases the small upward overshoot. The rail translation and content lift are sampled from the same release clock. Both finish in the same layout for every configured duration. The page rises at most 28 CSS pixels at rest, additionally limited by the real header height so that the logo/theme controls retain room.
+Normalized release energy is the square root of buildup seconds / 5, bounded to 0.4–2. Energy shortens the release interval (440 ms at the default five-second charge) and increases upward overshoot. The cubic ease-out delivers a concentrated impulse at the start of release. The rail translation and content lift are sampled from the same release clock. Both finish in the same layout for every configured duration. The page rises up to 40 CSS pixels at rest and up to 54 pixels at the peak, bounded by the real header height, the measured heading clearance and the persistent controls. Scrolled pages use a conservative clearance. The clipped paint retracts with the lift.
 
 ## Interaction contract
 
