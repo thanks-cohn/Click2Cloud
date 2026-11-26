@@ -699,6 +699,19 @@ body[data-sky-opening]>.app-header{
 body[data-sky-opening]>.app-header>.sky-canopy{
  position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;
 }
+/* The page's actual surface wells up from below, covering every pixel of the
+   old header. A sampled smooth wave keeps the leading edge organic. */
+.sky-canopy>.sky-liquid{
+ position:absolute;inset:0;z-index:1;pointer-events:none;
+ background:var(--sky-page-surface,var(--bg));
+ animation:sky-liquid-rise 2200ms cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes sky-liquid-rise{
+ 0%,18%{clip-path:polygon(0 100%,8% 100%,16% 100%,25% 100%,34% 100%,42% 100%,50% 100%,58% 100%,66% 100%,75% 100%,84% 100%,92% 100%,100% 100%,100% 100%,0 100%)}
+ 36%{clip-path:polygon(0 96%,8% 94%,16% 89%,25% 80%,34% 67%,42% 56%,50% 52%,58% 56%,66% 67%,75% 80%,84% 89%,92% 94%,100% 96%,100% 100%,0 100%)}
+ 55%{clip-path:polygon(0 56%,8% 51%,16% 42%,25% 30%,34% 16%,42% 8%,50% 5%,58% 8%,66% 16%,75% 30%,84% 42%,92% 51%,100% 56%,100% 100%,0 100%)}
+ 74%,100%{clip-path:polygon(0 0,8% 0,16% 0,25% 0,34% 0,42% 0,50% 0,58% 0,66% 0,75% 0,84% 0,92% 0,100% 0,100% 100%,0 100%)}
+}
 .sky-canopy>.sky-half{
  position:absolute;inset-block:0;inline-size:50%;background:var(--sky-surface);
  border-block-end:1px solid var(--sky-rail);
