@@ -252,29 +252,47 @@ try{
   assert.deepEqual(hoverEvents.afterSwitch,['cancel','cancel']);
   assert.deepEqual(hoverEvents.calls,['cancel','cancel','arm','cancel','arm']);
 
-  // Sample the sky opening at its most open moment without relying on frame timing.
-  const sky=await page.evaluate(()=>{
+  // Production animation reversal: sample both endpoints and the intermediate liquid frame.
+  const sky=await page.evaluate(async()=>{
+   const {reverseSkyAnimations}=await import('/extension/sky-idle.mjs');
    const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
    const nav=header.querySelector('nav'),logo=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
    const original={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
    const canopy=document.createElement('div');canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
    canopy.style.setProperty('--sky-surface',original.background);
    canopy.style.setProperty('--sky-rail',getComputedStyle(header).borderBottomColor);
+   const pageColor=getComputedStyle(document.querySelector('#main')).backgroundColor;
+   canopy.style.setProperty('--sky-page-surface',pageColor);
    for(const side of ['left','right']){const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);}
+   const liquid=document.createElement('div');liquid.className='sky-liquid';canopy.append(liquid);
    header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
    const animations=[...header.getAnimations({subtree:true}),...shell.getAnimations()].filter(a=>a.animationName?.startsWith('sky-'));
-   for(const animation of animations){animation.pause();animation.currentTime=1500;}
+   const seek=time=>{for(const animation of animations){animation.pause();animation.currentTime=time;}};
    const opacity=el=>Number(getComputedStyle(el).opacity);
-   const open={nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.children].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height};
-   for(const animation of animations){animation.currentTime=12000;}
-   const held={nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.children].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height};
+   const measure=()=>({nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.querySelectorAll('.sky-half')].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height,liquid:getComputedStyle(liquid).clipPath,color:getComputedStyle(liquid).backgroundColor});
+   seek(0);const closed=measure();
+   seek(1000);const halfway=measure();
+   seek(2200);const open=measure();
+   seek(12000);const held=measure();
+   const returning=reverseSkyAnimations(animations);
+   const reverseRates=animations.map(a=>a.playbackRate);
+   for(const animation of animations)animation.pause();
+   seek(1000);const reverseHalf=measure();
+   for(const animation of animations){animation.currentTime=0;animation.finish();}
+   await returning;
+   const returned=measure();
    document.body.removeAttribute('data-sky-opening');canopy.remove();
    const restored={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
-   return {original,open,held,restored};
+   return {original,closed,halfway,open,held,reverseRates,reverseHalf,returned,restored,pageColor};
   });
   assert.equal(sky.open.nav,0);assert.equal(sky.open.logo,1);assert.equal(sky.open.theme,1);
   assert.deepEqual(sky.open.halves,[0,0]);assert(Math.abs(sky.open.rise-24)<1);
-  assert.equal(sky.open.header,sky.original.header);assert.deepEqual(sky.held,sky.open,'Header remains open long after animation completion');assert.deepEqual(sky.restored,sky.original);
+  assert.equal(sky.open.header,sky.original.header);assert.equal(sky.open.color,sky.pageColor);
+  assert.notEqual(sky.halfway.liquid,sky.closed.liquid);assert.notEqual(sky.halfway.liquid,sky.open.liquid);
+  assert.deepEqual(sky.held,sky.open,'Header remains open long after animation completion');
+  assert(sky.reverseRates.every(rate=>rate===-2),'Return plays the existing animation backward');
+  assert.deepEqual(sky.reverseHalf,sky.halfway,'Return uses the same intermediate geometry');
+  assert.deepEqual(sky.returned,sky.closed);assert.deepEqual(sky.restored,sky.original);
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
