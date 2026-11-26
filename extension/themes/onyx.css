@@ -403,3 +403,11 @@
 @media(forced-colors:active){
  :root[data-aesthetic=onyx] #shell[data-view=history] [data-history-records] .queue-history-card::after{display:none}
 }
+
+/* History search, calendar and pagination sit directly on the normal page.
+   Keep the wrapper's geometry, but remove its nested-card appearance. */
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-archive{
+ background:transparent;
+ border-color:transparent;
+ box-shadow:none;
+}
