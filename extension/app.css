@@ -79,7 +79,7 @@
 /* Providers only: the floating control is invisible at rest, but its existing
    compact hit target and keyboard focus still reveal the original button. */
 #shell[data-view=remotes]>#manage-slot #manage:not(:is(:hover,:focus-visible)){opacity:0}
-/* Only navigation from another floating-control view fades the Providers button. */
+/* Fade after non-Explorer navigation or an intentional hover/focus reveal. */
 #shell[data-view=remotes][data-manage-fade]>#manage-slot #manage:not(:is(:hover,:focus-visible)){
  transition:inline-size 420ms cubic-bezier(.45,0,.18,1),opacity 360ms ease-out;
 }
