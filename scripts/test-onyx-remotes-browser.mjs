@@ -239,7 +239,7 @@ try{
    const move=(x,y)=>document.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
    const phases=[];controller.start();await Promise.resolve();
    advance(4999);phases.push(phase());advance(1);phases.push(phase());
-   advance(180);phases.push(phase());
+   advance(1800);phases.push(phase());
    const overlay=header.querySelector('.hyperspace-overlay');
    const geometry=[...overlay.querySelectorAll('.hyperspace-rail')].map(el=>el.getAttribute('d'));
    const first=overlay.querySelector('.hyperspace-glint');
