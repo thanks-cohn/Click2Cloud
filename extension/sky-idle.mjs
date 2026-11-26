@@ -15,3 +15,17 @@ export function createSkyIdle({eligible,open,close,delay=5000,setTimer=setTimeou
  }
  return {cancel,reset};
 }
+
+// A real pointer movement, not a DOM-driven pointerleave (e.g. closing More),
+// is required to arm another idle period after navigation cancels it.
+export function createSkyHover(idle){
+ let inside=false;
+ return {
+  move(overHeader){
+   if(overHeader===inside)return;
+   inside=overHeader;
+   if(inside)idle.cancel();
+   else idle.reset();
+  }
+ };
+}
