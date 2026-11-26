@@ -67,6 +67,14 @@ body[data-hyperspace]:has(>#shell[data-view=remotes])>.app-header #theme{
 body[data-hyperspace]>#shell:is([data-view=history],[data-view=queue])>main>.queue-page>h1{
  translate:0 calc(0px - var(--hyper-title-up,0px));
 }
+/* Center only these two title labels, using the same progress as the lift.
+   Keep the heading's block and every card below it in their original layout. */
+#shell:is([data-view=settings],[data-view=screenshot])>main>.page>h1>[data-hyper-center-title]{
+ display:inline-block;
+}
+body[data-hyperspace]>#shell:is([data-view=settings],[data-view=screenshot])>main>.page>h1>[data-hyper-center-title]{
+ translate:var(--hyper-title-center,0px) 0;
+}
 /* One reservation at launch, one final layout commit. No animated margins. */
 body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-reserve,0px))}
 body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
