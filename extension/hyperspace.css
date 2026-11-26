@@ -14,6 +14,10 @@ body[data-hyperspace]>.app-header>.hyperspace-overlay{
  position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
 }
 .hyperspace-overlay>svg{overflow:hidden}
+/* Elegant mode fades one flat surface, without constructing any rail paths. */
+.hyperspace-overlay>.hyperspace-elegant-surface{
+ position:absolute;inset:0;pointer-events:none;border-bottom:1px solid transparent;
+}
 .hyperspace-rail{stroke-width:1;vector-effect:non-scaling-stroke}
 .hyperspace-glint{
  stroke:color-mix(in srgb,var(--text) 80%,var(--accent) 20%);
