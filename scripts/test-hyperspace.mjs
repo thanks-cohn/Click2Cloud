@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,elegantHeaderFrame,elegantThemeGlide,ELEGANT_MS,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,elegantHeaderFrame,ELEGANT_MS,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
 
 assert.deepEqual(normalizeHyperspace(),{mode:'none',seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:true,seconds:7}),{mode:'none',seconds:7});
@@ -8,10 +8,6 @@ assert.deepEqual(normalizeHyperspace({mode:'hyperspace',seconds:10}),{mode:'hype
 assert.deepEqual(normalizeHyperspace({mode:'elegant'}),{mode:'elegant',seconds:5});
 assert.equal(normalizeHyperspace({mode:'invalid'}).mode,'none');
 assert.equal(ELEGANT_MS,1050);
-assert.deepEqual(elegantThemeGlide(380,369,362),{button:6,glyph:0});
-assert.deepEqual(elegantThemeGlide(380,380,370),{button:0,glyph:6});
-assert.deepEqual(elegantThemeGlide(380,375,369),{button:3,glyph:3});
-assert.deepEqual(elegantThemeGlide(380,380,376),{button:0,glyph:2});
 let lastElegant=elegantHeaderFrame(0);
 assert.equal(lastElegant.lift,0);assert.equal(lastElegant.words,1);assert.equal(lastElegant.burst,0);
 for(let ms=1;ms<=ELEGANT_MS;ms++){
