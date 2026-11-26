@@ -271,19 +271,20 @@ try{
    const opacity=el=>Number(getComputedStyle(el).opacity);
    const measure=()=>({nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.querySelectorAll('.sky-half')].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height,liquid:getComputedStyle(liquid).clipPath,color:getComputedStyle(liquid).backgroundColor});
    seek(0);const closed=measure();
-   seek(1000);const halfway=measure();
-   seek(2200);const open=measure();
+   seek(2000);const halfway=measure();
+   seek(4000);const open=measure();
    seek(12000);const held=measure();
    const returning=reverseSkyAnimations(animations);
    const reverseRates=animations.map(a=>a.playbackRate);
+   const durations=animations.map(a=>a.effect.getTiming().duration);
    for(const animation of animations)animation.pause();
-   seek(1000);const reverseHalf=measure();
+   seek(2000);const reverseHalf=measure();
    for(const animation of animations){animation.currentTime=0;animation.finish();}
    await returning;
    const returned=measure();
    document.body.removeAttribute('data-sky-opening');canopy.remove();
    const restored={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
-   return {original,closed,halfway,open,held,reverseRates,reverseHalf,returned,restored,pageColor};
+   return {original,closed,halfway,open,held,reverseRates,durations,reverseHalf,returned,restored,pageColor};
   });
   assert.equal(sky.open.nav,0);assert.equal(sky.open.logo,1);assert.equal(sky.open.theme,1);
   assert.deepEqual(sky.open.halves,[0,0]);assert(Math.abs(sky.open.rise-24)<1);
@@ -293,6 +294,7 @@ try{
   assert.match(sky.halfway.liquid,/^circle\(/,'Use the original circular ink spread, not a polygon wave');
   assert.match(sky.open.liquid,/^circle\(150% at 50% 100%\)$/);
   assert.deepEqual(sky.held,sky.open,'Header remains open long after animation completion');
+  assert(sky.durations.every(duration=>duration===4000),'All sky tracks share the deliberate four-second timeline');
   assert(sky.reverseRates.every(rate=>rate===-2),'Return plays the existing animation backward');
   assert.deepEqual(sky.reverseHalf,sky.halfway,'Return uses the same intermediate geometry');
   assert.deepEqual(sky.returned,sky.closed);assert.deepEqual(sky.restored,sky.original);
