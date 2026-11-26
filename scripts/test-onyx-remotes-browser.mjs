@@ -289,6 +289,9 @@ try{
   assert.deepEqual(sky.open.halves,[0,0]);assert(Math.abs(sky.open.rise-24)<1);
   assert.equal(sky.open.header,sky.original.header);assert.equal(sky.open.color,sky.pageColor);
   assert.notEqual(sky.halfway.liquid,sky.closed.liquid);assert.notEqual(sky.halfway.liquid,sky.open.liquid);
+  assert.match(sky.closed.liquid,/^circle\(0% at 50% 100%\)$/);
+  assert.match(sky.halfway.liquid,/^circle\(/,'Use the original circular ink spread, not a polygon wave');
+  assert.match(sky.open.liquid,/^circle\(150% at 50% 100%\)$/);
   assert.deepEqual(sky.held,sky.open,'Header remains open long after animation completion');
   assert(sky.reverseRates.every(rate=>rate===-2),'Return plays the existing animation backward');
   assert.deepEqual(sky.reverseHalf,sky.halfway,'Return uses the same intermediate geometry');
