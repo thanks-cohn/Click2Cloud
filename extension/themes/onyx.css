@@ -14,8 +14,8 @@
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>main{background:var(--bg)}
 /* Canonical Onyx footer, shared by non-Explorer Shelf views. The existing DOM and handlers stay intact. */
 :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot{
- position:static;inset:auto;inline-size:100%;block-size:64px;min-block-size:64px;
- padding:10px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);
+ position:static;inset:auto;inline-size:100%;block-size:48px;min-block-size:48px;
+ padding:5px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);
  justify-content:space-between;align-items:center;box-sizing:border-box;color:var(--text);
 }
 :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #manage{
