@@ -1,7 +1,7 @@
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const hyperspaceKey='headerHyperspaceV1';
-export const IDLE_MS=5000, SPLIT_MS=1800, WATER_IDLE_MS=10000;
+export const IDLE_MS=5000, SPLIT_MS=1800, WATER_IDLE_MS=2000;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export function normalizeHyperspace(value){
@@ -78,27 +78,27 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
  return {left,right,leftFill:left+' L '+x(0)+' 0 L '+x(tip)+' 0 Z',rightFill:right+' L '+(w-x(0))+' 0 L '+(w-x(tip))+' 0 Z',gap};
 }
-// A static perspective field of shallow ripples. Far rows are closer
-// together, shorter and fainter; near rows grow in spacing and length.
-// Deterministic geometry, no random state, frame loop or external asset.
+// Four clear, straight horizontal water bands and eight shallow ripples.
+// Perspective spacing opens toward the foreground; no animation-frame loop.
 export function hyperspaceWaterGeometry(width,height){
  const w=Math.max(1,width),h=Math.max(1,height);
  if(w<100||h<8)return [];
- const lines=[],span=w*.68,center=w/2;
- const top=h*.19,depth=h*.63;
- for(let row=0;row<5;row++){
-  const t=row/4,y=top+depth*t**1.65;
-  const reach=span*(.65+.35*t);
-  if(row===0){
-   lines.push({x1:center-reach*.5,y1:y,x2:center+reach*.5,y2:y+.25,opacity:.24});
+ const lines=[],span=w*.88,center=w/2;
+ const top=h*.10,depth=h*.80;
+ for(let row=0;row<6;row++){
+  const t=row/5,y=top+depth*t**1.22;
+  if(row<4){
+   const len=span*(.71+.072*row);
+   const x=center+span*.025*Math.sin(row*2.4);
+   lines.push({x1:x-len/2,y1:y,x2:x+len/2,y2:y,opacity:.52+.055*row});
    continue;
   }
-  for(let i=0;i<3;i++){
-   const cell=reach/3,phase=Math.sin((row+1)*2.13+i*2.47);
-   const len=cell*(.35+.43*t+.07*phase);
-   const x=center-reach/2+cell*(i+.5)+phase*cell*.09;
-   const skew=Math.sin(row*2.1+i*1.8)*Math.min(.85,h*.035)*(.35+.65*t);
-   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,opacity:.16+.22*t+.025*phase});
+  for(let i=0;i<4;i++){
+   const cell=span/4,phase=Math.sin((row+1)*2.13+i*2.47);
+   const len=cell*(.63+.16*t+.08*phase);
+   const x=center-span/2+cell*(i+.5)+phase*cell*.055;
+   const skew=Math.sin(row*2.1+i*1.8)*Math.min(1.1,h*.055);
+   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,opacity:.48+.16*t+.035*phase});
   }
  }
  return lines;
