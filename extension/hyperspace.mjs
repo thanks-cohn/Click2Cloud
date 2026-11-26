@@ -72,9 +72,9 @@ export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShif
 }
 // History and Queue retain breathing room instead of rising to the viewport
 // edge. Their visible title rises a little farther than the content below it.
-export function archiveLiftBounds(bounds,atTop){
+export function archiveLiftBounds(bounds,atTop,view='history'){
  const rest=Math.min(bounds.rest,28),peak=Math.min(bounds.peak,34);
- return {rest,peak:Math.max(rest,peak),title:atTop?Math.min(8,rest*.4):0};
+ return {rest,peak:Math.max(rest,peak),title:atTop?(view==='queue'?Math.min(14,rest*.6):Math.min(8,rest*.4)):0};
 }
 // The surface and the stroke are constructed from exactly the same curve.
 // The initial center gap is 80 CSS px (clamped on tiny windows).
@@ -215,7 +215,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   let titleLift=0;
   if(['history','queue'].includes(shell.dataset.view)){
    const atTop=main?.scrollTop<1&&!!main.querySelector('.queue-page>h1');
-   ({rest:baseLift,peak:peakLift,title:titleLift}=archiveLiftBounds({rest:baseLift,peak:peakLift},atTop));
+   ({rest:baseLift,peak:peakLift,title:titleLift}=archiveLiftBounds({rest:baseLift,peak:peakLift},atTop,shell.dataset.view));
   }
   parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
