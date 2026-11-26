@@ -698,6 +698,8 @@ body[data-sky-opening]>.app-header{
 }
 body[data-sky-opening]>.app-header>.sky-canopy{
  position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;
+ /* Retain the old color beneath the ink until the actual front reaches it. */
+ background:var(--sky-surface);
 }
 /* Adapt the original REDOWN shelf-ink-reveal (shelf.css) to this header.
    A circular ink front expands upward from the bottom center, not a polygon wave.
@@ -705,12 +707,15 @@ body[data-sky-opening]>.app-header>.sky-canopy{
 .sky-canopy>.sky-liquid{
  position:absolute;inset:0;z-index:1;pointer-events:none;
  background:var(--sky-page-surface,var(--bg));
- animation:sky-liquid-rise 2200ms cubic-bezier(.23,.74,.25,1) both;
+ animation:sky-liquid-rise 4000ms cubic-bezier(.42,0,.58,1) both;
 }
 @keyframes sky-liquid-rise{
- 0%,18%{clip-path:circle(0% at 50% 100%)}
- 39%{clip-path:circle(20% at 49% 100%)}
- 67%{clip-path:circle(64% at 51% 99%)}
+ 0%,12%{clip-path:circle(0% at 50% 100%)}
+ 25%{clip-path:circle(6% at 50% 100%)}
+ 43%{clip-path:circle(19% at 49% 100%)}
+ 62%{clip-path:circle(36% at 51% 99%)}
+ 80%{clip-path:circle(58% at 50% 100%)}
+ 94%{clip-path:circle(80% at 50% 100%)}
  100%{clip-path:circle(150% at 50% 100%)}
 }
 .sky-canopy>.sky-half{
@@ -720,13 +725,13 @@ body[data-sky-opening]>.app-header>.sky-canopy{
 .sky-canopy>.sky-half::after{
  content:"";position:absolute;inset-inline:0;inset-block-end:0;block-size:1px;
  background:linear-gradient(90deg,transparent,color-mix(in srgb,currentColor 70%,transparent),transparent);
- animation:sky-shimmer 2200ms ease-in-out both;
+ animation:sky-shimmer 4000ms ease-in-out both;
 }
-.sky-canopy>.sky-left{inset-inline-start:0;transform-origin:left top;animation:sky-left 2200ms cubic-bezier(.4,0,.2,1) both}
-.sky-canopy>.sky-right{inset-inline-end:0;transform-origin:right top;animation:sky-right 2200ms cubic-bezier(.4,0,.2,1) both}
+.sky-canopy>.sky-left{inset-inline-start:0;transform-origin:left top;animation:sky-left 4000ms cubic-bezier(.4,0,.2,1) both}
+.sky-canopy>.sky-right{inset-inline-end:0;transform-origin:right top;animation:sky-right 4000ms cubic-bezier(.4,0,.2,1) both}
 body[data-sky-opening]>.app-header>:is(.brand-lockup,nav,.header-controls){position:relative;z-index:1}
-body[data-sky-opening]>.app-header :is(nav,.header-more){animation:sky-words 2200ms ease-in-out both}
-body[data-sky-opening]>#shell{animation:sky-body-rise 2200ms cubic-bezier(.4,0,.2,1) both}
+body[data-sky-opening]>.app-header :is(nav,.header-more){animation:sky-words 4000ms ease-in-out both}
+body[data-sky-opening]>#shell{animation:sky-body-rise 4000ms cubic-bezier(.4,0,.2,1) both}
 @keyframes sky-shimmer{
  0%{opacity:0;transform:scaleX(.25)}
  14%{opacity:1;transform:scaleX(1)}
@@ -745,7 +750,7 @@ body[data-sky-opening]>#shell{animation:sky-body-rise 2200ms cubic-bezier(.4,0,.
 }
 @keyframes sky-words{
  0%,18%{opacity:1;filter:blur(0);transform:translateY(0)}
- 57%,100%{opacity:0;filter:blur(1px);transform:translateY(-7px)}
+ 79%,100%{opacity:0;filter:blur(1px);transform:translateY(-7px)}
 }
 @keyframes sky-body-rise{
  0%,18%{margin-block-start:0}
