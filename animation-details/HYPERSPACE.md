@@ -24,6 +24,16 @@ For charge time c in seconds, the shimmer's travel (in rail lengths) is 2c + 0.2
 
 Normalized release energy grows approximately linearly with buildup seconds (0.35 + 0.65 × seconds / 5, bounded to 0.4–2.8). The release starts with a visible pressure wave: the rail interior bows outward while its endpoints barely move. The peak curvature grows with charge duration. The inward tension is bounded to keep the mirrored curves apart, and the navigation dips by up to 8 CSS pixels. The compression unwinds continuously into the outward bow, without adding time to the configured buildup. At the default five-second charge, the flex lasts 125 ms, followed by a 440 ms cubic-ease-out exit. Longer charging deepens the bow and accelerates the exit; bounded overshoot increases with energy. The curve and color boundary remain identical at every frame. The rail translation, navigation ejection and content lift share the same release impulse. Hover restoration interpolates from the current navigation position instead of snapping it back. Both finish in the same layout for every configured duration. The page rises up to 40 CSS pixels at rest and up to 54 pixels at the peak, bounded by the real header height, the measured heading clearance and the persistent controls. Scrolled pages use a conservative clearance. The clipped paint retracts with the lift.
 
+## Performance refinement
+
+The original artistic baseline is preserved at commit `90730236e58a70b41cabb8dc968b85679f774146` (checkpoint branch `hyperspace-the-basic-idea`). The refinement preserves the exact timing, frame equations, inward anticipation, outward rail flex, shimmer and energy-dependent overshoot.
+
+The page lift uses a FLIP-style layout reservation: the shell reserves the maximum travel once when upward motion begins, and the existing main scrolling surface moves through a compositor-friendly CSS translation. Its visible top follows the same original lift curve. The bottom dock remains anchored to the shell. At settlement, the exact resting layout is committed once, the temporary translation is restored, and the compositor hint is removed. Hover restoration uses the same reserved layout and translation until cleanup.
+
+The animated values are scoped to the header or the small overlay rather than the body. Unchanged Bézier paths are not rebuilt; fully exited rails no longer receive geometry or shimmer updates. The controller still uses a shared frame clock to keep the colors, navigation and page in sync. The browser regression fixture checks constant shell height and reservation during the release, stationary footer geometry, visible lift and final layout equivalence.
+
+These are structural rendering optimizations, not a measured frame-rate guarantee. Live Chrome profiling, scrolling behavior and visual acceptance on the target machine remain necessary.
+
 ## Interaction contract
 
 - Applies to all Shelf tabs and skins except File Explorer.
