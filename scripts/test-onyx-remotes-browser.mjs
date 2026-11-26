@@ -92,6 +92,7 @@ try{
   return {x:rect.x,width:rect.width,iconX:icon.x,iconWidth:icon.width,
    background:style.backgroundColor,backgroundImage:style.backgroundImage,shadow:style.boxShadow,
    sides:[style.borderInlineStartColor,style.borderInlineEndColor],
+   radius:style.borderTopLeftRadius,railAccent:getComputedStyle(el,'::before').backgroundImage,
    rails:[style.borderBlockStartColor,style.borderBlockEndColor],
    railWidths:[style.borderBlockStartWidth,style.borderBlockEndWidth],
    opacity:style.opacity,labelOpacity:getComputedStyle(el.querySelector('span')).opacity,
@@ -108,6 +109,8 @@ try{
   assert.equal(idle.slotPosition,'absolute');assert.equal(idle.slotBackground,'rgba(0, 0, 0, 0)');
   assert.equal(idle.mainBottom,idle.shellBottom);assert.equal(idle.iconWidth,16);
   assert.equal(idle.opacity,view==='remotes'?'0':'1','Only Providers hides the entire resting destination control');
+  assert.deepEqual(idle.sides,['rgba(0, 0, 0, 0)','rgba(0, 0, 0, 0)']);
+  assert.equal(idle.radius,'5px');assert.match(idle.railAccent,/linear-gradient/);
   await manage.hover();
   await page.waitForFunction(()=>{
    const el=document.querySelector('#manage'),label=el.querySelector('span');
@@ -116,6 +119,7 @@ try{
   });
   const expanded=await manageGeometry();
   assert.equal(expanded.opacity,'1','Hover reveals the destination control');
+  assert.equal(expanded.radius,'0px');assert.equal(expanded.railAccent,'none');
   assert.equal(expanded.x,idle.x);assert.equal(expanded.iconX,idle.iconX);
   assert.equal(expanded.mainBottom,idle.mainBottom);
   assert(expanded.rightGap>=7&&expanded.rightGap<=9,'Expanded button must fit its text with tight right padding');
