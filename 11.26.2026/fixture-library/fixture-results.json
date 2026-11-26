@@ -1,0 +1,283 @@
+{
+  "schema": "redown.fixture-library-verification/1",
+  "productionCloudflareWrites": 0,
+  "owner_600": {
+    "state": "PASS",
+    "fixture": "python-native-loopback-workerd-r2-fixture",
+    "extensionVersion": "0.3.32.4",
+    "reportedCheckoutRevision": "d79b5cdcedab3dc397b3b59b7f9078fed827c122",
+    "checks": [
+      {
+        "name": "native invocation and extension sender fences",
+        "state": "PASS"
+      },
+      {
+        "name": "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "state": "PASS",
+        "files": 600,
+        "bytes": 24130293,
+        "elapsedMs": 139969,
+        "receiptSummary": {
+          "metric": "production-confirmed uploads",
+          "mode": "upload",
+          "windowSeconds": 2400,
+          "measuredMs": 133842,
+          "result": "PASS",
+          "cutoffReached": false,
+          "plannedFiles": 600,
+          "filesWithinWindow": 600,
+          "bytesWithinWindow": 24130293,
+          "independentSha256WithinWindow": 0,
+          "distinctCompletionsAfterWindow": 0,
+          "activeTransferMs": 132134,
+          "filesPerMinute": 268.9739,
+          "bytesPerSecond": 180289.3935,
+          "latencyMsP50": 212,
+          "latencyMsP95": 251
+        },
+        "publicationWrites": 600,
+        "stagingPuts": 600,
+        "independentContentGets": 0,
+        "audit": {
+          "state": "PASS",
+          "completeScopedListing": true,
+          "matchedCount": 600,
+          "observedUniqueCount": 600,
+          "stagingBytes": 0,
+          "independentContentHashPerformedByAudit": false
+        },
+        "usage": {
+          "transfer": {
+            "files": 600,
+            "trafficBytes": 96521172,
+            "providerRequests": 6600,
+            "operations": 600
+          },
+          "audit": {
+            "trafficBytes": 161513,
+            "providerRequests": 5,
+            "operations": 5
+          },
+          "session": {
+            "files": 600,
+            "trafficBytes": 96682685,
+            "providerRequests": 6605,
+            "operations": 605
+          },
+          "modeledCostMicros": 60896
+        }
+      }
+    ]
+  },
+  "owner_2000": {
+    "state": "PASS",
+    "fixture": "python-native-loopback-workerd-r2-fixture",
+    "extensionVersion": "0.3.32.4",
+    "reportedCheckoutRevision": "5f538b47e9407346de162370d40d2d87cdaefcc6",
+    "checks": [
+      {
+        "name": "native invocation and extension sender fences",
+        "state": "PASS"
+      },
+      {
+        "name": "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "state": "PASS",
+        "files": 2000,
+        "bytes": 80856893,
+        "elapsedMs": 467452,
+        "receiptSummary": {
+          "metric": "production-confirmed uploads",
+          "mode": "upload",
+          "windowSeconds": 2400,
+          "measuredMs": 448053,
+          "result": "PASS",
+          "cutoffReached": false,
+          "plannedFiles": 2000,
+          "filesWithinWindow": 2000,
+          "bytesWithinWindow": 80856893,
+          "independentSha256WithinWindow": 0,
+          "distinctCompletionsAfterWindow": 0,
+          "activeTransferMs": 442184,
+          "filesPerMinute": 267.8255,
+          "bytesPerSecond": 180462.7868,
+          "latencyMsP50": 212,
+          "latencyMsP95": 249
+        },
+        "publicationWrites": 2000,
+        "stagingPuts": 2000,
+        "independentContentGets": 0,
+        "audit": {
+          "state": "PASS",
+          "completeScopedListing": true,
+          "matchedCount": 2000,
+          "observedUniqueCount": 2000,
+          "stagingBytes": 0,
+          "independentContentHashPerformedByAudit": false
+        },
+        "usage": {
+          "transfer": {
+            "files": 2000,
+            "trafficBytes": 323427572,
+            "providerRequests": 22000,
+            "operations": 2000
+          },
+          "audit": {
+            "trafficBytes": 538193,
+            "providerRequests": 16,
+            "operations": 16
+          },
+          "session": {
+            "files": 2000,
+            "trafficBytes": 323965765,
+            "providerRequests": 22016,
+            "operations": 2016
+          },
+          "modeledCostMicros": 203004
+        }
+      }
+    ],
+    "revisionNote": "Development-worktree measurement. The fixture reported the branch base while changes were uncommitted."
+  },
+  "owner_modes": {
+    "state": "PASS",
+    "fixture": "python-native-loopback-workerd-r2-fixture",
+    "extensionVersion": "0.3.32.4",
+    "reportedCheckoutRevision": "5f538b47e9407346de162370d40d2d87cdaefcc6",
+    "checks": [
+      {
+        "name": "native invocation and extension sender fences",
+        "state": "PASS"
+      },
+      {
+        "name": "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "state": "PASS",
+        "files": 24,
+        "bytes": 851907,
+        "elapsedMs": 6835,
+        "receiptSummary": {
+          "metric": "production-confirmed uploads",
+          "mode": "upload",
+          "windowSeconds": 2400,
+          "measuredMs": 5962,
+          "result": "PASS",
+          "cutoffReached": false,
+          "plannedFiles": 24,
+          "filesWithinWindow": 24,
+          "bytesWithinWindow": 851907,
+          "independentSha256WithinWindow": 0,
+          "distinctCompletionsAfterWindow": 0,
+          "activeTransferMs": 5750,
+          "filesPerMinute": 241.5297,
+          "bytesPerSecond": 142889.4666,
+          "latencyMsP50": 221,
+          "latencyMsP95": 322
+        },
+        "publicationWrites": 24,
+        "stagingPuts": 24,
+        "independentContentGets": 0,
+        "audit": {
+          "state": "PASS",
+          "completeScopedListing": true,
+          "matchedCount": 24,
+          "observedUniqueCount": 24,
+          "stagingBytes": 0,
+          "independentContentHashPerformedByAudit": false
+        },
+        "usage": {
+          "transfer": {
+            "files": 24,
+            "trafficBytes": 3407628,
+            "providerRequests": 264,
+            "operations": 24
+          },
+          "audit": {
+            "trafficBytes": 6490,
+            "providerRequests": 1,
+            "operations": 1
+          },
+          "session": {
+            "files": 24,
+            "trafficBytes": 3414118,
+            "providerRequests": 265,
+            "operations": 25
+          },
+          "modeledCostMicros": 2437
+        }
+      },
+      {
+        "name": "Download-only under a read-write grant verifies original keys with zero new PUT or publication calls",
+        "state": "PASS",
+        "files": 24,
+        "bytes": 851907,
+        "reads": 24,
+        "verified": 24
+      },
+      {
+        "name": "Timed cutoff preserves pending work; read-write continuation keeps exact keys and does not replay publications",
+        "state": "PASS",
+        "before": 5,
+        "final": 12,
+        "additionalPublicationWrites": 7
+      },
+      {
+        "name": "A lost production acknowledgement is reconciled against the same Worker operation without replay",
+        "state": "PASS",
+        "initialUncertain": 1,
+        "recovered": 1,
+        "additionalPublicationWrites": 0
+      },
+      {
+        "name": "A freshly authorized read-only grant can independently audit the exact original campaign",
+        "state": "PASS",
+        "matched": 24,
+        "additionalPublicationWrites": 0
+      }
+    ],
+    "revisionNote": "Development-worktree measurement. The fixture reported the branch base while changes were uncommitted."
+  },
+  "ordinary_browser_upload": {
+    "state": "PASS",
+    "fixture": "chromium-indexeddb-worker-local-provider-fixture",
+    "chromium": "156.0.8078.79",
+    "files": 4000,
+    "verified": 4000,
+    "receiptRows": 4000,
+    "shelfClosedBeforeDispatch": true,
+    "elapsedAfterCloseMs": 76895
+  },
+  "checks": {
+    "focusedJavaScript": {
+      "passed": 73
+    },
+    "fullJavaScript": {
+      "passed": 869,
+      "failed": 1,
+      "baselineFailure": "non-Narrow non-Depth composition stays byte-identical"
+    },
+    "python": {
+      "run": 19,
+      "passed": 17,
+      "windowsOnlySkips": 2
+    },
+    "extensionBuild": "PASS",
+    "linuxCliInstall": "PASS",
+    "chromiumSettingsAndWorkerOpfs": "PASS"
+  },
+  "conditional_projections": {
+    "basis": "owner_600 measured transfer window, excludes audit",
+    "assumptions": "Same local Workerd/R2 latency and input sizes, one slot, ample input and approved resources. No live-network or account limits are modeled.",
+    "expectedSecondsFor600": 133.842,
+    "windows": [
+      {
+        "minutes": 40,
+        "filesAtObservedRate": 10758,
+        "bytesAtObservedRate": 432694544
+      },
+      {
+        "minutes": 45,
+        "filesAtObservedRate": 12103,
+        "bytesAtObservedRate": 486781362
+      }
+    ]
+  }
+}
