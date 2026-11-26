@@ -57,24 +57,35 @@ try{
  page.on('pageerror',error=>errors.push(error.message));
  await page.addInitScript(()=>{
   const calls=[],grants=[];
-  let data={state:'OFF'};
+  let data={state:'OFF'},startCode=null,bucketError=false,empty=false;
+  const absentApi={stage:'native-api',code:'NATIVE_API_UNAVAILABLE',
+   recovery:'Once REDOWN work is idle, reload REDOWN once from chrome://extensions, reopen Settings and retry.'};
   const runtime={sendMessage:async({channel,action,input})=>{
    calls.push({channel,action,input});
    const result=value=>({ok:true,data:value});
    if(action==='status')return result(data);
    if(action==='accounts')return result({accounts:[{id:'owned-account',name:'QA fixture'}]});
-   if(action==='buckets')return result({buckets:[{name:'existing-qa'}],cursor:''});
+   if(action==='buckets'){
+    if(bucketError)return {ok:false,code:'PROVIDER_READ_FAILED'};
+    return result({buckets:empty?[]:[{name:'existing-qa'}],cursor:''});
+   }
    if(action==='start'){
+    if(startCode){data={state:'OFF',code:startCode,nativeApiAvailable:false};return {ok:false,code:startCode};}
     data={state:'PAIRING',ready:true,bucketName:'existing-qa',mode:'read-write',prefix:'.redown-python-lab/fixture/',
      pairCode:'0000111122223333',codeExpiresAt:Date.now()+120000,expiresAt:Date.now()+1800000};
     return result(data);
    }
    if(action==='end'){data={state:'OFF',code:'LAB_SESSION_ENDED'};return result(data);}
+   if(action==='preflight')return result({outcome:'BLOCKED',firstFailure:absentApi});
+   if(action==='diagnostics')return result({schema:'redown.python-lab.diagnostic-export/1',
+    startup:{firstFailure:absentApi},preflight:{firstFailure:absentApi}});
    return {ok:false,code:'UNEXPECTED_FIXTURE_REQUEST'};
   }};
   const permissions={request:async request=>{grants.push(request);return true;}};
   window.chrome={runtime,permissions};
-  window.labFixture={calls,grants,connect:()=>{data={...data,state:'CONNECTED',pairCode:null};}};
+  window.labFixture={calls,grants,connect:()=>{data={...data,state:'CONNECTED',pairCode:null};},
+   startError:code=>{startCode=code;},
+   bucketResult:value=>{bucketError=value==='error';empty=value==='empty';}};
  });
  await page.goto('http://127.0.0.1:'+server.address().port);
  const card=page.locator('section.card');
@@ -106,6 +117,31 @@ try{
  assert.equal(await card.getByRole('button',{name:'Copy CMD'}).isVisible(),false);
  assert.deepEqual(errors,[]);
  report.checks.push('paired state, revocation, and no page errors at 365 px');
+ await page.evaluate(()=>window.labFixture.bucketResult('error'));
+ await card.getByRole('button',{name:'Configure session'}).click();
+ await card.getByText(/Could not list QA buckets/).waitFor();
+ await page.evaluate(()=>window.labFixture.bucketResult('empty'));
+ await card.getByRole('button',{name:'Retry bucket list'}).click();
+ await card.getByText('No existing QA buckets found for this account.').waitFor();
+ await page.evaluate(()=>window.labFixture.bucketResult('ready'));
+ await card.getByRole('button',{name:'Configure session'}).click();
+ await bucket.selectOption('existing-qa');
+ await page.evaluate(()=>window.labFixture.startError('NATIVE_API_UNAVAILABLE'));
+ await card.getByRole('checkbox',{name:/I approve this bucket/}).check();
+ await card.getByRole('button',{name:'Start session'}).click();
+ await card.locator('[data-lab-session-notice]').getByText(/reload REDOWN once from chrome:\/\/extensions/).waitFor();
+ assert.equal(await card.getByRole('button',{name:'Copy CMD'}).isVisible(),false);
+ await card.getByRole('button',{name:'Check readiness'}).click();
+ await card.locator('[data-lab-preflight-status]').getByText(/native-api.*See Export diagnostics/).waitFor();
+ const downloadEvent=page.waitForEvent('download');
+ await card.getByRole('button',{name:'Export diagnostics'}).click();
+ const download=await downloadEvent;
+ assert.equal(download.suggestedFilename(),'redown-python-lab-diagnostics.json');
+ const exported=JSON.parse(await readFile(await download.path(),'utf8'));
+ assert.equal(exported.startup.firstFailure.code,'NATIVE_API_UNAVAILABLE');
+ assert(!JSON.stringify(exported).includes('0000111122223333'));
+ assert.deepEqual(errors,[]);
+ report.checks.push('bucket error and empty states, retry, reload guidance and JSON export without pairing');
  const valueToStage='REAL CHROMIUM OPFS spool fixture';
  const spool=await page.evaluate(async value=>{
   await navigator.serviceWorker.register('/opfs-worker.mjs',{type:'module'});

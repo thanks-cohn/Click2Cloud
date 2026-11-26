@@ -88,8 +88,8 @@ const runtime={id:extensionId,getURL:path=>origin+path,connectNative(){
  child.stderr.on('data',()=>{});
  child.on('error',()=>disconnect.forEach(listener=>listener()));
  child.on('close',()=>disconnect.forEach(listener=>listener()));
- return {onMessage:{addListener:listener=>events.add(listener)},
-  onDisconnect:{addListener:listener=>disconnect.add(listener)},
+ return {onMessage:{addListener:listener=>events.add(listener),removeListener:listener=>events.delete(listener)},
+  onDisconnect:{addListener:listener=>disconnect.add(listener),removeListener:listener=>disconnect.delete(listener)},
   postMessage(message){child.stdin.write(frame(message));},disconnect(){child.stdin.end();}};
 }};
 const memory={};const storage={async get(key){return {[key]:memory[key]};},async set(data){Object.assign(memory,data);}};
@@ -191,6 +191,7 @@ try{
  const revision=(await childResult(spawn('git',['rev-parse','HEAD'],{cwd:repository}))).stdout.trim();
  report.sourceRevision=revision;
  lab=createPythonLab({runtime,storage,build:{...BUILD_INFO,revision,labEvidenceClass:report.evidenceClass},
+  permission:async()=>true,opfsCapability:()=>true,
   authority:oauth.authority,buckets:async()=>({buckets:[{name:bucketName}],cursor:''}),
   checkBucket:async()=>true,workerPrefix:async()=>plan.prefixScope,checkUpload:service.checkDestination,
   upload:service.dispatchLabFile,
@@ -213,7 +214,14 @@ try{
  assert.deepEqual(doctor.limits,limits);
  assert.deepEqual((await cli(['doctor'])).limits,limits);
  assert.equal(doctor.providerRoundTrip,'NOT_TESTED_BY_DOCTOR');
+ const diagnostic=await cli(['doctor','--session','--diagnostics']);
+ assert.equal(diagnostic.startup.firstFailure.code,'PAIRING_CODE_REJECTED');
+ assert.equal(diagnostic.startup.stages.find(row=>row.stage==='pairing').outcome,'PASS');
+ assert.equal(diagnostic.providerRoundTrip,'NOT_TESTED_BY_DIAGNOSTICS');
+ for(const privateValue of [accountId,bucketName,initial.pairCode,doctor.scopeId,doctor.prefix])
+  assert(!JSON.stringify(diagnostic).includes(privateValue));
  receipt('paired native socket, single use code, and capability negotiation',{protocol:doctor.protocol});
+ receipt('paired CLI exports the shared sanitized startup stages and retains the first failure');
 
  const saved=JSON.parse(await readFile(join(stateRoot,'ticket.json'),'utf8'));
  const paired=await rawHandshake(endpoint,endpoint.key);

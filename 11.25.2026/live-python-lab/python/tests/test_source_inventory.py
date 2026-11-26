@@ -18,7 +18,7 @@ from redown_live_lab.fixtures import ASSET_SIZES, generate
 from redown_live_lab.runner import source_chunks
 
 source = importlib.import_module('redown_live_lab.inventory')
-LIMITS = dict(max_files=5, max_file_bytes=65536, max_total_bytes=262144, max_entries=24, seconds=10)
+LIMITS = dict(max_files=5, max_file_bytes=1024**2, max_total_bytes=2 * 1024**2, max_entries=24, seconds=10)
 
 
 class SourceInventory(unittest.TestCase):
@@ -73,7 +73,10 @@ class SourceInventory(unittest.TestCase):
                     (*source.FILE_ID, *source.FILE_METADATA, 'st_ctime_ns', 'st_mode')
                 })
                 setattr(opened, field, getattr(opened, field) + 1)
-                reason = 'IDENTITY_MISMATCH' if field in source.FILE_ID else 'METADATA_MISMATCH'
+                if field in source.FILE_ID:
+                    reason = 'IDENTITY_MISMATCH'
+                else:
+                    reason = 'SIZE_MISMATCH' if field == 'st_size' else 'METADATA_MISMATCH'
                 self.failure('SOURCE_CHANGED', 'open', reason, [field],
                              lambda: source.check_binding(path_stat, opened, 'open'))
         opened.st_ino = 0
@@ -93,7 +96,7 @@ class SourceInventory(unittest.TestCase):
         self.file.unlink()
         (self.root / 'nested' / 'empty-dir').mkdir(parents=True)
         files = {
-            'sample.png': generate('png', 512, 1, 'png'),
+            'sample.png': generate('png', 989488, 1, 'png'),
             'nested/sample.jpg': generate('jpg', ASSET_SIZES['jpg'], 1, 'jpg'),
             'nested/旅行.txt': b'stable text\r\n',
             'nested/bundle.zip': generate('zip', 2048, 1, 'zip'),
@@ -182,7 +185,7 @@ class SourceInventory(unittest.TestCase):
                         replacement.replace(self.file)
                     self.assertEqual(list(stream), [])
         with self.file.open('r+b'):
-            detail = self.failure('LOCAL_FILE_UNREADABLE', 'open', 'READ_OR_INSPECTION_FAILED', [],
+            detail = self.failure('LOCAL_FILE_UNREADABLE', 'open', 'WINDOWS_SHARING_VIOLATION', [],
                                   lambda: list(source.chunks(self.file, 7)))
         self.assertEqual(detail['winerror'], 32)
 

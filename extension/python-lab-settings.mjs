@@ -6,9 +6,14 @@ const messages={
  REAUTH_REQUIRED:'Reconnect Cloudflare in Remotes.',
  AUTH_SESSION_CHANGED:'Cloudflare authorization changed. Start a new laboratory session.',
  AUTHORIZATION_REVOKED:'Cloudflare authorization ended.',
+ NATIVE_PERMISSION_DENIED:'Chrome did not grant native messaging.',
+ NATIVE_API_UNAVAILABLE:'Chrome granted native messaging, but this REDOWN worker cannot use it yet. Once REDOWN work is idle, reload REDOWN once from chrome://extensions, reopen Settings and retry.',
  NATIVE_HOST_NOT_REGISTERED:'Install the Python native helper from CMD, then start the session again.',
  NATIVE_HOST_DISCONNECTED:'The native helper disconnected. Start a new session to reconnect.',
+ NATIVE_HOST_EXITED:'The native helper exited. Check the installation and start a new session.',
  NATIVE_PERMISSION_REVOKED:'Chrome removed native messaging access.',
+ LAB_WORKER_RESTARTED:'The REDOWN worker restarted. Start a new laboratory session.',
+ LAB_EXTENSION_UNAVAILABLE:'Reopen REDOWN Settings and try again.',
  WORKER_SETUP_REQUIRED:'Choose an existing QA bucket with a prepared REDOWN Worker.',
  WORKER_UPGRADE_APPROVAL_REQUIRED:'The selected QA bucket needs the normal REDOWN Worker update before use.',
  LAB_SESSION_ENDED:'Session ended.',
@@ -16,8 +21,10 @@ const messages={
 };
 
 async function request(action,input={}){
- const answer=await chrome.runtime.sendMessage({channel,action,input});
- if(!answer?.ok)throw Error(answer?.code??'LAB_REQUEST_FAILED');
+ let answer;
+ try{answer=await chrome.runtime.sendMessage({channel,action,input});}
+ catch{throw Error('LAB_EXTENSION_UNAVAILABLE');}
+ if(!answer?.ok)throw Object.assign(Error(answer?.code??'LAB_REQUEST_FAILED'),{recovery:answer?.recovery});
  return answer.data;
 }
 function option(select,value,label){
@@ -29,10 +36,16 @@ export function mountPythonLabSettings(page) {
  card.className='card';
  card.innerHTML=`<h2>Python Laboratory</h2>
   <p role="status" data-lab-status>Off</p>
+  <p role="status" data-lab-session-notice hidden></p>
   <button type="button" data-lab-config>Configure session</button>
+  <button type="button" data-lab-preflight>Check readiness</button>
+  <button type="button" data-lab-export>Export diagnostics</button>
+  <p role="status" data-lab-preflight-status hidden></p>
   <div data-lab-form hidden>
    <label>Cloudflare account <select data-lab-account></select></label>
    <label>Existing QA bucket <select data-lab-bucket></select></label>
+   <p role="status" data-lab-bucket-status hidden></p>
+   <button type="button" data-lab-bucket-retry hidden>Retry bucket list</button>
    <button type="button" data-lab-more hidden>More buckets</button>
    <label>Access <select data-lab-mode>
     <option value="read-write">Read and write a fresh QA prefix</option>
@@ -58,8 +71,9 @@ export function mountPythonLabSettings(page) {
   <p role="status" data-lab-error></p>`;
  page.append(card);
  const el=(key)=>card.querySelector('[data-lab-'+key+']');
- let next='',form=false,busy=false,bucketEpoch=0,recoveryEpoch=0;
- const report=error=>{el('error').textContent=error?(messages[error.message]??error.message):'';};
+ let next='',form=false,busy=false,bucketEpoch=0,recoveryEpoch=0,sessionEpoch=0;
+ const report=error=>{el('error').textContent=error?(messages[error.message]??
+  (error.recovery?`${error.message}. ${error.recovery}`:error.message)):'';};
  const act=fn=>async()=>{
   if(busy)return;
   busy=true;report();
@@ -79,17 +93,35 @@ export function mountPythonLabSettings(page) {
  }
  async function bucketPage(append){
   const epoch=++bucketEpoch;
+  recoveryEpoch++;
+  const note=el('bucket-status'),retry=el('bucket-retry'),bucket=el('bucket');
   if(!append){
-   el('bucket').replaceChildren();option(el('bucket'),'','Choose existing QA bucket');next='';
+   bucket.replaceChildren();option(bucket,'','Choose existing QA bucket');next='';
    el('approved').checked=false;
   }
+  retry.hidden=true;
   el('more').hidden=true;
   const accountId=el('account').value;
+  bucket.disabled=!accountId||!append;
+  note.hidden=!accountId;
   if(!accountId){await recovery();return;}
-  const {buckets,cursor}=await request('buckets',{accountId,cursor:next});
-  if(epoch!==bucketEpoch)return;
-  for(const row of buckets)option(el('bucket'),row.name,row.name);
+  note.textContent='Loading QA buckets…';
+  let buckets,cursor;
+  try{({buckets,cursor}=await request('buckets',{accountId,cursor:next}));}
+  catch(error){
+   if(epoch!==bucketEpoch||!card.isConnected)return;
+   note.textContent=`Could not list QA buckets (${error.message}).`;
+   retry.onclick=act(()=>bucketPage(append));
+   retry.hidden=false;
+   return;
+  }
+  if(epoch!==bucketEpoch||!card.isConnected)return;
+  const known=new Set([...bucket.options].map(row=>row.value));
+  for(const row of buckets)if(!known.has(row.name)){option(bucket,row.name,row.name);known.add(row.name);}
   next=cursor;
+  bucket.disabled=bucket.options.length===1;
+  note.hidden=!bucket.disabled;
+  note.textContent=next?'No QA buckets on this page.':'No existing QA buckets found for this account.';
   el('more').hidden=!next;
   await recovery();
  }
@@ -108,9 +140,20 @@ export function mountPythonLabSettings(page) {
   if(el('command').value!==cmd)el('command').value=cmd;
   el('command-row').hidden=!valid;el('copy').hidden=!valid;
   el('new').hidden=!data.ready||state==='CONNECTED'||valid;
-  if(code&&state==='OFF'&&!busy)report(Error(code));
+  const notice=el('session-notice');
+  notice.hidden=!code||active;
+  notice.textContent=code==='NATIVE_API_UNAVAILABLE'&&data.nativeApiAvailable===true?
+   'Native messaging is now available. Start a new session.':messages[code]??code??'';
  }
- const refresh=async()=>render(await request('status'));
+ const refresh=async()=>{
+  const epoch=sessionEpoch,data=await request('status');
+  if(epoch===sessionEpoch)render(data);
+ };
+ const selection=()=>{
+  const accountId=el('account').value,bucketName=el('bucket').value,mode=el('mode').value;
+  return {accountId,bucketName,mode,scopeId:mode==='read-only'?el('recovery').value:null,
+   minutes:Number(el('duration').value)};
+ };
  const clearApproval=()=>{el('approved').checked=false;};
  el('duration').onchange=clearApproval;
  el('config').onclick=act(async()=>{
@@ -127,16 +170,45 @@ export function mountPythonLabSettings(page) {
  el('bucket').onchange=el('mode').onchange=()=>{clearApproval();update(recovery);};
  el('recovery').onchange=clearApproval;
  el('start').onclick=act(async()=>{
-  const accountId=el('account').value,bucketName=el('bucket').value,mode=el('mode').value;
-  const scopeId=mode==='read-only'?el('recovery').value:null;
-  if(!accountId||!bucketName||!el('approved').checked||scopeId==='')throw Error('Choose the QA target and approve access first.');
+  const input=selection();
+  if(!input.accountId||!input.bucketName||!el('approved').checked||input.scopeId==='')throw Error('Choose the QA target and approve access first.');
+  const epoch=++sessionEpoch;
   // permissions.request must run in the owner's direct Chrome click gesture.
-  if(!await chrome.permissions.request({permissions:['nativeMessaging']}))throw Error('Chrome did not grant native messaging.');
   el('start').disabled=true;
   try{
-   render(await request('start',{accountId,bucketName,mode,minutes:Number(el('duration').value),scopeId}));
+   await chrome.permissions.request({permissions:['nativeMessaging']}).catch(()=>false);
+   // The worker checks the actual grant and records denial in the same report.
+   const data=await request('start',input);
+   if(epoch!==sessionEpoch)return;
    form=false;el('approved').checked=false;
+   ++sessionEpoch;
+   render(data);
+  }catch(error){
+   if(epoch===sessionEpoch){
+    await refresh().catch(()=>{});
+    if(epoch===sessionEpoch&&el('session-notice').hidden)throw error;
+   }
   }finally{el('start').disabled=false;}
+ });
+ el('preflight').onclick=act(async()=>{
+  const input=form?selection():{};
+  const note=el('preflight-status');
+  note.hidden=false;note.textContent='Checking readiness…';
+  try{
+   const preflight=await request('preflight',input.accountId&&input.bucketName&&input.scopeId!==''?input:{});
+   note.textContent=preflight.firstFailure?
+    `${preflight.firstFailure.stage}: ${preflight.firstFailure.recovery} See Export diagnostics for all checks.`:
+    preflight.outcome==='PASS'?'Readiness checks passed. The transfer round trip has not been tested.':
+     'Local checks complete. Choose a QA bucket to check its readiness.';
+  }catch(error){note.hidden=true;throw error;}
+ });
+ el('export').onclick=act(async()=>{
+  const report=await request('diagnostics');
+  const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)+'\n'],{type:'application/json'}));
+  const link=document.createElement('a');
+  link.href=url;link.download='redown-python-lab-diagnostics.json';
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
  });
  el('copy').onclick=act(async()=>{
   const text=el('command').value;
@@ -146,8 +218,10 @@ export function mountPythonLabSettings(page) {
   el('error').textContent='CMD copied.';
  });
  el('end').onclick=async()=>{
+  const epoch=++sessionEpoch;
   form=false;report();
-  try{render(await request('end'));}catch(error){report(error);}
+  try{const data=await request('end');if(epoch===sessionEpoch)render(data);}
+  catch(error){if(epoch===sessionEpoch)report(error);}
  };
  el('new').onclick=act(async()=>render(await request('newCode')));
  // Poll only while this card is mounted. Polling is local and does not contact Cloudflare.

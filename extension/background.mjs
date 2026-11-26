@@ -110,10 +110,10 @@ const setupOauth={...oauth,
  request:(...args)=>{assertConnected();return oauth.request(...args);}
 };
 const provisioner=createProvisioner({request:setupOauth.request,authority:setupOauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-async function checkSelectedBucket(target,auth,write=true){
+async function checkSelectedBucket(target,auth,write=true,signal){
  assertConnected();
  if(write&&!auth.scopes?.includes('workers-r2.write')||!auth.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});
- const response=await oauth.request('/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName),{expectedSession:auth.sessionId});
+ const response=await oauth.request('/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName),{expectedSession:auth.sessionId,signal});
  const body=await response.json();
  assertConnected();
  if(!response.ok||body.success!==true){
@@ -144,7 +144,7 @@ async function recordRemote(value){
 }
 const executeFileMessage=createFileTransport({remote});
 
-async function send(message) {
+async function send(message,{signal}={}) {
   let path,field;
   if(message.type==='cfCreateBucket')return createVerifiedBucket(setupOauth,message);
   if(['cfCreateFolder','cfTransferObjects','cfRenameEntry','cfDeleteObjects'].includes(message.type))return executeFileMessage(message);
@@ -153,7 +153,7 @@ async function send(message) {
     const status=await oauth.status();if(!status.accounts?.some(a=>a.id===message.accountId))throw Error('SCOPE_UNAUTHORIZED');
     const page=/^page:([1-9][0-9]*)$/.exec(message.cursor??'');path='/accounts/'+encodeURIComponent(message.accountId)+'/r2/buckets?per_page=1000'+(page?'&page='+page[1]:message.cursor?'&cursor='+encodeURIComponent(message.cursor):'');field='buckets';
   } else throw Object.assign(Error('AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'),{code:'AUTHORIZED_WORKER_TRANSPORT_UNAVAILABLE'});
-  const response=await oauth.request(path),body=await response.json();
+  const response=await oauth.request(path,{signal}),body=await response.json();
   if(!response.ok||body.success!==true)throw Object.assign(Error('PROVIDER_READ_FAILED'),{code:'PROVIDER_READ_FAILED'});
   const numericPage=Number(/^page:([1-9][0-9]*)$/.exec(message.cursor??'')?.[1]??1),nextPage=numericPage<(body.result_info?.total_pages??1)?'page:'+(numericPage+1):'';if((body.result?.truncated||body.result_info?.is_truncated)&&!body.result?.cursor&&!body.result_info?.cursor&&!nextPage)throw Error('PROVIDER_PAGINATION_UNAVAILABLE');
   return {ok:true,[field]:field==='buckets'?body.result.buckets.map(b=>({name:b.name})):body.result.map(a=>({id:a.id,name:a.name})),cursor:body.result?.cursor??body.result_info?.cursor??nextPage};
@@ -474,10 +474,11 @@ const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:
  remote,executeFileMessage,runFileUpload:(input,options)=>fileApi.run('upload',input,options),
  current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
 });
-const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.local,build:BUILD_INFO,
+const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.local,diagnosticStorage:chrome.storage.session,
+ build:BUILD_INFO,trustedStorage,permission:()=>chrome.permissions.contains({permissions:['nativeMessaging']}),
  authority:setupOauth.authority,
- buckets:(accountId,cursor)=>send({type:'cfBuckets',accountId,cursor}),
- checkBucket:(target,auth)=>checkSelectedBucket(target,auth,false),
+ buckets:(accountId,cursor,signal)=>send({type:'cfBuckets',accountId,cursor},{signal}),
+ checkBucket:(target,auth,signal)=>checkSelectedBucket(target,auth,false,signal),
  workerPrefix:async target=>(await provisioner.lookup(target))?.prefixScope??'',
  checkUpload:localUploadService.checkDestination,upload:localUploadService.dispatchLabFile,
  // Use production R2 stat/list/stream with exact OAuth session and scope
@@ -595,8 +596,7 @@ const activeTextReads=new Map();
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
   if(message?.channel===labChannel){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false,code:'LAB_SENDER_DENIED'});return false;}
-    void trustedStorage().then(()=>pythonLab.ui(message.action,message.input))
-      .then(data=>respond({ok:true,data}),error=>respond({ok:false,code:uploadCode(error.code,'LAB_REQUEST_FAILED')}));
+    void pythonLab.request(message.action,message.input).then(respond);
     return true;
   }
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}

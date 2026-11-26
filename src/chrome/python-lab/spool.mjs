@@ -22,12 +22,14 @@ export function encodeFrame(bytes) {
  return btoa(text);
 }
 
-export async function labSpoolDirectory() {
+export async function labSpoolDirectory(signal) {
  const root=await navigator.storage.getDirectory();
+ signal?.throwIfAborted();
  const directory=await root.getDirectoryHandle('redown-python-lab-v1',{create:true});
  // The session owns this directory exclusively. Recover abandoned files
  // left by a worker or Chrome crash before opening another grant.
  for await(const [name,handle] of directory.entries()){
+  signal?.throwIfAborted();
   if(handle.kind==='file'&&/^transfer-[0-9a-f-]{36}$/.test(name))await directory.removeEntry(name);
  }
  return directory;

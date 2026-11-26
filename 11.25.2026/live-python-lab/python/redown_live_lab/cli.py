@@ -11,7 +11,7 @@ from . import PROTOCOL, __version__
 from .errors import LabError
 from .evidence import compare, document, exclusive, load_run, projection, stamp
 from .fixtures import GENERATOR
-from .install_host import install
+from .install_host import install, registration_status
 from .inventory import inventory, ordinary_directory, relative_path
 from .manifest import OFFLINE_CAPABILITIES, SCHEMA, build_plan, money, read_json, validate
 from .runner import reconcile, run
@@ -88,6 +88,7 @@ def parse(argv):
     pair.add_argument('--code', required=True)
     doctor = commands.add_parser('doctor', help='Inspect offline or authenticated session capabilities without cloud mutations.')
     doctor.add_argument('--session', action='store_true')
+    doctor.add_argument('--diagnostics', action='store_true', help='Print a shareable diagnostic report without private scope fields.')
     plan = commands.add_parser('validate', aliases=['plan'], help='Validate a workload and do a read-only preflight.')
     execution_options(plan)
     execute = commands.add_parser('run', help='Plan or execute a manifest.')
@@ -143,12 +144,14 @@ def corpus_manifest(args, paths):
         nonlocal clock
         now = time.monotonic()
         if now - clock >= 1:
-            print(f'Inventory: {row["files"]} files, {row["bytes"]} bytes hashed', file=sys.stderr, flush=True)
+            print(f'Inventory in progress: {row["files"]} files, {row["bytes"]} bytes hashed', file=sys.stderr, flush=True)
             clock = now
 
     files, empty = inventory(source, max_files=args.max_files, max_file_bytes=args.max_file_bytes,
                              max_total_bytes=args.max_total_bytes, max_entries=args.max_entries,
                              seconds=args.seconds, excluded=(paths['manifests'], paths['runs']), progress=progress)
+    print(f'Inventory complete: {len(files)} files, {sum(row["sizeBytes"] for row in files)} bytes hashed',
+          file=sys.stderr, flush=True)
     if not files:
         raise LabError('CORPUS_HAS_NO_FILES', {'input': str(source), 'emptyFolders': empty})
     doc = validate({
@@ -168,7 +171,12 @@ def corpus_manifest(args, paths):
     ordinary_directory(target.parent)
     if target.suffix.lower() != '.json':
         raise LabError('MANIFEST_JSON_EXTENSION_REQUIRED')
-    document(target, doc)
+    try:
+        document(target, doc)
+    except FileExistsError:
+        raise LabError('MANIFEST_ALREADY_EXISTS', {
+            'stage': 'manifest-write', 'recovery': 'Use a new --manifest filename to preserve the existing file.'
+        }) from None
     print(f'Manifest {target}', file=sys.stderr, flush=True)
     return target, doc, source
 
@@ -195,7 +203,12 @@ def workspace_pipeline(args, paths):
             ordinary_directory(destination.parent)
             if destination.suffix.lower() != '.json':
                 raise LabError('PLAN_RECEIPT_JSON_EXTENSION_REQUIRED')
-            document(destination, review)
+            try:
+                document(destination, review)
+            except FileExistsError:
+                raise LabError('PLAN_RECEIPT_ALREADY_EXISTS', {
+                    'stage': 'plan-receipt-write', 'recovery': 'Use a new --plan-receipt filename.'
+                }) from None
         if not args.live or plan['status'] != 'READY':
             output(review)
             return EXIT_CODES[plan['status']]
@@ -207,6 +220,27 @@ def workspace_pipeline(args, paths):
         with connect() as client:
             return preflight(client.describe())
     return preflight(OFFLINE_CAPABILITIES)
+
+
+def doctor_diagnostics(session):
+    started = time.monotonic()
+    report = {
+        'schema': 'redown.python-lab.cli-diagnostics/1', 'correlationId': str(uuid.uuid4()),
+        'runnerVersion': __version__, 'protocol': PROTOCOL, 'status': 'READY',
+        'nativeRegistration': registration_status(), 'session': 'NOT_REACHED', 'startup': None,
+        'providerRoundTrip': 'NOT_TESTED_BY_DIAGNOSTICS',
+    }
+    if session:
+        try:
+            with connect() as client:
+                report.update(session='PASS', startup=client.describe().get('diagnostics'))
+        except LabError as error:
+            report.update(status='BLOCKED', session='UNAVAILABLE', code=error.code,
+                          recovery='Open Python Laboratory Settings, check readiness and export diagnostics there.')
+            if isinstance(error.detail, dict):
+                report.update(detail=error.detail)
+    report['elapsedMs'] = round((time.monotonic() - started) * 1000)
+    return report
 
 
 def main(argv=None):
@@ -225,6 +259,10 @@ def main(argv=None):
                         'expiresAt': caps['expiresAt'], 'version': __version__})
             return 0
         if args.command == 'doctor':
+            if args.diagnostics:
+                report = doctor_diagnostics(args.session)
+                output(report)
+                return EXIT_CODES[report['status']]
             if args.session:
                 with connect() as client:
                     output({'status': 'READY', 'runnerVersion': __version__, **client.describe(),

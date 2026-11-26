@@ -3,6 +3,7 @@ import {uploadCode} from '../local-upload-service.mjs';
 import {objectETag,key as objectKey,name} from '../../explorer/file-api.mjs';
 import {normalizeTarget,normalizePrefix} from '../../core/menu-identity.mjs';
 import {chunkBytes,decodeFrame,encodeFrame,labError,labSpoolDirectory,openLabSpool,utf8Length,validHash} from './spool.mjs';
+import {boundedLabStep,createLabReport,describeLabFailure,diagnosticCode} from './diagnostics.mjs';
 
 export const labChannel='redown-python-laboratory';
 export const labHostName='com.click2cloud.redown_live_lab';
@@ -20,11 +21,22 @@ const budgetFields=['files','trafficBytes','diskBytes','providerRequests','opera
 const maximums=[limits.maxFiles,limits.maxTrafficBytes,limits.maxDiskBytes,limits.maxProviderRequests,limits.maxOperations,limits.maxRunSeconds];
 const readScopes=['workers-r2.read','workers-r2-bucket-item.read'];
 const estimateStorage=()=>globalThis.navigator?.storage?.estimate?.();
+const opfsAvailable=()=>typeof globalThis.navigator?.storage?.getDirectory==='function';
+const probeOpfs=()=>globalThis.navigator.storage.getDirectory();
 const scopeKey='pythonLabRecoveryScopesV1';
+const diagnosticKey='pythonLabLastStartupV1';
 const freshness=30*86400_000;
 const available=data=>({apiVersion:labProtocol,state:'available',data});
 const failure=code=>({apiVersion:labProtocol,state:'failed',error:{code}});
-const typed=error=>uploadCode(error?.code,'LAB_REQUEST_FAILED');
+const typed=error=>diagnosticCode(error);
+
+function nativeDisconnectCode(message){
+ if(/^Specified native messaging host not found\.?$/i.test(message))return 'NATIVE_HOST_NOT_REGISTERED';
+ if(/^Failed to start native messaging host\.?$/i.test(message))return 'NATIVE_HOST_LAUNCH_FAILED';
+ if(/^Access to the specified native messaging host is forbidden\.?$/i.test(message))return 'NATIVE_HOST_FORBIDDEN';
+ if(/^Native host has exited\.?$/i.test(message))return 'NATIVE_HOST_EXITED';
+ return 'NATIVE_HOST_DISCONNECTED';
+}
 
 function token() {
  return Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>x.toString(16).padStart(2,'0')).join('');
@@ -64,15 +76,38 @@ function cleanReceipt(receipt,key,size,id) {
  return {key,size,operationId:id,etag:objectETag(receipt.etag),version:String(receipt.version).slice(0,256)};
 }
 
-export function createPythonLab({runtime,storage,build,authority,buckets,checkBucket,workerPrefix,checkUpload,upload,
- fileApi,spoolDirectory=labSpoolDirectory,storageEstimate=estimateStorage,clock=Date.now}) {
- let grant=null,starting=false,generation=0,lastCode=null,draining=null;
+export function createPythonLab({runtime,storage,diagnosticStorage,build,authority,buckets,checkBucket,workerPrefix,checkUpload,upload,
+ trustedStorage=()=>{},permission,opfsCapability=opfsAvailable,opfsProbe=probeOpfs,fileApi,
+ spoolDirectory=labSpoolDirectory,storageEstimate=estimateStorage,clock=Date.now,
+ stageTimeoutMs=12_000,startupTimeoutMs=80_000,handshakeTimeoutMs=10_000}) {
+ let grant=null,starting=null,preflighting=null,lastCode=null,draining=null,preparingSpool=null;
+ let startupReport=null,preflightReport=null,discoveryReport=null,savedStartup=null,restoring=null,saving=Promise.resolve();
  const status=()=>grant?{
-  state:grant.client?'CONNECTED':grant.ticket?'PAIRED':grant.ready?'PAIRING':'STARTING',
+  state:grant.client?'CONNECTED':grant.ticket?'PAIRED':'PAIRING',
   ready:grant.ready,scopeId:grant.id,bucketName:grant.target.bucketName,prefix:grant.target.prefix,
   mode:grant.mode,expiresAt:grant.expiresAt,codeExpiresAt:grant.codeExpiresAt,
-  pairCode:grant.ready?grant.pairCode:null,code:lastCode
- }:{state:starting?'STARTING':'OFF',code:lastCode};
+  pairCode:grant.pairCode,code:lastCode,nativeApiAvailable:typeof runtime.connectNative==='function'
+ }:{state:starting?'STARTING':'OFF',code:lastCode,nativeApiAvailable:typeof runtime.connectNative==='function',
+  ...(starting?{correlationId:starting.report.snapshot().correlationId}:{})};
+
+ function saveStartup(){
+  if(!startupReport||!diagnosticStorage)return;
+  const report=startupReport.snapshot();
+  saving=saving.then(()=>diagnosticStorage.set({[diagnosticKey]:report})).catch(()=>{});
+ }
+ async function previousStartup(){
+  if(startupReport||!diagnosticStorage)return;
+  await (restoring??=boundedLabStep(async()=>{
+   await trustedStorage();
+   return (await diagnosticStorage.get(diagnosticKey))[diagnosticKey];
+  },null,1500).then(prior=>{
+   if(startupReport||prior?.schema!=='redown.python-lab.diagnostics/1'||prior.build?.revision!==build.revision)return;
+   savedStartup=prior;
+   lastCode??=['CHECKING','READY_TO_PAIR','PAIRED','CLI_IDLE'].includes(prior.outcome)
+    ?'LAB_WORKER_RESTARTED':prior.outcome==='ENDED'?'LAB_SESSION_ENDED':
+      prior.stages.find(stage=>stage.stage==='lifecycle')?.code??prior.firstFailure?.code??null;
+  }).catch(()=>{}));
+ }
 
  function abortRun(session) {
   const run=session.run;
@@ -90,14 +125,39 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   }
  }
  function revoke(code='LAB_SESSION_ENDED') {
-  generation++;
+  starting?.controller.abort(labError(code));
+  preflighting?.abort(labError(code));
   const session=grant;
   grant=null;
   lastCode=code;
   if(!session)return;
   clearTimeout(session.timer);
   abortRun(session);
-  try{session.port?.disconnect();}catch{}
+  session.closeRelay();
+  const ended=code==='LAB_SESSION_ENDED';
+  session.report.mark('lifecycle',ended?'PASS':'FAIL',ended?{}:{error:labError(code)});
+  session.report.finish(ended?'ENDED':'FAILED');
+  saveStartup();
+ }
+ function requireIdentity(){
+  if(runtime.id!==extensionId)throw labError('LAB_EXTENSION_ID_MISMATCH');
+ }
+ async function requirePermission(){
+  if(await permission()!==true)throw labError('NATIVE_PERMISSION_DENIED');
+ }
+ function requireNativeApi(){
+  if(typeof runtime.connectNative!=='function')throw labError('NATIVE_API_UNAVAILABLE');
+ }
+ function requireOpfs(){
+  if(!opfsCapability())throw labError('LAB_OPFS_UNAVAILABLE');
+ }
+ function validateSelection(input){
+  requireKeys(input,['accountId','bucketName','mode','minutes','scopeId']);
+  const {accountId,bucketName,mode,minutes,scopeId}=input;
+  if(!/^[0-9a-f]{32}$/.test(accountId??'')||!/^[a-z0-9][a-z0-9-]{1,62}$/.test(bucketName??'')||
+   !['read-only','read-write'].includes(mode)||![15,30,60].includes(minutes)||
+   (mode==='read-only'?!uploadId(scopeId):scopeId!==null))throw labError('INVALID_INPUT');
+  return normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''});
  }
  async function sessionAuthority(target,mode,expectedSession) {
   const auth=await authority();
@@ -109,7 +169,8 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   return auth;
  }
  function live(session) {
-  if(grant!==session||clock()>=session.expiresAt)throw labError('LAB_AUTHORIZATION_EXPIRED');
+  if(grant===session&&clock()>=session.expiresAt)revoke('LAB_AUTHORIZATION_EXPIRED');
+  if(grant!==session)throw labError('LAB_AUTHORIZATION_EXPIRED');
  }
  async function check(session) {
   live(session);
@@ -126,59 +187,164 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
   return (Array.isArray(value)?value:[]).filter(validScope)
    .filter(row=>accountId===undefined||row.accountId===accountId&&row.bucketName===bucketName);
  }
- async function start(input) {
-  requireKeys(input,['accountId','bucketName','mode','minutes','scopeId']);
+ async function checkSelection(input,root,step){
   const {accountId,bucketName,mode,minutes,scopeId}=input;
+  const auth=await step('authorization',()=>sessionAuthority(root,mode));
+  await step('selected-bucket',async signal=>{
+   if(await checkBucket(root,auth,signal)!==true)throw labError('LAB_BUCKET_CHECK_FAILED');
+  });
+  const previous=mode==='read-only'?await step('recovery-scope',async()=>{
+   const record=(await scopes(accountId,bucketName)).find(row=>row.id===scopeId);
+   if(!record)throw labError('LAB_RECOVERY_SCOPE_NOT_FOUND');
+   return record;
+  }):null;
+  const id=previous?.id??crypto.randomUUID();
+  const parent=mode==='read-write'?await step('worker-prefix',async()=>normalizePrefix(await workerPrefix(root))):'';
+  const target=normalizeTarget({...root,prefix:previous?.prefix??parent+'.redown-python-lab/'+id+'/'});
+  if(mode==='read-write')await step('upload-readiness',async signal=>{
+   const checked=await checkUpload(target,signal);
+   if(checked?.sessionId!==auth.sessionId)throw labError('AUTH_SESSION_CHANGED');
+  },35_000);
+  return {target,id,auth,mode,minutes};
+ }
+ async function diskBudget(report,step){
+  const estimate=await step('storage-estimate',storageEstimate);
+  if(!Number.isFinite(estimate?.quota)||!Number.isFinite(estimate?.usage)){
+   report.mark('storage-estimate','UNAVAILABLE',{error:labError('LAB_STORAGE_ESTIMATE_UNAVAILABLE'),
+    optional:report.snapshot().kind==='startup'});
+   return limits.maxDiskBytes;
+  }
+  return Math.min(limits.maxDiskBytes,Math.floor(Math.max(0,estimate.quota-estimate.usage)));
+ }
+ function openRelay(session,attempt){
+  requireNativeApi();
+  const port=runtime.connectNative(labHostName);
+  session.port=port;
+  let resolveReady;
+  const ready=new Promise(resolve=>{resolveReady=resolve;});
+  const onMessage=message=>{
+   if(grant===session){void receive(session,message);return;}
+   if(starting!==attempt||attempt.controller.signal.aborted)return;
+   if(message?.type==='ready'&&Object.keys(message).length===1)resolveReady();
+   else attempt.controller.abort(labError('NATIVE_HANDSHAKE_INVALID'));
+  };
+  const onDisconnect=()=>{
+   const code=nativeDisconnectCode(runtime.lastError?.message??'');
+   if(grant===session)revoke(code);
+   else if(starting===attempt)attempt.controller.abort(labError(code));
+  };
+  session.closeRelay=()=>{
+   try{port.onMessage.removeListener?.(onMessage);}catch{}
+   try{port.onDisconnect.removeListener?.(onDisconnect);}catch{}
+   try{port.disconnect();}catch{}
+  };
+  port.onMessage.addListener(onMessage);
+  port.onDisconnect.addListener(onDisconnect);
+  return {ready};
+ }
+ async function start(input) {
   if(starting||grant)throw labError('LAB_SESSION_ALREADY_OPEN');
-  if(runtime.id!==extensionId)throw labError('LAB_EXTENSION_ID_MISMATCH');
-  if(!/^[0-9a-f]{32}$/.test(accountId??'')||!/^[a-z0-9][a-z0-9-]{1,62}$/.test(bucketName??'')||
-   !['read-only','read-write'].includes(mode)||![15,30,60].includes(minutes)||
-   (mode==='read-only'?!uploadId(scopeId):scopeId!==null))throw labError('INVALID_INPUT');
-  starting=true;lastCode=null;
-  const epoch=++generation;
+  const controller=new AbortController();
+  const report=createLabReport('startup',build);
+  const attempt={controller,report};
+  starting=attempt;startupReport=report;lastCode=null;
+  const step=(stage,work,timeoutMs=stageTimeoutMs,timeoutCode)=>report.run(stage,work,{signal:controller.signal,timeoutMs,timeoutCode});
+  const deadline=setTimeout(()=>controller.abort(labError('LAB_STARTUP_TIMEOUT')),startupTimeoutMs);
   let session;
   try {
-   const root=normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''});
-   const auth=await sessionAuthority(root,mode);
-   await checkBucket(root,auth);
-   const previous=mode==='read-only'?(await scopes(accountId,bucketName)).find(row=>row.id===scopeId):null;
-   if(mode==='read-only'&&!previous)throw labError('LAB_RECOVERY_SCOPE_NOT_FOUND');
-   const id=previous?.id??crypto.randomUUID();
-   const parent=mode==='read-write'?normalizePrefix(await workerPrefix(root)):'';
-   const target=normalizeTarget({...root,prefix:previous?.prefix??parent+'.redown-python-lab/'+id+'/'});
-   const checked=mode==='read-write'?await checkUpload(target,AbortSignal.timeout(35_000)):null;
-   if(checked&&checked.sessionId!==auth.sessionId)throw labError('AUTH_SESSION_CHANGED');
-   // Scope is fixed before launching the relay. Opening the card never provisions a Worker.
-   // A prior client may have disconnected after dispatch. Let its local
-   // transfer and spool drain before opening the next grant.
-   await draining;
-   const directory=await spoolDirectory();
-   const estimate=await storageEstimate();
-   const free=Number.isFinite(estimate?.quota)&&Number.isFinite(estimate?.usage)?Math.max(0,estimate.quota-estimate.usage):null;
-   const diskBytes=free===null?limits.maxDiskBytes:Math.min(limits.maxDiskBytes,Math.floor(free));
-   await sessionAuthority(target,mode,auth.sessionId);
-   if(epoch!==generation)throw labError('LAB_SESSION_ENDED');
-   const now=clock();
-   session={id,target,mode,directory,diskBytes,sessionId:auth.sessionId,checkedAt:now,expiresAt:now+minutes*60_000,
+   await step('trusted-storage',trustedStorage);
+   saveStartup();
+   await step('extension-identity',requireIdentity);
+   const root=await step('input-validation',()=>validateSelection(input));
+   await step('native-permission',requirePermission);
+   await step('native-api',requireNativeApi);
+   await step('opfs-capability',requireOpfs);
+   const {target,id,auth,mode,minutes}=await checkSelection(input,root,step);
+   const directory=await step('spool-init-cleanup',async signal=>{
+    await draining;
+    await preparingSpool?.catch(()=>{});
+    signal.throwIfAborted();
+    const pending=Promise.resolve().then(()=>spoolDirectory(signal));
+    preparingSpool=pending;
+    try{return await pending;}
+    finally{if(preparingSpool===pending)preparingSpool=null;}
+   });
+   const diskBytes=await diskBudget(report,step);
+   await step('auth-recheck',()=>sessionAuthority(target,mode,auth.sessionId));
+   session={id,target,mode,directory,diskBytes,sessionId:auth.sessionId,report,
     ready:false,client:null,ticket:null,attempts:0,usedRuns:new Set(),run:null,counters:{files:0,trafficBytes:0,providerRequests:0,operations:0}};
+   const {ready}=await step('native-port-launch',()=>openRelay(session,attempt));
+   await step('native-handshake',()=>ready,handshakeTimeoutMs,'NATIVE_HANDSHAKE_TIMEOUT');
+   controller.signal.throwIfAborted();
+   const now=clock();
+   Object.assign(session,{ready:true,checkedAt:now,expiresAt:now+minutes*60_000});
    refreshCode(session);
    grant=session;
-   session.port=runtime.connectNative(labHostName);
-   session.port.onMessage.addListener(message=>void receive(session,message));
-   session.port.onDisconnect.addListener(()=>{
-    const error=runtime.lastError?.message??'';
-    if(grant===session)revoke(/not found|not registered/i.test(error)?'NATIVE_HOST_NOT_REGISTERED':'NATIVE_HOST_DISCONNECTED');
-   });
    session.timer=setTimeout(()=>{if(grant===session)revoke('LAB_AUTHORIZATION_EXPIRED');},minutes*60_000);
    session.timer.unref?.();
+   report.finish('READY_TO_PAIR');
    return status();
   }catch(error){
-   if(session&&grant===session)revoke(typed(error));
-   else if(epoch===generation)lastCode=typed(error);
+   session?.closeRelay?.();
+   lastCode=typed(error);
+   if(!report.snapshot().firstFailure)report.mark('lifecycle','FAIL',{error});
+   report.finish(lastCode==='LAB_SESSION_ENDED'?'ENDED':'FAILED');
    throw error;
-  }finally{starting=false;}
+  }finally{
+   clearTimeout(deadline);
+   starting=null;
+   saveStartup();
+  }
+ }
+ async function preflight(input){
+  if(preflighting)throw labError('LAB_PREFLIGHT_BUSY');
+  const controller=new AbortController();
+  preflighting=controller;
+  const report=createLabReport('preflight',build);
+  preflightReport=report;
+  const step=(stage,work,timeoutMs=stageTimeoutMs)=>report.run(stage,work,{signal:controller.signal,timeoutMs});
+  const deadline=setTimeout(()=>controller.abort(labError('LAB_PREFLIGHT_TIMEOUT')),startupTimeoutMs);
+  let selectedTarget=false;
+  try{
+   await step('trusted-storage',trustedStorage);
+   await step('extension-identity',requireIdentity);
+   const root=await step('input-validation',()=>Object.keys(input).length?validateSelection(input):null);
+   selectedTarget=!!root;
+   const cloud=async()=>{
+    const auth=await step('account-discovery',authority);
+    if(!root)return;
+    if(auth.accounts.some(account=>account.id===root.accountId))
+     await step('bucket-listing',signal=>buckets(root.accountId,'',signal));
+    const selected=await checkSelection(input,root,step);
+    await step('auth-recheck',()=>sessionAuthority(selected.target,selected.mode,selected.auth.sessionId));
+   };
+   await Promise.allSettled([
+    step('native-permission',requirePermission),
+    step('native-api',requireNativeApi),
+    step('opfs-capability',signal=>{requireOpfs();return opfsProbe(signal);}),
+    diskBudget(report,step),cloud()
+   ]);
+  }catch{/* The failed step has already captured its cause. */}
+  finally{clearTimeout(deadline);preflighting=null;}
+  report.finish(report.snapshot().firstFailure?'BLOCKED':selectedTarget?'PASS':'INCOMPLETE');
+  return report.snapshot();
+ }
+ async function discover(stage,work,reset=false){
+  if(reset||!discoveryReport)discoveryReport=createLabReport('discovery',build);
+  const report=discoveryReport;
+  const step=(name,fn)=>report.run(name,fn,{timeoutMs:stageTimeoutMs});
+  try{
+   await step('trusted-storage',trustedStorage);
+   const data=await step(stage,work);
+   report.finish('PASS');
+   return data;
+  }catch(error){
+   report.finish('FAILED');
+   throw error;
+  }
  }
  function refreshCode(session) {
+  session.pairingStarted=performance.now();
   session.pairCode=token().slice(0,16);
   session.codeExpiresAt=Math.min(clock()+120_000,session.expiresAt);
   session.attempts=0;
@@ -193,6 +359,9 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    session.ticket=token();
   }else if(!session.ticket||!equal(session.ticket,input.ticket))throw labError('PAIRING_REQUIRED');
   session.client=client;
+  session.report.mark('pairing','PASS',{elapsedMs:performance.now()-session.pairingStarted});
+  session.report.finish('PAIRED');
+  saveStartup();
   return {ticket:session.ticket,scopeId:session.id,expiresAt:session.expiresAt};
  }
  function requireRun(session) {
@@ -264,6 +433,7 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    prefix:session.target.prefix,mode:session.mode,
    expiresAt:session.expiresAt,checkedAt:session.checkedAt,headroom,limits,
    operations:session.mode==='read-write'?['upload','download','metadata','list']:['download','metadata','list'],
+   diagnostics:session.report.snapshot(),
    unsupported,readback:'independent OAuth Object API streaming with strong ETag and SHA-256'};
  }
  function uploadOptions(input){
@@ -421,10 +591,14 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
  }
  async function receive(session,message) {
   if(grant!==session)return;
-  if(message?.type==='ready'){if(!session.ready){session.ready=true;refreshCode(session);}return;}
   if(!uploadId(message?.client))return;
   if(message.type==='closed'){
-   if(session.client===message.client){session.client=null;abortRun(session);}
+   if(session.client===message.client){
+    session.client=null;
+    abortRun(session);
+    session.report.finish('CLI_IDLE');
+    saveStartup();
+   }
    return;
   }
   if(message.type!=='request'||!uploadId(message.id))return;
@@ -438,21 +612,48 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    const data=message.method==='pair'?await pair(session,message.client,message.input):await query(session,message.method,message.input);
    live(session);
    response=available(data);
-  }catch(error){response=failure(typed(error));}
+  }catch(error){
+   response=failure(typed(error));
+   if(message.method==='pair'&&grant===session&&!session.ticket){
+    session.report.mark('pairing','FAIL',{error,elapsedMs:performance.now()-session.pairingStarted});
+    saveStartup();
+   }
+  }
   finally{if(session.inFlight===message.id)session.inFlight=null;}
   if(grant===session)try{session.port.postMessage({id:message.id,response});}catch{revoke('NATIVE_HOST_DISCONNECTED');}
  }
- return Object.freeze({revoke,async ui(action,input={}){
+ return Object.freeze({revoke,async request(action,input={}){
+  try{return {ok:true,data:await ui(action,input)};}
+  catch(error){
+   const failure=describeLabFailure(error);
+   const report=(action==='start'?startupReport:
+    ['accounts','buckets'].includes(action)?discoveryReport:null)?.snapshot();
+   const stage=report?.stages.find(row=>row.code===failure.code);
+   return {ok:false,...failure,...(stage?{...stage,correlationId:report.correlationId}:{})};
+  }
+ },ui});
+ async function ui(action,input={}){
   switch(action){
-   case 'status':return status();
-   case 'accounts':return {accounts:(await authority()).accounts.map(({id,name})=>({id,name}))};
+   case 'status':
+    await previousStartup();
+    return status();
+   case 'diagnostics':
+    await previousStartup();
+    const {state,code,nativeApiAvailable}=status();
+    return {schema:'redown.python-lab.diagnostic-export/1',startup:startupReport?.snapshot()??savedStartup,
+     discovery:discoveryReport?.snapshot()??null,preflight:preflightReport?.snapshot()??null,
+     session:{state,code:code??null,nativeApiAvailable}};
+   case 'preflight':return preflight(input);
+   case 'accounts':return discover('account-discovery',async()=>
+    ({accounts:(await authority()).accounts.map(({id,name})=>({id,name}))}),true);
    case 'buckets':{
     requireKeys(input,['accountId','cursor']);
     if(!/^[0-9a-f]{32}$/.test(input.accountId??'')||typeof input.cursor!=='string'||input.cursor.length>2048)throw labError('INVALID_INPUT');
-    return buckets(input.accountId,input.cursor);
+    return discover('bucket-listing',signal=>buckets(input.accountId,input.cursor,signal));
    }
    case 'recovery':{
     requireKeys(input,['accountId','bucketName']);
+    await trustedStorage();
     const auth=await authority();
     if(!auth.accounts.some(row=>row.id===input.accountId))throw labError('SCOPE_UNAUTHORIZED');
     return {scopes:await scopes(input.accountId,input.bucketName)};
@@ -461,8 +662,11 @@ export function createPythonLab({runtime,storage,build,authority,buckets,checkBu
    case 'end':revoke();return status();
    case 'newCode':
     if(!grant?.ready||grant.client)throw labError('LAB_SESSION_NOT_IDLE');
-    grant.ticket=null;refreshCode(grant);return status();
+    grant.ticket=null;refreshCode(grant);
+    grant.report.finish('READY_TO_PAIR');
+    saveStartup();
+    return status();
    default:throw uploadError('UNSUPPORTED_OPERATION','Unknown laboratory action.');
   }
- }});
+ }
 }

@@ -10,6 +10,35 @@ from pathlib import Path
 from .errors import LabError
 from .native_host import EXTENSION_ID, HOST_NAME, ORIGIN, home, private_directory
 
+WINDOWS_REGISTRY = r'Software\Google\Chrome\NativeMessagingHosts' + '\\' + HOST_NAME
+
+
+def registration_status():
+    """Inspect the current user's Chrome registration without exporting paths."""
+    if os.name != 'nt':
+        return 'NOT_CHECKED_ON_THIS_PLATFORM'
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, WINDOWS_REGISTRY) as key:
+            manifest, kind = winreg.QueryValueEx(key, '')
+    except FileNotFoundError:
+        return 'CURRENT_USER_REGISTRATION_NOT_FOUND'
+    except OSError:
+        return 'CURRENT_USER_REGISTRATION_UNREADABLE'
+    if kind != winreg.REG_SZ or not manifest:
+        return 'NATIVE_MANIFEST_INVALID'
+    try:
+        record = json.loads(Path(manifest).read_text(encoding='utf-8'))
+        if (not isinstance(record, dict) or record.get('name') != HOST_NAME or record.get('type') != 'stdio'
+                or record.get('allowed_origins') != [ORIGIN] or not isinstance(record.get('path'), str)):
+            return 'NATIVE_MANIFEST_INVALID'
+        launcher = Path(record['path'])
+        if not launcher.is_absolute() or not launcher.is_file():
+            return 'NATIVE_LAUNCHER_NOT_INSTALLED'
+    except (OSError, ValueError):
+        return 'NATIVE_MANIFEST_UNREADABLE'
+    return 'CURRENT_USER_REGISTRATION_PRESENT'
+
 
 def install(extension_id):
     if extension_id != EXTENSION_ID:
@@ -47,8 +76,7 @@ def install(extension_id):
     atomic_private_json(manifest, {'name': HOST_NAME, 'description': 'REDOWN Python Laboratory',
                         'path': str(launcher), 'type': 'stdio', 'allowed_origins': [ORIGIN]})
     if os.name == 'nt':
-        registry = r'Software\Google\Chrome\NativeMessagingHosts' + '\\' + HOST_NAME
-        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, registry) as key:
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, WINDOWS_REGISTRY) as key:
             winreg.SetValueEx(key, '', 0, winreg.REG_SZ, str(manifest))
     return {'status': 'REGISTERED', 'manifest': str(manifest), 'extensionId': EXTENSION_ID,
             'launcher': str(launcher)}

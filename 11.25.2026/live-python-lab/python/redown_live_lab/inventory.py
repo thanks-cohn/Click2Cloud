@@ -90,7 +90,10 @@ def check_binding(expected, observed, stage):
         fields += ('st_ctime_ns',)
     changed = [field for field in fields if getattr(expected, field) != getattr(observed, field)]
     if changed:
-        reason = 'IDENTITY_MISMATCH' if any(field in FILE_ID for field in changed) else 'METADATA_MISMATCH'
+        if any(field in FILE_ID for field in changed):
+            reason = 'IDENTITY_MISMATCH'
+        else:
+            reason = 'SIZE_MISMATCH' if 'st_size' in changed else 'METADATA_MISMATCH'
         raise source_error('SOURCE_CHANGED', stage, reason, changed)
 
 
@@ -137,7 +140,8 @@ def chunks(path, size, stop=lambda: None, *, before=None):
             raise source_error('SOURCE_CHANGED', stage, 'PATH_DISAPPEARED', error=error) from None
         raise source_error('LOCAL_FILE_UNREADABLE', stage, 'PATH_MISSING', error=error) from None
     except OSError as error:
-        raise source_error('LOCAL_FILE_UNREADABLE', stage, 'READ_OR_INSPECTION_FAILED', error=error) from None
+        reason = 'WINDOWS_SHARING_VIOLATION' if getattr(error, 'winerror', None) == 32 else 'READ_OR_INSPECTION_FAILED'
+        raise source_error('LOCAL_FILE_UNREADABLE', stage, reason, error=error) from None
 
 
 def digest_file(path, size, stop=lambda: None, *, before=None):
@@ -197,7 +201,11 @@ def inventory(directory, *, max_files, max_file_bytes, max_total_bytes, max_entr
             previous = seen_paths.setdefault(folded, rel)
             if previous != rel:
                 raise LabError('CORPUS_PATH_COLLISION', [previous, rel])
-            info = path.lstat()
+            try:
+                info = path.lstat()
+            except OSError as error:
+                raise source_error('LOCAL_FILE_UNREADABLE', 'inventory-metadata',
+                                   'READ_OR_INSPECTION_FAILED', error=error) from None
             if linked(info):
                 raise LabError('LINK_OR_REPARSE_POINT', rel)
             if stat.S_ISDIR(info.st_mode):

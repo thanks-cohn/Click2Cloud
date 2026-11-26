@@ -32,24 +32,32 @@ class ExtensionClient:
     def __init__(self, code=None):
         self.socket = None
         self.stream = None
+        stage = 'native-endpoint'
         try:
             directory = private_directory()
             endpoint = json.loads((directory / 'connection.json').read_text(encoding='utf-8'))
-            if (endpoint.get('version') != 1 or endpoint.get('host') != '127.0.0.1'
-                    or endpoint.get('expiresAt', 0) <= time.time()):
-                raise LabError('EXTENSION_UNAVAILABLE')
+            if not isinstance(endpoint, dict) or endpoint.get('version') != 1 or endpoint.get('host') != '127.0.0.1':
+                raise LabError('EXTENSION_UNAVAILABLE', {'stage': stage, 'reason': 'NATIVE_ENDPOINT_INVALID'})
+            if endpoint.get('expiresAt', 0) <= time.time():
+                raise LabError('EXTENSION_UNAVAILABLE', {'stage': stage, 'reason': 'NATIVE_ENDPOINT_EXPIRED'})
+            stage = 'pairing'
             if code is None:
                 try:
                     saved = json.loads((directory / 'ticket.json').read_text(encoding='utf-8'))
                 except FileNotFoundError:
                     raise LabError('PAIRING_REQUIRED') from None
-                if saved.get('relayId') != endpoint.get('relayId') or saved.get('expiresAt', 0) <= time.time() * 1000:
+                if not isinstance(saved, dict) or saved.get('relayId') != endpoint.get('relayId'):
                     raise LabError('PAIRING_REQUIRED')
+                if saved.get('expiresAt', 0) <= time.time() * 1000:
+                    raise LabError('LAB_AUTHORIZATION_EXPIRED')
+            stage = 'native-socket'
             self.socket = socket.create_connection(('127.0.0.1', int(endpoint['port'])), timeout=40)
             self.stream = self.socket.makefile('rwb', buffering=0)
+            stage = 'native-handshake'
             write_frame(self.stream, {'key': endpoint['key']})
             if 'clientId' not in read_frame(self.stream):
                 raise LabError('LOCAL_AUTH_DENIED')
+            stage = 'pairing'
             result = self.query('pair', code=code, ticket=None if code is not None else saved['ticket'])
             self.scope_id = result['scopeId']
             self.expires_at = result['expiresAt']
@@ -57,7 +65,17 @@ class ExtensionClient:
                 atomic_private_json(directory / 'ticket.json', {**result, 'relayId': endpoint['relayId']})
         except (OSError, ValueError, TypeError, KeyError, EOFError) as error:
             self.close()
-            raise LabError('EXTENSION_UNAVAILABLE', 'Start a session in REDOWN Settings and use its pairing command.') from error
+            if isinstance(error, FileNotFoundError) and stage == 'native-endpoint':
+                reason = 'NATIVE_ENDPOINT_MISSING'
+            elif isinstance(error, ConnectionRefusedError):
+                reason = 'NATIVE_SOCKET_REFUSED'
+            elif isinstance(error, TimeoutError):
+                reason = 'NATIVE_SOCKET_TIMEOUT'
+            elif isinstance(error, EOFError):
+                reason = 'NATIVE_SOCKET_CLOSED'
+            else:
+                reason = 'NATIVE_LOCAL_STATE_UNAVAILABLE'
+            raise LabError('EXTENSION_UNAVAILABLE', {'stage': stage, 'reason': reason}) from None
         except BaseException:
             self.close()
             raise
@@ -78,7 +96,7 @@ class ExtensionClient:
             raise LabError('TIMEOUT_UNCERTAIN') from None
         except (OSError, EOFError):
             self.close()
-            raise LabError('EXTENSION_DISCONNECTED') from None
+            raise LabError('EXTENSION_DISCONNECTED', {'stage': 'native-socket', 'reason': 'NATIVE_SOCKET_CLOSED'}) from None
         except ValueError:
             self.close()
             raise LabError('INVALID_FRAME') from None
