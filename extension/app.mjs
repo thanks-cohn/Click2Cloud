@@ -1,3 +1,4 @@
+import {createSkyIdle} from './sky-idle.mjs';
 import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
@@ -670,9 +671,9 @@ function clearSkyOpening(){
  document.body.removeAttribute('data-sky-opening');
  $('.app-header>.sky-canopy')?.remove();
 }
-function playSkyOpening(previous,next){
+function playSkyOpening(){
  clearSkyOpening();
- if(previous===next||previous==='explorer'||next==='explorer'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!skyEligible())return;
  const header=$('.app-header'),style=getComputedStyle(header),canopy=document.createElement('div');
  canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
  canopy.style.setProperty('--sky-surface',style.background);
@@ -686,6 +687,11 @@ function playSkyOpening(previous,next){
  });
  skyOpeningTimer=setTimeout(()=>{if(canopy.isConnected)clearSkyOpening();},2400);
 }
+function skyEligible(){
+ const header=$('.app-header');
+ return view!=='explorer'&&!document.hidden&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+const skyIdle=createSkyIdle({eligible:skyEligible,open:playSkyOpening,close:clearSkyOpening});
 // Visual-only morph eligibility uses the same connected state as the Explorer sign-out control.
 function prepareManageMorph(next){
  if(next===view)return;
@@ -693,7 +699,7 @@ function prepareManageMorph(next){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;const previousView=view;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next)playSkyOpening(previousView,next);$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next)skyIdle.reset();$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -827,7 +833,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){clearSkyOpening();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){skyIdle.cancel();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1955,9 +1961,15 @@ async function renderSettings(){
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
-$('.app-header').addEventListener('pointerdown',clearSkyOpening,{capture:true});
-document.addEventListener('keydown',clearSkyOpening,{capture:true});
-window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',clearSkyOpening);
+const skyHeader=$('.app-header');
+skyHeader.addEventListener('pointerenter',skyIdle.cancel);
+skyHeader.addEventListener('pointerleave',()=>queueMicrotask(skyIdle.reset));
+skyHeader.addEventListener('pointerdown',skyIdle.cancel,{capture:true});
+skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible'))skyIdle.cancel();});
+skyHeader.addEventListener('focusout',()=>queueMicrotask(skyIdle.reset));
+skyHeader.addEventListener('keydown',()=>{skyIdle.cancel();queueMicrotask(skyIdle.reset);});
+document.addEventListener('visibilitychange',skyIdle.reset);
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.reset);
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
 headerMore.onclick=()=>{headerMenu.hidden=!headerMenu.hidden;headerMore.setAttribute('aria-expanded',String(!headerMenu.hidden));if(!headerMenu.hidden)headerItems()[0]?.focus();};
@@ -1980,7 +1992,7 @@ $('#dialog').addEventListener('cancel',event=>{
 });
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
- view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header [data-view], #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');
+ view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header [data-view], #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');skyIdle.reset();
  const configuration=readWithRetry(()=>refreshState({quiet:true,readTimeout:5000})).catch(error=>{configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};}).finally(()=>{
   try{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}
   finally{document.dispatchEvent(new Event('redown-color-mode-ready'));}
