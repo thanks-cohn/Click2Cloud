@@ -20,7 +20,7 @@ Settings → Aesthetic → Header Animation offers three mutually exclusive choi
 
 ## Elegant alternative
 
-Elegant begins after the same five-second idle interval. Over 1.05 seconds a single flat header surface and the navigation fade while the lower content glides upward on a quintic easing curve. No rails, shimmer, charge, compression, overshoot or explosion. Both modes use the identical measured lift bounds, resting shell geometry, persistent logo and cleanup controller. Elegant fades navigation and the More control, while retaining the R and sun/moon. The theme glyph glides right by up to six CSS pixels, bounded by the available edge clearance, using the same easing as the content lift. Only hovering the R restores the header; the theme toggle remains usable. The cleared header is transparent and does not intercept pointer input; keyboard/touch activation of the R remains available. Neither mode adds any ocean elements. None does not arm an idle timer, mount an overlay or request frames. Changing modes cancels any in-progress animation; the next eligible header leave or launch arms the selected mode.
+Elegant begins after the same five-second idle interval. Over 1.05 seconds a single flat header surface and the navigation fade while the lower content glides upward on a quintic easing curve. No rails, shimmer, charge, compression, overshoot or explosion. Both modes use the identical measured lift bounds, resting shell geometry, persistent logo and cleanup controller. Elegant fades navigation and the More control, while retaining the R and sun/moon. The theme glyph glides right by up to six CSS pixels, bounded by the available edge clearance, using the same easing as the content lift. Only hovering the R restores the header (keyboard/touch activation of R is also supported). Clicking or keyboard-activating the sun/moon changes the theme without revealing the header or disturbing the settled lift. The hidden header surface, borders, shadows, pseudo-elements and button background are removed; exposed space uses the page background color. The cleared header is transparent and does not intercept pointer input; keyboard/touch activation of the R remains available. Neither mode adds any ocean elements. None does not arm an idle timer, mount an overlay or request frames. Changing modes cancels any in-progress animation; the next eligible header leave or launch arms the selected mode.
 
 ## Energy model
 
@@ -46,7 +46,7 @@ These are structural rendering optimizations, not a measured frame-rate guarante
 - Hovering again while restoring does not restart restoration.
 - Menu closure or DOM-only pointerleave cannot arm the timer.
 - Keyboard focus and activation restore navigation immediately for accessibility; direct clicks and entering Explorer also restore without waiting.
-- Reduced motion, disabling the setting, theme changes, viewport resize, and document hiding cancel and clean up the effect.
+- Reduced motion, disabling the setting, skin/finish changes, viewport resize, and document hiding cancel and clean up the effect. Color-mode changes leave Elegant's hidden state intact; Hyperspace retains its original reset behavior.
 - No authentication, provider, file, destination, or engine state is modified.
 - All temporary elements, CSS variables, and frame handles are removed on cleanup. No animation runs after settling until the next interaction.
 
