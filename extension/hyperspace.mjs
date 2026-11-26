@@ -1,7 +1,7 @@
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const hyperspaceKey='headerHyperspaceV1';
-export const IDLE_MS=5000, SPLIT_MS=180;
+export const IDLE_MS=5000, SPLIT_MS=1800;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export function normalizeHyperspace(value){
@@ -19,14 +19,14 @@ export function hyperspaceTiming(seconds){
 export function hyperspaceFrame(elapsed,seconds){
  const t=hyperspaceTiming(seconds), chargeMs=t.buildup*1000;
  const charge=clamp((elapsed-SPLIT_MS)/1000,0,t.buildup),p=charge/t.buildup;
- const travel=100*(.015*charge+.008*charge**2+.020*charge**3);
- const speed=.015+.016*charge+.060*charge**2;
+ const travel=100*(2*charge+.225*charge**2);
+ const speed=2+.45*charge;
  const releaseElapsed=elapsed-SPLIT_MS-chargeMs;
  const r=clamp(releaseElapsed/t.release),settle=smooth((releaseElapsed-t.release)/t.settle);
  const burst=r**2.4;
  const lift= smooth((r-.10)/.90)*(1+Math.min(.22,.075*t.energy)*(1-settle));
- return {split:1-(1-clamp(elapsed/SPLIT_MS))**3,burst,lift,words:1-smooth((r-.08)/.76),
-  travel,speed,glint:Math.min(.84,(.16+.62*p)*smooth(charge/.42))*(1-smooth(r)),
+ return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,lift,words:1-smooth((r-.08)/.76),
+  travel,speed,glint:Math.min(.84,(.48+.36*p)*smooth(charge/.08))*(1-smooth(r)),
   length:4+Math.min(18,3*speed),done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
 }
