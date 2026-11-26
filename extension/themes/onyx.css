@@ -103,27 +103,59 @@
  & > #manage-slot{min-block-size:64px;padding:10px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);justify-content:space-between}
  & #manage{font:600 12px/1.25 "Segoe UI",sans-serif;background:var(--raised);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-block-size:37px}
 }
-/* Keep the primary action in its dock even when hovering; otherwise moving
-   the pointer over a button would shift its target. Secondary actions occupy
-   a real row only when requested by hover, keyboard focus, or touch. */
+/* Integrated Edge Action: stable grid, bare refresh glyph on its left.
+   Hover changes opacity only; neither refresh nor secondary actions add rows. */
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
+ --onyx-edge-width:78px;--onyx-refresh-width:28px;
+ display:grid;grid-template-columns:minmax(0,1fr) var(--onyx-refresh-width) var(--onyx-edge-width);
+ grid-template-rows:minmax(74px,auto);gap:0;padding:0;
+ & .remote-provider-heading{padding:12px 2px 12px 14px;min-height:74px}
+ & .remote-provider-title{min-width:0}
+ & .remote-provider-heading h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ & .remote-provider-title .onyx-provider-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  & .remote-provider-actions{display:contents}
- & .remote-provider-actions>button{grid-column:2;grid-row:1;justify-self:end}
- & .remote-provider-actions::before{content:"";grid-column:2;grid-row:1;align-self:stretch;justify-self:start;width:1px;background:var(--line);margin-inline-end:10px}
- & .remote-provider-heading{padding-inline-end:14px}
- & :is([data-go],[data-connect]){margin-inline-start:10px}
- & .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]) [data-go],&[data-onyx-connected] [data-connect]{
-  position:absolute;pointer-events:none;clip-path:inset(50%);inline-size:1px;block-size:1px;min-block-size:0;padding:0;border:0;overflow:hidden;white-space:nowrap;opacity:0;
+ & .remote-provider-actions>button:is([data-go],[data-connect]){
+  grid-column:3;grid-row:1;align-self:stretch;justify-self:stretch;
+  inline-size:100%;max-inline-size:none;min-block-size:74px;margin:0;padding:6px 4px;
+  white-space:normal;border:0;border-inline-start:1px solid var(--line);
+  border-radius:0 12px 12px 0;
+  background:linear-gradient(145deg,var(--onyx-highlight),transparent 80%),var(--raised);box-shadow:none;
  }
- &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]):is(:hover,:focus-within) [data-go],&[data-onyx-connected]:is(:hover,:focus-within) [data-connect]{
-  grid-row:auto;grid-column:1;position:static;clip-path:none;inline-size:auto;block-size:auto;min-block-size:32px;padding:5px 9px;margin:0;overflow:visible;opacity:1;white-space:normal;pointer-events:auto;justify-self:start;
+ & .remote-provider-actions>button:is([data-go],[data-connect]):hover{filter:brightness(1.13)}
+ & .remote-provider-actions>[data-refresh]{
+  grid-column:2;grid-row:1;align-self:center;justify-self:center;
+  inline-size:28px;block-size:32px;min-block-size:32px;max-inline-size:none;
+  margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;
+  color:var(--onyx-subtitle);opacity:0;pointer-events:none;transition:opacity .12s ease;
  }
- &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh]{grid-column:2;justify-self:end}
+ & .remote-provider-actions>[data-refresh] svg{inline-size:15px;block-size:15px}
+ &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh],
+ & .remote-provider-actions>[data-refresh][aria-busy=true]{
+  opacity:1;pointer-events:auto;transition-delay:0s;background:transparent;box-shadow:none;
+ }
+ & .remote-provider-actions>[data-refresh]:hover{color:var(--text);background:transparent;box-shadow:none}
+ /* Preserve the alternate action without placing it in flow. It occupies
+    the account-caption line only when deliberately hovered or focused. */
+ &:not([data-onyx-connected]) .remote-provider-actions>[data-go],
+ &[data-onyx-connected] .remote-provider-actions>[data-connect]{
+  position:absolute;grid-column:auto;grid-row:auto;
+  inset-block-start:42px;inset-inline-start:69px;inset-inline-end:calc(var(--onyx-edge-width) + var(--onyx-refresh-width) + 3px);
+  inline-size:auto;max-inline-size:none;block-size:19px;min-block-size:19px;
+  margin:0;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-align:start;border:0;border-radius:3px;background:var(--panel);color:var(--onyx-subtitle);
+  font-size:11px;opacity:0;box-shadow:none;
+ }
+ &:not([data-onyx-connected]) .remote-provider-actions>[data-go]:is(:hover,:focus),
+ &[data-onyx-connected] .remote-provider-actions>[data-connect]:is(:hover,:focus){
+  opacity:1;filter:none;
+ }
+}
+@media(max-width:345px){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{--onyx-edge-width:70px;--onyx-refresh-width:24px}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>[data-refresh]{inline-size:24px}
 }
 @media(hover:none),(pointer:coarse){
- :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions{display:flex;grid-column:1/-1;grid-row:auto;border:0;padding:0;flex-wrap:wrap}
- :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions::before{display:none}
- :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>button{position:static;clip-path:none;inline-size:auto;block-size:auto;min-block-size:34px;padding:6px 9px;margin:0;overflow:visible;opacity:1;pointer-events:auto}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>[data-refresh]{opacity:1;pointer-events:auto}
 }
 .onyx-queue-metrics{display:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-page>h1{font-size:28px;color:var(--onyx-heading);margin-block:10px 24px;letter-spacing:-.8px}

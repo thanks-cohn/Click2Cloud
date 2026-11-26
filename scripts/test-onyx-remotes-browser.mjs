@@ -48,6 +48,22 @@ try{
    return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,overlap:title.right>button.left+1,verticalOverlap:title.top<button.bottom&&title.bottom>button.top,overflow:card.scrollWidth>card.clientWidth+1};
   }));
   assert(geometry.every((g,i)=>!g.overlap&&g.verticalOverlap&&!g.overflow&&g.left>=0&&g.right<=width&&(!i||g.top>=geometry[i-1].bottom)),JSON.stringify({width,geometry}));
+  const allBoxes=()=>page.locator('.remote-provider').evaluateAll(cards=>cards.map(card=>{const r=card.getBoundingClientRect();return [r.x,r.y,r.width,r.height];}));
+  const atRest=await allBoxes();
+  for(const card of [google,dropbox]){
+   await card.hover({position:{x:20,y:20}});
+   assert.deepEqual(await allBoxes(),atRest,'Hover must never resize or displace cards at '+width);
+   const refresh=card.locator('[data-refresh]');
+   await page.waitForFunction(el=>getComputedStyle(el).opacity==='1',await refresh.elementHandle());
+   const icon=await refresh.boundingBox(),primary=await card.locator(card===google?'[data-connect]':'[data-go]').boundingBox();
+   assert(icon.x+icon.width<=primary.x+1,'Refresh must be left of the primary edge');
+   assert(Math.abs(icon.y+icon.height/2-primary.y-primary.height/2)<=1,'Refresh must be vertically centered');
+   assert.equal(await refresh.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+   await refresh.hover();
+   assert.deepEqual(await allBoxes(),atRest,'Refresh hover cannot move cards');
+   await page.mouse.move(0,0);
+   assert.deepEqual(await allBoxes(),atRest,'Leaving hover cannot move cards');
+  }
   assert(await page.locator('#manage').isVisible());
   await page.screenshot({path:join(out,'provider-fixture-'+width+'.png')});
  }
