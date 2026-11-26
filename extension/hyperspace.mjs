@@ -29,13 +29,18 @@ export function hyperspaceFrame(elapsed,seconds){
  // bends the rails further and drives a faster exit, not just a longer wait.
  const impact=smooth(releaseElapsed/t.flexMs);
  const exit=clamp((releaseElapsed-t.flexMs)/t.exitMs);
+ // Wind up within the existing charge window, then unload the compression
+ // into the outward impact. No extra delay or discontinuous geometry.
+ const windup=Math.min(1.2,t.buildup*.28);
+ const tension=smooth((charge-(t.buildup-windup))/windup)*(1-impact)*clamp(.42+.36*t.energy,0,1);
+ const wordsDip=Math.min(8,3+3*t.energy)*tension;
  const burst=.08*impact+.92*(1-(1-exit)**3);
  const flex=clamp(.24+.16*t.energy,0,.72)*impact*(1-smooth(exit/.76));
  const lift=burst*(1+.16*t.energy*(1-settle));
  // The navigation is ejected by the very same impulse, not an independent fade.
  const wordsUp=burst;
  const releaseGlow=impact*(1-smooth(exit/.75));
- return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,flex,lift,wordsUp,words:1-smooth((wordsUp-.48)/.50),
+ return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,flex,tension,lift,wordsUp,wordsDip,words:1-smooth((wordsUp-.48)/.50),
   travel:travel+100*t.energy*2*burst,speed,glint:Math.min(1,(.48+.36*p)*smooth(charge/.08)*(1-smooth(r))+.18*releaseGlow),
   length:4+Math.min(18,3*speed)+12*releaseGlow,done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
@@ -48,13 +53,16 @@ export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShif
 }
 // The surface and the stroke are constructed from exactly the same curve.
 // The initial center gap is 80 CSS px (clamped on tiny windows).
-export function hyperspaceGeometry(width,height,split,burst,flex=0){
+export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const w=Math.max(1,width),h=Math.max(1,height),gap=Math.min(80,w*.42)*split;
  const tip=w/2-gap/2,tipY=h*(1-split),shift=(w/2+3)*burst;
  // Keep endpoints and the two color boundaries coherent; the interior of each
  // rail bows away from the center under pressure before the lateral exit.
  const bow=tip*clamp(flex,0,.72)*split;
- const c1=Math.max(0,tip-bow),c2=Math.max(0,tip*(1-.36*split)-bow*.82);
+ // The last part of charge arches both rails toward the center, but leaves
+ // a clean minimum corridor and never allows the mirror curves to intersect.
+ const inward=Math.max(0,gap/2-7)*clamp(tension)*split;
+ const c1=Math.max(0,tip-bow+inward),c2=Math.max(0,tip*(1-.36*split)-bow*.82+inward*1.35);
  const x=v=>Number((v-shift).toFixed(3)),y=v=>Number(v.toFixed(3));
  const left='M '+x(tip)+' '+y(tipY)+' C '+x(c1)+' '+y(h*(1-.44*split))+' '+x(c2)+' '+y(h*(1-.28*split))+' '+x(0)+' '+y(h);
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
@@ -89,7 +97,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function draw(frame){
   if(!overlay)return;
   current=frame;
-  const g=hyperspaceGeometry(parts.width,parts.height,frame.split,frame.burst,frame.flex);
+  const g=hyperspaceGeometry(parts.width,parts.height,frame.split,frame.burst,frame.flex,frame.tension);
   for(const side of ['left','right']){
    const el=parts[side];el.fill.style.clipPath='path("'+g[side+'Fill']+'")';
    el.rail.setAttribute('d',g[side]);el.glint.setAttribute('d',g[side]);
@@ -99,7 +107,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   }
   setVar('--hyper-lift',Math.min(peakLift,baseLift*frame.lift).toFixed(2)+'px');
   setVar('--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar('--hyper-words',frame.words);
-  setVar('--hyper-words-up',((parts.height+12)*frame.wordsUp).toFixed(2)+'px');
+  setVar('--hyper-words-up',((parts.height+12)*frame.wordsUp-frame.wordsDip).toFixed(2)+'px');
   body.dataset.hyperspace=frame.phase;
  }
  function tick(now){
@@ -107,7 +115,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(returning){
    const p=clamp((now-returning.start)/returning.duration),f=returning.frame;
    const q=smooth(p),releaseBack=smooth(p/.62),splitBack=smooth((p-.26)/.74);
-   draw({...f,split:f.split*(1-splitBack),burst:f.burst*(1-releaseBack),flex:f.flex*(1-q),lift:f.lift*(1-q),wordsUp:f.wordsUp*(1-q),words:f.words+(1-f.words)*q,glint:f.glint*(1-smooth(p/.35)),phase:'return'});
+   draw({...f,split:f.split*(1-splitBack),burst:f.burst*(1-releaseBack),flex:f.flex*(1-q),tension:f.tension*(1-q),lift:f.lift*(1-q),wordsUp:f.wordsUp*(1-q),wordsDip:f.wordsDip*(1-q),words:f.words+(1-f.words)*q,glint:f.glint*(1-smooth(p/.35)),phase:'return'});
    if(p>=1){clear();return;}
   }else{
    draw(hyperspaceFrame(Math.max(0,now-started),runSeconds));
