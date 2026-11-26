@@ -78,12 +78,15 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
  return {left,right,leftFill:left+' L '+x(0)+' 0 L '+x(tip)+' 0 Z',rightFill:right+' L '+(w-x(0))+' 0 L '+(w-x(tip))+' 0 Z',gap};
 }
-// The horizon lies below the visible theme glyph; reserve only the extra
-// space required for the water, and never cover the raised page heading.
+// Only use the space already opened by Hyperspace. Never reserve more room.
+// Prefer a band below the glyph; if too shallow, use the lower central gap
+// between the persistent controls instead, without covering either control.
 export function hyperspaceWaterLayout(headerHeight,lift,moonBottom){
- const horizon=Math.max(4,Math.ceil(moonBottom+2));
- const height=Math.max(headerHeight-lift,horizon+22);
- return {horizon,height,lift:headerHeight-height};
+ const height=Math.max(0,headerHeight-lift);
+ const preferred=Math.max(2,Math.ceil(moonBottom+2));
+ const below=height-preferred>=10;
+ const top=below?preferred:Math.max(1,Math.min(height-8,height*.30));
+ return {top,height:Math.max(0,height-top),below};
 }
 // Varied-length horizontal and shallow skewed ripples in three shades.
 // Geometry is generated once; movement is a small CSS-only drift.
@@ -126,7 +129,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
  function clearWater(){
   if(waterTimer!==undefined){time.clear(waterTimer);waterTimer=undefined;}
-  if(water){water.remove();if(overlay){overlay.style.removeProperty('height');setVar(overlay,'--hyper-lift',baseLift.toFixed(3)+'px');}}water=undefined;
+  water?.remove();water=undefined;
  }
  function armWater(){
   if(waterTimer!==undefined||water||!overlay)return;
@@ -137,27 +140,27 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const glyphs=[...(theme?.children??[])].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&win.getComputedStyle(el).visibility!=='hidden'&&win.getComputedStyle(el).display!=='none';});
    const moonBottom=Math.max(0,...(glyphs.length?glyphs:theme?[theme]:[]).map(el=>el.getBoundingClientRect().bottom-headerRect.top));
    const layout=hyperspaceWaterLayout(headerRect.height,baseLift,moonBottom);
-   const lines=hyperspaceWaterGeometry(parts.width,layout.height-layout.horizon);
+   const brand=header.querySelector('.brand-lockup')?.getBoundingClientRect();
+   const mode=theme?.getBoundingClientRect();
+   const left=layout.below?0:Math.max(8,(brand?.right??headerRect.left)-headerRect.left+8);
+   const right=layout.below?parts.width:Math.min(parts.width-8,(mode?.left??headerRect.right)-headerRect.left-8);
+   const width=Math.max(0,right-left);
+   const lines=hyperspaceWaterGeometry(width,layout.height);
    if(!lines.length)return;
-   // The original release has finished; adjust the settled reservation once
-   // if necessary to fit the ocean below the icon. Restoration starts here.
-   baseLift=layout.lift;reserve(baseLift);setVar(overlay,'--hyper-lift','0px');
+   // A transparent SVG containing only ripples. No changes to shell, colors,
+   // header height, overlay clipping, or the position of any control.
    water=doc.createElementNS(svgNS,'svg');
    water.setAttribute('class','hyperspace-water');
-   water.setAttribute('viewBox','0 0 '+parts.width+' '+layout.height);
+   water.setAttribute('viewBox','0 0 '+width+' '+layout.height);
    water.setAttribute('aria-hidden','true');
-   water.style.height=layout.height+'px';
-   overlay.style.height=layout.height+'px';
+   water.style.cssText='left:'+left+'px;top:'+layout.top+'px;width:'+width+'px;height:'+layout.height+'px';
    water.setAttribute('preserveAspectRatio','none');
-   const rect=(className,y,h)=>{const el=doc.createElementNS(svgNS,'rect');el.setAttribute('class',className);el.setAttribute('width',String(parts.width));el.setAttribute('y',String(y));el.setAttribute('height',String(h));water.append(el);};
-   rect('hyperspace-sky',0,layout.horizon);
-   rect('hyperspace-sea',layout.horizon,layout.height-layout.horizon);
-   const horizon=doc.createElementNS(svgNS,'path');horizon.setAttribute('class','hyperspace-horizon');horizon.setAttribute('d','M0 '+layout.horizon+' H'+parts.width);water.append(horizon);
    for(const segment of lines){
     const group=doc.createElementNS(svgNS,'g');group.setAttribute('class','hyperspace-ripple shade-'+segment.shade);
     group.style.setProperty('--water-delay',segment.delay+'ms');group.style.setProperty('--water-drift',segment.drift+'px');group.style.setProperty('--water-period',segment.duration+'s');
+    group.style.setProperty('--water-cycle',(12+segment.duration*.7)+'s');
     const line=doc.createElementNS(svgNS,'line');
-    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]+(k==='y1'||k==='y2'?layout.horizon:0)));
+    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]));
     group.append(line);water.append(group);
    }
    overlay.append(water);
@@ -183,7 +186,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // scrolling surface using only a transform. The footer remains stationary.
   // At rest commit the exact final layout and discard the compositor hint.
   if(frame.done&&frame.phase==='open'){reserve(baseLift);layer(false);}
-  else if(lift!==0||reserved!==0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
+  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
  }
