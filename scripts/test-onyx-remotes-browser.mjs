@@ -258,13 +258,10 @@ try{
    advance(1999);const waterEarly=!!overlay.querySelector('.hyperspace-water');
    advance(1);const ocean=overlay.querySelector('.hyperspace-water');
    const waterLines=ocean?.querySelectorAll('line').length??0;
-   ocean?.getAnimations().forEach(a=>a.finish());
    const rippleGroups=[...(ocean?.querySelectorAll('.hyperspace-ripple')??[])];
-   for(const group of rippleGroups)for(const a of group.getAnimations())if(Number.isFinite(a.effect.getComputedTiming().endTime))a.finish();
-   const waterVisible=!!ocean&&rippleGroups.every(g=>getComputedStyle(g).stroke!=='none')&&Number(getComputedStyle(ocean).opacity)>.9&&ocean.getBoundingClientRect().height>=22;
-   const horizonY=Number(ocean?.querySelector('.hyperspace-sea')?.getAttribute('y'));
-   const moonBottom=Math.max(0,...[...header.querySelector('#theme').children].filter(e=>e.getBoundingClientRect().height>0&&e.getBoundingClientRect().width>0&&getComputedStyle(e).visibility!=='hidden'&&getComputedStyle(e).display!=='none').map(e=>e.getBoundingClientRect().bottom-header.getBoundingClientRect().top));
-   const waterLayout={horizonY,moonBottom,shades:new Set(rippleGroups.map(g=>getComputedStyle(g).stroke)).size,below:rippleGroups.every(g=>['y1','y2'].every(k=>Number(g.firstElementChild.getAttribute(k))>horizonY)),bottom:ocean?.getBoundingClientRect().bottom,shellTop:shell.getBoundingClientRect().top};
+   for(const group of rippleGroups)for(const a of group.getAnimations()){a.pause();a.currentTime=5000;}
+   const waterVisible=!!ocean&&rippleGroups.every(g=>getComputedStyle(g).stroke!=='none')&&rippleGroups.some(g=>Number(getComputedStyle(g).opacity)>.5)&&ocean.getBoundingClientRect().height>=8;
+   const waterLayout={shades:new Set(rippleGroups.map(g=>getComputedStyle(g).stroke)).size,onlyLines:!!ocean&&[...ocean.children].every(g=>g.matches('g.hyperspace-ripple')&&g.children.length===1&&g.firstElementChild.matches('line')),bottom:ocean?.getBoundingClientRect().bottom,shellTop:shell.getBoundingClientRect().top,mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,lift:parseFloat(overlay.style.getPropertyValue('--hyper-lift')),overlayHeight:overlay.getBoundingClientRect().height,cyclic:rippleGroups.every(g=>g.getAnimations().some(a=>a.animationName==='hyperspace-water-life'&&a.effect.getTiming().iterations===Infinity))};
    advance(5000);const waterIdleFrames=frames.size;phases.push(phase());
 
    move(10,10);const waterRemoved=!overlay.querySelector('.hyperspace-water');advance(200);phases.push(phase());advance(1000);phases.push(phase());
@@ -281,7 +278,8 @@ try{
   assert.equal(hyperspace.waterEarly,false,'Water must wait two seconds after settling');
   assert.equal(hyperspace.waterLines,14,'Fourteen ripples are mounted together after two seconds');
   assert.equal(hyperspace.waterLayout.shades,3,'Three distinct ripple shades');
-  assert(hyperspace.waterLayout.horizonY>=hyperspace.waterLayout.moonBottom+1&&hyperspace.waterLayout.below,'All ripples are below the moon and horizon');
+  assert(hyperspace.waterLayout.onlyLines&&hyperspace.waterLayout.cyclic,'Only cyclically fading ripples; no panels or horizon element');
+  for(const key of ['shellTop','mainTop','dockBottom','lift','overlayHeight'])assert.equal(hyperspace.waterLayout[key],hyperspace.paint[key],'Ocean must not change settled '+key);
   assert(hyperspace.waterLayout.bottom<=hyperspace.waterLayout.shellTop+1,'Ocean cannot cover the page');
   assert.equal(hyperspace.waterVisible,true,'Water has a visible stroke and nonzero painted height');
   assert.equal(hyperspace.waterIdleFrames,0,'Water must not restart frame rendering');
