@@ -240,6 +240,18 @@ try{
    return counts;
   });
   assert.deepEqual(idle,[0,0,0,1,1,1,1],'Five-second idle, navigation cancellation, one-shot and exclusion');
+  const hoverEvents=await page.evaluate(async()=>{
+   const {createSkyHover}=await import('/extension/sky-idle.mjs');
+   const calls=[];const idle={cancel:()=>calls.push('cancel'),reset:()=>calls.push('arm')};
+   const hover=createSkyHover(idle);
+   hover.move(true);idle.cancel(); // Providers -> History selection
+   const afterSwitch=[...calls]; // closing the menu emits no real pointer movement
+   hover.move(false);hover.move(false);hover.move(true);hover.move(false);
+   return {afterSwitch,calls};
+  });
+  assert.deepEqual(hoverEvents.afterSwitch,['cancel','cancel']);
+  assert.deepEqual(hoverEvents.calls,['cancel','cancel','arm','cancel','arm']);
+
   // Sample the sky opening at its most open moment without relying on frame timing.
   const sky=await page.evaluate(()=>{
    const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
