@@ -1,8 +1,25 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,elegantHeaderFrame,ELEGANT_MS,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
 
-assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
-assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
+assert.deepEqual(normalizeHyperspace(),{mode:'none',seconds:5});
+assert.deepEqual(normalizeHyperspace({enabled:true,seconds:7}),{mode:'none',seconds:7});
+assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{mode:'none',seconds:20});
+assert.deepEqual(normalizeHyperspace({mode:'hyperspace',seconds:10}),{mode:'hyperspace',seconds:10});
+assert.deepEqual(normalizeHyperspace({mode:'elegant'}),{mode:'elegant',seconds:5});
+assert.equal(normalizeHyperspace({mode:'invalid'}).mode,'none');
+assert.equal(ELEGANT_MS,1050);
+let lastElegant=elegantHeaderFrame(0);
+assert.equal(lastElegant.lift,0);assert.equal(lastElegant.words,1);assert.equal(lastElegant.burst,0);
+for(let ms=1;ms<=ELEGANT_MS;ms++){
+ const next=elegantHeaderFrame(ms);
+ assert(next.lift>=lastElegant.lift&&next.lift<=1);
+ assert(next.words<=lastElegant.words&&next.words>=0);
+ assert(next.burst>=lastElegant.burst&&next.burst<=1);
+ assert.equal(next.split,0);assert.equal(next.glint,0);assert.equal(next.flex,0);assert.equal(next.tension,0);
+ lastElegant=next;
+}
+const highwayEnd=hyperspaceFrame(SPLIT_MS+5000+hyperspaceTiming(5).release+hyperspaceTiming(5).settle,5);
+for(const key of ['lift','words','wordsUp','wordsDip','burst','done','phase'])assert.equal(lastElegant[key],highwayEnd[key],'Shared final state: '+key);
 assert.equal(normalizeHyperspace({seconds:'bad'}).seconds,5);
 assert.equal(IDLE_MS,5000);
 assert.equal(SPLIT_MS,1800);
