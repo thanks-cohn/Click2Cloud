@@ -98,19 +98,22 @@
 /* Returning to a connected Explorer: rebuild the compact control into the
    original button without introducing a second button or changing its resting layout. */
 @keyframes manage-explorer-morph{
- from{border-inline-color:transparent;border-radius:5px}
+ 0%,12%{border-inline-color:transparent;border-radius:5px}
+ 45%{border-inline-color:color-mix(in srgb,var(--line) 28%,transparent);border-radius:6px}
 }
 @keyframes manage-explorer-morph-width{
- from{inline-size:36px;border-inline-color:transparent;border-radius:5px}
+ 0%,12%{inline-size:36px;border-inline-color:transparent;border-radius:5px}
+ 45%{border-inline-color:color-mix(in srgb,var(--line) 28%,transparent);border-radius:6px}
 }
 @keyframes manage-explorer-label{
- 0%,20%{opacity:0}
+ 0%,36%{opacity:0;filter:blur(2px);transform:translateX(-3px)}
+ 78%{opacity:1;filter:blur(0);transform:translateX(0)}
 }
 #shell[data-view=explorer][data-manage-morph]>#manage-slot #manage{
- animation:manage-explorer-morph 440ms cubic-bezier(.25,.75,.25,1);
+ animation:manage-explorer-morph 2200ms cubic-bezier(.4,0,.2,1);
 }
 #shell[data-view=explorer][data-manage-morph]>#manage-slot #manage span{
- animation:manage-explorer-label 440ms ease-out;
+ animation:manage-explorer-label 2200ms ease-in-out;
 }
 @supports(interpolate-size:allow-keywords){
  #shell[data-view=explorer][data-manage-morph]>#manage-slot #manage{
@@ -686,3 +689,58 @@ dialog[data-file-preview]:not([data-immersive]) .dialog-head button {flex:none;m
 :root:not([data-aesthetic=standard]) #programmatic-access {display:none}
 #explorer-upload-progress{inline-size:clamp(64px,15vw,120px);block-size:8px;accent-color:var(--accent)}
 #preview-text{max-inline-size:100%;max-block-size:min(55vh,480px);overflow:auto;white-space:pre;overscroll-behavior:contain}
+
+
+/* Sky opening: transient, two real halves of the header surface, not a screenshot.
+   All controls keep their original layout and remain in the DOM. */
+body[data-sky-opening]>.app-header{
+ background:transparent!important;border-block-end-color:transparent!important;
+}
+body[data-sky-opening]>.app-header>.sky-canopy{
+ position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;
+}
+.sky-canopy>.sky-half{
+ position:absolute;inset-block:0;inline-size:50%;background:var(--sky-surface);
+ border-block-end:1px solid var(--sky-rail);
+}
+.sky-canopy>.sky-half::after{
+ content:"";position:absolute;inset-inline:0;inset-block-end:0;block-size:1px;
+ background:linear-gradient(90deg,transparent,color-mix(in srgb,currentColor 70%,transparent),transparent);
+ animation:sky-shimmer 2200ms ease-in-out both;
+}
+.sky-canopy>.sky-left{inset-inline-start:0;transform-origin:left top;animation:sky-left 2200ms cubic-bezier(.4,0,.2,1) both}
+.sky-canopy>.sky-right{inset-inline-end:0;transform-origin:right top;animation:sky-right 2200ms cubic-bezier(.4,0,.2,1) both}
+body[data-sky-opening]>.app-header>:is(.brand-lockup,nav,.header-controls){position:relative;z-index:1}
+body[data-sky-opening]>.app-header :is(nav,.header-more){animation:sky-words 2200ms ease-in-out both}
+body[data-sky-opening]>#shell{animation:sky-body-rise 2200ms cubic-bezier(.4,0,.2,1) both}
+@keyframes sky-shimmer{
+ 0%{opacity:0;transform:scaleX(.25)}
+ 14%{opacity:1;transform:scaleX(1)}
+ 25%{opacity:.8;transform:scaleX(1)}
+ 58%,100%{opacity:0;transform:scaleX(.7)}
+}
+@keyframes sky-left{
+ 0%,18%{transform:translate(0,0) rotate(0);opacity:1}
+ 43%{transform:translate(-13%,-22%) rotate(-9deg);opacity:1}
+ 64%,78%{transform:translate(-100%,-85%) rotate(-16deg);opacity:0}
+ 79%{transform:translate(0,0) rotate(0);opacity:0}
+ 100%{transform:translate(0,0) rotate(0);opacity:1}
+}
+@keyframes sky-right{
+ 0%,18%{transform:translate(0,0) rotate(0);opacity:1}
+ 43%{transform:translate(13%,-22%) rotate(9deg);opacity:1}
+ 64%,78%{transform:translate(100%,-85%) rotate(16deg);opacity:0}
+ 79%{transform:translate(0,0) rotate(0);opacity:0}
+ 100%{transform:translate(0,0) rotate(0);opacity:1}
+}
+@keyframes sky-words{
+ 0%,18%,100%{opacity:1;filter:blur(0);transform:translateY(0)}
+ 57%,78%{opacity:0;filter:blur(1px);transform:translateY(-7px)}
+}
+@keyframes sky-body-rise{
+ 0%,18%,100%{margin-block-start:0}
+ 62%,78%{margin-block-start:-24px}
+}
+@media(prefers-reduced-motion:reduce){
+ body[data-sky-opening]>.app-header>.sky-canopy{display:none}
+}
