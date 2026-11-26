@@ -266,13 +266,15 @@ try{
    for(const animation of animations){animation.pause();animation.currentTime=1500;}
    const opacity=el=>Number(getComputedStyle(el).opacity);
    const open={nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.children].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height};
+   for(const animation of animations){animation.currentTime=12000;}
+   const held={nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.children].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height};
    document.body.removeAttribute('data-sky-opening');canopy.remove();
    const restored={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
-   return {original,open,restored};
+   return {original,open,held,restored};
   });
   assert.equal(sky.open.nav,0);assert.equal(sky.open.logo,1);assert.equal(sky.open.theme,1);
   assert.deepEqual(sky.open.halves,[0,0]);assert(Math.abs(sky.open.rise-24)<1);
-  assert.equal(sky.open.header,sky.original.header);assert.deepEqual(sky.restored,sky.original);
+  assert.equal(sky.open.header,sky.original.header);assert.deepEqual(sky.held,sky.open,'Header remains open long after animation completion');assert.deepEqual(sky.restored,sky.original);
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
