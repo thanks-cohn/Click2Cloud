@@ -1,8 +1,11 @@
 // One opening per uninterrupted idle period. Navigation never plays immediately.
 export function createSkyIdle({eligible,open,close,delay=5000,setTimer=setTimeout,clearTimer=clearTimeout}){
  let timer;
- function cancel(){
+ function stopPending(){
   if(timer!==undefined){clearTimer(timer);timer=undefined;}
+ }
+ function cancel(){
+  stopPending();
   close();
  }
  function reset(){
@@ -13,7 +16,7 @@ export function createSkyIdle({eligible,open,close,delay=5000,setTimer=setTimeou
    if(eligible())open();
   },delay);
  }
- return {cancel,reset};
+ return {cancel,reset,stopPending};
 }
 
 // A real pointer movement, not a DOM-driven pointerleave (e.g. closing More),
