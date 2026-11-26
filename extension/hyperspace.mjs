@@ -64,13 +64,6 @@ export function elegantHeaderFrame(elapsed){
  return {split:0,burst:smooth(p),flex:0,tension:0,lift,wordsUp:lift,wordsDip:0,
   words:1-smooth(p/.65),travel:0,speed:0,glint:0,length:0,done:p>=1,phase:p>=1?'open':'elegant'};
 }
-// Preserve the intended six-pixel glyph glide even when the button itself
-// has little right-edge clearance. The remaining travel is within the button.
-export function elegantThemeGlide(headerRight,buttonRight,glyphRight){
- const total=clamp(headerRight-glyphRight-2,0,6);
- const button=clamp(headerRight-buttonRight-2,0,total);
- return {button,glyph:total-button};
-}
 // Preserve the logo/theme clearance while allowing the content to occupy the opened space.
 export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShift){
  const clearance=Math.max(0,height+Math.max(0,contentGap)-controlBottom+controlShift-4);
@@ -148,7 +141,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
   reserve(0);layer(false);lastGeometry=lastPhase='';
-  for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right','--hyper-theme-glyph-right'])header.style.removeProperty(key);
+  for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
  function draw(frame){
@@ -156,8 +149,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   current=frame;
   if(runMode==='elegant'){
    setVar(parts.elegant,'opacity',1-frame.burst);
-   setVar(header,'--hyper-theme-right',(parts.themeShift.button*clamp(frame.lift)).toFixed(2)+'px');
-   setVar(header,'--hyper-theme-glyph-right',(parts.themeShift.glyph*clamp(frame.lift)).toFixed(2)+'px');
+   setVar(header,'--hyper-theme-right',(parts.themeShift*clamp(frame.lift)).toFixed(2)+'px');
   }else{
   const gone=frame.burst>=1;
   const geometry=gone?'gone':[frame.split,frame.burst,frame.flex,frame.tension].join('/');
@@ -218,9 +210,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(runMode==='elegant'){
    setVar(body,'--hyper-elegant-page',page);
    const themeRect=theme?.getBoundingClientRect();
-   const glyphRects=[...(theme?.children??[])].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0);
-   const glyphRight=glyphRects.length?Math.max(...glyphRects.map(r=>r.right)):themeRect?.right;
-   parts.themeShift=themeRect?elegantThemeGlide(rect.right,themeRect.right,glyphRight):{button:0,glyph:0};
+   parts.themeShift=themeRect?Math.max(0,Math.min(6,rect.right-themeRect.right-2)):0;
    // Retain a keyboard/touch-accessible R as a keyboard/touch reveal target.
    if(brand){brandAttributes=['tabindex','role','aria-label'].map(k=>[k,brand.getAttribute(k)]);brand.setAttribute('tabindex','0');brand.setAttribute('role','button');brand.setAttribute('aria-label','Reveal header');}
    const fill=doc.createElement('div');fill.className='hyperspace-elegant-surface';fill.style.background=surface;fill.style.borderBottomColor=rail;overlay.append(fill);parts.elegant=fill;
