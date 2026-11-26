@@ -25,10 +25,13 @@ export function hyperspaceFrame(elapsed,seconds){
  const r=clamp(releaseElapsed/t.release),settle=smooth((releaseElapsed-t.release)/t.settle);
  // A short initial tension followed by an explosive, shared outward/upward impulse.
  const burst=1-(1-r)**3;
- const lift=(1-(1-clamp((r-.025)/.975))**3)*(1+.16*t.energy*(1-settle));
- return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,lift,words:1-smooth((r-.08)/.76),
-  travel,speed,glint:Math.min(.84,(.48+.36*p)*smooth(charge/.08))*(1-smooth(r)),
-  length:4+Math.min(18,3*speed),done:releaseElapsed>=t.release+t.settle,
+ const lift=burst*(1+.16*t.energy*(1-settle));
+ // The navigation is ejected by the very same impulse, not an independent fade.
+ const wordsUp=burst;
+ const releaseGlow=smooth(r/.10)*(1-smooth(r/.68));
+ return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,lift,wordsUp,words:1-smooth((wordsUp-.48)/.50),
+  travel:travel+100*t.energy*2*burst,speed,glint:Math.min(1,(.48+.36*p)*smooth(charge/.08)*(1-smooth(r))+.18*releaseGlow),
+  length:4+Math.min(18,3*speed)+12*releaseGlow,done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
 }
 // Preserve the logo/theme clearance while allowing the content to occupy the opened space.
@@ -70,7 +73,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');
-  for(const key of ['--hyper-page','--hyper-lift','--hyper-words','--hyper-controls-up'])body.style.removeProperty(key);
+  for(const key of ['--hyper-page','--hyper-lift','--hyper-words','--hyper-controls-up','--hyper-words-up'])body.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
  function draw(frame){
@@ -86,6 +89,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   }
   setVar('--hyper-lift',Math.min(peakLift,baseLift*frame.lift).toFixed(2)+'px');
   setVar('--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar('--hyper-words',frame.words);
+  setVar('--hyper-words-up',((parts.height+12)*frame.wordsUp).toFixed(2)+'px');
   body.dataset.hyperspace=frame.phase;
  }
  function tick(now){
@@ -93,7 +97,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(returning){
    const p=clamp((now-returning.start)/returning.duration),f=returning.frame;
    const q=smooth(p),releaseBack=smooth(p/.62),splitBack=smooth((p-.26)/.74);
-   draw({...f,split:f.split*(1-splitBack),burst:f.burst*(1-releaseBack),lift:f.lift*(1-q),words:f.words+(1-f.words)*q,glint:f.glint*(1-smooth(p/.35)),phase:'return'});
+   draw({...f,split:f.split*(1-splitBack),burst:f.burst*(1-releaseBack),lift:f.lift*(1-q),wordsUp:f.wordsUp*(1-q),words:f.words+(1-f.words)*q,glint:f.glint*(1-smooth(p/.35)),phase:'return'});
    if(p>=1){clear();return;}
   }else{
    draw(hyperspaceFrame(Math.max(0,now-started),runSeconds));
