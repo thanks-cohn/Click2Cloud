@@ -536,6 +536,32 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 #shell[data-view=history] .queue-history-card>details>summary{margin-block:0;line-height:1.55}
 #shell[data-view=history] .queue-history-card>details>.history-preview{margin-block:5px 2px}
 #shell[data-view=history] .queue-history-card>details>.queue-record-fields{margin-block:6px 2px}
+/* Three free-floating fragments: their dedicated quiet zone is independent
+   of text, previews, and disclosure controls. No repeated full grid. */
+.history-card-ornament{display:none}
+#shell[data-view=history] .queue-history-card>.history-card-ornament{
+ display:grid;grid-template-rows:repeat(3,1fr);align-items:center;
+ block-size:32px;flex:none;pointer-events:none;overflow:hidden;
+}
+#shell[data-view=history] .history-card-ornament>span{
+ display:block;block-size:1px;inline-size:var(--ornament-width);
+ margin-inline-start:var(--ornament-left);background:currentColor;opacity:.25;
+}
+/* Separate, short partial rules at meaningful text-section boundaries.
+   Draw on details, not summary: preserve both animated disclosure strokes. */
+#shell[data-view=history] .queue-history-card>details:is(.history-urls,:has(>.history-preview)){
+ --history-fragment-length:34px;
+ background-image:linear-gradient(currentColor,currentColor);
+ background-image:linear-gradient(color-mix(in srgb,currentColor 22%,transparent),color-mix(in srgb,currentColor 22%,transparent));
+ background-size:var(--history-fragment-length) 1px;background-repeat:no-repeat;background-position:left top;
+ padding-block-start:5px;
+}
+#shell[data-view=history] .queue-history-card>details.history-urls{
+ --history-fragment-length:22px;background-position:right top;
+}
+@media(forced-colors:active){
+ #shell[data-view=history] .history-card-ornament{forced-color-adjust:none;color:CanvasText}
+}
 .queue-image-dialog[data-immersive] [role=status]:empty{display:none}
 .queue-image-dialog[data-immersive] .image-frame{min-height:0}
 

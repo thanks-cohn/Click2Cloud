@@ -1,6 +1,7 @@
 import {VISIBILITY_MS} from '../src/queue/store.mjs';
 import {historyCalendar,historyInterval} from '../src/queue/calendar.mjs';
 import {createHistoryCards,historyLocation,providerName,queueStatus} from './history-v2-cards.mjs';
+import {historyOrnamentPattern,createHistoryOrnament} from './history-card-ornament.mjs';
 
 const rowHeight=82, jobBatch=10;
 const element=(tag,text)=>Object.assign(document.createElement(tag),text==null?{}:{textContent:text});
@@ -217,6 +218,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
     cards=createHistoryCards({api,screenshotRequest,goTo,canRead,signal:cardScope.signal,
       preferences:prefs,isFirstPage:page===1,visibility:metadataPreference?.value,rename,renameError,onGalleryClosed:()=>void refresh({force:true})});
     const groups=new Map(), contents=document.createDocumentFragment();
+    let previousOrnament=null;
     for(const row of items){
       let parent=contents;
       for(const [key,label] of historyCalendar(row.terminalAt??row.requestedAt,prefs.timezone)){
@@ -233,6 +235,9 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         parent=group;
       }
       const card=cards.render(row), previous=cardDisclosures.get(row.recordId);
+      const ornament=historyOrnamentPattern(row.recordId,previousOrnament);
+      previousOrnament=ornament;
+      card.insertBefore(createHistoryOrnament(document,ornament),card.querySelector(':scope > .history-urls'));
       if(previous)[...card.querySelectorAll('details')].forEach(detail=>{
         const title=detail.querySelector('summary')?.textContent;
         if(previous.has(title))detail.open=previous.get(title);

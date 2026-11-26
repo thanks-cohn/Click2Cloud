@@ -227,6 +227,37 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.evaluate(()=>{document.querySelector('#history-spacing-fixture').remove();document.querySelector('#shell').dataset.view='remotes';});
+ // Independent ornament fragments and partial text dividers must coexist.
+ const ornamentCheck=await page.evaluate(async()=>{
+  const {historyOrnamentPattern,createHistoryOrnament}=await import('/extension/history-card-ornament.mjs');
+  document.querySelector('#shell').dataset.view='history';
+  const fixture=document.createElement('section');fixture.id='ornament-fixture';fixture.className='queue-archive';
+  let previous=null;const patterns=[];
+  for(const key of ['one','two','three','three']){
+   const lines=historyOrnamentPattern(key,previous);previous=lines;patterns.push(lines);
+   const card=document.createElement('article');card.className='card queue-history-card';
+   card.innerHTML='<details open><summary>Image</summary><div class="history-preview"></div></details><details class="history-urls"><summary>URLs</summary></details>';
+   card.insertBefore(createHistoryOrnament(document,lines),card.lastElementChild);
+   fixture.append(card);
+  }
+  document.querySelector('#main').prepend(fixture);
+  const cards=[...fixture.children].map(card=>{
+   const ornament=card.querySelector('.history-card-ornament'),rect=ornament.getBoundingClientRect();
+   return {hidden:ornament.getAttribute('aria-hidden'),lines:[...ornament.children].map(el=>{
+    const r=el.getBoundingClientRect();return {height:r.height,width:r.width,x:r.x,y:r.y,inside:r.left>=rect.left-.1&&r.right<=rect.right+.1&&r.top>=rect.top&&r.bottom<=rect.bottom};
+   }),dividers:[...card.querySelectorAll(':scope>details')].map(el=>getComputedStyle(el).backgroundSize)};
+  });
+  const stable=JSON.stringify(historyOrnamentPattern('one'))===JSON.stringify(patterns[0]);
+  fixture.remove();document.querySelector('#shell').dataset.view='remotes';
+  return {patterns,cards,stable};
+ });
+ assert(ornamentCheck.stable);
+ for(let i=0;i<ornamentCheck.cards.length;i++){
+  const card=ornamentCheck.cards[i];assert.equal(card.hidden,'true');assert.equal(card.lines.length,3);
+  assert.equal(new Set(card.lines.map(l=>l.width)).size,3);assert.equal(new Set(card.lines.map(l=>l.y)).size,3);
+  assert(card.lines.every(l=>l.inside&&l.height===1));assert.deepEqual(card.dividers,['34px 1px','22px 1px']);
+  if(i)assert.notDeepEqual(ornamentCheck.patterns[i],ornamentCheck.patterns[i-1]);
+ }
  // Queue job surfaces retain status colors on the top rule only, with open sides.
  for(const mode of ['dark','light']){
   const rules=await page.evaluate(mode=>{
