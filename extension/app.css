@@ -691,7 +691,7 @@ dialog[data-file-preview]:not([data-immersive]) .dialog-head button {flex:none;m
 #preview-text{max-inline-size:100%;max-block-size:min(55vh,480px);overflow:auto;white-space:pre;overscroll-behavior:contain}
 
 
-/* Sky opening: transient, two real halves of the header surface, not a screenshot.
+/* Sky opening: hold the two halves open until header interaction, not a screenshot.
    All controls keep their original layout and remain in the DOM. */
 body[data-sky-opening]>.app-header{
  background:transparent!important;border-block-end-color:transparent!important;
@@ -722,24 +722,20 @@ body[data-sky-opening]>#shell{animation:sky-body-rise 2200ms cubic-bezier(.4,0,.
 @keyframes sky-left{
  0%,18%{transform:translate(0,0) rotate(0);opacity:1}
  43%{transform:translate(-13%,-22%) rotate(-9deg);opacity:1}
- 64%,78%{transform:translate(-100%,-85%) rotate(-16deg);opacity:0}
- 79%{transform:translate(0,0) rotate(0);opacity:0}
- 100%{transform:translate(0,0) rotate(0);opacity:1}
+ 64%,100%{transform:translate(-100%,-85%) rotate(-16deg);opacity:0}
 }
 @keyframes sky-right{
  0%,18%{transform:translate(0,0) rotate(0);opacity:1}
  43%{transform:translate(13%,-22%) rotate(9deg);opacity:1}
- 64%,78%{transform:translate(100%,-85%) rotate(16deg);opacity:0}
- 79%{transform:translate(0,0) rotate(0);opacity:0}
- 100%{transform:translate(0,0) rotate(0);opacity:1}
+ 64%,100%{transform:translate(100%,-85%) rotate(16deg);opacity:0}
 }
 @keyframes sky-words{
- 0%,18%,100%{opacity:1;filter:blur(0);transform:translateY(0)}
- 57%,78%{opacity:0;filter:blur(1px);transform:translateY(-7px)}
+ 0%,18%{opacity:1;filter:blur(0);transform:translateY(0)}
+ 57%,100%{opacity:0;filter:blur(1px);transform:translateY(-7px)}
 }
 @keyframes sky-body-rise{
- 0%,18%,100%{margin-block-start:0}
- 62%,78%{margin-block-start:-24px}
+ 0%,18%{margin-block-start:0}
+ 62%,100%{margin-block-start:-24px}
 }
 @media(prefers-reduced-motion:reduce){
  body[data-sky-opening]>.app-header>.sky-canopy{display:none}
