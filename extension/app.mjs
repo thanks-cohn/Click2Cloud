@@ -1,3 +1,4 @@
+import {createHyperspacePreference,installHyperspace,mountHyperspaceSettings} from './hyperspace.mjs';
 import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
@@ -668,7 +669,7 @@ function prepareManageMorph(next){
  if(next===view)return;
  $('#shell').toggleAttribute('data-manage-morph',next==='explorer'&&view!=='remotes'&&view!=='explorer'&&connection.state==='CONNECTED');
 }
-async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){hyperspace.viewChanged();notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
 }if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
@@ -804,7 +805,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){hyperspace.viewChanged();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1850,6 +1851,7 @@ async function renderSettings(){
    appearanceStatus.textContent=result.error?'Busy cursor changed for this session. The preference could not be saved.':'';
   };
   mountVisualFeedbackSettings(appearance.closest('.card'),visualFeedback);
+  mountHyperspaceSettings(appearance.closest('.card'),hyperspacePreference);
   const nostalgiaStyle=$('#nostalgia-style'),onyxFinish=$('#onyx-finish');
   function syncAppearance(){
    appearance.value=aesthetic.getActive().id;
@@ -1932,6 +1934,8 @@ async function renderSettings(){
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
+const hyperspacePreference=createHyperspacePreference(chrome.storage);
+const hyperspace=installHyperspace({header:$('.app-header'),shell:$('#shell'),preference:hyperspacePreference});
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
 headerMore.onclick=()=>{headerMenu.hidden=!headerMenu.hidden;headerMore.setAttribute('aria-expanded',String(!headerMenu.hidden));if(!headerMenu.hidden)headerItems()[0]?.focus();};
@@ -1942,7 +1946,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more')
 document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 const navigationPlacement=installNavigation({header:document.querySelector('header nav'),menu:headerMenu,more:headerMore,open:next=>show(next).catch(e=>status(e.message))});
 void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();})
- .catch(()=>{}).finally(()=>document.dispatchEvent(new Event('redown-aesthetic-ready')));
+ .catch(()=>{}).finally(()=>{document.dispatchEvent(new Event('redown-aesthetic-ready'));hyperspace.start();});
 // Arm the Providers fade after an intentional reveal, including keyboard access.
 function armManageFade(){if(view==='remotes')$('#shell').setAttribute('data-manage-fade','');}
 listen('#manage','pointerenter',armManageFade);listen('#manage','focus',armManageFade);
