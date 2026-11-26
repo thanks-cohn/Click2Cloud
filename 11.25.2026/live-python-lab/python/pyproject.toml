@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "redown-live-lab"
+version = "0.3.32.2"
+description = "The scoped REDOWN Python Laboratory CLI and native messaging relay"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+redown-lab = "redown_live_lab.cli:main"
+redown-lab-native = "redown_live_lab.native_host:main"
+
+[tool.setuptools.package-data]
+redown_live_lab = ["workload.schema.json", "assets/*"]
+
+[tool.setuptools.packages.find]
+include = ["redown_live_lab*"]

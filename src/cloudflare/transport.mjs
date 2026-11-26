@@ -43,13 +43,17 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   return {state:'cancelling'};
  }
  const planIdentity=plan=>digest([plan.state,plan.accountId,plan.bucketName,plan.protocol,plan.url,plan.secret,plan.prefixScope??'',plan.codeDigest,plan.verifiedTargets]);
- async function cap(target,{use='status',operationId,source,provenance,fileIntent,screenshotIntent,screenshotAction,sourceBucket,live=true}={}){
+ async function cap(target,{use='status',operationId,source,provenance,fileIntent,screenshotIntent,screenshotAction,sourceBucket,live=true,beforeRequest}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
   const plan=await lookup(target,sourceBucket);if(plan?.state!=='ready'||plan.accountId!==target.accountId||plan.bucketName!==target.bucketName||plan.sourceBucket!==sourceBucket||plan.protocol!==PROTOCOL)fail('WORKER_SETUP_REQUIRED');
   if(typeof plan.secret!=='string'||!plan.secret)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');
   if(use==='screenshot'&&expectedCodeDigest&&plan.codeDigest!==expectedCodeDigest)fail('SCREENSHOT_WORKER_UPDATE_REQUIRED');
   if(!['status','revoke'].includes(use)&&!matchesBuild(plan,expectedCodeDigest,compatibleCodeDigests))fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
-  if(live&&use!=='revoke'&&(await verifyAuthority(target,a)!==true||sourceBucket&&await verifyAuthority({...target,bucketName:sourceBucket,prefix:''},a)!==true))fail('AUTHORIZATION_REVOKED');
+  if(live&&use!=='revoke'){
+   beforeRequest?.();
+   if(await verifyAuthority(target,a)!==true)fail('AUTHORIZATION_REVOKED');
+   if(sourceBucket){beforeRequest?.();if(await verifyAuthority({...target,bucketName:sourceBucket,prefix:''},a)!==true)fail('AUTHORIZATION_REVOKED');}
+  }
   const u=new URL(plan.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.workers.dev')||u.username||u.password||u.pathname!=='/'||u.search||u.hash)fail('WORKER_ADDRESS_INVALID');
   const destination=remoteDestination(target);if(plan.prefixScope&&destination.prefix!==plan.prefixScope&&!destination.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');const expiresAt=clock()+120000;
   const payload={protocol:PROTOCOL,use,principal:target.connectionId,sessionId:a.sessionId,destination,expiresAt,...(operationId?{operationId,...(source?{sourceDigest:await digest(canonicalSource(source))}:{}),...(provenance?{provenanceDigest:await digest(provenance)}:{}),...(fileIntent?{fileDigest:await digest(fileIntent)}:{}),...(screenshotIntent?{screenshotDigest:await digest(screenshotIntent),screenshotAction}:{})}:{})};
@@ -69,11 +73,17 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
   });
  }
- async function recheck(c,target,{live=true,matchPlan=false,reportDenial=false}={}){
+ async function recheck(c,target,{live=true,matchPlan=false,reportDenial=false,beforeRequest}={}){
   try{
    const a=await oauth.authority();
-   return a.sessionId===c.sessionId&&a.accounts.some(x=>x.id===target.accountId)&&c.expiresAt>clock()
-    &&(!matchPlan||await planIdentity(await lookup(target))===c.planIdentity)&&(!live||await verifyAuthority(target,a)===true&&(!c.sourceBucket||await verifyAuthority({...target,bucketName:c.sourceBucket,prefix:''},a)===true));
+   if(a.sessionId!==c.sessionId||!a.accounts.some(x=>x.id===target.accountId)||c.expiresAt<=clock()||
+     matchPlan&&await planIdentity(await lookup(target))!==c.planIdentity)return false;
+   if(!live)return true;
+   beforeRequest?.();
+   if(await verifyAuthority(target,a)!==true)return false;
+   if(!c.sourceBucket)return true;
+   beforeRequest?.();
+   return await verifyAuthority({...target,bucketName:c.sourceBucket,prefix:''},a)===true;
   }catch(error){if(reportDenial)throw error;return false;}
  }
  const screenshotCode=(error,fallback)=>/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:fallback;
@@ -235,16 +245,17 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     const final={...result,...(result.state==='uncertain'&&job.submitted&&!job.settled?{remotePending:true}:{}),timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
    }finally{activeSaves.delete(operationId);}
   },
-  async files({target,intent,signal,sourceBucket,expectedSession}){
+  async files({target,intent,signal,sourceBucket,expectedSession,beforeRequest}){
    const operationId=intent.operationId;let dispatched=false;
+   const sendFileRequest=(...args)=>{beforeRequest?.();return post(...args);};
    try{
-   const c=await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket});
+   const c=await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket,beforeRequest});
    if(expectedSession&&c.sessionId!==expectedSession)fail('AUTH_SESSION_CHANGED');
    const singleRename=intent.action==='rename'&&intent.entry?.folder===false;
    if(singleRename||!expectedCodeDigest||c.codeDigest!==expectedCodeDigest){
-    const check=await cap(target,{sourceBucket,live:false}),features=await post(check,'/capabilities',{});
+    const check=await cap(target,{sourceBucket,live:false,beforeRequest}),features=await sendFileRequest(check,'/capabilities',{});
     if(singleRename){
-     if(check.sessionId!==c.sessionId||check.planIdentity!==c.planIdentity||!await recheck(c,target,{live:false,matchPlan:true}))fail('AUTHORIZATION_REVOKED');
+     if(check.sessionId!==c.sessionId||check.planIdentity!==c.planIdentity||!await recheck(c,target,{live:false,matchPlan:true,beforeRequest}))fail('AUTHORIZATION_REVOKED');
      if(features.state!=='completed')fail(features.code??'WORKER_NOT_READY');
      if(features.codeDigest!==c.codeDigest)fail('WORKER_BUILD_MISMATCH');
      if(features.protocol!==PROTOCOL||!equal(features.destination,c.destination)||!features.storageBound||!features.durableClaims||!features.conditionalCreate)fail('WORKER_NOT_READY');
@@ -253,13 +264,13 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    }
    signal?.throwIfAborted();
    dispatched=true;
-   let result=await post(c,'/files',intent,signal),lastLease=clock();
+   let result=await sendFileRequest(c,'/files',intent,signal),lastLease=clock();
    while(result.state==='pending'){
-    if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};
-    if(clock()-lastLease>=30000){Object.assign(c,await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket}));const lease=await post(c,'/lease',{},signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED',operationId};lastLease=clock();}
-    await new Promise(r=>setTimeout(r,pollIntervalMs));const statusCap=await cap(target,{sourceBucket});result=await post(statusCap,'/operation',{operationId},signal);
+    if(!await recheck(c,target,{beforeRequest}))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};
+    if(clock()-lastLease>=30000){Object.assign(c,await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket,beforeRequest}));const lease=await sendFileRequest(c,'/lease',{},signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED',operationId};lastLease=clock();}
+    await new Promise(r=>setTimeout(r,pollIntervalMs));const statusCap=await cap(target,{sourceBucket,beforeRequest});result=await sendFileRequest(statusCap,'/operation',{operationId},signal);
    }
-   if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return {...result,operationId};
+   if(!await recheck(c,target,{beforeRequest}))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return {...result,operationId};
    }catch(error){
     return {state:dispatched?'uncertain':'blocked',code:dispatched?'FILE_ACTION_UNCONFIRMED':
      /^[A-Z][A-Z0-9_]+$/.test(error.code??'')?error.code:'TRANSPORT_UNAVAILABLE',operationId};

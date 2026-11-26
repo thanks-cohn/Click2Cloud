@@ -7,3 +7,9 @@ dist/
 *.log
 
 work/
+
+# Private Python Laboratory corpus, evidence and virtual environment
+/lab-local/
+**/__pycache__/
+**/*.egg-info/
+/11.25.2026/live-python-lab/python/build/

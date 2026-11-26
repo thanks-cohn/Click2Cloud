@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "redown.live-lab.workload/1",
+  "id": "quick",
+  "seed": 20261125,
+  "generator": "redown-small-fixtures/1",
+  "local": {
+    "sourceRoot": "input",
+    "destinationRoot": "downloads"
+  },
+  "targets": {
+    "qa": "files"
+  },
+  "fixtures": [
+    {
+      "id": "start",
+      "kind": "generated",
+      "path": "Examples/start.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 1024
+    },
+    {
+      "id": "blank",
+      "kind": "generated",
+      "path": "Notes/blank.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 0
+    }
+  ],
+  "phases": [
+    {
+      "id": "quick",
+      "dependsOn": [],
+      "direction": "upload",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 180,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "round-trip",
+          "operation": "upload",
+          "fixtures": [
+            "*"
+          ],
+          "verify": "sha256",
+          "retain": true
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "files": 30,
+    "totalBytes": 67108864,
+    "trafficBytes": 335544320,
+    "tempDiskBytes": 75497472,
+    "providerRequests": 8192,
+    "seconds": 900,
+    "costUsd": 0.1,
+    "inventoryEntries": 10000
+  },
+  "notes": "A small text and zero-byte round trip."
+}

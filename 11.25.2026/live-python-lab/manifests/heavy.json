@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "redown.live-lab.workload/1",
+  "id": "heavy",
+  "seed": 20261125,
+  "generator": "redown-small-fixtures/1",
+  "local": {
+    "sourceRoot": "input",
+    "destinationRoot": "downloads"
+  },
+  "targets": {
+    "qa": "files"
+  },
+  "fixtures": [
+    {
+      "id": "upload",
+      "kind": "generated",
+      "path": "Payloads/upload-{index}.mp4",
+      "format": "mp4",
+      "target": "qa",
+      "sizeBytes": 100000000,
+      "count": 20
+    },
+    {
+      "id": "preseed",
+      "kind": "generated",
+      "path": "Seed/preseed-{index}.mp4",
+      "format": "mp4",
+      "target": "qa",
+      "sizeBytes": 100000000,
+      "count": 20
+    }
+  ],
+  "phases": [
+    {
+      "id": "seed",
+      "dependsOn": [],
+      "direction": "upload",
+      "concurrency": 20,
+      "cycles": 1,
+      "timeoutSeconds": 1800,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "seed-verify",
+          "operation": "upload",
+          "fixtures": [
+            "preseed"
+          ],
+          "verify": "sha256",
+          "directory": "seeded"
+        }
+      ]
+    },
+    {
+      "id": "upload-only",
+      "dependsOn": [
+        "seed"
+      ],
+      "direction": "upload",
+      "concurrency": 20,
+      "cycles": 2,
+      "timeoutSeconds": 1800,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "upload",
+          "operation": "upload",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "sha256",
+          "directory": "upload-only"
+        }
+      ],
+      "isolateCycles": true
+    },
+    {
+      "id": "download-only",
+      "dependsOn": [
+        "seed"
+      ],
+      "direction": "download",
+      "concurrency": 20,
+      "cycles": 2,
+      "timeoutSeconds": 1800,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "download",
+          "operation": "download",
+          "fixtures": [
+            "preseed"
+          ],
+          "verify": "sha256",
+          "directory": "seeded",
+          "retain": true
+        }
+      ]
+    },
+    {
+      "id": "bidirectional",
+      "dependsOn": [
+        "upload-only",
+        "download-only"
+      ],
+      "direction": "bidirectional",
+      "concurrency": 40,
+      "cycles": 2,
+      "timeoutSeconds": 1800,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "upload",
+          "operation": "upload",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "sha256",
+          "directory": "mixed",
+          "isolateCycles": true
+        },
+        {
+          "id": "download",
+          "operation": "download",
+          "fixtures": [
+            "preseed"
+          ],
+          "verify": "sha256",
+          "directory": "seeded",
+          "retain": true
+        }
+      ]
+    },
+    {
+      "id": "cleanup",
+      "dependsOn": [
+        "bidirectional"
+      ],
+      "direction": "control",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 300,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "seed",
+          "operation": "delete",
+          "fixtures": [
+            "preseed"
+          ],
+          "verify": "provider",
+          "directory": "seeded"
+        },
+        {
+          "id": "upload-cycle-one",
+          "operation": "delete",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "provider",
+          "directory": "upload-only/cycle-1"
+        },
+        {
+          "id": "upload-cycle-two",
+          "operation": "delete",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "provider",
+          "directory": "upload-only/cycle-2"
+        },
+        {
+          "id": "mixed-cycle-one",
+          "operation": "delete",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "provider",
+          "directory": "mixed/cycle-1"
+        },
+        {
+          "id": "mixed-cycle-two",
+          "operation": "delete",
+          "fixtures": [
+            "upload"
+          ],
+          "verify": "provider",
+          "directory": "mixed/cycle-2"
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "files": 200,
+    "totalBytes": 4000000000,
+    "trafficBytes": 100000000000,
+    "tempDiskBytes": 16000000000,
+    "providerRequests": 200000,
+    "seconds": 7200,
+    "costUsd": 30,
+    "inventoryEntries": 10000
+  },
+  "notes": "Draft gate for full encoded media and real overlapping byte transfer. Each mixed phase cycle needs 20 uploads and 20 independently verified preseeded downloads active together. Expected to be blocked. Cleanup lists the 100 exact planned keys; capability and conditional deletion proof are required before dispatch."
+}

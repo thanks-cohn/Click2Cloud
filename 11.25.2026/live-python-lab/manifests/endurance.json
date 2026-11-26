@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "redown.live-lab.workload/1",
+  "id": "endurance",
+  "seed": 20261125,
+  "generator": "redown-small-fixtures/1",
+  "local": {
+    "sourceRoot": "input",
+    "destinationRoot": "downloads"
+  },
+  "targets": {
+    "qa": "files"
+  },
+  "fixtures": [
+    {
+      "id": "start",
+      "kind": "generated",
+      "path": "Examples/start.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 1024
+    },
+    {
+      "id": "blank",
+      "kind": "generated",
+      "path": "Notes/blank.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 0
+    }
+  ],
+  "phases": [
+    {
+      "id": "cycles",
+      "dependsOn": [],
+      "direction": "upload",
+      "concurrency": 1,
+      "cycles": 6,
+      "timeoutSeconds": 600,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "upload-verify",
+          "operation": "upload",
+          "fixtures": [
+            "*"
+          ],
+          "verify": "sha256",
+          "retain": false
+        }
+      ],
+      "isolateCycles": true
+    },
+    {
+      "id": "profile-renewal",
+      "dependsOn": [
+        "cycles"
+      ],
+      "direction": "download",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 180,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "after-interruption",
+          "operation": "download",
+          "fixtures": [
+            "start"
+          ],
+          "verify": "sha256"
+        }
+      ],
+      "fault": "browser-session-restart"
+    }
+  ],
+  "budget": {
+    "files": 30,
+    "totalBytes": 67108864,
+    "trafficBytes": 335544320,
+    "tempDiskBytes": 75497472,
+    "providerRequests": 8192,
+    "seconds": 900,
+    "costUsd": 0.1,
+    "inventoryEntries": 10000
+  },
+  "notes": "Draft repeated cycles and browser restart. The current preflight blocks fault injection before dispatch."
+}

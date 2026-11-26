@@ -21,6 +21,7 @@ import {createProjectileFeedback} from '../src/aesthetic/projectile.mjs';
 import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {localUploadPort,uploadBatchJournal} from '../src/chrome/local-upload-files.mjs';
+import {createPythonLab,labChannel} from '../src/chrome/python-lab/session.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {operationIdentity} from '../src/core/boundary-observation.mjs';
@@ -109,10 +110,10 @@ const setupOauth={...oauth,
  request:(...args)=>{assertConnected();return oauth.request(...args);}
 };
 const provisioner=createProvisioner({request:setupOauth.request,authority:setupOauth.authority,readModule:async path=>{const r=await fetch(chrome.runtime.getURL(path));if(!r.ok)throw Error('WORKER_MODULE_UNAVAILABLE');return r.text();},load:async key=>(await chrome.storage.local.get('remoteTransport:'+key))['remoteTransport:'+key],store:(key,value)=>chrome.storage.local.set({['remoteTransport:'+key]:value})});
-async function checkSelectedBucket(target,auth){
+async function checkSelectedBucket(target,auth,write=true){
  assertConnected();
- if(!auth.scopes?.includes('workers-r2.write')||!auth.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});
- const response=await oauth.request('/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName));
+ if(write&&!auth.scopes?.includes('workers-r2.write')||!auth.scopes?.includes('workers-r2.read'))throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});
+ const response=await oauth.request('/accounts/'+encodeURIComponent(target.accountId)+'/r2/buckets/'+encodeURIComponent(target.bucketName),{expectedSession:auth.sessionId});
  const body=await response.json();
  assertConnected();
  if(!response.ok||body.success!==true){
@@ -431,6 +432,7 @@ const cloudJobs=createWholeCloudJobs({recovery,fileApi,isAuthorized:async i=>{co
 const wholeCloud={...cloudJobs,enable:async(i,options)=>{const result=await cloudJobs.enable(i,options);const stopped=(await chrome.storage.local.get('outlineStoppedAccounts')).outlineStoppedAccounts??[];await chrome.storage.local.set({outlineStoppedAccounts:stopped.filter(a=>a!==i.accountId)});return result;}};
 const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
   const status=await oauth.status();revoking=true;snapshots.clear();
+  pythonLab.revoke('AUTHORIZATION_REVOKED');
   try{
     try{
       const keys=(await chrome.storage.local.getKeys()).filter(key=>key.startsWith('remoteTransport:'));
@@ -471,6 +473,23 @@ const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:
  checkPrepared:(plan,target)=>preparedDestination(plan,target,BUILD_INFO.workerCodeDigest,previousWorkerDigests),
  remote,executeFileMessage,runFileUpload:(input,options)=>fileApi.run('upload',input,options),
  current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
+});
+const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.local,build:BUILD_INFO,
+ authority:setupOauth.authority,
+ buckets:(accountId,cursor)=>send({type:'cfBuckets',accountId,cursor}),
+ checkBucket:(target,auth)=>checkSelectedBucket(target,auth,false),
+ workerPrefix:async target=>(await provisioner.lookup(target))?.prefixScope??'',
+ checkUpload:localUploadService.checkDestination,upload:localUploadService.dispatchLabFile,
+ // Use production R2 stat/list/stream with exact OAuth session and scope
+ // fences. The relay never owns either OAuth or signed Worker credentials.
+ fileApi:(expectedSession,beforeRequest)=>createClick2CloudFileApi({send,http:{
+  request:(path,options)=>{beforeRequest();return setupOauth.request(path,{...options,expectedSession,
+   requiredScopes:['workers-r2.read','workers-r2-bucket-item.read']});},
+  boundedFetch:fetch
+ }})
+});
+chrome.permissions?.onRemoved?.addListener(({permissions})=>{
+ if(permissions?.includes('nativeMessaging'))pythonLab.revoke('NATIVE_PERMISSION_REVOKED');
 });
 const batchReceiptPorts=new Map();
 const observeUploadEffect=code=>diagnostics.emit({stage:'chrome.local-upload',outcome:'failed',code,operationId:operationIdentity()});
@@ -574,6 +593,12 @@ chrome.runtime.onConnect?.addListener(port=>{
 });
 const activeTextReads=new Map();
 chrome.runtime.onMessage.addListener((message,sender,respond)=>{
+  if(message?.channel===labChannel){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false,code:'LAB_SENDER_DENIED'});return false;}
+    void trustedStorage().then(()=>pythonLab.ui(message.action,message.input))
+      .then(data=>respond({ok:true,data}),error=>respond({ok:false,code:uploadCode(error.code,'LAB_REQUEST_FAILED')}));
+    return true;
+  }
   if(sender?.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL('extension/mirror.html')){debugHost.request(message,sender).then(respond,()=>respond({state:'failed',code:'DEBUG_REQUEST_FAILED'}));return true;}
   if(message?.channel===BASIC_CHANNEL){
     basic.request(message,sender).then(respond,()=>respond({

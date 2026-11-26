@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "redown.live-lab.workload/1",
+  "id": "everyday",
+  "seed": 20261125,
+  "generator": "redown-small-fixtures/1",
+  "local": {
+    "sourceRoot": "input",
+    "destinationRoot": "downloads"
+  },
+  "targets": {
+    "qa": "files"
+  },
+  "fixtures": [
+    {
+      "id": "notes",
+      "kind": "generated",
+      "path": "Notes/旅/notes.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 1024
+    },
+    {
+      "id": "readme",
+      "kind": "generated",
+      "path": "Notes/旅/readme.md",
+      "format": "md",
+      "target": "qa",
+      "sizeBytes": 4096
+    },
+    {
+      "id": "metrics",
+      "kind": "generated",
+      "path": "Data/metrics.csv",
+      "format": "csv",
+      "target": "qa",
+      "sizeRange": {
+        "min": 1100,
+        "max": 2100
+      }
+    },
+    {
+      "id": "settings",
+      "kind": "generated",
+      "path": "Data/settings.json",
+      "format": "json",
+      "target": "qa",
+      "sizeBytes": 1024
+    },
+    {
+      "id": "labels",
+      "kind": "generated",
+      "path": "Data/labels.yaml",
+      "format": "yaml",
+      "target": "qa",
+      "sizeBytes": 640
+    },
+    {
+      "id": "shape",
+      "kind": "generated",
+      "path": "Data/shape.xml",
+      "format": "xml",
+      "target": "qa",
+      "sizeBytes": 864
+    },
+    {
+      "id": "badge",
+      "kind": "generated",
+      "path": "Images/badge.svg",
+      "format": "svg",
+      "target": "qa",
+      "sizeBytes": 1024
+    },
+    {
+      "id": "chart",
+      "kind": "generated",
+      "path": "Images/chart.png",
+      "format": "png",
+      "target": "qa",
+      "sizeBytes": 8192
+    },
+    {
+      "id": "thumbnail",
+      "kind": "generated",
+      "path": "Images/thumbnail.jpg",
+      "format": "jpg",
+      "target": "qa",
+      "sizeBytes": 947
+    },
+    {
+      "id": "animation",
+      "kind": "generated",
+      "path": "Images/animation.gif",
+      "format": "gif",
+      "target": "qa",
+      "sizeBytes": 1654
+    },
+    {
+      "id": "recent",
+      "kind": "generated",
+      "path": "Images/recent.webp",
+      "format": "webp",
+      "target": "qa",
+      "sizeBytes": 382
+    },
+    {
+      "id": "report",
+      "kind": "generated",
+      "path": "Documents/report.pdf",
+      "format": "pdf",
+      "target": "qa",
+      "sizeBytes": 4096
+    },
+    {
+      "id": "letter",
+      "kind": "generated",
+      "path": "Documents/letter.docx",
+      "format": "docx",
+      "target": "qa",
+      "sizeBytes": 4096
+    },
+    {
+      "id": "archive",
+      "kind": "generated",
+      "path": "Documents/archive.zip",
+      "format": "zip",
+      "target": "qa",
+      "sizeBytes": 8192
+    },
+    {
+      "id": "pages",
+      "kind": "generated",
+      "path": "Documents/pages.cbz",
+      "format": "cbz",
+      "target": "qa",
+      "sizeBytes": 32768
+    },
+    {
+      "id": "clip",
+      "kind": "generated",
+      "path": "Media/Nested/clip.mp4",
+      "format": "mp4",
+      "target": "qa",
+      "sizeBytes": 6904
+    },
+    {
+      "id": "sample",
+      "kind": "generated",
+      "path": "Media/sample.webm",
+      "format": "webm",
+      "target": "qa",
+      "sizeBytes": 4937
+    },
+    {
+      "id": "sound",
+      "kind": "generated",
+      "path": "Media/sound.mp3",
+      "format": "mp3",
+      "target": "qa",
+      "sizeBytes": 4510
+    },
+    {
+      "id": "empty",
+      "kind": "generated",
+      "path": "Data/empty.txt",
+      "format": "txt",
+      "target": "qa",
+      "sizeBytes": 0
+    }
+  ],
+  "phases": [
+    {
+      "id": "files",
+      "dependsOn": [],
+      "direction": "upload",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 180,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "round-trip",
+          "operation": "upload",
+          "fixtures": [
+            "*"
+          ],
+          "verify": "sha256",
+          "retain": true
+        }
+      ]
+    },
+    {
+      "id": "inspect",
+      "dependsOn": [
+        "files"
+      ],
+      "direction": "control",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 180,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "identity",
+          "operation": "metadata",
+          "fixtures": [
+            "*"
+          ],
+          "verify": "identity"
+        },
+        {
+          "id": "list",
+          "operation": "list",
+          "fixtures": [
+            "*"
+          ],
+          "verify": "contains",
+          "folder": "files",
+          "maxPages": 2
+        }
+      ]
+    },
+    {
+      "id": "second-read",
+      "dependsOn": [
+        "inspect"
+      ],
+      "direction": "download",
+      "concurrency": 1,
+      "cycles": 1,
+      "timeoutSeconds": 180,
+      "transferSeconds": 60,
+      "onFailure": "stop",
+      "recovery": "read-only",
+      "steps": [
+        {
+          "id": "download",
+          "operation": "download",
+          "fixtures": [
+            "chart",
+            "clip"
+          ],
+          "verify": "sha256",
+          "retain": true
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "files": 30,
+    "totalBytes": 67108864,
+    "trafficBytes": 335544320,
+    "tempDiskBytes": 75497472,
+    "providerRequests": 8192,
+    "seconds": 900,
+    "costUsd": 0.1,
+    "inventoryEntries": 10000
+  },
+  "notes": "Nested roots, Unicode, seven text types, images, documents, archives, media and an empty file. Includes metadata, listing and independent rereads."
+}

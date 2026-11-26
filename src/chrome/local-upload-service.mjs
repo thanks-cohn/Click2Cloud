@@ -54,10 +54,11 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     signal?.throwIfAborted();assertConnected();
     await localBinding?.beforeCommit?.();
     signal?.throwIfAborted();assertConnected();
-    return executeFileMessage(message,{signal,expectedSession:sessionId});
+    return executeFileMessage(message,{signal,expectedSession:sessionId,beforeRequest:localBinding?.beforeRequest});
    },
    http:{request:(path,request)=>{
     assertConnected();
+    localBinding?.beforeRequest?.();
     return oauth.request(path,{...request,expectedSession:sessionId,requiredScopes:uploadReadScopes});
    },boundedFetch}
   });
@@ -108,13 +109,18 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   }
   return receipt;
  }
- async function dispatchLocalUpload({ticket,batchId,index,item,mode},batch,controller,onProgress){
+ async function dispatchLocalUpload(input,batch,controller,onProgress){
+  return dispatchFile(input,batch,controller,onProgress,()=>takeFile(input.ticket));
+ }
+ // Both Shelf tickets and a trusted native laboratory File use the same
+ // size/path binding, destination claim, provider dispatch and durable history.
+ async function dispatchFile({ticket,batchId,index,item,mode},batch,controller,onProgress,loadFile){
   const {signal}=controller;
   if(activeLocalUploads.size>=2)
    throw uploadError('RESOURCE_BUSY','Two local uploads are already running. Wait for one to finish.');
   activeLocalUploads.set(ticket,{controller,batchId});
   try{
-   const staged=await takeFile(ticket), binding=staged?.binding;
+   const staged=await loadFile(), binding=staged?.binding;
    signal.throwIfAborted();
    if(!binding||binding.batchId!==batchId||binding.index!==index||targetKey(binding.source)!==targetKey(batch.target)||
      binding.relativePath!==item.relativePath||binding.mode!==mode||staged.file.size!==item.size)
@@ -143,9 +149,11 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
     recorded=true;
     const beforeCommit=async()=>{
+     await batch.assertAuthorized?.();
      const checkpoint={...job,commitRequested:true};
      await recordLocalUpload(checkpoint,'pending','LOCAL_UPLOAD_VERIFY_COMMIT');
      job.commitRequested=true;
+     await batch.assertAuthorized?.();
     };
     outcome=await runFileUpload({source:batch.target,file:staged.file,key,uploadMode:binding.mode,
      localBinding:{...batch,beforeCommit}},{signal,onProgress,operationId:ticket});
@@ -168,6 +176,12 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     return {state:'uncertain',error:'Cloudflare upload accounting was interrupted. Inspect the destination before retrying.'};
    }
   }finally{activeLocalUploads.delete(ticket);}
+ }
+ async function dispatchLabFile({ticket,batchId,relativePath,file,binding},controller,onProgress){
+  const mode='mixed',index=0,source=binding.target;
+  const item={relativePath,size:file.size,key:localUploadKey(source,file,relativePath,mode)};
+  return dispatchFile({ticket,batchId,index,item,mode},binding,controller,onProgress,
+   ()=>({file,binding:{batchId,index,source,relativePath,mode}}));
  }
  async function reconcileUploadBatch({batch,flight,item,signal}){
   signal?.throwIfAborted();
@@ -192,7 +206,7 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   return null;
  }
  return Object.freeze({checkDestination:checkUploadDestination,validatePlan,run:runLocalUpload,dispatch:dispatchLocalUpload,
-  reconcile:reconcileUploadBatch,reconcileFile:job=>reconcileLocalUpload(job,localUploadClaimKey(job.source,job.key)),
+  dispatchLabFile,reconcile:reconcileUploadBatch,reconcileFile:job=>reconcileLocalUpload(job,localUploadClaimKey(job.source,job.key)),
   isActive:id=>activeLocalUploads.has(id),cancel:id=>{
    const job=activeLocalUploads.get(id);
    if(!job)return null;

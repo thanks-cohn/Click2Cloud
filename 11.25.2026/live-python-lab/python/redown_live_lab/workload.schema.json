@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:redown:live-lab:workload:1",
+  "title": "REDOWN live Python laboratory workload v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "seed",
+    "generator",
+    "local",
+    "targets",
+    "fixtures",
+    "phases",
+    "budget"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "redown.live-lab.workload/1"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "seed": {
+      "$ref": "#/$defs/uint"
+    },
+    "generator": {
+      "const": "redown-small-fixtures/1"
+    },
+    "local": {
+      "type": "object",
+      "required": [
+        "sourceRoot",
+        "destinationRoot"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sourceRoot": {
+          "$ref": "#/$defs/path"
+        },
+        "destinationRoot": {
+          "$ref": "#/$defs/path"
+        }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/id"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 1024
+      }
+    },
+    "fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fixture"
+      }
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/phase"
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": [
+        "files",
+        "totalBytes",
+        "trafficBytes",
+        "tempDiskBytes",
+        "providerRequests",
+        "seconds",
+        "costUsd",
+        "inventoryEntries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "$ref": "#/$defs/positive"
+        },
+        "totalBytes": {
+          "$ref": "#/$defs/uint"
+        },
+        "trafficBytes": {
+          "$ref": "#/$defs/uint"
+        },
+        "tempDiskBytes": {
+          "$ref": "#/$defs/uint"
+        },
+        "providerRequests": {
+          "$ref": "#/$defs/uint"
+        },
+        "seconds": {
+          "$ref": "#/$defs/positive"
+        },
+        "costUsd": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000.0
+        },
+        "inventoryEntries": {
+          "$ref": "#/$defs/positive"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "emptyFolders": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/$defs/path"
+      }
+    }
+  },
+  "$defs": {
+    "uint": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positive": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*\\/$)[^\\\\:\\u0000-\\u001f<>|?*\"]+$"
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "path",
+        "format",
+        "target"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "generated",
+            "corpus"
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/path"
+        },
+        "format": {
+          "enum": [
+            "txt",
+            "md",
+            "csv",
+            "json",
+            "yaml",
+            "xml",
+            "svg",
+            "png",
+            "jpg",
+            "gif",
+            "webp",
+            "pdf",
+            "zip",
+            "cbz",
+            "mp4",
+            "webm",
+            "mp3",
+            "docx",
+            "binary",
+            "unknown"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        },
+        "count": {
+          "$ref": "#/$defs/positive"
+        },
+        "sizeBytes": {
+          "$ref": "#/$defs/uint"
+        },
+        "sizeRange": {
+          "type": "object",
+          "required": [
+            "min",
+            "max"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "min": {
+              "$ref": "#/$defs/uint"
+            },
+            "max": {
+              "$ref": "#/$defs/uint"
+            }
+          }
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "formatHint": {
+          "type": "string"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "sizeBytes"
+          ]
+        },
+        {
+          "required": [
+            "sizeRange"
+          ]
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "corpus"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "sha256",
+              "sizeBytes"
+            ],
+            "properties": {
+              "count": {
+                "const": 1
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "formatHint"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "format": {
+                "enum": [
+                  "txt",
+                  "md",
+                  "csv",
+                  "json",
+                  "yaml",
+                  "xml",
+                  "svg",
+                  "png",
+                  "jpg",
+                  "gif",
+                  "webp",
+                  "pdf",
+                  "zip",
+                  "cbz",
+                  "mp4",
+                  "webm",
+                  "mp3",
+                  "docx",
+                  "binary"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "phase": {
+      "type": "object",
+      "required": [
+        "id",
+        "dependsOn",
+        "direction",
+        "concurrency",
+        "cycles",
+        "timeoutSeconds",
+        "transferSeconds",
+        "onFailure",
+        "recovery",
+        "steps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "dependsOn": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "direction": {
+          "enum": [
+            "upload",
+            "download",
+            "bidirectional",
+            "control"
+          ]
+        },
+        "concurrency": {
+          "$ref": "#/$defs/positive"
+        },
+        "cycles": {
+          "$ref": "#/$defs/positive"
+        },
+        "timeoutSeconds": {
+          "$ref": "#/$defs/positive"
+        },
+        "transferSeconds": {
+          "$ref": "#/$defs/positive"
+        },
+        "onFailure": {
+          "enum": [
+            "stop",
+            "continue"
+          ]
+        },
+        "recovery": {
+          "enum": [
+            "read-only",
+            "none"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "fault": {
+          "type": "string"
+        },
+        "isolateCycles": {
+          "type": "boolean"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "id",
+        "operation",
+        "fixtures",
+        "verify"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "operation": {
+          "enum": [
+            "upload",
+            "download",
+            "metadata",
+            "list",
+            "copy",
+            "move",
+            "rename",
+            "delete",
+            "mkdir",
+            "search",
+            "preview",
+            "publicUrl",
+            "trueRemoteSave"
+          ]
+        },
+        "fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/id"
+              },
+              {
+                "const": "*"
+              }
+            ]
+          }
+        },
+        "verify": {
+          "enum": [
+            "sha256",
+            "identity",
+            "contains",
+            "provider"
+          ]
+        },
+        "directory": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "retain": {
+          "type": "boolean"
+        },
+        "expect": {
+          "enum": [
+            "PASS",
+            "CONFLICT"
+          ]
+        },
+        "folder": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "maxPages": {
+          "$ref": "#/$defs/positive"
+        },
+        "isolateCycles": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
