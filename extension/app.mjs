@@ -14,7 +14,6 @@ import {createScreenshotPage,screenshotFeedback,screenshotRequest} from './scree
 import {createAestheticHost} from '../src/aesthetic/host.mjs';
 const aesthetic=createAestheticHost({root:document.documentElement,storage:chrome.storage?.local});
 const aestheticReady=aesthetic.restore();
-void aestheticReady.finally(()=>{delete document.documentElement.dataset.aestheticPending;});
 const visualFeedback=createVisualFeedbackPreference(chrome.storage);
 let feedbackAccent;
 function rememberFeedbackAccent(){
@@ -253,6 +252,9 @@ listen('#help-diagnose','click',async()=>{
 });
 function applyColorMode(theme){
  document.documentElement.dataset.theme=theme;
+ if(theme==='light'||theme==='dark'){
+  try{localStorage.setItem('redownShelfColorModeV1',theme);}catch{}
+ }
  void aestheticReady.then(rememberFeedbackAccent);
 }
 async function refreshState(options){const next=await api('getConfiguration',{},options);if(!state||next.product.revision>=state.product.revision)state=next;configurationIssue=null;applyColorMode(state.product.theme);$('#theme').disabled=false;return state;}
@@ -1913,7 +1915,8 @@ headerMenu.addEventListener('keydown',e=>{if(e.defaultPrevented||e.isComposing)r
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 const navigationPlacement=installNavigation({header:document.querySelector('header nav'),menu:headerMenu,more:headerMore,open:next=>show(next).catch(e=>status(e.message))});
-void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();});
+void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();})
+ .catch(()=>{}).finally(()=>document.dispatchEvent(new Event('redown-aesthetic-ready')));
 listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
 document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open)e.preventDefault();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
 $('#dialog').addEventListener('cancel',event=>{
@@ -1923,7 +1926,10 @@ $('#dialog').addEventListener('cancel',event=>{
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
  view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header [data-view], #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');
- const configuration=readWithRetry(()=>refreshState({quiet:true,readTimeout:5000})).catch(error=>{configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};}).finally(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();});
+ const configuration=readWithRetry(()=>refreshState({quiet:true,readTimeout:5000})).catch(error=>{configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};}).finally(()=>{
+  try{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}
+  finally{document.dispatchEvent(new Event('redown-color-mode-ready'));}
+ });
  const session=connections().finally(()=>{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();});
  const description=readWithRetry(()=>api('describeCapabilities',{}, {quiet:true,readTimeout:5000})).then(value=>{capabilities=value;}).catch(()=>{});
  const startingView=viewEpoch;

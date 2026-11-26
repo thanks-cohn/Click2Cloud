@@ -101,3 +101,9 @@
 #repair-me:not(:disabled){animation:repair-outline 2.6s ease-in-out infinite}
 @keyframes repair-outline{50%{border-color:#c7ffda;box-shadow:0 0 9px #61e98775}}
 .chrome-appearance-icon,.cf-chrome-mark{display:none}
+
+/* First paint: neutral, mode-aware canvas until both appearance reads settle.
+   Never wait on cloud login, storage transfers or the connection status. */
+:root[data-aesthetic-pending]{background:#13171e}
+:root[data-aesthetic-pending][data-theme=light]{background:#e8edf3}
+:root[data-aesthetic-pending] body{opacity:0;pointer-events:none;transition:none!important}
