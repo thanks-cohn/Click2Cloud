@@ -105,7 +105,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     section.dataset.provider=id;
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
-        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'15 GB free',onedrive:'5 GB free',dropbox:'2 GB free'})[id]}</span></div>
+        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'15 GB Free',onedrive:'5 GB Free',dropbox:'2 GB Free'})[id]}</span></div>
       </div>
       <p role="status" class="remote-provider-activity" data-activity hidden></p>
       <button type="button" class="onyx-provider-detail-toggle" aria-expanded="false" aria-controls="remote-provider-info-${id}">Details</button>

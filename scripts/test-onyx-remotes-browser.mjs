@@ -100,7 +100,7 @@ try{
  }
  await page.evaluate(async()=>{document.querySelector('#scrollbar-fixture').remove();document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
- assert.deepEqual(await page.locator('.remote-provider .onyx-provider-meta').allTextContents(),['15 GB free','5 GB free','2 GB free']);
+ assert.deepEqual(await page.locator('.remote-provider .onyx-provider-meta').allTextContents(),['15 GB Free','5 GB Free','2 GB Free']);
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){
   await page.setViewportSize({width,height:760});await page.mouse.move(0,0);
@@ -146,9 +146,24 @@ try{
   await waitWidth(52);
   const idle=await browseState();
   assert.equal(idle.word,'0');assert.equal(idle.closed,'1');assert.equal(idle.open,'0');
+  // Sample the entire transition, starting with the pointer entering the card.
+  // Refresh must remain invisible on every frame before the dock reaches full width.
+  const frames=page.evaluate(async()=>{
+   const card=document.querySelector('[data-provider=dropbox]'),button=card.querySelector('[data-go]'),refresh=card.querySelector('[data-refresh]');
+   const samples=[];const limit=performance.now()+650;
+   await new Promise(resolve=>{function frame(){samples.push({width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity)});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+   return samples;
+  });
   await browse.hover();
-  await waitWidth(width<=345?100:110);
+  const expandedWidth=width<=345?100:110;
+  await waitWidth(expandedWidth);
   const expanded=await browseState();
+  const samples=await frames;
+  assert(samples.some(f=>f.width>52&&f.width<expandedWidth-.5),'Expected intermediate Browse expansion frames');
+  assert(samples.every(f=>f.width>=expandedWidth-.5||f.opacity===0),'Refresh must not appear before Browse is fully expanded');
+  assert(samples.some(f=>f.width>=expandedWidth-.5&&f.opacity===1),'Refresh must finish fading in');
+  const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width}));
+  assert.deepEqual(sizes,{word:'10px',folder:'18px'});
   assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
