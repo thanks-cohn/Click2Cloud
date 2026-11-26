@@ -28,13 +28,12 @@ import {manifestCard,mountManifestPanel} from './manifest-panel.mjs';
 import {mountLoadingVisual} from '../src/explorer/loading-visual.mjs';
 import {loadingMedia,LOADING_MEDIA_MAX_BYTES} from '../src/explorer/loading-visual-config.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
-import {isImage,galleryStep,createImageReader,readPreviewBytes} from '../src/explorer/image-preview.mjs';
+import {isImage,galleryStep,createImageReader} from '../src/explorer/image-preview.mjs';
 import {installExplorerLayout} from './explorer-layout.mjs';
 import {wireExplorerUpload} from './explorer-upload.mjs';
 import {dividerCycleKey,normalizeDividerMode} from '../src/explorer/layout.mjs';
 import {installShortcuts} from './shortcut-settings.mjs';
-import {createExplorerExports,noteDownload} from './explorer-exports.mjs';
-import {downloadJob} from '../src/explorer/download-archive.mjs';
+import {createExplorerExports} from './explorer-exports.mjs';
 import {selectedSetupReady,selectedSetupLabel,selectedSetupCode} from './cloudflare-setup-view.mjs';
 let fileClipboard=null;
 const fileClipboardKey='explorerClipboardV1';
@@ -1246,8 +1245,12 @@ async function contextFor(t,entry,x,y){
   action('Open',()=>entry?openEntry(entry):navigate(t));
   const file=entry&&!entry.folder?entry:null,scope=file?origin:t;
   if(file)action('Preview',()=>openEntry(file));
-  action('Download',()=>file?downloadEntry(file):explorerExports.download(scope,null,'original'));
-  action('Download original',()=>file?downloadEntry(file):explorerExports.download(scope,null,'original'));
+  const selection=file&&capturedSelection.length>1&&capturedSelection.every(item=>!item.folder)&&
+    capturedSelection.some(item=>item.key===file.key)?capturedSelection.map(item=>ordered()[listingOrder.index(item.key)]):null;
+  const downloadOriginal=()=>selection?explorerExports.downloadSelection(origin,selection):
+    file?explorerExports.download(origin,file,'original'):explorerExports.download(scope,null,'original');
+  action('Download',downloadOriginal);
+  action('Download original',downloadOriginal);
   action('Download with Tags',()=>explorerExports.download(scope,file,'tags'));
   action('Download with All Metadata',()=>explorerExports.download(scope,file,'metadata'));
   action('Get URL',()=>explorerExports.urls(scope,file,()=>view==='explorer'&&contextEpoch===navigationEpoch));
@@ -1972,17 +1975,8 @@ async function remoteHistory(cursor=null,append=[]){
  $$('[data-cancel-operation]').forEach(b=>b.onclick=async()=>{const result=await api('cancelRemoteOperation',{operationId:b.dataset.cancelOperation,target:(()=>{const d=rows.find(r=>r.operationId===b.dataset.cancelOperation).destination;return {provider:'cloudflare',connectionId:d.connectionId,accountId:d.accountId,bucketName:d.bucketName,prefix:d.prefix?d.prefix+'/':''};})()});status(result.code??'Cancellation requested; inspect the receipt before retrying.');b.disabled=true;});
  listen('#more-results','click',()=>remoteHistory(page.nextCursor,rows));
 }
-async function downloadEntry(entry){
- if(!window.showSaveFilePicker)throw Error('Streaming Download requires Chrome file-system access.');
- status('Preparing download…');
- const captured=structuredClone(source),handle=await window.showSaveFilePicker({suggestedName:entry.displayName??entry.key.split('/').at(-1)});let writer,offset=0;
- try{
-  const result=await readPreviewBytes(p=>api('readFileChunk',p,{quiet:true}),{source:captured,key:entry.key,etag:entry.etag,size:entry.size},{limit:Number.MAX_SAFE_INTEGER,concurrency:1,onChunk:async bytes=>{writer??=await handle.createWritable();await writer.write(bytes);offset+=bytes.length;status('Downloading '+offset.toLocaleString()+' bytes');}});
-  if(offset!==result.total)throw Error('RANGE_RESPONSE_INVALID');writer??=await handle.createWritable();await writer.close();
-  if((await handle.getFile()).size!==result.total)throw Error('DOWNLOAD_WRITE_UNCONFIRMED');
-  status('Download complete · '+offset.toLocaleString()+' bytes.');
-  void noteDownload(downloadJob().jobId,1);
- }catch(error){try{await writer?.abort();}catch{}throw error;}
+function downloadEntry(entry){
+ return explorerExports.download(source,entry,'original');
 }
 
 chrome.runtime.onMessage?.addListener((message,sender)=>{

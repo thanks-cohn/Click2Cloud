@@ -213,7 +213,7 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
         for (const record of records) {
           if (record.schemaVersion !== 1 || typeof record.recordId !== 'string' || !record.recordId ||
               !Number.isSafeInteger(record.sortAt) || record.sortAt < 0) throw Error('HISTORY_INVALID_RECORD');
-          const {recordId, rank, jobAt, removeJob, queueTerminal, ...metadata} = record;
+          const {recordId, rank, jobAt, removeJob, queueTerminal, includeHistory, archivePending, ...metadata} = record;
           if(removeJob){
             s.jobs.delete(recordId);
             s.state.put(record.updatedAt??0,'retired-job:'+recordId);
@@ -227,9 +227,9 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
             request(s.jobs.get(recordId)), request(s.excluded.get(recordId))]);
           const latest = [old, job].filter(Boolean).sort((a,b) => (b.updatedAt ?? 0)-(a.updatedAt ?? 0))[0];
           if((latest?.updatedAt??0)>(record.updatedAt??0)||old?.status==='verified'&&record.status!=='verified')continue;
-          if (latest && latest.updatedAt === record.updatedAt && latest.status === record.status &&
+          if (!archivePending && latest && latest.updatedAt === record.updatedAt && latest.status === record.status &&
               latest.code === record.code && latest.retryable===record.retryable && latest.cancellable===record.cancellable &&
-              latest.bytes===record.bytes && (!job||job.saveMode===record.saveMode) && (record.terminal ? (!!old || excluded) && (rank===undefined||!!job) : !!job)) continue;
+              latest.bytes===record.bytes && (!job||job.saveMode===record.saveMode) && (record.terminal ? (!!old || excluded || includeHistory===false) && (rank===undefined||!!job) : !!job)) continue;
           const group=expiryClass(record);
           const expired=group&&record.terminalAt<=Math.max(before[group]??-1,watermark[group]??-1);
           if (rank!==undefined&&!expired) {
@@ -238,14 +238,27 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
             const entry=projectJob(record,acknowledged?4:rank,jobAt??record.requestedAt??record.sortAt);
             s.jobs.put({...entry,acknowledged});
           }else if(!job?.acknowledged)s.jobs.delete(recordId);
-          if (record.terminal && !excluded) {
+          if ((record.terminal||archivePending) && includeHistory!==false && !excluded) {
             const rename=old?.renamed?Object.fromEntries(
               ['renamed','filename','providerObjectId','etag','version','bytes','destination'].map(field=>[field,old[field]])):null;
             const value={recordId,...metadata,...rename,sortAt:old?.sortAt??record.sortAt,terminalAt:old?.terminalAt??record.terminalAt};
+            if(value.kind==='folder-upload'&&old?.folderUpload?.representative)
+              value.folderUpload={...value.folderUpload,representative:old.folderUpload.representative};
             s.records.put({...value,searchKeys:searchKeys(value)});
           }
         }
         await enforce(s);
+      }));
+    },
+    selectFolderRepresentative(recordId,operationId){
+      return lock(()=>run(['records'],'readwrite',async ({records})=>{
+        const row=await request(records.get(recordId));
+        if(row?.kind!=='folder-upload')return null;
+        if(row.folderUpload.representative)return row.folderUpload.representative;
+        const image=row.folderUpload.candidates.find(candidate=>candidate.operationId===operationId);
+        if(!image)return null;
+        await request(records.put({...row,folderUpload:{...row.folderUpload,representative:image}}));
+        return image;
       }));
     },
     maintain: () => lock(() => run(stores, 'readwrite', enforce)),

@@ -105,7 +105,7 @@ function archivePath(key, prefix) {
   const segments = relative.split('/');
   if (!relative || !key.startsWith(prefix) || segments.some(segment =>
     !segment || segment==='.' || segment==='..' || /[\\:<>"|?*\x00-\x1f\x7f]/.test(segment) ||
-    /[. ]$/.test(segment) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment))) return null;
+    /[. ]$/.test(segment) || /^(con|prn|aux|nul|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(segment) || segment.length>255)) return null;
   return 'files/'+relative;
 }
 export function downloadJob(now=Date.now(), jobId=crypto.randomUUID()) {
@@ -127,10 +127,29 @@ export async function prepareTaggedPng(file, tags, read) {
   return embedPngTags(await bufferedRead(file,read),tags);
 }
 
-export async function streamDownloadArchive({source, inventory, mode, recursive, job, outputName, write, read, metadata, signal, onProgress, forceCompanion=false}) {
+export function preflightZip32({source,inventory,mode,recursive}) {
+  let bytes=22,entries=0;
+  for(const file of inventory.files){
+    const path=archivePath(file.key,source.prefix);
+    if(!path||!Number.isSafeInteger(file.size)||file.size<0)continue;
+    const overhead=92+2*encode(path).length;
+    // The entry may grow by a bounded PNG tag payload. In metadata modes
+    // reserve a possible sidecar for every input before reading object bytes.
+    bytes+=file.size+overhead+(mode==='original'?0:64*1024);
+    entries+=mode==='original'?1:2;
+    // The compatibility manifest and directory receipt include object paths.
+    if(recursive||mode!=='original')bytes+=1024+4*encode(file.key).length;
+  }
+  entries+=Number(recursive)+Number(mode!=='original');
+  if(entries>limits.entries)throw exportError('ZIP32_ENTRY_LIMIT');
+  if(bytes>=max32)throw exportError('ZIP32_LIMIT');
+  return {upperEstimatedBytes:bytes,entries};
+}
+
+export async function streamDownloadArchive({source, inventory, mode, recursive, job, outputName, write, read, metadata, signal, onProgress, forceCompanion=false, onSummary}) {
   if (!exportModes.includes(mode)) throw exportError('DOWNLOAD_MODE_INVALID');
   const expectedBytes = inventory.files.reduce((bytes,file)=>bytes+(file.size??0),0);
-  if (expectedBytes>=max32) throw exportError('ZIP32_LIMIT');
+  preflightZip32({source,inventory,mode,recursive});
   const zip=zipWriter(write,signal), dispositions=[], paths=new Set(), parents=new Set();
   let written=0, sourceBytes=0, archivedBytes=0, tagged=0;
   for (const file of inventory.files) {
@@ -183,7 +202,7 @@ export async function streamDownloadArchive({source, inventory, mode, recursive,
   }
   const errors=dispositions.filter(row=>row.reason&&row.reason!=='DIRECTORY_MARKER').map(({key,reason})=>({key,code:reason}));
   for(const row of dispositions)if(row.metadataWarning)errors.push({key:row.key,code:row.metadataWarning});
-  const complete=inventory.complete&&!errors.length;
+  const complete=inventory.complete&&written>0&&!errors.length;
   const stats={expectedItems:inventory.files.length,expectedBytes,written,sourceBytes,archivedBytes,tagged,errors:errors.length};
   const scope={provider:source.provider,accountId:source.accountId,bucketName:source.bucketName,prefix:source.prefix};
   const summary={schema:'click2cloud.directory-download/1',...job,source:scope,mode,outputName,complete,
@@ -196,5 +215,6 @@ export async function streamDownloadArchive({source, inventory, mode, recursive,
   });
   if(recursive)await zip.json('_click2cloud/'+job.receiptName,summary);
   const bytes=await zip.finish();
+  onSummary?.(summary);
   return {state:complete?'completed':'partial',evidence:'ARCHIVE_FINALIZED',bytes,files:written,errors:errors.length,...(recursive?{receiptName:job.receiptName}:{})};
 }

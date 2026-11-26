@@ -1,8 +1,9 @@
 import {createHistoryStore,HISTORY_CLEANUP_ALARM,QUEUE_CLEANUP_ALARM} from '../src/queue/store.mjs';
-import {basicReceipt,currentReceipt} from '../src/queue/receipts.mjs';
+import {basicReceipt,currentReceipt,folderUploadReceipts,localDownloadReceipt} from '../src/queue/receipts.mjs';
 import {BASIC_CHANNEL, basicMenuProvider, createBasicHost} from '../src/basic/host.mjs';
 import {createScreenshotBackground} from './screenshot-background.mjs';
 import {exportOptions,exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
+import {showUploadsInHistoryKey} from '../src/history/upload-preference.mjs';
 import {captureHistoryContext} from '../src/history/model.mjs';
 import {createManifestLocations} from '../src/cloudflare/manifest-locations.mjs';
 import {createRecorderHost} from '../src/recorder/host.mjs';
@@ -49,6 +50,8 @@ import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
 import {uploadError,uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {createLocalUploadService,uploadCode} from '../src/chrome/local-upload-service.mjs';
+import {observeReceiptDelivery,receiptDataURL} from '../src/chrome/receipt-delivery.mjs';
+import {createLocalDownloads,downloadReceiptPreferenceKey,localDownloadChannel} from '../src/chrome/local-download-service.mjs';
 import {createLocalUploadBatches} from '../src/chrome/local-upload-batch.mjs';
 import {qualifyUploadReceipt,readUploadReceiptSettings} from '../src/chrome/upload-receipt-policy.mjs';
 import {downloadUploadReceipt,uploadReceiptGate} from '../src/chrome/local-upload-receipt-download.mjs';
@@ -434,6 +437,7 @@ const wholeCloud={...cloudJobs,enable:async(i,options)=>{const result=await clou
 const oauthForApi={...oauth,connect:()=>oauth.connect(),disconnect:async()=>{
   const status=await oauth.status();revoking=true;snapshots.clear();
   pythonLab.revoke('AUTHORIZATION_REVOKED');
+  await localDownloads.revoke().catch(()=>{});
   try{
     try{
       const keys=(await chrome.storage.local.getKeys()).filter(key=>key.startsWith('remoteTransport:'));
@@ -475,6 +479,54 @@ const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:
  remote,executeFileMessage,runFileUpload:(input,options)=>fileApi.run('upload',input,options),
  current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
 });
+const receiptDelivery=observeReceiptDelivery({chrome,current,
+ changed:delivery=>chrome.runtime.sendMessage({channel:'receipt-delivery-changed',delivery})});
+void receiptDelivery.reconcile().catch(()=>{});
+async function recordDownloadReceipt(job){
+ if(!job.automaticReceipt||!['verified','partial','blocked','cancelled','uncertain','failed'].includes(job.state))return;
+ return receiptDelivery.download('download',job.jobId,async()=>{
+  const receipt=await localDownloads.receipt(job.jobId);
+  const url=receiptDataURL(JSON.stringify(receipt)+'\n');
+  if(!url)return 'manual-required';
+  const id=await chrome.downloads.download({url,filename:'redown-download-receipt-'+job.jobId+'.json',saveAs:false});
+  if(!Number.isInteger(id))throw Error('CHROME_DOWNLOAD_ID_UNAVAILABLE');
+  return {state:'download-requested',id};
+ });
+}
+const localDownloads=createLocalDownloads({current,authority:setupOauth.authority,
+ makeFileApi:expectedSession=>createClick2CloudFileApi({send,http:{boundedFetch:fetch,
+  request:(path,options)=>setupOauth.request(path,{...options,expectedSession,requiredScopes:['workers-r2.read','workers-r2-bucket-item.read'],
+   onSend:()=>{assertConnected();options.signal?.throwIfAborted();}})}}),
+ allowExport:async mode=>exportOptions((await chrome.storage.local.get(exportPreferenceKey))[exportPreferenceKey])[mode],
+ receiptEnabled:async()=>((await chrome.storage.local.get(downloadReceiptPreferenceKey))[downloadReceiptPreferenceKey]===true),
+ onReceipt:receipt=>{
+  void recordDownloadReceipt(receipt).catch(()=>{});
+  void accountQueueReceipt(localDownloadReceipt,receipt);
+  return chrome.runtime.sendMessage({channel:'local-download-changed',receipt});
+ },
+ onVerified:(id,files)=>dailyBadge.recordLocal(id,files)
+});
+const downloadAlarm='redown-local-download-wake';
+let runningDownloads;
+function wakeDownloads(){
+ if(runningDownloads)return runningDownloads;
+ runningDownloads=(async()=>{
+  const jobs=(await current.activeDownloads()).filter(Boolean);
+  if(jobs.length){
+   // Alarm exists only while durable browser jobs remain, including worker restart.
+   if(!await chrome.alarms.get(downloadAlarm))await chrome.alarms.create(downloadAlarm,{periodInMinutes:.5});
+   await Promise.allSettled(jobs.map(job=>localDownloads.drive(job)));
+  }
+  if(!(await current.activeDownloads()).length)await chrome.alarms.clear(downloadAlarm);
+ })().catch(()=>lifecycle('LOCAL_DOWNLOAD_SCHEDULER_UNAVAILABLE')).finally(()=>{runningDownloads=null;});
+ return runningDownloads;
+}
+chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name===downloadAlarm)void wakeDownloads();});
+chrome.runtime.onStartup.addListener(()=>void wakeDownloads());
+void wakeDownloads();
+void current.recentDownloads().then(rows=>Promise.allSettled(rows.flatMap(row=>[
+ recordDownloadReceipt(row),accountQueueReceipt(localDownloadReceipt,row)
+]))).catch(()=>{});
 const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.local,diagnosticStorage:chrome.storage.session,
  build:BUILD_INFO,trustedStorage,permission:()=>chrome.permissions.contains({permissions:['nativeMessaging']}),
  authority:setupOauth.authority,
@@ -497,37 +549,59 @@ chrome.permissions?.onRemoved?.addListener(({permissions})=>{
 const batchReceiptPorts=new Map();
 const observeUploadEffect=code=>diagnostics.emit({stage:'chrome.local-upload',outcome:'failed',code,operationId:operationIdentity()});
 async function requestUploadReceipt(receipt,gate){
- const result=await downloadUploadReceipt(chrome,receipt,gate,batchReceiptPorts.get(receipt.batchId));
- if(result?.state==='download-requested'&&chrome.downloads.onChanged){
-  function changed(delta){
-   if(delta.id!==result.id||!['complete','interrupted'].includes(delta.state?.current))return;
-   chrome.downloads.onChanged.removeListener(changed);
-   clearTimeout(timer);
-   if(delta.state.current==='interrupted')observeUploadEffect('UPLOAD_RECEIPT_DOWNLOAD_FAILED');
+ return receiptDelivery.download('upload',receipt.batchId,
+  ()=>downloadUploadReceipt(chrome,receipt,gate,batchReceiptPorts.get(receipt.batchId)));
+}
+let historyProjection,historyProjectionTimer;
+async function flushUploadHistory(){
+ if(historyProjection)return historyProjection;
+ historyProjection=(async()=>{
+  const pending=await uploadBatchJournal.historyProjections();
+  for(const snapshot of pending){
+   const records=folderUploadReceipts(snapshot);
+   for(let index=0;index<records.length;index+=250)await queueHistory.reconcile(records.slice(index,index+250));
+   await uploadBatchJournal.acknowledgeHistory(snapshot);
   }
-  const timer=setTimeout(()=>chrome.downloads.onChanged.removeListener(changed),30_000);
-  chrome.downloads.onChanged.addListener(changed);
- }
- return result;
+  if(pending.length)void chrome.runtime.sendMessage({channel:'queue-history-changed'}).catch(()=>{});
+  if(pending.length===32)scheduleUploadHistory();
+ })().catch(()=>observeUploadEffect('UPLOAD_HISTORY_PROJECTION_PENDING')).finally(()=>{historyProjection=null;});
+ return historyProjection;
+}
+function scheduleUploadHistory(){
+ if(historyProjectionTimer)return;
+ historyProjectionTimer=setTimeout(()=>{historyProjectionTimer=null;void flushUploadHistory();},350);
 }
 const localUploadBatches=createLocalUploadBatches({
  journal:uploadBatchJournal,checkDestination:localUploadService.checkDestination,
  validatePlan:localUploadService.validatePlan,dispatch:localUploadService.dispatch,dispatchStored:localUploadService.dispatchStored,
  reconcile:localUploadService.reconcile,notify:saveNotice.savedBatch,receiptEnabled:()=>uploadReceiptGate(chrome.storage.local),downloadReceipt:requestUploadReceipt,
+ showUploadHistory:async()=>((await chrome.storage.local.get(showUploadsInHistoryKey))[showUploadsInHistoryKey]!==false),
+ historyChanged:scheduleUploadHistory,readReceiptDelivery:id=>receiptDelivery.read('upload',id),
  selectionReceiptPolicy:async (mode,items)=>qualifyUploadReceipt(await readUploadReceiptSettings(chrome.storage.local),mode,items),
  observe:observeUploadEffect,
  version:BUILD_INFO.extensionVersion
 });
 const durableUploadAlarm='redown-durable-local-upload';
+const uploadRetryAlarm='redown-local-upload-retry';
+let retryTimer;
+async function scheduleUploadRetry(at){
+ clearTimeout(retryTimer);
+ const delay=Math.max(0,at-Date.now());
+ if(delay<25_000)retryTimer=setTimeout(wakeLocalUploads,delay);
+ await chrome.alarms.create(uploadRetryAlarm,{when:at});
+}
 async function driveLocalUploads(){
  await trustedStorage();
+ await flushUploadHistory();
  const pending=await uploadBatchJournal.runnable();
  if(!pending.length){await chrome.alarms.clear(durableUploadAlarm).catch(()=>{});return;}
  if(!await chrome.alarms.get(durableUploadAlarm))await chrome.alarms.create(durableUploadAlarm,{periodInMinutes:.5});
- await Promise.allSettled(pending.map(batch=>localUploadBatches.driveDurable(batch)));
+ const results=await Promise.allSettled(pending.map(batch=>localUploadBatches.driveDurable(batch)));
+ const due=results.flatMap(result=>Number.isFinite(result.value)?[result.value]:[]);
+ if(due.length)await scheduleUploadRetry(Math.min(...due));
 }
 const wakeLocalUploads=()=>void driveLocalUploads().catch(()=>observeUploadEffect('LOCAL_UPLOAD_SCHEDULER_UNAVAILABLE'));
-chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name===durableUploadAlarm)wakeLocalUploads();});
+chrome.alarms.onAlarm.addListener(alarm=>{if([durableUploadAlarm,uploadRetryAlarm].includes(alarm.name))wakeLocalUploads();});
 chrome.runtime.onStartup.addListener(wakeLocalUploads);
 wakeLocalUploads();
 chrome.runtime.onConnect?.addListener(port=>{
@@ -637,6 +711,27 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     }
     return false;
   }
+  if(message?.channel===localDownloadChannel){
+    if(!appSenderDecision(chrome.runtime,sender).accepted){respond({ok:false,code:'UNTRUSTED_APP_SENDER'});return false;}
+    const run=async()=>{
+      await trustedStorage();
+      if(message.action==='admit'){
+        const receipt=await localDownloads.admit(message.input);
+        void localDownloads.drive(receipt).catch(()=>lifecycle('LOCAL_DOWNLOAD_SCHEDULER_UNAVAILABLE'));
+        if(!await chrome.alarms.get(downloadAlarm))await chrome.alarms.create(downloadAlarm,{periodInMinutes:.5});
+        return receipt;
+      }
+      if(message.action==='list')return Promise.all((await localDownloads.list()).map(async job=>({
+        ...job,receiptDelivery:await receiptDelivery.read('download',job.jobId)
+      })));
+      if(message.action==='receipt')return {...await localDownloads.receipt(message.jobId),
+        receiptDelivery:await receiptDelivery.read('download',message.jobId)};
+      if(message.action==='cancel')return localDownloads.cancel(message.jobId);
+      throw Object.assign(Error(),{code:'DOWNLOAD_ACTION_INVALID'});
+    };
+    void run().then(data=>respond({ok:true,data}),error=>respond({ok:false,code:uploadCode(error.code,uploadCode(error.message,'DOWNLOAD_REQUEST_FAILED'))}));
+    return true;
+  }
   if(message?.channel==='verified-local-download'){
     if(!appSenderDecision(chrome.runtime,sender).accepted){respond({accepted:false});return false;}
     dailyBadge.recordLocal(message.jobId,message.files).then(()=>respond({accepted:true}),()=>respond({accepted:false}));
@@ -647,6 +742,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     const {action,recordId}=message;
     const run=async()=>{
       if(action==='cancel-all'){
+        await localDownloads.cancelAll?.();
         const pendingLocalJobs=await localUploadBatches.cancelDurableAll();
         wakeLocalUploads();
         const localJobs=localUploadService.cancelAll();
@@ -687,6 +783,7 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
       }
       if(job.terminal||!job.cancellable)throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
       if(job.sourceApi?.startsWith('basic:'))return basic.cancel(job.provider,job.sourceRecordId);
+      if(job.sourceApi==='r2-download')return localDownloads.cancel(job.sourceRecordId);
       const local=localUploadService.cancel(job.sourceRecordId);
       if(local)return local;
       if(job.saveMode==='local-upload')throw Error('QUEUE_CANCELLATION_UNAVAILABLE');
@@ -711,7 +808,8 @@ chrome.runtime.onMessage.addListener((message,sender,respond)=>{
       (typeof cursor.key==='string'&&cursor.key.startsWith('remote-result:')&&cursor.key.length<1024||
       Number.isSafeInteger(cursor.legacyOffset)&&cursor.legacyOffset>=0));
     if(!validBasic&&!validCurrent){respond({ok:false});return false;}
-    const scan=validBasic?basic.historySource(cursor):current.readQueueHistorySource(cursor??{});
+    const scan=validBasic?basic.historySource(cursor):
+     flushUploadHistory().then(()=>current.readQueueHistorySource(cursor??{}));
     scan.then(({rows,next})=>{
       let malformed=0;
       const records=rows.flatMap(row=>{

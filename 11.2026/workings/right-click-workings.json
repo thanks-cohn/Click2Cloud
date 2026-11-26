@@ -9198,13 +9198,13 @@
   },
   "currentImplementation": {
     "auditStatus": "SOURCE_VERIFIED",
-    "sourceCommit": "3f90da5beb340fd8bfe7bb2361f8645c4ae48fee",
+    "sourceCommit": "Tracked hashes for the Part 1 implementation lineage based on 1bad4007678fd3f2dcb628a3681598850feeb36e",
     "sourceFiles": {
       "extension/aesthetic.css": "0bf0e8e1e0c74c66c4c5a7d9e43d60185d9100e28692f2ff3af0e73b3ed74cbd",
       "extension/app.css": "be271732c1035fafe83a666998184755df353ea89dc2e67b8dc1813c02be1e59",
       "extension/app.html": "ee17a11bc4e45da7687309d82d1efbd07c8cd3051dff4d6814b6c3eb070edf7a",
-      "extension/app.mjs": "9977454b7932517c1c893c91e6d3d38bc5bf122e1a250fd20c60cef890ad5224",
-      "extension/background.mjs": "98c506a2f7b4c7ab011f42612a6be7d506ee113dec3f681bfa61b94ed8126832",
+      "extension/app.mjs": "26370e320a9471aaa9519935069f6346b8ee6c6a57a1afa372a4979ee30330a1",
+      "extension/background.mjs": "b6c56d702b0142149e0f1d8e84b7e24761c879703f919987cb8d5987cfd63c2b",
       "extension/basic-diagnostics-export.mjs": "6fed1977d469fac859d47b8437015d9c54da3be473f089ad363b18ba63f6e2fe",
       "extension/basic-history-preview.mjs": "f1e096e9322c421ef7fc3f5f07fab3536617422441ce7eecea1fa55a589c061e",
       "extension/basic-provider-cards.mjs": "20d5248fed062072d5d52af16a41b5dca0027c59e4ea4e937883601b1828ce18",
@@ -9213,15 +9213,15 @@
       "extension/console-save-notice.js": "5658cad25a7af2acfbdf707d23b3910981f0d4993eb3783b6de18d5256b46304",
       "extension/depth-destinations.css": "e3914876aa3057657aebfead4690ed599f69b835feccf73d6bcf11f19d8aed97",
       "extension/explorer-details-columns.mjs": "b4a0a3a6cf8c7cd73558ca5454bd4deaa34165fd6a8c6a4d0da04329ee81b7b5",
-      "extension/explorer-exports.mjs": "8377aadac9dbda483d75455ac92945d56f69544591067e17791248d285550131",
+      "extension/explorer-exports.mjs": "fbd091e41beedd975d46da5004b86dfe73f7cd6abf9cc3f7d80c6adfe8f6feb1",
       "extension/explorer-image-clipboard.mjs": "2497a264d874ac9f23b4073fd397ed03af7e316e006c3d068af60cee450d6d7c",
       "extension/explorer-layout.mjs": "dda59b77a0171991f3a38233795816a44b3751963dec492ec254b718e0b05e80",
       "extension/explorer-marquee.mjs": "07a317d925a4afd91abfbf0629c75fed6f41b143d76c7e6cbe124655b73d8329",
       "extension/explorer-operation-feedback.mjs": "3feacf3eb555e53fc340ed62d1b05bb628aba1b9499548cedaf6878ff2b72253",
       "extension/explorer-upload.mjs": "9426625b087ab2ba918d1ad988d2f728463d2bdf165fb049c62bed1238788273",
       "extension/history-destination-urls.mjs": "c8cab337805a2baafa44c62ce6950b3d5a39da16ac81681cb677bd87e3df397c",
-      "extension/history-v2-cards.mjs": "6128d0ac49aa4d17fd0b5f3b50ae1182c95368c1909a61b638cfee7d3e5d92c8",
-      "extension/history-v2-preferences.mjs": "7853c85c63f92741d8790c8f32b8572539bfe9ed0c0cb2fa7f2274fcf24658ac",
+      "extension/history-v2-cards.mjs": "84d00d2cb4be2f10f9c10e8df0c5dcb448075436521ff869d7ff784ee8aa7ec9",
+      "extension/history-v2-preferences.mjs": "a77564a8c17a912f7ef5b5c13834d51f3cd299637f23e1f7199d070a04c482a2",
       "extension/icon.png": "6f3f12fed7a5fd2033677fde36f7ba386f1a635c876f33449d544b73643f7740",
       "extension/icons/chrome-moon-dark.svg": "2bea00751eb05ff9bfcacfd1cb652dd777d815713eb241baa9edfbb7829ed5d6",
       "extension/icons/chrome-moon-light.svg": "972754d07efe6e91a3866a6e9dabe80048a784055d9367f7be66b0b60be56fcb",
@@ -9246,8 +9246,8 @@
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
       "extension/navigation.mjs": "e4d53ec8572bedbc4344dffa13afbc27d69a90a5c0c7a5580e68a619f682794d",
       "extension/projectile.js": "0f45e6b34682c4b4dd316e3f62b7b613bb5609692e4bc81a0da495b05834dccd",
-      "extension/python-lab-settings.mjs": "c7d4e75cc536defbea89f3dabf3802323078983501b4d8cd1bcb71da884256af",
-      "extension/queue-page.mjs": "9be4a8b43b66edfaf66f313cb598ffd326b9921d08a51c85c0767a7037e0e911",
+      "extension/python-lab-settings.mjs": "5442e1441e390bedd8a18c36f9536266bb3c085c0450ff0b81c3abb6ba964f14",
+      "extension/queue-page.mjs": "e210d2367685a8ba820c8d57af4cb096b885b422c82663013791064daa032831",
       "extension/queue-service.mjs": "082da1e5f4121e770b4048d461196ae547fdb85d85e8a85aea741bbf33dba114",
       "extension/queue-settings.mjs": "59b3528440310897fe332c7944d9e815644b7f61c4b25596c520eafa894f803a",
       "extension/recorder-panel.css": "88f0585dca6657875ecc8c1aab19ae9bb17bafee76d8151afbfbc05e0d60a1d3",
@@ -9308,22 +9308,25 @@
       "src/chrome/daily-badge.mjs": "936580d6b71a714c20f7517fc80bee12d3c29ed459774a8908ca984577895b36",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
       "src/chrome/debug-preference.mjs": "abcc65ab3946999b1b970bd13162cce702a159497790718f476c5e8986213de5",
+      "src/chrome/local-download-service.mjs": "680a8c497003326681ef697461b65633ab20eafc5c2f94faf727504d79756697",
       "src/chrome/local-preference.mjs": "e8013683e101662556b0a87138585084fe80f9ae35389c9eeaad6c54a5c3a944",
-      "src/chrome/local-upload-batch.mjs": "43d24ef575056ce5b82f42c4fdb0d4912e322d4c3b8ec42afcc4efb5e6533df6",
-      "src/chrome/local-upload-files.mjs": "9540fe813199971e452342e5dd300f1280b6ca33be9e0c2f7a7dab3f96a8e2e6",
+      "src/chrome/local-upload-batch.mjs": "6624b79c22deac7570ef84464707e42650fb38d1abdbd0e4b33d2112c1c7f6e9",
+      "src/chrome/local-upload-files.mjs": "6e26b561647812eaf1a6ce506d1f7fcf5723b2c8feef4029288946b604844a5a",
       "src/chrome/local-upload-plan.mjs": "c0f92da5446664b031eace10acbd431990585220fa35f533d6933c530ccfe667",
-      "src/chrome/local-upload-receipt-download.mjs": "f0f6baad2ec688a37e06d75494fb15bc4565f4f191f5ea5c1a6b30f1bb8d7471",
-      "src/chrome/local-upload-service.mjs": "96fe560130e619715931b1e42d24509de996beb149fc38c6f6abf4edb3616c95",
+      "src/chrome/local-upload-receipt-download.mjs": "125952ee528ed1a7f6cdecb28656adae611a9a45efbe629f9d3d56b9b13f0549",
+      "src/chrome/local-upload-service.mjs": "e18dc5e2047214eaef98ef46e85edd39a40b7496915ea57352375d42229cf384",
       "src/chrome/mirror.mjs": "39718d94a1ef8c7e8571ab1a8c1c1c94b0a8792dd7f8d1bc74fe39c0c02aad4d",
       "src/chrome/provider-panel.mjs": "4717e381c8503362164040b16e9e3bad45e978b18735b564f303e51346f7ea3a",
       "src/chrome/python-lab/campaign-policy.mjs": "fceedb79cde3c46bc167fc761ad7a435519f51290fe15fe6fafa7183c2076f7e",
       "src/chrome/python-lab/diagnostics.mjs": "c1be0ffd8bfd25cbcfb340ed548ab0a277ef299465cad36d359d4067cd7169b3",
-      "src/chrome/python-lab/session.mjs": "f50a2f4df22dcf08329c2653cb2b96e77246286238bf6593a13541db65670fb7",
+      "src/chrome/python-lab/session.mjs": "1e94b459948e42f231699ebda9018246ff23c69546a9267c051a18da5f2601eb",
       "src/chrome/python-lab/spool.mjs": "4314cd3cadb4abbedcd2341e492c6ed6f5a9d2e1f64b1a7bab88bdb2d5249b20",
       "src/chrome/python-lab/vendor/sha256.mjs": "d1cc9098f317cf4c5c1652090f680cd4303a9854e345845199ccdae64269c79e",
+      "src/chrome/receipt-delivery.mjs": "01805e2eba62c34930c92fef123940d2e57ac6954ac8be51f9a73c3086539e57",
       "src/chrome/registrar.mjs": "5439ead09e28f0f90774eddc00400eb16feb8a1741d59dae017a5dfc37885317",
       "src/chrome/save-notice.mjs": "1c20f090f7950e57be73afd0e8cc8c5dd1d7af6bc09b1f6241ed249064dfa2a9",
       "src/chrome/screenshot-menu.mjs": "a0a7a5b749721def90387ddc52ef6cbd3f2e30fa9cf41a98cc6eb4048026ee21",
+      "src/chrome/transfer-outcome.mjs": "cf17531f0e2906df85462021ae879a295b21fd22159d12230c7c1de2e29aa8b0",
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/chrome/upload-receipt-policy.mjs": "876d789235451953a118c4a09a7fe19fd12bae95b539910ef43702b001c825ec",
       "src/chrome/visible-tab-screenshot.mjs": "e991f22723f02fd367e5669d33cc50e742c2dde2c155675872e45750a20c1ecb",
@@ -9361,10 +9364,10 @@
       "src/explorer/depth-inventory.mjs": "6b0f897bf6be5fd23f533fe6a00cbca4c1c2151b63f1f243c968e640c1d8c563",
       "src/explorer/directory-inventory-store.mjs": "e42cac6d8a43a2f922f8ac257b257aa5b0cae3c2ceff27f1a7277b3956c52893",
       "src/explorer/directory-search.mjs": "7130d5060dc7d98f71146258222c6bf22b351544ae3bec17589692a3e05c29b5",
-      "src/explorer/download-archive.mjs": "84fd9189f7d77e07f36542755217f2def5bfb0ed8eff5c4a999efa2930c0088d",
+      "src/explorer/download-archive.mjs": "03f489caf41f863a5ef3cdd8a8f54dfa8bbf17a15bd1838c5df13ec6c73beeba",
       "src/explorer/export-preferences.mjs": "6018e225359bae5b423b81750573f4169d6c890ac6c8474c910f4ff66f1ba726",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
-      "src/explorer/file-api.mjs": "4f213c2efcdb81ae37943a54b0de8a581e061b9a13d035e57c3630c58c30b3b7",
+      "src/explorer/file-api.mjs": "886ad7ec225b2030f79eaffdbe7af804b2a80c37ab65f4123a23f93d3b1cc67e",
       "src/explorer/image-preview.mjs": "9912a998cdbb8f9e4ae977347a0ab4876303776d10621dd7c4d1ae5dd7454398",
       "src/explorer/index.mjs": "bd20dfee3353476fd2c815fae25d94c21d87e866a7f24085f4e4b8014a4b3fd0",
       "src/explorer/layout.mjs": "5d143323eb8ef11cc790bb03a867518aea15357e21f0afee910f38ac652fc3e7",
@@ -9377,19 +9380,20 @@
       "src/explorer/object-exports.mjs": "3aae075968b96db78e60839db7641e243d8deda28a3f5715f56b8e51cfa8182a",
       "src/explorer/observed-api.mjs": "b125c9fbe3c643b4240baaab67ca0ff76fba2fcc984ce63abae7df3ee9f92acf",
       "src/explorer/performance.mjs": "b8700610c58a69cbade1378c22a156e869301be6dc457172137b0122a820bb6e",
-      "src/explorer/r2-adapter.mjs": "e4703007a10cf356e0279649d48fc8282b2a65048496c04f79466dbfc950b38d",
+      "src/explorer/r2-adapter.mjs": "a9d2c8deb05e751ff0128de435ff2d6133e2769b23e4a80bc260054c30b57c1a",
       "src/explorer/read-coalescer.mjs": "a6a4906fc54e0a0e61234756bf7a262ffdd801ae258b67a8afae72b3bfae8e5f",
       "src/explorer/save-provider.mjs": "20d846a78bee30ee774b7a35181fffd8db450805f97482f86f64f4394efc758d",
       "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "8bc0402ab039f1f4dbc202a32f6d9c2be1612b746220ba42cdfee358ab083f4b",
-      "src/glaciaring/catalog.mjs": "e2922b82c5aa1a4212401d0de5a87d00a90f823a39e235bdb5bb284cbf829e1c",
+      "src/glaciaring/catalog.mjs": "35ed56210d28ac5cbe5ef7a0630ef61ac3293e95f9fee882f27d1b8a7a492e36",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "4cb85bec8ea3b1ce664c436648756f868a179d3fd2709f78e801dcfba784e032",
       "src/glaciaring/support-report.mjs": "89ddf6b76469492630b2978dbdd4ea590fbb47b43bdfb3a4d9e5d6ccbc207443",
       "src/history/model.mjs": "1f7d5390fcb8459cc145731c96f46ed5eb9756560065df4d7a7171a6999a91ac",
       "src/history/navigation.mjs": "26012ae774c3c0c53c5899822b2f4dd1472b82e3aa32b67ca2a0fc7d50c76104",
       "src/history/screenshot-output.mjs": "a91e3b60e3e1e506728f98d356c93c38a0dc7c099142fc31c3c63ebf09c7ba24",
+      "src/history/upload-preference.mjs": "d3219c54585509b71c544f27eda22deb382f1f10bb6d067dabc4ef1655b25cb8",
       "src/history/verified-save.mjs": "527831725c4c8abf737d1873a569f6b4e5316879ae7d0fce5e0540406b679a89",
       "src/inventory/discovery.mjs": "aac3ecefeeee7f59b94cf6e8717b5da2c9a64da3d63c48b4b07a0bd04745f89e",
       "src/lab-worker.mjs": "290e671d490ccbbedafb96455104969da8ad498468b8c3fca46ba1013e83783b",
@@ -9402,7 +9406,7 @@
       "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
-      "src/persistence/current-store.mjs": "8e19b5f3b4df9acb54994eb18c34641d1330df2bd4dc463bff77b0e022e0631d",
+      "src/persistence/current-store.mjs": "ff3e67fc36d9b5f8f92b22ec85d7b58789bc0d8d08b1d9f6578f16347095d0d4",
       "src/persistence/external-recovery.mjs": "b504a73b76dc53864de870056b7636a74b11259f58db1e10a5be73a4eb8cd336",
       "src/persistence/node-files.mjs": "81f8b801bbb75769e16afd7608cb54e01538f7c43bc241af376cb1c30071249e",
       "src/persistence/profile-preservation.mjs": "38482da515ec9214119dccdc186f9ac21bb0fc9139db88b23b44fefb2a345f32",
@@ -9410,8 +9414,8 @@
       "src/persistence/schema.mjs": "b15bfb031f909fa8fa94160050bdab79b0c0488aca1f41b8f08905963936a4ed",
       "src/queue/calendar.mjs": "cf3180e9fecc654094098d4a207bc2d6dfc5fa22432b3ba25eb6dcdd968c054c",
       "src/queue/export.mjs": "c53e3995e29e5f02ab1f34d194d5f084514504dd06316a287570dbe109ebf4bd",
-      "src/queue/receipts.mjs": "4202e683f1ceb9c8257aa2632fad7553aed4b311245a70c797f5e0e62a84ddaa",
-      "src/queue/store.mjs": "fe31dce5bd6e275a0395e89ef228fd08e1bc8fa49fea09a11f58fdfd154df7b6",
+      "src/queue/receipts.mjs": "8c06a2d62fdbf919f6bd9523dd963aa60c7de208496ac6b7c4fd2befda474fce",
+      "src/queue/store.mjs": "6efc0df6a41b191de94a890863575b5906cf41c245b01a85878730063e0e65c8",
       "src/queue/zip.mjs": "7196989fd505dfc4e342654c54d5fab572e373919fb8eddcd225d8adf469b615",
       "src/recorder/archive-stream.mjs": "4dd534f0563cfb5b6f6e06713ae723fe1b493ba8d1e87a276dc4315797d7f739",
       "src/recorder/export.mjs": "3f4d178e7476294674e3f3b97734494c2b09f67df46c98486ef30a82f652f327",
@@ -11380,7 +11384,7 @@
         "preconditions": "Open/preview file",
         "trigger": "explorer",
         "guard": "Async read with epoch fence; preview memory budget separate",
-        "actual": "Same trusted readFileChunk API validates canonical strong ETag, listed size, exact offsets/totals/counts and EOF for full200 or206 responses. Byte-derived image decode/cache drives thumbnails and enlarged previews. Download streams through this same validator; abort on failure, await close and local file-size readback before completion.",
+        "actual": "The trusted readFileChunk API validates the selected image identity, bounded byte ranges, and EOF. Byte-derived image decode/cache drives thumbnails and enlarged previews. Explorer transfers use the background path in EXPLORER_DOWNLOAD.",
         "apiMethods": [
           "readFile"
         ],
@@ -11406,11 +11410,6 @@
             "path": "src/explorer/image-preview.mjs",
             "symbol": "readPreviewBytes",
             "line": 25
-          },
-          {
-            "path": "extension/app.mjs",
-            "symbol": "async function downloadEntry",
-            "line": 1800
           }
         ],
         "verification": {
@@ -11423,33 +11422,53 @@
       },
       {
         "id": "EXPLORER_DOWNLOAD",
-        "preconditions": "Explicit streaming Download",
+        "preconditions": "Explicit Shelf download and a Chrome picker destination with write permission",
         "trigger": "explorer",
-        "guard": "Bounded Range chunks with ETag continuation; scoped source",
-        "actual": "Write to user-chosen file with backpressure; refuse changed object",
+        "guard": "Exact account and OAuth session, frozen file or ZIP inventory, conditional stream, staged local writable, and bounded retries",
+        "actual": "Persist an accepted intent and handle before provider file reads. Read through the production R2 File API with identity checks and backpressure. Persist local publication intent before closing the file. A reopened file of the expected size confirms delivery.",
         "apiMethods": [
           "readFileChunk"
         ],
         "identity": "symbolic SELECTED_PROVIDER / AUTHORIZED_CONNECTION / SELECTED_ACCOUNT / CHOSEN_BUCKET / EXACT_PREFIX; never inferred from website context",
-        "nextState": "Write to user-chosen file with backpressure; refuse changed object",
-        "uiEffect": "Write to user-chosen file with backpressure; refuse changed object",
-        "externalResourceEffect": "none",
-        "persistence": "none",
-        "errors": [],
-        "retry": "No blind write replay. Explicit inspection after uncertainty. See specific source guard.",
+        "nextState": "Queue and Downloads consume the result. A restart across an unconfirmed close stays uncertain.",
+        "uiEffect": "Original file, selected-file ZIP, and recursive ZIP continue independently of the Shelf.",
+        "externalResourceEffect": "Authorized R2 reads and explicit local file publication",
+        "persistence": "CURRENT download intent, frozen inventory, publication and receipt rows. The optional JSON export has independent Chrome delivery evidence.",
+        "errors": [
+          "DOWNLOAD_DESTINATION_PERMISSION_REQUIRED",
+          "DOWNLOAD_DESTINATION_CHANGED",
+          "DOWNLOAD_PUBLICATION_UNCONFIRMED",
+          "ZIP32_LIMIT",
+          "ZIP32_ENTRY_LIMIT"
+        ],
+        "retry": "Bounded attempts for eligible transient reads extend the same job ID. A job with uncertain publication is fenced.",
         "sourceRefs": [
           {
+            "path": "extension/app.mjs",
+            "symbol": "function downloadEntry(",
+            "line": 1978
+          },
+          {
+            "path": "extension/explorer-exports.mjs",
+            "symbol": "async function transfer(",
+            "line": 165
+          },
+          {
+            "path": "src/chrome/local-download-service.mjs",
+            "symbol": "export function createLocalDownloads",
+            "line": 36
+          },
+          {
             "path": "src/explorer/r2-adapter.mjs",
-            "symbol": "async readChunk",
-            "line": 232
+            "symbol": "async readStream(",
+            "line": 288
           }
         ],
         "verification": {
-          "level": "SOURCE_OBSERVED",
+          "level": "CHROMIUM_OPFS_AND_LOCAL_PROVIDER_FIXTURE",
           "status": "PASS",
-          "meaning": "Source behavior observed, not live certification",
-          "testFile": "tests/p0-repair.test.mjs",
-          "runtime": "NOT_TESTED_INSTALLED_OR_LIVE"
+          "testFile": "scripts/verify-durable-local-download.mjs",
+          "runtime": "NOT_TESTED_INSTALLED_WINDOWS_OR_LIVE"
         },
         "contractViolation": null
       },
@@ -13571,7 +13590,7 @@
         "installedWindows": "NOT_VERIFIED"
       }
     },
-    "sourceState": "Working REDOWN 0.3.29 source with exact file hashes",
+    "sourceState": "ReDown 0.3.32.4 Part 1 reliability foundation; exact source file hashes",
     "sourceErrorInventory": {
       "extension/app.mjs": [
         "AUTH_STATUS_UNAVAILABLE",
@@ -15566,7 +15585,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "2afb0742d8da79d42759efc4df5826df10c3c550490c20c6fbce0ea04993d800",
+    "digest": "2f47d1f5367c8b7aa599dea0564d07857c383bf69b2cea44c48bb718bb7fb0cf",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",
@@ -15712,6 +15731,12 @@
       "getUrl": "The existing Explorer configuration defaults to On when unset. The existing public-access consent still applies.",
       "upload": "The trusted Shelf uses the existing Universal File API to stage, verify, and commit local files to the exact Cloudflare folder.",
       "evidence": "11.24.2026/REDOWN_0329_VERIFICATION.md"
+    },
+    "part1Reliability": {
+      "release": "0.3.32.4",
+      "base": "1bad4007678fd3f2dcb628a3681598850feeb36e",
+      "handoff": "11.25.2026/alpha-three-runs/01-reliability-foundation/HANDOFF.md",
+      "scope": "R2 local uploads and downloads, scoped Python Laboratory, receipts, and upload History; tests and remaining acceptance are in the handoff."
     }
   },
   "changeLog": [

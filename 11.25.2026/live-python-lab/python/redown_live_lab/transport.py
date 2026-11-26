@@ -164,7 +164,7 @@ class ExtensionClient:
         if count != row['sizeBytes']:
             raise LabError('SOURCE_CHANGED')
 
-    def read(self, identity, row, timeout, receipt, output, notify, stop):
+    def read(self, identity, row, timeout, receipt, output, notify, stop, publication=None):
         receipt = receipt or {}
         self.query('readOpen', id=identity, path=row['remotePath'], size=row['sizeBytes'],
                    etag=receipt.get('etag'), version=receipt.get('version'), timeout=timeout)
@@ -172,20 +172,18 @@ class ExtensionClient:
             observed = self.wait(identity, notify=notify, stop=stop)
             if observed['state'] != 'PASS':
                 return observed
-            return self.pull(identity, row, observed, output, notify, stop)
+            return self.pull(identity, row, observed, output, notify, stop, publication)
         except (KeyboardInterrupt, LabError, OSError):
             self.cleanup('cancel', id=identity)
             raise
         finally:
             self.cleanup('closeTransfer', id=identity)
 
-    def pull(self, identity, row, observed, output, notify, stop):
+    def pull(self, identity, row, observed, output, notify, stop, publication=None):
+        from .download_output import DownloadOutput
+
         count, digest = 0, hashlib.sha256()
-        stream = None
-        try:
-            if output is not None:
-                output.parent.mkdir(parents=True, exist_ok=True)
-                stream = output.open('xb')
+        with DownloadOutput(output) as sink:
             while True:
                 stop()
                 frame = self.query('pull', id=identity, offset=count)
@@ -199,24 +197,23 @@ class ExtensionClient:
                 if count != frame['offset'] or count > row['sizeBytes']:
                     raise LabError('STREAM_SIZE_MISMATCH')
                 digest.update(value)
-                if stream is not None:
-                    stream.write(value)
+                sink.write(value)
                 notify({'phase': 'verified-bytes-to-cli', 'bytes': count})
                 if frame['done']:
                     break
             calculated = digest.hexdigest()
-            if count != row['sizeBytes'] or calculated != observed['sha256'] or calculated != row['sha256']:
+            trusted = row.get('sha256')
+            if count != row['sizeBytes'] or calculated != observed['sha256'] or trusted is not None and calculated != trusted:
                 raise LabError('READBACK_SHA256_MISMATCH')
-            if stream is not None:
-                stream.flush()
-                os.fsync(stream.fileno())
-            return {**observed, 'clientSha256': calculated, 'clientBytes': count,
-                    'savedCopy': str(output) if output is not None else None}
-        except BaseException:
-            if stream is not None:
-                stream.close()
-                output.unlink(missing_ok=True)
-            raise
-        finally:
-            if stream is not None:
-                stream.close()
+            stop()
+            if output is not None and publication:
+                publication('downloadPublishRequested', count, calculated)
+            try:
+                disk = sink.publish(count, calculated, stop)
+            except (LabError, OSError):
+                if sink.published:
+                    raise LabError('DOWNLOAD_PUBLICATION_UNCONFIRMED') from None
+                raise
+        return {**observed, 'clientSha256': calculated, 'clientBytes': count,
+                'savedCopy': str(output) if output is not None else None,
+                'independentSourceSha256': trusted is not None, **disk}

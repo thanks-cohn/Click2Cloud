@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
 import {openAsBlob} from 'node:fs';
-import {mkdir,mkdtemp,open,readFile,rm,writeFile} from 'node:fs/promises';
+import {cp,mkdir,mkdtemp,open,readFile,rm,writeFile} from 'node:fs/promises';
 import {createConnection} from 'node:net';
 import {join,resolve} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -37,9 +37,11 @@ const childEnv={...process.env,REDOWN_LAB_STATE_DIR:stateRoot};
 const report={evidenceClass:'python-native-loopback-workerd-r2-fixture',sourceRevision:BUILD_INFO.revision,
  extensionVersion:BUILD_INFO.extensionVersion,remoteCloudflareWrites:0,checks:[]};
 const evidence=join(temp,'fixture-summary.json');
+const faults=process.env.REDOWN_RELIABILITY_FAULTS==='1';
 const ownerCount=Number(process.env.REDOWN_OWNER_FIXTURE_FILES??0);
 const children=new Set();
 let worker,lab,executeFault=null,r2Puts=0,workerWrites=0,providerReads=0,current,history;
+let stageFaults=0,publicationFaults=0,readFaults=0;
 await mkdir(stateRoot,{mode:0o700});
 await mkdir(spoolRoot);
 
@@ -156,6 +158,7 @@ try{
    if(options.method==='PUT'){
     const key=decodeURIComponent(encoded);
     assert.match(key,/^permitted\/\.redown-python-lab\/[0-9a-f-]+\/[0-9a-f-]+\/\.redown-beta-uploads\//);
+    if(faults&&!stageFaults){stageFaults++;return new Response(null,{status:502});}
     r2Puts++;
     await bucket.put(key,await options.body.arrayBuffer());
     return Response.json({success:true});
@@ -165,7 +168,10 @@ try{
     if(!item)return new Response(null,{status:404});
     if(options.headers?.['If-Match']){
      assert.equal(options.headers['If-Match'],item.httpEtag);
-     if(!encoded.includes('.redown-beta-uploads'))providerReads++;
+     if(!encoded.includes('.redown-beta-uploads')){
+      if(faults&&!readFaults){readFaults++;return new Response(null,{status:502});}
+      providerReads++;
+     }
     }
     return new Response(item.body,{headers:{etag:item.httpEtag,'content-length':String(item.size)}});
    }
@@ -188,7 +194,9 @@ try{
   runFileUpload:(input,options)=>service.run(input,options),
   executeFileMessage:async(...args)=>{
    const value=await execute(...args);
-   if(executeFault==='lost-ack')throw Error('Fixture dropped signed Worker response after commit');
+   if(executeFault==='lost-ack'||faults&&!publicationFaults){
+    publicationFaults++;throw Error('Fixture dropped signed Worker response after commit');
+   }
    return value;
   }
  });
@@ -239,8 +247,10 @@ try{
   const check=await cli(['check-location','--run',run.receiptBundle]);
   assert.equal(check.status,'PASS');assert.equal(check.matchedFiles,ownerCount);
   const ops=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
-  assert.equal(ops.filter(row=>row.event==='uploadAcknowledged').length,ownerCount);
-  assert.equal(ops.filter(row=>row.event==='result'&&row.state==='PASS'&&row.readback===null).length,ownerCount);
+  assert.equal(ops.filter(row=>['uploadAcknowledged','recoveredPublication'].includes(row.event)).length,ownerCount);
+  assert.equal(ops.filter(row=>row.event==='result'&&row.state==='PASS'&&row.readback===null).length,
+   ownerCount-Number(faults));
+  if(faults)assert(ops.some(row=>row.event==='retryScheduled'&&row.direction==='upload'&&row.code==='HTTP_502'));
   await Promise.all(accounting);
   const queue=await history.jobs({limit:ownerCount});
   assert.equal(queue.finished,ownerCount);
@@ -250,15 +260,39 @@ try{
    files:ownerCount,bytes,elapsedMs:Math.round(performance.now()-start),receiptSummary:run.benchmark,
    publicationWrites:workerWrites,stagingPuts:r2Puts,independentContentGets:providerReads,
    audit:run.locationAudit,usage:run.usage,receiptBundle:run.receiptBundle});
-  if(ownerCount<=24){
+  if(faults||ownerCount<=24){
    const download=await cli(['download-campaign','--run',run.receiptBundle,'--retain-downloads','--live','--approve-cost-usd','1']);
    assert.equal(download.downloadStatesInWindow.PASS,ownerCount);
    assert.equal(download.benchmark.independentSha256WithinWindow,ownerCount);
    assert.equal(r2Puts,ownerCount);assert.equal(workerWrites,ownerCount);assert.equal(providerReads,ownerCount);
    assert.equal((await cli(['check-location','--run',run.receiptBundle])).status,'PASS');
    assert(download.share.every(path=>!path.includes('/downloads/')));
+   const disk=await cli(['check-downloads','--run',run.receiptBundle,'--window',download.windowId]);
+   assert.equal(disk.checkedFiles,ownerCount);
+   if(faults){
+    const events=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
+    assert(events.some(row=>row.event==='retryScheduled'&&row.direction==='download'&&row.code==='HTTP_502'));
+    assert.deepEqual([stageFaults,publicationFaults,readFaults],[1,1,1]);
+    // Preserve the original receipt. In a separate fixture copy, emulate
+    // abrupt CLI loss after a final-file publication and before its result.
+    const interrupted=join(local.runs,'interrupted-download-evidence');
+    await cp(run.receiptBundle,interrupted,{recursive:true});
+    const missing=events.find(event=>event.event==='result'&&event.action==='download'&&event.state==='PASS');
+    const torn=events.filter(event=>event!==missing).map(event=>JSON.stringify(event)).join('\n')+'\n{"event":';
+    await writeFile(join(interrupted,'operations.ndjson'),torn);
+    const recovered=await cli(['check-downloads','--run',interrupted,'--window',download.windowId]);
+    assert.equal(recovered.checkedFiles,ownerCount);
+    assert.equal(recovered.recoveredPublicationFiles,1);
+    assert.equal(providerReads,ownerCount);
+    receipt('Injected 502 and lost acknowledgement preserve each unique logical transfer',
+     {files:ownerCount,upload502:stageFaults,postPublicationLostAck:publicationFaults,download502:readFaults,
+      diskSha256Files:disk.checkedFiles,lostLocalAcknowledgementsRecovered:recovered.recoveredPublicationFiles,r2Puts,workerWrites,providerReads,stagingBytes:run.locationAudit.stagingBytes,
+      uploadReceipt:run.receiptBundle});
+   }
    receipt('Download-only under a read-write grant verifies original keys with zero new PUT or publication calls',
     {files:ownerCount,bytes,reads:providerReads,verified:download.benchmark.independentSha256WithinWindow});
+  }
+  if(ownerCount<=24&&!faults){
    const nextInput=join(temp,'deadline-input');
    await mkdir(nextInput);
    for(let i=0;i<12;i++)await writeFile(join(nextInput,`${i}.txt`),String(i));
@@ -276,7 +310,7 @@ try{
    const lostInput=join(temp,'lost-ack-input');
    await mkdir(lostInput);await writeFile(join(lostInput,'lost.txt'),'lost acknowledgement');
    executeFault='lost-ack';
-   const lost=await cli(['campaign','--input',lostInput,'--execution-seconds','90','--audit-seconds','30',
+   const lost=await cli(['campaign','--input',lostInput,'--execution-seconds','90','--audit-seconds','30','--retry-reserve','0',
     '--live','--approve-cost-usd','1'],3);
    executeFault=null;
    assert.equal(lost.productionConfirmedFiles,0);
@@ -296,6 +330,27 @@ try{
    assert.equal((await cli(['check-location','--run',run.receiptBundle])).status,'PASS');
    receipt('A freshly authorized read-only grant can independently audit the exact original campaign',
     {matched:ownerCount,additionalPublicationWrites:0});
+   await lab.ui('end');
+   const preexisting='other/read-only-fixture/';
+   await Promise.all([
+    bucket.put(preexisting+'nested/two.txt','two'),
+    bucket.put(preexisting+'one.txt','one'),
+    bucket.put(preexisting+'empty.bin','')
+   ]);
+   const selected=await bind('read-only',null,{readSelection:{prefix:preexisting,maxReadAttempts:5},
+    ceilings:{...campaignDefaults,files:0},minutes:75});
+   await cli(['pair','--code',selected.pairCode]);
+   const priorPuts=r2Puts,priorWrites=workerWrites;
+   const downloadOnly=await cli(['download-selection','--output','preexisting','--expect-files','3','--retain-downloads',
+    '--inventory-requests','10','--inventory-traffic-bytes','65536','--execution-seconds','120','--live','--approve-cost-usd','1']);
+   assert.equal(downloadOnly.target.prefix,preexisting);
+   assert.equal(downloadOnly.downloadStatesInWindow.PASS,3);
+   assert.equal(downloadOnly.usage.readAttempts,3);
+   assert.equal(downloadOnly.benchmark.independentSha256WithinWindow,0);
+   assert.equal((await cli(['check-downloads','--run',downloadOnly.receiptBundle])).checkedFiles,3);
+   assert.equal(r2Puts,priorPuts);assert.equal(workerWrites,priorWrites);
+   receipt('A separate read-only selection freezes existing remote keys and verifies reopened local files',
+    {matched:3,independentSourceHash:false,reopenedDiskHashes:3,additionalPublicationWrites:0});
   }
   report.state='PASS';
  }else{

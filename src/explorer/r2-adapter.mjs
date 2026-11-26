@@ -11,6 +11,14 @@ export function isTextPreview(objectKey){
   return textNames.has(leaf)||previewType(leaf)==='text/plain'||
     /\.(svg|jsonl|ndjson|toml|ini|cfg|conf|properties|sql|tsv|rst|rb|php|cs|kt|lua|fish|zsh|bash|diff|patch|cmd|env)$/.test(leaf);
 }
+// Preserve a bounded provider backoff hint without forwarding response headers.
+function retryHint(response){
+  const value=response.headers.get('retry-after');
+  if(!value)return {};
+  const ms=/^\d+$/.test(value)?Number(value)*1000:Date.parse(value)-Date.now();
+  return Number.isSafeInteger(ms)?{retryAfterMs:Math.max(0,ms)}:{};
+}
+
 export function createR2Adapter({send=message=>chrome.runtime.sendMessage(message),http=globalThis.RedownCloudflareApi}={}) {
   async function message(type,input={},options={}) {
     options.signal?.throwIfAborted();
@@ -46,7 +54,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         return [code,message].filter(Boolean).join(': ');
       }).join('; ');
       const guidance=response.status===401?'Cloudflare session expired. Reconnect Cloudflare.':response.status===403?'Cloudflare denied access. Check account authorization.':response.status===404?'This bucket may no longer exist. Refresh connection discovery.':'Retry Refresh; no files were changed.';
-      throw Object.assign(Error(`Cloudflare could not list this folder (HTTP ${response.status}). ${details} ${guidance}`),{code:'HTTP_'+response.status});
+      throw Object.assign(Error(`Cloudflare could not list this folder (HTTP ${response.status}). ${details} ${guidance}`),{code:'HTTP_'+response.status,...retryHint(response)});
     }
     // Legacy accepts both REST envelopes and the top-level objects shape.
     const result=body?.result ?? body,info=body?.result_info || {};
@@ -224,7 +232,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{method:'PUT',headers:{'content-type':file.type||'application/octet-stream'},body:file,timeoutMs:options.uploadTimeoutMs,signal});
         const body=await response.json().catch(()=>null);
         if(!response.ok || body?.success!==true)throw Object.assign(Error('Upload was not confirmed.'),
-          {code:response.ok?'R2_STAGE_UNCONFIRMED':'HTTP_'+response.status});
+          {code:response.ok?'R2_STAGE_UNCONFIRMED':'HTTP_'+response.status,...retryHint(response)});
         const uploaded=await stat({source:l,key:staging},options);
         if(Number(uploaded.object?.size)!==file.size)throw Error('Uploaded file size could not be verified.');
         await verifyUpload(l,staging,file,options);
@@ -242,7 +250,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
           throw Error('Final upload destination was not confirmed.');
         return {...result,key:finalKey,verification:'byte-for-byte staging read-back and provider final copy receipt; not independent final SHA-256'};
       }catch(error){
-        if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,cause:error});
+        if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,retryAfterMs:error.retryAfterMs,cause:error});
         throw error;
       }
     },
@@ -253,7 +261,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       const response=await http.request(path,{signal,timeoutMs:requestTimeoutMs??providerDefaults.requestTimeoutMs,headers:{Range:'bytes='+offset+'-'+(offset+length-1),...(wanted?{'If-Match':'"'+wanted+'"'}:{})}});
       try{
         if(response.status===412)throw readError('OBJECT_CHANGED');
-        if(!response.ok&&response.status!==416)throw Object.assign(Error('OBJECT_READ_FAILED'),{code:'HTTP_'+response.status});
+        if(!response.ok&&response.status!==416)throw Object.assign(Error('OBJECT_READ_FAILED'),{code:'HTTP_'+response.status,...retryHint(response)});
         const currentEtag=objectETag(response.headers.get('etag'));if(wanted&&currentEtag!==wanted)throw readError('OBJECT_CHANGED');
         if(response.status===416){const m=/^bytes \*\/(\d+)$/.exec(response.headers.get('content-range')??'');if(m&&Number(m[1])===offset)return {bytes:[],offset,total:offset,etag:currentEtag,done:true};throw readError('RANGE_RESPONSE_INVALID');}
         if(response.status===200){
@@ -288,7 +296,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       });
       if(!response.ok||!response.body){
         await response.body?.cancel();
-        throw readError(response.status===412?'OBJECT_CHANGED':'HTTP_'+response.status);
+        throw Object.assign(readError(response.status===412?'OBJECT_CHANGED':'HTTP_'+response.status),retryHint(response));
       }
       const reader=response.body.getReader();
       let size=0, ended=false, extra=false;

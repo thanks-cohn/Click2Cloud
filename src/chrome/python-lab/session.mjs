@@ -1,5 +1,6 @@
 import {sha256} from './vendor/sha256.mjs';
 import {localUploadKey,maximumObjectBytes,uploadId,uploadError} from '../local-upload-plan.mjs';
+import {retryableTransferCode} from '../transfer-outcome.mjs';
 import {uploadCode} from '../local-upload-service.mjs';
 import {objectETag,key as objectKey,name} from '../../explorer/file-api.mjs';
 import {normalizeTarget,normalizePrefix} from '../../core/menu-identity.mjs';
@@ -19,7 +20,7 @@ export const limits=Object.freeze({
  uploadTrafficFactor:4,chunkBytes,maxTransferSeconds:90,maxRunSeconds:3600
 });
 export const unsupported=Object.freeze(['copy','move','rename','delete','mkdir','search','preview','publicUrl',
- 'trueRemoteSave','parallelTransfers','failureInjection','providerJobReattach','preseedFromExternalNamespace']);
+ 'trueRemoteSave','parallelTransfers','failureInjection','providerJobReattach']);
 const maximums=[limits.maxFiles,limits.maxTrafficBytes,limits.maxDiskBytes,limits.maxProviderRequests,limits.maxOperations,limits.maxRunSeconds];
 const readScopes=['workers-r2.read','workers-r2-bucket-item.read'];
 const estimateStorage=()=>globalThis.navigator?.storage?.estimate?.();
@@ -152,13 +153,20 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   if(!opfsCapability())throw labError('LAB_OPFS_UNAVAILABLE');
  }
  function validateSelection(input){
-  requireKeys(input,['accountId','bucketName','mode','minutes','scopeId'],['ceilings','campaignId']);
-  const {accountId,bucketName,mode,minutes,scopeId,campaignId=null}=input;
+  requireKeys(input,['accountId','bucketName','mode','minutes','scopeId'],['ceilings','campaignId','readSelection']);
+  const {accountId,bucketName,mode,minutes,scopeId,campaignId=null,readSelection}=input;
   if(!/^[0-9a-f]{32}$/.test(accountId??'')||!/^[a-z0-9][a-z0-9-]{1,62}$/.test(bucketName??'')||
    !['read-only','read-write'].includes(mode)||!validInt(minutes,1,maxSessionMinutes)||
    (scopeId!==null&&!uploadId(scopeId))||
    (campaignId!==null&&(!uploadId(campaignId)||!scopeId||!input.ceilings))||
-   (mode==='read-only'&&!scopeId)||(mode==='read-write'&&scopeId&&!campaignId))throw labError('INVALID_INPUT');
+   (mode==='read-only'&&!scopeId&&!readSelection)||(mode==='read-write'&&scopeId&&!campaignId))throw labError('INVALID_INPUT');
+  if(readSelection){
+   requireKeys(readSelection,['prefix','maxReadAttempts']);
+   if(mode!=='read-only'||scopeId||campaignId||!input.ceilings||input.ceilings.files!==0||
+      typeof readSelection.prefix!=='string'||!validInt(readSelection.maxReadAttempts,1,20_000))
+    throw labError('INVALID_READ_SELECTION');
+   normalizePrefix(readSelection.prefix);
+  }
   if(input.ceilings!==undefined)validateCeilings(input.ceilings,maximumObjectBytes);
   return normalizeTarget({provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''});
  }
@@ -191,7 +199,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    .filter(row=>accountId===undefined||row.accountId===accountId&&row.bucketName===bucketName);
  }
  async function checkSelection(input,root,step){
-  const {accountId,bucketName,mode,minutes,scopeId,campaignId=null,ceilings}=input;
+  const {accountId,bucketName,mode,minutes,scopeId,campaignId=null,ceilings,readSelection}=input;
   const auth=await step('authorization',()=>sessionAuthority(root,mode));
   await step('selected-bucket',async signal=>{
    if(await checkBucket(root,auth,signal)!==true)throw labError('LAB_BUCKET_CHECK_FAILED');
@@ -207,12 +215,12 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   }):null;
   const id=previous?.id??crypto.randomUUID();
   const parent=mode==='read-write'&&!previous?await step('worker-prefix',async()=>normalizePrefix(await workerPrefix(root))):'';
-  const target=normalizeTarget({...root,prefix:previous?.prefix??parent+'.redown-python-lab/'+id+'/'});
+  const target=normalizeTarget({...root,prefix:readSelection?.prefix??previous?.prefix??parent+'.redown-python-lab/'+id+'/'});
   if(mode==='read-write')await step('upload-readiness',async signal=>{
    const checked=await checkUpload(target,signal);
    if(checked?.sessionId!==auth.sessionId)throw labError('AUTH_SESSION_CHANGED');
   },35_000);
-  return {target,id,auth,mode,minutes,campaignId,ceilings};
+  return {target,id,auth,mode,minutes,campaignId,ceilings,readSelection};
  }
  async function diskBudget(report,step,approved=limits.maxDiskBytes){
   const estimate=await step('storage-estimate',storageEstimate);
@@ -266,7 +274,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    await step('native-permission',requirePermission);
    await step('native-api',requireNativeApi);
    await step('opfs-capability',requireOpfs);
-   const {target,id,auth,mode,minutes,campaignId,ceilings}=await checkSelection(input,root,step);
+   const {target,id,auth,mode,minutes,campaignId,ceilings,readSelection}=await checkSelection(input,root,step);
    const directory=await step('spool-init-cleanup',async signal=>{
     await draining;
     await preparingSpool?.catch(()=>{});
@@ -278,7 +286,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    });
    const diskBytes=await diskBudget(report,step,ceilings?.diskBytes);
    await step('auth-recheck',()=>sessionAuthority(target,mode,auth.sessionId));
-   session={id,target,mode,directory,diskBytes,campaignId,ceilings,minutes,sessionId:auth.sessionId,report,
+   session={id,target,mode,directory,diskBytes,campaignId,ceilings,minutes,readSelection,readAttempts:0,sessionId:auth.sessionId,report,
     ready:false,client:null,ticket:null,attempts:0,usedRuns:new Set(),run:null,counters:{files:0,trafficBytes:0,providerRequests:0,operations:0}};
    const {ready}=await step('native-port-launch',()=>openRelay(session,attempt));
    await step('native-handshake',()=>ready,handshakeTimeoutMs,'NATIVE_HANDSHAKE_TIMEOUT');
@@ -421,6 +429,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
  async function admitCampaign(session,input){
   requireKeys(input,['runId','mode','digest','fileDigest','fileCount','policy','preparationMs']);
   const {runId,mode,digest,fileDigest,fileCount,preparationMs}=input;
+  if(session.readSelection)throw labError('LAB_READ_SELECTION_ADMISSION_REQUIRED');
   if(!session.ceilings)throw labError('LAB_CAMPAIGN_CEILINGS_REQUIRED');
   if(!uploadId(runId)||!validHash(digest)||!validHash(fileDigest)||!validInt(fileCount,1)||!validInt(preparationMs)||
      !['new','continue','audit','download'].includes(mode))throw labError('INVALID_INPUT');
@@ -440,6 +449,10 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    await rememberScope(session);
    await storage.set({[key]:{id:runId,scopeId:session.id,digest,fileDigest,fileCount,prefix,created:clock()}});
   }
+  return startCampaign(session,{runId,mode,prefix,fileDigest,fileCount,policy,preparationMs});
+ }
+
+ function startCampaign(session,{runId,mode,prefix,fileDigest,fileCount,policy,preparationMs,selectionPhase,readFiles}){
   live(session);
   if(!session.client)throw labError('EXTENSION_DISCONNECTED');
   const remainingMs=session.expiresAt-clock();
@@ -453,6 +466,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    used:{files:0,trafficBytes:0,providerRequests:0,operations:0},auditUsed:{trafficBytes:0,providerRequests:0,operations:0},
    controller,transferController,transferIds:new Set(),target:normalizeTarget({...session.target,prefix}),transfer:null,
    fileDigest,fileCount,fileHasher:sha256.create(),files:new Map(),fileIds:new Set(),sealed:false,
+   selectionPhase,readFiles,readAttempts:0,
    deadline:clock()+durationMs,transferDeadline:clock()+transferMs};
   run.timer=setTimeout(()=>{if(session.run===run)abortRun(session);},durationMs);
   run.transferTimer=setTimeout(()=>transferController.abort(labError('LAB_TRANSFER_DEADLINE')),transferMs);
@@ -461,6 +475,30 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   session.run=run;
   return {prefix,budget:run.budget,deadline:run.deadline,transferDeadline:run.transferDeadline,policyVersion:campaignPolicyVersion};
  }
+ async function admitReadSelection(session,input){
+  requireKeys(input,['runId','phase','inventoryDigest','readFiles','policy','preparationMs']);
+  const {runId,phase,inventoryDigest,readFiles,preparationMs}=input;
+  const approved=session.readSelection;
+  if(session.mode!=='read-only'||!approved)throw labError('LAB_READ_SELECTION_SCOPE_REQUIRED');
+  if(!uploadId(runId)||!validInt(preparationMs)||!['inventory','download'].includes(phase))
+   throw labError('INVALID_INPUT');
+  if(session.run)throw labError('LAB_RUN_BUSY');
+  if(draining)throw labError('LAB_TRANSFER_DRAINING');
+  const policy=validateCampaign(input.policy,session.ceilings,campaignHeadroom(session));
+  if(policy.budget.files!==0)throw labError('LAB_WRITE_SCOPE_DENIED');
+  if(phase==='inventory'){
+   if(inventoryDigest!==null||readFiles!==0||policy.execution!=='audit')throw labError('INVALID_READ_SELECTION');
+   session.selectionInventory=null;
+  }else{
+   const frozen=session.selectionInventory;
+   if(!validHash(inventoryDigest)||frozen?.runId!==runId||frozen.digest!==inventoryDigest||policy.execution==='audit')
+    throw labError('LAB_READ_INVENTORY_MISMATCH');
+   if(!validInt(readFiles,1,approved.maxReadAttempts-session.readAttempts))
+    throw labError('LAB_READ_FILE_BUDGET_EXCEEDED');
+  }
+  return startCampaign(session,{runId,mode:'download',prefix:session.target.prefix,
+   policy,preparationMs,selectionPhase:phase,readFiles});
+ }
  async function admit(session,input) {
   requireKeys(input,['runId','mode','budget']);
   requireKeys(input.budget,budgetFields);
@@ -468,7 +506,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   if(!uploadId(runId)||!['read','write'].includes(mode))throw labError('INVALID_INPUT');
   if(session.run)throw labError('LAB_RUN_BUSY');
   if(draining)throw labError('LAB_TRANSFER_DRAINING');
-  if(session.campaignId||mode==='write'&&(session.mode!=='read-write'||session.usedRuns.has(runId)))throw labError('LAB_WRITE_SCOPE_DENIED');
+  if(session.readSelection||session.campaignId||mode==='write'&&(session.mode!=='read-write'||session.usedRuns.has(runId)))throw labError('LAB_WRITE_SCOPE_DENIED');
   for(const [index,field] of budgetFields.entries()){
    const remaining=field==='diskBytes'?Math.min(session.diskBytes,limits.maxDiskBytes):maximums[index]-(session.counters[field]??0);
    if(!validInt(budget[field],field==='seconds'?1:0,remaining))throw labError('LAB_BUDGET_EXCEEDED');
@@ -540,7 +578,9 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    diagnostics:session.report.snapshot(),
    ...(session.ceilings?{campaign:{policyVersion:campaignPolicyVersion,approved:session.ceilings,
      headroom:campaignHeadroom(session),maxFileBytes:maximumObjectBytes,maxTransferSeconds:timerSeconds,
-     auditPageSize,authorizedMinutes:session.minutes,campaignId:session.campaignId}}:{}),
+     auditPageSize,authorizedMinutes:session.minutes,campaignId:session.campaignId,
+     ...(session.readSelection?{readSelection:{maxReadAttempts:session.readSelection.maxReadAttempts,
+      remainingReadAttempts:session.readSelection.maxReadAttempts-session.readAttempts}}:{})}}:{}),
    unsupported,readback:'independent OAuth Object API streaming with strong ETag and SHA-256'};
  }
  function uploadOptions(input,run){
@@ -551,22 +591,32 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
  async function transferOpen(session,run,method,input) {
   requireKeys(input,method==='uploadOpen'?['id','path','size','sha256','timeout','contentType']:['id','path','size','etag','version','timeout']);
   uploadOptions(input,run);
-  if(run.transferIds.has(input.id))throw labError('TRANSFER_ID_REUSED');
   if(input.size>run.budget.diskBytes||run.transfer)throw labError('LAB_SPOOL_UNAVAILABLE');
   const key=targetKey(run,input.path,input.size);
   const write=method==='uploadOpen';
   let retryPrecommit=false;
   if(run.policy){
-   const frozen=run.files.get(input.path);
-   if(!run.sealed||!frozen||frozen.size!==input.size||write&&(frozen.id!==input.id||frozen.hash!==input.sha256))
+   if(run.selectionPhase==='download'){
+    const frozen=session.selectionInventory?.files.get(input.path);
+    if(write||!frozen||frozen.size!==input.size||frozen.etag!==input.etag||frozen.version!==input.version)
+     throw labError('LAB_FROZEN_FILE_PLAN_MISMATCH');
+    if(run.readAttempts>=run.readFiles||session.readAttempts>=session.readSelection.maxReadAttempts)
+     throw labError('LAB_READ_FILE_BUDGET_EXCEEDED');
+   }else{
+    const frozen=run.files.get(input.path);
+    if(!run.sealed||!frozen||frozen.size!==input.size||write&&(frozen.id!==input.id||frozen.hash!==input.sha256))
     throw labError('LAB_FROZEN_FILE_PLAN_MISMATCH');
-   if(write){
-    const old=await readUploadOutcome?.(input.id);
-    if(old?.state==='verified'||old?.localUpload?.commitRequested===true)throw labError('LAB_OPERATION_RECONCILIATION_REQUIRED');
-    retryPrecommit=run.recoveryMode==='continue'&&['cancelled','failed'].includes(old?.state)&&
-     old.localUpload?.commitRequested===false&&old.localUpload.batchId===run.id&&old.localUpload.key===key;
+    if(write){
+     const old=await readUploadOutcome?.(input.id);
+     if(old?.state==='verified'||old?.localUpload?.commitRequested===true)throw labError('LAB_OPERATION_RECONCILIATION_REQUIRED');
+     retryPrecommit=['cancelled','failed'].includes(old?.state)&&old.localUpload?.commitRequested===false&&
+      old.localUpload.batchId===run.id&&old.localUpload.key===key&&old.localUpload.size===input.size&&
+      old.localUpload.source.accountId===run.target.accountId&&old.localUpload.source.bucketName===run.target.bucketName&&
+      (run.recoveryMode==='continue'||run.transferIds.has(input.id)&&retryableTransferCode(old.code));
+    }
    }
   }
+  if(run.transferIds.has(input.id)&&!retryPrecommit)throw labError('TRANSFER_ID_REUSED');
   if(write&&(run.mode!=='write'||!validHash(input.sha256)))throw labError('LAB_WRITE_SCOPE_DENIED');
   if(write&&(typeof input.contentType!=='string'||!/^[a-z0-9.+-]+\/[a-z0-9.+-]+$/.test(input.contentType)||input.contentType.length>128))
    throw labError('INVALID_CONTENT_TYPE');
@@ -575,10 +625,12 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   const reservation=write?{files:1,trafficBytes:input.size*limits.uploadTrafficFactor,operations:1}:
    {trafficBytes:input.size,operations:1};
   charge(session,run,reservation);
+  if(run.selectionPhase==='download'){run.readAttempts++;session.readAttempts++;}
   let spool;
   try{spool=await openLabSpool(session.directory,input.size);}
   catch(error){
    for(const [field,amount] of Object.entries(reservation)){run.used[field]-=amount;session.counters[field]-=amount;}
+   if(run.selectionPhase==='download'){run.readAttempts--;session.readAttempts--;}
    throw error;
   }
   if(grant!==session||session.run!==run){
@@ -615,7 +667,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    transfer.result=result;
   },error=>{
    transfer.result={state:transfer.kind==='upload'&&transfer.submitted?'UNCERTAIN':
-    transfer.signal.aborted?'CANCELLED':'FAIL',code:typed(transfer.signal.aborted?transfer.signal.reason:error)};
+    transfer.signal.aborted?'CANCELLED':'FAIL',code:typed(transfer.signal.aborted?transfer.signal.reason:error),...(Number.isSafeInteger(error?.retryAfterMs)?{retryAfterMs:error.retryAfterMs}:{})};
   }).finally(()=>{transfer.state='terminal';clearTimeout(transfer.idleTimer);clearTimeout(transfer.absoluteTimer);});
  }
  async function download(session,run,transfer) {
@@ -623,7 +675,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   const api=fileApi(session.sessionId,requests(session,run,limits.readRequests,signal));
   const timeouts=run.policy?{requestTimeoutMs:run.policy.requestSeconds*1000}:{};
   const result=await api.run('stat',{source:run.target,key},{signal,...timeouts});
-  if(result.state!=='completed')throw labError(uploadCode(result.code,'METADATA_FAILED'));
+  if(result.state!=='completed')throw Object.assign(labError(uploadCode(result.code,'METADATA_FAILED')),{retryAfterMs:result.retryAfterMs});
   const observed=identity(result.data?.object,key);
   if(!observed)throw labError('OBJECT_MISSING');
   if(observed.size!==input.size||input.etag!==null&&observed.etag!==objectETag(input.etag)||
@@ -635,10 +687,10 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
     await spool.append(bytes);
     progressTransfer(transfer,'reading',spool.bytes);
    }});
-  if(data.state!=='completed'||data.data?.size!==observed.size)throw labError(uploadCode(data.code,'READBACK_FAILED'));
+  if(data.state!=='completed'||data.data?.size!==observed.size)throw Object.assign(labError(uploadCode(data.code,'READBACK_FAILED')),{retryAfterMs:data.retryAfterMs});
   if(run.policy){
    const final=await api.run('stat',{source:run.target,key},{signal,...timeouts});
-   if(final.state!=='completed')throw labError(uploadCode(final.code,'METADATA_FAILED'));
+   if(final.state!=='completed')throw Object.assign(labError(uploadCode(final.code,'METADATA_FAILED')),{retryAfterMs:final.retryAfterMs});
    const after=identity(final.data?.object,key);
    if(!after||after.etag!==observed.etag||after.size!==observed.size||after.version!==observed.version||after.modifiedAt!==observed.modifiedAt)
     throw labError('OBJECT_CHANGED');
@@ -667,7 +719,8 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
      progressTransfer(transfer,progress.phase,progress.bytes);
    });
   if(result.state!=='completed')return {state:({skipped:'CONFLICT',uncertain:'UNCERTAIN',cancelled:'CANCELLED',blocked:'BLOCKED'})[result.state]??'FAIL',
-   code:signal.aborted?typed(signal.reason):uploadCode(result.code,'UPLOAD_NOT_VERIFIED')};
+   code:signal.aborted?typed(signal.reason):uploadCode(result.code,'UPLOAD_NOT_VERIFIED'),
+   ...(Number.isSafeInteger(result.retryAfterMs)?{retryAfterMs:result.retryAfterMs}:{})};
   return {state:'ACKNOWLEDGED',code:'PRODUCTION_UPLOAD_RECEIPT',receipt:cleanReceipt(result.receipt,key,input.size,input.id)};
  }
  async function metadata(session,run,input) {
@@ -677,7 +730,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   meter(session,run,'operations',1);
   const api=fileApi(session.sessionId,requests(session,run,limits.statRequests,signal));
   const result=await api.run('stat',{source:run.target,key},{signal});
-  if(result.state!=='completed')throw labError(uploadCode(result.code,'METADATA_FAILED'));
+  if(result.state!=='completed')throw Object.assign(labError(uploadCode(result.code,'METADATA_FAILED')),{retryAfterMs:result.retryAfterMs});
   return {object:identity(result.data?.object,key)};
  }
  async function list(session,run,input) {
@@ -716,7 +769,11 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   requireKeys(input,['cursor']);
   if(typeof input.cursor!=='string'||input.cursor.length>36)throw labError('INVALID_INPUT');
   const signal=startAudit(run);
-  if(!input.cursor)run.auditScan={next:'',providerCursor:'',seen:new Set(),entries:[],at:0,done:false};
+  if(!input.cursor){
+   if(run.selectionPhase==='inventory'&&run.auditScan?.done)throw labError('LAB_AUDIT_CURSOR_INVALID');
+   if(run.selectionPhase!=='inventory'||!run.auditScan)run.auditScan={next:'',providerCursor:'',seen:new Set(),entries:[],at:0,done:false,
+    ...(run.selectionPhase==='inventory'?{inventory:new Map()}:{} )};
+  }
   const scan=run.auditScan;
   if(!scan||scan.done||input.cursor!==scan.next)throw labError('LAB_AUDIT_CURSOR_INVALID');
   meter(session,run,'operations',1,'audit');
@@ -755,11 +812,32 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
     if(!entries.length)throw labError('LIST_PAGE_FRAME_LIMIT');
     break;
    }
+   if(scan.inventory){
+    if(scan.inventory.has(entry.key))throw labError('LAB_READ_INVENTORY_DUPLICATE');
+    if(scan.inventory.size>=20_000)throw labError('LAB_READ_INVENTORY_LIMIT');
+    scan.inventory.set(entry.key,entry);
+   }
    entries.push(entry);bytes+=size;scan.at++;
   }
   scan.done=scan.at===scan.entries.length&&!scan.providerCursor;
   scan.next=scan.done?'':crypto.randomUUID();
-  return {entries,cursor:scan.next,providerCalls};
+  let inventoryDigest;
+  if(scan.done&&scan.inventory){
+   const hash=sha256.create(),encoder=new TextEncoder();
+   const identity=[run.target.provider,run.target.accountId,run.target.bucketName,run.target.prefix];
+   hash.update(encoder.encode(JSON.stringify(identity)+'\n'));
+   const files=new Map();
+   for(const key of [...scan.inventory.keys()].sort()){
+    const item=scan.inventory.get(key),path=key.slice(run.target.prefix.length);
+    hash.update(encoder.encode(JSON.stringify(item)+'\n'));
+    if(!item.staging&&item.etag&&item.size<=maximumObjectBytes){
+     try{targetKey(run,path,item.size);files.set(path,item);}catch{/* Unsafe keys remain in inventory evidence. */}
+    }
+   }
+   inventoryDigest=Array.from(hash.digest(),byte=>byte.toString(16).padStart(2,'0')).join('');
+   session.selectionInventory={runId:run.id,digest:inventoryDigest,files};
+  }
+  return {entries,cursor:scan.next,providerCalls,...(inventoryDigest?{inventoryDigest}:{})};
  }
  async function campaignOutcome(session,run,input){
   requireKeys(input,['id','path','size']);
@@ -787,9 +865,13 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    case 'describe':requireKeys(input,[]);return projectDescription(session);
    case 'admit':return admit(session,input);
    case 'admitCampaign':return admitCampaign(session,input);
+   case 'admitReadSelection':return admitReadSelection(session,input);
    case 'releaseRun':requireKeys(input,[]);abortRun(session);return {released:true};
   }
   const run=requireRun(session);
+  if(run.selectionPhase&&!(run.selectionPhase==='inventory'?['auditList','campaignUsage']:
+   ['campaignUsage','readOpen','poll','pull','closeTransfer','cancel']).includes(method))
+   throw labError('LAB_READ_SELECTION_OPERATION_DENIED');
   if(method==='registerCampaignFiles')return registerFiles(run,input);
   if(method==='auditList')return auditList(session,run,input);
   if(method==='drainCampaign'){
@@ -810,6 +892,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    requireKeys(input,[]);
    if(!run.policy)throw labError('LAB_RUN_REQUIRED');
    return {transfer:run.used,audit:run.auditUsed,session:session.counters,
+    ...(run.selectionPhase?{readAttempts:run.readAttempts,sessionReadAttempts:session.readAttempts}:{}),
     modeledCostMicros:costMicros(session.counters.providerRequests,session.counters.trafficBytes)};
   }
   if(method==='metadata')return metadata(session,run,input);

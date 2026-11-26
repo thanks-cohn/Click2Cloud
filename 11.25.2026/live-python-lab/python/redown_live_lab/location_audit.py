@@ -37,7 +37,7 @@ def scan(client, journal, prefix, stop):
         pages += 1
         journal.append('auditPage', page=pages, providerCalls=calls, entries=entries, exhausted=not next_cursor)
         if not next_cursor:
-            return
+            return page.get('inventoryDigest')
         seen.add(next_cursor)
         cursor = next_cursor
 

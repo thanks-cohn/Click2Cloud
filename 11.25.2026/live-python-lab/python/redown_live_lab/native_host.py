@@ -20,7 +20,7 @@ ORIGIN = 'chrome-extension://' + EXTENSION_ID + '/'
 METHODS = frozenset((
     'pair', 'describe', 'admit', 'releaseRun', 'uploadOpen', 'uploadAppend',
     'uploadStart', 'readOpen', 'poll', 'pull', 'closeTransfer', 'cancel',
-    'metadata', 'list', 'admitCampaign', 'auditList', 'campaignUsage', 'campaignOutcome', 'drainCampaign', 'registerCampaignFiles',
+    'metadata', 'list', 'admitCampaign', 'admitReadSelection', 'auditList', 'campaignUsage', 'campaignOutcome', 'drainCampaign', 'registerCampaignFiles',
 ))
 AUTHENTICATED_IDLE_TIMEOUT = 60 * 60
 PAIRING_TIMEOUT = 120

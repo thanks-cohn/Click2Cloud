@@ -60,6 +60,7 @@ export function currentReceipt(row, {interrupted = false} = {}) {
     hostUrl:view.hostPageURL,bytes:number(receipt?.size ?? row.bytes),
     mime:text(view.savedFileMetadata?.httpMetadata?.contentType), saveMode:view.saveMode,
     metadata:view.savedFileMetadata,metadataAvailability:view.metadataAvailability,
+    ...(row.saveMode==='local-upload'?{origin:'manual-local',includeHistory:row.localUpload?.ordinaryHistory?.include!==false}:{}),
     destination:location(receipt?.destination ?? row.destination,receipt?.key),providerObjectId:text(receipt?.key),
     etag:text(receipt?.etag),version:text(receipt?.version),durationMs:number(row.durationMs),
     code:interrupted?'SAVE_OUTCOME_UNCERTAIN':code(row.code),
@@ -67,6 +68,36 @@ export function currentReceipt(row, {interrupted = false} = {}) {
     cancellable:(!terminal||row.remotePending===true)&&status!=='cancelling'&&!!row.destination,
     rank:verified||status==='cancelled'?3:terminal||interrupted?1:0
   })];
+}
+
+export function localDownloadReceipt(row){
+  const terminal=!['queued','scanning','writing','publishing'].includes(row.state);
+  const updatedAt=time(row.updatedAt),requestedAt=time(row.createdAt);
+  const status=terminal?row.state:row.state==='publishing'?'verifying':row.state==='queued'?'waiting':'working';
+  return [base('r2-download',row.jobId,{
+    provider:'cloudflare',kind:'download',status,terminal,updatedAt,requestedAt,terminalAt:terminal?updatedAt:null,
+    filename:row.name,bytes:number(row.bytes),destination:location(row.source),includeHistory:false,
+    proofLevel:row.state==='verified'?row.proof:null,code:code(row.error),
+    cancellable:!terminal&&row.state!=='publishing',rank:row.state==='verified'||status==='cancelled'?3:terminal?1:0
+  })];
+}
+
+export function folderUploadReceipts(batch){
+  const terminal=['verified','failed','cancelled','unconfirmed'].includes(batch.phase);
+  return batch.groups.map(group=>{
+    const {verified,failed,skipped,cancelled,unconfirmed}=group.counts;
+    const allVerified=group.total>0&&group.eligible===group.total&&verified===group.total;
+    const status=allVerified?'verified':unconfirmed||batch.inFlightGroupId===group.id&&
+      batch.code==='LOCAL_UPLOAD_COMMIT_UNCONFIRMED'?'uncertain':
+      terminal?(verified?'partial':batch.phase==='cancelled'?'cancelled':'failed'):batch.phase==='paused'?'waiting':'working';
+    return base('r2-folder-upload',group.id,{
+      provider:'cloudflare',kind:'folder-upload',origin:'manual-local',status,terminal:terminal||allVerified,
+      archivePending:true,filename:group.root,requestedAt:batch.startedAt,updatedAt:batch.updatedAt,
+      terminalAt:terminal?batch.finishedAt??batch.updatedAt:null,sortAt:batch.startedAt,
+      destination:location({...batch.target,prefix:batch.target.prefix+group.root+'/'}),
+      folderUpload:{total:group.total,verified,failed,skipped,cancelled,unconfirmed,candidates:group.candidates??[],representative:null}
+    });
+  });
 }
 
 function screenshotReceipts(row, interrupted) {

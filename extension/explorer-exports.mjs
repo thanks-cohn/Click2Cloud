@@ -1,7 +1,9 @@
 import {exportDefaults, exportOptions, exportPreferenceKey} from '../src/explorer/export-preferences.mjs';
-import {readPreviewBytes} from '../src/explorer/image-preview.mjs';
-import {assertExportIdentity,developmentalDomain,directoryUrlFiles,domainName,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,simpleDirectoryUrls} from '../src/explorer/object-exports.mjs';
-import {canEmbedTags,downloadJob,prepareTaggedPng,streamDownloadArchive} from '../src/explorer/download-archive.mjs';
+import {createCurrentStore} from '../src/persistence/current-store.mjs';
+import {createLocalPreference} from '../src/chrome/local-preference.mjs';
+import {downloadReceiptPreferenceKey,localDownloadChannel} from '../src/chrome/local-download-service.mjs';
+import {developmentalDomain,directoryUrlFiles,domainName,formatUrlExport,listExportInventory,metadataBudget,normalizedTags,objectUrls,simpleDirectoryUrls} from '../src/explorer/object-exports.mjs';
+import {canEmbedTags} from '../src/explorer/download-archive.mjs';
 
 const labels={original:'Download',tags:'Download with Tags',metadata:'Download with All Metadata'};
 const settingLabels={urls:'Show Get URL in right-click menu',tags:'Show Download with Tags in right-click menu',metadata:'Show Download with Metadata in right-click menu',nest:'Nest under Download'};
@@ -55,9 +57,28 @@ export function renderPublicUrlCards(container,links,onCopy){
 
 export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesChange}) {
   let options=exportDefaults, update=Promise.resolve();
-  const jobs=new Map(), subscribers=new Set(), active=new Map();
+  const jobs=new Map(), subscribers=new Set(), current=createCurrentStore();
   let settingsCard;
-  window.addEventListener('pagehide',()=>{for(const controller of active.values())controller.abort();});
+  async function background(action, fields={}){
+    const reply=await chrome.runtime.sendMessage({channel:localDownloadChannel,action,...fields});
+    if(reply?.ok!==true)throw Object.assign(Error(reply?.code??'DOWNLOAD_BACKGROUND_UNAVAILABLE'),{code:reply?.code});
+    return reply.data;
+  }
+  function setJob(job){
+    const previous=jobs.get(job.jobId);
+    if(previous?.updatedAt>job.updatedAt)return;
+    job={...job,receiptDelivery:job.receiptDelivery??previous?.receiptDelivery};
+    jobs.set(job.jobId,job);
+    for(const listener of subscribers)listener(job);
+  }
+  chrome.runtime.onMessage?.addListener((message,sender)=>{
+    if(sender?.id!==chrome.runtime.id)return;
+    if(message?.channel==='local-download-changed')setJob(message.receipt);
+    if(message?.channel==='receipt-delivery-changed'&&message.delivery.scope==='download'){
+      const job=jobs.get(message.delivery.operationId);
+      if(job)setJob({...job,receiptDelivery:message.delivery});
+    }
+  });
   function refreshOptions(value){
     options=exportOptions(value);
     onPreferencesChange();
@@ -74,6 +95,18 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
     card.innerHTML='<h2>Explorer Downloads and Links</h2>'+Object.entries(settingLabels).map(([flag,label])=>
       `<label><input type="checkbox" data-export-option="${flag}" ${options[flag]?'checked':''}> ${label}</label>`).join('')+
       '<button type="button" data-reset-exports>Reset to Defaults</button><p role="status"></p>';
+    const receiptLabel=document.createElement('label'),receiptInput=document.createElement('input');
+    receiptInput.type='checkbox';
+    receiptLabel.append(receiptInput,' Automatically save download receipts');
+    card.insertBefore(receiptLabel,card.querySelector('[role=status]'));
+    const preference=createLocalPreference(chrome.storage,downloadReceiptPreferenceKey,value=>value===true);
+    const paintReceipt=()=>{receiptInput.checked=preference.value;};
+    receiptInput.onchange=async()=>{
+      try{await preference.update(()=>receiptInput.checked);}
+      catch{card.querySelector('[role=status]').textContent='Could not save this setting.';}
+      paintReceipt();
+    };
+    void preference.ready.then(paintReceipt);
     parent.append(card);
     function write(patch){
       const save=async()=>{
@@ -96,96 +129,76 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   function collect(source,signal,onProgress,immediate=false){return listExportInventory((source,cursor)=>
     api('listDirectoryObjects',{source,...(cursor?{cursor}:{}),...(immediate?{immediate:true}:{})},{quiet:true,signal}),source,{signal,onProgress});}
   async function refreshJobs(){
-    try{const stored=await chrome.storage?.session?.get(null);
-      for(const [key,job] of Object.entries(stored??{}))if(key.startsWith(downloadKey)&&!active.has(job?.jobId)&&job?.createdAt)jobs.set(job.jobId,job);
-    }catch{}
-    for(const listener of subscribers)listener();
+    try{
+      const stored=await chrome.storage?.session?.get(null);
+      for(const [key,job] of Object.entries(stored??{}))if(key.startsWith(downloadKey)&&job?.createdAt&&!jobs.has(job.jobId))setJob(job);
+      for(const job of await background('list'))setJob(job);
+    }catch{/* Legacy session receipts are still available when local access fails. */}
   }
-  function saveJob(job){
-    jobs.set(job.jobId,job);
-    for(const listener of subscribers)listener();
-    if(!chrome.storage?.session?.set)return;
-    const old=[...jobs.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(40).filter(item=>!active.has(item.jobId));
-    for(const item of old)jobs.delete(item.jobId);
-    if(old.length)void chrome.storage.session.remove(old.map(item=>downloadKey+item.jobId)).catch(()=>{});
-    void chrome.storage.session.set({[downloadKey+job.jobId]:{...job}}).catch(()=>{});
+  const running=job=>['queued','scanning','writing','publishing'].includes(job.state);
+  async function exportReceipt(jobId){
+    const receipt=await background('receipt',{jobId});
+    const url=URL.createObjectURL(new Blob([JSON.stringify(receipt,null,2)],{type:'application/json'}));
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='redown-download-receipt-'+jobId+'.json';
+    link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),60_000);
   }
   function mountJobs(parent){
     const section=document.createElement('section');section.className='page';
-    section.innerHTML='<h1>Downloads</h1><div id="download-jobs"></div>';
+    section.innerHTML='<h1>Downloads</h1><div id="download-jobs"></div><p role="status"></p>';
     parent.replaceChildren(section);
     const render=()=>{
       if(!section.isConnected){subscribers.delete(render);return;}
       const holder=section.querySelector('#download-jobs'),expanded=new Set([...holder.querySelectorAll('details[open]')].map(card=>card.dataset.job));
       const cards=[...jobs.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,40);
-      holder.innerHTML=cards.map(job=>`<details class="card download-job" data-job="${esc(job.jobId)}" ${expanded.has(job.jobId)?'open':''}><summary><strong>${esc(job.name)}</strong> · ${esc(labels[job.mode])} · ${esc(job.status)}<br><time datetime="${esc(job.createdAt)}">${esc(new Date(job.createdAt).toLocaleString())}</time> · ${format(job.files??0)} files · ${format(job.bytes??0)} bytes</summary><p>Scanned ${format(job.scanned??0)} · errors ${format(job.errors??0)}</p>${job.error?'<p>Code: '+esc(job.error)+'</p>':''}${job.receiptName?'<p>'+esc(job.receiptName)+'</p>':''}</details>`).join('')||'<p>No download jobs in this browser session.</p>';
+      holder.innerHTML=cards.map(job=>`<details class="card download-job" data-job="${esc(job.jobId)}" ${expanded.has(job.jobId)?'open':''}><summary><strong>${esc(job.name)}</strong> · ${esc(labels[job.mode])} · ${esc(job.status)}<br><time datetime="${esc(job.createdAt)}">${esc(new Date(job.createdAt).toLocaleString())}</time> · ${format(job.files??0)} files · ${format(job.bytes??0)} bytes</summary><p>Expected ${format(job.expectedFiles??job.scanned??0)} · errors ${format(job.errors??0)}</p>${job.error?'<p>'+esc(job.error)+'</p>':''}${job.receiptDelivery?'<p>Receipt · '+esc(job.receiptDelivery.state)+'</p>':''}${job.schema?'<button data-receipt>Export receipt</button>':''}${running(job)&&job.state!=='publishing'?'<button data-cancel>Cancel</button>':''}</details>`).join('')||'<p>No download jobs.</p>';
+      for(const element of holder.querySelectorAll('[data-receipt],[data-cancel]')){
+        const jobId=element.closest('[data-job]').dataset.job;
+        element.onclick=()=>void (element.hasAttribute('data-receipt')?exportReceipt(jobId):background('cancel',{jobId}))
+          .catch(error=>{section.querySelector('[role=status]').textContent=safeError(error);});
+      }
     };
     subscribers.add(render);render();void refreshJobs();
   }
-  function progressDialog(job,controller){
-    dialog(labels[job.mode],'<p id="download-progress" role="status">Preparing '+esc(job.name)+'…</p><button id="cancel-export">Cancel</button>');
-    const display=document.querySelector('#download-progress');
-    document.querySelector('#cancel-export').onclick=()=>controller.abort();
-    return display;
-  }
-  async function archive(source,entry,mode,{forceCompanion=false}={}){
-    const recursive=!entry;
+  async function transfer(source,entry,mode,{forceCompanion=false,entries}={}){
     if(!window.showSaveFilePicker)throw Error('Streaming Download requires Chrome file-system access.');
-    const name=entry?.displayName??entry?.key.split('/').at(-1)??source.prefix.split('/').filter(Boolean).at(-1)??source.bucketName;
-    const taggedPng=!recursive&&mode==='tags'&&!forceCompanion&&canEmbedTags(entry);
-    const outputName=taggedPng?name:name+'.zip';
-    const handle=await window.showSaveFilePicker({suggestedName:outputName});
-    const controller=new AbortController(), {signal}=controller, job=downloadJob();
-    const record={jobId:job.jobId,createdAt:job.createdAt,name,mode,status:'Preparing'};
-    active.set(job.jobId,controller);saveJob(record);
-    const display=progressDialog(record,controller);
-    let writer,last=0,deliverable;
-    function report(values,force=false){
-      Object.assign(record,values);
-      if(force||Date.now()-last>300){
-        last=Date.now();saveJob(record);
-        if(display.isConnected)display.textContent=record.status+' · '+format(record.files??0)+(record.files===1?' file · ':' files · ')+format(record.bytes??0)+' bytes';
-      }
-    }
-    const read=(file,onChunk)=>readPreviewBytes(p=>api('readFileChunk',p,{quiet:true,signal}),
-      {source,key:file.key,etag:file.etag,size:file.size},{limit:Number.MAX_SAFE_INTEGER,concurrency:1,signal,onChunk});
-    try {
-      let inventory;
-      if(recursive)inventory=await collect(source,signal,values=>report({status:'Scanning',...values}));
-      else {
-        const observed=await metadata(source,entry.key,signal);
-        if(entry.etag&&Number.isSafeInteger(entry.size))assertExportIdentity(entry,observed);
-        inventory={files:[observed],pages:1,complete:true};
-      }
-      signal.throwIfAborted();
-      writer=await handle.createWritable();
-      if(taggedPng){
-        const file=inventory.files[0];
-        if(file.availability!=='observed')throw Error('TAG_METADATA_UNAVAILABLE');
-        const bytes=await prepareTaggedPng(file,file.tags,read);
-        await writer.write(bytes);deliverable={state:'completed',files:1,bytes:bytes.length};
-      }else deliverable=await streamDownloadArchive({source,inventory,mode,recursive,job,outputName:handle.name??outputName,
-        write:bytes=>writer.write(bytes),read,metadata:file=>file.tags?file:metadata(source,file.key,signal),signal,
-        onProgress:values=>report({status:'Writing',...values}),forceCompanion});
-      signal.throwIfAborted();
-      await writer.close();
-      if((await handle.getFile()).size!==deliverable.bytes)throw Error('DOWNLOAD_WRITE_UNCONFIRMED');
-      report({status:deliverable.state==='partial'?'Partial · file size verified':'Complete · file size verified',files:deliverable.files,bytes:deliverable.bytes,errors:deliverable.errors,receiptName:deliverable.receiptName},true);
-      if(deliverable.state==='completed'&&deliverable.files>0)void noteDownload(job.jobId,deliverable.files);
+    const jobId=crypto.randomUUID();
+    const name=entries?'Selected files':entry?.displayName??entry?.key.split('/').at(-1)??source.prefix.split('/').filter(Boolean).at(-1)??source.bucketName;
+    const direct=entry&&(mode==='original'||mode==='tags'&&!forceCompanion&&canEmbedTags(entry));
+    const handle=await window.showSaveFilePicker({suggestedName:direct?name:name+'.zip'});
+    const file=await handle.getFile();
+    await current.stageDownloadHandle(jobId,handle);
+    let job;
+    try{
+      job=await background('admit',{input:{jobId,source,mode,forceCompanion,entry,entries,
+        initialFile:{name:file.name,size:file.size,lastModified:file.lastModified}}});
     }catch(error){
-      try{await writer?.abort();}catch{}
-      report({status:signal.aborted?'Cancelled':'Failed',error:safeError(error),receiptName:undefined},true);
-      if(display.isConnected)display.textContent=signal.aborted?'Download cancelled.':'Download failed · '+safeError(error);
-      if(taggedPng&&['PNG_FORMAT_INVALID','PNG_TAG_READBACK_FAILED'].includes(error.code))offerCompanion(source,entry);
-    }finally{
-      active.delete(job.jobId);
-      const cancel=display.parentElement?.querySelector('#cancel-export');
-      if(cancel){cancel.textContent='Close';cancel.onclick=closeDialog;}
+      await current.discardDownloadHandle(jobId).catch(()=>{});
+      throw error;
     }
+    setJob(job);
+    dialog(labels[mode],'<p id="download-progress" role="status"></p><button id="cancel-export">Cancel</button>');
+    const display=document.querySelector('#download-progress'),button=document.querySelector('#cancel-export');
+    function render(value){
+      if(!display.isConnected){subscribers.delete(render);return;}
+      if(value.jobId!==jobId)return;
+      display.textContent=value.status+(value.error?' · '+value.error:'')+(value.nextRetryAt?' · retry scheduled':'');
+      const active=running(value)&&value.state!=='publishing';
+      button.textContent=active?'Cancel':'Close';
+      button.onclick=active?()=>void background('cancel',{jobId}).catch(showError):closeDialog;
+      if(!running(value)){
+        subscribers.delete(render);
+        if(entry&&mode==='tags'&&['PNG_FORMAT_INVALID','PNG_TAG_READBACK_FAILED'].includes(value.error))offerCompanion(source,entry);
+      }
+    }
+    subscribers.add(render);
+    render(jobs.get(jobId));
   }
   function offerCompanion(source,entry){
     dialog(labels.tags,'<p>This image cannot safely embed tags. Download the unchanged original and a companion tags JSON together in a ZIP.</p><button id="save-tags-zip">Choose ZIP location</button>');
-    document.querySelector('#save-tags-zip').onclick=()=>void archive(source,entry,'tags',{forceCompanion:true}).catch(showError);
+    document.querySelector('#save-tags-zip').onclick=()=>void transfer(source,entry,'tags',{forceCompanion:true}).catch(showError);
   }
   function showError(error){
     if(error.name==='AbortError')return;
@@ -193,7 +206,10 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
   }
   function download(source,entry,mode){
     if(entry&&mode==='tags'&&!canEmbedTags(entry))return offerCompanion(source,entry);
-    return archive(source,entry,mode).catch(showError);
+    return transfer(structuredClone(source),entry,mode).catch(showError);
+  }
+  function downloadSelection(source,entries){
+    return transfer(structuredClone(source),null,'original',{entries}).catch(showError);
   }
   function urls(source,entry,isCurrent){
     const params={source:structuredClone(source),...(entry?{key:entry.key}:{})};
@@ -375,8 +391,5 @@ export function createExplorerExports({api,esc,dialog,closeDialog,onPreferencesC
       render();input.focus();
     }catch(error){dialog('Add Tags','<p role="alert">'+esc(safeError(error))+'</p>');}
   }
-  return Object.freeze({get options(){return options;},mountSettings,mountJobs,download,urls,tags});
-}
-export async function noteDownload(jobId,files) {
-  try{await chrome.runtime.sendMessage({channel:'verified-local-download',jobId,files});}catch{}
+  return Object.freeze({get options(){return options;},mountSettings,mountJobs,download,downloadSelection,urls,tags});
 }

@@ -1,10 +1,12 @@
 """One scheduler for every profile, drop folder, and checked-in manifest."""
+import errno
 import hashlib
 import sys
 import time
 import uuid
 from pathlib import Path
 
+from .download_output import prepare_output
 from .errors import LabError
 from .evidence import Journal, document, environment, load_run, projection, save_summary, snapshot
 from .fixtures import generate
@@ -78,6 +80,7 @@ class Scheduler:
         self.end = time.monotonic() + plan['effectiveBudget']['seconds']
         self.production_only = plan.get('verification') == 'production'
         self.phase_end = self.end
+        self.attempt = 1
 
     def stop(self):
         if (self.root / 'cancel.request').exists():
@@ -158,10 +161,11 @@ class Scheduler:
         except KeyboardInterrupt:
             result = {'state': 'UNCERTAIN' if pending else 'CANCELLED', 'code': 'CANCELLATION_REQUESTED'}
         except (LabError, OSError) as error:
-            code = error.code if isinstance(error, LabError) else 'LOCAL_IO_FAILED'
+            code = (error.code if isinstance(error, LabError) else
+                    'LOCAL_DISK_EXHAUSTED' if error.errno in (errno.ENOSPC, errno.EDQUOT) else 'LOCAL_IO_FAILED')
             if code == 'READBACK_SHA256_MISMATCH':
                 state = 'FAIL'
-            elif pending:
+            elif pending or code == 'DOWNLOAD_PUBLICATION_UNCONFIRMED':
                 state = 'UNCERTAIN'
             elif code in ('CANCELLATION_REQUESTED', 'RUN_OR_PHASE_TIMEOUT'):
                 state = 'CANCELLED'
@@ -175,11 +179,14 @@ class Scheduler:
                 result['diagnostic'] = error.detail
         return self.finish(entry, result, start, ack, requested, acknowledged)
 
+    def copy_reference(self, path):
+        return Path(path).relative_to(self.root).as_posix()
+
     def finish(self, entry, result, start, ack, requested, acknowledged):
         row = entry.get('fixture')
         observed = result.get('readback') or (result if 'clientSha256' in result else None)
         if observed and observed.get('savedCopy') and self.plan.get('verification'):
-            observed = {**observed, 'savedCopy': Path(observed['savedCopy']).relative_to(self.root).as_posix()}
+            observed = {**observed, 'savedCopy': self.copy_reference(observed['savedCopy'])}
         self.journal.append('result', scenarioId=entry['scenarioId'], action=entry['operation'],
                             phase=entry['phase'], fixtureId=row['id'] if row else None,
                             expected=entry['step'].get('expect', 'PASS'), state=result['state'], code=result['code'],
@@ -187,18 +194,31 @@ class Scheduler:
                             intendedKey=self.prefix + row['remotePath'] if row else None,
                             upload={'requested': requested, 'acknowledged': acknowledged, 'receipt': ack},
                             readback=observed, metadata=result.get('metadata'), listing=result.get('listing'),
-                            diagnostic=result.get('diagnostic'),
+                            diagnostic=result.get('diagnostic'), attempt=self.attempt,
+                            retryAfterMs=result.get('retryAfterMs'),
                             durationMs=round((time.monotonic() - start) * 1000))
         self.progress.finished += 1
         self.progress.bytes += observed['clientBytes'] if observed else 0
-        return {**result,'productionConfirmed': acknowledged} if self.plan.get('verification') else result
+        return {**result, 'productionConfirmed': acknowledged, 'receipt': ack} if self.plan.get('verification') else result
 
     def read(self, scenario, row, timeout, receipt, retain):
         self.stop()
         id_ = operation_id(self.run_id, scenario, 'read')
-        output = self.download_root / scenario.split('/')[0] / scenario.split('/')[1] / scenario.split('/')[2] / row['remotePath'] if retain else None
+        relative = '/'.join(scenario.split('/')[:3] + [row['remotePath']])
+        self.journal.append('downloadIntent', scenarioId=scenario, operationId=id_,
+                            key=self.prefix + row['remotePath'], size=row['sizeBytes'], sha256=row['sha256'],
+                            etag=(receipt or {}).get('etag'), version=(receipt or {}).get('version'),
+                            retain=bool(retain))
+        output = prepare_output(self.download_root, relative) if retain else None
         notify = self.progress.callback(scenario, 'download', row['sizeBytes'])
-        result = self.client.read(id_, row, timeout, receipt, output, notify, self.stop)
+        attempt_id = id_ if self.attempt == 1 else operation_id(self.run_id, scenario, f'read-attempt-{self.attempt}')
+        def publication(event, size, sha256):
+            self.journal.append(event, scenarioId=scenario, operationId=id_,
+                                key=self.prefix + row['remotePath'], size=size, sha256=sha256,
+                                savedCopy=self.copy_reference(output),
+                                etag=(receipt or {}).get('etag'), version=(receipt or {}).get('version'))
+
+        result = self.client.read(attempt_id, row, timeout, receipt, output, notify, self.stop, publication)
         if result['state'] == 'PASS' and result['key'] != self.prefix + row['remotePath']:
             raise LabError('READBACK_SCOPE_MISMATCH')
         return result

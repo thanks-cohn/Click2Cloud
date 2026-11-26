@@ -1,3 +1,4 @@
+import {showUploadsInHistoryKey} from '../src/history/upload-preference.mjs';
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const historyV2ViewKey = 'historyV2MetadataVisibilityV1';
@@ -34,12 +35,22 @@ export function mountHistoryV2Settings(parent, preference) {
   const section = document.createElement('section');
   section.className = 'history-v2-settings';
   section.innerHTML = `
+    <label class="settings-row">Show uploads in History<input type="checkbox" data-show-uploads checked></label>
     <label class="settings-row">Hide N/A fields<input type="checkbox" data-hide-na></label>
     <details><summary>Advanced</summary>${Object.entries(historyV2ProviderFields).map(([provider,fields]) => `
       <details data-history-provider="${provider}"><summary>${historyV2Providers[provider]}</summary>
         ${fields.filter(field=>field!=='hostUrl'&&field!=='sourceUrl').map(field => `<label class="settings-row">${historyV2FieldLabels[field]}<input type="checkbox" data-field="${field}"></label>`).join('')}
         <button type="button">Restore defaults</button>
       </details>`).join('')}</details><p role="status"></p>`;
+  const uploadPreference=createLocalPreference(chrome.storage,showUploadsInHistoryKey,value=>value!==false);
+  const uploads=section.querySelector('[data-show-uploads]');
+  const paintUploads=()=>{uploads.checked=uploadPreference.value;};
+  uploads.onchange=async()=>{
+    try{await uploadPreference.update(()=>uploads.checked);}
+    catch{section.querySelector('[role=status]').textContent='Upload History preference could not be saved.';}
+    paintUploads();
+  };
+  void uploadPreference.ready.then(paintUploads);
   const hideNA = section.querySelector('[data-hide-na]'), feedback = section.querySelector('[role=status]');
   const groups = [...section.querySelectorAll('[data-history-provider]')];
   function paint() {

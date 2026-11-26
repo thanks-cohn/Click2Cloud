@@ -1,4 +1,5 @@
 import {uploadReceiptPreferenceKey} from './debug-preference.mjs';
+import {receiptDataURL} from './receipt-delivery.mjs';
 import {uploadId} from './local-upload-plan.mjs';
 
 export async function uploadReceiptGate(storage){
@@ -19,22 +20,11 @@ async function requestDownload(chrome,url,id,gate){
 }
 export async function downloadUploadReceipt(chrome,receipt,gate,largeReceipt){
   const text=JSON.stringify(receipt)+'\n';
-  const bytes=new TextEncoder().encode(text);
-  // Chromium's URL IPC caps data URLs around 2 MiB. Use a document-owned blob
-  // for larger JSON when a trusted initiating Shelf is still present.
-  if(bytes.length>1_500_000){
-    if(!largeReceipt)throw Error('UPLOAD_RECEIPT_SHELF_UNAVAILABLE');
-    return largeReceipt({text,batchId:receipt.batchId,gate});
-  }
-  let base64;
-  if(typeof bytes.toBase64==='function')base64=bytes.toBase64();
-  else{
-    const chunks=[];
-    for(let offset=0;offset<bytes.length;offset+=8192)
-      chunks.push(String.fromCharCode(...bytes.subarray(offset,offset+8192)));
-    base64=btoa(chunks.join(''));
-  }
-  return requestDownload(chrome,'data:application/json;base64,'+base64,receipt.batchId,gate);
+  const url=receiptDataURL(text);
+  // Oversized automatic export can still use the previously registered Shelf
+  // blob path. Without a Shelf the durable receipt remains manually exportable.
+  if(!url)return largeReceipt?largeReceipt({text,batchId:receipt.batchId,gate}):'manual-required';
+  return requestDownload(chrome,url,receipt.batchId,gate);
 }
 export async function downloadUploadReceiptBlob(chrome,{text,batchId,gate}){
   if(!uploadId(batchId)||(!uploadId(gate)&&!savedSelection(gate,batchId))||typeof text!=='string')throw Error('UPLOAD_RECEIPT_INVALID');

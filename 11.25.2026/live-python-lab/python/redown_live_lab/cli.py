@@ -15,8 +15,8 @@ from .install_host import install, registration_status
 from .inventory import inventory, ordinary_directory, relative_path
 from .manifest import OFFLINE_CAPABILITIES, SCHEMA, build_plan, money, read_json, validate
 from .runner import reconcile, run
-from .owner_campaign import MAX_INT, MAX_TIMER_SECONDS, campaign, existing_campaign
-from .location_audit import check as check_location
+from .owner_campaign import MAX_INT, MAX_TIMER_SECONDS, campaign, check_downloads, existing_campaign, offline_campaign_status, selection_campaign
+from .location_audit import check as check_location, load_plan
 from .transport import ExtensionClient, connect
 
 DEFAULT_WORKSPACE = 'lab-local'
@@ -124,6 +124,8 @@ def campaign_options(command, *, transfer=False):
                              help='Completion continues beyond the measured window within execution and grant deadlines.')
     else:
         command.set_defaults(execution='completion', admit_partial=False)
+    command.add_argument('--retry-reserve', type=int, choices=range(9), default=2,
+                         help='Additional upload and read attempts to reserve when approved ceilings allow (default 2 each).')
     command.set_defaults(expect_files=None, retain_downloads=False)
 
 
@@ -193,9 +195,28 @@ def parse(argv):
     campaign_options(download, transfer=True)
     download.add_argument('--run', required=True)
     download.add_argument('--retain-downloads', action='store_true')
+    download.add_argument('--resume-downloads', action='store_true')
+    download.add_argument('--clear-cancel', action='store_true')
+    selection = commands.add_parser('download-selection', help='Read from the exact existing folder approved in REDOWN Settings.')
+    campaign_options(selection, transfer=True)
+    selection.add_argument('--output', help='Group under lab-local/runs.')
+    selection.add_argument('--run', help='Exact run directory when resuming.')
+    selection.add_argument('--resume-downloads', action='store_true', help='Keep confirmed files and resume remaining reads.')
+    selection.add_argument('--clear-cancel', action='store_true')
+    selection.add_argument('--retain-downloads', action='store_true', help='Publish under retained-downloads and reopen each final file.')
+    selection.add_argument('--download-to', help='Existing authorized local directory for a new independent results folder.')
+    selection.add_argument('--expect-files', type=integer_flag())
+    selection.add_argument('--inventory-seconds', type=integer_flag(MAX_TIMER_SECONDS), default=120)
+    selection.add_argument('--inventory-requests', type=integer_flag(), default=200)
+    selection.add_argument('--inventory-traffic-bytes', type=integer_flag(), default=16 * MIB)
     checker = commands.add_parser('check-location', help='Verify the frozen plan and observed keys from local receipts, offline.')
     checker.add_argument('--run', required=True)
     checker.add_argument('--audit', help='Specific location-audit.json under the run, defaults to its latest window.')
+    disk = commands.add_parser('check-downloads', help='Reopen retained campaign files and verify paths, sizes and SHA-256 offline.')
+    disk.add_argument('--run', required=True)
+    audit_window = disk.add_mutually_exclusive_group()
+    audit_window.add_argument('--window', help='Optional receipt window ID (default latest).')
+    audit_window.add_argument('--all-windows', action='store_true', help='Check copies retained across continuation windows.')
     comparison = commands.add_parser('compare', help='Compare stable scenarios and explain changed workloads and environments.')
     comparison.add_argument('--before', required=True)
     comparison.add_argument('--after', required=True)
@@ -204,6 +225,10 @@ def parse(argv):
     if result.command == 'campaign' and (result.operations == 'round-trip' and result.verification != 'sha256' or
                                          result.retain_downloads and result.verification != 'sha256'):
         parser.error('round-trip and retained downloads require --verification sha256.')
+    if result.command == 'download-selection' and (bool(result.run) != result.resume_downloads or result.run and (result.output or result.download_to)):
+        parser.error('Use --output for a new selection or --run with --resume-downloads.')
+    if result.command == 'download-selection' and result.download_to:
+        result.retain_downloads = True
     if result.command in ('validate', 'plan') and result.live:
         parser.error('validate uses --dry-run or --session.')
     if getattr(result, 'live', False) and result.approve_cost_usd is None:
@@ -367,6 +392,14 @@ def main(argv=None):
             outcome = campaign(args, source, output_dir, claims, started=started)
             output(outcome)
             return EXIT_CODES[outcome['status']]
+        if args.command == 'download-selection':
+            if not args.live:
+                raise LabError('EXPLICIT_LIVE_CONFIRMATION_REQUIRED')
+            destination = (ordinary_directory(under(paths['runs'], args.run)) if args.resume_downloads
+                           else under(paths['runs'], args.output, create=True))
+            outcome = selection_campaign(args, destination, started=started)
+            output(outcome)
+            return EXIT_CODES[outcome['status']]
         if args.command in ('continue-campaign', 'audit-location', 'download-campaign', 'check-location'):
             root = ordinary_directory(under(paths['runs'], args.run))
             if args.command == 'check-location':
@@ -411,15 +444,15 @@ def main(argv=None):
                     pass
                 output({'status': 'CANCELLATION_REQUESTED', 'run': str(root)})
                 return 0
+            if args.command == 'check-downloads':
+                if args.window and str(uuid.UUID(args.window)) != args.window:
+                    raise LabError('INVALID_WINDOW_ID')
+                data = check_downloads(root, args.window, all_windows=args.all_windows)
+                output(data)
+                return EXIT_CODES[data['status']]
             if args.command in ('report', 'status'):
-                summary, checkpoint = root / 'summary.json', root / 'checkpoint.json'
-                data = read_json(summary) if summary.exists() else {'status': 'IN_PROGRESS_OR_INTERRUPTED'}
-                if args.command == 'status' and checkpoint.exists():
-                    live = read_json(checkpoint)
-                    if live['windowId'] != data.get('windowId'):
-                        data = live
-                output({**data,
-                        'receiptBundle': str(root), 'operationReceipts': str(root / 'operations.ndjson')})
+                data = offline_campaign_status(root, load_plan(root))
+                output({**data, 'receiptBundle': str(root), 'operationReceipts': str(root / 'operations.ndjson')})
                 return 0
             raise LabError('USE_CONTINUE_CAMPAIGN_OR_AUDIT_LOCATION')
         _, frozen, _ = load_run(root)

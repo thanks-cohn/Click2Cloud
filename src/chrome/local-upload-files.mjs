@@ -75,7 +75,7 @@ export const releaseLocalUpload=(key,id)=>transact(store=>{
 // One transaction publishes a file outcome and advances its batch checkpoint.
 // Manifests and outcomes are separate from the hot, fixed-size progress record.
 async function batchTransaction(tables,mode,work) {
-  const tx=(await open()).transaction(tables,mode);
+  const tx=(await open()).transaction(tables,mode,mode==='readwrite'?{durability:'strict'}:undefined);
   return new Promise((resolve,reject)=>{
     let value, cause;
     const done=result=>{value=result;};
@@ -132,6 +132,14 @@ export const discardUploadSelection=id=>batchTransaction(['selections','sources'
   });
 });
 
+const historyOutboxPrefix='history-projection:';
+function putHistoryProjection(tx,batch){
+  if(!batch.historyGroups)return;
+  tx.objectStore('outcomes').put({id:batch.id,projectionId:crypto.randomUUID(),updatedAt:batch.updatedAt,startedAt:batch.startedAt,
+    finishedAt:batch.finishedAt,phase:batch.phase,target:batch.target,code:batch.code,inFlightGroupId:batch.inFlight?.historyGroupId,groups:batch.historyGroups},
+  historyOutboxPrefix+batch.id);
+}
+
 export const uploadBatchJournal=Object.freeze({
   create(batch,items){
     return batchTransaction(['batches','manifests','outcomes'],'readwrite',(tx,done,guard)=>{
@@ -141,7 +149,7 @@ export const uploadBatchJournal=Object.freeze({
     });
   },
   accept(batch,id,count){
-    return batchTransaction(['batches','selections'],'readwrite',(tx,done,guard)=>{
+    return batchTransaction(['batches','selections','outcomes'],'readwrite',(tx,done,guard)=>{
       const selections=tx.objectStore('selections'),request=selections.get(id);
       request.onsuccess=guard(()=>{
         const row=request.result;
@@ -149,6 +157,7 @@ export const uploadBatchJournal=Object.freeze({
           throw Object.assign(Error('Select the original files again.'),{code:'UPLOAD_FILE_UNAVAILABLE'});
         selections.put({id,count,rowBytes:row.bytes,accepted:true});
         tx.objectStore('batches').put(batch);
+        putHistoryProjection(tx,batch);
         done(batch);
       });
     });
@@ -214,13 +223,28 @@ export const uploadBatchJournal=Object.freeze({
         const old=current.result;
         if(old?.processed>batch.processed)return;
         if(old?.cancelRequested)batch.cancelRequested=true;
-        if(!outcome){batches.put(batch);return;}
+        if(!outcome){batches.put(batch);putHistoryProjection(tx,batch);return;}
         const key=[batch.id,outcome.index],existing=outcomes.get(key);
         existing.onsuccess=guard(()=>{
           if(existing.result)return;
           outcomes.add(outcome,key);
           batches.put(batch);
+          putHistoryProjection(tx,batch);
         });
+      });
+    });
+  },
+  historyProjections(limit=32){
+    return batchTransaction(['outcomes'],'readonly',(tx,done,guard)=>{
+      const read=tx.objectStore('outcomes').getAll(IDBKeyRange.bound(historyOutboxPrefix,historyOutboxPrefix+'\uffff'),limit);
+      read.onsuccess=guard(()=>done(read.result));
+    });
+  },
+  acknowledgeHistory(projection){
+    return batchTransaction(['outcomes'],'readwrite',(tx,_done,guard)=>{
+      const store=tx.objectStore('outcomes'),key=historyOutboxPrefix+projection.id,read=store.get(key);
+      read.onsuccess=guard(()=>{
+        if(read.result?.projectionId===projection.projectionId)store.delete(key);
       });
     });
   },

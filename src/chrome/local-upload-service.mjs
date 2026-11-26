@@ -14,11 +14,12 @@ export const uploadCode = (value, fallback) => /^[A-Z][A-Z0-9_]{1,79}$/.test(val
 export function createLocalUploadService({assertConnected,oauth,lookup,checkPrepared,remote,
     executeFileMessage,runFileUpload,current,onVerified,onAccounted,boundedFetch=fetch,
     takeFile=takeLocalUpload,claim=claimLocalUpload,release=releaseLocalUpload}){
- async function checkUploadDestination(source,signal){
+ async function checkUploadDestination(source,signal,expectedSession){
   const target=normalizeTarget(source);
   assertConnected();
   const auth=await oauth.authority();
   signal?.throwIfAborted();
+  if(expectedSession!==undefined&&expectedSession!==auth.sessionId)throw uploadError('AUTH_SESSION_CHANGED','Reconnect and explicitly resume this upload.');
   if(target.provider!=='cloudflare'||target.connectionId!=='cloudflare:'+target.accountId||
      !auth.accounts.some(account=>account.id===target.accountId))
    throw uploadError('SCOPE_UNAUTHORIZED','Select an authorized Cloudflare R2 folder.');
@@ -128,7 +129,7 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
  }
  // Both Shelf tickets and a trusted native laboratory File use the same
  // size/path binding, destination claim, provider dispatch and durable history.
- async function dispatchFile({ticket,batchId,index,item,mode},batch,controller,onProgress,loadFile){
+ async function dispatchFile({ticket,batchId,index,item,mode,ordinaryHistory},batch,controller,onProgress,loadFile){
   const {signal}=controller;
   if(batch.waitForSlot){
    while(activeLocalUploads.size>=2)await waitForUploadSlot(signal);
@@ -136,6 +137,8 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   }
   if(activeLocalUploads.size>=2)
    throw uploadError('RESOURCE_BUSY','Two local uploads are already running. Wait for one to finish.');
+  if(activeLocalUploads.has(ticket))
+   throw uploadError('LOCAL_UPLOAD_ALREADY_ACTIVE','This upload operation is already active.');
   activeLocalUploads.set(ticket,{controller,batchId});
   try{
    const staged=await loadFile(), binding=staged?.binding;
@@ -152,7 +155,8 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
    const key=localUploadKey(batch.target,staged.file,binding.relativePath,binding.mode);
    if(key!==item.key)throw uploadError('UPLOAD_BATCH_INVALID','The staged file differs from the validated upload plan.');
    const parent=key.slice(0,key.lastIndexOf('/')+1),staging=batch.stagingPrefix+ticket+'/';
-   const job={id:ticket,batchId,index,source:batch.target,key,mode:binding.mode,size:staged.file.size,commitRequested:false,...(batch.retryPrecommit?{retryPrecommit:true}:{}),
+   const job={id:ticket,batchId,index,source:batch.target,key,mode:binding.mode,size:staged.file.size,commitRequested:false,
+    ...(ordinaryHistory?{ordinaryHistory}:{}),...(batch.retryPrecommit?{retryPrecommit:true}:{}),
     workerTarget:fileOperationTarget({...batch.target,prefix:staging},{...batch.target,prefix:parent})};
    const claimKey=localUploadClaimKey(batch.target,key);
    const previous=await claim(claimKey,job);
@@ -164,7 +168,11 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
    }
    let outcome,recorded=false;
    try{
-    await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
+    const intent=await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
+    if(intent.state!=='pending'){
+     await release(claimKey,ticket);
+     return {state:'uncertain',code:'LOCAL_UPLOAD_RECONCILIATION_REQUIRED'};
+    }
     recorded=true;
     const beforeCommit=async()=>{
      await batch.assertAuthorized?.();
@@ -183,11 +191,11 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     }
     const conflict=['FILE_CONFLICT','FILES_SKIPPED'].includes(outcome.data?.code);
     const state=conflict?'failed':!job.commitRequested?(signal.aborted?'cancelled':'failed'):
-     ['uncertain','partial','completed','cancelled'].includes(outcome.state)?'uncertain':'failed';
+     'uncertain';
     const code=uploadCode(outcome.code??outcome.data?.code,state==='cancelled'?'LOCAL_UPLOAD_CANCELLED':'LOCAL_UPLOAD_'+state.toUpperCase());
     await recordLocalUpload(job,state,code);
     if(state!=='uncertain')await release(claimKey,ticket);
-    return {state:conflict?'skipped':state,code,continue:conflict,error:conflict?'An existing Cloudflare object was left untouched.':
+    return {state:conflict?'skipped':state,code,continue:conflict,precommitRetrySafe:!job.commitRequested&&state==='failed'&&!conflict,...(Number.isSafeInteger(outcome.retryAfterMs)?{retryAfterMs:outcome.retryAfterMs}:{}),error:conflict?'An existing Cloudflare object was left untouched.':
      state==='cancelled'?'Upload cancelled.':outcome.error??(state==='uncertain'?'Cloudflare did not confirm the committed object. Inspect the destination before retrying.':undefined)};
    }catch(error){
     if(!recorded){await release(claimKey,ticket).catch(()=>{});throw error;}
@@ -210,10 +218,11 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
    return {file,binding:{source:batch.target,batchId,index,mode,relativePath}};
   });
  }
- async function reconcileUploadBatch({batch,flight,item,signal}){
+ async function reconcileUploadBatch({batch,flight,item,signal,expectedSession}){
   signal?.throwIfAborted();
   assertConnected();
   const auth=await oauth.authority();
+  if(expectedSession!==undefined&&auth.sessionId!==expectedSession)throw uploadError('AUTH_SESSION_CHANGED','Reconnect and explicitly resume this upload.');
   if(!auth.accounts.some(account=>account.id===batch.target.accountId)||!uploadReadScopes.every(scope=>auth.scopes?.includes(scope)))
    throw uploadError('SCOPE_UNAUTHORIZED','Reconnect the selected Cloudflare account to check this upload.');
   const stored=await current.readRemoteResult(flight.ticket);
@@ -225,7 +234,9 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   }
   if(!stored.localUpload||stored.localUpload.batchId!==batch.id||stored.localUpload.key!==item?.key)return null;
   const receipt=await reconcileLocalUpload(stored.localUpload,claimKey);
-  if(!receipt&&stored.state==='pending'&&stored.localUpload.commitRequested===false)return {state:'reselect'};
+  if(!receipt&&stored.localUpload.commitRequested===false&&
+     (stored.state==='pending'||flight.retryAt&&['failed','cancelled'].includes(stored.state)))
+   return {state:'reselect',retryPrecommit:true};
   if(receipt)return {state:'completed',code:'LOCAL_UPLOAD_RECONCILED',receipt};
   const last=await current.readRemoteResult(flight.ticket);
   if(['failed','blocked','cancelled'].includes(last?.state))

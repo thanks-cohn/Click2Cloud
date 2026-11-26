@@ -45,7 +45,7 @@ export function createFileApi(adapter) {
       options.onProgress?.({id,operation,phase:state});return {id,state,data};
     } catch(error) {
       // Unknown writes must be reconciled, never automatically replayed.
-      return {id,state:error.uncertain?'uncertain':error.name==='AbortError'?'cancelled':'failed',error:error.message || 'Operation failed.',code:error.code,recoveryKey:error.recoveryKey};
+      return {id,state:error.uncertain?'uncertain':error.name==='AbortError'?'cancelled':'failed',error:error.message || 'Operation failed.',code:error.code,recoveryKey:error.recoveryKey,...(Number.isSafeInteger(error.retryAfterMs)?{retryAfterMs:error.retryAfterMs}:{})};
     }
   },async batch(operation,items,options={}) {
     const concurrency=options.batchConcurrency??preferences.batchConcurrency??adapter.configuration?.defaults.batchConcurrency??1;

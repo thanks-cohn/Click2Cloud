@@ -297,6 +297,96 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
     const items=best.slice(0,limit),last=items.at(-1);return {items,nextCursor:best.length>limit?'history:'+encodeURIComponent(JSON.stringify([last.at,last.operationId])):null};
   }
   return Object.freeze({
+    createReceiptDelivery:(scope,operationId,at)=>transact('readwrite',async ({state})=>{
+      const id='receipt-delivery:'+scope+':'+operationId;
+      if(await request(state.get(id)))return false;
+      state.add({id,value:{scope,operationId,state:'dispatching',updatedAt:at}});
+      state.add({id:'receipt-pending:'+scope+':'+operationId,value:{scope,operationId}});
+      return true;
+    }),
+    updateReceiptDelivery:(scope,operationId,patch)=>transact('readwrite',async ({state})=>{
+      const id='receipt-delivery:'+scope+':'+operationId;
+      const old=(await request(state.get(id)))?.value;
+      if(!old||!['dispatching','download-requested'].includes(old.state))return old;
+      const value={...old,...patch};
+      state.put({id,value});
+      if(value.state==='download-requested')state.put({id:'receipt-chrome-id:'+value.downloadId,value:{scope,operationId}});
+      else{
+        state.delete('receipt-pending:'+scope+':'+operationId);
+        if(value.downloadId!==undefined)state.delete('receipt-chrome-id:'+value.downloadId);
+      }
+      return value;
+    }),
+    readReceiptDelivery:(scope,operationId)=>transact('readonly',async ({state})=>
+      (await request(state.get('receipt-delivery:'+scope+':'+operationId)))?.value),
+    receiptDeliveryForDownload:id=>transact('readonly',async ({state})=>
+      (await request(state.get('receipt-chrome-id:'+id)))?.value),
+    pendingReceiptDeliveries:()=>transact('readonly',async ({state})=>{
+      const pending=await request(state.getAll(IDBKeyRange.bound('receipt-pending:','receipt-pending:\uffff')));
+      return Promise.all(pending.map(async ({value})=>
+        (await request(state.get('receipt-delivery:'+value.scope+':'+value.operationId)))?.value));
+    }),
+    // Structured-cloned destination handles live only while a download is
+    // pending. The intent and receipt remain readable without cloud access.
+    stageDownloadHandle:(id,handle)=>transact('readwrite',async ({state})=>{
+      const range=IDBKeyRange.bound('download-picker:','download-picker:\uffff');
+      await new Promise((resolve,reject)=>{
+        const scan=state.openCursor(range);
+        scan.onerror=()=>reject(scan.error);
+        scan.onsuccess=()=>{const cursor=scan.result;if(!cursor){resolve();return;}
+          if(cursor.value.value.expiresAt<=clock())cursor.delete();cursor.continue();};
+      });
+      state.add({id:'download-picker:'+id,value:{handle,expiresAt:clock()+120_000}});
+    }),
+    discardDownloadHandle:id=>transact('readwrite',({state})=>{state.delete('download-picker:'+id);}),
+    admitDownload:job=>transact('readwrite',async ({state})=>{
+      const pickerKey='download-picker:'+job.jobId;
+      const picker=(await request(state.get(pickerKey)))?.value;
+      if(!picker||picker.expiresAt<=clock())fail('DOWNLOAD_DESTINATION_PERMISSION_REQUIRED');
+      const active=(await request(state.get('download-active')))?.value??[];
+      if(active.length>=2)fail('DOWNLOAD_QUEUE_FULL');
+      state.add({id:'download-job:'+job.jobId,value:job});
+      state.add({id:'download-sink:'+job.jobId,value:picker.handle});
+      state.delete(pickerKey);
+      state.put({id:'download-active',value:[...active,job.jobId]});
+      return job;
+    }),
+    readDownload:jobId=>transact('readonly',async ({state})=>(await request(state.get('download-job:'+jobId)))?.value),
+    readDownloadSink:jobId=>transact('readonly',async ({state})=>(await request(state.get('download-sink:'+jobId)))?.value),
+    readDownloadDelivery:jobId=>transact('readonly',async ({state})=>(await request(state.get('download-delivery:'+jobId)))?.value),
+    readDownloadInventory:jobId=>transact('readonly',async ({state})=>(await request(state.get('download-inventory:'+jobId)))?.value),
+    activeDownloads:()=>transact('readonly',async ({state})=>{
+      const active=(await request(state.get('download-active')))?.value??[];
+      return Promise.all(active.map(async id=>(await request(state.get('download-job:'+id)))?.value));
+    }),
+    recentDownloads:(limit=40)=>transact('readonly',async ({state})=>{
+      const rows=[];
+      await new Promise((resolve,reject)=>{
+        const scan=state.openCursor(IDBKeyRange.bound('download-job:','download-job:\uffff'));
+        scan.onerror=()=>reject(scan.error);
+        scan.onsuccess=()=>{const cursor=scan.result;if(!cursor){resolve();return;}
+          rows.push(cursor.value.value);
+          rows.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+          if(rows.length>limit)rows.pop();
+          cursor.continue();};
+      });
+      return rows;
+    }),
+    updateDownload:(jobId,expected,patch,{inventory,delivery,terminal=false}={})=>transact('readwrite',async ({state})=>{
+      const id='download-job:'+jobId;
+      const old=(await request(state.get(id)))?.value;
+      if(!old||!expected.includes(old.state))return null;
+      const job={...old,...patch,updatedAt:clock()};
+      state.put({id,value:job});
+      if(inventory)state.add({id:'download-inventory:'+jobId,value:inventory});
+      if(delivery)state.add({id:'download-delivery:'+jobId,value:delivery});
+      if(terminal){
+        const active=(await request(state.get('download-active')))?.value??[];
+        state.put({id:'download-active',value:active.filter(id=>id!==jobId)});
+        state.delete('download-sink:'+jobId);
+      }
+      return job;
+    }),
     recordRemoteResult:async (value,{onVerified}={})=>{
       const {row,firstVerified}=await transact('readwrite',async s=>{
         if(typeof value.operationId!=='string'||!value.operationId)fail('OPERATION_INVALID');
@@ -304,6 +394,13 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         const legacy=async()=>((await request(s.state.get('remoteResults')))?.value??[])
           .find(receipt=>receipt.operationId===value.operationId);
         const previous=stored??(await legacy());
+        if(previous?.localUpload&&value.localUpload){
+          const a=previous.localUpload,b=value.localUpload;
+          if(a.batchId!==b.batchId||a.index!==b.index||a.mode!==b.mode||a.size!==b.size||a.key!==b.key||
+             targetKey(a.source)!==targetKey(b.source))fail('OPERATION_BINDING_MISMATCH');
+          if(previous.state==='verified')return {row:previous};
+          if(a.commitRequested===true&&b.commitRequested===false)fail('OPERATION_COMMIT_REGRESSION');
+        }
         const retryPrecommit=value.localUpload?.retryPrecommit===true&&['cancelled','failed'].includes(previous?.state)&&
           previous.localUpload?.commitRequested===false&&value.localUpload.batchId===previous.localUpload.batchId&&
           value.localUpload.key===previous.localUpload.key&&targetKey(value.localUpload.source)===targetKey(previous.localUpload.source);

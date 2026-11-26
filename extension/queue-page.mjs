@@ -188,6 +188,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
     cardScope?.abort();
     cardScope=new AbortController();
     cards=createHistoryCards({api,screenshotRequest,goTo,canRead,signal:cardScope.signal,
+      selectFolderRepresentative:(id,operation)=>service.store.selectFolderRepresentative(id,operation),
       preferences:prefs,isFirstPage:page===1,visibility:metadataPreference?.value,rename,renameError,onGalleryClosed:()=>void refresh({force:true})});
     const groups=new Map(), contents=document.createDocumentFragment();
     for(const row of items){

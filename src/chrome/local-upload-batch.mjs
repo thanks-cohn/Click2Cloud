@@ -1,4 +1,6 @@
-import {normalizeTarget,targetKey} from '../core/menu-identity.mjs';
+import {normalizeTarget,stableId,targetKey} from '../core/menu-identity.mjs';
+import {isImage} from '../explorer/image-preview.mjs';
+import {retryableTransferCode,transferOutcomeClass,transferRetryDelay} from './transfer-outcome.mjs';
 import {planLocalUpload,uploadId,uploadError} from './local-upload-plan.mjs';
 
 const sameTarget=(a,b)=>targetKey(a)===targetKey(b);
@@ -26,6 +28,7 @@ export function uploadBatchReceipt({batch,items,outcomes},version){
       return {index,operationId:row?.operationId??null,relativePath:item.relativePath,
         intendedKey:item.key,intendedSize:item.size,observedKey:proof?.key??null,observedSize:proof?.size??null,
         status:row?.status??'unprocessed',code:row?.code??null,
+        attempts:row?.attempts??null,outcomeClass:row?.outcomeClass??null,
         evidence:proof?{kind:'staging-byte-readback-and-final-r2-head',etag:proof.etag,
           version:proof.version,sha256:null}:null,finishedAt:row?.finishedAt??null};
     })
@@ -34,16 +37,36 @@ export function uploadBatchReceipt({batch,items,outcomes},version){
 
 /** Trusted local batch operations over the existing File API and upload claims. */
 export function createLocalUploadBatches({journal,checkDestination,validatePlan,dispatch,dispatchStored,reconcile,notify,
-    receiptEnabled,selectionReceiptPolicy,downloadReceipt,observe=()=>{},version,clock=Date.now}){
+    receiptEnabled,selectionReceiptPolicy,downloadReceipt,readReceiptDelivery,showUploadHistory,historyChanged,observe=()=>{},version,clock=Date.now,locks=globalThis.navigator?.locks}){
   const leases=new Map();
   const publicState=batch=>{
     if(!batch)return null;
-    const {inFlight,...snapshot}=batch;
-    return {...snapshot,next:batch.processed,activeIndex:inFlight?.index??null,uploaded:batch.uploaded+Number(inFlight?.uploaded===true)};
+    const {inFlight,historyGroups,authorizedSessionId,...snapshot}=batch;
+    return {...snapshot,next:batch.processed,activeIndex:inFlight?.index??null,nextRetryAt:inFlight?.retryAt??null,uploaded:batch.uploaded+Number(inFlight?.uploaded===true)};
   };
   async function save(batch,outcome){
     batch.updatedAt=clock();
     await journal.save(batch,outcome);
+    if(batch.historyGroups)try{historyChanged?.();}catch{/* Replay comes from the durable journal. */}
+  }
+  function historyGroup(batch,item){
+    return batch.historyGroups?.find(group=>group.root===item.relativePath.split('/')[0]);
+  }
+  function historyContext(batch,item){
+    return batch.historyEnabled===undefined?undefined:{
+      include:batch.historyEnabled&&!historyGroup(batch,item),origin:'manual-local'
+    };
+  }
+  function updateGroup(batch,flight,result,status){
+    const group=batch.historyGroups?.find(entry=>entry.id===flight.historyGroupId);
+    if(!group)return;
+    group.counts[status]++;
+    const proof=result.receipt;
+    if(status==='verified'&&proof?.size>0&&isImage({key:proof.key})){
+      group.candidates??=[];
+      if(group.candidates.length<8)
+        group.candidates.push({operationId:flight.ticket,key:proof.key,size:proof.size,etag:proof.etag,version:proof.version});
+    }
   }
   async function effect(batch,field,action){
     try{
@@ -92,10 +115,12 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
   async function apply(batch,flight,result,cancelled,publish){
     const status=statusOf(result);
     const outcome={index:flight.index,operationId:flight.ticket,status,
-      code:validCode(result.code,fileCodes[status]),
+      code:validCode(result.code,fileCodes[status]),attempts:flight.attempt??1,
+      outcomeClass:transferOutcomeClass(status==='unconfirmed'?'uncertain':status,result.code),
       ...(status==='verified'?{receipt:result.receipt}:{}),finishedAt:clock()};
     batch.processed++;
     batch.counts[status]++;
+    updateGroup(batch,flight,result,status);
     if((flight.uploaded||status==='verified'))batch.uploaded++;
     if(result.receipt?.key&&result.receipt.key!==flight.key)batch.renamed++;
     batch.inFlight=null;
@@ -138,11 +163,28 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
           counts:{verified:0,failed:0,skipped:0,cancelled:0,unconfirmed:0}};
         try{batch.receiptPolicy=await selectionReceiptPolicy?.(mode,plan.items);}
         catch{observe('UPLOAD_RECEIPT_PREFERENCE_UNAVAILABLE',batch.id);}
+        if(showUploadHistory){
+          try{batch.historyEnabled=await showUploadHistory();}
+          catch{batch.historyEnabled=true;observe('UPLOAD_HISTORY_PREFERENCE_UNAVAILABLE',batch.id);}
+          if(batch.historyEnabled&&mode==='folder'){
+            const roots=new Map();
+            for(const item of plan.items){
+              const root=item.relativePath.split('/')[0];
+              if(!roots.has(root))roots.set(root,{id:stableId('folder-upload',[batchId,root]),root,total:0,
+                eligible:0,counts:{verified:0,failed:0,skipped:0,cancelled:0,unconfirmed:0}});
+              const group=roots.get(root);
+              group.total++;
+              group.eligible+=Number(!item.invalidCode);
+            }
+            batch.historyGroups=[...roots.values()];
+          }
+        }
         await journal.create(batch,plan.items);
         owner.batch=batch;
         owner.busy=true;
         try{
           owner.binding=await checkDestination(plan.target,signal);
+          if(owner.binding.sessionId)batch.authorizedSessionId=owner.binding.sessionId;
           await validatePlan?.(plan.items,owner.binding,signal);
           signal?.throwIfAborted();
           if(owner.detached){
@@ -153,6 +195,7 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
             if(selectionId){
               batch.selectionId=selectionId;batch.durableRunnable='yes';
               await journal.accept(batch,selectionId,items.length);
+              if(batch.historyGroups)try{historyChanged?.();}catch{}
             }else await save(batch);
           }
           return {state:'completed',batch:publicState(batch)};
@@ -183,6 +226,7 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
         if(order.some(index=>index===undefined)||selection.items.some(item=>original.get(item.key)!==item.size))
           throw uploadError('UPLOAD_RESELECT_MISMATCH','Select the same folders or all remaining files with their original paths and sizes.');
         owner.binding=await checkDestination(target,signal);
+        if(owner.binding.sessionId)batch.authorizedSessionId=owner.binding.sessionId;
         await validatePlan?.(prior.slice(batch.processed),owner.binding,signal);
         signal?.throwIfAborted();
         if(owner.detached){leases.delete(batchId);return {state:'completed',batch:publicState(batch)};}
@@ -200,7 +244,7 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
         throw error;
       }finally{owner.busy=false;}
     },
-    async step({source,batchId,index,ticket},controller,onProgress,token){
+    async step({source,batchId,index,ticket,retryFlight},controller,onProgress,token){
       const owner=leases.get(batchId),batch=owner?.batch;
       if(!batch||owner.token!==token||owner.busy||batch.phase!=='ready'||!sameTarget(batch.target,normalizeTarget(source))||
          index!==batch.processed||index>=batch.total||!uploadId(ticket))
@@ -211,7 +255,9 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
         const item=await journal.item(batchId,index);
         if(batch.cancelRequested)controller.abort();
         if(!item)throw uploadError('UPLOAD_BATCH_INVALID','The local upload plan is unavailable.');
-        const flight={index,ticket,key:item.key,uploaded:false};
+        const group=historyGroup(batch,item);
+        const flight={index,ticket,key:item.key,uploaded:false,attempt:(retryFlight?.attempt??0)+1,
+          startedAt:retryFlight?.startedAt??clock(),...(group?{historyGroupId:group.id}:{})};
         batch.inFlight=flight;
         batch.phase='uploading';
         await save(batch);
@@ -224,7 +270,8 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
           const staged=batch.selectionId?await journal.source(batch.selectionId,index):null;
           if(batch.selectionId&&!staged)throw uploadError('UPLOAD_FILE_UNAVAILABLE','This local source is unavailable.');
           const method=batch.selectionId?dispatchStored:dispatch;
-          result=await method({ticket,batchId,index,source:batch.target,item,mode:batch.mode,staged},owner.binding,controller,event=>{
+          result=await method({ticket,batchId,index,source:batch.target,item,mode:batch.mode,staged,ordinaryHistory:historyContext(batch,item)},
+           {...owner.binding,retryPrecommit:retryFlight?.retryPrecommit===true},controller,event=>{
             if((event.phase==='verifying'||event.phase==='committing')&&!flight.uploaded){
               flight.uploaded=true;
               batch.phase='verifying';
@@ -233,6 +280,22 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
           });
         }catch(error){
           result={state:signal.aborted?'cancelled':'failed',code:validCode(error.code,'LOCAL_UPLOAD_UNAVAILABLE'),error:error.message};
+        }
+        if(batch.selectionId&&!signal.aborted&&result.precommitRetrySafe&&retryableTransferCode(result.code)){
+          const retryAt=clock()+transferRetryDelay(flight.attempt,result.retryAfterMs);
+          if(flight.attempt<3&&retryAt<flight.startedAt+15*60_000){
+            Object.assign(flight,{retryAt,retryPrecommit:true,retryCode:result.code});
+            batch.phase='retry-wait';
+            await save(batch);
+            publish();
+            return {state:'retry-scheduled',code:result.code,batch:publicState(batch)};
+          }
+          result={...result,continue:true};
+        }
+        if(batch.selectionId&&result.state==='uncertain'&&!signal.aborted){
+          let recovered;
+          try{recovered=await reconcile({batch,flight,item,signal,expectedSession:batch.authorizedSessionId});}catch{}
+          if(recovered?.state==='completed')result=recovered;
         }
         if(batch.selectionId&&result.state==='failed'&&!/AUTH|HTTP_429|QUOTA|RESOURCE_BUSY/.test(result.code??''))result.continue=true;
         if(batch.selectionId&&result.state==='uncertain'){
@@ -261,7 +324,10 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
       await recover(batch);
       signal?.throwIfAborted();
       const receipt=detail?uploadBatchReceipt(await journal.detail(batch.id),version):undefined;
-      return {state:'completed',batch:publicState(leases.get(batch.id)?.batch??batch),...(receipt?{receipt}:{})};
+      const delivery=await readReceiptDelivery?.(batch.id).catch(()=>null);
+      const state=publicState(leases.get(batch.id)?.batch??batch);
+      if(delivery){state.receiptDownload=delivery;if(receipt)receipt.receiptDownload=delivery;}
+      return {state:'completed',batch:state,...(receipt?{receipt}:{})};
     },
     async reconcile({source,batchId},signal){
       const target=normalizeTarget(source),batch=await journal.get(batchId);
@@ -273,13 +339,16 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
         const flight=batch.inFlight;
         const makeReady=async()=>{
           if(!batch.selectionId)return pause(batch,'LOCAL_UPLOAD_RESELECT_REQUIRED');
+          const binding=await checkDestination(batch.target,signal);
+          if(binding.sessionId)batch.authorizedSessionId=binding.sessionId;
           batch.phase='ready';batch.durableRunnable='yes';delete batch.code;await save(batch);
         };
         if(flight&&!terminal.has(batch.phase)){
           const item=await journal.item(batchId,flight.index);
           const result=await reconcile({batch,flight,item,signal});
           if(result?.state==='reselect'){
-            batch.inFlight=null;
+            if(!result.retryPrecommit)batch.inFlight=null;
+            else Object.assign(flight,{retryAt:clock(),retryPrecommit:true});
             await makeReady();
           }else if(result){
             await apply(batch,flight,result,false);
@@ -300,7 +369,13 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
       const pending=await journal.runnable(0xffffffff);
       return (await Promise.all(pending.map(batch=>api.cancelDurable(batch.id)))).filter(Boolean);
     },
-    async driveDurable(candidate,onProgress){
+    driveDurable(candidate,onProgress){
+      if(locks)return locks.request('redown-durable-upload:'+candidate.id,{ifAvailable:true},
+        lease=>lease?driveDurable(candidate,onProgress):undefined);
+      return driveDurable(candidate,onProgress);
+    }
+  });
+  async function driveDurable(candidate,onProgress){
       const id=candidate.id;
       let owner=leases.get(id);
       if(owner?.driving||owner?.busy||!owner&&leases.size>=2)return;
@@ -312,28 +387,33 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
       if(batch?.durableRunnable!=='yes')return;
       owner.driving=true;
       try{
-        if(batch.inFlight){
+        if(batch.inFlight&&!batch.inFlight.retryAt){
           const flight=batch.inFlight;
           const item=await journal.item(id,flight.index);
-          const result=await reconcile({batch,flight,item});
+          const result=await reconcile({batch,flight,item,expectedSession:batch.authorizedSessionId});
           if(!result){await pause(batch,'LOCAL_UPLOAD_COMMIT_UNCONFIRMED');return;}
           if(result.state==='reselect'){
-            batch.inFlight=null;batch.phase='ready';await save(batch);
+            // Retain the same publication ID whenever a production checkpoint exists.
+            if(result.retryPrecommit)Object.assign(flight,{retryAt:clock(),retryPrecommit:true});
+            else batch.inFlight=null;
+            batch.phase='ready';await save(batch);
           }else await apply(batch,flight,result,false);
         }
-        if(batch.cancelRequested){
-          await finish(batch,'cancelled','LOCAL_UPLOAD_BATCH_CANCELLED');
-          return;
-        }
         if(batch.durableRunnable!=='yes')return;
-        owner.binding??=await checkDestination(batch.target);
-        while(batch.phase==='ready'){
+        if(batch.cancelRequested){await finish(batch,'cancelled','LOCAL_UPLOAD_BATCH_CANCELLED');return;}
+        if(batch.inFlight?.retryAt>clock())return batch.inFlight.retryAt;
+        owner.binding??=await checkDestination(batch.target,undefined,batch.authorizedSessionId);
+        if(batch.authorizedSessionId&&owner.binding.sessionId!==batch.authorizedSessionId){
+          await pause(batch,'AUTH_SESSION_CHANGED');return;
+        }
+        while(batch.phase==='ready'||batch.phase==='retry-wait'){
           if(batch.cancelRequested){await finish(batch,'cancelled','LOCAL_UPLOAD_BATCH_CANCELLED');break;}
+          const retryFlight=batch.inFlight?.retryAt?batch.inFlight:undefined;
+          if(retryFlight?.retryAt>clock())return retryFlight.retryAt;
           const controller=new AbortController();owner.controller=controller;
-          // A stable ticket lets restart recovery inspect the exact publication
-          // intent. A fresh ticket is used only after known precommit recovery.
-          await api.step({source:batch.target,batchId:id,index:batch.processed,ticket:crypto.randomUUID()},
-            controller,onProgress,owner.token);
+          batch.phase='ready';
+          await api.step({source:batch.target,batchId:id,index:batch.processed,
+            ticket:retryFlight?.ticket??crypto.randomUUID(),retryFlight},controller,onProgress,owner.token);
           owner.controller=null;
           try{onProgress?.(publicState(batch));}catch{/* Presentation is optional. */}
         }
@@ -343,7 +423,6 @@ export function createLocalUploadBatches({journal,checkDestination,validatePlan,
         if(leases.get(id)===owner)leases.delete(id);
         if(terminal.has(batch.phase))await journal.releaseSource(batch.selectionId).catch(()=>{});
       }
-    }
-  });
+  }
   return api;
 }

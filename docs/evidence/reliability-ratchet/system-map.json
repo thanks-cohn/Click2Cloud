@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "See 11.26.2026/fixture-library/HANDOFF.md",
+  "productionSourceRevision": "11.25.2026/alpha-three-runs/01-reliability-foundation/HANDOFF.md",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -11889,6 +11889,8 @@
         "codes": [
           "UPLOAD_RECEIPT_DOWNLOAD_FAILED",
           "UPLOAD_RECEIPT_PREFERENCE_UNAVAILABLE",
+          "UPLOAD_HISTORY_PREFERENCE_UNAVAILABLE",
+          "UPLOAD_HISTORY_PROJECTION_PENDING",
           "UPLOAD_BATCH_INVALID",
           "UPLOAD_RESELECT_MISMATCH",
           "UPLOAD_SELECTION_EMPTY",

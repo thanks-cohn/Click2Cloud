@@ -44,10 +44,21 @@ def environment(caps):
 
 
 def atomic_document(path, data):
+    value = json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + '\n'
+    atomic_bytes(path, value.encode('utf-8'))
+
+
+def atomic_bytes(path, data):
     temporary = path.with_name('.' + path.name + '.' + str(uuid.uuid4()))
     try:
-        document(temporary, data)
+        exclusive(temporary, data)
         os.replace(temporary, path)
+        if os.name != 'nt':
+            directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
     finally:
         temporary.unlink(missing_ok=True)
 

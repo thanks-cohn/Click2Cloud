@@ -16,7 +16,7 @@ export const providerName = value => Object.hasOwn(historyV2Providers,value) ? h
 export const queueStatus = value => ({
   working:'Working',waiting:'Pending',uploading:'Uploading',verifying:'Verifying',verified:'Verified',cancelling:'Cancelling',
   uploaded:'Uploaded · verification unavailable',failed:'Failed',blocked:'Blocked',uncertain:'Outcome uncertain',
-  'needs-login':'Needs login',cancelled:'Cancelled'
+  'needs-login':'Needs login',cancelled:'Cancelled',partial:'Partial'
 })[value] ?? 'N/A';
 const savedLocation = destination => [
   destination?.bucket, destination?.key ?? destination?.path ?? destination?.folder
@@ -110,7 +110,7 @@ function previewRetry(record,error,feedback,retry,isCurrent){
   return button;
 }
 
-export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility,rename,renameError,onGalleryClosed}) {
+export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,preferences,isFirstPage,visibility,rename,renameError,selectFolderRepresentative,onGalleryClosed}) {
   const rows = [], names = new Map(), thumbnails = new WeakMap(), previews = new Map(), visible = new Set(), pending = new Map(), metadata = [];
   const reader = createImageReader(read,{maxBytes:12*1024*1024,maxEntries:2});
   const retryCache=createScreenshotRetryCache();
@@ -347,6 +347,38 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     }
     pump();
   });
+  async function folderPreview(folder,signal){
+    const selected=folder.folderUpload.representative;
+    const candidates=selected?[selected]:folder.folderUpload.candidates??[];
+    for(const candidate of candidates){
+      signal.throwIfAborted();
+      const record={...folder,kind:'save',status:'verified',sourceRecordId:candidate.operationId,
+        filename:candidate.key.split('/').at(-1),bytes:candidate.size,etag:candidate.etag,version:candidate.version,
+        destination:{...folder.destination,key:candidate.key}};
+      let url;
+      try{
+        const result=await loadPreview(record,4*1024*1024,signal,1);
+        signal.throwIfAborted();
+        const image=new Image();
+        image.alt=record.filename;
+        url=URL.createObjectURL(result.blob);
+        image.src=url;
+        await image.decode();
+        signal.throwIfAborted();
+        const chosen=selected??await selectFolderRepresentative(folder.recordId,candidate.operationId);
+        signal.throwIfAborted();
+        if(chosen?.operationId===candidate.operationId){url=null;return image;}
+        if(chosen)return folderPreview({...folder,folderUpload:{...folder.folderUpload,representative:chosen}},signal);
+      }catch(error){
+        if(signal.aborted)throw error;
+        if(canRead(record)===false)break;
+      }finally{
+        // Successful decoding hands its own URL to releasePreview.
+        if(url)URL.revokeObjectURL(url);
+      }
+    }
+    return null;
+  }
   function pump() {
     if (signal.aborted || previewDialog) return;
     for(const slot of visible){
@@ -357,6 +389,13 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       pending.set(slot,ctrl);
       void (async()=>{
         try{
+          if(slot.dataset.folderRepresentative==='true'){
+            const image=await folderPreview(record,ctrl.signal);
+            if(ctrl.signal.aborted){if(image)URL.revokeObjectURL(image.src);return;}
+            if(image)slot.replaceChildren(image);
+            else{slot.textContent='Folder';slot.dataset.failed='true';}
+            return;
+          }
           const result=await loadPreview(record,4*1024*1024,ctrl.signal,1);
           ctrl.signal.throwIfAborted();
           const image=new Image();
@@ -375,7 +414,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
           if(!ctrl.signal.aborted){
             const message=previewMessage(error);
             if(!record.destination?.key||error.message!=='PREVIEW_SIZE_LIMIT'){
-              const feedback=node('span',message);
+              const feedback=node('span',slot.dataset.folderRepresentative==='true'?'Folder':message);
               const retry=previewRetry(record,error,feedback,()=>{
                 delete slot.dataset.failed;
                 slot.replaceChildren();
@@ -409,7 +448,46 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     for (const update of metadata) update();
   }
 
+  function renderFolder(record){
+    const article=node('article',null,'card queue-history-card folder-upload-history');
+    article.dataset.recordId=record.recordId;
+    article.dataset.provider=record.provider;
+    const summary=node('div',null,'queue-card-summary');
+    const total=record.folderUpload.total;
+    const count=total.toLocaleString()+(total===1?' file':' files');
+    summary.append(node('strong',record.filename),node('p',count+' · '+providerName(record.provider),'queue-location'));
+    const state=node('span',queueStatus(record.status),'queue-card-status');
+    state.dataset.outcome=record.status;
+    const top=node('div',null,'queue-card-header');
+    top.append(summary,state);
+    article.append(top);
+    const details=node('details');
+    details.append(node('summary','Details'),node('p',count),node('p',savedLocation(record.destination)),
+      node('time',date(record.requestedAt,preferences.timezone)));
+    article.append(details);
+    const representative=record.folderUpload.representative;
+    const media=node('details');
+    media.append(node('summary','Media'));
+    media.open=preferences.previews==='all'||preferences.previews==='first'&&isFirstPage;
+    if(representative||record.folderUpload.candidates?.length){
+      const slot=node('div',null,'history-preview');
+      slot.dataset.folderRepresentative='true';
+      previews.set(slot,record);
+      media.append(slot);
+      observer.observe(slot);
+      media.addEventListener('toggle',()=>{
+        if(media.open){delete slot.dataset.failed;pump();}
+        else releasePreview(slot);
+      });
+    }else{
+      const fallback=node('span','Folder','muted');media.append(fallback);
+    }
+    article.append(media);
+    return article;
+  }
+
   function render(record) {
+    if(record.kind==='folder-upload')return renderFolder(record);
     const article=node('article',null,'card queue-history-card');
     article.dataset.recordId=record.recordId;
     article.dataset.provider=record.provider;
@@ -536,7 +614,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
         article.append(publicURLs);
       }
     }
-    for(const [field,label,preferred] of [
+    if(record.origin!=='manual-local'&&record.saveMode!=='local-upload')for(const [field,label,preferred] of [
       ['hostUrl','Host URL',preferences.hostUrlDefault],
       ['sourceUrl','Source URL',preferences.sourceUrlDefault]
     ]){
@@ -560,6 +638,8 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
           tracked.push({field,available,elements});
         }
         function field(key,value,url=false,label=historyV2FieldLabels[key]){
+          if((record.origin==='manual-local'||record.saveMode==='local-upload')&&
+             ['hostTitle','hostUrl','sourceUrl','originalUrl'].includes(key))return;
           const term=node('dt',label);
           const item=node('dd');
           if(key==='objectId')item.dataset.providerObject='';

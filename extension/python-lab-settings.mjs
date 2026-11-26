@@ -57,12 +57,17 @@ export function mountPythonLabSettings(page) {
     <option value="read-write">Read and write a fresh QA prefix</option>
     <option value="continue">Continue an existing campaign (read and write)</option>
     <option value="read-only">Read a previous QA prefix for audit or recovery</option>
+    <option value="read-existing">Download from an existing folder (read only)</option>
    </select></label>
+   <div data-lab-existing hidden>
+    <label>Exact bucket-relative folder <input type="text" data-lab-prefix maxlength="1024" placeholder="Empty for bucket root"></label>
+    <label>Download attempts <input type="number" min="1" max="20000" step="1" value="1200" data-lab-read-files></label>
+   </div>
    <label data-lab-recovery-row hidden>Previous QA scope <select data-lab-recovery></select></label>
    <label>Session duration <input type="number" min="1" max="${maxSessionMinutes}" step="1" value="30" data-lab-duration> minutes</label>
    <details data-lab-budgets>
     <summary>Campaign resource ceilings</summary>
-    <label>Upload file attempts <input type="number" min="0" step="1" value="${campaignDefaults.files}" data-lab-files></label>
+    <label data-lab-upload-files-label>Upload file attempts <input type="number" min="0" step="1" value="${campaignDefaults.files}" data-lab-files></label>
     <label>Provider request units <input type="number" min="0" step="1" value="${campaignDefaults.providerRequests}" data-lab-requests></label>
     <label>Operation units <input type="number" min="0" step="1" value="${campaignDefaults.operations}" data-lab-operations></label>
     <label>Modeled traffic (MiB) <input type="number" min="0" step="1" value="${campaignDefaults.trafficBytes/2**20}" data-lab-traffic></label>
@@ -95,7 +100,10 @@ export function mountPythonLabSettings(page) {
  };
  async function recovery(){
   const epoch=++recoveryEpoch;
-  const mode=el('mode').value,previous=mode!=='read-write';
+  const mode=el('mode').value,previous=['read-only','continue'].includes(mode);
+  el('existing').hidden=mode!=='read-existing';
+  el('upload-files-label').hidden=mode==='read-existing';
+  showCeilings();
   el('recovery-row').hidden=!previous;
   el('recovery').replaceChildren();option(el('recovery'),'','Choose previous QA scope');
   const accountId=el('account').value,bucketName=el('bucket').value;
@@ -148,7 +156,7 @@ export function mountPythonLabSettings(page) {
   el('config').hidden=active;
   el('active').hidden=!active;
   el('form').hidden=active||!form;
-  el('scope').textContent=data.prefix?
+  el('scope').textContent=data.prefix||data.readSelection?
    `${data.mode==='read-write'?'Read and write':'Read only'} · ${data.bucketName}/${data.prefix}${data.campaignId?data.campaignId+'/':''} · Expires ${new Date(data.expiresAt).toLocaleTimeString()}`:'';
   const valid=!!data.pairCode&&Date.now()<data.codeExpiresAt;
   const cmd=valid?command+data.pairCode:'';
@@ -166,24 +174,28 @@ export function mountPythonLabSettings(page) {
   return data;
  };
  const budgetControls=['files','requests','operations','traffic','disk','cost'];
- const ceilings=()=>({files:Number(el('files').value),providerRequests:Number(el('requests').value),
+ const ceilings=()=>({files:el('mode').value==='read-existing'?0:Number(el('files').value),providerRequests:Number(el('requests').value),
   operations:Number(el('operations').value),trafficBytes:Number(el('traffic').value)*2**20,
   diskBytes:Number(el('disk').value)*2**20,costMicros:Math.round(Number(el('cost').value)*1_000_000)});
  const selection=()=>{
   const accountId=el('account').value,bucketName=el('bucket').value,choice=el('mode').value;
-  const [scopeId,campaignId=null]=choice==='read-write'?[null]:el('recovery').value.split('/');
-  return {accountId,bucketName,mode:choice==='read-only'?'read-only':'read-write',scopeId,campaignId,
+  const existing=choice==='read-existing';
+  const [scopeId,campaignId=null]=['continue','read-only'].includes(choice)?el('recovery').value.split('/'):[null];
+  return {accountId,bucketName,mode:choice==='read-only'||existing?'read-only':'read-write',scopeId,campaignId,
+   ...(existing?{readSelection:{prefix:el('prefix').value,maxReadAttempts:Number(el('read-files').value)}}:{}),
    minutes:Number(el('duration').value),ceilings:ceilings()};
  };
  const showCeilings=()=>{
   const limit=ceilings();
-  el('limits').textContent=`${limit.files.toLocaleString()} upload attempts, ${limit.providerRequests.toLocaleString()} request units, `+
+  el('limits').textContent=`${el('mode').value==='read-existing'?Number(el('read-files').value).toLocaleString()+' download attempts':limit.files.toLocaleString()+' upload attempts'}, ${limit.providerRequests.toLocaleString()} request units, `+
    `${limit.operations.toLocaleString()} operations, ${(limit.trafficBytes/2**20).toLocaleString()} MiB modeled traffic, `+
    `${(limit.diskBytes/2**20).toLocaleString()} MiB temporary disk, $${(limit.costMicros/1_000_000).toFixed(2)} modeled cost.`;
  };
  const clearApproval=()=>{el('approved').checked=false;};
  showCeilings();
  el('duration').onchange=clearApproval;
+ el('prefix').oninput=clearApproval;
+ el('read-files').oninput=()=>{clearApproval();showCeilings();};
  for(const field of budgetControls)el(field).oninput=()=>{clearApproval();showCeilings();};
  el('config').onclick=act(async()=>{
   form=true;el('form').hidden=false;
@@ -201,7 +213,7 @@ export function mountPythonLabSettings(page) {
  el('start').onclick=act(async()=>{
   const input=selection();
   if(!input.accountId||!input.bucketName||!el('approved').checked||input.scopeId==='')throw Error('Choose the QA target and approve access first.');
-  if(['duration',...budgetControls].some(key=>!el(key).value||!el(key).checkValidity()))throw Error('Enter valid session duration and resource ceilings.');
+  if(['duration',...budgetControls,...(input.readSelection?['read-files']:[])].some(key=>!el(key).value||!el(key).checkValidity()))throw Error('Enter valid session duration and resource ceilings.');
   const epoch=++sessionEpoch;
   // permissions.request must run in the owner's direct Chrome click gesture.
   el('start').disabled=true;
