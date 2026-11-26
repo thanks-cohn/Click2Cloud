@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .errors import LabError
 from .fixtures import ASSET_SIZES, GENERATOR, MAX_GENERATED_BYTES, MIME, content_type, generate
-from .inventory import digest_file, name_key, ordinary_directory, relative_path, source_path
+from .inventory import digest_file, name_key, ordinary_directory, relative_path, source_error, source_path
 
 SCHEMA = 'redown.live-lab.workload/1'
 MAX_MANIFEST_BYTES = 64 * 1024**2
@@ -393,7 +393,7 @@ def resolve(document, *, source, prefix_length):
                     root = ordinary_directory(source)
                 value, _ = digest_file(source_path(root, path), size)
                 if value != row['sha256']:
-                    raise LabError('SOURCE_CHANGED', path)
+                    raise source_error('SOURCE_CHANGED', 'manifest-validation', 'DIGEST_MISMATCH', ('sha256',))
             else:
                 value = hashlib.sha256(generate(row['format'], size, document['seed'], id_)).hexdigest()
             observation['sha256'] = value

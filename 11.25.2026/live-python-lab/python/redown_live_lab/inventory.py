@@ -11,9 +11,16 @@ from .errors import LabError
 from .fixtures import extension_format
 from .transport import CHUNK_BYTES
 
+if os.name == 'nt':
+    from . import windows_source
+else:
+    windows_source = None
+
 RESERVED = frozenset(('con', 'prn', 'aux', 'nul', 'conin$', 'conout$',
                       *(f'com{i}' for i in '123456789¹²³'), *(f'lpt{i}' for i in '123456789¹²³')))
 INTERNAL = frozenset(('.redown', '.redown-beta-uploads', '.redown-python-lab'))
+FILE_ID = ('st_dev', 'st_ino')
+FILE_METADATA = ('st_size', 'st_mtime_ns')
 
 
 def relative_path(value, empty=False):
@@ -48,51 +55,94 @@ def ordinary_directory(directory):
     for path in (*reversed(root.parents), root):
         info = path.lstat()
         if linked(info) or not stat.S_ISDIR(info.st_mode):
-            raise LabError('UNSAFE_SOURCE_DIRECTORY', str(path))
+            raise LabError('UNSAFE_SOURCE_DIRECTORY')
     return root
 
 
 def source_path(root, name):
     relative_path(name)
-    path = root.joinpath(*PurePosixPath(name).parts)
-    ordinary_directory(path.parent)
-    return path
+    return root.joinpath(*PurePosixPath(name).parts)
 
 
-def identity(info):
-    return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns
+def source_error(code, stage, reason, attributes=(), error=None):
+    detail = {'stage': stage, 'reason': reason, 'attributes': list(attributes)}
+    if error is not None:
+        detail['errno'] = error.errno
+        if getattr(error, 'winerror', None) is not None:
+            detail['winerror'] = error.winerror
+    return LabError(code, detail)
 
 
-def chunks(path, size, stop=lambda: None):
-    """Recheck exact identity after reading; a changed file is never dispatched."""
-    before = path.lstat()
-    if linked(before) or not stat.S_ISREG(before.st_mode):
-        raise LabError('LINK_OR_NONREGULAR', str(path))
-    if before.st_size != size:
-        raise LabError('SOURCE_CHANGED', str(path))
-    flags = os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_BINARY', 0)
-    fd = os.open(path, flags)
-    with os.fdopen(fd, 'rb') as handle:
-        if identity(os.fstat(handle.fileno())) != identity(before):
-            raise LabError('SOURCE_CHANGED', str(path))
-        # A replaced parent may point outside the root during a concurrent edit.
+def check_source(info, stage):
+    if linked(info) or not stat.S_ISREG(info.st_mode):
+        raise source_error('LINK_OR_NONREGULAR', stage, 'UNSAFE_FILE',
+                           ('st_mode', 'st_file_attributes'))
+    if not info.st_ino:
+        raise source_error('SOURCE_IDENTITY_UNAVAILABLE', stage, 'FILE_ID_UNAVAILABLE', ('st_ino',))
+
+
+def check_binding(expected, observed, stage):
+    check_source(observed, stage)
+    fields = FILE_ID + FILE_METADATA
+    # CPython deprecates Windows stat ctime. Bind path and fd through the
+    # device/file index and size/mtime, as in the original REDOWN inventory.
+    if windows_source is None:
+        fields += ('st_ctime_ns',)
+    changed = [field for field in fields if getattr(expected, field) != getattr(observed, field)]
+    if changed:
+        reason = 'IDENTITY_MISMATCH' if any(field in FILE_ID for field in changed) else 'METADATA_MISMATCH'
+        raise source_error('SOURCE_CHANGED', stage, reason, changed)
+
+
+def chunks(path, size, stop=lambda: None, *, before=None):
+    """Read exactly size bytes and verify the opened file and its path binding."""
+    stage = 'before-open'
+    try:
+        stop()
         ordinary_directory(path.parent)
-        remaining = size
-        while remaining:
+        if before is None:
+            before = path.lstat()
+        check_source(before, stage)
+        if before.st_size != size:
+            raise source_error('SOURCE_CHANGED', stage, 'SIZE_MISMATCH', ('st_size',))
+        stage = 'open'
+        flags = os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0)
+        fd = os.open(path, flags) if windows_source is None else windows_source.open_fd(path)
+        with os.fdopen(fd, 'rb', buffering=0) as handle:
+            opened = os.fstat(fd)
+            check_binding(before, opened, stage)
+            change_time = windows_source.change_time(fd) if windows_source is not None else None
+            ordinary_directory(path.parent)
+            stage = 'read'
+            remaining = size
+            while remaining:
+                stop()
+                part = handle.read(min(CHUNK_BYTES, remaining))
+                if not part:
+                    raise source_error('SOURCE_CHANGED', stage, 'TRUNCATED_READ', ('st_size',))
+                remaining -= len(part)
+                yield part
             stop()
-            part = handle.read(min(CHUNK_BYTES, remaining))
-            if not part:
-                raise LabError('SOURCE_CHANGED', str(path))
-            remaining -= len(part)
-            yield part
-        if (handle.read(1) or identity(os.fstat(handle.fileno())) != identity(before)
-                or identity(path.lstat()) != identity(before)):
-            raise LabError('SOURCE_CHANGED', str(path))
+            stage = 'after-read'
+            if handle.read(1):
+                raise source_error('SOURCE_CHANGED', stage, 'EXTRA_BYTES', ('st_size',))
+            check_binding(opened, os.fstat(fd), stage)
+            if windows_source is not None and windows_source.change_time(fd) != change_time:
+                raise source_error('SOURCE_CHANGED', stage, 'METADATA_MISMATCH', ('ChangeTime',))
+            stage = 'after-read-path'
+            ordinary_directory(path.parent)
+            check_binding(before, path.lstat(), stage)
+    except FileNotFoundError as error:
+        if before is not None:
+            raise source_error('SOURCE_CHANGED', stage, 'PATH_DISAPPEARED', error=error) from None
+        raise source_error('LOCAL_FILE_UNREADABLE', stage, 'PATH_MISSING', error=error) from None
+    except OSError as error:
+        raise source_error('LOCAL_FILE_UNREADABLE', stage, 'READ_OR_INSPECTION_FAILED', error=error) from None
 
 
-def digest_file(path, size, stop=lambda: None):
+def digest_file(path, size, stop=lambda: None, *, before=None):
     digest, signature = hashlib.sha256(), b''
-    for part in chunks(path, size, stop):
+    for part in chunks(path, size, stop, before=before):
         if not signature:
             signature = part[:32]
         digest.update(part)
@@ -158,10 +208,7 @@ def inventory(directory, *, max_files, max_file_bytes, max_total_bytes, max_entr
             size = info.st_size
             if len(files) >= max_files or size > max_file_bytes or total + size > max_total_bytes:
                 raise LabError('CORPUS_FILE_OR_BYTE_LIMIT', rel)
-            try:
-                digest, signature = digest_file(path, size, stop)
-            except OSError:
-                raise LabError('LOCAL_FILE_UNREADABLE', rel) from None
+            digest, signature = digest_file(path, size, stop, before=info)
             total += size
             files.append({'id': 'file-' + hashlib.sha256(rel.encode()).hexdigest()[:24],
                           'kind': 'corpus', 'path': rel, 'format': extension_format(rel),

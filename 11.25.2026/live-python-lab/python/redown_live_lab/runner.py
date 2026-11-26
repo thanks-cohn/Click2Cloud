@@ -8,7 +8,7 @@ from pathlib import Path
 from .errors import LabError
 from .evidence import Journal, document, environment, load_run, projection, save_summary, snapshot
 from .fixtures import generate
-from .inventory import chunks, ordinary_directory, source_path
+from .inventory import chunks, ordinary_directory, source_error, source_path
 from .manifest import build_plan, digest, resolve
 from .transport import CHUNK_BYTES
 
@@ -28,7 +28,7 @@ def source_chunks(row, seed, source, stop):
         hashed.update(part)
         yield part
     if hashed.hexdigest() != row['sha256']:
-        raise LabError('SOURCE_CHANGED', row['path'])
+        raise source_error('SOURCE_CHANGED', 'local-staging', 'DIGEST_MISMATCH', ('sha256',))
 
 
 class Progress:
@@ -161,6 +161,9 @@ class Scheduler:
             else:
                 state = 'FAIL'
             result = {'state': state, 'code': code}
+            if isinstance(error, LabError) and code in ('SOURCE_CHANGED', 'SOURCE_IDENTITY_UNAVAILABLE',
+                                                        'LOCAL_FILE_UNREADABLE', 'LINK_OR_NONREGULAR'):
+                result['diagnostic'] = error.detail
         return self.finish(entry, result, start, ack, requested, acknowledged)
 
     def finish(self, entry, result, start, ack, requested, acknowledged):
@@ -173,6 +176,7 @@ class Scheduler:
                             intendedKey=self.prefix + row['remotePath'] if row else None,
                             upload={'requested': requested, 'acknowledged': acknowledged, 'receipt': ack},
                             readback=observed, metadata=result.get('metadata'), listing=result.get('listing'),
+                            diagnostic=result.get('diagnostic'),
                             durationMs=round((time.monotonic() - start) * 1000))
         self.progress.finished += 1
         self.progress.bytes += observed['clientBytes'] if observed else 0
