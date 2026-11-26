@@ -72,6 +72,11 @@ try{
   },{finish,mode});
   const reference=await headerAppearance();
   assert.equal(reference.header.geometry[3],66,'Providers header height must remain canonical');
+  const selection=await page.locator('.app-header nav>button.active').evaluate(el=>{
+   const s=getComputedStyle(el);return {radius:s.borderRadius,border:s.borderTopColor,shadow:s.boxShadow,fill:s.backgroundColor,after:getComputedStyle(el,'::after').content};
+  });
+  assert.equal(selection.radius,'0px');assert.equal(selection.border,'rgba(0, 0, 0, 0)');
+  assert.equal(selection.shadow,'none');assert.notEqual(selection.fill,'rgba(0, 0, 0, 0)');assert.equal(selection.after,'none');
   for(const view of ['queue','history','explorer','settings','screenshot','downloads']){
    await page.evaluate(view=>document.querySelector('#shell').dataset.view=view,view);
    assert.deepEqual(await headerAppearance(),reference,JSON.stringify({width,finish,mode,view}));
@@ -97,11 +102,14 @@ try{
   const width=getComputedStyle(el,'::-webkit-scrollbar').width;
   const thumb=getComputedStyle(el,'::-webkit-scrollbar-thumb');
   const track=getComputedStyle(el,'::-webkit-scrollbar-track');
-  return {width,radius:thumb.borderTopLeftRadius,track:track.backgroundColor};
+  return {width,radius:thumb.borderTopLeftRadius,track:track.backgroundColor,idle:thumb.backgroundColor,
+   hover:getComputedStyle(el).getPropertyValue('--shelf-scroll-hover').trim(),active:getComputedStyle(el).getPropertyValue('--shelf-scroll-active').trim()};
  });
  assert.equal(scrollbar.width,'9px');
  assert.equal(scrollbar.radius,'999px');
  assert.equal(scrollbar.track,'rgba(0, 0, 0, 0)');
+ assert.equal(scrollbar.idle,'rgb(41, 59, 83)');
+ assert.equal(scrollbar.hover,'#506b8d');assert.equal(scrollbar.active,'#7495bd');
  // Shared scrollbars: all theme packages, Nostalgia styles and Onyx finishes.
  // Use a real overflow element to verify native vertical/horizontal movement.
  await page.evaluate(()=>{
@@ -125,6 +133,10 @@ try{
      top:el.scrollTop,left:el.scrollLeft};
    });
    assert.deepEqual(metrics,{width:'9px',height:'9px',thumb:'999px',track:'rgba(0, 0, 0, 0)',top:60,left:60},JSON.stringify({skin,mode,view}));
+   if(skin.id==='onyx'){
+    const color=await page.locator('#scrollbar-fixture').evaluate(el=>getComputedStyle(el,'::-webkit-scrollbar-thumb').backgroundColor);
+    assert.equal(color,mode==='light'||skin.finish==='platinum'?'rgb(135, 156, 182)':'rgb(41, 59, 83)');
+   }
   }
  }
  await page.evaluate(async()=>{document.querySelector('#scrollbar-fixture').remove();document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});

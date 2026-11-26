@@ -40,14 +40,18 @@
 }
 :root[data-aesthetic=onyx] .app-header nav{gap:3px}
 :root[data-aesthetic=onyx] .app-header nav>button{
- font:600 13px/1.2 "Segoe UI",sans-serif;min-block-size:40px;padding:8px 9px;border:1px solid transparent;position:relative;
+ font:600 13px/1.2 "Segoe UI",sans-serif;min-block-size:40px;padding:8px 9px;border:1px solid transparent;border-radius:0;position:relative;box-shadow:none;
 }
-:root[data-aesthetic=onyx] .app-header nav>button.active{
- border-color:var(--line);background:var(--raised);box-shadow:none;
+ /* Flat selection zone, not an outlined or raised button. Geometry stays fixed. */
+:root[data-aesthetic=onyx] .app-header nav>button:hover:not(:disabled){
+ background:color-mix(in srgb,var(--onyx-blue) 6%,transparent);box-shadow:none;
 }
-:root[data-aesthetic=onyx] .app-header nav>button.active::after{
- content:"";position:absolute;bottom:3px;left:calc(50% - 9px);width:18px;height:2px;background:var(--accent);border-radius:3px;
+:root[data-aesthetic=onyx] .app-header nav>button.active,
+:root[data-aesthetic=onyx] .app-header nav>button.active:hover:not(:disabled){
+ border-color:transparent;border-radius:0;background:color-mix(in srgb,var(--onyx-blue) 12%,var(--onyx-nav));box-shadow:none;
 }
+:root[data-aesthetic=onyx] .app-header nav>button.active::after{content:none}
+:root[data-aesthetic=onyx] .app-header nav>button:focus-visible{outline-color:var(--focus)}
 :root[data-aesthetic=onyx] .app-header .header-controls{gap:0}
 :root[data-aesthetic=onyx] .app-header #header-more{min-inline-size:30px;padding-inline:4px}
 /* Shared Onyx appearance control: identical SVGs on every Shelf view. */

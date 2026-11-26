@@ -5,7 +5,17 @@
   --shelf-scroll-thumb:color-mix(in srgb,var(--muted,#a0a0a0) 62%,var(--bg,#13171e));
   --shelf-scroll-hover:color-mix(in srgb,var(--muted,#a0a0a0) 85%,var(--bg,#13171e));
   scrollbar-width:thin;
+  --shelf-scroll-active:var(--muted,#a0a0a0);
   scrollbar-color:var(--shelf-scroll-thumb) transparent;
+ }
+ /* Quiet midnight-blue idle thumb; brighten only on direct interaction.
+    Keep native scroll behavior, dimensions, and other themes unchanged. */
+ :root[data-aesthetic=onyx],:root[data-aesthetic=onyx] *{
+  --shelf-scroll-thumb:#293b53;--shelf-scroll-hover:#506b8d;--shelf-scroll-active:#7495bd;
+ }
+ :root[data-aesthetic=onyx]:is([data-theme=light],[data-onyx-finish=platinum]),
+ :root[data-aesthetic=onyx]:is([data-theme=light],[data-onyx-finish=platinum]) *{
+  --shelf-scroll-thumb:#879cb6;--shelf-scroll-hover:#657f9f;--shelf-scroll-active:#466486;
  }
  @supports selector(::-webkit-scrollbar){
   :root,:root *{scrollbar-width:auto;scrollbar-color:auto}
@@ -17,7 +27,7 @@
    min-height:28px;min-width:28px;
   }
   :root::-webkit-scrollbar-thumb:hover,:root *::-webkit-scrollbar-thumb:hover{background-color:var(--shelf-scroll-hover)}
-  :root::-webkit-scrollbar-thumb:active,:root *::-webkit-scrollbar-thumb:active{background-color:var(--muted,#a0a0a0)}
+  :root::-webkit-scrollbar-thumb:active,:root *::-webkit-scrollbar-thumb:active{background-color:var(--shelf-scroll-active)}
   :root::-webkit-scrollbar-button,:root *::-webkit-scrollbar-button{display:none}
   :root::-webkit-scrollbar-corner,:root *::-webkit-scrollbar-corner{background:transparent}
  }
