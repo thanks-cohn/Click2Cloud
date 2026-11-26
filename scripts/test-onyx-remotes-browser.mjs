@@ -193,6 +193,36 @@ try{
   assert.equal((await manageGeometry()).opacity,'0','Reduced motion disables fade');
   await page.evaluate(()=>document.querySelector('#shell').removeAttribute('data-manage-fade'));
   await page.emulateMedia({reducedMotion:'no-preference'});
+  // The Explorer morph uses the existing button and returns to its exact original style.
+  const morph=await page.evaluate(()=>{
+   const shell=document.querySelector('#shell'),button=document.querySelector('#manage');
+   const geometry=()=>{const s=getComputedStyle(button),r=button.getBoundingClientRect();return {width:r.width,radius:s.borderTopLeftRadius,side:s.borderInlineStartColor};};
+   shell.dataset.view='explorer';shell.removeAttribute('data-manage-morph');
+   const original=geometry();
+   shell.dataset.view='queue';geometry();
+   shell.setAttribute('data-manage-morph','');shell.dataset.view='explorer';
+   const animation=button.getAnimations().find(a=>a.animationName?.startsWith('manage-explorer-morph'));
+   if(!animation)throw Error('Expected Explorer button morph');
+   animation.pause();animation.currentTime=0;
+   const start=geometry();
+   animation.finish();
+   const end=geometry();
+   shell.removeAttribute('data-manage-morph');
+   const excluded=getComputedStyle(button).animationName;
+   shell.dataset.view='remotes';
+   return {original,start,end,excluded};
+  });
+  assert.equal(morph.start.side,'rgba(0, 0, 0, 0)');
+  assert.equal(morph.start.radius,'5px');
+  assert.deepEqual(morph.end,morph.original,'Morph must settle into unmodified Explorer geometry');
+  assert.equal(morph.excluded,'none','Excluded navigation keeps the original control');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  assert.equal(await page.evaluate(()=>{
+   const shell=document.querySelector('#shell');shell.setAttribute('data-manage-morph','');shell.dataset.view='explorer';
+   return getComputedStyle(document.querySelector('#manage')).animationName;
+  }),'none');
+  await page.evaluate(()=>{const shell=document.querySelector('#shell');shell.removeAttribute('data-manage-morph');shell.dataset.view='remotes';});
+  await page.emulateMedia({reducedMotion:'no-preference'});
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
