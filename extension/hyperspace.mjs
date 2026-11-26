@@ -12,7 +12,7 @@ export const createHyperspacePreference=storage=>createLocalPreference(storage,h
 export function hyperspaceTiming(seconds){
  const buildup=normalizeHyperspace({seconds}).seconds;
  const energy=clamp(Math.sqrt(buildup/5),.4,2);
- return {buildup,energy,release:Math.round(780/(.65+.35*energy)),settle:Math.round(420+energy*85)};
+ return {buildup,energy,release:Math.round(440/(.60+.40*energy)),settle:Math.round(460+energy*90)};
 }
 // Instantaneous velocity grows continuously; integrating it avoids a dash jump
 // when its speed changes. Longer charging produces higher terminal velocity.
@@ -23,12 +23,19 @@ export function hyperspaceFrame(elapsed,seconds){
  const speed=2+.45*charge;
  const releaseElapsed=elapsed-SPLIT_MS-chargeMs;
  const r=clamp(releaseElapsed/t.release),settle=smooth((releaseElapsed-t.release)/t.settle);
- const burst=r**2.4;
- const lift= smooth((r-.10)/.90)*(1+Math.min(.22,.075*t.energy)*(1-settle));
+ // A short initial tension followed by an explosive, shared outward/upward impulse.
+ const burst=1-(1-r)**3;
+ const lift=(1-(1-clamp((r-.025)/.975))**3)*(1+.16*t.energy*(1-settle));
  return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,lift,words:1-smooth((r-.08)/.76),
   travel,speed,glint:Math.min(.84,(.48+.36*p)*smooth(charge/.08))*(1-smooth(r)),
   length:4+Math.min(18,3*speed),done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
+}
+// Preserve the logo/theme clearance while allowing the content to occupy the opened space.
+export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShift){
+ const clearance=Math.max(0,height+Math.max(0,contentGap)-controlBottom+controlShift-4);
+ const peak=Math.max(0,Math.min(54,height-18,clearance));
+ return {rest:Math.max(0,Math.min(40,height-26,peak)),peak};
 }
 // The surface and the stroke are constructed from exactly the same curve.
 // The initial center gap is 80 CSS px (clamped on tiny windows).
@@ -53,7 +60,7 @@ const svgNS='http://www.w3.org/2000/svg';
 export function installHyperspace({header,shell,preference,doc=header.ownerDocument,clock}){
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
- let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24;
+ let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
@@ -63,7 +70,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');
-  for(const key of ['--hyper-page','--hyper-lift','--hyper-words'])body.style.removeProperty(key);
+  for(const key of ['--hyper-page','--hyper-lift','--hyper-words','--hyper-controls-up'])body.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
  function draw(frame){
@@ -77,7 +84,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    el.glint.setAttribute('stroke-dashoffset',String(frame.length+(frame.travel%100)));
    el.glint.setAttribute('opacity',String(frame.glint));
   }
-  setVar('--hyper-lift',(baseLift*frame.lift).toFixed(2)+'px');setVar('--hyper-words',frame.words);
+  setVar('--hyper-lift',Math.min(peakLift,baseLift*frame.lift).toFixed(2)+'px');
+  setVar('--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar('--hyper-words',frame.words);
   body.dataset.hyperspace=frame.phase;
  }
  function tick(now){
@@ -99,7 +107,13 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(rect.width<1||rect.height<1)return;
   const surface=style.background,rail=style.borderBottomColor;
   const page=[shell.querySelector('main'),shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||style.getPropertyValue('--bg');
-  baseLift=Math.min(28,Math.max(0,rect.height-40));
+  const controls=[header.querySelector('.brand-lockup'),header.querySelector('#theme')].filter(Boolean).map(el=>el.getBoundingClientRect());
+  const controlBottom=Math.max(0,...controls.map(r=>r.bottom-rect.top));
+  controlShift=controls.length?Math.max(0,Math.min(12,...controls.map(r=>r.top-rect.top-3))):0;
+  const main=shell.querySelector('main'),heading=main?.querySelector('h1,h2');
+  // A page that is already scrolled may have content against its top edge.
+  const contentGap=main&&heading&&main.scrollTop<1?clamp(heading.getBoundingClientRect().top-main.getBoundingClientRect().top,0,32):0;
+  ({rest:baseLift,peak:peakLift}=hyperspaceLiftBounds(rect.height,contentGap,controlBottom,controlShift));
   overlay=doc.createElement('div');overlay.className='hyperspace-overlay';overlay.setAttribute('aria-hidden','true');
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
   const svg=doc.createElementNS(svgNS,'svg');svg.setAttribute('viewBox','0 0 '+parts.width+' '+parts.height);svg.setAttribute('preserveAspectRatio','none');
