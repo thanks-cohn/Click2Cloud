@@ -14,7 +14,11 @@ assert.equal(hyperspaceTiming(5).flexMs,125);
 assert.equal(hyperspaceTiming(5).exitMs,440);
 assert.equal(hyperspaceTiming(5).release,565);
 const loadedDefault=hyperspaceFrame(SPLIT_MS+5000,5);
-assert(loadedDefault.tension>.7&&loadedDefault.wordsDip>4,'Final charge visibly compresses and dips navigation');
+assert(loadedDefault.tension>.9&&loadedDefault.wordsDip>12,'Final charge deepens compression and navigation dip');
+const windupStart=SPLIT_MS+3500;
+const middleSpeed=hyperspaceFrame(windupStart+750,5).tension-hyperspaceFrame(windupStart+650,5).tension;
+const lateSpeed=hyperspaceFrame(windupStart+1450,5).tension-hyperspaceFrame(windupStart+1350,5).tension;
+assert(lateSpeed>0&&lateSpeed<middleSpeed*.15,'Creak slows nearly to a standstill before release');
 assert.equal(hyperspaceFrame(SPLIT_MS+3500,5).tension,0,'Early shimmer remains unchanged');
 const impactDefault=hyperspaceFrame(SPLIT_MS+5000+125,5);
 assert.equal(impactDefault.tension,0);assert.equal(impactDefault.wordsDip,0);
@@ -40,7 +44,8 @@ for(const w of widths){
  const xControl=g=>Number(g.left.split(' ')[4]);
  const compressed=hyperspaceGeometry(w,65,1,0,0,1);
  assert(xControl(compressed)>xControl(corridor),'The left rail curves toward the center under tension');
- assert(xControl(compressed)<=w/2-7,'Compressed controls retain the center corridor');
+ assert(xControl(compressed)<=w/2-4,'Compressed controls retain the center corridor');
+ assert.equal(xControl(compressed),w/2-4,'Fully loaded rails reach the stronger inward bend');
  assert(compressed.leftFill.startsWith(compressed.left)&&compressed.rightFill.startsWith(compressed.right));
  assert(xControl(stronger)<xControl(bent)&&xControl(bent)<xControl(corridor),'Longer charge bows the interior of the left rail farther outward');
  assert.equal(Number(bent.left.split(' ')[1]),Number(corridor.left.split(' ')[1]),'Flex changes curvature, not just translation');
@@ -59,7 +64,7 @@ for(const seconds of [1,3,5,10,20]){
  for(let i=0;i<=100;i++){
   const sample=hyperspaceFrame(SPLIT_MS+seconds*1000*i/100,seconds);
   assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);assert.equal(sample.wordsUp,0);assert.equal(sample.words,1);assert.equal(sample.flex,0);
-  assert(sample.tension>=tension);assert(sample.wordsDip>=0&&sample.wordsDip<=8);
+  assert(sample.tension>=tension);assert(sample.wordsDip>=0&&sample.wordsDip<=14);
   speed=sample.speed;travel=sample.travel;tension=sample.tension;
  }
  const impact=hyperspaceFrame(end+timing.flexMs,seconds);
