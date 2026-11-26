@@ -239,7 +239,7 @@ try{
    const move=(x,y)=>document.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
    const phases=[];controller.start();await Promise.resolve();
    advance(4999);phases.push(phase());advance(1);phases.push(phase());
-   advance(1300);phases.push(phase());
+   advance(1800);phases.push(phase());
    const overlay=header.querySelector('.hyperspace-overlay');
    const geometry=[...overlay.querySelectorAll('.hyperspace-rail')].map(el=>el.getAttribute('d'));
    const first=overlay.querySelector('.hyperspace-glint');
@@ -247,17 +247,22 @@ try{
    advance(2999);phases.push(phase());const later=first.getAttribute('stroke-dashoffset');
    advance(1);phases.push(phase());advance(2000);phases.push(phase());
    const heldFrames=frames.size;advance(15000);phases.push(phase());
+   const paint={header:getComputedStyle(header).backgroundColor,clip:getComputedStyle(overlay).clipPath,lift:parseFloat(document.body.style.getPropertyValue('--hyper-lift')),shellTop:shell.getBoundingClientRect().top,overlayTop:overlay.getBoundingClientRect().top,overlayHeight:overlay.getBoundingClientRect().height};
    move(10,10);advance(200);phases.push(phase());advance(1000);phases.push(phase());
    move(190,500);advance(1000);controller.viewChanged();shell.dataset.view='history';advance(10000);phases.push(phase());
    move(10,10);move(190,500);advance(5000);phases.push(phase());
    controller.viewChanged();shell.dataset.view='explorer';advance(10000);phases.push(phase());
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,clean:!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,clean:!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
   assert.notEqual(hyperspace.streak,hyperspace.later);
   assert.equal(hyperspace.heldFrames,0);assert.equal(hyperspace.clean,true);
+  assert.equal(hyperspace.paint.header,'rgba(0, 0, 0, 0)','Header must not paint over the elevated page');
+  assert(hyperspace.paint.lift>0);
+  assert(hyperspace.paint.overlayTop+hyperspace.paint.overlayHeight-hyperspace.paint.lift<=hyperspace.paint.shellTop+1,'Painted header must end before the raised page');
+  assert.match(hyperspace.paint.clip,/^inset\(/);
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
