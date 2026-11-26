@@ -154,7 +154,35 @@ try{
  assert(repairBounds&&manageBounds.x+manageBounds.width<=repairBounds.x);
  await page.locator('#repair-me').evaluate(el=>el.hidden=true);
  await page.mouse.move(1,1);
- // Outer page geometry must be symmetric with and without vertical overflow.
+   // Navigation fade is opt-in, never a flash on first paint or Explorer entry.
+  await page.evaluate(()=>{
+   const shell=document.querySelector('#shell'),button=document.querySelector('#manage');
+   shell.dataset.view='queue';shell.removeAttribute('data-manage-fade');
+   button.getBoundingClientRect();getComputedStyle(button).opacity;
+   shell.setAttribute('data-manage-fade','');shell.dataset.view='remotes';
+  });
+  await page.waitForFunction(()=>{
+   const opacity=Number(getComputedStyle(document.querySelector('#manage')).opacity);
+   return opacity>0&&opacity<1;
+  });
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('#manage')).opacity==='0');
+  await page.evaluate(()=>{
+   const shell=document.querySelector('#shell'),button=document.querySelector('#manage');
+   shell.dataset.view='explorer';shell.removeAttribute('data-manage-fade');
+   button.getBoundingClientRect();getComputedStyle(button).opacity;
+   shell.dataset.view='remotes';
+  });
+  assert.equal((await manageGeometry()).opacity,'0','Explorer entry hides without a fade');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.evaluate(()=>{
+   const shell=document.querySelector('#shell'),button=document.querySelector('#manage');
+   shell.dataset.view='queue';getComputedStyle(button).opacity;
+   shell.setAttribute('data-manage-fade','');shell.dataset.view='remotes';
+  });
+  assert.equal((await manageGeometry()).opacity,'0','Reduced motion disables fade');
+  await page.evaluate(()=>document.querySelector('#shell').removeAttribute('data-manage-fade'));
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
   for(const view of ['remotes','queue','history','settings','screenshot','downloads']){
