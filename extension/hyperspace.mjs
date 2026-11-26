@@ -83,7 +83,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
  const main=shell.querySelector('main');
- let reserved=0,liftActive=false,lastGeometry='',lastPhase='';
+ let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
@@ -99,7 +99,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function layer(active){
   if(liftActive===active)return;liftActive=active;
   shell.toggleAttribute('data-hyperspace-lifting',active);
-  if(!active)main?.style.removeProperty('--hyper-main-offset');
+  if(active){originalTranslate=main?.style.getPropertyValue('translate')??'';originalTranslatePriority=main?.style.getPropertyPriority('translate')??'';}
+  else if(main){if(originalTranslate)main.style.setProperty('translate',originalTranslate,originalTranslatePriority);else main.style.removeProperty('translate');}
  }
  function movePage(frame){
   const lift=Math.min(peakLift,baseLift*frame.lift);
@@ -107,7 +108,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // scrolling surface using only a transform. The footer remains stationary.
   // At rest commit the exact final layout and discard the compositor hint.
   if(frame.done&&frame.phase==='open'){reserve(baseLift);layer(false);}
-  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'--hyper-main-offset',(reserved-lift).toFixed(3)+'px');}
+  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
  }
