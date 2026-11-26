@@ -9,8 +9,12 @@ const messages={
  NATIVE_PERMISSION_DENIED:'Chrome did not grant native messaging.',
  NATIVE_API_UNAVAILABLE:'Chrome granted native messaging, but this REDOWN worker cannot use it yet. Once REDOWN work is idle, reload REDOWN once from chrome://extensions, reopen Settings and retry.',
  NATIVE_HOST_NOT_REGISTERED:'Install the Python native helper from CMD, then start the session again.',
+ NATIVE_HOST_LAUNCH_FAILED:'Chrome could not launch the Python helper. Check the installation from CMD and retry.',
+ NATIVE_HOST_FORBIDDEN:'Chrome blocked access to the Python helper. Check the profile policy and registered extension ID.',
  NATIVE_HOST_DISCONNECTED:'The native helper disconnected. Start a new session to reconnect.',
  NATIVE_HOST_EXITED:'The native helper exited. Check the installation and start a new session.',
+ NATIVE_HANDSHAKE_TIMEOUT:'The Python helper did not become ready in time. Check the installation and retry.',
+ NATIVE_HANDSHAKE_INVALID:'The Python helper sent an unexpected ready message. Reinstall the helper from this checkout.',
  NATIVE_PERMISSION_REVOKED:'Chrome removed native messaging access.',
  LAB_WORKER_RESTARTED:'The REDOWN worker restarted. Start a new laboratory session.',
  LAB_EXTENSION_UNAVAILABLE:'Reopen REDOWN Settings and try again.',
@@ -148,6 +152,7 @@ export function mountPythonLabSettings(page) {
  const refresh=async()=>{
   const epoch=sessionEpoch,data=await request('status');
   if(epoch===sessionEpoch)render(data);
+  return data;
  };
  const selection=()=>{
   const accountId=el('account').value,bucketName=el('bucket').value,mode=el('mode').value;
@@ -176,7 +181,7 @@ export function mountPythonLabSettings(page) {
   // permissions.request must run in the owner's direct Chrome click gesture.
   el('start').disabled=true;
   try{
-   await chrome.permissions.request({permissions:['nativeMessaging']}).catch(()=>false);
+   try{await chrome.permissions.request({permissions:['nativeMessaging']});}catch{}
    // The worker checks the actual grant and records denial in the same report.
    const data=await request('start',input);
    if(epoch!==sessionEpoch)return;
@@ -185,8 +190,8 @@ export function mountPythonLabSettings(page) {
    render(data);
   }catch(error){
    if(epoch===sessionEpoch){
-    await refresh().catch(()=>{});
-    if(epoch===sessionEpoch&&el('session-notice').hidden)throw error;
+    const observed=await refresh().catch(()=>null);
+    if(epoch===sessionEpoch&&observed?.code!==error.message)throw error;
    }
   }finally{el('start').disabled=false;}
  });

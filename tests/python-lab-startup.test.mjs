@@ -268,4 +268,9 @@ test('read-only preflight and discovery use shared stages without launching or c
  assert(!h.calls.includes('spool'));
  const {discovery}=await h.lab.ui('diagnostics');
  assert.equal(stage(discovery,'bucket-listing').outcome,'PASS');
+ const blocked=harness({opfsProbe:()=>{throw new DOMException('DO_NOT_EXPORT','SecurityError');}});
+ const failure=await blocked.lab.ui('preflight',input);
+ assert.equal(failure.firstFailure.code,'LAB_OPFS_PROBE_FAILED');
+ assert.equal(failure.firstFailure.outcome,'FAIL');
+ assert.equal(failure.firstFailure.causeName,'SecurityError');
 });

@@ -13,7 +13,7 @@ const stageCodes=Object.freeze({
  'recovery-scope':'LAB_RECOVERY_SCOPE_NOT_FOUND',
  'worker-prefix':'LAB_WORKER_PREFIX_FAILED',
  'upload-readiness':'LAB_UPLOAD_READINESS_FAILED',
- 'opfs-capability':'LAB_OPFS_UNAVAILABLE',
+ 'opfs-capability':'LAB_OPFS_PROBE_FAILED',
  'spool-init-cleanup':'LAB_SPOOL_INITIALIZATION_FAILED',
  'storage-estimate':'LAB_STORAGE_ESTIMATE_FAILED',
  'auth-recheck':'LAB_AUTHORIZATION_CHECK_FAILED',
@@ -46,6 +46,7 @@ const guidance=Object.freeze({
  WORKER_SETUP_REQUIRED:'Choose an existing QA bucket with a prepared REDOWN Worker.',
  WORKER_UPGRADE_APPROVAL_REQUIRED:'Use the normal REDOWN Worker update flow if approved.',
  LAB_OPFS_UNAVAILABLE:'Check extension storage access in this Chrome profile and retry.',
+ LAB_OPFS_PROBE_FAILED:'Check whether this Chrome profile can open extension storage and retry.',
  LAB_STORAGE_ESTIMATE_UNAVAILABLE:'Chrome did not provide a storage estimate.',
  LAB_WORKER_RESTARTED:'Reopen Settings and start a new laboratory session.',
  PAIRING_CODE_UNAVAILABLE:'Request a new pairing code in Settings.',
@@ -98,7 +99,7 @@ export function createLabReport(kind,build){
  const started=performance.now(),correlationId=crypto.randomUUID();
  const stages=Object.fromEntries(Object.keys(stageCodes).map(stage=>[stage,{stage,outcome:'NOT_REACHED'}]));
  let firstFailure=null,outcome='CHECKING',finishedAt=null;
- function mark(stage,status,{error,elapsedMs=0,optional=false}={}){
+ function mark(stage,status,{error,elapsedMs=stages[stage].elapsedMs??0,optional=false}={}){
   const row={stage,outcome:status,elapsedMs:Math.round(elapsedMs),
    ...(error?describeLabFailure(error,stageCodes[stage]):{})};
   stages[stage]=row;
