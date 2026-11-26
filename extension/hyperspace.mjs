@@ -104,7 +104,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,runMode,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
- const main=shell.querySelector('main');
+ const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup');
+ let brandAttributes;
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
@@ -136,7 +137,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
-  body.removeAttribute('data-hyperspace');
+  body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');
+  if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
   reserve(0);layer(false);lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up'])header.style.removeProperty(key);
  }
@@ -198,8 +200,10 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   ({rest:baseLift,peak:peakLift}=hyperspaceLiftBounds(rect.height,contentGap,controlBottom,controlShift));
   overlay=doc.createElement('div');overlay.className='hyperspace-overlay';overlay.setAttribute('aria-hidden','true');
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
-  runMode=preference.value.mode;
+  runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
+   // Retain a keyboard/touch-accessible R as the only reveal target.
+   if(brand){brandAttributes=['tabindex','role','aria-label'].map(k=>[k,brand.getAttribute(k)]);brand.setAttribute('tabindex','0');brand.setAttribute('role','button');brand.setAttribute('aria-label','Reveal header');}
    const fill=doc.createElement('div');fill.className='hyperspace-elegant-surface';fill.style.background=surface;fill.style.borderBottomColor=rail;overlay.append(fill);parts.elegant=fill;
   }else{
   const svg=doc.createElementNS(svgNS,'svg');svg.setAttribute('viewBox','0 0 '+parts.width+' '+parts.height);svg.setAttribute('preserveAspectRatio','none');
@@ -225,12 +229,15 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(over===inside)return;inside=over;
   if(over)restore();else arm();
  }
- // Coordinate-based hover retains the original full header hit region even
- // when content has moved up. DOM-only dropdown removal cannot arm the timer.
- on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;const r=header.getBoundingClientRect();pointer(header.contains(e.target)||(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom));},{passive:true,capture:true});
- on(header,'pointerenter',()=>pointer(true));
+ // Elegant reveals only from the R while disappearing or held open.
+ // During ordinary idle and restoration, keep the normal full header region.
+ const logoOnly=()=>!!overlay&&runMode==='elegant'&&!returning;
+ const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);};
+ on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(within(logoOnly()?brand:header,e));},{passive:true,capture:true});
+ on(header,'pointerenter',e=>{if(!logoOnly()||within(brand,e))pointer(true);});
+ if(brand)on(brand,'pointerenter',()=>{if(logoOnly())pointer(true);});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
- on(header,'pointerdown',()=>restore(true),true);
+ on(header,'pointerdown',e=>{if(!logoOnly()||within(brand,e))restore(true);},true);
  on(header,'focusin',()=>{if(header.querySelector(':focus-visible'))restore(true);});
  on(header,'keydown',()=>restore(true));
  on(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
