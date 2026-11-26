@@ -1,10 +1,21 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,hyperspaceWaterGeometry,IDLE_MS,SPLIT_MS,WATER_IDLE_MS} from '../extension/hyperspace.mjs';
 
 assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
 assert.equal(normalizeHyperspace({seconds:'bad'}).seconds,5);
 assert.equal(IDLE_MS,5000);
+assert.equal(WATER_IDLE_MS,10000);
+assert.deepEqual(hyperspaceWaterGeometry(80,24),[]);
+assert.deepEqual(hyperspaceWaterGeometry(380,7),[]);
+for(const width of [320,380,800,1200])for(const height of [8,18,26,40,56]){
+ const lines=hyperspaceWaterGeometry(width,height);
+ assert.equal(lines.length,13);
+ assert.deepEqual(lines,hyperspaceWaterGeometry(width,height));
+ for(const l of lines){assert(l.x1>=0&&l.x2<=width&&l.x2>l.x1);assert(l.y1>=0&&l.y2>=0&&l.y1<height&&l.y2<height);assert(Math.abs(l.y2-l.y1)<=.85);assert(l.opacity>0&&l.opacity<.5);}
+ const rows=[lines[0].y1,...[1,4,7,10].map(i=>(lines[i].y1+lines[i].y2)/2)];
+ assert(rows[4]-rows[3]>rows[2]-rows[1]&&rows[2]-rows[1]>rows[1]-rows[0],'Ripple spacing opens toward the foreground');
+}
 assert.equal(SPLIT_MS,1800);
 assert(hyperspaceFrame(180,5).split<.01,'Preserve the original gentle split');
 assert.equal(hyperspaceFrame(SPLIT_MS,5).split,1);
