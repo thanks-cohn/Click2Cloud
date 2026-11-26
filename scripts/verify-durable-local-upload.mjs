@@ -5,11 +5,16 @@ import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright-core';
 
 const files=Number(process.env.REDOWN_GUI_FIXTURE_FILES??4000);
+const verifyHistory=process.env.REDOWN_GUI_FIXTURE_HISTORY==='1';
 const worker=`
 import {uploadBatchJournal as journal} from '/src/chrome/local-upload-files.mjs';
 import {createLocalUploadBatches} from '/src/chrome/local-upload-batch.mjs';
+import {folderUploadReceipts} from '/src/queue/receipts.mjs';
+import {createHistoryStore} from '/src/queue/store.mjs';
 const source={provider:'cloudflare',connectionId:'cloudflare:account',accountId:'account',bucketName:'bucket',prefix:'destination/'};
+const history=createHistoryStore();
 const driver=createLocalUploadBatches({journal,version:'fixture',checkDestination:async()=>({}),
+  ${verifyHistory?'showUploadHistory:async()=>true,':''}
   async dispatchStored({item,staged,ticket}){
     if(staged.file.name!==item.name||staged.file.size!==item.size||staged.file.lastModified!==staged.lastModified||
        await staged.file.text()!==String(staged.lastModified))throw Error('Stored browser File identity changed');
@@ -22,7 +27,11 @@ self.addEventListener('message',event=>{
   event.waitUntil((async()=>{
     if(data.action==='read'){
       const answer=await driver.inspect({source,batchId:data.id});
-      port.postMessage(answer.batch);
+      if(data.history&&answer.batch.phase==='verified'){
+        for(const projection of await journal.historyProjections())await history.reconcile(folderUploadReceipts(projection));
+        const {items}=await history.page();
+        port.postMessage({...answer.batch,history:items.map(item=>({name:item.filename,total:item.folderUpload.total,status:item.status}))});
+      }else port.postMessage(answer.batch);
       return;
     }
     const result=await driver.begin({source,batchId:data.id,mode:'folder',items:data.items,selectionId:data.selectionId});
@@ -37,7 +46,7 @@ const server=createServer(async(req,res)=>{
   if(req.url==='/'){res.setHeader('Content-Type','text/html');res.end('<title>Durable upload fixture</title>');return;}
   res.setHeader('Content-Type','text/javascript');
   if(req.url==='/driver.mjs'){res.end(worker);return;}
-  if(!/^\/src\/[\w/.-]+\.mjs$/.test(req.url)||req.url.includes('..')){res.writeHead(404).end();return;}
+  if(!/^\/(src|right2cloud-module)\/[\w/.-]+\.mjs$/.test(req.url)||req.url.includes('..')){res.writeHead(404).end();return;}
   res.end(await readFile('.'+req.url));
  }catch{res.writeHead(404).end();}
 });
@@ -70,18 +79,19 @@ try{
  let batch;
  const started=performance.now();
  for(let index=0;index<1000;index++){
-  batch=await observer.evaluate(async id=>{
+  batch=await observer.evaluate(async ({id,history})=>{
    const {active}=await navigator.serviceWorker.ready;
    return new Promise(resolve=>{
     const channel=new MessageChannel();channel.port1.onmessage=event=>resolve(event.data);
-    active.postMessage({action:'read',id},[channel.port2]);
+    active.postMessage({action:'read',id,history},[channel.port2]);
    });
-  },begin.id);
+  },{id:begin.id,history:verifyHistory});
   if(batch?.phase==='verified'||batch?.phase==='paused'||batch?.error)break;
   await new Promise(resolve=>setTimeout(resolve,100));
  }
  assert.equal(batch.phase,'verified',JSON.stringify(batch));
  assert.equal(batch.counts.verified,files);
+ if(verifyHistory)assert.deepEqual(batch.history,[{name:'Chosen',total:files,status:'verified'}]);
  const after=await observer.evaluate(async ({id,selectionId})=>{
   const {uploadBatchJournal:journal}=await import('/src/chrome/local-upload-files.mjs');
   const result=await journal.detail(id);
@@ -90,7 +100,7 @@ try{
  assert.deepEqual(after,{rows:files,remaining:false});
  console.log(JSON.stringify({state:'PASS',evidenceClass:'chromium-indexeddb-worker-local-provider-fixture',
   chromium:browser.version(),files,verified:batch.counts.verified,receiptRows:after.rows,
-  shelfClosedBeforeDispatch:true,elapsedAfterCloseMs:Math.round(performance.now()-started)},null,2));
+  shelfClosedBeforeDispatch:true,...(verifyHistory?{history:batch.history}:{}),elapsedAfterCloseMs:Math.round(performance.now()-started)},null,2));
 }finally{
  await browser?.close();
  await new Promise(resolve=>server.close(resolve));

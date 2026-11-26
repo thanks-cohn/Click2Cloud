@@ -9364,7 +9364,7 @@
       "src/explorer/depth-inventory.mjs": "6b0f897bf6be5fd23f533fe6a00cbca4c1c2151b63f1f243c968e640c1d8c563",
       "src/explorer/directory-inventory-store.mjs": "e42cac6d8a43a2f922f8ac257b257aa5b0cae3c2ceff27f1a7277b3956c52893",
       "src/explorer/directory-search.mjs": "7130d5060dc7d98f71146258222c6bf22b351544ae3bec17589692a3e05c29b5",
-      "src/explorer/download-archive.mjs": "03f489caf41f863a5ef3cdd8a8f54dfa8bbf17a15bd1838c5df13ec6c73beeba",
+      "src/explorer/download-archive.mjs": "7ee910d2f527bec4dfea78ba7b0514fd65bcdded681831d6395e1fd4fabef654",
       "src/explorer/export-preferences.mjs": "6018e225359bae5b423b81750573f4169d6c890ac6c8474c910f4ff66f1ba726",
       "src/explorer/failure-classification.mjs": "709d858de604d0d20281eb8c433001c25c62f882d3e09f27c891c16aff51671b",
       "src/explorer/file-api.mjs": "886ad7ec225b2030f79eaffdbe7af804b2a80c37ab65f4123a23f93d3b1cc67e",
@@ -15585,7 +15585,7 @@
       "historicalReadinessFailures": "UNEXPLAINED",
       "configurationMigration": "NONE"
     },
-    "digest": "2f47d1f5367c8b7aa599dea0564d07857c383bf69b2cea44c48bb718bb7fb0cf",
+    "digest": "049f2de8cbdfdd35390fab1e9f6b20559c46e5901cf1ce7711e9be31540a1fb0",
     "portableManifestSourceBaseline": "384961b15dab4e199b4e7a0b3b868ef45a910d72",
     "customerHistoryQuietFeedback": {
       "apiOwner": "3+1.1 dispatchSave / inspectRemoteHistory",

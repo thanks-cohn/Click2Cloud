@@ -202,7 +202,7 @@ export async function streamDownloadArchive({source, inventory, mode, recursive,
   }
   const errors=dispositions.filter(row=>row.reason&&row.reason!=='DIRECTORY_MARKER').map(({key,reason})=>({key,code:reason}));
   for(const row of dispositions)if(row.metadataWarning)errors.push({key:row.key,code:row.metadataWarning});
-  const complete=inventory.complete&&written>0&&!errors.length;
+  const complete=inventory.complete&&!errors.length;
   const stats={expectedItems:inventory.files.length,expectedBytes,written,sourceBytes,archivedBytes,tagged,errors:errors.length};
   const scope={provider:source.provider,accountId:source.accountId,bucketName:source.bucketName,prefix:source.prefix};
   const summary={schema:'click2cloud.directory-download/1',...job,source:scope,mode,outputName,complete,
