@@ -20,6 +20,10 @@ body[data-hyperspace]>.app-header>.hyperspace-overlay{
  stroke-width:1.7;stroke-linecap:round;vector-effect:non-scaling-stroke;
 }
 body[data-hyperspace]>.app-header>:is(.brand-lockup,nav,.header-controls){position:relative;z-index:1}
+/* Give the remaining controls a little clearance during the lift. */
+body[data-hyperspace]>.app-header :is(.brand-lockup,#theme){
+ translate:0 calc(0px - var(--hyper-controls-up,0px));
+}
 body[data-hyperspace]>.app-header :is(nav,.header-more){
  opacity:var(--hyper-words,1);
 }
