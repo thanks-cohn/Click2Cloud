@@ -12,16 +12,16 @@ export const createHyperspacePreference=storage=>createLocalPreference(storage,h
 export function hyperspaceTiming(seconds){
  const buildup=normalizeHyperspace({seconds}).seconds;
  const energy=clamp(.35+.65*buildup/5,.4,2.8);
- const flexMs=Math.round(80+45*energy),exitMs=Math.round(440/(.60+.40*energy));
- return {buildup,energy,flexMs,exitMs,release:flexMs+exitMs,settle:Math.round(460+energy*90)};
+ const flexMs=Math.round(55+35*energy),exitMs=Math.round(290/(.72+.28*energy));
+ return {buildup,energy,flexMs,exitMs,release:flexMs+exitMs,settle:Math.round(290+energy*65)};
 }
 // Instantaneous velocity grows continuously; integrating it avoids a dash jump
 // when its speed changes. Longer charging produces higher terminal velocity.
 export function hyperspaceFrame(elapsed,seconds){
  const t=hyperspaceTiming(seconds), chargeMs=t.buildup*1000;
  const charge=clamp((elapsed-SPLIT_MS)/1000,0,t.buildup),p=charge/t.buildup;
- const travel=100*(2*charge+.225*charge**2);
- const speed=2+.45*charge;
+ const travel=100*(3*charge+.35*charge**2);
+ const speed=3+.70*charge;
  const releaseElapsed=elapsed-SPLIT_MS-chargeMs;
  const r=clamp(releaseElapsed/t.release),settle=smooth((releaseElapsed-t.release)/t.settle);
  // First the pressure visibly bends the rails; then the same impulse sends
@@ -32,7 +32,9 @@ export function hyperspaceFrame(elapsed,seconds){
  // Wind up within the existing charge window, then unload the compression
  // into the outward impact. No extra delay or discontinuous geometry.
  const windup=Math.min(1.5,t.buildup*.32);
- const windupProgress=smooth((charge-(t.buildup-windup))/windup);
+ // Spend the last tenth of the windup almost motionless at maximum strain.
+ // The glints continue accelerating: anticipation, not an extra wait.
+ const windupProgress=smooth((charge-(t.buildup-windup))/(windup*.90));
  // Diminishing travel with two smooth resistance points: the spring seems
  // to creak and nearly stall without reversing, jittering or adding a delay.
  const load=1-(1-windupProgress)**2;
@@ -41,14 +43,14 @@ export function hyperspaceFrame(elapsed,seconds){
  const tension=loaded*(1-impact);
  // The deeper dip holds against the initial impact, then snaps upward.
  const wordsDip=Math.min(14,7+6*t.energy)*loaded*(1-impact**1.7);
- const burst=.08*impact+.92*(1-(1-exit)**3);
+ const burst=.08*impact+.92*(1-(1-exit)**3.4);
  const flex=clamp(.24+.16*t.energy,0,.72)*impact*(1-smooth(exit/.76));
  const lift=burst*(1+.16*t.energy*(1-settle));
  // The navigation is ejected by the very same impulse, not an independent fade.
  const wordsUp=burst;
  const releaseGlow=impact*(1-smooth(exit/.75));
  return {split:((u)=>u*u*u*(10+u*(-15+6*u)))(clamp(elapsed/SPLIT_MS)),burst,flex,tension,lift,wordsUp,wordsDip,words:1-smooth((wordsUp-.48)/.50),
-  travel:travel+100*t.energy*2*burst,speed,glint:Math.min(1,(.48+.36*p)*smooth(charge/.08)*(1-smooth(r))+.18*releaseGlow),
+  travel:travel+100*t.energy*2.6*burst,speed,glint:Math.min(1,(.48+.36*p)*smooth(charge/.08)*(1-smooth(r))+.18*releaseGlow),
   length:4+Math.min(18,3*speed)+12*releaseGlow,done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
 }
