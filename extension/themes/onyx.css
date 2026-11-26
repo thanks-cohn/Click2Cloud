@@ -435,17 +435,17 @@
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-next]{grid-column:4}
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-last]{grid-column:5}
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:not(.sr-only)::before,
-:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::after{
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:is([data-first],[data-last])::after{
  content:"";position:absolute;inset-block-start:50%;inset-inline-start:50%;inline-size:8px;block-size:8px;
  border-block-start:1.5px solid currentColor;border-inline-end:1.5px solid currentColor;
  transform:translate(-65%,-50%) rotate(45deg);pointer-events:none;
 }
-:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-prev])::before,
-:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-first]::after{
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:is([data-first],[data-prev])::before,
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button[data-first]::after{
  transform:translate(-35%,-50%) rotate(-135deg);
 }
-:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::before{inset-inline-start:calc(50% - 4px)}
-:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::after{inset-inline-start:calc(50% + 4px)}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:is([data-first],[data-last])::before{inset-inline-start:calc(50% - 4px)}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:is([data-first],[data-last])::after{inset-inline-start:calc(50% + 4px)}
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:not(.sr-only):hover:not(:disabled){
  color:var(--text);background:color-mix(in srgb,var(--pager-ink) 13%,transparent);box-shadow:none;
 }
