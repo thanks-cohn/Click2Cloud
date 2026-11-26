@@ -75,6 +75,14 @@ body[data-hyperspace]>#shell:is([data-view=history],[data-view=queue])>main>.que
 body[data-hyperspace]>#shell:is([data-view=settings],[data-view=screenshot])>main>.page>h1>[data-hyper-center-title]{
  translate:var(--hyper-title-center,0px) 0;
 }
+/* The shortcut line follows the Screenshots title, independently centered
+   even when the assigned keys change during the animation. */
+#shell[data-view=screenshot] [data-hyper-center-shortcuts]{
+ display:inline-block;max-inline-size:100%;
+}
+body[data-hyperspace]>#shell[data-view=screenshot] [data-hyper-center-shortcuts]{
+ translate:calc(var(--hyper-shortcut-center,0px) - 50% * var(--hyper-shortcut-progress,0)) 0;
+}
 /* One reservation at launch, one final layout commit. No animated margins. */
 body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-reserve,0px))}
 body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
