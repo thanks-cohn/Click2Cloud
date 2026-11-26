@@ -296,3 +296,22 @@
   & .remote-provider-actions::before,& [data-go],& [data-go] .onyx-browse-word,& [data-go] .onyx-browse-symbol svg,& .remote-provider-actions>[data-refresh]{transition:none}
  }
 }
+
+/* Onyx connection handoff: no Browse affordance without verified authorization.
+   Keep the real connect/reconnect button and its existing operation. */
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) .remote-provider-actions>[data-go]{display:none!important}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) .remote-provider-actions>[data-connect]{
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ animation:onyx-provider-action-enter .22s ease-out both;
+}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected] .remote-provider-actions>[data-go] .onyx-browse-label{
+ animation:onyx-provider-action-enter .28s ease-out both;
+}
+@keyframes onyx-provider-action-enter{
+ from{opacity:0;transform:translateY(2px)}
+ to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) .remote-provider-actions>[data-connect],
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected] .remote-provider-actions>[data-go] .onyx-browse-label{animation:none}
+}

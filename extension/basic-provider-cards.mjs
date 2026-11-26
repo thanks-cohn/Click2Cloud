@@ -86,10 +86,21 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     const authenticated = card.isReady && status.authorized !== false;
     const reconnect = status.phase === 'reconnect-needed';
     const disconnected = !status.connected && [undefined,'disconnected'].includes(status.phase);
-    card.connect.textContent = authenticated ? 'Connected' : reconnect ? 'Reconnect' :
+    const section = card.connect.closest('.remote-provider');
+    const wasAuthenticated = section.hasAttribute('data-onyx-connected');
+    card.hadConnection = card.hadConnection || authenticated || status.connected === true || reconnect;
+    const onyx = document.documentElement.dataset.aesthetic === 'onyx';
+    card.connect.textContent = authenticated ? 'Connected' : reconnect || (onyx && disconnected && card.hadConnection) ? 'Reconnect' :
       disconnected ? 'Connect' : status.phase === 'connecting' ? 'Connecting…' : 'Check connection';
     card.connect.toggleAttribute('data-authenticated',authenticated);
-    card.connect.closest('.remote-provider').toggleAttribute('data-onyx-connected',authenticated);
+    section.toggleAttribute('data-onyx-connected',authenticated);
+    // Keep keyboard focus on the active control when the provider state changes.
+    // The status response, never the animation, determines availability.
+    if(onyx && wasAuthenticated !== authenticated){
+      const go = section.querySelector('[data-go]');
+      if(authenticated && document.activeElement === card.connect)go.focus({preventScroll:true});
+      else if(!authenticated && document.activeElement === go)card.connect.focus({preventScroll:true});
+    }
     card.connect.title = authenticated ? 'Reconnect ' + card.label : '';
     if(authenticated)card.connect.setAttribute('aria-description',card.connect.title);
     else card.connect.removeAttribute('aria-description');

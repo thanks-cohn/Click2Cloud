@@ -34,7 +34,7 @@ try{
       await new Promise(resolve=>window.releaseRefresh=resolve);
       if(window.failRefresh)return {ok:false,error:{code:'FIXTURE_ERROR',message:'Long fixture error: check your account connection and retry.'}};
     }
-    const connected=m.input.provider==='dropbox'||m.op==='auth.connect';
+    const connected=m.input.provider==='dropbox'||m.op==='auth.connect'||m.op==='auth.reconnect';
     return {ok:true,value:m.op==='saves.pending'?null:m.op==='providers.goTo'?{opened:true}:{connected,ready:connected,authorized:connected}};
   }};
   const stack=createBasicProviderCards({runtime,document,pulseEnabled:()=>true});
@@ -215,6 +215,22 @@ try{
  assert(calls.some(([op,p])=>op==='auth.connect'&&p==='google'));
  assert(calls.some(([op,p])=>op==='providers.goTo'&&p==='google'));
  assert(calls.some(([op,p])=>op==='auth.refresh'&&p==='google'));
+ await page.mouse.move(0,0);
+ // A provider logout must remove Browse entirely and show Reconnect.
+ // Reconnect only becomes Browse after the existing auth operation succeeds.
+ await page.mouse.move(0,0);
+ const reconnect=dropbox.locator('[data-connect]'),browseAfterAuth=dropbox.locator('[data-go]');
+ await page.evaluate(()=>window.testProviderCards.onStatus({provider:'dropbox',connected:true,ready:false,authorized:false,phase:'reconnect-needed',reason:'AUTH_REQUIRED'}));
+ assert.equal(await reconnect.textContent(),'Reconnect');
+ assert.equal(await browseAfterAuth.isVisible(),false);
+ await page.evaluate(()=>window.testProviderCards.onStatus({provider:'dropbox',connected:false,ready:false,authorized:false,phase:'disconnected',reason:'AUTH_REQUIRED'}));
+ assert.equal(await reconnect.textContent(),'Reconnect','A previously connected provider must retain its reconnect label in Onyx');
+ assert.equal(await browseAfterAuth.isVisible(),false);
+ await page.evaluate(()=>window.testProviderCards.onStatus({provider:'dropbox',connected:true,ready:false,authorized:false,phase:'reconnect-needed',reason:'AUTH_REQUIRED'}));
+ await reconnect.click();
+ await page.waitForFunction(()=>document.querySelector('[data-provider=dropbox]').hasAttribute('data-onyx-connected'));
+ assert(await browseAfterAuth.isVisible());
+ assert((await page.evaluate(()=>window.providerCalls)).some(([op,p])=>op==='auth.reconnect'&&p==='dropbox'));
  await page.mouse.move(0,0);
  const fills=[];
  for(const finish of ['onyx','platinum','gunmetal','obsidian','azure']){
