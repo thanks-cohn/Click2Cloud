@@ -111,10 +111,10 @@
 /* Integrated Edge Action: stable grid, bare refresh glyph on its left.
    Hover changes opacity only; neither refresh nor secondary actions add rows. */
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
- --onyx-card-inset:12px;--onyx-edge-width:88px;--onyx-refresh-width:28px;--onyx-action-outline:color-mix(in srgb,var(--text) 27%,transparent);
+ --onyx-edge-width:88px;--onyx-refresh-width:28px;--onyx-action-outline:color-mix(in srgb,var(--text) 27%,transparent);
  display:grid;grid-template-columns:minmax(0,1fr) var(--onyx-refresh-width) var(--onyx-edge-width);
  grid-template-rows:minmax(74px,auto);gap:0;padding:0;
- & .remote-provider-heading{padding:12px 2px 12px var(--onyx-card-inset);min-height:74px}
+ & .remote-provider-heading{padding:12px 2px 12px 14px;min-height:74px}
  & .remote-provider-title{min-width:0}
  & .remote-provider-heading h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  & .remote-provider-title .onyx-provider-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -127,7 +127,7 @@
  }
  & .remote-provider-actions>button:is([data-go],[data-connect]){
   grid-column:3;grid-row:1;align-self:center;justify-self:stretch;
-  inline-size:auto;max-inline-size:none;block-size:44px;min-block-size:44px;margin:0 var(--onyx-card-inset) 0 8px;padding:5px 4px;
+  inline-size:auto;max-inline-size:none;block-size:44px;min-block-size:44px;margin:0 12px 0 8px;padding:5px 4px;
   white-space:normal;border:1px solid var(--onyx-action-outline);border-inline-start:0;
   border-radius:0 8px 8px 0;
   background:linear-gradient(90deg,transparent,var(--raised));box-shadow:none;
@@ -150,7 +150,7 @@
  &:not([data-onyx-connected]) .remote-provider-actions>[data-go],
  &[data-onyx-connected] .remote-provider-actions>[data-connect]{
   position:absolute;grid-column:auto;grid-row:auto;
-  inset-block-start:42px;inset-inline-start:calc(var(--onyx-card-inset) + 55px);inset-inline-end:calc(var(--onyx-edge-width) + var(--onyx-refresh-width) + 3px);
+  inset-block-start:42px;inset-inline-start:69px;inset-inline-end:calc(var(--onyx-edge-width) + var(--onyx-refresh-width) + 3px);
   inline-size:auto;max-inline-size:none;block-size:19px;min-block-size:19px;
   margin:0;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   text-align:start;border:0;border-radius:3px;background:var(--panel);color:var(--onyx-subtitle);
@@ -162,9 +162,9 @@
  }
 }
 @media(max-width:345px){
- :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{--onyx-card-inset:10px;--onyx-edge-width:82px;--onyx-refresh-width:24px}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{--onyx-edge-width:80px;--onyx-refresh-width:24px}
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>[data-refresh]{inline-size:24px}
- :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>button:is([data-go],[data-connect]){font-size:11px;margin-inline-end:var(--onyx-card-inset)}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>button:is([data-go],[data-connect]){font-size:11px;margin-inline-end:8px}
 }
 @media(hover:none),(pointer:coarse){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>[data-refresh]{opacity:1;pointer-events:auto}
@@ -173,7 +173,7 @@
    reuse the caption space; wider shelves have a separate middle status slot. */
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
  & :is(.remote-provider-activity:not([hidden]),.onyx-provider-detail-toggle){
-  position:absolute;inset-block-start:42px;inset-inline-start:calc(var(--onyx-card-inset) + 55px);
+  position:absolute;inset-block-start:42px;inset-inline-start:69px;
   inset-inline-end:calc(var(--onyx-edge-width) + var(--onyx-refresh-width) + 3px);
   inline-size:auto;block-size:19px;min-block-size:0;margin:0;padding:0;
   font:600 11px/19px "Segoe UI",sans-serif;text-align:start;
@@ -250,7 +250,7 @@
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-folder-open{opacity:1}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) [data-go] .onyx-browse-symbol{inline-size:14px;block-size:14px;margin-inline-start:4px}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
- --onyx-browse-idle:44px;--onyx-browse-expanded:92px;--onyx-browse-inset:var(--onyx-card-inset);
+ --onyx-browse-idle:44px;--onyx-browse-expanded:92px;--onyx-browse-inset:12px;
  --onyx-browse-width:var(--onyx-browse-idle);--onyx-edge-width:112px;
  --onyx-action-outline:color-mix(in srgb,var(--text) 19%,transparent);
  --onyx-browse-duration:.23s;--onyx-refresh-delay:calc(var(--onyx-browse-duration) + 2s);
@@ -282,7 +282,7 @@
 }
 @media(max-width:345px){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
-  --onyx-browse-expanded:88px;--onyx-edge-width:106px;
+  --onyx-browse-expanded:88px;--onyx-browse-inset:8px;--onyx-edge-width:104px;
   & .remote-provider-actions>[data-go]{padding-inline:15px}
  }
 }
@@ -346,4 +346,15 @@
 @media(prefers-reduced-motion:reduce){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-transfer-fill{transition:none}
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-transfer:not([aria-valuenow]) .onyx-transfer-fill{animation:none;transform:translateX(85%)}
+}
+
+/* Balance the OUTER Shelf page margins, not provider-card internals.
+   Classic scrollbars consume inline space on one side; reserve matching
+   gutters so scrollable pages stay centered even when content height changes. */
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>main{
+ scrollbar-gutter:stable both-edges;
+}
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>main>.page{
+ margin-inline:auto;
+ padding-inline:clamp(5px,calc(4vw - 9px),21px);
 }

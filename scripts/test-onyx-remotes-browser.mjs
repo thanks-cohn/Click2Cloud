@@ -84,6 +84,32 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.evaluate(async()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
+ // Outer page geometry must be symmetric with and without vertical overflow.
+ for(const width of [320,380,480,800,1200]){
+  await page.setViewportSize({width,height:760});
+  for(const view of ['remotes','queue','history','settings','screenshot','downloads']){
+   await page.evaluate(view=>{
+    const shell=document.querySelector('#shell'),main=document.querySelector('#main');
+    shell.dataset.view=view;
+    const fixture=document.createElement('section');fixture.className='page '+(view==='remotes'?'remotes-page':view==='queue'||view==='history'?'queue-page':'');
+    fixture.id='outer-page-fixture';fixture.innerHTML='<div data-outer-content style="height:20px"></div>';
+    for(const child of main.children)child.hidden=true;
+    main.append(fixture);
+   },view);
+   for(const height of [20,1800]){
+    const insets=await page.locator('#outer-page-fixture').evaluate((el,height)=>{
+     const child=el.querySelector('[data-outer-content]');child.style.height=height+'px';
+     const c=child.getBoundingClientRect(),r=el.parentElement.getBoundingClientRect();
+     return {left:c.left-r.left,right:r.right-c.right,gutter:getComputedStyle(el.parentElement).scrollbarGutter};
+    },height);
+    assert.equal(insets.gutter,'stable both-edges');
+    assert(Math.abs(insets.left-insets.right)<=1,JSON.stringify({width,view,height,insets}));
+   }
+   await page.evaluate(()=>{const main=document.querySelector('#main');document.querySelector('#outer-page-fixture').remove();for(const child of main.children)child.hidden=false;});
+  }
+ }
+ await page.setViewportSize({width:380,height:760});
+ await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
  // Every view shares the same header glyph, dimensions and color.
  const iconAppearance=()=>page.locator('#theme .onyx-mode-icon:visible').evaluate(el=>{
   const style=getComputedStyle(el);return {className:el.getAttribute('class'),width:style.width,height:style.height,color:style.color};
@@ -165,16 +191,6 @@ try{
   assert(geometry.every((g,i)=>!g.overlap&&g.verticalOverlap&&!g.overflow&&g.left>=0&&g.right<=width&&(!i||g.top>=geometry[i-1].bottom)),JSON.stringify({width,geometry}));
   const allBoxes=()=>page.locator('.remote-provider').evaluateAll(cards=>cards.map(card=>{const r=card.getBoundingClientRect();return [r.x,r.y,r.width,r.height];}));
   const atRest=await allBoxes();
-  // The outermost content boundaries share the same inset, regardless of auth or hover.
-  const checkInsets=async()=> {
-   const insets=await page.locator('.remote-provider').evaluateAll(cards=>cards.map(card=>{
-    const r=card.getBoundingClientRect(),logo=card.querySelector('.remote-provider-heading img').getBoundingClientRect();
-    const action=card.querySelector(card.hasAttribute('data-onyx-connected')?'[data-go]':'[data-connect]').getBoundingClientRect();
-    return {left:logo.left-r.left,right:r.right-action.right};
-   }));
-   assert(insets.every(({left,right})=>Math.abs(left-right)<=1),JSON.stringify({width,insets}));
-  };
-  await checkInsets();
   for(const card of [google,dropbox]){
    await card.hover({position:{x:20,y:20}});
    assert.deepEqual(await allBoxes(),atRest,'Hover must never resize or displace cards at '+width);
@@ -232,7 +248,6 @@ try{
   const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width,weight:getComputedStyle(el.querySelector('.onyx-browse-word')).fontWeight,stroke:getComputedStyle(el.querySelector('.onyx-folder-open')).strokeWidth}));
   assert.deepEqual(sizes,{word:'9px',folder:'13px',weight:'400',stroke:'1.1px'});
   assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
-  await checkInsets();
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
   await page.mouse.move(0,0);await waitWidth(44);
