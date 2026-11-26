@@ -82,33 +82,66 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
+ const main=shell.querySelector('main');
+ let reserved=0,liftActive=false,lastGeometry='',lastPhase='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
  const eligible=()=>!disposed&&preference.value.enabled&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
- const setVar=(k,v)=>body.style.setProperty(k,String(v));
+ // Keep per-frame style invalidation local, rather than inheriting changing
+ // variables from body through every History card. Skip unchanged values.
+ const setVar=(el,k,v)=>{v=String(v);if(el&&el.style.getPropertyValue(k)!==v)el.style.setProperty(k,v);};
+ function reserve(value){
+  if(reserved===value)return;reserved=value;
+  if(value)shell.style.setProperty('--hyper-reserve',value+'px');else shell.style.removeProperty('--hyper-reserve');
+ }
+ function layer(active){
+  if(liftActive===active)return;liftActive=active;
+  shell.toggleAttribute('data-hyperspace-lifting',active);
+  if(!active)main?.style.removeProperty('--hyper-main-offset');
+ }
+ function movePage(frame){
+  const lift=Math.min(peakLift,baseLift*frame.lift);
+  // FLIP: reserve the maximum travel once, then move the already-laid-out
+  // scrolling surface using only a transform. The footer remains stationary.
+  // At rest commit the exact final layout and discard the compositor hint.
+  if(frame.done&&frame.phase==='open'){reserve(baseLift);layer(false);}
+  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'--hyper-main-offset',(reserved-lift).toFixed(3)+'px');}
+  else if(frame.tension>0){layer(true);}
+  setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
+ }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');
-  for(const key of ['--hyper-page','--hyper-lift','--hyper-words','--hyper-controls-up','--hyper-words-up'])body.style.removeProperty(key);
+  reserve(0);layer(false);lastGeometry=lastPhase='';
+  for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
  function draw(frame){
   if(!overlay)return;
   current=frame;
-  const g=hyperspaceGeometry(parts.width,parts.height,frame.split,frame.burst,frame.flex,frame.tension);
-  for(const side of ['left','right']){
-   const el=parts[side];el.fill.style.clipPath='path("'+g[side+'Fill']+'")';
-   el.rail.setAttribute('d',g[side]);el.glint.setAttribute('d',g[side]);
+  const gone=frame.burst>=1;
+  const geometry=gone?'gone':[frame.split,frame.burst,frame.flex,frame.tension].join('/');
+  if(geometry!==lastGeometry){
+   const g=gone?null:hyperspaceGeometry(parts.width,parts.height,frame.split,frame.burst,frame.flex,frame.tension);
+   for(const side of ['left','right']){
+    const el=parts[side];el.fill.hidden=gone;
+    el.rail.style.display=gone?'none':'';el.glint.style.display=gone?'none':'';
+    if(g){el.fill.style.clipPath='path("'+g[side+'Fill']+'")';el.rail.setAttribute('d',g[side]);el.glint.setAttribute('d',g[side]);}
+   }
+   lastGeometry=geometry;
+  }
+  if(!gone)for(const side of ['left','right']){
+   const el=parts[side];
    el.glint.setAttribute('stroke-dasharray',frame.length+' '+(100-frame.length));
    el.glint.setAttribute('stroke-dashoffset',String(frame.length+(frame.travel%100)));
    el.glint.setAttribute('opacity',String(frame.glint));
   }
-  setVar('--hyper-lift',Math.min(peakLift,baseLift*frame.lift).toFixed(2)+'px');
-  setVar('--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar('--hyper-words',frame.words);
-  setVar('--hyper-words-up',((parts.height+12)*frame.wordsUp-frame.wordsDip).toFixed(2)+'px');
-  body.dataset.hyperspace=frame.phase;
+  movePage(frame);
+  setVar(header,'--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar(header,'--hyper-words',frame.words);
+  setVar(header,'--hyper-words-up',((parts.height+12)*frame.wordsUp-frame.wordsDip).toFixed(2)+'px');
+  if(lastPhase!==frame.phase){body.dataset.hyperspace=frame.phase;lastPhase=frame.phase;}
  }
  function tick(now){
   raf=undefined;if(!overlay)return;
@@ -132,7 +165,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   const controls=[header.querySelector('.brand-lockup'),header.querySelector('#theme')].filter(Boolean).map(el=>el.getBoundingClientRect());
   const controlBottom=Math.max(0,...controls.map(r=>r.bottom-rect.top));
   controlShift=controls.length?Math.max(0,Math.min(12,...controls.map(r=>r.top-rect.top-3))):0;
-  const main=shell.querySelector('main'),heading=main?.querySelector('h1,h2');
+  const heading=main?.querySelector('h1,h2');
   // A page that is already scrolled may have content against its top edge.
   const contentGap=main&&heading&&main.scrollTop<1?clamp(heading.getBoundingClientRect().top-main.getBoundingClientRect().top,0,32):0;
   ({rest:baseLift,peak:peakLift}=hyperspaceLiftBounds(rect.height,contentGap,controlBottom,controlShift));
@@ -145,7 +178,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const railNode=line('hyperspace-rail');railNode.setAttribute('stroke',rail);
    parts[side]={fill,rail:railNode,glint:line('hyperspace-glint')};
   }
-  overlay.append(svg);header.prepend(overlay);setVar('--hyper-page',page);
+  overlay.append(svg);header.prepend(overlay);setVar(overlay,'--hyper-page',page);
   runSeconds=preference.value.seconds;started=time.now();draw(hyperspaceFrame(0,runSeconds));raf=time.frame(tick);
  }
  function arm(){cancelTimer();if(!overlay&&eligible())timer=time.set(open,IDLE_MS);}
