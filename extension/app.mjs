@@ -1,3 +1,4 @@
+import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
 import {createQueueService} from './queue-service.mjs';
@@ -78,6 +79,13 @@ for(const event of ['error','unhandledrejection'])window.addEventListener(event,
 shelfBreadcrumb('started');
 const connectionElement=$('#connection');
 const shelfWindow=chrome.windows?.getCurrent?Promise.resolve().then(()=>chrome.windows.getCurrent()).then(w=>w.id).catch(()=>null):Promise.resolve(null);
+// Ordinary app.html tabs must not provide Shelf-edge targets.
+let projectileShelfWindow=null;
+if(typeof chrome.tabs?.getCurrent==='function'){
+ void Promise.all([shelfWindow,Promise.resolve().then(()=>chrome.tabs.getCurrent())]).then(([id,tab])=>{
+  if(Number.isInteger(id)&&!tab)projectileShelfWindow=id;
+ }).catch(()=>{});
+}
 const shelfView=async(method,next,sequence)=>{
  const windowId=await shelfWindow;
  if(!Number.isInteger(windowId))return null;
@@ -2004,8 +2012,14 @@ async function downloadEntry(entry){
  }catch(error){try{await writer?.abort();}catch{}throw error;}
 }
 
-chrome.runtime.onMessage?.addListener((message,sender)=>{
+chrome.runtime.onMessage?.addListener((message,sender,respond)=>{
  if(sender?.id!==chrome.runtime.id)return;
+ if(message?.channel==='redown-projectile-target'){
+  if(projectileShelfWindow===null||message.windowId!==projectileShelfWindow)return;
+  const verticalFraction=visibleProviderFraction(document,message.provider);
+  if(verticalFraction!==null)respond({windowId:projectileShelfWindow,provider:message.provider,verticalFraction});
+  return;
+ }
  if(['shelf-history-show','shelf-explorer-search'].includes(message?.channel)){
   const requestedAt=viewEpoch;
   void shelfWindow.then(async id=>{

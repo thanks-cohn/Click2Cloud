@@ -4,6 +4,26 @@ const channel = 'redown-energy-projectile';
 const staleAfter = 2200;
 const burstDecay = 1250;
 const maxDensity = 5;
+const targetBudgetMs=60;
+export const projectileTargetChannel='redown-projectile-target';
+export function projectileProvider(value){
+  return value==='google-drive'?'google':['google','onedrive','dropbox','cloudflare'].includes(value)?value:null;
+}
+// No persisted layout or guessed provider positions. Only the matching live
+// Shelf may answer, and this optional lookup is strictly bounded.
+export async function readProjectileTarget(chrome,windowId,provider){
+  if(!Number.isInteger(windowId)||!provider||typeof chrome.runtime?.sendMessage!=='function')return null;
+  let timer;
+  try{
+    const result=await Promise.race([
+      Promise.resolve().then(()=>chrome.runtime.sendMessage({channel:projectileTargetChannel,windowId,provider})),
+      new Promise(resolve=>{timer=setTimeout(()=>resolve(null),targetBudgetMs);})
+    ]);
+    return result?.windowId===windowId&&result.provider===provider&&
+      Number.isFinite(result.verticalFraction)&&result.verticalFraction>=0&&result.verticalFraction<=1
+      ?result.verticalFraction:null;
+  }catch{return null;}finally{clearTimeout(timer);}
+}
 
 export function projectileStyle(preferences, accent, energy, random = Math.random) {
   const variation = () => random()*2-1;
@@ -52,14 +72,16 @@ export function createProjectileFeedback({chrome, preferences, clock = Date.now,
   });
   function arm(info,tab) {
     if (!Number.isInteger(tab?.id)) return;
-    gestures.set(info,{tabId:tab.id,frameId:info.frameId ?? 0,clickedAt:clock()});
+    gestures.set(info,{tabId:tab.id,windowId:tab.windowId,frameId:info.frameId ?? 0,clickedAt:clock()});
   }
-  async function play({tabId,frameId,clickedAt}) {
+  async function play({tabId,windowId,frameId,clickedAt},provider) {
     await preferences.ready;
     if (!preferences.value.projectile || clock()-clickedAt>staleAfter) return;
     if (preferences.value.colors === 'theme') await loadAccent();
-    let layout;
-    try { layout = await chrome.sidePanel?.getLayout?.(); } catch { /* Placement API can be absent. */ }
+    const [layout,verticalFraction]=await Promise.all([
+      Promise.resolve().then(()=>chrome.sidePanel?.getLayout?.()).catch(()=>null),
+      readProjectileTarget(chrome,windowId,provider)
+    ]);
     const now = clock(), value = preferences.value;
     if (!value.projectile || now-clickedAt>staleAfter) return;
     const energy = value.rapidClicks ? Math.max(0,density-(now-last)/burstDecay) : 0;
@@ -69,9 +91,10 @@ export function createProjectileFeedback({chrome, preferences, clock = Date.now,
     if (flights.length>=4) return;
     const style = projectileStyle(value,accent,energy,random);
     flights.push({tabId,frameId,ends:now+style.duration+180});
-    send(tabId,frameId,{clickedAt,side:layout?.side==='left'?'left':'right',style});
+    send(tabId,frameId,{clickedAt,side:layout?.side==='left'?'left':'right',style,
+      ...(verticalFraction===null?{}:{verticalFraction})});
   }
-  function forClick(info) {
+  function forClick(info,provider) {
     const gesture = gestures.get(info);
     gestures.delete(info);
     if (!gesture) return;
@@ -79,7 +102,7 @@ export function createProjectileFeedback({chrome, preferences, clock = Date.now,
     return () => {
       if (played) return;
       played = true;
-      void play(gesture).catch(()=>{});
+      void play(gesture,projectileProvider(provider)).catch(()=>{});
     };
   }
   return {arm,forClick};

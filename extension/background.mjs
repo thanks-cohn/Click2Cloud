@@ -385,8 +385,8 @@ const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration
   },sink:diagnostics,persist:state=>chrome.storage.local.set({nativeRegistration:state}),getAuthorization,dispatchOwnsAuthorization:true,isIndependentProvider:basicMenuProvider,
   dispatchAttention:(provider,info)=>invokeProviderAction({provider,emptyAssignment:provider==='cloudflare',attentionContext:attention.context(info)}),
   dispatch:async(action,{info,tab,generation,depthAuthorization,observation})=>{
-    const onAccepted=projectile.forClick(info);
     const provider=basicMenuProvider(action.providerAction);
+    const onAccepted=projectile.forClick(info,provider??action.target?.provider??action.providerAction);
     if(provider){
       const result=await basic.click(provider,info,tab,onAccepted);
       if(result.state==='pending'||result.state==='failed'&&/^(?:AUTH_|OAUTH_CONFIG_REQUIRED$)/.test(result.code)){

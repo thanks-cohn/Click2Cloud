@@ -23,7 +23,7 @@
     return {view,x,y};
   }
 
-  function launch(origin, side, style) {
+  function launch(origin, side, style, verticalFraction) {
     motion ??= matchMedia('(prefers-reduced-motion: reduce)');
     if (motion.matches || active.size>=3 || document.hidden) return;
     const {view,x,y} = viewport(origin);
@@ -33,7 +33,11 @@
     const distance = edge-x;
     if (Math.abs(distance)<12) return;
     const clampY = n => Math.max(7,Math.min(height-7,n));
-    const endY = clampY(y+style.curve*.25);
+    // The browser owns the boundary between the webpage and Shelf. Map
+    // the live Shelf viewport fraction onto the top webpage viewport only.
+    // A cross-origin frame cannot reliably align with the outer edge.
+    const aligned=view===view.top&&Number.isFinite(verticalFraction)&&verticalFraction>=0&&verticalFraction<=1;
+    const endY = clampY(aligned?verticalFraction*height:y+style.curve*.25);
     const transform = (p,scale) => {
       const lift = 4*p*(1-p)*style.curve;
       const angle = Math.atan2(endY-y+(1-2*p)*4*style.curve,distance);
@@ -84,6 +88,6 @@
     if (!point || point.at>message.clickedAt || message.clickedAt-point.at>12000 || Date.now()-message.clickedAt>2200) return;
     const origin = point;
     point = null;
-    try { launch(origin,message.side,message.style); } catch { /* Appearance is optional. */ }
+    try { launch(origin,message.side,message.style,message.verticalFraction); } catch { /* Appearance is optional. */ }
   });
 })();
