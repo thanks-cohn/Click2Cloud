@@ -25,6 +25,8 @@ Inherit Run 1's minimal folder card: root directory name, file count, provider/s
 
 Verify Run 1's folder History media representative in the packaged UI: existing media thumbnail area displays the first successfully uploaded image available to authorized preview for that job, with stable selection across reload/retry; neutral folder fallback when unavailable. Preserve balanced spacing, no gallery/search/tree or extra scanning. Reuse the existing individual and aggregate History renderers and honor the upload History switch.
 
+Folder upload History card: display the text `Verified` in the top-right corner, using the existing verified-status styling, only when every expected eligible child has satisfied the established verification contract. Show truthful pending/partial/failed/uncertain status otherwise; never infer verification from a thumbnail, listing alone or mere request acceptance. Preserve balanced spacing and the compact layout.
+
 ## Final release acceptance
 - Reliable right-click after login and lifecycle events; auth/reconnection and destination continuity.
 - Automatic upload AND download recovery, durable receipts, no duplicate publications, no false success, safe local file publication and integrity.
