@@ -91,6 +91,8 @@ try{
   const slot=el.parentElement,main=document.querySelector('#main'),shell=slot.parentElement;
   return {x:rect.x,width:rect.width,iconX:icon.x,iconWidth:icon.width,
    labelOpacity:getComputedStyle(el.querySelector('span')).opacity,
+   rightGap:rect.right-el.querySelector('span').getBoundingClientRect().right,
+   duration:getComputedStyle(el).transitionDuration,
    slotPosition:getComputedStyle(slot).position,slotBackground:getComputedStyle(slot).backgroundColor,
    mainBottom:main.getBoundingClientRect().bottom,shellBottom:shell.getBoundingClientRect().bottom};
  });
@@ -102,20 +104,34 @@ try{
   assert.equal(idle.slotPosition,'absolute');assert.equal(idle.slotBackground,'rgba(0, 0, 0, 0)');
   assert.equal(idle.mainBottom,idle.shellBottom);assert.equal(idle.iconWidth,16);
   await manage.hover();
-  await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170&&getComputedStyle(document.querySelector('#manage span')).opacity==='1');
+  await page.waitForFunction(()=>{
+   const el=document.querySelector('#manage'),label=el.querySelector('span');
+   const gap=el.getBoundingClientRect().right-label.getBoundingClientRect().right;
+   return gap>=7&&gap<=9&&getComputedStyle(label).opacity==='1';
+  });
   const expanded=await manageGeometry();
   assert.equal(expanded.x,idle.x);assert.equal(expanded.iconX,idle.iconX);
   assert.equal(expanded.mainBottom,idle.mainBottom);
+  assert(expanded.rightGap>=7&&expanded.rightGap<=9,'Expanded button must fit its text with tight right padding');
+  assert.equal(expanded.duration,'0.48s');assert.equal(idle.duration,'0.42s');
   await page.mouse.move(1,1);
   await page.waitForFunction(()=>Math.abs(document.querySelector('#manage').getBoundingClientRect().width-36)<1&&getComputedStyle(document.querySelector('#manage span')).opacity==='0');
  }
  await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
  await manage.focus();
- await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170);
+ await page.waitForFunction(()=>{
+  const el=document.querySelector('#manage'),label=el.querySelector('span');
+  const gap=el.getBoundingClientRect().right-label.getBoundingClientRect().right;
+  return gap>=7&&gap<=9&&getComputedStyle(label).opacity==='1';
+ });
  await manage.evaluate(el=>el.blur());
  await page.locator('#repair-me').evaluate(el=>el.hidden=false);
  await manage.hover();
- await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170);
+ await page.waitForFunction(()=>{
+  const el=document.querySelector('#manage'),label=el.querySelector('span');
+  const gap=el.getBoundingClientRect().right-label.getBoundingClientRect().right;
+  return gap>=7&&gap<=9&&getComputedStyle(label).opacity==='1';
+ });
  const [manageBounds,repairBounds]=await Promise.all([manage.boundingBox(),page.locator('#repair-me').boundingBox()]);
  assert(repairBounds&&manageBounds.x+manageBounds.width<=repairBounds.x);
  await page.locator('#repair-me').evaluate(el=>el.hidden=true);

@@ -46,12 +46,24 @@
    tail keeps the last content reachable without reserving a fixed strip. */
 #shell:not([data-view=explorer])>#manage-slot{inline-size:100%;justify-content:flex-start;background:transparent;border:0;container-type:normal}
 #shell:not([data-view=explorer])>#manage-slot #manage{
- flex:0 1 auto;inline-size:36px;justify-content:flex-start;padding:0 9px;overflow:hidden;
- transition:inline-size 180ms ease;
+ flex:0 1 auto;inline-size:36px;justify-content:flex-start;padding:0 7px 0 9px;overflow:hidden;
+ transition:inline-size 420ms cubic-bezier(.45,0,.18,1);
 }
-#shell:not([data-view=explorer])>#manage-slot #manage span{flex:none;opacity:0;transition:opacity 140ms ease}
-#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){inline-size:174px}
-#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled) span{opacity:1}
+#shell:not([data-view=explorer])>#manage-slot #manage span{
+ flex:none;opacity:0;transition:opacity 200ms ease-out;
+}
+#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){
+ inline-size:148px;transition-duration:480ms;
+}
+#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled) span{
+ opacity:1;transition:opacity 280ms ease-out 90ms;
+}
+/* Animate to the actual label width, not an oversized fixed button.
+   Older engines retain a compact numerical-width fallback. */
+@supports(interpolate-size:allow-keywords){
+ #shell:not([data-view=explorer])>#manage-slot #manage{interpolate-size:allow-keywords}
+ #shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){inline-size:max-content}
+}
 #shell:not([data-view=explorer])>#manage-slot #repair-me{margin-inline-start:auto}
 #shell[data-view=explorer][data-manage-in-toolbar]:has(#sign-out){--manage-toolbar-width:118px}
 #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{inset-inline-start:calc(var(--tree-split) + 8px);inset-block:8px auto;inline-size:var(--manage-toolbar-width,36px);padding:0}
