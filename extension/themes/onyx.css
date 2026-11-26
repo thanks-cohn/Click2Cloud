@@ -266,3 +266,9 @@
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:hover:not(:disabled){background:transparent;color:var(--text);box-shadow:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:active:not(:disabled){background:transparent;box-shadow:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+/* Onyx Remotes: VISIT with an understated door glyph, same navigation action. */
+.onyx-visit-label{display:none!important}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .legacy-go-label{display:none}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-visit-label{display:inline-flex!important;align-items:center;justify-content:center;gap:4px;white-space:nowrap;font-size:inherit;line-height:1.2}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-visit-label svg{width:14px;height:14px;flex:none}

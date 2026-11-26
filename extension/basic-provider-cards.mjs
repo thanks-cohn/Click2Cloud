@@ -117,7 +117,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       <div class="remote-provider-actions">
         <button type="button" class="primary" data-connect>Connect</button>
         <button type="button" data-refresh aria-label="Refresh ${label}" title="Refresh ${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M5.5 8a7.5 7.5 0 0 1 12.4-2L20 9M4 15l2.1 3a7.5 7.5 0 0 0 12.4-2"/></svg></button>
-        <button type="button" data-go aria-label="GO TO ${label}">GO TO</button>
+        <button type="button" data-go id="remote-provider-go-${id}" aria-labelledby="remote-provider-go-${id} remote-provider-${id}"><span class="legacy-go-label">GO TO</span><span class="onyx-visit-label">VISIT<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 21V4l10-2v19M15 4h4v17M3 21h18"/><path d="M11.5 12h.01"/></svg></span></button>
       </div>
       <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');
