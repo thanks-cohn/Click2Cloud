@@ -1,12 +1,15 @@
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const hyperspaceKey='headerHyperspaceV1';
-export const IDLE_MS=5000, SPLIT_MS=1800;
+export const IDLE_MS=5000, SPLIT_MS=1800, ELEGANT_MS=1050;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export function normalizeHyperspace(value){
  const seconds=Number(value?.seconds);
- return {enabled:value?.enabled!==false,seconds:Number.isFinite(seconds)&&seconds>0?clamp(Math.round(seconds),1,20):5};
+ // Require an explicit new mode selection. Legacy on/off preferences retain
+ // their saved charge duration but migrate to None, the new default.
+ const mode=['hyperspace','elegant'].includes(value?.mode)?value.mode:'none';
+ return {mode,seconds:Number.isFinite(seconds)&&seconds>0?clamp(Math.round(seconds),1,20):5};
 }
 export const createHyperspacePreference=storage=>createLocalPreference(storage,hyperspaceKey,normalizeHyperspace);
 export function hyperspaceTiming(seconds){
@@ -54,6 +57,13 @@ export function hyperspaceFrame(elapsed,seconds){
   length:4+Math.min(18,3*speed)+12*releaseGlow,done:releaseElapsed>=t.release+t.settle,
   phase:elapsed<SPLIT_MS?'split':releaseElapsed<0?'charge':r<1?'release':settle<1?'settle':'open'};
 }
+// The quiet alternative uses the same final frame contract and layout engine.
+// No rails, charge, overshoot or abrupt impulse.
+export function elegantHeaderFrame(elapsed){
+ const p=clamp(elapsed/ELEGANT_MS),lift=p*p*p*(10+p*(-15+6*p));
+ return {split:0,burst:smooth(p),flex:0,tension:0,lift,wordsUp:lift,wordsDip:0,
+  words:1-smooth(p/.65),travel:0,speed:0,glint:0,length:0,done:p>=1,phase:p>=1?'open':'elegant'};
+}
 // Preserve the logo/theme clearance while allowing the content to occupy the opened space.
 export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShift){
  const clearance=Math.max(0,height+Math.max(0,contentGap)-controlBottom+controlShift-4);
@@ -81,24 +91,26 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
 export function mountHyperspaceSettings(parent,preference){
  const section=parent.ownerDocument.createElement('section');
  section.className='hyperspace-settings';
- section.innerHTML='<h3>Header Hyperspace</h3><label class="settings-row">Enable header animation<input type="checkbox" data-hyperspace-enabled></label><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p><p role="status"></p>';
- const enabled=section.querySelector('[data-hyperspace-enabled]'),seconds=section.querySelector('[data-hyperspace-seconds]'),status=section.querySelector('[role=status]');
- const paint=()=>{enabled.checked=preference.value.enabled;seconds.value=preference.value.seconds;seconds.disabled=!enabled.checked;};
- const save=async()=>{try{const next={enabled:enabled.checked,seconds:seconds.valueAsNumber};await preference.update(()=>next);status.textContent='';}catch{status.textContent='Hyperspace preference could not be saved.';}paint();};
- enabled.onchange=seconds.onchange=()=>void save();parent.append(section);paint();void preference.ready.then(paint);
+ section.innerHTML='<h3>Header Animation</h3><label class="settings-row">Animation<select data-hyperspace-mode><option value="none">None (default)</option><option value="hyperspace">Hyperspace</option><option value="elegant">Elegant</option></select></label><div data-hyperspace-options><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p></div><p class="muted">Animated modes begin after five seconds away from the header. Hover to restore it.</p><p role="status"></p>';
+ const mode=section.querySelector('[data-hyperspace-mode]'),seconds=section.querySelector('[data-hyperspace-seconds]'),options=section.querySelector('[data-hyperspace-options]'),status=section.querySelector('[role=status]');
+ const paint=()=>{const value=preference.value;mode.value=value.mode;seconds.value=value.seconds;options.hidden=value.mode!=='hyperspace';seconds.disabled=options.hidden;};
+ const save=async(transform)=>{try{await preference.update(transform);status.textContent='';}catch{status.textContent='Header animation preference could not be saved.';}paint();};
+ mode.onchange=()=>{const selected=mode.value;void save(v=>({...v,mode:selected}));};
+ seconds.onchange=()=>{const selected=seconds.valueAsNumber;void save(v=>({...v,seconds:selected}));};
+ parent.append(section);paint();void preference.ready.then(paint);
 }
 const svgNS='http://www.w3.org/2000/svg';
 export function installHyperspace({header,shell,preference,doc=header.ownerDocument,clock}){
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
- let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
+ let timer,raf,overlay,parts,current,started,returning,runSeconds,runMode,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
  const main=shell.querySelector('main');
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
- const eligible=()=>!disposed&&preference.value.enabled&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
+ const eligible=()=>!disposed&&['hyperspace','elegant'].includes(preference.value.mode)&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
  // Keep per-frame style invalidation local, rather than inheriting changing
  // variables from body through every History card. Skip unchanged values.
  const setVar=(el,k,v)=>{v=String(v);if(el&&el.style.getPropertyValue(k)!==v)el.style.setProperty(k,v);};
@@ -132,6 +144,9 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function draw(frame){
   if(!overlay)return;
   current=frame;
+  if(runMode==='elegant'){
+   setVar(parts.elegant,'opacity',1-frame.burst);
+  }else{
   const gone=frame.burst>=1;
   const geometry=gone?'gone':[frame.split,frame.burst,frame.flex,frame.tension].join('/');
   if(geometry!==lastGeometry){
@@ -149,6 +164,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    el.glint.setAttribute('stroke-dashoffset',String(frame.length+(frame.travel%100)));
    el.glint.setAttribute('opacity',String(frame.glint));
   }
+  }
   movePage(frame);
   setVar(header,'--hyper-controls-up',(controlShift*clamp(frame.lift)).toFixed(2)+'px');setVar(header,'--hyper-words',frame.words);
   setVar(header,'--hyper-words-up',((parts.height+12)*frame.wordsUp-frame.wordsDip).toFixed(2)+'px');
@@ -158,11 +174,11 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   raf=undefined;if(!overlay)return;
   if(returning){
    const p=clamp((now-returning.start)/returning.duration),f=returning.frame;
-   const q=smooth(p),releaseBack=smooth(p/.62),splitBack=smooth((p-.26)/.74);
+   const q=smooth(p),releaseBack=runMode==='elegant'?q:smooth(p/.62),splitBack=smooth((p-.26)/.74);
    draw({...f,split:f.split*(1-splitBack),burst:f.burst*(1-releaseBack),flex:f.flex*(1-q),tension:f.tension*(1-q),lift:f.lift*(1-q),wordsUp:f.wordsUp*(1-q),wordsDip:f.wordsDip*(1-q),words:f.words+(1-f.words)*q,glint:f.glint*(1-smooth(p/.35)),phase:'return'});
    if(p>=1){clear();return;}
   }else{
-   draw(hyperspaceFrame(Math.max(0,now-started),runSeconds));
+   draw(runMode==='elegant'?elegantHeaderFrame(Math.max(0,now-started)):hyperspaceFrame(Math.max(0,now-started),runSeconds));
    if(current.done)return; // hold indefinitely; no idle frame loop
   }
   raf=time.frame(tick);
@@ -182,6 +198,10 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   ({rest:baseLift,peak:peakLift}=hyperspaceLiftBounds(rect.height,contentGap,controlBottom,controlShift));
   overlay=doc.createElement('div');overlay.className='hyperspace-overlay';overlay.setAttribute('aria-hidden','true');
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
+  runMode=preference.value.mode;
+  if(runMode==='elegant'){
+   const fill=doc.createElement('div');fill.className='hyperspace-elegant-surface';fill.style.background=surface;fill.style.borderBottomColor=rail;overlay.append(fill);parts.elegant=fill;
+  }else{
   const svg=doc.createElementNS(svgNS,'svg');svg.setAttribute('viewBox','0 0 '+parts.width+' '+parts.height);svg.setAttribute('preserveAspectRatio','none');
   for(const side of ['left','right']){
    const fill=doc.createElement('div');fill.className='hyperspace-surface';fill.style.background=surface;overlay.append(fill);
@@ -189,8 +209,9 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const railNode=line('hyperspace-rail');railNode.setAttribute('stroke',rail);
    parts[side]={fill,rail:railNode,glint:line('hyperspace-glint')};
   }
-  overlay.append(svg);header.prepend(overlay);setVar(overlay,'--hyper-page',page);
-  runSeconds=preference.value.seconds;started=time.now();draw(hyperspaceFrame(0,runSeconds));raf=time.frame(tick);
+  overlay.append(svg);}
+  header.prepend(overlay);setVar(overlay,'--hyper-page',page);
+  runSeconds=preference.value.seconds;started=time.now();draw(runMode==='elegant'?elegantHeaderFrame(0):hyperspaceFrame(0,runSeconds));raf=time.frame(tick);
  }
  function arm(){cancelTimer();if(!overlay&&eligible())timer=time.set(open,IDLE_MS);}
  function restore(immediate=false){
