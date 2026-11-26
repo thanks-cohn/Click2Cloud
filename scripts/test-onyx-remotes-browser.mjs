@@ -302,10 +302,25 @@ try{
     move(r.left+r.width/2,r.top+r.height/2);advance(200);const after=phase();advance(1000);
     viewReveal.push({view,before,after,closed:phase()});
    }
-   move(190,500);advance(5200);choose('none');advance(20000);
+   const archiveSpacing=[],originalChildren=[...main.childNodes],originalScroll=main.scrollTop;
+   for(const mode of ['elegant','hyperspace'])for(const view of ['history','queue']){
+    controller.viewChanged();shell.dataset.view=view;choose(mode);
+    const fixture=document.createElement('section');fixture.className='page queue-page';
+    fixture.innerHTML='<h1>'+view+'</h1><section class="card '+(view==='history'?'queue-archive':'queue-jobs')+'">Content</section>';
+    main.replaceChildren(fixture);main.scrollTop=0;
+    const title=fixture.firstElementChild,content=fixture.lastElementChild;
+    const read=()=>({title:title.getBoundingClientRect().top,content:content.getBoundingClientRect().top,gap:content.getBoundingClientRect().top-title.getBoundingClientRect().bottom});
+    const initialArchive=read();move(190,500);move(190,20);move(190,500);advance(5000);advance(10000);
+    const settled=read(),settledPhase=phase();
+    move(190,20);advance(1000);
+    const restored=read();
+    archiveSpacing.push({mode,view,titleLift:initialArchive.title-settled.title,contentLift:initialArchive.content-settled.content,gap: settled.gap-initialArchive.gap,settledPhase,restored:Math.abs(restored.title-initialArchive.title)<.1&&Math.abs(restored.content-initialArchive.content)<.1});
+   }
+   controller.viewChanged();main.replaceChildren(...originalChildren);main.scrollTop=originalScroll;shell.dataset.view='remotes';choose('elegant');
+   move(190,20);move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
@@ -325,6 +340,8 @@ try{
   assert(hyperspace.themeGlide.mid>=0&&hyperspace.themeGlide.end>=hyperspace.themeGlide.mid&&hyperspace.themeGlide.end<=6.1&&hyperspace.themeGlide.right<=hyperspace.themeGlide.edge,'Moon/sun glides right within available clearance');
   assert.equal(hyperspace.themeHoverPhase,'open','Theme control hover and redundant skin writes must not restore Elegant');
   assert.equal(hyperspace.viewReveal.length,6);
+  assert.equal(hyperspace.archiveSpacing.length,4);
+  assert(hyperspace.archiveSpacing.every(v=>v.settledPhase==='open'&&v.contentLift>0&&v.contentLift<=28.1&&v.titleLift>v.contentLift&&v.titleLift<=36.1&&v.gap>0&&v.restored),'History and Queue preserve a relaxed title/content gap and restore cleanly');
   assert(hyperspace.viewReveal.every(v=>v.before==='open'&&v.after==='return'&&v.closed==='closed'),'Former header region reveals consistently on every supported Shelf tab');
   assert.equal(hyperspace.noPaint.visibility,'hidden');assert.equal(hyperspace.noPaint.background,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.image,'none');assert.equal(hyperspace.noPaint.border,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.shadow,'none');assert.equal(hyperspace.noPaint.themeBackground,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.bodyColor,hyperspace.noPaint.pageColor);
   assert.equal(hyperspace.afterThemeClick.phase,'open');assert.equal(hyperspace.afterThemeClick.mode,'light');assert.equal(hyperspace.afterThemeClick.navVisibility,'hidden');assert.equal(hyperspace.afterThemeClick.themeVisibility,'visible');assert.equal(hyperspace.afterThemeClick.frames,0);assert(Math.abs(hyperspace.afterThemeClick.mainTop-hyperspace.elegantEnd.mainTop)<1);
