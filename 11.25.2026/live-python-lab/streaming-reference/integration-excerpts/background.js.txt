@@ -1,0 +1,55 @@
+# Historical integration excerpts: extension/background.js
+
+Source revision cc7cab5dccec715708dfe6a25a63d349e2c8e40a. Original line numbers retained. Read-only reference, not a runnable file. Sections unrelated to the laboratory omitted.
+
+## Lines 419–467
+
+419:       headers.set("x-redown-http-metadata", encodeURIComponent(JSON.stringify(head.httpMetadata || {})));
+420:       if(diagnostic)for(const [name,value] of Object.entries(diagnostic.headers()))headers.set(name,value);
+421:       headers.set("x-redown-etag", head.etag);
+422:       headers.set("x-redown-version",head.version);
+423:       if(checksumHex(head))headers.set("x-redown-md5",checksumHex(head));
+424:       if (request.method === "HEAD") { headers.set("content-length", String(head.size)); return new Response(null, { status:200, headers }); }
+425:       const match = request.headers.get("range")?.match(/^bytes=(\\d*)-(\\d*)$/);
+426:       let offset = 0, length = head.size, status = 200;
+427:       if (match) {
+428:         const requestedStart = match[1] ? Number(match[1]) : Math.max(0, head.size - Number(match[2] || 0));
+429:         const requestedEnd = match[1] ? (match[2] ? Number(match[2]) : head.size - 1) : head.size - 1;
+430:         if (!Number.isSafeInteger(requestedStart) || requestedStart < 0 || requestedStart >= head.size || requestedEnd < requestedStart) return new Response(null, { status:416, headers:{ "content-range":\`bytes */\${head.size}\` } });
+431:         offset = requestedStart; length = Math.min(head.size - 1, requestedEnd) - offset + 1; status = 206;
+432:         headers.set("content-range", \`bytes \${offset}-\${offset + length - 1}/\${head.size}\`);
+433:       }
+434:       const object = await env.STORAGE.get(key, {onlyIf:{etagMatches:head.etag},...(match&&head.size?{range:{offset,length}}:{})});
+435:       if(!object?.body||head.version&&object.version!==head.version)return Response.json({ok:false,error:"Object changed while reading. Refresh and retry."},{status:409});
+436:       headers.set("content-length", String(length));
+437:       return new Response(object.body, { status, headers });
+438:     }
+439:     if (request.method === "GET") return Response.json({ ok:true, service:"REDOWN", secretConfigured:Boolean(REDOWN_SHARED_SECRET), storageBound:Boolean(env.STORAGE), workerVersion:6, diagnosticProtocol:1, safeTransfers:true });
+440:     if (request.method !== "POST") return Response.json({ ok:false, error:"Method not allowed" }, { status:405 });
+441:     if (!authorized) return Response.json({ ok:false, error:"Unauthorized" }, { status:401 });
+442:     try {
+443:       // Exact laboratory creation uses the existing authenticated STORAGE engine.
+444:       // Never fall through to ingest or expose unconditional overwrite/delete.
+445:       // Multipart transport stages under an unpredictable private key, then publishes
+446:       // using conditional PUT. Multipart completion itself has no atomic onlyIf.
+447:       if (request.headers.get("x-redown-action")?.startsWith("stream-")) {
+448:         const action=request.headers.get("x-redown-action");
+449:         const key=decodeURIComponent(request.headers.get("x-redown-key")||"");exactObjectKey(key);
+450:         const size=Number(request.headers.get("x-redown-size"));
+451:         // Actual R2 single PUT limit for atomic conditional publication (5 GiB - 5 MiB).
+452:         if(!Number.isSafeInteger(size)||size<0)return Response.json({ok:false,code:"INVALID_REQUEST"},{status:400});
+453:         if(size>5363466240)return Response.json({ok:false,code:"PROVIDER_CONDITIONAL_PUT_LIMIT"},{status:413});
+454:         if(action==="stream-begin"){
+455:           if(await env.STORAGE.head(key))return Response.json({ok:false,code:"CONFLICT"},{status:409});
+456:           const temporary="__redown_upload__/"+crypto.randomUUID();
+457:           const contentType=request.headers.get("x-redown-content-type")||"application/octet-stream";
+458:           if(contentType.length>128)return Response.json({ok:false,code:"INVALID_REQUEST"},{status:400});
+459:           const upload=await env.STORAGE.createMultipartUpload(temporary,{httpMetadata:{contentType,cacheControl:"no-store"}});
+460:           return Response.json({ok:true,temporary,uploadId:upload.uploadId});
+461:         }
+462:         const temporary=request.headers.get("x-redown-temporary")||"";
+463:         const uploadId=request.headers.get("x-redown-upload-id")||"";
+464:         if(!/^__redown_upload__\\/[a-f0-9-]{36}$/.test(temporary)||!uploadId||uploadId.length>2048)return Response.json({ok:false,code:"INVALID_REQUEST"},{status:400});
+465:         const upload=env.STORAGE.resumeMultipartUpload(temporary,uploadId);
+466:         if(action==="stream-part"){
+467:           const partNumber=Number(request.headers.get("x-redown-part"));

@@ -1,0 +1,87 @@
+# Historical integration excerpts: extension/options.html
+
+Source revision cc7cab5dccec715708dfe6a25a63d349e2c8e40a. Original line numbers retained. Read-only reference, not a runnable file. Sections unrelated to the laboratory omitted.
+
+## Lines 494–543
+
+494:     @media(prefers-reduced-motion:reduce){html:not(.debug-mode) .bucket-grid{animation:none!important}.bucket[data-signal] :is(.bucket-select:after,.bucket-repair,.signal-glyph),.signal-demo-tile,.signal-demo-tile .signal-glyph,.storage-training[data-stage="complete"] .signal-demo-tile{animation:none!important}.bucket[data-signal="ready"] .bucket-select:after{opacity:0}}
+495: 
+496:     @media(max-width:520px){
+497:       #cloudflare-panel .bucket-surface{gap:3px;padding:4px 6px 32px}
+498:       #cloudflare-panel .bucket-icon{flex-basis:16px;height:16px;width:20px}
+499:       #cloudflare-panel .bucket-icon svg{width:18px;height:18px}
+500:       #cloudflare-panel .bucket-copy{gap:3px}
+501:       #cloudflare-panel .bucket-name{font-size:11px;line-height:1.2}
+502:       #cloudflare-panel .bucket-status{font-size:10px;line-height:1.2}
+503:       #cloudflare-panel .bucket-repair{right:12px;bottom:12px}
+504:     }
+505: 
+506:     .bucket[data-signal="working"] .bucket-status:before{border-color:#b9cfe0;border-top-color:#3d739b}
+507:     .bucket[data-signal] .bucket-repair:active:not(:disabled){box-shadow:inset 0 4px 7px #000f,0 1px 0 #fff9,0 0 4px color-mix(in srgb,var(--signal-color) 30%,transparent)}
+508:     #refresh-storage[aria-busy="true"]{color:#b5dfff;border-color:#79b8eb}
+509: 
+510:     .url-menu-trigger::after{content:"›";float:right;margin-left:22px;color:#b6a6ca}
+511:     .url-popover{position:fixed;z-index:60;box-sizing:border-box;width:420px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow:auto;padding:8px;border:1px solid #443655;border-radius:12px;background:#1d2a40;color:#edf1f8;box-shadow:0 18px 50px #0009;font-size:12px}
+512:     .url-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 7px 10px}.url-popover-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+513:     .url-popover-close{border:0;background:transparent;color:#c9bfd9;padding:3px 8px;font-size:18px}
+514:     .url-popover-row[hidden]{display:none}.url-popover-list{display:grid;gap:5px}.url-popover-row{position:relative;display:grid;gap:6px;width:100%;min-width:0;text-align:left;padding:12px 44px 12px 10px;border:1px solid transparent;border-radius:7px;background:#172238;color:#edf1f8;cursor:pointer}
+515:     .url-popover-row code{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:#d8c5ec}.url-popover-state{font-size:10px;color:#b5bdcd;line-height:1.5}.url-popover-copy{position:absolute;right:9px;top:12px;font-size:10px;color:#c7b1e4;opacity:0}
+516:     .url-popover-row:hover:not(:disabled),.url-popover-row:focus-visible{background:#302b47;border-color:#79638e;outline:none}.url-popover-row:hover .url-popover-copy,.url-popover-row:focus-visible .url-popover-copy,.url-popover-row[data-copied] .url-popover-copy{opacity:1}.url-popover-row:disabled{opacity:.6;cursor:default}.url-popover-feedback{padding:10px 7px 4px;color:#c9c2d6;line-height:1.5}.url-popover-close:focus-visible{outline:2px solid #bda2e8;border-radius:5px}
+517:     body{padding-bottom:64px}
+518:     .laboratory-footer{position:fixed;inset:auto 0 0;z-index:20;display:flex;justify-content:center;padding:12px 16px;background:var(--bg);border-top:1px solid var(--line)}
+519:     .laboratory-footer a{color:var(--purple2);text-align:center;overflow-wrap:anywhere}
+520: </style>
+521: </head>
+522: <body>
+523: <div class="wrap">
+524:   <header>
+525:     <div class="brand">
+526:       <img src="icon.svg" alt="">
+527:       <div><div class="wordmark">REDOWN</div><div class="sub">Your Dashboard · Everything in its place.</div></div>
+528:     </div>
+529:     <div class="header-actions">
+530:       <div class="pill">v0.5.13</div>
+531:       <a id="beta-explorer-entry" class="secondary beta-only" href="beta-explorer.html">Beta Explorer</a>
+532:       <details id="settings-disclosure" class="settings-disclosure">
+533:         <summary aria-label="Settings"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></summary>
+534:         <div class="settings-popover">
+535:           <label class="toggle"><input id="notifications-enabled" type="checkbox" aria-describedby="notifications-description"> Desktop notifications</label><p id="notifications-description" class="mode-hint">Optional transfer updates. Off by default.</p>
+536:           <label class="toggle"><input id="beta-mode-enabled" type="checkbox" aria-describedby="beta-mode-description"> Beta Mode</label><p id="beta-mode-description" class="mode-hint">Explore experimental REDOWN features.</p>
+537:           <label class="toggle"><input id="debug-mode-enabled" type="checkbox" aria-describedby="debug-mode-description"> Debug Mode</label><p id="debug-mode-description" class="mode-hint">Show advanced diagnostics and troubleshooting tools.</p>
+538:         </div>
+539:       </details>
+540:     </div>
+541:   </header>
+542: 
+543:   <section id="connections" class="hero">
+
+## Lines 732–759
+
+732:       <button id="explorer-diagnostics-clear" class="ghost" type="button">Clear records</button>
+733:     </div>
+734:     <label for="explorer-diagnostic-id">Operation</label><select id="explorer-diagnostic-id"></select>
+735:     <div class="row-actions"><button id="explorer-diagnostics-trace" class="ghost" type="button">Inspect trace</button><button id="explorer-diagnostics-copy" class="ghost" type="button">Copy diagnostic ID</button><button id="explorer-diagnostics-download" class="ghost" type="button" hidden>Download reviewed bundle</button></div>
+736:     <div id="explorer-diagnostics-status" class="status" role="status"></div>
+737:     <pre id="explorer-diagnostics-output" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:480px;overflow:auto" role="status"></pre>
+738:   </details>
+739:   <pre id="runtime-diagnostics-output" role="status" aria-live="polite"></pre>
+740: </section>
+741: <script src="settings-mascot.js"></script>
+742: <script type="module" src="model-viewer.min.js"></script>
+743: <script src="cloudflare-auth.js"></script>
+744: <script src="cloudflare-api.js"></script>
+745: <script src="nested-locations.js"></script>
+746: <script src="menu-reorder.js"></script>
+747: <script src="nested-menu-editor.js"></script>
+748: <script src="explorer-destination-menu.js"></script>
+749: <script src="storage-signals.js"></script>
+750: <script src="public-addresses.js"></script>
+751: <script src="explorer-status.js"></script>
+752: <script src="explorer-diagnostics.js"></script>
+753: <script src="explorer-diagnostics-bridge.js"></script>
+754: <script src="options.js"></script>
+755: <script src="explorer-diagnostics-ui.js"></script>
+756: <footer class="laboratory-footer"><a href="laboratory.html" target="_blank" rel="noopener">Open Python Laboratory</a></footer>
+757: </body>
+758: </html>
+759: 
