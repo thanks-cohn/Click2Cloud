@@ -31,9 +31,16 @@ export function hyperspaceFrame(elapsed,seconds){
  const exit=clamp((releaseElapsed-t.flexMs)/t.exitMs);
  // Wind up within the existing charge window, then unload the compression
  // into the outward impact. No extra delay or discontinuous geometry.
- const windup=Math.min(1.2,t.buildup*.28);
- const tension=smooth((charge-(t.buildup-windup))/windup)*(1-impact)*clamp(.42+.36*t.energy,0,1);
- const wordsDip=Math.min(8,3+3*t.energy)*tension;
+ const windup=Math.min(1.5,t.buildup*.32);
+ const windupProgress=smooth((charge-(t.buildup-windup))/windup);
+ // Diminishing travel with two smooth resistance points: the spring seems
+ // to creak and nearly stall without reversing, jittering or adding a delay.
+ const load=1-(1-windupProgress)**2;
+ const creak=clamp(load+.065*Math.sin(4*Math.PI*load)*(1-load));
+ const loaded=creak*clamp(.52+.43*t.energy,0,1);
+ const tension=loaded*(1-impact);
+ // The deeper dip holds against the initial impact, then snaps upward.
+ const wordsDip=Math.min(14,7+6*t.energy)*loaded*(1-impact**1.7);
  const burst=.08*impact+.92*(1-(1-exit)**3);
  const flex=clamp(.24+.16*t.energy,0,.72)*impact*(1-smooth(exit/.76));
  const lift=burst*(1+.16*t.energy*(1-settle));
@@ -61,8 +68,9 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const bow=tip*clamp(flex,0,.72)*split;
  // The last part of charge arches both rails toward the center, but leaves
  // a clean minimum corridor and never allows the mirror curves to intersect.
- const inward=Math.max(0,gap/2-7)*clamp(tension)*split;
- const c1=Math.max(0,tip-bow+inward),c2=Math.max(0,tip*(1-.36*split)-bow*.82+inward*1.35);
+ const inward=Math.max(0,gap/2-4)*clamp(tension)*split;
+ const limit=Math.max(tip,w/2-4);
+ const c1=Math.min(limit,Math.max(0,tip-bow+inward)),c2=Math.min(limit,Math.max(0,tip*(1-.36*split)-bow*.82+inward*1.65));
  const x=v=>Number((v-shift).toFixed(3)),y=v=>Number(v.toFixed(3));
  const left='M '+x(tip)+' '+y(tipY)+' C '+x(c1)+' '+y(h*(1-.44*split))+' '+x(c2)+' '+y(h*(1-.28*split))+' '+x(0)+' '+y(h);
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
