@@ -48,7 +48,17 @@
 #shell:not([data-view=explorer])>#manage-slot #manage{
  flex:0 1 auto;inline-size:36px;justify-content:flex-start;padding:0 7px 0 9px;overflow:hidden;
  transition:inline-size 420ms cubic-bezier(.45,0,.18,1);
+ /* Keep the original border box, but open both sides and soften the rail ends. */
+ position:relative;border-inline-color:transparent;border-radius:5px;
 }
+/* Subtle extra rail weight near the four ends of the compact control only. */
+#shell:not([data-view=explorer])>#manage-slot #manage:not(:is(:hover,:focus-visible))::before,
+#shell:not([data-view=explorer])>#manage-slot #manage:not(:is(:hover,:focus-visible))::after{
+ content:"";position:absolute;inset-inline:3px;block-size:1px;pointer-events:none;border-radius:2px;
+ background:linear-gradient(90deg,color-mix(in srgb,var(--line) 65%,currentColor 35%),transparent 30%,transparent 70%,color-mix(in srgb,var(--line) 65%,currentColor 35%));
+}
+#shell:not([data-view=explorer])>#manage-slot #manage:not(:is(:hover,:focus-visible))::before{inset-block-start:0}
+#shell:not([data-view=explorer])>#manage-slot #manage:not(:is(:hover,:focus-visible))::after{inset-block-end:0}
 #shell:not([data-view=explorer])>#manage-slot #manage span{
  flex:none;opacity:0;transition:opacity 200ms ease-out;
 }
