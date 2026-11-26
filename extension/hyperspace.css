@@ -26,11 +26,12 @@ body[data-hyperspace]>.app-header :is(.brand-lockup,#theme){
 }
 body[data-hyperspace]>.app-header :is(nav,.header-more){
  opacity:var(--hyper-words,1);
+ translate:0 calc(0px - var(--hyper-words-up,0px));
 }
 body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none}
 body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-lift,0px))}
 @media(prefers-reduced-motion:reduce){
  body[data-hyperspace]>.app-header>.hyperspace-overlay{display:none}
- body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;pointer-events:auto}
+ body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;translate:none;pointer-events:auto}
  body[data-hyperspace]>#shell{margin-block-start:0}
 }
