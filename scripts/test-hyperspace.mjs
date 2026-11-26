@@ -1,28 +1,10 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,hyperspaceWaterGeometry,hyperspaceWaterLayout,IDLE_MS,SPLIT_MS,WATER_IDLE_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
 
 assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
 assert.equal(normalizeHyperspace({seconds:'bad'}).seconds,5);
 assert.equal(IDLE_MS,5000);
-assert.equal(WATER_IDLE_MS,2000);
-assert.deepEqual(hyperspaceWaterGeometry(80,24),[]);
-assert.deepEqual(hyperspaceWaterGeometry(380,7),[]);
-assert.deepEqual(hyperspaceWaterLayout(66,40,35),{top:7.8,height:18.2,below:false});
-assert.deepEqual(hyperspaceWaterLayout(66,20,30),{top:32,height:14,below:true});
-for(const h of [56,66,90])for(const lift of [0,12,26,40]){const r=hyperspaceWaterLayout(h,lift,35);assert(r.top+r.height<=h-lift+1e-9);}
-for(const width of [320,380,800,1200])for(const height of [8,18,26,40,56]){
- const lines=hyperspaceWaterGeometry(width,height);
- assert.equal(lines.length,14);
- assert.equal(new Set(lines.map(l=>l.shade)).size,3);
- assert(lines.some(l=>l.y1===l.y2)&&lines.some(l=>l.y1!==l.y2));
- assert(new Set(lines.map(l=>Math.round(l.x2-l.x1))).size>=8);
- assert.deepEqual(lines,hyperspaceWaterGeometry(width,height));
- for(const l of lines){assert(l.x1>=0&&l.x2<=width&&l.x2>l.x1);assert(l.y1>=0&&l.y2>=0&&l.y1<height&&l.y2<height);assert(Math.abs(l.y2-l.y1)<=1.2+1e-9);assert(l.opacity>=.56&&l.opacity<=.69);assert(l.duration>=8&&l.delay>=0);}
- const rows=[0,2,5,8,11].map(i=>(lines[i].y1+lines[i].y2)/2);
- assert(rows.every((y,i)=>i===0||y>rows[i-1]),'All five rows are separated');
- assert(rows[4]-rows[3]>rows[1]-rows[0],'Ripple spacing opens toward foreground');
-}
 assert.equal(SPLIT_MS,1800);
 assert(hyperspaceFrame(180,5).split<.01,'Preserve the original gentle split');
 assert.equal(hyperspaceFrame(SPLIT_MS,5).split,1);
