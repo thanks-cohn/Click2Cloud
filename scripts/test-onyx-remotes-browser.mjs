@@ -87,9 +87,13 @@ try{
  // The shared button is the existing Explorer icon, not a layout-consuming footer.
  const manage=page.locator('#manage');
  const manageGeometry=()=>manage.evaluate(el=>{
-  const rect=el.getBoundingClientRect(),icon=el.querySelector('svg').getBoundingClientRect();
+  const rect=el.getBoundingClientRect(),icon=el.querySelector('svg').getBoundingClientRect(),style=getComputedStyle(el);
   const slot=el.parentElement,main=document.querySelector('#main'),shell=slot.parentElement;
   return {x:rect.x,width:rect.width,iconX:icon.x,iconWidth:icon.width,
+   background:style.backgroundColor,backgroundImage:style.backgroundImage,shadow:style.boxShadow,
+   sides:[style.borderInlineStartColor,style.borderInlineEndColor],
+   rails:[style.borderBlockStartColor,style.borderBlockEndColor],
+   railWidths:[style.borderBlockStartWidth,style.borderBlockEndWidth],
    labelOpacity:getComputedStyle(el.querySelector('span')).opacity,
    rightGap:rect.right-el.querySelector('span').getBoundingClientRect().right,
    duration:getComputedStyle(el).transitionDuration,
@@ -114,8 +118,14 @@ try{
   assert.equal(expanded.mainBottom,idle.mainBottom);
   assert(expanded.rightGap>=7&&expanded.rightGap<=9,'Expanded button must fit its text with tight right padding');
   assert.equal(expanded.duration,'0.48s');assert.equal(idle.duration,'0.42s');
+  assert.equal(expanded.background,'rgba(0, 0, 0, 0)');
+  assert.equal(expanded.backgroundImage,'none');assert.equal(expanded.shadow,'none');
+  assert.deepEqual(expanded.sides,['rgba(0, 0, 0, 0)','rgba(0, 0, 0, 0)']);
+  assert.deepEqual(expanded.rails,idle.rails);assert.deepEqual(expanded.railWidths,idle.railWidths);
   await page.mouse.move(1,1);
   await page.waitForFunction(()=>Math.abs(document.querySelector('#manage').getBoundingClientRect().width-36)<1&&getComputedStyle(document.querySelector('#manage span')).opacity==='0');
+  const collapsed=await manageGeometry();
+  assert.equal(collapsed.background,idle.background);assert.deepEqual(collapsed.sides,idle.sides);
  }
  await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
  await manage.focus();

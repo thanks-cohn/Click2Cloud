@@ -54,6 +54,8 @@
 }
 #shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){
  inline-size:148px;transition-duration:480ms;
+ /* Retain border geometry so the icon and label never shift as the sides vanish. */
+ border-inline-color:transparent;border-radius:0;background:transparent;box-shadow:none;
 }
 #shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled) span{
  opacity:1;transition:opacity 280ms ease-out 90ms;
