@@ -6,12 +6,17 @@ on:
       - '.github/workflows/python-lab-windows.yml'
       - '11.25.2026/live-python-lab/python/**'
       - '11.25.2026/python-lab-live-repair/verify-windows-inventory.cmd'
+      - '11.25.2026/python-lab-live-repair/windows-acceptance.py'
 permissions:
   contents: read
 jobs:
   windows-inventory:
     runs-on: windows-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.14.7', '3.14']
     defaults:
       run:
         shell: cmd
@@ -19,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: ${{ matrix.python }}
           architecture: x64
       - name: Install and test the real Windows source paths
         run: |

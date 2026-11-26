@@ -2,6 +2,9 @@
 import argparse
 import hashlib
 import json
+import os
+import platform
+import tempfile
 from pathlib import Path
 
 from redown_live_lab import __version__
@@ -10,6 +13,41 @@ from redown_live_lab.evidence import Journal, load_run
 from redown_live_lab.fixtures import ASSET_SIZES, generate
 from redown_live_lab.inventory import digest_file, ordinary_directory, relative_path
 from redown_live_lab.manifest import read_json
+
+
+def probe():
+    if os.name != 'nt':
+        raise LabError('WINDOWS_REQUIRED')
+    from redown_live_lab import windows_source
+
+    attributes = ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns')
+    contents = generate('png', 989488, 3323, 'windows-stat-probe')
+    expected = hashlib.sha256(contents).hexdigest()
+
+    def changed(before, after):
+        return [name for name in attributes if getattr(before, name) != getattr(after, name)]
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / 'fixture.png'
+        path.write_bytes(contents)
+        before = path.lstat()
+        with os.fdopen(windows_source.open_fd(path), 'rb') as stream:
+            opened = os.fstat(stream.fileno())
+            change_time = windows_source.change_time(stream.fileno())
+            actual = hashlib.sha256(stream.read(len(contents) + 1)).hexdigest()
+            closed_read = os.fstat(stream.fileno())
+            final_change_time = windows_source.change_time(stream.fileno())
+            after = path.lstat()
+        verified, _ = digest_file(path, len(contents))
+        comparisons = {'pathToOpenedHandle': changed(before, opened),
+                       'openedHandleToAfterRead': changed(opened, closed_read),
+                       'pathBeforeToAfterRead': changed(before, after)}
+    if (any(set(fields) - {'st_ctime_ns'} for fields in comparisons.values())
+            or change_time != final_change_time or expected != actual or expected != verified):
+        raise LabError('GENERATED_SOURCE_COMPARISON_FAILED')
+    return {'status': 'PASS', 'platform': 'Windows', 'architecture': platform.machine(),
+            'python': platform.python_version(), 'bytes': len(contents), 'sha256': verified,
+            'changedAttributes': comparisons, 'sameHandleChangeTimeStable': True}
 
 
 def prepare():
@@ -89,12 +127,18 @@ def main():
     parser = argparse.ArgumentParser()
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('prepare')
+    commands.add_parser('probe')
     verify = commands.add_parser('check')
     verify.add_argument('--run', required=True, type=Path)
     verify.add_argument('--files', required=True, type=int, choices=range(1, 31), metavar='1..30')
     args = parser.parse_args()
     try:
-        report = prepare() if args.command == 'prepare' else check(args.run, args.files)
+        if args.command == 'prepare':
+            report = prepare()
+        elif args.command == 'probe':
+            report = probe()
+        else:
+            report = check(args.run, args.files)
     except FileExistsError:
         print(json.dumps({'status': 'BLOCKED', 'code': 'ACCEPTANCE_DIRECTORY_ALREADY_EXISTS'}))
         return 2
@@ -102,7 +146,7 @@ def main():
         code = error.code if isinstance(error, LabError) else 'ACCEPTANCE_RECEIPT_UNREADABLE'
         print(json.dumps({'status': 'BLOCKED', 'code': code}))
         return 2
-    print(json.dumps(report, indent=2))
+    print(json.dumps(report, indent=None if args.command == 'probe' else 2))
     return 0
 
 
