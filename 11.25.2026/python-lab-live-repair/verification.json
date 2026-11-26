@@ -1,0 +1,356 @@
+{
+  "schema": "redown.python-lab.repair-verification/1",
+  "release": "0.3.32.3",
+  "branch": "codex/redown-11-25-2026-python-lab-live-repair",
+  "commits": {
+    "branchStart": "9ad2ec987148b487613b0299d88810a0945ff968",
+    "sourceRepair": "3298632c91f4223095952250a1c4c7f3829f63a9",
+    "nativeStartupAndDiagnostics": "f1124a4501028937ac2946b9203f5b3525a62c2c",
+    "verifiedProduction": "ae4b80cc879072ca60a9094500027b168be4d8ab"
+  },
+  "build": {
+    "version": "0.3.32.3",
+    "revision": "ae4b80cc879072ca60a9094500027b168be4d8ab",
+    "sourceDigest": "bcc79e44a64885a92f200a82150228b8a7a4582f99be230ad549eca79b8b9e4f",
+    "engineVersion": "3+1.1",
+    "nativeProtocol": "1.0.0",
+    "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+    "workerDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI"
+  },
+  "before": {
+    "ownerInstalledWindows": {
+      "version": "0.3.32.2",
+      "commit": "b2be6f3189c440e315ac684fb9f61a44cb57cb41",
+      "platform": "Windows 11 AMD64",
+      "python": "3.14.7",
+      "sourceDigest": "461352a1fc49364308d0c45eeeebfa64e762073a90e85860045f60d6327df701",
+      "nativeStartup": {
+        "status": "FAIL",
+        "permissionGranted": true,
+        "causeName": "TypeError",
+        "apiCallable": false,
+        "subsequentPairing": "OWNER_REPORTED_PASS",
+        "reloadAction": "NOT_INDEPENDENTLY_OBSERVED"
+      },
+      "sourceInventory": {
+        "status": "BLOCKED",
+        "code": "SOURCE_CHANGED",
+        "stage": "open",
+        "bytes": 989488,
+        "equalAttributes": [
+          "st_dev",
+          "st_ino",
+          "st_size",
+          "st_mtime_ns"
+        ],
+        "mismatchedAttributes": [
+          "st_ctime_ns"
+        ],
+        "pathCTimeNs": "1795570665323396800",
+        "handleCTimeNs": "1795660635024773200",
+        "exactBytesIndependentlyChecked": false
+      },
+      "separateLiveBaseline": {
+        "status": "OWNER_REPORTED_PASS",
+        "scenarios": 2,
+        "verifiedBytes": 35,
+        "elapsedMs": 10977,
+        "observedActiveUploads": 1,
+        "observedActiveDownloads": 1,
+        "providerActivitySignals": 4,
+        "independentProviderQueryByCodex": "NOT_TESTED"
+      }
+    },
+    "deterministicReplay": {
+      "status": "REPRODUCED",
+      "evidenceClass": "synthetic-stat-pair-on-Linux",
+      "commit": "9ad2ec987148b487613b0299d88810a0945ff968",
+      "stage": "open",
+      "code": "SOURCE_CHANGED",
+      "mismatchedAttributes": [
+        "st_ctime_ns"
+      ],
+      "elapsedMs": 0.363
+    }
+  },
+  "after": {
+    "packageAndExtensionBuild": {
+      "status": "PASS",
+      "editableCliVersion": "0.3.32.3",
+      "workerDigestMatchesPriorRelease": true
+    },
+    "pythonOffline": {
+      "status": "PASS",
+      "platform": "Linux",
+      "python": "3.12.14",
+      "passed": 17,
+      "skipped": 2,
+      "total": 19,
+      "elapsedMs": 3787,
+      "syntheticWindowsCTimeMismatch": "PASS",
+      "windowsNativeHandleAndJunction": "NOT_TESTED_ON_LINUX"
+    },
+    "sourceAcceptancePlans": {
+      "status": "PASS",
+      "evidenceClass": "Linux-offline-generated-files",
+      "twoFilePlan": {
+        "files": 2,
+        "bytes": 35
+      },
+      "fiveFilePlan": {
+        "files": 5,
+        "bytes": 992504,
+        "pngBytes": 989488
+      },
+      "hashCheckerRejectsFixtureAsInstalled": "PASS",
+      "hashCheckerWithSimulatedInstalledMetadata": "PASS"
+    },
+    "startupFixtureTests": {
+      "status": "PASS",
+      "tests": 27
+    },
+    "apiUnavailableReceipt": {
+      "schema": "redown.python-lab.diagnostics/1",
+      "correlationId": "2d99b0cd-8f53-4785-b3f9-b74f541a498f",
+      "outcome": "FAILED",
+      "elapsedMs": 12,
+      "firstFailure": {
+        "stage": "native-api",
+        "outcome": "UNAVAILABLE",
+        "elapsedMs": 0,
+        "code": "NATIVE_API_UNAVAILABLE",
+        "causeName": "Error",
+        "recovery": "Once REDOWN work is idle, reload REDOWN once from chrome://extensions, reopen Settings and retry."
+      },
+      "providerRoundTrip": "NOT_TESTED_BY_DIAGNOSTICS",
+      "evidenceClass": "injected-runtime-missing-connectNative",
+      "stages": [
+        {
+          "stage": "trusted-storage",
+          "outcome": "PASS",
+          "elapsedMs": 1
+        },
+        {
+          "stage": "extension-identity",
+          "outcome": "PASS",
+          "elapsedMs": 0
+        },
+        {
+          "stage": "input-validation",
+          "outcome": "PASS",
+          "elapsedMs": 1
+        },
+        {
+          "stage": "native-permission",
+          "outcome": "PASS",
+          "elapsedMs": 0
+        },
+        {
+          "stage": "native-api",
+          "outcome": "UNAVAILABLE",
+          "elapsedMs": 0,
+          "code": "NATIVE_API_UNAVAILABLE",
+          "causeName": "Error",
+          "recovery": "Once REDOWN work is idle, reload REDOWN once from chrome://extensions, reopen Settings and retry."
+        },
+        {
+          "stage": "account-discovery",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "bucket-listing",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "authorization",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "selected-bucket",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "recovery-scope",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "worker-prefix",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "upload-readiness",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "opfs-capability",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "spool-init-cleanup",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "storage-estimate",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "auth-recheck",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "native-port-launch",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "native-handshake",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "pairing",
+          "outcome": "NOT_REACHED"
+        },
+        {
+          "stage": "lifecycle",
+          "outcome": "NOT_REACHED"
+        }
+      ]
+    },
+    "settingsBrowser": {
+      "status": "PASS",
+      "evidenceClass": "browser-rendered-settings-with-chrome-message-fixture",
+      "chromium": "156.0.8078.79",
+      "checks": [
+        "single card, off by default, no passive permission or provider discovery",
+        "explicit scoped approval and precise Windows pairing command",
+        "paired state, revocation, and no page errors at 365 px",
+        "bucket error and empty states, retry, reload guidance and JSON export without pairing",
+        "disk-backed spool, incremental SHA-256, and cleanup in a real Chromium service worker"
+      ]
+    },
+    "nativeLoopbackAndWorkerdR2": {
+      "status": "PASS",
+      "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+      "checks": [
+        {
+          "name": "native invocation and extension sender fences",
+          "state": "PASS"
+        },
+        {
+          "name": "paired native socket, single use code, and capability negotiation",
+          "state": "PASS",
+          "protocol": "1.0.0"
+        },
+        {
+          "name": "paired CLI exports the shared sanitized startup stages and retains the first failure",
+          "state": "PASS"
+        },
+        {
+          "name": "scope escape, foreign bucket, budgets, pre-dispatch cancellation and transfer ID reuse",
+          "state": "PASS"
+        },
+        {
+          "name": "case-folded collision and changed source blocked",
+          "state": "PASS"
+        },
+        {
+          "name": "three mixed nested corpus objects per run, including zero bytes, and one R2 read per verified upload",
+          "state": "PASS",
+          "upstreamWrites": 9,
+          "independentReads": 9,
+          "verifiedBytes": 310004,
+          "example": {
+            "fixtureId": "file-ebdb0296e2a793069cac8820",
+            "sha256": "dfb8b376a931a2f49838eadefae72883d2ed02f1d303494cc82b475858d9ac30",
+            "uploadOnlySavedCopy": null,
+            "roundTripHash": "dfb8b376a931a2f49838eadefae72883d2ed02f1d303494cc82b475858d9ac30"
+          }
+        },
+        {
+          "name": "same manifest replay and changed retention compared by stable scenario",
+          "state": "PASS",
+          "same": {
+            "UNCHANGED_OUTCOME": 3
+          },
+          "changed": {
+            "WORKLOAD_CHANGED": 3
+          }
+        },
+        {
+          "name": "Comprehensive executes the same interpreter for 19 fixtures plus two preserved conflicts",
+          "state": "PASS",
+          "verifiedUploads": 19,
+          "conflicts": 2,
+          "metadata": 19,
+          "listing": 1,
+          "independentDownloads": 19
+        },
+        {
+          "name": "lost ACK recovered by a separate read-only grant without replay or overwrite",
+          "state": "PASS",
+          "before": "UNCERTAIN",
+          "after": "PASS",
+          "digestMismatch": "FROZEN_MANIFEST_DIGEST_MISMATCH",
+          "additionalWorkerWrites": 0
+        },
+        {
+          "name": "revocation removed native endpoint; unrelated object remained intact",
+          "state": "PASS"
+        }
+      ],
+      "remoteCloudflareWrites": 0
+    },
+    "priorUploadLabSmoke": {
+      "status": "PASS",
+      "files": 5,
+      "bytes": 5120,
+      "elapsedMs": 10711
+    },
+    "fullNodeSuite": {
+      "status": "BASELINE_FAILURE",
+      "passed": 868,
+      "failed": 1,
+      "total": 869,
+      "elapsedMs": 90223.402411,
+      "knownBaselineFailures": [
+        "non-Narrow non-Depth composition digest mismatch"
+      ]
+    },
+    "dependencyAudit": {
+      "status": "REPORTED_SEPARATELY",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 3,
+        "critical": 0,
+        "total": 3
+      },
+      "ownerInstallScriptWarnings": [
+        "esbuild",
+        "workerd"
+      ],
+      "dependencyVersionsChanged": false
+    },
+    "windowsGeneratedInventory": {
+      "status": "NOT_TESTED",
+      "command": "verify-windows-inventory.cmd"
+    },
+    "installedWindowsChrome": {
+      "status": "NOT_TESTED",
+      "checks": [
+        "fresh permission",
+        "existing granted profile",
+        "original source dry-run",
+        "paired validation"
+      ]
+    },
+    "liveCloudflare": {
+      "status": "NOT_TESTED",
+      "checks": [
+        "two-file baseline",
+        "five nested files",
+        "cost-approved original corpus"
+      ]
+    }
+  }
+}
