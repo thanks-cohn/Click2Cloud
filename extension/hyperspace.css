@@ -29,9 +29,18 @@ body[data-hyperspace]>.app-header :is(nav,.header-more){
  translate:0 calc(0px - var(--hyper-words-up,0px));
 }
 body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none}
-body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-lift,0px))}
+/* One reservation at launch, one final layout commit. No animated margins. */
+body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-reserve,0px))}
+body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
+ translate:0 var(--hyper-main-offset,0px);
+ will-change:translate;
+}
+/* The rail surfaces are hidden after exit, so the settling frames only move
+   the page and retract the small header paint region. */
+.hyperspace-overlay>.hyperspace-surface[hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){
  body[data-hyperspace]>.app-header>.hyperspace-overlay{display:none}
  body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;translate:none;pointer-events:auto}
  body[data-hyperspace]>#shell{margin-block-start:0}
+ body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{translate:none;will-change:auto}
 }
