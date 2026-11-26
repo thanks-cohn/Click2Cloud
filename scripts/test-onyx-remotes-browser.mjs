@@ -204,6 +204,29 @@ try{
  assert.equal((await strokes()).upper.width,12);
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.evaluate(()=>{document.querySelector('#history-disclosure-fixture').remove();document.querySelector('#shell').dataset.view='remotes';});
+ // History cards maintain a compact, consistent rhythm with optional content.
+ await page.evaluate(()=>{
+  document.querySelector('#shell').dataset.view='history';
+  const fixture=document.createElement('section');fixture.id='history-spacing-fixture';fixture.className='queue-archive';
+  fixture.innerHTML='<details open class="queue-calendar"><summary>Today</summary><article class="card queue-history-card" data-provider="dropbox"><div class="queue-card-header"><div class="queue-card-summary"><strong>image.png</strong></div><div class="queue-card-status"><span class="queue-badge">Verified</span><time>11/26/2026</time></div></div><p class="queue-location">Dropbox · /image.png</p><p class="queue-feedback"></p><details open><summary>Image</summary><div class="history-preview"><div style="width:100px;height:100px"></div></div></details><p class="queue-location">www.example.com</p><details><summary>URLs</summary></details><details><summary>Details</summary></details></article></details>';
+  document.querySelector('#main').prepend(fixture);
+ });
+ for(const width of [320,380,800]){
+  await page.setViewportSize({width,height:760});
+  const spacing=await page.locator('#history-spacing-fixture .queue-history-card').evaluate(card=>{
+   const rect=el=>el.getBoundingClientRect(),style=getComputedStyle(card);
+   const children=[...card.children].filter(el=>el.getClientRects().length);
+   const preview=card.querySelector('.history-preview'),imageLabel=preview.previousElementSibling;
+   return {padding:parseFloat(style.paddingBlockStart),gap:parseFloat(style.rowGap),gaps:children.slice(1).map((el,i)=>rect(el).top-rect(children[i]).bottom),
+    previewGap:rect(preview).top-rect(imageLabel).bottom,
+    overflow:card.scrollWidth>card.clientWidth+1,feedbackVisible:children.some(el=>el.classList.contains('queue-feedback'))};
+  });
+  assert(spacing.padding>=14&&spacing.padding<=18);
+  assert.equal(spacing.gap,5);assert(spacing.gaps.every(gap=>gap>=4.9&&gap<=7.1));
+  assert.equal(spacing.previewGap,5);assert(!spacing.overflow);assert(!spacing.feedbackVisible);
+ }
+ await page.setViewportSize({width:380,height:760});
+ await page.evaluate(()=>{document.querySelector('#history-spacing-fixture').remove();document.querySelector('#shell').dataset.view='remotes';});
  // Queue job surfaces retain status colors on the top rule only, with open sides.
  for(const mode of ['dark','light']){
   const rules=await page.evaluate(mode=>{

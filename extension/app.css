@@ -522,6 +522,20 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .history-path-end>span{flex:none}
 .queue-image-dialog[data-retained-preview]:not([data-immersive]) .image-frame img.preview{object-fit:scale-down}
 .queue-history-card .history-preview img{display:block;max-inline-size:100%;max-block-size:180px;object-fit:contain}
+/* History card rhythm: one compact spacing system rather than accumulated
+   paragraph and calendar-summary margins. Leave skin, borders and preview size alone. */
+#shell[data-view=history] .queue-history-card{
+ display:flex;flex-direction:column;gap:5px;
+ padding-block:clamp(14px,var(--card-padding),18px);
+}
+#shell[data-view=history] .queue-history-card>.queue-card-header{margin-block-end:2px}
+#shell[data-view=history] .queue-history-card .queue-card-status{gap:5px}
+#shell[data-view=history] .queue-history-card>.queue-location,
+#shell[data-view=history] .queue-history-card>.queue-feedback{margin-block:0}
+#shell[data-view=history] .queue-history-card>.queue-actions{margin-block:1px}
+#shell[data-view=history] .queue-history-card>details>summary{margin-block:0;line-height:1.55}
+#shell[data-view=history] .queue-history-card>details>.history-preview{margin-block:5px 2px}
+#shell[data-view=history] .queue-history-card>details>.queue-record-fields{margin-block:6px 2px}
 .queue-image-dialog[data-immersive] [role=status]:empty{display:none}
 .queue-image-dialog[data-immersive] .image-frame{min-height:0}
 
