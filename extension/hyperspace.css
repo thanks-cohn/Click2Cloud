@@ -37,6 +37,13 @@ body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
 /* The rail surfaces are hidden after exit, so the settling frames only move
    the page and retract the small header paint region. */
 .hyperspace-overlay>.hyperspace-surface[hidden]{display:none!important}
+/* A distant water surface: delicate, slightly skewed, theme-aware ripples. */
+.hyperspace-overlay>.hyperspace-water{
+ stroke:color-mix(in srgb,var(--accent) 38%,var(--text) 62%);
+ stroke-width:.65;stroke-linecap:round;
+ animation:hyperspace-water-arrive 1500ms ease-out both;
+}
+@keyframes hyperspace-water-arrive{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){
  body[data-hyperspace]>.app-header>.hyperspace-overlay{display:none}
  body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;translate:none;pointer-events:auto}
