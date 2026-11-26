@@ -219,7 +219,18 @@
 :root[data-aesthetic=onyx] #shell[data-view=queue] [data-metric=finished] strong{color:var(--onyx-green)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] [data-metric=attention] strong{color:var(--onyx-amber)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>[data-job-counts]{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions{justify-content:flex-end;margin-block-end:9px}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions{justify-content:space-between;margin-block-end:9px}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]){
+ border:0;background:transparent;box-shadow:none;min-block-size:36px;padding:6px 8px;
+}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-cancel-all]{color:var(--onyx-amber)}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-clear-all]{color:var(--onyx-blue);margin-inline-start:auto}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):hover:not(:disabled){background:color-mix(in srgb,currentColor 9%,transparent)}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):active:not(:disabled){box-shadow:none}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+ /* Onyx virtualizes against the Shelf scrollport, not a second nested scrollbar. */
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job-window{max-height:none;overflow:visible;overflow-anchor:none}
+:root[data-aesthetic=onyx] #shell[data-view=queue]>main{overflow-anchor:none}
 /* Queue cards: open sides, a state-colored top rule and quiet bottom rule. */
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job{background:var(--panel);border:0;border-block:1px solid var(--line);border-radius:0;padding-inline:7px}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job:is([data-queue-state=failed],[data-queue-state=uncertain],[data-queue-state=blocked]){border-block-start-color:var(--onyx-amber)}

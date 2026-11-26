@@ -13,6 +13,16 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
   parent.append(root);
   const counts=root.querySelector('[data-job-counts]'),warning=root.querySelector('[data-job-warning]');
   const scroll=root.querySelector('.queue-job-window'),list=root.querySelector('[data-job-items]');
+  const outer=parent.closest('#main');
+  const usesShelfScroll=()=>!!outer&&document.documentElement.dataset.aesthetic==='onyx'&&outer.closest('#shell')?.dataset.view==='queue';
+  function scrollPosition(){
+    if(!usesShelfScroll())return scroll.scrollTop;
+    return Math.max(0,outer.getBoundingClientRect().top+outer.clientTop-scroll.getBoundingClientRect().top);
+  }
+  function resetScroll(){
+    if(usesShelfScroll())outer.scrollTop=0;
+    else scroll.scrollTop=0;
+  }
   const metrics=root.querySelector('.onyx-queue-metrics');
   const metricNodes=['Working','Waiting','Attention','Finished'].map(label=>{
     const item=element('div');item.dataset.metric=label.toLowerCase();
@@ -50,12 +60,15 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
   let revision=0;
   const rendered=new Map();
   async function refresh(){
-    const ticket=++revision, offset=Math.max(0,(Math.floor(scroll.scrollTop/(rowHeight*jobBatch))-1)*jobBatch);
+    const ticket=++revision, position=scrollPosition(), offset=Math.max(0,(Math.floor(position/(rowHeight*jobBatch))-1)*jobBatch);
+    const visibleBatches=usesShelfScroll()?Math.ceil(outer.clientHeight/(rowHeight*jobBatch)):1;
+    const limit=usesShelfScroll()?Math.max(jobBatch*3,(visibleBatches+2)*jobBatch):
+      offset===0&&position<rowHeight*3?jobBatch:jobBatch*3;
     try{
-      const result=await service.store.jobs({offset,limit:offset===0&&scroll.scrollTop<rowHeight*3?jobBatch:jobBatch*3});
+      const result=await service.store.jobs({offset,limit});
       if(signal.aborted||ticket!==revision)return;
-      if(offset>=result.total&&scroll.scrollTop>0){
-        scroll.scrollTop=0;
+      if(offset>=result.total&&position>0){
+        resetScroll();
         return void refresh();
       }
       resync.hidden=!service.accountingPending;
@@ -145,11 +158,17 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
     return row;
   }
   let frame;
-  scroll.addEventListener('scroll',()=>{
+  const schedule=()=>{
     cancelAnimationFrame(frame);
     frame=requestAnimationFrame(()=>void refresh());
-  },{signal});
-  signal.addEventListener('abort',()=>cancelAnimationFrame(frame),{once:true});
+  };
+  scroll.addEventListener('scroll',()=>{if(!usesShelfScroll())schedule();},{signal});
+  outer?.addEventListener('scroll',()=>{if(usesShelfScroll())schedule();},{signal});
+  const appearance=new MutationObserver(schedule);
+  appearance.observe(document.documentElement,{attributeFilter:['data-aesthetic']});
+  const viewport=new ResizeObserver(()=>{if(usesShelfScroll())schedule();});
+  if(outer)viewport.observe(outer);
+  signal.addEventListener('abort',()=>{cancelAnimationFrame(frame);appearance.disconnect();viewport.disconnect();},{once:true});
   void refresh();
   return {refresh};
 }

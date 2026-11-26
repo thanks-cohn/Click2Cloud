@@ -141,6 +141,43 @@ try{
   }
  }
  await page.evaluate(()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';});
+ // Use the production virtualized Queue renderer with a long job list.
+ await page.evaluate(async()=>{
+  const {mountLiveJobs}=await import('/extension/queue-page.mjs');
+  const main=document.querySelector('#main');
+  document.querySelector('#shell').dataset.view='queue';
+  const fixture=document.createElement('section');fixture.className='page queue-page';fixture.id='queue-scroll-fixture';
+  for(const child of main.children)child.hidden=true;
+  main.append(fixture);
+  const rows=Array.from({length:125},(_,i)=>({recordId:'job-'+i,filename:'fixture-'+i+'.png',provider:'google',status:'verified',rank:3,terminal:true,updatedAt:1}));
+  window.queueFixtureCalls=[];
+  window.queueFixtureScope=new AbortController();
+  mountLiveJobs(fixture,{service:{store:{jobs:async({offset,limit})=>{
+   window.queueFixtureCalls.push([offset,limit]);return {items:rows.slice(offset,offset+limit),total:rows.length,working:0,waiting:0,attention:0,finished:rows.length};
+  }},control:async()=>({}),accountingPending:false},signal:window.queueFixtureScope.signal});
+ });
+ await page.locator('#queue-scroll-fixture .queue-job').first().waitFor();
+ const queueLayout=await page.locator('#queue-scroll-fixture').evaluate(el=>{
+  const window=el.querySelector('.queue-job-window'),main=el.parentElement;
+  const cancel=el.querySelector('[data-cancel-all]'),clear=el.querySelector('[data-clear-all]');
+  return {overflow:getComputedStyle(window).overflowY,maxHeight:getComputedStyle(window).maxHeight,
+   outerScrollable:main.scrollHeight>main.clientHeight,
+   left:cancel.getBoundingClientRect().left,right:clear.getBoundingClientRect().right,
+   edges:[el.querySelector('.queue-actions').getBoundingClientRect().left,el.querySelector('.queue-actions').getBoundingClientRect().right],
+   borders:[getComputedStyle(cancel).borderTopWidth,getComputedStyle(clear).borderTopWidth],
+   colors:[getComputedStyle(cancel).color,getComputedStyle(clear).color]};
+ });
+ assert.equal(queueLayout.overflow,'visible');assert.equal(queueLayout.maxHeight,'none');assert(queueLayout.outerScrollable);
+ assert(Math.abs(queueLayout.left-queueLayout.edges[0])<=1);assert(Math.abs(queueLayout.right-queueLayout.edges[1])<=1);
+ assert.deepEqual(queueLayout.borders,['0px','0px']);assert.notEqual(...queueLayout.colors);
+ await page.locator('#main').evaluate(el=>el.scrollTop=el.scrollHeight);
+ await page.waitForFunction(()=>[...document.querySelectorAll('#queue-scroll-fixture .queue-job strong')].some(el=>el.textContent==='fixture-124.png'));
+ assert(await page.locator('#queue-scroll-fixture .queue-job').count()<125);
+ await page.evaluate(()=>{
+  window.queueFixtureScope.abort();document.querySelector('#queue-scroll-fixture').remove();
+  const main=document.querySelector('#main');for(const child of main.children)child.hidden=false;main.scrollTop=0;
+  document.querySelector('#shell').dataset.view='remotes';
+ });
  // Every view shares the same header glyph, dimensions and color.
  const iconAppearance=()=>page.locator('#theme .onyx-mode-icon:visible').evaluate(el=>{
   const style=getComputedStyle(el);return {className:el.getAttribute('class'),width:style.width,height:style.height,color:style.color};
