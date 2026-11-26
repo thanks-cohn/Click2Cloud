@@ -91,7 +91,7 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
 export function mountHyperspaceSettings(parent,preference){
  const section=parent.ownerDocument.createElement('section');
  section.className='hyperspace-settings';
- section.innerHTML='<h3>Header Animation</h3><label class="settings-row">Animation<select data-hyperspace-mode><option value="none">None (default)</option><option value="hyperspace">Hyperspace</option><option value="elegant">Elegant</option></select></label><div data-hyperspace-options><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p></div><p class="muted">Animated modes begin after five seconds away from the header. Hover over the header (Hyperspace) or R (Elegant) to restore it.</p><p role="status"></p>';
+ section.innerHTML='<h3>Header Animation</h3><label class="settings-row">Animation<select data-hyperspace-mode><option value="none">None (default)</option><option value="hyperspace">Hyperspace</option><option value="elegant">Elegant</option></select></label><div data-hyperspace-options><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p></div><p class="muted">Animated modes begin after five seconds away from the header. Hover over the header area to restore it.</p><p role="status"></p>';
  const mode=section.querySelector('[data-hyperspace-mode]'),seconds=section.querySelector('[data-hyperspace-seconds]'),options=section.querySelector('[data-hyperspace-options]'),status=section.querySelector('[role=status]');
  const paint=()=>{const value=preference.value;mode.value=value.mode;seconds.value=value.seconds;options.hidden=value.mode!=='hyperspace';seconds.disabled=options.hidden;};
  const save=async(transform)=>{try{await preference.update(transform);status.textContent='';}catch{status.textContent='Header animation preference could not be saved.';}paint();};
@@ -104,7 +104,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,runMode,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
- const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup'),logo=brand?.querySelector('img')??brand,theme=header.querySelector('#theme');
+ const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
  const pageColor=()=>[main,shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||win.getComputedStyle(doc.documentElement).getPropertyValue('--bg');
  let brandAttributes;
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
@@ -211,7 +211,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    setVar(body,'--hyper-elegant-page',page);
    const themeRect=theme?.getBoundingClientRect();
    parts.themeShift=themeRect?Math.max(0,Math.min(6,rect.right-themeRect.right-2)):0;
-   // Retain a keyboard/touch-accessible R as the only reveal target.
+   // Retain a keyboard/touch-accessible R as a keyboard/touch reveal target.
    if(brand){brandAttributes=['tabindex','role','aria-label'].map(k=>[k,brand.getAttribute(k)]);brand.setAttribute('tabindex','0');brand.setAttribute('role','button');brand.setAttribute('aria-label','Reveal header');}
    const fill=doc.createElement('div');fill.className='hyperspace-elegant-surface';fill.style.background=surface;fill.style.borderBottomColor=rail;overlay.append(fill);parts.elegant=fill;
   }else{
@@ -238,33 +238,24 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(over===inside)return;inside=over;
   if(over)restore();else arm();
  }
- // Elegant reveals only from the R while disappearing or held open.
- // During ordinary idle and restoration, keep the normal full header region.
- const logoOnly=()=>!!overlay&&runMode==='elegant'&&!returning;
- const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);};
- // A real hit on the painted R image is required in Elegant mode. Ancestor
- // pointerenter events and broad header/wrapper rectangles cannot reveal it.
- const hitsLogo=e=>{
-  if(!logo||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return false;
-  const r=logo.getBoundingClientRect();
-  if(e.clientX<r.left||e.clientX>=r.right||e.clientY<r.top||e.clientY>=r.bottom)return false;
-  const hit=doc.elementFromPoint(e.clientX,e.clientY);
-  return !!hit&&(hit===logo||logo.contains(hit));
- };
- on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(logoOnly()?hitsLogo(e):within(header,e));},{passive:true,capture:true});
- on(header,'pointerenter',()=>{if(!logoOnly())pointer(true);});
- if(logo)on(logo,'pointerenter',e=>{if(logoOnly()&&e.pointerType!=='touch'&&hitsLogo(e))pointer(true);});
+ // Both animations reveal from the original header rectangle on every
+ // supported view. The visible color toggle is an independent control.
+ const elegantHidden=()=>!!overlay&&runMode==='elegant'&&!returning;
+ const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<r.right&&e.clientY>=r.top&&e.clientY<r.bottom);};
+ const revealArea=e=>within(header,e)&&!(elegantHidden()&&within(theme,e));
+ on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(revealArea(e));},{passive:true,capture:true});
+ on(header,'pointerenter',e=>{if(e.pointerType!=='touch')pointer(revealArea(e));});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
- on(header,'pointerdown',e=>{if(!logoOnly()||hitsLogo(e))restore(true);},true);
- on(header,'focusin',e=>{if(logoOnly()){if(brand?.contains(e.target)&&e.target.matches(':focus-visible'))restore(true);return;}if(header.querySelector(':focus-visible'))restore(true);});
- on(header,'keydown',e=>{if(logoOnly()){if(brand?.contains(e.target)&&(e.key==='Enter'||e.key===' '))restore(true);return;}restore(true);});
+ on(header,'pointerdown',e=>{if(revealArea(e))restore(true);},true);
+ on(header,'focusin',e=>{if(elegantHidden()){if(brand?.contains(e.target)&&e.target.matches(':focus-visible'))restore(true);return;}if(header.querySelector(':focus-visible'))restore(true);});
+ on(header,'keydown',e=>{if(elegantHidden()){if(brand?.contains(e.target)&&(e.key==='Enter'||e.key===' '))restore(true);return;}restore(true);});
  on(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
  on(win,'resize',reset);on(media,'change',reset);on(win,'pagehide',reset);
  const skinSignature=()=>['data-aesthetic','data-onyx-finish','data-nostalgia-style'].map(k=>doc.documentElement.getAttribute(k)).join('|');
  let lastSkin=skinSignature();
  const themeObserver=new win.MutationObserver(records=>{
   const nextSkin=skinSignature(),sameSkin=nextSkin===lastSkin;lastSkin=nextSkin;
-  if(logoOnly()&&sameSkin){
+  if(elegantHidden()&&sameSkin){
    // Color-mode changes or redundant skin writes during Providers updates
    // must never reveal Elegant navigation. Read the new
    // page color without retaining the previous fallback on the body.
