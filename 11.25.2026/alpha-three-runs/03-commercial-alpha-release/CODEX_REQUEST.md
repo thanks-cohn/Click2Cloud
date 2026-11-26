@@ -23,6 +23,8 @@ Preserve Run 1 folder upload aggregation: a single visible History card labeled 
 ### Approved History presentation acceptance
 Inherit Run 1's minimal folder card: root directory name, file count, provider/status, optional expanded details limited to count, actual remote destination and timestamp. No search, rename, nested tree or per-file browser. Individual manual uploads reuse the existing individual card UI and applicable destination actions, but omit source URL, host/website URL and web-origin-only fields/actions (no blank placeholders, fabricated links or exposed local paths). Preserve ordinary right-click web-save metadata. Respect the upload History switch; verify the actual packaged UI without introducing another renderer or policy.
 
+Verify Run 1's folder History media representative in the packaged UI: existing media thumbnail area displays the first successfully uploaded image available to authorized preview for that job, with stable selection across reload/retry; neutral folder fallback when unavailable. Preserve balanced spacing, no gallery/search/tree or extra scanning. Reuse the existing individual and aggregate History renderers and honor the upload History switch.
+
 ## Final release acceptance
 - Reliable right-click after login and lifecycle events; auth/reconnection and destination continuity.
 - Automatic upload AND download recovery, durable receipts, no duplicate publications, no false success, safe local file publication and integrity.
