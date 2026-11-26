@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REDOWN — Onyx Queue · Approved Reference</title>
+<link rel="stylesheet" href="queue.css"></head><body>
+<div class="rd-stage">
+<div class="rd-controls" id="rd-themes">
+<button class="selected" onclick="setTheme('',this)">Onyx</button><button onclick="setTheme('light',this)">Platinum</button><button onclick="setTheme('gunmetal',this)">Gunmetal</button><button onclick="setTheme('obsidian',this)">Obsidian</button><button onclick="setTheme('azure',this)">Azure</button>
+</div>
+<div class="rd-app" id="rd-app">
+<div class="rd-header"><div class="rd-mark">R</div><span class="rd-tab">Files</span><span class="rd-tab">Remotes</span><span class="rd-tab active">Queue</span><div class="rd-spacer"></div><span class="rd-tab rd-symbol">···</span><button class="rd-tab rd-symbol" aria-label="Toggle Color Mode" style="cursor:pointer" onclick="setTheme(currentTheme==='light'?'':'light')" id="rd-mode">☾</button></div>
+<div class="rd-content"><h1 class="rd-title">Queue</h1><div class="rd-metrics" id="rd-metrics"></div><div class="rd-tools"><span class="rd-label">Transfers</span><div style="display:flex;gap:8px"><button id="rd-cancel" onclick="cancelAll()">Cancel All</button><button id="rd-clear" onclick="clearFinished()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></svg>Clear Finished</button></div></div><div id="rd-jobs"></div></div>
+<div class="rd-footer"><button disabled title="Navigation reference only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 5h6l3 3h9v12H3z"/><path d="M12 12v5m-2.5-2.5h5"/></svg>Manage Destinations</button></div>
+</div><div class="rd-scenarios"><button onclick="scenario('completed')">Completed Transfers</button><button onclick="scenario('mixed')">Active Transfers</button><button onclick="scenario('failed')">Failed Transfer</button><button onclick="scenario('empty')">Empty Queue</button></div><div class="rd-preview">REDOWN · ONYX QUEUE<br>Interactive HTML / CSS reference · Simulated transfers</div></div>
+<script src="queue.js"></script></body></html>
