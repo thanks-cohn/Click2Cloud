@@ -664,10 +664,8 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
-// Temporary header surface: never replace navigation controls or delay a view change.
-let skyOpeningTimer;
+// Persistent open header surface: restore on interaction, not on animation completion.
 function clearSkyOpening(){
- clearTimeout(skyOpeningTimer);skyOpeningTimer=undefined;
  document.body.removeAttribute('data-sky-opening');
  $('.app-header>.sky-canopy')?.remove();
 }
@@ -682,10 +680,7 @@ function playSkyOpening(){
   const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);
  }
  header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
- canopy.firstElementChild.addEventListener('animationend',event=>{
-  if(event.animationName==='sky-left'&&canopy.isConnected)clearSkyOpening();
- });
- skyOpeningTimer=setTimeout(()=>{if(canopy.isConnected)clearSkyOpening();},2400);
+ // CSS retains the final open frame until clearSkyOpening is explicitly called.
 }
 function skyEligible(){
  const header=$('.app-header');
@@ -699,7 +694,7 @@ function prepareManageMorph(next){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;const previousView=view;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next)skyIdle.cancel();$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next){if(next==='explorer')skyIdle.cancel();else skyIdle.stopPending();}$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -1969,7 +1964,7 @@ document.documentElement.addEventListener('pointerleave',()=>skyHover.move(false
 skyHeader.addEventListener('pointerdown',skyIdle.cancel,{capture:true});
 skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible'))skyIdle.cancel();});
 skyHeader.addEventListener('keydown',skyIdle.cancel);
-document.addEventListener('visibilitychange',skyIdle.cancel);
+document.addEventListener('visibilitychange',skyIdle.stopPending);
 window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.cancel);
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
