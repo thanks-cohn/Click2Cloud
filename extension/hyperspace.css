@@ -34,7 +34,7 @@ body[data-hyperspace]>.app-header :is(nav,.header-more){
 }
 body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none}
 /* Elegant keeps the R and theme switch while the invisible header passes input through.
-   The R is the sole hover-reveal target. */
+   The original header rectangle is the hover-reveal target. */
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header{
  pointer-events:none;background:none!important;border-color:transparent!important;border-image:none!important;box-shadow:none!important;outline:none!important;backdrop-filter:none!important;
 }
