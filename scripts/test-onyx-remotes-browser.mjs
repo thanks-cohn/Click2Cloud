@@ -173,6 +173,17 @@ try{
    shell.dataset.view='remotes';
   });
   assert.equal((await manageGeometry()).opacity,'0','Explorer entry hides without a fade');
+  // Once the reveal is armed, leaving the hover area must dissolve, not snap.
+  await manage.hover();
+  await page.evaluate(()=>document.querySelector('#shell').setAttribute('data-manage-fade',''));
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('#manage span')).opacity==='1');
+  await page.mouse.move(1,1);
+  await page.waitForFunction(()=>{
+   const opacity=Number(getComputedStyle(document.querySelector('#manage')).opacity);
+   return opacity>0&&opacity<1;
+  });
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('#manage')).opacity==='0');
+
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.evaluate(()=>{
    const shell=document.querySelector('#shell'),button=document.querySelector('#manage');
