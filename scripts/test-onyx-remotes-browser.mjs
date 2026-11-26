@@ -50,6 +50,15 @@ try{
  assert(await page.locator('#theme .onyx-sun').isVisible());
  assert(!(await page.locator('#theme .onyx-moon').isVisible()));
  await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ const scrollbar=await page.locator('#main').evaluate(el=>{
+  const width=getComputedStyle(el,'::-webkit-scrollbar').width;
+  const thumb=getComputedStyle(el,'::-webkit-scrollbar-thumb');
+  const track=getComputedStyle(el,'::-webkit-scrollbar-track');
+  return {width,radius:thumb.borderTopLeftRadius,track:track.backgroundColor};
+ });
+ assert.equal(scrollbar.width,'9px');
+ assert.equal(scrollbar.radius,'999px');
+ assert.equal(scrollbar.track,'rgba(0, 0, 0, 0)');
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){

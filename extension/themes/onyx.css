@@ -226,3 +226,35 @@
 .queue-history-card .queue-card-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);align-items:start}
 .history-urls .history-url-group{margin-block:8px;min-width:0;overflow-wrap:anywhere}
 .history-urls .history-record-url{white-space:normal;overflow-wrap:anywhere}
+
+/* Onyx metallic scrollbars. Only the approved Remotes/Queue surfaces.
+   Keep native scrolling, keyboard access and drag targets; no JS or reflow on hover. */
+:root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue]){
+ --onyx-scroll-thumb:color-mix(in srgb,var(--muted) 56%,var(--bg));
+ --onyx-scroll-hover:color-mix(in srgb,var(--muted) 80%,var(--bg));
+ --onyx-scroll-active:var(--muted);
+ & >main,& :is(.queue-job-window,.remote-provider-info){
+  scrollbar-width:thin;scrollbar-color:var(--onyx-scroll-thumb) transparent;
+ }
+}
+@supports selector(::-webkit-scrollbar){
+ :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue]){
+  & >main,& :is(.queue-job-window,.remote-provider-info){scrollbar-width:auto;scrollbar-color:auto}
+  & >main::-webkit-scrollbar,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar{width:9px;height:9px}
+  & >main::-webkit-scrollbar-track,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-track{background:transparent}
+  & >main::-webkit-scrollbar-thumb,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-thumb{
+   background:var(--onyx-scroll-thumb);border:1px solid transparent;border-radius:999px;background-clip:padding-box;min-height:28px;min-width:28px;
+  }
+  & >main::-webkit-scrollbar-thumb:hover,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-thumb:hover{background-color:var(--onyx-scroll-hover)}
+  & >main::-webkit-scrollbar-thumb:active,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-thumb:active{background-color:var(--onyx-scroll-active)}
+  & >main::-webkit-scrollbar-button,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-button{display:none}
+  & >main::-webkit-scrollbar-corner,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-corner{background:transparent}
+ }
+}
+@media(forced-colors:active){
+ :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue]){
+  & >main,& :is(.queue-job-window,.remote-provider-info){scrollbar-color:auto;scrollbar-width:auto}
+  & >main::-webkit-scrollbar-thumb,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-thumb{background:ButtonText;border-color:Canvas}
+  & >main::-webkit-scrollbar-track,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-track{background:Canvas}
+ }
+}
