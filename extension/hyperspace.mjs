@@ -104,7 +104,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,runMode,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
- const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup');
+ const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
+ const pageColor=()=>[main,shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||win.getComputedStyle(doc.documentElement).getPropertyValue('--bg');
  let brandAttributes;
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
@@ -137,7 +138,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
-  body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');
+  body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
   reserve(0);layer(false);lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
@@ -191,7 +192,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   const rect=header.getBoundingClientRect(),style=win.getComputedStyle(header);
   if(rect.width<1||rect.height<1)return;
   const surface=style.background,rail=style.borderBottomColor;
-  const page=[shell.querySelector('main'),shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||style.getPropertyValue('--bg');
+  const page=pageColor();
   const controls=[header.querySelector('.brand-lockup'),header.querySelector('#theme')].filter(Boolean).map(el=>el.getBoundingClientRect());
   const controlBottom=Math.max(0,...controls.map(r=>r.bottom-rect.top));
   controlShift=controls.length?Math.max(0,Math.min(12,...controls.map(r=>r.top-rect.top-3))):0;
@@ -203,7 +204,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
-   const themeRect=header.querySelector('#theme')?.getBoundingClientRect();
+   setVar(body,'--hyper-elegant-page',page);
+   const themeRect=theme?.getBoundingClientRect();
    parts.themeShift=themeRect?Math.max(0,Math.min(6,rect.right-themeRect.right-2)):0;
    // Retain a keyboard/touch-accessible R as the only reveal target.
    if(brand){brandAttributes=['tabindex','role','aria-label'].map(k=>[k,brand.getAttribute(k)]);brand.setAttribute('tabindex','0');brand.setAttribute('role','button');brand.setAttribute('aria-label','Reveal header');}
@@ -241,11 +243,19 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  if(brand)on(brand,'pointerenter',()=>{if(logoOnly())pointer(true);});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
  on(header,'pointerdown',e=>{if(!logoOnly()||within(brand,e))restore(true);},true);
- on(header,'focusin',()=>{if(header.querySelector(':focus-visible'))restore(true);});
- on(header,'keydown',()=>restore(true));
+ on(header,'focusin',e=>{if(logoOnly()&&theme?.contains(e.target))return;if(header.querySelector(':focus-visible'))restore(true);});
+ on(header,'keydown',e=>{if(logoOnly()&&theme?.contains(e.target))return;restore(true);});
  on(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
  on(win,'resize',reset);on(media,'change',reset);on(win,'pagehide',reset);
- const themeObserver=new win.MutationObserver(reset);themeObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic','data-theme','data-onyx-finish','data-nostalgia-style','style']});
+ const themeObserver=new win.MutationObserver(records=>{
+  if(logoOnly()&&records.every(r=>r.attributeName==='data-theme'||r.attributeName==='style')){
+   // Color-mode changes must never reveal Elegant navigation. Read the new
+   // page color without retaining the previous fallback on the body.
+   body.style.removeProperty('--hyper-elegant-page');setVar(body,'--hyper-elegant-page',pageColor());
+   return;
+  }
+  reset();
+ });themeObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic','data-theme','data-onyx-finish','data-nostalgia-style','style']});
  const unsub=preference.subscribe(reset);
  // Navigation is cancellation-only: it never starts a timer or animation.
  return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();unsub();for(const fn of cleanups)fn();}};
