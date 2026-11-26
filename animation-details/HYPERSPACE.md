@@ -20,7 +20,7 @@ Settings → Aesthetic → Header Animation offers three mutually exclusive choi
 
 ## Elegant alternative
 
-Elegant begins after the same five-second idle interval. Over 1.05 seconds a single flat header surface and the navigation fade while the lower content glides upward on a quintic easing curve. No rails, shimmer, charge, compression, overshoot or explosion. Both modes use the identical measured lift bounds, resting shell geometry, persistent logo/theme controls, hover return and cleanup controller. Neither mode adds any ocean elements. None does not arm an idle timer, mount an overlay or request frames. Changing modes cancels any in-progress animation; the next eligible header leave or launch arms the selected mode.
+Elegant begins after the same five-second idle interval. Over 1.05 seconds a single flat header surface and the navigation fade while the lower content glides upward on a quintic easing curve. No rails, shimmer, charge, compression, overshoot or explosion. Both modes use the identical measured lift bounds, resting shell geometry, persistent logo and cleanup controller. Unlike Hyperspace, Elegant also fades the sun/moon and all navigation controls, leaves only the R visible, and restores by hovering the R. The cleared header is transparent and does not intercept pointer input; keyboard/touch activation of the R remains available. Neither mode adds any ocean elements. None does not arm an idle timer, mount an overlay or request frames. Changing modes cancels any in-progress animation; the next eligible header leave or launch arms the selected mode.
 
 ## Energy model
 
@@ -42,7 +42,7 @@ These are structural rendering optimizations, not a measured frame-rate guarante
 
 - Applies to all Shelf tabs and skins except File Explorer.
 - No tab-switch trigger. Navigation cancels pending or running motion without starting it.
-- Returning the pointer during idle cancels the timer; returning during any animation phase starts a continuous restoration.
+- Returning the pointer during idle cancels the timer; during animation or the open state, Hyperspace restores on header hover while Elegant restores only on R hover. Keyboard/touch restoration remains available.
 - Hovering again while restoring does not restart restoration.
 - Menu closure or DOM-only pointerleave cannot arm the timer.
 - Keyboard focus and activation restore navigation immediately for accessibility; direct clicks and entering Explorer also restore without waiting.
