@@ -131,6 +131,12 @@ export function createClosedShelfSaveNotice({chrome, preferences, isClosed, obse
       if (slot.offer===notice) slot.offer=undefined;
     }
     if (result===false || !notice.claimed && result!==true) return null;
+    if(result?.state==='suppressed-hover'&&notice.claimed){
+      // A deliberately hidden notification is not a delivery failure. Do not
+      // try a different surface, allocate an active slot or wait ten seconds.
+      observe('CUSTOM_NOTICE_SUPPRESSED_HOVER');
+      return {state:'suppressed',reason:'hover',surface,observedAt:Date.now()};
+    }
     if (!await eligible(event)) {
       void sendCustom(notice,{stop:true}).catch(()=>{});
       return {state:'suppressed'};

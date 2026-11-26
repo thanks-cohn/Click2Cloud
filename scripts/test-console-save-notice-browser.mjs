@@ -28,6 +28,12 @@ try{
   const page=await browser.newPage({viewport:{width:260,height:420}});
   await page.addInitScript(()=>{
     // Open the otherwise closed shadow for accessibility and timing assertions.
+    const nativeAnimate=Element.prototype.animate;
+    window.noticeAnimations=0;
+    Element.prototype.animate=function(...args){window.noticeAnimations++;return nativeAnimate.apply(this,args);};
+    const NativeImage=window.Image;
+    window.noticeImageLoads=0;
+    window.Image=new Proxy(NativeImage,{construct(target,args){window.noticeImageLoads++;return Reflect.construct(target,args);}});
     const attach=Element.prototype.attachShadow;
     Element.prototype.attachShadow=function(options){return attach.call(this,{...options,mode:'open'});};
     Object.defineProperty(window,'chrome',{value:{runtime:{id:'fixture',getURL:path=>new URL(path,location.origin).href,
@@ -109,14 +115,33 @@ try{
       assert.equal(await notice.count(),0);
     }
   }
+  // Fresh document: a parked cursor must suppress even the first artwork load.
+  await page.goto(origin+'/');
+  const activity=()=>page.evaluate(()=>[window.noticeImageLoads,window.noticeAnimations]);
   await page.mouse.move(850,680);
-  assert.equal(await send('hover','dropbox'),true);
-  assert.equal(await notice.count(),1,'An insertion under a stationary pointer must not dismiss');
+  assert.deepEqual(await send('hover','dropbox'),{state:'suppressed-hover'});
+  assert.equal(await notice.count(),0);
+  assert.deepEqual(await activity(),[0,0],'Suppression must precede artwork and animation');
+  for(const [size,width] of [['small',253],['standard',338],['large',422]]){
+    for(const position of ['center','bottom-right']){
+      await page.mouse.move(...(position==='center'?[450,360]:[890,700]));
+      assert.deepEqual(await send('parked-'+size+position,'google',undefined,{size,position}),{state:'suppressed-hover'});
+      assert.equal(await notice.count(),0);
+    }
+  }
+  assert.deepEqual(await activity(),[0,0]);
   await page.mouse.move(400,450);
+  assert.deepEqual(await send('hover','dropbox'),{state:'suppressed-hover'},'Suppressed ID must not replay');
+  assert.equal(await send('moving-hover','dropbox'),true);
+  assert.equal(await notice.count(),1);
   await page.mouse.move(850,680);
   await notice.waitFor({state:'detached'});
-  assert.equal(await send('hover','dropbox'),true);
+  assert.equal(await send('moving-hover','dropbox'),true);
   assert.equal(await notice.count(),0);
+  assert.equal(await send('hover-disabled','dropbox',undefined,{hover:false}),true);
+  assert.equal(await notice.count(),1,'Hover disabled must preserve parked-pointer display');
+  await notice.focus();await page.keyboard.press('Escape');
+  await page.mouse.move(400,450);
   assert.equal(await send('after-hover','dropbox'),true);
   assert.equal(await notice.count(),1);
   await send('hover','dropbox',undefined,{stop:true});

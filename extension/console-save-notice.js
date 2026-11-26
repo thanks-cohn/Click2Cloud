@@ -9,7 +9,7 @@
   };
   const duration = 10000;
   const channel = 'redown-console-save';
-  const seen = new Set(), stopped = new Set();
+  const seen = new Map(), stopped = new Set();
   const asset = chrome.runtime.getURL('extension/icons/redown-console-r.png');
   const isApp = location.protocol === 'chrome-extension:' && location.pathname === '/extension/app.html';
   let imageReady, current;
@@ -17,6 +17,50 @@
   const target = isApp ? Promise.all([chrome.windows.getCurrent(),chrome.tabs.getCurrent()])
     .then(([window,tab])=>appTarget={windowId:tab?.windowId??window.id,tabId:tab?.id,surface:tab?'app':'shelf'})
     .catch(()=>null) : null;
+
+  // Store only the latest trusted viewport coordinate, never a trail or telemetry.
+  let pointer;
+  function trackPointer(event) {
+    if (!event.isTrusted || event.pointerType === 'touch') return;
+    if (event.target?.localName === 'iframe' || event.target?.localName === 'frame') {
+      pointer = undefined; // Top-level coordinates inside another frame are unknown.
+      return;
+    }
+    pointer = {x:event.clientX,y:event.clientY};
+  }
+  document.addEventListener('pointermove',trackPointer,{capture:true,passive:true});
+  document.addEventListener('pointerover',trackPointer,{capture:true,passive:true});
+  document.addEventListener('pointerout',event=>{
+    if(event.isTrusted&&event.pointerType!=='touch'&&!event.relatedTarget)pointer=undefined;
+  },{capture:true,passive:true});
+  window.addEventListener('blur',()=>{pointer=undefined;});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pointer=undefined;});
+  const hoverEnabled = hover => hover!==false&&matchMedia('(any-hover: hover)').matches;
+  const noticeDimensions = size => ({
+    width:{small:253,standard:338,large:422}[size]??422,
+    padX:{small:10,standard:13,large:16}[size]??16,
+    padTop:{small:10,standard:13,large:16}[size]??16,
+    padBottom:{small:7,standard:10,large:12}[size]??12
+  });
+  function pointerInPlacement({position,size,hover}){
+    if(!pointer||!hoverEnabled(hover))return false;
+    const viewportWidth=document.documentElement?.clientWidth||innerWidth;
+    const viewportHeight=document.documentElement?.clientHeight||innerHeight;
+    const dimensions=noticeDimensions(size);
+    const width=Math.min(dimensions.width,innerWidth-16);
+    if(width<=0)return false;
+    // Matches the fixed host, 365:112 artwork and the 8px + 2px timer track.
+    const height=(width-2*dimensions.padX)*112/365+dimensions.padTop+dimensions.padBottom+10;
+    const left=position==='center'?(viewportWidth-width)/2:viewportWidth-width-8;
+    const top=position==='center'?(viewportHeight-height)/2:viewportHeight-height-12;
+    return pointer.x>=left&&pointer.x<=left+width&&pointer.y>=top&&pointer.y<=top+height;
+  }
+  function remember(id,result){
+    seen.set(id,result);
+    if(seen.size>128)seen.delete(seen.keys().next().value);
+    return result;
+  }
+  const suppressHover=id=>remember(id,{state:'suppressed-hover'});
 
   function loadArtwork() {
     if (imageReady) return imageReady;
@@ -39,7 +83,7 @@
   function reveal({id,provider,token,position,size,hover,windowId}) {
     current?.();
     const [name,color,width] = providers[provider];
-    const noticeWidth = {small:253,standard:338,large:422}[size] ?? 422;
+    const noticeWidth = noticeDimensions(size).width;
     const placement = position==='center'
       ? 'inset:50% 0 auto!important;margin-inline:auto!important;transform:translateY(-50%)!important;'
       : 'inset:auto 8px 12px auto!important;';
@@ -78,6 +122,8 @@
     shadow.append(reward);
     (isApp&&document.querySelector('dialog:modal')||document.documentElement).append(host);
 
+    // Browser hit testing also covers a pointer that has not moved since page load.
+    if(hoverEnabled(hover)&&reward.matches(':hover')){host.remove();return suppressHover(id);}
     const animations = [];
     const play = (element,frames,settings) => animations.push(element.animate(frames,settings));
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -103,12 +149,12 @@
     close.onkeydown = event => {
       if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dismiss();}
     };
-    if(hover!==false&&matchMedia('(any-hover: hover)').matches){
-      // Layout may dispatch pointerenter when the notice appears under a
-      // stationary pointer. Dismiss on actual pointer movement over the notice.
-      reward.addEventListener('pointermove',event=>{
-        if(event.isTrusted&&event.pointerType!=='touch'&&(event.movementX||event.movementY))dismiss();
-      });
+    if(hoverEnabled(hover)){
+      const dismissOnHover=event=>{
+        if(event.isTrusted&&event.pointerType!=='touch')dismiss();
+      };
+      reward.addEventListener('pointerenter',dismissOnHover);
+      reward.addEventListener('pointermove',dismissOnHover);
     }
     document.addEventListener('visibilitychange',checkExpiry);
     try {
@@ -130,9 +176,7 @@
       dispose();
       return false;
     }
-    seen.add(id);
-    if (seen.size>128) seen.delete(seen.values().next().value);
-    return true;
+    return remember(id,true);
   }
 
   chrome.runtime.onMessage.addListener((message,sender,respond) => {
@@ -156,12 +200,17 @@
       if (isApp && !matches(await target)) return;
 
       if (stopped.has(token)||document.hidden||Date.now()>=deliverBy) return false;
-      if (seen.has(id)) return true;
+      if (seen.has(id)) return seen.get(id);
       // Claim while the addressed document is ready to receive the offer.
       // Artwork decoding and painting are acknowledged separately.
       if(!await chrome.runtime.sendMessage({channel,claim:true,token,windowId:message.windowId}))return false;
-      if(stopped.has(token)||document.hidden||!await loadArtwork()||stopped.has(token)||document.hidden)return false;
-      return seen.has(id) || reveal(message);
+      if(stopped.has(token)||document.hidden||Date.now()>=deliverBy)return false;
+      // Claim the offer even when muted: the worker must not replay it elsewhere.
+      if(pointerInPlacement(message))return suppressHover(id);
+      if(!await loadArtwork()||stopped.has(token)||document.hidden||Date.now()>=deliverBy)return false;
+      if(seen.has(id))return seen.get(id);
+      if(pointerInPlacement(message))return suppressHover(id);
+      return reveal(message);
     })().then(result=>{if(result!==undefined)respond(result);},()=>respond(false));
     return true;
   });
