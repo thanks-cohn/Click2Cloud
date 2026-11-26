@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,elegantHeaderFrame,ELEGANT_MS,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
+import {normalizeHyperspace,hyperspaceTiming,hyperspaceFrame,hyperspaceGeometry,hyperspaceLiftBounds,archiveLiftBounds,elegantHeaderFrame,ELEGANT_MS,IDLE_MS,SPLIT_MS} from '../extension/hyperspace.mjs';
 
 assert.deepEqual(normalizeHyperspace(),{mode:'none',seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:true,seconds:7}),{mode:'none',seconds:7});
@@ -8,6 +8,10 @@ assert.deepEqual(normalizeHyperspace({mode:'hyperspace',seconds:10}),{mode:'hype
 assert.deepEqual(normalizeHyperspace({mode:'elegant'}),{mode:'elegant',seconds:5});
 assert.equal(normalizeHyperspace({mode:'invalid'}).mode,'none');
 assert.equal(ELEGANT_MS,1050);
+assert.deepEqual(archiveLiftBounds({rest:66,peak:66},true),{rest:28,peak:34,title:8});
+assert.deepEqual(archiveLiftBounds({rest:40,peak:54},true),{rest:28,peak:34,title:8});
+assert.deepEqual(archiveLiftBounds({rest:10,peak:10},true),{rest:10,peak:10,title:4});
+assert.deepEqual(archiveLiftBounds({rest:66,peak:66},false),{rest:28,peak:34,title:0});
 let lastElegant=elegantHeaderFrame(0);
 assert.equal(lastElegant.lift,0);assert.equal(lastElegant.words,1);assert.equal(lastElegant.burst,0);
 for(let ms=1;ms<=ELEGANT_MS;ms++){
