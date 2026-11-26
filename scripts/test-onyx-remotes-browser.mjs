@@ -254,8 +254,11 @@ try{
    }
    advance(1575);phases.push(phase());
    const heldFrames=frames.size;
-   advance(9999);const waterEarly=!!overlay.querySelector('.hyperspace-water');
-   advance(1);const waterLines=overlay.querySelectorAll('.hyperspace-water line').length;
+   advance(1999);const waterEarly=!!overlay.querySelector('.hyperspace-water');
+   advance(1);const ocean=overlay.querySelector('.hyperspace-water');
+   const waterLines=ocean?.querySelectorAll('line').length??0;
+   ocean?.getAnimations().forEach(a=>a.finish());
+   const waterVisible=!!ocean&&getComputedStyle(ocean).stroke!=='none'&&Number(getComputedStyle(ocean).opacity)>.9&&ocean.getBoundingClientRect().height>=8;
    advance(5000);const waterIdleFrames=frames.size;phases.push(phase());
    const paint={mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,translate:main.style.translate,lifting:shell.hasAttribute('data-hyperspace-lifting'),header:getComputedStyle(header).backgroundColor,clip:getComputedStyle(overlay).clipPath,lift:parseFloat(overlay.style.getPropertyValue('--hyper-lift')),shellTop:shell.getBoundingClientRect().top,overlayTop:overlay.getBoundingClientRect().top,overlayHeight:overlay.getBoundingClientRect().height};
    move(10,10);const waterRemoved=!overlay.querySelector('.hyperspace-water');advance(200);phases.push(phase());advance(1000);phases.push(phase());
@@ -263,14 +266,15 @@ try{
    move(10,10);move(190,500);advance(5000);phases.push(phase());
    controller.viewChanged();shell.dataset.view='explorer';advance(10000);phases.push(phase());
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,waterEarly,waterLines,waterIdleFrames,waterRemoved,paint,initial,sweep,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,waterEarly,waterLines,waterVisible,waterIdleFrames,waterRemoved,paint,initial,sweep,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
   assert.notEqual(hyperspace.streak,hyperspace.later);
   assert.equal(hyperspace.heldFrames,0);assert.equal(hyperspace.clean,true);
-  assert.equal(hyperspace.waterEarly,false,'Water must wait ten seconds after settling');
-  assert.equal(hyperspace.waterLines,13,'Water appears once after ten seconds');
+  assert.equal(hyperspace.waterEarly,false,'Water must wait two seconds after settling');
+  assert.equal(hyperspace.waterLines,12,'Twelve lines appear together after two seconds');
+  assert.equal(hyperspace.waterVisible,true,'Water has a visible stroke and nonzero painted height');
   assert.equal(hyperspace.waterIdleFrames,0,'Water must not restart frame rendering');
   assert.equal(hyperspace.waterRemoved,true,'Hover clears water before restoration');
   assert.equal(hyperspace.paint.header,'rgba(0, 0, 0, 0)','Header must not paint over the elevated page');
