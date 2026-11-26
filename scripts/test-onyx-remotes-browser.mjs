@@ -165,6 +165,16 @@ try{
   assert(geometry.every((g,i)=>!g.overlap&&g.verticalOverlap&&!g.overflow&&g.left>=0&&g.right<=width&&(!i||g.top>=geometry[i-1].bottom)),JSON.stringify({width,geometry}));
   const allBoxes=()=>page.locator('.remote-provider').evaluateAll(cards=>cards.map(card=>{const r=card.getBoundingClientRect();return [r.x,r.y,r.width,r.height];}));
   const atRest=await allBoxes();
+  // The outermost content boundaries share the same inset, regardless of auth or hover.
+  const checkInsets=async()=> {
+   const insets=await page.locator('.remote-provider').evaluateAll(cards=>cards.map(card=>{
+    const r=card.getBoundingClientRect(),logo=card.querySelector('.remote-provider-heading img').getBoundingClientRect();
+    const action=card.querySelector(card.hasAttribute('data-onyx-connected')?'[data-go]':'[data-connect]').getBoundingClientRect();
+    return {left:logo.left-r.left,right:r.right-action.right};
+   }));
+   assert(insets.every(({left,right})=>Math.abs(left-right)<=1),JSON.stringify({width,insets}));
+  };
+  await checkInsets();
   for(const card of [google,dropbox]){
    await card.hover({position:{x:20,y:20}});
    assert.deepEqual(await allBoxes(),atRest,'Hover must never resize or displace cards at '+width);
@@ -222,6 +232,7 @@ try{
   const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width,weight:getComputedStyle(el.querySelector('.onyx-browse-word')).fontWeight,stroke:getComputedStyle(el.querySelector('.onyx-folder-open')).strokeWidth}));
   assert.deepEqual(sizes,{word:'9px',folder:'13px',weight:'400',stroke:'1.1px'});
   assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
+  await checkInsets();
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
   await page.mouse.move(0,0);await waitWidth(44);
