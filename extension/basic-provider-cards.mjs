@@ -105,7 +105,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     section.dataset.provider=id;
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
-        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'Google Account',onedrive:'Microsoft Account',dropbox:'Dropbox Account'})[id]}</span></div>
+        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'15 GB free',onedrive:'5 GB free',dropbox:'2 GB free'})[id]}</span></div>
       </div>
       <p role="status" class="remote-provider-activity" data-activity hidden></p>
       <button type="button" class="onyx-provider-detail-toggle" aria-expanded="false" aria-controls="remote-provider-info-${id}">Details</button>
@@ -117,7 +117,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       <div class="remote-provider-actions">
         <button type="button" class="primary" data-connect>Connect</button>
         <button type="button" data-refresh aria-label="Refresh ${label}" title="Refresh ${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M5.5 8a7.5 7.5 0 0 1 12.4-2L20 9M4 15l2.1 3a7.5 7.5 0 0 0 12.4-2"/></svg></button>
-        <button type="button" data-go id="remote-provider-go-${id}" aria-labelledby="remote-provider-go-${id} remote-provider-${id}"><span class="legacy-go-label">GO TO</span><span class="onyx-visit-label">VISIT<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 21V4l10-2v19M15 4h4v17M3 21h18"/><path d="M11.5 12h.01"/></svg></span></button>
+        <button type="button" data-go id="remote-provider-go-${id}" aria-labelledby="remote-provider-go-${id} remote-provider-${id}"><span class="legacy-go-label">GO TO</span><span class="onyx-browse-label"><span class="onyx-browse-word">BROWSE</span><span class="onyx-browse-symbol" aria-hidden="true"><svg class="onyx-folder-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 7V5a2 2 0 0 1 2-2h4l3 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18"/></svg><svg class="onyx-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 19V5a2 2 0 0 1 2-2h4l3 3h7a2 2 0 0 1 2 2v2"/><path d="M3 19l3-9h16l-3 9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span></span></button>
       </div>
       <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');

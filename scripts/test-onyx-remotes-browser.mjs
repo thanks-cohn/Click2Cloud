@@ -100,6 +100,7 @@ try{
  }
  await page.evaluate(async()=>{document.querySelector('#scrollbar-fixture').remove();document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
+ assert.deepEqual(await page.locator('.remote-provider .onyx-provider-meta').allTextContents(),['15 GB free','5 GB free','2 GB free']);
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){
   await page.setViewportSize({width,height:760});await page.mouse.move(0,0);
@@ -134,6 +135,25 @@ try{
    await page.mouse.move(0,0);
    assert.deepEqual(await allBoxes(),atRest,'Leaving hover cannot move cards');
   }
+  const browse=dropbox.locator('[data-go]');
+  const browseState=()=>browse.evaluate(el=>{
+   const r=el.getBoundingClientRect();
+   const opacity=sel=>getComputedStyle(el.querySelector(sel)).opacity;
+   return {right:r.right,top:r.top,height:r.height,width:r.width,word:opacity('.onyx-browse-word'),closed:opacity('.onyx-folder-closed'),open:opacity('.onyx-folder-open')};
+  });
+  const waitWidth=async width=>page.waitForFunction(({el,width})=>Math.abs(el.getBoundingClientRect().width-width)<.1,{el:await browse.elementHandle(),width});
+  await page.mouse.move(0,0);
+  await waitWidth(52);
+  const idle=await browseState();
+  assert.equal(idle.word,'0');assert.equal(idle.closed,'1');assert.equal(idle.open,'0');
+  await browse.hover();
+  await waitWidth(width<=345?100:110);
+  const expanded=await browseState();
+  assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
+  assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
+  assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
+  await page.mouse.move(0,0);await waitWidth(52);
+  assert.deepEqual(await allBoxes(),atRest,'Browse contraction must not move cards');
   const activity=dropbox.locator('[data-activity]');
   await page.evaluate(()=>{window.deferRefresh=true;window.failRefresh=false;});
   await dropbox.hover({position:{x:20,y:20}});
