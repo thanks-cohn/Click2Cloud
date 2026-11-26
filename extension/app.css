@@ -66,6 +66,9 @@
  #shell:not([data-view=explorer])>#manage-slot #manage{interpolate-size:allow-keywords}
  #shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){inline-size:max-content}
 }
+/* Providers only: the floating control is invisible at rest, but its existing
+   compact hit target and keyboard focus still reveal the original button. */
+#shell[data-view=remotes]>#manage-slot #manage:not(:is(:hover,:focus-visible)){opacity:0}
 #shell:not([data-view=explorer])>#manage-slot #repair-me{margin-inline-start:auto}
 #shell[data-view=explorer][data-manage-in-toolbar]:has(#sign-out){--manage-toolbar-width:118px}
 #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{inset-inline-start:calc(var(--tree-split) + 8px);inset-block:8px auto;inline-size:var(--manage-toolbar-width,36px);padding:0}
