@@ -200,6 +200,10 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // A page that is already scrolled may have content against its top edge.
   const contentGap=main&&heading&&main.scrollTop<1?clamp(heading.getBoundingClientRect().top-main.getBoundingClientRect().top,0,32):0;
   ({rest:baseLift,peak:peakLift}=hyperspaceLiftBounds(rect.height,contentGap,controlBottom,controlShift));
+  // Elegant is an overlay-only header: reclaim the entire measured header
+  // height, including on scrolled pages. The R and theme glyph float above
+  // the existing content. Hyperspace retains its original clearance bounds.
+  if(preference.value.mode==='elegant')baseLift=peakLift=rect.height;
   overlay=doc.createElement('div');overlay.className='hyperspace-overlay';overlay.setAttribute('aria-hidden','true');
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
