@@ -8,8 +8,9 @@ assert.equal(IDLE_MS,5000);
 assert.equal(WATER_IDLE_MS,2000);
 assert.deepEqual(hyperspaceWaterGeometry(80,24),[]);
 assert.deepEqual(hyperspaceWaterGeometry(380,7),[]);
-assert.deepEqual(hyperspaceWaterLayout(66,40,35),{horizon:37,height:59,lift:7});
-assert.deepEqual(hyperspaceWaterLayout(56,12,36),{horizon:38,height:60,lift:-4});
+assert.deepEqual(hyperspaceWaterLayout(66,40,35),{top:7.8,height:18.2,below:false});
+assert.deepEqual(hyperspaceWaterLayout(66,20,30),{top:32,height:14,below:true});
+for(const h of [56,66,90])for(const lift of [0,12,26,40]){const r=hyperspaceWaterLayout(h,lift,35);assert(r.top+r.height<=h-lift+1e-9);}
 for(const width of [320,380,800,1200])for(const height of [8,18,26,40,56]){
  const lines=hyperspaceWaterGeometry(width,height);
  assert.equal(lines.length,14);
