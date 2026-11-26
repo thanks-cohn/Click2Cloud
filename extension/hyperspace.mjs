@@ -70,6 +70,12 @@ export function hyperspaceLiftBounds(height,contentGap,controlBottom,controlShif
  const peak=Math.max(0,Math.min(54,height-18,clearance));
  return {rest:Math.max(0,Math.min(40,height-26,peak)),peak};
 }
+// History and Queue retain breathing room instead of rising to the viewport
+// edge. Their visible title rises a little farther than the content below it.
+export function archiveLiftBounds(bounds,atTop){
+ const rest=Math.min(bounds.rest,28),peak=Math.min(bounds.peak,34);
+ return {rest,peak:Math.max(rest,peak),title:atTop?Math.min(8,rest*.4):0};
+}
 // The surface and the stroke are constructed from exactly the same curve.
 // The initial center gap is 80 CSS px (clamped on tiny windows).
 export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
@@ -135,12 +141,13 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
+  if(parts.titleLift)setVar(main,'--hyper-title-up',(parts.titleLift*clamp(frame.lift)).toFixed(3)+'px');
  }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
-  reserve(0);layer(false);lastGeometry=lastPhase='';
+  reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
@@ -205,7 +212,12 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // the existing content. Hyperspace retains its original clearance bounds.
   if(preference.value.mode==='elegant')baseLift=peakLift=rect.height;
   overlay=doc.createElement('div');overlay.className='hyperspace-overlay';overlay.setAttribute('aria-hidden','true');
-  parts={width:rect.width,height:Math.max(1,rect.height-1)};
+  let titleLift=0;
+  if(['history','queue'].includes(shell.dataset.view)){
+   const atTop=main?.scrollTop<1&&!!main.querySelector('.queue-page>h1');
+   ({rest:baseLift,peak:peakLift,title:titleLift}=archiveLiftBounds({rest:baseLift,peak:peakLift},atTop));
+  }
+  parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
    setVar(body,'--hyper-elegant-page',page);
