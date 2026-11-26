@@ -10,8 +10,12 @@ assert(hyperspaceFrame(180,5).split<.01,'Preserve the original gentle split');
 assert.equal(hyperspaceFrame(SPLIT_MS,5).split,1);
 assert.equal(hyperspaceFrame(SPLIT_MS,5).speed,2,'Shimmer starts at two rail lengths per second');
 assert(hyperspaceFrame(SPLIT_MS+1000,5).travel>200,'Shimmer completes over two passes in the first second');
-assert.equal(hyperspaceTiming(5).release,440);
-assert(hyperspaceFrame(SPLIT_MS+5000+110,5).burst>.5,'The release travels more than half its distance in the first quarter');
+assert.equal(hyperspaceTiming(5).flexMs,125);
+assert.equal(hyperspaceTiming(5).exitMs,440);
+assert.equal(hyperspaceTiming(5).release,565);
+const impactDefault=hyperspaceFrame(SPLIT_MS+5000+125,5);
+assert(impactDefault.flex>.35&&impactDefault.burst<.1,'Rail visibly bows before flying away');
+assert(hyperspaceFrame(SPLIT_MS+5000+125+110,5).burst>.5,'Exit travels more than half its distance in its first quarter');
 assert.deepEqual(hyperspaceLiftBounds(66,28,51,12),{rest:40,peak:48});
 const historyBounds=hyperspaceLiftBounds(66,20,51,10);
 assert(historyBounds.rest>26,'History can rise higher when heading clearance allows');
@@ -28,6 +32,11 @@ for(const w of widths){
  assert(corridor.leftFill.startsWith(corridor.left));assert(corridor.rightFill.startsWith(corridor.right));
  assert(corridor.left.startsWith('M '+(w/2-40)+' 0 C '));
  assert(corridor.right.startsWith('M '+(w/2+40)+' 0 C '));
+ const bent=hyperspaceGeometry(w,65,1,0,.4),stronger=hyperspaceGeometry(w,65,1,0,.68);
+ const xControl=g=>Number(g.left.split(' ')[4]);
+ assert(xControl(stronger)<xControl(bent)&&xControl(bent)<xControl(corridor),'Longer charge bows the interior of the left rail farther outward');
+ assert.equal(Number(bent.left.split(' ')[1]),Number(corridor.left.split(' ')[1]),'Flex changes curvature, not just translation');
+ assert(bent.leftFill.startsWith(bent.left)&&bent.rightFill.startsWith(bent.right),'Color surfaces retain exact deformed boundaries');
  const released=hyperspaceGeometry(w,65,1,1);
  assert(Number(released.left.split(' ')[1])<0);
  assert(Number(released.right.split(' ')[1])>w);
@@ -41,18 +50,20 @@ for(const seconds of [1,3,5,10,20]){
  let speed=-1,travel=-1;
  for(let i=0;i<=100;i++){
   const sample=hyperspaceFrame(SPLIT_MS+seconds*1000*i/100,seconds);
-  assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);assert.equal(sample.wordsUp,0);assert.equal(sample.words,1);
+  assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);assert.equal(sample.wordsUp,0);assert.equal(sample.words,1);assert.equal(sample.flex,0);
   speed=sample.speed;travel=sample.travel;
  }
- const impulse=hyperspaceFrame(end+timing.release*.25,seconds);
+ const impact=hyperspaceFrame(end+timing.flexMs,seconds);
+ assert(impact.flex>0&&impact.burst<=.081);
+ const impulse=hyperspaceFrame(end+timing.flexMs+timing.exitMs*.25,seconds);
  assert(impulse.wordsUp>.5,'Navigation travels upward explosively');
  assert.equal(impulse.wordsUp,impulse.burst,'Navigation and rails share the release impulse');
  assert(impulse.words>.5,'Navigation moves visibly instead of disappearing first');
  const release=hyperspaceFrame(end+timing.release,seconds);
  const settled=hyperspaceFrame(end+timing.release+timing.settle,seconds);
  assert.equal(release.burst,1);assert(release.lift>1);
- assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.wordsUp,1);assert.equal(settled.done,true);
- if(previous){assert(timing.release<previous.timing.release);assert(release.lift>previous.lift);assert(speed>previous.speed);}
- previous={timing,lift:release.lift,speed};
+ assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.wordsUp,1);assert.equal(settled.flex,0);assert.equal(settled.done,true);
+ if(previous){assert(timing.release<previous.timing.release);assert(release.lift>previous.lift);assert(speed>previous.speed);assert(impact.flex>previous.flex);assert(timing.exitMs<previous.timing.exitMs);}
+ previous={timing,lift:release.lift,speed,flex:impact.flex};
 }
 console.log('Hyperspace timing, continuous acceleration, geometry and energy assertions passed.');
