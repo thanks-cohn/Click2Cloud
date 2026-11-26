@@ -264,10 +264,10 @@ try{
    move(10,10);move(190,500);advance(5000);phases.push(phase());
    controller.viewChanged();shell.dataset.view='explorer';advance(10000);phases.push(phase());
    shell.dataset.view='remotes';choose('elegant');move(10,10);move(190,500);advance(4999);
-   const elegantIdle=phase();const themeStart=header.querySelector('#theme').getBoundingClientRect();advance(1);advance(350);const themeMid=header.querySelector('#theme').getBoundingClientRect();
+   const elegantIdle=phase();const elegantHeaderRect=header.getBoundingClientRect();const themeStart=header.querySelector('#theme').getBoundingClientRect();advance(1);advance(350);const themeMid=header.querySelector('#theme').getBoundingClientRect();
    const elegantOverlay=header.querySelector('.hyperspace-overlay'),surface=elegantOverlay?.querySelector('.hyperspace-elegant-surface');
    const elegantMid={phase:phase(),opacity:Number(surface?.style.opacity),rails:elegantOverlay?.querySelectorAll('svg,.hyperspace-rail').length,lift:parseFloat(elegantOverlay?.style.getPropertyValue('--hyper-lift'))};
-   advance(ELEGANT_MS);const elegantEnd={phase:phase(),mainTop:main.getBoundingClientRect().top,shellTop:shell.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,lift:parseFloat(elegantOverlay?.style.getPropertyValue('--hyper-lift')),frames:frames.size,surfaceOpacity:Number(surface?.style.opacity)};
+   advance(ELEGANT_MS);const elegantEnd={phase:phase(),headerHeight:elegantHeaderRect.height,headerTop:elegantHeaderRect.top,mainTop:main.getBoundingClientRect().top,shellTop:shell.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,lift:parseFloat(elegantOverlay?.style.getPropertyValue('--hyper-lift')),frames:frames.size,surfaceOpacity:Number(surface?.style.opacity)};
    const brand=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
    const logoRect=brand.getBoundingClientRect(),headerRect=header.getBoundingClientRect();
    const themeEnd=theme.getBoundingClientRect();
@@ -301,7 +301,10 @@ try{
   assert(hyperspace.elegantMid.opacity>0&&hyperspace.elegantMid.opacity<1&&hyperspace.elegantMid.lift>0);
   assert.equal(hyperspace.elegantMid.rails,0);
   assert.equal(hyperspace.elegantEnd.phase,'open');assert.equal(hyperspace.elegantEnd.frames,0);assert.equal(hyperspace.elegantEnd.surfaceOpacity,0);
-  for(const k of ['mainTop','shellTop','dockBottom','lift'])assert(Math.abs(hyperspace.elegantEnd[k]-hyperspace.paint[k])<1,'Elegant and Hyperspace share '+k);
+  assert(Math.abs(hyperspace.elegantEnd.lift-hyperspace.elegantEnd.headerHeight)<1,'Elegant reclaims the complete header height');
+  assert(Math.abs(hyperspace.elegantEnd.shellTop-hyperspace.elegantEnd.headerTop)<1,'No reserved header strip remains');
+  assert(Math.abs(hyperspace.elegantEnd.mainTop-hyperspace.elegantEnd.headerTop)<1,'Content reaches the top of the viewport');
+  assert(Math.abs(hyperspace.elegantEnd.dockBottom-hyperspace.paint.dockBottom)<1,'Footer stays anchored');
   assert.deepEqual(hyperspace.elegantHidden,{themeOpacity:'1',themeVisibility:'visible',navVisibility:'hidden',logoOpacity:'1',headerPointer:'none',logoPointer:'auto',overlayBackground:'rgba(0, 0, 0, 0)'});
   assert(hyperspace.themeGlide.mid>=0&&hyperspace.themeGlide.end>=hyperspace.themeGlide.mid&&hyperspace.themeGlide.end<=6.1&&hyperspace.themeGlide.right<=hyperspace.themeGlide.edge,'Moon/sun glides right within available clearance');
   assert.equal(hyperspace.awayFromLogo,'open','Only the R may restore Elegant mode on hover');
