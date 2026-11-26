@@ -56,10 +56,6 @@ body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header #theme{
  opacity:1;visibility:visible;pointer-events:auto;background:none!important;border-color:transparent!important;box-shadow:none!important;
  translate:var(--hyper-theme-right,0px) calc(0px - var(--hyper-controls-up,0px));
 }
-/* If the theme button is already at the edge, use its internal glyph clearance. */
-body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header #theme>*{
- translate:var(--hyper-theme-glyph-right,0px) 0;
-}
 body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.header-more){
  visibility:hidden;
 }
