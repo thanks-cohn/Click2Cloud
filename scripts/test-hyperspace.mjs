@@ -12,6 +12,10 @@ assert.deepEqual(archiveLiftBounds({rest:66,peak:66},true),{rest:28,peak:34,titl
 assert.deepEqual(archiveLiftBounds({rest:40,peak:54},true),{rest:28,peak:34,title:8});
 assert.deepEqual(archiveLiftBounds({rest:10,peak:10},true),{rest:10,peak:10,title:4});
 assert.deepEqual(archiveLiftBounds({rest:66,peak:66},false),{rest:28,peak:34,title:0});
+assert.deepEqual(archiveLiftBounds({rest:66,peak:66},true,'queue'),{rest:28,peak:34,title:14});
+assert.deepEqual(archiveLiftBounds({rest:40,peak:54},true,'queue'),{rest:28,peak:34,title:14});
+assert.deepEqual(archiveLiftBounds({rest:10,peak:10},true,'queue'),{rest:10,peak:10,title:6});
+assert.deepEqual(archiveLiftBounds({rest:66,peak:66},false,'queue'),{rest:28,peak:34,title:0});
 let lastElegant=elegantHeaderFrame(0);
 assert.equal(lastElegant.lift,0);assert.equal(lastElegant.words,1);assert.equal(lastElegant.burst,0);
 for(let ms=1;ms<=ELEGANT_MS;ms++){
