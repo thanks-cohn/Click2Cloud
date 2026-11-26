@@ -23,6 +23,12 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       card.problem ? 'Needs attention' : '';
     card.activity.hidden = !card.activity.textContent;
     card.activity.toggleAttribute('data-success', !!card.timer);
+    card.detailToggle.textContent=card.activity.textContent||'Details';
+    if(!card.info.textContent.trim())setDetails(card,false);
+  }
+  function setDetails(card,open){
+    card.detailToggle.setAttribute('aria-expanded',String(open));
+    card.info.toggleAttribute('data-onyx-details-open',open);
   }
   function clearSuccess(card) {
     clearTimeout(card.timer);
@@ -102,7 +108,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
         <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'Google Account',onedrive:'Microsoft Account',dropbox:'Dropbox Account'})[id]}</span></div>
       </div>
       <p role="status" class="remote-provider-activity" data-activity hidden></p>
-      <div class="remote-provider-info">
+      <button type="button" class="onyx-provider-detail-toggle" aria-expanded="false" aria-controls="remote-provider-info-${id}">Details</button>
+      <div class="remote-provider-info" id="remote-provider-info-${id}">
         <p class="muted" role="status" data-feedback></p>
         <p class="muted" role="status" data-navigation></p>
         <p class="muted" data-availability></p>
@@ -117,9 +124,19 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     const card = {
       label, connect: get('connect'), refresh: get('refresh'),
       availability: get('availability'), continueSave: get('continue'), activity: get('activity'),
+      detailToggle:section.querySelector('.onyx-provider-detail-toggle'),info:section.querySelector('.remote-provider-info'),
       operation: 'auth.connect', revision: 0, attemptRevision: 0, active: 0,
     };
     cards.set(id, card);
+    card.detailToggle.onclick=()=>setDetails(card,card.detailToggle.getAttribute('aria-expanded')!=='true');
+    section.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&card.info.hasAttribute('data-onyx-details-open')){
+        event.preventDefault();event.stopPropagation();setDetails(card,false);card.detailToggle.focus({preventScroll:true});
+      }
+    });
+    section.addEventListener('focusout',event=>{
+      if(!section.contains(event.relatedTarget))setDetails(card,false);
+    });
     async function action(button, op, changesStatus = true) {
       if (button.getAttribute('aria-disabled') === 'true') return;
       if (changesStatus) card.revision++;

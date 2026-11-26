@@ -30,15 +30,26 @@ try{
   const calls=window.providerCalls=[];
   const runtime={sendMessage:async m=>{
     calls.push([m.op,m.input.provider]);
+    if(m.op==='auth.refresh'&&window.deferRefresh){
+      await new Promise(resolve=>window.releaseRefresh=resolve);
+      if(window.failRefresh)return {ok:false,error:{code:'FIXTURE_ERROR',message:'Long fixture error: check your account connection and retry.'}};
+    }
     const connected=m.input.provider==='dropbox'||m.op==='auth.connect';
     return {ok:true,value:m.op==='saves.pending'?null:m.op==='providers.goTo'?{opened:true}:{connected,ready:connected,authorized:connected}};
   }};
-  const stack=createBasicProviderCards({runtime,document,pulseEnabled:()=>false});
+  const stack=createBasicProviderCards({runtime,document,pulseEnabled:()=>true});
+  window.testProviderCards=stack;
   const slot=document.createElement('div');document.querySelector('.remotes-page').append(slot);stack.mount(slot);
   document.querySelectorAll('header button,#manage').forEach(b=>b.disabled=false);
   document.querySelector('header [data-view=remotes]').classList.add('active');
  });
  await page.locator('[data-provider=dropbox][data-onyx-connected]').waitFor();
+ assert(await page.locator('#theme .onyx-moon').isVisible());
+ assert(!(await page.locator('#theme .onyx-sun').isVisible()));
+ await page.evaluate(()=>document.documentElement.dataset.theme='light');
+ assert(await page.locator('#theme .onyx-sun').isVisible());
+ assert(!(await page.locator('#theme .onyx-moon').isVisible()));
+ await page.evaluate(()=>document.documentElement.dataset.theme='dark');
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){
@@ -74,6 +85,34 @@ try{
    await page.mouse.move(0,0);
    assert.deepEqual(await allBoxes(),atRest,'Leaving hover cannot move cards');
   }
+  const activity=dropbox.locator('[data-activity]');
+  await page.evaluate(()=>{window.deferRefresh=true;window.failRefresh=false;});
+  await dropbox.hover({position:{x:20,y:20}});
+  await dropbox.locator('[data-refresh]').click();
+  await page.waitForFunction(()=>typeof window.releaseRefresh==='function');
+  assert.equal(await activity.textContent(),'Working…');
+  assert.deepEqual(await allBoxes(),atRest,'Working status must not change any card bounds');
+  await page.evaluate(()=>{window.releaseRefresh();delete window.releaseRefresh;});
+  await page.waitForFunction(()=>document.querySelector('[data-provider=dropbox] [data-activity]').textContent==='Success!');
+  assert.deepEqual(await allBoxes(),atRest,'Success pulse must not change card bounds');
+  await page.waitForFunction(()=>document.querySelector('[data-provider=dropbox] [data-activity]').hidden);
+  assert.deepEqual(await allBoxes(),atRest,'Status expiry must not change card bounds');
+  await page.evaluate(()=>{window.failRefresh=true;});
+  await dropbox.locator('[data-refresh]').click();
+  await page.waitForFunction(()=>typeof window.releaseRefresh==='function');
+  await page.evaluate(()=>{window.releaseRefresh();delete window.releaseRefresh;window.deferRefresh=false;});
+  const details=dropbox.locator('.onyx-provider-detail-toggle');
+  await details.waitFor({state:'visible'});
+  assert.deepEqual(await allBoxes(),atRest,'Error must not change card bounds');
+  await details.click();
+  assert(await dropbox.locator('[data-feedback]').isVisible());
+  assert.deepEqual(await allBoxes(),atRest,'Opening details must not change card bounds');
+  await details.press('Escape');
+  assert.equal(await details.getAttribute('aria-expanded'),'false');
+  await dropbox.locator('[data-refresh]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-provider=dropbox] [data-activity]').hidden);
+  await page.mouse.move(0,0);
+  assert.deepEqual(await allBoxes(),atRest,'Recovery must not change card bounds');
   assert(await page.locator('#manage').isVisible());
   await page.screenshot({path:join(out,'provider-fixture-'+width+'.png')});
  }

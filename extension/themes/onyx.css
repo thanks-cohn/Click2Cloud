@@ -16,7 +16,7 @@
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>#manage-slot{background:var(--onyx-nav);justify-content:space-between}
 /* Screenshot-derived Remotes geometry. 380px Shelf: ~336px cards, 76px
    ordinary rows, ~65px header and footer. No mock account usage is imported. */
-.onyx-provider-meta,.onyx-punctuation,.onyx-slogan{display:none!important}
+.onyx-provider-meta,.onyx-punctuation,.onyx-slogan,.onyx-provider-detail-toggle,.onyx-mode-icon{display:none!important}
 .legacy-slogan{font:inherit!important;color:inherit!important}
 :root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
  --onyx-highlight:#ffffff08;--onyx-icon:#344354;--onyx-subtitle:#b4c5dc;
@@ -53,8 +53,9 @@
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #header-more{min-inline-size:30px;padding-inline:4px}
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme{color:var(--onyx-subtitle)}
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme :is(.theme-sun,.theme-moon){display:none}
-:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme::before{content:"☾";font-size:21px}
-:root[data-aesthetic=onyx]:is([data-theme=light],[data-onyx-finish=platinum]) body:has(#shell[data-view=remotes]) #theme::before{content:"☀"}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme .onyx-mode-icon{width:19px;height:19px;color:var(--onyx-subtitle)}
+:root[data-aesthetic=onyx]:not([data-theme=light]) body:has(#shell[data-view=remotes]) #theme .onyx-moon,
+:root[data-aesthetic=onyx][data-theme=light] body:has(#shell[data-view=remotes]) #theme .onyx-sun{display:block!important}
 @media(max-width:345px){
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button{font-size:12px;padding-inline:4px}
@@ -163,6 +164,46 @@
 }
 @media(hover:none),(pointer:coarse){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>[data-refresh]{opacity:1;pointer-events:auto}
+}
+/* Inline status stays within the fixed first row. Narrow shelves temporarily
+   reuse the caption space; wider shelves have a separate middle status slot. */
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
+ & :is(.remote-provider-activity:not([hidden]),.onyx-provider-detail-toggle){
+  position:absolute;inset-block-start:42px;inset-inline-start:69px;
+  inset-inline-end:calc(var(--onyx-edge-width) + var(--onyx-refresh-width) + 3px);
+  inline-size:auto;block-size:19px;min-block-size:0;margin:0;padding:0;
+  font:600 11px/19px "Segoe UI",sans-serif;text-align:start;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:transparent;border:0;box-shadow:none;z-index:1;
+ }
+ & .remote-provider-activity:not([hidden]){pointer-events:none;color:var(--onyx-subtitle)}
+ & .remote-provider-activity[data-success]:not([hidden]){color:var(--onyx-green)}
+ & .remote-provider-info{
+  position:absolute;inset:calc(74px + 1px) 8px auto 8px;z-index:5;
+  padding:10px 12px;margin:0;max-block-size:160px;overflow:auto;
+  border:1px solid var(--line);border-radius:8px;background:var(--panel);
+  box-shadow:0 6px 18px #0006;visibility:hidden;pointer-events:none;
+ }
+ & .remote-provider-info[data-onyx-details-open]{visibility:visible;pointer-events:auto}
+ &:has(.remote-provider-info[data-onyx-details-open]){z-index:4}
+ &:has(.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty)) .onyx-provider-detail-toggle{
+  display:block!important;color:var(--onyx-subtitle);text-decoration:underline;text-underline-offset:2px;
+ }
+ &:has(.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty)) .remote-provider-activity:not([hidden]){
+  clip-path:inset(50%); /* Retain live announcement for assistive technology. */
+ }
+ &:has(.remote-provider-activity:not([hidden]),.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty)) .remote-provider-title .onyx-provider-meta{visibility:hidden}
+ &:not([data-onyx-connected]) .remote-provider-actions>[data-go],
+ &[data-onyx-connected] .remote-provider-actions>[data-connect]{z-index:2;pointer-events:none}
+ &:not([data-onyx-connected]) .remote-provider-actions>[data-go]:focus,
+ &[data-onyx-connected] .remote-provider-actions>[data-connect]:focus{pointer-events:auto}
+}
+@container (min-width:400px){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider :is(.remote-provider-activity:not([hidden]),.onyx-provider-detail-toggle){
+  inset-block-start:27px;inset-inline-start:max(195px,48%);text-align:end;
+ }
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:has(.remote-provider-activity:not([hidden]),.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty)) .remote-provider-title .onyx-provider-meta{visibility:visible}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-heading{max-inline-size:max(195px,48cqi)}
 }
 .onyx-queue-metrics{display:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-page>h1{font-size:28px;color:var(--onyx-heading);margin-block:10px 24px;letter-spacing:-.8px}
