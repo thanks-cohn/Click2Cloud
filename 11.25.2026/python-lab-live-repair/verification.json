@@ -30,7 +30,8 @@
         "causeName": "TypeError",
         "apiCallable": false,
         "subsequentPairing": "OWNER_REPORTED_PASS",
-        "reloadAction": "NOT_INDEPENDENTLY_OBSERVED"
+        "reloadAction": "NOT_INDEPENDENTLY_OBSERVED",
+        "guiCode": "LAB_REQUEST_FAILED"
       },
       "sourceInventory": {
         "status": "BLOCKED",
@@ -332,8 +333,63 @@
       "dependencyVersionsChanged": false
     },
     "windowsGeneratedInventory": {
-      "status": "NOT_TESTED",
-      "command": "verify-windows-inventory.cmd"
+      "status": "PASS",
+      "evidenceClass": "GitHub Actions Windows x64 hosted runner",
+      "commit": "eefc0ca1ea378a7e121696eccc3b4aec4281a451",
+      "runUrl": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/45758486024",
+      "command": "verify-windows-inventory.cmd",
+      "runs": [
+        {
+          "python": "3.14.7",
+          "passed": 18,
+          "skipped": 1,
+          "skipReason": "POSIX-only concurrent mutation test",
+          "total": 19,
+          "testElapsedMs": 1183,
+          "jobUrl": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/45758486024/job/139702648124",
+          "probe": {
+            "status": "PASS",
+            "platform": "Windows",
+            "architecture": "AMD64",
+            "python": "3.14.7",
+            "bytes": 989488,
+            "sha256": "5dfea8a6d50f14317b21229c6893d234dc527e2339d53069e8e747e61bc02c48",
+            "changedAttributes": {
+              "pathToOpenedHandle": [
+                "st_ctime_ns"
+              ],
+              "openedHandleToAfterRead": [],
+              "pathBeforeToAfterRead": []
+            },
+            "sameHandleChangeTimeStable": true
+          }
+        },
+        {
+          "python": "3.14.10",
+          "passed": 18,
+          "skipped": 1,
+          "skipReason": "POSIX-only concurrent mutation test",
+          "total": 19,
+          "testElapsedMs": 907,
+          "jobUrl": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/45758486024/job/139702648476",
+          "probe": {
+            "status": "PASS",
+            "platform": "Windows",
+            "architecture": "AMD64",
+            "python": "3.14.10",
+            "bytes": 989488,
+            "sha256": "5dfea8a6d50f14317b21229c6893d234dc527e2339d53069e8e747e61bc02c48",
+            "changedAttributes": {
+              "pathToOpenedHandle": [
+                "st_ctime_ns"
+              ],
+              "openedHandleToAfterRead": [],
+              "pathBeforeToAfterRead": []
+            },
+            "sameHandleChangeTimeStable": true
+          }
+        }
+      ]
     },
     "installedWindowsChrome": {
       "status": "NOT_TESTED",

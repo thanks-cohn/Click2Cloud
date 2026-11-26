@@ -29,11 +29,11 @@ git fetch origin refs/heads/codex/redown-11-25-2026-python-lab-live-repair && gi
 set "LAB=lab-local\.venv\Scripts\redown-lab.exe"
 set "LABPY=lab-local\.venv\Scripts\python.exe"
 set "ACCEPT=11.25.2026\python-lab-live-repair\windows-acceptance.py"
-call 11.25.2026\python-lab-live-repair\verify-windows-inventory.cmd && "%LABPY%" "%ACCEPT%" prepare > "lab-local\windows-fixtures-03323.json"
+call 11.25.2026\python-lab-live-repair\verify-windows-inventory.cmd > "lab-local\windows-source-probe-03323.json" && type "lab-local\windows-source-probe-03323.json" && "%LABPY%" "%ACCEPT%" prepare > "lab-local\windows-fixtures-03323.json"
 type "lab-local\windows-fixtures-03323.json"
 ```
 
-The test suite generates PNG, JPEG, text, ZIP, zero-byte, and Unicode-named files and inventories them in separate Python processes. Windows cases exercise write sharing, rename and replacement denial, and a junction. The suite reports whether the local Windows profile permits symbolic-link creation. `prepare` creates a two-text-file baseline of 35 bytes and a five-file nested corpus containing a 989,488-byte PNG. Its output directory is exclusive.
+The test suite generates PNG, JPEG, text, ZIP, zero-byte, and Unicode-named files and inventories them in separate Python processes. Windows cases exercise write sharing, rename and replacement denial, and a junction. The suite reports whether the local Windows profile permits symbolic-link creation. The probe records which attributes differed across the path and handle observations of a disposable PNG and verifies its SHA-256. `prepare` creates a two-text-file baseline of 35 bytes and a five-file nested corpus containing a 989,488-byte PNG. Its output directory is exclusive.
 
 ## Check readiness and pair
 
@@ -117,6 +117,8 @@ After collecting evidence, use **End and revoke**. For an uncertain commit, the 
 
 ## Evidence boundaries
 
-The owner’s 0.3.32.2 Windows records isolate the mismatched attribute and include a separate successful two-file live baseline. The 0.3.32.3 local checks exercise the production native relay, upload service, signed Worker, and independent readback against workerd/R2 fixtures. Installed Windows Chrome startup, the original owner PNG, and production Cloudflare round trips are owner acceptance gates for this release. [Before and after verification](verification.json)
+The owner’s 0.3.32.2 Windows records isolate the mismatched attribute and include a separate successful two-file live baseline. On hosted Windows x64, Python 3.14.7 and 3.14.10 each passed 18 tests and skipped the POSIX-only concurrent mutation case. On both versions, the generated 989,488-byte PNG differed only in `st_ctime_ns` between the path and handle observations. The handle’s Windows `ChangeTime` stayed stable through the read and the expected SHA-256 matched. [Windows matrix run](https://github.com/thanks-cohn/Click2Cloud/actions/runs/45758486024)
+
+The 0.3.32.3 local checks exercise the production native relay, upload service, signed Worker, and independent readback against workerd/R2 fixtures. Installed Windows Chrome startup, the original owner PNG, and production Cloudflare round trips are owner acceptance gates for this release. [Before and after verification](verification.json)
 
 The full Node suite passed 868 of 869 tests. The remaining menu-composition digest failure was reproduced on the repair branch’s starting commit. The owner separately reported three high-severity npm dependency findings and esbuild/workerd install-script warnings on the prior Windows setup. The local audit also found three high-severity entries. The release retains the existing locked dependency versions.
