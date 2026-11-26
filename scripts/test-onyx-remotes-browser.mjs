@@ -203,6 +203,7 @@ try{
    shell.setAttribute('data-manage-morph','');shell.dataset.view='explorer';
    const animation=button.getAnimations().find(a=>a.animationName?.startsWith('manage-explorer-morph'));
    if(!animation)throw Error('Expected Explorer button morph');
+   if(animation.effect.getTiming().duration!==2200)throw Error('Expected deliberate 2.2 second morph');
    animation.pause();animation.currentTime=0;
    const start=geometry();
    animation.finish();
@@ -223,6 +224,27 @@ try{
   }),'none');
   await page.evaluate(()=>{const shell=document.querySelector('#shell');shell.removeAttribute('data-manage-morph');shell.dataset.view='remotes';});
   await page.emulateMedia({reducedMotion:'no-preference'});
+  // Sample the sky opening at its most open moment without relying on frame timing.
+  const sky=await page.evaluate(()=>{
+   const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
+   const nav=header.querySelector('nav'),logo=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
+   const original={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
+   const canopy=document.createElement('div');canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
+   canopy.style.setProperty('--sky-surface',original.background);
+   canopy.style.setProperty('--sky-rail',getComputedStyle(header).borderBottomColor);
+   for(const side of ['left','right']){const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);}
+   header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
+   const animations=[...header.getAnimations({subtree:true}),...shell.getAnimations()].filter(a=>a.animationName?.startsWith('sky-'));
+   for(const animation of animations){animation.pause();animation.currentTime=1500;}
+   const opacity=el=>Number(getComputedStyle(el).opacity);
+   const open={nav:opacity(nav),logo:opacity(logo),theme:opacity(theme),halves:[...canopy.children].map(opacity),rise:original.shell-shell.getBoundingClientRect().top,header:header.getBoundingClientRect().height};
+   document.body.removeAttribute('data-sky-opening');canopy.remove();
+   const restored={header:header.getBoundingClientRect().height,shell:shell.getBoundingClientRect().top,background:getComputedStyle(header).background};
+   return {original,open,restored};
+  });
+  assert.equal(sky.open.nav,0);assert.equal(sky.open.logo,1);assert.equal(sky.open.theme,1);
+  assert.deepEqual(sky.open.halves,[0,0]);assert(Math.abs(sky.open.rise-24)<1);
+  assert.equal(sky.open.header,sky.original.header);assert.deepEqual(sky.restored,sky.original);
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
