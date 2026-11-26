@@ -150,8 +150,8 @@ try{
   // Refresh must remain invisible on every frame before the dock reaches full width.
   const frames=page.evaluate(async()=>{
    const card=document.querySelector('[data-provider=dropbox]'),button=card.querySelector('[data-go]'),refresh=card.querySelector('[data-refresh]');
-   const samples=[];const limit=performance.now()+650;
-   await new Promise(resolve=>{function frame(){samples.push({width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity)});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+   const samples=[];const start=performance.now(),limit=start+1750;
+   await new Promise(resolve=>{function frame(){samples.push({time:performance.now()-start,width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity)});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
    return samples;
   });
   await browse.hover();
@@ -161,9 +161,12 @@ try{
   const samples=await frames;
   assert(samples.some(f=>f.width>52&&f.width<expandedWidth-.5),'Expected intermediate Browse expansion frames');
   assert(samples.every(f=>f.width>=expandedWidth-.5||f.opacity===0),'Refresh must not appear before Browse is fully expanded');
+  const fullyExpanded=samples.find(f=>f.width>=expandedWidth-.5);
+  const firstRefresh=samples.find(f=>f.opacity>0);
+  assert(fullyExpanded&&firstRefresh&&firstRefresh.time-fullyExpanded.time>=970,'Refresh must wait a full second after expansion (allowing frame sampling tolerance)');
   assert(samples.some(f=>f.width>=expandedWidth-.5&&f.opacity===1),'Refresh must finish fading in');
-  const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width}));
-  assert.deepEqual(sizes,{word:'10px',folder:'18px'});
+  const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width,weight:getComputedStyle(el.querySelector('.onyx-browse-word')).fontWeight,stroke:getComputedStyle(el.querySelector('.onyx-folder-open')).strokeWidth}));
+  assert.deepEqual(sizes,{word:'9px',folder:'14px',weight:'500',stroke:'1.2px'});
   assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
