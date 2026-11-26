@@ -142,12 +142,13 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
   if(parts.titleLift)setVar(main,'--hyper-title-up',(parts.titleLift*clamp(frame.lift)).toFixed(3)+'px');
+  if(parts.titleCenter!==undefined)setVar(main,'--hyper-title-center',(parts.titleCenter*clamp(frame.lift)).toFixed(3)+'px');
  }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
-  reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');lastGeometry=lastPhase='';
+  reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');main?.style.removeProperty('--hyper-title-center');lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
@@ -217,7 +218,12 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const atTop=main?.scrollTop<1&&!!main.querySelector('.queue-page>h1');
    ({rest:baseLift,peak:peakLift,title:titleLift}=archiveLiftBounds({rest:baseLift,peak:peakLift},atTop,shell.dataset.view));
   }
-  parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift};
+  let titleCenter;
+  if(['settings','screenshot'].includes(shell.dataset.view)){
+   const title=main?.querySelector('.page>h1>[data-hyper-center-title]');
+   if(title){const r=title.getBoundingClientRect();titleCenter=rect.left+rect.width/2-r.left-r.width/2;}
+  }
+  parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift,titleCenter};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
    setVar(body,'--hyper-elegant-page',page);
