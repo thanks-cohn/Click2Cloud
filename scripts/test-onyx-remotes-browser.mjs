@@ -55,7 +55,17 @@ try{
    assert.deepEqual(await allBoxes(),atRest,'Hover must never resize or displace cards at '+width);
    const refresh=card.locator('[data-refresh]');
    await page.waitForFunction(el=>getComputedStyle(el).opacity==='1',await refresh.elementHandle());
-   const icon=await refresh.boundingBox(),primary=await card.locator(card===google?'[data-connect]':'[data-go]').boundingBox();
+   const primaryAction=card.locator(card===google?'[data-connect]':'[data-go]');
+   const icon=await refresh.boundingBox(),primary=await primaryAction.boundingBox();
+   const outline=await primaryAction.evaluate(el=>{
+    const style=getComputedStyle(el),divider=getComputedStyle(el.parentElement,'::before');
+    const card=el.closest('.remote-provider').getBoundingClientRect(),r=el.getBoundingClientRect();
+    return {sides:[style.borderTopWidth,style.borderRightWidth,style.borderBottomWidth,style.borderLeftWidth],divider:divider.content,dividerWidth:divider.width,inset:r.right<card.right-3};
+   });
+   assert.deepEqual(outline.sides,['1px','1px','1px','0px'],'Only three button sides should be outlined');
+   assert.notEqual(outline.divider,'none','Independent divider must remain present');
+   assert.equal(outline.dividerWidth,'1px');
+   assert(outline.inset,'The action must be inset from the card edge');
    assert(icon.x+icon.width<=primary.x+1,'Refresh must be left of the primary edge');
    assert(Math.abs(icon.y+icon.height/2-primary.y-primary.height/2)<=1,'Refresh must be vertically centered');
    assert.equal(await refresh.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
