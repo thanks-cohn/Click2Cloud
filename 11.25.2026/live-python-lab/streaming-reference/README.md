@@ -1,11 +1,9 @@
-# Pinned historical streaming and native laboratory references
+# Pinned historical streaming and native laboratory reference
 
-Source: https://github.com/thanks-cohn/REDOWN/tree/cc7cab5dccec715708dfe6a25a63d349e2c8e40a
+Source revision: REDOWN cc7cab5dccec715708dfe6a25a63d349e2c8e40a (v0.5.27). This ID is provenance only. Codex will not have original repository access.
 
-Selected files only, not a runnable standalone package or production dependency. The previous commit copied 12 source files; this commit adds 12 source, test, documentation and license files. Source paths are retained. Consult the pinned original tree for missing dependencies. Do not deploy the historical worker, copy old provider logic wholesale, or broaden permissions. The current application and offline lab are authoritative.
+Physically vendored source includes the Python CLI, SDK, native host and installation, manifest, adaptive orchestration, inventory, reporting, recovery and supporting schemas; extension-side pairing, worker, session and streaming code; canonical historical engine/contracts and validators; selected regression tests, historical evidence and license files. The integration-excerpts directory contains relevant original background.js and options.html sections with line numbers. No matching laboratory excerpt was found in historical options.js, so it was not copied. Historical GUI-only Python code is intentionally excluded. The exact older Quick baseline comparison is in ../quick-live-reference/ (its selected manifest.py path returned 404; use the newer local manifest module). Additional older references are already in ../../upload-recovery/.
 
-The earlier live Quick acceptance benchmark is https://github.com/thanks-cohn/REDOWN/tree/2acca6f2a0e0fbdd37dcc15012033cb7bfbb7965 (inferred tested revision). See ../../upload-recovery/comprehensive-lab-reference and ../../upload-recovery/legacy-lab for earlier reference files and ledger. Live 19.8 MiB evidence and simulated native 200 MiB evidence are different. No private corpus, secrets or raw owner reports copied.
+These are selected source snapshots, not an independently runnable historical package. Adapt compatible code to the current Click2Cloud API. Do not require external REDOWN access; supply minimal compatible missing dependencies locally. Preserve current production authentication, API, permissions and application behavior. No historical cloud deployment or private data is supplied. Historical live Quick and streaming results are limited evidence, not full acceptance of the new workload.
 
-All files selected for this batch were retrieved.
-
-Read ../CODEX_REQUEST.md before implementation.
+See ../CODEX_REQUEST.md for all requirements.
