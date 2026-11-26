@@ -316,11 +316,25 @@ try{
     const restored=read();
     archiveSpacing.push({mode,view,titleLift:initialArchive.title-settled.title,contentLift:initialArchive.content-settled.content,gap: settled.gap-initialArchive.gap,settledPhase,restored:Math.abs(restored.title-initialArchive.title)<.1&&Math.abs(restored.content-initialArchive.content)<.1});
    }
+   const titleCentering=[];
+   for(const mode of ['elegant','hyperspace'])for(const view of ['settings','screenshot']){
+    controller.viewChanged();shell.dataset.view=view;choose(mode);
+    const fixture=document.createElement('section');fixture.className=view==='screenshot'?'page screenshot-page':'page';
+    fixture.innerHTML='<h1><span data-hyper-center-title>'+ (view==='settings'?'Settings':'Screenshots')+'</span></h1><section class="card">Content</section>';
+    main.replaceChildren(fixture);main.scrollTop=0;
+    const label=fixture.querySelector('[data-hyper-center-title]'),content=fixture.lastElementChild;
+    const read=()=>{const r=label.getBoundingClientRect(),c=content.getBoundingClientRect();return {center:r.left+r.width/2,top:r.top,contentX:c.left,contentWidth:c.width,contentTop:c.top};};
+    const initialTitle=read(),hr=header.getBoundingClientRect(),target=hr.left+hr.width/2;
+    move(190,500);move(190,20);move(190,500);advance(5000);advance(mode==='elegant'?525:6950);
+    const mid=read();advance(10000);const settled=read(),settledPhase=phase();
+    move(190,20);advance(1000);const restored=read();
+    titleCentering.push({mode,view,initial:initialTitle,mid,settled,restored,target,settledPhase,cleared:!main.style.getPropertyValue('--hyper-title-center')});
+   }
    controller.viewChanged();main.replaceChildren(...originalChildren);main.scrollTop=originalScroll;shell.dataset.view='remotes';choose('elegant');
    move(190,20);move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
@@ -341,6 +355,15 @@ try{
   assert.equal(hyperspace.themeHoverPhase,'open','Theme control hover and redundant skin writes must not restore Elegant');
   assert.equal(hyperspace.viewReveal.length,6);
   assert.equal(hyperspace.archiveSpacing.length,4);
+  assert.equal(hyperspace.titleCentering.length,4);
+  for(const v of hyperspace.titleCentering){
+   assert.equal(v.settledPhase,'open');
+   assert(Math.abs(v.settled.center-v.target)<.2,'Title ends centered in Shelf');
+   assert(v.mid.center>v.initial.center&&v.mid.center<v.target,'Title glides to center');
+   assert(v.settled.top<v.initial.top,'Title rises with the page');
+   assert([v.mid,v.settled,v.restored].every(p=>Math.abs(p.contentX-v.initial.contentX)<.2&&Math.abs(p.contentWidth-v.initial.contentWidth)<.2),'Cards retain horizontal layout');
+   assert(Math.abs(v.restored.center-v.initial.center)<.2&&Math.abs(v.restored.top-v.initial.top)<.2&&Math.abs(v.restored.contentTop-v.initial.contentTop)<.2&&v.cleared,'Original alignment restored and style cleared');
+  }
   assert(hyperspace.archiveSpacing.every(v=>v.settledPhase==='open'&&v.contentLift>0&&v.contentLift<=28.1&&v.titleLift>v.contentLift&&v.titleLift<=(v.view==='queue'?42.1:36.1)&&Math.abs(v.titleLift-v.contentLift-(v.view==='queue'?Math.min(14,v.contentLift*.6):Math.min(8,v.contentLift*.4)))<.1&&v.gap>0&&v.restored),'History and Queue preserve a relaxed title/content gap and restore cleanly');
   assert(hyperspace.viewReveal.every(v=>v.before==='open'&&v.after==='return'&&v.closed==='closed'),'Former header region reveals consistently on every supported Shelf tab');
   assert.equal(hyperspace.noPaint.visibility,'hidden');assert.equal(hyperspace.noPaint.background,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.image,'none');assert.equal(hyperspace.noPaint.border,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.shadow,'none');assert.equal(hyperspace.noPaint.themeBackground,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.bodyColor,hyperspace.noPaint.pageColor);
