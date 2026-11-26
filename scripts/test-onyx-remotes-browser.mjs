@@ -320,15 +320,17 @@ try{
    for(const mode of ['elegant','hyperspace'])for(const view of ['settings','screenshot']){
     controller.viewChanged();shell.dataset.view=view;choose(mode);
     const fixture=document.createElement('section');fixture.className=view==='screenshot'?'page screenshot-page':'page';
-    fixture.innerHTML='<h1><span data-hyper-center-title>'+ (view==='settings'?'Settings':'Screenshots')+'</span></h1><section class="card">Content</section>';
+    fixture.innerHTML='<h1><span data-hyper-center-title>'+ (view==='settings'?'Settings':'Screenshots')+'</span></h1>'+(view==='screenshot'?'<div class="muted" data-keys><p><span data-hyper-center-shortcuts>Alt+Q · Ctrl+Shift+Y</span></p></div>':'')+'<section class="card">Content</section>';
     main.replaceChildren(fixture);main.scrollTop=0;
-    const label=fixture.querySelector('[data-hyper-center-title]'),content=fixture.lastElementChild;
-    const read=()=>{const r=label.getBoundingClientRect(),c=content.getBoundingClientRect();return {center:r.left+r.width/2,top:r.top,contentX:c.left,contentWidth:c.width,contentTop:c.top};};
+    const label=fixture.querySelector('[data-hyper-center-title]'),content=fixture.lastElementChild,keys=fixture.querySelector('[data-hyper-center-shortcuts]');
+    const read=()=>{const r=label.getBoundingClientRect(),c=content.getBoundingClientRect();const k=keys?.getBoundingClientRect();return {center:r.left+r.width/2,top:r.top,contentX:c.left,contentWidth:c.width,contentTop:c.top,keysCenter:k?k.left+k.width/2:null};};
     const initialTitle=read(),hr=header.getBoundingClientRect(),target=hr.left+hr.width/2;
     move(190,500);move(190,20);move(190,500);advance(5000);advance(mode==='elegant'?525:6950);
     const mid=read();advance(10000);const settled=read(),settledPhase=phase();
+    if(keys)keys.textContent='Alt+Shift+Q · Ctrl+Shift+Y';
+    const updated=read();if(keys)keys.textContent='Alt+Q · Ctrl+Shift+Y';
     move(190,20);advance(1000);const restored=read();
-    titleCentering.push({mode,view,initial:initialTitle,mid,settled,restored,target,settledPhase,cleared:!main.style.getPropertyValue('--hyper-title-center')});
+    titleCentering.push({mode,view,initial:initialTitle,mid,settled,updated,restored,target,settledPhase,cleared:!main.style.getPropertyValue('--hyper-title-center')&&!main.style.getPropertyValue('--hyper-shortcut-center')&&!main.style.getPropertyValue('--hyper-shortcut-progress')});
    }
    controller.viewChanged();main.replaceChildren(...originalChildren);main.scrollTop=originalScroll;shell.dataset.view='remotes';choose('elegant');
    move(190,20);move(190,500);advance(5200);choose('none');advance(20000);
@@ -361,6 +363,11 @@ try{
    assert(Math.abs(v.settled.center-v.target)<.2,'Title ends centered in Shelf');
    assert(v.mid.center>v.initial.center&&v.mid.center<v.target,'Title glides to center');
    assert(v.settled.top<v.initial.top,'Title rises with the page');
+   if(v.view==='screenshot'){
+    assert(v.mid.keysCenter>v.initial.keysCenter&&v.mid.keysCenter<v.target,'Shortcut line glides with title');
+    assert(Math.abs(v.settled.keysCenter-v.target)<.2&&Math.abs(v.updated.keysCenter-v.target)<.2,'Shortcut line remains centered even when key labels change');
+    assert(Math.abs(v.restored.keysCenter-v.initial.keysCenter)<.2,'Shortcut line returns to original alignment');
+   }
    assert([v.mid,v.settled,v.restored].every(p=>Math.abs(p.contentX-v.initial.contentX)<.2&&Math.abs(p.contentWidth-v.initial.contentWidth)<.2),'Cards retain horizontal layout');
    assert(Math.abs(v.restored.center-v.initial.center)<.2&&Math.abs(v.restored.top-v.initial.top)<.2&&Math.abs(v.restored.contentTop-v.initial.contentTop)<.2&&v.cleared,'Original alignment restored and style cleared');
   }
