@@ -14,7 +14,7 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Release | Energy-dependent | The accumulated inward tension and deeper downward navigation dip reverse into the release: the rails visibly bow away from the center as pressure strikes their interior. The deformed rails and the header surfaces then surge outward together. Navigation text is launched upward beyond the header and viewport, with a late fade only as it exits. The lower content is pulled upward by the same concentrated release impulse. The rail glints lengthen briefly and gain a final burst of travel before vanishing with the color boundary. |
 | Settle | Energy-dependent | A stronger, energy-dependent upward overshoot settles into a constant final position. |
 | Open | Indefinite | The page color fills the header space and the page stays raised. No ongoing animation-frame loop. |
-| Ocean horizon | After 10 uninterrupted seconds open | A delicate, theme-aware field of shallow, slightly skewed horizontal ripples fades into the cleared header over 1.5 seconds. |
+| Ocean horizon | After 2 uninterrupted seconds open | Four long, straight water bands and eight shallow, slightly skewed ripples fade together into the cleared header over 0.5 seconds. |
 | Return | Up to about 0.88 seconds | Header hover reverses from the current state and restores the surfaces, navigation and content together. No restart from an unrelated frame. |
 
 Settings → Aesthetic → Header Hyperspace offers an enable switch and a buildup duration of 1–20 whole seconds, persisted locally in `headerHyperspaceV1`. The buildup is separate from the initial fixed five-second idle delay. Longer buildup produces a deeper outward bend, a stronger, quicker outward release and more upward overshoot, without changing the final geometry. Limits are deliberate to keep motion legible and bounded.
@@ -37,7 +37,7 @@ These are structural rendering optimizations, not a measured frame-rate guarante
 
 ## Ocean horizon
 
-The settled state schedules one cancellable ten-second timer. A long, fine horizon and four rows of broken ripples are generated from deterministic perspective geometry: row spacing follows a power of 1.65, ripple widths increase toward the foreground, and bounded sinusoidal variation gives each line a shallow skew. The detail occupies the central 68% of the available header and is clipped to the remaining painted space above the lifted page. It is decorative, static after its one-time opacity fade, and consumes no continuous animation frames. Hover, navigation, resize, theme changes, disablement and all existing reset paths remove it and cancel its timer. The Hyperspace release timing is unchanged.
+The settled state schedules one cancellable two-second timer. Four spaced, long horizontal lines and two foreground rows of four broken ripples (12 lines total) are generated from deterministic perspective geometry: row spacing follows a power of 1.22, widths and spacing increase toward the foreground, and bounded sinusoidal variation gives the broken ripples a shallow skew. The higher-contrast detail occupies up to the central 88% of the available header and is clipped to the remaining painted space above the lifted page. It is decorative, static after its one-time opacity fade, and consumes no continuous animation frames. Hover, navigation, resize, theme changes, disablement and all existing reset paths remove it and cancel its timer. The Hyperspace release timing is unchanged.
 
 ## Interaction contract
 
