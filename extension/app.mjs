@@ -663,14 +663,37 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
+// Temporary header surface: never replace navigation controls or delay a view change.
+let skyOpeningTimer;
+function clearSkyOpening(){
+ clearTimeout(skyOpeningTimer);skyOpeningTimer=undefined;
+ document.body.removeAttribute('data-sky-opening');
+ $('.app-header>.sky-canopy')?.remove();
+}
+function playSkyOpening(previous,next){
+ clearSkyOpening();
+ if(previous===next||previous==='explorer'||next==='explorer'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const header=$('.app-header'),style=getComputedStyle(header),canopy=document.createElement('div');
+ canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
+ canopy.style.setProperty('--sky-surface',style.background);
+ canopy.style.setProperty('--sky-rail',style.borderBottomColor);
+ for(const side of ['left','right']){
+  const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);
+ }
+ header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
+ canopy.firstElementChild.addEventListener('animationend',event=>{
+  if(event.animationName==='sky-left'&&canopy.isConnected)clearSkyOpening();
+ });
+ skyOpeningTimer=setTimeout(()=>{if(canopy.isConnected)clearSkyOpening();},2400);
+}
 // Visual-only morph eligibility uses the same connected state as the Explorer sign-out control.
 function prepareManageMorph(next){
  if(next===view)return;
  $('#shell').toggleAttribute('data-manage-morph',next==='explorer'&&view!=='remotes'&&view!=='explorer'&&connection.state==='CONNECTED');
 }
-async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;const previousView=view;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next)playSkyOpening(previousView,next);$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -804,7 +827,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){clearSkyOpening();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1932,6 +1955,9 @@ async function renderSettings(){
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
+$('.app-header').addEventListener('pointerdown',clearSkyOpening,{capture:true});
+document.addEventListener('keydown',clearSkyOpening,{capture:true});
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',clearSkyOpening);
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
 headerMore.onclick=()=>{headerMenu.hidden=!headerMenu.hidden;headerMore.setAttribute('aria-expanded',String(!headerMenu.hidden));if(!headerMenu.hidden)headerItems()[0]?.focus();};
