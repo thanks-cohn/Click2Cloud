@@ -1,4 +1,3 @@
-import {createSkyIdle,createSkyHover,reverseSkyAnimations} from './sky-idle.mjs';
 import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
@@ -664,49 +663,14 @@ function markCurrentSearchStale(){
  filenameSearch.error='Results may have changed. Use Refresh to recheck.';
  renderFiles();
 }
-// Persistent open header surface: restore on interaction, not on animation completion.
-function finishSkyOpening(){
- document.body.removeAttribute('data-sky-opening');
- $('.app-header>.sky-canopy')?.remove();
-}
-function clearSkyOpening(){
- const header=$('.app-header'),canopy=header.querySelector('.sky-canopy');
- if(!canopy)return;
- if(view==='explorer'||window.matchMedia('(prefers-reduced-motion: reduce)').matches){finishSkyOpening();return;}
- if(canopy.hasAttribute('data-returning'))return;
- canopy.setAttribute('data-returning','');
- const animations=[...header.getAnimations({subtree:true}),...$('#shell').getAnimations()].filter(animation=>animation.animationName?.startsWith('sky-'));
- void reverseSkyAnimations(animations).finally(()=>{if(canopy.isConnected)finishSkyOpening();});
-}
-function playSkyOpening(){
- finishSkyOpening();
- if(!skyEligible())return;
- const header=$('.app-header'),style=getComputedStyle(header),canopy=document.createElement('div');
- canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
- canopy.style.setProperty('--sky-surface',style.background);
- canopy.style.setProperty('--sky-rail',style.borderBottomColor);
- const pageColor=[$('#main'),$('#shell'),document.body].map(element=>getComputedStyle(element).backgroundColor).find(color=>color!=='rgba(0, 0, 0, 0)'&&color!=='transparent')||getComputedStyle($('#shell')).getPropertyValue('--bg');
- canopy.style.setProperty('--sky-page-surface',pageColor);
- for(const side of ['left','right']){
-  const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);
- }
- const liquid=document.createElement('div');liquid.className='sky-liquid';canopy.append(liquid);
- header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
- // CSS retains the final open frame until clearSkyOpening is explicitly called.
-}
-function skyEligible(){
- const header=$('.app-header');
- return view!=='explorer'&&!document.hidden&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-const skyIdle=createSkyIdle({eligible:skyEligible,open:playSkyOpening,close:clearSkyOpening});
 // Visual-only morph eligibility uses the same connected state as the Explorer sign-out control.
 function prepareManageMorph(next){
  if(next===view)return;
  $('#shell').toggleAttribute('data-manage-morph',next==='explorer'&&view!=='remotes'&&view!=='explorer'&&connection.state==='CONNECTED');
 }
-async function show(next){if(next==='downloads'&&!debugMode)return;const previousView=view;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
+async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;if(previousView!==next){if(next==='explorer')skyIdle.cancel();else skyIdle.stopPending();}$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -840,7 +804,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){skyIdle.cancel();finishSkyOpening();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1968,16 +1932,6 @@ async function renderSettings(){
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
-const skyHeader=$('.app-header'),skyHover=createSkyHover(skyIdle);
-// Only actual pointer movement across the header boundary can restart the timer.
-skyHeader.addEventListener('pointerenter',()=>skyHover.move(true));
-document.addEventListener('pointermove',event=>skyHover.move(skyHeader.contains(event.target)),{passive:true,capture:true});
-document.documentElement.addEventListener('pointerleave',()=>skyHover.move(false));
-skyHeader.addEventListener('pointerdown',skyIdle.cancel,{capture:true});
-skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible')){skyIdle.cancel();finishSkyOpening();}});
-skyHeader.addEventListener('keydown',skyIdle.cancel);
-document.addEventListener('visibilitychange',skyIdle.stopPending);
-window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.cancel);
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
 headerMore.onclick=()=>{headerMenu.hidden=!headerMenu.hidden;headerMore.setAttribute('aria-expanded',String(!headerMenu.hidden));if(!headerMenu.hidden)headerItems()[0]?.focus();};
@@ -2000,7 +1954,7 @@ $('#dialog').addEventListener('cancel',event=>{
 });
 async function bootstrap(){
  // Remotes and its independent controls precede every optional read. No fake config.
- view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header [data-view], #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');skyIdle.reset();
+ view='remotes';$('#shell').dataset.view='remotes';renderRemotes();$$('header [data-view], #manage').forEach(b=>b.disabled=false);$('header [data-view="remotes"]').classList.add('active');
  const configuration=readWithRetry(()=>refreshState({quiet:true,readTimeout:5000})).catch(error=>{configurationIssue={code:error.code??'CURRENT_READ_UNAVAILABLE',method:error.method,stage:error.stage,diagnostic:error.diagnostic};}).finally(()=>{
   try{if(view==='remotes'&&$('#remotes-connection'))renderRemotes();}
   finally{document.dispatchEvent(new Event('redown-color-mode-ready'));}
