@@ -411,3 +411,8 @@
  border-color:transparent;
  box-shadow:none;
 }
+
+/* History card metadata: status above timestamp, destination in italics. */
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card .queue-card-status > .history-card-timestamp{order:1}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card .queue-card-summary > .queue-location,
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card:not([data-provider=cloudflare]) > .queue-card-header + .queue-location{font-style:italic}
