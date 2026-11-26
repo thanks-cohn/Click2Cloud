@@ -1,0 +1,63 @@
+/* Minimal Underline: one shared treatment for native single-choice dropdowns.
+   Keep original controls, values, focus, events and form behavior. */
+:root[data-aesthetic] select:not([multiple],[size]):not([hidden]),
+:root[data-aesthetic] select[size="1"]:not([multiple],[hidden]){
+ --select-underline:color-mix(in srgb,var(--muted) 65%,transparent);
+ appearance:auto;
+ border:0;border-block-end:1px solid var(--select-underline);border-radius:0;
+ background:transparent;color:var(--text);box-shadow:none;
+ padding:5px 4px;min-block-size:32px;cursor:pointer;
+ font-size:inherit;transition:border-color .12s ease;
+}
+:root[data-aesthetic] select:not([multiple],[size]):not(:disabled):hover,
+:root[data-aesthetic] select[size="1"]:not([multiple]):not(:disabled):hover{border-block-end-color:var(--accent)}
+:root[data-aesthetic] select:not([multiple],[size]):focus-visible,
+:root[data-aesthetic] select[size="1"]:not([multiple]):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+:root[data-aesthetic] select:disabled{opacity:.5;cursor:default}
+:root[data-aesthetic] select option,:root[data-aesthetic] select optgroup{background-color:var(--panel);color:var(--text)}
+/* Current Chromium: native, top-layer, fully keyboard-operable picker. No custom JS.
+   Older Chromium retains its native popup and arrow. */
+@supports (appearance:base-select) and selector(::picker(select)){
+ :root[data-aesthetic] select:not([multiple],[size]):not([hidden]),
+ :root[data-aesthetic] select[size="1"]:not([multiple],[hidden]){
+  appearance:base-select;align-items:center;gap:10px;
+ }
+ :root[data-aesthetic] select:not([multiple],[size])::picker(select),
+ :root[data-aesthetic] select[size="1"]:not([multiple])::picker(select){
+  appearance:base-select;
+  background:var(--panel);color:var(--text);
+  border:1px solid var(--line);border-radius:8px;
+  padding:4px;margin-block:4px;box-shadow:0 8px 24px #0004;
+  max-block-size:min(320px,65dvh);overflow:auto;
+ }
+ :root[data-aesthetic] select:not([multiple],[size])::picker-icon,
+ :root[data-aesthetic] select[size="1"]:not([multiple])::picker-icon{
+  content:"";inline-size:7px;block-size:7px;flex:none;
+  border-inline-end:1.5px solid currentColor;border-block-end:1.5px solid currentColor;
+  color:var(--muted);transform:rotate(45deg);margin-inline:4px 3px;margin-block-end:3px;
+ }
+ :root[data-aesthetic] select:not([multiple],[size]):open::picker-icon,
+ :root[data-aesthetic] select[size="1"]:not([multiple]):open::picker-icon{transform:rotate(225deg);margin-block-end:-3px}
+ :root[data-aesthetic] select:not([multiple],[size]) option,
+ :root[data-aesthetic] select[size="1"]:not([multiple]) option{
+  padding:7px 9px;border-radius:4px;min-block-size:30px;
+  gap:8px;font-size:inherit;cursor:pointer;
+ }
+ :root[data-aesthetic] select:not([multiple],[size]) option:checked,
+ :root[data-aesthetic] select[size="1"]:not([multiple]) option:checked{background:var(--selected);color:var(--text)}
+ :root[data-aesthetic] select:not([multiple],[size]) option:hover:not(:disabled),
+ :root[data-aesthetic] select[size="1"]:not([multiple]) option:hover:not(:disabled){background:var(--raised)}
+ :root[data-aesthetic] select:not([multiple],[size]) option:disabled,
+ :root[data-aesthetic] select[size="1"]:not([multiple]) option:disabled{opacity:.5;cursor:default}
+ :root[data-aesthetic] select:not([multiple],[size]) option::checkmark,
+ :root[data-aesthetic] select[size="1"]:not([multiple]) option::checkmark{order:1;margin-inline-start:auto;color:var(--accent)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root[data-aesthetic] select{transition:none}
+}
+@media(forced-colors:active){
+ :root[data-aesthetic] select:not([multiple],[size]):not([hidden]),
+ :root[data-aesthetic] select[size="1"]:not([multiple],[hidden]){
+  border-block-end-color:ButtonText;color:ButtonText;background:Canvas;
+ }
+}
