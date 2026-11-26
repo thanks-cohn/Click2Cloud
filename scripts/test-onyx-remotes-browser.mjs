@@ -50,6 +50,20 @@ try{
  assert(await page.locator('#theme .onyx-sun').isVisible());
  assert(!(await page.locator('#theme .onyx-moon').isVisible()));
  await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ // Every view shares the same header glyph, dimensions and color.
+ const iconAppearance=()=>page.locator('#theme .onyx-mode-icon:visible').evaluate(el=>{
+  const style=getComputedStyle(el);return {className:el.getAttribute('class'),width:style.width,height:style.height,color:style.color};
+ });
+ for(const mode of ['dark','light']){
+  await page.evaluate(mode=>{document.documentElement.dataset.theme=mode;document.querySelector('#shell').dataset.view='remotes';},mode);
+  const reference=await iconAppearance();
+  for(const view of ['queue','history','explorer','settings','screenshot','downloads']){
+   await page.evaluate(view=>document.querySelector('#shell').dataset.view=view,view);
+   assert.deepEqual(await iconAppearance(),reference,'Shared appearance icon must not change on '+view);
+   assert.equal(await page.locator('#theme :is(.theme-sun,.theme-moon,.chrome-appearance-icon):visible').count(),0);
+  }
+ }
+ await page.evaluate(()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';});
  const scrollbar=await page.locator('#main').evaluate(el=>{
   const width=getComputedStyle(el,'::-webkit-scrollbar').width;
   const thumb=getComputedStyle(el,'::-webkit-scrollbar-thumb');

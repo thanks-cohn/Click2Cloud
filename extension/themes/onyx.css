@@ -50,11 +50,13 @@
 }
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .header-controls{gap:0}
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #header-more{min-inline-size:30px;padding-inline:4px}
-:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme{color:var(--onyx-subtitle)}
-:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme :is(.theme-sun,.theme-moon){display:none}
-:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme .onyx-mode-icon{width:19px;height:19px;color:var(--onyx-subtitle)}
-:root[data-aesthetic=onyx]:not([data-theme=light]) body:has(#shell[data-view=remotes]) #theme .onyx-moon,
-:root[data-aesthetic=onyx][data-theme=light] body:has(#shell[data-view=remotes]) #theme .onyx-sun{display:block!important}
+/* Shared Onyx appearance control: identical SVGs on every Shelf view. */
+:root[data-aesthetic=onyx] .app-header #theme{color:#b4c5dc}
+:root[data-aesthetic=onyx]:is([data-theme=light],[data-onyx-finish=platinum]) .app-header #theme{color:#465c77}
+:root[data-aesthetic=onyx] .app-header #theme :is(.theme-sun,.theme-moon,.chrome-appearance-icon){display:none!important}
+:root[data-aesthetic=onyx] .app-header #theme .onyx-mode-icon{width:19px;height:19px;color:inherit}
+:root[data-aesthetic=onyx]:not([data-theme=light]) .app-header #theme .onyx-moon,
+:root[data-aesthetic=onyx][data-theme=light] .app-header #theme .onyx-sun{display:block!important}
 @media(max-width:345px){
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button{font-size:12px;padding-inline:4px}
