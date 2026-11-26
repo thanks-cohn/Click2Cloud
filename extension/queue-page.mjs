@@ -188,6 +188,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   const form=root.querySelector('form'),input=form.querySelector('input'),find=root.querySelector('[data-history-find]');
   const singlePage=root.querySelector('.queue-single-page');
   let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, reading, editingPage=false;
+  const pageDisplay=()=>document.documentElement.dataset.aesthetic==='onyx'?String(page).padStart(2,'0'):String(page);
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
   const groupState=new Map(), cardDisclosures=new Map();
   const urlDisclosures=state.urlDisclosures??=new Map();
@@ -269,8 +270,10 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
       form.hidden=pages<=1;
       singlePage.hidden=pages>1 || !result.total;
       input.max=String(pages);
-      if(!editingPage)input.value=String(page);
-      form.querySelector('[data-pages]').textContent='/ '+pages.toLocaleString();
+      if(!editingPage)input.value=pageDisplay();
+      const pageTotal=form.querySelector('[data-pages]');
+      pageTotal.textContent='/ '+pages.toLocaleString();
+      pageTotal.dataset.total=pages.toLocaleString();
       form.querySelector('[data-first]').disabled=form.querySelector('[data-prev]').disabled=page<=1;
       form.querySelector('[data-last]').disabled=form.querySelector('[data-next]').disabled=page>=pages;
       const signature=JSON.stringify([prefs,page,result.items.map(row=>[row.recordId,row.updatedAt,row.status,canRead(row)])]);
@@ -286,7 +289,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   form.onsubmit=event=>{event.preventDefault();if(input.reportValidity())select(input.valueAsNumber);};
   input.oninput=()=>{editingPage=true;};
   input.onchange=()=>{if(input.checkValidity())select(input.valueAsNumber);};
-  input.onblur=()=>{if(!input.checkValidity()){editingPage=false;input.value=String(page);}};
+  input.onblur=()=>{if(!input.checkValidity()){editingPage=false;input.value=pageDisplay();}};
   form.querySelector('[data-first]').onclick=()=>select(1);
   form.querySelector('[data-prev]').onclick=()=>select(page-1);
   form.querySelector('[data-next]').onclick=()=>select(page+1);

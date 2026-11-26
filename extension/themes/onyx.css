@@ -416,3 +416,59 @@
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card .queue-card-status > .history-card-timestamp{order:1}
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card .queue-card-summary > .queue-location,
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card:not([data-provider=cloudflare]) > .queue-card-header + .queue-location{font-style:italic}
+
+/* Onyx History pagination: paired open rails and editable digital counter. */
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager:not([hidden]){
+ --pager-ink:var(--onyx-subtitle,#a8bbd8);
+ --pager-number:var(--onyx-heading,#c7d9f4);
+ --pager-rule:color-mix(in srgb,var(--pager-ink) 44%,transparent);
+ display:grid;grid-template-columns:repeat(2,minmax(0,40px)) minmax(48px,88px) repeat(2,minmax(0,40px));
+ grid-template-rows:auto auto;column-gap:0;row-gap:0;justify-content:center;align-items:center;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:not(.sr-only){
+ grid-row:1 / 3;inline-size:100%;min-inline-size:0;block-size:36px;
+ position:relative;border:0;border-block:1px solid var(--pager-rule);
+ border-radius:0;box-shadow:none;background:transparent;color:var(--pager-ink);font-size:0;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-first]{grid-column:1}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-prev]{grid-column:2}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-next]{grid-column:4}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-last]{grid-column:5}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:not(.sr-only)::before,
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::after{
+ content:"";position:absolute;inset-block-start:50%;inset-inline-start:50%;inline-size:8px;block-size:8px;
+ border-block-start:1.5px solid currentColor;border-inline-end:1.5px solid currentColor;
+ transform:translate(-65%,-50%) rotate(45deg);pointer-events:none;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-prev])::before,
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-first]::after{
+ transform:translate(-35%,-50%) rotate(-135deg);
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::before{inset-inline-start:calc(50% - 4px)}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>:is([data-first],[data-last])::after{inset-inline-start:calc(50% + 4px)}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:not(.sr-only):hover:not(:disabled){
+ color:var(--text);background:color-mix(in srgb,var(--pager-ink) 13%,transparent);box-shadow:none;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>button:disabled:not(.sr-only){
+ opacity:1;color:color-mix(in srgb,var(--pager-ink) 35%,transparent);cursor:default;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>label{
+ grid-column:3;grid-row:1;display:block;margin-inline:6px;position:relative;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>label>span{
+ position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager input{
+ inline-size:100%;padding:0;border:0;border-block-end:1px solid transparent;border-radius:0;
+ background:transparent;box-shadow:none;color:var(--pager-number);
+ font:300 clamp(22px,7vw,28px)/1.15 "Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager input:is(:hover,:focus){
+ border-block-end-color:var(--focus,var(--pager-ink));
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-pages]{
+ grid-column:3;grid-row:2;text-align:center;font-size:0;color:var(--muted);margin-inline:2px;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager>[data-pages]::after{
+ content:"OF " attr(data-total);font:400 9px/1.3 "Segoe UI",system-ui,sans-serif;letter-spacing:.1em;
+}
