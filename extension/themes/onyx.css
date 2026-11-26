@@ -290,7 +290,9 @@
  & .remote-provider-actions>[data-go]{
   justify-self:end;box-sizing:border-box;inline-size:var(--onyx-browse-width);max-inline-size:none;
   margin-inline:0 var(--onyx-browse-inset);padding:5px 15px;display:flex;align-items:center;justify-content:flex-end;
-  white-space:nowrap;overflow:hidden;transition:inline-size var(--onyx-browse-duration) ease,filter .2s ease;
+  white-space:nowrap;overflow:visible;transition:inline-size var(--onyx-browse-duration) ease,filter .2s ease;
+  /* The SVG strokes occupy the original border box; padding-box overflow
+     clipping would otherwise erase the one-pixel outline. */
   position:relative;border-color:transparent;
  }
  & [data-go]>.onyx-browse-outline{
