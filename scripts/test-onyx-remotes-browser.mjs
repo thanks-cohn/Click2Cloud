@@ -130,6 +130,19 @@ try{
  await page.evaluate(async()=>{document.querySelector('#scrollbar-fixture').remove();document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
  const google=page.locator('[data-provider=google]'),dropbox=page.locator('[data-provider=dropbox]');
  assert.deepEqual(await page.locator('.remote-provider .onyx-provider-meta').allTextContents(),['15 GB Free','5 GB Free','2 GB Free']);
+ // Exercise the real projection on mounted provider cards without credentials.
+ await page.evaluate(async()=>{
+  const {paintProviderUploadProgress}=await import('/extension/onyx-provider-progress.mjs');
+  window.paintUploadFixture=jobs=>paintProviderUploadProgress(document,jobs);
+ });
+ const free=dropbox.locator('.onyx-free-caption'),transfer=dropbox.locator('.onyx-provider-transfer');
+ await page.evaluate(()=>window.paintUploadFixture([{provider:'dropbox',status:'uploading',progress:37}]));
+ assert(await transfer.isVisible());assert.equal(await transfer.getAttribute('aria-valuenow'),'37');
+ assert.equal(await free.isVisible(),false);
+ await page.evaluate(()=>window.paintUploadFixture([{provider:'dropbox',status:'uploading'},{provider:'dropbox',status:'verifying'}]));
+ assert.equal(await transfer.getAttribute('aria-valuenow'),null);
+ await page.evaluate(()=>window.paintUploadFixture([]));
+ assert.equal(await transfer.isVisible(),false);assert(await free.isVisible());
  const box=locator=>locator.boundingBox();
  for(const width of [320,380,480,800]){
   await page.setViewportSize({width,height:760});await page.mouse.move(0,0);
@@ -172,34 +185,34 @@ try{
   });
   const waitWidth=async width=>page.waitForFunction(({el,width})=>Math.abs(el.getBoundingClientRect().width-width)<.1,{el:await browse.elementHandle(),width});
   await page.mouse.move(0,0);
-  await waitWidth(52);
+  await waitWidth(44);
   const idle=await browseState();
   assert.equal(idle.word,'0');assert.equal(idle.closed,'1');assert.equal(idle.open,'0');
   // Sample the entire transition, starting with the pointer entering the card.
   // Refresh must remain invisible on every frame before the dock reaches full width.
   const frames=page.evaluate(async()=>{
    const card=document.querySelector('[data-provider=dropbox]'),button=card.querySelector('[data-go]'),refresh=card.querySelector('[data-refresh]');
-   const samples=[];const start=performance.now(),limit=start+1750;
+   const samples=[];const start=performance.now(),limit=start+3000;
    await new Promise(resolve=>{function frame(){samples.push({time:performance.now()-start,width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity)});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
    return samples;
   });
   await browse.hover();
-  const expandedWidth=width<=345?100:110;
+  const expandedWidth=width<=345?88:92;
   await waitWidth(expandedWidth);
   const expanded=await browseState();
   const samples=await frames;
-  assert(samples.some(f=>f.width>52&&f.width<expandedWidth-.5),'Expected intermediate Browse expansion frames');
+  assert(samples.some(f=>f.width>44&&f.width<expandedWidth-.5),'Expected intermediate Browse expansion frames');
   assert(samples.every(f=>f.width>=expandedWidth-.5||f.opacity===0),'Refresh must not appear before Browse is fully expanded');
   const fullyExpanded=samples.find(f=>f.width>=expandedWidth-.5);
   const firstRefresh=samples.find(f=>f.opacity>0);
-  assert(fullyExpanded&&firstRefresh&&firstRefresh.time-fullyExpanded.time>=970,'Refresh must wait a full second after expansion (allowing frame sampling tolerance)');
+  assert(fullyExpanded&&firstRefresh&&firstRefresh.time-fullyExpanded.time >=1970,'Refresh must wait two full seconds after expansion (allowing frame sampling tolerance)');
   assert(samples.some(f=>f.width>=expandedWidth-.5&&f.opacity===1),'Refresh must finish fading in');
   const sizes=await browse.evaluate(el=>({word:getComputedStyle(el.querySelector('.onyx-browse-word')).fontSize,folder:getComputedStyle(el.querySelector('.onyx-browse-symbol')).width,weight:getComputedStyle(el.querySelector('.onyx-browse-word')).fontWeight,stroke:getComputedStyle(el.querySelector('.onyx-folder-open')).strokeWidth}));
-  assert.deepEqual(sizes,{word:'9px',folder:'14px',weight:'500',stroke:'1.2px'});
+  assert.deepEqual(sizes,{word:'9px',folder:'13px',weight:'400',stroke:'1.1px'});
   assert.equal(expanded.word,'1');assert.equal(expanded.closed,'0');assert.equal(expanded.open,'1');
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
-  await page.mouse.move(0,0);await waitWidth(52);
+  await page.mouse.move(0,0);await waitWidth(44);
   assert.deepEqual(await allBoxes(),atRest,'Browse contraction must not move cards');
   const activity=dropbox.locator('[data-activity]');
   await page.evaluate(()=>{window.deferRefresh=true;window.failRefresh=false;});

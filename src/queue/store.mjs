@@ -348,6 +348,15 @@ export function createHistoryStore({indexedDB = globalThis.indexedDB, locks = gl
       });
     },
     job: recordId=>run(['jobs'],'readonly',s=>request(s.jobs.get(recordId))),
+    // Read only the working rank, including non-cancellable verification.
+    workingProviderJobs: ()=>run(['jobs'],'readonly',async s=>{
+      const items=[];
+      await cursors(s.jobs.index('order'),IDBKeyRange.bound([0],[1],false,true),'next',cursor=>{
+        const job=cursor.value;
+        if(!job.terminal&&['working','uploading','verifying'].includes(job.status))items.push(job);
+      });
+      return items;
+    }),
     activeJobs: (updatedSince=0)=>run(['jobs'],'readonly',async s=>{
       const items=[];
       await cursors(s.jobs.index('order'),IDBKeyRange.upperBound([3],true),'next',cursor=>{

@@ -240,15 +240,16 @@
 .onyx-browse-label{display:none!important}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .legacy-go-label{display:none}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-browse-label{display:inline-flex!important;align-items:center;justify-content:flex-end;white-space:nowrap;font-size:inherit;line-height:1.2}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-browse-symbol{position:relative;display:inline-block;inline-size:14px;block-size:14px;flex:none}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-browse-symbol svg{position:absolute;inset:0;inline-size:100%;block-size:100%;stroke-width:1.2;transition:opacity .16s ease}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-browse-symbol{position:relative;display:inline-block;inline-size:13px;block-size:13px;flex:none}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-browse-symbol svg{position:absolute;inset:0;inline-size:100%;block-size:100%;stroke-width:1.1;transition:opacity .16s ease}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-folder-closed{opacity:0}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider [data-go] .onyx-folder-open{opacity:1}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) [data-go] .onyx-browse-symbol{inline-size:14px;block-size:14px;margin-inline-start:4px}
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
- --onyx-browse-idle:52px;--onyx-browse-expanded:110px;--onyx-browse-inset:12px;
- --onyx-browse-width:var(--onyx-browse-idle);--onyx-edge-width:130px;
- --onyx-browse-duration:.23s;--onyx-refresh-delay:calc(var(--onyx-browse-duration) + 1s);
+ --onyx-browse-idle:44px;--onyx-browse-expanded:92px;--onyx-browse-inset:12px;
+ --onyx-browse-width:var(--onyx-browse-idle);--onyx-edge-width:112px;
+ --onyx-action-outline:color-mix(in srgb,var(--text) 19%,transparent);
+ --onyx-browse-duration:.23s;--onyx-refresh-delay:calc(var(--onyx-browse-duration) + 2s);
  /* The whole card is the hover zone, so moving from Browse to Refresh never collapses the dock. */
  &:is(:hover,:has([data-go]:focus-visible,[data-refresh]:focus-visible,[data-refresh][aria-busy=true])){
   --onyx-browse-width:var(--onyx-browse-expanded);
@@ -257,7 +258,7 @@
   & [data-go] .onyx-folder-closed{opacity:0}
   & [data-go] .onyx-folder-open{opacity:1}
  }
- & .remote-provider-actions>[data-refresh]{opacity:0;pointer-events:none;transition:opacity .18s ease;transition-delay:0s}
+ & .remote-provider-actions>[data-refresh]{opacity:0;pointer-events:none;transition:opacity .24s ease;transition-delay:0s}
  /* Keep the reveal rule after the idle rule, including when a refresh is pending. */
  &:is(:hover,:has([data-go]:focus-visible,[data-refresh]:focus-visible,[data-refresh][aria-busy=true])) .remote-provider-actions>[data-refresh]{
   opacity:1;pointer-events:auto;transition-delay:var(--onyx-refresh-delay);
@@ -268,17 +269,17 @@
  }
  & .remote-provider-actions>[data-go]{
   justify-self:end;box-sizing:border-box;inline-size:var(--onyx-browse-width);max-inline-size:none;
-  margin-inline:0 var(--onyx-browse-inset);padding:5px 18px;display:flex;align-items:center;justify-content:flex-end;
+  margin-inline:0 var(--onyx-browse-inset);padding:5px 15px;display:flex;align-items:center;justify-content:flex-end;
   white-space:nowrap;overflow:hidden;transition:inline-size var(--onyx-browse-duration) ease,filter .2s ease;
  }
- & [data-go] .onyx-browse-word{max-inline-size:0;overflow:hidden;opacity:0;margin-inline-end:0;font-size:9px;font-weight:500;letter-spacing:.4px;transition:max-inline-size var(--onyx-browse-duration) ease,margin-inline-end var(--onyx-browse-duration) ease,opacity .16s ease}
+ & [data-go] .onyx-browse-word{max-inline-size:0;overflow:hidden;opacity:0;margin-inline-end:0;font-size:9px;font-weight:400;letter-spacing:.45px;transition:max-inline-size var(--onyx-browse-duration) ease,margin-inline-end var(--onyx-browse-duration) ease,opacity .16s ease}
  & [data-go] .onyx-folder-closed{opacity:1}
  & [data-go] .onyx-folder-open{opacity:0}
 }
 @media(max-width:345px){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
-  --onyx-browse-expanded:100px;--onyx-browse-inset:8px;--onyx-edge-width:116px;
-  & .remote-provider-actions>[data-go]{padding-inline:17px}
+  --onyx-browse-expanded:88px;--onyx-browse-inset:8px;--onyx-edge-width:104px;
+  & .remote-provider-actions>[data-go]{padding-inline:15px}
  }
 }
 @media(hover:none),(pointer:coarse){
@@ -314,4 +315,31 @@
 @media(prefers-reduced-motion:reduce){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) .remote-provider-actions>[data-connect],
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected] .remote-provider-actions>[data-go] .onyx-browse-label{animation:none}
+}
+
+/* The free-tier caption and upload line occupy the same footprint.
+   The line is purely a read-only projection of Queue job state. */
+.onyx-provider-transfer{display:none!important}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-meta{position:relative}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-meta[data-onyx-transfer] .onyx-free-caption{visibility:hidden}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-meta[data-onyx-transfer] .onyx-provider-transfer:not([hidden]){
+ display:block!important;position:absolute;inset-inline-start:0;inset-block-start:50%;
+ inline-size:min(100%,100px);block-size:2px;transform:translateY(-50%);
+ background:color-mix(in srgb,var(--text) 13%,transparent);border-radius:99px;overflow:hidden;
+}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-transfer-fill{
+ display:block;block-size:100%;inline-size:var(--onyx-transfer-percent,100%);border-radius:99px;
+ background:var(--onyx-blue);transition:inline-size .2s ease;
+}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-transfer:not([aria-valuenow]) .onyx-transfer-fill{
+ inline-size:35%;animation:onyx-provider-transfer-sweep 1.6s ease-in-out infinite;
+}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:has(.onyx-provider-meta[data-onyx-transfer]):not(:has(.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty))) .remote-provider-title .onyx-provider-meta{visibility:visible}
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:has(.onyx-provider-meta[data-onyx-transfer]):not(:has(.remote-provider-info :is([data-feedback],[data-availability],[data-navigation]):not(:empty))) .remote-provider-activity:not([hidden]){clip-path:inset(50%)}
+@keyframes onyx-provider-transfer-sweep{
+ 0%{transform:translateX(-100%)}100%{transform:translateX(286%)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-transfer-fill{transition:none}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .onyx-provider-transfer:not([aria-valuenow]) .onyx-transfer-fill{animation:none;transform:translateX(85%)}
 }

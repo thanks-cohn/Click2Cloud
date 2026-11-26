@@ -1,6 +1,7 @@
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
 import {createQueueService} from './queue-service.mjs';
+import {paintProviderUploadProgress} from './onyx-provider-progress.mjs';
 import {createQueuePage,createHistoryArchive} from './queue-page.mjs';
 import {mountHistorySettings,mountQueueSettings} from './queue-settings.mjs';
 import {installNavigation} from './navigation.mjs';
@@ -455,6 +456,17 @@ const basicCards=createBasicProviderCards({runtime:chrome.runtime,document,permi
  pulseEnabled:()=>visualFeedback.value.cardPulse});
 visualFeedback.subscribe(value=>{if(!value.cardPulse)basicCards.clearSuccesses();});
 const basicDiagnostics=createBasicDiagnosticsExport({runtime:chrome.runtime,confirm:message=>window.confirm(message)});
+let providerProgressRevision=0;
+function refreshProviderUploadProgress(){
+ if(view!=='remotes'||document.documentElement.dataset.aesthetic!=='onyx')return;
+ const revision=++providerProgressRevision;
+ void queueService.store.workingProviderJobs().then(jobs=>{
+  if(revision===providerProgressRevision&&view==='remotes'&&document.documentElement.dataset.aesthetic==='onyx')
+   paintProviderUploadProgress($('#main'),jobs);
+ }).catch(()=>{
+  if(revision===providerProgressRevision&&view==='remotes')paintProviderUploadProgress($('#main'),[]);
+ });
+}
 function renderRemotes(){
   if(view!=='remotes')return;
   connectionElement.remove();
@@ -463,7 +475,7 @@ function renderRemotes(){
     <div class="remotes-intro"><h1 class="remotes-headline"><span>All Your Clouds</span> <span>One Place</span></h1></div>
     <div id="basic-provider-slot"></div>
     <h2 class="remote-interlude"><span><span class="legacy-slogan">The Future Is NOW</span><span class="onyx-slogan">The Future Is Now</span></span><span>True Remote Is Here</span></h2>
-    <div class="card remote-cloudflare"><h2><span class="cf-legacy-mark">☁</span><svg class="cf-chrome-mark" viewBox="0 0 48 32" aria-hidden="true"><path fill="#f48120" d="M4 25a8 8 0 0 1 9-9 13 13 0 0 1 25 2l-3 7Z"/><path fill="#faae40" d="M37 17a7 7 0 1 1 3 12H34Z"/><path fill="#f48120" d="M3 27h30v3H3Z"/></svg> Cloudflare R2</h2><p class="onyx-provider-meta onyx-cloudflare-meta">10 GB Free</p><div id="remotes-connection"></div></div>${setupStatusMarkup()}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<button id="cloudflare-setup" class="remote-v1-copy">Review Cloudflare setup</button>${configurationIssue?recoveryCard():''}</section>`;
+    <div class="card remote-cloudflare"><h2><span class="cf-legacy-mark">☁</span><svg class="cf-chrome-mark" viewBox="0 0 48 32" aria-hidden="true"><path fill="#f48120" d="M4 25a8 8 0 0 1 9-9 13 13 0 0 1 25 2l-3 7Z"/><path fill="#faae40" d="M37 17a7 7 0 1 1 3 12H34Z"/><path fill="#f48120" d="M3 27h30v3H3Z"/></svg> Cloudflare R2</h2><p class="onyx-provider-meta onyx-cloudflare-meta"><span class="onyx-free-caption">10 GB Free</span><span class="onyx-provider-transfer" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span class="onyx-transfer-fill"></span></span></p><div id="remotes-connection"></div></div>${setupStatusMarkup()}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<button id="cloudflare-setup" class="remote-v1-copy">Review Cloudflare setup</button>${configurationIssue?recoveryCard():''}</section>`;
   if(aesthetic.getActive().id!=='standard')$('#cloudflare-setup')?.remove();
   basicCards.mount($('#basic-provider-slot'));
   focusedProvider?.focus({preventScroll:true});
@@ -472,6 +484,7 @@ function renderRemotes(){
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
   renderRepair();
+  refreshProviderUploadProgress();
 }
 async function focusShelf({live=false}={}){
  const request=await api('inspectShelfAttention',{}, {quiet:true});shelfRequest=request;
@@ -2010,6 +2023,7 @@ chrome.runtime.onMessage?.addListener((message,sender)=>{
   }}).catch(()=>{});
   return;
  }
+ if(message?.channel==='queue-history-changed'){refreshProviderUploadProgress();return;}
  if(message?.channel==='screenshot-history-changed')return;
  if(message?.channel==='screenshot-result'){
   void shelfWindow.then(id=>{
