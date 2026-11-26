@@ -33,8 +33,8 @@ body[data-hyperspace]>.app-header :is(nav,.header-more){
  translate:0 calc(0px - var(--hyper-words-up,0px));
 }
 body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none}
-/* Elegant leaves only the R: the invisible header cannot intercept the page.
-   The active logo remains the reveal target; the theme switch fades with nav. */
+/* Elegant keeps the R and theme switch while the invisible header passes input through.
+   The R is the sole hover-reveal target. */
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header{
  pointer-events:none;box-shadow:none!important;
 }
@@ -48,10 +48,10 @@ body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header :is(nav,.header-
  pointer-events:none;
 }
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header #theme{
- opacity:var(--hyper-words,1);
- translate:0 calc(0px - var(--hyper-words-up,0px));
+ opacity:1;visibility:visible;pointer-events:auto;
+ translate:var(--hyper-theme-right,0px) calc(0px - var(--hyper-controls-up,0px));
 }
-body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.header-controls){
+body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.header-more){
  visibility:hidden;
 }
 /* One reservation at launch, one final layout commit. No animated margins. */
