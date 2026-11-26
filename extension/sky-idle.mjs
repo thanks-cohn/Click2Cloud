@@ -32,3 +32,21 @@ export function createSkyHover(idle){
   }
  };
 }
+
+// Reverse the actual opening from its current frame, including mid-flight hover.
+// Clamp filled animations to their endpoint so a long idle never adds return delay.
+export function reverseSkyAnimations(animations,rate=2){
+ const pending=[];
+ for(const animation of animations){
+  const duration=Number(animation.effect?.getComputedTiming().endTime);
+  const time=Math.max(0,Math.min(duration,Number(animation.currentTime)||0));
+  if(!Number.isFinite(duration)||!Number.isFinite(time))continue;
+  animation.pause();
+  animation.currentTime=time;
+  if(time===0)continue;
+  animation.playbackRate=-rate;
+  animation.play();
+  pending.push(animation.finished);
+ }
+ return Promise.allSettled(pending);
+}
