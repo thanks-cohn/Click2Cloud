@@ -1,0 +1,28 @@
+/* Hyperspace is scoped to the active transient state. No idle header changes. */
+body[data-hyperspace]>.app-header{
+ background:var(--hyper-page,var(--bg))!important;
+ border-block-end-color:transparent!important;
+}
+body[data-hyperspace]>.app-header>.hyperspace-overlay{
+ position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;
+}
+.hyperspace-overlay>.hyperspace-surface,.hyperspace-overlay>svg{
+ position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
+}
+.hyperspace-overlay>svg{overflow:hidden}
+.hyperspace-rail{stroke-width:1;vector-effect:non-scaling-stroke}
+.hyperspace-glint{
+ stroke:color-mix(in srgb,var(--text) 80%,var(--accent) 20%);
+ stroke-width:1.7;stroke-linecap:round;vector-effect:non-scaling-stroke;
+}
+body[data-hyperspace]>.app-header>:is(.brand-lockup,nav,.header-controls){position:relative;z-index:1}
+body[data-hyperspace]>.app-header :is(nav,.header-more){
+ opacity:var(--hyper-words,1);
+}
+body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none}
+body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-lift,0px))}
+@media(prefers-reduced-motion:reduce){
+ body[data-hyperspace]>.app-header>.hyperspace-overlay{display:none}
+ body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;pointer-events:auto}
+ body[data-hyperspace]>#shell{margin-block-start:0}
+}
