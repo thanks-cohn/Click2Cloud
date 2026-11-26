@@ -240,7 +240,7 @@ try{
    const phase=()=>document.body.dataset.hyperspace??'closed';
    const move=(x,y)=>document.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
    const phases=[];const main=shell.querySelector('main'),dock=shell.querySelector('#manage-slot');
-   const logoPositions=[];const recordLogo=()=>{const r=header.querySelector('.brand-lockup').getBoundingClientRect();logoPositions.push([r.x,r.y,r.width,r.height]);};recordLogo();
+   const logoPositions=[],providerThemePositions=[];const recordLogo=()=>{const r=header.querySelector('.brand-lockup').getBoundingClientRect();logoPositions.push([r.x,r.y,r.width,r.height]);if(shell.dataset.view==='remotes'){const t=header.querySelector('#theme').getBoundingClientRect();providerThemePositions.push([t.x,t.y,t.width,t.height]);}};recordLogo();
    const initial={shellTop:shell.getBoundingClientRect().top,mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,translate:main.style.translate};
    controller.start();await Promise.resolve();advance(20000);
    const none={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
@@ -305,11 +305,12 @@ try{
    move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
   assert(hyperspace.logoPositions.every(p=>p.every((v,i)=>Math.abs(v-hyperspace.logoPositions[0][i])<.1)),'R stays fixed throughout both animations and restoration');
+  assert(hyperspace.providerThemePositions.every(p=>p.every((v,i)=>Math.abs(v-hyperspace.providerThemePositions[0][i])<.1)),'Providers sun/moon stays fixed throughout both effects and restoration');
   assert.deepEqual(hyperspace.none,{phase:'closed',timers:0,frames:0,overlay:false});
   assert.deepEqual(hyperspace.disabledAgain,hyperspace.none);
   assert.equal(hyperspace.elegantIdle,'closed');assert.equal(hyperspace.elegantMid.phase,'elegant');
