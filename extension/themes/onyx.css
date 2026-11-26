@@ -1,73 +1,57 @@
 /* Onyx preview: the Providers header is shared by every view. Page bodies remain limited to approved surfaces. */
 :root[data-aesthetic=onyx]{--a-package:onyx}
-:root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#13171e;--panel:#1e252f;--raised:#2b3441;--text:#f3f5f8;--muted:#a2afc0;--line:#ffffff25;--accent:#e63357;--selected:#2b3441;--focus:#72aef3;--primary-text:#fff;
  --onyx-heading:#91abdf;--onyx-green:#68d1a4;--onyx-blue:#64b4ff;--onyx-amber:#e9b47e;--onyx-nav:#191f28;
  --frame:var(--onyx-nav);--frame-ink:var(--text);--frame-hover:var(--raised);--frame-accent:var(--accent);--frame-edge:1px solid var(--line);
  --heading-font:"Segoe UI Variable","Segoe UI",system-ui,sans-serif;--body-font:"Segoe UI",system-ui,sans-serif;--control-font:var(--body-font);--heading-weight:650;--heading-slant:normal;--heading-tracking:normal;--card-radius:12px;--card-padding:14px;--surface-shadow:0 3px 8px #0002;--control-radius:7px;
  color:var(--text);font-family:var(--body-font);
 }
-:root[data-aesthetic=onyx][data-theme=light] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx][data-theme=light] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#e8edf3;--panel:#f8fafc;--raised:#e0e7ef;--text:#1c2531;--muted:#617186;--line:#344e6830;--accent:#bd1439;--focus:#1677ec;--primary-text:#fff;--onyx-heading:#191970;--onyx-green:#21805b;--onyx-blue:#1265c8;--onyx-amber:#a56425;--onyx-nav:#f3f6f9;
 }
 :root[data-aesthetic=onyx] .app-header{background:var(--onyx-nav);border-block-end:1px solid var(--line)}
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>main{background:var(--bg)}
-/* Canonical Onyx footer, shared by all Shelf views. The existing DOM and handlers stay intact. */
-:root[data-aesthetic=onyx] #shell>#manage-slot{
+/* Canonical Onyx footer, shared by non-Explorer Shelf views. The existing DOM and handlers stay intact. */
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot{
  position:static;inset:auto;inline-size:100%;block-size:64px;min-block-size:64px;
  padding:10px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);
  justify-content:space-between;align-items:center;box-sizing:border-box;color:var(--text);
 }
-:root[data-aesthetic=onyx] #shell>#manage-slot #manage{
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #manage{
  font:600 12px/1.25 "Segoe UI",sans-serif;background:var(--raised);color:var(--text);
  border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-block-size:37px;
 }
-:root[data-aesthetic=onyx] #shell>#manage-slot #sign-out{
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #sign-out{
  margin-inline-start:auto;font:600 12px/1.25 "Segoe UI",sans-serif;
  background:var(--raised);color:var(--text);border:1px solid var(--line);border-radius:6px;
  padding:8px 12px;min-block-size:37px;
 }
-:root[data-aesthetic=onyx] #shell>#manage-slot :is(#manage,#sign-out):hover:not(:disabled){background:color-mix(in srgb,var(--raised) 75%,var(--text))}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]{
- display:grid;grid-template-columns:minmax(0,var(--tree-split)) minmax(0,1fr);
- grid-template-rows:minmax(0,1fr) 64px;
-}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]>aside{grid-area:1 / 1;inline-size:100%;min-inline-size:0}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]:not([data-collapsed=tree])>aside{padding-block-end:18px}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]>main{grid-area:1 / 2;min-block-size:0}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]>#pane-splitter{inset-block-end:64px}
-:root[data-aesthetic=onyx] #shell[data-view=explorer]>#manage-slot{grid-area:2 / 1 / 3 / 3}
-:root[data-aesthetic=onyx] #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{
- position:static;inset:auto;inline-size:100%;padding:10px 14px;
-}
-:root[data-aesthetic=onyx] #shell[data-view=explorer][data-manage-in-toolbar] #explorer-commands{padding-inline-start:8px}
-@media(max-width:700px){
- :root[data-aesthetic=onyx] #shell[data-view=explorer]:not([data-collapsed=tree])>aside{padding-block-end:12px}
-}
+:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot :is(#manage,#sign-out):hover:not(:disabled){background:color-mix(in srgb,var(--raised) 75%,var(--text))}
 @container(max-width:226px){
- :root[data-aesthetic=onyx] #shell>#manage-slot:has(#sign-out) #manage{inline-size:36px;justify-content:center;padding:0}
+ :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot:has(#sign-out) #manage{inline-size:36px;justify-content:center;padding:0}
 }
 @container(max-width:142px){
- :root[data-aesthetic=onyx] #shell>#manage-slot #manage{inline-size:36px;justify-content:center;padding:0}
+ :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #manage{inline-size:36px;justify-content:center;padding:0}
 }
 /* Shared Providers header and screenshot-derived Remotes geometry. 380px Shelf: ~336px cards, 76px
    ordinary rows, ~65px header and footer. No mock account usage is imported. */
 .onyx-provider-meta,.onyx-slogan,.onyx-provider-detail-toggle,.onyx-mode-icon{display:none!important}
 .legacy-slogan{font:inherit!important;color:inherit!important}
-:root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --onyx-highlight:#ffffff08;--onyx-icon:#344354;--onyx-subtitle:#b4c5dc;
  --frame-focus:var(--focus);--control-weight:600;
 }
-:root[data-aesthetic=onyx]:is([data-onyx-finish=platinum],[data-theme=light]) :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx]:is([data-onyx-finish=platinum],[data-theme=light]) :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#e8edf3;--panel:#f8fafc;--raised:#e0e7ef;--text:#1c2531;--muted:#617186;--line:#344e6830;--accent:#bd1439;--selected:#e0e7ef;--focus:#1677ec;--primary-text:#fff;--onyx-heading:#191970;--onyx-green:#21805b;--onyx-blue:#1677ec;--onyx-amber:#a56425;--onyx-nav:#f3f6f9;--onyx-highlight:#ffffffa0;--onyx-icon:#e3ebf6;--onyx-subtitle:#465c77; color-scheme:light;
 }
-:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=gunmetal] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=gunmetal] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#30363e;--panel:#3b444f;--raised:#495565;--text:#f2f5f9;--muted:#b4c0cf;--line:#ffffff29;--onyx-nav:#343d47;--onyx-highlight:#ffffff0c;--onyx-icon:#4c5b6d;--onyx-subtitle:#d0def0;
 }
-:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=obsidian] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=obsidian] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#101113;--panel:#1b1e23;--raised:#292e36;--text:#f5f5f7;--muted:#a5acb8;--line:#ffffff22;--onyx-nav:#17191e;--onyx-icon:#303741;
 }
-:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=azure] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell>#manage-slot){
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=azure] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --bg:#101d2d;--panel:#1d3046;--raised:#29435e;--text:#f0f6ff;--muted:#a5bad1;--line:#bddaff35;--onyx-nav:#162538;--onyx-icon:#29435e;--onyx-subtitle:#b6d7fc;--accent:#72aef3;
 }
 :root[data-aesthetic=onyx] .app-header{
