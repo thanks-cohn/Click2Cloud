@@ -262,11 +262,17 @@
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
  --onyx-browse-idle:44px;--onyx-browse-expanded:92px;--onyx-browse-inset:12px;
  --onyx-browse-width:var(--onyx-browse-idle);--onyx-edge-width:112px;
+ /* Each fixed-length dash initially covers half the 44px three-sided outline:
+    14px vertical + a quarter-circle of radius 7.5px + 36px horizontal.
+    Slide exactly the vertical+arc distance along the stationary track. */
+ --onyx-browse-stroke-length:61.780972px;
+ --onyx-browse-stroke-offset:0px;
  --onyx-action-outline:color-mix(in srgb,var(--text) 19%,transparent);
  --onyx-browse-duration:.23s;--onyx-refresh-delay:calc(var(--onyx-browse-duration) + 2s);
  /* The whole card is the hover zone, so moving from Browse to Refresh never collapses the dock. */
  &:is(:hover,:has([data-go]:focus-visible,[data-refresh]:focus-visible,[data-refresh][aria-busy=true])){
   --onyx-browse-width:var(--onyx-browse-expanded);
+  --onyx-browse-stroke-offset:-25.780972px;
   & .remote-provider-actions>[data-refresh]{opacity:1;pointer-events:auto;transition-delay:var(--onyx-refresh-delay);background:transparent;box-shadow:none}
   & [data-go] .onyx-browse-word{max-inline-size:65px;margin-inline-end:7px;opacity:1}
   & [data-go] .onyx-folder-closed{opacity:0}
@@ -285,6 +291,18 @@
   justify-self:end;box-sizing:border-box;inline-size:var(--onyx-browse-width);max-inline-size:none;
   margin-inline:0 var(--onyx-browse-inset);padding:5px 15px;display:flex;align-items:center;justify-content:flex-end;
   white-space:nowrap;overflow:hidden;transition:inline-size var(--onyx-browse-duration) ease,filter .2s ease;
+  position:relative;border-color:transparent;
+ }
+ & [data-go]>.onyx-browse-outline{
+  display:block;position:absolute;right:-1px;top:-1px;
+  inline-size:92px;block-size:44px;max-inline-size:none;pointer-events:none;
+  overflow:visible;
+ }
+ & [data-go]>.onyx-browse-outline>path{
+  fill:none;stroke:var(--onyx-action-outline);stroke-width:1px;stroke-linecap:butt;
+  stroke-dasharray:var(--onyx-browse-stroke-length) 200px;
+  stroke-dashoffset:var(--onyx-browse-stroke-offset);
+  transition:stroke-dashoffset var(--onyx-browse-duration) ease;
  }
  & [data-go] .onyx-browse-word{max-inline-size:0;overflow:hidden;opacity:0;margin-inline-end:0;font-size:9px;font-weight:400;letter-spacing:.45px;transition:max-inline-size var(--onyx-browse-duration) ease,margin-inline-end var(--onyx-browse-duration) ease,opacity .16s ease}
  & [data-go] .onyx-folder-closed{opacity:1}
@@ -299,6 +317,7 @@
 @media(hover:none),(pointer:coarse){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
   --onyx-browse-width:var(--onyx-browse-expanded);--onyx-refresh-delay:0s;
+  --onyx-browse-stroke-offset:-25.780972px;
   & .remote-provider-actions>[data-refresh]{opacity:1;pointer-events:auto;transition-delay:0s}
   & [data-go] .onyx-browse-word{max-inline-size:65px;margin-inline-end:7px;opacity:1}
   & [data-go] .onyx-folder-closed{opacity:0}
@@ -308,10 +327,13 @@
 @media(prefers-reduced-motion:reduce){
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected]{
   --onyx-browse-duration:0s;--onyx-refresh-delay:0s;
-  & .remote-provider-actions::before,& [data-go],& [data-go] .onyx-browse-word,& [data-go] .onyx-browse-symbol svg,& .remote-provider-actions>[data-refresh]{transition:none}
+  & .remote-provider-actions::before,& [data-go],& [data-go] .onyx-browse-word,& [data-go] .onyx-browse-symbol svg,& [data-go]>.onyx-browse-outline>path,& .remote-provider-actions>[data-refresh]{transition:none}
  }
 }
 
+@media(forced-colors:active){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider[data-onyx-connected] [data-go]>.onyx-browse-outline>path{stroke:ButtonText}
+}
 /* Onyx connection handoff: no Browse affordance without verified authorization.
    Keep the real connect/reconnect button and its existing operation. */
 :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:not([data-onyx-connected]) .remote-provider-actions>[data-go]{display:none!important}

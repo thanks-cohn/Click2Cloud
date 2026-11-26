@@ -505,19 +505,30 @@ try{
   const browseState=()=>browse.evaluate(el=>{
    const r=el.getBoundingClientRect();
    const opacity=sel=>getComputedStyle(el.querySelector(sel)).opacity;
-   return {right:r.right,top:r.top,height:r.height,width:r.width,word:opacity('.onyx-browse-word'),closed:opacity('.onyx-folder-closed'),open:opacity('.onyx-folder-open')};
+   const outline=el.querySelector('.onyx-browse-outline');
+   const strokes=[...outline.querySelectorAll('path')].map(path=>{
+    const style=getComputedStyle(path),length=parseFloat(style.strokeDasharray),offset=-parseFloat(style.strokeDashoffset);
+    const start=path.getPointAtLength(offset),end=path.getPointAtLength(offset+length);
+    return {length,offset,start:[start.x,start.y],end:[end.x,end.y],track:path.getTotalLength()};
+   });
+   return {right:r.right,top:r.top,height:r.height,width:r.width,word:opacity('.onyx-browse-word'),closed:opacity('.onyx-folder-closed'),open:opacity('.onyx-folder-open'),strokes};
   });
   const waitWidth=async width=>page.waitForFunction(({el,width})=>Math.abs(el.getBoundingClientRect().width-width)<.1,{el:await browse.elementHandle(),width});
   await page.mouse.move(0,0);
   await waitWidth(44);
   const idle=await browseState();
   assert.equal(idle.word,'0');assert.equal(idle.closed,'1');assert.equal(idle.open,'0');
+  for(const stroke of idle.strokes){
+   assert(Math.abs(stroke.length-61.780972)<.01);
+   assert.equal(stroke.offset,0);assert(Math.abs(stroke.start[1]-22)<.01);
+   assert(Math.abs(stroke.end[0]-48)<.1);
+  }
   // Sample the entire transition, starting with the pointer entering the card.
   // Refresh must remain invisible on every frame before the dock reaches full width.
   const frames=page.evaluate(async()=>{
    const card=document.querySelector('[data-provider=dropbox]'),button=card.querySelector('[data-go]'),refresh=card.querySelector('[data-refresh]');
    const samples=[];const start=performance.now(),limit=start+3000;
-   await new Promise(resolve=>{function frame(){samples.push({time:performance.now()-start,width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity)});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+   await new Promise(resolve=>{function frame(){samples.push({time:performance.now()-start,width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity),strokes:[...button.querySelectorAll('.onyx-browse-outline>path')].map(path=>{const style=getComputedStyle(path),length=parseFloat(style.strokeDasharray),offset=-parseFloat(style.strokeDashoffset),end=path.getPointAtLength(offset+length);return {length,offset,endX:end.x};})});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
    return samples;
   });
   await browse.hover();
@@ -526,6 +537,17 @@ try{
   const expanded=await browseState();
   const samples=await frames;
   assert(samples.some(f=>f.width>44&&f.width<expandedWidth-.5),'Expected intermediate Browse expansion frames');
+  assert(samples.some(f=>f.strokes[0].offset>0.1&&f.strokes[0].offset<25.6),'Expected continuous perimeter travel');
+  for(const frame of samples)for(const stroke of frame.strokes){
+   assert(Math.abs(stroke.length-61.780972)<.01,'Each visible strand must conserve length');
+   assert(stroke.endX>=92-frame.width-.2,'No stroke can be clipped at the expanding left edge');
+  }
+  for(const [i,stroke] of expanded.strokes.entries()){
+   const y=i===0?.5:43.5;
+   assert(Math.abs(stroke.offset-25.780972)<.1);
+   assert(Math.abs(stroke.start[1]-y)<.1&&Math.abs(stroke.end[1]-y)<.1,'Expanded outline is horizontal only');
+   assert(stroke.offset+stroke.length<stroke.track);
+  }
   assert(samples.every(f=>f.width>=expandedWidth-.5||f.opacity===0),'Refresh must not appear before Browse is fully expanded');
   const fullyExpanded=samples.find(f=>f.width>=expandedWidth-.5);
   const firstRefresh=samples.find(f=>f.opacity>0);
@@ -537,6 +559,7 @@ try{
   assert.equal(expanded.right,idle.right);assert.equal(expanded.top,idle.top);assert.equal(expanded.height,idle.height);
   assert.deepEqual(await allBoxes(),atRest,'Browse hover must not move cards');
   await page.mouse.move(0,0);await waitWidth(44);
+  await page.waitForFunction(()=>[...document.querySelectorAll('[data-provider=dropbox] .onyx-browse-outline>path')].every(p=>Math.abs(parseFloat(getComputedStyle(p).strokeDashoffset))<.01));
   assert.deepEqual(await allBoxes(),atRest,'Browse contraction must not move cards');
   const activity=dropbox.locator('[data-activity]');
   await page.evaluate(()=>{window.deferRefresh=true;window.failRefresh=false;});

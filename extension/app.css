@@ -430,6 +430,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-jobs>.queue-actions{justify-content:space-between}
 .queue-card-header{justify-content:space-between}
 .queue-settings h2{margin:0}
+.onyx-browse-outline{display:none}
 .queue-search{display:grid;gap:4px;min-width:0;font-size:.88rem}
 .queue-search input{inline-size:100%;margin:0}
 .queue-job-window{max-height:360px;overflow:auto}
