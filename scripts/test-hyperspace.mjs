@@ -5,11 +5,11 @@ assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
 assert.equal(normalizeHyperspace({seconds:'bad'}).seconds,5);
 assert.equal(IDLE_MS,5000);
-assert.equal(SPLIT_MS,180);
-assert(hyperspaceFrame(45,5).split>.5,'Initial separation opens rapidly');
-assert.equal(hyperspaceFrame(180,5).split,1,'Corridor is fully open in 180ms');
-assert(hyperspaceFrame(SPLIT_MS,5).speed<.02,'Shimmer begins near rest');
-assert(hyperspaceFrame(SPLIT_MS+1000,5).travel<5,'First second covers less than 5% of one rail');
+assert.equal(SPLIT_MS,1800);
+assert(hyperspaceFrame(180,5).split<.01,'Preserve the original gentle split');
+assert.equal(hyperspaceFrame(SPLIT_MS,5).split,1);
+assert.equal(hyperspaceFrame(SPLIT_MS,5).speed,2,'Shimmer starts at two rail lengths per second');
+assert(hyperspaceFrame(SPLIT_MS+1000,5).travel>200,'Shimmer completes over two passes in the first second');
 const widths=[320,380,800,1200];
 for(const w of widths){
  const flat=hyperspaceGeometry(w,65,0,0);
