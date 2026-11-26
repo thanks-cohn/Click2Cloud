@@ -20,6 +20,9 @@ Inherit exact approved Run 2 candidate and evidence. Produce a packaged, verifie
 ## P0 — History customer experience
 Preserve Run 1 folder upload aggregation: a single visible History card labeled with the root directory name, never hundreds of child-file cards. Keep truthful aggregate outcome and access to existing receipts; no duplicate cards on retry/restart. Expose a clear persistent setting, e.g. “Show uploads in History,” in existing settings; OFF prevents new upload cards and ON enables future ones, without deleting older History or affecting download/right-click History, Queue, recovery, usage or diagnostics. Verify both settings, standalone uploads and nested folder batches on the actual packaged UI. Reuse Run 1 behavior rather than implementing a second History policy.
 
+### Approved History presentation acceptance
+Inherit Run 1's minimal folder card: root directory name, file count, provider/status, optional expanded details limited to count, actual remote destination and timestamp. No search, rename, nested tree or per-file browser. Individual manual uploads reuse the existing individual card UI and applicable destination actions, but omit source URL, host/website URL and web-origin-only fields/actions (no blank placeholders, fabricated links or exposed local paths). Preserve ordinary right-click web-save metadata. Respect the upload History switch; verify the actual packaged UI without introducing another renderer or policy.
+
 ## Final release acceptance
 - Reliable right-click after login and lifecycle events; auth/reconnection and destination continuity.
 - Automatic upload AND download recovery, durable receipts, no duplicate publications, no false success, safe local file publication and integrity.
