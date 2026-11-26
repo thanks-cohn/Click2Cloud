@@ -8,7 +8,7 @@ const element=(tag,text)=>Object.assign(document.createElement(tag),text==null?{
 export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screenshotRequest,signal}) {
   const root=element('section');
   root.className='card queue-jobs';
-  root.innerHTML='<div class="queue-actions"><button type="button" data-cancel-all>Cancel All</button><button type="button" data-clear-all>Clear All</button></div><p data-job-counts role="status"></p><div class="onyx-queue-metrics" aria-hidden="true" hidden></div><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry receipt sync</button>'+
+  root.innerHTML='<div class="queue-actions"><button type="button" data-clear-all>Clear All</button><button type="button" data-cancel-all>Cancel All</button></div><p data-job-counts role="status"></p><div class="onyx-queue-metrics" aria-hidden="true" hidden></div><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry receipt sync</button>'+
     '<div class="queue-job-window" tabindex="0" aria-label="Live jobs"><div data-job-padding-top></div><div data-job-items></div><div data-job-padding-bottom></div></div>';
   parent.append(root);
   const counts=root.querySelector('[data-job-counts]'),warning=root.querySelector('[data-job-warning]');

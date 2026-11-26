@@ -84,6 +84,42 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.evaluate(async()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
+ // The shared button is the existing Explorer icon, not a layout-consuming footer.
+ const manage=page.locator('#manage');
+ const manageGeometry=()=>manage.evaluate(el=>{
+  const rect=el.getBoundingClientRect(),icon=el.querySelector('svg').getBoundingClientRect();
+  const slot=el.parentElement,main=document.querySelector('#main'),shell=slot.parentElement;
+  return {x:rect.x,width:rect.width,iconX:icon.x,iconWidth:icon.width,
+   labelOpacity:getComputedStyle(el.querySelector('span')).opacity,
+   slotPosition:getComputedStyle(slot).position,slotBackground:getComputedStyle(slot).backgroundColor,
+   mainBottom:main.getBoundingClientRect().bottom,shellBottom:shell.getBoundingClientRect().bottom};
+ });
+ for(const view of ['remotes','queue','history','settings','screenshot','downloads']){
+  await page.mouse.move(1,1);
+  await page.evaluate(view=>{document.activeElement?.blur();document.querySelector('#shell').dataset.view=view;},view);
+  await page.waitForFunction(()=>Math.abs(document.querySelector('#manage').getBoundingClientRect().width-36)<1);
+  const idle=await manageGeometry();
+  assert.equal(idle.slotPosition,'absolute');assert.equal(idle.slotBackground,'rgba(0, 0, 0, 0)');
+  assert.equal(idle.mainBottom,idle.shellBottom);assert.equal(idle.iconWidth,16);
+  await manage.hover();
+  await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170&&getComputedStyle(document.querySelector('#manage span')).opacity==='1');
+  const expanded=await manageGeometry();
+  assert.equal(expanded.x,idle.x);assert.equal(expanded.iconX,idle.iconX);
+  assert.equal(expanded.mainBottom,idle.mainBottom);
+  await page.mouse.move(1,1);
+  await page.waitForFunction(()=>Math.abs(document.querySelector('#manage').getBoundingClientRect().width-36)<1&&getComputedStyle(document.querySelector('#manage span')).opacity==='0');
+ }
+ await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
+ await manage.focus();
+ await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170);
+ await manage.evaluate(el=>el.blur());
+ await page.locator('#repair-me').evaluate(el=>el.hidden=false);
+ await manage.hover();
+ await page.waitForFunction(()=>document.querySelector('#manage').getBoundingClientRect().width>170);
+ const [manageBounds,repairBounds]=await Promise.all([manage.boundingBox(),page.locator('#repair-me').boundingBox()]);
+ assert(repairBounds&&manageBounds.x+manageBounds.width<=repairBounds.x);
+ await page.locator('#repair-me').evaluate(el=>el.hidden=true);
+ await page.mouse.move(1,1);
  // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
@@ -162,7 +198,7 @@ try{
   const cancel=el.querySelector('[data-cancel-all]'),clear=el.querySelector('[data-clear-all]');
   return {overflow:getComputedStyle(window).overflowY,maxHeight:getComputedStyle(window).maxHeight,
    outerScrollable:main.scrollHeight>main.clientHeight,
-   left:cancel.getBoundingClientRect().left,right:clear.getBoundingClientRect().right,
+   left:clear.getBoundingClientRect().left,right:cancel.getBoundingClientRect().right,
    edges:[el.querySelector('.queue-actions').getBoundingClientRect().left,el.querySelector('.queue-actions').getBoundingClientRect().right],
    borders:[getComputedStyle(cancel).borderTopWidth,getComputedStyle(clear).borderTopWidth],
    colors:[getComputedStyle(cancel).color,getComputedStyle(clear).color]};

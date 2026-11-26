@@ -30,9 +30,9 @@
 #shell{position:relative;overflow:hidden;--tree-split:50%}
 #shell>aside{flex:0 0 var(--tree-split);width:var(--tree-split);min-width:0;max-width:none;resize:none;min-height:0}
 #shell>main{min-width:0;flex:1;overflow:hidden}
-#shell:not([data-view=explorer]){display:grid;grid-template-rows:minmax(0,1fr) auto}
+#shell:not([data-view=explorer]){display:grid;grid-template-rows:minmax(0,1fr)}
 #shell:not([data-view=explorer])>aside,#shell:not([data-view=explorer])>#pane-splitter{display:none}
-#shell:not([data-view=explorer])>main{overflow:auto}
+#shell:not([data-view=explorer])>main{overflow:auto;padding-block-end:52px;scroll-padding-block-end:52px}
 #shell[data-collapsed=tree]>aside{padding:0;border:0;visibility:hidden}
 #shell[data-collapsed=files]>main{visibility:hidden}
 #shell:not([data-view=explorer])>main{visibility:visible}
@@ -41,7 +41,18 @@
 #manage svg{flex:none}
 #manage-slot #sign-out{flex:none;min-block-size:36px;font-size:12px;white-space:nowrap;pointer-events:auto}
 #shell[data-view=explorer]:not([data-manage-in-toolbar])>aside{padding-block-end:56px}
-#shell:not([data-view=explorer])>#manage-slot{position:static;inline-size:100%;justify-content:flex-end;padding:6px clamp(8px,2vw,18px);border-block-start:1px solid var(--line);background:var(--panel)}
+/* Reuse the Explorer's existing 36px destination icon as a floating Shelf
+   control. No footer row: only the buttons accept pointer events. The scroll
+   tail keeps the last content reachable without reserving a fixed strip. */
+#shell:not([data-view=explorer])>#manage-slot{inline-size:100%;justify-content:flex-start;background:transparent;border:0;container-type:normal}
+#shell:not([data-view=explorer])>#manage-slot #manage{
+ flex:0 1 auto;inline-size:36px;justify-content:flex-start;padding:0 9px;overflow:hidden;
+ transition:inline-size 180ms ease;
+}
+#shell:not([data-view=explorer])>#manage-slot #manage span{flex:none;opacity:0;transition:opacity 140ms ease}
+#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled){inline-size:174px}
+#shell:not([data-view=explorer])>#manage-slot #manage:is(:hover,:focus-visible):not(:disabled) span{opacity:1}
+#shell:not([data-view=explorer])>#manage-slot #repair-me{margin-inline-start:auto}
 #shell[data-view=explorer][data-manage-in-toolbar]:has(#sign-out){--manage-toolbar-width:118px}
 #shell[data-view=explorer][data-manage-in-toolbar]>#manage-slot{inset-inline-start:calc(var(--tree-split) + 8px);inset-block:8px auto;inline-size:var(--manage-toolbar-width,36px);padding:0}
 #shell[data-view=explorer][data-manage-in-toolbar] #explorer-commands{padding-inline-start:calc(var(--manage-toolbar-width,36px) + 14px)}
@@ -402,6 +413,7 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-page{max-inline-size:1024px;margin-inline:auto}
 .queue-page>h1,.queue-archive>h2{text-align:center}
 .queue-card-header,.queue-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.queue-jobs>.queue-actions{justify-content:space-between}
 .queue-card-header{justify-content:space-between}
 .queue-settings h2{margin:0}
 .queue-search{display:grid;gap:4px;min-width:0;font-size:.88rem}

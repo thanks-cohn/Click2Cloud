@@ -63,7 +63,7 @@
     border-image:var(--chrome-edge) 1;
     pointer-events:none;
   }
-  & :is(.app-header,#shell:not([data-view=explorer])>#manage-slot) {
+  & .app-header {
     background:var(--chrome-bar);
   }
   & :where(.card,dialog:not([data-immersive]),#header-menu,#context,#toolbar-overflow) {

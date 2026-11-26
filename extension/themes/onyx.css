@@ -12,30 +12,8 @@
 }
 :root[data-aesthetic=onyx] .app-header{background:var(--onyx-nav);border-block-end:1px solid var(--line)}
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>main{background:var(--bg)}
-/* Canonical Onyx footer, shared by non-Explorer Shelf views. The existing DOM and handlers stay intact. */
-:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot{
- position:static;inset:auto;inline-size:100%;block-size:48px;min-block-size:48px;
- padding:5px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);
- justify-content:space-between;align-items:center;box-sizing:border-box;color:var(--text);
-}
-:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #manage{
- font:600 12px/1.25 "Segoe UI",sans-serif;background:var(--raised);color:var(--text);
- border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-block-size:37px;
-}
-:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #sign-out{
- margin-inline-start:auto;font:600 12px/1.25 "Segoe UI",sans-serif;
- background:var(--raised);color:var(--text);border:1px solid var(--line);border-radius:6px;
- padding:8px 12px;min-block-size:37px;
-}
-:root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot :is(#manage,#sign-out):hover:not(:disabled){background:color-mix(in srgb,var(--raised) 75%,var(--text))}
-@container(max-width:226px){
- :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot:has(#sign-out) #manage{inline-size:36px;justify-content:center;padding:0}
-}
-@container(max-width:142px){
- :root[data-aesthetic=onyx] #shell:not([data-view=explorer])>#manage-slot #manage{inline-size:36px;justify-content:center;padding:0}
-}
 /* Shared Providers header and screenshot-derived Remotes geometry. 380px Shelf: ~336px cards, 76px
-   ordinary rows, ~65px header and footer. No mock account usage is imported. */
+   ordinary rows, ~65px header. No mock account usage is imported. */
 .onyx-provider-meta,.onyx-slogan,.onyx-provider-detail-toggle,.onyx-mode-icon{display:none!important}
 .legacy-slogan{font:inherit!important;color:inherit!important}
 :root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
@@ -242,8 +220,8 @@
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]){
  border:0;background:transparent;box-shadow:none;min-block-size:36px;padding:6px 8px;
 }
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-cancel-all]{color:var(--onyx-amber)}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-clear-all]{color:var(--onyx-blue);margin-inline-start:auto}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-cancel-all]{color:var(--onyx-amber);margin-inline-start:auto}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>[data-clear-all]{color:var(--onyx-blue)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):hover:not(:disabled){background:color-mix(in srgb,currentColor 9%,transparent)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):active:not(:disabled){box-shadow:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions>button:is([data-cancel-all],[data-clear-all]):focus-visible{outline:2px solid var(--focus);outline-offset:2px}
