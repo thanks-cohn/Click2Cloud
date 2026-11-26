@@ -183,7 +183,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // scrolling surface using only a transform. The footer remains stationary.
   // At rest commit the exact final layout and discard the compositor hint.
   if(frame.done&&frame.phase==='open'){reserve(baseLift);layer(false);}
-  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
+  else if(lift!==0||reserved!==0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
  }
