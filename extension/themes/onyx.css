@@ -1,5 +1,5 @@
 /* Onyx preview, limited to approved surfaces. Other pages retain Oceania. */
-:root[data-aesthetic-pending] body{visibility:hidden}
+:root[data-aesthetic-pending] body{opacity:0;pointer-events:none}
 :root[data-aesthetic=onyx]{--a-package:onyx}
 :root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
  --bg:#13171e;--panel:#1e252f;--raised:#2b3441;--text:#f3f5f8;--muted:#a2afc0;--line:#ffffff25;--accent:#e63357;--selected:#2b3441;--focus:#72aef3;--primary-text:#fff;
