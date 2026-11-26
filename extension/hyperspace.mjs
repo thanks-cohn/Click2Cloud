@@ -1,7 +1,7 @@
 import {createLocalPreference} from '../src/chrome/local-preference.mjs';
 
 export const hyperspaceKey='headerHyperspaceV1';
-export const IDLE_MS=5000, SPLIT_MS=1800;
+export const IDLE_MS=5000, SPLIT_MS=1800, WATER_IDLE_MS=10000;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
 export function normalizeHyperspace(value){
@@ -78,6 +78,31 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
  return {left,right,leftFill:left+' L '+x(0)+' 0 L '+x(tip)+' 0 Z',rightFill:right+' L '+(w-x(0))+' 0 L '+(w-x(tip))+' 0 Z',gap};
 }
+// A static perspective field of shallow ripples. Far rows are closer
+// together, shorter and fainter; near rows grow in spacing and length.
+// Deterministic geometry, no random state, frame loop or external asset.
+export function hyperspaceWaterGeometry(width,height){
+ const w=Math.max(1,width),h=Math.max(1,height);
+ if(w<100||h<8)return [];
+ const lines=[],span=w*.68,center=w/2;
+ const top=h*.19,depth=h*.63;
+ for(let row=0;row<5;row++){
+  const t=row/4,y=top+depth*t**1.65;
+  const reach=span*(.65+.35*t);
+  if(row===0){
+   lines.push({x1:center-reach*.5,y1:y,x2:center+reach*.5,y2:y+.25,opacity:.24});
+   continue;
+  }
+  for(let i=0;i<3;i++){
+   const cell=reach/3,phase=Math.sin((row+1)*2.13+i*2.47);
+   const len=cell*(.35+.43*t+.07*phase);
+   const x=center-reach/2+cell*(i+.5)+phase*cell*.09;
+   const skew=Math.sin(row*2.1+i*1.8)*Math.min(.85,h*.035)*(.35+.65*t);
+   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,opacity:.16+.22*t+.025*phase});
+  }
+ }
+ return lines;
+}
 export function mountHyperspaceSettings(parent,preference){
  const section=parent.ownerDocument.createElement('section');
  section.className='hyperspace-settings';
@@ -91,13 +116,38 @@ const svgNS='http://www.w3.org/2000/svg';
 export function installHyperspace({header,shell,preference,doc=header.ownerDocument,clock}){
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
- let timer,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
+ let timer,waterTimer,water,raf,overlay,parts,current,started,returning,runSeconds,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
  const main=shell.querySelector('main');
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
+ function clearWater(){
+  if(waterTimer!==undefined){time.clear(waterTimer);waterTimer=undefined;}
+  water?.remove();water=undefined;
+ }
+ function armWater(){
+  if(waterTimer!==undefined||water||!overlay)return;
+  waterTimer=time.set(()=>{
+   waterTimer=undefined;
+   if(!overlay||current?.phase!=='open'||returning||!eligible())return;
+   const height=Math.max(1,parts.height+1-baseLift);
+   const lines=hyperspaceWaterGeometry(parts.width,height);
+   if(!lines.length)return;
+   water=doc.createElementNS(svgNS,'svg');
+   water.setAttribute('class','hyperspace-water');
+   water.setAttribute('viewBox','0 0 '+parts.width+' '+height);
+   water.setAttribute('aria-hidden','true');
+   water.style.height=height+'px';
+   for(const segment of lines){
+    const line=doc.createElementNS(svgNS,'line');
+    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]));
+    water.append(line);
+   }
+   overlay.append(water);
+  },WATER_IDLE_MS);
+ }
  const eligible=()=>!disposed&&preference.value.enabled&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
  // Keep per-frame style invalidation local, rather than inheriting changing
  // variables from body through every History card. Skip unchanged values.
@@ -123,7 +173,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
  }
  function clear(){
-  cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
+  cancelFrame();clearWater();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');
   reserve(0);layer(false);lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up'])header.style.removeProperty(key);
@@ -163,7 +213,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    if(p>=1){clear();return;}
   }else{
    draw(hyperspaceFrame(Math.max(0,now-started),runSeconds));
-   if(current.done)return; // hold indefinitely; no idle frame loop
+   if(current.done){armWater();return;} // one delayed static detail; no idle frame loop
   }
   raf=time.frame(tick);
  }
@@ -197,7 +247,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   cancelTimer();if(!overlay)return;
   if(immediate||media.matches){clear();return;}
   if(returning)return;
-  cancelFrame();returning={frame:{...current},start:time.now(),duration:Math.max(300,Math.round(880*Math.max(current.split,current.burst,.3)))};
+  clearWater();cancelFrame();returning={frame:{...current},start:time.now(),duration:Math.max(300,Math.round(880*Math.max(current.split,current.burst,.3)))};
   raf=time.frame(tick);
  }
  function pointer(over){
