@@ -224,6 +224,22 @@ try{
   }),'none');
   await page.evaluate(()=>{const shell=document.querySelector('#shell');shell.removeAttribute('data-manage-morph');shell.dataset.view='remotes';});
   await page.emulateMedia({reducedMotion:'no-preference'});
+  // Production idle controller: no arrival flash, no navigation-triggered opening.
+  const idle=await page.evaluate(async()=>{
+   const {createSkyIdle}=await import('/extension/sky-idle.mjs');
+   let eligible=true,opened=0,now=0,seq=0;const timers=new Map();
+   const controller=createSkyIdle({eligible:()=>eligible,open:()=>opened++,close:()=>{},setTimer:(fn,delay)=>{const id=++seq;timers.set(id,{at:now+delay,fn});return id;},clearTimer:id=>timers.delete(id)});
+   const advance=ms=>{now+=ms;for(const [id,t] of [...timers])if(t.at<=now){timers.delete(id);t.fn();}};
+   const counts=[];
+   controller.reset();advance(4999);counts.push(opened);
+   controller.cancel();advance(10000);counts.push(opened);
+   controller.reset();advance(4999);counts.push(opened);
+   advance(1);counts.push(opened);advance(10000);counts.push(opened);
+   controller.reset();eligible=false;advance(5000);counts.push(opened);
+   controller.reset();advance(5000);counts.push(opened);
+   return counts;
+  });
+  assert.deepEqual(idle,[0,0,0,1,1,1,1],'Five-second idle, navigation cancellation, one-shot and exclusion');
   // Sample the sky opening at its most open moment without relying on frame timing.
   const sky=await page.evaluate(()=>{
    const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
