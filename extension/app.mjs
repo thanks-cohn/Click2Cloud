@@ -1938,6 +1938,9 @@ document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))clo
 const navigationPlacement=installNavigation({header:document.querySelector('header nav'),menu:headerMenu,more:headerMore,open:next=>show(next).catch(e=>status(e.message))});
 void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();})
  .catch(()=>{}).finally(()=>document.dispatchEvent(new Event('redown-aesthetic-ready')));
+// Arm the Providers fade after an intentional reveal, including keyboard access.
+function armManageFade(){if(view==='remotes')$('#shell').setAttribute('data-manage-fade','');}
+listen('#manage','pointerenter',armManageFade);listen('#manage','focus',armManageFade);
 listen('#manage','click',()=>manager());listen('#theme','click',async()=>{await change({type:'setTheme',theme:state.product.theme==='dark'?'light':'dark'});if(view==='settings')await renderSettings();});
 document.addEventListener('pointerdown',e=>{if(!$('#context').contains(e.target))hideContext();});document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=!$('#context').hidden;hideContext();if(open)e.preventDefault();if(open&&contextReturnElement?.isConnected)contextReturnElement.focus({preventScroll:true});}if(!$('#context').hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...$('#context').querySelectorAll('button:not(:disabled),summary')].filter(item=>item.getClientRects().length),i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}});
 $('#dialog').addEventListener('cancel',event=>{
