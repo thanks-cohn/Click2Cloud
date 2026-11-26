@@ -36,6 +36,8 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
  const styles=themes.get('nostalgia')?.styles??[];
  const defaultStyle=styles[0]?.id;
  let nostalgiaStyle=defaultStyle;
+ const onyxFinishes=['onyx','platinum','gunmetal','obsidian','azure'];
+ let onyxFinish='onyx';
  const applied=new Set();
  let active=minimal.id,palette=palettes[0].id,lastError=null,sequence=0,writes=Promise.resolve();
  const systemCursor=busyCursorPackages[0];
@@ -57,6 +59,8 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
   root.dataset.aesthetic=active;
   if(active==='nostalgia')root.dataset.nostalgiaStyle=nostalgiaStyle;
   else delete root.dataset.nostalgiaStyle;
+  if(active==='onyx')root.dataset.onyxFinish=onyxFinish;
+  else delete root.dataset.onyxFinish;
   if(active!==minimal.id&&active!=='frames')return;
   const {colors,fonts}=schemes.get(palette);
   const set=(key,value)=>{root.style.setProperty(key,String(value));applied.add(key);};
@@ -75,17 +79,18 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
   return writes;
  }
  const getActive=()=>({apiVersion:AESTHETIC_API_VERSION,id:active,version:themes.get(active).version,error:lastError});
- async function apply({id=minimal.id,style=nostalgiaStyle,persist=true}={}){
+ async function apply({id=minimal.id,style=nostalgiaStyle,finish=onyxFinish,persist=true}={}){
   const ticket=++sequence;
   const theme=themes.get(id),variant=id==='nostalgia'?styles.find(item=>item.id===style):undefined;
   lastError=!theme||id==='nostalgia'&&!variant?'PACKAGE_UNAVAILABLE':null;
   active=lastError?minimal.id:id;
-  const previousStyle=nostalgiaStyle;
+  const previousStyle=nostalgiaStyle,previousFinish=onyxFinish;
+  if(id==='onyx'&&onyxFinishes.includes(finish))onyxFinish=finish;
   if(variant)nostalgiaStyle=variant.id;
   paint();
   const stylesheet=theme?.stylesheet??variant?.stylesheet;
   if(stylesheet&&!hasStylesheet(root,stylesheet)){
-   nostalgiaStyle=previousStyle;
+   nostalgiaStyle=previousStyle;onyxFinish=previousFinish;
    active=minimal.id;
    lastError='PACKAGE_UNAVAILABLE';
    paint();
@@ -93,7 +98,7 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
   const result=getActive();
   if(persist&&!lastError)try{
    await persistPreference(AESTHETIC_PREFERENCE_KEY,{schemaVersion:1,id,
-    ...(nostalgiaStyle?{nostalgiaStyle}:{})});
+    ...(nostalgiaStyle?{nostalgiaStyle}:{}),...(onyxFinish!=='onyx'||id==='onyx'?{onyxFinish}:{})});
   }catch{
    if(sequence===ticket)lastError='PREFERENCE_WRITE_FAILED';
    return {...result,error:'PREFERENCE_WRITE_FAILED'};
@@ -124,6 +129,7 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
    if(isPreference(saved)){
     const style=saved.nostalgiaStyle===undefined?defaultStyle:saved.nostalgiaStyle;
     if(styles.some(item=>item.id===style))nostalgiaStyle=style;
+    if(onyxFinishes.includes(saved.onyxFinish))onyxFinish=saved.onyxFinish;
     if(themes.has(saved.id))return apply({id:saved.id,style,persist:false});
    }
    active=minimal.id;
@@ -140,6 +146,9 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
   listNostalgiaStyles:()=>styles.map(({id,name})=>({id,name})),
   getNostalgiaStyle:()=>nostalgiaStyle,
   applyNostalgiaStyle:style=>apply({id:'nostalgia',style}),
+  listOnyxFinishes:()=>onyxFinishes.map(id=>({id,name:id[0].toUpperCase()+id.slice(1)})),
+  getOnyxFinish:()=>onyxFinish,
+  applyOnyxFinish:finish=>apply({id:'onyx',finish}),
   listBusyCursors:()=>[...cursors.values()].map(({id,name})=>({id,name})),
   getBusyCursor:()=>busyCursor,applyBusyCursor});
 }

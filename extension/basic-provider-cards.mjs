@@ -83,6 +83,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     card.connect.textContent = authenticated ? 'Connected' : reconnect ? 'Reconnect' :
       disconnected ? 'Connect' : status.phase === 'connecting' ? 'Connecting…' : 'Check connection';
     card.connect.toggleAttribute('data-authenticated',authenticated);
+    card.connect.closest('.remote-provider').toggleAttribute('data-onyx-connected',authenticated);
     card.connect.title = authenticated ? 'Reconnect ' + card.label : '';
     if(authenticated)card.connect.setAttribute('aria-description',card.connect.title);
     else card.connect.removeAttribute('aria-description');
@@ -95,9 +96,10 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     const section = document.createElement('section');
     section.className = 'card remote-provider';
     section.setAttribute('aria-labelledby', 'remote-provider-' + id);
+    section.dataset.provider=id;
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
-        <h2 id="remote-provider-${id}">${label}</h2>
+        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta">${({google:'Google Account',onedrive:'Microsoft Account',dropbox:'Dropbox Account'})[id]}</span></div>
       </div>
       <p role="status" class="remote-provider-activity" data-activity hidden></p>
       <div class="remote-provider-info">

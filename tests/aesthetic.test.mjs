@@ -174,3 +174,14 @@ test('Golden Age uses varied image heights and a bounded, ordered window at each
  assert.equal(narrow.columns,1);
  assert(narrow.tiles.every((tile,index)=>index===0||tile.top>narrow.tiles[index-1].bottom));
 });
+
+test('Onyx finishes restore without changing the selected theme or palette',async()=>{
+ const values={}, {host,root}=fixture(values);
+ assert.deepEqual(host.listOnyxFinishes().map(x=>x.id),['onyx','platinum','gunmetal','obsidian','azure']);
+ for(const {id} of host.listOnyxFinishes()){
+  await host.applyOnyxFinish(id);assert.equal(root.dataset.onyxFinish,id);
+  const reopened=fixture(values);await reopened.host.restore();assert.equal(reopened.root.dataset.onyxFinish,id);
+  await reopened.host.apply({id:'oceania'});assert.equal(reopened.root.dataset.onyxFinish,undefined);
+  await reopened.host.apply({id:'onyx'});assert.equal(reopened.root.dataset.onyxFinish,id);
+ }
+});

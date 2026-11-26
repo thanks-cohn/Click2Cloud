@@ -14,18 +14,114 @@
 :root[data-aesthetic=onyx] body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header{background:var(--onyx-nav);border-block-end:1px solid var(--line)}
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>main{background:var(--bg);scrollbar-width:thin}
 :root[data-aesthetic=onyx] #shell:is([data-view=remotes],[data-view=queue])>#manage-slot{background:var(--onyx-nav);justify-content:space-between}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remotes-intro{border:0;padding-block:7px 12px}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] :is(.remotes-headline,.remote-interlude){font-style:normal;letter-spacing:-.025em;color:var(--text)}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-interlude::after{display:none}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] :is(.remote-provider,.remote-cloudflare){background:linear-gradient(145deg,#ffffff09,transparent 65%),var(--panel);border:1px solid var(--line);border-radius:12px;transform:none}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider:has([data-connect][data-authenticated]){border-inline-start:3px solid var(--onyx-blue)}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-actions{justify-content:flex-end;gap:4px}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-actions [data-connect]{margin-inline-end:0}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-actions [data-authenticated]{color:var(--onyx-green);background:var(--raised);border-color:var(--line)}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-actions [data-go]{background:var(--raised)}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-cloudflare .cf-connection-primary:not([data-authenticated]){background:#e97d25;color:#221509;border-color:#f6a35c;width:100%}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-cloudflare .cf-legacy-mark{display:none}
-:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-cloudflare .cf-chrome-mark{display:inline-block;inline-size:25px;block-size:16px;vertical-align:-3px}
+/* Screenshot-derived Remotes geometry. 380px Shelf: ~336px cards, 76px
+   ordinary rows, ~65px header and footer. No mock account usage is imported. */
+.onyx-provider-meta,.onyx-punctuation,.onyx-slogan{display:none!important}
+.legacy-slogan{font:inherit!important;color:inherit!important}
+:root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
+ --onyx-highlight:#ffffff08;--onyx-icon:#344354;--onyx-subtitle:#b4c5dc;
+ --frame-focus:var(--focus);--control-weight:600;
+}
+:root[data-aesthetic=onyx]:is([data-onyx-finish=platinum],[data-theme=light]) :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
+ --bg:#e8edf3;--panel:#f8fafc;--raised:#e0e7ef;--text:#1c2531;--muted:#617186;--line:#344e6830;--accent:#bd1439;--selected:#e0e7ef;--focus:#1677ec;--primary-text:#fff;--onyx-heading:#191970;--onyx-green:#21805b;--onyx-blue:#1677ec;--onyx-amber:#a56425;--onyx-nav:#f3f6f9;--onyx-highlight:#ffffffa0;--onyx-icon:#e3ebf6;--onyx-subtitle:#465c77; color-scheme:light;
+}
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=gunmetal] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
+ --bg:#30363e;--panel:#3b444f;--raised:#495565;--text:#f2f5f9;--muted:#b4c0cf;--line:#ffffff29;--onyx-nav:#343d47;--onyx-highlight:#ffffff0c;--onyx-icon:#4c5b6d;--onyx-subtitle:#d0def0;
+}
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=obsidian] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
+ --bg:#101113;--panel:#1b1e23;--raised:#292e36;--text:#f5f5f7;--muted:#a5acb8;--line:#ffffff22;--onyx-nav:#17191e;--onyx-icon:#303741;
+}
+:root[data-aesthetic=onyx][data-theme=dark][data-onyx-finish=azure] :is(#shell[data-view=remotes],#shell[data-view=queue],body:has(#shell:is([data-view=remotes],[data-view=queue])) .app-header){
+ --bg:#101d2d;--panel:#1d3046;--raised:#29435e;--text:#f0f6ff;--muted:#a5bad1;--line:#bddaff35;--onyx-nav:#162538;--onyx-icon:#29435e;--onyx-subtitle:#b6d7fc;--accent:#72aef3;
+}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header{
+ --header-gap:6px;--header-padding:11px;--header-height:66px;--theme-size:32px;
+ background:linear-gradient(180deg,var(--onyx-highlight),transparent),var(--onyx-nav);
+ color:var(--text);border-block-end:1px solid var(--line);
+}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav{gap:3px}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button{
+ font:600 13px/1.2 "Segoe UI",sans-serif;min-block-size:40px;padding:8px 9px;border:1px solid transparent;position:relative;
+}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button.active{
+ border-color:var(--line);background:var(--raised);box-shadow:none;
+}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button.active::after{
+ content:"";position:absolute;bottom:3px;left:calc(50% - 9px);width:18px;height:2px;background:var(--accent);border-radius:3px;
+}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .header-controls{gap:0}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #header-more{min-inline-size:30px;padding-inline:4px}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme{color:var(--onyx-subtitle)}
+@media(max-width:345px){
+ :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
+ :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button{font-size:12px;padding-inline:4px}
+}
+:root[data-aesthetic=onyx] #shell[data-view=remotes]{
+ & > main{background:var(--bg);scrollbar-color:var(--raised) transparent;scrollbar-width:thin}
+ & .remotes-page{padding:26px 14px 16px;max-inline-size:740px}
+ & .remotes-intro{border:0;padding:0;margin:0 0 31px}
+ & .remotes-intro .remotes-headline{max-inline-size:none;font:700 clamp(21px,7.9cqi,28px)/1.2 "Segoe UI Variable","Segoe UI",Arial,sans-serif;letter-spacing:-.7px;color:var(--text);margin:0}
+ & .remotes-headline>span{white-space:normal}
+ & .remotes-headline>span+span{font:400 18px/1.35 "Segoe UI",sans-serif;color:var(--onyx-subtitle);letter-spacing:0;margin-block-start:8px}
+ & .onyx-punctuation{display:inline!important;margin:0!important;font:inherit;color:inherit;white-space:normal}
+ & .remote-providers{gap:10px}
+ & :is(.remote-provider,.remote-cloudflare){position:relative;background:linear-gradient(145deg,var(--onyx-highlight),transparent 75%),var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;margin:0;box-shadow:0 3px 8px #0002;transform:none}
+ & :is(.remote-provider,.remote-cloudflare):focus-within{border-color:var(--focus)}
+ & .remote-provider{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 0;min-block-size:76px;align-items:center;container-type:inline-size}
+ & .remote-provider[data-onyx-connected]::before,& .remote-cloudflare::before{content:"";position:absolute;inset:11px auto 11px 0;width:3px;border-radius:0 3px 3px 0;background:#2389ff;pointer-events:none}
+ & .remote-provider-heading{grid-column:1;grid-row:1;gap:11px;min-width:0}
+ & .remote-provider-heading img{width:44px;height:44px;object-fit:contain;padding:7px;border-radius:11px;background:var(--onyx-icon)}
+ & [data-provider=google] .remote-provider-heading img{background:#23774945}
+ & [data-provider=onedrive] .remote-provider-heading img{background:#2367a34d}
+ & [data-provider=dropbox] .remote-provider-heading img{background:#2862a853}
+ & .remote-provider-title{min-width:0}
+ & .remote-provider-heading h2{font:700 15px/1.2 "Segoe UI",sans-serif;letter-spacing:-.15px;color:var(--text);margin:0;overflow-wrap:anywhere}
+ & .remote-provider[data-onyx-connected] .remote-provider-heading h2::after{content:" ✓";font-size:12px;font-weight:600;color:var(--onyx-green)}
+ & .onyx-provider-meta{display:block!important;color:var(--onyx-subtitle);font:400 11px/1.4 "Segoe UI",sans-serif;margin:4px 0 0;overflow-wrap:anywhere}
+ & .remote-provider-actions{grid-column:2;grid-row:1;display:flex;align-items:center;gap:3px;justify-content:flex-end;border-inline-start:1px solid var(--line);padding-inline-start:9px;min-width:0}
+ & .remote-provider-actions :is([data-connect],[data-go],[data-refresh]){font:600 12px/1.2 "Segoe UI",sans-serif;background:linear-gradient(145deg,var(--onyx-highlight),transparent 75%),var(--raised);color:var(--text);border:0;border-radius:8px;min-block-size:44px;padding:8px 10px;margin:0;white-space:normal;overflow-wrap:anywhere}
+ & .remote-provider-actions [data-refresh]{inline-size:32px;min-block-size:32px;padding:0;opacity:1;pointer-events:auto}
+ & .remote-provider-actions [data-connect][aria-disabled=true]{opacity:.58}
+ & .remote-provider-activity{grid-column:1/-1;grid-row:auto;text-align:start;font-size:11px}
+ & .remote-provider-info{grid-column:1/-1;grid-row:auto;text-align:start}
+ & .remote-provider>[data-continue]{grid-column:1/-1;grid-row:auto}
+ & .remote-interlude{margin:34px 0 25px;padding:0;gap:8px;font-style:normal;letter-spacing:normal;color:var(--text)}
+ & .remote-interlude::after{display:none}
+ & .remote-interlude>span:first-child{font:400 14px/1.3 "Segoe UI",sans-serif;color:var(--onyx-subtitle)}
+ & .remote-interlude>span:last-child{font:700 clamp(20px,7cqi,24px)/1.2 "Segoe UI",sans-serif;letter-spacing:-.5px;white-space:normal}
+ & .remote-interlude .legacy-slogan{display:none}
+ & .remote-interlude .onyx-slogan{display:inline!important;font:inherit;color:inherit}
+ & .remote-cloudflare>h2{display:flex;align-items:flex-start;gap:11px;font:700 15px/1.2 "Segoe UI",sans-serif;color:var(--text);border:0;padding:0;margin:0}
+ & .remote-cloudflare .cf-legacy-mark{display:none}
+ & .remote-cloudflare .cf-chrome-mark{display:block;flex:none;width:44px;height:44px;padding:7px;background:#a65b2455;border-radius:11px}
+ & .onyx-cloudflare-meta{margin:-24px 0 14px 55px;position:relative}
+ & .remote-cloudflare #connection button{font:600 13px/1.3 "Segoe UI",sans-serif;border-radius:8px;min-height:43px;margin:3px 0}
+ & .remote-cloudflare #login{background:linear-gradient(135deg,#ffc28e,#f0a56d);color:#20170f;border:1px solid #f6ad77;width:100%}
+ & > #manage-slot{min-block-size:64px;padding:10px 14px;background:var(--onyx-nav);border-block-start:1px solid var(--line);justify-content:space-between}
+ & #manage{font:600 12px/1.25 "Segoe UI",sans-serif;background:var(--raised);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-block-size:37px}
+}
+/* Keep the primary action in its dock even when hovering; otherwise moving
+   the pointer over a button would shift its target. Secondary actions occupy
+   a real row only when requested by hover, keyboard focus, or touch. */
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
+ & .remote-provider-actions{display:contents}
+ & .remote-provider-actions>button{grid-column:2;grid-row:1;justify-self:end}
+ & .remote-provider-actions::before{content:"";grid-column:2;grid-row:1;align-self:stretch;justify-self:start;width:1px;background:var(--line);margin-inline-end:10px}
+ & .remote-provider-heading{padding-inline-end:14px}
+ & :is([data-go],[data-connect]){margin-inline-start:10px}
+ & .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]) [data-go],&[data-onyx-connected] [data-connect]{
+  position:absolute;clip-path:inset(50%);inline-size:1px;block-size:1px;min-block-size:0;padding:0;border:0;overflow:hidden;white-space:nowrap;opacity:0;
+ }
+ &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]):is(:hover,:focus-within) [data-go],&[data-onyx-connected]:is(:hover,:focus-within) [data-connect]{
+  grid-row:auto;grid-column:1;position:static;clip-path:none;inline-size:auto;block-size:auto;min-block-size:32px;padding:5px 9px;margin:0;overflow:visible;opacity:1;white-space:normal;pointer-events:auto;justify-self:start;
+ }
+ &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh]{grid-column:2;justify-self:end}
+}
+@media(hover:none),(pointer:coarse){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions{display:flex;grid-column:1/-1;grid-row:auto;border:0;padding:0;flex-wrap:wrap}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions::before{display:none}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .remote-provider-actions>button{position:static;clip-path:none;inline-size:auto;block-size:auto;min-block-size:34px;padding:6px 9px;margin:0;overflow:visible;opacity:1;pointer-events:auto}
+}
 .onyx-queue-metrics{display:none}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-page>h1{font-size:28px;color:var(--onyx-heading);margin-block:10px 24px;letter-spacing:-.8px}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs{background:transparent;border:0;padding:0;box-shadow:none;display:flex;flex-direction:column}
