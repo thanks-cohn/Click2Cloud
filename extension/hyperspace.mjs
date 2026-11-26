@@ -91,7 +91,7 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
 export function mountHyperspaceSettings(parent,preference){
  const section=parent.ownerDocument.createElement('section');
  section.className='hyperspace-settings';
- section.innerHTML='<h3>Header Animation</h3><label class="settings-row">Animation<select data-hyperspace-mode><option value="none">None (default)</option><option value="hyperspace">Hyperspace</option><option value="elegant">Elegant</option></select></label><div data-hyperspace-options><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p></div><p class="muted">Animated modes begin after five seconds away from the header. Hover to restore it.</p><p role="status"></p>';
+ section.innerHTML='<h3>Header Animation</h3><label class="settings-row">Animation<select data-hyperspace-mode><option value="none">None (default)</option><option value="hyperspace">Hyperspace</option><option value="elegant">Elegant</option></select></label><div data-hyperspace-options><label class="settings-row">Shimmer buildup (seconds)<input type="number" min="1" max="20" step="1" data-hyperspace-seconds></label><p class="muted">Default: 5 seconds. Longer buildup creates a stronger outward release and upward sweep.</p></div><p class="muted">Animated modes begin after five seconds away from the header. Hover over the header (Hyperspace) or R (Elegant) to restore it.</p><p role="status"></p>';
  const mode=section.querySelector('[data-hyperspace-mode]'),seconds=section.querySelector('[data-hyperspace-seconds]'),options=section.querySelector('[data-hyperspace-options]'),status=section.querySelector('[role=status]');
  const paint=()=>{const value=preference.value;mode.value=value.mode;seconds.value=value.seconds;options.hidden=value.mode!=='hyperspace';seconds.disabled=options.hidden;};
  const save=async(transform)=>{try{await preference.update(transform);status.textContent='';}catch{status.textContent='Header animation preference could not be saved.';}paint();};
@@ -140,7 +140,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
   reserve(0);layer(false);lastGeometry=lastPhase='';
-  for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up'])header.style.removeProperty(key);
+  for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
  function draw(frame){
@@ -148,6 +148,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   current=frame;
   if(runMode==='elegant'){
    setVar(parts.elegant,'opacity',1-frame.burst);
+   setVar(header,'--hyper-theme-right',(parts.themeShift*clamp(frame.lift)).toFixed(2)+'px');
   }else{
   const gone=frame.burst>=1;
   const geometry=gone?'gone':[frame.split,frame.burst,frame.flex,frame.tension].join('/');
@@ -202,6 +203,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   parts={width:rect.width,height:Math.max(1,rect.height-1)};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
+   const themeRect=header.querySelector('#theme')?.getBoundingClientRect();
+   parts.themeShift=themeRect?Math.max(0,Math.min(6,rect.right-themeRect.right-2)):0;
    // Retain a keyboard/touch-accessible R as the only reveal target.
    if(brand){brandAttributes=['tabindex','role','aria-label'].map(k=>[k,brand.getAttribute(k)]);brand.setAttribute('tabindex','0');brand.setAttribute('role','button');brand.setAttribute('aria-label','Reveal header');}
    const fill=doc.createElement('div');fill.className='hyperspace-elegant-surface';fill.style.background=surface;fill.style.borderBottomColor=rail;overlay.append(fill);parts.elegant=fill;
