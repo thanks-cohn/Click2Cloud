@@ -1,4 +1,4 @@
-import {createSkyIdle} from './sky-idle.mjs';
+import {createSkyIdle,createSkyHover} from './sky-idle.mjs';
 import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
@@ -1961,15 +1961,16 @@ async function renderSettings(){
   }
 }
 const headerMore=$('#header-more'),headerMenu=$('#header-menu');
-const skyHeader=$('.app-header');
-skyHeader.addEventListener('pointerenter',skyIdle.cancel);
-skyHeader.addEventListener('pointerleave',()=>queueMicrotask(skyIdle.reset));
+const skyHeader=$('.app-header'),skyHover=createSkyHover(skyIdle);
+// Only actual pointer movement across the header boundary can restart the timer.
+skyHeader.addEventListener('pointerenter',()=>skyHover.move(true));
+document.addEventListener('pointermove',event=>skyHover.move(skyHeader.contains(event.target)),{passive:true,capture:true});
+document.documentElement.addEventListener('pointerleave',()=>skyHover.move(false));
 skyHeader.addEventListener('pointerdown',skyIdle.cancel,{capture:true});
 skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible'))skyIdle.cancel();});
-skyHeader.addEventListener('focusout',()=>queueMicrotask(skyIdle.reset));
-skyHeader.addEventListener('keydown',()=>{skyIdle.cancel();queueMicrotask(skyIdle.reset);});
-document.addEventListener('visibilitychange',skyIdle.reset);
-window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.reset);
+skyHeader.addEventListener('keydown',skyIdle.cancel);
+document.addEventListener('visibilitychange',skyIdle.cancel);
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.cancel);
 const headerItems=()=>[...headerMenu.querySelectorAll('button:not([hidden]):not(:disabled)')].filter(button=>button.getClientRects().length);
 function closeHeaderMore(focus=false){if(headerMenu.hidden)return;headerMenu.hidden=true;headerMore.setAttribute('aria-expanded','false');if(focus)headerMore.focus({preventScroll:true});}
 headerMore.onclick=()=>{headerMenu.hidden=!headerMenu.hidden;headerMore.setAttribute('aria-expanded',String(!headerMenu.hidden));if(!headerMenu.hidden)headerItems()[0]?.focus();};
