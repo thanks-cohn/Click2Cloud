@@ -257,3 +257,12 @@
   & >main::-webkit-scrollbar-track,& :is(.queue-job-window,.remote-provider-info)::-webkit-scrollbar-track{background:Canvas}
  }
 }
+
+/* Bare Queue dismiss/cancel glyph: retain the native button and its hit area. */
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss{
+ background:transparent;border-color:transparent;box-shadow:none;
+ color:var(--muted);font-size:18px;line-height:1;
+}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:hover:not(:disabled){background:transparent;color:var(--text);box-shadow:none}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:active:not(:disabled){background:transparent;box-shadow:none}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job .queue-dismiss:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
