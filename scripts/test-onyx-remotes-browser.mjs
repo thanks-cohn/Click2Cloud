@@ -50,6 +50,35 @@ try{
  assert(await page.locator('#theme .onyx-sun').isVisible());
  assert(!(await page.locator('#theme .onyx-moon').isVisible()));
  await page.evaluate(()=>document.documentElement.dataset.theme='dark');
+ // The approved Providers header is the canonical header for every Onyx view.
+ const headerAppearance=()=>page.locator('.app-header').evaluate(header=>{
+  const read=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {
+   geometry:[r.x,r.y,r.width,r.height],background:s.background,color:s.color,border:s.borderBottom,
+   padding:s.padding,gap:s.gap,font:s.font,fontSize:s.fontSize,fontWeight:s.fontWeight,
+   radius:s.borderRadius,shadow:s.boxShadow
+  }};
+  const active=header.querySelector('nav>button.active');
+  const indicator=active?getComputedStyle(active,'::after'):null;
+  return {header:read(header),nav:read(header.querySelector('nav')),controls:read(header.querySelector('.header-controls')),
+   logo:read(header.querySelector('.brand-lockup')),tabs:[...header.querySelectorAll('nav>button')].map(read),
+   more:read(header.querySelector('#header-more')),theme:read(header.querySelector('#theme')),
+   indicator:indicator&&[indicator.content,indicator.backgroundColor,indicator.width,indicator.height]};
+ });
+ for(const width of [320,380,480,800])for(const finish of ['onyx','platinum','gunmetal','obsidian','azure'])for(const mode of ['dark','light']){
+  await page.setViewportSize({width,height:760});
+  await page.evaluate(async({finish,mode})=>{
+   document.documentElement.dataset.theme=mode;document.querySelector('#shell').dataset.view='remotes';
+   await window.testHost.apply({id:'onyx',finish,persist:false});
+  },{finish,mode});
+  const reference=await headerAppearance();
+  assert.equal(reference.header.geometry[3],66,'Providers header height must remain canonical');
+  for(const view of ['queue','history','explorer','settings','screenshot','downloads']){
+   await page.evaluate(view=>document.querySelector('#shell').dataset.view=view,view);
+   assert.deepEqual(await headerAppearance(),reference,JSON.stringify({width,finish,mode,view}));
+  }
+ }
+ await page.setViewportSize({width:380,height:760});
+ await page.evaluate(async()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';await window.testHost.apply({id:'onyx',finish:'onyx',persist:false});});
  // Every view shares the same header glyph, dimensions and color.
  const iconAppearance=()=>page.locator('#theme .onyx-mode-icon:visible').evaluate(el=>{
   const style=getComputedStyle(el);return {className:el.getAttribute('class'),width:style.width,height:style.height,color:style.color};
