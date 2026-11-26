@@ -63,6 +63,10 @@ body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.he
 body[data-hyperspace]:has(>#shell[data-view=remotes])>.app-header #theme{
  translate:none!important;
 }
+/* History/Queue: the title gently leads the more restrained page lift. */
+body[data-hyperspace]>#shell:is([data-view=history],[data-view=queue])>main>.queue-page>h1{
+ translate:0 calc(0px - var(--hyper-title-up,0px));
+}
 /* One reservation at launch, one final layout commit. No animated margins. */
 body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-reserve,0px))}
 body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
