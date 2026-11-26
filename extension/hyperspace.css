@@ -36,19 +36,24 @@ body[data-hyperspace=open]>.app-header :is(nav,.header-more){pointer-events:none
 /* Elegant keeps the R and theme switch while the invisible header passes input through.
    The R is the sole hover-reveal target. */
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header{
- pointer-events:none;box-shadow:none!important;
+ pointer-events:none;background:none!important;border-color:transparent!important;border-image:none!important;box-shadow:none!important;outline:none!important;backdrop-filter:none!important;
 }
+/* The exposed area is the page, not a leftover bar of header color. */
+body[data-hyperspace-mode=elegant][data-hyperspace]{background-color:var(--hyper-elegant-page,var(--bg))!important}
+body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header::before,
+body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header::after{content:none!important}
+body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header{visibility:hidden}
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header>.hyperspace-overlay{
  background:transparent;
 }
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header>.brand-lockup{
- pointer-events:auto;cursor:pointer;
+ pointer-events:auto;visibility:visible;cursor:pointer;
 }
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header :is(nav,.header-controls,.header-more,#theme){
  pointer-events:none;
 }
 body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header #theme{
- opacity:1;visibility:visible;pointer-events:auto;
+ opacity:1;visibility:visible;pointer-events:auto;background:none!important;border-color:transparent!important;box-shadow:none!important;
  translate:var(--hyper-theme-right,0px) calc(0px - var(--hyper-controls-up,0px));
 }
 body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.header-more){
