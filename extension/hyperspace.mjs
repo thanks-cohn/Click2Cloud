@@ -104,7 +104,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const win=doc.defaultView,body=doc.body,media=win.matchMedia('(prefers-reduced-motion: reduce)');
  const time=clock??{now:()=>win.performance.now(),set:(fn,ms)=>win.setTimeout(fn,ms),clear:id=>win.clearTimeout(id),frame:fn=>win.requestAnimationFrame(fn),cancel:id=>win.cancelAnimationFrame(id)};
  let timer,raf,overlay,parts,current,started,returning,runSeconds,runMode,inside=false,disposed=false,baseLift=24,peakLift=30,controlShift=0;
- const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
+ const main=shell.querySelector('main'),brand=header.querySelector('.brand-lockup'),logo=brand?.querySelector('img')??brand,theme=header.querySelector('#theme');
  const pageColor=()=>[main,shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||win.getComputedStyle(doc.documentElement).getPropertyValue('--bg');
  let brandAttributes;
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
@@ -242,18 +242,31 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // During ordinary idle and restoration, keep the normal full header region.
  const logoOnly=()=>!!overlay&&runMode==='elegant'&&!returning;
  const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);};
- on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(within(logoOnly()?brand:header,e));},{passive:true,capture:true});
- on(header,'pointerenter',e=>{if(!logoOnly()||within(brand,e))pointer(true);});
- if(brand)on(brand,'pointerenter',()=>{if(logoOnly())pointer(true);});
+ // A real hit on the painted R image is required in Elegant mode. Ancestor
+ // pointerenter events and broad header/wrapper rectangles cannot reveal it.
+ const hitsLogo=e=>{
+  if(!logo||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return false;
+  const r=logo.getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>=r.right||e.clientY<r.top||e.clientY>=r.bottom)return false;
+  const hit=doc.elementFromPoint(e.clientX,e.clientY);
+  return !!hit&&(hit===logo||logo.contains(hit));
+ };
+ on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(logoOnly()?hitsLogo(e):within(header,e));},{passive:true,capture:true});
+ on(header,'pointerenter',()=>{if(!logoOnly())pointer(true);});
+ if(logo)on(logo,'pointerenter',e=>{if(logoOnly()&&e.pointerType!=='touch'&&hitsLogo(e))pointer(true);});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
- on(header,'pointerdown',e=>{if(!logoOnly()||within(brand,e))restore(true);},true);
- on(header,'focusin',e=>{if(logoOnly()&&theme?.contains(e.target))return;if(header.querySelector(':focus-visible'))restore(true);});
- on(header,'keydown',e=>{if(logoOnly()&&theme?.contains(e.target))return;restore(true);});
+ on(header,'pointerdown',e=>{if(!logoOnly()||hitsLogo(e))restore(true);},true);
+ on(header,'focusin',e=>{if(logoOnly()){if(brand?.contains(e.target)&&e.target.matches(':focus-visible'))restore(true);return;}if(header.querySelector(':focus-visible'))restore(true);});
+ on(header,'keydown',e=>{if(logoOnly()){if(brand?.contains(e.target)&&(e.key==='Enter'||e.key===' '))restore(true);return;}restore(true);});
  on(doc,'visibilitychange',()=>{if(doc.hidden)reset();});
  on(win,'resize',reset);on(media,'change',reset);on(win,'pagehide',reset);
+ const skinSignature=()=>['data-aesthetic','data-onyx-finish','data-nostalgia-style'].map(k=>doc.documentElement.getAttribute(k)).join('|');
+ let lastSkin=skinSignature();
  const themeObserver=new win.MutationObserver(records=>{
-  if(logoOnly()&&records.every(r=>r.attributeName==='data-theme'||r.attributeName==='style')){
-   // Color-mode changes must never reveal Elegant navigation. Read the new
+  const nextSkin=skinSignature(),sameSkin=nextSkin===lastSkin;lastSkin=nextSkin;
+  if(logoOnly()&&sameSkin){
+   // Color-mode changes or redundant skin writes during Providers updates
+   // must never reveal Elegant navigation. Read the new
    // page color without retaining the previous fallback on the body.
    body.style.removeProperty('--hyper-elegant-page');setVar(body,'--hyper-elegant-page',pageColor());
    return;
