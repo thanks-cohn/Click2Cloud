@@ -16,7 +16,11 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Open | Indefinite | The page color fills the header space and the page stays raised. No ongoing animation-frame loop. |
 | Return | Up to about 0.88 seconds | Header hover reverses from the current state and restores the surfaces, navigation and content together. No restart from an unrelated frame. |
 
-Settings → Aesthetic → Header Hyperspace offers an enable switch and a buildup duration of 1–20 whole seconds, persisted locally in `headerHyperspaceV1`. The buildup is separate from the initial fixed five-second idle delay. Longer buildup produces a deeper outward bend, a stronger, quicker outward release and more upward overshoot, without changing the final geometry. Limits are deliberate to keep motion legible and bounded.
+Settings → Aesthetic → Header Animation offers three mutually exclusive choices: None (default), Hyperspace, and Elegant. The choice and a Hyperspace-only buildup duration of 1–20 whole seconds persist locally in `headerHyperspaceV1`. Legacy boolean preferences default to None until explicitly selected; their charge duration is preserved. The buildup is separate from the initial fixed five-second idle delay. Longer buildup produces a deeper outward bend, a stronger, quicker outward release and more upward overshoot, without changing the final geometry. Limits are deliberate to keep motion legible and bounded.
+
+## Elegant alternative
+
+Elegant begins after the same five-second idle interval. Over 1.05 seconds a single flat header surface and the navigation fade while the lower content glides upward on a quintic easing curve. No rails, shimmer, charge, compression, overshoot or explosion. Both modes use the identical measured lift bounds, resting shell geometry, persistent logo/theme controls, hover return and cleanup controller. Neither mode adds any ocean elements. None does not arm an idle timer, mount an overlay or request frames. Changing modes cancels any in-progress animation; the next eligible header leave or launch arms the selected mode.
 
 ## Energy model
 
