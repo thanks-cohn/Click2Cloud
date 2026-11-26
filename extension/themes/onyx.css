@@ -220,9 +220,11 @@
 :root[data-aesthetic=onyx] #shell[data-view=queue] [data-metric=attention] strong{color:var(--onyx-amber)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>[data-job-counts]{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs>.queue-actions{justify-content:flex-end;margin-block-end:9px}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding-inline:7px}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job:is([data-queue-state=failed],[data-queue-state=uncertain],[data-queue-state=blocked]){border-inline-start-color:var(--onyx-amber)}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job:is([data-queue-state=working],[data-queue-state=uploading],[data-queue-state=verifying]){border-inline-start-color:var(--onyx-blue)}
+/* Queue cards: open sides, a state-colored top rule and quiet bottom rule. */
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job{background:var(--panel);border:0;border-block:1px solid var(--line);border-radius:0;padding-inline:7px}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job:is([data-queue-state=failed],[data-queue-state=uncertain],[data-queue-state=blocked]){border-block-start-color:var(--onyx-amber)}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job:is([data-queue-state=working],[data-queue-state=uploading],[data-queue-state=verifying]){border-block-start-color:var(--onyx-blue)}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-job[data-queue-state=verified]{border-block-start-color:var(--onyx-green)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-badge[data-outcome=verified]{color:var(--onyx-green)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-badge[data-outcome=failed]{color:var(--onyx-amber)}
 /* Only the two approved History fixes apply across all themes. */

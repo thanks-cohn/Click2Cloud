@@ -110,6 +110,37 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
+ // Queue job surfaces retain status colors on the top rule only, with open sides.
+ for(const mode of ['dark','light']){
+  const rules=await page.evaluate(mode=>{
+   document.documentElement.dataset.theme=mode;
+   document.querySelector('#shell').dataset.view='queue';
+   const fixture=document.createElement('section');
+   fixture.className='queue-page';
+   document.querySelector('#main').append(fixture);
+   const results=[];
+   for(const state of ['working','uploading','verifying','failed','uncertain','blocked','verified','waiting','cancelled']){
+    const card=document.createElement('article');
+    card.className='queue-job';card.dataset.queueState=state;fixture.append(card);
+    const style=getComputedStyle(card);
+    const expected=['working','uploading','verifying'].includes(state)?'--onyx-blue':['failed','uncertain','blocked'].includes(state)?'--onyx-amber':state==='verified'?'--onyx-green':'--line';
+    const probe=document.createElement('span');card.append(probe);
+    probe.style.color='var('+expected+')';
+    const top=getComputedStyle(probe).color;
+    probe.style.color='var(--line)';
+    results.push({state,sides:[style.borderLeftWidth,style.borderRightWidth],horizontal:[style.borderTopWidth,style.borderBottomWidth],top:style.borderTopColor,expectedTop:top,bottom:style.borderBottomColor,expectedBottom:getComputedStyle(probe).color,radius:style.borderRadius});
+   }
+   fixture.remove();return results;
+  },mode);
+  for(const rule of rules){
+   assert.deepEqual(rule.sides,['0px','0px'],rule.state);
+   assert.deepEqual(rule.horizontal,['1px','1px'],rule.state);
+   assert.equal(rule.top,rule.expectedTop,rule.state);
+   assert.equal(rule.bottom,rule.expectedBottom,rule.state);
+   assert.equal(rule.radius,'0px',rule.state);
+  }
+ }
+ await page.evaluate(()=>{document.documentElement.dataset.theme='dark';document.querySelector('#shell').dataset.view='remotes';});
  // Every view shares the same header glyph, dimensions and color.
  const iconAppearance=()=>page.locator('#theme .onyx-mode-icon:visible').evaluate(el=>{
   const style=getComputedStyle(el);return {className:el.getAttribute('class'),width:style.width,height:style.height,color:style.color};
