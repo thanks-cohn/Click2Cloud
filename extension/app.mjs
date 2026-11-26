@@ -14,6 +14,7 @@ import {createScreenshotPage,screenshotFeedback,screenshotRequest} from './scree
 import {createAestheticHost} from '../src/aesthetic/host.mjs';
 const aesthetic=createAestheticHost({root:document.documentElement,storage:chrome.storage?.local});
 const aestheticReady=aesthetic.restore();
+void aestheticReady.finally(()=>{delete document.documentElement.dataset.aestheticPending;});
 const visualFeedback=createVisualFeedbackPreference(chrome.storage);
 let feedbackAccent;
 function rememberFeedbackAccent(){

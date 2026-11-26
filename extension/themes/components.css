@@ -1,5 +1,5 @@
 /* Full-theme surfaces reuse the Shelf's existing layout and virtual row sizes. */
-:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=nostalgia],[data-aesthetic=frames]){
+:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=onyx],[data-aesthetic=nostalgia],[data-aesthetic=frames]){
  --primary-text:var(--button-ink);
  --page-padding:clamp(14px,4vw,30px);
  --frame:var(--panel);
@@ -11,7 +11,7 @@
  --body-font:var(--a-font-body,"Segoe UI",system-ui,sans-serif);
  --control-font:var(--a-font-control,var(--body-font));
 }
-:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=nostalgia],[data-aesthetic=frames]) {
+:root:is([data-aesthetic=golden-age],[data-aesthetic=oceania],[data-aesthetic=onyx],[data-aesthetic=nostalgia],[data-aesthetic=frames]) {
  & :is(h1,h2,h3,.remotes-headline){
   letter-spacing:var(--heading-tracking);
   font-style:var(--heading-slant);

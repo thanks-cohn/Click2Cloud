@@ -417,15 +417,22 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     const heading=node('strong',record.filename ?? 'N/A');
     const summary=node('div',null,'queue-card-summary');
     const timestamp=date(record.terminalAt ?? record.requestedAt,preferences.timezone);
-    const when=node('time',timestamp ?? 'N/A');
+    const when=node('time',null,'history-card-timestamp');
+    const at=record.terminalAt ?? record.requestedAt;
+    if(Number.isFinite(at)){
+      const value=new Date(at);
+      when.dateTime=value.toISOString();
+      when.append(node('span',value.toLocaleDateString('en-US',{timeZone:preferences.timezone,month:'numeric',day:'numeric',year:'numeric'})),
+        node('span',value.toLocaleTimeString('en-US',{timeZone:preferences.timezone,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})));
+    }else when.textContent='N/A';
     const basic=record.provider!=='cloudflare', compact=basic&&preferences.preset==='compact';
     summary.append(heading);
     const label=node('span',queueStatus(record.status),'queue-badge');
     label.dataset.outcome=record.status;
     const location=node('p',null,'queue-location');
     if(basic){
-      summary.append(when);
-      top.append(summary,label);
+      const status=node('div',null,'queue-card-status');status.append(when,label);
+      top.append(summary,status);
     }else{
       summary.append(location);
       const status=node('div',null,'queue-card-status');
@@ -516,41 +523,45 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
       const host=safeHistoryURL(record.hostUrl);
       if(host)article.append(node('p',new URL(host).hostname,'queue-location'));
     }
+    const urls=disclosure('URLs',false);
+    urls.className='history-urls';
     if(!basic){
       const publicURL=safeHistoryURL(record.publicUrl);
       const screenshotURLs=record.kind==='screenshot'&&record.deliveryId&&record.destination?.bucket;
       if(screenshotURLs||publicURL){
-        const publicURLs=disclosure('Public URLs',false);
+        const publicURLs=node('section',null,'history-url-group');
+        publicURLs.append(node('strong','Public URLs'));
         if(screenshotURLs){
           const holder=node('div');holder.dataset.destinationUrls='';
           publicURLs.append(holder);
-          wireHistoryDestinationUrls(publicURLs,{request:screenshotRequest,
-            params:{operationId:record.sourceRecordId,outputId:record.deliveryId},
-            location:{bucketName:record.destination.bucket},confirmed:record.status==='verified'});
         }else{
-          const link=node('a',publicURL);
-          link.href=publicURL;link.target='_blank';link.rel='noreferrer noopener';publicURLs.append(link);
+          const link=node('a',publicURL,'history-record-url');
+          link.href=publicURL;link.title=publicURL;link.target='_blank';link.rel='noreferrer noopener';publicURLs.append(link);
         }
         const update=()=>{publicURLs.hidden=!historyV2FieldVisible(view,record.provider,'publicUrl',true);};
         metadata.push(update);update();
-        article.append(publicURLs);
+        urls.append(publicURLs);
+        if(screenshotURLs)wireHistoryDestinationUrls(urls,{request:screenshotRequest,
+          params:{operationId:record.sourceRecordId,outputId:record.deliveryId},
+          location:{bucketName:record.destination.bucket},confirmed:record.status==='verified',
+          isVisible:()=>!publicURLs.hidden});
       }
     }
-    for(const [field,label,preferred] of [
-      ['hostUrl','Host URL',preferences.hostUrlDefault],
-      ['sourceUrl','Source URL',preferences.sourceUrlDefault]
-    ]){
+    for(const [field,label] of [['hostUrl','Host URL'],['sourceUrl','Source URL']]){
       const href=safeHistoryURL(record[field]);
-      const section=disclosure(label,preferred==='expanded');
+      const section=node('section',null,'history-url-group');
       section.dataset.historyUrl=field;
+      section.append(node('strong',label));
       if(href){
         const link=node('a',href,'history-record-url');
         link.href=href;link.title=href;link.target='_blank';link.rel='noopener noreferrer';
         link.addEventListener('click',event=>event.stopPropagation());
         section.append(link);
       }else section.append(node('p','N/A'));
-      article.append(section);
+      urls.append(section);
     }
+    article.append(urls);
+    urls.open=preferences.hostUrlDefault==='expanded'||preferences.sourceUrlDefault==='expanded';
     if(basic||flags.showAdvancedDetails) {
       details.append(node('summary','Details'));
       if(basic||flags.showAdvancedDetails){

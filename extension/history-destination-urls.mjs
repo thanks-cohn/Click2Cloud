@@ -11,14 +11,14 @@ const customErrors={
  CUSTOM_DOMAIN_UNCONFIRMED:'Cloudflare has not confirmed the association. Refresh before trying again.'
 };
 
-export function wireHistoryDestinationUrls(details,{request,params,location,confirmed}){
+export function wireHistoryDestinationUrls(details,{request,params,location,confirmed,isVisible=()=>true}){
  const body=details.querySelector('[data-destination-urls]');
  if(!confirmed){body.textContent='Public URLs are available after this file is verified.';return;}
  let sequence=0;
  details.addEventListener('toggle',()=>{
   const ticket=++sequence;
-  if(!details.open)return;
-  const current=()=>ticket===sequence&&details.isConnected&&details.open;
+  if(!details.open||!isVisible())return;
+  const current=()=>ticket===sequence&&details.isConnected&&details.open&&isVisible();
   body.innerHTML=`<div class="public-url-cards history-public-list" aria-label="Public URLs for this destination" tabindex="0" hidden></div>
    <p role="status"></p><button type="button" data-enable hidden>Enable public URLs for this bucket</button>
    <button type="button" data-refresh>Refresh</button>

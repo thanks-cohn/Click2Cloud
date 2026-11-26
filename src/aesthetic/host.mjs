@@ -1,4 +1,4 @@
-import {standard,minimal,palettes,themePackages,busyCursorPackages} from './packages.mjs';
+import {standard,minimal,oceania,palettes,themePackages,busyCursorPackages} from './packages.mjs';
 
 export const AESTHETIC_API_VERSION='1.1';
 export const AESTHETIC_PREFERENCE_KEY='aestheticPreferenceV1';
@@ -119,7 +119,8 @@ export function createAestheticHost({root,storage,packages=themePackages,busyPac
    if(isPreference(scheme)&&schemes.has(scheme.id))palette=scheme.id;
    // Keep the durable IDs for Minimal and Remote V1 and read old Bit o' Polish
    // preferences as Minimal. The independently saved palette stays intact.
-   if(saved===undefined||isPreference(saved)&&saved.id==='high-polish')return apply({persist:false});
+   if(saved===undefined)return apply({id:themes.has(oceania.id)?oceania.id:minimal.id,persist:false});
+   if(isPreference(saved)&&saved.id==='high-polish')return apply({persist:false});
    if(isPreference(saved)){
     const style=saved.nostalgiaStyle===undefined?defaultStyle:saved.nostalgiaStyle;
     if(styles.some(item=>item.id===style))nostalgiaStyle=style;

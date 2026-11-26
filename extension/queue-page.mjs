@@ -8,11 +8,16 @@ const element=(tag,text)=>Object.assign(document.createElement(tag),text==null?{
 export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screenshotRequest,signal}) {
   const root=element('section');
   root.className='card queue-jobs';
-  root.innerHTML='<div class="queue-actions"><button type="button" data-cancel-all>Cancel All</button><button type="button" data-clear-all>Clear All</button></div><p data-job-counts role="status"></p><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry receipt sync</button>'+
+  root.innerHTML='<div class="queue-actions"><button type="button" data-cancel-all>Cancel All</button><button type="button" data-clear-all>Clear All</button></div><p data-job-counts role="status"></p><div class="onyx-queue-metrics" aria-hidden="true" hidden></div><p data-job-warning role="status"></p><button data-job-resync type="button" hidden>Retry receipt sync</button>'+
     '<div class="queue-job-window" tabindex="0" aria-label="Live jobs"><div data-job-padding-top></div><div data-job-items></div><div data-job-padding-bottom></div></div>';
   parent.append(root);
   const counts=root.querySelector('[data-job-counts]'),warning=root.querySelector('[data-job-warning]');
   const scroll=root.querySelector('.queue-job-window'),list=root.querySelector('[data-job-items]');
+  const metrics=root.querySelector('.onyx-queue-metrics');
+  const metricNodes=['Working','Waiting','Attention','Finished'].map(label=>{
+    const item=element('div');item.dataset.metric=label.toLowerCase();
+    const number=element('strong','—');item.append(number,element('span',label));metrics.append(item);return number;
+  });
   const top=root.querySelector('[data-job-padding-top]'), bottom=root.querySelector('[data-job-padding-bottom]');
   const resync=root.querySelector('[data-job-resync]');
   resync.onclick=async()=>{
@@ -56,6 +61,8 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
       resync.hidden=!service.accountingPending;
 
       counts.textContent=result.total?`Working ${result.working} · Waiting ${result.waiting} · Needs attention ${result.attention} · Finished ${result.finished}`:'No jobs';
+      [result.working,result.waiting,result.attention,result.finished].forEach((value,index)=>{metricNodes[index].textContent=String(value);});
+      metrics.hidden=false;
       scroll.hidden=!result.total;
       top.style.height=(offset*rowHeight)+'px';
       bottom.style.height=(Math.max(0,result.total-offset-result.items.length)*rowHeight)+'px';
@@ -80,7 +87,7 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
     }
   }
   function renderJob(job){
-    const row=element('article');row.className='queue-job';
+    const row=element('article');row.className='queue-job';row.dataset.queueState=job.status;
     const heading=element('div'), title=element('strong',job.filename??'N/A');
     heading.className='queue-job-heading';
     title.title=job.filename??'';

@@ -1,4 +1,4 @@
-:root[data-aesthetic=oceania] {
+:root:is([data-aesthetic=oceania],[data-aesthetic=onyx]) {
   --a-package: oceania;
   --bg: #171c32;
   --panel: #262d47;
@@ -33,7 +33,7 @@
   --surface-hover: 0 7px 18px #0005;
   --error: #ffc1c9;
 }
-:root[data-aesthetic=oceania][data-theme=light] {
+:root:is([data-aesthetic=oceania],[data-aesthetic=onyx])[data-theme=light] {
   --bg: #edf0f4;
   --panel: #fdfbf6;
   --raised: #e5eaf2;
@@ -48,7 +48,7 @@
   --surface-shadow: 0 3px #dfe4ee, 0 5px 0 -1px #c3cde3;
   --surface-hover: 0 6px 16px #23334d2b;
 }
-:root[data-aesthetic=oceania] {
+:root:is([data-aesthetic=oceania],[data-aesthetic=onyx]) {
   & #shell:not([data-view=explorer]) > main {
     background-image: repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--text) 3%, transparent) 4px 5px);
   }
