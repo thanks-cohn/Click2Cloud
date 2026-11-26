@@ -78,27 +78,28 @@ export function hyperspaceGeometry(width,height,split,burst,flex=0,tension=0){
  const right='M '+(w-x(tip))+' '+y(tipY)+' C '+(w-x(c1))+' '+y(h*(1-.44*split))+' '+(w-x(c2))+' '+y(h*(1-.28*split))+' '+(w-x(0))+' '+y(h);
  return {left,right,leftFill:left+' L '+x(0)+' 0 L '+x(tip)+' 0 Z',rightFill:right+' L '+(w-x(0))+' 0 L '+(w-x(tip))+' 0 Z',gap};
 }
-// Four clear, straight horizontal water bands and eight shallow ripples.
-// Perspective spacing opens toward the foreground; no animation-frame loop.
+// The horizon lies below the visible theme glyph; reserve only the extra
+// space required for the water, and never cover the raised page heading.
+export function hyperspaceWaterLayout(headerHeight,lift,moonBottom){
+ const horizon=Math.max(4,Math.ceil(moonBottom+2));
+ const height=Math.max(headerHeight-lift,horizon+22);
+ return {horizon,height,lift:headerHeight-height};
+}
+// Varied-length horizontal and shallow skewed ripples in three shades.
+// Geometry is generated once; movement is a small CSS-only drift.
 export function hyperspaceWaterGeometry(width,height){
  const w=Math.max(1,width),h=Math.max(1,height);
  if(w<100||h<8)return [];
- const lines=[],span=w*.88,center=w/2;
- const top=h*.10,depth=h*.80;
- for(let row=0;row<6;row++){
-  const t=row/5,y=top+depth*t**1.22;
-  if(row<4){
-   const len=span*(.71+.072*row);
-   const x=center+span*.025*Math.sin(row*2.4);
-   lines.push({x1:x-len/2,y1:y,x2:x+len/2,y2:y,opacity:.52+.055*row});
-   continue;
-  }
-  for(let i=0;i<4;i++){
-   const cell=span/4,phase=Math.sin((row+1)*2.13+i*2.47);
-   const len=cell*(.63+.16*t+.08*phase);
-   const x=center-span/2+cell*(i+.5)+phase*cell*.055;
-   const skew=Math.sin(row*2.1+i*1.8)*Math.min(1.1,h*.055);
-   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,opacity:.48+.16*t+.035*phase});
+ const lines=[],span=w*.90,center=w/2;
+ for(let row=0;row<5;row++){
+  const t=row/4,y=h*(.12+.76*t**1.2);
+  const count=row===0?2:3;
+  for(let i=0;i<count;i++){
+   const n=row*3+i,cell=span/count,phase=Math.sin((row+1)*2.13+i*2.47);
+   const len=cell*(.29+.37*t+.16*(phase+1));
+   const x=center-span/2+cell*(i+.5)+phase*cell*.045;
+   const skew=n%3===0?0:Math.sin(row*2.1+i*1.8)*Math.min(1.2,h*.045);
+   lines.push({x1:x-len/2,y1:y-skew/2,x2:x+len/2,y2:y+skew/2,shade:n%3,opacity:.56+.12*t,delay:Math.round(n*125),drift:(n%2?1:-1)*(3+7*t),duration:8+(n%4)*2});
   }
  }
  return lines;
@@ -125,25 +126,39 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
  function clearWater(){
   if(waterTimer!==undefined){time.clear(waterTimer);waterTimer=undefined;}
-  water?.remove();water=undefined;
+  if(water){water.remove();if(overlay){overlay.style.removeProperty('height');setVar(overlay,'--hyper-lift',baseLift.toFixed(3)+'px');}}water=undefined;
  }
  function armWater(){
   if(waterTimer!==undefined||water||!overlay)return;
   waterTimer=time.set(()=>{
    waterTimer=undefined;
    if(!overlay||current?.phase!=='open'||returning||!eligible())return;
-   const height=Math.max(1,parts.height+1-baseLift);
-   const lines=hyperspaceWaterGeometry(parts.width,height);
+   const headerRect=header.getBoundingClientRect(),theme=header.querySelector('#theme');
+   const glyphs=[...(theme?.children??[])].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&win.getComputedStyle(el).visibility!=='hidden'&&win.getComputedStyle(el).display!=='none';});
+   const moonBottom=Math.max(0,...(glyphs.length?glyphs:theme?[theme]:[]).map(el=>el.getBoundingClientRect().bottom-headerRect.top));
+   const layout=hyperspaceWaterLayout(headerRect.height,baseLift,moonBottom);
+   const lines=hyperspaceWaterGeometry(parts.width,layout.height-layout.horizon);
    if(!lines.length)return;
+   // The original release has finished; adjust the settled reservation once
+   // if necessary to fit the ocean below the icon. Restoration starts here.
+   baseLift=layout.lift;reserve(baseLift);setVar(overlay,'--hyper-lift','0px');
    water=doc.createElementNS(svgNS,'svg');
    water.setAttribute('class','hyperspace-water');
-   water.setAttribute('viewBox','0 0 '+parts.width+' '+height);
+   water.setAttribute('viewBox','0 0 '+parts.width+' '+layout.height);
    water.setAttribute('aria-hidden','true');
-   water.style.height=height+'px';
+   water.style.height=layout.height+'px';
+   overlay.style.height=layout.height+'px';
+   water.setAttribute('preserveAspectRatio','none');
+   const rect=(className,y,h)=>{const el=doc.createElementNS(svgNS,'rect');el.setAttribute('class',className);el.setAttribute('width',String(parts.width));el.setAttribute('y',String(y));el.setAttribute('height',String(h));water.append(el);};
+   rect('hyperspace-sky',0,layout.horizon);
+   rect('hyperspace-sea',layout.horizon,layout.height-layout.horizon);
+   const horizon=doc.createElementNS(svgNS,'path');horizon.setAttribute('class','hyperspace-horizon');horizon.setAttribute('d','M0 '+layout.horizon+' H'+parts.width);water.append(horizon);
    for(const segment of lines){
+    const group=doc.createElementNS(svgNS,'g');group.setAttribute('class','hyperspace-ripple shade-'+segment.shade);
+    group.style.setProperty('--water-delay',segment.delay+'ms');group.style.setProperty('--water-drift',segment.drift+'px');group.style.setProperty('--water-period',segment.duration+'s');
     const line=doc.createElementNS(svgNS,'line');
-    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]));
-    water.append(line);
+    for(const k of ['x1','y1','x2','y2','opacity'])line.setAttribute(k,String(segment[k]+(k==='y1'||k==='y2'?layout.horizon:0)));
+    group.append(line);water.append(group);
    }
    overlay.append(water);
   },WATER_IDLE_MS);
