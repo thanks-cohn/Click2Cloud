@@ -41,13 +41,17 @@ for(const seconds of [1,3,5,10,20]){
  let speed=-1,travel=-1;
  for(let i=0;i<=100;i++){
   const sample=hyperspaceFrame(SPLIT_MS+seconds*1000*i/100,seconds);
-  assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);
+  assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);assert.equal(sample.wordsUp,0);assert.equal(sample.words,1);
   speed=sample.speed;travel=sample.travel;
  }
+ const impulse=hyperspaceFrame(end+timing.release*.25,seconds);
+ assert(impulse.wordsUp>.5,'Navigation travels upward explosively');
+ assert.equal(impulse.wordsUp,impulse.burst,'Navigation and rails share the release impulse');
+ assert(impulse.words>.5,'Navigation moves visibly instead of disappearing first');
  const release=hyperspaceFrame(end+timing.release,seconds);
  const settled=hyperspaceFrame(end+timing.release+timing.settle,seconds);
  assert.equal(release.burst,1);assert(release.lift>1);
- assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.done,true);
+ assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.wordsUp,1);assert.equal(settled.done,true);
  if(previous){assert(timing.release<previous.timing.release);assert(release.lift>previous.lift);assert(speed>previous.speed);}
  previous={timing,lift:release.lift,speed};
 }
