@@ -665,7 +665,7 @@ function markCurrentSearchStale(){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
