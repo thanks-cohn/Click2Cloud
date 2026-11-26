@@ -440,6 +440,36 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-feedback:empty,.queue-settings [role=status]:empty{display:none}
 .queue-calendar{padding-inline-start:clamp(3px,1.5vw,10px)}
 .queue-calendar summary{cursor:pointer;margin-block:6px}
+/* History disclosure: the same two strokes travel, rotate and change length.
+   Keep the native details/summary element, text, focus and toggle semantics. */
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary{
+ display:block;list-style:none;position:relative;padding-inline-start:20px;cursor:pointer;
+}
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::marker{content:""}
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::-webkit-details-marker{display:none}
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::before,
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::after{
+ content:"";position:absolute;left:7px;width:6.5px;height:1.3px;border-radius:2px;
+ background:currentColor;pointer-events:none;transform-origin:center;
+ transition:left 380ms cubic-bezier(.45,0,.18,1),top 380ms cubic-bezier(.45,0,.18,1),
+  width 380ms cubic-bezier(.45,0,.18,1),transform 380ms cubic-bezier(.45,0,.18,1);
+}
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::before{
+ top:calc(.65em - 2.3px);transform:translate(-50%,-50%) rotate(45deg);
+}
+#shell[data-view=history] :is(.queue-archive,.history-page) details>summary::after{
+ top:calc(.65em + 2.3px);transform:translate(-50%,-50%) rotate(-45deg);
+}
+#shell[data-view=history] :is(.queue-archive,.history-page) details[open]>summary::before{
+ left:8px;top:calc(.65em - 3.5px);width:12px;transform:translate(-50%,-50%) rotate(0deg);
+}
+#shell[data-view=history] :is(.queue-archive,.history-page) details[open]>summary::after{
+ left:8px;top:calc(.65em + 3.5px);width:7px;transform:translate(-50%,-50%) rotate(0deg);
+}
+@media(prefers-reduced-motion:reduce){
+ #shell[data-view=history] :is(.queue-archive,.history-page) details>summary::before,
+ #shell[data-view=history] :is(.queue-archive,.history-page) details>summary::after{transition:none}
+}
 .queue-pager{display:flex;align-items:center;justify-content:center;gap:clamp(2px,1vw,6px);margin-block-start:12px;white-space:nowrap;font-size:.86rem}
 .queue-pager[hidden],.queue-single-page[hidden]{display:none}
 .queue-pager button:not(.sr-only){display:grid;place-items:center;flex:none;inline-size:32px;block-size:32px;padding:0}

@@ -146,6 +146,48 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.evaluate(()=>document.querySelector('#shell').dataset.view='remotes');
+ // History uses native disclosures with two persistent, animated CSS strokes.
+ await page.evaluate(()=>{
+  const shell=document.querySelector('#shell');shell.dataset.view='history';
+  const fixture=document.createElement('section');fixture.id='history-disclosure-fixture';fixture.className='queue-archive';
+  fixture.innerHTML='<details class="queue-calendar"><summary>November 2026</summary><article class="queue-history-card"><details><summary>URLs</summary><p>Example URL</p></details></article></details>';
+  document.querySelector('#main').prepend(fixture);
+ });
+ const historySummary=page.locator('#history-disclosure-fixture>.queue-calendar>summary');
+ const strokes=()=>historySummary.evaluate(el=>{
+  const read=pseudo=>{const s=getComputedStyle(el,pseudo);return {width:parseFloat(s.width),left:parseFloat(s.left),top:parseFloat(s.top),transform:s.transform,opacity:s.opacity,background:s.backgroundColor,duration:s.transitionDuration}};
+  return {open:el.parentElement.open,upper:read('::before'),lower:read('::after'),marker:getComputedStyle(el,'::marker').content,list:getComputedStyle(el).listStyleType,text:el.textContent};
+ });
+ const closed=await strokes();
+ assert.equal(closed.open,false);assert.equal(closed.list,'none');assert.equal(closed.text,'November 2026');
+ assert.equal(closed.upper.width,6.5);assert.equal(closed.lower.width,6.5);
+ assert.notEqual(closed.upper.transform,closed.lower.transform);
+ const samples=await historySummary.evaluate(async el=>{
+  const frames=[];
+  const read=pseudo=>{const s=getComputedStyle(el,pseudo);return {width:parseFloat(s.width),top:parseFloat(s.top),left:parseFloat(s.left),transform:s.transform,opacity:s.opacity}};
+  el.click();
+  await new Promise(resolve=>{const start=performance.now();function frame(){frames.push({upper:read('::before'),lower:read('::after')});if(performance.now()-start<500)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
+  return frames;
+ });
+ const opened=await strokes();
+ assert.equal(opened.open,true);assert.equal(opened.upper.width,12);assert.equal(opened.lower.width,7);
+ assert(opened.upper.top<closed.upper.top&&opened.lower.top>closed.lower.top);
+ assert(samples.some(f=>f.upper.width>6.5&&f.upper.width<11.9&&f.upper.top<closed.upper.top&&f.upper.top>opened.upper.top&&f.upper.transform!==closed.upper.transform&&f.upper.transform!==opened.upper.transform),'Upper stroke must travel and rotate through intermediate frames');
+ assert(samples.some(f=>f.lower.top>closed.lower.top&&f.lower.top<opened.lower.top&&f.lower.transform!==closed.lower.transform&&f.lower.transform!==opened.lower.transform),'Lower stroke must travel and rotate independently');
+ assert(samples.every(f=>f.upper.opacity==='1'&&f.lower.opacity==='1'),'Neither stroke may flash or fade');
+ const nested=page.locator('#history-disclosure-fixture .queue-history-card summary');
+ await nested.press('Enter');
+ assert(await nested.evaluate(el=>el.parentElement.open));
+ await nested.press('Enter');
+ assert(!(await nested.evaluate(el=>el.parentElement.open)));
+ await historySummary.press('Space');
+ await page.waitForFunction(()=>{const el=document.querySelector('#history-disclosure-fixture>.queue-calendar>summary');return !el.parentElement.open&&getComputedStyle(el,'::before').width==='6.5px'});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await historySummary.press('Enter');
+ assert.equal((await strokes()).upper.duration,'0s');
+ assert.equal((await strokes()).upper.width,12);
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.evaluate(()=>{document.querySelector('#history-disclosure-fixture').remove();document.querySelector('#shell').dataset.view='remotes';});
  // Queue job surfaces retain status colors on the top rule only, with open sides.
  for(const mode of ['dark','light']){
   const rules=await page.evaluate(mode=>{
