@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
-import {randomUUID} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {join,resolve} from 'node:path';
 import {chromium} from 'playwright-core';
 
@@ -19,7 +19,28 @@ const server=createServer(async(req,res)=>{
     'mountPythonLabSettings(document.querySelector("main"));</script>');
    return;
   }
-  const types={'/extension/app.css':'text/css','/extension/python-lab-settings.mjs':'text/javascript'};
+  if(req.url==='/opfs-worker.mjs'){
+   res.setHeader('Content-Type','text/javascript');
+   res.end(`import {labSpoolDirectory,openLabSpool} from '/src/chrome/python-lab/spool.mjs';
+     self.addEventListener('message',event=>event.waitUntil((async()=>{
+      try{
+       const directory=await labSpoolDirectory();
+       const data=new TextEncoder().encode(event.data);
+       const spool=await openLabSpool(directory,data.length);
+       await spool.append(data.subarray(0,3),0);
+       await spool.append(data.subarray(3),3);
+       const hash=await spool.seal();
+       const value=await (await spool.file()).text();
+       await spool.close();
+       const retained=[];
+       for await(const name of directory.keys())retained.push(name);
+       event.ports[0].postMessage({hash,value,retained});
+      }catch(error){event.ports[0].postMessage({error:String(error)});}
+     })()));`);
+   return;
+  }
+  const types={'/extension/app.css':'text/css','/extension/python-lab-settings.mjs':'text/javascript',
+   '/src/chrome/python-lab/spool.mjs':'text/javascript','/src/chrome/python-lab/vendor/sha256.mjs':'text/javascript'};
   if(!Object.hasOwn(types,req.url)){res.writeHead(404).end();return;}
   res.setHeader('Content-Type',types[req.url]);res.end(await readFile('.'+req.url));
  }catch{res.writeHead(500).end();}
@@ -85,6 +106,17 @@ try{
  assert.equal(await card.getByRole('button',{name:'Copy CMD'}).isVisible(),false);
  assert.deepEqual(errors,[]);
  report.checks.push('paired state, revocation, and no page errors at 365 px');
+ const valueToStage='REAL CHROMIUM OPFS spool fixture';
+ const spool=await page.evaluate(async value=>{
+  await navigator.serviceWorker.register('/opfs-worker.mjs',{type:'module'});
+  const registration=await navigator.serviceWorker.ready;
+  const channel=new MessageChannel();
+  const result=new Promise(resolve=>{channel.port1.onmessage=event=>resolve(event.data);});
+  registration.active.postMessage(value,[channel.port2]);
+  return result;
+ },valueToStage);
+ assert.deepEqual(spool,{value:valueToStage,hash:createHash('sha256').update(valueToStage).digest('hex'),retained:[]});
+ report.checks.push('disk-backed spool, incremental SHA-256, and cleanup in a real Chromium service worker');
  report.state='PASS';
 }catch(error){
  report.state='FAIL';report.error=String(error.stack??error);process.exitCode=1;
