@@ -143,12 +143,17 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
   if(parts.titleLift)setVar(main,'--hyper-title-up',(parts.titleLift*clamp(frame.lift)).toFixed(3)+'px');
   if(parts.titleCenter!==undefined)setVar(main,'--hyper-title-center',(parts.titleCenter*clamp(frame.lift)).toFixed(3)+'px');
+  if(parts.shortcutAnchor!==undefined){
+   const progress=clamp(frame.lift);
+   setVar(main,'--hyper-shortcut-center',(parts.shortcutAnchor*progress).toFixed(3)+'px');
+   setVar(main,'--hyper-shortcut-progress',progress.toFixed(6));
+  }
  }
  function clear(){
   cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
-  reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');main?.style.removeProperty('--hyper-title-center');lastGeometry=lastPhase='';
+  reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');main?.style.removeProperty('--hyper-title-center');main?.style.removeProperty('--hyper-shortcut-center');main?.style.removeProperty('--hyper-shortcut-progress');lastGeometry=lastPhase='';
   for(const key of ['--hyper-words','--hyper-controls-up','--hyper-words-up','--hyper-theme-right'])header.style.removeProperty(key);
  }
  function reset(){cancelTimer();clear();}
@@ -223,7 +228,10 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const title=main?.querySelector('.page>h1>[data-hyper-center-title]');
    if(title){const r=title.getBoundingClientRect();titleCenter=rect.left+rect.width/2-r.left-r.width/2;}
   }
-  parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift,titleCenter};
+  const shortcuts=shell.dataset.view==='screenshot'?main?.querySelector('[data-hyper-center-shortcuts]'):null;
+  // Measure the unshifted start, not the text width: CSS handles live key changes.
+  const shortcutAnchor=shortcuts?rect.left+rect.width/2-shortcuts.getBoundingClientRect().left:undefined;
+  parts={width:rect.width,height:Math.max(1,rect.height-1),titleLift,titleCenter,shortcutAnchor};
   runMode=preference.value.mode;body.dataset.hyperspaceMode=runMode;
   if(runMode==='elegant'){
    setVar(body,'--hyper-elegant-page',page);
