@@ -59,6 +59,10 @@ body[data-hyperspace-mode=elegant][data-hyperspace]>.app-header #theme{
 body[data-hyperspace-mode=elegant][data-hyperspace=open]>.app-header :is(nav,.header-more){
  visibility:hidden;
 }
+/* Providers: keep the sun/moon at its original x/y position in either effect. */
+body[data-hyperspace]:has(>#shell[data-view=remotes])>.app-header #theme{
+ translate:none!important;
+}
 /* One reservation at launch, one final layout commit. No animated margins. */
 body[data-hyperspace]>#shell{margin-block-start:calc(0px - var(--hyper-reserve,0px))}
 body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
