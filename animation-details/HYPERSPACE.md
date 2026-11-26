@@ -14,7 +14,6 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Release | Energy-dependent | The accumulated inward tension and deeper downward navigation dip reverse into the release: the rails visibly bow away from the center as pressure strikes their interior. The deformed rails and the header surfaces then surge outward together. Navigation text is launched upward beyond the header and viewport, with a late fade only as it exits. The lower content is pulled upward by the same concentrated release impulse. The rail glints lengthen briefly and gain a final burst of travel before vanishing with the color boundary. |
 | Settle | Energy-dependent | A stronger, energy-dependent upward overshoot settles into a constant final position. |
 | Open | Indefinite | The page color fills the header space and the page stays raised. No ongoing animation-frame loop. |
-| Ocean horizon | After 2 uninterrupted seconds open | Fourteen varied-length ripples in three shades slowly appear, drift and disappear within the existing cleared header. No new background, horizon bar or layout change. |
 | Return | Up to about 0.88 seconds | Header hover reverses from the current state and restores the surfaces, navigation and content together. No restart from an unrelated frame. |
 
 Settings → Aesthetic → Header Hyperspace offers an enable switch and a buildup duration of 1–20 whole seconds, persisted locally in `headerHyperspaceV1`. The buildup is separate from the initial fixed five-second idle delay. Longer buildup produces a deeper outward bend, a stronger, quicker outward release and more upward overshoot, without changing the final geometry. Limits are deliberate to keep motion legible and bounded.
@@ -34,10 +33,6 @@ The page lift uses a FLIP-style layout reservation: the shell reserves the maxim
 The animated values are scoped to the header or the small overlay rather than the body. Unchanged Bézier paths are not rebuilt; fully exited rails no longer receive geometry or shimmer updates. The controller still uses a shared frame clock to keep the colors, navigation and page in sync. The browser regression fixture checks constant shell height and reservation during the release, stationary footer geometry, visible lift and final layout equivalence.
 
 These are structural rendering optimizations, not a measured frame-rate guarantee. Live Chrome profiling, scrolling behavior and visual acceptance on the target machine remain necessary.
-
-## Ocean horizon
-
-The settled state schedules one cancellable two-second timer. A transparent SVG contains only fourteen varied-length straight and slightly skewed ripples in three theme-aware shades. Independent, staggered CSS opacity cycles slowly reveal and dissolve the lines while gentle horizontal drift conveys night water. The original sky/page colors and all settled geometry remain untouched; the existing division acts as the implied horizon. Ripples occupy the space below the theme glyph when sufficient room exists, otherwise the lower central gap between the logo and theme control. They never reserve additional space or cover page content. No JavaScript animation-frame loop is restarted. Existing reset paths remove the scene and cancel its timer and animations.
 
 ## Interaction contract
 
