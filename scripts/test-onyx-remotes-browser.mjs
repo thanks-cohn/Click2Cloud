@@ -258,7 +258,7 @@ try{
   assert(card.lines.every(l=>l.inside&&l.height===1));assert.deepEqual(card.dividers,['34px 1px','22px 1px']);
   if(i)assert.notDeepEqual(ornamentCheck.patterns[i],ornamentCheck.patterns[i-1]);
  }
- // Stationary architectural History: real pagination form, separate scrollport.
+ // Floating architectural History: real pagination and delayed, non-blocking reveal.
  await page.evaluate(async()=>{
   const {mountHistoryV2}=await import('/extension/queue-page.mjs');
   const shell=document.querySelector('#shell'),main=document.querySelector('#main');
@@ -279,14 +279,36 @@ try{
    const rect=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width};};
    return {pager:rect('#history-pagination-dock .queue-pager'),main:rect('#main'),dock:rect('#history-pagination-dock'),shell:rect('#shell')};
   });
+  await page.mouse.move(1,1);
   const before=await layout();
-  assert.equal(before.dock.bottom,before.shell.bottom);assert.equal(before.main.bottom,before.dock.y);
+  assert.equal(before.shell.bottom-before.dock.bottom,6);
+  assert.equal(before.main.bottom,before.shell.bottom,'Overlay must not reserve footer height');
   assert(Math.abs(before.pager.x+before.pager.width/2-(before.shell.x+before.shell.width/2))<=1);
+  const dock=page.locator('#history-pagination-dock');
+  await page.waitForFunction(()=>document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
+  assert.equal(await dock.evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
   await page.evaluate(()=>{const group=document.createElement('details');group.id='fixed-history-group';group.className='queue-calendar';group.innerHTML='<summary>Today</summary><div style="height:1800px">Expanded archive</div>';document.querySelector('#fixed-history-fixture [data-history-records]').append(group);group.open=true;});
+  await page.waitForFunction(()=>!document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
+  assert.equal(await fixedPager.evaluate(el=>getComputedStyle(el).pointerEvents),'none');
+  const hoverX=before.pager.x+before.pager.width/2,hoverY=before.pager.y+8;
+  await page.mouse.move(hoverX,hoverY);
+  await page.waitForTimeout(600);
+  assert(!(await dock.evaluate(el=>el.hasAttribute('data-revealed'))),'Reveal must wait a full second');
+  await page.mouse.move(1,1);
+  await page.waitForTimeout(500);
+  assert(!(await dock.evaluate(el=>el.hasAttribute('data-revealed'))),'Leaving early must cancel the dwell');
+  await page.mouse.move(hoverX,hoverY);
+  await page.waitForFunction(()=>document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
+  assert.equal(await fixedPager.evaluate(el=>getComputedStyle(el).pointerEvents),'auto');
+  await page.mouse.move(1,1);
+  await page.waitForFunction(()=>!document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
   await page.locator('#main').evaluate(el=>el.scrollTop=el.scrollHeight);
+  await page.waitForFunction(()=>document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
   assert.deepEqual((await layout()).pager,before.pager);
   await page.locator('#main').evaluate(el=>el.scrollTop=0);
+  await page.waitForFunction(()=>!document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
   await page.locator('#fixed-history-group>summary').click();
+  await page.waitForFunction(()=>document.querySelector('#history-pagination-dock').hasAttribute('data-revealed'));
   assert.deepEqual((await layout()).pager,before.pager);
   await page.locator('#fixed-history-group').evaluate(el=>el.remove());
  }

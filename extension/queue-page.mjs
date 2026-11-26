@@ -174,6 +174,39 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
   return {refresh};
 }
 
+// The transparent overlay cannot capture the pointer while hidden. Observe
+// the shell instead, and reveal only after a continuous one-second dwell.
+function bindHistoryPaginationReveal(dock,main,content,signal){
+  const shell=main?.parentElement;
+  if(!shell)return;
+  let hovered=false, dwellComplete=false, dwellTimer;
+  const sync=()=>{
+    const atBottom=main.scrollHeight-main.clientHeight-main.scrollTop<=2;
+    dock.toggleAttribute('data-revealed',atBottom||dwellComplete);
+  };
+  const clearHover=()=>{
+    clearTimeout(dwellTimer);dwellTimer=undefined;
+    hovered=false;dwellComplete=false;sync();
+  };
+  const pointerMove=event=>{
+    if(event.pointerType==='touch')return;
+    const r=dock.getBoundingClientRect();
+    const inside=r.height>0&&event.clientX>=r.left&&event.clientX<=r.right&&
+      event.clientY>=r.top-6&&event.clientY<=shell.getBoundingClientRect().bottom;
+    if(!inside){if(hovered)clearHover();return;}
+    if(hovered)return;
+    hovered=true;
+    dwellTimer=setTimeout(()=>{dwellComplete=hovered;sync();},1000);
+  };
+  shell.addEventListener('pointermove',pointerMove,{passive:true,signal});
+  shell.addEventListener('pointerleave',clearHover,{signal});
+  main.addEventListener('scroll',sync,{passive:true,signal});
+  const resize=new ResizeObserver(sync);
+  resize.observe(main);resize.observe(content);resize.observe(dock);
+  signal.addEventListener('abort',()=>{clearTimeout(dwellTimer);resize.disconnect();},{once:true});
+  sync();
+}
+
 export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,rename,renameError,state={page:1},pagerHost=null}) {
   const root=element('section');
   root.className='card queue-archive';
@@ -188,7 +221,10 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   const list=root.querySelector('[data-history-records]'),notice=root.querySelector('[data-history-notice]');
   const form=root.querySelector('form'),input=form.querySelector('input'),find=root.querySelector('[data-history-find]');
   const singlePage=root.querySelector('.queue-single-page');
-  if(pagerHost) pagerHost.append(form);
+  if(pagerHost){
+    pagerHost.append(form);
+    bindHistoryPaginationReveal(pagerHost,parent.closest('#main'),parent,signal);
+  }
   let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, reading, editingPage=false;
   const pageDisplay=()=>document.documentElement.dataset.aesthetic==='onyx'?String(page).padStart(2,'0'):String(page);
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));

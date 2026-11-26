@@ -489,25 +489,27 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-pager input{inline-size:clamp(3em,13vw,6.5em);min-inline-size:0;margin:0!important;padding-inline:4px;text-align:center;appearance:textfield}
 .queue-pager input::-webkit-inner-spin-button{appearance:none}
 .queue-single-page{text-align:center;color:var(--muted);font-size:.86rem;margin-block:12px 0}
-/* History architecture: the archive scrolls, the controls do not.
-   The transparent dock is geometry only, never a visible footer panel. */
-#shell[data-view=history]:has(>#history-pagination-dock){
- grid-template-rows:minmax(0,1fr) auto;
-}
-#shell[data-view=history]:has(>#history-pagination-dock)>main{
- padding-block-end:8px;scroll-padding-block-end:8px;
-}
+/* Floating History pagination. No footer row, no background, and no
+   pointer interception until the archive ends or the hover dwell completes. */
 #history-pagination-dock{
- grid-row:2;min-inline-size:0;display:flex;justify-content:center;align-items:flex-end;
- padding:4px 48px 8px;min-block-size:56px;background:transparent;border:0;
+ position:absolute;z-index:2;inset-block-end:6px;inset-inline-start:50%;
+ transform:translateX(-50%);inline-size:min(248px,calc(100% - 96px));
+ min-inline-size:0;display:flex;justify-content:center;align-items:flex-end;
+ padding:0;background:transparent;border:0;opacity:0;pointer-events:none;
+ transition:opacity 220ms ease;
 }
-#history-pagination-dock>.queue-pager{margin:0;min-inline-size:0;inline-size:min(100%,248px)}
-/* Narrow shelves retain a separate clear lane for the expanding destination
-   control, so it cannot obscure any of the stationary pagination arrows. */
+#history-pagination-dock>.queue-pager{
+ margin:0;min-inline-size:0;inline-size:100%;pointer-events:none;
+}
+#history-pagination-dock:is([data-revealed],:focus-within){opacity:1}
+#history-pagination-dock:is([data-revealed],:focus-within)>.queue-pager{pointer-events:auto}
+/* At narrow widths the original destination control takes precedence only
+   while it is expanding; neither control moves nor reserves a footer. */
 @media(max-width:560px){
- #history-pagination-dock{min-block-size:88px;padding-inline:12px}
- #shell[data-view=history]:has(>#history-pagination-dock)>#manage-slot{inset-block-end:48px}
+ #shell[data-view=history]:has(>#manage-slot #manage:is(:hover,:focus-visible))>#history-pagination-dock:not(:focus-within){opacity:0}
+ #shell[data-view=history]:has(>#manage-slot #manage:is(:hover,:focus-visible))>#history-pagination-dock:not(:focus-within)>.queue-pager{pointer-events:none}
 }
+@media(prefers-reduced-motion:reduce){#history-pagination-dock{transition:none}}
 #shell[data-view=history] .queue-search{position:relative;gap:0}
 #shell[data-view=history] .queue-search-label{
  position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;
