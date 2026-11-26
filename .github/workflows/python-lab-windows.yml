@@ -1,0 +1,27 @@
+name: REDOWN Windows source inventory
+on:
+  push:
+    branches: [codex/redown-11-25-2026-python-lab-live-repair]
+    paths:
+      - '.github/workflows/python-lab-windows.yml'
+      - '11.25.2026/live-python-lab/python/**'
+      - '11.25.2026/python-lab-live-repair/verify-windows-inventory.cmd'
+permissions:
+  contents: read
+jobs:
+  windows-inventory:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          architecture: x64
+      - name: Install and test the real Windows source paths
+        run: |
+          python --version
+          python -m venv lab-local\.venv && lab-local\.venv\Scripts\python.exe -m pip install -e 11.25.2026\live-python-lab\python && call 11.25.2026\python-lab-live-repair\verify-windows-inventory.cmd
