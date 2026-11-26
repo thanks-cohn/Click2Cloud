@@ -37,20 +37,6 @@ body[data-hyperspace]>#shell[data-hyperspace-lifting]>main{
 /* The rail surfaces are hidden after exit, so the settling frames only move
    the page and retract the small header paint region. */
 .hyperspace-overlay>.hyperspace-surface[hidden]{display:none!important}
-/* Moonlit ripples only: the existing background and layout remain untouched. */
-.hyperspace-overlay>.hyperspace-water{
- stroke-width:.85;stroke-linecap:round;
-}
-.hyperspace-ripple{
- stroke:currentColor;opacity:0;
- animation:hyperspace-water-life var(--water-cycle,20s) var(--water-delay,0ms) ease-in-out infinite both,
- hyperspace-water-drift var(--water-period,10s) ease-in-out infinite alternate;
-}
-.hyperspace-ripple.shade-0{stroke:color-mix(in srgb,var(--text,currentColor) 84%,var(--hyper-page,var(--bg)) 16%)}
-.hyperspace-ripple.shade-1{stroke:color-mix(in srgb,var(--text,currentColor) 61%,var(--hyper-page,var(--bg)) 39%)}
-.hyperspace-ripple.shade-2{stroke:color-mix(in srgb,var(--text,currentColor) 40%,var(--hyper-page,var(--bg)) 60%)}
-@keyframes hyperspace-water-life{0%,100%{opacity:0}15%,76%{opacity:1}42%{opacity:.68}93%{opacity:0}}
-@keyframes hyperspace-water-drift{from{transform:translateX(calc(-.5 * var(--water-drift,6px)))}to{transform:translateX(var(--water-drift,6px))}}
 @media(prefers-reduced-motion:reduce){
  body[data-hyperspace]>.app-header>.hyperspace-overlay{display:none}
  body[data-hyperspace]>.app-header :is(nav,.header-more){opacity:1;translate:none;pointer-events:auto}
