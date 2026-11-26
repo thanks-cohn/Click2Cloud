@@ -19,22 +19,26 @@
     .catch(()=>null) : null;
 
   // Store only the latest trusted viewport coordinate, never a trail or telemetry.
-  let pointer;
+  let pointerX, pointerY;
+  function forgetPointer(){pointerX=pointerY=undefined;}
   function trackPointer(event) {
     if (!event.isTrusted || event.pointerType === 'touch') return;
     if (event.target?.localName === 'iframe' || event.target?.localName === 'frame') {
-      pointer = undefined; // Top-level coordinates inside another frame are unknown.
+      forgetPointer(); // Top-level coordinates inside another frame are unknown.
       return;
     }
-    pointer = {x:event.clientX,y:event.clientY};
+    pointerX=event.clientX;pointerY=event.clientY;
   }
   document.addEventListener('pointermove',trackPointer,{capture:true,passive:true});
   document.addEventListener('pointerover',trackPointer,{capture:true,passive:true});
-  document.addEventListener('pointerout',event=>{
-    if(event.isTrusted&&event.pointerType!=='touch'&&!event.relatedTarget)pointer=undefined;
+  // Leaving an individual element (especially a notice being removed) is
+  // not leaving the document. Keep the parked point across dismissals.
+  document.addEventListener('pointerleave',event=>{
+    if(event.isTrusted&&event.pointerType!=='touch'&&
+       (event.target===document.documentElement||event.target===document))forgetPointer();
   },{capture:true,passive:true});
-  window.addEventListener('blur',()=>{pointer=undefined;});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)pointer=undefined;});
+  window.addEventListener('blur',forgetPointer);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)forgetPointer();});
   const hoverEnabled = hover => hover!==false&&matchMedia('(any-hover: hover)').matches;
   const noticeDimensions = size => ({
     width:{small:253,standard:338,large:422}[size]??422,
@@ -43,7 +47,7 @@
     padBottom:{small:7,standard:10,large:12}[size]??12
   });
   function pointerInPlacement({position,size,hover}){
-    if(!pointer||!hoverEnabled(hover))return false;
+    if(pointerX===undefined||!hoverEnabled(hover))return false;
     const viewportWidth=document.documentElement?.clientWidth||innerWidth;
     const viewportHeight=document.documentElement?.clientHeight||innerHeight;
     const dimensions=noticeDimensions(size);
@@ -53,7 +57,7 @@
     const height=(width-2*dimensions.padX)*112/365+dimensions.padTop+dimensions.padBottom+10;
     const left=position==='center'?(viewportWidth-width)/2:viewportWidth-width-8;
     const top=position==='center'?(viewportHeight-height)/2:viewportHeight-height-12;
-    return pointer.x>=left&&pointer.x<=left+width&&pointer.y>=top&&pointer.y<=top+height;
+    return pointerX>=left&&pointerX<=left+width&&pointerY>=top&&pointerY<=top+height;
   }
   function remember(id,result){
     seen.set(id,result);
@@ -151,7 +155,7 @@
     };
     if(hoverEnabled(hover)){
       const dismissOnHover=event=>{
-        if(event.isTrusted&&event.pointerType!=='touch')dismiss();
+        if(event.isTrusted&&event.pointerType!=='touch'){trackPointer(event);dismiss();}
       };
       reward.addEventListener('pointerenter',dismissOnHover);
       reward.addEventListener('pointermove',dismissOnHover);

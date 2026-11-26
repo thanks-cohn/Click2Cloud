@@ -138,6 +138,12 @@ try{
   await notice.waitFor({state:'detached'});
   assert.equal(await send('moving-hover','dropbox'),true);
   assert.equal(await notice.count(),0);
+  const afterDismiss=await activity();
+  for(let i=0;i<20;i++){
+    assert.deepEqual(await send('rapid-parked-'+i,'dropbox'),{state:'suppressed-hover'});
+    assert.equal(await notice.count(),0);
+  }
+  assert.deepEqual(await activity(),afterDismiss,'Parked cursor after dismissal must not allocate new animations');
   assert.equal(await send('hover-disabled','dropbox',undefined,{hover:false}),true);
   assert.equal(await notice.count(),1,'Hover disabled must preserve parked-pointer display');
   await notice.focus();await page.keyboard.press('Escape');
