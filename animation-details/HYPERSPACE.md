@@ -9,7 +9,7 @@ A quiet interface becomes a perspective highway: the bottom dividing line splits
 | Phase | Timing | Behavior |
 | --- | --- | --- |
 | Idle | 5 seconds | Only uninterrupted absence of hover arms the effect. Initial launch may arm the idle timer; changing tabs never arms it. |
-| Split | 1.8 seconds | The line separates from the center; its tips climb to the top and create an 80 CSS-pixel opening (bounded on exceptionally narrow windows). Curves create a vanishing-point highway. |
+| Split | 0.18 seconds | The line rapidly separates from the center; its tips climb to the top and create an 80 CSS-pixel opening (bounded on exceptionally narrow windows). Curves create a vanishing-point highway. |
 | Charge | 5 seconds by default | Light streaks begin near the bottom of both rails and travel upward toward the horizon, starting almost imperceptibly and accelerating continuously throughout the configured time. The colors remain separated at the curves. |
 | Release | Energy-dependent | The rails and the header surfaces move outward together. Navigation text fades and lower content is pulled upward by the same release. |
 | Settle | Energy-dependent | A small, bounded upward overshoot settles into a constant final position. |
