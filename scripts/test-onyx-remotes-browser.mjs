@@ -224,6 +224,40 @@ try{
   }),'none');
   await page.evaluate(()=>{const shell=document.querySelector('#shell');shell.removeAttribute('data-manage-morph');shell.dataset.view='remotes';});
   await page.emulateMedia({reducedMotion:'no-preference'});
+  // Exercise the actual controller with a deterministic clock and real DOM geometry.
+  await page.mouse.move(190,500);
+  const hyperspace=await page.evaluate(async()=>{
+   const {installHyperspace}=await import('/extension/hyperspace.mjs');
+   const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
+   document.activeElement?.blur();shell.dataset.view='remotes';
+   let now=0,sequence=0;const timers=new Map(),frames=new Map();
+   const clock={now:()=>now,set:(fn,ms)=>{const id=++sequence;timers.set(id,{fn,at:now+ms});return id;},clear:id=>timers.delete(id),frame:fn=>{const id=++sequence;frames.set(id,fn);return id;},cancel:id=>frames.delete(id)};
+   const advance=ms=>{now+=ms;for(const [id,t] of [...timers])if(t.at<=now){timers.delete(id);t.fn();}for(const [id,fn] of [...frames]){frames.delete(id);fn(now);}};
+   const preference={ready:Promise.resolve(),value:{enabled:true,seconds:5},subscribe:()=>()=>{}};
+   const controller=installHyperspace({header,shell,preference,clock});
+   const phase=()=>document.body.dataset.hyperspace??'closed';
+   const move=(x,y)=>document.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
+   const phases=[];controller.start();await Promise.resolve();
+   advance(4999);phases.push(phase());advance(1);phases.push(phase());
+   advance(1300);phases.push(phase());
+   const overlay=header.querySelector('.hyperspace-overlay');
+   const geometry=[...overlay.querySelectorAll('.hyperspace-rail')].map(el=>el.getAttribute('d'));
+   const first=overlay.querySelector('.hyperspace-glint');
+   advance(2000);const streak=first.getAttribute('stroke-dashoffset');
+   advance(2999);phases.push(phase());const later=first.getAttribute('stroke-dashoffset');
+   advance(1);phases.push(phase());advance(2000);phases.push(phase());
+   const heldFrames=frames.size;advance(15000);phases.push(phase());
+   move(10,10);advance(200);phases.push(phase());advance(1000);phases.push(phase());
+   move(190,500);advance(1000);controller.viewChanged();shell.dataset.view='history';advance(10000);phases.push(phase());
+   move(10,10);move(190,500);advance(5000);phases.push(phase());
+   controller.viewChanged();shell.dataset.view='explorer';advance(10000);phases.push(phase());
+   controller.dispose();shell.dataset.view='remotes';
+   return {phases,geometry,streak,later,heldFrames,clean:!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&frames.size===0&&timers.size===0};
+  });
+  assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
+  assert.equal(hyperspace.geometry.length,2);
+  assert.notEqual(hyperspace.streak,hyperspace.later);
+  assert.equal(hyperspace.heldFrames,0);assert.equal(hyperspace.clean,true);
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});
