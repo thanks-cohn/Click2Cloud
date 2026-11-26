@@ -1,0 +1,1 @@
+CC0-1.0 synthetic fixtures from https://github.com/teamaraduru-hub/araduru-file-format-test-corpus/tree/316e1f03b6f13d3c84e68c61bb7f16af112465bd. Git blob identities matched the source. Verify SHA-256 against the upstream manifest before use. Treat malformed samples as inert bytes; do not execute or automatically open them.
