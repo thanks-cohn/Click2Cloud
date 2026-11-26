@@ -297,10 +297,11 @@ try{
    const viewReveal=[];
    for(const view of ['history','queue','screenshot','settings','downloads','remotes']){
     controller.viewChanged();shell.dataset.view=view;
+    const glyph=theme.querySelector('.onyx-moon');const startGlyph=glyph.getBoundingClientRect();
     move(190,500);move(190,20);move(190,500);advance(5000);advance(ELEGANT_MS);
-    const before=phase();const r=header.getBoundingClientRect();
+    const before=phase();const r=header.getBoundingClientRect(),endGlyph=glyph.getBoundingClientRect();
     move(r.left+r.width/2,r.top+r.height/2);advance(200);const after=phase();advance(1000);
-    viewReveal.push({view,before,after,closed:phase()});
+    viewReveal.push({view,before,after,closed:phase(),glyphShift:endGlyph.left-startGlyph.left,glyphRight:endGlyph.right,edge:r.right,restored:glyph.getBoundingClientRect().left-startGlyph.left});
    }
    move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
@@ -324,6 +325,7 @@ try{
   assert(hyperspace.themeGlide.mid>=0&&hyperspace.themeGlide.end>=hyperspace.themeGlide.mid&&hyperspace.themeGlide.end<=6.1&&hyperspace.themeGlide.right<=hyperspace.themeGlide.edge,'Moon/sun glides right within available clearance');
   assert.equal(hyperspace.themeHoverPhase,'open','Theme control hover and redundant skin writes must not restore Elegant');
   assert.equal(hyperspace.viewReveal.length,6);
+  assert(hyperspace.viewReveal.every(v=>v.glyphShift>0&&v.glyphShift<=6.1&&v.glyphRight<=v.edge&&Math.abs(v.restored)<.1),'Visible moon glides and returns on every supported tab, including Providers');
   assert(hyperspace.viewReveal.every(v=>v.before==='open'&&v.after==='return'&&v.closed==='closed'),'Former header region reveals consistently on every supported Shelf tab');
   assert.equal(hyperspace.noPaint.visibility,'hidden');assert.equal(hyperspace.noPaint.background,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.image,'none');assert.equal(hyperspace.noPaint.border,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.shadow,'none');assert.equal(hyperspace.noPaint.themeBackground,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.bodyColor,hyperspace.noPaint.pageColor);
   assert.equal(hyperspace.afterThemeClick.phase,'open');assert.equal(hyperspace.afterThemeClick.mode,'light');assert.equal(hyperspace.afterThemeClick.navVisibility,'hidden');assert.equal(hyperspace.afterThemeClick.themeVisibility,'visible');assert.equal(hyperspace.afterThemeClick.frames,0);assert(Math.abs(hyperspace.afterThemeClick.mainTop-hyperspace.elegantEnd.mainTop)<1);
