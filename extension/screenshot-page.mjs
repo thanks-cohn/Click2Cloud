@@ -270,7 +270,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
  async function mount(parent){
   stop();
   const page=element('section');page.className='page screenshot-page';
-  page.innerHTML='<h1>Screenshots</h1><div class="muted" data-keys></div><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
+  page.innerHTML='<h1><span data-hyper-center-title>Screenshots</span></h1><div class="muted" data-keys></div><form id="screenshot-form"><fieldset><legend>Website</legend><div data-websites></div></fieldset><fieldset><legend>Cloudflare Directories</legend><div data-directories></div></fieldset><button class="primary">Save</button><p role="status"></p></form><section><h2>Saved Screenshot Rules</h2><p class="muted">Every active rule that matches the page receives the screenshot.</p><div data-cards></div><div class="screenshot-pagination" data-pages></div><p data-rule-status role="status"></p></section>';
   parent.replaceChildren(page);
   const form=page.querySelector('form'),cards=page.querySelector('[data-cards]'),pager=page.querySelector('[data-pages]'),feedback=page.querySelector('[data-rule-status]');
   const readSites=sites(form.querySelector('[data-websites]'),[{kind:'all'}]);
