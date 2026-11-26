@@ -1,4 +1,4 @@
-import {createSkyIdle,createSkyHover} from './sky-idle.mjs';
+import {createSkyIdle,createSkyHover,reverseSkyAnimations} from './sky-idle.mjs';
 import {visibleProviderFraction} from './projectile-target.mjs';
 import {uploadId} from '../src/chrome/local-upload-plan.mjs';
 import {isTextPreview} from '../src/explorer/r2-adapter.mjs';
@@ -665,20 +665,32 @@ function markCurrentSearchStale(){
  renderFiles();
 }
 // Persistent open header surface: restore on interaction, not on animation completion.
-function clearSkyOpening(){
+function finishSkyOpening(){
  document.body.removeAttribute('data-sky-opening');
  $('.app-header>.sky-canopy')?.remove();
 }
+function clearSkyOpening(){
+ const header=$('.app-header'),canopy=header.querySelector('.sky-canopy');
+ if(!canopy)return;
+ if(view==='explorer'||window.matchMedia('(prefers-reduced-motion: reduce)').matches){finishSkyOpening();return;}
+ if(canopy.hasAttribute('data-returning'))return;
+ canopy.setAttribute('data-returning','');
+ const animations=[...header.getAnimations({subtree:true}),...$('#shell').getAnimations()].filter(animation=>animation.animationName?.startsWith('sky-'));
+ void reverseSkyAnimations(animations).finally(()=>{if(canopy.isConnected)finishSkyOpening();});
+}
 function playSkyOpening(){
- clearSkyOpening();
+ finishSkyOpening();
  if(!skyEligible())return;
  const header=$('.app-header'),style=getComputedStyle(header),canopy=document.createElement('div');
  canopy.className='sky-canopy';canopy.setAttribute('aria-hidden','true');
  canopy.style.setProperty('--sky-surface',style.background);
  canopy.style.setProperty('--sky-rail',style.borderBottomColor);
+ const pageColor=[$('#main'),$('#shell'),document.body].map(element=>getComputedStyle(element).backgroundColor).find(color=>color!=='rgba(0, 0, 0, 0)'&&color!=='transparent')||getComputedStyle($('#shell')).getPropertyValue('--bg');
+ canopy.style.setProperty('--sky-page-surface',pageColor);
  for(const side of ['left','right']){
   const half=document.createElement('div');half.className='sky-half sky-'+side;canopy.append(half);
  }
+ const liquid=document.createElement('div');liquid.className='sky-liquid';canopy.append(liquid);
  header.prepend(canopy);document.body.setAttribute('data-sky-opening','');
  // CSS retains the final open frame until clearSkyOpening is explicitly called.
 }
@@ -828,7 +840,7 @@ async function navigate(t,push=true,fromAPI=false){
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
   if(push&&(historyAt<0||targetKey(history[historyAt])!==targetKey(t))){history=history.slice(0,historyAt+1);history.push(source);historyAt=history.length-1;}
-  if(view!=='explorer'){skyIdle.cancel();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
+  if(view!=='explorer'){skyIdle.cancel();finishSkyOpening();prepareManageMorph('explorer');view='explorer';renderConnection();$('#shell').dataset.view='explorer';$$('header [data-view]').forEach(button=>{const active=button.dataset.view===view;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}renderExplorer();if(!same){$('#files').scrollTop=0;void explorerUpload.inspect();}paintTrace('navigation-feedback',started);
   try{if(!fromAPI)await api('navigateExplorer',{target:t},{quiet:true});if(ticket!==navigationEpoch)return;await loadListing();}catch(e){if(ticket===navigationEpoch){loading=false;listingError=e.message;status(e.message);renderFiles();}}
 }
 async function loadListing(more=false,fresh=false){
@@ -1962,7 +1974,7 @@ skyHeader.addEventListener('pointerenter',()=>skyHover.move(true));
 document.addEventListener('pointermove',event=>skyHover.move(skyHeader.contains(event.target)),{passive:true,capture:true});
 document.documentElement.addEventListener('pointerleave',()=>skyHover.move(false));
 skyHeader.addEventListener('pointerdown',skyIdle.cancel,{capture:true});
-skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible'))skyIdle.cancel();});
+skyHeader.addEventListener('focusin',()=>{if(skyHeader.querySelector(':focus-visible')){skyIdle.cancel();finishSkyOpening();}});
 skyHeader.addEventListener('keydown',skyIdle.cancel);
 document.addEventListener('visibilitychange',skyIdle.stopPending);
 window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',skyIdle.cancel);
