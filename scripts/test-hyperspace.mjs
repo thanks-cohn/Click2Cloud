@@ -13,7 +13,11 @@ assert(hyperspaceFrame(SPLIT_MS+1000,5).travel>200,'Shimmer completes over two p
 assert.equal(hyperspaceTiming(5).flexMs,125);
 assert.equal(hyperspaceTiming(5).exitMs,440);
 assert.equal(hyperspaceTiming(5).release,565);
+const loadedDefault=hyperspaceFrame(SPLIT_MS+5000,5);
+assert(loadedDefault.tension>.7&&loadedDefault.wordsDip>4,'Final charge visibly compresses and dips navigation');
+assert.equal(hyperspaceFrame(SPLIT_MS+3500,5).tension,0,'Early shimmer remains unchanged');
 const impactDefault=hyperspaceFrame(SPLIT_MS+5000+125,5);
+assert.equal(impactDefault.tension,0);assert.equal(impactDefault.wordsDip,0);
 assert(impactDefault.flex>.35&&impactDefault.burst<.1,'Rail visibly bows before flying away');
 assert(hyperspaceFrame(SPLIT_MS+5000+125+110,5).burst>.5,'Exit travels more than half its distance in its first quarter');
 assert.deepEqual(hyperspaceLiftBounds(66,28,51,12),{rest:40,peak:48});
@@ -34,6 +38,10 @@ for(const w of widths){
  assert(corridor.right.startsWith('M '+(w/2+40)+' 0 C '));
  const bent=hyperspaceGeometry(w,65,1,0,.4),stronger=hyperspaceGeometry(w,65,1,0,.68);
  const xControl=g=>Number(g.left.split(' ')[4]);
+ const compressed=hyperspaceGeometry(w,65,1,0,0,1);
+ assert(xControl(compressed)>xControl(corridor),'The left rail curves toward the center under tension');
+ assert(xControl(compressed)<=w/2-7,'Compressed controls retain the center corridor');
+ assert(compressed.leftFill.startsWith(compressed.left)&&compressed.rightFill.startsWith(compressed.right));
  assert(xControl(stronger)<xControl(bent)&&xControl(bent)<xControl(corridor),'Longer charge bows the interior of the left rail farther outward');
  assert.equal(Number(bent.left.split(' ')[1]),Number(corridor.left.split(' ')[1]),'Flex changes curvature, not just translation');
  assert(bent.leftFill.startsWith(bent.left)&&bent.rightFill.startsWith(bent.right),'Color surfaces retain exact deformed boundaries');
@@ -47,11 +55,12 @@ for(const seconds of [1,3,5,10,20]){
  assert.equal(hyperspaceFrame(SPLIT_MS-1,seconds).phase,'split');
  assert.equal(hyperspaceFrame(end-1,seconds).phase,'charge');
  assert.equal(hyperspaceFrame(end,seconds).phase,'release');
- let speed=-1,travel=-1;
+ let speed=-1,travel=-1,tension=-1;
  for(let i=0;i<=100;i++){
   const sample=hyperspaceFrame(SPLIT_MS+seconds*1000*i/100,seconds);
   assert(sample.speed>speed);assert(sample.travel>travel);assert.equal(sample.lift,0);assert.equal(sample.wordsUp,0);assert.equal(sample.words,1);assert.equal(sample.flex,0);
-  speed=sample.speed;travel=sample.travel;
+  assert(sample.tension>=tension);assert(sample.wordsDip>=0&&sample.wordsDip<=8);
+  speed=sample.speed;travel=sample.travel;tension=sample.tension;
  }
  const impact=hyperspaceFrame(end+timing.flexMs,seconds);
  assert(impact.flex>0&&impact.burst<=.081);
@@ -62,8 +71,8 @@ for(const seconds of [1,3,5,10,20]){
  const release=hyperspaceFrame(end+timing.release,seconds);
  const settled=hyperspaceFrame(end+timing.release+timing.settle,seconds);
  assert.equal(release.burst,1);assert(release.lift>1);
- assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.wordsUp,1);assert.equal(settled.flex,0);assert.equal(settled.done,true);
- if(previous){assert(timing.release<previous.timing.release);assert(release.lift>previous.lift);assert(speed>previous.speed);assert(impact.flex>previous.flex);assert(timing.exitMs<previous.timing.exitMs);}
- previous={timing,lift:release.lift,speed,flex:impact.flex};
+ assert.equal(settled.lift,1);assert.equal(settled.words,0);assert.equal(settled.wordsUp,1);assert.equal(settled.flex,0);assert.equal(settled.tension,0);assert.equal(settled.wordsDip,0);assert.equal(settled.done,true);
+ if(previous){assert(timing.release<previous.timing.release);assert(release.lift>previous.lift);assert(speed>previous.speed);assert(impact.flex>previous.flex);assert(timing.exitMs<previous.timing.exitMs);assert(tension>=previous.tension);}
+ previous={timing,lift:release.lift,speed,flex:impact.flex,tension};
 }
 console.log('Hyperspace timing, continuous acceleration, geometry and energy assertions passed.');
