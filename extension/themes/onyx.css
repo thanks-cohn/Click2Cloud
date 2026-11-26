@@ -52,6 +52,9 @@
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .header-controls{gap:0}
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #header-more{min-inline-size:30px;padding-inline:4px}
 :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme{color:var(--onyx-subtitle)}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme :is(.theme-sun,.theme-moon){display:none}
+:root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) #theme::before{content:"☾";font-size:21px}
+:root[data-aesthetic=onyx]:is([data-theme=light],[data-onyx-finish=platinum]) body:has(#shell[data-view=remotes]) #theme::before{content:"☀"}
 @media(max-width:345px){
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] body:has(#shell[data-view=remotes]) .app-header nav>button{font-size:12px;padding-inline:4px}
@@ -67,7 +70,7 @@
  & .remote-providers{gap:10px}
  & :is(.remote-provider,.remote-cloudflare){position:relative;background:linear-gradient(145deg,var(--onyx-highlight),transparent 75%),var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;margin:0;box-shadow:0 3px 8px #0002;transform:none}
  & :is(.remote-provider,.remote-cloudflare):focus-within{border-color:var(--focus)}
- & .remote-provider{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 0;min-block-size:76px;align-items:center;container-type:inline-size}
+ & .remote-provider{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(44px,auto);gap:8px 0;min-block-size:76px;align-items:center;container-type:inline-size}
  & .remote-provider[data-onyx-connected]::before,& .remote-cloudflare::before{content:"";position:absolute;inset:11px auto 11px 0;width:3px;border-radius:0 3px 3px 0;background:#2389ff;pointer-events:none}
  & .remote-provider-heading{grid-column:1;grid-row:1;gap:11px;min-width:0}
  & .remote-provider-heading img{width:44px;height:44px;object-fit:contain;padding:7px;border-radius:11px;background:var(--onyx-icon)}
@@ -110,7 +113,7 @@
  & .remote-provider-heading{padding-inline-end:14px}
  & :is([data-go],[data-connect]){margin-inline-start:10px}
  & .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]) [data-go],&[data-onyx-connected] [data-connect]{
-  position:absolute;clip-path:inset(50%);inline-size:1px;block-size:1px;min-block-size:0;padding:0;border:0;overflow:hidden;white-space:nowrap;opacity:0;
+  position:absolute;pointer-events:none;clip-path:inset(50%);inline-size:1px;block-size:1px;min-block-size:0;padding:0;border:0;overflow:hidden;white-space:nowrap;opacity:0;
  }
  &:is(:hover,:focus-within) .remote-provider-actions>[data-refresh],&:not([data-onyx-connected]):is(:hover,:focus-within) [data-go],&[data-onyx-connected]:is(:hover,:focus-within) [data-connect]{
   grid-row:auto;grid-column:1;position:static;clip-path:none;inline-size:auto;block-size:auto;min-block-size:32px;padding:5px 9px;margin:0;overflow:visible;opacity:1;white-space:normal;pointer-events:auto;justify-self:start;
