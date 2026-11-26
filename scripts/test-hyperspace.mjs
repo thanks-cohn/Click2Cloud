@@ -5,6 +5,10 @@ assert.deepEqual(normalizeHyperspace(),{enabled:true,seconds:5});
 assert.deepEqual(normalizeHyperspace({enabled:false,seconds:200}),{enabled:false,seconds:20});
 assert.equal(normalizeHyperspace({seconds:'bad'}).seconds,5);
 assert.equal(IDLE_MS,5000);
+assert.equal(SPLIT_MS,1800);
+assert(hyperspaceFrame(180,5).split<.01,'Split starts gently');
+assert(hyperspaceFrame(SPLIT_MS,5).speed<.02,'Shimmer begins near rest');
+assert(hyperspaceFrame(SPLIT_MS+1000,5).travel<5,'First second covers less than 5% of one rail');
 const widths=[320,380,800,1200];
 for(const w of widths){
  const flat=hyperspaceGeometry(w,65,0,0);
