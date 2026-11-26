@@ -227,7 +227,8 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
    const label=element('span');
    label.dataset.shortcutStatus=id;return label;
   });
-  statuses.append(labels[0],' · ',labels[1],help);
+  const keys=element('span');keys.dataset.hyperCenterShortcuts='';
+  keys.append(labels[0],' · ',labels[1],help);statuses.append(keys);
   const change=button('Chrome shortcut settings',()=>{
    feedback.textContent='';
    void openChromeShortcuts(chrome).catch(()=>{feedback.textContent=' Open chrome://extensions/shortcuts in Chrome.';});
