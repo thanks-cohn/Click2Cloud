@@ -246,8 +246,8 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
    const missing=bindings&&screenshotCommands.some(id=>!bindings.get(id));
    for(const [index,id] of screenshotCommands.entries()){
     const suggested=suggestedKey(id),key=bindings?.get(id);
-    const text=key?key+' — Assigned'+(key!==suggested?' (suggested '+suggested+')':''):
-     suggested+' — '+(bindings?'Unassigned':bindings===null?'Status unavailable':'Checking assignment…');
+    const text=key?key:
+     suggested+' ('+(bindings?'Unassigned':bindings===null?'Status unavailable':'Checking assignment…')+')';
     if(labels[index].textContent!==text)labels[index].textContent=text;
    }
    const tip=missing?' · Choose a shortcut in Chrome.':'';
