@@ -274,21 +274,11 @@ try{
    const themeEnd=theme.getBoundingClientRect();
    const themeGlide={mid:themeMid.left-themeStart.left,end:themeEnd.left-themeStart.left,right:themeEnd.right,edge:headerRect.right};
    const elegantHidden={themeOpacity:getComputedStyle(theme).opacity,themeVisibility:getComputedStyle(theme).visibility,navVisibility:getComputedStyle(header.querySelector('nav')).visibility,logoOpacity:getComputedStyle(brand).opacity,headerPointer:getComputedStyle(header).pointerEvents,logoPointer:getComputedStyle(brand).pointerEvents,overlayBackground:getComputedStyle(elegantOverlay).backgroundColor};
-   const providerHoverPhases=[];
-   // Exercise actual DOM targets, ancestor pointerenter events and the whole
-   // former header on Providers, excluding the visible R itself.
-   for(const y of [headerRect.top+3,headerRect.top+headerRect.height/2,headerRect.bottom-3]){
-    for(let x=headerRect.left+3;x<headerRect.right;x+=9){
-     if(x>=logoRect.left&&x<logoRect.right&&y>=logoRect.top&&y<logoRect.bottom)continue;
-     const hit=document.elementFromPoint(x,y);
-     header.dispatchEvent(new PointerEvent('pointerenter',{clientX:x,clientY:y,pointerType:'mouse'}));
-     hit?.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:x,clientY:y,pointerType:'mouse'}));
-     advance(16);providerHoverPhases.push(phase());
-    }
-   }
+   // Preserve the hidden state for appearance writes and direct theme input.
+   move(themeEnd.left+themeEnd.width/2,themeEnd.top+themeEnd.height/2);
    document.documentElement.setAttribute('data-aesthetic',document.documentElement.getAttribute('data-aesthetic'));
    await Promise.resolve();await Promise.resolve();advance(1500);
-   const awayFromLogo=phase();
+   const themeHoverPhase=phase();
    const headerStyle=getComputedStyle(header);
    const noPaint={visibility:headerStyle.visibility,background:headerStyle.backgroundColor,image:headerStyle.backgroundImage,border:headerStyle.borderBottomColor,shadow:headerStyle.boxShadow,themeBackground:getComputedStyle(theme).backgroundColor,bodyColor:getComputedStyle(document.body).backgroundColor,pageColor:getComputedStyle(main).backgroundColor};
    // Fixture mirrors app.mjs's color-mode mutation without a backend call.
@@ -302,11 +292,20 @@ try{
    theme.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));theme.click();await Promise.resolve();await Promise.resolve();
    const afterThemeKeyboard={phase:phase(),mode:root.dataset.theme};
    theme.removeEventListener('click',toggle);theme.blur();
-   move(logoRect.left+logoRect.width/2,logoRect.top+logoRect.height/2);advance(200);const elegantReturn=phase();recordLogo();advance(1000);const elegantClosed=phase();recordLogo();
+   // The middle of the original header, far from R and theme, restores it.
+   move(headerRect.left+headerRect.width/2,headerRect.top+headerRect.height/2);advance(200);const elegantReturn=phase();recordLogo();advance(1000);const elegantClosed=phase();recordLogo();
+   const viewReveal=[];
+   for(const view of ['history','queue','screenshot','settings','downloads','remotes']){
+    controller.viewChanged();shell.dataset.view=view;
+    move(190,500);move(190,20);move(190,500);advance(5000);advance(ELEGANT_MS);
+    const before=phase();const r=header.getBoundingClientRect();
+    move(r.left+r.width/2,r.top+r.height/2);advance(200);const after=phase();advance(1000);
+    viewReveal.push({view,before,after,closed:phase()});
+   }
    move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,providerHoverPhases,awayFromLogo,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
@@ -323,8 +322,9 @@ try{
   assert(Math.abs(hyperspace.elegantEnd.dockBottom-hyperspace.paint.dockBottom)<1,'Footer stays anchored');
   assert.deepEqual(hyperspace.elegantHidden,{themeOpacity:'1',themeVisibility:'visible',navVisibility:'hidden',logoOpacity:'1',headerPointer:'none',logoPointer:'auto',overlayBackground:'rgba(0, 0, 0, 0)'});
   assert(hyperspace.themeGlide.mid>=0&&hyperspace.themeGlide.end>=hyperspace.themeGlide.mid&&hyperspace.themeGlide.end<=6.1&&hyperspace.themeGlide.right<=hyperspace.themeGlide.edge,'Moon/sun glides right within available clearance');
-  assert(hyperspace.providerHoverPhases.length>20&&hyperspace.providerHoverPhases.every(p=>p==='open'),'Providers hover sweep must never restore Elegant outside the R');
-  assert.equal(hyperspace.awayFromLogo,'open','Only the R may restore Elegant mode on hover, including after redundant skin writes');
+  assert.equal(hyperspace.themeHoverPhase,'open','Theme control hover and redundant skin writes must not restore Elegant');
+  assert.equal(hyperspace.viewReveal.length,6);
+  assert(hyperspace.viewReveal.every(v=>v.before==='open'&&v.after==='return'&&v.closed==='closed'),'Former header region reveals consistently on every supported Shelf tab');
   assert.equal(hyperspace.noPaint.visibility,'hidden');assert.equal(hyperspace.noPaint.background,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.image,'none');assert.equal(hyperspace.noPaint.border,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.shadow,'none');assert.equal(hyperspace.noPaint.themeBackground,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.bodyColor,hyperspace.noPaint.pageColor);
   assert.equal(hyperspace.afterThemeClick.phase,'open');assert.equal(hyperspace.afterThemeClick.mode,'light');assert.equal(hyperspace.afterThemeClick.navVisibility,'hidden');assert.equal(hyperspace.afterThemeClick.themeVisibility,'visible');assert.equal(hyperspace.afterThemeClick.frames,0);assert(Math.abs(hyperspace.afterThemeClick.mainTop-hyperspace.elegantEnd.mainTop)<1);
   assert.deepEqual(hyperspace.afterThemeKeyboard,{phase:'open',mode:'dark'});
