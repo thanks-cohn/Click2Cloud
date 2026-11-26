@@ -174,10 +174,10 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
   return {refresh};
 }
 
-export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,rename,renameError,state={page:1}}) {
+export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRead,signal,metadataPreference,rename,renameError,state={page:1},pagerHost=null}) {
   const root=element('section');
   root.className='card queue-archive';
-  root.innerHTML='<label class="queue-search">Find saved files<input data-history-find type="search" placeholder="Filename, provider or a word"></label>'+
+  root.innerHTML='<label class="queue-search"><span class="queue-search-label">Find saved files</span><input data-history-find type="search" placeholder="Find saved files"></label>'+
     '<p role="status" data-history-notice></p><div data-history-records></div>'+
     '<p class="queue-single-page" hidden>Page 1 of 1</p>'+
     '<form class="queue-pager" aria-label="History pages" hidden><button type="button" data-first aria-label="First page" title="First page">«</button>'+
@@ -188,6 +188,7 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
   const list=root.querySelector('[data-history-records]'),notice=root.querySelector('[data-history-notice]');
   const form=root.querySelector('form'),input=form.querySelector('input'),find=root.querySelector('[data-history-find]');
   const singlePage=root.querySelector('.queue-single-page');
+  if(pagerHost) pagerHost.append(form);
   let page=state.page??1, pages=1, generation=0, cardScope, cards, lastSignature, debounce, reading, editingPage=false;
   const pageDisplay=()=>document.documentElement.dataset.aesthetic==='onyx'?String(page).padStart(2,'0'):String(page);
   const unsubscribe=metadataPreference?.subscribe(value=>cards?.setVisibility(value));
@@ -272,8 +273,8 @@ export function mountHistoryV2(parent,{service,api,screenshotRequest,goTo,canRea
         query&&!result.rangeEmpty?'No saved files match your search.':'No saves in this display range.';
       const timer=prefs.timer==='off'?'':' · 15-minute '+(prefs.timer==='delete'?'Delete':'Hide');
       notice.textContent=text+timer+(service.accountingPending?' · Some receipts are awaiting reconciliation.':'');
-      form.hidden=pages<=1;
-      singlePage.hidden=pages>1 || !result.total;
+      form.hidden=!pagerHost&&pages<=1;
+      singlePage.hidden=!!pagerHost||pages>1||!result.total;
       input.max=String(pages);
       if(!editingPage)input.value=pageDisplay();
       const pageTotal=form.querySelector('[data-pages]');
@@ -353,7 +354,10 @@ export function createHistoryArchive(options) {
     page.className='page queue-page';
     page.append(element('h1','History'));
     main.replaceChildren(page);
-    const history=mountHistoryV2(page,{...options,signal,state});
+    const pagerHost=element('div');pagerHost.id='history-pagination-dock';
+    main.after(pagerHost);
+    signal.addEventListener('abort',()=>pagerHost.remove(),{once:true});
+    const history=mountHistoryV2(page,{...options,signal,state,pagerHost});
     let pending;
     const schedule=()=>{
       clearTimeout(pending);

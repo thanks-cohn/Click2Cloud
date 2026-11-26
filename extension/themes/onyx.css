@@ -414,6 +414,9 @@
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card .queue-card-summary > .queue-location,
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card:not([data-provider=cloudflare]) > .queue-card-header + .queue-location{font-style:italic}
 
+/* Architectural History: keep the sparse archive hierarchy and the original
+   Onyx card colors; the stationary counter is styled below. */
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-archive{padding-block-start:8px}
 /* Onyx History pagination: paired open rails and editable digital counter. */
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-pager:not([hidden]){
  --pager-ink:var(--onyx-subtitle,#a8bbd8);

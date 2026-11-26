@@ -258,6 +258,44 @@ try{
   assert(card.lines.every(l=>l.inside&&l.height===1));assert.deepEqual(card.dividers,['34px 1px','22px 1px']);
   if(i)assert.notDeepEqual(ornamentCheck.patterns[i],ornamentCheck.patterns[i-1]);
  }
+ // Stationary architectural History: real pagination form, separate scrollport.
+ await page.evaluate(async()=>{
+  const {mountHistoryV2}=await import('/extension/queue-page.mjs');
+  const shell=document.querySelector('#shell'),main=document.querySelector('#main');
+  shell.dataset.view='history';
+  const fixture=document.createElement('section');fixture.className='page queue-page';fixture.id='fixed-history-fixture';
+  for(const child of main.children)child.hidden=true;
+  main.append(fixture);
+  const dock=document.createElement('div');dock.id='history-pagination-dock';main.after(dock);
+  window.fixedHistoryScope=new AbortController();
+  const service={ready:Promise.resolve(),preferences:{timer:'off',range:'all',timezone:'UTC'},store:{page:async({page})=>({page,pages:2,total:50,items:[]})}};
+  mountHistoryV2(fixture,{service,canRead:()=>true,signal:window.fixedHistoryScope.signal,pagerHost:dock});
+ });
+ const fixedPager=page.locator('#history-pagination-dock .queue-pager');
+ await fixedPager.waitFor();
+ for(const width of [320,380,800]){
+  await page.setViewportSize({width,height:760});
+  const layout=()=>page.evaluate(()=>{
+   const rect=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width};};
+   return {pager:rect('#history-pagination-dock .queue-pager'),main:rect('#main'),dock:rect('#history-pagination-dock'),shell:rect('#shell')};
+  });
+  const before=await layout();
+  assert.equal(before.dock.bottom,before.shell.bottom);assert.equal(before.main.bottom,before.dock.y);
+  assert(Math.abs(before.pager.x+before.pager.width/2-(before.shell.x+before.shell.width/2))<=1);
+  await page.evaluate(()=>{const group=document.createElement('details');group.id='fixed-history-group';group.className='queue-calendar';group.innerHTML='<summary>Today</summary><div style="height:1800px">Expanded archive</div>';document.querySelector('#fixed-history-fixture [data-history-records]').append(group);group.open=true;});
+  await page.locator('#main').evaluate(el=>el.scrollTop=el.scrollHeight);
+  assert.deepEqual((await layout()).pager,before.pager);
+  await page.locator('#main').evaluate(el=>el.scrollTop=0);
+  await page.locator('#fixed-history-group>summary').click();
+  assert.deepEqual((await layout()).pager,before.pager);
+  await page.locator('#fixed-history-group').evaluate(el=>el.remove());
+ }
+ await fixedPager.locator('[data-last]').click();
+ await page.waitForFunction(()=>document.querySelector('#history-pagination-dock input').value==='02');
+ await fixedPager.locator('[data-first]').click();
+ await page.waitForFunction(()=>document.querySelector('#history-pagination-dock input').value==='01');
+ await page.evaluate(()=>{window.fixedHistoryScope.abort();document.querySelector('#history-pagination-dock').remove();document.querySelector('#fixed-history-fixture').remove();for(const child of document.querySelector('#main').children)child.hidden=false;document.querySelector('#shell').dataset.view='remotes';});
+ await page.setViewportSize({width:380,height:760});
  // Queue job surfaces retain status colors on the top rule only, with open sides.
  for(const mode of ['dark','light']){
   const rules=await page.evaluate(mode=>{

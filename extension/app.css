@@ -489,6 +489,54 @@ dialog:has([data-gallery]) .dialog-body{gap:10px;padding:12px clamp(8px,2.5vw,20
 .queue-pager input{inline-size:clamp(3em,13vw,6.5em);min-inline-size:0;margin:0!important;padding-inline:4px;text-align:center;appearance:textfield}
 .queue-pager input::-webkit-inner-spin-button{appearance:none}
 .queue-single-page{text-align:center;color:var(--muted);font-size:.86rem;margin-block:12px 0}
+/* History architecture: the archive scrolls, the controls do not.
+   The transparent dock is geometry only, never a visible footer panel. */
+#shell[data-view=history]:has(>#history-pagination-dock){
+ grid-template-rows:minmax(0,1fr) auto;
+}
+#shell[data-view=history]:has(>#history-pagination-dock)>main{
+ padding-block-end:8px;scroll-padding-block-end:8px;
+}
+#history-pagination-dock{
+ grid-row:2;min-inline-size:0;display:flex;justify-content:center;align-items:flex-end;
+ padding:4px 48px 8px;min-block-size:56px;background:transparent;border:0;
+}
+#history-pagination-dock>.queue-pager{margin:0;min-inline-size:0;inline-size:min(100%,248px)}
+/* Narrow shelves retain a separate clear lane for the expanding destination
+   control, so it cannot obscure any of the stationary pagination arrows. */
+@media(max-width:560px){
+ #history-pagination-dock{min-block-size:88px;padding-inline:12px}
+ #shell[data-view=history]:has(>#history-pagination-dock)>#manage-slot{inset-block-end:48px}
+}
+#shell[data-view=history] .queue-search{position:relative;gap:0}
+#shell[data-view=history] .queue-search-label{
+ position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+}
+#shell[data-view=history] .queue-search input{
+ border:0;border-block-end:1px solid color-mix(in srgb,var(--muted) 45%,transparent);
+ border-radius:0;background:transparent;box-shadow:none;padding:8px 0;
+}
+#shell[data-view=history] .queue-search input:focus{border-block-end-color:var(--focus)}
+#shell[data-view=history] [data-history-notice]{margin-block:9px 14px;color:var(--muted)}
+#shell[data-view=history] [data-history-records]>.queue-calendar{
+ position:relative;padding-inline-start:0;
+}
+#shell[data-view=history] [data-history-records]>.queue-calendar::before{
+ content:"";position:absolute;inset-inline-end:0;inset-block-start:0;
+ inline-size:33px;block-size:1px;background:currentColor;opacity:.22;pointer-events:none;
+}
+#shell[data-view=history] [data-history-records] .queue-calendar>summary{
+ min-block-size:34px;line-height:20px;margin-block:0;padding-block:7px;
+}
+#shell[data-view=history] [data-history-records] .queue-calendar>summary::before,
+#shell[data-view=history] [data-history-records] .queue-calendar>summary::after{
+ /* Offset the existing traveling strokes by the added heading padding. */
+ margin-block-start:7px;
+}
+#shell[data-view=history] [data-history-records] .queue-calendar>.queue-calendar{
+ margin-inline-start:10px;padding-inline-start:10px;
+ border-inline-start:1px solid color-mix(in srgb,var(--muted) 22%,transparent);
+}
 @media(max-width:300px){
  .queue-pager button:not(.sr-only){inline-size:26px}
  .queue-pager label span{position:absolute;clip-path:inset(50%)}
