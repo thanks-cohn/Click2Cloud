@@ -225,287 +225,40 @@ try{
   }),'none');
   await page.evaluate(()=>{const shell=document.querySelector('#shell');shell.removeAttribute('data-manage-morph');shell.dataset.view='remotes';});
   await page.emulateMedia({reducedMotion:'no-preference'});
-  // Exercise the actual controller with a deterministic clock and real DOM geometry.
-  await page.mouse.move(190,500);
-  const hyperspace=await page.evaluate(async()=>{
-   const {installHyperspace,normalizeHyperspace,ELEGANT_MS}=await import('/extension/hyperspace.mjs');
-   const header=document.querySelector('.app-header'),shell=document.querySelector('#shell');
-   document.activeElement?.blur();shell.dataset.view='remotes';
-   let now=0,sequence=0;const timers=new Map(),frames=new Map();
-   const clock={now:()=>now,set:(fn,ms)=>{const id=++sequence;timers.set(id,{fn,at:now+ms});return id;},clear:id=>timers.delete(id),frame:fn=>{const id=++sequence;frames.set(id,fn);return id;},cancel:id=>frames.delete(id)};
-   const advance=ms=>{now+=ms;for(const [id,t] of [...timers])if(t.at<=now){timers.delete(id);t.fn();}for(const [id,fn] of [...frames]){frames.delete(id);fn(now);}};
-   const listeners=new Set();
-   const preference={ready:Promise.resolve(),value:normalizeHyperspace(),subscribe:fn=>{listeners.add(fn);return ()=>listeners.delete(fn);}};
-   const choose=mode=>{preference.value=normalizeHyperspace({mode,seconds:5});for(const fn of listeners)fn(preference.value);};
-   const controller=installHyperspace({header,shell,preference,clock});
-   const phase=()=>document.body.dataset.hyperspace??'closed';
-   const move=(x,y)=>document.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
-   const phases=[];const main=shell.querySelector('main'),dock=shell.querySelector('#manage-slot');
-   const logoPositions=[],providerThemePositions=[];const recordLogo=()=>{const r=header.querySelector('.brand-lockup').getBoundingClientRect();logoPositions.push([r.x,r.y,r.width,r.height]);if(shell.dataset.view==='remotes'){const t=header.querySelector('#theme').getBoundingClientRect();providerThemePositions.push([t.x,t.y,t.width,t.height]);}};recordLogo();
-   const initial={shellTop:shell.getBoundingClientRect().top,mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,translate:main.style.translate};
-   controller.start();await Promise.resolve();advance(20000);
-   const none={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
-   choose('hyperspace');move(10,10);move(190,500);
-   advance(4999);phases.push(phase());advance(1);phases.push(phase());
-   advance(1800);phases.push(phase());recordLogo();
-   const overlay=header.querySelector('.hyperspace-overlay');
-   const geometry=[...overlay.querySelectorAll('.hyperspace-rail')].map(el=>el.getAttribute('d'));
-   const first=overlay.querySelector('.hyperspace-glint');
-   advance(2000);const streak=first.getAttribute('stroke-dashoffset');
-   advance(2999);phases.push(phase());const later=first.getAttribute('stroke-dashoffset');
-   advance(1);phases.push(phase());
-   const sweep=[];for(const step of [64,61,50,60,90,100]){
-    advance(step);recordLogo();const lift=parseFloat(overlay.style.getPropertyValue('--hyper-lift'));
-    sweep.push({lift,reserve:shell.style.getPropertyValue('--hyper-reserve'),height:shell.offsetHeight,mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,translate:main.style.translate});
-   }
-   advance(1575);phases.push(phase());
-   const heldFrames=frames.size;advance(15000);phases.push(phase());recordLogo();
-   const paint={mainTop:main.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,translate:main.style.translate,lifting:shell.hasAttribute('data-hyperspace-lifting'),header:getComputedStyle(header).backgroundColor,clip:getComputedStyle(overlay).clipPath,lift:parseFloat(overlay.style.getPropertyValue('--hyper-lift')),shellTop:shell.getBoundingClientRect().top,overlayTop:overlay.getBoundingClientRect().top,overlayHeight:overlay.getBoundingClientRect().height};
-   move(10,10);advance(200);phases.push(phase());recordLogo();advance(1000);phases.push(phase());recordLogo();
-   move(190,500);advance(1000);controller.viewChanged();shell.dataset.view='history';advance(10000);phases.push(phase());
-   move(10,10);move(190,500);advance(5000);phases.push(phase());
-   controller.viewChanged();shell.dataset.view='explorer';advance(10000);phases.push(phase());
-   shell.dataset.view='remotes';choose('elegant');move(10,10);move(190,500);advance(4999);
-   const elegantIdle=phase();const elegantHeaderRect=header.getBoundingClientRect();const themeStart=header.querySelector('#theme').getBoundingClientRect();advance(1);advance(350);recordLogo();const themeMid=header.querySelector('#theme').getBoundingClientRect();
-   const elegantOverlay=header.querySelector('.hyperspace-overlay'),surface=elegantOverlay?.querySelector('.hyperspace-elegant-surface');
-   const elegantMid={phase:phase(),opacity:Number(surface?.style.opacity),rails:elegantOverlay?.querySelectorAll('svg,.hyperspace-rail').length,lift:parseFloat(elegantOverlay?.style.getPropertyValue('--hyper-lift'))};
-   advance(ELEGANT_MS);recordLogo();const elegantEnd={phase:phase(),headerHeight:elegantHeaderRect.height,headerTop:elegantHeaderRect.top,mainTop:main.getBoundingClientRect().top,shellTop:shell.getBoundingClientRect().top,dockBottom:dock.getBoundingClientRect().bottom,lift:parseFloat(elegantOverlay?.style.getPropertyValue('--hyper-lift')),frames:frames.size,surfaceOpacity:Number(surface?.style.opacity)};
-   const brand=header.querySelector('.brand-lockup'),theme=header.querySelector('#theme');
-   const logo=brand.querySelector('img')??brand,logoRect=logo.getBoundingClientRect(),headerRect=header.getBoundingClientRect();
-   const themeEnd=theme.getBoundingClientRect();
-   const themeGlide={mid:themeMid.left-themeStart.left,end:themeEnd.left-themeStart.left,right:themeEnd.right,edge:headerRect.right};
-   const elegantHidden={themeOpacity:getComputedStyle(theme).opacity,themeVisibility:getComputedStyle(theme).visibility,navVisibility:getComputedStyle(header.querySelector('nav')).visibility,logoOpacity:getComputedStyle(brand).opacity,headerPointer:getComputedStyle(header).pointerEvents,logoPointer:getComputedStyle(brand).pointerEvents,overlayBackground:getComputedStyle(elegantOverlay).backgroundColor};
-   // Preserve the hidden state for appearance writes and direct theme input.
-   move(themeEnd.left+themeEnd.width/2,themeEnd.top+themeEnd.height/2);
-   document.documentElement.setAttribute('data-aesthetic',document.documentElement.getAttribute('data-aesthetic'));
-   await Promise.resolve();await Promise.resolve();advance(1500);
-   const themeHoverPhase=phase();
-   const headerStyle=getComputedStyle(header);
-   const noPaint={visibility:headerStyle.visibility,background:headerStyle.backgroundColor,image:headerStyle.backgroundImage,border:headerStyle.borderBottomColor,shadow:headerStyle.boxShadow,themeBackground:getComputedStyle(theme).backgroundColor,bodyColor:getComputedStyle(document.body).backgroundColor,pageColor:getComputedStyle(main).backgroundColor};
-   // Fixture mirrors app.mjs's color-mode mutation without a backend call.
-   const root=document.documentElement,originalMode=root.dataset.theme;
-   const toggle=()=>{root.dataset.theme=root.dataset.theme==='light'?'dark':'light';};
-   theme.addEventListener('click',toggle);
-   theme.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:themeEnd.left+5,clientY:themeEnd.top+5,pointerType:'mouse'}));
-   theme.focus();theme.click();await Promise.resolve();await Promise.resolve();
-   advance(1500);
-   const afterThemeClick={phase:phase(),mode:root.dataset.theme,navVisibility:getComputedStyle(header.querySelector('nav')).visibility,themeVisibility:getComputedStyle(theme).visibility,frames:frames.size,mainTop:main.getBoundingClientRect().top};
-   theme.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));theme.click();await Promise.resolve();await Promise.resolve();
-   const afterThemeKeyboard={phase:phase(),mode:root.dataset.theme};
-   theme.removeEventListener('click',toggle);theme.blur();
-   // The middle of the original header, far from R and theme, restores it.
-   move(headerRect.left+headerRect.width/2,headerRect.top+headerRect.height/2);advance(200);const elegantReturn=phase();recordLogo();advance(1000);const elegantClosed=phase();recordLogo();
-   const viewReveal=[];
-   for(const view of ['history','queue','screenshot','settings','downloads','remotes']){
-    controller.viewChanged();shell.dataset.view=view;
-    move(190,500);move(190,20);move(190,500);advance(5000);advance(ELEGANT_MS);
-    const before=phase();const r=header.getBoundingClientRect();
-    move(r.left+r.width/2,r.top+r.height/2);advance(200);const after=phase();advance(1000);
-    viewReveal.push({view,before,after,closed:phase()});
-   }
-   const archiveSpacing=[],originalChildren=[...main.childNodes],originalScroll=main.scrollTop;
-   for(const mode of ['elegant','hyperspace'])for(const view of ['history','queue']){
-    controller.viewChanged();shell.dataset.view=view;choose(mode);
-    const fixture=document.createElement('section');fixture.className='page queue-page';
-    fixture.innerHTML='<h1>'+view+'</h1><section class="card '+(view==='history'?'queue-archive':'queue-jobs')+'">Content</section>';
-    main.replaceChildren(fixture);main.scrollTop=0;
-    const title=fixture.firstElementChild,content=fixture.lastElementChild;
-    const read=()=>({title:title.getBoundingClientRect().top,content:content.getBoundingClientRect().top,gap:content.getBoundingClientRect().top-title.getBoundingClientRect().bottom});
-    const initialArchive=read();move(190,500);move(190,20);move(190,500);advance(5000);advance(10000);
-    const settled=read(),settledPhase=phase();
-    move(190,20);advance(1000);
-    const restored=read();
-    archiveSpacing.push({mode,view,titleLift:initialArchive.title-settled.title,contentLift:initialArchive.content-settled.content,gap: settled.gap-initialArchive.gap,settledPhase,restored:Math.abs(restored.title-initialArchive.title)<.1&&Math.abs(restored.content-initialArchive.content)<.1});
-   }
-   const titleCentering=[];
-   for(const mode of ['elegant','hyperspace'])for(const view of ['settings','screenshot']){
-    controller.viewChanged();shell.dataset.view=view;choose(mode);
-    const fixture=document.createElement('section');fixture.className=view==='screenshot'?'page screenshot-page':'page';
-    fixture.innerHTML='<h1><span data-hyper-center-title>'+ (view==='settings'?'Settings':'Screenshots')+'</span></h1>'+(view==='screenshot'?'<div class="muted" data-keys><p><span data-hyper-center-shortcuts>Alt+Q · Ctrl+Shift+Y</span></p></div>':'')+'<section class="card">Content</section>';
-    main.replaceChildren(fixture);main.scrollTop=0;
-    const label=fixture.querySelector('[data-hyper-center-title]'),content=fixture.lastElementChild,keys=fixture.querySelector('[data-hyper-center-shortcuts]');
-    const read=()=>{const r=label.getBoundingClientRect(),c=content.getBoundingClientRect();const k=keys?.getBoundingClientRect();return {center:r.left+r.width/2,top:r.top,contentX:c.left,contentWidth:c.width,contentTop:c.top,keysCenter:k?k.left+k.width/2:null};};
-    const initialTitle=read(),hr=header.getBoundingClientRect(),target=hr.left+hr.width/2;
-    move(190,500);move(190,20);move(190,500);advance(5000);advance(mode==='elegant'?525:6950);
-    const mid=read();advance(10000);const settled=read(),settledPhase=phase();
-    if(keys)keys.textContent='Alt+Shift+Q · Ctrl+Shift+Y';
-    const updated=read();if(keys)keys.textContent='Alt+Q · Ctrl+Shift+Y';
-    move(190,20);advance(1000);const restored=read();
-    titleCentering.push({mode,view,initial:initialTitle,mid,settled,updated,restored,target,settledPhase,cleared:!main.style.getPropertyValue('--hyper-title-center')&&!main.style.getPropertyValue('--hyper-shortcut-center')&&!main.style.getPropertyValue('--hyper-shortcut-progress')});
-   }
-   controller.viewChanged();main.replaceChildren(...originalChildren);main.scrollTop=originalScroll;shell.dataset.view='remotes';choose('elegant');
-   move(190,20);move(190,500);advance(5200);choose('none');advance(20000);
-   const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
-   const scrollAnchors=[];
-   const spacer=document.createElement('div');spacer.style.height='1500px';main.append(spacer);
-   const readAnchors=()=>({r:brand.getBoundingClientRect().top,moon:theme.getBoundingClientRect().top,nav:header.querySelector('nav').getBoundingClientRect().top,more:header.querySelector('#header-more').getBoundingClientRect().top,header:header.getBoundingClientRect().top});
-   const scrollTo=y=>{main.scrollTop=y;main.dispatchEvent(new Event('scroll'));};
-   for(const view of ['remotes','queue','history','settings','screenshot','downloads'])for(const mode of ['none','elegant','hyperspace']){
-    controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
-    if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
-    const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom,headerHeight=header.offsetHeight;
-    const nav=header.querySelector('nav'),more=header.querySelector('.header-more');
-    const menuPaint=()=>[getComputedStyle(nav).visibility,getComputedStyle(nav).opacity,getComputedStyle(more).visibility,getComputedStyle(more).opacity,getComputedStyle(header).backgroundColor,phase()];
-    const beforePaint=menuPaint(),handoffPaint=[],handoffLayout=[];
-    scrollTo(100);handoffPaint.push(menuPaint());
-    for(let i=0;i<10;i++){
-     advance(68);handoffPaint.push(menuPaint());
-     handoffLayout.push({reserve:shell.style.getPropertyValue('--hyper-reserve'),height:shell.offsetHeight,frames:frames.size});
+  // The original stationary header is the contract: no idle or scroll
+  // animation, no layout reclaim, and no hidden navigation on any Shelf tab.
+  const stationaryHeader=await page.evaluate(async()=>{
+   const header=document.querySelector('.app-header'),shell=document.querySelector('#shell'),main=shell.querySelector('main'),dock=shell.querySelector('#manage-slot');
+   const original=[...main.childNodes],oldView=shell.dataset.view,oldScroll=main.scrollTop;
+   const results=[];
+   const rect=el=>{const r=el.getBoundingClientRect();return [r.x,r.y,r.width,r.height];};
+   const read=()=>({header:rect(header),nav:rect(header.querySelector('nav')),brand:rect(header.querySelector('.brand-lockup')),theme:rect(header.querySelector('#theme')),more:rect(header.querySelector('#header-more')),main:rect(main),footer:rect(dock),visibility:getComputedStyle(header).visibility,opacity:getComputedStyle(header).opacity,overlay:!!header.querySelector('.hyperspace-overlay'),reserve:shell.style.getPropertyValue('--hyper-reserve')});
+   try{
+    for(const view of ['remotes','queue','history','settings','screenshot','downloads','explorer']){
+     shell.dataset.view=view;
+     const fixture=document.createElement('div');fixture.style.height='1800px';
+     main.replaceChildren(fixture);main.scrollTop=0;
+     const before=read();
+     for(const y of [1,12,100,300,0]){
+      main.scrollTop=y;main.dispatchEvent(new Event('scroll'));
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      results.push({view,y,before,after:read()});
+     }
     }
-    const down=readAnchors();const actual=main.scrollTop;
-    const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
-    const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
-    // Moving into the old header area while scrolled cannot expose an orphaned menu.
-    move(190,20);advance(1000);
-    const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
-    scrollTo(0);advance(680);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint,handoffLayout});
-    controller.viewChanged();
-   }
-   // A nearly-fitting Screenshots page is the critical boundary: scroll
-   // reclaim must not shrink the range and clamp scrollTop back toward zero.
-   controller.viewChanged();choose('none');shell.dataset.view='screenshot';scrollTo(0);
-   const savedScrollChildren=[...main.childNodes];
-   const shortPage=document.createElement('div');shortPage.style.cssText='margin:0;flex:none;display:block;';
-   main.replaceChildren(shortPage);
-   const style=getComputedStyle(main);
-   shortPage.style.height=(main.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom)+24)+'px';
-   const shortRange=main.scrollHeight-main.clientHeight;
-   const shortScroll=[];
-   for(const mode of ['none','elegant','hyperspace']){
-    controller.viewChanged();choose(mode);scrollTo(0);advance(680);
-    const before=main.scrollHeight-main.clientHeight;
-    scrollTo(before);
-    const samples=[];
-    for(let n=0;n<6;n++){advance(136);main.dispatchEvent(new Event('scroll'));samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});}
-    if(mode!=='none'){
-     move(190,20);move(190,500);advance(5000);advance(15000);
-     main.dispatchEvent(new Event('scroll'));
-     samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});
-    }
-    shortScroll.push({mode,before,samples});
-   }
-   // Tiny changes must move proportionally, not toggle the entire header.
-   const hysteresis=[];
-   for(const mode of ['none','elegant','hyperspace']){
-    controller.viewChanged();choose(mode);scrollTo(0);
-    for(const value of [1,5,11,12,11,10,3,2,5,11,12,0]){
-     scrollTo(value);move(190,20);advance(680);
-     hysteresis.push({mode,value,offset:-header.getBoundingClientRect().top,phase:phase()});
-    }
-   }
-   controller.viewChanged();choose('none');scrollTo(0);advance(680);
-   // Sample real layout at intermediate frames, not only final states.
-   const motion=[];
-   for(const target of [12,0,12,0]){
-    const from=header.getBoundingClientRect().top;
-    scrollTo(target);
-    const samples=[header.getBoundingClientRect().top],ranges=[main.scrollHeight-main.clientHeight],layouts=[];
-    for(let i=0;i<10;i++){advance(20);samples.push(header.getBoundingClientRect().top);ranges.push(main.scrollHeight-main.clientHeight);layouts.push({reserve:shell.style.getPropertyValue('--hyper-reserve'),frames:frames.size});}
-    motion.push({target,from,samples,ranges,layouts,height:header.offsetHeight});
-   }
-   main.replaceChildren(...savedScrollChildren);
-   choose('none');shell.dataset.view='remotes';scrollTo(0);
-   const explorerReference=readAnchors();scrollTo(100);advance(680);
-   shell.dataset.view='explorer';
-   const explorerWithoutSync=readAnchors();main.dispatchEvent(new Event('scroll'));
-   const explorerAfterSync=readAnchors();
-   const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--hyper-reserve');
-   spacer.remove();scrollTo(0);
-   controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,shortRange,shortScroll,hysteresis,motion,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   }finally{shell.dataset.view=oldView;main.replaceChildren(...original);main.scrollTop=oldScroll;}
+   return results;
   });
-  assert(Math.abs(hyperspace.shortRange-24)<=1,'short Screenshots fixture overflows by only 24px');
-  for(const {mode,before,samples} of hyperspace.shortScroll){
-   assert(Math.abs(before-hyperspace.shortRange)<=1,mode+' stable initial short scroll range');
-   for(const sample of samples){
-    assert(Math.abs(sample.range-before)<=1,mode+' header reclaim must not change the scroll range');
-    assert(Math.abs(sample.top-before)<=1,mode+' header reclaim must not clamp the scroll offset');
-   }
+  for(const {view,y,before,after} of stationaryHeader){
+   assert.deepEqual(after,before,view+' header and page frame remain stationary at scroll '+y);
+   assert.equal(after.visibility,'visible');assert.equal(after.opacity,'1');
+   assert.equal(after.overlay,false);assert.equal(after.reserve,'');
   }
-  for(const mode of ['none','elegant','hyperspace']){
-   const rows=hyperspace.hysteresis.filter(row=>row.mode===mode);
-   assert(rows.every(row=>Math.abs(row.offset-row.value)<.1),mode+' proportional partial-scroll movement');
-   assert(rows.filter(row=>row.value>0).every(row=>row.phase==='closed'),mode+' scroll ownership suppresses idle animation');
-  }
-  for(const {target,from,samples,ranges,layouts,height} of hyperspace.motion){
-   assert(Math.abs(samples[0]-from)<.1,'no instantaneous header jump');
-   assert(Math.abs(samples.at(-1)+target)<.1,'motion settles at the proportional endpoint');
-   assert(samples.slice(1).every((v,i)=>target?v<=samples[i]+.1:v>=samples[i]-.1),'motion is monotonic');
-   assert(samples.slice(1).some(v=>v<-.1&&v>-12+.1),'motion has genuine intermediate frames');
-   assert(layouts.every(v=>v.frames<=1),'only one animation frame scheduler');
-   assert(new Set(layouts.map(v=>v.reserve)).size<=2,'reservation changes only on settle');
-   assert(ranges.every(v=>Math.abs(v-ranges[0])<=1),'motion preserves the short-page scroll range');
-  }
-  assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint,handoffLayout} of hyperspace.scrollAnchors){
-   const label=view+'/'+mode;
-   assert.equal(actual,100,label+' scroll fixture');
-   assert(Math.abs(top.r-down.r-headerHeight)<.1&&Math.abs(top.moon-down.moon-headerHeight)<.1,label+' icons must fully retract');
-   assert(Math.abs(top.nav-down.nav-headerHeight)<.1&&Math.abs(top.more-down.more-headerHeight)<.1&&Math.abs(top.header-down.header-headerHeight)<.1,label+' navigation and header retract as one unit');
-   assert(handoffPaint.every(sample=>JSON.stringify(sample)===JSON.stringify(beforePaint)),label+' idle-hidden menu and background must never reappear during scroll handoff');
-   assert(handoffLayout.every(sample=>sample.frames<=1),label+' single frame scheduler');
-   assert(new Set(handoffLayout.slice(0,-1).map(sample=>sample.reserve)).size===1,label+' no per-frame reservation changes');
-   assert(offscreen,label+' hovering the old header position must not expose a detached menu');
-   assert(noHeaderStrip,label+' scroll immediately reclaims the entire former header strip');
-   assert(footerStable,label+' scroll reclaim preserves the footer anchor');
-   assert(Math.abs(restored.r-top.r)<.1&&Math.abs(restored.moon-top.moon)<.1&&Math.abs(restored.header-top.header)<.1,label+' header returns at page top');
-  }
-  assert.deepEqual(hyperspace.explorerWithoutSync,hyperspace.explorerReference,'File Explorer excludes shared header offset even before observer delivery');
-  assert.deepEqual(hyperspace.explorerAfterSync,hyperspace.explorerReference,'File Explorer header stays unchanged');
-  assert(hyperspace.explorerScrollCleared,'File Explorer clears the shared scroll offset');
-  assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
-  assert.equal(hyperspace.geometry.length,2);
-  assert(hyperspace.logoPositions.every(p=>p.every((v,i)=>Math.abs(v-hyperspace.logoPositions[0][i])<.1)),'R stays fixed throughout both animations and restoration');
-  assert(hyperspace.providerThemePositions.every(p=>p.every((v,i)=>Math.abs(v-hyperspace.providerThemePositions[0][i])<.1)),'Providers sun/moon stays fixed throughout both effects and restoration');
-  assert.deepEqual(hyperspace.none,{phase:'closed',timers:0,frames:0,overlay:false});
-  assert.deepEqual(hyperspace.disabledAgain,hyperspace.none);
-  assert.equal(hyperspace.elegantIdle,'closed');assert.equal(hyperspace.elegantMid.phase,'elegant');
-  assert(hyperspace.elegantMid.opacity>0&&hyperspace.elegantMid.opacity<1&&hyperspace.elegantMid.lift>0);
-  assert.equal(hyperspace.elegantMid.rails,0);
-  assert.equal(hyperspace.elegantEnd.phase,'open');assert.equal(hyperspace.elegantEnd.frames,0);assert.equal(hyperspace.elegantEnd.surfaceOpacity,0);
-  assert(Math.abs(hyperspace.elegantEnd.lift-hyperspace.elegantEnd.headerHeight)<1,'Elegant reclaims the complete header height');
-  assert(Math.abs(hyperspace.elegantEnd.shellTop-hyperspace.elegantEnd.headerTop)<1,'No reserved header strip remains');
-  assert(Math.abs(hyperspace.elegantEnd.mainTop-hyperspace.elegantEnd.headerTop)<1,'Content reaches the top of the viewport');
-  assert(Math.abs(hyperspace.elegantEnd.dockBottom-hyperspace.paint.dockBottom)<1,'Footer stays anchored');
-  assert.deepEqual(hyperspace.elegantHidden,{themeOpacity:'1',themeVisibility:'visible',navVisibility:'hidden',logoOpacity:'1',headerPointer:'none',logoPointer:'auto',overlayBackground:'rgba(0, 0, 0, 0)'});
-  assert(hyperspace.themeGlide.mid>=0&&hyperspace.themeGlide.end>=hyperspace.themeGlide.mid&&hyperspace.themeGlide.end<=6.1&&hyperspace.themeGlide.right<=hyperspace.themeGlide.edge,'Moon/sun glides right within available clearance');
-  assert.equal(hyperspace.themeHoverPhase,'open','Theme control hover and redundant skin writes must not restore Elegant');
-  assert.equal(hyperspace.viewReveal.length,6);
-  assert.equal(hyperspace.archiveSpacing.length,4);
-  assert.equal(hyperspace.titleCentering.length,4);
-  for(const v of hyperspace.titleCentering){
-   assert.equal(v.settledPhase,'open');
-   assert(Math.abs(v.settled.center-v.target)<.2,'Title ends centered in Shelf');
-   assert(v.mid.center>v.initial.center&&v.mid.center<v.target,'Title glides to center');
-   assert(v.settled.top<v.initial.top,'Title rises with the page');
-   if(v.view==='screenshot'){
-    assert(v.mid.keysCenter>v.initial.keysCenter&&v.mid.keysCenter<v.target,'Shortcut line glides with title');
-    assert(Math.abs(v.settled.keysCenter-v.target)<.2&&Math.abs(v.updated.keysCenter-v.target)<.2,'Shortcut line remains centered even when key labels change');
-    assert(Math.abs(v.restored.keysCenter-v.initial.keysCenter)<.2,'Shortcut line returns to original alignment');
-   }
-   assert([v.mid,v.settled,v.restored].every(p=>Math.abs(p.contentX-v.initial.contentX)<.2&&Math.abs(p.contentWidth-v.initial.contentWidth)<.2),'Cards retain horizontal layout');
-   assert(Math.abs(v.restored.center-v.initial.center)<.2&&Math.abs(v.restored.top-v.initial.top)<.2&&Math.abs(v.restored.contentTop-v.initial.contentTop)<.2&&v.cleared,'Original alignment restored and style cleared');
-  }
-  assert(hyperspace.archiveSpacing.every(v=>v.settledPhase==='open'&&v.contentLift>0&&v.contentLift<=28.1&&v.titleLift>v.contentLift&&v.titleLift<=(v.view==='queue'?42.1:36.1)&&Math.abs(v.titleLift-v.contentLift-(v.view==='queue'?Math.min(14,v.contentLift*.6):Math.min(8,v.contentLift*.4)))<.1&&v.gap>0&&v.restored),'History and Queue preserve a relaxed title/content gap and restore cleanly');
-  assert(hyperspace.viewReveal.every(v=>v.before==='open'&&v.after==='return'&&v.closed==='closed'),'Former header region reveals consistently on every supported Shelf tab');
-  assert.equal(hyperspace.noPaint.visibility,'hidden');assert.equal(hyperspace.noPaint.background,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.image,'none');assert.equal(hyperspace.noPaint.border,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.shadow,'none');assert.equal(hyperspace.noPaint.themeBackground,'rgba(0, 0, 0, 0)');assert.equal(hyperspace.noPaint.bodyColor,hyperspace.noPaint.pageColor);
-  assert.equal(hyperspace.afterThemeClick.phase,'open');assert.equal(hyperspace.afterThemeClick.mode,'light');assert.equal(hyperspace.afterThemeClick.navVisibility,'hidden');assert.equal(hyperspace.afterThemeClick.themeVisibility,'visible');assert.equal(hyperspace.afterThemeClick.frames,0);assert(Math.abs(hyperspace.afterThemeClick.mainTop-hyperspace.elegantEnd.mainTop)<1);
-  assert.deepEqual(hyperspace.afterThemeKeyboard,{phase:'open',mode:'dark'});
-  assert.equal(hyperspace.elegantReturn,'return');assert.equal(hyperspace.elegantClosed,'closed');
-  assert.notEqual(hyperspace.streak,hyperspace.later);
-  assert.equal(hyperspace.heldFrames,0);assert.equal(hyperspace.clean,true);
-  assert.equal(hyperspace.paint.header,'rgba(0, 0, 0, 0)','Header must not paint over the elevated page');
-  assert(hyperspace.paint.lift>0);
-  assert(hyperspace.paint.overlayTop+hyperspace.paint.overlayHeight-hyperspace.paint.lift<=hyperspace.paint.shellTop+1,'Painted header must end before the raised page');
-  assert.match(hyperspace.paint.clip,/^inset\(/);
-  assert(hyperspace.sweep.every(f=>f.reserve===hyperspace.sweep[0].reserve&&f.height===hyperspace.sweep[0].height),'Release must not relayout the shell on every frame');
-  assert(hyperspace.sweep.every(f=>Math.abs(f.dockBottom-hyperspace.initial.dockBottom)<1),'Footer must stay anchored');
-  assert(hyperspace.sweep.every(f=>Math.abs(f.mainTop-(hyperspace.initial.mainTop-f.lift))<1),'Translated surface follows the original lift curve');
-  assert(hyperspace.sweep.some(f=>f.translate&&f.lift>0),'Release uses translation');
-  assert.equal(hyperspace.paint.lifting,false,'Compositor hint removed after settling');
-  assert.equal(hyperspace.paint.translate,hyperspace.initial.translate,'Inline translation restored');
-  assert(Math.abs(hyperspace.paint.mainTop-(hyperspace.initial.mainTop-hyperspace.paint.lift))<1,'Final layout matches the visual resting position');
+  // Verify the production entry point no longer installs or exposes the
+  // retired animation controller, even for an existing saved preference.
+  const appSource=await readFile(new URL('../extension/app.mjs',import.meta.url),'utf8');
+  const appMarkup=await readFile(new URL('../extension/app.html',import.meta.url),'utf8');
+  assert(!/installHyperspace|mountHyperspaceSettings|hyperspace\.start/.test(appSource));
+  assert(!appMarkup.includes('href="hyperspace.css"'));
   // Outer page geometry must be symmetric with and without vertical overflow.
  for(const width of [320,380,480,800,1200]){
   await page.setViewportSize({width,height:760});

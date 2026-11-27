@@ -92,34 +92,6 @@
  :root[data-aesthetic=onyx] .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] .app-header nav>button{font-size:12px;padding-inline:4px}
 }
-/* Move the actual header as one unit with page scroll. A returning
-   navigation animation cannot strand tabs or More without R and theme. */
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header{
- translate:0 calc(0px - var(--onyx-header-scroll,0px));
-}
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header[data-onyx-scroll-hidden]{
- pointer-events:none!important;
-}
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header[data-onyx-scroll-hidden] *{
- pointer-events:none!important;
-}
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header #theme{
- translate:none!important;
-}
-/* Shared FLIP reservation: changes only at motion boundaries. The single
-   controller translates the already-laid-out main surface on each frame.
-   Matching bottom padding keeps the native scroll range unchanged. */
-:root[data-aesthetic=onyx] body>#shell:not([data-view=explorer]){
- margin-block-start:calc(0px - var(--hyper-reserve,0px));
-}
-:root[data-aesthetic=onyx] body>#shell:not([data-view=explorer])>main{
- padding-block-end:calc(52px + var(--hyper-reserve,0px));
- overflow-anchor:none;
-}
-:root[data-aesthetic=onyx] body>#shell:not([data-view=explorer])[data-hyperspace-lifting]>main,
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer])[data-hyperspace-lifting])>.app-header{
- will-change:translate;
-}
 :root[data-aesthetic=onyx] #shell[data-view=remotes]{
  & > main{background:var(--bg)}
  & .remotes-page{padding:26px 14px 16px;max-inline-size:740px}
