@@ -879,6 +879,31 @@ try{
  assert(await browseAfterAuth.isVisible());
  assert((await page.evaluate(()=>window.providerCalls)).some(([op,p])=>op==='auth.reconnect'&&p==='dropbox'));
  await page.mouse.move(0,0);
+ // Sign-in and verification captions must not expand the Cloudflare card.
+ for(const width of [320,380,480,800]){
+  await page.setViewportSize({width,height:760});
+  const geometry=await page.evaluate(()=>{
+   const page=document.querySelector('.remotes-page');
+   const card=document.createElement('div');card.className='card remote-cloudflare';
+   card.innerHTML='<h2><svg class="cf-chrome-mark" viewBox="0 0 48 32"></svg> Cloudflare R2</h2><p class="onyx-provider-meta onyx-cloudflare-meta">10 GB Free</p><div id="cf-test-connection"><button id="login">Connect to Cloudflare</button></div>';
+   // Use the production connection selector without a duplicate document ID.
+   const existing=document.getElementById('connection');if(existing)existing.id='connection-test-original';
+   const connection=card.querySelector('#cf-test-connection');connection.id='connection';
+   page.append(card);
+   try{
+    const read=()=>({height:card.getBoundingClientRect().height,buttonY:connection.querySelector('button').getBoundingClientRect().top-card.getBoundingClientRect().top});
+    const base=read(),results=[];
+    for(const [state,label,button] of [['CONNECTING','Signing in…','Cancel sign-in'],['VERIFYING','Authorization received. Checking account access…','Check account authorization']]){
+     connection.innerHTML='<p class="muted cf-connection-caption" data-connection-state="'+state+'">'+label+'</p><button>'+button+'</button>';
+     const caption=connection.querySelector('p'),r=caption.getBoundingClientRect(),bounds=card.getBoundingClientRect();
+     results.push({...read(),inside:r.left>=bounds.left+169&&r.right<=bounds.right&&r.bottom<=connection.querySelector('button').getBoundingClientRect().top});
+    }
+    return {base,results};
+   }finally{card.remove();if(existing)existing.id='connection';}
+  });
+  for(const state of geometry.results){assert.equal(state.height,geometry.base.height,'Cloudflare sign-in caption must not change card height');assert.equal(state.buttonY,geometry.base.buttonY);assert(state.inside,'Caption stays in the right-hand header space');}
+ }
+ await page.setViewportSize({width:380,height:760});
  const fills=[];
  for(const finish of ['onyx','platinum','gunmetal','obsidian','azure']){
   await page.evaluate(async id=>window.testHost.apply({id:'onyx',finish:id,persist:false}),finish);
