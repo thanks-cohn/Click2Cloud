@@ -75,6 +75,10 @@ Each implementation checkpoint should leave ReDown more coherent, operable, obse
 
 Evidence over claims: build and focused tests, actual packaged GUI behavior, installed browser behavior and authorized live-provider verification are separate proof classes. Use existing Laboratory and Python tooling to generate independent manifests, receipts, fault/recovery tests and reproducible evidence. Do not hide failed runs, substitute mock success for production proof or advance through an unaccepted dependency.
 
+## Vision-first engineering autonomy
+
+Every agent reads this vision and the Customer Experience Vision before interpreting an individual request. Use the decided architecture and working references to resolve ordinary engineering details independently, anticipate related failures within the authorized checkpoint, and verify whole behavioral classes rather than wait for a separate prompt per issue. Ask the owner only for genuine unresolved product-policy, permission, cost, compatibility or scope decisions; record the affected blocker and proceed with independent work. The owner sets the destination; the agent chooses the simplest justified implementation path. This is bounded autonomy, not permission to bypass acceptance or implement later checkpoints. A handoff explains concrete improvements and evidence, not merely compliance language.
+
 ## Governing hierarchy
 
 1. Permanent engineering vision: why we engineer this way.
