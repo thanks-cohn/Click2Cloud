@@ -14,7 +14,7 @@ I want the remaining workflows to follow that same principle: familiar controls,
 Add a cloud-provider dropdown to the existing screenshot location configuration. Do not build a separate screenshot application for every provider.
 
 - Cloudflare R2: selecting it brings up the existing working Cloudflare setup, including its established bucket, directory/prefix and rule behavior. Reuse rather than replace it.
-- Google Drive, OneDrive and Dropbox: select the connected account where needed, then use a straightforward destination dropdown for the supported ReDown folder, original cloud location, account-default mode or an already authorized existing folder. Do not require arbitrary remote directory creation.
+- Google Drive, OneDrive and Dropbox: select the connected account where needed, then show exactly two Location choices: ReDown folder or Account default. No separate original/root or existing/custom folder selector. If redown is unavailable, immediately save to the same account's authorized default/original location without waiting or notification. See `SHORTCUTS_TAB_SPECIFICATION.md` for the complete approved tab and migration behavior.
 - Preserve existing screenshot rules and working assignments. Provider choice should only change the relevant destination controls.
 - The missing basic-cloud screenshot functionality is implemented by connecting the existing capture mechanism to the shared authorized save engine, not by inventing four capture engines.
 - Built-in redown mode uses the approved same-account original-location fallback immediately when redown is not already verified ready; prepare redown independently. No extra fallback dialog or notification. Explicit arbitrary folder targets retain their normal authorization and error semantics.
@@ -45,13 +45,15 @@ The ordinary dropdown path should avoid most conflicts. The existing conflict-re
 
 ## 5. Shortcut + Click: one simple section
 
+The detailed authoritative tab reference is `SHORTCUTS_TAB_SPECIFICATION.md` alongside this document.
+
 Create a straightforward Shortcut + Click section/tab within the existing shortcut/settings experience. Reuse the screenshot location controls and available-shortcut dropdown behavior. Do not introduce a complicated workflow builder.
 
 The intended setup is:
 
 1. Choose or enter a supported two- or three-key chord.
 2. Select a provider and connected account where necessary.
-3. Choose the destination (existing R2 bucket/prefix controls for R2; simple supported location controls for basic clouds).
+3. Choose the destination (existing R2 bucket/prefix controls for R2; exactly ReDown folder or Account default for all three basic clouds).
 4. Save the binding.
 
 Support multiple independently editable bindings. Use existing add/edit/remove/disable affordances where suitable. Once configured, the customer holds the chord, clicks an eligible source, and saves. Releasing the chord returns to ordinary browsing. No routine extra confirmation, opening Explorer or opening the shelf for an already authorized save. Match the directness of our existing screenshot and right-click interactions.
