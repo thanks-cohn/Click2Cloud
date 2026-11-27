@@ -6,7 +6,9 @@
 
 Work on `codex/redown-11-27-2026-part-2-3-continuation`, starting from its latest verified tip or an expressly owner-approved descendant. Verify checkout, status, actual runtime version and ancestry; do not switch to main, reset to a historic SHA, create another implementation branch merely to begin, merge an older branch for its documents, or force push. If the checkout differs, report the mismatch rather than implementing on the wrong lineage. Runtime reference is ReDown 0.3.32.5, implementation `1627f59e6f759eb80fb2c4d9d5126abde312ecd5`, evidence checkpoint `ea8e1d8d495fe276de48063b1640340d3c2f7cce`; later accepted runtime revisions supersede it. Documentation commits are not runtime acceptance.
 
-Read these active files, in order:
+Standing engineering authority: read [Permanent Engineering Vision](docs/engineering-vision/PERMANENT_ENGINEERING_VISION.md) and its [companion verification vision](docs/engineering-vision/README.md) for architectural principles. The vision is not a separate task or permission to advance beyond the active checkpoint. Adopt its decided architecture, not a session-long external research assignment. The Silent/Normal transfer-feedback preference is presentation only; never weaken verification or conceal essential instructions.
+
+Read these active execution files, in order:
 1. [Part 2 execution index](11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/PART_2_EXECUTION_INDEX.md) — sole immediate checkpoint assignment and status. At this revision the next checkpoint is 2B.1, independent Worker and menu readiness; subsequent handoffs update the index.
 2. [Master execution roadmap](11.25.2026/ALPHA_MASTER_EXECUTION_ROADMAP.md) — sole cross-stage dependency order.
 3. [Part 2 detailed request](11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/CODEX_REQUEST.md) and [always-ready Worker directive](11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/PART_2B_P0_ALWAYS_READY_WORKER_DIRECTIVE.md) — technical and product requirements for the current repair.
