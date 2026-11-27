@@ -162,7 +162,7 @@ function finishExplorerOpening(reveal=false){
  // Opacity only: no delayed interactivity, size changes or artificial wait.
  for(const pane of [$('#tree'),$('#files')]){
   if(pane&&!pane.hidden)for(const child of pane.children){
-   if(!child.hidden)child.animate([{opacity:.68},{opacity:1}],{duration:220,easing:'ease-out'});
+   if(!child.hidden)child.animate([{opacity:.18},{opacity:1}],{duration:1050,easing:'cubic-bezier(.25,.1,.25,1)'});
   }
  }
 }
