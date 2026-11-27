@@ -346,9 +346,12 @@ try{
     const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom,headerHeight=header.offsetHeight;
     const nav=header.querySelector('nav'),more=header.querySelector('.header-more');
     const menuPaint=()=>[getComputedStyle(nav).visibility,getComputedStyle(nav).opacity,getComputedStyle(more).visibility,getComputedStyle(more).opacity,getComputedStyle(header).backgroundColor,phase()];
-    const beforePaint=menuPaint(),handoffPaint=[];
+    const beforePaint=menuPaint(),handoffPaint=[],handoffLayout=[];
     scrollTo(100);handoffPaint.push(menuPaint());
-    for(let i=0;i<10;i++){advance(68);handoffPaint.push(menuPaint());}
+    for(let i=0;i<10;i++){
+     advance(68);handoffPaint.push(menuPaint());
+     handoffLayout.push({reserve:shell.style.getPropertyValue('--hyper-reserve'),height:shell.offsetHeight,frames:frames.size});
+    }
     const down=readAnchors();const actual=main.scrollTop;
     const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
     const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
@@ -356,7 +359,7 @@ try{
     move(190,20);advance(1000);
     const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
     scrollTo(0);advance(680);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint});
+    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint,handoffLayout});
     controller.viewChanged();
    }
    // A nearly-fitting Screenshots page is the critical boundary: scroll
@@ -382,13 +385,13 @@ try{
     }
     shortScroll.push({mode,before,samples});
    }
-   // Jitter on either side of the entry threshold cannot reopen the header.
+   // Tiny changes must move proportionally, not toggle the entire header.
    const hysteresis=[];
    for(const mode of ['none','elegant','hyperspace']){
     controller.viewChanged();choose(mode);scrollTo(0);
     for(const value of [1,5,11,12,11,10,3,2,5,11,12,0]){
-     scrollTo(value);move(190,20);advance(6000);
-     hysteresis.push({mode,value,hidden:header.hasAttribute('data-onyx-scroll-hidden'),phase:phase()});
+     scrollTo(value);move(190,20);advance(680);
+     hysteresis.push({mode,value,offset:-header.getBoundingClientRect().top,phase:phase()});
     }
    }
    controller.viewChanged();choose('none');scrollTo(0);advance(680);
@@ -397,9 +400,9 @@ try{
    for(const target of [12,0,12,0]){
     const from=header.getBoundingClientRect().top;
     scrollTo(target);
-    const samples=[header.getBoundingClientRect().top],ranges=[main.scrollHeight-main.clientHeight];
-    for(let i=0;i<10;i++){advance(68);samples.push(header.getBoundingClientRect().top);ranges.push(main.scrollHeight-main.clientHeight);}
-    motion.push({target,from,samples,ranges,height:header.offsetHeight});
+    const samples=[header.getBoundingClientRect().top],ranges=[main.scrollHeight-main.clientHeight],layouts=[];
+    for(let i=0;i<10;i++){advance(20);samples.push(header.getBoundingClientRect().top);ranges.push(main.scrollHeight-main.clientHeight);layouts.push({reserve:shell.style.getPropertyValue('--hyper-reserve'),frames:frames.size});}
+    motion.push({target,from,samples,ranges,layouts,height:header.offsetHeight});
    }
    main.replaceChildren(...savedScrollChildren);
    choose('none');shell.dataset.view='remotes';scrollTo(0);
@@ -407,7 +410,7 @@ try{
    shell.dataset.view='explorer';
    const explorerWithoutSync=readAnchors();main.dispatchEvent(new Event('scroll'));
    const explorerAfterSync=readAnchors();
-   const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--onyx-header-reclaim');
+   const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--hyper-reserve');
    spacer.remove();scrollTo(0);
    controller.dispose();shell.dataset.view='remotes';
    return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,shortRange,shortScroll,hysteresis,motion,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
@@ -422,23 +425,27 @@ try{
   }
   for(const mode of ['none','elegant','hyperspace']){
    const rows=hyperspace.hysteresis.filter(row=>row.mode===mode);
-   assert.deepEqual(rows.map(row=>row.hidden),[false,false,false,true,true,true,true,false,false,false,true,false],mode+' stable partial-scroll hysteresis');
-   assert(rows.filter(row=>row.value>2).every(row=>row.phase==='closed'),mode+' scroll ownership suppresses idle animation');
+   assert(rows.every(row=>Math.abs(row.offset-row.value)<.1),mode+' proportional partial-scroll movement');
+   assert(rows.filter(row=>row.value>0).every(row=>row.phase==='closed'),mode+' scroll ownership suppresses idle animation');
   }
-  for(const {target,from,samples,ranges,height} of hyperspace.motion){
+  for(const {target,from,samples,ranges,layouts,height} of hyperspace.motion){
    assert(Math.abs(samples[0]-from)<.1,'no instantaneous header jump');
-   assert(Math.abs(samples.at(-1)-(target?-height:0))<.1,'motion settles at the intended endpoint');
+   assert(Math.abs(samples.at(-1)+target)<.1,'motion settles at the proportional endpoint');
    assert(samples.slice(1).every((v,i)=>target?v<=samples[i]+.1:v>=samples[i]-.1),'motion is monotonic');
-   assert(samples.slice(1).some(v=>v<-.1&&v>-height+.1),'motion has genuine intermediate frames');
+   assert(samples.slice(1).some(v=>v<-.1&&v>-12+.1),'motion has genuine intermediate frames');
+   assert(layouts.every(v=>v.frames<=1),'only one animation frame scheduler');
+   assert(new Set(layouts.map(v=>v.reserve)).size<=2,'reservation changes only on settle');
    assert(ranges.every(v=>Math.abs(v-ranges[0])<=1),'motion preserves the short-page scroll range');
   }
   assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint} of hyperspace.scrollAnchors){
+  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint,handoffLayout} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;
    assert.equal(actual,100,label+' scroll fixture');
    assert(Math.abs(top.r-down.r-headerHeight)<.1&&Math.abs(top.moon-down.moon-headerHeight)<.1,label+' icons must fully retract');
    assert(Math.abs(top.nav-down.nav-headerHeight)<.1&&Math.abs(top.more-down.more-headerHeight)<.1&&Math.abs(top.header-down.header-headerHeight)<.1,label+' navigation and header retract as one unit');
    assert(handoffPaint.every(sample=>JSON.stringify(sample)===JSON.stringify(beforePaint)),label+' idle-hidden menu and background must never reappear during scroll handoff');
+   assert(handoffLayout.every(sample=>sample.frames<=1),label+' single frame scheduler');
+   assert(new Set(handoffLayout.slice(0,-1).map(sample=>sample.reserve)).size===1,label+' no per-frame reservation changes');
    assert(offscreen,label+' hovering the old header position must not expose a detached menu');
    assert(noHeaderStrip,label+' scroll immediately reclaims the entire former header strip');
    assert(footerStable,label+' scroll reclaim preserves the footer anchor');
