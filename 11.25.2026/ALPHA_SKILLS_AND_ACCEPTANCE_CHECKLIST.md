@@ -121,3 +121,6 @@ Generic S3, automatic download rerouting, advanced explorer functionality, extra
 7. Final regression and release audit.
 
 The authoritative master roadmap supersedes this historical list, defines current Run 2 and unified Run 3, and preserves Onyx as separate final work. Start from the approved 0.3.32.4 candidate or explicitly approved descendant; no historical downgrade. Each session should have a focused specification, reproducible scripts, durable receipts and a bounded execution window. The objective is dependable service for the first 1,000 paying customers, as a foundation for broader adoption; no adoption or release guarantees.
+
+
+- [ ] Chrome-first shortcut qualification per SHORTCUTS_TAB_SPECIFICATION.md: official docs, four suggested defaults, useful proven additional manual commands only (16 optional isolated probe), actual getAll/command delivery, supported scoped held-click/local handlers, protected/reserved input, actual registration and capture permission/rate/tab identity, scope/layout/restart/update/conflicts; separate synthetic and actual browser evidence. No unsupported API or scope/permission bypass; no fixed slot-count gate.
