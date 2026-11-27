@@ -107,7 +107,9 @@ def main():
     started_at = datetime.now(timezone.utc).isoformat()
     child = subprocess.Popen(['node', 'scripts/verify-python-lab.mjs'], cwd=ROOT, env=child_env)
     print(f'Resource receipts {directory}', file=sys.stderr, flush=True)
-    measures, labels, minima = {}, {}, {}
+    measures, labels, minima = {}, {child.pid: 'node'}, {}
+    if args.chrome_pid is not None:
+        labels[args.chrome_pid] = 'chrome'
     count, omitted, capture_errors = 0, 0, 0
     try:
         with (directory / 'process-samples.ndjson').open('x', encoding='utf-8') as out:

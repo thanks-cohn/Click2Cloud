@@ -1,0 +1,22 @@
+ReDown Part 2 P0.0 checkpoint
+Implementation 1627f59e6f759eb80fb2c4d9d5126abde312ecd5 · 0.3.32.5
+Approved base ade3a1b60ccef6728c236236cd95030fb8cc8652
+Frozen specification 896b456b7cf975d6c1dd3e8abea28a103765051b
+Branch codex/redown-11-27-2026-part-2-p0-transport
+
+PASS Package build, stable extension ID, OAuth callback and Worker digest.
+PASS Actual disconnected packaged Chromium 143.0.7499.4, 14 views.
+PASS Browser OPFS, download archives and 1,000-child folder upload fixtures.
+PASS Focused JS 744/744; Python 28 passed, 2 Windows skips.
+PASS 4,096 seeded P0.0 decision cases and exact replay of case 72, seed 3372.
+PASS Local native/Workerd 100/100 and 555/555 uploads and independently reopened SHA-256 downloads.
+PASS Zero staging leftovers and exactly one verified notification per logical upload in both fault campaigns.
+PASS 997-byte precommit transport replay, postcommit recovery, lost status response, upload/read 502 and torn-disk journal recovery.
+PASS Zero-reserve reconciliation, authorized continuation, frozen inventory mismatch and retained round trip.
+FAIL Full JS 877/878; inherited non-Narrow/non-Depth digest fixture only.
+NOT_TESTED Windows reference machine, live post-repair R2 and historical retained restart proof.
+BLOCKED Original historical audit/staging artifacts, owner acceptance and dependent Part 2 stages.
+Recorded live cloud spend $0.
+
+See HANDOFF.md for reproducible Windows commands and the gate sequence.
+See evidence.json for source identity, process samples, case counts and local receipt locations.

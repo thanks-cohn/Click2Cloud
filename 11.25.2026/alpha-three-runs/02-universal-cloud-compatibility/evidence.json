@@ -1,0 +1,583 @@
+{
+  "schema": "redown.part2.p0-checkpoint/1",
+  "scope": "Part 2 P0.0",
+  "ownerAcceptance": "BLOCKED",
+  "branch": "codex/redown-11-27-2026-part-2-p0-transport",
+  "approvedBase": "ade3a1b60ccef6728c236236cd95030fb8cc8652",
+  "pinnedSpecification": "896b456b7cf975d6c1dd3e8abea28a103765051b",
+  "testedImplementationCommit": "1627f59e6f759eb80fb2c4d9d5126abde312ecd5",
+  "liveCloudCostUsd": 0,
+  "checks": {
+    "build": {
+      "state": "PASS",
+      "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+      "extensionVersion": "0.3.32.5",
+      "revision": "1627f59e6f759eb80fb2c4d9d5126abde312ecd5",
+      "sourceDigest": "d10cdab5225b16d71f99cd8c27ed8b52f441cbb1cec38672b937c68afcfb019a",
+      "apiVersion": "3+1.1",
+      "remoteProtocol": "click2cloud-remote-2",
+      "extensionId": "ajppphdiamdobknpamcheohmdbdbeoal",
+      "oauthRedirect": "https://ajppphdiamdobknpamcheohmdbdbeoal.chromiumapp.org/cloudflare",
+      "manifestChangedFields": [
+        "version",
+        "version_name"
+      ]
+    },
+    "javascriptFull": {
+      "state": "FAIL",
+      "tests": 878,
+      "pass": 877,
+      "fail": 1,
+      "skipped": 0,
+      "failures": [
+        "non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary"
+      ]
+    },
+    "javascriptBaseline": {
+      "state": "FAIL",
+      "tests": 874,
+      "pass": 873,
+      "fail": 1,
+      "skipped": 0,
+      "failures": [
+        "non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary"
+      ]
+    },
+    "javascriptFocused": {
+      "state": "PASS",
+      "tests": 744,
+      "pass": 744,
+      "fail": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "javascriptFocusedP0AndGeneratedMaps": {
+      "state": "PASS",
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "apiDocs": {
+      "state": "PASS",
+      "apiMethods": 78,
+      "shortcutCommands": 3
+    },
+    "python": {
+      "state": "PASS",
+      "tests": 30,
+      "passed": 28,
+      "windowsOnlySkipped": 2,
+      "seed": 3372,
+      "extendedCases": 4096,
+      "exactReplayCase": 72
+    },
+    "installedChromium": {
+      "state": "PASS",
+      "proof": "INSTALLED_UNPACKED_CHROME_SHELF_TAB_DISCONNECTED",
+      "browser": "143.0.7499.4",
+      "viewsChecked": 14
+    },
+    "browserUpload": {
+      "state": "PASS",
+      "evidenceClass": "chromium-indexeddb-worker-local-provider-fixture",
+      "chromium": "156.0.8078.79",
+      "files": 1000,
+      "verified": 1000,
+      "receiptRows": 1000,
+      "shelfClosedBeforeDispatch": true,
+      "history": [
+        {
+          "name": "Chosen",
+          "total": 1000,
+          "status": "verified"
+        }
+      ]
+    },
+    "browserDownload": {
+      "state": "PASS",
+      "evidenceClass": "chromium-worker-opfs-local-provider-fixture",
+      "chromium": "156.0.8078.79",
+      "shelfClosedBeforeDispatch": true,
+      "results": [
+        {
+          "name": "empty.txt",
+          "files": 1,
+          "attempts": 1,
+          "bytes": 0
+        },
+        {
+          "name": "a.txt",
+          "files": 1,
+          "attempts": 2,
+          "bytes": 1
+        },
+        {
+          "name": "files.zip",
+          "files": 2,
+          "attempts": 1,
+          "bytes": 280
+        },
+        {
+          "name": "root.zip",
+          "files": 3,
+          "attempts": 1,
+          "bytes": 2287
+        }
+      ]
+    },
+    "browserLabSettings": {
+      "state": "PASS",
+      "evidenceClass": "browser-rendered-settings-with-chrome-message-fixture",
+      "chromium": "156.0.8078.79",
+      "checks": [
+        "single card, off by default, no passive permission or provider discovery",
+        "explicit scoped approval and precise Windows pairing command",
+        "paired state, revocation, and no page errors at 365 px",
+        "bucket error and empty states, retry, reload guidance and JSON export without pairing",
+        "disk-backed spool, incremental SHA-256, and cleanup in a real Chromium service worker"
+      ]
+    },
+    "nativeComprehensive": {
+      "state": "PASS",
+      "testedRevision": "56378aa4d2f60672dcb8cd42f558985d13d02f01",
+      "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+      "cloudflareWrites": 0,
+      "receipt": "lab-local/verification/native-Icb3De/fixture-summary.json",
+      "assertions": 10,
+      "checkNames": [
+        "native invocation and extension sender fences",
+        "paired native socket, single use code, and capability negotiation",
+        "paired CLI exports the shared sanitized startup stages and retains the first failure",
+        "scope escape, foreign bucket, budgets, pre-dispatch cancellation and transfer ID reuse",
+        "case-folded collision and changed source blocked",
+        "three mixed nested corpus objects per run, including zero bytes, and one R2 read per verified upload",
+        "same manifest replay and changed retention compared by stable scenario",
+        "Comprehensive executes the same interpreter for 19 fixtures plus two preserved conflicts",
+        "lost ACK recovered by a separate read-only grant without replay or overwrite",
+        "revocation removed native endpoint; unrelated object remained intact"
+      ]
+    },
+    "nativeOrdinaryAndRoundTrip": {
+      "state": "PASS",
+      "testedRevision": "1627f59e6f759eb80fb2c4d9d5126abde312ecd5",
+      "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+      "cloudflareWrites": 0,
+      "receipt": "lab-local/verification/native-8N1YvW/fixture-summary.json",
+      "assertions": 10,
+      "checkNames": [
+        "native invocation and extension sender fences",
+        "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "Download-only under a read-write grant verifies original keys with zero new PUT or publication calls",
+        "Timed cutoff preserves pending work; read-write continuation keeps exact keys and does not replay publications",
+        "A lost production acknowledgement is reconciled with zero replay reserve",
+        "Two lost status responses leave a durable fence until read-only recovery in the same campaign",
+        "Expected inventory mismatch blocks writes until explicitly admitted for diagnostics",
+        "Round-trip campaign preserves the exact owned path and independently reopens the saved file",
+        "A freshly authorized read-only grant can independently audit the exact original campaign",
+        "A separate read-only selection freezes existing remote keys and verifies reopened local files"
+      ],
+      "files": 8,
+      "bytes": 283633,
+      "elapsedMs": 5132,
+      "audit": {
+        "state": "PASS",
+        "completeScopedListing": true,
+        "matchedCount": 8,
+        "observedUniqueCount": 8,
+        "stagingBytes": 0,
+        "independentContentHashPerformedByAudit": false
+      },
+      "publicationWrites": 8,
+      "stagingPuts": 8,
+      "receiptSummary": {
+        "metric": "production-confirmed uploads",
+        "mode": "upload",
+        "windowSeconds": 2400,
+        "measuredMs": 4539,
+        "result": "PASS",
+        "cutoffReached": false,
+        "plannedFiles": 8,
+        "filesWithinWindow": 8,
+        "bytesWithinWindow": 283633,
+        "independentSha256WithinWindow": 0,
+        "distinctCompletionsAfterWindow": 0,
+        "activeTransferMs": 3446,
+        "filesPerMinute": 105.7502,
+        "bytesPerSecond": 62487.9929,
+        "latencyMsP50": 352,
+        "latencyMsP95": 666
+      }
+    },
+    "legacyLocationReceiptReplay": {
+      "state": "PASS",
+      "fixtureLegacyState": "FAIL",
+      "locationVerdict": {
+        "status": "PASS",
+        "reasonCodes": []
+      },
+      "reasonCodes": [
+        "EXPECTED_FILE_COUNT_MISMATCH"
+      ]
+    },
+    "nativeFault100": {
+      "state": "PASS",
+      "testedRevision": "1627f59e6f759eb80fb2c4d9d5126abde312ecd5",
+      "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+      "cloudflareWrites": 0,
+      "receipt": "lab-local/verification/native-BYUmvl/fixture-summary.json",
+      "assertions": 5,
+      "checkNames": [
+        "native invocation and extension sender fences",
+        "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "Precommit transport failure reuses owned staging; postcommit failure reconciles after a lost status response",
+        "Injected 502 and lost acknowledgement preserve each unique logical transfer",
+        "Download-only under a read-write grant verifies original keys with zero new PUT or publication calls"
+      ],
+      "files": 100,
+      "bytes": 3970873,
+      "elapsedMs": 48236,
+      "audit": {
+        "state": "PASS",
+        "completeScopedListing": true,
+        "matchedCount": 100,
+        "observedUniqueCount": 100,
+        "stagingBytes": 0,
+        "independentContentHashPerformedByAudit": false
+      },
+      "publicationWrites": 100,
+      "stagingPuts": 100,
+      "receiptSummary": {
+        "metric": "production-confirmed uploads",
+        "mode": "upload",
+        "windowSeconds": 2400,
+        "measuredMs": 46701,
+        "result": "PASS",
+        "cutoffReached": false,
+        "plannedFiles": 100,
+        "filesWithinWindow": 100,
+        "bytesWithinWindow": 3970873,
+        "independentSha256WithinWindow": 0,
+        "distinctCompletionsAfterWindow": 0,
+        "activeTransferMs": 36694,
+        "filesPerMinute": 128.4769,
+        "bytesPerSecond": 85027.5797,
+        "latencyMsP50": 354,
+        "latencyMsP95": 436
+      },
+      "transportFaults": {
+        "precommitBytes": 997,
+        "precommitTransportFaults": 1,
+        "postcommitTransportFaults": 1,
+        "reconciliationTransportFaults": 1,
+        "uploadRetries": 2,
+        "uniqueVerifiedNotifications": 100
+      },
+      "verification": {
+        "upload502": 1,
+        "postPublicationLostAck": 1,
+        "download502": 1,
+        "diskSha256Files": 100,
+        "lostLocalAcknowledgementsRecovered": 1,
+        "r2Puts": 100,
+        "workerWrites": 100,
+        "providerReads": 100,
+        "stagingBytes": 0
+      },
+      "resourceProfile": {
+        "platform": "linux",
+        "fixtureFiles": 100,
+        "fixtureExitCode": 0,
+        "sampleSeconds": 5.0,
+        "samples": 19,
+        "elapsedMs": 90293,
+        "minimumSystemHeadroom": {
+          "availablePhysicalBytes": 8495251456,
+          "freeDiskBytes": 62819946496
+        },
+        "chromeSamplingRequested": false,
+        "captureErrors": 0,
+        "processRoles": {
+          "node": {
+            "observedProcesses": 1,
+            "samples": 19,
+            "workingSetStartBytesMin": 5914624,
+            "workingSetPeakBytesMax": 368369664,
+            "workingSetEndBytesMax": 368369664
+          },
+          "python-cli": {
+            "observedProcesses": 2,
+            "samples": 17,
+            "workingSetStartBytesMin": 16814080,
+            "workingSetPeakBytesMax": 17219584,
+            "workingSetEndBytesMax": 17219584
+          },
+          "python-native-host": {
+            "observedProcesses": 1,
+            "samples": 18,
+            "workingSetStartBytesMin": 11313152,
+            "workingSetPeakBytesMax": 11882496,
+            "workingSetEndBytesMax": 11812864
+          },
+          "workerd": {
+            "observedProcesses": 1,
+            "samples": 18,
+            "workingSetStartBytesMin": 73232384,
+            "workingSetPeakBytesMax": 182644736,
+            "workingSetEndBytesMax": 182644736
+          }
+        },
+        "receipt": "lab-local/verification/resources-9df861f12d50/resource-summary.json"
+      }
+    },
+    "nativeFault555": {
+      "state": "PASS",
+      "testedRevision": "1627f59e6f759eb80fb2c4d9d5126abde312ecd5",
+      "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+      "cloudflareWrites": 0,
+      "receipt": "lab-local/verification/native-KF1rYv/fixture-summary.json",
+      "assertions": 5,
+      "checkNames": [
+        "native invocation and extension sender fences",
+        "Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue",
+        "Precommit transport failure reuses owned staging; postcommit failure reconciles after a lost status response",
+        "Injected 502 and lost acknowledgement preserve each unique logical transfer",
+        "Download-only under a read-write grant verifies original keys with zero new PUT or publication calls"
+      ],
+      "files": 555,
+      "bytes": 22407018,
+      "elapsedMs": 265088,
+      "audit": {
+        "state": "PASS",
+        "completeScopedListing": true,
+        "matchedCount": 555,
+        "observedUniqueCount": 555,
+        "stagingBytes": 0,
+        "independentContentHashPerformedByAudit": false
+      },
+      "publicationWrites": 555,
+      "stagingPuts": 555,
+      "receiptSummary": {
+        "metric": "production-confirmed uploads",
+        "mode": "upload",
+        "windowSeconds": 2400,
+        "measuredMs": 259552,
+        "result": "PASS",
+        "cutoffReached": false,
+        "plannedFiles": 555,
+        "filesWithinWindow": 555,
+        "bytesWithinWindow": 22407018,
+        "independentSha256WithinWindow": 0,
+        "distinctCompletionsAfterWindow": 0,
+        "activeTransferMs": 208142,
+        "filesPerMinute": 128.298,
+        "bytesPerSecond": 86329.591,
+        "latencyMsP50": 355,
+        "latencyMsP95": 610
+      },
+      "transportFaults": {
+        "precommitBytes": 997,
+        "precommitTransportFaults": 1,
+        "postcommitTransportFaults": 1,
+        "reconciliationTransportFaults": 1,
+        "uploadRetries": 2,
+        "uniqueVerifiedNotifications": 555
+      },
+      "verification": {
+        "upload502": 1,
+        "postPublicationLostAck": 1,
+        "download502": 1,
+        "diskSha256Files": 555,
+        "lostLocalAcknowledgementsRecovered": 1,
+        "r2Puts": 555,
+        "workerWrites": 555,
+        "providerReads": 555,
+        "stagingBytes": 0
+      },
+      "resourceProfile": {
+        "platform": "linux",
+        "fixtureFiles": 555,
+        "fixtureExitCode": 0,
+        "sampleSeconds": 5.0,
+        "samples": 95,
+        "elapsedMs": 475254,
+        "minimumSystemHeadroom": {
+          "availablePhysicalBytes": 7727980544,
+          "freeDiskBytes": 62804946944
+        },
+        "chromeSamplingRequested": false,
+        "captureErrors": 0,
+        "processRoles": {
+          "node": {
+            "observedProcesses": 1,
+            "samples": 1,
+            "workingSetStartBytesMin": 2961408,
+            "workingSetPeakBytesMax": 2961408,
+            "workingSetEndBytesMax": 2961408
+          },
+          "python-cli": {
+            "observedProcesses": 2,
+            "samples": 94,
+            "workingSetStartBytesMin": 16674816,
+            "workingSetPeakBytesMax": 19734528,
+            "workingSetEndBytesMax": 19734528
+          },
+          "python-native-host": {
+            "observedProcesses": 1,
+            "samples": 94,
+            "workingSetStartBytesMin": 11296768,
+            "workingSetPeakBytesMax": 12374016,
+            "workingSetEndBytesMax": 12156928
+          },
+          "workerd": {
+            "observedProcesses": 1,
+            "samples": 94,
+            "workingSetStartBytesMin": 73859072,
+            "workingSetPeakBytesMax": 269254656,
+            "workingSetEndBytesMax": 269008896
+          }
+        },
+        "receipt": "lab-local/verification/resources-3caa5970fe5c/resource-summary.json"
+      }
+    },
+    "supplementalPackagedBrowserAndNativeResourceSample": {
+      "platform": "linux",
+      "fixtureFiles": 8,
+      "fixtureExitCode": 0,
+      "sampleSeconds": 1.0,
+      "samples": 15,
+      "elapsedMs": 14891,
+      "minimumSystemHeadroom": {
+        "availablePhysicalBytes": 8555728896,
+        "freeDiskBytes": 62862528512
+      },
+      "chromeSamplingRequested": true,
+      "captureErrors": 0,
+      "processRoles": {
+        "chrome": {
+          "observedProcesses": 11,
+          "samples": 162,
+          "workingSetStartBytesMin": 52703232,
+          "workingSetPeakBytesMax": 205856768,
+          "workingSetEndBytesMax": 201973760
+        },
+        "node": {
+          "observedProcesses": 1,
+          "samples": 15,
+          "workingSetStartBytesMin": 3973120,
+          "workingSetPeakBytesMax": 207339520,
+          "workingSetEndBytesMax": 207339520
+        },
+        "python-cli": {
+          "observedProcesses": 3,
+          "samples": 11,
+          "workingSetStartBytesMin": 8495104,
+          "workingSetPeakBytesMax": 16523264,
+          "workingSetEndBytesMax": 16523264
+        },
+        "python-native-host": {
+          "observedProcesses": 1,
+          "samples": 11,
+          "workingSetStartBytesMin": 11161600,
+          "workingSetPeakBytesMax": 11714560,
+          "workingSetEndBytesMax": 11653120
+        },
+        "workerd": {
+          "observedProcesses": 1,
+          "samples": 11,
+          "workingSetStartBytesMin": 74235904,
+          "workingSetPeakBytesMax": 100454400,
+          "workingSetEndBytesMax": 100454400
+        }
+      },
+      "receipt": "lab-local/verification/resources-8f36e0be619f/resource-summary.json"
+    }
+  },
+  "inheritedEvidence": {
+    "source": "Pinned Part 2 request, owner-reported live R2 campaign",
+    "uploadConfirmedFiles": 578,
+    "independentReadbackSha256Files": 578,
+    "bytesEachDirection": 336467559,
+    "workloadExpectedFiles": 555,
+    "overallWorkload": "FAIL",
+    "combinedLocationAudit": "FAIL",
+    "originalAuditReceiptAvailability": "BLOCKED",
+    "original997ByteStagingOwnership": "BLOCKED",
+    "windowsMemoryErrorPhysicalCause": "UNKNOWN",
+    "restartAndRetainedCopyEvidence": "NOT_TESTED"
+  },
+  "gates": {
+    "windowsFault100And555": "NOT_TESTED",
+    "actualConstrainedWindowsHeadroom": "NOT_TESTED",
+    "postRepairLiveR2UploadDownload100": "NOT_TESTED",
+    "historicalRetainedCopiesAfterRestart": "NOT_TESTED",
+    "inheritedWindowsNativeAndArchive": "BLOCKED",
+    "P0.1ThroughP0.4AndRun2D": "BLOCKED",
+    "part3": "OUT_OF_SCOPE"
+  },
+  "providerQualification": {
+    "Cloudflare R2": {
+      "localUpload": "PASS",
+      "localDownload": "PASS",
+      "postRepairLiveUpload": "NOT_TESTED",
+      "postRepairLiveDownload": "NOT_TESTED"
+    },
+    "Google Drive": {
+      "upload": "NOT_TESTED",
+      "download": "NOT_TESTED"
+    },
+    "OneDrive": {
+      "upload": "NOT_TESTED",
+      "download": "NOT_TESTED"
+    },
+    "Dropbox": {
+      "upload": "NOT_TESTED",
+      "download": "NOT_TESTED"
+    }
+  },
+  "changedPaths": [
+    "11.2026/workings/right-click-workings.json",
+    "11.25.2026/ALPHA_MASTER_EXECUTION_ROADMAP.md",
+    "11.25.2026/ALPHA_SKILLS_AND_ACCEPTANCE_CHECKLIST.md",
+    "11.25.2026/MY_INTENDED_IMPLEMENTATION.md",
+    "11.25.2026/RDATA_ACKNOWLEDGMENT_TEMPLATE_V1.txt",
+    "11.25.2026/RDATA_CONTINUITY_SPECIFICATION.md",
+    "11.25.2026/SHORTCUTS_TAB_SPECIFICATION.md",
+    "11.25.2026/STAGE_CODEX_REQUEST.md",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/ACTION_COVERAGE_V1.md",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/CODEX_REQUEST.md",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/HANDOFF.md",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/SUMMARY.txt",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/evidence.json",
+    "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/part2-lab.cmd",
+    "11.25.2026/alpha-three-runs/03-commercial-alpha-release/CODEX_REQUEST.md",
+    "11.25.2026/live-python-lab/python/pyproject.toml",
+    "11.25.2026/live-python-lab/python/redown_live_lab/__init__.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/cli.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/location_audit.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/native_host.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/owner_campaign.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/resources.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/runner.py",
+    "11.25.2026/live-python-lab/python/redown_live_lab/transport.py",
+    "11.25.2026/live-python-lab/python/tests/test_part2_transport.py",
+    "docs/evidence/reliability-ratchet/system-map.json",
+    "extension/manifest.json",
+    "package-lock.json",
+    "package.json",
+    "scripts/profile-python-lab.py",
+    "scripts/verify-python-lab.mjs",
+    "src/build-info.mjs",
+    "src/chrome/local-upload-service.mjs",
+    "src/chrome/python-lab/session.mjs",
+    "src/chrome/python-lab/spool.mjs",
+    "src/chrome/transfer-outcome.mjs",
+    "src/cloudflare/file-transport.mjs",
+    "src/cloudflare/transport.mjs",
+    "src/explorer/file-api.mjs",
+    "src/explorer/r2-adapter.mjs",
+    "src/persistence/current-store.mjs",
+    "tests/part2-p0-transport.test.mjs"
+  ]
+}

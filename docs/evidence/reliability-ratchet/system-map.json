@@ -1,5 +1,5 @@
 {
-  "productionSourceRevision": "11.25.2026/alpha-three-runs/01-reliability-foundation/HANDOFF.md",
+  "productionSourceRevision": "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/HANDOFF.md",
   "generatedFrom": [
     "src/api/service.mjs:toolRegistry",
     "src/glaciaring/reliability.mjs",
@@ -8,7 +8,7 @@
   "description": {
     "version": 1,
     "build": {
-      "extensionVersion": "0.3.32.4",
+      "extensionVersion": "0.3.32.5",
       "apiVersion": "3+1.1"
     },
     "permissionPolicy": {

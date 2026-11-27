@@ -396,13 +396,23 @@ try{
    executeFault=null;
    assert.equal(unavailable.productionConfirmedFiles,0);
    assert.equal(unavailable.statusCounts.UNCERTAIN,1);
-   const reconciled=await cli(['continue-campaign','--input',unavailableInput,'--run',unavailable.receiptBundle,
-    '--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1']);
+   await lab.ui('end');
+   const recovery=await bind('read-only',unavailable.target.scopeId,{
+    campaignId:unavailable.campaignId,ceilings:campaignDefaults,minutes:75});
+   await cli(['pair','--code',recovery.pairCode]);
+   await cli(['continue-campaign','--input',unavailableInput,'--run',unavailable.receiptBundle,
+    '--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1'],2);
+   const reconciled=await cli(['audit-location','--run',unavailable.receiptBundle,
+    '--audit-seconds','30','--live','--approve-cost-usd','1']);
    assert.equal(reconciled.productionConfirmedFiles,1);
+   assert.equal(reconciled.transferVerdict,'NOT_TESTED');
    assert.equal(reconciled.locationAudit.matchedCount,1);
    assert.equal(workerWrites,ownerCount+14);
-   receipt('Two lost status responses leave a durable fence until the same campaign is reconciled',
-    {initialUncertain:1,recovered:1,additionalPublicationWrites:0});
+   receipt('Two lost status responses leave a durable fence until read-only recovery in the same campaign',
+    {initialUncertain:1,recovered:1,writeContinuationRejected:true,additionalPublicationWrites:0});
+   await lab.ui('end');
+   const nextWrite=await bind('read-write',null,{ceilings:campaignDefaults,minutes:75});
+   await cli(['pair','--code',nextWrite.pairCode]);
    const countInput=join(temp,'frozen-count-input');
    await mkdir(countInput);await writeFile(join(countInput,'one.txt'),'one eligible file');
    const countArgs=['campaign','--input',countInput,'--expect-files','2','--execution-seconds','90',
