@@ -64,7 +64,7 @@ The Laboratory should be able to verify assignment, replacement, overlapping com
 
 I want ReDown to be useful enough that a person who rearranges their computer around it finds themselves using it naturally every day. I want them to feel free to change their mind without fighting the software.
 
-The one-time lifetime allowance of thirty remote saves and thirty right-click saves gives them an opportunity to experience the product. The proposed twelve-dollar annual subscription offers unlimited ReDown saving subject to provider limits. Counting and migration details still need to be settled; reliable and disclosed usage continuity must not complicate the ordinary gesture.
+The one-time lifetime trial gives customers thirty general saves plus ten each for right-click, Screenshot to Cloud, Shortcut + Click and manual uploads, shared by Google Drive, OneDrive and Dropbox. Cloudflare R2 has a separate identical allowance. Up to seventy successful files per group, one hundred forty in total, let customers experience every feature. Consume the matching feature bonus before general credits, one per verified file. The proposed twelve-dollar annual subscription offers unlimited ReDown saving subject to provider limits. Legacy migration and initial enrollment details still need to be settled; reliable and disclosed usage continuity must not complicate the ordinary gesture.
 
 My ambition is one billion paying customers. That is an aspiration, not a forecast. To pursue it, I want the most demanding engineering to result in the fewest unnecessary actions for the customer. A keyboard, a mouse, the cloud they already use, and the freedom to decide what happens next.
 
