@@ -25,7 +25,7 @@ Commercial V1: four providers (Cloudflare R2, Google Drive, OneDrive, Dropbox), 
 | 5 | Run 3A: Screenshot to Cloud | Multiple configurable screenshot routes and real installed-browser capture to all four providers using accepted Run 2 Shortcut API |
 | 6 | Run 3B: Shortcut + Click | Multiple editable two-/three-key destination bindings, cross-action conflict settings, correct target and verified saves on all four providers |
 | 7 | Run 3C: Media & Manifest | Existing feature annex, shared read/preview and canonical configuration contracts; MP4/WebM and MP3/WAV/M4A only |
-| 8 | Run 3D: commercial qualification | Lifetime policy/entitlement integration, security/store/privacy, onboarding, packaged component-failure and resource regression, one-year qualification plan |
+| 8 | Run 3D: commercial qualification | Lifetime policy/entitlement integration, persistent trial sticky (minimize, exhausted compact button, paid removal), security/store/privacy, onboarding, packaged component-failure and resource regression, one-year qualification plan |
 | 9 | Separate final Onyx surface overhaul if authorized | Exact accepted Run 3 ancestor, regression, no engine rewrite |
 | 10 | V1 release | All required gates including screenshots/chord-click, external prerequisites and owner approval; no automatic deployment |
 
