@@ -16,8 +16,11 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Dropbox: verified saving and authentication.
 - [ ] Cloudflare R2: complete automatic error recovery.
 - [ ] Default redown folder with optional direct-to-drive mode; automatic same-account original-destination fallback on any redown resolution/creation failure, no popup/toast/confirmation or separate warning, actual destination recorded in receipts, no duplicate writes. Test denied, timed-out, conflicting and uncertain folder creation across all three basic providers. No new arbitrary directory creation for basic-cloud shortcuts in V1.
+- [ ] First save starts at authorized original location while redown lookup/creation is still pending; only new jobs switch to verified redown, no notification or movement of earlier saves.
+- [ ] Basic-cloud local-folder upload is flat: recursive local discovery, no nested cloud creation, safe automatic filename suffixes, no overwrites, stable per-child mapping and fixed batch destination after possible publication. R2 hierarchy and existing remote download hierarchy preserved. Test name races, same basename/different bytes, same bytes/different files and partial failure; independently verify mapped copies.
 ### Screenshot and chord-click reliability (mandatory V1)
-- [ ] Actual Screenshot to Cloud verified on all four providers.
+- [ ] Actual Screenshot to Cloud verified on all four providers, multiple editable screenshot routes and shared Shortcut API with held-click/Explorer/shelf actions.
+- [ ] Show existing assignment; Override or change its keys; one Save updates both settings; Cancel preserves both. No ambiguous dispatch, failed edit preserves working settings, release all and explicit defaults restoration.
 - [ ] Actual held two-/three-key chord + click verified on all four providers.
 - [ ] Multiple independently editable chord bindings; redown, legacy/root, custom folder, account default and R2 bucket/prefix modes as applicable.
 - [ ] Exact destination, no duplicate or overlapping chord dispatch, ordinary clicks unaffected, no hardcoded immutable binding, no unnecessary prompts.
@@ -29,7 +32,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Recover from network interruptions.
 - [ ] Prevent duplicate publications and unsafe overwrites.
 - [ ] Verify every successful save.
-- [ ] Continue processing after individual failures.
+- [ ] Continue processing after individual failures; ready accounts do not wait on unrelated initialization, capture, UI, thumbnails, media, manifest or metadata sync. Test each fault independently. Source unavailable: actionable Retry/Recapture without false success. Media loading may wait for transfer resources; bounded buffers and prompt cleanup.
 - [ ] Support low local disk space.
 ### Authentication
 - [ ] Simple initial login.
@@ -39,7 +42,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Preserve settings and destinations after reconnection.
 ### Commercial infrastructure
 - [ ] One-time lifetime 30/30 independent free allowances, no day/month/year reset; disclosed cloud-backed persistence across supported providers, no false promise of unrelated-account identity enforcement.
-- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations. Implement actual versioned JSON replicas using native application storage or disclosed authorized existing-folder/original-location fallback; no dependence on redown creation. Verify tamper/rollback/deletion/conflict and replica outage recovery; no new free entitlement from missing records, no blocking a valid accounted save merely because replica sync is pending.
+- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations. Implement actual versioned JSON replicas using native application storage or disclosed authorized existing-folder/original-location fallback; no dependence on redown creation. Verify tamper/rollback/deletion/conflict and replica outage recovery; no new free entitlement from missing records, no blocking a valid accounted save merely because replica sync is pending. Read known authorized locations on connect/reinstall; no whole-cloud scan, opaque disclosed record ID, no size-based counters or scattered markers. Resolve policy and authority limits before public release.
 - [ ] Reliable $12/year license activation.
 - [ ] Restore paid licenses after reinstalling.
 - [ ] Prevent duplicate usage deductions.
