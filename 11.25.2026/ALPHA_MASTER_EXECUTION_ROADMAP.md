@@ -20,10 +20,10 @@ Commercial V1: four providers (Cloudflare R2, Google Drive, OneDrive, Dropbox), 
 |---|---|---|
 | 1 | Run 2A: targeted predecessor reliability repair | Resolve resource/transport uncertainty, journal and receipt defects; owner fault 100/555 and post-repair live R2 gates; preserve other inherited gates |
 | 2 | Run 2B: universal identity/auth/capabilities and migration | Stable account, independent initialization, supported operations, backward-compatible settings |
-| 3 | Run 2C: destination/operation/fault isolation foundation | Canonical destination, shared Shortcut API and binding contracts, nonblocking redown/opt-out, flat mapping, shared admission, source lifetime, conflict, usage and completion events; isolate component/account/provider failure |
+| 3 | Run 2C: destination/operation/fault isolation foundation | Canonical destination, shared agent-native Shortcut API, binding contracts, scoped callable interfaces and deterministic seeded test/replay suite, nonblocking redown/opt-out, flat mapping, shared admission, source lifetime, conflict, usage and completion events; isolate component/account/provider failure |
 | 4 | Run 2D: four-provider adapters, internal Lab and usage continuity | Shared bidirectional transfers and independent verification, required disclosed metadata, owner acceptance; no duplicate transfer engines |
 | 5 | Run 3A: Screenshot to Cloud | Multiple configurable screenshot routes and real installed-browser capture to all four providers using accepted Run 2 Shortcut API |
-| 6 | Run 3B: Shortcut + Click | Multiple editable two-/three-key destination bindings, cross-action conflict settings, correct target and verified saves on all four providers |
+| 6 | Run 3B: Shortcut + Click | Multiple editable two-/three-key destination bindings, cross-action conflict settings, agent-run combinatorial and packaged browser regression before handoff, correct target and verified saves on all four providers |
 | 7 | Run 3C: Media & Manifest | Existing feature annex, shared read/preview and canonical configuration contracts; MP4/WebM and MP3/WAV/M4A only |
 | 8 | Run 3D: commercial qualification | Monthly policy/entitlement integration, persistent allowance sticky (minimize, exhausted compact button, next refill date, monthly renewal, paid removal), security/store/privacy, onboarding, packaged component-failure and resource regression, one-year qualification plan |
 | 9 | Separate final Onyx surface overhaul if authorized | Exact accepted Run 3 ancestor, regression, no engine rewrite |
