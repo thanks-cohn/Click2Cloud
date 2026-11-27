@@ -206,9 +206,9 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // while scrolling owns the visual surface.
   if(scrollMotion){
    const m=scrollMotion,p=clamp((now-m.start)/m.duration);
-   paintScroll(m.from+(m.to-m.from)*smooth(p));
+   paintScroll(m.from+(m.to-m.from)*smooth(p),m.height);
    if(p<1){paintLayout(true,m.envelope);schedule();}
-   else{scrollMotion=undefined;paintScroll(m.to);paintLayout();resumeIdleAfterScroll();}
+   else{scrollMotion=undefined;paintScroll(m.to,m.height);paintLayout();resumeIdleAfterScroll();}
    return;
   }
   if(!overlay||scrollEngaged)return;
@@ -315,10 +315,10 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  });themeObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic','data-theme','data-onyx-finish','data-nostalgia-style','style']});
  // Scroll follows actual travel, not a binary threshold. The idle scene
  // freezes in place instead of being removed/recreated during the handoff.
- function paintScroll(offset){
+ function paintScroll(offset,height=header.offsetHeight){
   scrollOffset=offset;
   setVar(header,'--onyx-header-scroll',offset.toFixed(3)+'px');
-  header.toggleAttribute('data-onyx-scroll-hidden',offset>=header.offsetHeight-.1&&offset>0);
+  header.toggleAttribute('data-onyx-scroll-hidden',offset>=height-.1&&offset>0);
  }
  function pauseIdleForScroll(){
   cancelTimer();
@@ -342,8 +342,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   }
   // Small scroll inputs cause small movements; repeated inputs retarget
   // from the currently painted position rather than replaying a full glide.
-  const envelope=Math.max(header.offsetHeight,peakLift,idleLift,reserved);
-  scrollMotion={from:scrollOffset,to:target,start:time.now(),duration:Math.min(680,Math.max(110,680*distance/Math.max(1,header.offsetHeight))),envelope};
+  const height=header.offsetHeight,envelope=Math.max(height,peakLift,idleLift,reserved);
+  scrollMotion={from:scrollOffset,to:target,start:time.now(),duration:Math.min(680,Math.max(110,680*distance/Math.max(1,height))),envelope,height};
   paintLayout(true,envelope);schedule();
  }
  function clearScroll(){
