@@ -72,9 +72,9 @@ Use isolated fixtures and seeded combinations, reusable fast/extended/replay com
 
 ## 7. Simple cloud continuity record
 
-**Authoritative allowance record:** follow `11.25.2026/RDATA_CONTINUITY_SPECIFICATION.md` for `rdata.txt`, inside/outside replicas on all eligible clouds plus Google Drive appDataFolder, fixed symbolic ten-pool state, creator's exact shortening acknowledgment and immutable final line, original enrollment-anniversary renewal, approved complete-reinstall/all-absent policy, validation and recovery. No mandatory new backend for ordinary reinstall deterrence; acknowledge its limits. This supersedes previous JSON filenames, either/or placement, calendar-month renewal and pending first-enrollment policy.
+**Authoritative allowance record:** follow `11.25.2026/RDATA_CONTINUITY_SPECIFICATION.md` for `rdata.txt`, inside/outside replicas on all eligible clouds plus Google Drive appDataFolder, fixed symbolic ten-pool state, versioned generic 203-word shortening acknowledgment (replaceable by owner later) and immutable final line, original enrollment-anniversary renewal, approved complete-reinstall/all-absent policy, validation and recovery. No mandatory new backend for ordinary reinstall deterrence; acknowledge its limits. This supersedes previous JSON filenames, either/or placement, calendar-month renewal, pending first-enrollment policy and destination opt-out preventing folder preparation. Prefer valid local state; recover newest valid compatible replica when local accounting fails, and use lowest remaining per pool for genuinely conflicting comparable current-period records. Internal metadata operations never affect consumer counts or feedback.
 
-The owner wants a friendly header, manifest-like real application state, about 200 words of their exact personal gratitude and wishes that shorten as confirmed free saves are used, and the unchanging last line `Thank you for enjoying ReDown.`. The exact complete owner message is still needed before release; no invented personal acknowledgments. The decorative projection renews at the original enrollment anniversary and cannot authorize additional saves.
+The owner wants a friendly header, manifest-like real application state, about 200 words of gratitude and wishes that shorten as confirmed free saves are used, and the unchanging last line `Thank you for enjoying ReDown.`. Use the authorized generic 203-word starter in `11.25.2026/RDATA_ACKNOWLEDGMENT_TEMPLATE_V1.txt`, template ID rdata-ack-v1, until the owner supplies replacement text under a new permanent ID. Final personal wording is not an implementation gate. The decorative projection renews at the original enrollment anniversary and cannot authorize additional saves.
 
 ## 8. Implementation boundary
 
@@ -83,3 +83,5 @@ Do not turn simplicity into a large speculative framework. Reuse existing functi
 The customer sees direct, easy controls. Codex sees callable, observable and verifiable behavior behind those controls.
 
 **Do not multiply the interfaces. Multiply the supported destinations and actions behind familiar interfaces.**
+
+Standard redown infrastructure is automatically prepared independently of Account default versus ReDown folder routing. Internal maintenance never consumes customer allowance or triggers consumer save feedback.
