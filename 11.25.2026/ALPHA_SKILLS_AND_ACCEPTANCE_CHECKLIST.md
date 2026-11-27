@@ -111,17 +111,8 @@ Targets are proposed, not proven results or unconditional live execution instruc
 ## Deliberately postpone from V1
 Generic S3, automatic download rerouting, advanced explorer functionality, extra animations, cloud-to-cloud transfers, mobile applications, desktop expansion, aggressive concurrency optimization. Four-provider screenshots and configurable chord-click are mandatory V1, not deferred features. Retain existing development work except the explicitly owner-approved cloud-file Cut removal and seven default releases; preserve other underlying functionality.
 
-## Original proposed Codex execution list (historical planning reference)
-1. Automatic recovery, receipts and interruption handling.
-2. Cloud usage continuity and save destination selection.
-3. Right-click reliability and authentication audit.
-4. Multi-provider Laboratory integration.
-5. Live acceptance testing across all four providers.
-6. Commercial licensing and public alpha packaging.
-7. Final regression and release audit.
-
-The authoritative master roadmap supersedes this historical list, defines current Run 2 and unified Run 3, and preserves Onyx as separate final work. Start from the approved 0.3.32.4 candidate or explicitly approved descendant; no historical downgrade. Each session should have a focused specification, reproducible scripts, durable receipts and a bounded execution window. The objective is dependable service for the first 1,000 paying customers, as a foundation for broader adoption; no adoption or release guarantees.
-
+## Execution order
+Follow the current master roadmap and Part 2 execution index on the authorized continuation branch; no separate checklist execution sequence. Preserve Onyx as separate final work only if expressly authorized. The objective is dependable service, not an adoption or uptime guarantee.
 
 - [ ] Chrome-first shortcut qualification per SHORTCUTS_TAB_SPECIFICATION.md: official docs, four suggested defaults, useful proven additional manual commands only (16 optional isolated probe), actual getAll/command delivery, supported scoped held-click/local handlers, protected/reserved input, actual registration and capture permission/rate/tab identity, scope/layout/restart/update/conflicts; separate synthetic and actual browser evidence. No unsupported API or scope/permission bypass; no fixed slot-count gate.
 
