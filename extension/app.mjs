@@ -1957,6 +1957,9 @@ headerMenu.addEventListener('click',()=>closeHeaderMore());
 headerMenu.addEventListener('keydown',e=>{if(e.defaultPrevented||e.isComposing)return;const items=headerItems();if(e.key==='Escape'){e.preventDefault();closeHeaderMore(true);}else if(items.length&&['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();let i=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(i+(e.key==='ArrowDown'?1:items.length-1))%items.length]?.focus();}else if(e.key==='Tab')closeHeaderMore(true);});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
 document.addEventListener('focusin',e=>{if(!e.target.closest('.header-more'))closeHeaderMore();});
+$('#main').addEventListener('scroll',()=>{
+ if(view!=='explorer'&&document.documentElement.dataset.aesthetic==='onyx'&&$('#main').scrollTop>0)closeHeaderMore();
+},{passive:true});
 const navigationPlacement=installNavigation({header:document.querySelector('header nav'),menu:headerMenu,more:headerMore,open:next=>show(next).catch(e=>status(e.message))});
 void aestheticReady.then(()=>{navigationPlacement.fit();if(view==='remotes')renderRemotes();})
  .catch(()=>{}).finally(()=>{document.dispatchEvent(new Event('redown-aesthetic-ready'));hyperspace.start();});

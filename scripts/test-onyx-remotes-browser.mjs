@@ -338,14 +338,17 @@ try{
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
    const scrollAnchors=[];
    const spacer=document.createElement('div');spacer.style.height='1500px';main.append(spacer);
-   const readAnchors=()=>({r:brand.getBoundingClientRect().top,moon:theme.getBoundingClientRect().top,nav:header.querySelector('nav').getBoundingClientRect().top});
+   const readAnchors=()=>({r:brand.getBoundingClientRect().top,moon:theme.getBoundingClientRect().top,nav:header.querySelector('nav').getBoundingClientRect().top,more:header.querySelector('#header-more').getBoundingClientRect().top,header:header.getBoundingClientRect().top});
    const scrollTo=y=>{main.scrollTop=y;main.dispatchEvent(new Event('scroll'));};
    for(const view of ['remotes','queue','history','settings','screenshot','downloads'])for(const mode of ['none','elegant','hyperspace']){
     controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
     if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
     const top=readAnchors();scrollTo(100);const down=readAnchors();const actual=main.scrollTop;
+    // Moving into the old header area while scrolled cannot expose an orphaned menu.
+    move(190,20);advance(1000);
+    const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
     scrollTo(0);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored});
+    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen});
     controller.viewChanged();
    }
    choose('none');shell.dataset.view='remotes';scrollTo(0);
@@ -359,12 +362,13 @@ try{
    return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored} of hyperspace.scrollAnchors){
+  for(const {view,mode,top,down,actual,restored,offscreen} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;
    assert.equal(actual,100,label+' scroll fixture');
    assert(Math.abs(top.r-down.r-actual)<.1&&Math.abs(top.moon-down.moon-actual)<.1,label+' icons must scroll away');
-   assert(Math.abs(top.nav-down.nav)<.1,label+' navigation remains unchanged');
-   assert.deepEqual(restored,top,label+' icons return at page top');
+   assert(Math.abs(top.nav-down.nav-actual)<.1&&Math.abs(top.more-down.more-actual)<.1&&Math.abs(top.header-down.header-actual)<.1,label+' navigation and header scroll away with the icons');
+   assert(offscreen,label+' hovering the old header position must not expose a detached menu');
+   assert.deepEqual(restored,top,label+' header returns at page top');
   }
   assert.deepEqual(hyperspace.explorerWithoutSync,hyperspace.explorerReference,'File Explorer excludes shared header offset even before observer delivery');
   assert.deepEqual(hyperspace.explorerAfterSync,hyperspace.explorerReference,'File Explorer header stays unchanged');

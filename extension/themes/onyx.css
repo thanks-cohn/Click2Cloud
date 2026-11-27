@@ -83,10 +83,13 @@
  :root[data-aesthetic=onyx] .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] .app-header nav>button{font-size:12px;padding-inline:4px}
 }
-/* Shared Onyx Shelf header, excluding File Explorer: R and appearance
-   belong to the page's top. Preserve navigation and page geometry. */
-:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header :is(.brand-lockup,#theme){
- translate:0 calc(0px - var(--onyx-header-scroll,0px))!important;
+/* Move the actual header as one unit with page scroll. A returning
+   navigation animation cannot strand tabs or More without R and theme. */
+:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header{
+ translate:0 calc(0px - var(--onyx-header-scroll,0px));
+}
+:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header #theme{
+ translate:none!important;
 }
 :root[data-aesthetic=onyx] #shell[data-view=remotes]{
  & > main{background:var(--bg)}

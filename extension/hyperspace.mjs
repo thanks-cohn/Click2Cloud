@@ -304,8 +304,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const scrollSkinObserver=new win.MutationObserver(syncHeaderScroll);
  scrollSkinObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic']});
  on(header,'focusin',e=>{
-  if(usesSharedHeader()&&main?.scrollTop>0&&
-     (brand?.contains(e.target)||theme?.contains(e.target))&&e.target.matches(':focus-visible')){
+  // Keyboard access to any header control restores the page-top anchor.
+  if(usesSharedHeader()&&main?.scrollTop>0&&e.target.matches(':focus-visible')){
    main.scrollTop=0;syncHeaderScroll();
   }
  });
