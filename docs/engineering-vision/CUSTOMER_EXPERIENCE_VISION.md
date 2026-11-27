@@ -197,7 +197,7 @@ The original target and logical identity remain intact. Reconcile unknown public
 
 ## Day 14 — ReDown becomes an ordinary utility
 
-The customer has grown accustomed to saving directly to their cloud. They can choose Silent or Normal transfer feedback in Settings. Silent suppresses routine unsolicited feedback, not the actual transfer, recovery, verification or persistent results. Normal provides concise progress and truthful outcomes without narrating every internal step. Essential instructions remain visible in either mode when genuinely needed.
+The customer has grown accustomed to saving directly to their cloud. Normal feedback starts with optional notifications enabled for a new install; they can choose Silent at any time in Settings. Preserve existing explicit preferences. Silent suppresses routine unsolicited feedback, not the actual transfer, recovery, verification or persistent results. Normal provides concise progress and truthful outcomes without narrating every internal step. Necessary inline instructions and durable actionable state remain in either mode when genuinely needed; optional unsolicited notifications, including failure notices, are off in Silent. No forced Shelf opening.
 
 Queue, History and receipts remain accessible as applicable. The customer can inspect progress or retry a failed job whenever they choose. They can change a destination, switch menu presentation, save by screenshot or a configured shortcut where the active release supports it, or keep their original configuration. These actions do not require them to understand internal machinery.
 
