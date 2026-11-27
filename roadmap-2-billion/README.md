@@ -78,7 +78,7 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 | Feature | What we have | What we need to work on |
 |---|---|---|
 | Annual pricing | 🟢 $12/year concept | Validate willingness to pay |
-| Free tier | 🟢 Owner target: 30 remote saves + 30 right-click saves | Confirm reset period, category/folder accounting, migration and paid conversion; no silent policy change |
+| Free tier | 🟢 Owner-approved one-time lifetime allowance: 30 remote saves + 30 right-click saves | Confirm category/folder accounting, migration and paid conversion; no recurring replenishment |
 | Required cloud-backed usage metadata | 🟡 Design requirement | All four providers; disclosed, minimal app metadata and local cache, reinstall reconciliation, explicit identity/authority limits |
 | Unlimited premium saves | 🟢 Product concept | Dependable licensing and entitlements |
 | Payment processing | 🔴 Not established | Secure purchasing and renewal |
@@ -88,7 +88,7 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 | International pricing | 🔴 Not established | Affordable regional pricing and payment methods |
 | Referral system | 🔴 Not established | Optional privacy-respecting referral incentives |
 
-The 30/30 target supersedes the earlier seven-per-day proposal. Reset frequency and category mapping remain owner decisions; proposed non-overlapping counters avoid charging twice. App metadata deters casual reinstall abuse, but user-controlled metadata cannot prove one allowance per human across unrelated accounts. Disclose storage and respect deletion/disconnect; a privacy-respecting authoritative entitlement ledger may be required. Do not make free use artificially unreliable.
+The one-time lifetime 30/30 allowance supersedes the earlier seven-per-day proposal. There is no daily, monthly or annual reset. Reinstalls, known-identity provider switches and subscription lapse do not replenish it. Category mapping and existing-user migration remain owner decisions; proposed non-overlapping counters avoid charging twice. App metadata deters casual reinstall abuse, but user-controlled metadata cannot prove one allowance per human across unrelated accounts. Disclose storage and respect deletion/disconnect; a privacy-respecting authoritative entitlement ledger may be required. Do not make free use artificially unreliable.
 
 ## 5. Development order
 
