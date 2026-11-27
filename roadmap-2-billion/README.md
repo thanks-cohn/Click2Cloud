@@ -26,7 +26,7 @@ This is a planning snapshot based on reported development progress and test resu
 | Dropbox | 🟡 Existing integration | Full live reliability testing |
 | Right-click remote saving | 🟡 Implemented | Reliable availability after login and browser restart |
 | Screenshot to Cloud | 🟡 Existing R2 reference functionality | Mandatory V1: actual capture and verified saves to R2, Google Drive, OneDrive and Dropbox via shared engine |
-| Shortcut + Click to Cloud | 🟡 Existing R2 reference foundation | Mandatory V1: intuitive, reliable saving to all four providers via shared engine |
+| Shortcut + Click to Cloud | 🟡 Existing R2 reference foundation | Mandatory V1: hold a configurable two- or three-key chord and deliberately click an eligible item to save to any of the four providers; release to restore normal browsing. Validate shared gesture and save contracts, conflicts and browser permissions. |
 | Folder uploads | 🟡 Implemented and fixture-tested | Large live workloads across providers |
 | File downloads | 🟡 Implemented | Independent SHA-256 verification |
 | Folder downloads | 🟡 Existing implementation | Large live retrieval tests |
@@ -45,6 +45,7 @@ This is a planning snapshot based on reported development progress and test resu
 | Low-memory operation | 🟡 Successful sustained 4 GB machine test | Resolve earlier MemoryError |
 | Low-disk operation | 🟡 Successful constrained upload test | Graceful recovery from insufficient space |
 | Network interruption recovery | 🟡 Partially demonstrated | Repair unresolved transport failures |
+| Provider fault isolation | 🟡 Design requirement; not yet qualified | Isolate account/provider outages and retries so healthy providers continue serving their own authorized jobs; preserve frozen destinations, reconcile uncertainty and never silently redirect files. Test shared-core failures separately. |
 | Browser restart recovery | 🟡 Architecture exists | Verify interrupted transfers and subsequent retrieval |
 | Authentication recovery | 🟡 Existing functionality | Reliable expiration detection and reconnection |
 | Queue | 🟡 Implemented | Verify cancellation, progress and recovery |
@@ -93,9 +94,9 @@ The one-time lifetime 30/30 allowance supersedes the earlier seven-per-day propo
 ## 5. Development order
 
 1. **Reliability foundation:** Preserve the successful 578-file upload/readback baseline; complete retained-copy restart testing and repair outstanding faults.
-2. **Universal cloud compatibility:** Establish account/capability, destination, save/admission, completion and usage contracts before expanding dependable uploads, downloads and retrieval across R2, Google Drive, OneDrive and Dropbox.
+2. **Universal cloud compatibility:** Establish account/capability, destination, save/admission, completion, usage and provider fault-containment contracts before expanding dependable uploads, downloads and retrieval across R2, Google Drive, OneDrive and Dropbox. Verify each provider's failure does not stall otherwise healthy provider jobs.
 3. **Screenshot to Cloud:** Effortless capture across all four providers; reuse R2 behavior and the shared provider-neutral save contract. Mandatory V1 gate.
-4. **Shortcut + Click to Cloud:** Fast, intuitive signature interaction with verified completion across all four providers. Mandatory V1 gate.
+4. **Shortcut + Click to Cloud:** Hold two or three configured keys, click an eligible item, and save to the selected authorized cloud. Release to return to ordinary browsing. Reuse the R2 interaction as a reference, generalize via the provider-neutral engine, and verify actual gestures and completion across all four providers. Mandatory V1 gate.
 5. **Security, onboarding and commercialization:** Security audit, licensing, payments, privacy, accessibility and installation.
 6. **Public V1 release:** Staged rollout, real customer feedback and continuous reliability improvements.
 
