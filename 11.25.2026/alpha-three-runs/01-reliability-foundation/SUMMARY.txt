@@ -1,0 +1,22 @@
+ReDown Part 1 reliability foundation
+Candidate b18888cad769b6780c2ce8deade38ecb991b9b17
+Baseline 1bad4007678fd3f2dcb628a3681598850feeb36e
+GitHub branch codex/redown-11-26-2026-part-1-reliability-foundation
+
+PASS Candidate build, extension ID, OAuth redirect and Worker digest check.
+PASS 25 focused JavaScript regressions. Python 20 passed with 2 Windows-only skips.
+PASS Local Workerd/native fixture, 555/555 upload publications and 555/555 retained downloads.
+     One upload 502, one lost upload acknowledgement, one read 502 and one torn local acknowledgement recovered.
+     Exact 555 R2 key matches, zero staging bytes, 555 reopened disk SHA-256 matches.
+PASS Chromium OPFS fixture, single, multi-file ZIP and recursive ZIP after Shelf closure.
+PASS Chromium folder driver, 1,000 child receipts and one root History record.
+PASS Scoped Lab preexisting selection, three retained files, zero writes.
+FAIL Full JS suite, 873/874. See evidence.json for exact failures.
+FAIL Historical release-browser heading check, reproduced at the exact baseline.
+BLOCKED Installed Linux Shelf test reports unpacked extension disabled by administrator.
+NOT_TESTED Installed Windows, native 1,000 saves, live R2 and remaining fault gates.
+BLOCKED Owner acceptance and ZIP64 or equivalent large-folder delivery.
+
+Handoff and commands HANDOFF.md
+Fixture summary /workspace/Click2Cloud/lab-local/verification/native-AIN7Co/fixture-summary.json
+Fixture transfer receipts /workspace/Click2Cloud/lab-local/verification/native-AIN7Co/lab-local/runs/owner-fixture/f33d1329-f0d3-4173-acbd-a18076972d85

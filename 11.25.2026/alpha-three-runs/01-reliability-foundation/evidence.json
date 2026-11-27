@@ -1,0 +1,231 @@
+{
+  "schema": "redown.part1-handoff-evidence/1",
+  "baseline": "1bad4007678fd3f2dcb628a3681598850feeb36e",
+  "candidate": "b18888cad769b6780c2ce8deade38ecb991b9b17",
+  "branch": "codex/redown-11-26-2026-part-1-reliability-foundation",
+  "specificationRevision": "e2eb4da67bb5700ed457eb91d2db582545da8a59",
+  "build": {
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.32.4",
+    "revision": "b18888cad769b6780c2ce8deade38ecb991b9b17",
+    "sourceDigest": "3bfef8b3059cc2ef5374c846f48cc58927b937c71e12da241fb78d5502e27064",
+    "apiVersion": "3+1.1",
+    "remoteProtocol": "click2cloud-remote-2"
+  },
+  "state": "BLOCKED",
+  "classification": "Implementation candidate. Owner Windows and live release gates remain open.",
+  "baselineRegression": {
+    "command": "npm test",
+    "state": "FAIL",
+    "tests": 870,
+    "pass": 869,
+    "fail": 1,
+    "knownFailure": "non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary"
+  },
+  "candidateRegression": {
+    "command": "npm test",
+    "state": "FAIL",
+    "tests": 874,
+    "pass": 873,
+    "fail": 1,
+    "failures": [
+      "non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary"
+    ],
+    "rawLog": "/tmp/redown-part1-sourcecandidate-js.log"
+  },
+  "focusedJavaScript": {
+    "state": "PASS",
+    "tests": 25,
+    "command": "node --test tests/release-0320.test.mjs tests/workings.test.mjs tests/part1-reliability.test.mjs"
+  },
+  "python": {
+    "state": "PASS",
+    "tests": 22,
+    "pass": 20,
+    "skipped": 2,
+    "platform": "Linux",
+    "rawLog": "/tmp/redown-part1-sourcecandidate-py.log"
+  },
+  "ordinaryDownload": {
+    "state": "PASS",
+    "evidenceClass": "chromium-worker-opfs-local-provider-fixture",
+    "chromium": "156.0.8078.79",
+    "shelfClosedBeforeDispatch": true,
+    "results": [
+      {
+        "name": "empty.txt",
+        "files": 1,
+        "attempts": 1,
+        "bytes": 0
+      },
+      {
+        "name": "a.txt",
+        "files": 1,
+        "attempts": 2,
+        "bytes": 1
+      },
+      {
+        "name": "files.zip",
+        "files": 2,
+        "attempts": 1,
+        "bytes": 280
+      },
+      {
+        "name": "root.zip",
+        "files": 3,
+        "attempts": 1,
+        "bytes": 2287
+      }
+    ]
+  },
+  "ordinaryFolderUpload": {
+    "state": "PASS",
+    "evidenceClass": "chromium-indexeddb-worker-local-provider-fixture",
+    "chromium": "156.0.8078.79",
+    "files": 1000,
+    "verified": 1000,
+    "receiptRows": 1000,
+    "shelfClosedBeforeDispatch": true,
+    "history": [
+      {
+        "name": "Chosen",
+        "total": 1000,
+        "status": "verified"
+      }
+    ],
+    "elapsedAfterCloseMs": 18288
+  },
+  "settingsFixture": {
+    "evidenceClass": "browser-rendered-settings-with-chrome-message-fixture",
+    "checks": [
+      "single card, off by default, no passive permission or provider discovery",
+      "explicit scoped approval and precise Windows pairing command",
+      "paired state, revocation, and no page errors at 365 px",
+      "bucket error and empty states, retry, reload guidance and JSON export without pairing",
+      "disk-backed spool, incremental SHA-256, and cleanup in a real Chromium service worker"
+    ],
+    "chromium": "156.0.8078.79",
+    "state": "PASS",
+    "evidence": "/workspace/Click2Cloud/lab-local/verification/settings-295a3299-b535-451a-a93d-590b0af3ed04/results.json"
+  },
+  "laboratory555": {
+    "state": "PASS",
+    "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+    "gitHeadAtStart": "1bad4007678fd3f2dcb628a3681598850feeb36e",
+    "sourceNote": "Ran on the implementation working tree tied to this fixture. The process started before the candidate commit.",
+    "remoteCloudflareWrites": 0,
+    "fixtureSummary": "/workspace/Click2Cloud/lab-local/verification/native-AIN7Co/fixture-summary.json",
+    "receiptBundle": "/workspace/Click2Cloud/lab-local/verification/native-AIN7Co/lab-local/runs/owner-fixture/f33d1329-f0d3-4173-acbd-a18076972d85",
+    "uploadBenchmark": {
+      "metric": "production-confirmed uploads",
+      "mode": "upload",
+      "windowSeconds": 2400,
+      "measuredMs": 129333,
+      "result": "PASS",
+      "cutoffReached": false,
+      "plannedFiles": 555,
+      "filesWithinWindow": 555,
+      "bytesWithinWindow": 22407018,
+      "independentSha256WithinWindow": 0,
+      "distinctCompletionsAfterWindow": 0,
+      "activeTransferMs": 126054,
+      "filesPerMinute": 257.4749,
+      "bytesPerSecond": 173250.5857,
+      "latencyMsP50": 214,
+      "latencyMsP95": 254
+    },
+    "transferUsage": {
+      "transfer": {
+        "files": 556,
+        "trafficBytes": 89628072,
+        "providerRequests": 6110,
+        "operations": 557
+      },
+      "audit": {
+        "trafficBytes": 149530,
+        "providerRequests": 5,
+        "operations": 5
+      },
+      "session": {
+        "files": 556,
+        "trafficBytes": 89777602,
+        "providerRequests": 6115,
+        "operations": 562
+      },
+      "modeledCostMicros": 56382
+    },
+    "locationAudit": {
+      "state": "PASS",
+      "completeScopedListing": true,
+      "matchedCount": 555,
+      "observedUniqueCount": 555,
+      "stagingBytes": 0,
+      "independentContentHashPerformedByAudit": false
+    },
+    "faultRecovery": {
+      "name": "Injected 502 and lost acknowledgement preserve each unique logical transfer",
+      "state": "PASS",
+      "files": 555,
+      "upload502": 1,
+      "postPublicationLostAck": 1,
+      "download502": 1,
+      "diskSha256Files": 555,
+      "lostLocalAcknowledgementsRecovered": 1,
+      "r2Puts": 555,
+      "workerWrites": 555,
+      "providerReads": 555,
+      "stagingBytes": 0,
+      "uploadReceipt": "/workspace/Click2Cloud/lab-local/verification/native-AIN7Co/lab-local/runs/owner-fixture/f33d1329-f0d3-4173-acbd-a18076972d85"
+    }
+  },
+  "laboratoryReadSelection": {
+    "state": "PASS",
+    "evidenceClass": "python-native-loopback-workerd-r2-fixture",
+    "fixtureSummary": "/workspace/Click2Cloud/lab-local/verification/native-8aarWR/fixture-summary.json",
+    "check": {
+      "name": "A separate read-only selection freezes existing remote keys and verifies reopened local files",
+      "state": "PASS",
+      "matched": 3,
+      "independentSourceHash": false,
+      "reopenedDiskHashes": 3,
+      "additionalPublicationWrites": 0
+    }
+  },
+  "installedLinuxShelf": {
+    "state": "BLOCKED",
+    "code": "UNPACKED_EXTENSION_DISABLED_BY_ADMINISTRATOR",
+    "evidence": "/tmp/redown-part1-final-shelf/real-shelf-receipt.json"
+  },
+  "historicalBrowserSuite": {
+    "state": "FAIL",
+    "command": "npm run test:release-browser",
+    "reproducedOnBaseline": true,
+    "code": "REMOTES_HEADING_LOCATOR_TIMEOUT"
+  },
+  "remainingGates": [
+    {
+      "gate": "Installed Windows Chrome and native menu lifecycle",
+      "state": "NOT_TESTED"
+    },
+    {
+      "gate": "Live R2 with authorized 100, 555 and 1000 file workloads and actual picker paths",
+      "state": "NOT_TESTED"
+    },
+    {
+      "gate": "Actual native 1000 right-click saves",
+      "state": "NOT_TESTED"
+    },
+    {
+      "gate": "ZIP64 or authorized large-folder delivery",
+      "state": "BLOCKED"
+    },
+    {
+      "gate": "Full restart, revocation, low disk, and provider retry fault matrix",
+      "state": "NOT_TESTED"
+    },
+    {
+      "gate": "Owner acceptance before Part 2",
+      "state": "BLOCKED"
+    }
+  ]
+}
