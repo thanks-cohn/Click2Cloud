@@ -18,8 +18,8 @@ Investigate actual original REDOWN and current Click2Cloud Worker/readiness/menu
 | Checkpoint | Output | Gate |
 |---|---|---|
 | 2B.1 | Source study, independent first-use Worker/menu readiness | Focused regression, packaged tests/build and owner acceptance of relevant actual first-use evidence |
-| 2B.2 | Bounded per-operation and campaign retry, source retention, recoverable outcomes, Workerd startup/resource diagnostics | Explicit fault/retry/recovery cases and shared consumer/Lab behavior |
-| 2B.3 | Valid filename compatibility and failed-child-only consumer batch recovery | 43-file benign analogue, exact path, no duplicate successful children |
+| 2B.2 | Bounded automatic retry and repeatable deliberate Retry semantics, durable Queue state, source retention, Workerd startup/resource diagnostics | Explicit retry/reconciliation/restart cases and shared consumer/Lab behavior; no lifetime retry cutoff |
+| 2B.3 | Valid filename compatibility, actual Queue Retry and Retry All Failed controls, failed-child-only consumer batch recovery | 43-file benign analogue, repeatable retries, durable Queue after restart, exact path, no duplicate successful children or charges |
 | 2B.4 | Integrated reference Windows and authorized R2 qualification | Predeclared repetitions, exact reopened SHA-256, current live 100 round trip, inherited gates; historical missing-artifact decision separately |
 | 2C | Account/auth/capabilities/migration and default resolver | Shared real identity and target/fallback behavior |
 | 2D | Shared save/retrieval, functional durable local accounting, isolation, Shortcut API, media/manifest foundation | Real local reservations/settlement and tested production contracts before additional providers |
