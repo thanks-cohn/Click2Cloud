@@ -46,3 +46,6 @@ These are logical checkpoints, not a fixed number of sessions. Maximum 45 minute
 The 0.3.32.4 candidate confirmed 578/578 live R2 uploads and retrieved 578/578 with independent SHA-256 matches (336,467,559 bytes each direction; 46m29s upload, 15m04s readback). Workload overall FAIL (555 expected, 578 actual); location audit FAIL despite matching keys; retained-copy restart verification pending. Prior MemoryError and TRANSPORT_UNAVAILABLE fault cases remain open. Preserve historical receipts and distinguish real live evidence, deterministic fixtures, installed-browser behavior and release readiness. No acceptance or version claim merely from a specification change.
 
 V2: generic S3, automatic download rerouting, independent native execution and expanded concurrency; no scope creep in V1.
+
+
+**Chrome-first boundary:** `SHORTCUTS_TAB_SPECIFICATION.md` contains the mandatory documented-capability and installed-browser evidence gate. Run 2C produces verified shortcut capability matrix and bounded disposable capacity probes (16 additional commands optional experiment only). Runs 3A/3B adopt useful proven declarations and actual scoped input behavior, not speculative slots, dynamic registration or unsupported browser-wide coverage. Preserve supported required routes, permissions and existing defaults.
