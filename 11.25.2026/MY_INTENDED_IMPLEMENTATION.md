@@ -85,3 +85,6 @@ The customer sees direct, easy controls. Codex sees callable, observable and ver
 **Do not multiply the interfaces. Multiply the supported destinations and actions behind familiar interfaces.**
 
 Standard redown infrastructure is automatically prepared independently of Account default versus ReDown folder routing. Internal maintenance never consumes customer allowance or triggers consumer save feedback.
+
+
+**Owner direction — build around Chrome:** Follow the documented Chrome capability and tested-proof contract in `SHORTCUTS_TAB_SPECIFICATION.md`. Keep the four working suggested defaults; test useful additional unassigned declarations in disposable profiles, never mandate 16 or arbitrary capacity. Use native Chrome-managed manual assignments, authorized page-held chords and focused local handlers through one registry. Do not offer unsupported combinations as available or fake registration/capture proof. Preserve existing permissions and actual browser behavior.
