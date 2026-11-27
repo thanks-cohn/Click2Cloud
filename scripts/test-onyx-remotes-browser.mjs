@@ -343,12 +343,15 @@ try{
    for(const view of ['remotes','queue','history','settings','screenshot','downloads'])for(const mode of ['none','elegant','hyperspace']){
     controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
     if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
-    const top=readAnchors();scrollTo(100);const down=readAnchors();const actual=main.scrollTop;
+    const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom;
+    scrollTo(100);const down=readAnchors();const actual=main.scrollTop;
+    const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
+    const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
     // Moving into the old header area while scrolled cannot expose an orphaned menu.
     move(190,20);advance(1000);
     const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
     scrollTo(0);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen});
+    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable});
     controller.viewChanged();
    }
    choose('none');shell.dataset.view='remotes';scrollTo(0);
@@ -356,18 +359,20 @@ try{
    shell.dataset.view='explorer';
    const explorerWithoutSync=readAnchors();main.dispatchEvent(new Event('scroll'));
    const explorerAfterSync=readAnchors();
-   const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll');
+   const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--onyx-header-reclaim');
    spacer.remove();scrollTo(0);
    controller.dispose();shell.dataset.view='remotes';
    return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored,offscreen} of hyperspace.scrollAnchors){
+  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;
    assert.equal(actual,100,label+' scroll fixture');
    assert(Math.abs(top.r-down.r-actual)<.1&&Math.abs(top.moon-down.moon-actual)<.1,label+' icons must scroll away');
    assert(Math.abs(top.nav-down.nav-actual)<.1&&Math.abs(top.more-down.more-actual)<.1&&Math.abs(top.header-down.header-actual)<.1,label+' navigation and header scroll away with the icons');
    assert(offscreen,label+' hovering the old header position must not expose a detached menu');
+   assert(noHeaderStrip,label+' scroll immediately reclaims the entire former header strip');
+   assert(footerStable,label+' scroll reclaim preserves the footer anchor');
    assert.deepEqual(restored,top,label+' header returns at page top');
   }
   assert.deepEqual(hyperspace.explorerWithoutSync,hyperspace.explorerReference,'File Explorer excludes shared header offset even before observer delivery');

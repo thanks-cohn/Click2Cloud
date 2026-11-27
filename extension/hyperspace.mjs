@@ -130,7 +130,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(liftActive===active)return;liftActive=active;
   shell.toggleAttribute('data-hyperspace-lifting',active);
   if(active){originalTranslate=main?.style.getPropertyValue('translate')??'';originalTranslatePriority=main?.style.getPropertyPriority('translate')??'';}
-  else if(main){if(originalTranslate)main.style.setProperty('translate',originalTranslate,originalTranslatePriority);else main.style.removeProperty('translate');}
+  else if(main){main.style.removeProperty('--onyx-animation-translate');if(originalTranslate)main.style.setProperty('translate',originalTranslate,originalTranslatePriority);else main.style.removeProperty('translate');}
  }
  function movePage(frame){
   const lift=Math.min(peakLift,baseLift*frame.lift);
@@ -138,7 +138,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   // scrolling surface using only a transform. The footer remains stationary.
   // At rest commit the exact final layout and discard the compositor hint.
   if(frame.done&&frame.phase==='open'){reserve(baseLift);layer(false);}
-  else if(lift>0||reserved>0){layer(true);reserve(peakLift);setVar(main,'translate','0 '+(reserved-lift).toFixed(3)+'px');}
+  else if(lift>0||reserved>0){layer(true);reserve(peakLift);const offset=(reserved-lift).toFixed(3)+'px';setVar(main,'translate','0 '+offset);setVar(main,'--onyx-animation-translate',offset);}
   else if(frame.tension>0){layer(true);}
   setVar(overlay,'--hyper-lift',lift.toFixed(3)+'px');
   if(parts.titleLift)setVar(main,'--hyper-title-up',(parts.titleLift*clamp(frame.lift)).toFixed(3)+'px');
@@ -294,9 +294,14 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // File Explorer; the animation preference does not affect the scroll anchor.
  const usesSharedHeader=()=>shell.dataset.view!=='explorer'&&doc.documentElement.dataset.aesthetic==='onyx';
  const syncHeaderScroll=()=>{
-  if(usesSharedHeader())
-   setVar(header,'--onyx-header-scroll',Math.max(0,main?.scrollTop??0)+'px');
-  else header.style.removeProperty('--onyx-header-scroll');
+  if(usesSharedHeader()){
+   const scroll=Math.max(0,main?.scrollTop??0);
+   setVar(header,'--onyx-header-scroll',scroll+'px');
+   setVar(shell,'--onyx-header-reclaim',Math.min(scroll,header.offsetHeight)+'px');
+  }else{
+   header.style.removeProperty('--onyx-header-scroll');
+   shell.style.removeProperty('--onyx-header-reclaim');
+  }
  };
  if(main)on(main,'scroll',syncHeaderScroll,{passive:true});
  const viewObserver=new win.MutationObserver(syncHeaderScroll);
@@ -312,5 +317,5 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  syncHeaderScroll();
  const unsub=preference.subscribe(reset);
  // Navigation is cancellation-only: it never starts a timer or animation.
- return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.style.removeProperty('--onyx-header-scroll');unsub();for(const fn of cleanups)fn();}};
+ return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.style.removeProperty('--onyx-header-scroll');shell.style.removeProperty('--onyx-header-reclaim');unsub();for(const fn of cleanups)fn();}};
 }
