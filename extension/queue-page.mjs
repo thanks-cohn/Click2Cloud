@@ -49,7 +49,7 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
         action==='reconcile-upload'?(data?.state==='verified'?'Uploaded file verified.':
           'Upload still unconfirmed. Check its destination before selecting the file again.') : '';
     }catch{
-      warning.textContent=action==='retry'?'Retry unavailable. Check the original source and account in Remotes.':
+      warning.textContent=action==='retry'?'Retry unavailable. Check the original source and account in Providers.':
         'Could not complete this Queue action. Check the job before trying again.';
     }finally{
       button.disabled=false;
@@ -127,7 +127,7 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
       const b=element('button',label);
       b.type='button';
       b.onclick=()=>void Promise.resolve().then(()=>click(b)).catch(()=>{
-        warning.textContent='This action is unavailable. Review the save in Remotes or History.';
+        warning.textContent='This action is unavailable. Review the save in Providers or History.';
       });
       parent.append(b);
       return b;
@@ -135,7 +135,7 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
     if(job.status==='uncertain'&&job.saveMode==='local-upload')button('Check receipt',b=>control(b,'reconcile-upload',job));
     else if(job.status==='uncertain'&&job.sourceApi==='r2'&&job.destination?.bucket)button('Check receipt',async()=>{
       const result=await inspectReceipt(job.sourceRecordId);
-      warning.textContent=result.reconciliation?.state==='verified'?'Saved file verified.':'Save still unconfirmed. Check Remotes before starting another save.';
+      warning.textContent=result.reconciliation?.state==='verified'?'Saved file verified.':'Save still unconfirmed. Check Providers before starting another save.';
       if(result.reconciliation?.state==='verified')await service.refresh({force:true});
     });
     if(job.kind==='screenshot'&&job.deliveryId&&job.status==='uncertain')button('Check receipt',async b=>{
@@ -145,7 +145,7 @@ export function mountLiveJobs(parent,{service,openRemotes,inspectReceipt,screens
         warning.textContent=result.state==='confirmed'?'Screenshot files verified.':'Some screenshot files remain unconfirmed.';
       }finally{b.disabled=false;}
     });
-    if(['needs-login','waiting'].includes(job.status))button('Remotes',openRemotes);
+    if(['needs-login','waiting'].includes(job.status))button('Providers',openRemotes);
     if(job.terminal&&['cancelled','failed'].includes(job.status)&&job.retryExpiresAt>Date.now()&&
         (job.retryable||job.kind==='screenshot'&&job.recoverable))
       button('Retry',b=>control(b,'retry',job));
