@@ -6,6 +6,149 @@ Owner direction • November 27, 2026
 
 This is the desired customer journey, not a claim that every capability has already passed acceptance. Read with the [Permanent Engineering Vision](PERMANENT_ENGINEERING_VISION.md), [original verification vision](README.md), [owner's intended implementation](../../11.25.2026/MY_INTENDED_IMPLEMENTATION.md) and active roadmap. It gives every engineer and agent a common behavioral target without requiring the owner to prescribe every internal decision. It does not authorize a new interface, change menu semantics or expand the active checkpoint.
 
+# ReDown — The customer experience we are engineering toward
+
+Imagine an ordinary customer who knows nothing about Cloudflare Workers, APIs, IndexedDB, service workers or software architecture.
+
+They simply want to save things to their cloud.
+
+## Day 1 — Installation
+
+The customer installs ReDown.
+
+They open it, connect their cloud account and choose a destination.
+
+They find an image they like, right-click it and save it.
+
+It works.
+
+They save another image. It works again.
+
+They close the Shelf. They continue saving.
+
+They never encounter a Worker initialization screen, never need to understand Simple versus Depth to make saving work, and never have to repair infrastructure themselves.
+
+**Their first impression is that ReDown is a natural extension of their browser.**
+
+## Day 2 — Ordinary use
+
+The customer uploads a folder containing hundreds of files.
+
+ReDown prepares the operation, preserves the necessary source material and begins uploading.
+
+Once the transfer has been durably accepted, where supported, the customer can close the Shelf.
+
+They continue browsing.
+
+ReDown handles temporary connection failures independently. Successful files are preserved. Unsuccessful files are retried without unnecessarily repeating completed work.
+
+The customer does not have to supervise the process.
+
+## Day 7 — Something goes wrong
+
+The customer's internet connection temporarily disappears.
+
+ReDown preserves the unfinished work.
+
+When connectivity returns, eligible operations recover automatically.
+
+If something genuinely cannot be recovered, the customer finds it in Queue.
+
+### Queue
+
+> **Photograph.png**
+>
+> Connection interrupted
+>
+> Retry
+>
+> Original source URLs
+
+They press Retry.
+
+It works.
+
+They don't need to understand why the connection failed, how recovery operates or what internal state had to be restored.
+
+## Day 14 — ReDown becomes invisible
+
+The customer has grown accustomed to saving directly to their cloud.
+
+They choose Silent feedback because they no longer want routine notifications.
+
+ReDown quietly continues doing its work.
+
+The customer trusts that their files are being verified. Queue and History remain available whenever they want to inspect the results.
+
+The software does not constantly demand their attention.
+
+**It has become a utility rather than an activity.**
+
+## Day 21 — Three weeks after installation
+
+- Right-click saving still works.
+- Their original destinations remain configured.
+- Their shortcuts still work.
+- Uploads remain dependable.
+- Failed operations remain recoverable.
+- Their settings remain intact.
+- No unnecessary infrastructure maintenance.
+
+The customer has not needed to understand ReDown's internal architecture at any point.
+
+They have simply used it.
+
+## One year later
+
+The customer returns after several months of inactivity.
+
+They reconnect if their provider genuinely requires authorization.
+
+Their saved configuration remains intact. ReDown inspects and recovers its existing infrastructure as necessary.
+
+The customer right-clicks an image.
+
+It saves.
+
+# What this vision means for our engineers
+
+Every architectural decision should be evaluated against this customer's experience.
+
+| Engineering principle | Customer experiences |
+| --- | --- |
+| Durable execution | My work doesn't disappear. |
+| Self-reconciliation | I don't have to repair anything. |
+| Provider abstraction | Saving feels consistent across clouds. |
+| Transactional integrity | My configuration remains intact. |
+| Automatic recovery | Temporary problems rarely concern me. |
+| Verified publication | I can trust that my files arrived. |
+| Fault isolation | Other features continue working. |
+| Architectural simplicity | The software remains dependable over time. |
+
+The individual technologies are merely instruments for achieving this experience.
+
+# The ultimate acceptance criterion
+
+An agent should not merely ask whether its code compiles, whether its tests pass, or whether it satisfies one isolated instruction.
+
+It should ask:
+
+**Does this implementation bring us closer to a product that an ordinary customer can install, use every day for three weeks, and return to a year later without having to understand or maintain its machinery?**
+
+That is the vision I understand.
+
+Not the most elaborate cloud-saving software.
+
+Not the software with the greatest number of recovery mechanisms.
+
+**The software that quietly, consistently and reliably does what the customer asked it to do.**
+
+---
+
+# Companion — Detailed customer journey and engineering interpretation
+
+The preceding narrative is the owner-selected vision, preserved in full. The following existing details clarify its implementation: customers may deliberately choose Simple, Narrow or Depth for their preferred menu presentation, but never need to switch modes to make saving work. The narrative describes desired outcomes for eligible, authorized operations, not an unconditional guarantee when original sources or provider access are genuinely unavailable.
+
 ## Day 1 — Installation, choosing locations and the first save
 
 The customer installs ReDown, opens the Shelf and connects their chosen cloud account through normal authorization. They see familiar controls rather than an infrastructure setup procedure.
