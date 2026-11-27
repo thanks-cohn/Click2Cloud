@@ -20,7 +20,7 @@ I want several such shortcuts to coexist. One chord might save to a particular C
 
 These are illustrative routes, not prescribed keys or mandatory folders. The exact combinations and destination choices belong to the user.
 
-Cloudflare is our reference implementation because its accessible API allowed us to explore the concept. The first commercial release should generalize that behavior across Cloudflare R2, Google Drive, OneDrive and Dropbox. Screenshot to Cloud should enjoy the same freedom of destination and configurable shortcut assignment. We should not maintain four separate gesture systems or four independent transfer engines.
+Cloudflare is our reference implementation because its accessible API allowed us to explore the concept. The first commercial release should generalize that behavior across Cloudflare R2, Google Drive, OneDrive and Dropbox. Screenshot to Cloud should enjoy the same freedom of destination and multiple independently configurable shortcut assignments. Screenshot keypress, held chord + click, Explorer and shelf controls share one registry so overlapping triggers cannot dispatch accidentally. We should not maintain four separate gesture systems or four independent transfer engines.
 
 ## A shortcut is an assignment, not a permanent obligation
 
@@ -28,9 +28,9 @@ I want an understandable Shortcuts section where the user can create, change, di
 
 When a person wants to use an already assigned combination, I want ReDown to tell them plainly what it belongs to. For example:
 
-> This shortcut is currently assigned to Screenshots. Keep that assignment, replace it with Click & Save, or choose another combination?
+> This shortcut is currently assigned to Screenshots. Override the existing assignment or change its keys, then press Save.
 
-If they choose to replace it, the old assignment must be released and the new one applied as one coherent change, or the old configuration must remain intact. If they choose to keep it, nothing changes. If the browser or operating system reserves the keys, explain the limitation and allow them to choose another combination. Do not pretend ReDown can release shortcuts belonging to Chrome, Windows or unrelated applications.
+Show the previous and new action and destination directly in settings. They may select Override to release the old assignment, or enter different keys for the old action. One Save applies both chosen settings together. Cancel leaves both unchanged; an invalid or failed change must preserve or restore the working settings. I do not want a separate complex transaction system. If the browser or operating system reserves the keys, explain the limitation and allow them to choose another combination. Do not pretend ReDown can release shortcuts belonging to Chrome, Windows or unrelated applications.
 
 I want the conflict dialog during configuration, not every time someone saves. Once a binding has been configured and authorized, the normal experience is simply hold, click, save.
 
@@ -46,7 +46,7 @@ The Shortcut API should determine what the user intends to do. The shared Destin
 
 - A supported chord must be editable. There should be no hardcoded immutable ReDown user-facing assignment.
 - One deliberate eligible gesture must dispatch one intended action. Exact matching and conflict validation must prevent duplicate or overlapping chords from sending two saves.
-- An explicit destination-bound chord must honor its selected provider, account and arbitrary selected folder. The built-in redown mode is the deliberate exception: if the standard folder is unavailable for any reason, save to the same account's authorized original cloud destination automatically, without a fallback notification. Record the actual location in the receipt. No cross-account/provider redirection. Keep V1 simple: reuse existing folder choices, do not implement new arbitrary directory creation for basic-cloud shortcuts. An account-default binding follows the documented rule/default precedence.
+- An explicit destination-bound chord must honor its selected provider, account and arbitrary selected folder. The built-in redown mode is the deliberate exception: if the standard folder is not already ready, start saving to the same account's authorized original cloud destination while redown is prepared independently, without a fallback notification. New saves use redown when ready; earlier saves remain where they started. Record the actual location in the receipt. No cross-account/provider redirection. Keep V1 simple: reuse existing folder choices, do not implement new arbitrary directory creation for basic-cloud shortcuts. An account-default binding follows the documented rule/default precedence.
 - A change to the binding must not retarget work already admitted. A disconnected or missing target should be repairable, not secretly substituted.
 - Configuration survives restart and compatible updates; transient armed state does not. Release, blur, navigation, tab or window changes, and cancellation clear stale gesture state.
 - Ordinary clicks, typing and text editing should continue normally outside an intentional supported gesture. No global keylogging, arbitrary keystroke storage or permission bypass.
