@@ -33,7 +33,7 @@ This is a planning snapshot based on reported development progress and test resu
 | File Explorer | 🟡 Implemented | Responsiveness and operation reliability |
 | Get URL | 🟡 Existing R2 functionality | Reliable URL generation and appropriate provider support; public access only with explicit consent |
 | Destination rules | 🟡 Existing foundation | Consistent behavior across providers |
-| Default `redown` folder | 🟡 Planned or partially implemented | Uniform behavior across basic cloud providers |
+| Default `redown` folder | 🟡 Owner-mandated V1 behavior | Prefer redown; if unavailable, automatically save to the same authorized original cloud location without a fallback notification; no new arbitrary shortcut directory creation |
 
 ## 2. Reliability and infrastructure
 
@@ -80,7 +80,7 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 |---|---|---|
 | Annual pricing | 🟢 $12/year concept | Validate willingness to pay |
 | Free tier | 🟢 Owner-approved one-time lifetime allowance: 30 remote saves + 30 right-click saves | Confirm category/folder accounting, migration and paid conversion; no recurring replenishment |
-| Required cloud-backed usage metadata | 🟡 Design requirement | All four providers; disclosed, minimal app metadata and local cache, reinstall reconciliation, explicit identity/authority limits |
+| Required cloud-backed usage metadata | 🟡 Implementation requirement | Compact versioned JSON, native app storage first, disclosed file in existing redown or authorized original location as fallback; independent of folder creation, local journal/cache, revision and tamper/rollback checks, authoritative accounting limits |
 | Unlimited premium saves | 🟢 Product concept | Dependable licensing and entitlements |
 | Payment processing | 🔴 Not established | Secure purchasing and renewal |
 | License recovery | 🔴 Not established | Restore purchases across devices |
