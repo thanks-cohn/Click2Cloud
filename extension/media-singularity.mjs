@@ -20,7 +20,10 @@ export function fragmentPattern(start,end,random=Math.random){
 }
 export function singularityFrame(p,left,right){
  p=clamp(p);
- const approach=ease(p/.42),collapse=ease((p-.42)/.28),retreat=clamp((p-.70)/.30);
+ // Short acceleration, long friction-like coast: velocity peaks at a quarter
+ // of the approach and smoothly falls to zero at the merge boundary.
+ const t=clamp(p/.42),approach=1-(1-t)**4*(1+4*t);
+ const collapse=ease((p-.42)/.28),retreat=clamp((p-.70)/.30);
  const edge=right.x+right.w, movingX=left.x+(right.x-left.x)*approach+(edge-right.x)*collapse;
  const width=Math.max(0,(left.w+(right.w-left.w)*approach)*(1-collapse));
  return {movingX,width,retreat,rotation:1080*retreat*retreat,scale:Math.pow(1-retreat,1.8),
