@@ -838,7 +838,11 @@ try{
  }
  await page.setViewportSize({width:380,height:760});
  await page.mouse.move(0,0);
+ // A cold-start status check must not consume the first interactive click.
+ await page.evaluate(()=>window.testProviderCards.onStatus({provider:'google',connected:false,ready:false,authorized:false,phase:'checking',reason:'AUTH_CHANGED'}));
  const primary=google.locator('[data-connect]'),before=await box(primary);
+ assert.equal(await primary.textContent(),'Connect');
+ const googleConnectBefore=await page.evaluate(()=>window.providerCalls.filter(([op,p])=>op==='auth.connect'&&p==='google').length);
  await primary.hover();
  const after=await box(primary);
  assert(Math.abs(before.x-after.x)<=2&&Math.abs(before.y-after.y)<=2,'Primary dock must remain stable on hover');
@@ -848,7 +852,14 @@ try{
  await google.locator('[data-refresh]').focus();
  await google.locator('[data-refresh]').press('Enter');
  const calls=await page.evaluate(()=>window.providerCalls);
- assert(calls.some(([op,p])=>op==='auth.connect'&&p==='google'));
+ assert.equal(calls.filter(([op,p])=>op==='auth.connect'&&p==='google').length,googleConnectBefore+1,'First Google click launches exactly one interactive connection');
+ await page.evaluate(()=>window.testProviderCards.onStatus({provider:'onedrive',connected:false,ready:false,authorized:false,phase:'network-temporary',reason:'AUTH_NETWORK'}));
+ const oneDriveConnect=page.locator('[data-provider=onedrive] [data-connect]');
+ assert.equal(await oneDriveConnect.textContent(),'Connect');
+ const oneDriveConnectBefore=await page.evaluate(()=>window.providerCalls.filter(([op,p])=>op==='auth.connect'&&p==='onedrive').length);
+ await oneDriveConnect.click();
+ await page.locator('[data-provider=onedrive][data-onyx-connected]').waitFor();
+ assert.equal(await page.evaluate(()=>window.providerCalls.filter(([op,p])=>op==='auth.connect'&&p==='onedrive').length),oneDriveConnectBefore+1,'First OneDrive click launches exactly one interactive connection');
  assert(calls.some(([op,p])=>op==='providers.goTo'&&p==='google'));
  assert(calls.some(([op,p])=>op==='auth.refresh'&&p==='google'));
  await page.mouse.move(0,0);
