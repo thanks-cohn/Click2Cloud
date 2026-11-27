@@ -299,8 +299,8 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const usesSharedHeader=()=>shell.dataset.view!=='explorer'&&doc.documentElement.dataset.aesthetic==='onyx';
  function paintScrollOffset(offset,layout=offset){
   scrollOffset=offset;scrollLayout=layout;
-  setVar(header,'--onyx-header-scroll',Math.round(offset)+'px');
-  setVar(shell,'--onyx-header-reclaim',Math.round(layout)+'px');
+  setVar(header,'--onyx-header-scroll',offset.toFixed(3)+'px');
+  setVar(shell,'--onyx-header-reclaim',layout.toFixed(3)+'px');
  }
  function cancelScrollFrame(){
   if(scrollFrame!==undefined){time.cancel(scrollFrame);scrollFrame=undefined;}
@@ -314,7 +314,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   if(immediate||media.matches||Math.max(Math.abs(target-from),Math.abs(target-layoutFrom))<.5){
    paintScrollOffset(target);return;
   }
-  const start=time.now(),duration=220;
+  const start=time.now(),duration=680;
   const animate=now=>{
    scrollFrame=undefined;
    const p=clamp((now-start)/duration),eased=smooth(p);

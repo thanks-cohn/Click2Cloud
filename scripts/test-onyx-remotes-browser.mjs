@@ -344,13 +344,13 @@ try{
     controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
     if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
     const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom,headerHeight=header.offsetHeight;
-    scrollTo(100);advance(220);const down=readAnchors();const actual=main.scrollTop;
+    scrollTo(100);advance(680);const down=readAnchors();const actual=main.scrollTop;
     const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
     const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
     // Moving into the old header area while scrolled cannot expose an orphaned menu.
     move(190,20);advance(1000);
     const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
-    scrollTo(0);advance(220);const restored=readAnchors();
+    scrollTo(0);advance(680);const restored=readAnchors();
     scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight});
     controller.viewChanged();
    }
@@ -365,11 +365,11 @@ try{
    const shortRange=main.scrollHeight-main.clientHeight;
    const shortScroll=[];
    for(const mode of ['none','elegant','hyperspace']){
-    controller.viewChanged();choose(mode);scrollTo(0);advance(220);
+    controller.viewChanged();choose(mode);scrollTo(0);advance(680);
     const before=main.scrollHeight-main.clientHeight;
     scrollTo(before);
     const samples=[];
-    for(let n=0;n<6;n++){advance(44);main.dispatchEvent(new Event('scroll'));samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});}
+    for(let n=0;n<6;n++){advance(136);main.dispatchEvent(new Event('scroll'));samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});}
     if(mode!=='none'){
      move(190,20);move(190,500);advance(5000);advance(15000);
      main.dispatchEvent(new Event('scroll'));
@@ -386,19 +386,19 @@ try{
      hysteresis.push({mode,value,hidden:header.hasAttribute('data-onyx-scroll-hidden'),phase:phase()});
     }
    }
-   controller.viewChanged();choose('none');scrollTo(0);advance(220);
+   controller.viewChanged();choose('none');scrollTo(0);advance(680);
    // Sample real layout at intermediate frames, not only final states.
    const motion=[];
    for(const target of [12,0,12,0]){
     const from=header.getBoundingClientRect().top;
     scrollTo(target);
     const samples=[header.getBoundingClientRect().top],ranges=[main.scrollHeight-main.clientHeight];
-    for(let i=0;i<10;i++){advance(22);samples.push(header.getBoundingClientRect().top);ranges.push(main.scrollHeight-main.clientHeight);}
+    for(let i=0;i<10;i++){advance(68);samples.push(header.getBoundingClientRect().top);ranges.push(main.scrollHeight-main.clientHeight);}
     motion.push({target,from,samples,ranges,height:header.offsetHeight});
    }
    main.replaceChildren(...savedScrollChildren);
    choose('none');shell.dataset.view='remotes';scrollTo(0);
-   const explorerReference=readAnchors();scrollTo(100);advance(220);
+   const explorerReference=readAnchors();scrollTo(100);advance(680);
    shell.dataset.view='explorer';
    const explorerWithoutSync=readAnchors();main.dispatchEvent(new Event('scroll'));
    const explorerAfterSync=readAnchors();
@@ -874,7 +874,7 @@ try{
   // Refresh must remain invisible on every frame before the dock reaches full width.
   const frames=page.evaluate(async()=>{
    const card=document.querySelector('[data-provider=dropbox]'),button=card.querySelector('[data-go]'),refresh=card.querySelector('[data-refresh]');
-   const samples=[];const start=performance.now(),limit=start+3000;
+   const samples=[];const start=performance.now(),limit=start+3800;
    await new Promise(resolve=>{function frame(){samples.push({time:performance.now()-start,width:button.getBoundingClientRect().width,opacity:Number(getComputedStyle(refresh).opacity),strokes:[...button.querySelectorAll('.onyx-browse-outline>path')].map(path=>{const style=getComputedStyle(path),length=parseFloat(style.strokeDasharray),offset=-parseFloat(style.strokeDashoffset),end=path.getPointAtLength(offset+length);return {length,offset,endX:end.x};})});if(performance.now()<limit)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)});
    return samples;
   });
@@ -993,6 +993,7 @@ try{
   const original=await card.boundingBox();
   assert.equal(await signout.evaluate(el=>getComputedStyle(el).opacity),'0');
   await card.hover();
+  await page.waitForFunction(el=>getComputedStyle(el).opacity==='1',await signout.elementHandle());
   assert.equal(await signout.evaluate(el=>getComputedStyle(el).opacity),'1');
   assert.equal(await card.locator('.onyx-free-caption').evaluate(el=>getComputedStyle(el).visibility),'hidden');
   assert.deepEqual(await card.boundingBox(),original,'Hover must not resize the provider card');
