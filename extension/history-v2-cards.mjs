@@ -4,6 +4,7 @@ import {withHistoryDownload} from '../src/queue/zip.mjs';
 import {safeHistoryURL} from '../src/history/model.mjs';
 import {wireHistoryDestinationUrls} from './history-destination-urls.mjs';
 import {wireImmersiveView} from './immersive-view.mjs';
+import {wireMediaSingularity} from './media-singularity.mjs';
 import {authorizeDropboxHistoryPreview,basicImageMime,loadBasicHistoryImage} from './basic-history-preview.mjs';
 import {createScreenshotRetryCache} from '../src/screenshot/retry-cache.mjs';
 import {hasHistoryV2Value,historyV2FieldLabels,historyV2FieldVisible,historyV2Providers,normalizeHistoryV2View} from './history-v2-preferences.mjs';
@@ -511,6 +512,7 @@ export function createHistoryCards({api,screenshotRequest,goTo,canRead,signal,pr
     if(!basic&&previewable){
       const media=disclosure('Media',preferences.previews==='all'||preferences.previews==='first'&&isFirstPage);
       thumbnail(media);article.append(media);
+      wireMediaSingularity(media,actions,signal);
     }
     if(actions.childElementCount)article.append(actions);
     article.append(feedback);

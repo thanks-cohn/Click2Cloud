@@ -591,3 +591,16 @@
   transform:none;transition:none;
  }
 }
+
+
+/* Singularity V1: decorative surface only. Keep the original action row
+   footprint and native controls; never animate the Media preview or divider. */
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-history-card>.queue-actions[data-media-singularity]{
+ position:relative;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-actions[data-media-singularity]>svg.media-singularity-scene{
+ display:block;position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;
+}
+:root[data-aesthetic=onyx] #shell[data-view=history] .queue-actions[data-media-singularity][data-singularity-painted]>button:is([data-download],[data-go]){
+ opacity:0!important;pointer-events:none!important;
+}
