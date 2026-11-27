@@ -4,6 +4,12 @@ Owner direction • November 27, 2026
 
 **The customer chooses what to save and where. ReDown takes responsibility for the machinery.**
 
+> **NON-NEGOTIABLE P0 — INDEPENDENT FIRST-CLICK SAVING**
+>
+> **Simple, Narrow and Depth must each work independently from the very first authorized save. The customer must NEVER have to configure, use or successfully save through Depth before Simple or Narrow works.**
+>
+> Once the customer connects their account and registers their chosen authorized location, the first native Save click must initiate the requested operation immediately. ReDown handles any necessary authorized preparation and recoverable readiness failure automatically within that same logical operation. No second click, no preliminary Depth save, no switching modes, no manual Worker setup, no forced Shelf reopening. Verified completion follows actual provider confirmation, not an optimistic success signal. Genuine external limitations remain truthful and actionable; this is not permission to bypass authorization or claim instantaneous remote completion.
+
 This is the desired customer journey, not a claim that every capability has already passed acceptance. Read with the [Permanent Engineering Vision](PERMANENT_ENGINEERING_VISION.md), [original verification vision](README.md), [owner's intended implementation](../../11.25.2026/MY_INTENDED_IMPLEMENTATION.md) and active roadmap. It gives every engineer and agent a common behavioral target without requiring the owner to prescribe every internal decision. It does not authorize a new interface, change menu semantics or expand the active checkpoint.
 
 # ReDown — The customer experience we are engineering toward
@@ -18,9 +24,15 @@ The customer installs ReDown.
 
 They open it, connect their cloud account and choose a destination.
 
-They find an image they like, right-click it and save it.
+They choose a Simple location, without ever configuring or using Depth. They find an image they like, right-click it and save it.
 
-It works.
+It works on the first click.
+
+Another customer chooses Narrow instead, without ever configuring or using Depth. Their first native Save click works too.
+
+A customer who chooses Depth directly enjoys the same independent first-click behavior.
+
+**No one has to save a file through Depth to unlock Simple or Narrow. Each mode works independently the moment the customer invokes Save.**
 
 They save another image. It works again.
 
@@ -220,6 +232,10 @@ This is a longevity target to validate over time, not a claim that simulated lif
 | Feedback preference and fault isolation | I can use ReDown quietly and unrelated failures do not needlessly interrupt me. |
 
 Use the established references and architecture from the Permanent Engineering Vision. Make ordinary implementation decisions independently within the authorized checkpoint; do not ask the owner to prescribe every timeout, module boundary or state transition. Respect genuine product, authorization, cost, resource and compatibility boundaries. Preserve and repair the existing working infrastructure rather than invent competing engines.
+
+### Mandatory independent first-use acceptance
+
+Run three isolated fresh-install/first-use cases using actual native Chrome menu actions and the authorized provider path. Each case begins without prior saves or readiness accidentally inherited from another mode; normal authorized login and location registration are permitted. Test Simple-only with no Depth configuration/action, Narrow-only with no Depth configuration/action, and Depth-only with no Simple/Narrow prerequisite. In each case the first eligible native Save click must yield a verified file at the exact selected destination from the same logical submission, including automatic recovery when needed. Confirm that no prerequisite save, mode switch, redundant click, manual preparation or forced Shelf opening occurred. Include cold/returning lifecycle cases and preserve failure evidence; the active 2B.1/2B.4 specifications govern full qualification counts and scope. A warm-path pass or a Simple/Narrow test run after a successful Depth save is not proof of independent first-use readiness.
 
 The practical acceptance target is the actual customer journey: install, connect, select a Simple or Narrow or Depth location, perform the first native save independently, repeat ordinary saves, upload, recover interruptions, change preferences, restart and return to the same dependable behavior. Cover all three modes independently and preserve exact configuration. The active execution index determines which pieces to implement and qualify in each session. Record actual fixture, packaged-browser, installed-browser and authorized live-provider evidence separately; never claim the whole journey passed when only parts have been verified.
 
