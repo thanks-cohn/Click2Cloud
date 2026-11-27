@@ -14,7 +14,7 @@ I also believe there is a security advantage to reducing unnecessary local downl
 
 My ambition is one billion paying ReDown customers. I want to build something of everyday usefulness, not a utility reserved for developers, system administrators, or people with powerful computers. I want ReDown to be affordable enough for ordinary people to buy and useful enough that they have a reason to keep using it.
 
-My proposed price is twelve dollars a year for unlimited remote saving, alongside a useful free tier of seven remote saves per day. I want the product to earn its place in people's lives through the quality of its service, not through unnecessary complexity.
+My proposed price is twelve dollars a year for unlimited ReDown saving, subject to the user's cloud provider limits, alongside a useful free tier of thirty remote saves and thirty right-click saves. The exact renewal period and counting details remain to be settled. I want the product to earn its place in people's lives through the quality of its service, not through unnecessary complexity. I also want a small, disclosed application usage record in each connected cloud so that simply uninstalling and reinstalling the extension does not automatically restore the allowance. I want this to be unobtrusive and privacy-respecting, without pretending that user-controlled records are tamper-proof or that unrelated accounts necessarily belong to the same person.
 
 One billion paying customers is my aspiration, not a prediction or a claim about the size of our present audience. I want our engineering and product decisions to leave room for that ambition rather than assuming that ReDown must always remain a small extension.
 
@@ -22,7 +22,7 @@ One billion paying customers is my aspiration, not a prediction or a claim about
 
 The first version should be simple, compact, and immediately useful. A person should be able to connect their existing cloud storage, right-click a file and save it remotely. They should be able to press a keyboard shortcut to capture a screenshot and have it appear in their chosen cloud folder. They should also be able to activate a shortcut and click something they wish to save.
 
-I believe Screenshot to Cloud, particularly Google Drive, and Shortcut + Click to Cloud are among our greatest opportunities to win users. Their usefulness can be understood without a lengthy explanation.
+I believe Screenshot to Cloud, particularly Google Drive, and Shortcut + Click to Cloud are among our greatest opportunities to win users. Their usefulness can be understood without a lengthy explanation. Cloudflare has been our reference implementation because its accessible API made the original development practical. I want these same interactions to work with Google Drive, OneDrive and Dropbox in the very first commercial release, through one shared architecture rather than four independent systems.
 
 I want the first release to support Cloudflare R2, Google Drive, OneDrive, and Dropbox. It should handle files and folders in both directions, allow users to choose their destinations and define saving rules, and provide an understandable Explorer, Queue, and History. When a cloud provider permits it, users should be able to obtain links to their saved files, with public access under their control.
 
@@ -46,7 +46,7 @@ I want people to be able to use the software every day for a year without having
 
 I want the system to keep receipts. I want to know what was requested, where it went, whether it arrived, and whether the result was verified. An uncertain operation must not be presented as a success. A beautiful notification is only meaningful when the software has actually done what it says it has done.
 
-Our current live R2 campaign has demonstrated 578 production-confirmed uploads out of 578 eligible files. That is encouraging, but the expected-count mismatch, location-audit verdict, pending independent retrieval and restart verification, and earlier fault-recovery failures mean that we still have work to do. I want our claims about ReDown to follow the evidence.
+Our current live R2 campaign has demonstrated 578 production-confirmed uploads out of 578 eligible files, followed by independent retrieval and SHA-256 matches for all 578 files. That is encouraging, but the expected-count mismatch, location-audit verdict, pending retained-copy verification after restart, and earlier fault-recovery failures mean that we still have work to do. I want our claims about ReDown to follow the evidence.
 
 ## A machine that can be tested
 
