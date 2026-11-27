@@ -354,6 +354,30 @@ try{
     scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable});
     controller.viewChanged();
    }
+   // A nearly-fitting Screenshots page is the critical boundary: scroll
+   // reclaim must not shrink the range and clamp scrollTop back toward zero.
+   controller.viewChanged();choose('none');shell.dataset.view='screenshot';scrollTo(0);
+   const savedScrollChildren=[...main.childNodes];
+   const shortPage=document.createElement('div');shortPage.style.cssText='margin:0;flex:none;display:block;';
+   main.replaceChildren(shortPage);
+   const style=getComputedStyle(main);
+   shortPage.style.height=(main.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom)+24)+'px';
+   const shortRange=main.scrollHeight-main.clientHeight;
+   const shortScroll=[];
+   for(const mode of ['none','elegant','hyperspace']){
+    controller.viewChanged();choose(mode);scrollTo(0);
+    const before=main.scrollHeight-main.clientHeight;
+    scrollTo(before);
+    const samples=[];
+    for(let n=0;n<6;n++){main.dispatchEvent(new Event('scroll'));samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});}
+    if(mode!=='none'){
+     move(190,20);move(190,500);advance(5000);advance(15000);
+     main.dispatchEvent(new Event('scroll'));
+     samples.push({top:main.scrollTop,range:main.scrollHeight-main.clientHeight});
+    }
+    shortScroll.push({mode,before,samples});
+   }
+   controller.viewChanged();choose('none');scrollTo(0);main.replaceChildren(...savedScrollChildren);
    choose('none');shell.dataset.view='remotes';scrollTo(0);
    const explorerReference=readAnchors();scrollTo(100);
    shell.dataset.view='explorer';
@@ -362,8 +386,16 @@ try{
    const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--onyx-header-reclaim');
    spacer.remove();scrollTo(0);
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,shortRange,shortScroll,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
+  assert(Math.abs(hyperspace.shortRange-24)<=1,'short Screenshots fixture overflows by only 24px');
+  for(const {mode,before,samples} of hyperspace.shortScroll){
+   assert(Math.abs(before-hyperspace.shortRange)<=1,mode+' stable initial short scroll range');
+   for(const sample of samples){
+    assert(Math.abs(sample.range-before)<=1,mode+' header reclaim must not change the scroll range');
+    assert(Math.abs(sample.top-before)<=1,mode+' header reclaim must not clamp the scroll offset');
+   }
+  }
   assert.equal(hyperspace.scrollAnchors.length,18);
   for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;

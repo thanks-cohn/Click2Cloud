@@ -94,13 +94,21 @@
 /* Reclaim the same physical header strip while scrolling. The greater of
    scroll and animation lift wins; never sum the two offsets. */
 :root[data-aesthetic=onyx] body>#shell:not([data-view=explorer]){
- margin-block-start:calc(0px - max(var(--hyper-reserve,0px),var(--onyx-header-reclaim,0px)));
+ --onyx-header-space:max(var(--hyper-reserve,0px),var(--onyx-header-reclaim,0px));
+ margin-block-start:calc(0px - var(--onyx-header-space));
+}
+/* Growing the scrollport must not reduce its scroll range. Compensate at
+   the bottom by exactly the reclaimed height; keep the original 52px
+   footer clearance. Otherwise short pages can oscillate at their limit. */
+:root[data-aesthetic=onyx] body>#shell:not([data-view=explorer])>main{
+ padding-block-end:calc(52px + var(--onyx-header-space,0px));
+ overflow-anchor:none;
 }
 :root[data-aesthetic=onyx] body>#shell:not([data-view=explorer])[data-hyperspace-lifting]>main{
  translate:0 min(var(--onyx-animation-translate,0px),max(0px,calc(var(--hyper-reserve,0px) - var(--onyx-header-reclaim,0px))))!important;
 }
 @media(prefers-reduced-motion:reduce){
- :root[data-aesthetic=onyx] body>#shell:not([data-view=explorer]){margin-block-start:calc(0px - var(--onyx-header-reclaim,0px))}
+ :root[data-aesthetic=onyx] body>#shell:not([data-view=explorer]){--onyx-header-space:var(--onyx-header-reclaim,0px)}
 }
 :root[data-aesthetic=onyx] #shell[data-view=remotes]{
  & > main{background:var(--bg)}
