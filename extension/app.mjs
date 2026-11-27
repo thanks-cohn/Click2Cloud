@@ -350,7 +350,7 @@ function renderConnection(){
     connection.state==='UNKNOWN'?'':'<button id="check-connection">Check connection</button>';
   const showCaption=inExplorer||!['DISCONNECTED','CONNECTED'].includes(connection.state);
   const connectionIssue=names[connection.diagnostic?.code];
-  connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}${showCaption?`<p class="muted">${caption}</p>`:''}${connectionIssue?
+  connectionElement.innerHTML=`${inExplorer?'<strong>☁ Cloudflare</strong>':''}${showCaption?`<p class="muted cf-connection-caption" data-connection-state="${esc(connection.state)}" title="${esc(caption)}">${caption}</p>`:''}${connectionIssue?
     '<p class="muted" role="status">'+esc(connectionIssue)+'</p>':''}${controls}`;
   listen('#connection #sign-out','click',signOut);listen('#reauthorize','click',()=>login('#reauthorize'));
   listen('#verify-login','click',()=>login('#verify-login',{verifyOnly:true}));listen('#login','click',()=>login());
