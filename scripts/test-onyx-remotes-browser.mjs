@@ -336,9 +336,28 @@ try{
    controller.viewChanged();main.replaceChildren(...originalChildren);main.scrollTop=originalScroll;shell.dataset.view='remotes';choose('elegant');
    move(190,20);move(190,500);advance(5200);choose('none');advance(20000);
    const disabledAgain={phase:phase(),timers:timers.size,frames:frames.size,overlay:!!header.querySelector('.hyperspace-overlay')};
+   const scrollAnchors=[];
+   const spacer=document.createElement('div');spacer.style.height='1500px';main.append(spacer);
+   const readAnchors=()=>({r:brand.getBoundingClientRect().top,moon:theme.getBoundingClientRect().top,nav:header.querySelector('nav').getBoundingClientRect().top});
+   const scrollTo=y=>{main.scrollTop=y;main.dispatchEvent(new Event('scroll'));};
+   for(const mode of ['none','elegant','hyperspace']){
+    choose(mode);scrollTo(0);
+    if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
+    const top=readAnchors();scrollTo(100);const down=readAnchors();const actual=main.scrollTop;
+    scrollTo(0);const restored=readAnchors();
+    scrollAnchors.push({mode,top,down,actual,restored});
+    controller.viewChanged();
+   }
+   spacer.remove();
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
+  for(const {mode,top,down,actual,restored} of hyperspace.scrollAnchors){
+   assert.equal(actual,100,mode+' scroll fixture');
+   assert(Math.abs(top.r-down.r-actual)<.1&&Math.abs(top.moon-down.moon-actual)<.1,mode+' icons must scroll away');
+   assert(Math.abs(top.nav-down.nav)<.1,mode+' navigation remains unchanged');
+   assert.deepEqual(restored,top,mode+' icons return at page top');
+  }
   assert.deepEqual(hyperspace.phases,['closed','split','charge','charge','release','open','open','return','closed','closed','split','closed']);
   assert.equal(hyperspace.geometry.length,2);
   assert(hyperspace.logoPositions.every(p=>p.every((v,i)=>Math.abs(v-hyperspace.logoPositions[0][i])<.1)),'R stays fixed throughout both animations and restoration');
