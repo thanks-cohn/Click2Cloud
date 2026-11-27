@@ -26,7 +26,7 @@ const screenshotMessages={
  INSUFFICIENT_SCOPE:'Reconnect Cloudflare with permission to read and write R2 objects.',
  WRONG_ACCOUNT:'Reconnect the Cloudflare account that owns this bucket.',
  AUTH_SESSION_CHANGED:'The Cloudflare session changed. Reconnect the original account and retry.',
- REAUTH_REQUIRED:'Reconnect Cloudflare in Remotes and retry from History.',
+ REAUTH_REQUIRED:'Reconnect Cloudflare in Providers and retry from History.',
  TRANSIENT_API_FAILURE:'Cloudflare could not be reached. Retry from History.',
  R2_OBJECT_UNCONFIRMED:'R2 did not return the exact file for verification.',
  R2_OBJECT_CONFLICT:'R2 returned different bytes at this key. This file needs inspection.',
@@ -37,9 +37,9 @@ const screenshotMessages={
  SCREENSHOT_CROSS_BUCKET_UNSUPPORTED:'This capture can write to one account and bucket. This directory is outside its Worker binding.',
  SCREENSHOT_ORIGINAL_UNAVAILABLE:'The original image is unavailable for retry.',
  SCREENSHOT_OBJECT_UNCONFIRMED:'The Worker could not independently confirm this file.',
- WORKER_SETUP_REQUIRED:'Prepare this bucket’s Click2Cloud Worker in Remotes.',
+ WORKER_SETUP_REQUIRED:'Prepare this bucket’s Click2Cloud Worker in Providers.',
  WORKER_DESTINATION_SCOPE_REQUIRED:'The existing Worker does not authorize this directory.',
- AUTH_REQUIRED:'Connect Cloudflare in Remotes.',
+ AUTH_REQUIRED:'Connect Cloudflare in Providers.',
  SCOPE_UNAUTHORIZED:'This Cloudflare account is unavailable or unauthorized.'
 };
 export const screenshotMessage=(code,fallback)=>screenshotMessages[code]??fallback;
@@ -120,7 +120,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
     if(result.state!=='completed')throw Error(result.code);
     const data=result.data,rows=target?data.entries.filter(item=>item.folder):account?data.buckets:data.accounts;
     if(!target&&!account)accounts=data.accounts;
-    if(!cursor&&!rows.length)progress.textContent=target?'No subfolders.':account?'No authorized buckets.':'Connect Cloudflare in Remotes to select a directory.';
+    if(!cursor&&!rows.length)progress.textContent=target?'No subfolders.':account?'No authorized buckets.':'Connect Cloudflare in Providers to select a directory.';
     else progress.remove();
     for(const item of rows){
      const name=target?item.displayName??item.key:account?item.name:accountLabel(item,accounts);
@@ -138,7 +138,7 @@ export function createScreenshotPage({api,dialog,closeDialog,esc,connectedAccoun
     if(data.cursor&&data.cursor!==cursor){
      const more=button('Load more',()=>void page(place,data.cursor));more.dataset.pickerMore='';holder.append(more);
     }
-   }catch(error){if(requested===ticket)progress.textContent=screenshotMessage(error.code,'Could not list Cloudflare directories. Check access in Remotes.');}
+   }catch(error){if(requested===ticket)progress.textContent=screenshotMessage(error.code,'Could not list Cloudflare directories. Check access in Providers.');}
   }
   view();
  }
