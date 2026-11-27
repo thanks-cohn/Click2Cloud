@@ -123,6 +123,33 @@ function assertHeader(bounds, label) {
   assert(bounds.header.height <= 68, `${label} header height ${bounds.header.height}px`);
 }
 
+async function explorerOpening(){
+  // Exercise an actual cold Explorer entry with the provider response held.
+  await settings();
+  await page.locator('#appearance').selectOption('onyx');
+  await page.waitForFunction(()=>document.documentElement.dataset.aesthetic==='onyx');
+  await nav('remotes');
+  await page.evaluate(()=>{
+    window.fixtureHook=async(message,invoke)=>{
+      if(message.method==='enterExplorer')await new Promise(resolve=>{window.releaseExplorerOpening=resolve;});
+      return invoke();
+    };
+  });
+  await nav('explorer');
+  await page.waitForFunction(()=>typeof window.releaseExplorerOpening==='function');
+  const shell=page.locator('#shell');
+  assert.equal(await shell.getAttribute('data-explorer-opening'),'');
+  const geometry=()=>page.evaluate(()=>['.app-header','#pane-splitter','#main','aside'].map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return [r.x,r.y,r.width,r.height];}));
+  const initial=await geometry();
+  await idleFrames();
+  assert.deepEqual(await geometry(),initial,'panel frame must not move while opening');
+  await page.evaluate(()=>{window.releaseExplorerOpening();window.fixtureHook=null;});
+  await page.getByRole('row').filter({hasText:'notes.txt'}).first().waitFor();
+  await page.waitForFunction(()=>!document.querySelector('#shell').hasAttribute('data-explorer-opening'));
+  await nav('remotes');await nav('explorer');
+  assert.equal(await shell.getAttribute('data-explorer-opening'),null,'warm entry must not replay the loading presentation');
+  await page.getByRole('row').filter({hasText:'notes.txt'}).first().waitFor();
+}
 async function matrix(build) {
   await page.locator('#sign-out').waitFor();
   for (const theme of ['dark', 'light']) for (const width of widths) {
@@ -372,6 +399,7 @@ try {
   }
   if (!baselineOnly) {
     await open('after');
+    await gate('Onyx cold Explorer reveal and warm-entry continuity',explorerOpening);
     await gate('single-row header and gallery area across 36 width, appearance and color combinations', () => matrix('after'));
     await gate('Debug visibility, keyboard focus, History and uncertain-save feedback across nine combinations', debugMatrix);
     await gate('Debug preference restores on reload', async () => {

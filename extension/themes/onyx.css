@@ -571,3 +571,31 @@
 :root[data-aesthetic=onyx] #shell[data-view=history] .queue-actions[data-media-singularity][data-singularity-painted]>button:is([data-download],[data-go]){
  opacity:0!important;pointer-events:none!important;
 }
+
+
+/* Explorer opening: a single calm loading surface across both panes, only
+   while the real initial read is pending. Frames, toolbar, divider, footer
+   and the stationary header are never animated or removed. */
+:root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] :is(#tree,#files){
+ position:relative;color:transparent;
+}
+:root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] #tree{
+ min-block-size:112px;
+}
+:root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] :is(#tree,#files)>*{
+ visibility:hidden;
+}
+:root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] :is(#tree,#files)::before{
+ content:"";position:absolute;inset:14px 12px auto;block-size:96px;
+ pointer-events:none;
+ --explorer-placeholder:color-mix(in srgb,var(--text) 9%,transparent);
+ background:
+  linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 0/68% 5px,
+  linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 25px/86% 5px,
+  linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 50px/49% 5px,
+  linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 75px/75% 5px;
+ background-repeat:no-repeat;
+}
+:root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] #files::before{
+ inset:18px 14px auto;
+}

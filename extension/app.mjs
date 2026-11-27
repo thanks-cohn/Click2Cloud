@@ -147,10 +147,31 @@ let marquee,draggedFiles,dropFolder;
 let suggestionDue=false,enteringExplorer=null,connectionEpoch=0,explorerShell,contextTicket=0,viewportWidth=800,viewportHeight=400,paintPending=false,presentationView=null,viewCommit=Promise.resolve(),addressWidth=0,listingAbort=null,explorerScroll=0;
 const displayView=()=>presentationView??state.product.view;
 const scheduleWindow=()=>{if(paintPending)return;paintPending=true;requestAnimationFrame(()=>{paintPending=false;if(view==='explorer')renderWindow();});};
+// Keep the pane frames visible during the first authorized read. Never
+// replay the reveal for an already-mounted, populated Explorer.
+function beginExplorerOpening(){
+ if(view==='explorer'&&connection.state==='CONNECTED'&&document.documentElement.dataset.aesthetic==='onyx'){
+  $('#shell').setAttribute('data-explorer-opening','');
+ }
+}
+function finishExplorerOpening(reveal=false){
+ const shell=$('#shell');
+ if(!shell.hasAttribute('data-explorer-opening'))return;
+ shell.removeAttribute('data-explorer-opening');
+ if(!reveal||view!=='explorer'||connection.state!=='CONNECTED'||document.documentElement.dataset.aesthetic!=='onyx'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ // Opacity only: no delayed interactivity, size changes or artificial wait.
+ for(const pane of [$('#tree'),$('#files')]){
+  if(pane&&!pane.hidden)for(const child of pane.children){
+   if(!child.hidden)child.animate([{opacity:.68},{opacity:1}],{duration:220,easing:'ease-out'});
+  }
+ }
+}
 // enterExplorer owns initial selection through the trusted API; the promise
 // coalesces repeated tab clicks, and navigationEpoch protects newer user intent.
 async function enterExplorer(){
- const epoch=navigationEpoch;if(enteringExplorer?.epoch===epoch)return enteringExplorer.promise;
+ const epoch=navigationEpoch;
+ beginExplorerOpening();
+ if(enteringExplorer?.epoch===epoch)return enteringExplorer.promise;
  const attempt={epoch};enteringExplorer=attempt;
  attempt.promise=(async()=>{const r=await api('enterExplorer');if(view!=='explorer'||epoch!==navigationEpoch)return;await loadTree(r);if(view!=='explorer'||epoch!==navigationEpoch)return;
   if(r.target){await navigate(r.target,true,true);const slot=treeNodes.get(targetKey({...r.target,prefix:''}));if(slot){slot.button.setAttribute('aria-selected','true');slot.button.setAttribute('aria-expanded','true');slot.children.hidden=false;}const current=treeNodes.get(targetKey(r.target));if(current)syncTreePage(r.target,{entries,cursor,completeListing:!cursor});}
@@ -164,7 +185,15 @@ async function enterExplorer(){
    }
    renderExplorer();
   }
- })().finally(()=>{if(enteringExplorer===attempt)enteringExplorer=null;});return attempt.promise;
+ })().catch(error=>{
+  if(view==='explorer'&&epoch===navigationEpoch){
+   loading=false;listingError=error.message||'Unable to open Explorer. Use Refresh to retry.';
+   if($('#files')&&state)renderFiles();
+  }
+  throw error;
+ }).finally(()=>{
+  if(enteringExplorer===attempt){enteringExplorer=null;finishExplorerOpening(true);}
+ });return attempt.promise;
 }
 let explorerAccountId=null;
 let shelfRequest=null,cloudflareState=null,reconnectNeeded=false,confirmExplorerDelete=true;
@@ -318,6 +347,7 @@ async function connections() {
   listingReader.invalidate();imageReader.clear();clearThumbnails();treeFolders.clear();treeEpoch++;treeNodes.clear();
   $('#tree').replaceChildren();bucketTargets.length=0;
   if(connection.state!=='CONNECTED'){
+    finishExplorerOpening();
     navigationEpoch++;listingEpoch++;entries=[];selected.clear();loading=false;listingError='Reconnect to browse. Saved locations are preserved.';
     // The browser shortcut can enter Explorer before the saved layout has loaded.
     if(view==='explorer'&&state&&!configurationIssue){
@@ -683,7 +713,7 @@ function prepareManageMorph(next){
 }
 async function show(next){if(next==='downloads'&&!debugMode)return;if(next!==view){notifications.clear();basicCards.clearSuccesses();}if(next!=='history')historyUI.stop();if(next!=='queue')queuePage.stop();if(next!=='screenshot')screenshotUI.stop();const ticket=++viewEpoch;if(view==='explorer'&&next!=='explorer'){
  explorerScroll=$('#files')?.scrollTop??0;
-}if(next!=='remotes')restoreConnection();if(next!=='explorer'){marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
+}if(next!=='remotes')restoreConnection();if(next!=='explorer'){finishExplorerOpening();marquee?.cancel();clearDropFolder();finishSearchIntent();explorerUpload?.invalidate();explorerLayoutUI?.hide();stopThumbnailJobs();if(gallery)closeDialog();}if(next!==view)$('#shell').toggleAttribute('data-manage-fade',next==='remotes'&&view!=='explorer');prepareManageMorph(next);view=next;void shelfView('view',next).catch(()=>{});$('#shell').dataset.view=next;$('#main').inert=false;hideContext();$$('header [data-view]').forEach(button=>{
  const active=button.dataset.view===next;
  button.classList.toggle('active',active);
  if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -813,6 +843,7 @@ function parseLocation(value){
 }
 function renderAddress(restore=false){const input=$('#location'),display=$('#location-display');if(!input)return;const e=selected.size===1?ordered()[listingOrder.index(selected.values().next().value)]:null,value=displayLocation(source,e&&!e.folder?e.key:source?.prefix);if(restore||document.activeElement!==input)input.value=value;input.title=value;display.textContent=value?middlePath(value,Math.max(20,addressWidth-20),pathMeasure):'Choose a cloud folder';}
 async function navigate(t,push=true,fromAPI=false){
+  if(!fromAPI)finishExplorerOpening();
   marquee?.cancel();clearDropFolder();typedName='';
   listingAbort?.abort();const started=performance.now(),same=source&&targetKey(source)===targetKey(t),ticket=++navigationEpoch;if(!same)resetFilenameSearch();listingEpoch++;previewEpoch++;if(!same){imageReader.clear();clearThumbnails();}hideContext();closeDialog();
   source=structuredClone(t);if(!same)explorerUpload?.invalidate();explorerAccountId=t.accountId;if(!same){selected.clear();focusIndex=0;anchor=0;}if(!same){entries=[];cursor='';}loading=true;listingError='';
@@ -909,7 +940,15 @@ function renderFiles(){
  }
  el.hidden=false;
  const search=filenameSearch,rows=displayedEntries(),busy=search?search.loading:loading;
- el.className='file-scroll '+displayView();el.setAttribute('aria-busy',String(busy));
+ const paneClass='file-scroll '+displayView();
+ if(el.className!==paneClass)el.className=paneClass;
+ el.setAttribute('aria-busy',String(busy));
+ // Reattached panes can still have dimensions from the previous view
+ // (or zero from a detached ResizeObserver). Measure before the first
+ // virtual window is painted, not a frame later.
+ if(document.documentElement.dataset.aesthetic==='onyx'){
+  viewportWidth=el.clientWidth;viewportHeight=el.clientHeight;
+ }
  if(!el.querySelector('table')){el.innerHTML=`<div class="empty"></div><table role="grid" aria-label="Files" aria-multiselectable="true"><thead><tr>${[['Name','displayName'],['Date Modified','uploaded'],['Type','folder'],['Size','size']].map(([label,k])=>`<th><button data-sort="${k}">${label}</button></th>`).join('')}</tr></thead><tbody></tbody></table><div class="grid-tiles" role="grid" aria-label="Files" aria-multiselectable="true" hidden></div>`;
   el.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{hideContext();sort={key:b.dataset.sort,direction:sort.key===b.dataset.sort?-sort.direction:1};focusIndex=0;el.scrollTop=0;renderWindow();});
   const table=el.querySelector('table');
