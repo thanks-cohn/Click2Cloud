@@ -37,7 +37,7 @@ Commercial V1: four providers (Cloudflare R2, Google Drive, OneDrive, Dropbox), 
 ## Authoritative execution sequence
 | Order | Assignment | Acceptance / dependency |
 |---|---|---|
-| 1 | Part 2B.1–2B.4: R2 reliability restoration | 2B.1 original REDOWN comparison and independent Worker/menu readiness; 2B.2 bounded recovery/retry/source retention, truthful Shelf lifecycle and fixture startup diagnostics; 2B.3 filename compatibility, Queue Retry/Retry All Failed and original source links, ordinary Upload/API parity and partial-batch feedback/recovery; 2B.4 Windows and authorized live qualification |
+| 1 | Part 2B.1–2B.4: R2 reliability restoration | 2B.1 original REDOWN comparison and independent Worker/menu readiness; 2B.2 critical in-place repair and qualification of existing IndexedDB source persistence, durable journal and background scheduler, bounded recovery/retry, truthful Shelf lifecycle and fixture startup diagnostics; 2B.3 filename compatibility, Queue Retry/Retry All Failed and original source links, ordinary Upload/API parity and partial-batch feedback/recovery; 2B.4 Windows and authorized live qualification |
 | 2 | Part 2C: identity, capabilities, migration and default destination | Shared account/auth, independent readiness, default/opt-out/fallback, frozen target and naming contracts |
 | 3 | Part 2D: shared production foundations | Save/retrieval, conflict and source lifetime, functional durable local accounting, completion events, isolation, Shortcut API and actual capability proof, media/manifest contracts |
 | 4 | Part 2E: four-provider production adapters and Lab | Shared bidirectional transfers; independent exact mapping, reopened bytes and authorized evidence |
