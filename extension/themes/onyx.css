@@ -88,6 +88,9 @@
 :root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header{
  translate:0 calc(0px - var(--onyx-header-scroll,0px));
 }
+:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header[data-onyx-scroll-hidden]{
+ pointer-events:none;
+}
 :root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header #theme{
  translate:none!important;
 }

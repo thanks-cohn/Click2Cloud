@@ -343,7 +343,7 @@ try{
    for(const view of ['remotes','queue','history','settings','screenshot','downloads'])for(const mode of ['none','elegant','hyperspace']){
     controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
     if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
-    const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom;
+    const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom,headerHeight=header.offsetHeight;
     scrollTo(100);const down=readAnchors();const actual=main.scrollTop;
     const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
     const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
@@ -351,7 +351,7 @@ try{
     move(190,20);advance(1000);
     const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
     scrollTo(0);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable});
+    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight});
     controller.viewChanged();
    }
    // A nearly-fitting Screenshots page is the critical boundary: scroll
@@ -377,6 +377,15 @@ try{
     }
     shortScroll.push({mode,before,samples});
    }
+   // Jitter on either side of the entry threshold cannot reopen the header.
+   const hysteresis=[];
+   for(const mode of ['none','elegant','hyperspace']){
+    controller.viewChanged();choose(mode);scrollTo(0);
+    for(const value of [1,5,11,12,11,10,3,2,5,11,12,0]){
+     scrollTo(value);move(190,20);advance(6000);
+     hysteresis.push({mode,value,hidden:header.hasAttribute('data-onyx-scroll-hidden'),phase:phase()});
+    }
+   }
    controller.viewChanged();choose('none');scrollTo(0);main.replaceChildren(...savedScrollChildren);
    choose('none');shell.dataset.view='remotes';scrollTo(0);
    const explorerReference=readAnchors();scrollTo(100);
@@ -386,7 +395,7 @@ try{
    const explorerScrollCleared=!header.style.getPropertyValue('--onyx-header-scroll')&&!shell.style.getPropertyValue('--onyx-header-reclaim');
    spacer.remove();scrollTo(0);
    controller.dispose();shell.dataset.view='remotes';
-   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,shortRange,shortScroll,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
+   return {phases,geometry,streak,later,heldFrames,paint,initial,sweep,logoPositions,providerThemePositions,none,elegantIdle,elegantMid,elegantEnd,elegantHidden,themeGlide,themeHoverPhase,viewReveal,archiveSpacing,titleCentering,noPaint,afterThemeClick,afterThemeKeyboard,elegantReturn,elegantClosed,disabledAgain,scrollAnchors,shortRange,shortScroll,hysteresis,explorerReference,explorerWithoutSync,explorerAfterSync,explorerScrollCleared,clean:!shell.hasAttribute('data-hyperspace-lifting')&&!shell.style.getPropertyValue('--hyper-reserve')&&main.style.translate===initial.translate&&!header.querySelector('.hyperspace-overlay')&&!document.body.hasAttribute('data-hyperspace')&&!document.body.hasAttribute('data-hyperspace-mode')&&!brand.hasAttribute('tabindex')&&frames.size===0&&timers.size===0};
   });
   assert(Math.abs(hyperspace.shortRange-24)<=1,'short Screenshots fixture overflows by only 24px');
   for(const {mode,before,samples} of hyperspace.shortScroll){
@@ -396,16 +405,21 @@ try{
     assert(Math.abs(sample.top-before)<=1,mode+' header reclaim must not clamp the scroll offset');
    }
   }
+  for(const mode of ['none','elegant','hyperspace']){
+   const rows=hyperspace.hysteresis.filter(row=>row.mode===mode);
+   assert.deepEqual(rows.map(row=>row.hidden),[false,false,false,true,true,true,true,false,false,false,true,false],mode+' stable partial-scroll hysteresis');
+   assert(rows.filter(row=>row.value>2).every(row=>row.phase==='closed'),mode+' scroll ownership suppresses idle animation');
+  }
   assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable} of hyperspace.scrollAnchors){
+  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;
    assert.equal(actual,100,label+' scroll fixture');
-   assert(Math.abs(top.r-down.r-actual)<.1&&Math.abs(top.moon-down.moon-actual)<.1,label+' icons must scroll away');
-   assert(Math.abs(top.nav-down.nav-actual)<.1&&Math.abs(top.more-down.more-actual)<.1&&Math.abs(top.header-down.header-actual)<.1,label+' navigation and header scroll away with the icons');
+   assert(Math.abs(top.r-down.r-headerHeight)<.1&&Math.abs(top.moon-down.moon-headerHeight)<.1,label+' icons must fully retract');
+   assert(Math.abs(restored.nav-down.nav-headerHeight)<.1&&Math.abs(restored.more-down.more-headerHeight)<.1&&Math.abs(top.header-down.header-headerHeight)<.1,label+' navigation and header retract as one unit');
    assert(offscreen,label+' hovering the old header position must not expose a detached menu');
    assert(noHeaderStrip,label+' scroll immediately reclaims the entire former header strip');
    assert(footerStable,label+' scroll reclaim preserves the footer anchor');
-   assert.deepEqual(restored,top,label+' header returns at page top');
+   assert(Math.abs(restored.r-top.r)<.1&&Math.abs(restored.moon-top.moon)<.1&&Math.abs(restored.header-top.header)<.1,label+' header returns at page top');
   }
   assert.deepEqual(hyperspace.explorerWithoutSync,hyperspace.explorerReference,'File Explorer excludes shared header offset even before observer delivery');
   assert.deepEqual(hyperspace.explorerAfterSync,hyperspace.explorerReference,'File Explorer header stays unchanged');

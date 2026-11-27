@@ -114,11 +114,14 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  const pageColor=()=>[main,shell,body].filter(Boolean).map(el=>win.getComputedStyle(el).backgroundColor).find(c=>c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')||win.getComputedStyle(doc.documentElement).getPropertyValue('--bg');
  let brandAttributes;
  let reserved=0,liftActive=false,lastGeometry='',lastPhase='',originalTranslate='',originalTranslatePriority='';
+ // Scroll owns the shared header while the page is away from its top.
+ // Hysteresis avoids toggling at a single noisy scroll boundary.
+ let scrollEngaged=false,scrollHidden=false,scrollView;
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
  const cancelFrame=()=>{if(raf!==undefined){time.cancel(raf);raf=undefined;}};
- const eligible=()=>!disposed&&['hyperspace','elegant'].includes(preference.value.mode)&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
+ const eligible=()=>!disposed&&['hyperspace','elegant'].includes(preference.value.mode)&&!media.matches&&!doc.hidden&&shell.dataset.view!=='explorer'&&!scrollEngaged&&!inside&&!header.matches(':hover')&&!header.querySelector(':focus-visible')&&!header.querySelector('#header-menu:not([hidden])')&&!doc.querySelector('dialog[open]');
  // Keep per-frame style invalidation local, rather than inheriting changing
  // variables from body through every History card. Skip unchanged values.
  const setVar=(el,k,v)=>{v=String(v);if(el&&el.style.getPropertyValue(k)!==v)el.style.setProperty(k,v);};
@@ -268,7 +271,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // supported view. The visible color toggle is an independent control.
  const elegantHidden=()=>!!overlay&&runMode==='elegant'&&!returning;
  const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<r.right&&e.clientY>=r.top&&e.clientY<r.bottom);};
- const revealArea=e=>within(header,e)&&!(elegantHidden()&&within(theme,e));
+ const revealArea=e=>!scrollHidden&&within(header,e)&&!(elegantHidden()&&within(theme,e));
  on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(revealArea(e));},{passive:true,capture:true});
  on(header,'pointerenter',e=>{if(e.pointerType!=='touch')pointer(revealArea(e));});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
@@ -294,11 +297,30 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // File Explorer; the animation preference does not affect the scroll anchor.
  const usesSharedHeader=()=>shell.dataset.view!=='explorer'&&doc.documentElement.dataset.aesthetic==='onyx';
  const syncHeaderScroll=()=>{
+  const sameView=scrollView===shell.dataset.view;
+  scrollView=shell.dataset.view;
+  const wasEngaged=sameView&&scrollEngaged;
+  if(!sameView){scrollEngaged=false;scrollHidden=false;}
   if(usesSharedHeader()){
    const scroll=Math.max(0,main?.scrollTop??0);
-   setVar(header,'--onyx-header-scroll',scroll+'px');
-   setVar(shell,'--onyx-header-reclaim',Math.min(scroll,header.offsetHeight)+'px');
+   const range=Math.max(0,(main?.scrollHeight??0)-(main?.clientHeight??0));
+   // A short but genuinely scrollable page can still hide its header.
+   // One- or two-pixel overflow is treated as the top.
+   const enter=Math.min(12,range);
+   const leave=Math.min(2,enter/3);
+   scrollEngaged=range>2&&scroll>leave;
+   if(!scrollEngaged)scrollHidden=false;
+   else if(scroll>=enter)scrollHidden=true;
+   // Never allow idle animation or hover to compete with scroll ownership.
+   if(scrollEngaged&&!wasEngaged){reset();inside=false;}
+   const offset=scrollHidden?header.offsetHeight:0;
+   setVar(header,'--onyx-header-scroll',offset+'px');
+   setVar(shell,'--onyx-header-reclaim',offset+'px');
+   header.toggleAttribute('data-onyx-scroll-hidden',scrollHidden);
+   if(wasEngaged&&!scrollEngaged)arm();
   }else{
+   scrollEngaged=false;scrollHidden=false;
+   header.removeAttribute('data-onyx-scroll-hidden');
    header.style.removeProperty('--onyx-header-scroll');
    shell.style.removeProperty('--onyx-header-reclaim');
   }
@@ -317,5 +339,5 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  syncHeaderScroll();
  const unsub=preference.subscribe(reset);
  // Navigation is cancellation-only: it never starts a timer or animation.
- return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.style.removeProperty('--onyx-header-scroll');shell.style.removeProperty('--onyx-header-reclaim');unsub();for(const fn of cleanups)fn();}};
+ return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.removeAttribute('data-onyx-scroll-hidden');header.style.removeProperty('--onyx-header-scroll');shell.style.removeProperty('--onyx-header-reclaim');unsub();for(const fn of cleanups)fn();}};
 }
