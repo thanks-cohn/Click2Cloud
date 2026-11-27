@@ -15,7 +15,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] OneDrive: verified saving and authentication.
 - [ ] Dropbox: verified saving and authentication.
 - [ ] Cloudflare R2: complete automatic error recovery.
-- [ ] Default redown folder with optional direct-to-drive mode.
+- [ ] Default redown folder with optional direct-to-drive mode; automatic same-account original-destination fallback on any redown resolution/creation failure, no popup/toast/confirmation or separate warning, actual destination recorded in receipts, no duplicate writes. Test denied, timed-out, conflicting and uncertain folder creation across all three basic providers. No new arbitrary directory creation for basic-cloud shortcuts in V1.
 ### Screenshot and chord-click reliability (mandatory V1)
 - [ ] Actual Screenshot to Cloud verified on all four providers.
 - [ ] Actual held two-/three-key chord + click verified on all four providers.
@@ -39,7 +39,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Preserve settings and destinations after reconnection.
 ### Commercial infrastructure
 - [ ] One-time lifetime 30/30 independent free allowances, no day/month/year reset; disclosed cloud-backed persistence across supported providers, no false promise of unrelated-account identity enforcement.
-- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations.
+- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations. Implement actual versioned JSON replicas using native application storage or disclosed authorized existing-folder/original-location fallback; no dependence on redown creation. Verify tamper/rollback/deletion/conflict and replica outage recovery; no new free entitlement from missing records, no blocking a valid accounted save merely because replica sync is pending.
 - [ ] Reliable $12/year license activation.
 - [ ] Restore paid licenses after reinstalling.
 - [ ] Prevent duplicate usage deductions.
