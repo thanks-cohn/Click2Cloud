@@ -776,6 +776,8 @@ def execute_window(args, client, caps, root, plan, source, mode, started, window
              f"{policy['budget']['seconds']} seconds execution, {policy['audit']['seconds']} seconds reserved for audit; "
              f"{policy['budget']['providerRequests']} reserved request units; "
              f"${preflight['modeledCostMicros']/1_000_000:.6f} modeled expense.")
+    if workload['expectedFiles'] is not None:
+        announce(f"Frozen workload: expected {workload['expectedFiles']}, discovered {workload['eligibleFiles']} eligible.")
     checkpoint = root / 'checkpoint.json'
     progress = {'schema': 'redown.owner-campaign-checkpoint/1', 'status': 'IN_PROGRESS_OR_INTERRUPTED',
                 'campaignId': plan['campaignId'], 'windowId': window_id, 'plannedFiles': len(planned),
@@ -984,11 +986,10 @@ def execute_window(args, client, caps, root, plan, source, mode, started, window
     document(window / 'benchmark.json', score)
     location = audit['locationVerdict'] if audit else {'status': 'NOT_TESTED', 'reasonCodes': ['NO_LOCATION_AUDIT']}
     retain = args.retain_downloads if read_mode else plan['retainDownloads'] and not audit_only
-    disk_count = 0
-    if retain:
-        observed = download_outcomes(plan, journal.rows(), window_id if read_mode else None)
-        disk_count = sum(item.get('readback', {}).get('localEvidence') == 'REOPENED_FINAL_SHA256'
-                         for item in observed.values())
+    observed = (download_outcomes(plan, journal.rows(), window_id if read_mode else None)
+                if retain or requires_readback and not audit_only else {})
+    disk_count = sum(item.get('readback', {}).get('localEvidence') == 'REOPENED_FINAL_SHA256'
+                     for item in observed.values()) if retain else 0
     disk = {'status': ('PASS' if disk_count == len(planned) and disk_count else 'INCOMPLETE') if retain else 'NOT_TESTED',
             'checkedFiles': disk_count, 'expectedFiles': len(planned) if retain else 0}
     if any(error['code'] == 'CANCELLATION_REQUESTED' for error in errors):
@@ -1083,6 +1084,9 @@ def execute_window(args, client, caps, root, plan, source, mode, started, window
         lines.append('Continuation CMD: ' + summary['continuationCommand'])
     try:
         atomic_document(checkpoint, {**progress, 'status': status, 'transferVerdict': transfer_status,
+                                    'statusCounts': dict(status_counts), 'downloadAttemptStates': progress['downloadStates'],
+                                    'downloadStates': dict(Counter(last_download_states.values() if read_mode else
+                                                                  (row['state'] for row in observed.values()))),
                                     'productionConfirmedFiles': len(acked), 'terminationReason': termination})
         document(window / 'summary.json', summary)
         atomic_document(root / 'summary.json', summary)

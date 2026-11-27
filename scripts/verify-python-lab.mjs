@@ -320,6 +320,9 @@ try{
    assert(download.share.every(path=>!path.includes('/downloads/')));
    const disk=await cli(['check-downloads','--run',run.receiptBundle,'--window',download.windowId]);
    assert.equal(disk.checkedFiles,ownerCount);
+   const terminalCheckpoint=JSON.parse(await readFile(join(run.receiptBundle,'checkpoint.json'),'utf8'));
+   assert.deepEqual(terminalCheckpoint.downloadStates,{PASS:ownerCount});
+   assert.deepEqual(terminalCheckpoint.statusCounts,{PASS:ownerCount});
    if(faults){
     const events=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
     assert(events.some(row=>row.event==='retryScheduled'&&row.direction==='download'&&row.code==='HTTP_502'));
