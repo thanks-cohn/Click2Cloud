@@ -207,7 +207,7 @@
  :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider-heading{max-inline-size:max(195px,48cqi)}
 }
 .onyx-queue-metrics{display:none}
-:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-page>h1{font-size:28px;color:var(--onyx-heading);margin-block:10px 24px;letter-spacing:-.8px}
+:root[data-aesthetic=onyx] #shell[data-view=queue] .queue-page>h1{font-size:28px;color:var(--onyx-heading);margin-block:10px 24px;letter-spacing:-.8px;position:relative;inset-block-start:-8px}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .queue-jobs{background:transparent;border:0;padding:0;box-shadow:none;display:flex;flex-direction:column}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .onyx-queue-metrics:not([hidden]){order:-2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:14px 4px;margin-bottom:14px;border-radius:11px;border:1px solid var(--line);background:var(--panel)}
 :root[data-aesthetic=onyx] #shell[data-view=queue] .onyx-queue-metrics>div{min-width:0;text-align:center;border-inline-end:1px solid var(--line);font-size:11px;color:var(--muted)}
