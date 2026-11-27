@@ -34,14 +34,16 @@ I want the customer to have a useful selection of available shortcuts rather tha
 
 Use one shared source of truth for shortcut assignments and their availability.
 
-- An occupied key combination should not appear as an available option in another shortcut dropdown. The current assignment remains visible when editing its own action.
+- A key combination should be excluded only if it conflicts in the effective input scope; reuse on unrelated authorized websites is allowed. The current assignment remains visible when editing its own action.
 - Recalculate available choices after a successful assignment, edit, release, removal or applicable scope/layout change. Do not maintain separate, inconsistent lists for Screenshots and Shortcut + Click.
 - Only offer technically supported, unoccupied choices. Check canonical equivalent keys, conflicting immediate versus held triggers, ambiguous overlapping chords, scope and keyboard layout. Do not mistake a suggestion for proof of browser registration.
-- Users may also enter a supported key combination manually. If it is already in use, show the old action/target and the requested new action/target.
+- Users may also enter a supported key combination manually. If it conflicts in the effective scope, show the old site/action/target and the requested new site/action/target.
 - Let the customer keep the old assignment (cancel the conflicting change), override it, or edit the old assignment to a different available combination. One deliberate Save applies the selected changes together; Cancel leaves the existing working configuration unchanged.
 - Validate the entire proposed configuration before applying. No silent override, duplicate active dispatch or apparent success when browser-managed registration is unavailable. When a real browser settings action is necessary, make that limitation clear rather than claiming it was performed programmatically.
 
 The ordinary dropdown path should avoid most conflicts. The existing conflict-resolution design is the fallback for manual entry and actual stale/conflicting settings, not an extra step on every save.
+
+**Latest contextual shortcut direction:** Enabled websites accepts a hostname or full URL, normalizes to the host, and optionally includes subdomains with explicit site consent. The same key/chord can select different authorized clouds/locations on unrelated websites. Exact host overrides broader matching domains. No Shelf-open prerequisite on a focused authorized webpage; no arbitrary extra Chrome command slots. Follow the canonical SHORTCUTS_TAB_SPECIFICATION.md section for actual permissions, conflict and lifecycle rules. Keep existing working defaults pending explicit further direction.
 
 ## 5. Shortcut + Click: one simple section
 
