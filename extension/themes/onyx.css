@@ -588,7 +588,9 @@
 :root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] :is(#tree,#files)::before{
  content:"";position:absolute;inset:14px 12px auto;block-size:96px;
  pointer-events:none;
- --explorer-placeholder:color-mix(in srgb,var(--text) 9%,transparent);
+ --explorer-placeholder:color-mix(in srgb,var(--text) 24%,transparent);
+ animation:onyx-explorer-loading-breathe 2.6s ease-in-out infinite;
+ opacity:.35;
  background:
   linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 0/68% 5px,
   linear-gradient(var(--explorer-placeholder),var(--explorer-placeholder)) 0 25px/86% 5px,
@@ -598,4 +600,15 @@
 }
 :root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] #files::before{
  inset:18px 14px auto;
+}
+
+/* A quiet luminous pulse, not a flash. Both panes breathe in sync. */
+@keyframes onyx-explorer-loading-breathe{
+ 0%,100%{opacity:.35;filter:drop-shadow(0 0 0 transparent)}
+ 50%{opacity:1;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--text) 24%,transparent))}
+}
+@media(prefers-reduced-motion:reduce){
+ :root[data-aesthetic=onyx] #shell[data-view=explorer][data-explorer-opening] :is(#tree,#files)::before{
+  animation:none;opacity:.7;filter:none;
+ }
 }
