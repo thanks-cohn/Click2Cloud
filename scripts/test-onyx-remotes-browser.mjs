@@ -344,14 +344,19 @@ try{
     controller.viewChanged();shell.dataset.view=view;choose(mode);scrollTo(0);
     if(mode!=='none'){move(190,20);move(190,500);advance(5000);advance(15000);}
     const top=readAnchors(),footerBefore=dock.getBoundingClientRect().bottom,headerHeight=header.offsetHeight;
-    scrollTo(100);advance(680);const down=readAnchors();const actual=main.scrollTop;
+    const nav=header.querySelector('nav'),more=header.querySelector('.header-more');
+    const menuPaint=()=>[getComputedStyle(nav).visibility,getComputedStyle(nav).opacity,getComputedStyle(more).visibility,getComputedStyle(more).opacity,getComputedStyle(header).backgroundColor,phase()];
+    const beforePaint=menuPaint(),handoffPaint=[];
+    scrollTo(100);handoffPaint.push(menuPaint());
+    for(let i=0;i<10;i++){advance(68);handoffPaint.push(menuPaint());}
+    const down=readAnchors();const actual=main.scrollTop;
     const noHeaderStrip=Math.abs(main.getBoundingClientRect().top-(top.header))<.1;
     const footerStable=Math.abs(dock.getBoundingClientRect().bottom-footerBefore)<.1;
     // Moving into the old header area while scrolled cannot expose an orphaned menu.
     move(190,20);advance(1000);
     const offscreen=[brand,theme,header.querySelector('nav'),header.querySelector('#header-more')].every(el=>el.getBoundingClientRect().bottom<=0);
     scrollTo(0);advance(680);const restored=readAnchors();
-    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight});
+    scrollAnchors.push({view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint});
     controller.viewChanged();
    }
    // A nearly-fitting Screenshots page is the critical boundary: scroll
@@ -428,11 +433,12 @@ try{
    assert(ranges.every(v=>Math.abs(v-ranges[0])<=1),'motion preserves the short-page scroll range');
   }
   assert.equal(hyperspace.scrollAnchors.length,18);
-  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight} of hyperspace.scrollAnchors){
+  for(const {view,mode,top,down,actual,restored,offscreen,noHeaderStrip,footerStable,headerHeight,beforePaint,handoffPaint} of hyperspace.scrollAnchors){
    const label=view+'/'+mode;
    assert.equal(actual,100,label+' scroll fixture');
    assert(Math.abs(top.r-down.r-headerHeight)<.1&&Math.abs(top.moon-down.moon-headerHeight)<.1,label+' icons must fully retract');
-   assert(Math.abs(restored.nav-down.nav-headerHeight)<.1&&Math.abs(restored.more-down.more-headerHeight)<.1&&Math.abs(top.header-down.header-headerHeight)<.1,label+' navigation and header retract as one unit');
+   assert(Math.abs(top.nav-down.nav-headerHeight)<.1&&Math.abs(top.more-down.more-headerHeight)<.1&&Math.abs(top.header-down.header-headerHeight)<.1,label+' navigation and header retract as one unit');
+   assert(handoffPaint.every(sample=>JSON.stringify(sample)===JSON.stringify(beforePaint)),label+' idle-hidden menu and background must never reappear during scroll handoff');
    assert(offscreen,label+' hovering the old header position must not expose a detached menu');
    assert(noHeaderStrip,label+' scroll immediately reclaims the entire former header strip');
    assert(footerStable,label+' scroll reclaim preserves the footer anchor');

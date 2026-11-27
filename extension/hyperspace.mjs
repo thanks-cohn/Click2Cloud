@@ -117,7 +117,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // Scroll owns the shared header while the page is away from its top.
  // Hysteresis avoids toggling at a single noisy scroll boundary.
  let scrollEngaged=false,scrollHidden=false,scrollView;
- let scrollFrame,scrollTarget=0,scrollOffset=0,scrollLayout=0;
+ let scrollFrame,scrollTarget=0,scrollOffset=0,scrollLayout=0,scrollPausedAt;
  const cleanups=[];
  const on=(target,type,fn,opts)=>{target.addEventListener(type,fn,opts);cleanups.push(()=>target.removeEventListener(type,fn,opts));};
  const cancelTimer=()=>{if(timer!==undefined){time.clear(timer);timer=undefined;}};
@@ -154,7 +154,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   }
  }
  function clear(){
-  cancelFrame();overlay?.remove();overlay=parts=current=returning=undefined;
+  cancelFrame();scrollPausedAt=undefined;overlay?.remove();overlay=parts=current=returning=undefined;
   body.removeAttribute('data-hyperspace');body.removeAttribute('data-hyperspace-mode');body.style.removeProperty('--hyper-elegant-page');
   if(brandAttributes&&brand){for(const [key,value] of brandAttributes){if(value===null)brand.removeAttribute(key);else brand.setAttribute(key,value);}brandAttributes=undefined;}
   reserve(0);layer(false);main?.style.removeProperty('--hyper-title-up');main?.style.removeProperty('--hyper-title-center');main?.style.removeProperty('--hyper-shortcut-center');main?.style.removeProperty('--hyper-shortcut-progress');lastGeometry=lastPhase='';
@@ -258,7 +258,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  }
  function arm(){cancelTimer();if(!overlay&&eligible())timer=time.set(open,IDLE_MS);}
  function restore(immediate=false){
-  cancelTimer();if(!overlay)return;
+  cancelTimer();if(!overlay||scrollEngaged||scrollFrame!==undefined)return;
   if(immediate||media.matches){clear();return;}
   if(returning)return;
   cancelFrame();returning={frame:{...current},start:time.now(),duration:Math.max(300,Math.round(880*Math.max(current.split,current.burst,.3)))};
@@ -272,7 +272,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  // supported view. The visible color toggle is an independent control.
  const elegantHidden=()=>!!overlay&&runMode==='elegant'&&!returning;
  const within=(el,e)=>{if(!el)return false;const r=el.getBoundingClientRect();return el.contains(e.target)||(e.clientX>=r.left&&e.clientX<r.right&&e.clientY>=r.top&&e.clientY<r.bottom);};
- const revealArea=e=>!scrollHidden&&scrollFrame===undefined&&within(header,e)&&!(elegantHidden()&&within(theme,e));
+ const revealArea=e=>!scrollEngaged&&!scrollHidden&&scrollFrame===undefined&&within(header,e)&&!(elegantHidden()&&within(theme,e));
  on(doc,'pointermove',e=>{if(e.pointerType==='touch')return;pointer(revealArea(e));},{passive:true,capture:true});
  on(header,'pointerenter',e=>{if(e.pointerType!=='touch')pointer(revealArea(e));});
  on(doc.documentElement,'pointerleave',()=>pointer(false));
@@ -305,14 +305,30 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  function cancelScrollFrame(){
   if(scrollFrame!==undefined){time.cancel(scrollFrame);scrollFrame=undefined;}
  }
- function settleScroll(target,immediate=false,initialLayout){
-  if(!immediate&&target===scrollTarget&&initialLayout===undefined)return;
+ // Suspend, rather than clear, the actual idle scene. Its menu visibility,
+ // surface, and title positions stay exactly as painted through the handoff.
+ function pauseIdleForScroll(){
+  cancelTimer();
+  if(overlay&&scrollPausedAt===undefined){
+   scrollPausedAt=time.now();cancelFrame();
+  }
+ }
+ function resumeIdleAfterScroll(){
+  if(scrollEngaged||scrollFrame!==undefined)return;
+  if(overlay&&scrollPausedAt!==undefined){
+   const elapsed=time.now()-scrollPausedAt;scrollPausedAt=undefined;
+   started+=elapsed;
+   if(returning)returning.start+=elapsed;
+   if(returning||!current?.done)raf=time.frame(tick);
+  }else if(!overlay)arm();
+ }
+ function settleScroll(target,immediate=false){
+  if(!immediate&&target===scrollTarget)return;
   cancelScrollFrame();
   scrollTarget=target;
-  if(initialLayout!==undefined)paintScrollOffset(scrollOffset,initialLayout);
   const from=scrollOffset,layoutFrom=scrollLayout;
   if(immediate||media.matches||Math.max(Math.abs(target-from),Math.abs(target-layoutFrom))<.5){
-   paintScrollOffset(target);return;
+   paintScrollOffset(target);resumeIdleAfterScroll();return;
   }
   const start=time.now(),duration=680;
   const animate=now=>{
@@ -320,7 +336,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    const p=clamp((now-start)/duration),eased=smooth(p);
    paintScrollOffset(from+(target-from)*eased,layoutFrom+(target-layoutFrom)*eased);
    if(p<1)scrollFrame=time.frame(animate);
-   else{paintScrollOffset(target);if(!scrollEngaged)arm();}
+   else{paintScrollOffset(target);resumeIdleAfterScroll();}
   };
   scrollFrame=time.frame(animate);
  }
@@ -339,21 +355,15 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
    scrollEngaged=range>2&&scroll>leave;
    if(!scrollEngaged)scrollHidden=false;
    else if(scroll>=enter)scrollHidden=true;
-   // Never allow idle animation or hover to compete with scroll ownership.
-   let initialLayout;
+   // Do not reset the idle scene on scroll. Reset would reveal navigation
+   // and repaint the header before the glide, producing a visible flash.
    if(scrollEngaged&&!wasEngaged){
-    // Take over from the actual rendered lift, not the idle animation's
-    // reserved layout, so cancelling it does not snap the content down.
-    if(overlay){
-     const bodyTop=body.getBoundingClientRect().top;
-     initialLayout=clamp((bodyTop+header.offsetHeight-main.getBoundingClientRect().top)/Math.max(1,header.offsetHeight))*header.offsetHeight;
-     if(initialLayout>=header.offsetHeight/2)scrollHidden=true;
-    }
-    reset();inside=false;
+    if(overlay&&current&&(current.words<.99||current.lift>=.5))scrollHidden=true;
+    pauseIdleForScroll();inside=false;
    }
-   settleScroll(scrollHidden?header.offsetHeight:0,!sameView,initialLayout);
+   settleScroll(scrollHidden?header.offsetHeight:0,!sameView);
    header.toggleAttribute('data-onyx-scroll-hidden',scrollHidden);
-   if(wasEngaged&&!scrollEngaged)arm();
+   if(wasEngaged&&!scrollEngaged)resumeIdleAfterScroll();
   }else{
    scrollEngaged=false;scrollHidden=false;cancelScrollFrame();scrollTarget=scrollOffset=scrollLayout=0;
    header.removeAttribute('data-onyx-scroll-hidden');
@@ -369,7 +379,7 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
  on(header,'focusin',e=>{
   // Keyboard access to any header control restores the page-top anchor.
   if(usesSharedHeader()&&main?.scrollTop>0&&e.target.matches(':focus-visible')){
-   main.scrollTop=0;syncHeaderScroll();settleScroll(0,true);
+   main.scrollTop=0;syncHeaderScroll();settleScroll(0,true);restore(true);
   }
  });
  on(win,'resize',syncHeaderScroll);on(media,'change',()=>{if(usesSharedHeader())settleScroll(scrollHidden?header.offsetHeight:0,true);});
