@@ -129,3 +129,6 @@ Follow the current master roadmap and Part 2 execution index on the authorized c
 
 
 **Latest owner acceptance:** Google Drive drive.file only, My Drive/ReDown new save targets, authorized retrieval only. Preserve healthy compatible Workers across updates, no digest-only redeploy; independently ready Simple/Narrow/Depth; crash recovery does not block unrelated eligible work; immutable account identity and thin provider adapters; bounded rolling local retention with configurable settings and protected unresolved claims. Follow active Part 2 owner decisions and inherited Part 3 regression. No new framework, scope or phase.
+
+
+**Additional owner acceptance:** actual paid key re-entry restores original verified term without new charge/free reset, valid cached entitlement during allowed outage, no raw keys in diagnostics; issuer approval and actual store/OAuth/merchant prerequisites verified. Early 2C permissions and approval feasibility matrix, 2D canonical scope-aware shortcut occupancy/capability catalog and actual command readback, Part 3 all-editor conflict/restore and four-domain delivery tests. Unknown other-extension/OS/site conflicts are not advertised as known availability. No new engine, broad permissions or extra phase.
