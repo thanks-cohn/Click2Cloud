@@ -18,7 +18,7 @@ Investigate actual original REDOWN and current Click2Cloud Worker/readiness/menu
 | Checkpoint | Output | Gate |
 |---|---|---|
 | 2B.1 | Source study, independent first-use Worker/menu readiness | Focused regression, packaged tests/build and owner acceptance of relevant actual first-use evidence |
-| 2B.2 | Bounded automatic retry, repeatable deliberate Retry, durable Queue/source retention, actual Shelf lifecycle and scheduler ownership, Workerd startup/resource diagnostics | Explicit retry/reconciliation/restart cases and shared consumer/Lab behavior; no lifetime retry cutoff |
+| 2B.2 | **Critical P0: repair and qualify existing IndexedDB source persistence, journal and background scheduler in place**; bounded automatic/manual retry, Queue retention, Shelf lifecycle and startup/resource diagnostics | Prove actual ownership and closure/restart recovery, source preservation and no duplicate publication; shared consumer/Lab behavior; no lifetime retry cutoff |
 | 2B.3 | Filename compatibility, Queue Retry/Retry All Failed and expandable source/host links, ordinary Upload button/API parity, partial outcome feedback and failed-child-only recovery | 43-file benign analogue, repeatable retries, durable Queue after restart, source links/privacy, truthful close/open behavior and partial/verified feedback, no duplicate successful children or charges |
 | 2B.4 | Integrated reference Windows and authorized R2 qualification | Predeclared repetitions, exact reopened SHA-256, current live 100 round trip, inherited gates; historical missing-artifact decision separately |
 | 2C | Account/auth/capabilities/migration and default resolver | Shared real identity and target/fallback behavior |
