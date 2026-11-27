@@ -47,7 +47,7 @@ The ordinary dropdown path should avoid most conflicts. The existing conflict-re
 
 The detailed authoritative tab reference is `SHORTCUTS_TAB_SPECIFICATION.md` alongside this document.
 
-Create a straightforward Shortcut + Click section/tab within the existing shortcut/settings experience. Reuse the screenshot location controls and available-shortcut dropdown behavior. Do not introduce a complicated workflow builder.
+Create a dedicated Shortcuts tab with a straightforward Shortcut + Click section, Explorer & History assignments and retained built-in controls. Screenshots is its own page; do not include screenshot rows or configuration in Shortcuts. Both pages share one registry and validation. Reuse the screenshot location controls and available-shortcut dropdown behavior. Do not introduce a complicated workflow builder.
 
 The intended setup is:
 
