@@ -6,6 +6,8 @@ Owner direction • November 27, 2026
 
 This standing vision governs engineering choices across ReDown's development and maintenance. It is not a separate implementation assignment, a research project, or authorization for a wholesale rewrite. Read it alongside the [existing engineering and verification vision](README.md) and [owner's intended implementation](../../11.25.2026/MY_INTENDED_IMPLEMENTATION.md). The active roadmap and execution index determine the current work; the latest explicit owner decisions govern product policy.
 
+The [Customer Experience Vision](CUSTOMER_EXPERIENCE_VISION.md) is the concrete behavioral target for these principles: independent first-use Simple, Narrow and Depth saves, everyday reliability, recovery and long-term continuity.
+
 ## 1. Simplicity is the ultimate architectural objective
 
 Prefer one elegant, dependable mechanism over multiple mechanisms addressing variations of the same problem. Every mechanism must justify its existence. Remove unnecessary complexity while preserving proven capabilities. Small, specialized modules with clear ownership are desirable; competing owners, overlapping state machines and redundant infrastructure are not.
