@@ -183,6 +183,29 @@ function setup({
   };
 }
 for (const id of ["google", "dropbox", "onedrive"]) {
+  test(`${id}: explicit sign-out removes credentials and persists across restart`, async () => {
+    const f = setup({id,initial:true});
+    const other = id === "google" ? "dropbox" : "google";
+    const otherKey = "redownRemoteBasicV1:auth:" + other;
+    f.store[otherKey] = {connected:true,identity:["other-account"]};
+    const grant = await f.auth.authorization(id);
+    const result = await f.auth.disconnect(id);
+    assert.equal(result.connected,false);
+    assert.equal(result.ready,false);
+    assert.equal(result.reason,"AUTH_SIGNED_OUT");
+    assert.equal(grant.isCurrent(),false);
+    assert.deepEqual(f.store["redownRemoteBasicV1:auth:"+id],{connected:false,signedOut:true});
+    assert.deepEqual(f.store[otherKey],{connected:true,identity:["other-account"]});
+    const restart=f.restart();
+    assert.equal((await restart.status(id)).reason,"AUTH_SIGNED_OUT");
+    await assert.rejects(restart.authorization(id),{code:"AUTH_SIGNED_OUT"});
+    assert.equal(f.popups.length,0);
+    assert.ok(f.native.every(o=>o.interactive===false));
+    assert.equal((await restart.connect(id)).ready,true);
+    assert.equal((await restart.status(id)).ready,true);
+  });
+}
+for (const id of ["google", "dropbox", "onedrive"]) {
   test(`${id}: absent OAuth config is not confused with website login`, async () => {
     const f = setup({ id, noConfig: true });
     const status = await f.auth.status(id);

@@ -437,6 +437,7 @@ export function createAuth({
       AUTH_BROWSER_UNSUPPORTED: "browser-api-unsupported",
       AUTH_NETWORK: "network-temporary", AUTH_CHECK_TIMEOUT: "network-temporary",
       AUTH_REQUIRED: connected ? "reconnect-needed" : "disconnected",
+      AUTH_SIGNED_OUT: "disconnected",
       AUTH_SCOPE_REQUIRED: "reconnect-needed", AUTH_REVOKED: "reconnect-needed",
       AUTH_ACCOUNT_CHANGED: "reconnect-needed",
     }[reason] ?? "auth-failed";
@@ -449,6 +450,7 @@ export function createAuth({
   function authorization(id) {
     valid(id);
     const slot = slots[id];
+    if (slot.disconnecting) return Promise.reject(changed());
     if (slot.login) return Promise.reject(connecting());
     if (slot.check && slot.check.ticket !== slot.epoch) return Promise.reject(changed());
     slot.checked = undefined;
@@ -462,6 +464,7 @@ export function createAuth({
       const record = await load(id);
       if (slot.epoch !== ticket) throw changed();
       rememberRecord(id, record);
+      if (record?.signedOut === true) throw fail("AUTH_SIGNED_OUT", "You signed out of this provider.", "Open Providers and select Connect to sign in again.");
       if (id === "google" && typeof chrome.identity?.getAuthToken !== "function")
         throw fail("AUTH_BROWSER_UNSUPPORTED", "Google Drive needs the browser's extension token API.");
       if (!record?.connected || (id !== "google" && !record.refreshToken))
@@ -498,6 +501,7 @@ export function createAuth({
   function snapshot(id) {
     valid(id);
     const slot = slots[id];
+    if (slot.disconnecting) return unavailable(id, changed());
     if (slot.login) return unavailable(id, connecting());
     const age = now() - slot.checked?.at;
     const maxAge = slot.checked?.result.ready ? STATUS_FRESH_MS : 3000;
@@ -557,6 +561,7 @@ export function createAuth({
   async function connect(id, previewIdentity) {
     valid(id);
     const slot = slots[id];
+    if(slot.disconnecting)throw changed();
     if(previewIdentity&&slot.login)throw connecting();
     return flight(slot, "login", OAUTH_WINDOW_MS, () => fail(
       "AUTH_WINDOW_TIMEOUT", "The sign-in window could not complete in time.",
@@ -598,7 +603,30 @@ export function createAuth({
       return publish(result);
     });
   }
-  return {status, snapshot, connect, reconnect: connect, authorization,
+  async function disconnect(id) {
+    valid(id);
+    const slot = slots[id];
+    if (slot.login || slot.disconnecting) throw connecting();
+    slot.disconnecting = true;
+    // Invalidate all grants and serialize with any already-started token write.
+    // A passive authorization check must not restore credentials after logout.
+    slot.epoch++;
+    slot.checked = undefined;
+    try {
+      await secure();
+      await slot.commit?.catch(() => {});
+      // Keep only a credential-free marker. Native saves must not implicitly
+      // reconnect an account that the user explicitly disconnected.
+      await storage(() => chrome.storage.local.set({[key(id)]:{connected:false,signedOut:true}}));
+      rememberRecord(id, null);
+      const result = unavailable(id, fail("AUTH_SIGNED_OUT", "You signed out of this provider.", "Open Providers and select Connect to sign in again."));
+      slot.checked = {result, at: now()};
+      return publish(result);
+    } finally {
+      slot.disconnecting = false;
+    }
+  }
+  return {status, snapshot, connect, reconnect: connect, disconnect, authorization,
     token: async id => (await authorization(id)).accessToken,
     binding: id => slots[id]?.binding ?? null,
     refresh: id => status(id, true)};

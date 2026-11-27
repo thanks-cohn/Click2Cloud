@@ -15,6 +15,25 @@
 /* Shared Providers header and screenshot-derived Remotes geometry. 380px Shelf: ~336px cards, 76px
    ordinary rows, ~65px header. No mock account usage is imported. */
 .onyx-provider-meta,.onyx-slogan,.onyx-provider-detail-toggle,.onyx-mode-icon{display:none!important}
+/* Sign out replaces the free-capacity caption, without adding a grid row.
+   The hidden caption continues to reserve the exact original footprint. */
+:root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider{
+ & .onyx-provider-meta>[data-signout][hidden]{display:none!important}
+ & .onyx-provider-meta>[data-signout]:not([hidden]){
+  position:absolute;inset:0 auto 0 0;max-inline-size:100%;min-block-size:0;
+  margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;
+  color:var(--onyx-subtitle);font:inherit;line-height:inherit;text-align:start;
+  opacity:0;pointer-events:none;white-space:nowrap;text-decoration:underline;text-underline-offset:2px;
+ }
+ &:is(:hover,:focus-within) .onyx-provider-meta:not([data-onyx-transfer]):has(>[data-signout]:not([hidden]))>.onyx-free-caption{visibility:hidden}
+ &:is(:hover,:focus-within) .onyx-provider-meta:not([data-onyx-transfer])>[data-signout]:not([hidden]){opacity:1;pointer-events:auto}
+ & .onyx-provider-meta>[data-signout]:not([hidden]):is(:hover,:focus-visible){color:var(--text)}
+ & .onyx-provider-meta[data-onyx-transfer]>[data-signout]{visibility:hidden;pointer-events:none}
+}
+@media(hover:none),(pointer:coarse){
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .onyx-provider-meta:not([data-onyx-transfer]):has(>[data-signout]:not([hidden]))>.onyx-free-caption{visibility:hidden}
+ :root[data-aesthetic=onyx] #shell[data-view=remotes] .remote-provider .onyx-provider-meta:not([data-onyx-transfer])>[data-signout]:not([hidden]){opacity:1;pointer-events:auto}
+}
 .legacy-slogan{font:inherit!important;color:inherit!important}
 :root[data-aesthetic=onyx] :is(#shell[data-view=remotes],#shell[data-view=queue],.app-header,#shell:not([data-view=explorer])>#manage-slot){
  --onyx-highlight:#ffffff08;--onyx-icon:#344354;--onyx-subtitle:#b4c5dc;

@@ -12,6 +12,7 @@ export const CONTRACTS = Object.freeze({
   "auth.connect": { provider: "provider" },
   "auth.reconnect": { provider: "provider", previewId: "string?" },
   "auth.refresh": { provider: "provider" },
+  "auth.disconnect": { provider: "provider" },
   "saves.start": {
     provider: "provider",
     sourceUrl: "string",
@@ -131,6 +132,10 @@ export function createApi({auth, chrome, durable, afterAuth, previewAdapters}) {
       }
       case "auth.refresh":
         return describe(await auth.refresh(input.provider));
+      case "auth.disconnect": {
+        const {coordinator} = await durable();
+        return describe(await coordinator.withProviderIdle(input.provider, () => auth.disconnect(input.provider)));
+      }
       case "history.readImagePreview":
         return previews.read(input,owner);
       case "history.cancelImagePreview":

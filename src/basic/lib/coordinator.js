@@ -24,6 +24,14 @@ export function createCoordinator({
   const running = new Map(),
     warnings = new Set(), cancelling = new Set(), retrying = new Set();
   let stopping=false;
+  const signingOut = new Set();
+  const signOutBusy = () => fail("PROVIDER_SIGN_OUT_BUSY", "Wait for this provider’s active save or sign-out to finish.", "Try again after the provider is idle.");
+  async function withProviderIdle(provider, work) {
+    providerId(provider);
+    if (signingOut.has(provider) || [...running.values()].some(job=>job.provider===provider)) throw signOutBusy();
+    signingOut.add(provider);
+    try { return await work(); } finally { signingOut.delete(provider); }
+  }
   async function event(a, stage, outcome = "Uncertain", extra = {}) {
     try { void Promise.resolve(observe(a)).catch(() => {}); } catch { /* History is optional. */ }
     try {
@@ -285,6 +293,7 @@ export function createCoordinator({
   }
   function start(input, options = {}) {
       providerId(input.provider);
+      if(signingOut.has(input.provider))throw signOutBusy();
       const id = input.requestId || crypto.randomUUID();
       if (typeof id !== "string" || !/^[a-zA-Z0-9_-]{8,100}$/.test(id))
         throw fail(
@@ -416,7 +425,7 @@ export function createCoordinator({
     }finally{retrying.delete(id);}
   }
   return {
-    start, pending, resume, cancel, cancelAll, expirePending, retry,
+    start, pending, resume, cancel, cancelAll, expirePending, retry, withProviderIdle,
     async afterLogin(provider) {
       const waiting = await pending(provider);
       if (waiting?.state === "AWAITING_AUTH") return resume(provider, waiting.id, false);

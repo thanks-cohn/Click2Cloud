@@ -9,6 +9,7 @@ const actionTimeout = {
   'auth.connect': 120000,
   'auth.reconnect': 120000,
   'auth.refresh': 45000,
+  'auth.disconnect': 45000,
   'providers.getStatus': 45000,
   'saves.resume': 120000,
 };
@@ -89,7 +90,10 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     const disconnected = !status.connected && [undefined,'disconnected','checking','network-temporary'].includes(status.phase);
     const section = card.connect.closest('.remote-provider');
     const wasAuthenticated = section.hasAttribute('data-onyx-connected');
-    card.hadConnection = card.hadConnection || authenticated || status.connected === true || reconnect;
+    card.hadConnection = status.reason === 'AUTH_SIGNED_OUT' ? false : card.hadConnection || authenticated || status.connected === true || reconnect;
+    const canSignOut = status.connected === true;
+    if(!canSignOut && document.activeElement === card.signOut)card.connect.focus({preventScroll:true});
+    card.signOut.hidden = !canSignOut;
     const onyx = document.documentElement.dataset.aesthetic === 'onyx';
     card.connect.textContent = authenticated ? 'Connected' : reconnect || (onyx && disconnected && card.hadConnection) ? 'Reconnect' :
       disconnected ? 'Connect' : status.phase === 'connecting' ? 'Connecting…' : 'Check connection';
@@ -106,7 +110,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     if(authenticated)card.connect.setAttribute('aria-description',card.connect.title);
     else card.connect.removeAttribute('aria-description');
     card.operation = authenticated || reconnect || (disconnected && card.hadConnection) ? 'auth.reconnect' : disconnected ? 'auth.connect' : 'auth.refresh';
-    card.availability.textContent = status.ready || !status.connected && ['AUTH_REQUIRED','DISCONNECTED',undefined].includes(status.reason)
+    card.availability.textContent = status.ready || !status.connected && ['AUTH_REQUIRED','AUTH_SIGNED_OUT','DISCONNECTED',undefined].includes(status.reason)
       ? '' : [status.message, status.nextAction].filter(Boolean).join(' ');
     paintActivity(card);
   }
@@ -117,7 +121,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     section.dataset.provider=id;
     section.innerHTML = `<div class="remote-provider-heading">
         <img src="icons/${icon}" width="24" height="24" alt="">
-        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta"><span class="onyx-free-caption">${({google:'15 GB Free',onedrive:'5 GB Free',dropbox:'2 GB Free'})[id]}</span><span class="onyx-provider-transfer" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span class="onyx-transfer-fill"></span></span></span></div>
+        <div class="remote-provider-title"><h2 id="remote-provider-${id}">${label}</h2><span class="onyx-provider-meta"><span class="onyx-free-caption">${({google:'15 GB Free',onedrive:'5 GB Free',dropbox:'2 GB Free'})[id]}</span><button type="button" data-signout hidden aria-label="Sign out of ${label}">Sign out</button><span class="onyx-provider-transfer" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span class="onyx-transfer-fill"></span></span></span></div>
       </div>
       <p role="status" class="remote-provider-activity" data-activity hidden></p>
       <button type="button" class="onyx-provider-detail-toggle" aria-expanded="false" aria-controls="remote-provider-info-${id}">Details</button>
@@ -134,7 +138,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       <button type="button" data-continue hidden>Continue save</button>`;
     const get = key => section.querySelector('[data-' + key + ']');
     const card = {
-      label, connect: get('connect'), refresh: get('refresh'),
+      label, connect: get('connect'), refresh: get('refresh'), signOut: get('signout'),
       availability: get('availability'), continueSave: get('continue'), activity: get('activity'),
       detailToggle:section.querySelector('.onyx-provider-detail-toggle'),info:section.querySelector('.remote-provider-info'),
       operation: 'auth.connect', revision: 0, attemptRevision: 0, active: 0,
@@ -153,7 +157,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
       if (button.getAttribute('aria-disabled') === 'true') return;
       if (changesStatus) card.revision++;
       const revision = card.revision;
-      const buttons = changesStatus ? [card.connect, card.refresh] : [button];
+      const buttons = changesStatus ? [card.connect, card.refresh, card.signOut] : [button];
       for (const control of buttons) control.setAttribute('aria-disabled', 'true');
       if(changesStatus)card.refresh.setAttribute('aria-busy','true');
       const feedback = get(changesStatus ? 'feedback' : 'navigation');
@@ -181,6 +185,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     }
     card.connect.onclick = () => action(card.connect, card.operation);
     card.refresh.onclick = () => action(card.refresh, 'auth.refresh');
+    card.signOut.onclick = () => { if(!card.signOut.hidden)void action(card.signOut, 'auth.disconnect'); };
     const go = get('go');
     go.onclick = () => action(go, 'providers.goTo', false);
     card.continueSave.onclick = async () => {
