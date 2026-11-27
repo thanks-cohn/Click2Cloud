@@ -2,6 +2,8 @@
 
 This is the original standing design philosophy and verification strategy, not an independent feature request or authorization to rewrite production code. See the [Permanent Engineering Vision](PERMANENT_ENGINEERING_VISION.md) for the current overarching principles and reference architecture, including customer-selectable Silent/Normal feedback. The active execution index governs current Part 2/3 scope; preserve the verified Part 1 foundation and existing Python laboratories. The original Part 1 scope statement is historical, not a new assignment.
 
+Companion: [Customer Experience Vision](CUSTOMER_EXPERIENCE_VISION.md) — the intended journey from installation and destination selection through three weeks of ordinary use and long-term return.
+
 ## Conceptual integrity
 
 - NO BLOAT: every mechanism must justify its existence. Prefer existing proven services, eliminate competing implementations only where safely justified, and avoid speculative abstractions.
