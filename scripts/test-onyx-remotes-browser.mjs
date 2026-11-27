@@ -34,6 +34,7 @@ try{
       await new Promise(resolve=>window.releaseRefresh=resolve);
       if(window.failRefresh)return {ok:false,error:{code:'FIXTURE_ERROR',message:'Long fixture error: check your account connection and retry.'}};
     }
+    if(m.op==='auth.disconnect')return {ok:true,value:{provider:m.input.provider,connected:false,ready:false,authorized:false,phase:'disconnected',reason:'AUTH_SIGNED_OUT'}};
     const connected=m.input.provider==='dropbox'||m.op==='auth.connect'||m.op==='auth.reconnect';
     return {ok:true,value:m.op==='saves.pending'?null:m.op==='providers.goTo'?{opened:true}:{connected,ready:connected,authorized:connected}};
   }};
@@ -879,6 +880,27 @@ try{
  assert(await browseAfterAuth.isVisible());
  assert((await page.evaluate(()=>window.providerCalls)).some(([op,p])=>op==='auth.reconnect'&&p==='dropbox'));
  await page.mouse.move(0,0);
+ // Hover replaces the capacity label without changing the card geometry.
+ for(const provider of ['google','onedrive','dropbox']){
+  await page.evaluate(provider=>{
+   window.testProviderCards.onStatus({provider,connected:true,ready:true,authorized:true,phase:'ready'});
+   document.activeElement?.blur();
+  },provider);
+  await page.mouse.move(0,0);
+  const card=page.locator('[data-provider='+provider+']'),signout=card.locator('[data-signout]');
+  const original=await card.boundingBox();
+  assert.equal(await signout.evaluate(el=>getComputedStyle(el).opacity),'0');
+  await card.hover();
+  assert.equal(await signout.evaluate(el=>getComputedStyle(el).opacity),'1');
+  assert.equal(await card.locator('.onyx-free-caption').evaluate(el=>getComputedStyle(el).visibility),'hidden');
+  assert.deepEqual(await card.boundingBox(),original,'Hover must not resize the provider card');
+  await signout.click();
+  await page.waitForFunction(provider=>!document.querySelector('[data-provider='+provider+']').hasAttribute('data-onyx-connected'),provider);
+  assert.equal(await card.locator('[data-connect]').textContent(),'Connect');
+  assert.equal(await signout.evaluate(el=>el.hidden),true);
+  assert.equal(await page.evaluate(provider=>window.providerCalls.filter(([op,p])=>op==='auth.disconnect'&&p===provider).length,provider),1);
+  assert.deepEqual(await card.boundingBox(),original,'Disconnect must not resize the provider card');
+ }
  // Sign-in and verification captions must not expand the Cloudflare card.
  for(const width of [320,380,480,800]){
   await page.setViewportSize({width,height:760});
