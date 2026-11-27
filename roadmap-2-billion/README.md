@@ -26,14 +26,14 @@ This is a planning snapshot based on reported development progress and test resu
 | Dropbox | 🟡 Existing integration | Full live reliability testing |
 | Right-click remote saving | 🟡 Implemented | Reliable availability after login and browser restart |
 | Screenshot to Cloud | 🟡 Existing R2 reference functionality | Mandatory V1: actual capture and verified saves to R2, Google Drive, OneDrive and Dropbox via shared engine |
-| Shortcut + Click to Cloud | 🟡 Existing R2 reference foundation | Mandatory V1: hold a configurable two- or three-key chord and deliberately click an eligible item to save to any of the four providers; release to restore normal browsing. Validate shared gesture and save contracts, conflicts and browser permissions. |
-| Folder uploads | 🟡 Implemented and fixture-tested | Large live workloads across providers |
+| Shortcut + Click to Cloud | 🟡 Existing R2 reference foundation | Mandatory V1: hold a configurable two- or three-key chord and deliberately click an eligible item to save to any of the four providers; release to restore normal browsing. Multiple screenshot and held-click routes share the Shortcut API; show existing assignment, Override or edit old keys, one Save updates both. Validate actual browser compatibility. |
+| Folder uploads | 🟡 Existing R2 foundation; revised basic-cloud V1 design | R2 preserves hierarchy; basic clouds flatten recursively discovered local files into one resolved target, automatically suffix conflicting names; verify each mapped file |
 | File downloads | 🟡 Implemented | Independent SHA-256 verification |
 | Folder downloads | 🟡 Existing implementation | Large live retrieval tests |
 | File Explorer | 🟡 Implemented | Responsiveness and operation reliability |
 | Get URL | 🟡 Existing R2 functionality | Reliable URL generation and appropriate provider support; public access only with explicit consent |
 | Destination rules | 🟡 Existing foundation | Consistent behavior across providers |
-| Default `redown` folder | 🟡 Owner-mandated V1 behavior | Prefer redown; if unavailable, automatically save to the same authorized original cloud location without a fallback notification; no new arbitrary shortcut directory creation |
+| Default `redown` folder | 🟡 Owner-mandated V1 behavior | If redown is not already ready, save immediately at the authorized original location while independently preparing redown. No fallback notice; new jobs switch when ready. No new arbitrary shortcut directory creation |
 
 ## 2. Reliability and infrastructure
 
@@ -89,7 +89,9 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 | International pricing | 🔴 Not established | Affordable regional pricing and payment methods |
 | Referral system | 🔴 Not established | Optional privacy-respecting referral incentives |
 
-The one-time lifetime 30/30 allowance supersedes the earlier seven-per-day proposal. There is no daily, monthly or annual reset. Reinstalls, known-identity provider switches and subscription lapse do not replenish it. Category mapping and existing-user migration remain owner decisions; proposed non-overlapping counters avoid charging twice. App metadata deters casual reinstall abuse, but user-controlled metadata cannot prove one allowance per human across unrelated accounts. Disclose storage and respect deletion/disconnect; a privacy-respecting authoritative entitlement ledger may be required. Do not make free use artificially unreliable.
+The one-time lifetime 30/30 allowance supersedes the earlier seven-per-day proposal. There is no daily, monthly or annual reset. Reinstalls, known-identity provider switches and subscription lapse do not replenish it. Category mapping and existing-user migration remain owner decisions; proposed non-overlapping counters avoid charging twice. App metadata deters casual reinstall abuse, but user-controlled metadata cannot prove one allowance per human across unrelated accounts. Disclose storage and respect deletion/disconnect; a privacy-respecting authoritative entitlement ledger may be required. Do not make free use artificially unreliable. Check known authorized JSON locations on connect/reinstall and synchronize replicas independently; a missing file does not establish exhaustion or grant a new allowance. Opaque disclosed record IDs are acceptable, padding and size-based counters are not security.
+
+**ALWAYS WORK.** Ready accounts and actions operate independently, save immediately, do not wait for optional folder creation or UI, and prioritize active saving over previews. Preserve working code; recover only affected components. Notify Retry/Recapture when original source cannot be recovered.
 
 ## 5. Development order
 
