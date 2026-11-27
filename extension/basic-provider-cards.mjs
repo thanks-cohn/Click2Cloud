@@ -85,7 +85,8 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     card.isReady = status.ready === true && status.connected === true;
     const authenticated = card.isReady && status.authorized !== false;
     const reconnect = status.phase === 'reconnect-needed';
-    const disconnected = !status.connected && [undefined,'disconnected'].includes(status.phase);
+    // A transient passive check must not turn the primary sign-in action into Refresh.
+    const disconnected = !status.connected && [undefined,'disconnected','checking','network-temporary'].includes(status.phase);
     const section = card.connect.closest('.remote-provider');
     const wasAuthenticated = section.hasAttribute('data-onyx-connected');
     card.hadConnection = card.hadConnection || authenticated || status.connected === true || reconnect;
@@ -104,7 +105,7 @@ export function createBasicProviderCards({runtime, document, permissions, pulseE
     card.connect.title = authenticated ? 'Reconnect ' + card.label : '';
     if(authenticated)card.connect.setAttribute('aria-description',card.connect.title);
     else card.connect.removeAttribute('aria-description');
-    card.operation = authenticated || reconnect ? 'auth.reconnect' : disconnected ? 'auth.connect' : 'auth.refresh';
+    card.operation = authenticated || reconnect || (disconnected && card.hadConnection) ? 'auth.reconnect' : disconnected ? 'auth.connect' : 'auth.refresh';
     card.availability.textContent = status.ready || !status.connected && ['AUTH_REQUIRED','DISCONNECTED',undefined].includes(status.reason)
       ? '' : [status.message, status.nextAction].filter(Boolean).join(' ');
     paintActivity(card);
