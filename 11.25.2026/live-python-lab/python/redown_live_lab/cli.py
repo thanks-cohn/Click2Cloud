@@ -182,12 +182,16 @@ def parse(argv):
                        help='Default production confirmation does not read final object content.')
     owner.add_argument('--retain-downloads', action='store_true', help='Retain copies only for SHA-256 readback.')
     owner.add_argument('--expect-files', type=integer_flag(), help='Expected selection count for acceptance.')
+    owner.add_argument('--allow-count-mismatch', action='store_true',
+                       help='Run a diagnostic upload despite count mismatch; the frozen workload still fails acceptance.')
     owner.add_argument('--new-run', action='store_true', help='Deliberately allocate a fresh prefix despite unfinished local evidence.')
     continuation = commands.add_parser('continue-campaign', help='Continue an owner campaign in its exact approved prefix.')
     campaign_options(continuation, transfer=True)
     continuation.add_argument('--run', required=True)
     continuation.add_argument('--input', help='Original input directory (default lab-local/input).')
     continuation.add_argument('--clear-cancel', action='store_true', help='Continue after an explicit cancellation marker.')
+    continuation.add_argument('--allow-count-mismatch', action='store_true',
+                              help='Allow diagnostic writes while retaining the original workload mismatch verdict.')
     audit = commands.add_parser('audit-location', help='Independently list the exact frozen QA prefix. Reads metadata only.')
     campaign_options(audit)
     audit.add_argument('--run', required=True)
@@ -487,6 +491,10 @@ def main(argv=None):
         return 130
     except LabError as error:
         output({'status': 'BLOCKED', 'code': error.code, 'detail': error.detail})
+        return 2
+    except MemoryError:
+        # Avoid another JSON allocation when even ordinary finalization failed.
+        sys.stdout.buffer.write(b'{"status":"BLOCKED","code":"LOCAL_MEMORY_EXHAUSTED"}\n')
         return 2
     except (OSError, ValueError, TypeError, KeyError, RecursionError) as error:
         # Private paths are already in the owner's workspace. Avoid arbitrary

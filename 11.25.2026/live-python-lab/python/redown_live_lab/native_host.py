@@ -25,6 +25,10 @@ METHODS = frozenset((
 AUTHENTICATED_IDLE_TIMEOUT = 60 * 60
 PAIRING_TIMEOUT = 120
 
+
+class FrameAllocationError(MemoryError):
+    """Frame encoding failed before any bytes were written."""
+
 def home():
     override = os.environ.get('REDOWN_LAB_STATE_DIR')
     if override:
@@ -57,13 +61,18 @@ def atomic_private_json(path, value):
         temporary.unlink(missing_ok=True)
 
 def read_exact(stream, length):
-    chunks = bytearray()
+    first = stream.read(length)
+    if not first:
+        raise EOFError()
+    if len(first) == length:
+        return first
+    chunks = bytearray(first)
     while len(chunks) < length:
         part = stream.read(length - len(chunks))
         if not part:
             raise EOFError()
         chunks.extend(part)
-    return bytes(chunks)
+    return chunks
 
 def read_frame(stream):
     size = struct.unpack('=I', read_exact(stream, 4))[0]
@@ -75,15 +84,21 @@ def read_frame(stream):
     return value
 
 def write_frame(stream, value):
-    data = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()
+    try:
+        data = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()
+        header = struct.pack('=I', len(data))
+    except MemoryError:
+        raise FrameAllocationError() from None
     if len(data) > MAX_FRAME:
         raise ValueError('FRAME_BUDGET')
-    remaining = memoryview(struct.pack('=I', len(data)) + data)
-    while remaining:
-        count = stream.write(remaining)
-        if not count:
-            raise OSError('CONNECTION_CLOSED')
-        remaining = remaining[count:]
+    # Avoid allocating a second contiguous copy of a Base64-bearing frame.
+    for payload in (header, data):
+        remaining = memoryview(payload)
+        while remaining:
+            count = stream.write(remaining)
+            if not count:
+                raise OSError('CONNECTION_CLOSED')
+            remaining = remaining[count:]
     stream.flush()
 
 def failure(code):
@@ -114,6 +129,8 @@ class Relay:
             return response.get(timeout=PAIRING_TIMEOUT if method == 'pair' else 35)
         except queue.Empty:
             return failure('PAIRING_TIMEOUT' if method == 'pair' else 'TIMEOUT_UNCERTAIN')
+        except FrameAllocationError:
+            return failure('LOCAL_MEMORY_EXHAUSTED')
         except (OSError, ValueError):
             return failure('EXTENSION_DISCONNECTED')
         finally:
@@ -169,12 +186,12 @@ class Handler(socketserver.StreamRequestHandler):
                     self.connection.settimeout(AUTHENTICATED_IDLE_TIMEOUT)
                 if response.get('error', {}).get('code') in ('TIMEOUT_UNCERTAIN', 'EXTENSION_DISCONNECTED'):
                     return
-        except (OSError, EOFError, ValueError, TypeError):
+        except (OSError, EOFError, ValueError, TypeError, MemoryError):
             pass
         finally:
             try:
                 relay.send({'type': 'closed', 'client': client})
-            except (OSError, ValueError):
+            except (OSError, ValueError, MemoryError):
                 pass
             relay.slots.release()
 
@@ -199,10 +216,15 @@ def main():
               'relayId': uuid.uuid4().hex, 'expiresAt': time.time() + 2_147_480 + 120}
     atomic_private_json(endpoint, record)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    relay.send({'type': 'ready'})
     try:
+        relay.send({'type': 'ready'})
         while True:
             relay.receive(read_frame(sys.stdin.buffer))
+    except MemoryError:
+        try:
+            os.write(2, b'REDOWN native channel closed: LOCAL_MEMORY_EXHAUSTED\n')
+        except OSError:
+            pass
     except (EOFError, OSError, ValueError, TypeError) as error:
         print('REDOWN native channel closed: ' + type(error).__name__, file=sys.stderr)
     finally:

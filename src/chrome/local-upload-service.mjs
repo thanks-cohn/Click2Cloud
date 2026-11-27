@@ -54,9 +54,8 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   const uploader=createClick2CloudFileApi({
    send:async(message,{signal})=>{
     signal?.throwIfAborted();assertConnected();
-    await localBinding?.beforeCommit?.();
-    signal?.throwIfAborted();assertConnected();
-    return executeFileMessage(message,{signal,expectedSession:sessionId,beforeRequest:localBinding?.beforeRequest});
+    return executeFileMessage(message,{signal,expectedSession:sessionId,beforeRequest:localBinding?.beforeRequest,
+     beforeDispatch:localBinding?.beforeCommit});
    },
    http:{request:(path,request)=>{
     assertConnected();
@@ -64,7 +63,9 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     return oauth.request(path,{...request,expectedSession:sessionId,requiredScopes:uploadReadScopes});
    },boundedFetch}
   });
-  return uploader.run('upload',{source:target,key:destinationKey,file,stagingPrefix,conflict:uploadMode==='files'?'keep':'skip'},options);
+  return uploader.run('upload',{source:target,key:destinationKey,file,stagingPrefix,
+   retryStage:localBinding?.retryStage,recordStage:localBinding?.recordStage,
+   conflict:uploadMode==='files'?'keep':'skip'},options);
  }
  const activeLocalUploads = new Map();
  const capacityWaiters = new Set();
@@ -81,6 +82,9 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
   signal.throwIfAborted();
  }
  const localUploadClaimKey = (source,key) => JSON.stringify([targetKey({...source,prefix:''}),key]);
+ const sameLabUpload=(saved,job)=>saved?.id===job.id&&saved.batchId===job.batchId&&saved.key===job.key&&
+  saved.size===job.size&&targetKey(saved.source)===targetKey(job.source)&&
+  (!saved.sourceSha256||saved.sourceSha256===job.sourceSha256);
  async function recordLocalUpload(job,state,code,receipt){
   const destination=remoteDestination(job.source);
   const row=await current.recordRemoteResult({kind:'save',operationId:job.id,saveMode:'local-upload',
@@ -157,10 +161,16 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
    const parent=key.slice(0,key.lastIndexOf('/')+1),staging=batch.stagingPrefix+ticket+'/';
    const job={id:ticket,batchId,index,source:batch.target,key,mode:binding.mode,size:staged.file.size,commitRequested:false,
     ...(ordinaryHistory?{ordinaryHistory}:{}),...(batch.retryPrecommit?{retryPrecommit:true}:{}),
+    ...(batch.sourceSha256?{sourceSha256:batch.sourceSha256}:{}),
     workerTarget:fileOperationTarget({...batch.target,prefix:staging},{...batch.target,prefix:parent})};
    const claimKey=localUploadClaimKey(batch.target,key);
+   const checkpoint=job.sourceSha256&&job.retryPrecommit?await current.readRemoteResult(job.id):null;
+   const retryStage=['pending','failed','cancelled'].includes(checkpoint?.state)&&
+    checkpoint.localUpload?.commitRequested===false&&sameLabUpload(checkpoint.localUpload,job)?
+    {proof:checkpoint.localUpload.stageProof}:undefined;
    const previous=await claim(claimKey,job);
-   if(previous){
+   const ownsPrecommitClaim=retryStage&&sameLabUpload(previous,job);
+   if(previous&&!ownsPrecommitClaim){
     const receipt=activeLocalUploads.has(previous.id)?null:await reconcileLocalUpload(previous,claimKey).catch(()=>null);
     return {state:'uncertain',error:receipt?
      'An earlier upload was verified. Review its saved object before selecting a replacement. This selection was not uploaded.':
@@ -168,6 +178,7 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
    }
    let outcome,recorded=false;
    try{
+    if(retryStage?.proof)job.stageProof=retryStage.proof;
     const intent=await recordLocalUpload(job,'pending','LOCAL_UPLOAD_STARTED');
     if(intent.state!=='pending'){
      await release(claimKey,ticket);
@@ -177,12 +188,20 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     const beforeCommit=async()=>{
      await batch.assertAuthorized?.();
      const checkpoint={...job,commitRequested:true};
-     await recordLocalUpload(checkpoint,'pending','LOCAL_UPLOAD_VERIFY_COMMIT');
+     const row=await recordLocalUpload(checkpoint,'pending','LOCAL_UPLOAD_VERIFY_COMMIT');
+     if(row.state!=='pending'||row.localUpload?.commitRequested!==true)
+      throw uploadError('LOCAL_UPLOAD_RECONCILIATION_REQUIRED','Verify the previous upload before retrying.');
      job.commitRequested=true;
      await batch.assertAuthorized?.();
     };
+    const recordStage=job.sourceSha256?async proof=>{
+     const row=await recordLocalUpload({...job,stageProof:proof},'pending','LOCAL_UPLOAD_STAGE_VERIFIED');
+     if(row.state!=='pending'||row.localUpload?.commitRequested!==false)
+      throw uploadError('LOCAL_UPLOAD_RECONCILIATION_REQUIRED','Verify the previous upload before retrying.');
+     job.stageProof=proof;
+    }:undefined;
     outcome=await runFileUpload({source:batch.target,file:staged.file,key,uploadMode:binding.mode,
-     localBinding:{...batch,beforeCommit}},{...batch.timeouts,signal,onProgress,operationId:ticket});
+     localBinding:{...batch,beforeCommit,retryStage,recordStage}},{...batch.timeouts,signal,onProgress,operationId:ticket});
     const receipt=uploadReceipt(job,outcome.data);
     if(receipt){
      await recordLocalUpload(job,'verified','LOCAL_UPLOAD_VERIFIED',receipt);
@@ -195,11 +214,15 @@ export function createLocalUploadService({assertConnected,oauth,lookup,checkPrep
     const code=uploadCode(outcome.code??outcome.data?.code,state==='cancelled'?'LOCAL_UPLOAD_CANCELLED':'LOCAL_UPLOAD_'+state.toUpperCase());
     await recordLocalUpload(job,state,code);
     if(state!=='uncertain')await release(claimKey,ticket);
-    return {state:conflict?'skipped':state,code,continue:conflict,precommitRetrySafe:!job.commitRequested&&state==='failed'&&!conflict,...(Number.isSafeInteger(outcome.retryAfterMs)?{retryAfterMs:outcome.retryAfterMs}:{}),error:conflict?'An existing Cloudflare object was left untouched.':
+    return {state:conflict?'skipped':state,code,continue:conflict,
+     precommitRetrySafe:!job.commitRequested&&state==='failed'&&!conflict&&(code!=='TRANSPORT_UNAVAILABLE'||!!job.sourceSha256),
+     errorPhase:job.commitRequested?'publication':outcome.errorPhase??'precommit',
+     ...(Number.isSafeInteger(outcome.retryAfterMs)?{retryAfterMs:outcome.retryAfterMs}:{}),error:conflict?'An existing Cloudflare object was left untouched.':
      state==='cancelled'?'Upload cancelled.':outcome.error??(state==='uncertain'?'Cloudflare did not confirm the committed object. Inspect the destination before retrying.':undefined)};
    }catch(error){
     if(!recorded){await release(claimKey,ticket).catch(()=>{});throw error;}
-    return {state:'uncertain',error:'Cloudflare upload accounting was interrupted. Inspect the destination before retrying.'};
+    return {state:'uncertain',code:'LOCAL_UPLOAD_ACCOUNTING_UNCONFIRMED',errorPhase:'checkpoint',
+     error:'Cloudflare upload accounting was interrupted. Inspect the destination before retrying.'};
    }
   }finally{activeLocalUploads.delete(ticket);for(const notify of capacityWaiters)notify();}
  }

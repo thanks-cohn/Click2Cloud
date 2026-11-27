@@ -20,22 +20,29 @@ from .fixtures import content_type
 from .inventory import inventory, name_key, ordinary_directory, relative_path, source_path
 from .location_audit import load_plan, project_audit, scan
 from .manifest import canonical, digest, read_json
+from .resources import CampaignResources, DISK_RESERVE, local_resource_error
 from .runner import Scheduler, operation_id
 from .transport import connect
 
 
 MAX_INT = 2**53 - 1
 TRANSIENT = {'HTTP_429', 'HTTP_502', 'HTTP_503', 'HTTP_504', 'EXPLORER_NETWORK_ERROR',
-             'EXPLORER_REQUEST_TIMEOUT', 'NETWORK_ERROR', 'REQUEST_TIMEOUT', 'TRANSIENT_API_FAILURE'}
+             'EXPLORER_REQUEST_TIMEOUT', 'NETWORK_ERROR', 'REQUEST_TIMEOUT', 'TRANSIENT_API_FAILURE',
+             'TRANSPORT_UNAVAILABLE'}
 MAX_ATTEMPTS = 3
 MAX_TIMER_SECONDS = 2_147_483
 MAX_FILE_BYTES = (5 * 1024 - 1) * 1024**2
 SHARE = ['resolved-manifest.json', 'operations.ndjson', 'checkpoint.json', 'summary.json', 'SUMMARY.txt']
 WINDOW_EVIDENCE = ['summary.json', 'effective-policy.json', 'benchmark.json', 'location-audit.json', 'audit-observations.ndjson']
 STOP_CODES = {'CANCELLATION_REQUESTED', 'CAMPAIGN_TRANSFER_DEADLINE', 'RUN_OR_PHASE_TIMEOUT',
-              'LAB_TRANSFER_DEADLINE', 'LAB_TRANSFER_ADMISSION_CLOSED', 'LAB_AUTHORIZATION_EXPIRED',
+              'LAB_TRANSFER_DEADLINE', 'LAB_TRANSFER_ADMISSION_CLOSED', 'LAB_AUTHORIZATION_EXPIRED', 'LAB_EXECUTION_DEADLINE',
               'LAB_BUDGET_EXCEEDED', 'LAB_RUN_REQUIRED', 'LAB_SPOOL_UNAVAILABLE', 'AUTH_SESSION_CHANGED',
-              'PAIRING_REQUIRED', 'EXTENSION_DISCONNECTED', 'EXTENSION_UNAVAILABLE', 'TIMEOUT_UNCERTAIN'}
+              'PAIRING_REQUIRED', 'EXTENSION_DISCONNECTED', 'EXTENSION_UNAVAILABLE', 'TIMEOUT_UNCERTAIN',
+              'LAB_SESSION_ENDED', 'LAB_AUTHORIZATION_REVOKED', 'AUTHORIZATION_REVOKED', 'AUTHORIZATION_LOST',
+              'LOCAL_MEMORY_EXHAUSTED', 'LOCAL_DISK_EXHAUSTED', 'LOCAL_RESOURCE_HEADROOM_LOW',
+              'OPFS_QUOTA_EXCEEDED', 'HTTP_401', 'HTTP_403'}
+AUDIT_STOP_CODES = STOP_CODES - {'CAMPAIGN_TRANSFER_DEADLINE', 'RUN_OR_PHASE_TIMEOUT',
+                                 'LAB_TRANSFER_DEADLINE', 'LAB_TRANSFER_ADMISSION_CLOSED'}
 
 
 def ceil_div(value, unit):
@@ -128,6 +135,12 @@ def validate_scope(plan, caps):
         raise LabError('CAMPAIGN_SCOPE_MISMATCH', {'useRecoveryScope': plan['target']})
 
 
+def valid_upload_receipt(row, receipt):
+    return (isinstance(receipt, dict) and receipt.get('operationId') == row['operationId'] and
+            receipt.get('key') == row['expectedKey'] and receipt.get('size') == row['sizeBytes'] and
+            all(isinstance(receipt.get(field), str) and receipt[field] for field in ('etag', 'version')))
+
+
 def publication_outcomes(plan, events, through_window=None):
     rows = {row['scenarioId']: row for row in plan['inventory']}
     states = {}
@@ -147,20 +160,20 @@ def publication_outcomes(plan, events, through_window=None):
             states[key] = {**prior, 'state': 'UNCERTAIN', 'code': 'INTENT_WITHOUT_TERMINAL_RECEIPT', 'hasIntent': True}
         if kind in ('uploadAcknowledged', 'recoveredPublication'):
             receipt = event['receipt']
-            valid = (receipt.get('operationId') == key and receipt.get('key') == row['expectedKey'] and
-                     receipt.get('size') == row['sizeBytes'] and isinstance(receipt.get('etag'), str) and
-                     isinstance(receipt.get('version'), str) and bool(receipt['etag']) and bool(receipt['version']))
+            valid = valid_upload_receipt(row, receipt)
             earlier = prior.get('receipt')
             conflicting = bool(prior.get('conflictingPublicationEvidence') or earlier and earlier != receipt)
             states[key] = {**prior, 'state': 'PASS' if valid and not conflicting else 'UNCERTAIN',
                            'receipt': earlier if conflicting and earlier else receipt,
                            'productionConfirmed': valid and not conflicting, 'hasIntent': True,
                            'conflictingPublicationEvidence': conflicting,
-                           'code': 'DUPLICATE_PUBLICATION_EVIDENCE' if conflicting else 'PRODUCTION_UPLOAD_RECEIPT'}
+                           'code': ('DUPLICATE_PUBLICATION_EVIDENCE' if conflicting else
+                                    'PRODUCTION_UPLOAD_RECEIPT' if valid else 'UPLOAD_RECEIPT_MISMATCH')}
         if kind == 'result' and event.get('action') in ('upload', 'download'):
             state = {**prior}
             readback = event.get('readback') or {}
-            if row['sha256'] and event['state'] == 'PASS' and readback.get('clientSha256') == row['sha256']:
+            if (row['sha256'] and event['state'] == 'PASS' and readback.get('clientSha256') == row['sha256'] and
+                    readback.get('clientBytes') == row['sizeBytes'] and readback.get('key') == row['expectedKey']):
                 state['independentSha256Verified'] = True
             if event['action'] == 'upload':
                 if not prior.get('productionConfirmed'):
@@ -191,6 +204,18 @@ def valid_sha(value):
     return isinstance(value, str) and len(value) == 64 and all(c in '0123456789abcdef' for c in value)
 
 
+def matches_copy_path(plan, row, relative, window_id=None):
+    if not isinstance(relative, str):
+        return False
+    suffix = '/'.join(row['scenarioId'].split('/')[:3] + [row['remotePath']])
+    if plan.get('selectionInventoryDigest'):
+        return relative == 'retained-downloads/' + suffix
+    root, _, remaining = relative.partition('/')
+    window, _, output = remaining.partition('/')
+    return (root == 'window-receipts' and bool(window) and (window_id is None or window == window_id) and
+            output == 'downloads/' + suffix)
+
+
 def download_outcomes(plan, events, window=None):
     rows = {row['scenarioId']: row for row in plan['inventory']}
     states = {}
@@ -204,12 +229,17 @@ def download_outcomes(plan, events, window=None):
         if event['event'] in ('downloadIntent', 'downloadPublishRequested'):
             states[operation] = {'state': 'UNCERTAIN', 'code': 'DOWNLOAD_INTENT_WITHOUT_RESULT'}
         if event['event'] == 'downloadRecovered':
-            states[operation] = {'state': 'PASS', 'readback': event['readback']}
+            proof = event['readback']
+            if (matches_copy_path(plan, row, proof.get('savedCopy')) and valid_sha(proof.get('clientSha256')) and
+                    row['sha256'] in (None, proof['clientSha256']) and proof.get('clientBytes') == row['sizeBytes'] and
+                    proof.get('localEvidence') == 'REOPENED_FINAL_SHA256'):
+                states[operation] = {'state': 'PASS', 'readback': proof}
         if event['event'] != 'result':
             continue
         readback = event.get('readback') or {}
         observed_hash = readback.get('clientSha256')
-        if (valid_sha(observed_hash) and row['sha256'] in (None, observed_hash) and
+        if (valid_sha(observed_hash) and row['sha256'] in (None, observed_hash) and readback.get('key') == row['expectedKey'] and
+                (readback.get('savedCopy') is None or matches_copy_path(plan, row, readback['savedCopy'], event.get('windowId'))) and
                 readback.get('clientBytes') == row['sizeBytes'] and event['state'] == 'PASS'):
             states[operation] = {'state': 'PASS', 'readback': readback}
         elif event.get('action') == 'download':
@@ -231,12 +261,18 @@ def offline_campaign_status(root, plan):
     window = latest['windowId']
     uploads = publication_outcomes(plan, journal.rows())
     downloads = download_outcomes(plan, journal.rows(), window)
-    finished = next((event for event in journal.rows() if event.get('windowId') == window and
-                     event['event'] == 'windowFinished'), None)
+    finished, emergency = None, None
+    for event in journal.rows():
+        if event.get('windowId') != window:
+            continue
+        if event['event'] == 'windowFinished':
+            finished = event
+        elif event['event'] == 'windowInterrupted':
+            emergency = event['code']
     checkpoint = root / 'checkpoint.json'
     return {'schema': 'redown.owner-campaign-recovery/1', 'campaignId': plan['campaignId'],
             'manifestDigest': plan['resolvedDigest'], 'windowId': window, 'windowMode': latest['mode'],
-            'status': 'IN_PROGRESS_OR_INTERRUPTED', 'terminationReason': 'FINAL_SNAPSHOT_UNAVAILABLE',
+            'status': 'IN_PROGRESS_OR_INTERRUPTED', 'terminationReason': emergency or 'FINAL_SNAPSHOT_UNAVAILABLE',
             'journalWindowVerdict': finished['state'] if finished else None,
             'workloadVerdict': workload_verdict(plan), 'plannedFiles': len(plan['inventory']),
             'uploadStates': dict(Counter(uploads.get(row['operationId'], {}).get('state', 'PENDING') for row in plan['inventory'])),
@@ -267,12 +303,12 @@ def local_publications(plan, events, window=None):
         if not row or event['event'] != 'downloadPublishRequested':
             continue
         relative = event.get('savedCopy')
-        if not isinstance(relative, str) or not relative.endswith('/'+row['remotePath']):
+        if not matches_copy_path(plan, row, relative, event.get('windowId')):
             continue
         if (event.get('key') == row['expectedKey'] and event.get('size') == row['sizeBytes'] and
                 valid_sha(event.get('sha256')) and row['sha256'] in (None, event['sha256']) and
                 all(event.get(key) == value for key, value in row.get('remoteIdentity', {}).items())):
-            requested[row['operationId']] = {'savedCopy': relative, 'clientSha256': event['sha256'],
+            requested[row['operationId']] = {'savedCopy': relative, 'key': row['expectedKey'], 'clientSha256': event['sha256'],
                                             'clientBytes': event['size'], 'independentSourceSha256': row['sha256'] is not None}
     return requested
 
@@ -303,8 +339,10 @@ def check_downloads(root, window=None, *, all_windows=False):
             failures.append({'operationId': operation, 'relativePath': row['remotePath'],
                              'code': error.code if isinstance(error, LabError) else 'DOWNLOAD_OUTPUT_UNAVAILABLE'})
     workload = workload_verdict(plan)
+    disk_status = 'PASS' if copies and not failures else 'FAIL'
     return {'schema': 'redown.download-disk-audit/1', 'windowId': window, 'receiptBundle': str(root),
-            'status': 'PASS' if copies and not failures and workload['status'] == 'PASS' else 'FAIL',
+            'status': 'PASS' if disk_status == 'PASS' and workload['status'] == 'PASS' else 'FAIL',
+            'retainedDiskVerdict': {'status': disk_status, 'checkedFiles': copies, 'expectedFiles': len(plan['inventory'])},
             'workloadVerdict': workload, 'checkedFiles': copies, 'recoveredPublicationFiles': recovered,
             'errors': failures}
 
@@ -351,9 +389,12 @@ def options_budget(args, caps, plan, rows, mode, output):
         audit = dict.fromkeys(audit, 0)
     if not is_audit and mode != 'download' and not audit_seconds:
         raise LabError('CAMPAIGN_AUDIT_REQUIRED')
+    reconciliation_reserve = 2 if upload_count else 0
     required = {'files': upload_count, 'trafficBytes': total * (baseline['uploadTrafficFactor'] * bool(upload_count) + bool(read_count)),
-                'diskBytes': largest, 'providerRequests': baseline['uploadRequests'] * upload_count + baseline['readRequests'] * read_count,
-                'operations': upload_count + read_count, 'seconds': audit_seconds if is_audit else args.execution_seconds}
+                'diskBytes': largest, 'providerRequests': (baseline['uploadRequests'] * upload_count +
+                    baseline['readRequests'] * read_count + baseline['statRequests'] * reconciliation_reserve),
+                'operations': upload_count + read_count + reconciliation_reserve,
+                'seconds': audit_seconds if is_audit else args.execution_seconds}
     budget = {key: value + (audit.get(key, 0) if key != 'seconds' else 0) for key, value in required.items()}
     if args.execution == 'timed' and mode not in ('download', 'audit') and args.benchmark_seconds <= 0:
         raise LabError('INVALID_CAMPAIGN_TIME')
@@ -388,7 +429,8 @@ def options_budget(args, caps, plan, rows, mode, output):
             retries += 1
     modeled_cost = budget['providerRequests'] * 9 + ceil_div(budget['trafficBytes'] * 15, 1_000_000)
     local_evidence_bytes = 131_072 + 20_480 * len(plan['inventory'])
-    local_required = local_evidence_bytes + (total if read_count and args.retain_downloads else 0)
+    retain = args.retain_downloads if mode == 'download' else plan['retainDownloads']
+    local_required = max(DISK_RESERVE, local_evidence_bytes) + (total if read_count and retain else 0)
     local_available = shutil.disk_usage(output).free
     blockers = []
     if read_count > read_headroom:
@@ -418,6 +460,7 @@ def options_budget(args, caps, plan, rows, mode, output):
                     'plannedInputBytes': sum(row['sizeBytes'] for row in plan['inventory']), 'remainingBytes': total,
                     'largestPendingFileBytes': largest, 'modeledCostMicros': modeled_cost, 'policy': policy,
                     'reservedRetriesPerDirection': retries,
+                    'reservedPublicationObservations': reconciliation_reserve,
                     'approved': capability['approved'], 'remainingAtPreflight': capability['headroom'],
                     'requestedAuthorizationMinutes': args.authorization_minutes, 'grantedAuthorizationMinutes': capability['authorizedMinutes'],
                     'grantExpiresAtEpochMs': caps['expiresAt'], 'grantReadyAtEpochMs': caps['checkedAt'],
@@ -479,6 +522,16 @@ class CampaignScheduler(Scheduler):
         if time.monotonic() >= min(self.end, self.phase_end):
             raise LabError('CAMPAIGN_TRANSFER_DEADLINE')
 
+    def read(self, scenario, row, timeout, receipt, retain):
+        if retain:
+            volume = self.download_root if self.download_root.is_dir() else self.download_root.parent
+            available = shutil.disk_usage(volume).free
+            if available < row['sizeBytes'] + DISK_RESERVE:
+                self.journal.append('resourceRejected', stage='retained-output', scenarioId=scenario,
+                                    freeDiskBytes=available, minimumBytes=row['sizeBytes'] + DISK_RESERVE)
+                raise LabError('LOCAL_RESOURCE_HEADROOM_LOW')
+        return super().read(scenario, row, timeout, receipt, retain)
+
 
 def recover(client, plan, states, journal, *, reset_noncommit):
     for row in plan['inventory']:
@@ -486,7 +539,7 @@ def recover(client, plan, states, journal, *, reset_noncommit):
         if (not state.get('hasIntent') or state.get('productionConfirmed') or state.get('conflictingPublicationEvidence')
                 or state.get('state') != 'UNCERTAIN'):
             continue
-        result = client.query('campaignOutcome', id=row['operationId'], path=row['remotePath'], size=row['sizeBytes'])
+        result = publication_status(client, row, journal, trigger='CAMPAIGN_RESUME')
         if result['state'] == 'ACKNOWLEDGED':
             journal.append('recoveredPublication', scenarioId=row['scenarioId'], receipt=result['receipt'])
         elif result['state'] == 'NOT_COMMITTED' and reset_noncommit:
@@ -505,10 +558,19 @@ class CampaignRetries:
         self.serial = 0
         self.throttle_until = 0
 
-    def schedule(self, row, entry, result, attempt, file_deadline):
+    def schedule(self, row, entry, result, attempt, file_deadline, *, safe=True):
         direction = entry['operation']
         code = result['code']
-        if code not in TRANSIENT or result['state'] in ('PASS', 'CANCELLED', 'BLOCKED'):
+        if result['state'] == 'PASS':
+            return False
+        fields = {'operationId': operation_id(self.scheduler.run_id, row['scenarioId'],
+                                             'upload' if direction == 'upload' else 'read'),
+                  'scenarioId': row['scenarioId'], 'direction': direction, 'attempt': attempt, 'code': code,
+                  'errorPhase': result.get('errorPhase'), 'reconciliationState': result.get('reconciliationState')}
+        if code not in TRANSIENT or result['state'] in ('CANCELLED', 'BLOCKED') or not safe:
+            reason = ('STOP_CONDITION' if code in STOP_CODES or result['state'] in ('CANCELLED', 'BLOCKED') else
+                      'NONPUBLICATION_NOT_PROVEN' if not safe else 'ERROR_NOT_RETRYABLE')
+            self.journal.append('retryIneligible', **fields, reason=reason)
             return False
         hint = result.get('retryAfterMs') or 0
         delay = max(hint / 1000, min(8, 0.25 * 2**(attempt - 1)) * random.uniform(0.75, 1.25))
@@ -520,9 +582,6 @@ class CampaignRetries:
             reason = 'RETRY_RESERVE_EXHAUSTED'
         elif now + delay + 1 >= min(file_deadline, self.admission_end):
             reason = 'RETRY_DEADLINE'
-        fields = {'operationId': operation_id(self.scheduler.run_id, row['scenarioId'],
-                                             'upload' if direction == 'upload' else 'read'),
-                  'scenarioId': row['scenarioId'], 'direction': direction, 'attempt': attempt, 'code': code}
         if reason:
             self.journal.append('retryExhausted', **fields, reason=reason)
             return False
@@ -547,24 +606,52 @@ class CampaignRetries:
             self.wait_until(max(next_at, self.throttle_until))
             self.scheduler.stop()
             if time.monotonic() + 1 >= min(file_deadline, self.admission_end):
-                self.journal.append('retryExhausted', scenarioId=row['scenarioId'], direction=entry['operation'],
-                                    attempt=attempt, code='RETRY_DEADLINE')
+                direction = entry['operation']
+                self.journal.append('retryExhausted', scenarioId=row['scenarioId'], direction=direction,
+                                    operationId=operation_id(self.scheduler.run_id, row['scenarioId'],
+                                                              'upload' if direction == 'upload' else 'read'),
+                                    attempt=attempt, code='RETRY_DEADLINE', reason='RETRY_DEADLINE')
                 continue
             yield row, entry, attempt, file_deadline
 
 
-def reconcile_attempt(client, row, journal, result):
+def publication_status(client, row, journal, *, trigger, attempt=None, error_phase=None):
+    fields = {'operationId': row['operationId'], 'scenarioId': row['scenarioId'], 'trigger': trigger,
+              'attempt': attempt, 'errorPhase': error_phase}
+    # A second observation can recover a lost status response. This has its own
+    # request/operation allowance and never calls an upload method.
+    for probe in (1, 2):
+        journal.append('reconciliationRequested', **fields, probe=probe)
+        try:
+            status = client.query('campaignOutcome', id=row['operationId'], path=row['remotePath'], size=row['sizeBytes'])
+        except LabError as error:
+            status = {'state': 'UNKNOWN', 'reason': error.code, 'queryError': error.code}
+        state = status.get('state')
+        if state not in ('ACKNOWLEDGED', 'NOT_COMMITTED', 'UNKNOWN'):
+            status = {'state': 'UNKNOWN', 'reason': 'INVALID_RECONCILIATION_RESPONSE'}
+        elif state == 'ACKNOWLEDGED' and not valid_upload_receipt(row, status.get('receipt')):
+            status = {'state': 'UNKNOWN', 'reason': 'UPLOAD_RECEIPT_MISMATCH'}
+        journal.append('reconciliationObserved', **fields, probe=probe, state=status['state'], reason=status.get('reason'))
+        if status.get('queryError') != 'TRANSPORT_UNAVAILABLE':
+            break
+    return status
+
+
+def reconcile_attempt(client, row, journal, result, attempt):
     """Only the production checkpoint can permit reuse of an upload intent."""
-    if result.get('productionConfirmed') or not (result['state'] == 'UNCERTAIN' or result['code'] in TRANSIENT):
-        return result
-    status = client.query('campaignOutcome', id=row['operationId'], path=row['remotePath'], size=row['sizeBytes'])
+    status = publication_status(client, row, journal, trigger=result['code'], attempt=attempt,
+                                error_phase=result.get('errorPhase'))
     if status['state'] == 'ACKNOWLEDGED':
         receipt = status['receipt']
         journal.append('recoveredPublication', scenarioId=row['scenarioId'], receipt=receipt)
-        return {'state': 'PASS', 'code': 'PRODUCTION_UPLOAD_RECONCILED', 'productionConfirmed': True, 'receipt': receipt}
+        return {'state': 'PASS', 'code': 'PRODUCTION_UPLOAD_RECONCILED', 'productionConfirmed': True,
+                'reconciliationState': status['state'], 'receipt': receipt}
     if status['state'] == 'NOT_COMMITTED':
-        return {**result, 'state': 'FAIL', 'precommitRetrySafe': True}
-    return {**result, 'state': 'UNCERTAIN', 'precommitRetrySafe': False}
+        if result['code'] in TRANSIENT:
+            journal.append('recoveredNoCommit', scenarioId=row['scenarioId'], operationId=row['operationId'])
+        return {**result, 'state': 'FAIL', 'precommitRetrySafe': True, 'reconciliationState': status['state']}
+    return {**result, 'state': 'UNCERTAIN' if result.get('publicationRequested') else result['state'],
+            'precommitRetrySafe': False, 'reconciliationState': status['state'], 'reconciliationCode': status.get('queryError')}
 
 
 def benchmark(plan, events, args, mode, elapsed_ms):
@@ -580,8 +667,10 @@ def benchmark(plan, events, args, mode, elapsed_ms):
         readback = event.get('readback') or {}
         hash_value = readback.get('clientSha256')
         verified = (event['event'] == 'result' and event['state'] == 'PASS' and valid_sha(hash_value) and
-                    readback.get('clientBytes') == row['sizeBytes'] and row['sha256'] in (None, hash_value))
-        acknowledged = event['event'] in ('uploadAcknowledged', 'recoveredPublication')
+                    readback.get('clientBytes') == row['sizeBytes'] and row['sha256'] in (None, hash_value) and
+                    readback.get('key') == row['expectedKey'])
+        acknowledged = (event['event'] in ('uploadAcknowledged', 'recoveredPublication') and
+                        valid_upload_receipt(row, event.get('receipt')))
         if verified and row['sha256'] and elapsed <= cutoff:
             independent.add(row['operationId'])
         if acknowledged and mode == 'upload' or verified and mode in ('round-trip', 'download'):
@@ -631,6 +720,27 @@ def run_window(args, client, caps, root, plan, source, mode, started):
     window.mkdir(mode=0o700, parents=True)
     journal = Journal(root, start=started, fields={'windowId': window_id})
     journal.repair_tail()
+    journal.append('windowStarted', mode=mode, target=plan['target'], resolvedDigest=plan['resolvedDigest'])
+    try:
+        return execute_window(args, client, caps, root, plan, source, mode, started, window, window_id, journal)
+    except (OSError, MemoryError) as error:
+        code = local_resource_error(error)
+    except LabError as error:
+        if error.code != 'LOCAL_RECEIPT_WRITE_FAILED':
+            raise
+        code = error.code
+    try:
+        journal.append('windowInterrupted', code=code)
+    except (OSError, MemoryError):
+        try:
+            os.write(2, b'REDOWN could not finalize the local receipt. Use report to inspect durable evidence.\n')
+        except OSError:
+            pass
+    raise LabError(code, {'receiptBundle': str(root), 'journal': str(journal.path)}) from None
+
+
+def execute_window(args, client, caps, root, plan, source, mode, started, window, window_id, journal):
+    resources = CampaignResources(window, journal)
     prior = publication_outcomes(plan, journal.rows())
     selection = plan.get('selectionInventoryDigest')
     read_mode = mode == 'download'
@@ -646,8 +756,19 @@ def run_window(args, client, caps, root, plan, source, mode, started):
         preflight['blockedBy'].append({'code': 'CONCURRENCY_UNSUPPORTED', 'requested': args.concurrency, 'available': 1})
     if args.expect_files is not None and args.expect_files != plan['expectedSelectionFiles']:
         preflight['blockedBy'].append({'code': 'FROZEN_EXPECTED_SELECTION_COUNT_CHANGED'})
+    workload = workload_verdict(plan)
+    count_mismatch = workload['code'] == 'EXPECTED_FILE_COUNT_MISMATCH'
+    count_override = bool(getattr(args, 'allow_count_mismatch', False))
+    if mode in ('new', 'continue') and preflight['policy']['budget']['files'] and count_mismatch and not count_override:
+        preflight['blockedBy'].append({'code': 'EXPECTED_FILE_COUNT_MISMATCH', 'expected': workload['expectedFiles'],
+                                       'discovered': workload['eligibleFiles']})
+    try:
+        resources.observe('preflight')
+    except LabError as error:
+        preflight['blockedBy'].append({'code': error.code, **error.detail})
     preflight['status'] = 'BLOCKED' if preflight['blockedBy'] else 'READY'
     preflight.update(windowId=window_id, mode=mode, environment=environment(caps),
+                     workloadVerdict=workload, countMismatchDiagnosticAuthorized=count_mismatch and count_override,
                      preparationMs=round((time.monotonic() - started) * 1000))
     document(window / 'effective-policy.json', preflight)
     announce(f"QA destination {plan['target']['bucketName']}/{plan['target']['prefix']}")
@@ -655,7 +776,6 @@ def run_window(args, client, caps, root, plan, source, mode, started):
              f"{policy['budget']['seconds']} seconds execution, {policy['audit']['seconds']} seconds reserved for audit; "
              f"{policy['budget']['providerRequests']} reserved request units; "
              f"${preflight['modeledCostMicros']/1_000_000:.6f} modeled expense.")
-    journal.append('windowStarted', mode=mode, target=plan['target'], resolvedDigest=plan['resolvedDigest'])
     checkpoint = root / 'checkpoint.json'
     progress = {'schema': 'redown.owner-campaign-checkpoint/1', 'status': 'IN_PROGRESS_OR_INTERRUPTED',
                 'campaignId': plan['campaignId'], 'windowId': window_id, 'plannedFiles': len(planned),
@@ -715,24 +835,32 @@ def run_window(args, client, caps, root, plan, source, mode, started):
                 try:
                     retries.wait_until(retries.throttle_until)
                     scheduler.stop()
+                    resources.observe('transfer', attempt_count=progress['observedResultsInWindow'])
                     timeout = max(1, min(args.transfer_seconds, int(file_deadline - time.monotonic() + 1)))
                     logical_id = operation_id(plan['campaignId'], row['scenarioId'], 'read') if reading else operation
                     attempt_id = str(uuid.uuid5(uuid.UUID(logical_id), f'attempt/{window_id}/{attempt}'))
                     journal.append('attemptStarted', scenarioId=row['scenarioId'], operationId=logical_id,
                                    direction=action, attempt=attempt, attemptId=attempt_id)
                     result = scheduler.execute(entry, timeout)
-                    if not reading and not result.get('productionConfirmed') and (
-                            result['code'] in TRANSIENT or
-                            result['state'] == 'UNCERTAIN' and retries.remaining['upload'] and result['code'] not in STOP_CODES):
-                        result = reconcile_attempt(client, row, journal, result)
-                    will_retry = (reading or result.get('precommitRetrySafe')) and retries.schedule(
-                        row, entry, result, attempt, file_deadline)
+                    confirmed = result.get('productionConfirmed')
+                    if not reading and not confirmed and (result['code'] in TRANSIENT or result['state'] == 'UNCERTAIN'):
+                        if result['code'] in STOP_CODES or (root / 'cancel.request').exists():
+                            journal.append('reconciliationDeferred', scenarioId=row['scenarioId'], operationId=operation,
+                                           code=result['code'], attempt=attempt, errorPhase=result.get('errorPhase'),
+                                           reason='WINDOW_STOP_CONDITION')
+                        else:
+                            result = reconcile_attempt(client, row, journal, result, attempt)
+                    will_retry = False
+                    if reading or not result.get('productionConfirmed'):
+                        will_retry = retries.schedule(row, entry, result, attempt, file_deadline,
+                                                      safe=reading or result.get('precommitRetrySafe', False))
                     if not reading and result.get('receipt') and requires_readback:
                         readback = entry_for(row, 'download', plan['retainDownloads'], result['receipt'])
                         if result['code'] == 'PRODUCTION_UPLOAD_RECONCILED':
-                            execute_attempt(row, readback, 1, file_deadline)
+                            if not execute_attempt(row, readback, 1, file_deadline):
+                                return False
                         elif result['state'] != 'PASS':
-                            will_retry = retries.schedule(row, readback, result, 1, file_deadline)
+                            will_retry = retries.schedule(row, readback, result, attempt, file_deadline)
                 finally:
                     scheduler.phase_end = baseline_end
                 progress['observedResultsInWindow'] += 1
@@ -745,8 +873,9 @@ def run_window(args, client, caps, root, plan, source, mode, started):
                     states[result['state']] = states.get(result['state'], 0) + 1
                 if read_mode:
                     last_download_states[operation] = result['state']
-                if result['code'] in STOP_CODES or result['code'] in ('HTTP_401', 'HTTP_403'):
-                    errors.append({'code': result['code'], 'operationId': operation})
+                stop_code = result.get('reconciliationCode') if result.get('reconciliationCode') in STOP_CODES else result['code']
+                if stop_code in STOP_CODES:
+                    errors.append({'code': stop_code, 'operationId': operation})
                     return False
                 if result['code'] == 'HTTP_429' and not will_retry:
                     errors.append({'code': 'THROTTLED_WITHOUT_RETRY_BUDGET', 'operationId': operation})
@@ -798,7 +927,7 @@ def run_window(args, client, caps, root, plan, source, mode, started):
                         next_checkpoint = time.monotonic() + 2
             transfer_end_ms = round((time.monotonic() - started) * 1000)
             atomic_document(checkpoint, progress)
-            if policy['audit']['seconds']:
+            if policy['audit']['seconds'] and not any(error['code'] in AUDIT_STOP_CODES for error in errors):
                 audit_journal = Journal(window, filename='audit-observations.ndjson', fields={'windowId': window_id})
                 audit_journal.append('auditStarted', scope=plan['target'], resolvedDigest=plan['resolvedDigest'])
                 audit_deadline = min(time.monotonic() + policy['audit']['seconds'], provider_deadline)
@@ -817,8 +946,8 @@ def run_window(args, client, caps, root, plan, source, mode, started):
                     reason = 'CANCELLATION_REQUESTED'
                 except LabError as error:
                     reason = error.code
-                except OSError:
-                    reason = 'LOCAL_AUDIT_IO_FAILED'
+                except (OSError, MemoryError) as error:
+                    reason = local_resource_error(error)
                 if reason:
                     errors.append({'code': reason})
                     audit_journal.append('auditError', code=reason)
@@ -830,18 +959,19 @@ def run_window(args, client, caps, root, plan, source, mode, started):
             errors.append({'code': 'CANCELLATION_REQUESTED'})
         except LabError as error:
             errors.append({'code': error.code})
-        except OSError:
-            errors.append({'code': 'LOCAL_IO_FAILED'})
+        except (OSError, MemoryError) as error:
+            errors.append({'code': local_resource_error(error)})
         finally:
             if admission:
                 try:
                     usage = client.query('campaignUsage')
-                except LabError:
+                except (LabError, MemoryError):
                     errors.append({'code': 'FINAL_BROWSER_USAGE_UNAVAILABLE'})
                 client.cleanup('releaseRun')
     else:
         for error in errors:
             journal.append('runError', **error)
+    resources.observe('end', attempt_count=progress['observedResultsInWindow'], force=True, guard=False)
     latest = publication_outcomes(plan, journal.rows())
     status_counts = (Counter(last_download_states.get(row['operationId'], 'PENDING') for row in planned) if read_mode else
                      Counter(latest.get(row['operationId'], {}).get('state', 'PENDING') for row in planned))
@@ -852,26 +982,43 @@ def run_window(args, client, caps, root, plan, source, mode, started):
     score = benchmark(plan, (event for event in journal.rows() if event.get('windowId') == window_id),
                       args, window_mode, elapsed_ms if transfer_end_ms is None else transfer_end_ms)
     document(window / 'benchmark.json', score)
+    location = audit['locationVerdict'] if audit else {'status': 'NOT_TESTED', 'reasonCodes': ['NO_LOCATION_AUDIT']}
+    retain = args.retain_downloads if read_mode else plan['retainDownloads'] and not audit_only
+    disk_count = 0
+    if retain:
+        observed = download_outcomes(plan, journal.rows(), window_id if read_mode else None)
+        disk_count = sum(item.get('readback', {}).get('localEvidence') == 'REOPENED_FINAL_SHA256'
+                         for item in observed.values())
+    disk = {'status': ('PASS' if disk_count == len(planned) and disk_count else 'INCOMPLETE') if retain else 'NOT_TESTED',
+            'checkedFiles': disk_count, 'expectedFiles': len(planned) if retain else 0}
     if any(error['code'] == 'CANCELLATION_REQUESTED' for error in errors):
-        status = 'CANCELLED'
+        transfer_status = 'CANCELLED'
     elif preflight['blockedBy'] or admission is None and not already_delivered:
-        status = 'BLOCKED'
+        transfer_status = 'BLOCKED'
     elif read_mode:
-        status = 'PASS' if all(last_download_states.get(row['operationId']) == 'PASS' for row in planned) else 'INCOMPLETE'
+        transfer_status = 'PASS' if all(last_download_states.get(row['operationId']) == 'PASS' for row in planned) else 'INCOMPLETE'
     elif audit_only:
-        status = (audit or {}).get('state', 'AUDIT_INCOMPLETE')
-    elif audit and audit['completeScopedListing'] and audit['matchedCount']==len(planned) and not (
-            audit['unexpectedKeys'] or audit['stagingLeftovers'] or audit['duplicatePublicationKeys'] or
-            audit['duplicateListingKeys'] or audit['renamedOrMislocatedPublications']) and len(acked) == len(planned) and (
-            not requires_readback or verified == len(planned)):
-        status = 'PASS'
+        transfer_status = 'NOT_TESTED'
+    elif len(acked) == len(planned) and (not requires_readback or verified == len(planned)):
+        transfer_status = 'PASS'
     else:
+        transfer_status = 'INCOMPLETE'
+    status = transfer_status
+    if audit_only and status == 'NOT_TESTED':
+        status = (audit or {}).get('state', 'AUDIT_INCOMPLETE')
+    elif status == 'PASS' and not read_mode and location['status'] != 'PASS':
+        status = 'FAIL' if location['status'] == 'FAIL' else 'INCOMPLETE'
+    if status == 'PASS' and retain and disk['status'] != 'PASS':
         status = 'INCOMPLETE'
-    transfer_status = status
-    workload = workload_verdict(plan)
+    unresolved = status_counts.get('UNCERTAIN', 0) + status_counts.get('FAIL', 0)
+    if unresolved:
+        errors.append({'code': 'OPERATION_OUTCOMES_UNRESOLVED', 'files': unresolved})
     if status == 'PASS' and workload['status'] != 'PASS':
         status = 'FAIL'
-    termination = (errors[0]['code'] if errors else workload['code'] if status == 'FAIL' else
+    if status == 'PASS' and errors:
+        status = 'INCOMPLETE'
+    termination = (errors[0]['code'] if errors else workload['code'] if status == 'FAIL' and workload['code'] else
+                   location['reasonCodes'][0] if status == 'FAIL' and location['reasonCodes'] else
                    'COMPLETED' if status == 'PASS' else 'NOT_ALL_OPERATIONS_VERIFIED')
     journal.append('windowFinished', state=status, transferState=transfer_status, terminationReason=termination, errors=errors)
     old_summary = read_json(root / 'summary.json') if (root / 'summary.json').is_file() else {}
@@ -882,6 +1029,7 @@ def run_window(args, client, caps, root, plan, source, mode, started):
     summary = {'schema': 'redown.owner-campaign-receipt/1', 'status': status, 'campaignId': plan['campaignId'],
                'target': plan['target'], 'manifestDigest': plan['resolvedDigest'], 'finishedAt': stamp(), 'windowId': window_id,
                'windowMode': window_mode, 'transferVerdict': transfer_status, 'workloadVerdict': workload,
+               'locationVerdict': location, 'retainedDiskVerdict': disk, 'resourceEvidence': resources.summary(),
                'terminationReason': termination, 'selectionInventoryDigest': selection, 'preflight': preflight, 'admission': admission, 'usage': usage, 'errors': errors,
                'plannedFiles': len(planned), 'inventoryIssues': len(plan['inventoryIssues']), 'statusCounts': dict(status_counts),
                'productionConfirmedFiles': len(acked), 'productionConfirmedBytes': sum(row['sizeBytes'] for row in acked),
@@ -893,12 +1041,13 @@ def run_window(args, client, caps, root, plan, source, mode, started):
     lines = [f"REDOWN campaign {plan['campaignId']}", f"Result {status} · transfer {transfer_status} · workload {workload['status']} ({termination})",
              f"Destination {plan['target']['bucketName']}/{plan['target']['prefix']}",
              f"Production-confirmed {len(acked)} of {len(planned)} eligible files ({summary['productionConfirmedBytes']} bytes)",
-             f"Location audit {(summary['locationAudit'] or {}).get('state', 'NOT_RUN')}",
+             f"Location {location['status']} · retained disk {disk['status']} ({disk_count} verified)",
              f"Benchmark {score['filesWithinWindow']} files in {score['measuredMs']/1000:.3f} seconds ({score['metric']})",
              f"Proof files {', '.join(summary['share'])}", f"Window {window.relative_to(root).as_posix()}"]
     if errors:
         lines.append('Blockers ' + ', '.join(error['code'] for error in errors))
-    if status in ('INCOMPLETE', 'UNCERTAIN', 'CANCELLED', 'AUDIT_INCOMPLETE') and admission is not None:
+    if admission is not None and (status in ('INCOMPLETE', 'UNCERTAIN', 'CANCELLED', 'AUDIT_INCOMPLETE') or
+                                  status == 'FAIL' and location['status'] == 'FAIL' and transfer_status == 'PASS'):
         audit_only_next = audit_only or len(acked) == len(planned) and (not requires_readback or verified == len(planned))
         action = 'download-selection' if selection else 'download-campaign' if read_mode else 'audit-location' if audit_only_next else 'continue-campaign'
         command = [r'lab-local\.venv\Scripts\redown-lab.exe', action, '--run', str(root),
@@ -922,6 +1071,8 @@ def run_window(args, client, caps, root, plan, source, mode, started):
                 command.append('--admit-partial')
             if action == 'continue-campaign' and (root / 'cancel.request').exists():
                 command.append('--clear-cancel')
+            if action == 'continue-campaign' and count_mismatch and count_override:
+                command.append('--allow-count-mismatch')
         if selection:
             command.extend(('--inventory-seconds', str(args.inventory_seconds), '--inventory-requests', str(args.inventory_requests),
                             '--inventory-traffic-bytes', str(args.inventory_traffic_bytes)))
@@ -931,6 +1082,8 @@ def run_window(args, client, caps, root, plan, source, mode, started):
         summary['continuationCommand'] = subprocess.list2cmdline(command)
         lines.append('Continuation CMD: ' + summary['continuationCommand'])
     try:
+        atomic_document(checkpoint, {**progress, 'status': status, 'transferVerdict': transfer_status,
+                                    'productionConfirmedFiles': len(acked), 'terminationReason': termination})
         document(window / 'summary.json', summary)
         atomic_document(root / 'summary.json', summary)
         atomic_bytes(root / 'SUMMARY.txt', ('\n'.join(lines) + '\n').encode('utf-8'))

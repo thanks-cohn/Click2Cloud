@@ -3,7 +3,7 @@ import {localUploadKey,maximumObjectBytes,uploadId,uploadError} from '../local-u
 import {retryableTransferCode} from '../transfer-outcome.mjs';
 import {uploadCode} from '../local-upload-service.mjs';
 import {objectETag,key as objectKey,name} from '../../explorer/file-api.mjs';
-import {normalizeTarget,normalizePrefix} from '../../core/menu-identity.mjs';
+import {normalizeTarget,normalizePrefix,targetKey as accountTargetKey} from '../../core/menu-identity.mjs';
 import {chunkBytes,decodeFrame,encodeFrame,labError,labSpoolDirectory,openLabSpool,utf8Length,validHash} from './spool.mjs';
 import {boundedLabStep,createLabReport,describeLabFailure,diagnosticCode} from './diagnostics.mjs';
 import {auditFields,auditFrameBytes,auditPageSize,budgetFields,campaignPolicyVersion,costMicros,exactKeys,
@@ -464,7 +464,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    Math.max(0,policy.benchmarkSeconds*1000-preparationMs):durationMs));
   const run={id:runId,mode:['new','continue'].includes(mode)?'write':'read',recoveryMode:mode,policy,budget:policy.budget,
    used:{files:0,trafficBytes:0,providerRequests:0,operations:0},auditUsed:{trafficBytes:0,providerRequests:0,operations:0},
-   controller,transferController,transferIds:new Set(),target:normalizeTarget({...session.target,prefix}),transfer:null,
+   controller,transferController,transferIds:new Set(),precommitProofs:new Set(),target:normalizeTarget({...session.target,prefix}),transfer:null,
    fileDigest,fileCount,fileHasher:sha256.create(),files:new Map(),fileIds:new Set(),sealed:false,
    selectionPhase,readFiles,readAttempts:0,
    deadline:clock()+durationMs,transferDeadline:clock()+transferMs};
@@ -556,6 +556,12 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   path=leafPath(path);
   return localUploadKey(run.target,{size,name:path.split('/').at(-1)},path,'mixed');
  }
+ function matchesUploadCheckpoint(result,run,file,key){
+  const job=result?.localUpload;
+  return job?.id===file.id&&job.key===key&&job.batchId===run.id&&job.size===file.size&&
+   job.source&&accountTargetKey(job.source)===accountTargetKey(run.target)&&
+   (job.sourceSha256===undefined||job.sourceSha256===file.hash);
+ }
  function requests(session,run,limit,signal=run.controller.signal,category='transfer') {
   let count=0;
   return ()=>{
@@ -608,11 +614,12 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
     throw labError('LAB_FROZEN_FILE_PLAN_MISMATCH');
     if(write){
      const old=await readUploadOutcome?.(input.id);
+     if(old&&!matchesUploadCheckpoint(old,run,frozen,key))throw labError('LAB_FROZEN_FILE_PLAN_MISMATCH');
      if(old?.state==='verified'||old?.localUpload?.commitRequested===true)throw labError('LAB_OPERATION_RECONCILIATION_REQUIRED');
-     retryPrecommit=['cancelled','failed'].includes(old?.state)&&old.localUpload?.commitRequested===false&&
-      old.localUpload.batchId===run.id&&old.localUpload.key===key&&old.localUpload.size===input.size&&
-      old.localUpload.source.accountId===run.target.accountId&&old.localUpload.source.bucketName===run.target.bucketName&&
-      (run.recoveryMode==='continue'||run.transferIds.has(input.id)&&retryableTransferCode(old.code));
+     retryPrecommit=['pending','cancelled','failed'].includes(old?.state)&&old.localUpload?.commitRequested===false&&
+      (run.precommitProofs.has(input.id)||run.recoveryMode==='continue'&&!run.transferIds.has(input.id)||
+       ['cancelled','failed'].includes(old.state)&&run.transferIds.has(input.id)&&retryableTransferCode(old.code));
+     if(old&&!retryPrecommit)throw labError('LAB_OPERATION_RECONCILIATION_REQUIRED');
     }
    }
   }
@@ -646,6 +653,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   const transfer={key,spool,controller,signal,input,kind:write?'upload':'download',offset:0,
    state:write?'staging':'running',progress:{phase:write?'staging':'reading',bytes:0},retryPrecommit};
   run.transferIds.add(input.id);
+  if(write)run.precommitProofs?.delete(input.id);
   transfer.absoluteTimer=absolute;
   transfer.idleMs=run.policy?.inactivitySeconds*1000||0;
   run.transfer=transfer;
@@ -707,7 +715,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   objectKey(stagingPrefix+input.id+'/'+file.name);
   const beforeRequest=requests(session,run,limits.uploadRequests,signal);
   const binding={target:run.target,sessionId:session.sessionId,stagingPrefix,beforeRequest,retryPrecommit:transfer.retryPrecommit,
-   assertAuthorized:()=>check(session)};
+   assertAuthorized:()=>check(session),...(run.policy?{sourceSha256:input.sha256}:{})};
   signal.throwIfAborted();
   transfer.submitted=true;
   const timeouts=run.policy?{requestTimeoutMs:run.policy.requestSeconds*1000,uploadTimeoutMs:run.policy.uploadSeconds*1000,
@@ -720,6 +728,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
    });
   if(result.state!=='completed')return {state:({skipped:'CONFLICT',uncertain:'UNCERTAIN',cancelled:'CANCELLED',blocked:'BLOCKED'})[result.state]??'FAIL',
    code:signal.aborted?typed(signal.reason):uploadCode(result.code,'UPLOAD_NOT_VERIFIED'),
+   ...(result.errorPhase?{errorPhase:result.errorPhase}:{}),
    ...(Number.isSafeInteger(result.retryAfterMs)?{retryAfterMs:result.retryAfterMs}:{})};
   return {state:'ACKNOWLEDGED',code:'PRODUCTION_UPLOAD_RECEIPT',receipt:cleanReceipt(result.receipt,key,input.size,input.id)};
  }
@@ -841,16 +850,21 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
  }
  async function campaignOutcome(session,run,input){
   requireKeys(input,['id','path','size']);
-  if(!run.policy||!run.sealed||run.files.get(input.path)?.id!==input.id||!uploadId(input.id)||!validInt(input.size,0,maximumObjectBytes))throw labError('INVALID_INPUT');
+  const frozen=run.files?.get(input.path);
+  if(!run.policy||!run.sealed||!frozen||frozen.id!==input.id||frozen.size!==input.size||
+     !uploadId(input.id)||!validInt(input.size,0,maximumObjectBytes))throw labError('INVALID_INPUT');
   const key=targetKey(run,input.path,input.size);
+  if(run.transfer?.input.id===input.id&&run.transfer.state==='running')return {state:'UNKNOWN',reason:'TRANSFER_ACTIVE'};
   const result=await readUploadOutcome?.(input.id);
-  if(!result||result.localUpload?.key!==key||result.localUpload?.batchId!==run.id||
-     result.localUpload?.size!==input.size||result.localUpload?.source?.accountId!==run.target.accountId||
-     result.localUpload?.source?.bucketName!==run.target.bucketName)return {state:'UNKNOWN'};
+  if(!result&&!run.transferIds.has(input.id)&&run.precommitProofs.has(input.id))
+   return {state:'NOT_COMMITTED',reason:'TRANSFER_CLOSED_BEFORE_DISPATCH'};
+  if(!matchesUploadCheckpoint(result,run,frozen,key))return {state:'UNKNOWN',reason:'CHECKPOINT_UNAVAILABLE'};
   if(result.state==='verified')return {state:'ACKNOWLEDGED',receipt:cleanReceipt(result.receipt,key,input.size,input.id)};
-  if(['pending','cancelled','failed'].includes(result.state)&&result.localUpload.commitRequested===false)
-   return {state:'NOT_COMMITTED'};
-  if(result.localUpload.commitRequested&&['pending','uncertain'].includes(result.state)&&reconcileUpload&&session.mode==='read-write'){
+  if(['pending','cancelled','failed'].includes(result.state)&&result.localUpload.commitRequested===false){
+   run.precommitProofs.add(input.id);
+   return {state:'NOT_COMMITTED',reason:'PRODUCTION_PRECOMMIT_CHECKPOINT'};
+  }
+  if(result.localUpload.commitRequested&&['pending','uncertain'].includes(result.state)&&reconcileUpload){
    const category=run.policy.execution==='audit'?'audit':'transfer';
    const signal=category==='audit'?startAudit(run):run.transferController.signal;
    meter(session,run,'operations',1,category);
@@ -858,7 +872,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
     beforeRequest:requests(session,run,limits.statRequests,signal,category)});
    if(receipt)return {state:'ACKNOWLEDGED',receipt:cleanReceipt(receipt,key,input.size,input.id)};
   }
-  return {state:'UNKNOWN'};
+  return {state:'UNKNOWN',reason:'NO_CONFIRMED_PUBLICATION_OUTCOME'};
  }
  async function query(session,method,input) {
   switch(method) {
@@ -909,7 +923,12 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
   if(method==='closeTransfer'){
    if(transfer.state==='running')throw labError('TRANSFER_BUSY');
    clearTimeout(transfer.idleTimer);clearTimeout(transfer.absoluteTimer);
-   await spool.close();run.transfer=null;return {closed:true};
+   await spool.close();run.transfer=null;
+   if(run.precommitProofs&&transfer.kind==='upload'&&!transfer.submitted){
+    run.transferIds.delete(input.id);
+    run.precommitProofs.add(input.id);
+   }
+   return {closed:true};
   }
   if(method==='uploadStart'&&transfer.kind==='upload'&&transfer.state==='staging'){
    launch(session,run,transfer,()=>submit(session,run,transfer));return {started:true};

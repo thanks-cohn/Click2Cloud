@@ -397,7 +397,8 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
         if(previous?.localUpload&&value.localUpload){
           const a=previous.localUpload,b=value.localUpload;
           if(a.batchId!==b.batchId||a.index!==b.index||a.mode!==b.mode||a.size!==b.size||a.key!==b.key||
-             targetKey(a.source)!==targetKey(b.source))fail('OPERATION_BINDING_MISMATCH');
+             targetKey(a.source)!==targetKey(b.source)||a.sourceSha256&&a.sourceSha256!==b.sourceSha256)
+            fail('OPERATION_BINDING_MISMATCH');
           if(previous.state==='verified')return {row:previous};
           if(a.commitRequested===true&&b.commitRequested===false)fail('OPERATION_COMMIT_REGRESSION');
         }

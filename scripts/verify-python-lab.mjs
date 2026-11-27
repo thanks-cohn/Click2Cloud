@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
-import {openAsBlob} from 'node:fs';
+import {appendFileSync,openAsBlob} from 'node:fs';
 import {cp,mkdir,mkdtemp,open,readFile,rm,writeFile} from 'node:fs/promises';
 import {createConnection} from 'node:net';
 import {join,resolve} from 'node:path';
@@ -42,6 +42,8 @@ const ownerCount=Number(process.env.REDOWN_OWNER_FIXTURE_FILES??0);
 const children=new Set();
 let worker,lab,executeFault=null,r2Puts=0,workerWrites=0,providerReads=0,current,history;
 let stageFaults=0,publicationFaults=0,readFaults=0;
+let fileFault=null,precommitTransportFaults=0,postcommitTransportFaults=0,reconciliationTransportFaults=0;
+let loseProbeId=null,loseProbes=0;
 await mkdir(stateRoot,{mode:0o700});
 await mkdir(spoolRoot);
 
@@ -50,16 +52,23 @@ function pythonCommand(module,argv,stdio='pipe') {
  const setup='import runpy,sys; sys.path.insert(0, sys.argv.pop(1)); runpy.run_module(sys.argv.pop(1),run_name="__main__")';
  const child=spawn(python,[...pythonArguments,'-c',setup,pythonRoot,module,...argv],
   {env:childEnv,cwd:temp,stdio,windowsHide:true});
+ const registry=process.env.REDOWN_FIXTURE_PROFILE_REGISTRY;
+ if(registry&&child.pid)try{
+  appendFileSync(registry,JSON.stringify({pid:child.pid,role:module.endsWith('.native_host')?'python-native-host':'python-cli'})+'\n');
+ }catch{report.resourceRoleRegistrationFailures=(report.resourceRoleRegistrationFailures??0)+1;}
  children.add(child);
  child.once('close',()=>children.delete(child));
  return child;
 }
 function childResult(child) {
  return new Promise((resolve,reject)=>{
-  const out=[],err=[];
-  child.stdout.on('data',data=>out.push(data));child.stderr.on('data',data=>err.push(data));
+  const out=[];
+  let stdoutBytes=0,err=Buffer.alloc(0);
+  child.stdout.on('data',data=>{stdoutBytes+=data.length;if(stdoutBytes<=2*1024**2)out.push(data);});
+  child.stderr.on('data',data=>{err=Buffer.concat([err,data]).subarray(-64*1024);});
   child.once('error',reject);
-  child.once('close',code=>resolve({code,stdout:Buffer.concat(out).toString(),stderr:Buffer.concat(err).toString()}));
+  child.once('close',code=>stdoutBytes<=2*1024**2?
+   resolve({code,stdout:Buffer.concat(out).toString(),stderr:err.toString()}):reject(Error('FIXTURE_STDOUT_BUDGET')));
  });
 }
 async function cli(args,expected=0) {
@@ -185,19 +194,59 @@ try{
  };
  const lookup=async()=>plan;
  const remote=createRemoteTransport({oauth,lookup,pollIntervalMs:5,
-  fetch:(url,options)=>{if(new URL(url).pathname==='/files')workerWrites++;return worker.dispatchFetch(url,options);}});
+  async fetch(url,options){
+   const path=new URL(url).pathname;
+   if(path==='/files')workerWrites++;
+   if(path==='/capabilities'&&fileFault==='precommit'){
+    precommitTransportFaults++;
+    throw new TypeError('Fixture lost capabilities response before the signed publication request');
+   }
+   const response=await worker.dispatchFetch(url,options);
+   if(path==='/operation'&&(fileFault==='postcommit'||loseProbes)){
+    const {operationId}=JSON.parse(options.body);
+    if(fileFault==='postcommit'&&['completed','verified'].includes((await response.clone().json()).state)){
+     postcommitTransportFaults++;
+     loseProbeId=operationId;loseProbes=1;
+     await response.body?.cancel();
+     throw new TypeError('Fixture lost completed publication status');
+    }
+    if(operationId===loseProbeId&&loseProbes){
+     loseProbes--;reconciliationTransportFaults++;
+     await response.body?.cancel();
+     throw new TypeError('Fixture lost reconciliation response');
+    }
+   }
+   return response;
+  }});
  const execute=createFileTransport({remote});
  current=createCurrentStore();history=createHistoryStore();
- const accounting=[];
+ const accounting=new Set();
+ const verifiedNotifications=new Map();
  const service=createLocalUploadService({assertConnected:()=>{},oauth,lookup,checkPrepared:preparedDestination,remote,current,
-  onVerified:()=>{},onAccounted:row=>{const job=history.reconcile(currentReceipt(row));accounting.push(job);return job;},
+  onVerified:row=>verifiedNotifications.set(row.operationId,(verifiedNotifications.get(row.operationId)??0)+1),
+  onAccounted:row=>{
+   const job=history.reconcile(currentReceipt(row));accounting.add(job);
+   void job.then(()=>accounting.delete(job),()=>accounting.delete(job));
+   return job;
+  },
   runFileUpload:(input,options)=>service.run(input,options),
   executeFileMessage:async(...args)=>{
-   const value=await execute(...args);
-   if(executeFault==='lost-ack'||faults&&!publicationFaults){
-    publicationFaults++;throw Error('Fixture dropped signed Worker response after commit');
+   const [message]=args;
+   const leaf=message.entries[0].key.split('/').at(-1);
+   if(faults&&ownerCount>=8){
+    if(!precommitTransportFaults&&leaf.startsWith(ownerCount>=100?'0072 ':'0002 '))fileFault='precommit';
+    if(!postcommitTransportFaults&&leaf.startsWith(ownerCount>=100?'0073 ':'0005 '))fileFault='postcommit';
    }
-   return value;
+   try{
+    const value=await execute(...args);
+    if(value.state==='completed'&&(executeFault==='lost-ack'||executeFault==='lost-probes'||faults&&!publicationFaults)){
+     if(executeFault==='lost-probes'){
+      loseProbeId=message.operationId;loseProbes=2;
+     }
+     publicationFaults++;throw Error('Fixture dropped signed Worker response after commit');
+    }
+    return value;
+   }finally{fileFault=null;}
   }
  });
  const revision=(await childResult(spawn('git',['rev-parse','HEAD'],{cwd:repository}))).stdout.trim();
@@ -249,12 +298,14 @@ try{
   const ops=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
   assert.equal(ops.filter(row=>['uploadAcknowledged','recoveredPublication'].includes(row.event)).length,ownerCount);
   assert.equal(ops.filter(row=>row.event==='result'&&row.state==='PASS'&&row.readback===null).length,
-   ownerCount-Number(faults));
+   ownerCount-Number(faults)-Number(faults&&ownerCount>=8));
   if(faults)assert(ops.some(row=>row.event==='retryScheduled'&&row.direction==='upload'&&row.code==='HTTP_502'));
   await Promise.all(accounting);
   const queue=await history.jobs({limit:ownerCount});
   assert.equal(queue.finished,ownerCount);
   assert(queue.items.every(row=>row.status==='verified'));
+  assert.equal(verifiedNotifications.size,ownerCount);
+  assert([...verifiedNotifications.values()].every(count=>count===1));
   assert.equal((await bucket.head('unrelated/private.txt')).size,12);
   receipt('Owner campaign uses native framing, production Worker/R2, independent location audit and durable queue',{
    files:ownerCount,bytes,elapsedMs:Math.round(performance.now()-start),receiptSummary:run.benchmark,
@@ -273,6 +324,22 @@ try{
     const events=(await readFile(join(run.receiptBundle,'operations.ndjson'),'utf8')).trim().split('\n').map(JSON.parse);
     assert(events.some(row=>row.event==='retryScheduled'&&row.direction==='download'&&row.code==='HTTP_502'));
     assert.deepEqual([stageFaults,publicationFaults,readFaults],[1,1,1]);
+    if(ownerCount>=8){
+     assert.deepEqual([precommitTransportFaults,postcommitTransportFaults,reconciliationTransportFaults],[1,1,1]);
+     const retry=ops.find(row=>row.event==='retryScheduled'&&row.code==='TRANSPORT_UNAVAILABLE');
+     assert(retry?.operationId);
+     const failed=ops.find(row=>row.event==='result'&&row.scenarioId===retry.scenarioId&&row.code==='TRANSPORT_UNAVAILABLE');
+     assert.equal(failed.fixture.size,997);
+     assert.equal(failed.errorPhase,'commit-admission');
+     assert(ops.some(row=>row.event==='reconciliationObserved'&&row.operationId===retry.operationId&&row.state==='NOT_COMMITTED'));
+     const post=ops.find(row=>row.event==='reconciliationObserved'&&row.reason==='TRANSPORT_UNAVAILABLE');
+     assert(ops.some(row=>row.event==='reconciliationObserved'&&row.operationId===post.operationId&&row.state==='ACKNOWLEDGED'));
+     assert(!ops.some(row=>row.event==='retryScheduled'&&row.operationId===post.operationId));
+     receipt('Precommit transport failure reuses owned staging; postcommit failure reconciles after a lost status response',
+      {precommitBytes:failed.fixture.size,precommitTransportFaults,postcommitTransportFaults,reconciliationTransportFaults,
+       uploadRetries:ops.filter(row=>row.event==='retryScheduled').length,uniqueVerifiedNotifications:verifiedNotifications.size,
+       stagingBytes:run.locationAudit.stagingBytes});
+    }
     // Preserve the original receipt. In a separate fixture copy, emulate
     // abrupt CLI loss after a final-file publication and before its result.
     const interrupted=join(local.runs,'interrupted-download-evidence');
@@ -311,22 +378,61 @@ try{
    await mkdir(lostInput);await writeFile(join(lostInput,'lost.txt'),'lost acknowledgement');
    executeFault='lost-ack';
    const lost=await cli(['campaign','--input',lostInput,'--execution-seconds','90','--audit-seconds','30','--retry-reserve','0',
-    '--live','--approve-cost-usd','1'],3);
+    '--live','--approve-cost-usd','1']);
    executeFault=null;
-   assert.equal(lost.productionConfirmedFiles,0);
-   assert.equal(lost.statusCounts.UNCERTAIN,1);
-   const reconciled=await cli(['continue-campaign','--input',lostInput,'--run',lost.receiptBundle,
+   assert.equal(lost.productionConfirmedFiles,1);
+   assert.equal(lost.preflight.reservedRetriesPerDirection,0);
+   assert.equal(workerWrites,ownerCount+13);
+   receipt('A lost production acknowledgement is reconciled with zero replay reserve',
+    {confirmed:1,replayReserve:0,publicationWrites:1});
+   const unavailableInput=join(temp,'unavailable-outcome-input');
+   await mkdir(unavailableInput);await writeFile(join(unavailableInput,'probe.txt'),'lost reconciliation responses');
+   executeFault='lost-probes';
+   const unavailable=await cli(['campaign','--input',unavailableInput,'--execution-seconds','90','--audit-seconds','30',
+    '--retry-reserve','0','--live','--approve-cost-usd','1'],3);
+   executeFault=null;
+   assert.equal(unavailable.productionConfirmedFiles,0);
+   assert.equal(unavailable.statusCounts.UNCERTAIN,1);
+   const reconciled=await cli(['continue-campaign','--input',unavailableInput,'--run',unavailable.receiptBundle,
     '--execution-seconds','90','--audit-seconds','30','--live','--approve-cost-usd','1']);
    assert.equal(reconciled.productionConfirmedFiles,1);
    assert.equal(reconciled.locationAudit.matchedCount,1);
-   assert.equal(workerWrites,ownerCount+13);
-   receipt('A lost production acknowledgement is reconciled against the same Worker operation without replay',
+   assert.equal(workerWrites,ownerCount+14);
+   receipt('Two lost status responses leave a durable fence until the same campaign is reconciled',
     {initialUncertain:1,recovered:1,additionalPublicationWrites:0});
+   const countInput=join(temp,'frozen-count-input');
+   await mkdir(countInput);await writeFile(join(countInput,'one.txt'),'one eligible file');
+   const countArgs=['campaign','--input',countInput,'--expect-files','2','--execution-seconds','90',
+    '--audit-seconds','30','--live','--approve-cost-usd','1'];
+   const countBlocked=await cli(countArgs,2);
+   assert.equal(countBlocked.workloadVerdict.code,'EXPECTED_FILE_COUNT_MISMATCH');
+   assert.equal(countBlocked.admission,null);
+   assert.equal(workerWrites,ownerCount+14);
+   const diagnostic=await cli([...countArgs,'--new-run','--allow-count-mismatch'],1);
+   assert.equal(diagnostic.transferVerdict,'PASS');
+   assert.equal(diagnostic.locationVerdict.status,'PASS');
+   assert.equal(diagnostic.locationAudit.state,'FAIL');
+   assert.equal(diagnostic.locationAudit.matchedCount,1);
+   const reproduced=await cli(['check-location','--run',diagnostic.receiptBundle],1);
+   assert.deepEqual(reproduced.combinedReasonCodes,['EXPECTED_FILE_COUNT_MISMATCH']);
+   receipt('Expected inventory mismatch blocks writes until explicitly admitted for diagnostics',
+    {expected:2,eligible:1,writesBeforeDiagnostic:0,transfer:diagnostic.transferVerdict,
+     location:reproduced.locationVerdict.status,combined:reproduced.status,workload:diagnostic.workloadVerdict.status});
+   const roundInput=join(temp,'owner-round-trip-input');
+   await mkdir(roundInput);await writeFile(join(roundInput,'round.txt'),'owner round trip');
+   const round=await cli(['campaign','--input',roundInput,'--expect-files','1','--operations','round-trip',
+    '--verification','sha256','--retain-downloads','--execution-seconds','90','--audit-seconds','30',
+    '--live','--approve-cost-usd','1']);
+   assert.equal(round.retainedDiskVerdict.status,'PASS');
+   assert.equal(round.benchmark.independentSha256WithinWindow,1);
+   assert.equal((await cli(['check-downloads','--run',round.receiptBundle,'--all-windows'])).checkedFiles,1);
+   receipt('Round-trip campaign preserves the exact owned path and independently reopens the saved file',
+    {independentSha256:round.benchmark.independentSha256WithinWindow,retainedDisk:round.retainedDiskVerdict.status});
    await lab.ui('end');
    const restored=await bind('read-only',run.target.scopeId,{campaignId:run.campaignId,ceilings:campaignDefaults,minutes:75});
    await cli(['pair','--code',restored.pairCode]);
    const audit=await cli(['audit-location','--run',run.receiptBundle,'--live','--approve-cost-usd','1']);
-   assert.equal(audit.locationAudit.matchedCount,ownerCount);assert.equal(workerWrites,ownerCount+13);
+   assert.equal(audit.locationAudit.matchedCount,ownerCount);assert.equal(workerWrites,ownerCount+16);
    assert.equal((await cli(['check-location','--run',run.receiptBundle])).status,'PASS');
    receipt('A freshly authorized read-only grant can independently audit the exact original campaign',
     {matched:ownerCount,additionalPublicationWrites:0});

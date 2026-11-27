@@ -245,7 +245,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     const final={...result,...(result.state==='uncertain'&&job.submitted&&!job.settled?{remotePending:true}:{}),timings,durationMs:Math.round(performance.now()-start)};try{await recordOperation(final);}catch{return {...final,state:final.state==='verified'?'partial':final.state,code:'COMPLETION_PENDING'};}return final;
    }finally{activeSaves.delete(operationId);}
   },
-  async files({target,intent,signal,sourceBucket,expectedSession,beforeRequest}){
+  async files({target,intent,signal,sourceBucket,expectedSession,beforeRequest,beforeDispatch}){
    const operationId=intent.operationId;let dispatched=false;
    const sendFileRequest=(...args)=>{beforeRequest?.();return post(...args);};
    try{
@@ -263,8 +263,11 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     if(check.sessionId!==c.sessionId||!Array.isArray(features.fileOperations)||!features.fileOperations.includes(intent.action))fail('WORKER_FILE_API_REPAIR_REQUIRED');
    }
    signal?.throwIfAborted();
+   beforeRequest?.();
+   if(beforeDispatch)await beforeDispatch();
+   signal?.throwIfAborted();
    dispatched=true;
-   let result=await sendFileRequest(c,'/files',intent,signal),lastLease=clock();
+   let result=await post(c,'/files',intent,signal),lastLease=clock();
    while(result.state==='pending'){
     if(!await recheck(c,target,{beforeRequest}))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};
     if(clock()-lastLease>=30000){Object.assign(c,await cap(target,{use:'files',operationId,fileIntent:intent,sourceBucket,beforeRequest}));const lease=await sendFileRequest(c,'/lease',{},signal);if(lease.state!=='completed')return {state:'uncertain',code:'LEASE_DENIED',operationId};lastLease=clock();}
@@ -272,7 +275,8 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    }
    if(!await recheck(c,target,{beforeRequest}))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return {...result,operationId};
    }catch(error){
-    return {state:dispatched?'uncertain':'blocked',code:dispatched?'FILE_ACTION_UNCONFIRMED':
+    const transportFailure=beforeDispatch&&error.code==='TRANSPORT_UNAVAILABLE';
+    return {state:dispatched?'uncertain':'blocked',code:dispatched&&!transportFailure?'FILE_ACTION_UNCONFIRMED':
      /^[A-Z][A-Z0-9_]+$/.test(error.code??'')?error.code:'TRANSPORT_UNAVAILABLE',operationId};
    }
   },

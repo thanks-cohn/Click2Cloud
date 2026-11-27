@@ -7,6 +7,7 @@ const encoder=new TextEncoder();
 export const utf8Length=value=>encoder.encode(value).length;
 export const labError=code=>Object.assign(Error(code),{code});
 export const validHash=value=>typeof value==='string'&&/^[0-9a-f]{64}$/.test(value);
+const spoolFailure=error=>error?.name==='QuotaExceededError'?labError('OPFS_QUOTA_EXCEEDED'):error;
 
 export function decodeFrame(value) {
  if(typeof value!=='string'||!value||value.length>4*Math.ceil(chunkBytes/3))throw labError('INVALID_FRAME_BYTES');
@@ -37,10 +38,10 @@ export async function labSpoolDirectory(signal) {
 
 export async function openLabSpool(directory,size) {
  const name='transfer-'+crypto.randomUUID();
- const handle=await directory.getFileHandle(name,{create:true});
+ const handle=await directory.getFileHandle(name,{create:true}).catch(error=>{throw spoolFailure(error);});
  let writer;
  try{writer=await handle.createWritable();}
- catch(error){await directory.removeEntry(name).catch(()=>{});throw error;}
+ catch(error){await directory.removeEntry(name).catch(()=>{});throw spoolFailure(error);}
  const digest=sha256.create();
  let bytes=0,sealed=false,closing;
  return {
@@ -48,14 +49,14 @@ export async function openLabSpool(directory,size) {
   size,
   async append(chunk,offset=bytes){
    if(!writer||offset!==bytes||bytes+chunk.length>size)throw labError('STREAM_SIZE_MISMATCH');
-   await writer.write(chunk);
+   try{await writer.write(chunk);}catch(error){throw spoolFailure(error);}
    digest.update(chunk);bytes+=chunk.length;
   },
   async seal(expected){
    if(!writer||bytes!==size)throw labError('STREAM_SIZE_MISMATCH');
    const hash=Array.from(digest.digest(),byte=>byte.toString(16).padStart(2,'0')).join('');
    if(expected!==undefined&&hash!==expected)throw labError('SOURCE_CHANGED');
-   await writer.close();
+   try{await writer.close();}catch(error){throw spoolFailure(error);}
    writer=null;sealed=true;
    return hash;
   },

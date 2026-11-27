@@ -96,19 +96,23 @@ class Scheduler:
         ack = None
         pending = False
         requested = acknowledged = False
+        error_phase = op
         try:
             self.stop()
             if op == 'upload':
                 id_ = operation_id(self.run_id, scenario, 'upload')
                 send = self.progress.callback(scenario, 'upload', row['sizeBytes'])
                 try:
+                    error_phase = 'source-staging'
                     self.client.stage(id_, row, transfer_seconds,
                                       source_chunks(row, self.manifest['seed'], self.source, self.stop), send, self.stop)
                     self.stop()
                     self.journal.append('intent', scenarioId=scenario, operationId=id_,
                                         key=self.prefix + row['remotePath'], size=row['sizeBytes'], sha256=row['sha256'])
                     pending = requested = True
+                    error_phase = 'publication-request'
                     self.client.query('uploadStart', id=id_)
+                    error_phase = 'publication-outcome'
                     response = self.client.wait(id_, notify=send, stop=self.stop)
                     if response['state'] == 'ACKNOWLEDGED':
                         ack = response['receipt']
@@ -129,12 +133,14 @@ class Scheduler:
                         expected_row = row
                     else:
                         result = response if response['state'] != 'CONFLICT' else {'state': 'FAIL', 'code': response['code']}
-                        return self.finish(entry, result, start, ack, requested, acknowledged)
+                        return self.finish(entry, {**result, 'errorPhase': result.get('errorPhase', error_phase)},
+                                           start, ack, requested, acknowledged)
                 except BaseException:
                     self.client.cleanup('cancel', id=id_)
                     raise
                 finally:
                     self.client.cleanup('closeTransfer', id=id_)
+                error_phase = 'readback'
                 verification = self.read(scenario, expected_row, transfer_seconds, expected, step.get('retain'))
                 if verification['state'] == 'PASS':
                     self.verified[row['remotePath']] = verification
@@ -159,9 +165,11 @@ class Scheduler:
             elif op == 'list':
                 result = self.list(entry)
         except KeyboardInterrupt:
-            result = {'state': 'UNCERTAIN' if pending else 'CANCELLED', 'code': 'CANCELLATION_REQUESTED'}
-        except (LabError, OSError) as error:
+            result = {'state': 'UNCERTAIN' if pending else 'CANCELLED', 'code': 'CANCELLATION_REQUESTED',
+                      'errorPhase': error_phase}
+        except (LabError, OSError, MemoryError) as error:
             code = (error.code if isinstance(error, LabError) else
+                    'LOCAL_MEMORY_EXHAUSTED' if isinstance(error, MemoryError) else
                     'LOCAL_DISK_EXHAUSTED' if error.errno in (errno.ENOSPC, errno.EDQUOT) else 'LOCAL_IO_FAILED')
             if code == 'READBACK_SHA256_MISMATCH':
                 state = 'FAIL'
@@ -173,9 +181,10 @@ class Scheduler:
                 state = 'BLOCKED'
             else:
                 state = 'FAIL'
-            result = {'state': state, 'code': code}
+            result = {'state': state, 'code': code, 'errorPhase': error_phase}
             if isinstance(error, LabError) and code in ('SOURCE_CHANGED', 'SOURCE_IDENTITY_UNAVAILABLE',
-                                                        'LOCAL_FILE_UNREADABLE', 'LINK_OR_NONREGULAR'):
+                                                        'LOCAL_FILE_UNREADABLE', 'LINK_OR_NONREGULAR',
+                                                        'LOCAL_MEMORY_EXHAUSTED', 'EXTENSION_DISCONNECTED'):
                 result['diagnostic'] = error.detail
         return self.finish(entry, result, start, ack, requested, acknowledged)
 
@@ -195,11 +204,12 @@ class Scheduler:
                             upload={'requested': requested, 'acknowledged': acknowledged, 'receipt': ack},
                             readback=observed, metadata=result.get('metadata'), listing=result.get('listing'),
                             diagnostic=result.get('diagnostic'), attempt=self.attempt,
-                            retryAfterMs=result.get('retryAfterMs'),
+                            retryAfterMs=result.get('retryAfterMs'), errorPhase=result.get('errorPhase'),
                             durationMs=round((time.monotonic() - start) * 1000))
         self.progress.finished += 1
         self.progress.bytes += observed['clientBytes'] if observed else 0
-        return {**result, 'productionConfirmed': acknowledged, 'receipt': ack} if self.plan.get('verification') else result
+        return {**result, 'productionConfirmed': acknowledged, 'receipt': ack,
+                'publicationRequested': requested} if self.plan.get('verification') else result
 
     def read(self, scenario, row, timeout, receipt, retain):
         self.stop()
@@ -301,8 +311,9 @@ def run(client, caps, manifest_path, manifest, plan, *, source, runs, approve_co
     except KeyboardInterrupt:
         state = 'CANCELLED'
         journal.append('runError', code='CANCELLATION_REQUESTED')
-    except (LabError, OSError) as error:
-        journal.append('runError', code=error.code if isinstance(error, LabError) else 'LOCAL_IO_FAILED')
+    except (LabError, OSError, MemoryError) as error:
+        journal.append('runError', code=error.code if isinstance(error, LabError) else
+                       'LOCAL_MEMORY_EXHAUSTED' if isinstance(error, MemoryError) else 'LOCAL_IO_FAILED')
     finally:
         client.cleanup('releaseRun')
     counts = scheduler.progress

@@ -102,10 +102,22 @@ def project_audit(plan, outcomes, events, *, complete, reason=None):
     inventory_issues = len(plan['inventoryIssues'])
     expected_count = plan.get('expectedSelectionFiles')
     selection_matches = expected_count is None or expected_count == len(expected)
-    state = ('AUDIT_INCOMPLETE' if not complete else 'PASS' if counts.get('MATCHED', 0) == len(expected) and
-             not (duplicates or renamed or duplicate_commits or unexpected or staging or inventory_issues)
-             and selection_matches else 'FAIL')
+    location_reasons = [code for present, code in (
+        (not complete, reason or 'SCOPED_LISTING_INCOMPLETE'),
+        (counts.get('MATCHED', 0) != len(expected), 'FROZEN_KEYS_NOT_ALL_MATCHED'),
+        (duplicates, 'DUPLICATE_LISTING_KEYS'), (duplicate_commits, 'DUPLICATE_PUBLICATION_EVIDENCE'),
+        (renamed, 'PUBLICATION_LOCATION_MISMATCH'), (unexpected, 'UNEXPECTED_KEYS'),
+        (staging, 'STAGING_OBJECTS_REMAIN'),
+    ) if present]
+    workload_reasons = [code for present, code in (
+        (inventory_issues, 'INVENTORY_HAS_ERRORS'), (not selection_matches, 'EXPECTED_FILE_COUNT_MISMATCH'),
+    ) if present]
+    location_status = 'INCOMPLETE' if not complete else 'FAIL' if location_reasons else 'PASS'
+    # Preserve the original combined verdict for existing readers and receipts.
+    state = 'AUDIT_INCOMPLETE' if not complete else 'FAIL' if location_reasons or workload_reasons else 'PASS'
     return {'schema': 'redown.location-audit/1', 'state': state, 'reason': reason, 'scope': plan['target'],
+            'locationVerdict': {'status': location_status, 'reasonCodes': location_reasons},
+            'combinedReasonCodes': location_reasons + workload_reasons,
             'manifestDigest': plan['resolvedDigest'], 'completeScopedListing': complete,
             'observation': 'Independent R2 Object API listing; pages are not an atomic snapshot',
             'independentContentHashPerformedByAudit': False, 'pages': pages, 'successfulProviderPageCalls': provider_calls,
@@ -139,18 +151,24 @@ def check(root, audit_path):
 
     plan = load_plan(root)
     audit = read_json(audit_path)
-    events = list(Journal(audit_path.parent, filename='audit-observations.ndjson').rows())
-    pages = [event for event in events if event['event'] == 'auditPage']
-    completed = bool(pages and pages[-1]['exhausted'])
-    if any(page['page'] != index or page['exhausted'] and index != len(pages)
-           for index, page in enumerate(pages, 1)):
-        raise LabError('AUDIT_OBSERVATION_SEQUENCE_INVALID')
+    journal = Journal(audit_path.parent, filename='audit-observations.ndjson')
+    page_count, completed = 0, False
+    for page in journal.rows():
+        if page['event'] != 'auditPage':
+            continue
+        page_count += 1
+        if completed or page['page'] != page_count:
+            raise LabError('AUDIT_OBSERVATION_SEQUENCE_INVALID')
+        completed = page['exhausted']
     outcomes = publication_outcomes(plan, Journal(root).rows(), through_window=audit['windowId'])
-    computed = project_audit(plan, outcomes, events, complete=completed, reason=audit['reason'])
-    differences = [field for field, value in computed.items() if value != audit.get(field)]
+    computed = project_audit(plan, outcomes, journal.rows(), complete=completed, reason=audit['reason'])
+    additive = {'locationVerdict', 'combinedReasonCodes'}
+    differences = [field for field, value in computed.items() if value != audit.get(field) and
+                   (field not in additive or field in audit)]
     if differences:
         raise LabError('AUDIT_RECEIPT_MISMATCH', differences)
     return {'status': audit['state'], 'manifestDigest': plan['resolvedDigest'],
+            'locationVerdict': computed['locationVerdict'], 'combinedReasonCodes': computed['combinedReasonCodes'],
             'expectedFiles': audit['expectedCount'], 'observedUniqueFiles': audit['observedUniqueCount'],
             'matchedFiles': audit['matchedCount'], 'expectedBytes': audit['expectedBytes'],
             'observedBytes': audit['observedBytes'], 'fileStates': audit['fileStates'],

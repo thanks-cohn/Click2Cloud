@@ -10,7 +10,7 @@ import time
 
 from . import PROTOCOL
 from .errors import LabError
-from .native_host import atomic_private_json, private_directory, read_frame, write_frame
+from .native_host import FrameAllocationError, atomic_private_json, private_directory, read_frame, write_frame
 
 CHUNK_BYTES = 128 * 1024
 CODE = re.compile(r'[A-Z][A-Z0-9_]{1,79}\Z')
@@ -86,6 +86,11 @@ class ExtensionClient:
         try:
             write_frame(self.stream, {'method': method, 'input': inputs})
             result = read_frame(self.stream)
+        except FrameAllocationError:
+            raise LabError('LOCAL_MEMORY_EXHAUSTED', {'stage': 'native-encode', 'method': method}) from None
+        except MemoryError:
+            self.close()
+            raise LabError('LOCAL_MEMORY_EXHAUSTED', {'stage': 'native-frame', 'method': method}) from None
         except KeyboardInterrupt:
             # The stream may be between frame boundaries. Closing it lets the
             # extension cancel the disconnected lease without a second RPC.
@@ -155,8 +160,12 @@ class ExtensionClient:
         count = 0
         for chunk in chunks:
             stop()
-            answer = self.query('uploadAppend', id=identity, offset=count,
-                                bytesBase64=base64.b64encode(chunk).decode('ascii'))
+            try:
+                encoded = base64.b64encode(chunk).decode('ascii')
+            except MemoryError:
+                raise LabError('LOCAL_MEMORY_EXHAUSTED', {'stage': 'native-base64', 'method': 'uploadAppend'}) from None
+            answer = self.query('uploadAppend', id=identity, offset=count, bytesBase64=encoded)
+            del encoded
             count += len(chunk)
             if answer['bytes'] != count:
                 raise LabError('STREAM_SIZE_MISMATCH')
@@ -173,7 +182,7 @@ class ExtensionClient:
             if observed['state'] != 'PASS':
                 return observed
             return self.pull(identity, row, observed, output, notify, stop, publication)
-        except (KeyboardInterrupt, LabError, OSError):
+        except (KeyboardInterrupt, LabError, OSError, MemoryError):
             self.cleanup('cancel', id=identity)
             raise
         finally:
@@ -210,7 +219,7 @@ class ExtensionClient:
                 publication('downloadPublishRequested', count, calculated)
             try:
                 disk = sink.publish(count, calculated, stop)
-            except (LabError, OSError):
+            except (LabError, OSError, MemoryError):
                 if sink.published:
                     raise LabError('DOWNLOAD_PUBLICATION_UNCONFIRMED') from None
                 raise

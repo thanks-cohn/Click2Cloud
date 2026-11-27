@@ -71,7 +71,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     do {const p=await page(source,exact,cursor,'',options);const object=p.objects.find(o=>(o.key||o.name)===exact);if(object)return {object:{...object,key:exact}};cursor=p.cursor;if(seen.has(cursor)&&cursor)throw Error('Repeated metadata page.');seen.add(cursor);}while(cursor);
     return {object:null};
   }
-  async function verifyUpload(l,staging,file,options) {
+  async function verifyUpload(l,staging,file,options,expectedETag) {
     const {onProgress}=options;
     const deadline=AbortSignal.timeout(options.verificationTimeoutMs);
     const signal=AbortSignal.any([deadline,...(options.signal?[options.signal]:[])]);
@@ -84,7 +84,8 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
         if(signal.aborted)abort();
       })]);}finally{clearTimeout(timer);signal.removeEventListener('abort',abort);}
     }
-    const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{signal,timeoutMs:options.requestTimeoutMs});
+    const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{
+      signal,timeoutMs:options.requestTimeoutMs,...(expectedETag?{headers:{'If-Match':'"'+expectedETag+'"'}}:{})});
     if(!response.ok || !response.body){await response.body?.cancel();throw Error('Uploaded bytes could not be read back.');}
     const remote=response.body.getReader(),local=file.stream().getReader();
     let expected=new Uint8Array(),offset=0,verified=0;
@@ -215,7 +216,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
     copy:(input,o)=>transfer('copy',input,o),move:(input,o)=>transfer('move',input,o),
     rename:({source,entry:e,newName,conflict='keep'},o)=>message('cfRenameEntry',{source:location(source),entry:entry(e),newName:name(newName),conflict},o),
     delete:({source,entries},o)=>message('cfDeleteObjects',{source:location(source),entries:entries.map(entry)},o),
-    async upload({source,file,key:k,conflict='keep',stagingPrefix='.redown-beta-uploads/'},options={}) {
+    async upload({source,file,key:k,conflict='keep',stagingPrefix='.redown-beta-uploads/',retryStage,recordStage},options={}) {
       options=resolveOptions('upload',{},options);const {signal,onProgress}=options;
       const l=location(source);key(k);
       if(!file || !Number.isSafeInteger(file.size)||file.size<0)throw Error('Choose a local file.');
@@ -226,16 +227,36 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
       const parent=k.slice(0,k.lastIndexOf('/')+1),leaf=name(k.slice(parent.length));
       const stagingDirectory=prefix(stagingPrefix)+(options.operationId??crypto.randomUUID())+'/';
       const staging=key(stagingDirectory+leaf);
-      let attempted=false;
+      let attempted=false,errorPhase='staging';
       try {
         signal?.throwIfAborted();onProgress?.({phase:'uploading',bytes:0,totalBytes:file.size});attempted=true;
-        const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{method:'PUT',headers:{'content-type':file.type||'application/octet-stream'},body:file,timeoutMs:options.uploadTimeoutMs,signal});
-        const body=await response.json().catch(()=>null);
-        if(!response.ok || body?.success!==true)throw Object.assign(Error('Upload was not confirmed.'),
-          {code:response.ok?'R2_STAGE_UNCONFIRMED':'HTTP_'+response.status,...retryHint(response)});
-        const uploaded=await stat({source:l,key:staging},options);
-        if(Number(uploaded.object?.size)!==file.size)throw Error('Uploaded file size could not be verified.');
-        await verifyUpload(l,staging,file,options);
+        let staged=retryStage?(await stat({source:l,key:staging},options)).object:null;
+        const stageIdentity=object=>{
+          try{return {key:staging,etag:objectETag(object.etag),version:object.version??null};}
+          catch{return {key:staging,etag:null,version:null};}
+        };
+        const matchesStage=(object,proof)=>object&&proof?.key===staging&&proof.etag&&proof.version&&
+          stageIdentity(object).etag===proof.etag&&object.version===proof.version;
+        const reused=!!staged;
+        if(reused&&!matchesStage(staged,retryStage.proof))
+          throw Object.assign(Error('The existing temporary object does not match the upload checkpoint.'),{code:'R2_STAGING_OWNERSHIP_UNCONFIRMED'});
+        if(!staged){
+          const response=await http.request(base(l)+'/'+staging.split('/').map(encodeURIComponent).join('/'),{method:'PUT',headers:{'content-type':file.type||'application/octet-stream'},body:file,timeoutMs:options.uploadTimeoutMs,signal});
+          const body=await response.json().catch(()=>null);
+          if(!response.ok || body?.success!==true)throw Object.assign(Error('Upload was not confirmed.'),
+            {code:response.ok?'R2_STAGE_UNCONFIRMED':'HTTP_'+response.status,...retryHint(response)});
+          staged=(await stat({source:l,key:staging},options)).object;
+        }
+        if(Number(staged?.size)!==file.size)throw Error('Uploaded file size could not be verified.');
+        errorPhase='staging-verification';
+        await verifyUpload(l,staging,file,options,reused?retryStage.proof.etag:undefined);
+        if(recordStage){
+          const proof=stageIdentity(staged);
+          if(reused&&!matchesStage((await stat({source:l,key:staging},options)).object,proof))
+            throw Object.assign(Error('The temporary object changed during verification.'),{code:'R2_STAGING_IDENTITY_CHANGED'});
+          if(proof.etag&&proof.version)await recordStage(proof);
+        }
+        errorPhase='commit-admission';
         signal?.throwIfAborted();onProgress?.({phase:'committing',bytes:file.size,totalBytes:file.size});
         // destinationKey is exact, so a folder upload retains every component.
         const result=await message('cfTransferObjects',{operation:'move',source:{...l,prefix:stagingDirectory},destination:{...l,prefix:parent},entries:[{key:staging,folder:false,destinationKey:k}],conflict},options);
@@ -250,7 +271,7 @@ export function createR2Adapter({send=message=>chrome.runtime.sendMessage(messag
           throw Error('Final upload destination was not confirmed.');
         return {...result,key:finalKey,verification:'byte-for-byte staging read-back and provider final copy receipt; not independent final SHA-256'};
       }catch(error){
-        if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,retryAfterMs:error.retryAfterMs,cause:error});
+        if(attempted)throw Object.assign(new Error((error.message||'Upload interrupted.')+' Temporary upload may remain at '+staging+'. Inspect it before retrying.'),{name:error.name,uncertain:true,recoveryKey:staging,code:error.code,errorPhase,retryAfterMs:error.retryAfterMs,cause:error});
         throw error;
       }
     },
