@@ -478,17 +478,30 @@ function refreshProviderUploadProgress(){
 }
 function renderRemotes(){
   if(view!=='remotes')return;
-  connectionElement.remove();
-  const focusedProvider=document.activeElement?.closest('.remote-provider')?document.activeElement:null;
-  $('#main').innerHTML=`<section class="page remotes-page">
+  const main=$('#main');
+  const existingCloudflare=main.querySelector(':scope > .remotes-page > .remote-cloudflare');
+  const markup=`<section class="page remotes-page">
     <div class="remotes-intro"><h1 class="remotes-headline"><span>All Your Clouds</span> <span>One Place</span></h1></div>
     <div id="basic-provider-slot"></div>
     <h2 class="remote-interlude"><span><span class="legacy-slogan">The Future Is NOW</span><span class="onyx-slogan">The Future Is Now</span></span><span>True Remote Is Here</span></h2>
     <div class="card remote-cloudflare"><h2><span class="cf-legacy-mark">☁</span><svg class="cf-chrome-mark" viewBox="0 0 48 32" aria-hidden="true"><path fill="#f48120" d="M4 25a8 8 0 0 1 9-9 13 13 0 0 1 25 2l-3 7Z"/><path fill="#faae40" d="M37 17a7 7 0 1 1 3 12H34Z"/><path fill="#f48120" d="M3 27h30v3H3Z"/></svg> Cloudflare R2</h2><p class="onyx-provider-meta onyx-cloudflare-meta"><span class="onyx-free-caption">10 GB Free</span><span class="onyx-provider-transfer" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span class="onyx-transfer-fill"></span></span></p><div id="remotes-connection"></div></div>${setupStatusMarkup()}${connection?.state==='CONNECTED'&&cloudflareState?.code==='SETUP_APPROVAL_REQUIRED'?'<p>Automatic setup needs your approval: prepare the selected account’s destinations, create/reuse redown only when none exist, and verify a small retained file. Cloudflare may charge for usage.</p><button id="authorize-setup">Authorize automatic setup</button>':''}${workerUpdateMarkup(cloudflareState)}${workerFailureMarkup(cloudflareState?.diagnostic)}${ordinarySetupReview()}<button id="cloudflare-setup" class="remote-v1-copy">Review Cloudflare setup</button>${configurationIssue?recoveryCard():''}</section>`;
+  // Startup and background refreshes must not detach a provider button between
+  // pointerdown and click. Only the dynamic Cloudflare setup/recovery tail changes.
+  if(existingCloudflare&&main.querySelector('.remote-providers')){
+   const template=document.createElement('template');template.innerHTML=markup;
+   const freshCloudflare=template.content.querySelector('.remote-cloudflare');
+   const page=existingCloudflare.parentElement;
+   while(existingCloudflare.nextSibling)existingCloudflare.nextSibling.remove();
+   while(freshCloudflare.nextSibling)page.append(freshCloudflare.nextSibling);
+  }else{
+   connectionElement.remove();
+   main.innerHTML=markup;
+   basicCards.mount($('#basic-provider-slot'));
+  }
   if(aesthetic.getActive().id!=='standard')$('#cloudflare-setup')?.remove();
-  basicCards.mount($('#basic-provider-slot'));
-  focusedProvider?.focus({preventScroll:true});
-  $('#remotes-connection').append(connectionElement);connectionElement.hidden=false;renderConnection();
+  const connectionSlot=$('#remotes-connection');
+  if(connectionElement.parentElement!==connectionSlot)connectionSlot.append(connectionElement);
+  connectionElement.hidden=false;renderConnection();
   listen('#update-worker','click',()=>authorizeCloudflare(cloudflareState.accountId,cloudflareState.target));listen('#reauthorize-worker','click',()=>login('#reauthorize-worker'));listen('#resume-worker','click',resumeWorkerSetup);listen('#authorize-setup','click',()=>authorizeCloudflare(cloudflareState.accountId,selectedCloudflareTarget()));listen('#review-selected','click',cloudflarePanel);listen('#cloudflare-setup','click',cloudflarePanel);applyDebugMode(debugMode);
   listen('#open-explorer','click',async()=>{await show('explorer');});
   bindRecovery();
