@@ -290,25 +290,27 @@ export function installHyperspace({header,shell,preference,doc=header.ownerDocum
   }
   reset();
  });themeObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic','data-theme','data-onyx-finish','data-nostalgia-style','style']});
- // Scroll anchoring is independent of the selected header animation.
- const syncProviderScroll=()=>{
-  if(shell.dataset.view==='remotes'&&doc.documentElement.dataset.aesthetic==='onyx')
-   setVar(header,'--onyx-provider-scroll',Math.max(0,main?.scrollTop??0)+'px');
-  else header.style.removeProperty('--onyx-provider-scroll');
+ // The Providers scroll behavior is shared by all Onyx Shelf pages except
+ // File Explorer; the animation preference does not affect the scroll anchor.
+ const usesSharedHeader=()=>shell.dataset.view!=='explorer'&&doc.documentElement.dataset.aesthetic==='onyx';
+ const syncHeaderScroll=()=>{
+  if(usesSharedHeader())
+   setVar(header,'--onyx-header-scroll',Math.max(0,main?.scrollTop??0)+'px');
+  else header.style.removeProperty('--onyx-header-scroll');
  };
- if(main)on(main,'scroll',syncProviderScroll,{passive:true});
- const viewObserver=new win.MutationObserver(syncProviderScroll);
+ if(main)on(main,'scroll',syncHeaderScroll,{passive:true});
+ const viewObserver=new win.MutationObserver(syncHeaderScroll);
  viewObserver.observe(shell,{attributeFilter:['data-view']});
- const scrollSkinObserver=new win.MutationObserver(syncProviderScroll);
+ const scrollSkinObserver=new win.MutationObserver(syncHeaderScroll);
  scrollSkinObserver.observe(doc.documentElement,{attributeFilter:['data-aesthetic']});
  on(header,'focusin',e=>{
-  if(shell.dataset.view==='remotes'&&doc.documentElement.dataset.aesthetic==='onyx'&&
-     main?.scrollTop>0&&(brand?.contains(e.target)||theme?.contains(e.target))&&e.target.matches(':focus-visible')){
-   main.scrollTop=0;syncProviderScroll();
+  if(usesSharedHeader()&&main?.scrollTop>0&&
+     (brand?.contains(e.target)||theme?.contains(e.target))&&e.target.matches(':focus-visible')){
+   main.scrollTop=0;syncHeaderScroll();
   }
  });
- syncProviderScroll();
+ syncHeaderScroll();
  const unsub=preference.subscribe(reset);
  // Navigation is cancellation-only: it never starts a timer or animation.
- return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.style.removeProperty('--onyx-provider-scroll');unsub();for(const fn of cleanups)fn();}};
+ return {start(){void preference.ready.then(()=>{if(!disposed)arm();});},viewChanged:reset,dispose(){disposed=true;reset();themeObserver.disconnect();viewObserver.disconnect();scrollSkinObserver.disconnect();header.style.removeProperty('--onyx-header-scroll');unsub();for(const fn of cleanups)fn();}};
 }

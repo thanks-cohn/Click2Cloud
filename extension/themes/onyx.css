@@ -83,10 +83,10 @@
  :root[data-aesthetic=onyx] .app-header{--header-padding:6px;--header-gap:3px;--theme-size:28px}
  :root[data-aesthetic=onyx] .app-header nav>button{font-size:12px;padding-inline:4px}
 }
-/* Providers: R and the appearance glyph belong to the page's top, not
-   the viewport. Track the scrollport without moving navigation or layout. */
-:root[data-aesthetic=onyx] body:has(>#shell[data-view=remotes])>.app-header :is(.brand-lockup,#theme){
- translate:0 calc(0px - var(--onyx-provider-scroll,0px))!important;
+/* Shared Onyx Shelf header, excluding File Explorer: R and appearance
+   belong to the page's top. Preserve navigation and page geometry. */
+:root[data-aesthetic=onyx] body:has(>#shell:not([data-view=explorer]))>.app-header :is(.brand-lockup,#theme){
+ translate:0 calc(0px - var(--onyx-header-scroll,0px))!important;
 }
 :root[data-aesthetic=onyx] #shell[data-view=remotes]{
  & > main{background:var(--bg)}
