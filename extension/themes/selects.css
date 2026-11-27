@@ -61,3 +61,29 @@
   border-block-end-color:ButtonText;color:ButtonText;background:Canvas;
  }
 }
+
+/* Onyx Screenshots only: keep the native picker, but twirl its two-stroke
+   chevron and let it reform pointing up. No flash, opacity change or reflow. */
+@supports (appearance:base-select) and selector(::picker(select)){
+ :root[data-aesthetic=onyx] #shell[data-view=screenshot] .screenshot-page select:is(:not([multiple],[size]),[size="1"]:not([multiple]))::picker-icon,
+ :root[data-aesthetic=onyx] body:has(>#shell[data-view=screenshot]) #screenshot-editor select:is(:not([multiple],[size]),[size="1"]:not([multiple]))::picker-icon{
+  margin-block:0;transform:translateY(-1px) rotate(45deg);
+  transform-origin:center;transition:transform .52s cubic-bezier(.25,.75,.28,1);
+ }
+ :root[data-aesthetic=onyx] #shell[data-view=screenshot] .screenshot-page select:is(:not([multiple],[size]),[size="1"]:not([multiple])):open::picker-icon,
+ :root[data-aesthetic=onyx] body:has(>#shell[data-view=screenshot]) #screenshot-editor select:is(:not([multiple],[size]),[size="1"]:not([multiple])):open::picker-icon{
+  margin-block:0;transform:translateY(1px) rotate(585deg);
+  animation:onyx-screenshot-chevron-reform .52s ease-in-out;
+ }
+ @keyframes onyx-screenshot-chevron-reform{
+  0%,100%{scale:1}
+  45%{scale:.64}
+  78%{scale:1.08}
+ }
+ @media(prefers-reduced-motion:reduce){
+  :root[data-aesthetic=onyx] #shell[data-view=screenshot] .screenshot-page select::picker-icon,
+  :root[data-aesthetic=onyx] body:has(>#shell[data-view=screenshot]) #screenshot-editor select::picker-icon{
+   transition:none!important;animation:none!important;
+  }
+ }
+}
