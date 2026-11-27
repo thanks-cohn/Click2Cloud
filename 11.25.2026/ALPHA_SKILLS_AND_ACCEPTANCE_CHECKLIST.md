@@ -1,8 +1,8 @@
-# ReDown public alpha — skills, requirements and acceptance checklist
-Roadmap reference — 2026-11-26. Companion to STAGE_CODEX_REQUEST.md and ALPHA_MASTER_EXECUTION_ROADMAP.md. This is a cross-branch planning checklist, not authorization to expand Part 3 or change its prerequisite gates.
+# ReDown commercial V1 — skills, requirements and acceptance checklist
+November 26, 2026. Subordinate to ALPHA_MASTER_EXECUTION_ROADMAP.md (authoritative sequence) and active Run 2/3 requests. STAGE_CODEX_REQUEST.md is the Media & Manifest annex of unified Run 3. Historical stage numbering, default-folder/Lab exclusions, prohibition on current Run 2, and fixed 0.3.31 version are superseded. This checklist does not waive inherited gates or authorize independent branch execution.
 
 ## Product scope
-One feature. Four clouds. Right-click, Save, Done. Google Drive, OneDrive, Dropbox and Cloudflare R2, with $12/year proposed unlimited ReDown usage (provider limits still apply). Keep the Python Laboratory internal. Defer generic S3 and nonessential customer-facing functionality.
+Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDrive, Dropbox and Cloudflare R2, with $12/year proposed unlimited ReDown usage (provider limits still apply) and one-time lifetime 30 remote + 30 right-click free saves, no recurring reset. Manual uploads/retrieval, direct screenshots and multiple editable chord-to-destination bindings on all four providers are mandatory V1. Preserve the default redown folder with opt-out, explicit destinations and R2 bucket/prefix behavior. Keep the Python Laboratory internal. Defer generic S3, auto-rerouting and nonessential expansion.
 
 ## P0 — essential functionality
 ### Right-click reliability
@@ -16,6 +16,14 @@ One feature. Four clouds. Right-click, Save, Done. Google Drive, OneDrive, Dropb
 - [ ] Dropbox: verified saving and authentication.
 - [ ] Cloudflare R2: complete automatic error recovery.
 - [ ] Default redown folder with optional direct-to-drive mode.
+### Screenshot and chord-click reliability (mandatory V1)
+- [ ] Actual Screenshot to Cloud verified on all four providers.
+- [ ] Actual held two-/three-key chord + click verified on all four providers.
+- [ ] Multiple independently editable chord bindings; redown, legacy/root, custom folder, account default and R2 bucket/prefix modes as applicable.
+- [ ] Exact destination, no duplicate or overlapping chord dispatch, ordinary clicks unaffected, no hardcoded immutable binding, no unnecessary prompts.
+- [ ] Shared capture/source, destination, admission, accounting and verified completion contracts; no independent engine.
+- [ ] Provider-specific outage containment; healthy providers remain usable without silent redirection.
+- [ ] Media & Manifest annex verified using canonical versioned configuration and authorized reads.
 ### Transfer reliability
 - [ ] Automatic safe retries for temporary provider failures.
 - [ ] Recover from network interruptions.
@@ -30,7 +38,7 @@ One feature. Four clouds. Right-click, Save, Done. Google Drive, OneDrive, Dropb
 - [ ] One-click reconnection when user authorization is needed.
 - [ ] Preserve settings and destinations after reconnection.
 ### Commercial infrastructure
-- [ ] Cloud-backed free allowance persistence.
+- [ ] One-time lifetime 30/30 independent free allowances, no day/month/year reset; disclosed cloud-backed persistence across supported providers, no false promise of unrelated-account identity enforcement.
 - [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations.
 - [ ] Reliable $12/year license activation.
 - [ ] Restore paid licenses after reinstalling.
@@ -64,7 +72,7 @@ One feature. Four clouds. Right-click, Save, Done. Google Drive, OneDrive, Dropb
 ## ASAP acceptance targets
 | Test | Current evidence |
 |---|---|
-| 555 live R2 uploads | 554/555 confirmed |
+| Live R2 upload/readback | 578/578 uploaded and 578 independent SHA-256 matches; historical workload FAIL and location audit FAIL; retained restart verification pending |
 | 555 uploads with injected failure recovery | Pending |
 | 1,000 right-click saves | Needs formal verification |
 | 1,000 Google Drive saves | Pending |
@@ -93,8 +101,8 @@ Targets are proposed, not proven results or unconditional live execution instruc
 | Commercial licensing | Needs validation |
 | Public alpha packaging | Pending |
 
-## Deliberately postpone from public alpha
-Generic S3, advanced explorer functionality, Screenshot to Cloud expansion, extra animations, cloud-to-cloud transfers, mobile applications, desktop expansion, aggressive concurrency optimization. Retain existing development work; do not delete working features simply because they are not alpha requirements.
+## Deliberately postpone from V1
+Generic S3, automatic download rerouting, advanced explorer functionality, extra animations, cloud-to-cloud transfers, mobile applications, desktop expansion, aggressive concurrency optimization. Four-provider screenshots and configurable chord-click are mandatory V1, not deferred features. Retain existing development work; no deletion of working features.
 
 ## Original proposed Codex execution list (historical planning reference)
 1. Automatic recovery, receipts and interruption handling.
@@ -105,4 +113,4 @@ Generic S3, advanced explorer functionality, Screenshot to Cloud expansion, extr
 6. Commercial licensing and public alpha packaging.
 7. Final regression and release audit.
 
-The companion master roadmap refines this order and adds Part 3 and Onyx. Each session should have a focused specification, reproducible scripts, durable receipts and a bounded execution window. The objective is dependable service for the first 1,000 paying customers, as a foundation for broader adoption; no adoption or release guarantees.
+The authoritative master roadmap supersedes this historical list, defines current Run 2 and unified Run 3, and preserves Onyx as separate final work. Start from the approved 0.3.32.4 candidate or explicitly approved descendant; no historical downgrade. Each session should have a focused specification, reproducible scripts, durable receipts and a bounded execution window. The objective is dependable service for the first 1,000 paying customers, as a foundation for broader adoption; no adoption or release guarantees.
