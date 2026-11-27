@@ -6,6 +6,8 @@
 
 ## 1. Product mandate
 
+**Permanent regression:** no prior Depth configuration, use or successful save is ever a prerequisite for Simple or Narrow. Each mode works independently from the first authorized native Save click. Preserve this in every later checkpoint and Part 3; follow the active Part 2 cross-stage customer journey regression. No contextual shortcut expansion in 2B.1; that is 2D/Part 3. Silent/Normal feedback is presentation only, implemented through the existing feedback mechanism in 2B.3.
+
 ### Primary owner acceptance: it just works
 
 A brand-new user opens ReDown, completes normal account login and any genuinely required provider authorization, right-clicks a destination, saves it as a save location, then uses that location for a save. **The first save works. The end.** No prior Depth save, Shelf visit, manual Worker preparation, extra repair click, waiting ritual, or unexplained readiness error. Destination registration itself must initiate any permitted preparation necessary for first use; if the user clicks save immediately, the same operation must join or initiate readiness recovery and continue automatically when possible. A new configured location must not depend on any other location having been used first.
