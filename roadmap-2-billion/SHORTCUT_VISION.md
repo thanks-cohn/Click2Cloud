@@ -46,7 +46,7 @@ The Shortcut API should determine what the user intends to do. The shared Destin
 
 - A supported chord must be editable. There should be no hardcoded immutable ReDown user-facing assignment.
 - One deliberate eligible gesture must dispatch one intended action. Exact matching and conflict validation must prevent duplicate or overlapping chords from sending two saves.
-- An explicit destination-bound chord must honor its selected provider, account and folder. An account-default binding follows the documented rule/default precedence. No silent fallback or redirection.
+- An explicit destination-bound chord must honor its selected provider, account and arbitrary selected folder. The built-in redown mode is the deliberate exception: if the standard folder is unavailable for any reason, save to the same account's authorized original cloud destination automatically, without a fallback notification. Record the actual location in the receipt. No cross-account/provider redirection. Keep V1 simple: reuse existing folder choices, do not implement new arbitrary directory creation for basic-cloud shortcuts. An account-default binding follows the documented rule/default precedence.
 - A change to the binding must not retarget work already admitted. A disconnected or missing target should be repairable, not secretly substituted.
 - Configuration survives restart and compatible updates; transient armed state does not. Release, blur, navigation, tab or window changes, and cancellation clear stale gesture state.
 - Ordinary clicks, typing and text editing should continue normally outside an intentional supported gesture. No global keylogging, arbitrary keystroke storage or permission bypass.
