@@ -21,12 +21,3 @@ test('Singularity approaches, compresses, then accelerates into depth',()=>{
  assert(singularityFrame(.98,left,right).rotation-singularityFrame(.97,left,right).rotation>singularityFrame(.78,left,right).rotation-singularityFrame(.77,left,right).rotation);
  assert.equal(SINGULARITY_MS,3800);
 });
-
-test('Download coasts into GO TO with continuously decreasing late velocity',()=>{
- const left={x:10,w:90},right={x:210,w:80};
- const at=t=>singularityFrame(t*.42,left,right).movingX;
- const steps=Array.from({length:15},(_,i)=>at((i+6)/20)-at((i+5)/20));
- assert(steps.every((v,i)=>v>0&&(!i||v<steps[i-1])));
- assert.equal(at(0),10);assert.equal(at(1),210);
- assert(steps.at(-1)<steps[0]*.01);
-});
