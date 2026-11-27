@@ -21,14 +21,16 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 ### Screenshot and chord-click reliability (mandatory V1)
 - [ ] Actual Screenshot to Cloud verified on all four providers, multiple editable screenshot routes and shared Shortcut API with held-click/Explorer/shelf actions.
 - [ ] Agent-native shortcut contracts reuse production recognition, registry, validation and dispatch; focused/seeded pairwise and targeted stateful campaigns cover existing bindings, conflicts, invalid input, lifecycle, faults, permission and destination/usage invariants. Independent expected/actual assertions, bounded redacted receipts, reproducible seeds and fast/extended/replay commands. Codex executes affordable suites and packaged browser regressions before ready handoff; real browser input/capture/provider evidence distinct from fixtures. Owner performs necessary environment/live gates, not first-line debugging. No production test bypass or keylogging.
-- [ ] Show existing assignment; Override or change its keys; one Save updates both settings; Cancel preserves both. No ambiguous dispatch, failed edit preserves working settings, release all and explicit defaults restoration.
+- [ ] Show existing assignment; Override or change its keys; one Save updates both settings; Cancel preserves both. No ambiguous dispatch, failed edit preserves working settings, release all configurable assignments and explicit defaults restoration; fixed/browser-owned controls are protected.
 - [ ] Actual held two-/three-key chord + click verified on all four providers.
-- [ ] Multiple independently editable chord bindings; redown, legacy/root, custom folder, account default and R2 bucket/prefix modes as applicable.
+- [ ] Separate Screenshots page and Shortcuts tab; all screenshot configuration on Screenshots, no duplicate rows. Multiple independently editable screenshot/chord bindings; exactly ReDown folder / Account default for all three basic clouds, existing R2 bucket/prefix controls. Preserve legacy explicit targets without silent migration and unrelated manual/Save Here destinations.
+- [ ] Shared filtered shortcut availability; cross-page conflict handling; verify actual browser-managed assignment. Seven approved default releases, protected selection/navigation/editing controls, Cut removed while Copy/Paste/Move and admitted-job recovery remain. Restore Defaults cannot reinstate released keys. See the required owner UX references.
 - [ ] Exact destination, no duplicate or overlapping chord dispatch, ordinary clicks unaffected, no hardcoded immutable binding, no unnecessary prompts.
 - [ ] Shared capture/source, destination, admission, accounting and verified completion contracts; no independent engine.
 - [ ] Provider-specific outage containment; healthy providers remain usable without silent redirection.
 - [ ] Media & Manifest annex verified using canonical versioned configuration and authorized reads.
 ### Transfer reliability
+- [ ] Resolve inherited MemoryError and TRANSPORT_UNAVAILABLE with reproducible focused faults and resource evidence; reconstruct/check historic receipts without changing the frozen manifest, separate integrity/location/retained-restart/performance verdicts; required owner gates remain pending until evidenced.
 - [ ] Automatic safe retries for temporary provider failures.
 - [ ] Recover from network interruptions.
 - [ ] Prevent duplicate publications and unsafe overwrites.
@@ -43,7 +45,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Preserve settings and destinations after reconnection.
 ### Commercial infrastructure
 - [ ] Monthly free tier: 10 general plus 10 right-click, 10 screenshot, 10 chord-click and 10 manual-upload credits for basic clouds collectively, and the same five pools for R2 separately (50 each/100 per month). Matching bonus first, then same-group general; one verified file = one credit including folder children. No double debit or borrowing across groups/features; exactly one validated calendar-month renewal, no carryover or reinstall/clock-change reset; disclosed cloud-backed persistence across supported providers, no false promise of unrelated-account identity enforcement.
-- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations. Implement actual versioned JSON replicas using native application storage or disclosed authorized existing-folder/original-location fallback; no dependence on redown creation. Verify tamper/rollback/deletion/conflict and replica outage recovery; no premature renewal from missing records; surviving valid current-period replica restores all ten pools; prior-month exhaustion does not block valid new-period renewal, no blocking a valid accounted save merely because replica sync is pending. Read known authorized locations on connect/reinstall; no whole-cloud scan, opaque disclosed record ID, no size-based counters or scattered markers. Resolve policy and authority limits before public release.
+- [ ] Prevent ordinary reinstall abuse, without deceptive storage or privacy violations. Implement actual disclosed compact versioned JSON replicas (normal descriptive or namespaced start.json file, no extra marker or overwrite of unrelated files) using native application storage or disclosed authorized existing-folder/original-location fallback; no dependence on redown creation. Verify tamper/rollback/deletion/conflict and replica outage recovery; no premature renewal from missing records; surviving valid current-period replica restores all ten pools; prior-month exhaustion does not block valid new-period renewal, no blocking a valid accounted save merely because replica sync is pending. Read known authorized locations on connect/reinstall; no whole-cloud scan, opaque disclosed record ID, no size-based counters or scattered markers. Resolve policy and authority limits before public release.
 - [ ] First-visit ReDown-only allowance sticky: two groups, ten slim progress bars, accurate counts from shared state; persist user minimize, never auto-reopen, compact button only after confirmed full exhaustion, hide after verified paid activation, restore on expiry; show next renewal date and restore current-period credits at validated renewal without re-expanding a user-minimized sticky. No UI failure, stale state, pending reservation, unavailable provider or checkout flow blocks authorized saves/retrieval. Verify actual packaged UI, keyboard and compact layout.
 - [ ] Reliable $12/year license activation.
 - [ ] Restore paid licenses after reinstalling.
@@ -52,7 +54,7 @@ Four clouds. Right-click, Capture, Hold + Click, Save, Done. Google Drive, OneDr
 - [ ] Automatic JSON receipts.
 - [ ] Preserve evidence after logout, expiration or crashes (recover durable records on restart).
 - [ ] Extend Python Laboratory to all four providers.
-- [ ] Automated lifecycle and regression testing.
+- [ ] Application-wide action coverage matrix and actual shared production equivalents for every meaningful supported action, affordable seeded campaigns plus browser checks, independent bytes/state/receipt/accounting assertions, reusable failure replay and permanent regressions. Codex performs affordable diagnosis/repair/retest; owner performs necessary environment/live acceptance and optional stress campaigns. No simulated pass substituted for browser/provider evidence.
 - [ ] Separate development tools from the public alpha interface.
 
 ## Engineering competencies
@@ -107,7 +109,7 @@ Targets are proposed, not proven results or unconditional live execution instruc
 | Public alpha packaging | Pending |
 
 ## Deliberately postpone from V1
-Generic S3, automatic download rerouting, advanced explorer functionality, extra animations, cloud-to-cloud transfers, mobile applications, desktop expansion, aggressive concurrency optimization. Four-provider screenshots and configurable chord-click are mandatory V1, not deferred features. Retain existing development work; no deletion of working features.
+Generic S3, automatic download rerouting, advanced explorer functionality, extra animations, cloud-to-cloud transfers, mobile applications, desktop expansion, aggressive concurrency optimization. Four-provider screenshots and configurable chord-click are mandatory V1, not deferred features. Retain existing development work except the explicitly owner-approved cloud-file Cut removal and seven default releases; preserve other underlying functionality.
 
 ## Original proposed Codex execution list (historical planning reference)
 1. Automatic recovery, receipts and interruption handling.
