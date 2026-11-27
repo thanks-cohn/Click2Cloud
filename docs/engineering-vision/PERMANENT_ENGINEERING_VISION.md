@@ -56,6 +56,8 @@ Expect customers to return after a day, a month or a year. Preserve saved config
 
 One unavailable provider, account, optional feature or damaged component should not unnecessarily disable unrelated legitimate work. Isolate failures at the smallest appropriate boundary, with fair scheduling and bounded resources. History, previews, animation, feedback and diagnostics must not become competing transfer authorities or block valid saves.
 
+**Recovery is not a prerequisite to unrelated work.** After interruption, restore the independently usable application and recover affected operations in bounded background work. Protect genuine shared prerequisites; never bypass authorization or unresolved publication/eligibility fences. Keep provider-specific details in thin modules behind one authoritative contract; preserve compatible deployed infrastructure and avoid build-driven replacement. Bound long-term storage and rotate eligible resolved local records under simple user-configurable retention, never discard unresolved work or delete cloud content to make space.
+
 ## 9. Truth above appearances — discretion above interruption
 
 Never report a successful operation without adequate verification. An accurate partial result is preferable to misleading success; an honest limitation is preferable to an unreliable promise. Truthful state is mandatory, but the amount of unsolicited presentation is the customer's choice.
