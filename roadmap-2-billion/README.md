@@ -20,13 +20,13 @@ This is a planning snapshot based on reported development progress and test resu
 
 | Feature | What we have | What we need to work on |
 |---|---|---|
-| Cloudflare R2 | 🟢 578/578 live uploads production-confirmed | Independent retrieval and restart verification |
+| Cloudflare R2 | 🟢 578/578 live uploads and independent SHA-256 downloads | Retained-copy restart verification and fault repairs |
 | Google Drive | 🟡 Existing integration | Full live reliability testing |
 | OneDrive | 🟡 Existing integration | Full live reliability testing |
 | Dropbox | 🟡 Existing integration | Full live reliability testing |
 | Right-click remote saving | 🟡 Implemented | Reliable availability after login and browser restart |
-| Screenshot to Cloud | 🟡 Existing functionality | Support and verify all four providers |
-| Shortcut + Click to Cloud | 🟡 Existing foundation | Intuitive, responsive, reliable interaction |
+| Screenshot to Cloud | 🟡 Existing R2 reference functionality | Mandatory V1: actual capture and verified saves to R2, Google Drive, OneDrive and Dropbox via shared engine |
+| Shortcut + Click to Cloud | 🟡 Existing R2 reference foundation | Mandatory V1: intuitive, reliable saving to all four providers via shared engine |
 | Folder uploads | 🟡 Implemented and fixture-tested | Large live workloads across providers |
 | File downloads | 🟡 Implemented | Independent SHA-256 verification |
 | Folder downloads | 🟡 Existing implementation | Large live retrieval tests |
@@ -52,7 +52,7 @@ This is a planning snapshot based on reported development progress and test resu
 | Parallel processing | 🟡 Limited concurrency | Prepare architecture for V2; maintain safe V1 limits |
 | Engine separation | 🟡 Existing native bridge | Separate orchestration from execution for future native processing |
 
-**Evidence boundary:** ReDown 0.3.32.4 confirmed 578/578 eligible live R2 uploads, 336,467,559 bytes, zero reported transfer errors and zero staging leftovers. The workload verdict was FAIL because 555 files were expected and 578 were discovered. The location audit also reported FAIL despite 578 unique matches; independent final-object SHA-256 verification and restart retrieval remained pending at this snapshot. Earlier fault-injection and resource-pressure failures remain open. Do not describe this as a complete release acceptance pass.
+**Evidence boundary:** ReDown 0.3.32.4 confirmed 578/578 eligible live R2 uploads, 336,467,559 bytes, zero reported transfer errors and zero staging leftovers. The workload verdict was FAIL because 555 files were expected and 578 were discovered. The location audit also reported FAIL despite 578 unique matches; a later read-only download window retrieved all 578 files and independently matched every original SHA-256 hash (transfer PASS; 15m04s; no retained copies). Full-restart retained-copy verification remains pending. Earlier fault-injection and resource-pressure failures remain open. Do not describe this as a complete release acceptance pass.
 
 ## 3. Consumer appeal and security
 
@@ -78,7 +78,8 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 | Feature | What we have | What we need to work on |
 |---|---|---|
 | Annual pricing | 🟢 $12/year concept | Validate willingness to pay |
-| Free tier | 🟢 Seven daily remote saves proposed | Test whether the limit encourages adoption or discourages it |
+| Free tier | 🟢 Owner target: 30 remote saves + 30 right-click saves | Confirm reset period, category/folder accounting, migration and paid conversion; no silent policy change |
+| Required cloud-backed usage metadata | 🟡 Design requirement | All four providers; disclosed, minimal app metadata and local cache, reinstall reconciliation, explicit identity/authority limits |
 | Unlimited premium saves | 🟢 Product concept | Dependable licensing and entitlements |
 | Payment processing | 🔴 Not established | Secure purchasing and renewal |
 | License recovery | 🔴 Not established | Restore purchases across devices |
@@ -87,14 +88,14 @@ Remote saving reduces certain forms of local exposure; it does not neutralize ma
 | International pricing | 🔴 Not established | Affordable regional pricing and payment methods |
 | Referral system | 🔴 Not established | Optional privacy-respecting referral incentives |
 
-Seven free saves daily equals 2,555 per 365-day year. Test whether users have a meaningful reason to upgrade; do not make the free experience artificially unreliable.
+The 30/30 target supersedes the earlier seven-per-day proposal. Reset frequency and category mapping remain owner decisions; proposed non-overlapping counters avoid charging twice. App metadata deters casual reinstall abuse, but user-controlled metadata cannot prove one allowance per human across unrelated accounts. Disclose storage and respect deletion/disconnect; a privacy-respecting authoritative entitlement ledger may be required. Do not make free use artificially unreliable.
 
 ## 5. Development order
 
-1. **Reliability foundation:** Complete independent retrieval and restart testing for the current 578-file campaign; repair outstanding faults.
-2. **Universal cloud compatibility:** Dependable uploads, downloads and retrieval across R2, Google Drive, OneDrive and Dropbox.
-3. **Screenshot to Cloud:** Effortless capture across all supported providers.
-4. **Shortcut + Click to Cloud:** Fast, intuitive signature interaction with verified completion.
+1. **Reliability foundation:** Preserve the successful 578-file upload/readback baseline; complete retained-copy restart testing and repair outstanding faults.
+2. **Universal cloud compatibility:** Establish account/capability, destination, save/admission, completion and usage contracts before expanding dependable uploads, downloads and retrieval across R2, Google Drive, OneDrive and Dropbox.
+3. **Screenshot to Cloud:** Effortless capture across all four providers; reuse R2 behavior and the shared provider-neutral save contract. Mandatory V1 gate.
+4. **Shortcut + Click to Cloud:** Fast, intuitive signature interaction with verified completion across all four providers. Mandatory V1 gate.
 5. **Security, onboarding and commercialization:** Security audit, licensing, payments, privacy, accessibility and installation.
 6. **Public V1 release:** Staged rollout, real customer feedback and continuous reliability improvements.
 
