@@ -6,6 +6,12 @@
 
 ## 1. Product mandate
 
+### Primary owner acceptance: it just works
+
+A brand-new user opens ReDown, completes normal account login and any genuinely required provider authorization, right-clicks a destination, saves it as a save location, then uses that location for a save. **The first save works. The end.** No prior Depth save, Shelf visit, manual Worker preparation, extra repair click, waiting ritual, or unexplained readiness error. Destination registration itself must initiate any permitted preparation necessary for first use; if the user clicks save immediately, the same operation must join or initiate readiness recovery and continue automatically when possible. A new configured location must not depend on any other location having been used first.
+
+Test this exact user-visible journey independently in Simple, Narrow and Depth, on a clean new-user profile and on returning-user profiles, including immediately after destination registration. Verify the actual saved object at the requested location and record the number of extra user interventions (target: zero beyond normal login, destination selection and the original save). A real external outage or missing provider authorization is a separately classified blocker, not a passing first-use test. A background preparation success alone is not acceptance; the first actual save must complete and be verified.
+
 **The user's job is to save files. ReDown's job is to make that possible. Maintaining the Worker must not become the user's responsibility.**
 
 Prioritize immediate legitimate saves, automatic recovery, preservation of the user's time and durable recovery of incomplete operations. A user should not need to know about Worker deployment, generations, readiness caches, ledgers, initialization order, the Shelf, or another menu mode. A recoverable internal condition must not become a terminal user-facing error merely because an internal precondition has not been initialized.
