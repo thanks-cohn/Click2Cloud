@@ -37,6 +37,9 @@ Commercial V1: four providers (Cloudflare R2, Google Drive, OneDrive, Dropbox), 
 ## Latest owner-approved clarification — contextual shortcuts and permanent regression
 The approved narrow V1 shortcut extension is domain-based contextual reuse of the same chord for different authorized destinations, with optional user-granted site access, one scoped registry/dispatcher and no Shelf-open requirement on eligible focused webpages. Follow SHORTCUTS_TAB_SPECIFICATION.md; 2D foundation and Part 3 integration, not 2B scope. This supersedes blanket global key exclusion, not existing defaults or platform/security rules. Inherit Part 2's permanent customer-journey regression through every relevant checkpoint and final Part 3, including independent first-use, durable jobs, exact destinations, accounting, migration and Silent/Normal. No second test framework, no new research phase, no automatic release.
 
+## Latest owner direction — minimal scope and fault segmentation
+Keep Google Drive drive.file and only My Drive/ReDown new external-save destinations; no new Google scope or mandatory appDataFolder. Qualify authorized items, not full Drive. In 2B.1 preserve compatible Workers rather than upgrade on build digest change and ensure independent on-login/on-demand Simple/Narrow/Depth. In 2B.2 recover individual jobs without blocking independently eligible work and bound storage; 2B.3 existing Settings retention controls. 2C–2E use immutable identity and thin provider adapters, 2D/2F crash-safe settlement, 2G/3 sustain and regress. Follow active Part 2 detailed owner decisions. No new phase or framework.
+
 ## Authoritative execution sequence
 | Order | Assignment | Acceptance / dependency |
 |---|---|---|
