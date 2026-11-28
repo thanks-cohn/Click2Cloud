@@ -32,7 +32,7 @@ The reported sequence in which a Depth save unlocked Simple and Narrow is owner 
 | Packaged Chromium 143, direct registrar submission | 3/3 mode-only profiles verified one exact publication during a held deployment. Chrome reported zero Shelf contexts and no opening event. |
 | Actual Chromium 143 native menu on Linux/X11 | 9/9 across three consecutive runs with one extension load per profile. Each trial recorded one native delivery, one exact publication, one reopened SHA-256 match and zero Shelf openings. |
 | Chromium Shelf fixture | 19/19 verified GUI/production-owner cases with isolated Chrome callbacks and provider fixtures. |
-| Linux native relay fault round trip | 100/100 reopened SHA-256 matches, one file publication per logical operation, zero residual staging bytes. The 555-file attempt is tracked separately in the evidence. |
+| Linux native relay fault round trip | 100/100 and 555/555 uploads independently reopened with matching SHA-256. Each run exercised upload and read faults plus a lost acknowledgement. One publication per logical file and zero residual staging bytes. |
 | Cloudflare connector read-only | One account, 53 Worker scripts and eight buckets accessible. Five sampled ReDown Worker settings records matched the expected binding shape and baseline deployed digest. |
 | Installed Windows and live authorized save | Owner gate open. The candidate completed zero writes to live Cloudflare. |
 
@@ -74,7 +74,7 @@ lab-local\.venv\Scripts\redown-lab.exe download-selection --retain-downloads --l
 certutil -hashfile "PATH-PRINTED-BY-LAB\first-save.txt" SHA256
 ```
 
-The retained test file must match the independently recorded fixture hash and exact requested key. The dedicated prefix can include a small readiness object, so inspect the exact requested test file in the readback manifest. The read-only receipt can correlate a known operation with `--operation-id`. A native menu that was rendered and selected must be recorded outside the RPC. Chrome's callback and production provider receipt distinguish registration, delivery, publication and byte proof.
+The retained test file must match the independently recorded fixture hash and exact requested key. The dedicated prefix can include a small readiness object. Inspect the exact requested test file in the readback manifest. The read-only receipt can correlate a known operation with `--operation-id`. A native menu that was rendered and selected must be recorded outside the RPC. Chrome's callback and production provider receipt distinguish registration, delivery, publication and byte proof.
 
 The existing Windows fault gates remain in force. The current execution plan requires two consecutive complete 100-file and two consecutive complete 555-file round trips on the same qualified runtime. Keep each receipt. [Inherited Part 2 handoff](HANDOFF.md)
 
@@ -85,6 +85,6 @@ call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd 
 
 ## Acceptance boundaries
 
-The per-run evidence records the exact implementation revision, candidate results, diagnostic signals, and remaining gates. The Cloudflare connector reached account inventory and an owned Worker settings sample. The packaged extension's signed Cloudflare grant and a live-provider round trip need the explicitly scoped QA context. Installed Windows and accepted live first-use evidence remain open. The inherited staging, source retention, failed-child recovery and historical acceptance decisions stay with their assigned checkpoints.
+The per-run evidence records the exact implementation revision, candidate results, diagnostic signals, and remaining gates. The Cloudflare connector reached account inventory and an owned Worker settings sample. The packaged extension's signed Cloudflare grant and a live-provider round trip need the explicitly scoped QA context. Installed Windows and accepted live first-use evidence remain open. The inherited staging, source retention, failed-child recovery and historical acceptance decisions stay with their assigned checkpoints. A supplementary check of archived Worker c337e41 observed authenticated health and signed verification. Independent byte readback for that archived build is incomplete.
 
 A Worker plan missing from a profile with an established setup ledger cannot be reconstructed without the owning signing material. ReDown preserves the ledger and rejects a duplicate deployment. Interrupted user-source admission before a remote claim remains within the 2B.2 durable execution qualification. [Machine-readable evidence](EVIDENCE_2B1.json) · [Part 2 requests](CODEX_REQUEST.md)

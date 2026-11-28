@@ -130,7 +130,7 @@
         "visibleMenu": null,
         "menuGeneration": 2,
         "actualAppliedGeneration": 2,
-        "operationId": "6f1dd098-8ad7-4977-a726-fbc4f75748f3",
+        "operationId": "d8926798-088c-47b7-8f7d-dbac0798f63a",
         "key": "qa/QAleaf/first-simple.txt",
         "sha256": "c87a50ae93618edf2147254dad6096e06c6cfa46606d6f698b0c77eb0aeba3c3",
         "verifiedObjects": 1,
@@ -145,7 +145,7 @@
         "visibleMenu": null,
         "menuGeneration": 2,
         "actualAppliedGeneration": 2,
-        "operationId": "b849be81-8949-43a0-ae0e-79db461605a2",
+        "operationId": "577036fe-fa7b-4d48-aa0f-d174e89a8ee6",
         "key": "qa/QAleaf/first-nested.txt",
         "sha256": "125bb1e2b5dea48198c0a6159777631b7971e648d368fd698bc286d0b583b242",
         "verifiedObjects": 1,
@@ -160,7 +160,7 @@
         "visibleMenu": null,
         "menuGeneration": 2,
         "actualAppliedGeneration": 2,
-        "operationId": "a71c2b1d-40be-4dde-90dc-675dd3044fae",
+        "operationId": "16d2952a-9f77-4343-a5d5-1c92bbffba73",
         "key": "qa/QAleaf/first-depth.txt",
         "sha256": "79b500879f9bcd640e64e65533b0ef5a7d00ec241e2ed348085b6a033240f17a",
         "verifiedObjects": 1,
@@ -418,10 +418,38 @@
       }
     },
     {
-      "status": "NOT_TESTED",
-      "files": 555
+      "status": "PASS",
+      "files": 555,
+      "revision": "4fd670404a4ee6b32392e1d38afd7a2814268566",
+      "evidenceLayer": "python-native-loopback-workerd-r2-fixture",
+      "receipt": {
+        "name": "Injected 502 and lost acknowledgement preserve each unique logical transfer",
+        "state": "PASS",
+        "files": 555,
+        "upload502": 1,
+        "postPublicationLostAck": 1,
+        "download502": 1,
+        "diskSha256Files": 555,
+        "lostLocalAcknowledgementsRecovered": 1,
+        "r2Puts": 555,
+        "workerWrites": 555,
+        "providerReads": 555,
+        "stagingBytes": 0
+      }
     }
   ],
+  "archivalWorkerProbe": {
+    "revision": "c337e41",
+    "status": "PARTIAL",
+    "observed": [
+      "authenticated compatible /capabilities",
+      "signed /remote-save accepted",
+      "/operation verified",
+      "/verify completed"
+    ],
+    "independentlyReopenedContent": "NOT_VERIFIED",
+    "reason": "Supplementary older-bundle test exceeded its local time limit before independent byte evidence was recorded."
+  },
   "liveReadOnly": {
     "status": "PASS",
     "accounts": 1,
