@@ -144,7 +144,7 @@ try{
   const {port}=service.address();
   let release;
   run={filename:'first-'+mode+'.txt',content:'First '+mode+' file via packaged extension\n',
-   workers:new Map(),workerPaths:[],publications:[],nativeClicks:[],errors:[],deployStarted:0,held:true,hold:new Promise(resolve=>{release=resolve;})};
+   workers:new Map(),workerPaths:[],publications:[],nativeClicks:[],sidePanels:0,errors:[],deployStarted:0,held:true,hold:new Promise(resolve=>{release=resolve;})};
   let registration;
   try{
    const executablePath=process.env.C2C_CHROME_EXECUTABLE??(process.env.REDOWN_PLAYWRIGHT_CHROMIUM==='1'?chromium.executablePath():process.platform==='win32'?
@@ -156,18 +156,19 @@ try{
      '--disable-extensions-except='+extension,'--load-extension='+extension,
      `--host-resolver-rules=MAP api.cloudflare.com 127.0.0.1:${port}, MAP *.${'right-click-fixture.workers.dev'} 127.0.0.1:${port}, MAP ${sourceHost} 127.0.0.1:${port}, MAP * ~NOTFOUND`]
    });
-   let sw=context.serviceWorkers()[0];
-   if(!sw){
-    const cdp=await context.browser().newBrowserCDPSession();
-    await cdp.send('Extensions.loadUnpacked',{path:extension});
-    sw=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker',{timeout:6000});
-   }
+   // The launch flags already load this unpacked extension. Issuing a
+   // second CDP install while Chromium is still starting can create another
+   // service-worker owner and invalidates the one-gesture experiment.
+   const sw=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker',{timeout:12000});
+   assert.equal(context.serviceWorkers().filter(worker=>worker.url()===sw.url()).length,1);
    sw.on('console',message=>{
     if(message.text().startsWith('RightClickFixtureDelivery:'))run.nativeClicks.push(message.text().slice('RightClickFixtureDelivery:'.length));
+    if(message.text()==='RightClickFixtureShelfOpened')run.sidePanels++;
    });
    await sw.evaluate(async({accountId,apiToken,scopes})=>{
     await click2cloud.ready;
     chrome.contextMenus.onClicked.addListener(info=>console.log('RightClickFixtureDelivery:'+info.menuItemId));
+    chrome.sidePanel.onOpened?.addListener(()=>console.log('RightClickFixtureShelfOpened'));
     await chrome.storage.local.set({click2cloudOAuth:{sessionId:'isolated-browser-session',accessToken:apiToken,
      expiresAt:Date.now()+3600000,scopes,scopeEvidence:'provider-returned',accounts:[{id:accountId,name:'Isolated fixture'}]}});
    },{accountId,apiToken,scopes:CLOUDFLARE_SCOPES});
@@ -181,6 +182,7 @@ try{
     return api.invoke({version:'3+1.1',method:'commitConfigChange',
      params:{changes,prepareModes:[mode],expectedRevision:product.revision,idempotencyKey:crypto.randomUUID()}},'gui');
    },{mode,target});
+   void registration.catch(()=>{});
    await waitFor(()=>run.deployStarted===1,'held provider deployment');
    assert.equal(run.workerPaths.length,0);
    const route=await sw.evaluate(({mode,target})=>{
@@ -196,7 +198,10 @@ try{
    assert(route?.enabled,'Exact authorized native route must be actionable during preparation');
    let visibleMenu=null,submission;
    if(nativeInput)visibleMenu=await pressNative(page,route.labels,mode);
-   else submission=sw.evaluate(({id,url})=>click2cloud.registrar.handleClick({menuItemId:id,linkUrl:url}),{id:route.id,url:sourceOrigin+'/'+run.filename});
+   else{
+    submission=sw.evaluate(({id,url})=>click2cloud.registrar.handleClick({menuItemId:id,linkUrl:url}),{id:route.id,url:sourceOrigin+'/'+run.filename});
+    void submission.catch(()=>{});
+   }
    await delay(120);
    assert.equal(run.workerPaths.filter(path=>path==='/remote-save').length,0);
    release();
@@ -215,6 +220,8 @@ try{
    const configuration=await sw.evaluate(()=>click2cloud.current.read());
    assert.deepEqual(Object.keys(configuration.configs).filter(key=>(configuration.configs[key].destinations??configuration.configs[key].scopes).length),[mode]);
    assert.equal(context.pages().filter(page=>page.url().includes('/extension/app.html')).length,0);
+   assert.equal((await sw.evaluate(()=>chrome.runtime.getContexts({contextTypes:['SIDE_PANEL']}))).length,0);
+   assert.equal(run.sidePanels,0);
    assert.deepEqual(run.errors,[]);
    receipt.scenarios.push({mode,status:'PASS',browser:context.browser().version(),visibleMenu,menuGeneration:route.generation,
     actualAppliedGeneration:configuration.generation.applied,operationId:observed.operationId,key,sha256:sha(run.content),
