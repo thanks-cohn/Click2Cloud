@@ -6,3 +6,21 @@ test('a missing dispatch generation can yield STALE_GENERATION without a generat
 test('genuinely stale generation is rejected before any provider write',async()=>{const f=await fixture();try{f.state.generation.desired++;const out=await f.engine.save({itemId:f.row.id,generation:f.spec.generation,context:'link'});assert.equal(out.code,'STALE_GENERATION');assert.equal(f.writes(),0);}finally{f.close();}});
 test('post-write session loss stays uncertain and is never retried or marked verified',async()=>{const f=await fixture();try{const saving=f.engine.save({itemId:f.row.id,generation:f.spec.generation,context:'link'});await f.writing;f.session('different');f.release();const out=await saving;assert.equal(out.state,'uncertain');assert.equal(out.code,'AUTHORIZATION_LOST');assert.equal(out.completion,undefined);assert.equal(f.writes(),1);}finally{f.close();}});
 test('post-write generation change stays uncertain; unchanged authority completes once',async()=>{for(const change of [true,false]){const f=await fixture();try{const saving=f.engine.save({itemId:f.row.id,generation:f.spec.generation,context:'link'});await f.writing;if(change)f.state.generation.desired++;f.release();const out=await saving;assert.equal(out.state,change?'uncertain':'completed');assert.equal(f.writes(),1);}finally{f.close();}}});
+
+
+test('a fully acknowledged reconciliation can retain an in-flight save only for the identical route',async()=>{
+ const f=await fixture();
+ try{
+  const saving=f.engine.save({itemId:f.row.id,generation:f.spec.generation,context:'link'});
+  await f.writing;
+  const next=await f.engine.compile({mode:'composite',inventory:{scopes:[{target,folders:[],authorized:true,workerReady:false,complete:true}]}});
+  // Readiness alone can flip during reconciliation. Use an ACK for the same
+  // eligible action without changing its requested destination.
+  const retained=await f.engine.compile({mode:'composite',generation:next.generation,
+   inventory:{scopes:[{target,folders:[],authorized:true,workerReady:true,complete:true}]}});
+  assert.equal((await f.engine.apply(retained)).state,'completed');
+  f.release();
+  assert.equal((await saving).completion,'verified');
+  assert.equal(f.writes(),1);
+ }finally{f.release();f.close();}
+});

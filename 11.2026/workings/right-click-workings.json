@@ -9203,8 +9203,8 @@
       "extension/aesthetic.css": "0bf0e8e1e0c74c66c4c5a7d9e43d60185d9100e28692f2ff3af0e73b3ed74cbd",
       "extension/app.css": "be271732c1035fafe83a666998184755df353ea89dc2e67b8dc1813c02be1e59",
       "extension/app.html": "ee17a11bc4e45da7687309d82d1efbd07c8cd3051dff4d6814b6c3eb070edf7a",
-      "extension/app.mjs": "26370e320a9471aaa9519935069f6346b8ee6c6a57a1afa372a4979ee30330a1",
-      "extension/background.mjs": "b6c56d702b0142149e0f1d8e84b7e24761c879703f919987cb8d5987cfd63c2b",
+      "extension/app.mjs": "86ae06e04776429d3a837f894ba5b161e7e7023fb8277524b3c2d6afbd6332b3",
+      "extension/background.mjs": "66d7f198afa0325a0d62cc4cff2f3ef20a4919296436d80b7f3a57417b8446f1",
       "extension/basic-diagnostics-export.mjs": "6fed1977d469fac859d47b8437015d9c54da3be473f089ad363b18ba63f6e2fe",
       "extension/basic-history-preview.mjs": "f1e096e9322c421ef7fc3f5f07fab3536617422441ce7eecea1fa55a589c061e",
       "extension/basic-provider-cards.mjs": "20d5248fed062072d5d52af16a41b5dca0027c59e4ea4e937883601b1828ce18",
@@ -9240,7 +9240,7 @@
       "extension/icons/redown-success-48.png": "c4f2c6aeae721a6b3323d428d07e6dd91f1d72f22b2810a9772f45fc34ce7f28",
       "extension/immersive-view.mjs": "761fec575f44bd244605a31cb96e70102dad2032820e8383c29c9abf4fbd98f6",
       "extension/manifest-panel.mjs": "f07e728e4a26e8945b914bf56f1c26ef8897d59a11e303614eb9c1699c107adf",
-      "extension/manifest.json": "62843017b5df98e996daba4da8585ee4cc3bf9deec04f51858e22d56918f6366",
+      "extension/manifest.json": "7a2b6ab0a9cb8edac4f8ab8f03536eae744b94aa51451eb873da4c893291e106",
       "extension/mirror.css": "b73a14eacd71cf4d690928aeae813f3d3ae27ff75aecf1aab6a061f61716e907",
       "extension/mirror.html": "6fcd9440e4b07060a03ffaf831adfebb21c264a81a5e94d4d205d6fa9f9db5ce",
       "extension/mirror.mjs": "009aa2782f3ecaa70face9575c45cbde3de98ee649ab8fed5e9ab99310ae75e9",
@@ -9284,7 +9284,7 @@
       "src/api/gateway.mjs": "c5b2c7a7c8450026e21ed817719f8c703e4eff8ceae8797c6acf4c7292eeca1b",
       "src/api/menu-view.mjs": "0e2fd6ede812b94d280f223fdc2cf08f591f9133b17cdb6d79f0bf448301ceba",
       "src/api/permissions.mjs": "46937906b8c1587f771e14b759a0aa152acd274cbf45962a0e26347dfaad759c",
-      "src/api/service.mjs": "009663486bdc46814f447695c35f0189ef54449aafa9350d39c53674fc875052",
+      "src/api/service.mjs": "e8898b8b1ca8ad4947c2efb370a301d1fa16b4a9501e7d4658faf8084e101f53",
       "src/api/shortcuts.mjs": "e294d5fabcd88fbd8090506cf5617de0d9bd6685d4566619feb1c54ef34f7db7",
       "src/api/whole-cloud.mjs": "9e74238b00704b2e7978c3af7786752ce29729015d706230e930701ab472c5d7",
       "src/auth/cloudflare-oauth.mjs": "92e44670b1a591c5ebe75e61476fb3a53badd1555260f7db1b6bee3521ef85f8",
@@ -9303,7 +9303,7 @@
       "src/basic/providers/index.js": "af6d8826d073f8cd5d028e5232afddfdaf340ae05f6b1dd0b72fded9a368ebf2",
       "src/basic/save-protocol.mjs": "c8e606dbcbef5462a786b4dbedd5d9d8d69674cda8083ab9f6face5862e5587a",
       "src/basic/vendor/fflate.js": "8cc1f687e0159e977addb6b85e274dbd11e622cf151f4fcb7b85d49622ea43e7",
-      "src/build-info.mjs": "2c9bc65cecbb10edd521675150febd1f6ece4251472bc44660f1a6097dbbfac7",
+      "src/build-info.mjs": "326ed8787c6ec45614b6951a8d57fbb349ef33cb0f6442bf47e54fc810e9b2e9",
       "src/chrome/command-bindings.mjs": "aa19442d7508b30e27c3363ca0affaefbf6890e99192fcdcc114736d87f7dfa5",
       "src/chrome/daily-badge.mjs": "936580d6b71a714c20f7517fc80bee12d3c29ed459774a8908ca984577895b36",
       "src/chrome/debug-host.mjs": "866ef7433b6447805c280b10d00e2768b38c3eb12762f27e8ab2e1e4859200dd",
@@ -9319,7 +9319,8 @@
       "src/chrome/provider-panel.mjs": "4717e381c8503362164040b16e9e3bad45e978b18735b564f303e51346f7ea3a",
       "src/chrome/python-lab/campaign-policy.mjs": "fceedb79cde3c46bc167fc761ad7a435519f51290fe15fe6fafa7183c2076f7e",
       "src/chrome/python-lab/diagnostics.mjs": "c1be0ffd8bfd25cbcfb340ed548ab0a277ef299465cad36d359d4067cd7169b3",
-      "src/chrome/python-lab/session.mjs": "c6efb69743fd2023774c67c6270ea742371013a41ed258c4075b16671ad98e6c",
+      "src/chrome/python-lab/right-click.mjs": "648fef7eac4a9d53ae05d2bb0c4d9b9c8715d0f19281912d03dd8af4e670966f",
+      "src/chrome/python-lab/session.mjs": "915c6ae7384775515fc756e1503f06bd29138ccfc70d8f249aaf48aee1778e66",
       "src/chrome/python-lab/spool.mjs": "093687d8ca1f1cd2a52c5afc98ee818ed886db9b3f7f6d45cd15d1fe18629516",
       "src/chrome/python-lab/vendor/sha256.mjs": "d1cc9098f317cf4c5c1652090f680cd4303a9854e345845199ccdae64269c79e",
       "src/chrome/receipt-delivery.mjs": "01805e2eba62c34930c92fef123940d2e57ac6954ac8be51f9a73c3086539e57",
@@ -9330,12 +9331,12 @@
       "src/chrome/trusted-sender.mjs": "77f25fc9f459abd3f55a37200436c02a32a3c1bda214d5e3a4b0f1d974b9ec32",
       "src/chrome/upload-receipt-policy.mjs": "876d789235451953a118c4a09a7fe19fd12bae95b539910ef43702b001c825ec",
       "src/chrome/visible-tab-screenshot.mjs": "e991f22723f02fd367e5669d33cc50e742c2dde2c155675872e45750a20c1ecb",
-      "src/cloudflare/deployment.mjs": "c29bfc8bab9e1f0e3c5cde7d82deafc7f7deb86b0519b6fe771a79f81260c942",
+      "src/cloudflare/deployment.mjs": "211f675c477358f91fd677f5663169781c8f0a5f7df69a61b315d6c13fb1ec3a",
       "src/cloudflare/file-transport.mjs": "db292cf710ec9da580888594e68e3db5059eb6ff11dd510f81302cac11268518",
       "src/cloudflare/files.mjs": "c4ae42b72be96a04c89f6c7d57cfb17e28a19fd8347b2d92ceefc6ce040122b2",
       "src/cloudflare/inventory.mjs": "6c503961e9e7738d1c96eb45eacb94d0c62060bc941d74f524eea458fce9c151",
       "src/cloudflare/manifest-locations.mjs": "0ebd97a59c23a4dac5ace564d9a136d35f242ed65ab533cf083be0f6a86f1c88",
-      "src/cloudflare/onboarding.mjs": "81b2d35c5826186ba951dc625cfe335052ae79425b2991730c3c01c113b71816",
+      "src/cloudflare/onboarding.mjs": "8015e2228d6f22fbe3b37963d6e55ee3ec8a1ce23823d3d584e2fa306b0448a9",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/r2-public-domains.mjs": "d774e02b55cf0e65e7d749bb0222d1f6490b44e434308fb9be5dba0d7f10dcec",
@@ -9343,18 +9344,18 @@
       "src/cloudflare/screenshot-direct-upload.mjs": "19c477f270be1b1b1de2afbfbc4b5113044f00ccc177611596dab929545a5ddd",
       "src/cloudflare/screenshot-wire.mjs": "0026483e1eec5b72daecdff5f8d28c08ffa16806ad4a56e64085f6816e1d90d0",
       "src/cloudflare/screenshot-worker.mjs": "f1ab47d33036675eb1c878aa9ee297c11ec93fd0812b1f0628df3c71310e57f3",
-      "src/cloudflare/transport.mjs": "4e61a9ed4f6a7aed651dea5dbdbf6d6c75784ccdb52aad7a351017709f3398f3",
+      "src/cloudflare/transport.mjs": "defc0de5592c51bbd6b839d0307b69154b9200b202eacb45208d3b771932ca3d",
       "src/cloudflare/wire.mjs": "12a5a32d2846d215d97dc33d1ab1e88929f527c1a2d3d73de80ced903d128dd0",
       "src/cloudflare/worker.mjs": "5a1ea1ea1bad2f79845a6f80d83b4d2ffc7f5a3b4fd1e7e460df75e13d0fc57d",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
       "src/core/action-resolver.mjs": "c4b4710bec835196ddfb4c7079cf682b775a01b83e8dc1b19d47a4a6ce2acbfa",
       "src/core/boundary-observation.mjs": "9d064e09b515f687c3d8bddeea1e919b7b17973c324516859e8ec495df075c0d",
       "src/core/composite-menu.mjs": "d7ef5963f9fd4474ae7c03c3f3c5a4b9b7e393bcaf6a2b44d3f7a54e80bfb3e0",
-      "src/core/engine.mjs": "8d8f25a4a98ef20ad3347d002c7c3793ae26f1deaba781345526fdfbf80718fb",
+      "src/core/engine.mjs": "b76ff50a42d7043f285b60610af13609c2bf38c25e26cc521b703ee240ebce13",
       "src/core/menu-compiler.mjs": "a20da101804200abaa25577c5113770e57aa7359d4618ed4170b2a2015a876b2",
-      "src/core/menu-identity.mjs": "e5ebf6059cfc57b373c33a2eb84a6b3d6f482b3152bfe2bccbaf999fc497143d",
+      "src/core/menu-identity.mjs": "9a5450a7d2e18d638569ba97119a5a0038d44fa26aae35916ebc76583df44700",
       "src/core/menu-provenance.mjs": "1b0044640d068729d5d260ac3be558dcedae5c5e4322c0039726ead80eb3c987",
-      "src/core/menu-spec.mjs": "e61ef4a8152df2f7da88633c06ec8abf240aa030ed1a7007a740ee2670dc4d7d",
+      "src/core/menu-spec.mjs": "60a0882c0c67b16e470534f2b86acc437c5581b87a8c7c1228ce89ff76f90bbc",
       "src/core/save-dispatcher.mjs": "2542bf157025975f5e469128bd09e071d3ce6b8794beb476e3cbc5e57351d429",
       "src/core/source-capture.mjs": "249c21765f5eb2d9b74c04f49984f5dcd230e537e533e907eb7b55615ce57ff6",
       "src/dashboard/controls.mjs": "7d723ebacf860bfa8e05edf6afcfc643108f19fa2ff545ac80ef62e0c12c48aa",
@@ -9386,7 +9387,7 @@
       "src/explorer/search-file-api.mjs": "9059f90323a7c6df761083af0817bbee7e08347f9fee50023e41478e222180bc",
       "src/glaciaring/agent-api.mjs": "ff4d6c360799c5010d87acbd0cf09bf3b266b3ff27c67121f7d3c6fa4046f01e",
       "src/glaciaring/breadcrumbs.mjs": "8bc0402ab039f1f4dbc202a32f6d9c2be1612b746220ba42cdfee358ab083f4b",
-      "src/glaciaring/catalog.mjs": "35ed56210d28ac5cbe5ef7a0630ef61ac3293e95f9fee882f27d1b8a7a492e36",
+      "src/glaciaring/catalog.mjs": "3f7443a8113908885bcd9da23e3cc2055969817c6453ddaf3d142510872d5b82",
       "src/glaciaring/index.mjs": "1d0762320b0ffff2dc768a1ff494f19171b819ad03b23020de80cb77134e90c0",
       "src/glaciaring/reliability.mjs": "4cb85bec8ea3b1ce664c436648756f868a179d3fd2709f78e801dcfba784e032",
       "src/glaciaring/support-report.mjs": "89ddf6b76469492630b2978dbdd4ea590fbb47b43bdfb3a4d9e5d6ccbc207443",
@@ -9402,8 +9403,8 @@
       "src/manifest/schema.mjs": "cba93d4eb18b8ea9a7e5cdf08b7e84b742f897ffd567e5338c2de6cb2ad173af",
       "src/manifest/service.mjs": "794c990f587a9c1189dd439f19fd4ca63bf022fe7d93ad60f101fed5a9b36ece",
       "src/modes/depth/index.mjs": "fe368fed7b0d97af61770ee967ae93074614f57afc6f503e1b8c28a2718fe195",
-      "src/modes/depth/native-click.mjs": "a66ef32142a1b60ba745c72f3d0c95666f77b7a133ee654b9bdffb3446a6248a",
-      "src/modes/nested/index.mjs": "c14c5460d85d981d32d2f1dfacdaf958e601ed99b000f30fd245db8c9314c4ad",
+      "src/modes/depth/native-click.mjs": "075707804bd5bac465c0f6dabe286d2cf7294169f4b532c5409faf48136492b6",
+      "src/modes/nested/index.mjs": "3cdda1eccd6fccc15d971b2a25ab44534ddc34687111723345878648f2dbd77b",
       "src/modes/simple/index.mjs": "bb545006f78605134494fe9914d3e4da71c0e0e81658503217fe98f0b7a611e5",
       "src/persistence/backup.mjs": "4859e595415478098fd097bd22a7622e80ec4715926ddd528cc829f6aaf9bbcf",
       "src/persistence/current-store.mjs": "48f0229e01a9cdf669060191bfb24296d741ac4c9afa27ae7967db52107ffd5a",
@@ -9422,7 +9423,7 @@
       "src/recorder/host.mjs": "321734f82439f1f4cd40adbc7036f03ad8e075e983b9d51ac5264b83a08af8a2",
       "src/recorder/provider-observation.mjs": "6742a3baa498377baa0c05723510970a0145c261371ad128223219a119162f4a",
       "src/recorder/recorder.mjs": "912cc977a2065bd8823cd350c582d84f30ca2179549a50e0959f24d867b4c4bb",
-      "src/recorder/schema.mjs": "f18a9e9c9a114fae1772fd876f71d35d43732bcb1fb1c45657c7e715e652fbce",
+      "src/recorder/schema.mjs": "4b2137d3fd31bee36645ed376c53e4f905b95140ccf15ee61ac51214224504b1",
       "src/recorder/storage.mjs": "a61d9e6217cafcffa85727918dc6f921ac1fa1125b06b1e60cd9413727598a31",
       "src/recorder/writer.mjs": "d5c2783cb953a6be4b9f032121fa0e042356d1cef8d7150bf478030bcef37303",
       "src/screenshot/capture.mjs": "dd145dcbaa16a245b6b30a5960d45e62429aa017e8d217ee45c251ff27373486",
@@ -12201,11 +12202,11 @@
         }
       },
       {
-        "id": "DEPTH_EXACT_BUCKET_RECOVERY",
-        "preconditions": "Configured exact Cloudflare Depth bucket/descendant, validated CURRENT, current native ACK, live account grants",
-        "trigger": "Native Depth preflight or trusted selected-destination preparation",
-        "guard": "Original target and covering configured scope; durable prior approval or explicit confirmed setup; remote owned binding inspection; no scope widening",
-        "actual": "Missing plan creates and persists one real Worker plan at digest(accountId,bucketName); pending creation and probe resume idempotently. Fresh scoped capability and verified R2 probe precede native regeneration. Stale code and signing renewal require explicit approval. The original source is never retained or replayed; a fresh click uses the common saver.",
+        "id": "CLOUDFLARE_INDEPENDENT_FIRST_SAVE",
+        "preconditions": "Exact configured and acknowledged Cloudflare Simple, Narrow or Depth route, canonical CURRENT and current authorization",
+        "trigger": "Native context-menu click or authorized dispatchSave, configured login preparation or destination registration",
+        "guard": "Same OAuth session and acknowledged action identity, exact account/bucket/prefix, confirmed approval for setup, owned scoped Worker and recorded deployed digest",
+        "actual": "Chrome registers an authorized route during Worker preparation. The signed save retains its original operation/source/target and joins shared recovery. Only a verified provider readback establishes success. Narrow ancestors use their exact scoped authority. Worker digest differences alone do not trigger an update.",
         "apiMethods": [
           "recoverCloudflareDestination",
           "checkCloudflareR2",
@@ -12214,55 +12215,67 @@
           "dispatchSave"
         ],
         "identity": "Exact selected account/connection/bucket/prefix; Default and other-mode buckets are never recovery fallbacks",
-        "nextState": "Prepared only after current transport proof and exact actionable native ACK; original click remains not saved / FRESH_CLICK_REQUIRED",
-        "uiEffect": "Exact target preparation card, one informed authorization where needed, bounded permission/scope/uncertainty reasons; no unconditional ready text",
-        "externalResourceEffect": "Only approved selected-bucket Worker/DO deployment or owned repair and small retained readiness object; actual source save requires a fresh gesture",
-        "persistence": "Per-bucket remoteTransport digest registry and destination-recovery private setup ledger; no saved destination/Default/Quick changes",
+        "nextState": "Exact single logical save continues after verified readiness unless its route, source or authority changes. Unknown publication remains fenced.",
+        "uiEffect": "Authorized routes remain selectable. Chrome acknowledgement and Worker readiness are reported independently. Genuine reconnect or scope decisions remain actionable.",
+        "externalResourceEffect": "Reuse authenticated compatible Workers. Repair only already-authorized owned infrastructure. No automatic replay of an uncertain probe or source write.",
+        "persistence": "Existing per-deployment plan registry, bounded setup/probe ledger, CURRENT remote-result ownership and exact acknowledged routes.",
         "errors": [
           "SETUP_APPROVAL_REQUIRED",
           "WORKER_CREATE_PERMISSION_REQUIRED",
-          "WORKER_UPGRADE_APPROVAL_REQUIRED",
           "WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED",
           "WORKER_DESTINATION_SCOPE_REQUIRED",
+          "WORKER_PROTOCOL_INCOMPATIBLE",
+          "WORKER_ENDPOINT_MISSING",
+          "WORKER_PLAN_RECORD_MISSING",
           "SETUP_PROBE_REQUIRES_INSPECTION",
-          "DESTINATION_NOT_REGISTERED",
-          "FRESH_CLICK_REQUIRED"
+          "AUTHORIZATION_REVOKED"
         ],
-        "retry": "Read-only inspect by original probe identity after uncertainty; no source replay, no duplicate confirmed ready deployment",
+        "retry": "Bounded health and preparation retry, per-deployment serialization, durable probe/result reconciliation. Never redeploy based only on timeout or extension digest.",
         "sourceRefs": [
           {
-            "path": "src/modes/depth/native-click.mjs",
-            "symbol": "if(recover)",
-            "line": 32
+            "path": "src/core/engine.mjs",
+            "symbol": "const currentRoute=resolveMenuAction",
+            "line": 110
+          },
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "async function ensureSaveReady",
+            "line": 186
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
             "symbol": "async function recoverDestinationLocked",
-            "line": 168
+            "line": 252
           },
           {
             "path": "src/cloudflare/deployment.mjs",
-            "symbol": "renewSigning=false",
-            "line": 35
+            "symbol": "function withPlanLock",
+            "line": 26
           },
           {
-            "path": "src/api/service.mjs",
-            "symbol": "if(method==='recoverCloudflareDestination')",
-            "line": 358
+            "path": "src/modes/depth/native-click.mjs",
+            "symbol": "export function createDepthNativeClick",
+            "line": 12
           },
           {
-            "path": "extension/cloudflare-setup-view.mjs",
-            "symbol": "export function selectedSetupReady",
-            "line": 7
+            "path": "src/chrome/python-lab/session.mjs",
+            "symbol": "case 'rightClickInspect'",
+            "line": 881
+          },
+          {
+            "path": "src/chrome/python-lab/right-click.mjs",
+            "symbol": "export function createRightClickObservation",
+            "line": 12
           }
         ],
         "verification": {
-          "level": "LOCAL_PRODUCTION_PATH_WORKERD_R2_AND_BROWSER_DOM_SYNTHETIC_RPC",
+          "level": "PRODUCTION_REGISTRAR_SIGNED_WORKERD_R2_FIXTURE_AND_PACKAGED_CHROMIUM",
           "testFile": "tests/depth-plan-recovery.test.mjs",
           "additionalTests": [
+            "tests/fixtures/right-click-lab.mjs",
+            "scripts/test-right-click-readiness-browser.mjs",
             "tests/cloudflare-destination-recovery.test.mjs",
-            "tests/cloudflare-deployment.test.mjs",
-            "tests/cloudflare-setup-ui.test.mjs"
+            "tests/depth-authority-race.test.mjs"
           ],
           "installedWindows": "NOT_VERIFIED",
           "liveCloudflareR2": "NOT_VERIFIED"
@@ -12435,25 +12448,33 @@
         }
       },
       {
-        "id": "DEPTH_GESTURE_CAPABILITY_REUSE",
-        "actual": "One Depth gesture may reuse a privately held exact ready observation for at most 10s, with fresh session/account/plan/verified proof/prefix/revocation checks. Expiration requires status; changed bindings deny. No uncertain-write replay.",
+        "id": "CLOUDFLARE_SAVE_CAPABILITY_REUSE",
+        "actual": "A short-lived successful capability can be reused only with an identical deployment, exact target and OAuth session. Failures do not become readiness cache entries.",
         "sourceRefs": [
+          {
+            "path": "src/cloudflare/onboarding.mjs",
+            "symbol": "const cached=saveReadiness.get(key)",
+            "line": 189
+          },
           {
             "path": "src/cloudflare/transport.mjs",
             "symbol": "async authorizeReady",
-            "line": 144
+            "line": 174
           },
           {
-            "path": "src/modes/depth/native-click.mjs",
-            "symbol": "const authorizeClick=",
-            "line": 44
+            "path": "src/core/engine.mjs",
+            "symbol": "const currentRoute=resolveMenuAction",
+            "line": 110
           }
         ],
         "verification": {
           "level": "SOURCE_AND_LOCAL_FIXTURE",
           "status": "LOCAL_PASS_HISTORICAL_RACE_UNEXPLAINED",
           "testFile": "tests/depth-ready-authorization.test.mjs"
-        }
+        },
+        "preconditions": "Current OAuth session and verified exact-scope Worker capability",
+        "trigger": "Any eligible Cloudflare Simple, Narrow or Depth save",
+        "nextState": "The retained same-operation save dispatches only after live authority and current exact route are rechecked."
       },
       {
         "id": "PORTABLE_MENU_MANIFEST",
@@ -12692,15 +12713,18 @@
         "sourceRefs": [
           {
             "path": "src/api/service.mjs",
-            "symbol": "fileApi.run('listRaw',{source:t})"
+            "symbol": "fileApi.run('listRaw',{source:t})",
+            "line": 612
           },
           {
             "path": "src/cloudflare/onboarding.mjs",
-            "symbol": "recoverDestinationLocked"
+            "symbol": "recoverDestinationLocked",
+            "line": 251
           },
           {
             "path": "extension/app.mjs",
-            "symbol": "repairDestinations"
+            "symbol": "repairDestinations",
+            "line": 423
           }
         ],
         "verification": {

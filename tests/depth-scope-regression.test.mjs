@@ -38,11 +38,24 @@ test('Depth exception matrix: exact target/action identity and nested actions ac
  }
  assert(checked>500);
 });
-test('non-Narrow non-Depth composition stays byte-identical; Narrow intentionally gains actual bucket boundary',async()=>{
+test('historical non-Narrow/non-Depth projection is preserved through the Basic provider release',async()=>{
  const expected=JSON.parse(await readFile(new URL('../codex/11.13.2026-0355/EVIDENCE/non-depth-baseline.json',import.meta.url)));
  const unchanged=scenarios().filter(s=>!s.product.show.depth&&!s.product.show.nested);
  const names=new Set(unchanged.map(s=>s.name));
- const actual=unchanged.map(input=>({name:input.name,digest:digest(compileMenuSpec(input))}));
+ const actual=unchanged.map(input=>{
+  const projection=structuredClone(compileMenuSpec(input));
+  const basic=projection.rows.filter(row=>row.role==='provider-action'&&row.providerAction!=='cloudflare');
+  assert.deepEqual(basic.map(row=>row.providerAction),['google-drive','dropbox','onedrive']);
+  // 8edc19c shipped these providers for content gestures. Verify their current
+  // contract before reconstructing the frozen 08f7d29 historical digest.
+  for(const row of basic){
+   assert.deepEqual(row.contexts,['image','link','video','audio']);
+   assert.equal(row.reason,'PROVIDER_ACTION');
+   row.contexts.push('page');
+   row.reason='PROVIDER_NOT_IMPLEMENTED';
+  }
+  return {name:input.name,digest:digest(projection)};
+ });
  assert.deepEqual(actual,expected.filter(s=>names.has(s.name)));
  for(const input of scenarios().filter(s=>!s.product.show.depth&&s.product.show.nested)){
   const spec=compileMenuSpec(input),leaf=spec.rows.find(r=>r.origin.mode==='nested'&&r.role==='save'&&r.target.prefix==='Images/same/');
@@ -64,7 +77,8 @@ test('Depth same-bucket root, intermediate Save here and leaf reuse the identica
  const transport=createRemoteTransport({oauth:{authority:async()=>({sessionId:'fixture-session',accounts:[{id:'fixture'},{id:'other'}]})},expectedCodeDigest:'fixture-code',lookup:async target=>{targets.push(target);return target.bucketName==='missing'?null:plan;},fetch:async(_u,options)=>{requests++;const grant=await verifyGrant(plan.secret,options.headers.authorization.slice(7));return Response.json({state:'completed',protocol:PROTOCOL,destination:grant.destination,storageBound:true,durableClaims:true,conditionalCreate:true,codeDigest:plan.codeDigest});}});
  for(const prefix of ['','Images/','Images/same/'])assert.equal((await transport.status({...root(),prefix})).state,'READY');
  assert.equal(requests,3);assert.deepEqual([...new Set(targets.map(t=>t.prefix))],['','Images/','Images/same/']);assert(targets.every(t=>t.accountId==='fixture'&&t.bucketName==='bucket'));
- for(const target of [root('missing'),root('different'),root('bucket','other')])assert.equal((await transport.status(target)).code,'WORKER_SETUP_REQUIRED');
+ assert.equal((await transport.status(root('missing'))).code,'WORKER_SETUP_REQUIRED');
+ for(const target of [root('different'),root('bucket','other')])assert.equal((await transport.status(target)).code,'TRANSPORT_PLAN_INVALID');
  assert.equal(requests,3,'no remote request or provisioning for mismatched plans');
- for(const patch of [{state:'pending'},{protocol:'wrong'}]){const bad=createRemoteTransport({oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},lookup:async()=>({...plan,...patch}),fetch:async()=>{throw Error('must not fetch');}});assert.equal((await bad.status(root())).code,'WORKER_SETUP_REQUIRED');}
+ for(const patch of [{state:'pending'},{protocol:'wrong'}]){const bad=createRemoteTransport({oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},lookup:async()=>({...plan,...patch}),fetch:async()=>{throw Error('must not fetch');}});assert.equal((await bad.status(root())).code,patch.protocol?'WORKER_PROTOCOL_INCOMPATIBLE':'WORKER_SETUP_REQUIRED');}
 });

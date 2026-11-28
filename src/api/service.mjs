@@ -451,6 +451,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
               stage='cloudflare-initialization';
               if(!cloudflare)fail('CLOUDFLARE_HOST_UNAVAILABLE');
               const prepared=await cloudflare.initialize({authorizeSetup:true,resume:true});
+              if(hasSaved)void Promise.resolve(cloudflare.primeConfigured?.((data.accounts??[]).map(a=>a.id))).catch(()=>{});
               stage='native-registration';
               let initialization=prepared;
               if(prepared.state==='completed')initialization=await finishInitialization(prepared,{refreshDepthReadiness:false});
@@ -642,13 +643,15 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
             const changesBasicVisibility=params.changes.some(c=>c.type==='setProviderMenuVisibility'&&c.provider!=='cloudflare');
             const displayOnly=params.changes.every(c=>['setView','setTheme','setExplorerLayout','setFavorite'].includes(c.type)),evidence=engine.getEvidence?.();
             const superseded=receipt.replayed&&(await current.read()).product.revision!==receipt.after;
-            const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
-            const preparedTargets=selected.filter(s=>prepared.get(targetKey(s.target))?.state==='completed').map(s=>s.target);
+            // Record the already confirmed bucket setup consent before exposing
+            // its route. A first native click can own or join preparation.
+            if(!superseded)for(const {target} of new Map(selected.map(entry=>[scopeKey(entry.target),entry])).values())
+              await cloudflare.rememberDestinationApproval?.(target);
             let native;
             try{native=superseded?{state:'blocked',code:'CONFIGURATION_SUPERSEDED'}:!readySave&&displayOnly&&evidence
               ?(evidence.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.acknowledgedGeneration===evidence.desired?.generation?{...evidence.lastOutcome,retained:true}:{state:'partial',code:'NATIVE_APPLY_INCOMPLETE',retained:true})
               :!readySave&&receipt.replayed&&!refreshDepth&&evidence?.lastOutcome?.state==='completed'&&!evidence.pending&&evidence.desired?.modeRevision===receipt.after
-                ?evidence.lastOutcome:await applyCurrent({refreshTargets:readySave||newDefault?[]:added,refreshDepth,refreshDepthReadiness:!visibilityOnly&&!readySave&&!newDefault&&!evidence?.desired,preparedTargets,saveSelection:readySave?selected:newDefault?[]:undefined,primeBasic:changesBasicVisibility});}
+                ?evidence.lastOutcome:await applyCurrent({refreshTargets:[],refreshDepth,refreshDepthReadiness:!visibilityOnly&&!readySave&&!newDefault&&!evidence?.desired,saveSelection:readySave?selected:newDefault?[]:undefined,primeBasic:changesBasicVisibility});}
             catch(error){
               if(!newDefault||!params.changes.some(c=>c.type==='makeDefault'&&c.ensureSimple))throw error;
               native={state:'partial',code:error.code??'NATIVE_RECONCILE_UNAVAILABLE'};
@@ -669,6 +672,10 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
                 await applyCurrent({saveSelection:[]});
                 fail(native.code??'NATIVE_APPLY_INCOMPLETE');
               }
+            }
+            const prepared=superseded?new Map():await prepareSelected(selected,receipt.after,newDefault);
+            if(!readySave&&!superseded&&added.length&&await authorize({actor,scope:'provision',method:'recoverCloudflareDestination',params:{},bindings:added})===true){
+              for(const target of added.slice(0,8))void Promise.resolve(cloudflare?.ensureSaveReady?.(target)).catch(()=>{});
             }
             let backup;
             if(unchanged)backup={state:'NOT_REPEATED'};else if(receipt.replayed)backup={state:'NOT_REPEATED',code:'IDEMPOTENT_REPLAY'};else try{backup=await recovery.writeVerified(await current.read());}catch{backup={state:'BLOCKED',code:'EXTERNAL_RECOVERY_UNAVAILABLE'};}
@@ -693,7 +700,7 @@ export function createEngineApi({engine,current,fileApi,oauth,getInventory,autho
                   candidates.find(row=>!actionable(row))?.reason??'DESTINATION_NOT_REGISTERED'});
               }
               const blocked=destinationReadiness.find(r=>r.state!=='READY');
-              if(blocked&&native.state==='completed')native={...native,state:'partial',code:blocked.code};
+              if(blocked&&native.state==='completed'&&!cloudflare?.ensureSaveReady)native={...native,state:'partial',code:blocked.code};
             }
             for(const target of readySave?[]:added){
               const row=engine.getEvidence?.().desired?.rows.find(r=>r.target&&targetKey(r.target)===targetKey(target));

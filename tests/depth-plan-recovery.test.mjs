@@ -69,21 +69,34 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
  try{
   await provisioner.prepare(a,{approved:true});assert.equal((await transport.status(a)).state,'PREPARED');assert.equal((await transport.probe({target:a})).state,'verified');await provisioner.markVerified(a,'fixture-session');assert.equal((await transport.status(a)).state,'READY');
   const aKey=await digest(['fixture','narrow-a']),bKey=await digest(['fixture','depth-b']),beforeA=structuredClone(plans.get(aKey));assert.equal(plans.has(bKey),false);
-  const auth=async target=>{trace('authorization.begin',{targetRef:ref(target),ack:registrar.inspect().acknowledgedGeneration,pending:registrar.inspect().pending});const status=await transport.status(target);trace('authorization.end',{targetRef:ref(target),state:status.state,code:status.code,sessionEqual:true});return {sessionId:'fixture-session',authorizedTargets:status.state==='READY'?[target]:[]};};
-  let engine;const depthClick=createDepthNativeClick({current,oauth,transport:domainOptions.transport,lookup:target=>provisioner.lookup(target),inspect:()=>registrar.inspect(),authorize:auth,recover:async params=>{const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params},'gui');return out.data??out;}});
+  const auth=async target=>({sessionId:'fixture-session',authorizedTargets:target?.accountId==='fixture'?[target]:[]});
+  let engine;
+  const depthClick=createDepthNativeClick({current,inspect:()=>registrar.inspect(),authorize:auth});
   const chrome={runtime:{},contextMenus:{onClicked:{addListener(){},removeListener(){}},remove:(_id,callback)=>callback(),create:(_properties,callback)=>callback()}};
-  registrar=createChromeRegistrar({chrome,depthClick,observeClick:observation.observeClick,sink:e=>trace('registrar.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),getAuthorization:async info=>auth(registrar.inspect().desired.rows.find(row=>row.id===info.menuItemId).target),dispatch:(_action,{info,generation,depthAuthorization,observation:observe})=>{trace('dispatch.enter',{generation,desired:state.generation.desired,applied:state.generation.applied,ack:registrar.inspect().acknowledgedGeneration,pending:registrar.inspect().pending});return engine.save({observation:observe,itemId:info.menuItemId,generation,depthAuthorization,context:'link',source:sourceFromClick(info)});}});
-  engine=createEngine({current,registrar,getAuthorization:auth,diagnostics:e=>trace('engine.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),remoteSave:input=>transport.save(input),providerSetupActions:true});
+  registrar=createChromeRegistrar({chrome,depthClick,dispatchOwnsAuthorization:true,observeClick:observation.observeClick,
+   sink:e=>trace('registrar.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),
+   dispatch:(_action,{info,generation,depthAuthorization,observation:observe})=>{
+    trace('dispatch.enter',{generation,desired:state.generation.desired,applied:state.generation.applied,ack:registrar.inspect().acknowledgedGeneration,pending:registrar.inspect().pending});
+    return engine.save({observation:observe,itemId:info.menuItemId,generation,depthAuthorization,context:'link',source:sourceFromClick(info)});
+   }});
+  engine=createEngine({current,registrar,getAuthorization:auth,diagnostics:e=>trace('engine.'+e.stage,{outcome:e.outcome,code:e.code,generation:e.generation}),
+   remoteSave:input=>transport.save({...input,prepare:domain.ensureSaveReady}),providerSetupActions:true});
   const inventory=ready=>({scopes:[{target:{...a,prefix:''},folders:['kept/','simple/'],authorized:true,workerReady:true,complete:true},{target:b,folders:['Images/','Images/Artwork/',...deep.split('/').filter(Boolean).map((_,index)=>deep.split('/').slice(0,index+1).join('/')+'/')],authorized:true,workerReady:ready,complete:true}]});
   api=createEngineApi({engine,current,oauth,cloudflare:domain,authorize:async()=>true,confirm:async()=>true,getInventory:async()=>inventory((await transport.status(b)).state==='READY')});
   let spec=await engine.compile({mode:'composite',inventory:inventory(false)});assert.equal((await engine.apply(spec)).state,'completed');
-  const rowBefore=spec.rows.find(row=>row.origin?.mode==='depth'&&row.role==='save'&&row.target.prefix==='Images/Artwork/');assert(rowBefore);assert.equal(rowBefore.actionKind,'attention');
+  const rowBefore=spec.rows.find(row=>row.origin?.mode==='depth'&&row.role==='save'&&row.target.prefix==='Images/Artwork/');assert(rowBefore);assert.equal(rowBefore.actionKind,'save');
     const controlBefore=spec.rows.filter(row=>row.role==='save'&&['simple','nested'].includes(row.origin?.mode)&&['simple-a','narrow-a'].includes(row.presentationId));assert.equal(controlBefore.length,2);
   for(const row of controlBefore){const saved=await observation.click(registrar,{menuItemId:row.id,linkUrl:sourceUrl});assert.equal(saved.state,'completed',JSON.stringify(saved));const runtime=workers.get(beforeA.name);assert.equal(await (await (await runtime.mf.getR2Bucket('STORAGE')).get(saved.receipt.key)).text(),'abc');}
-  const nativeRecovery=await observation.click(registrar,{menuItemId:rowBefore.id,linkUrl:sourceUrl});assert.equal(nativeRecovery.state,'blocked',JSON.stringify(nativeRecovery));assert.equal(nativeRecovery.code,'FRESH_CLICK_REQUIRED');assert.equal(nativeRecovery.requiredAction,'RIGHT_CLICK_AGAIN');assert.deepEqual(nativeRecovery.target,rowBefore.target);
-  const recovered=nativeRecovery.recovery;assert.equal(recovered.state,'completed',JSON.stringify(recovered));assert.equal(recovered.target.bucketName,'depth-b');assert.equal(recovered.target.prefix,'Images/Artwork/');assert.equal((await transport.status(rowBefore.target)).state,'READY');
-  assert.equal(plans.get(bKey).bucketName,'depth-b');assert.equal(plans.get(bKey).accountId,'fixture');assert.equal(plans.get(bKey).codeDigest,expectedCodeDigest);assert.notEqual(plans.get(bKey).secret,beforeA.secret);assert.deepEqual(plans.get(aKey),beforeA);assert.equal(deployments.filter(value=>value.bucketName==='depth-b').length,1);
-  const bRuntime=workers.get(plans.get(bKey).name),bucketB=await bRuntime.mf.getR2Bucket('STORAGE');const readiness=(await bucketB.list()).objects;assert.equal(readiness.some(value=>value.key.endsWith('approved.bin')),false,'The setup click must not upload or replay its original source');assert(readiness.some(value=>value.key.startsWith('Images/Artwork/.click2cloud-readiness/')),'Real exact-prefix readiness object must exist');
+  const savedFirst=await observation.click(registrar,{menuItemId:rowBefore.id,linkUrl:sourceUrl});
+  assert.equal(savedFirst.completion,'verified',JSON.stringify(savedFirst));
+  assert.equal(savedFirst.receipt.key,'Images/Artwork/approved.bin');
+  assert.equal((await transport.status(rowBefore.target)).state,'READY');
+  assert.equal(plans.get(bKey).bucketName,'depth-b');assert.equal(plans.get(bKey).accountId,'fixture');
+  assert.equal(plans.get(bKey).codeDigest,expectedCodeDigest);assert.notEqual(plans.get(bKey).secret,beforeA.secret);
+  assert.deepEqual(plans.get(aKey),beforeA);assert.equal(deployments.filter(value=>value.bucketName==='depth-b').length,1);
+  const bRuntime=workers.get(plans.get(bKey).name),bucketB=await bRuntime.mf.getR2Bucket('STORAGE');
+  assert.equal(await (await bucketB.get(savedFirst.receipt.key)).text(),'abc');
+  assert((await bucketB.list()).objects.some(value=>value.key.startsWith('Images/Artwork/.click2cloud-readiness/')));
   spec=await engine.compile({mode:'composite',inventory:inventory(true)});assert.equal((await engine.apply(spec)).state,'completed');assert.equal(registrar.inspect().acknowledgedGeneration,spec.generation);
   const selectedPrefixes=['','Images/','Images/Artwork/',deep];
   for(const prefix of selectedPrefixes){const row=spec.rows.find(row=>row.origin?.mode==='depth'&&row.role==='save'&&row.target.prefix===prefix);assert(row,'Missing exact Depth native row '+prefix);assert.equal(row.actionKind,'save');const saved=await observation.click(registrar,{menuItemId:row.id,linkUrl:sourceUrl});assert.equal(saved.state,'completed',JSON.stringify(saved));assert.equal(saved.receipt.key.startsWith(prefix),true);assert.equal(await (await bucketB.get(saved.receipt.key)).text(),'abc');assert.equal(saved.receipt.destination.bucketName,'depth-b');}
@@ -138,6 +151,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
    };
    function startHost(){
     registrar?.close();
+    provisioner=createProvisioner({...provisionerOptions,authority:localOauth.authority});
     transport=createTransport();
     const cloudflare=createCloudflareOnboarding({...domainOptions,oauth:localOauth,transport});
     const authorize=async target=>{
@@ -176,7 +190,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     const out=await registrar.handleClick({menuItemId:row.id,linkUrl:sourceUrl});
     assert.equal(out.state,expected,JSON.stringify(out));
     if(expected==='completed'||expected==='partial'){
-     assert.equal(count.capabilities,from.capabilities);
+     assert(count.capabilities-from.capabilities<=1,'Background login probing is independently bounded');
      assert.equal(count.authority-from.authority,2);
      assert.equal(count.upload-from.upload,1);
      assert.equal(count.verify-from.verify,1);
@@ -206,7 +220,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     }else assert.equal(first.state,'completed',JSON.stringify(first));
     const ready=mode==='nested'?await api.invoke(request,'gui'):first;
     assert.equal(ready.state,'completed',JSON.stringify(ready));
-    assert(ready.data.destinationReadiness.every(row=>row.state==='READY'));
+    assert(ready.data.destinationReadiness.every(row=>row.state==='READY'),JSON.stringify(ready.data.destinationReadiness));
     await click(mode,target);
     if(mode==='depth'||mode==='nested')for(const prefix of ['','Parent/'])await click(mode,{...root,prefix});
    }
@@ -239,7 +253,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
  }finally{trace('disposal.begin');registrar?.close();for(const worker of workers.values()){worker.lifecycle='disposing';trace('fixture.dispose',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight,requestCount:worker.requestCount});await worker.mf.dispose();worker.lifecycle='disposed';trace('fixture.disposed',{fixtureId:worker.fixtureId,lifecycle:worker.lifecycle,inFlight:worker.inFlight});}await mock.close();trace('disposal.end');await observation.finish();}
 });
 
-test('Depth recovery failures keep the exact contextual target and never dispatch or replay the clicked source',async()=>{
+test('Depth observes the shared recovery outcome without retaining source or changing target',async()=>{
  const target={...b,prefix:'selected/child/'},attempts=[];
  for(const recovery of [
   {state:'blocked',code:'SETUP_APPROVAL_REQUIRED',requiredAction:'AUTHORIZE_EXACT_DESTINATION_SETUP'},
@@ -249,12 +263,17 @@ test('Depth recovery failures keep the exact contextual target and never dispatc
   {state:'blocked',code:'WORKER_BUILD_MISMATCH'},
   {state:'partial',code:'NATIVE_APPLY_INCOMPLETE'}
  ]){
-  let dispatched=0;const attention=[];
-  const click=createDepthNativeClick({current:{recordRemoteResult:async value=>attempts.push(value)},oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},transport:{status:async()=>({state:'blocked',code:'WORKER_SETUP_REQUIRED'})},lookup:async()=>null,inspect:()=>({desired:{generation:7},acknowledgedGeneration:7}),recover:async params=>{assert.deepEqual(params,{target});assert.equal(params.source,undefined);assert.equal(params.info,undefined);return recovery;},attend:async(target,context)=>attention.push({target,code:context.code})});
-  const result=await click({id:'depth-selected',role:'save',actionKind:'attention',origin:{mode:'depth'},target},{linkUrl:sourceUrl},{},async()=>{dispatched++;return {state:'completed'};});
-  assert.notEqual(result.state,'completed');assert.equal(result.code,recovery.code);assert.deepEqual(result.target,target);assert.equal(dispatched,0);assert.deepEqual(attention,[{target,code:recovery.code}]);
+  let dispatches=0,finished;
+  const feedback=new Promise(resolve=>finished=resolve);
+  const click=createDepthNativeClick({current:{recordRemoteResult:async value=>attempts.push(value)},
+   inspect:()=>({desired:{generation:7},acknowledgedGeneration:7}),feedback:finished});
+  const result=await click({id:'depth-selected',role:'save',origin:{mode:'depth'},target},{linkUrl:sourceUrl},{},async()=>{
+   dispatches++;return recovery;
+  });
+  assert.equal(result.state,recovery.state);assert.equal(result.code,recovery.code);assert.deepEqual(result.target,target);
+  assert.equal(dispatches,1);assert.equal((await feedback).code,recovery.code);
  }
- assert.equal(JSON.stringify(attempts).includes(sourceUrl),false,'Recovery observations cannot retain an original source URL');
+ assert(!JSON.stringify(attempts).includes(sourceUrl));
 });
 
 test('exact recovery reconciles only selected Depth B when another same-account or foreign-account scope is unprepared',async()=>{

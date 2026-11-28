@@ -1127,3 +1127,44 @@ destination is ready. A new right-click is still required to save a file.
 An exhausted recoverable Worker failure can reveal **Repair Me**, which
 uses the existing authorized recovery and native reconciliation path.
 Evidence is recorded in the [0.3.30 verification report](../../11.25.2026/REDOWN_0330_VERIFICATION.md).
+
+## Part 2B.1 independent first saves
+
+`3+1.1 commitConfigChange` stores the confirmed exact assignments and applicable
+bucket setup approval before it registers the routes and receives Chrome's
+callbacks. An authorized route whose Worker proof is pending remains selectable.
+The API reports Chrome acknowledgement and Worker readiness independently.
+Narrow's visible ancestor can enter the same readiness path when its target
+is independently eligible and only Worker proof is missing. A hidden route,
+missing inventory, a nonwritable folder or lost authorization still follows its
+existing restrictions. The compiler retains immutable action identity and the
+product's existing menu labels and hierarchy.
+
+`3+1.1 dispatchSave` and native `contextMenus.onClicked` converge in
+`createEngine.save`. Once the resolver admits the exact route and original
+source, the existing signed `remote.save` retains its operation ID and joins the
+shared onboarding readiness path. The resolver rechecks the authorized session
+and current acknowledged route before publication. A reconciliation can retain
+the operation only when the exact route survives. Losing the route or session
+fences the original operation. Depth-specific observation runs around the
+common dispatch and cannot block the transfer.
+
+`recoverCloudflareDestination` owns authenticated health, bounded retries and
+the existing setup/probe ledger. Its deployment key uses the account and bucket
+plus a source-bucket binding when applicable. It joins prior durable work, uses
+an existing verified compatible Worker and checks the recorded deployed digest.
+Deployment and verification records are fenced by the OAuth session. A provider
+endpoint failure needs confirmed management-plane absence before the same
+owned script can be recreated. Interrupted probes are reconciled by their
+original operation ID. Losing an established private plan leaves its scope
+blocked until its ownership and signing material can be restored. A failed
+or uncertain user-object publication stays in the existing verification flow.
+
+The paired Python Laboratory's read-only `rightClickInspect` observes the exact
+approved prefix and mode. It reads the canonical menu/ACK, a local plan and
+correlated save evidence without advancing readiness. Its result keeps native
+input and independent byte verification unknown until measured separately.
+The existing CMD fixture drives the production registrar and signed transport
+against isolated Workerd and independently checks reopened object hashes.
+The packaged browser runner uses each mode with a fresh profile and can drive
+the actual native menu on Linux/X11.

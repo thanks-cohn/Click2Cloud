@@ -9,21 +9,22 @@ import {SCREENSHOT_PLAN_BYTES,screenshotBody,validateScreenshotIntent} from './s
 // Durable write evidence is bucket-wide, but every use stays inside the
 // signed plan's exact account, bucket and prefix. This is local preparation
 // evidence only. Dispatch still needs live OAuth authority and Worker checks.
-// The exact c337e41 Worker supports the same signed save/file protocol.
+// Kept for callers reporting historical build identities. Compatibility is
+// decided by the authenticated protocol and capability response.
 const release0320WorkerDigest='c7V2KvPfvPzNTga8RlR_Tl8AUL7AVGsI1kvc1yDO210';
 export const previousWorkerDigests=Object.freeze([release0320WorkerDigest,'Nyd2B_8P0CiVwmx9-r1H1k2vcwtywH0MeTMmNL1bCrM']);
-const matchesBuild=(plan,expected,compatible)=>!expected||plan.codeDigest===expected||compatible.includes(plan.codeDigest)&&(!plan.sourceBucket||plan.codeDigest===release0320WorkerDigest);
-export function preparedDestination(plan,target,expectedCodeDigest,compatible=[]){
+export function preparedDestination(plan,target){
  const d=remoteDestination(target);
- if(plan?.state!=='ready'||plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.protocol!==PROTOCOL)return {state:'blocked',code:'WORKER_SETUP_REQUIRED'};
+ if(plan?.state!=='ready')return {state:'blocked',code:'WORKER_SETUP_REQUIRED'};
+ if(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName)return {state:'blocked',code:'TRANSPORT_PLAN_INVALID'};
+ if(plan.protocol!==PROTOCOL)return {state:'blocked',code:'WORKER_PROTOCOL_INCOMPATIBLE'};
  if(!plan.secret)return {state:'blocked',code:'WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'};
- if(!matchesBuild(plan,expectedCodeDigest,compatible))return {state:'blocked',code:'WORKER_UPGRADE_APPROVAL_REQUIRED'};
  if(plan.prefixScope&&d.prefix!==plan.prefixScope&&!d.prefix.startsWith(plan.prefixScope+'/'))return {state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'};
  return plan.codeDigest&&Object.values(plan.verifiedTargets??{}).some(proof=>proof.codeDigest===plan.codeDigest)
   ?{state:'READY'}:{state:'PREPARED',code:'WRITE_PROOF_REQUIRED'};
 }
 
-export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fetch,authorizeSource=async()=>true,verifyAuthority=async()=>true,clock=Date.now,record=async()=>{},pollIntervalMs=1000,expectedCodeDigest=null,compatibleCodeDigests=[]}){
+export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fetch,authorizeSource=async()=>true,verifyAuthority=async()=>true,clock=Date.now,record=async()=>{},pollIntervalMs=1000,expectedCodeDigest=null}){
  // Per-gesture capability evidence, never persisted or shared across clicks.
  // Fresh OAuth, plan, prefix and verifyAuthority checks still run before each use.
  const readyProofs=new WeakMap();
@@ -45,16 +46,16 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
  const planIdentity=plan=>digest([plan.state,plan.accountId,plan.bucketName,plan.protocol,plan.url,plan.secret,plan.prefixScope??'',plan.codeDigest,plan.verifiedTargets]);
  async function cap(target,{use='status',operationId,source,provenance,fileIntent,screenshotIntent,screenshotAction,sourceBucket,live=true,beforeRequest}={}){
   const a=await oauth.authority();if(!a.accounts.some(x=>x.id===target.accountId))fail('SCOPE_UNAUTHORIZED');
-  const plan=await lookup(target,sourceBucket);if(plan?.state!=='ready'||plan.accountId!==target.accountId||plan.bucketName!==target.bucketName||plan.sourceBucket!==sourceBucket||plan.protocol!==PROTOCOL)fail('WORKER_SETUP_REQUIRED');
+  const plan=await lookup(target,sourceBucket);if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');
+  if(plan.accountId!==target.accountId||plan.bucketName!==target.bucketName||plan.sourceBucket!==sourceBucket)fail('TRANSPORT_PLAN_INVALID');
+  if(plan.protocol!==PROTOCOL)fail('WORKER_PROTOCOL_INCOMPATIBLE');
   if(typeof plan.secret!=='string'||!plan.secret)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');
-  if(use==='screenshot'&&expectedCodeDigest&&plan.codeDigest!==expectedCodeDigest)fail('SCREENSHOT_WORKER_UPDATE_REQUIRED');
-  if(!['status','revoke'].includes(use)&&!matchesBuild(plan,expectedCodeDigest,compatibleCodeDigests))fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
   if(live&&use!=='revoke'){
    beforeRequest?.();
    if(await verifyAuthority(target,a)!==true)fail('AUTHORIZATION_REVOKED');
    if(sourceBucket){beforeRequest?.();if(await verifyAuthority({...target,bucketName:sourceBucket,prefix:''},a)!==true)fail('AUTHORIZATION_REVOKED');}
   }
-  const u=new URL(plan.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.workers.dev')||u.username||u.password||u.pathname!=='/'||u.search||u.hash)fail('WORKER_ADDRESS_INVALID');
+  const u=new URL(plan.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.workers.dev')||plan.name&&!u.hostname.startsWith(plan.name+'.')||u.username||u.password||u.pathname!=='/'||u.search||u.hash)fail('WORKER_ADDRESS_INVALID');
   const destination=remoteDestination(target);if(plan.prefixScope&&destination.prefix!==plan.prefixScope&&!destination.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');const expiresAt=clock()+120000;
   const payload={protocol:PROTOCOL,use,principal:target.connectionId,sessionId:a.sessionId,destination,expiresAt,...(operationId?{operationId,...(source?{sourceDigest:await digest(canonicalSource(source))}:{}),...(provenance?{provenanceDigest:await digest(provenance)}:{}),...(fileIntent?{fileDigest:await digest(fileIntent)}:{}),...(screenshotIntent?{screenshotDigest:await digest(screenshotIntent),screenshotAction}:{})}:{})};
   return {destination,prefixScope:plan.prefixScope??'',sourceBucket,expiresAt,sessionId:a.sessionId,codeDigest:plan.codeDigest,url:u.origin,token:await signGrant(plan.secret,payload),planIdentity:await planIdentity(plan)};
@@ -64,7 +65,16 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   const deadline=AbortSignal.any([AbortSignal.timeout(30000),...(signal?[signal]:[])]);
   let response;try{response=await fetcher(c.url+path,{method:'POST',redirect:'error',credentials:'omit',referrerPolicy:'no-referrer',headers:{authorization:'Bearer '+c.token,'content-type':'application/json'},body:JSON.stringify(input),signal:deadline});}catch{fail('TRANSPORT_UNAVAILABLE');}
   passiveObservation(onObservation,{stage:'provider.request',durationMs:performance.now()-requestStarted,outcome:'ok'});
+  if(path==='/capabilities'&&response.status===404){await response.body?.cancel().catch(()=>{});fail('WORKER_ENDPOINT_MISSING');}
   const value=await boundedJSON(response);if(!response.ok&&!['blocked','uncertain'].includes(value.state))fail('TRANSPORT_UNAVAILABLE');return value;
+ }
+ function checkCapabilities(c,features){
+  if(features.state!=='completed')fail(features.code??'WORKER_NOT_READY');
+  if((expectedCodeDigest||c.codeDigest||features.codeDigest)&&features.codeDigest!==c.codeDigest)fail('WORKER_BUILD_MISMATCH');
+  if(!equal(features.destination,c.destination)||c.sourceBucket&&(features.sourceBucket!==c.sourceBucket||!features.sourceBound))
+   fail('WORKER_BINDING_MISMATCH');
+  if(features.protocol!==PROTOCOL||!features.storageBound||!features.durableClaims||!features.conditionalCreate)
+   fail('WORKER_PROTOCOL_INCOMPATIBLE');
  }
  function pollDelay(ms,signal){
   return new Promise((resolve,reject)=>{
@@ -87,6 +97,14 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   }catch(error){if(reportDenial)throw error;return false;}
  }
  const screenshotCode=(error,fallback)=>/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:fallback;
+ async function screenshotCapability(target,c,signal){
+  if(!expectedCodeDigest||c.codeDigest===expectedCodeDigest)return;
+  const read=await cap(target,{live:false});
+  if(read.sessionId!==c.sessionId||read.planIdentity!==c.planIdentity)fail('AUTHORIZATION_REVOKED');
+  const features=await post(read,'/capabilities',{},signal);
+  checkCapabilities(c,features);
+  if(features.screenshotTransfer!=='signed-png-fan-out-v1')fail('SCREENSHOT_WORKER_UPDATE_REQUIRED');
+ }
  async function resolveScreenshotTargets(outputs,previousTarget){
   const groups=new Map(),excluded=[];
   for(const output of outputs){
@@ -107,7 +125,8 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
     block(group.filter(output=>!inScope.has(output)),'WORKER_DESTINATION_SCOPE_REQUIRED');
     if(!inside.length)continue;
     try{
-     await cap(inside[0].target,{use:'screenshot'});
+     const c=await cap(inside[0].target,{use:'screenshot'});
+     await screenshotCapability(inside[0].target,c);
      target=inside[0].target;
      allowed=inside;
     }catch(error){block(inside,screenshotCode(error,'SCREENSHOT_WORKER_UNAVAILABLE'));}
@@ -122,6 +141,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   const action=verify?'verify':'write';
   const c=await cap(target,{use:'screenshot',operationId:plan.operationId,screenshotIntent:intent,screenshotAction:action,live:false});
   validateScreenshotIntent(intent,c.prefixScope);
+  await screenshotCapability(target,c);
   if(!await recheck(c,target,{matchPlan:true}))fail('AUTHORIZATION_REVOKED');
   const body=verify?JSON.stringify(intent):screenshotBody(intent,image);
   let response;
@@ -154,16 +174,27 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   async authorizeReady(target,readiness){
    const proof=readyProofs.get(readiness);
    if(!proof||clock()<proof.at||clock()-proof.at>=10000)return null;
-   try{const c=await cap(target);return {sessionId:c.sessionId,authorizedTargets:
+   try{const c=await cap(target,{live:false});return {sessionId:c.sessionId,authorizedTargets:
     equal(c.destination,proof.destination)&&c.sessionId===proof.sessionId&&c.planIdentity===proof.planIdentity?[target]:[]};}
    catch{return {sessionId:null,authorizedTargets:[]};}
   },
-  filePlanCurrent:plan=>plan?.state==='ready'&&!!plan.secret&&matchesBuild(plan,expectedCodeDigest,compatibleCodeDigests),
-  async status(target,{sourceBucket}={}){try{const selected=await lookup(target,sourceBucket);if(selected&&!matchesBuild(selected,expectedCodeDigest,compatibleCodeDigests))fail('WORKER_UPGRADE_APPROVAL_REQUIRED');const c=await cap(target,{sourceBucket}),r=await post(c,'/capabilities',{});if(!await recheck(c,target))fail('AUTHORIZATION_REVOKED');if(r.state!=='completed'||r.protocol!==PROTOCOL||!equal(r.destination,c.destination)||!r.storageBound||!r.durableClaims||!r.conditionalCreate||sourceBucket&&(r.sourceBucket!==sourceBucket||!r.sourceBound))fail(r.code??'WORKER_NOT_READY');const plan=await lookup(target,sourceBucket);if(plan.codeDigest&&r.codeDigest!==plan.codeDigest)fail('WORKER_BUILD_MISMATCH');// R2 binding/write authority is bucket-wide. A current exact scoped capability
-  // plus a same-code verified write in THIS bucket is reusable for new folders.
-  // The Worker still rejects prefix escape before returning capabilities.
-  const exact=plan.verifiedTargets?.[c.destination.prefix],proof=(exact?.codeDigest===plan.codeDigest?exact:null)??Object.values(plan.verifiedTargets??{}).find(p=>p.codeDigest===plan.codeDigest),ready=!!proof&&!!plan.codeDigest&&proof.codeDigest===plan.codeDigest;const result={state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,destination:target,sourcePolicy:r.sourcePolicy,transfer:r.transfer,multipartConditionalCompletion:r.multipartConditionalCompletion,checkedAt:clock()};if(ready&&await planIdentity(plan)===c.planIdentity)readyProofs.set(result,{at:clock(),sessionId:c.sessionId,destination:c.destination,planIdentity:c.planIdentity});return result;}catch(e){return {state:'blocked',code:/^[A-Z_]+$/.test(e.code??'')?e.code:'WORKER_UNAVAILABLE'};}},
-  async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,onBoundary,onObservation,onAccepted,dispatchPreparationMs,readinessMs}){
+  filePlanCurrent:plan=>plan?.state==='ready'&&!!plan.secret&&plan.protocol===PROTOCOL,
+  async status(target,{sourceBucket,onObservation}={}){
+   try{
+    const c=await cap(target,{sourceBucket}),features=await post(c,'/capabilities',{},undefined,onObservation);
+    if(!c.codeDigest)fail('WORKER_BUILD_MISMATCH');
+    checkCapabilities(c,features);
+    const plan=await lookup(target,sourceBucket);
+    if(!await recheck(c,target,{live:false})||!plan||await planIdentity(plan)!==c.planIdentity)fail('AUTHORIZATION_REVOKED');
+    const exact=plan.verifiedTargets?.[c.destination.prefix];
+    const ready=preparedDestination(plan,target).state==='READY';
+    const result={state:ready?'READY':'PREPARED',proof:ready?(exact?.codeDigest===plan.codeDigest?'exact-destination-write':'same-bucket-write-and-current-scoped-capability'):null,
+     destination:target,sourcePolicy:features.sourcePolicy,screenshotTransfer:features.screenshotTransfer,transfer:features.transfer,multipartConditionalCompletion:features.multipartConditionalCompletion,checkedAt:clock()};
+    if(ready)readyProofs.set(result,{at:clock(),sessionId:c.sessionId,destination:c.destination,planIdentity:c.planIdentity});
+    return result;
+   }catch(error){return {state:'blocked',code:/^[A-Z][A-Z0-9_]+$/.test(error.code??'')?error.code:'WORKER_UNAVAILABLE'};}
+  },
+  async save({target,source,provenance,operationId=crypto.randomUUID(),signal,authorize=async()=>true,prepare,onBoundary,onObservation,onAccepted,dispatchPreparationMs,readinessMs}){
    // A transfer can retain polling and network state while the remote Worker
    // runs. Reject excess work immediately; there is no URL or promise queue.
    if(activeSaves.has(operationId)||activeSaves.size>=maxActiveSaves)return {state:'blocked',code:'RESOURCE_BUSY',operationId};
@@ -195,13 +226,38 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
      return job.cancelling;
     };
     progress({state:'pending',code:'REMOTE_PREPARING',operationId,destination});
+    if(prepare){
+     const blocked=async (code,state='blocked',details={})=>{
+      const result={state,code,operationId,destination,timings,...details};
+      try{await recordOperation(result);}catch{/* Optional projection cannot change prepublication truth. */}
+      return result;
+     };
+     if(!await timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)))
+      return blocked('AUTHORIZATION_DENIED');
+     let readiness;
+     try{readiness=await timed('readinessMs','worker.readiness',()=>prepare(target,{authorize,signal,onObservation}));}
+     catch(error){return blocked(signal.aborted?'SAVE_CANCELLED':screenshotCode(error,'WORKER_RECOVERY_FAILED'),signal.aborted?'cancelled':'blocked');}
+     if(readiness.state!=='completed')return blocked(readiness.code,readiness.state,{
+      ...(readiness.requiredAction?{requiredAction:readiness.requiredAction}:{}),stage:readiness.stage??'worker-readiness'
+     });
+     if(signal.aborted||!await authorize())return blocked(signal.aborted?'SAVE_CANCELLED':'AUTHORIZATION_REVOKED',signal.aborted?'cancelled':'blocked');
+    }
     // An instance lasts one operation; imported module URL/promise retention ends here.
     const saver=createRemoteSaver({authorize:()=>timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)),
-     getPreparedWorkerCapability:()=>timed('capabilityMs','worker.capability',()=>cap(target,{use:'save',operationId,source,provenance,live:false})),
+     getPreparedWorkerCapability:()=>timed('capabilityMs','worker.capability',async()=>{
+      const c=await cap(target,{use:'save',operationId,source,provenance,live:false});
+      if(expectedCodeDigest&&c.codeDigest!==expectedCodeDigest){
+       const read=await cap(target,{live:false});
+       if(read.sessionId!==c.sessionId||read.planIdentity!==c.planIdentity)fail('AUTHORIZATION_REVOKED');
+       checkCapabilities(c,await post(read,'/capabilities',{},signal,onObservation));
+      }
+      return c;
+     }),
      recheckAuthorization:(_i,c)=>timed('authorizationRecheckMs','auth.check',async()=>await recheck(c,target,{matchPlan:true,reportDenial:!dispatched})&&await authorize()),
      authenticatedRequest:(c,intent,o)=>timed('workerRequestMs','transfer.upload',async()=>{
       o.signal?.throwIfAborted();
       dispatched=job.submitted=true;
+      passiveObservation(onObservation,{stage:'transfer.submitted',outcome:'ok',code:'REMOTE_SUBMISSION_ATTEMPTED'});
       const submittedAt=performance.now();
       let result=await post(c,'/remote-save',intent,o.signal,onObservation),lastLease=clock(),statusCap;
       if(result.operationId===operationId&&(result.state==='pending'&&result.code==='REMOTE_ACCEPTED'||result.state==='written'&&result.receipt))passiveObservation(onAccepted);
@@ -254,13 +310,9 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    const singleRename=intent.action==='rename'&&intent.entry?.folder===false;
    if(singleRename||!expectedCodeDigest||c.codeDigest!==expectedCodeDigest){
     const check=await cap(target,{sourceBucket,live:false,beforeRequest}),features=await sendFileRequest(check,'/capabilities',{});
-    if(singleRename){
-     if(check.sessionId!==c.sessionId||check.planIdentity!==c.planIdentity||!await recheck(c,target,{live:false,matchPlan:true,beforeRequest}))fail('AUTHORIZATION_REVOKED');
-     if(features.state!=='completed')fail(features.code??'WORKER_NOT_READY');
-     if(features.codeDigest!==c.codeDigest)fail('WORKER_BUILD_MISMATCH');
-     if(features.protocol!==PROTOCOL||!equal(features.destination,c.destination)||!features.storageBound||!features.durableClaims||!features.conditionalCreate)fail('WORKER_NOT_READY');
-    }
-    if(check.sessionId!==c.sessionId||!Array.isArray(features.fileOperations)||!features.fileOperations.includes(intent.action))fail('WORKER_FILE_API_REPAIR_REQUIRED');
+    if(check.sessionId!==c.sessionId||check.planIdentity!==c.planIdentity||!await recheck(c,target,{live:false,matchPlan:!sourceBucket,beforeRequest}))fail('AUTHORIZATION_REVOKED');
+    checkCapabilities(c,features);
+    if(!Array.isArray(features.fileOperations)||!features.fileOperations.includes(intent.action))fail('WORKER_FILE_API_REPAIR_REQUIRED');
    }
    signal?.throwIfAborted();
    beforeRequest?.();

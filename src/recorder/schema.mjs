@@ -6,7 +6,7 @@ export const FIELDS=Object.freeze(['attemptId','schemaVersion','clickTimestampUt
 export const METRICS=Object.freeze([...FIELDS.slice(19,30),...DETAIL_METRICS]);
 export const STATES=['pending','verified','failed','blocked','cancelled','uncertain','interrupted'];
 export const PROVIDERS=['cloudflare','google-drive','onedrive','dropbox','other'];
-export const STAGES=['CLICK_RECEIVED','dispatch.enter','auth.check','resolver','capture.acquire','intent','worker.capability','transfer.upload','transfer.verify','completion.history','native.terminal','provider.request','native.identity','provider.verification'];
+export const STAGES=['CLICK_RECEIVED','dispatch.enter','auth.check','resolver','capture.acquire','intent','worker.health','worker.readiness','worker.capability','transfer.upload','transfer.submitted','transfer.verify','completion.history','native.terminal','provider.request','native.identity','provider.verification'];
 export const safeId=v=>typeof v==='string'&&/^[a-z0-9-]{1,64}$/i.test(v)?v:null;
 export const number=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0?v:null;
 export function capacity(value){if(!Number.isSafeInteger(value)||value<1)throw Error('POSITIVE_SAFE_INTEGER_REQUIRED');return value;}

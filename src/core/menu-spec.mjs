@@ -66,11 +66,11 @@ export function compileMenuSpec(options={}) {
     let projection,composition;
     try {
       if(composite) {
-        const parts=Object.entries(modeModules).filter(([m])=>show[m]).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory:m==='depth'?depthInventory:inventory})}));
+        const parts=Object.entries(modeModules).filter(([m])=>show[m]).map(([m,mod])=>({m,...mod.project({config:mod.createConfig(options.configs?.[m]??{}),inventory:m==='depth'?depthInventory:inventory,allowWorkerRecovery:options.providerSetupActions===true})}));
         projection={revision:options.product?.revision??0,rows:parts.flatMap(p=>p.rows.map(r=>({...r,sourceMode:p.m}))),omissions:parts.flatMap(p=>p.omissions)};
       } else {
         const config=module.createConfig(options.configs?.[mode]??{});
-        projection=module.project({config,inventory:mode==='depth'?depthInventory:inventory});
+        projection=module.project({config,inventory:mode==='depth'?depthInventory:inventory,allowWorkerRecovery:options.providerSetupActions===true});
       }
       emit(options,'modes.'+mode,projection.omissions.some(x=>x.kind!=='excluded')?'partial':'ok',projection.omissions.some(x=>x.kind!=='excluded')?'PROJECTION_PARTIAL':'PROJECTION_OK');
     } catch(error) {emit(options,'modes.'+mode,'failed','PROJECTION_FAILED');throw error;}
@@ -98,10 +98,11 @@ export function compileMenuSpec(options={}) {
       }
       const peers=siblings.get(parentId)??[];
       if(role!=='separator'&&peers.some(peer=>peer.role!=='separator'&&peer.label===label))throw new MenuSpecError('LABEL_COLLISION','Sibling menu labels collide; resolve explicitly before applying.');
-      const setupProvider=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare'&&!enabled&&['SCOPE_UNAUTHORIZED','WORKER_UNVERIFIED'].includes(reason)?'cloudflare':null;
-      // Saved destinations keep their chosen label. Unready clicks explain the
-      // actual blocker in the Shelf; never add a second native setup workflow.
-      if(setupProvider)enabled=true;
+      const cloudflareSave=options.providerSetupActions&&role==='save'&&target?.provider==='cloudflare';
+      const setupProvider=cloudflareSave&&!enabled&&reason==='SCOPE_UNAUTHORIZED'?'cloudflare':null;
+      // Readiness belongs to dispatch. Keep the exact route actionable while
+      // preparation is pending; retain the reason for inspection.
+      if(setupProvider||cloudflareSave&&reason==='WORKER_UNVERIFIED')enabled=true;
       const row={...(presentationId?{presentationId}:{}),actionKind:setupProvider?'attention':role==='provider-action'?'provider':role==='save'?'save':role,...(setupProvider?{setupProvider}:{}),...(providerAction?{providerAction}:{}),id,itemId:id,parentId,siblingIndex:peers.length,index:peers.length,type:role==='separator'?'separator':'normal',label,contexts:[...contexts],enabled,visible,role,kind:['save','provider-action'].includes(role)?'action':role==='separator'?'separator':'menu',origin:{...origin},reason,actionId,target,intent:target&&role==='save'?intentFor(target):null};
       if(composite&&role==='save'&&target?.provider==='cloudflare'&&['simple','nested','depth'].includes(origin.mode)){const menuPath=[label];let ancestor=byId.get(parentId);while(ancestor){menuPath.unshift(ancestor.label);ancestor=byId.get(ancestor.parentId);}row.provenance=menuProvenance({mode:origin.mode,entryId:id,target,title:label,presentationId,destinationConfig,menuPath,quickPlacement:placement.startsWith('quick:')});}
       peers.push(row);siblings.set(parentId,peers);rows.push(row);byId.set(id,row);return id;

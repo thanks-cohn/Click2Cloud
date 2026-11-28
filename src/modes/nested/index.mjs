@@ -15,7 +15,7 @@ export function levelHidden(destination,prefix){
   if(prefix===''||prefix===destination.target.prefix)return false;
   return destination.visibilityMode==='hide-all'||destination.visibilityMode!=='all'&&destination.levels?.[prefix]?.hidden===true;
 }
-export function project({config,inventory}) {
+export function project({config,inventory,allowWorkerRecovery=false}) {
   const own=createConfig(config),selected=new Map(),tree=new Map(),omissions=[];
   for(const destination of own.destinations) {
     if(destination.hidden){omissions.push({target:destination.target,reason:'DESTINATION_HIDDEN',kind:'excluded'});continue;}
@@ -47,14 +47,14 @@ export function project({config,inventory}) {
     const destinations=row.destinations??[],hasChildren=branches.has(row.placement)||row.target.prefix==='';
     if(hasChildren||!destinations.length)rows.push({...row,label:row.label,role:'branch',enabled:true,reason:'NATURAL_ANCESTOR'});
     // previewNativeMenu/dispatchSave: structural routes never manufacture a saved
-    // destination or grant. Each exact ancestor is checked independently; unavailable
-    // ancestors remain disabled and cannot enter the provider setup shortcut.
+    // destination or grant. Native dispatch can recover an independently
+    // authorized ancestor whose only missing prerequisite is Worker proof.
     if(hasChildren&&!destinations.length){
       const {scope,folder}=findCandidate(inventory,row.target),reasons=availabilityReasons(scope,folder);
       rows.push({...row,placement:row.placement+':ancestor-save',parentPlacement:row.placement,
         presentationId:stableId('nested-ancestor',row.placement),structuralAncestor:true,
         label:'Save here',role:'save',enabled:reasons.length===0,
-        reason:reasons.length?'NARROW_ANCESTOR_AUTHORIZATION_REQUIRED':'NARROW_ANCESTOR_READY'});
+        reason:!reasons.length?'NARROW_ANCESTOR_READY':allowWorkerRecovery&&reasons.length===1&&reasons[0]==='WORKER_UNVERIFIED'?'WORKER_UNVERIFIED':'NARROW_ANCESTOR_AUTHORIZATION_REQUIRED'});
     }
     for(const destination of destinations){
       const quickLabel=destination.label??destination.levels?.[row.target.prefix]?.label??targetLabel(row.target);

@@ -18,6 +18,7 @@ from .runner import reconcile, run
 from .owner_campaign import MAX_INT, MAX_TIMER_SECONDS, campaign, check_downloads, existing_campaign, offline_campaign_status, selection_campaign
 from .location_audit import check as check_location, load_plan
 from .transport import ExtensionClient, connect
+from .right_click import FOCUSED, MODES, INTERNAL_MODE, fixture as right_click_fixture
 
 DEFAULT_WORKSPACE = 'lab-local'
 MIB = 1024**2
@@ -141,6 +142,14 @@ def parse(argv):
     doctor = commands.add_parser('doctor', help='Inspect offline or authenticated session capabilities without cloud mutations.')
     doctor.add_argument('--session', action='store_true')
     doctor.add_argument('--diagnostics', action='store_true', help='Print a shareable diagnostic report without private scope fields.')
+    click = commands.add_parser('right-click-inspect', help='Read scoped menu and save evidence without preparing a Worker.')
+    click.add_argument('--mode', choices=MODES, required=True)
+    click.add_argument('--prefix', required=True, help='Exact configured path inside the paired QA scope.')
+    click.add_argument('--operation-id', help='Exact previously observed save ID.')
+    click_test = commands.add_parser('right-click-fixture', help='Generate and verify local first-save scenarios.')
+    click_test.add_argument('--seed', type=int, default=271127)
+    click_test.add_argument('--cases', type=integer_flag(300), default=len(FOCUSED))
+    click_test.add_argument('--case', type=integer_flag(300), help='Replay one case from the same seed.')
     plan = commands.add_parser('validate', aliases=['plan'], help='Validate a workload and do a read-only preflight.')
     execution_options(plan)
     execute = commands.add_parser('run', help='Plan or execute a manifest.')
@@ -380,6 +389,20 @@ def main(argv=None):
             else:
                 output({'status': 'READY', 'runnerVersion': __version__, 'protocol': PROTOCOL,
                         **OFFLINE_CAPABILITIES, 'providerRoundTrip': 'NOT_TESTED_OFFLINE'})
+            return 0
+
+        if args.command == 'right-click-fixture':
+            result = right_click_fixture(args.seed, args.cases, args.case, repository=Path.cwd())
+            output(result)
+            return EXIT_CODES[result['status']]
+        if args.command == 'right-click-inspect':
+            with connect() as client:
+                inputs = {'mode': INTERNAL_MODE.get(args.mode, args.mode), 'prefix': args.prefix}
+                if args.operation_id:
+                    inputs['operationId'] = args.operation_id
+                caps = client.describe()
+                output({'build': {key: caps[key] for key in ('commit', 'extensionVersion', 'sourceDigest', 'protocol')},
+                        'evidenceLayer': caps['evidenceClass'], **client.query('rightClickInspect', **inputs)})
             return 0
 
         paths = workspace()

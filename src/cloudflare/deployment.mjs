@@ -22,8 +22,17 @@ const workerError=diagnostic=>Object.assign(Error(diagnostic.code),{code:diagnos
 const planKey=(target,sourceBucket)=>digest(sourceBucket&&sourceBucket!==target.bucketName
  ?[target.accountId,target.bucketName,sourceBucket]:[target.accountId,target.bucketName]);
 export function createProvisioner({request,readModule,load,store,authority=async()=>null}){
+ const locks=new Map();
+ function withPlanLock(key,run){
+  if(globalThis.navigator?.locks?.request)return navigator.locks.request('click2cloud-worker-plan:'+key,run);
+  const task=(locks.get(key)??Promise.resolve()).catch(()=>{}).then(run);
+  locks.set(key,task);
+  return task.finally(()=>{if(locks.get(key)===task)locks.delete(key);});
+ }
  async function json(path,options={},operation,auth,allowMissing=false){
-  let r,body;try{r=await request(path,options);body=await r.json();}catch(error){
+  let r,body;
+  try{r=await request(path,{...options,...(auth?.sessionId?{expectedSession:auth.sessionId}:{})});body=await r.json();}catch(error){
+   if(['AUTH_REQUIRED','AUTH_SESSION_CHANGED','AUTHORIZATION_REVOKED','WRONG_ACCOUNT'].includes(error.code))throw error;
    const diagnostic=safeWorkerDiagnostic({operation,code:error.code??(r?'CLOUDFLARE_RESPONSE_INVALID':'TRANSIENT_API_FAILURE'),classification:r?'RESPONSE_INVALID':error.code==='REAUTH_REQUIRED'||error.code==='TOKEN_EXPIRED'?'AUTHENTICATION_REJECTED':'TRANSIENT_API_FAILURE',httpStatus:r?.status??error.diagnostic?.httpStatus,providerCodes:error.diagnostic?.providerCodes,challenge:error.diagnostic?.challenge,observedAt:new Date().toISOString(),requestId:r?.headers?.get('cf-ray'),grantedScopes:auth?.scopes,scopeEvidence:auth?.scopeEvidence,selectedAccountVerified:auth?.selectedAccountVerified,workerIntent:auth?.workerIntent});throw workerError(diagnostic);
   }
   if(allowMissing&&r.status===404)return null;
@@ -32,10 +41,17 @@ export function createProvisioner({request,readModule,load,store,authority=async
   }return body.result;
  }
 
- return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName,expandScope=false,sourceBucket,updateOnly=false}={}){
+ return Object.freeze({async prepare(target,{prefixScope,approved=false,rebuild=false,retryDenied=false,inspect=false,renewSigning=false,workerName,expandScope=false,sourceBucket,updateOnly=false,recoverMissing=false,expectedSession}={}){
   if(!approved)fail('SETUP_APPROVAL_REQUIRED');const d=remoteDestination(target),key=await planKey(d,sourceBucket);
+  return withPlanLock(key,async()=>{
   if(sourceBucket===d.bucketName)sourceBucket=undefined;
-  const identity=await authority();let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
+  const identity=await authority();
+  if(expectedSession&&identity?.sessionId!==expectedSession)fail('AUTHORIZATION_REVOKED');
+  const savePlan=async plan=>{
+   if(identity?.sessionId&&(await authority())?.sessionId!==identity.sessionId)fail('AUTHORIZATION_REVOKED');
+   await store(key,plan);
+  };
+  let auth=identity?{...identity,selectedAccountVerified:identity.accounts?.some(a=>a.id===d.accountId)}:null;
   let plan=await load(key);
   if(updateOnly&&!plan)fail('WORKER_SETUP_REQUIRED');
   try{if(plan&&(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.sourceBucket!==sourceBucket||(plan.protocol!==PROTOCOL&&!(rebuild&&plan.protocol==='click2cloud-remote-1'))||!/^click2cloud-r2-[a-f0-9]{20}$/.test(plan.name??'')))fail('TRANSPORT_PLAN_INVALID');if(plan&&!/^[a-f0-9]{64}$/.test(plan.secret??'')&&!renewSigning)fail('WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED');const renewing=!!plan&&(renewSigning||plan.signingRenewalPending===true);if(renewing)rebuild=true;if(plan?.failure&&!retryDenied)throw workerError(safeWorkerDiagnostic(plan.failure));
@@ -43,11 +59,12 @@ export function createProvisioner({request,readModule,load,store,authority=async
   const expanding=expandScope&&!!plan?.prefixScope;
   if(expanding){prefixScope='';rebuild=true;}
   prefixScope??=plan?.prefixScope??'';
-  if(plan&&prefixScope!==(plan.prefixScope??'')&&!expanding)fail('WORKER_DESTINATION_SCOPE_REQUIRED');const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);if(plan?.state==='ready'&&!rebuild){if(plan.codeDigest!==codeDigest)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');if(!inspect)return plan;}
+  if(plan&&prefixScope!==(plan.prefixScope??'')&&!expanding)fail('WORKER_DESTINATION_SCOPE_REQUIRED');
+  if(plan?.state==='ready'&&!rebuild&&!inspect&&!recoverMissing)return plan;
   const base='/accounts/'+encodeURIComponent(d.accountId)+'/workers';
   const sub=await json(base+'/subdomain',{},'account-subdomain-read',{...auth,workerIntent:'account-settings'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
   let recoveredMissing=false,workerIntent=plan?'update':'create';
-  if(plan?.state==='pending'||plan&&(rebuild||inspect)){
+  if(plan?.state==='pending'||plan&&(rebuild||inspect||recoverMissing)){
    const settings=await json(base+'/scripts/'+plan.name+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true);
    if(settings){const bindings=settings.bindings??[];
     if(!bindings.some(x=>x.name==='STORAGE'&&x.type==='r2_bucket'&&x.bucket_name===d.bucketName)||!bindings.some(x=>x.name==='ACCOUNT_ID'&&x.text===d.accountId)||!bindings.some(x=>x.name==='BUCKET_NAME'&&x.text===d.bucketName)||!bindings.some(x=>x.name==='CLAIMS'&&x.type==='durable_object_namespace'&&x.class_name==='RemoteClaims'&&!x.script_name)||!bindings.some(x=>x.name==='SIGNING_KEY'&&x.type==='secret_text'))fail('PROVISION_RECONCILE_REQUIRED');
@@ -60,9 +77,17 @@ export function createProvisioner({request,readModule,load,store,authority=async
     const desiredBinding=deployedScope===(plan.prefixScope??'');
     const previousBinding=plan.previousBinding&&deployedScope===plan.previousBinding.prefixScope&&deployedDigest===plan.previousBinding.codeDigest;
     if(!desiredBinding&&!previousBinding)fail('PROVISION_RECONCILE_REQUIRED');
-    if(plan.state==='ready'&&!rebuild){if(!bindings.some(x=>x.name==='CODE_DIGEST'&&x.text===codeDigest))fail('WORKER_BUILD_MISMATCH');return plan;}
-    if(plan.state==='pending'&&!renewing&&!expanding&&desiredBinding&&plan.codeDigest===codeDigest&&deployedDigest===codeDigest){await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');delete plan.failure;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;}
-    if(plan.state==='pending'&&!rebuild&&!previousBinding)fail('WORKER_UPGRADE_APPROVAL_REQUIRED');
+    if(!plan.codeDigest||deployedDigest!==plan.codeDigest&&!previousBinding)fail('WORKER_BUILD_MISMATCH');
+    if(plan.state==='ready'&&!rebuild){
+     if(recoverMissing)fail('WORKER_ENDPOINT_MISSING');
+     return plan;
+    }
+    if(plan.state==='pending'&&!renewing&&!expanding&&desiredBinding&&deployedDigest===plan.codeDigest){
+     await json(base+'/scripts/'+plan.name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});
+     const {failure,previousBinding,signingRenewalPending,...resumed}=plan;
+     plan={...resumed,state:'ready',url:'https://'+plan.name+'.'+sub.subdomain+'.workers.dev'};
+     await savePlan(plan);return plan;
+    }
    }else{if(updateOnly)fail('WORKER_SETUP_REQUIRED');recoveredMissing=true;workerIntent='create';}
   }
   if(plan&&!['ready','pending'].includes(plan.state))fail('PROVISION_RECONCILE_REQUIRED');
@@ -72,9 +97,10 @@ export function createProvisioner({request,readModule,load,store,authority=async
   if(workerName!==undefined&&!/^click2cloud-r2-[a-f0-9]{20}$/.test(workerName))fail('WORKER_ADDRESS_INVALID');
   if(!plan&&workerName&&await json(base+'/scripts/'+workerName+'/settings',{},'script-settings-read',{...auth,workerIntent:'inspect'},true))fail('PROVISION_RECONCILE_REQUIRED');
   const name=plan?.name??workerName??'click2cloud-r2-'+crypto.randomUUID().replace(/-/g,'').slice(0,20),secret=renewing&&!plan.signingRenewalPending||!plan?.secret?Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join(''):plan.secret;
-  const previousBinding=plan?.previousBinding??(expanding?{prefixScope:plan.prefixScope,codeDigest:plan.codeDigest}:null);
+  const previousBinding=plan?.previousBinding??(updating&&plan.state==='ready'?{prefixScope:plan.prefixScope??'',codeDigest:plan.codeDigest}:null);
+  const sources=await Promise.all(WORKER_MODULES.map(async path=>[path,await readModule(path)])),codeDigest=await digest(sources);
   plan={name,secret,codeDigest,state:'pending',accountId:d.accountId,bucketName:d.bucketName,prefixScope,protocol:PROTOCOL,
-   ...(sourceBucket?{sourceBucket}:{}),...(previousBinding?{previousBinding}:{}),...(renewing?{signingRenewalPending:true}:{})};await store(key,plan);
+   ...(sourceBucket?{sourceBucket}:{}),...(previousBinding?{previousBinding}:{}),...(renewing?{signingRenewalPending:true}:{})};await savePlan(plan);
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify({main_module:'src/cloudflare/worker.mjs',compatibility_date:'2026-01-01',compatibility_flags:['nodejs_compat'],observability:{enabled:false},
    bindings:[{name:'STORAGE',type:'r2_bucket',bucket_name:d.bucketName},
@@ -85,7 +111,19 @@ export function createProvisioner({request,readModule,load,store,authority=async
   await json(base+'/scripts/'+name,{method:'PUT',body:form},'script-upload',auth);
   await json(base+'/scripts/'+name+'/subdomain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({enabled:true})},'script-subdomain-enable',{...auth,workerIntent:'update'});
  if(!/^[a-z0-9-]+$/.test(sub?.subdomain??''))fail('WORKER_ADDRESS_UNAVAILABLE');
-  delete plan.failure;delete plan.signingRenewalPending;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await store(key,plan);return plan;
-  }catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(diagnostic){if(plan)await store(key,{...plan,failure:diagnostic});throw workerError(diagnostic);}throw error;}
- },async markVerified(target,sessionId){const d=remoteDestination(target),key=await digest([d.accountId,d.bucketName]),plan=await load(key);if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');if(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.protocol!==PROTOCOL)fail('TRANSPORT_PLAN_INVALID');if(plan.prefixScope&&d.prefix!==plan.prefixScope&&!d.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');await store(key,{...plan,verifiedAt:Date.now(),verifiedTargets:{...plan.verifiedTargets,[d.prefix]:{at:Date.now(),sessionId,codeDigest:plan.codeDigest}}});},async lookup(target,sourceBucket){return load(await planKey(remoteDestination(target),sourceBucket));}});
+  delete plan.failure;delete plan.signingRenewalPending;delete plan.previousBinding;plan={...plan,state:'ready',url:'https://'+name+'.'+sub.subdomain+'.workers.dev'};await savePlan(plan);return plan;
+  }catch(error){const diagnostic=safeWorkerDiagnostic(error.diagnostic);if(diagnostic){if(plan)await savePlan({...plan,failure:diagnostic});throw workerError(diagnostic);}throw error;}
+  });
+ },async markVerified(target,sessionId){
+  const d=remoteDestination(target),key=await planKey(d);
+  return withPlanLock(key,async()=>{
+   const plan=await load(key);
+   if(plan?.state!=='ready')fail('WORKER_SETUP_REQUIRED');
+   if(plan.accountId!==d.accountId||plan.bucketName!==d.bucketName||plan.protocol!==PROTOCOL)fail('TRANSPORT_PLAN_INVALID');
+   if(plan.prefixScope&&d.prefix!==plan.prefixScope&&!d.prefix.startsWith(plan.prefixScope+'/'))fail('WORKER_DESTINATION_SCOPE_REQUIRED');
+   const auth=await authority();
+   if(auth?.sessionId&&auth.sessionId!==sessionId)fail('AUTHORIZATION_REVOKED');
+   await store(key,{...plan,verifiedAt:Date.now(),verifiedTargets:{...plan.verifiedTargets,[d.prefix]:{at:Date.now(),sessionId,codeDigest:plan.codeDigest}}});
+  });
+ },async lookup(target,sourceBucket){return load(await planKey(remoteDestination(target),sourceBucket));}});
 }

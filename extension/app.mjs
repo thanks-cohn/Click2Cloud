@@ -271,9 +271,9 @@ async function change(changes,{confirmed=false,expectedRevision=state.product.re
   }
   renderRepair();
   const blocked=r.destinationReadiness?.find(d=>d.state!=='READY');
-  if(blocked){cloudflareState={state:'REPAIR_REQUIRED',...blocked,accountId:blocked.target.accountId};status('Configuration saved · Destination unavailable · '+(names[blocked.code]??blocked.code)+'');}
+  if(blocked){cloudflareState={state:'REPAIR_REQUIRED',...blocked,accountId:blocked.target.accountId};status('Destination saved · '+(names[blocked.code]??blocked.code));}
  else if(!r.native?.retained&&r.backup?.code!=='IDEMPOTENT_REPLAY')
-  status(r.native?.state==='completed'?(prepareModes&&r.destinationReadiness?.length?'Saved · Ready for right-click':'Saved · Chrome menu acknowledged'):'Saved · Native menu pending or incomplete',{noticeKey:idempotencyKey});
+  status(r.native?.state==='completed'?(prepareModes&&r.destinationReadiness?.length&&r.destinationReadiness.every(item=>item.state==='READY')?'Saved · Ready for right-click':'Saved · Chrome menu acknowledged'):'Saved · Native menu pending or incomplete',{noticeKey:idempotencyKey});
   return r;
 }
 function listen(selector,event,fn){$(selector)?.addEventListener(event,e=>{try{Promise.resolve(fn(e)).catch(error=>status(error.message,{attention:true}));}catch(error){status(error.message,{attention:true});}});}
@@ -1518,7 +1518,7 @@ async function chooseRemoteSave(entry){const capabilities=await api('describeCap
   dialog('Save to cloud',`<p>${esc(entry.displayName??entry.key)}</p>${render(menu.roots)||'<p>No configured destinations.</p>'}<p class="muted">Saving requires current source-account authorization, a native menu ACK and a verified provider transport.</p>`);
   $$('[data-cloud-save]').forEach(b=>b.onclick=async()=>{try{const item=leaves[b.dataset.cloudSave];if(!confirm('Save this file to '+item.label+'?'))return;if(item.providerAction){await api('invokeProviderAction',{provider:item.providerAction,idempotencyKey:crypto.randomUUID()});return;}const r=await api('dispatchExplorerSave',{itemId:item.itemId,generation:menu.generation,context:'link',source:captured,entry:{key:entry.key,folder:false,...(entry.displayName?{displayName:entry.displayName}:{})},idempotencyKey:crypto.randomUUID()});status(r.confirmed?'Save verified by provider readback.':r.code);closeDialog();}catch(error){status(error.message);}});
 }
-const completedDestinationMessage=result=>result.destinationReadiness?.length?'Saved · Ready for right-click':'Saved · Chrome menu acknowledged';
+const completedDestinationMessage=result=>result.destinationReadiness?.length&&result.destinationReadiness.every(item=>item.state==='READY')?'Saved · Ready for right-click':'Saved · Chrome menu acknowledged';
 const saveButton='<button id="save" class="primary">Save</button>';
 const saveFeedback='<p id="destination-save-status" class="muted" role="status" aria-live="polite" hidden></p>';
 const destinationSetupDisclosure='<details><summary>Setup and Usage</summary><p>Save prepares or maintains the private Cloudflare Worker for the selected destinations and checks a small R2 verification file when needed. Worker and R2 usage may incur charges. Setup covers the selected bucket.</p></details>';

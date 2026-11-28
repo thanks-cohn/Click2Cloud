@@ -73,7 +73,7 @@ function cleanReceipt(receipt,key,size,id) {
  return {key,size,operationId:id,etag:objectETag(receipt.etag),version:String(receipt.version).slice(0,256)};
 }
 
-export function createPythonLab({runtime,storage,diagnosticStorage,build,authority,buckets,checkBucket,workerPrefix,checkUpload,upload,readUploadOutcome,reconcileUpload,
+export function createPythonLab({runtime,storage,diagnosticStorage,build,authority,buckets,checkBucket,workerPrefix,checkUpload,upload,readUploadOutcome,reconcileUpload,inspectRightClick,
  trustedStorage=()=>{},permission,opfsCapability=opfsAvailable,opfsProbe=probeOpfs,fileApi,
  spoolDirectory=labSpoolDirectory,storageEstimate=estimateStorage,clock=Date.now,
  stageTimeoutMs=12_000,startupTimeoutMs=80_000,handshakeTimeoutMs=10_000}) {
@@ -587,6 +587,7 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
      auditPageSize,authorizedMinutes:session.minutes,campaignId:session.campaignId,
      ...(session.readSelection?{readSelection:{maxReadAttempts:session.readSelection.maxReadAttempts,
       remainingReadAttempts:session.readSelection.maxReadAttempts-session.readAttempts}}:{})}}:{}),
+   ...(inspectRightClick?{rightClickDiagnostics:{schemaVersion:1,method:'rightClickInspect',readOnly:true}}:{}),
    unsupported,readback:'independent OAuth Object API streaming with strong ETag and SHA-256'};
  }
  function uploadOptions(input,run){
@@ -877,6 +878,15 @@ export function createPythonLab({runtime,storage,diagnosticStorage,build,authori
  async function query(session,method,input) {
   switch(method) {
    case 'describe':requireKeys(input,[]);return projectDescription(session);
+   case 'rightClickInspect': {
+    requireKeys(input,['mode','prefix'],['operationId']);
+    if(!inspectRightClick)throw labError('UNSUPPORTED_OPERATION');
+    if(!['simple','nested','depth'].includes(input.mode)||typeof input.prefix!=='string'||
+      input.operationId!==undefined&&!uploadId(input.operationId))throw labError('INVALID_INPUT');
+    const prefix=normalizePrefix(input.prefix);
+    if(!prefix.startsWith(session.target.prefix))throw labError('LAB_SCOPE_MISMATCH');
+    return inspectRightClick(normalizeTarget({...session.target,prefix}),input);
+   }
    case 'admit':return admit(session,input);
    case 'admitCampaign':return admitCampaign(session,input);
    case 'admitReadSelection':return admitReadSelection(session,input);

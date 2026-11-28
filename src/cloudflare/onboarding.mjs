@@ -8,14 +8,21 @@ const savedTargets=s=>[...new Map([s.product.defaultTarget,...Object.values(s.co
 import {diagnoseCloudflare,hasWorkerWriteScope,hasWorkerCreateScope} from '../auth/cloudflare-oauth.mjs';
 import {readBuckets} from './inventory.mjs';
 import {fail,digest,remoteDestination} from './wire.mjs';
-import {targetKey,scopeKey,normalizeTarget} from '../core/menu-identity.mjs';
+import {targetKey,scopeKey,normalizeTarget,ancestors} from '../core/menu-identity.mjs';
+import {levelHidden} from '../modes/nested/index.mjs';
+import {passiveObservation} from '../core/boundary-observation.mjs';
+
+const transientWorkerCodes=new Set(['TRANSPORT_UNAVAILABLE','RESPONSE_INVALID','WORKER_UNAVAILABLE','TRANSIENT_API_FAILURE']);
 export function createCloudflareOnboarding({current,oauth,provisioner,transport,inspectBucket,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
  const setupApproved=async accountId=>{const a=await current.readSetupOperation?.('approval:'+accountId);return a?.accountId===accountId&&a.approved===true;};
  // recoverCloudflareDestination: a clicked Depth child is owned by its saved
  // scope, not by the current Default. Other modes retain exact target matching.
  function configuredScope(s,target){
   const depth=(s.configs.depth?.scopes??[]).map(x=>x.target).filter(t=>scopeKey(t)===scopeKey(target)&&target.prefix.startsWith(t.prefix)).sort((a,b)=>a.prefix.length-b.prefix.length)[0];
-  return depth??savedTargets(s).find(t=>targetKey(t)===targetKey(target))??null;
+  const narrow=s.product.show?.nested&&s.product.providerVisibility?.cloudflare
+   ?s.configs.nested.destinations.find(row=>!row.hidden&&scopeKey(row.target)===scopeKey(target)&&
+     ['',...ancestors(row.target.prefix)].includes(target.prefix)&&!levelHidden(row,target.prefix))?.target:null;
+  return depth??savedTargets(s).find(t=>targetKey(t)===targetKey(target))??narrow??null;
  }
  async function destinationApproved(target){
   if(await setupApproved(target.accountId))return true;
@@ -91,7 +98,11 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  function withSetupLock(accountId,run){
   const key='click2cloud-cloudflare-setup:'+accountId;
   if(globalThis.navigator?.locks?.request)return navigator.locks.request(key,run);
-  const preceding=setupLocks.get(current)??Promise.resolve(),task=preceding.then(run,run);setupLocks.set(current,task.catch(()=>{}));return task;
+  let locks=setupLocks.get(current);
+  if(!locks)setupLocks.set(current,locks=new Map());
+  const preceding=locks.get(key)??Promise.resolve(),task=preceding.then(run,run);
+  locks.set(key,task);
+  return task.finally(()=>{if(locks.get(key)===task)locks.delete(key);});
  }
  async function setupLocked({accountId,expectedRevision,idempotencyKey,repair=false,target:repairTarget,automatic=false,resume=false,upgrade=false}){
   const started=performance.now(),auth=await account(accountId);let s=await current.read();
@@ -106,6 +117,9 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!original&&hasSaved(s))return {state:'blocked',code:'CHOOSE_DESTINATION',accountId};
   const target=original??{provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName:'redown',prefix:''},initial=!original;
   if(prior&&targetKey(prior.target)!==targetKey(target))fail('IDEMPOTENCY_CONFLICT');
+  return withSetupLock(scopeKey(target),async()=>{
+  if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
+  if((await current.read()).product.revision!==expectedRevision)fail('REVISION_CONFLICT');
   const status=await r2(accountId);if(status.state!=='ACTIVE')return {state:'blocked',code:status.code??status.state,diagnostic:status.diagnostic};
   if(!automatic&&!await setupApproved(accountId)){if(typeof current.writeSetupOperation!=='function')fail('SETUP_LEDGER_UNAVAILABLE');await current.writeSetupOperation('approval:'+accountId,{accountId,approved:true});}
   const missing=['workers-r2.write'].filter(scope=>!auth.scopes?.includes(scope));if(!hasWorkerWriteScope(auth.scopes))missing.push('workers-scripts.write');
@@ -141,7 +155,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    for(let attempt=0;attempt<8;attempt++){
     await stillSelected();capability=await transport.status(target);
     if(['READY','PREPARED'].includes(capability.state))break;
-    if(!['RESPONSE_INVALID','TRANSPORT_UNAVAILABLE','WORKER_BUILD_MISMATCH'].includes(capability.code)||attempt===7)return {state:'blocked',code:capability.code??'WORKER_NOT_READY',stage:'worker-capability',accountId,target};
+    if(!['WORKER_ENDPOINT_MISSING','WORKER_BUILD_MISMATCH',...transientWorkerCodes].includes(capability.code)||attempt===7)return {state:'blocked',code:capability.code??'WORKER_NOT_READY',stage:'worker-capability',accountId,target};
     await new Promise(resolve=>setTimeout(resolve,Math.min(2000,250*2**attempt)));
    }
   }
@@ -158,16 +172,89 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    await current.commitProduct({...next,expectedRevision:latest.product.revision,idempotencyKey:'setup-complete:'+setupId,fingerprint:JSON.stringify({target,changes})});
    readyCache.clear();const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started)};await progress('complete',{operationId,result});return result;
   }catch(e){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(e.code??'')?e.code:'LOCAL_COMPLETION_UNCONFIRMED',operationId};}
+  });
+ }
+ async function rememberDestinationApproval(target){
+  await account(target.accountId);
+  if(!configuredScope(await current.read(),target))fail('TARGET_NOT_CONFIGURED');
+  if(!await destinationApproved(target)){
+   const bucketKey=await digest([target.accountId,target.bucketName]);
+   await current.writeSetupOperation('approval:destination:'+bucketKey,{accountId:target.accountId,bucketName:target.bucketName,approved:true});
+  }
+ }
+ const saveReadiness=new Map(),saveFlights=new Map();
+ async function ensureSaveReady(target,{authorize=async()=>true,signal,onObservation}={}){
+  const auth=await account(target.accountId),key=JSON.stringify([auth.sessionId,targetKey(target)]);
+  const report=(outcome,code)=>passiveObservation(onObservation,{stage:'worker.readiness',outcome,code});
+  const cached=saveReadiness.get(key);
+  if(cached&&(await transport.authorizeReady?.(target,cached))?.authorizedTargets?.length){
+   report('ok','WORKER_READY_REUSED');
+   return {state:'completed',code:'WORKER_READY_REUSED'};
+  }
+  saveReadiness.delete(key);
+  signal?.throwIfAborted();
+  if(!await authorize())return {state:'blocked',code:'AUTHORIZATION_REVOKED'};
+  let flight=saveFlights.get(key);
+  const joined=!!flight;
+  report('started',joined?'WORKER_PREPARATION_JOINED':'WORKER_READINESS_CHECK');
+  if(!flight){
+   flight=(async()=>{
+    const options={target,expectedSession:auth.sessionId,preserveReadyScope:true,onObservation};
+    let result=await recoverDestination(options);
+    for(let retry=0;retry<2&&result.state==='blocked'&&['TRANSIENT_API_FAILURE','CLOUDFLARE_RESPONSE_INVALID','TOKEN_EXPIRED'].includes(result.code);retry++){
+     report('started','WORKER_PREPARATION_RECONCILING');
+     await new Promise(resolve=>setTimeout(resolve,200*2**retry));
+     result=await recoverDestination(options);
+    }
+    return result;
+   })().finally(()=>saveFlights.delete(key));
+   saveFlights.set(key,flight);
+  }
+  const result=await flight;
+  signal?.throwIfAborted();
+  report(result.state==='completed'?'ok':result.state,result.code);
+  if((await account(target.accountId)).sessionId!==auth.sessionId)return {state:'blocked',code:'AUTHORIZATION_REVOKED'};
+  if(result.state==='completed'&&result.readiness?.state==='READY'){
+   if(saveReadiness.size>=32)saveReadiness.delete(saveReadiness.keys().next().value);
+   saveReadiness.set(key,result.readiness);
+  }
+  return result;
+ }
+ async function primeConfigured(accountIds,{resumeOnly=false}={}){
+  const state=await current.read();
+  if(!state.product.providerVisibility?.cloudflare)return;
+  const visible=['simple','nested','depth'].flatMap(mode=>state.product.show[mode]
+   ?(state.configs[mode].destinations??state.configs[mode].scopes).filter(row=>!row.hidden).map(row=>row.target):[]);
+  const targets=new Map();
+  for(const target of [state.product.defaultTarget,...visible]){
+   if(target?.provider!=='cloudflare'||!accountIds.includes(target.accountId))continue;
+   const key=scopeKey(target);
+   if(!targets.has(key))targets.set(key,target);
+  }
+  // On-demand saves can start immediately for any other bucket.
+  for(const target of [...targets.values()].slice(0,8))try{
+   if(resumeOnly){
+    const plan=await provisioner.lookup(target);
+    if(!plan)continue;
+    const pointer=await current.readSetupOperation('destination-recovery:'+await digest([target.accountId,target.bucketName]));
+    const progress=pointer&&await current.readSetupOperation(target.accountId+':'+pointer.idempotencyKey);
+    if(!progress||progress.result||!['pending','ready'].includes(plan.state))continue;
+   }
+   await ensureSaveReady(target);
+  }catch{/* An independently requested save can retry. */}
  }
  // Owning API: recoverCloudflareDestination. This is the existing per-bucket
  // provisioner/probe transition, with an immutable selected target and its own
  // crash ledger. It never initializes redown, edits Default, or retains a URL.
  // A verified probe is resumed by operation ID; an uncertain probe is never
  // replayed. A completed ledger is not current readiness evidence.
- function recoverDestination(options){const target=normalizeTarget(options.target);remoteDestination(target);return withSetupLock(target.accountId,()=>recoverDestinationLocked({...options,target}));}
- async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false,screenshotUpgrade=false,preserveReadyScope=false}){
+ function recoverDestination(options){const target=normalizeTarget(options.target);remoteDestination(target);return withSetupLock(scopeKey(target),()=>recoverDestinationLocked({...options,target}));}
+ async function recoverDestinationLocked({target,expectedRevision,idempotencyKey,authorizeSetup=false,screenshotUpgrade=false,preserveReadyScope=false,expectedSession,onObservation}){
   const accountId=target.accountId,auth=await account(accountId),s=await current.read();
-  const blocked=(code,extra={})=>({state:'blocked',code,accountId,target,...extra});
+  const blocked=(code,extra={})=>({state:'blocked',code,accountId,target,
+   ...(['AUTH_REQUIRED','REAUTH_REQUIRED','TOKEN_EXPIRED','AUTHORIZATION_REVOKED','AUTH_SESSION_CHANGED'].includes(code)?{requiredAction:'RECONNECT_CLOUDFLARE'}:{}),
+   ...(code==='INSUFFICIENT_SCOPE'?{requiredAction:'VERIFY_CLOUDFLARE_PERMISSIONS'}:{}),...extra});
+  if(expectedSession&&auth.sessionId!==expectedSession)return blocked('AUTHORIZATION_REVOKED');
   if(expectedRevision!==undefined&&s.product.revision!==expectedRevision)return blocked('REVISION_CONFLICT');
   if(!screenshotUpgrade&&!configuredScope(s,target))return blocked('TARGET_NOT_CONFIGURED');
   const plan=await provisioner.lookup?.(target);
@@ -179,14 +266,17 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(screenshotUpgrade&&(!authorizeSetup||!screenshotScope))return blocked('SCREENSHOT_WORKER_UPDATE_REQUIRED');
   const bucketKey=await digest([accountId,target.bucketName]),approvalKey='approval:destination:'+bucketKey;
   const retainApproval=()=>current.writeSetupOperation?.(approvalKey,{accountId,bucketName:target.bucketName,approved:true});
-  let observed=await transport.status(target);
-  for(let attempt=0;attempt<2&&['TRANSPORT_UNAVAILABLE','RESPONSE_INVALID'].includes(observed.code);attempt++){
+  let observed=await transport.status(target,onObservation?{onObservation}:undefined);
+  if(observed.state!=='READY')passiveObservation(onObservation,{stage:'worker.health',outcome:observed.state==='PREPARED'?'pending':'blocked',
+   code:observed.code??'WRITE_PROOF_REQUIRED'});
+  for(let attempt=0;attempt<2&&transientWorkerCodes.has(observed.code);attempt++){
    await new Promise(resolve=>setTimeout(resolve,150*2**attempt));
    if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
-   observed=await transport.status(target);
+   observed=await transport.status(target,onObservation?{onObservation}:undefined);
   }
-  const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope&&!(preserveReadyScope&&observed.state==='READY');
-  const update=screenshotUpgrade&&!transport.screenshotWorkerCurrent(plan);
+  if((await oauth.authority()).sessionId!==auth.sessionId)return blocked('AUTHORIZATION_REVOKED');
+  const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope&&!preserveReadyScope;
+  const update=screenshotUpgrade&&observed.screenshotTransfer!=='signed-png-fan-out-v1'&&!transport.screenshotWorkerCurrent(plan);
   const initialStatus=expandScope?{state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'}:
    update?{state:'blocked',code:'WORKER_UPGRADE_APPROVAL_REQUIRED'}:observed;
   if(initialStatus.state==='READY'){
@@ -194,13 +284,14 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    return {state:'completed',code:'CLOUDFLARE_READY',accountId,target,readiness:initialStatus,reused:true};
   }
   if(initialStatus.code==='WORKER_DESTINATION_SCOPE_REQUIRED'&&!expandScope)return blocked(initialStatus.code,{requiredAction:'CONFIRM_SCOPE_CHANGE'});
-  const requiresUpgrade=['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH'].includes(initialStatus.code);
-  if(requiresUpgrade&&!authorizeSetup)return blocked(initialStatus.code,{requiredAction:'AUTHORIZE_WORKER_UPGRADE'});
+  const incompatible=initialStatus.code==='WORKER_PROTOCOL_INCOMPATIBLE',missingEndpoint=initialStatus.code==='WORKER_ENDPOINT_MISSING';
+  const requiresUpgrade=incompatible||['WORKER_UPGRADE_APPROVAL_REQUIRED','WORKER_BUILD_MISMATCH'].includes(initialStatus.code);
+  if(requiresUpgrade&&!authorizeSetup&&!incompatible)return blocked(initialStatus.code,{requiredAction:'AUTHORIZE_WORKER_UPGRADE'});
   const requiresSigningRepair=['CAPABILITY_DENIED','WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'].includes(observed.code);
   if(requiresSigningRepair&&!authorizeSetup)return blocked(initialStatus.code,{requiredAction:'AUTHORIZE_WORKER_REPAIR'});
   // Temporary inability to inspect a known Worker is not evidence it needs
   // redeployment. An exact readiness check is enough for the routine path.
-  if(initialStatus.code&&!expandScope&&!requiresUpgrade&&!requiresSigningRepair&&!['WORKER_SETUP_REQUIRED','WRITE_PROOF_REQUIRED','WORKER_NOT_READY'].includes(initialStatus.code))return blocked(initialStatus.code);
+  if(initialStatus.code&&!expandScope&&!requiresUpgrade&&!requiresSigningRepair&&!missingEndpoint&&!['WORKER_SETUP_REQUIRED','WRITE_PROOF_REQUIRED','WORKER_NOT_READY'].includes(initialStatus.code))return blocked(initialStatus.code);
   if(inspectBucket){
    if(await inspectBucket(target,auth)!==true)return blocked('AUTHORIZATION_DENIED');
   }else{
@@ -250,12 +341,18 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   }
   if(!pointer){
    const legacyPointer=await current.readSetupOperation('initialization:'+accountId),legacy=legacyPointer&&await current.readSetupOperation(accountId+':'+legacyPointer.idempotencyKey);
-   if(legacy&&!legacy.result&&legacy.accountId===accountId&&legacy.target&&scopeKey(legacy.target)===scopeKey(target)){
-    if(targetKey(legacy.target)===targetKey(target)){pointer=legacyPointer;existing=legacy;}
-    else return legacy.stage==='probe-dispatched'?reconcileOtherPrefixProbe(legacy,legacyPointer):resumeOtherPrefixSetup(legacy,legacyPointer);
+   if(legacy?.accountId===accountId&&legacy.target&&scopeKey(legacy.target)===scopeKey(target)){
+    if(!plan&&['worker-prepared','probe-dispatched','complete'].includes(legacy.stage))
+     return blocked('WORKER_PLAN_RECORD_MISSING',{requiredAction:'RESTORE_OWNED_WORKER_RECORD'});
+    if(!legacy.result){
+     if(targetKey(legacy.target)===targetKey(target)){pointer=legacyPointer;existing=legacy;}
+     else return legacy.stage==='probe-dispatched'?reconcileOtherPrefixProbe(legacy,legacyPointer):resumeOtherPrefixSetup(legacy,legacyPointer);
+    }
    }
   }
   if(existing&&(existing.accountId!==accountId||!existing.target||scopeKey(existing.target)!==scopeKey(target)))return blocked('PROVISION_RECONCILE_REQUIRED');
+  if(!plan&&existing&&['worker-prepared','probe-dispatched','complete'].includes(existing.stage))
+   return blocked('WORKER_PLAN_RECORD_MISSING',{requiredAction:'RESTORE_OWNED_WORKER_RECORD'});
   // A sibling in this bucket may resume the same physical Worker, but a pending
   // probe remains bound to the original exact prefix until it is reconciled.
   const resumable=existing&&!existing.result;
@@ -283,7 +380,8 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     // neither a child click nor the Default can widen an existing plan.
     const currentPlan=await provisioner.lookup?.(target);
     const prepareOptions={approved:true,prefixScope:expandScope?'':currentPlan?.prefixScope??'',...(expandScope?{expandScope:true}:{}),
-      inspect:true,rebuild:authorizeSetup&&requiresUpgrade,renewSigning:!screenshotUpgrade&&authorizeSetup&&requiresSigningRepair,retryDenied:true,...(screenshotUpgrade?{updateOnly:true}:{})};
+      inspect:true,rebuild:(authorizeSetup||incompatible)&&requiresUpgrade,renewSigning:!screenshotUpgrade&&authorizeSetup&&requiresSigningRepair,
+      retryDenied:true,expectedSession:auth.sessionId,...(missingEndpoint?{recoverMissing:true}:{}),...(screenshotUpgrade?{updateOnly:true}:{})};
     try{await provisioner.prepare(target,prepareOptions);}catch(error){
      // A pending plan can reveal its older build only during owned settings
      // inspection. Explicit repair approval covers that discovered upgrade;
@@ -296,7 +394,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     for(let attempt=0;attempt<8;attempt++){
      await stillSelected();capability=await transport.status(expandScope?{...target,prefix:''}:target);
      if(['READY','PREPARED'].includes(capability.state))break;
-     if(!['RESPONSE_INVALID','TRANSPORT_UNAVAILABLE','WORKER_BUILD_MISMATCH'].includes(capability.code)||attempt===7)return blocked(capability.code??'WORKER_NOT_READY',{stage:'worker-capability'});
+     if(!['WORKER_ENDPOINT_MISSING','WORKER_BUILD_MISMATCH',...transientWorkerCodes].includes(capability.code)||attempt===7)return blocked(capability.code??'WORKER_NOT_READY',{stage:'worker-capability'});
      await new Promise(resolve=>setTimeout(resolve,Math.min(2000,250*2**attempt)));
     }
     const operationId=prior?.operationId??crypto.randomUUID();await stillSelected();await progress('probe-dispatched',{operationId});
@@ -321,7 +419,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  // Default nor needs a native menu. The source bucket is an additional binding
  // only for a transfer between buckets in the same OAuth account.
  async function ensureFileWorker(target,{sourceBucket,authorizeSetup=false,requireWriteProof=false,useSavedApproval=false}={}){
-  return withSetupLock(target.accountId,async()=>{
+  return withSetupLock(sourceBucket&&sourceBucket!==target.bucketName?JSON.stringify([scopeKey(target),sourceBucket]):scopeKey(target),async()=>{
    const auth=await account(target.accountId),plan=await provisioner.lookup(target,sourceBucket);
    const broad=plan?.state==='ready'&&!plan.prefixScope;
    if(broad&&(!requireWriteProof||!sourceBucket)){
@@ -364,12 +462,12 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(emptyAssignment){const s=await current.read(),known=s.product.defaultTarget||s.product.cloudflare.initialized.length||s.product.cloudflare.removed?.length||Object.values(s.configs??{}).some(c=>(c.destinations??c.scopes??[]).some(d=>d.target.provider==='cloudflare'));if(known){await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});return {state:'blocked',code:'CHOOSE_DESTINATION'};}}
   const readiness=await check(requestedTarget?.accountId,requestedTarget,{force:false});
   if(readiness.state!=='READY'){if(readiness.state==='CHOOSE_DESTINATION')await openShelf('manage-destinations',undefined,{code:'CHOOSE_DESTINATION',context:attentionContext});else if(['SETUP_APPROVAL_REQUIRED','SETUP_RESUME_REQUIRED','SETUP_APPROVAL_RECORD_MISSING','REPAIR_REQUIRED','DESTINATION_UNAVAILABLE','ACCOUNT_AMBIGUOUS','NOT_ACTIVATED','RECONNECT_REQUIRED','INSUFFICIENT_PERMISSION','UNKNOWN','NETWORK_UNAVAILABLE'].includes(readiness.state))await openShelf('cloudflare',requestedTarget,{code:readiness.code??readiness.worker?.code??readiness.state,context:attentionContext});return {state:'blocked',code:readiness.code??readiness.worker?.code??readiness.state,requiredAction:readiness.state,accountId:readiness.accountId,target:requestedTarget};}
-  if(setupOnly)return {state:'blocked',code:'FRESH_CLICK_REQUIRED',target:requestedTarget};
+  if(setupOnly)return {state:'blocked',code:'AUTHORIZATION_DENIED',target:requestedTarget};
   if(!source?.url||source.bytes)return {state:'blocked',code:'REMOTE_SOURCE_REQUIRED'};
   const target=readiness.target,out=await transport.save({target,source,signal,...(onAccepted?{onAccepted}:{}),dispatchPreparationMs,readinessMs:readiness.statusCheckMs,authorize:async()=>await authorize()&&savedTargets(await current.read()).some(t=>targetKey(t)===targetKey(target))});
   try{await record(out);}catch{return {...out,state:out.state==='verified'?'partial':out.state,code:'COMPLETION_PENDING'};}return out.state==='verified'?{...out,state:'completed',completion:'verified'}:out;
  }
- return Object.freeze({check,setup,initialize,recoverDestination,ensureFileWorker,invoke,history,async manage(){await openShelf('manage-destinations');return {state:'completed'};},cancel:({target,operationId})=>transport.cancel(target,operationId),setupStatus:({accountId,idempotencyKey})=>current.readSetupOperation?.(accountId+':'+idempotencyKey),
+ return Object.freeze({check,setup,initialize,recoverDestination,rememberDestinationApproval,primeConfigured,ensureSaveReady,ensureFileWorker,invoke,history,async manage(){await openShelf('manage-destinations');return {state:'completed'};},cancel:({target,operationId})=>transport.cancel(target,operationId),setupStatus:({accountId,idempotencyKey})=>current.readSetupOperation?.(accountId+':'+idempotencyKey),
   async select(accountId){await account(accountId);if((await current.read()).product.cloudflare.selectedAccountId===accountId)return check(accountId);await commit(p=>{p.cloudflare.selectedAccountId=accountId;});return check(accountId);},
   async activation(accountId){await account(accountId);const result=await r2(accountId);return {state:'blocked',code:result.state==='ACTIVE'?'R2_ALREADY_ACTIVE':'R2_MANUAL_ACTION_REQUIRED',readiness:result};},
   async inspect(){const s=await current.read(),candidate=await readRequestedTarget(),valid=candidate&&configuredScope(s,candidate)?candidate:null;const status=candidate&&!valid?{state:'REPAIR_REQUIRED',code:'TARGET_NOT_CONFIGURED',accountId:candidate.accountId,target:candidate}:await check(valid?.accountId,valid),pointer=status.accountId&&await current.readSetupOperation?.(valid?'destination-recovery:'+await digest([valid.accountId,valid.bucketName]):'initialization:'+status.accountId),pending=pointer&&await current.readSetupOperation?.(status.accountId+':'+pointer.idempotencyKey),failure=!pending?.result&&safeWorkerDiagnostic(pending?.failure);return {onboarding:{...s.product.cloudflare,setupAuthorized:valid?await destinationApproved(valid):status.accountId?await setupApproved(status.accountId):false},status:failure?{...status,state:'PROVISIONING_BLOCKED',code:failure.code,diagnostic:failure}:status,limits:{totalFilePolicy:null,buffering:'bounded spool; final R2 conditional PUT service limits apply'},sourcePolicy:{kind:'public-https-native-fetch',privateNetworks:false,browserCredentials:false,networkGuarantee:'Public-address DNS preflight and per-hop HTTPS validation; native fetch re-resolves, so DNS rebinding is not fully pinned'}};},

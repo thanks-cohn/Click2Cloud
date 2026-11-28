@@ -6,6 +6,7 @@ import {appendFileSync,openAsBlob} from 'node:fs';
 import {cp,mkdir,mkdtemp,open,readFile,rm,writeFile} from 'node:fs/promises';
 import {createConnection} from 'node:net';
 import {join,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
 import {build} from 'esbuild';
 import 'fake-indexeddb/auto';
@@ -141,6 +142,20 @@ async function rawHandshake(endpoint,key) {
 async function getEndpoint(){return JSON.parse(await readFile(join(stateRoot,'connection.json'),'utf8'));}
 const sha=data=>createHash('sha256').update(data).digest('hex');
 
+if(process.argv[2]==='--right-click-fixture'){
+ const {verifyRightClickFixture}=await import('../tests/fixtures/right-click-lab.mjs');
+ const revision=(await childResult(spawn('git',['rev-parse','HEAD'],{cwd:repository}))).stdout.trim();
+ try{
+  const packaged=await import(pathToFileURL(resolve('dist/click2cloud/src/build-info.mjs'))).catch(()=>null);
+  const verifiedBuild=packaged?.BUILD_INFO?.revision===revision?packaged.BUILD_INFO:null;
+  const result=await verifyRightClickFixture(resolve(process.argv[3]),{runtime,storage,opfs,cli,
+   buildInfo:{...BUILD_INFO,revision,sourceDigest:verifiedBuild?.sourceDigest??null},accountId,bucketName});
+  process.exitCode=result?0:1;
+ }finally{
+  for(const child of children)child.stdin.end();
+ }
+}else{
+
 try{
  const wrongOrigin=await childResult(pythonCommand('redown_live_lab.native_host',['chrome-extension://'+'b'.repeat(32)+'/']));
  assert.equal(wrongOrigin.code,2);
@@ -151,10 +166,10 @@ try{
   write:false,format:'esm',platform:'browser'});
  const secret='fixture-only-signed-worker-credential';
  const plan={state:'ready',protocol:PROTOCOL,accountId,bucketName,prefixScope:'permitted',
-  url:'https://python-lab-fixture.workers.dev',secret};
+  url:'https://python-lab-fixture.workers.dev',secret,codeDigest:'python-lab-fixture'};
  worker=new Miniflare({modules:true,script:compiled.outputFiles[0].text,compatibilityDate:'2026-01-01',r2Buckets:['STORAGE'],
   durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},
-  bindings:{SIGNING_KEY:secret,ACCOUNT_ID:accountId,BUCKET_NAME:bucketName,PREFIX_SCOPE:'permitted'}});
+  bindings:{SIGNING_KEY:secret,ACCOUNT_ID:accountId,BUCKET_NAME:bucketName,PREFIX_SCOPE:'permitted',CODE_DIGEST:plan.codeDigest}});
  const bucket=await worker.getR2Bucket('STORAGE');
  await bucket.put('unrelated/private.txt','out of scope');
  const oauth={
@@ -640,4 +655,6 @@ try{
  await rm(spoolRoot,{recursive:true,force:true});
  await writeFile(evidence,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
  console.log(JSON.stringify({...report,evidence},null,2));
+}
+
 }

@@ -21,10 +21,10 @@ test('production Depth callbacks -> provisioner -> signed transport -> workerd -
  const state={product:productState({show:{simple:true,nested:true,depth:true,flat:false}}),configs:{simple:{destinations:[{target:{...root,prefix:'Images/'},label:'Simple control'}]},nested:{destinations:[{target:{...root,prefix:'Images/Artwork/'},label:'Narrow control'}]},depth:{scopes:[{target:root,maxDepth:30}]}},generation:{desired:0,applied:null}};
  const current={read:async()=>{if(failCurrent)throw Object.assign(Error(),{code:'STORAGE_UNAVAILABLE'});return structuredClone(state);},setDesiredGeneration:async g=>state.generation.desired=g,acknowledgeGeneration:async g=>state.generation.applied=g,recordRemoteResult:async r=>{if(failOptional)throw Object.assign(Error(),{code:'STORAGE_UNAVAILABLE'});records.push(r);}};
  const normalAuth=async t=>({sessionId:'fixture-session',authorizedTargets:authorized&&shared.get(targetKey(t))?[t]:[]});
- const depthAuth=async t=>({sessionId:(await oauth.authority()).sessionId,authorizedTargets:(await transport.status(t)).state==='READY'?[t]:[]});
+ const depthAuth=async t=>({sessionId:'fixture-session',authorizedTargets:authorized?[t]:[]});
  let feedback=[];const depthClick=createDepthNativeClick({current,oauth,transport,lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:depthAuth,feedback:async r=>{feedback.push(r);finish?.();}});
  const chrome={runtime:{},contextMenus:{onClicked:{addListener:f=>listener=f,removeListener(){}},removeAll:cb=>cb(),create:(_p,cb)=>setTimeout(cb,0)}};
- let engine;registrar=createChromeRegistrar({chrome,depthClick,getAuthorization:async info=>normalAuth(registrar.inspect().desired.rows.find(r=>r.id===info.menuItemId).target),dispatch:(_a,{info,generation,depthAuthorization})=>engine.save({itemId:info.menuItemId,generation,depthAuthorization,context:'link',source:sourceFromClick(info)})});
+ let engine;registrar=createChromeRegistrar({chrome,depthClick,dispatchOwnsAuthorization:true,getAuthorization:async info=>normalAuth(registrar.inspect().desired.rows.find(r=>r.id===info.menuItemId).target),dispatch:(_a,{info,generation,depthAuthorization})=>engine.save({itemId:info.menuItemId,generation,depthAuthorization,context:'link',source:sourceFromClick(info)})});
  engine=createEngine({current,registrar,getAuthorization:normalAuth,remoteSave:transport.save});
  const inventory={scopes:[{target:root,folders:['Images/','Images/Artwork/'],authorized:true,workerReady:true,complete:true}]};
  const spec=await engine.compile({mode:'composite',inventory});assert.equal((await engine.apply(spec)).state,'completed');
@@ -45,10 +45,10 @@ test('production Depth callbacks -> provisioner -> signed transport -> workerd -
  const out=await emit(row);assert.equal(out.state,'completed',JSON.stringify(out));assert.equal(out.recordCode,'DEPTH_CLICK_RECORD_FAILED');assert.equal(JSON.stringify([...shared]),before);if(control){const denied=await engine.save({itemId:control.id,generation:spec.generation,depthAuthorization:depthAuth,context:'link'});assert.equal(denied.state,'blocked');}const remote=records.filter(r=>r.state==='verified'&&r.destination?.prefix===row.target.prefix.replace(/\/$/,'')).at(-1);assert(remote?.receipt);assert.equal(remote.receipt.key.startsWith(row.target.prefix),true);assert.equal(await (await bucket.get(remote.receipt.key)).text(),'abc');}
  for(const r of controls){assert.equal(shared.get(targetKey(r.target)),false);shared.set(targetKey(r.target),true);await saveControl(r);}
  const count=async()=>(await bucket.list()).objects.length;let before=await count();
- plans.delete(registryKey);let out=await emit(depthRows[0]);assert.equal(out.code,'WORKER_SETUP_REQUIRED');assert.equal(out.reason,'FOLLOWUP_PLAN_MISSING');assert.equal(await count(),before);plans.set(registryKey,plan);
+ plans.delete(registryKey);let out=await emit(depthRows[0]);assert.equal(out.code,'WORKER_SETUP_REQUIRED');assert.equal(await count(),before);plans.set(registryKey,plan);
  failCurrent=true;out=await emit(depthRows[0]);assert.equal(out.code,'STORAGE_UNAVAILABLE');assert.equal(await count(),before);failCurrent=false;
  state.generation.applied=null;out=await emit(depthRows[0]);assert.equal(out.code,'STALE_GENERATION');assert.equal(await count(),before);state.generation.applied=spec.generation;
- authorized=false;out=await emit(depthRows[0]);assert.equal(out.code,'AUTH_REQUIRED');assert.equal(await count(),before);authorized=true;
+ authorized=false;out=await emit(depthRows[0]);assert.equal(out.code,'SCOPE_UNAUTHORIZED');assert.equal(await count(),before);authorized=true;
  for(const t of [{...root,bucketName:'foreign'},{...root,accountId:'foreign',connectionId:'cloudflare:foreign'},{...root,connectionId:'invalid'}])assert.notEqual((await transport.status(t)).state,'READY');
  const restricted={...plan,prefixScope:'Images'};plans.set(registryKey,restricted);assert.equal((await transport.status(root)).code,'WORKER_DESTINATION_SCOPE_REQUIRED');assert.equal((await transport.status({...root,prefix:'Images/Artwork/'})).state,'READY');
  plans.set(registryKey,plan);lookups.length=0;for(const prefix of ['', 'Images/','Images/Artwork/'])await provisioner.lookup({...root,prefix});assert.equal(new Set(lookups).size,1);
@@ -59,9 +59,11 @@ test('optional lastDepthClick failure does not suppress existing channels or cla
  const calls=[];const feedback=createDepthFeedback({storage:{local:{set:async()=>{calls.push('set');throw Error('quota');}}},runtime:{getURL:p=>p,sendMessage:async m=>calls.push(m)},notifications:{create:async(_id,m)=>calls.push(m)},action:{setBadgeText:async()=>calls.push('direct-badge')}},async()=>calls.push('badge-refresh'));
  await feedback({state:'uncertain',code:'VERIFY_UNCERTAIN',operationId:'fixture'});assert(calls.some(c=>c.channel==='depth-click-outcome'));assert(calls.includes('badge-refresh'));assert(!calls.includes('direct-badge'));assert(calls.some(c=>c.message?.includes('not confirmed')));assert(!calls.some(c=>c.message?.includes('save completed')));
 });
-test('follow-up diagnostic read never purports to be rejecting plan snapshot',async()=>{
- let n=0;const plan={state:'ready',accountId:'fixture',bucketName:'bucket',protocol:PROTOCOL},lookup=async()=>++n===1?plan:n===2?{...plan,state:'pending'}:null;
- const transport=createRemoteTransport({oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},lookup,fetch:async()=>{throw Error('No fetch');}});
- const observed=[];const click=createDepthNativeClick({current:{recordRemoteResult:async()=>{}},feedback:async r=>observed.push(r),oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},transport,lookup,inspect:()=>({desired:{generation:1},acknowledgedGeneration:1})});
- const out=await click({id:'r',role:'save',target:root},{},{},()=>{throw Error('Must not save');});assert.equal(out.code,'WORKER_SETUP_REQUIRED');assert.equal(n,3);assert.equal(observed[0].reason,'FOLLOWUP_PLAN_MISSING');
+test('Depth observation delegates to the shared dispatcher without probing the provider',async()=>{
+ let called=0;
+ const click=createDepthNativeClick({current:{recordRemoteResult:async()=>{}},inspect:()=>({desired:{generation:1},acknowledgedGeneration:1})});
+ const result=await click({id:'r',role:'save',target:root},{},{},async()=>{
+  called++;return {state:'blocked',code:'WORKER_SETUP_REQUIRED'};
+ });
+ assert.equal(result.code,'WORKER_SETUP_REQUIRED');assert.equal(called,1);
 });

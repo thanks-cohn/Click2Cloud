@@ -97,7 +97,20 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
       if(resolved.action.target.provider==='cloudflare'||typeof selectedRemote==='function'){
         observe(saveSink,'capture.acquire','skipped','TRUE_REMOTE_ONLY',scope);
         if(typeof selectedRemote!=='function')return finish({state:'blocked',code:'REMOTE_TRANSPORT_REQUIRED',operationId});
-        const authorize=async()=>{const saved=await current.read();if(saved.generation.desired!==generation||saved.generation.applied!==generation||compiledIntent.has(spec)&&compiledIntent.get(spec)!==menuIntent(saved))return false;const latest=await authorizeTarget(resolved.action.target),n=registrar.inspect();return latest?.sessionId===auth.sessionId&&!n.pending&&n.desired?.generation===generation&&resolveMenuAction(spec,{itemId,generation,context,acknowledgedGeneration:n.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets}).state==='completed';};
+        const authorize=async()=>{
+          const latest=await authorizeTarget(resolved.action.target),saved=await current.read(),native=registrar.inspect();
+          const active=native.desired,activeGeneration=active?.generation;
+          if(latest?.sessionId!==auth.sessionId||native.pending||activeGeneration!==native.acknowledgedGeneration||
+             saved.generation.desired!==activeGeneration||saved.generation.applied!==activeGeneration||
+             !active||active!==spec&&!compiledIntent.has(active)||
+             compiledIntent.has(active)&&compiledIntent.get(active)!==menuIntent(saved))return false;
+          // A reconciliation that retains the identical route may finish
+          // while preparation is in flight. Revalidate the frozen identity
+          // against the current ACK and decline any changed or removed route.
+          const currentRoute=resolveMenuAction(active,{itemId,generation:activeGeneration,context,
+            acknowledgedGeneration:native.acknowledgedGeneration,authorizedTargets:latest.authorizedTargets});
+          return currentRoute.state==='completed'&&currentRoute.action.actionId===resolved.action.actionId;
+        };
         const out=await selectedRemote({target:resolved.action.target,source,...(resolved.action.provenance?{provenance:resolved.action.provenance}:{}),operationId:crypto.randomUUID(),signal,authorize,...(onAccepted?{onAccepted}:{}),dispatchPreparationMs:Math.round(performance.now()-dispatchStarted),onObservation:observation,onBoundary:(stage,outcome,code)=>observe(saveSink,stage,outcome,code,scope)});
         if(out.state==='verified'){if(out.completionPending)return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});observe(saveSink,'completion.history','started','REMOTE_COMPLETION_STARTED',scope);try{await onVerifiedCompletion?.(out);}catch{observe(saveSink,'completion.history','failed','REMOTE_COMPLETION_PENDING',scope);return finish({...out,state:'partial',code:'COMPLETION_PENDING',remoteOperationId:out.operationId,operationId});}observe(saveSink,'completion.history','ok','REMOTE_COMPLETION_RECORDED',scope);return finish({...out,state:'completed',completion:'verified',remoteOperationId:out.operationId,operationId});}
         return finish(out);

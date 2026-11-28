@@ -115,7 +115,7 @@ test('ordinary Rename uses a compatible earlier Worker and a collision leaves bo
 test('ordinary Rename identifies missing, incompatible and out-of-scope plans and revoked write authority',async t=>{
  const f=await fixture(t);
  for(const [change,code] of [
-  [plan=>({...plan,codeDigest:'unrecognized-build'}),'WORKER_UPGRADE_APPROVAL_REQUIRED'],
+  [plan=>({...plan,codeDigest:'unrecognized-build'}),'WORKER_BUILD_MISMATCH'],
   [plan=>({...plan,codeDigest:currentDigest,prefixScope:'Projects-old'}),'WORKER_DESTINATION_SCOPE_REQUIRED'],
   [plan=>({...plan,prefixScope:'Projects',secret:''}),'WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'],
   [plan=>({...plan,secret:fixtureSecret,protocol:'click2cloud-remote-1'}),'WORKER_SETUP_REQUIRED'],

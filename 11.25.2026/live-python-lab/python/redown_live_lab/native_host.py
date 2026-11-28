@@ -18,7 +18,7 @@ HOST_NAME = 'com.click2cloud.redown_live_lab'
 EXTENSION_ID = 'ajppphdiamdobknpamcheohmdbdbeoal'
 ORIGIN = 'chrome-extension://' + EXTENSION_ID + '/'
 METHODS = frozenset((
-    'pair', 'describe', 'admit', 'releaseRun', 'uploadOpen', 'uploadAppend',
+    'pair', 'describe', 'rightClickInspect', 'admit', 'releaseRun', 'uploadOpen', 'uploadAppend',
     'uploadStart', 'readOpen', 'poll', 'pull', 'closeTransfer', 'cancel',
     'metadata', 'list', 'admitCampaign', 'admitReadSelection', 'auditList', 'campaignUsage', 'campaignOutcome', 'drainCampaign', 'registerCampaignFiles',
 ))

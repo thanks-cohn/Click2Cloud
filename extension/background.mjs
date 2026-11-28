@@ -23,6 +23,7 @@ import {screenshotShortcutSetupKey} from '../src/chrome/command-bindings.mjs';
 import {appSenderDecision} from '../src/chrome/trusted-sender.mjs';
 import {localUploadPort,uploadBatchJournal} from '../src/chrome/local-upload-files.mjs';
 import {createPythonLab,labChannel} from '../src/chrome/python-lab/session.mjs';
+import {createRightClickObservation} from '../src/chrome/python-lab/right-click.mjs';
 import {sourceFromClick} from '../right2cloud-module/src/index.mjs';
 import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {operationIdentity} from '../src/core/boundary-observation.mjs';
@@ -44,7 +45,7 @@ import {createProvisioner} from '../src/cloudflare/deployment.mjs';
 import {createVerifiedBucket} from '../src/cloudflare/inventory.mjs';
 import {createFileTransport} from '../src/cloudflare/file-transport.mjs';
 import {createR2PublicDomains} from '../src/cloudflare/r2-public-domains.mjs';
-import {createRemoteTransport,preparedDestination,previousWorkerDigests} from '../src/cloudflare/transport.mjs';
+import {createRemoteTransport,preparedDestination} from '../src/cloudflare/transport.mjs';
 import {createCloudflareOnboarding} from '../src/cloudflare/onboarding.mjs';
 import {sourceURL} from '../src/cloudflare/public-address.mjs';
 import {levelHidden} from '../src/modes/nested/index.mjs';
@@ -126,12 +127,9 @@ async function checkSelectedBucket(target,auth,write=true,signal){
  }
  return true;
 }
-const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,compatibleCodeDigests:previousWorkerDigests,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
+const remote=createRemoteTransport({expectedCodeDigest:BUILD_INFO.workerCodeDigest,oauth,lookup:provisioner.lookup,verifyAuthority:checkSelectedBucket,record:recordRemote,authorizeSource:async s=>{try{sourceURL(s.url);return !s.bytes;}catch{return false;}}});
 const snapshots=new Map();
-async function remoteReady(target,signal){const a=await oauth.status();signal?.throwIfAborted();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;const r=await remote.status(target);signal?.throwIfAborted();snapshots.set(k,{at:Date.now(),ready:r.state==='READY'});return r.state==='READY';}
-async function prepared(target){
- return preparedDestination(await provisioner.lookup(target),target,BUILD_INFO.workerCodeDigest,previousWorkerDigests);
-}
+async function remoteReady(target,signal){const a=await oauth.status();signal?.throwIfAborted();if(a.state!=='CONNECTED'||!a.accounts.some(x=>x.id===target.accountId))return false;const k=targetKey(target),snapshot=snapshots.get(k);if(snapshot&&Date.now()-snapshot.at<10000)return true;const r=await remote.status(target);signal?.throwIfAborted();if(r.state==='READY'){if(snapshots.size>=128)snapshots.delete(snapshots.keys().next().value);snapshots.set(k,{at:Date.now(),ready:true});}return r.state==='READY';}
 const cloudflare=createCloudflareOnboarding({current,oauth:setupOauth,inspectBucket:checkSelectedBucket,provisioner:{...provisioner,markVerified:async(t,sessionId)=>{await provisioner.markVerified(t,sessionId);snapshots.clear();}},transport:remote,readRequestedTarget:async()=>(await attention.read())?.target,openShelf:(provider,target,details)=>attention.attend(provider??'cloudflare',target,details),record:recordRemote,history:options=>current.readRemoteResults(options)});
 
 function onVerifiedCurrent(row){
@@ -278,7 +276,7 @@ async function getInventory({refreshTargets=[],refreshDepthScopes=[],refreshDept
     if(checkedBuckets.has(bucket)&&!preparedBuckets.has(bucket)&&checkedTargets.has(targetKey(t)))return false;
     const snapshot=snapshots.get(targetKey(t));
     if(!checkedBuckets.has(bucket)&&snapshot&&Date.now()-snapshot.at<10000)return snapshot.ready;
-    try{return preparedDestination(plans.get(scopeKey(t)),t,BUILD_INFO.workerCodeDigest,previousWorkerDigests).state==='READY';}catch{return false;}
+    try{return preparedDestination(plans.get(scopeKey(t)),t).state==='READY';}catch{return false;}
   };
   const projectScope=s=>({...s,authorized:status.state==='CONNECTED'&&status.accounts.some(a=>a.id===s.target.accountId),
     workerReady:projectReady(s.target),
@@ -291,48 +289,21 @@ const getAuthorization=async selection=>{
  try{
   const auth=await oauth.authority();
   const target=selection?.provider?selection:registrar.inspect().desired?.rows.find(r=>r.id===String(selection?.menuItemId))?.target;
-  const authorized=target?.provider==='cloudflare'&&auth.accounts.some(a=>a.id===target.accountId)&&(await prepared(target)).state==='READY';
+  const authorized=target?.provider==='cloudflare'&&target.connectionId==='cloudflare:'+target.accountId&&auth.accounts.some(a=>a.id===target.accountId);
   return {sessionId:auth.sessionId,authorizedTargets:authorized?[target]:[]};
  }catch{return null;}
 };
-async function recoverConfiguredTarget({target,generation}){
- if(revoking)return {state:'blocked',code:'DISCONNECTING'};
- const state=await readCurrent(),native=registrar.inspect();
- if(native.pending||native.acknowledgedGeneration!==state.generation.desired||
-   (generation!==undefined&&generation!==native.acknowledgedGeneration)||!engine.matchesCurrent(native.desired,state))
-  return {state:'blocked',code:'STALE_GENERATION'};
- // The typed owner can use existing approval, but cannot grant new consent
- // from a context-menu gesture or repeat a source write.
- const out=await api.invoke({version:'3+1.1',method:'recoverCloudflareDestination',params:{target}},'gui');
- return out.data??{state:out.state,code:out.code};
-}
-const depthClick=createDepthNativeClick({current,oauth,transport:{async status(target){
- const evidence=await prepared(target);
- return evidence.state==='READY'?evidence:remote.status(target);
-}},lookup:provisioner.lookup,inspect:()=>registrar.inspect(),authorize:getAuthorization,recover:recoverConfiguredTarget,
-attend:(target,{code,info})=>attention.attend('cloudflare',target,{code,context:attention.context(info)}),feedback:createDepthFeedback(chrome,()=>{void dailyBadge.refresh();})});
+const depthClick=createDepthNativeClick({current,inspect:()=>registrar.inspect(),authorize:getAuthorization,
+ feedback:createDepthFeedback(chrome,()=>{void dailyBadge.refresh();})});
 async function invokeProviderAction(input){
  if(revoking)return {state:'blocked',code:'DISCONNECTING'};
- if(input.setupOnly&&input.attentionContext&&input.requestedTarget){
-  const target=input.requestedTarget,auth=await oauth.authority().catch(()=>null);
-  if(auth?.accounts.some(a=>a.id===target.accountId)){
-   const evidence=await prepared(target);
-   if(['WORKER_SETUP_REQUIRED','WRITE_PROOF_REQUIRED'].includes(evidence.code)){
-    const prepared=await recoverConfiguredTarget({target,generation:input.generation});
-    const code=prepared.state==='completed'?'FRESH_CLICK_REQUIRED':prepared.code;
-    try{await attention.attend('cloudflare',target,{code,context:input.attentionContext});}catch{}
-    return {state:prepared.state==='uncertain'?'uncertain':'blocked',code,target,
-     requiredAction:prepared.state==='completed'?'RIGHT_CLICK_AGAIN':prepared.requiredAction};
-   }
-  }
- }
  return cloudflare.invoke(input);
 }
 // MV3 supports static module loading only. The dependency graph is build-gated;
 // execution/readiness stays deferred and never gates the native listener.
 let recorder=null,recorderInitializationFailure=null,bootstrapDropped=0;
 const bootstrapObservations=[];
-function observeDeliveredClick(delivery){
+function observeRecordedClick(delivery){
   if(recorder)return recorder.click(delivery);
   // Bounded early BASIC checkpoint. No RAW URLs/destination identities retained
   // before consent is restored. Each delivery keeps its own stage/outcome list.
@@ -346,6 +317,16 @@ void Promise.resolve().then(async()=>{
   for(const pending of bootstrapObservations){pending.forward=recorder.click(pending.early);for(const event of pending.events)pending.forward(event);pending.events.length=0;}
   bootstrapObservations.length=0;
 }).catch(error=>{recorderInitializationFailure={stage:'recorder-initialization',causeName:['Error','TypeError','SyntaxError','ReferenceError','SecurityError','QuotaExceededError','InvalidStateError'].includes(error?.name)?error.name:'UnknownError'};bootstrapDropped+=bootstrapObservations.length;bootstrapObservations.length=0;});
+function observeDeliveredClick(delivery){
+ let trace=rightClickObservation.observe(delivery.row);
+ const recorded=observeRecordedClick(delivery);
+ return event=>{
+  if(!trace&&event.stage==='native.identity')trace=rightClickObservation.observe(event.row);
+  if(event.stage==='native.terminal')trace?.finish(event.result);
+  else trace?.event(event);
+  return recorded?.(event);
+ };
+}
 let screenshots;
 const screenshotHost=()=>screenshots??=createScreenshotBackground({chrome,oauth:setupOauth,current,fileApi,onVerified:onVerifiedCurrent,
  onConfirmed:id=>saveNotice.saved('cloudflare','cloudflare:'+id),
@@ -367,6 +348,9 @@ chrome.commands?.onCommand?.addListener((command,tab)=>{
  else try{screenshotHost().onCommand(command,tab);}catch{lifecycle('OBSERVATION_WORKER_EXCEPTION');}
 });
 const readNativeRegistration=async()=>(await chrome.storage.local.get('nativeRegistration')).nativeRegistration??null;
+const rightClickObservation=createRightClickObservation({readCurrent,inspectNative:()=>registrar.inspect(),
+ readPlan:provisioner.lookup,readResult:current.readRemoteResult,
+ readLastOperation:async()=>(await chrome.storage.local.get('lastSave')).lastSave?.operationId,readConnection:oauth.status});
 const registrar=createChromeRegistrar({chrome,epoch:workerEpoch,readRegistration:readNativeRegistration,retiredRoots:['click2cloud-screenshot'],observeClick:observeDeliveredClick,depthClick,readDepthClickRow:async id=>(await readNativeRegistration())?.desired?.rows.find(r=>r.id===id&&r.origin?.mode==='depth'),beforeApply:async spec=>{const s=await readCurrent();if(s.generation.desired!==spec.generation||spec.mode==='composite'&&spec.modeRevision!==s.product.revision)throw Object.assign(Error(),{code:'STALE_GENERATION'});},onGesture:(info,tab)=>{projectile.arm(info,tab);const native=registrar.inspect(),row=native.desired?.rows.find(r=>r.id===String(info.menuItemId)),provider=row?.providerAction??row?.origin?.provider;attention.gesture(info,tab,{provider,enabled:!!row&&!native.pending&&native.acknowledgedGeneration===native.desired?.generation&&['save','provider-action'].includes(row.role),needsAttention:!basicMenuProvider(provider)&&(row?.role==='provider-action'||row?.actionKind==='attention'||connectionObservation?.state==='DISCONNECTED')});
 },beforeClick:async info=>{
     const native=registrar.inspect(),itemId=String(info.menuItemId);
@@ -420,7 +404,7 @@ function showSaveBusy(){
  return true;
 }
 engine=createEngine({current,registrar,fileApi,providerSetupActions:true,providers:{},getAuthorization,diagnostics,
-  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save(input);},onProviderAction:invokeProviderAction,
+  remoteSave:async input=>{if(revoking)return {state:'blocked',code:'DISCONNECTING'};return remote.save({...input,prepare:cloudflare.ensureSaveReady});},onProviderAction:invokeProviderAction,
   authorizeSource:async s=>{if(s.bytes instanceof Uint8Array)return true;try{const u=new URL(s.url);return ['https:','http:'].includes(u.protocol)&&await chrome.permissions.contains({origins:[u.origin+'/*']});}catch{return false;}},fetchSource:fetch});
 async function external(){const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('EXTERNAL_RECOVERY_UNAVAILABLE');return createExternalRecovery({files:directoryFiles(h)});}
 const recovery={verifyProfileCopy:async()=>{const h=await current.readBackupRoot();if(!h||await h.queryPermission({mode:'readwrite'})!=='granted')throw Error('RECOVERY_PRESERVATION_REQUIRED');return verifyProfileCopy(directoryFiles(h),chrome.runtime.id);},choose:async options=>{
@@ -475,7 +459,7 @@ const debugHost=createDebugHost({runtime:chrome.runtime,api:debugApi,getMenu:g=>
 // Local File tickets and recovery metadata are available only to the trusted Shelf.
 const uploadReadTransient = new Set(['TRANSPORT_UNAVAILABLE','NETWORK_ERROR','WORKER_UNREACHABLE','WORKER_UNAVAILABLE','RESOURCE_BUSY']);
 const localUploadService=createLocalUploadService({assertConnected,oauth,lookup:provisioner.lookup,
- checkPrepared:(plan,target)=>preparedDestination(plan,target,BUILD_INFO.workerCodeDigest,previousWorkerDigests),
+ checkPrepared:preparedDestination,
  remote,executeFileMessage,runFileUpload:(input,options)=>fileApi.run('upload',input,options),
  current,onVerified:onVerifiedCurrent,onAccounted:row=>accountQueueReceipt(currentReceipt,row)
 });
@@ -534,7 +518,7 @@ const pythonLab=createPythonLab({runtime:chrome.runtime,storage:chrome.storage.l
  checkBucket:(target,auth,signal)=>checkSelectedBucket(target,auth,false,signal),
  workerPrefix:async target=>(await provisioner.lookup(target))?.prefixScope??'',
  checkUpload:localUploadService.checkDestination,upload:localUploadService.dispatchLabFile,
- readUploadOutcome:id=>current.readRemoteResult(id),reconcileUpload:localUploadService.reconcileFile,
+ readUploadOutcome:id=>current.readRemoteResult(id),reconcileUpload:localUploadService.reconcileFile,inspectRightClick:rightClickObservation.inspect,
  // Use production R2 stat/list/stream with exact OAuth session and scope
  // fences. The relay never owns either OAuth or signed Worker credentials.
  fileApi:(expectedSession,beforeRequest)=>createClick2CloudFileApi({send,http:{
@@ -923,6 +907,8 @@ for(const event of [chrome.runtime.onInstalled,chrome.runtime.onStartup])event?.
  if(details?.reason==='install')void chrome.storage.local.set({[screenshotShortcutSetupKey]:true}).catch(()=>{});
 });
 scheduleNative('NATIVE_ACTIVATION');
+void oauth.status().then(status=>status.state==='CONNECTED'&&cloudflare.primeConfigured(
+ status.accounts.map(account=>account.id),{resumeOnly:true})).catch(()=>{});
 // Developer/native-companion integration only. No website, content-script,
 // external-message or localhost path can issue grants or use this interface.
 Object.defineProperty(globalThis,'click2cloud',{value:Object.freeze({api,gateway,engine,current,registrar,get ready(){return readCurrent().then(()=>({state:'completed',code:'LOCAL_STATE_READY'}));},

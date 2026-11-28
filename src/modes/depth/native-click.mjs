@@ -1,5 +1,4 @@
-// Depth-only native click lifecycle. Recover only the exact configured target
-// through onboarding's retained approval; never retain or replay source bytes.
+// Depth-specific receipt and feedback around the shared native save path.
 import {remoteDestination,PROTOCOL} from '../../cloudflare/wire.mjs';
 const safeCode=value=>typeof value==='string'&&/^[A-Z][A-Z0-9_]{0,95}$/.test(value)?value:'DEPTH_CLICK_FAILED';
 export function workerPlanReason(plan,target){
@@ -10,51 +9,23 @@ export function workerPlanReason(plan,target){
  if(plan.protocol!==PROTOCOL)return 'PLAN_PROTOCOL_MISMATCH';
  return 'PLAN_MATCHES';
 }
-export function createDepthNativeClick({current,oauth,transport,lookup,inspect,authorize,recover,attend=async()=>{},feedback=async()=>{}}){
+export function createDepthNativeClick({current,inspect,authorize,feedback=async()=>{}}){
  return async function depthClick(row,info,tab,run){
-  const operationId='depth-click:'+crypto.randomUUID(),started=Date.now();let stage='native',reason=null,result,recordFailed=false;
-  // Deliberate allowlist: never serialize a plan, token, source URL or Chrome error.
-  const trace=()=>{const failed=inspect().acknowledgements?.find(a=>a.state!=='acknowledged');return JSON.stringify({itemId:row.id,parentId:row.parentId,role:row.role,actionKind:row.actionKind,mode:'depth',generation:inspect().desired?.generation,acknowledgedGeneration:inspect().acknowledgedGeneration,nativeCode:inspect().lastOutcome?.code,...(failed?{firstNativeFailure:{itemId:failed.itemId,code:safeCode(failed.code),state:failed.state}}:{}),stage,reason});};
-  const record=async(state,code,cause)=>current.recordRemoteResult({kind:'depth-click',operationId,state,code,cause,destination:remoteDestination(row.target),stage:trace(),durationMs:Date.now()-started});
-  try{
-   void record('pending','DEPTH_CLICK_STARTED').catch(()=>{recordFailed=true;});
-   // Retain original ACK/recovery semantics; never authorize a partial menu.
-   const native=inspect();
-   if(native.pending||native.acknowledgedGeneration!==native.desired?.generation){result=await run(authorize);}
-   else {
-    stage='authorization';const auth=await oauth.authority();
-    if(!auth.accounts.some(a=>a.id===row.target.accountId))result={state:'blocked',code:'SCOPE_UNAUTHORIZED'};
-    else {
-     stage='worker';const readiness=await transport.status(row.target);
-     if(readiness.state!=='READY'){
-      if(readiness.code==='WORKER_SETUP_REQUIRED'){const observed=workerPlanReason(await lookup(row.target),row.target);reason='FOLLOWUP_'+observed;}
-      result={state:'blocked',code:safeCode(readiness.code??(readiness.state==='PREPARED'?'DEPTH_WORKER_UNVERIFIED':'DEPTH_WORKER_UNAVAILABLE'))};
-      if(recover){
-       stage='recovery';const prepared=await recover({target:row.target});
-       // Recovery has not saved the clicked source. A fresh native gesture
-       // must resolve the newly acknowledged menu and exact original prefix.
-       result=prepared.state==='completed'
-        ?{state:'blocked',code:'FRESH_CLICK_REQUIRED',requiredAction:'RIGHT_CLICK_AGAIN',target:row.target,recovery:prepared}
-        :{...prepared,state:prepared.state==='uncertain'?'uncertain':'blocked',target:row.target,requiredAction:prepared.requiredAction??'PREPARE_SELECTED_DESTINATION'};
-      }
-      await attend(row.target,{code:result.code,info,tab});
-     }else{
-      // Authorization stays invocation-local; never warm the shared mode cache.
-      stage='dispatch';
-      const authorizeClick=typeof transport.authorizeReady==='function'?async target=>
-       (await transport.authorizeReady(target,readiness))??await authorize(target):authorize;
-      result=await run(authorizeClick);
-     }
-    }
-   }
-   result??={state:'failed',code:'DEPTH_CLICK_FAILED'};
-  }catch(e){result={state:'blocked',code:safeCode(e?.code)};try{await attend(row.target,{code:result.code,info,tab});}catch{}}
+  const operationId='depth-click:'+crypto.randomUUID(),started=Date.now();
+  const native=inspect(),failed=native.acknowledgements?.find(a=>a.state!=='acknowledged');
+  const stage=JSON.stringify({itemId:row.id,parentId:row.parentId,role:row.role,actionKind:row.actionKind,mode:'depth',
+   generation:native.desired?.generation,acknowledgedGeneration:native.acknowledgedGeneration,nativeCode:native.lastOutcome?.code,
+   ...(failed?{firstNativeFailure:{itemId:failed.itemId,code:safeCode(failed.code),state:failed.state}}:{}),stage:'dispatch'});
+  let result;
+  try{result=await run(authorize);}catch(error){result={state:'blocked',code:safeCode(error?.code)};}
   const code=safeCode(result.code??(result.state==='completed'?'DEPTH_CLICK_COMPLETED':'DEPTH_CLICK_FAILED'));
-  const outcome={...result,target:row.target,depthClickId:operationId};
-  try{await record(result.state,code,result.remoteOperationId??result.operationId);}catch{recordFailed=true;}
-  if(recordFailed)outcome.depthRecordCode='DEPTH_CLICK_RECORD_FAILED';
-  try{await feedback({state:result.state,code,reason,operationId,remoteOperationId:result.remoteOperationId??result.operationId,recordCode:outcome.depthRecordCode},tab);}catch{/* A failed notification never changes remote truth. */}
-  return outcome;
+  const remoteOperationId=result.remoteOperationId??result.operationId;
+  // Observation shares neither the authorization nor the transfer boundary.
+  void Promise.resolve().then(()=>current.recordRemoteResult({kind:'depth-click',operationId,state:result.state,code,
+   cause:remoteOperationId,destination:remoteDestination(row.target),stage,durationMs:Date.now()-started}))
+   .then(()=>null,()=>'DEPTH_CLICK_RECORD_FAILED')
+   .then(recordCode=>feedback({state:result.state,code,operationId,remoteOperationId,recordCode},tab)).catch(()=>{});
+  return {...result,target:row.target,depthClickId:operationId};
  };
 }
 

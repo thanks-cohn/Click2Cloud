@@ -5,29 +5,38 @@ import {productState} from '../src/api/config.mjs';import {targetKey} from '../s
 const target={provider:'cloudflare',connectionId:'cloudflare:fixture',accountId:'fixture',bucketName:'bucket',prefix:''};
 const plan={state:'ready',accountId:'fixture',bucketName:'bucket',protocol:PROTOCOL};
 function fixture({ready=true,fail=null,mode='depth',folders=['Images/','Images/Artwork/'],limit=20,controller=true}={}){
- const records=[],feedback=[],writes=[];let listener,registrar,engine,cached=false,done;
+ const records=[],feedback=[],writes=[];let listener,registrar,engine,done;
  const current={read:async()=>state,setDesiredGeneration:async g=>state.generation.desired=g,acknowledgeGeneration:async g=>state.generation.applied=g,recordRemoteResult:async r=>records.push(structuredClone(r))};
  const state={product:productState({show:{simple:mode==='simple',nested:false,depth:mode==='depth',flat:false}}),configs:{depth:{scopes:[{target,maxDepth:limit}]},simple:{destinations:[{target}]}},generation:{desired:0,applied:null}};
  const chrome={runtime:{},contextMenus:{onClicked:{addListener:f=>listener=f,removeListener(){}},removeAll:cb=>{if(fail==='remove')chrome.runtime.lastError={message:'fixture'};cb();delete chrome.runtime.lastError;},create:(p,cb)=>{setTimeout(()=>{if(fail==='timeout')return;if(fail===p.title)chrome.runtime.lastError={message:'fixture'};cb();delete chrome.runtime.lastError;},0);}}};
- const depthClick=createDepthNativeClick({current,oauth:{authority:async()=>({accounts:[{id:'fixture'}]})},transport:{status:async()=>ready===true?{state:'READY'}:ready},lookup:async()=>null,inspect:()=>registrar.inspect(),authorize:async t=>({sessionId:'fixture',authorizedTargets:[t]}),feedback:async r=>{feedback.push(r);done?.();}});
- registrar=createChromeRegistrar({chrome,timeoutMs:20,...(controller?{depthClick}:{}),getAuthorization:async()=>({authorizedTargets:cached?[...registrar.inspect().desired.rows.filter(r=>r.target).map(r=>r.target)]:[]}),dispatch:(_a,{info,generation,depthAuthorization})=>engine.save({depthAuthorization,itemId:info.menuItemId,generation:generation??registrar.inspect().acknowledgedGeneration,context:'link',source:{url:'https://example.org/file',filename:'probe.txt'}})});
- engine=createEngine({current,registrar,providerSetupActions:true,getAuthorization:async t=>({sessionId:'fixture',authorizedTargets:cached?[t]:[]}),onProviderAction:async()=>({state:'blocked',code:ready===true?'FRESH_CLICK_REQUIRED':'WORKER_SETUP_REQUIRED'}),remoteSave:async i=>{assert(await i.authorize());writes.push(i.target);return {state:'verified',operationId:'fixture-remote',receipt:{key:i.target.prefix+'probe.txt'}};}});
+ const authorized=async t=>({sessionId:'fixture',authorizedTargets:[t]});
+ const depthClick=createDepthNativeClick({current,inspect:()=>registrar.inspect(),authorize:authorized,feedback:async r=>{feedback.push(r);done?.();}});
+ registrar=createChromeRegistrar({chrome,timeoutMs:20,...(controller?{depthClick}:{}),dispatchOwnsAuthorization:true,
+  dispatch:(_row,{info,generation,depthAuthorization})=>engine.save({depthAuthorization,itemId:info.menuItemId,generation,
+   context:'link',source:{url:'https://example.org/file',filename:'probe.txt'}})});
+ engine=createEngine({current,registrar,providerSetupActions:true,getAuthorization:authorized,
+  remoteSave:async input=>{
+   assert(await input.authorize());
+   if(ready!==true)return {state:'blocked',code:ready.code??'WRITE_PROOF_REQUIRED'};
+   writes.push(input.target);
+   return {state:'verified',operationId:'fixture-remote',receipt:{key:input.target.prefix+'probe.txt'}};
+  }});
  return {records,feedback,writes,state,registrar,engine,async start(){const spec=await engine.compile({mode:'composite',inventory:{scopes:[{target,folders,authorized:true,workerReady:false,complete:true}]}});await engine.apply(spec);return spec;},async emit(row){const finished=new Promise(r=>done=r);listener({menuItemId:row.id,linkUrl:'https://example.org/file'},{});await finished;}};
 }
-test('Depth emitted click uses fresh ready status to escape cached-negative attention and saves exact root/intermediate/leaf',async()=>{
+test('Depth emitted click reaches the common dispatcher through unverified readiness and saves exact root/intermediate/leaf',async()=>{
  const f=fixture(),spec=await f.start();
  for(const row of spec.rows.filter(r=>r.role==='save'))await f.emit(row);
  assert.deepEqual(f.writes.map(t=>t.prefix).sort(),['','Images/','Images/Artwork/'].sort());
  assert.equal(f.feedback.length,3);assert(f.feedback.every(r=>r.state==='completed'));
- assert.equal(f.records.length,6);assert(f.records.every(r=>r.kind==='depth-click'&&!r.receipt));assert(f.records.every(r=>!JSON.stringify(r).includes('example.org')));
+ assert.equal(f.records.length,3);assert(f.records.every(r=>r.kind==='depth-click'&&!r.receipt));assert(f.records.every(r=>!JSON.stringify(r).includes('example.org')));
 });
-test('baseline fallback reproduces FRESH_CLICK_REQUIRED with readiness-cache denial and zero uploads',async()=>{
+test('canonical Depth route dispatches once without the Depth observer',async()=>{
  const f=fixture({controller:false}),spec=await f.start(),row=spec.rows.find(r=>r.role==='save');
- assert.equal((await f.registrar.handleClick({menuItemId:row.id,linkUrl:'https://example.org/file'})).code,'FRESH_CLICK_REQUIRED');assert.equal(f.writes.length,0);
+ assert.equal((await f.registrar.handleClick({menuItemId:row.id,linkUrl:'https://example.org/file'})).completion,'verified');assert.equal(f.writes.length,1);
 });
 for(const readiness of [{state:'blocked',code:'WORKER_SETUP_REQUIRED'},{state:'PREPARED'},{state:'blocked',code:'TRANSPORT_UNAVAILABLE'},{state:'blocked',code:'WORKER_DESTINATION_SCOPE_REQUIRED'}])test('Depth blocked status is recorded and visible: '+(readiness.code??readiness.state),async()=>{
  const f=fixture({ready:readiness}),spec=await f.start();await f.emit(spec.rows.find(r=>r.role==='save'));
- assert.equal(f.writes.length,0);assert.equal(f.records.at(-1).state,'blocked');assert.equal(f.feedback.length,1);if(readiness.code==='WORKER_SETUP_REQUIRED')assert.equal(f.feedback[0].reason,'FOLLOWUP_PLAN_MISSING');
+ assert.equal(f.writes.length,0);assert.equal(f.records.at(-1).state,'blocked');assert.equal(f.feedback.length,1);assert.equal(f.feedback[0].code,readiness.code??'WRITE_PROOF_REQUIRED');
 });
 for(const failure of ['Cloudflare','Images','Artwork','timeout'])test('Depth native ACK failure retains fail-closed authority and durable feedback: '+failure,async()=>{
  const f=fixture({fail:failure}),spec=await f.start();await f.emit(spec.rows.find(r=>r.role==='save'));assert.equal(f.writes.length,0);assert.equal(f.records.at(-1).state,'blocked');assert.equal(f.feedback.length,1);assert.equal(f.registrar.inspect().acknowledgedGeneration,null);
@@ -44,14 +53,26 @@ test('Depth keeps twenty siblings and depth beyond ten; no row cap or changed me
 test('non-Depth rows do not enter Depth preflight, history or feedback',async()=>{
  const f=fixture({mode:'simple'}),spec=await f.start();await f.registrar.handleClick({menuItemId:spec.rows.find(r=>r.role==='save').id,linkUrl:'https://example.org/file'});assert.equal(f.records.length,0);assert.equal(f.feedback.length,0);
 });
-test('Depth records authorization loss, hostile exceptions, uncertain/partial dispatch and persistence failures without retry',async()=>{
+test('Depth preserves shared authorization and publication outcomes when optional observation fails',async()=>{
  for(const kind of ['denied','throw','uncertain','partial','storage']){
-  const records=[],feedback=[];let runs=0;
-  const click=createDepthNativeClick({current:{recordRemoteResult:async r=>{if(kind==='storage')throw Object.assign(Error(),{code:'STORAGE_UNAVAILABLE'});records.push(r);}},oauth:{authority:async()=>{if(kind==='throw')throw Error('secret-url?token=private');return {accounts:kind==='denied'?[]:[{id:'fixture'}]};}},transport:{status:async()=>({state:'READY'})},lookup:async()=>plan,inspect:()=>({desired:{generation:1},acknowledgedGeneration:1}),refreshReady(){},feedback:async r=>feedback.push(r)});
-  const out=await click({id:'fixture-row',parentId:'parent',role:'save',origin:{mode:'depth'},target},{},{},async()=>{runs++;return {state:kind==='storage'?'completed':kind,code:kind==='storage'?'DEPTH_CLICK_COMPLETED':'VERIFY_UNCERTAIN',operationId:'remote-fixture'};});
-  assert.equal(feedback.length,1);assert(!JSON.stringify(feedback).includes('private'));assert(!JSON.stringify(records).includes('secret-url'));
-  if(['denied','throw'].includes(kind))assert.equal(runs,0);else{assert.equal(runs,1);assert.equal(out.state,kind==='storage'?'completed':kind);if(kind!=='storage')assert.equal(records.at(-1).cause,'remote-fixture');}
-  if(kind==='storage')assert.equal(out.depthRecordCode,'DEPTH_CLICK_RECORD_FAILED');
+  const records=[];let runs=0,finished;
+  const feedback=new Promise(resolve=>finished=resolve);
+  const click=createDepthNativeClick({current:{recordRemoteResult:async record=>{
+   if(kind==='storage')throw Object.assign(Error(),{code:'STORAGE_UNAVAILABLE'});
+   records.push(record);
+  }},inspect:()=>({desired:{generation:1},acknowledgedGeneration:1}),feedback:finished});
+  const out=await click({id:'fixture-row',role:'save',target},{},{},async()=>{
+   runs++;
+   if(kind==='throw')throw Error('secret-url?token=private');
+   if(kind==='denied')return {state:'blocked',code:'AUTHORIZATION_REVOKED'};
+   return {state:kind==='storage'?'completed':kind,code:kind==='storage'?'DEPTH_CLICK_COMPLETED':'VERIFY_UNCERTAIN',operationId:'remote-fixture'};
+  });
+  const observed=await feedback;
+  assert.equal(runs,1);
+  assert(!JSON.stringify([observed,records]).includes('secret-url'));
+  assert.equal(observed.state,out.state);
+  if(kind==='storage')assert.equal(observed.recordCode,'DEPTH_CLICK_RECORD_FAILED');
+  if(['uncertain','partial'].includes(kind))assert.equal(records.at(-1).cause,'remote-fixture');
  }
 });
 test('cold worker classifies persisted Depth row without trusting its historical ACK',async()=>{

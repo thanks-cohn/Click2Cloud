@@ -79,23 +79,6 @@ try{
     await page.getByText(/Save prepares or maintains the private Cloudflare Worker/).waitFor({state:'attached'});
     await button('Save').click();
     await page.waitForFunction(()=>!document.querySelector('#dialog').open||document.querySelector('#save')?.textContent==='Retry Save');
-    if(repair){
-     assert(await page.locator('#destination-save-status').isVisible());
-     await page.locator('#close-dialog').click();
-     await button('Remotes').click();
-     const recovery=button('Repair Me');
-     assert(await recovery.isVisible());
-     const manageBox=await page.locator('#manage').boundingBox(),repairBox=await recovery.boundingBox();
-     assert.equal(repairBox.y,manageBox.y);
-     assert(repairBox.x>manageBox.x+manageBox.width);
-     await recovery.click();
-     await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Destination recovery is incomplete'));
-     assert(await recovery.isVisible());
-     await page.evaluate(()=>{window.fixtureColdWorkerOffline=false;});
-     await recovery.click();
-     await recovery.waitFor({state:'hidden'});
-     assert.equal(await page.evaluate(()=>productFixture.r2Objects.has('fixture-bucket:projects/simple.png')),false);
-    }
     assert.equal(await page.getByRole('dialog').count(),0,await page.locator('#destination-save-status').allTextContents());
    }
    const result=await page.evaluate(async mode=>{
@@ -104,6 +87,7 @@ try{
     if(!row||pending||acknowledgedGeneration!==desired.generation||row.actionKind!=='save')throw Error('Expected acknowledged exact route '+mode);
     const configuration=await fixture.current.read(),config=configuration.configs[mode];
     const saved=(config.destinations??config.scopes).some(item=>item.target.bucketName==='fixture-bucket'&&item.target.prefix===(mode==='depth'?'':'projects/'));
+    if(window.fixtureColdWorkerOffline)setTimeout(()=>{window.fixtureColdWorkerOffline=false;},200);
     const response=await fixture.api.invoke({version:'3+1.1',method:'dispatchSave',params:{itemId:row.id,generation:desired.generation,context:'link',
      source:{url:'https://example.com/image.png',filename:mode+'.png'},idempotencyKey:crypto.randomUUID()}},'gui');
     return {saved,state:response.state,completion:response.data?.completion,

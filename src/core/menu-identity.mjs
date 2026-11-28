@@ -93,9 +93,9 @@ export function availabilityReasons(scope,folder) {
   const reasons=[];
   if(scope.authorized!==true)reasons.push('SCOPE_UNAUTHORIZED');
   if(scope.stale===true)reasons.push('INVENTORY_STALE');
-  if((folder?.workerReady??scope.workerReady)!==true)reasons.push('WORKER_UNVERIFIED');
   if(!folder)reasons.push(scope.complete===true?'FOLDER_UNDISCOVERED':'INVENTORY_INCOMPLETE');
   if(folder?.writable===false)reasons.push('FOLDER_NOT_WRITABLE');
+  if((folder?.workerReady??scope.workerReady)!==true)reasons.push('WORKER_UNVERIFIED');
   return reasons;
 }
 export const availability=(scope,folder)=>availabilityReasons(scope,folder)[0]??null;
