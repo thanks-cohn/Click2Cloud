@@ -128,17 +128,19 @@ def _stop_fixture(process):
         return None
 
 
-def _run_fixture(command, *, repository, root, total, timeout_seconds):
+def _run_fixture(command, *, repository, root, plans, timeout_seconds):
     started = time.monotonic()
+    expected = {case['case']: case for case in plans}
+    total = len(plans)
     current = None
     case_started = started
     next_heartbeat = started + 5
-    completed_cases = 0
+    counts = {'PASS': 0, 'FAIL': 0}
     offset = 0
     progress_path = root / 'progress.ndjson'
 
     def update():
-        nonlocal offset, current, case_started, next_heartbeat, completed_cases
+        nonlocal offset, current, case_started, next_heartbeat
         if not progress_path.is_file():
             return
         with progress_path.open('rb') as stream:
@@ -148,15 +150,17 @@ def _run_fixture(command, *, repository, root, total, timeout_seconds):
                     break
                 offset += len(line)
                 event = json.loads(line)
-                if event['status'] == 'RUNNING':
+                status = event['status']
+                if status == 'RUNNING':
                     if current is None or event['case'] != current['case']:
                         case_started = time.monotonic()
                     current = event
                 else:
-                    completed_cases += 1
+                    status = 'FAIL' if _verdict(expected[event['case']], event['observation']) else 'PASS'
+                    counts[status] += 1
                     current = None
                 print(f"[{event['ordinal']}/{event['total']}] case {event['case']} "
-                      f"{event['mode']} {event['scenario']} | {event['phase']} | {event['status']} "
+                      f"{event['mode']} {event['scenario']} | {event['phase']} | {status} "
                       f"| case {event['caseElapsedMs'] / 1000:.1f}s | campaign {event['elapsedMs'] / 1000:.1f}s",
                       file=sys.stderr, flush=True)
                 next_heartbeat = time.monotonic() + 5
@@ -177,7 +181,9 @@ def _run_fixture(command, *, repository, root, total, timeout_seconds):
                     break
                 if now >= next_heartbeat:
                     phase = f"case {current['case']} | {current['phase']}" if current else 'waiting for fixture'
-                    print(f"[{completed_cases}/{total} complete] {phase} | {now - started:.1f}s elapsed",
+                    remaining = total - sum(counts.values())
+                    print(f"[{counts['PASS']} PASS, {counts['FAIL']} FAIL, {remaining} unfinished] "
+                          f"{phase} | {now - started:.1f}s elapsed",
                           file=sys.stderr, flush=True)
                     next_heartbeat = now + 5
                 time.sleep(0.2)
@@ -207,7 +213,7 @@ def fixture(seed, count, selected, *, repository, timeout_seconds=None):
     document(manifest, {'schema': 'redown.right-click-scenarios/1', 'seed': seed, 'cases': plans})
     exit_code, stop_code, active, elapsed = _run_fixture(
         ['node', str(runner), '--right-click-fixture', str(manifest)], repository=repository,
-        root=root, total=len(plans), timeout_seconds=timeout_seconds)
+        root=root, plans=plans, timeout_seconds=timeout_seconds)
     results_file = root / 'observations.json'
     results = json.loads(results_file.read_text(encoding='utf-8')) if results_file.is_file() else {}
     observed_cases = {case['case']: case for case in results.get('cases', [])}

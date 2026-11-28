@@ -84,9 +84,9 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
  await save();
  for(const [index,scenario] of manifest.cases.entries()){
   const started=performance.now();
-  const report=async(phase,status)=>progress({
+  const report=async(phase,status,observation)=>progress({
    ordinal:index+1,total:manifest.cases.length,case:scenario.case,mode:scenario.mode,scenario:scenario.scenario,
-   phase,status,caseElapsedMs:Math.round(performance.now()-started)
+   phase,status,caseElapsedMs:Math.round(performance.now()-started),...(observation?{observation}:{})
   });
   const fixture={phase:'fixture-initialization',warmInitialization:null,fixtureTransport:[]};
   await report('fixture-initialization','RUNNING');
@@ -96,7 +96,8 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
   }
   outcome.cases.at(-1).elapsedMs=Math.round(performance.now()-started);
   await save();
-  await report('case-complete',outcome.cases.at(-1).status);
+  const {status,code,phase,actual,warmInitialization}=outcome.cases.at(-1);
+  await report('case-complete',status,{status,code,phase,actual,warmInitialization});
  }
  return outcome.cases.every(item=>item.status==='OBSERVED');
 

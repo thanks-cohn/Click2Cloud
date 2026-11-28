@@ -181,9 +181,11 @@ For browser-managed shortcuts, use actual registration evidence and supported ma
 
 ## 7. Operational quality of the Laboratory
 
-The Laboratory must itself be dependable. Current right-click execution is sequential and redirects subprocess output to a log; the Python runner waits for completion before printing its final summary. The owner experienced a long silent campaign. Observations are written after completed scenarios, but the inspected runner lacks an overall subprocess timeout.
+The Laboratory must itself be dependable. At the owner baseline, the sequential right-click runner redirected subprocess output to a log and printed its first summary at completion. The owner experienced a long silent campaign, and that runner had no campaign timeout.
 
-Proposed improvements within the applicable checkpoint:
+The Case 65 follow-up adds live case and phase reporting, elapsed time, and pass and fail counts derived from the Python verdict. It bounds both the active case and the campaign, terminates the fixture process tree on interruption, and retains partial receipts. The deterministic Case 65 replay uses the original probe and save identities. Reference Windows and higher evidence layers still require qualification. [Checkpoint handoff](../../11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/HANDOFF_2B1.md#case-65-interrupted-readiness-probe)
+
+Operational goals for this and subsequent checkpoints:
 
 - Live current-case and phase display, elapsed time, last progress, observed/pass/fail/untested counts (do not confuse observation with final verdict).
 - Bounded phase and campaign execution, cancellation, process cleanup and preserved partial evidence.
@@ -193,7 +195,7 @@ Proposed improvements within the applicable checkpoint:
 - Fresh isolation when necessary, deliberate persisted state for returning tests, no hidden prewarming.
 - No arbitrary sleep/timeout inflation, blind retries, lowered assertions or replacement of failing runs with favorable runs.
 
-Preserve current APIs and evidence formats where possible; evolve them compatibly. These improvements are design direction, not a statement that the current runner already supports them.
+Preserve current APIs and evidence formats where possible. The checkpoint handoff records which improvements are implemented and verified.
 
 ## 8. Evidence hierarchy and acceptance discipline
 
