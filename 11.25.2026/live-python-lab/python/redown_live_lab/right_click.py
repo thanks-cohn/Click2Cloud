@@ -53,7 +53,8 @@ def scenarios(seed, count):
 
 def _verdict(expected, observed):
     if observed.get('status') != 'OBSERVED':
-        return [{'predicate': 'fixture completed', 'expected': True, 'actual': observed.get('code')}]
+        predicate = 'fixture initialization completed' if observed.get('phase') == 'fixture-initialization' else 'fixture completed'
+        return [{'predicate': predicate, 'expected': True, 'actual': observed.get('code')}]
     actual = observed['actual']
     checks = {
         'isolatedMode': expected['mode'],
@@ -87,8 +88,14 @@ def _verdict(expected, observed):
             'readinessProbeRequests': 1,
             'originalOperationVerified': True,
         })
-    return [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
-            for name, value in checks.items() if actual.get(name) != value]
+    differences = [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
+                   for name, value in checks.items() if actual.get(name) != value]
+    if 'capabilityFaults' in expected:
+        warm = observed.get('warmInitialization') or {}
+        probe = warm.get('probe') or {}
+        if warm.get('boundary') != 'verified' or probe.get('state') != 'verified':
+            differences.append({'predicate': 'warm probe verified', 'expected': True, 'actual': probe.get('state')})
+    return differences
 
 
 def fixture(seed, count, selected, *, repository):

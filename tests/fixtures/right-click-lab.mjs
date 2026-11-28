@@ -14,7 +14,7 @@ import {campaignDefaults} from '../../src/chrome/python-lab/campaign-policy.mjs'
 import {createCloudflareOnboarding} from '../../src/cloudflare/onboarding.mjs';
 import {createProvisioner,WORKER_MODULES} from '../../src/cloudflare/deployment.mjs';
 import {createRemoteTransport,preparedDestination} from '../../src/cloudflare/transport.mjs';
-import {digest} from '../../src/cloudflare/wire.mjs';
+import {digest,remoteDestination} from '../../src/cloudflare/wire.mjs';
 import {createEngine} from '../../src/core/engine.mjs';
 import {createCurrentStore} from '../../src/persistence/current-store.mjs';
 import {sourceFromClick} from '../../right2cloud-module/src/index.mjs';
@@ -35,6 +35,30 @@ const safeTransportError=error=>({
  errno:Number.isInteger(error?.cause?.errno)?error.cause.errno:Number.isInteger(error?.errno)?error.errno:null
 });
 
+function probeEvidence(result,target,operationId){
+ const exact=remoteDestination(target);
+ const probePrefix=[exact.prefix,'.click2cloud-readiness',operationId].filter(Boolean).join('/');
+ const destination=value=>value?{
+  matchesScope:['provider','connectionId','accountId','bucketName','conflictPolicy'].every(key=>value[key]===exact[key]),
+  prefix:value.prefix===probePrefix?probePrefix:value.prefix===exact.prefix?exact.prefix:null
+ }:null;
+ const id=value=>/^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i.test(value??'')?value:null;
+ const hex=value=>/^[\da-f]{32,64}$/i.test(value??'')?value:null;
+ const receipt=result?.receipt;
+ return {
+  state:['verified','blocked','uncertain','failed','pending'].includes(result?.state)?result.state:null,
+  code:safeCode(result,null),operationId:id(result?.operationId),
+  destination:destination(result?.destination),
+  proofKind:result?.proofKind==='independent-get-byte-comparison'?result.proofKind:null,
+  receipt:receipt?{
+   operationId:id(receipt.operationId),destination:destination(receipt.destination),
+   key:receipt.key===probePrefix+'/readiness.txt'?receipt.key:null,
+   size:Number.isSafeInteger(receipt.size)&&receipt.size>=0?receipt.size:null,
+   etag:hex(receipt.etag),version:hex(receipt.version)
+  }:null
+ };
+}
+
 export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs,cli,buildInfo,accountId,bucketName}){
  const manifest=JSON.parse(await readFile(manifestPath,'utf8'));
  assert.equal(manifest.schema,'redown.right-click-scenarios/1');
@@ -49,16 +73,17 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
   extensionVersion:buildInfo.extensionVersion,protocol:'1.0.0',platform:process.platform,nodeVersion:process.versions.node,cases:[]};
  const save=()=>writeFile(join(dirname(manifestPath),'observations.json'),JSON.stringify(outcome,null,2)+'\n');
  for(const scenario of manifest.cases){
-  const fixtureTransport=[];
-  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixtureTransport),fixtureTransport});}
+  const fixture={phase:'fixture-initialization',warmInitialization:null,fixtureTransport:[]};
+  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixture),...fixture});}
   catch(error){
-   outcome.cases.push({case:scenario.case,status:'FAIL',code:safeCode(error),errorType:error.name,location:String(error.stack).split('\n').find(line=>line.includes('right-click-lab.mjs'))?.trim().replace(/^.*right-click-lab.mjs:/,'right-click-lab.mjs:'),fixtureTransport});
+   outcome.cases.push({case:scenario.case,status:'FAIL',code:safeCode(error),errorType:error.name,location:String(error.stack).split('\n').find(line=>line.includes('right-click-lab.mjs'))?.trim().replace(/^.*right-click-lab.mjs:/,'right-click-lab.mjs:'),...fixture});
   }
   await save();
  }
  return outcome.cases.every(item=>item.status==='OBSERVED');
 
- async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[]},fixtureTransport){
+ async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[],warmProbeResponseLost=false},fixture){
+  const {fixtureTransport}=fixture;
   assert(['simple','nested','depth'].includes(mode));
   const root={provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''};
   const exact={...root,prefix},sibling={...root,prefix:'qa/second/'};
@@ -132,7 +157,8 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
      if(pathname==='/capabilities'&&armTransient){armTransient=false;healthFailures++;throw Error('BENIGN_FIXTURE_CONNECTION_LOST');}
      const worker=runtimes.get(hostname.split('.')[0]);
      if(!worker)return new Response(null,{status:404});
-     const phase=pathname==='/capabilities'?(deployments===0?'retained':readinessProbeRequests?'post-probe':'post-deploy'):null;
+     const warm=fixture.phase==='fixture-initialization'?fixture.warmInitialization:null;
+     const phase=warm?'warm-initialization':pathname==='/capabilities'?(deployments===0?'retained':readinessProbeRequests?'post-probe':'post-deploy'):null;
      if(pathname==='/probe')readinessProbeRequests++;
      const started=performance.now();
      let injected=false;
@@ -142,7 +168,17 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
        injectedFaults.push(phase);
        throw Object.assign(new TypeError('Fixture capability connection lost'),{cause:{code:'ECONNRESET'}});
       }
-      return await worker.mf.dispatchFetch(url,options);
+      const response=await worker.mf.dispatchFetch(url,options);
+      if(warm)warm.requests.push({
+       route:pathname,httpStatus:response.status,json:response.headers.get('content-type')?.split(';',1)[0]==='application/json',
+       durationMs:Math.round(performance.now()-started)
+      });
+      if(warm&&warmProbeResponseLost&&pathname==='/probe'){
+       await response.arrayBuffer();
+       injected=true;
+       throw Object.assign(new TypeError('Fixture lost the warm probe response'),{cause:{code:'ECONNRESET'}});
+      }
+      return response;
      }catch(error){
       fixtureTransport.push({boundary:'workerd-dispatch',route:pathname,phase,deployment:deployments,
        durationMs:Math.round(performance.now()-started),injected,...safeTransportError(error)});
@@ -175,11 +211,32 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    if(needsWarm){
     // Seed only the explicitly returning/fault scenarios. Cold first-use
     // cases start with no retained plan, no provider worker and no proof.
+    const warm=fixture.warmInitialization={
+     boundary:'provision',operationId:randomUUID(),requests:[],capability:null,probe:null,probeStatus:null
+    };
     await preparedOptions.provisioner.prepare(exact,{approved:true});
     const worker=[...runtimes.values()][0];
-    assert(await worker.mf.getR2Bucket('STORAGE'));
-    assert.equal((await preparedOptions.transport.probe({target:exact})).state,'verified');
+    warm.boundary='signed-capability';
+    // A listening Workerd port or R2 proxy handle does not exercise the signed
+    // Worker, Durable Object and R2 path. Match production's check before PUT.
+    const capability=await preparedOptions.transport.status(exact);
+    warm.capability={state:capability.state,code:safeCode(capability,null)};
+    assert.equal(capability.state,'PREPARED');
+    warm.boundary='readiness-probe';
+    let probe;
+    try{probe=await preparedOptions.transport.probe({target:exact,operationId:warm.operationId});}
+    catch(error){warm.probe={error:safeTransportError(error)};throw error;}
+    warm.probe=probeEvidence(probe,exact,warm.operationId);
+    if(probe.state==='uncertain'){
+     // Inspect the same operation read-only for diagnosis. The original
+     // probe must still verify for this scenario to start.
+     try{warm.probeStatus=probeEvidence(await preparedOptions.transport.probeStatus(exact,warm.operationId),exact,warm.operationId);}
+     catch(error){warm.probeStatus={error:safeTransportError(error)};}
+    }
+    assert.equal(probe.state,'verified');
+    warm.boundary='retain-write-proof';
     await preparedOptions.provisioner.markVerified(exact,activeAuth);
+    warm.boundary='verified';
     deployments=0;
     readinessProbeRequests=0;
     if(scenario!=='returning'){activeAuth='fixture-reconnected';startHost();}
@@ -192,6 +249,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
      allWorkers.delete(worker.mf);
     }
    }
+   fixture.phase='scenario';
 
    // Plain registration still uses the actual CURRENT/engine API. Explicitly
    // approved first-use setup can begin once the reconciled route is exposed.

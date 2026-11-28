@@ -17,6 +17,8 @@ jobs:
           architecture: x64
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run build:extension
+      - name: Verify warm probe failures stay visible
+        run: node --test tests/right-click-lab-initialization.test.mjs
       - name: Replay the permanent Case 83 regression
         shell: cmd
         run: |

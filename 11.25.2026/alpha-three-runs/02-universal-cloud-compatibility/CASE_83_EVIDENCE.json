@@ -1785,5 +1785,37 @@
         "Compare palette and layout browser evidence"
       ]
     }
+  },
+  "warmInitializationFollowUp": {
+    "ownerReceiptComparisonAt": "c6b506e76c19b5df9b438c1d80390880bec15709",
+    "ownerFailure": {
+      "status": "FAIL",
+      "case": 83,
+      "phase": "fixture-initialization",
+      "boundary": "readiness-probe",
+      "location": "tests/fixtures/right-click-lab.mjs:181:12",
+      "code": "ERR_ASSERTION",
+      "fixtureTransport": [],
+      "probeOutcome": null,
+      "experimentStarted": false,
+      "provenance": "Owner comparison of Windows receipts. The raw failed receipt and exact probe outcome were unavailable in this workspace."
+    },
+    "successfulReplay": {
+      "status": "PASS",
+      "case": 83,
+      "phase": "scenario",
+      "experimentStarted": true,
+      "capabilityFaults": [
+        "post-deploy",
+        "post-probe"
+      ],
+      "deployments": 1,
+      "publicationRequests": 1,
+      "reopenedSha256Matched": true,
+      "originalOperationVerified": true,
+      "hostedWindowsArtifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46099855219/artifacts/15244937591"
+    },
+    "determination": "Warm setup bypassed the signed capability read preceding the production probe. The owner receipt does not determine the reason the probe returned an unverified state.",
+    "followUp": "The fixture now checks the exact signed capability route first and records the original probe response, HTTP status, operation ID, duration and read-only inspection of ambiguous proof. A probe failure still blocks the scenario."
   }
 }
